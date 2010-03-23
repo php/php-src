@@ -19,15 +19,15 @@ echo "Done.\n";
 ?>
 --EXPECT--
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"æ"]=>
-  unicode(1) "2"
-  [u"æøåäö"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["æ"]=>
+  string(1) "2"
+  ["æøåäö"]=>
+  string(1) "3"
 }
 int(3)
-unicode(1) "1"
-unicode(1) "2"
-unicode(1) "3"
+string(1) "1"
+string(1) "2"
+string(1) "3"
 Done.

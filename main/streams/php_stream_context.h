@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -52,9 +52,6 @@ struct _php_stream_notifier {
 
 struct _php_stream_context {
 	php_stream_notifier *notifier;
-	char *output_encoding;	/* unicode->string character set */
-	char *input_encoding;	/* string->unicode character set */
-	int default_mode;		/* default fopen mode -- PHP_FILE_BINARY vs. PHP_FILE_TEXT -- potentially support other fpc() flags later */
 	zval *options;	/* hash keyed by wrapper family or specific wrapper */
 	zval *links;	/* hash keyed by hostent for connection pooling */
 	int rsrc_id;	/* used for auto-cleanup */
@@ -98,7 +95,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC);
-PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context TSRMLS_DC);
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context);
 END_EXTERN_C()
 
 #define php_stream_notify_info(context, code, xmsg, xcode)	do { if ((context) && (context)->notifier) { \

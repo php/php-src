@@ -49,24 +49,24 @@ foreach($array_type as $type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_search() with different haystack values ***
 -- Iteration 1 --
 int(0)
 int(3)
 int(0)
 -- Iteration 2 --
-unicode(1) "y"
+string(1) "y"
 int(4)
-unicode(1) "y"
+string(1) "y"
 -- Iteration 3 --
 int(3)
 bool(false)
 int(3)
 -- Iteration 4 --
-unicode(3) "key"
+string(3) "key"
 int(2)
-unicode(3) "key"
+string(3) "key"
 -- Iteration 5 --
 int(3)
 bool(false)
@@ -84,19 +84,19 @@ int(3)
 bool(false)
 int(3)
 -- Iteration 9 --
-unicode(1) "y"
-unicode(1) "y"
-unicode(1) "y"
+string(1) "y"
+string(1) "y"
+string(1) "y"
 -- Iteration 10 --
-unicode(1) "y"
+string(1) "y"
 bool(false)
-unicode(1) "y"
+string(1) "y"
 -- Iteration 11 --
 int(2)
 bool(false)
 int(2)
 -- Iteration 12 --
-unicode(1) "y"
-unicode(0) ""
-unicode(1) "y"
+string(1) "y"
+string(0) ""
+string(1) "y"
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Test mb_strrpos() function : usage variations - Pass different integers as $offset arg
+Test mb_strrpos() function : usage variations - pass encoding as third argument (deprecated behaviour)
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,32 +8,32 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
 --FILE--
 <?php
 /* Prototype  : int mb_strrpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of last occurrence of a string within another
+ * Description: Find position of last occurrence of a string within another 
  * Source code: ext/mbstring/mbstring.c
  */
 
 /*
- * Use different integers in place of $offset to see how mb_strrpos() behaves
+ * Testing deprecated behaviour where third argument can be $encoding
  */
 
 echo "*** Testing mb_strrpos() : usage variations ***\n";
 
-$string_ascii = '+Is an English string'; //21 chars
-$needle_ascii = 'g';
-
-$string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII='); //21 chars
+$string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 $needle_mb = base64_decode('44CC');
 
-/*
- * Loop through integers as multiples of ten for $offset argument
- * 60 is larger than *BYTE* count for $string_mb
- */
-for ($i = -60; $i <= 60; $i += 10) {
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	var_dump(mb_strrpos($string_ascii, $needle_ascii, $i));
-	echo "--Multibyte String --\n";
-	var_dump(mb_strrpos($string_mb, $needle_mb, $i, 'UTF-8'));
+$stringh = <<<END
+utf-8
+END;
+
+$inputs = array('Double Quoted String' => "utf-8",
+                'Single Quoted String' => 'utf-8',
+                'Heredoc' => $stringh);
+foreach ($inputs as $type => $input) {
+	echo "\n-- $type --\n";
+	echo "-- With fourth encoding argument --\n";
+	var_dump(mb_strrpos($string_mb, $needle_mb, $input, 'utf-8'));
+	echo "-- Without fourth encoding argument --\n";
+	var_dump(mb_strrpos($string_mb, $needle_mb, $input));
 }
 
 echo "Done";
@@ -41,113 +41,21 @@ echo "Done";
 --EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 
-**-- Offset is: -60 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: -50 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: -40 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: -30 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: -20 --**
--- ASCII String --
-bool(false)
---Multibyte String --
-bool(false)
-
-**-- Offset is: -10 --**
--- ASCII String --
-int(9)
---Multibyte String --
-int(9)
-
-**-- Offset is: 0 --**
--- ASCII String --
+-- Double Quoted String --
+-- With fourth encoding argument --
 int(20)
---Multibyte String --
+-- Without fourth encoding argument --
 int(20)
 
-**-- Offset is: 10 --**
--- ASCII String --
+-- Single Quoted String --
+-- With fourth encoding argument --
 int(20)
---Multibyte String --
-int(20)
-
-**-- Offset is: 20 --**
--- ASCII String --
-int(20)
---Multibyte String --
+-- Without fourth encoding argument --
 int(20)
 
-**-- Offset is: 30 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: 40 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: 50 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-**-- Offset is: 60 --**
--- ASCII String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
---Multibyte String --
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+-- Heredoc --
+-- With fourth encoding argument --
+int(20)
+-- Without fourth encoding argument --
+int(20)
 Done

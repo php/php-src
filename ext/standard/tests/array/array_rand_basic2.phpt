@@ -39,19 +39,20 @@ echo "Done";
 -- with all default and optional arguments --
 array(6) {
   [0]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [1]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [2]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [3]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [4]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [5]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
 }
 
 -- with default argument --
-unicode(%d) "%s"
+string(%d) "%s"
 Done
+

@@ -56,14 +56,14 @@ foreach($file_content_types as $file_content_type) {
 
     /*overwrite first 400 bytes in the file*/
     var_dump( ftell($file_handle) );  // expected : 0
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 400));
+    var_dump( fwrite($file_handle, $data_to_be_written, 400));
     var_dump( ftell($file_handle) );  // expected: 400
     var_dump( feof($file_handle) );  //Expecting bool(false)
 
     /*overwrite data in middle of the file*/
     fseek($file_handle, SEEK_SET, 1024/2 ); 
     var_dump( ftell($file_handle));  // expected: 1024/2
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 200) );
+    var_dump( fwrite($file_handle, $data_to_be_written, 200) );
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  //Expecting bool(false)
 
@@ -71,7 +71,7 @@ foreach($file_content_types as $file_content_type) {
     fseek($file_handle, SEEK_END, 0); 
     var_dump( ftell($file_handle) );  // expected: 1024
     var_dump( feof($file_handle) );
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 200) );
+    var_dump( fwrite($file_handle, $data_to_be_written, 200) );
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  //Expecting bool(false)
 
@@ -86,7 +86,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --
@@ -106,7 +106,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in r+b --
 int(0)
 int(400)
@@ -123,7 +123,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in r+t --
 int(0)
 int(400)
@@ -140,7 +140,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 
 -- Testing fwrite() with file having content of type text --
 -- Opening file in r+ --
@@ -159,7 +159,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3bdaf80dae28bc24bb304daa5ffee16c"
+string(32) "3bdaf80dae28bc24bb304daa5ffee16c"
 -- Opening file in r+b --
 int(0)
 int(400)
@@ -176,7 +176,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3bdaf80dae28bc24bb304daa5ffee16c"
+string(32) "3bdaf80dae28bc24bb304daa5ffee16c"
 -- Opening file in r+t --
 int(0)
 int(400)
@@ -193,7 +193,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3bdaf80dae28bc24bb304daa5ffee16c"
+string(32) "3bdaf80dae28bc24bb304daa5ffee16c"
 
 -- Testing fwrite() with file having content of type text_with_new_line --
 -- Opening file in r+ --
@@ -212,7 +212,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b188d7c8aa229cbef067e5970f2daba9"
+string(32) "b188d7c8aa229cbef067e5970f2daba9"
 -- Opening file in r+b --
 int(0)
 int(400)
@@ -229,7 +229,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b188d7c8aa229cbef067e5970f2daba9"
+string(32) "b188d7c8aa229cbef067e5970f2daba9"
 -- Opening file in r+t --
 int(0)
 int(400)
@@ -246,7 +246,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b188d7c8aa229cbef067e5970f2daba9"
+string(32) "b188d7c8aa229cbef067e5970f2daba9"
 
 -- Testing fwrite() with file having content of type alphanumeric --
 -- Opening file in r+ --
@@ -265,7 +265,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
+string(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
 -- Opening file in r+b --
 int(0)
 int(400)
@@ -282,7 +282,7 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
+string(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
 -- Opening file in r+t --
 int(0)
 int(400)
@@ -299,5 +299,5 @@ int(202)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
+string(32) "5d4ec23a3d9dd447e2f702d9e0e114d9"
 Done

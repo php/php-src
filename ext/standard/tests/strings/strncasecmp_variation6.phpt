@@ -1,5 +1,5 @@
 --TEST--
-Test strncasecmp() function : usage variations - binary safe - all ASCII chars(Bug #42528) 
+Test strncasecmp() function : usage variations - binary safe - all ASCII chars
 --FILE--
 <?php
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
@@ -31,7 +31,7 @@ var_dump( strncasecmp($str1, $str2, 8) );  //comparing all the 8-bits; expected:
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Test strncasecmp() function: with binary inputs ***
 
 -- Checking with all 256 characters given, in binary format --

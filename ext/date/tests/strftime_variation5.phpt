@@ -11,7 +11,7 @@ Test strftime() function : usage variation - Passing date related format strings
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
@@ -37,14 +37,14 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Year as decimal number without a century--
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 
 --Year as decimal number including the century--
-unicode(%d) "%d"
-unicode(4) "2008"
+string(%d) "%d"
+string(4) "2008"
 
 --Time zone offset--
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 ===DONE===

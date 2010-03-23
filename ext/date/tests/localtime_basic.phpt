@@ -3,8 +3,8 @@ Test localtime() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array localtime([int timestamp [, bool associative_array]])
- * Description: Returns the results of the C system call localtime as an associative 
- * array if the associative_array argument is set to 1 other wise it is a regular array 
+ * Description: Returns the results of the C system call localtime as an associative array 
+ * if the associative_array argument is set to 1 other wise it is a regular array 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
@@ -31,23 +31,23 @@ var_dump( localtime() );
 --EXPECTF--
 *** Testing localtime() : basic functionality ***
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 array(9) {

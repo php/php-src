@@ -52,7 +52,7 @@ var_dump(array_diff($array_int1, $array_int2, $array_string1, $array_string2));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff() : basic functionality ***
 -- Test indexed array with integers as elements --
 array(2) {
@@ -70,41 +70,41 @@ array(2) {
 -- Test indexed array with strings as elements --
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(2) {
   [2]=>
-  unicode(4) "five"
+  string(4) "five"
   [3]=>
-  unicode(3) "six"
+  string(3) "six"
 }
 -- Test associative array with strings as keys and integers as elements --
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"five"]=>
+  ["five"]=>
   int(5)
-  [u"six"]=>
+  ["six"]=>
   int(6)
 }
 -- Test associative array with strings as keys and integers as elements --
 array(2) {
-  [u"one"]=>
-  unicode(2) "un"
-  [u"two"]=>
-  unicode(4) "deux"
+  ["one"]=>
+  string(2) "un"
+  ["two"]=>
+  string(4) "deux"
 }
 array(2) {
-  [u"five"]=>
-  unicode(4) "cinq"
-  [u"six"]=>
-  unicode(3) "six"
+  ["five"]=>
+  string(4) "cinq"
+  ["six"]=>
+  string(3) "six"
 }
 -- Test array_diff with more than 2 arguments --
 array(2) {

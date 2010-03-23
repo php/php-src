@@ -110,30 +110,25 @@ string(13) "1.07654321E-9"
 
 Arg value 0.5 
 string(3) "0.5"
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
 
 Arg value  
@@ -155,16 +150,14 @@ Arg value
 string(0) ""
 
 Arg value  
-Error: 2 - rawurlencode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(74)
-NULL
+string(0) ""
 
 Arg value  
-Error: 2 - rawurlencode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(74)
-NULL
+string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 2 - rawurlencode() expects parameter 1 to be binary string, object given, %s(74)
+Error: 2 - rawurlencode() expects parameter 1 to be string, object given, %s(74)
 NULL
 
 Arg value  

@@ -45,7 +45,7 @@ database handler: flatfile
 Warning: dba_optimize() expects exactly 1 parameter, 0 given in %sdba_optimize.php on line %d
 NULL
 
-Warning: dba_optimize() expects parameter 1 to be resource, Unicode string given in %sdba_optimize.php on line %d
+Warning: dba_optimize() expects parameter 1 to be resource, string given in %sdba_optimize.php on line %d
 NULL
 bool(true)
 ===DONE===

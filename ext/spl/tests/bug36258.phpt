@@ -14,6 +14,6 @@ foreach ($diriter as $key => $file) {
 ?>
 ===DONE===
 --EXPECTF--	
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 ===DONE===

@@ -30,5 +30,5 @@ var_dump(reset($array));
 a => 0
 
 -- Unset First element in array and check reset() --
-unicode(1) "b"
+string(1) "b"
 ===DONE===

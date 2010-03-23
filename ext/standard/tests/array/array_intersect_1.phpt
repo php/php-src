@@ -120,25 +120,25 @@ $b=array (
 );
 var_dump(array_uintersect($a, $b, "comp_func_cr"));
 array(3) {
-  [u"0.1"]=>
+  ["0.1"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(9)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(9)
   }
   [1]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(4)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(-15)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(-15)
   }
 }
@@ -202,16 +202,16 @@ var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
 array(2) {
   [1]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(4)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(-15)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(-15)
   }
 }
@@ -275,16 +275,16 @@ var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(2) {
   [1]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(4)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(-15)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(-15)
   }
 }
@@ -348,16 +348,16 @@ var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func
 array(2) {
   [1]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(4)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(-15)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(-15)
   }
 }

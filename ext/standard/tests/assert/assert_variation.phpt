@@ -77,7 +77,7 @@ f1 called
 NULL
 
 Change callback function using ini.set and test return value 
-unicode(2) "f1"
+string(2) "f1"
 assert_options(ASSERT_CALLBACK) => [f2]
 ini.get("assert.callback") => [f2]
 f2 called
@@ -91,39 +91,39 @@ f3 called
 NULL
 
 Reset the name of the callback routine to a class method and check that it works
-unicode(2) "f3"
+string(2) "f3"
 assert_options(ASSERT_CALLBACK) => [c1]
 ini.get("assert.callback") => [f2]
 NULL
 
 Reset callback options to use a class method 
-unicode(2) "c1"
+string(2) "c1"
 array(2) {
   [0]=>
-  unicode(2) "c1"
+  string(2) "c1"
   [1]=>
-  unicode(6) "assert"
+  string(6) "assert"
 }
 ini.get("assert.callback") => [f2]
 
 
-Strict Standards: Non-static method c1::assert() should not be called statically in %s on line %d
+Strict Standards: Non-static method c1::assert() should not be called statically in %s on line 53
 Class assertion failed 53, "0 != 0"
 NULL
 
 Reset callback options to use an object method 
 array(2) {
   [0]=>
-  unicode(2) "c1"
+  string(2) "c1"
   [1]=>
-  unicode(6) "assert"
+  string(6) "assert"
 }
 array(2) {
   [0]=>
   &object(c1)#1 (0) {
   }
   [1]=>
-  unicode(6) "assert"
+  string(6) "assert"
 }
 ini.get("assert.callback") => [f2]
 

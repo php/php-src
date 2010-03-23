@@ -14,9 +14,9 @@ var_dump($dom->getDependencies());
 ==DONE==
 --EXPECTF--
 array(2) {
-  [%s"libxml"]=>
+  ["libxml"]=>
   %s(8) "Required"
-  [%s"domxml"]=>
+  ["domxml"]=>
   %s(9) "Conflicts"
 }
 ==DONE==

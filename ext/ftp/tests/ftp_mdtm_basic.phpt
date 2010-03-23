@@ -1,7 +1,5 @@
 --TEST--
 Test the File Modification Time as described in http://tools.ietf.org/html/rfc3659#section-3.1
---XFAIL--
-Fails because of missing Unicode implemetation in PHP6
 --CREDITS--
 Nathaniel McHugh 
 --SKIPIF--

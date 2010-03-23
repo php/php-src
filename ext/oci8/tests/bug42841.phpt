@@ -138,17 +138,17 @@ array(3) {
   [0]=>
   array(1) {
     [11]=>
-    unicode(2) "11"
+    string(2) "11"
   }
   [1]=>
   array(1) {
     [11]=>
-    unicode(2) "12"
+    string(2) "12"
   }
   [2]=>
   array(1) {
     [11]=>
-    unicode(2) "13"
+    string(2) "13"
   }
 }
 Second attempt
@@ -156,32 +156,32 @@ array(3) {
   [0]=>
   array(1) {
     [11]=>
-    unicode(2) "11"
+    string(2) "11"
   }
   [1]=>
   array(1) {
     [11]=>
-    unicode(2) "12"
+    string(2) "12"
   }
   [2]=>
   array(1) {
     [11]=>
-    unicode(2) "13"
+    string(2) "13"
   }
 }
 Test bug 43449: Cursor as function result
 array(1) {
   [0]=>
   array(1) {
-    [u"DUMMY"]=>
-    unicode(1) "X"
+    ["DUMMY"]=>
+    string(1) "X"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [u"DUMMY"]=>
-    unicode(1) "X"
+    ["DUMMY"]=>
+    string(1) "X"
   }
 }
 Done

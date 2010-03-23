@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,87 +35,20 @@
 #define COMMON (Z_ISREF_PP(struc) ? "&" : "")
 /* }}} */
 
-static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quote, int escape TSRMLS_DC) /* {{{ */
-{
-	UChar32 c;
-	int i;
-	UErrorCode status = U_ZERO_ERROR;
-	int clen;
-	char *out = NULL;
-
-	if (length == 0) {
-		ZEND_PUTS(quote);
-		ZEND_PUTS(quote);
-		return;
-	}
-
-	zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &out, &clen, ustr, length, &status);
-	if (U_FAILURE(status)) {
-		php_printf("problem converting string from Unicode: %s\n", u_errorName(status));
-		efree(out);
-		return;
-	}
-
-	ZEND_PUTS(quote);
-	if (escape) {
-		char *str;
-		int str_len;
-
-		str = php_addcslashes(out, clen, &str_len, 0, "'\\", 2 TSRMLS_CC);
-		PHPWRITE(str, str_len);
-		efree(str);
-	} else {
-		PHPWRITE(out, clen);
-	}
-	ZEND_PUTS(quote);
-	if (verbose) {
-		ZEND_PUTS(" {");
-		/* output the code points (not code units) */
-		if (length>=0) {
-			/* s is not NUL-terminated */
-			for (i = 0; i < length; /* U16_NEXT post-increments */) {
-				U16_NEXT(ustr, i, length, c);
-				php_printf(" %04x", c);
-			}
-		} else {
-			/* s is NUL-terminated */
-			for (i = 0; /* condition in loop body */; /* U16_NEXT post-increments */) {
-				U16_NEXT(ustr, i, length, c);
-				if (c == 0) {
-					break;
-				}
-				php_printf(" %04x", c);
-			}
-		}
-		php_printf(" }");
-	}
-	efree(out);
-}
-/* }}} */
-
 static int php_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	int verbose;
 
 	level = va_arg(args, int);
-	verbose = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c[", level + 1, ' ');
-		if (hash_key->type == IS_STRING) {
-			php_printf("\"");
-			PHPWRITE(hash_key->arKey.s, hash_key->nKeyLength - 1);
-			php_printf("\"");
-		} else if (hash_key->type == IS_UNICODE) {
-			php_printf("u");
-			php_var_dump_unicode(hash_key->arKey.u, hash_key->nKeyLength-1, verbose, "\"", 0 TSRMLS_CC);
-		}
-		php_printf("]=>\n");
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
-	php_var_dump(zv, level + 2, verbose TSRMLS_CC);
+	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -123,47 +56,38 @@ static int php_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list arg
 static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	zstr prop_name, class_name;
-	int verbose;
+	char *prop_name, *class_name;
 
 	level = va_arg(args, int);
-	verbose = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		int is_unicode = hash_key->type == IS_UNICODE;
-
-		int unmangle = zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength-1, &class_name, &prop_name);
+		int unmangle = zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
-		if (class_name.s && unmangle == SUCCESS) {
-			if (class_name.s[0] == '*') {
-				php_printf("%s\"%R\":protected", is_unicode ? "u" : "", hash_key->type, prop_name);
+		if (class_name && unmangle == SUCCESS) {
+			if (class_name[0] == '*') {
+				php_printf("\"%s\":protected", prop_name);
 			} else {
-				php_printf("%s\"%R\":%s\"%R\":private", is_unicode ? "u" : "", hash_key->type, prop_name, is_unicode ? "u" : "", hash_key->type, class_name);
+				php_printf("\"%s\":\"%s\":private", prop_name, class_name);
 			}
 		} else {
-			if (is_unicode) {
-				php_printf("u");
-				php_var_dump_unicode(hash_key->arKey.u, hash_key->nKeyLength-1, verbose, "\"", 0 TSRMLS_CC);
-			} else {
-				php_printf("\"");
-				PHPWRITE(hash_key->arKey.s, hash_key->nKeyLength - 1);
-				php_printf("\"");
-			}
+			php_printf("\"");
+			PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+			php_printf("\"");
 		}
 		ZEND_PUTS("]=>\n");
 	}
-	php_var_dump(zv, level + 2, verbose TSRMLS_CC);
+	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
-PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
-	zstr class_name;
+	char *class_name;
 	zend_uint class_name_len;
 	int (*php_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp;
@@ -190,11 +114,6 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ 
 		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 		PUTS("\"\n");
 		break;
-	case IS_UNICODE:
-		php_printf("%sunicode(%d) ", COMMON, u_countChar32((*struc)->value.ustr.val, (*struc)->value.ustr.len));
-		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose, "\"", 0 TSRMLS_CC);
-		PUTS("\n");
-		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
 		if (myht->nApplyCount > 1) {
@@ -213,12 +132,12 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ 
 		}
 
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf("%sobject(%v)#%d (%d) {\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
-		efree(class_name.v);
+		php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
+		efree(class_name);
 		php_element_dump_func = php_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 2, level, verbose);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 1, level);
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -243,11 +162,11 @@ head_done:
 }
 /* }}} */
 
-/* {{{ proto void var_dump(mixed var) U
+/* {{{ proto void var_dump(mixed var)
    Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
-	zval ***args = NULL;
+	zval ***args;
 	int argc;
 	int	i;
 
@@ -256,26 +175,7 @@ PHP_FUNCTION(var_dump)
 	}
 
 	for (i = 0; i < argc; i++) {
-		php_var_dump(args[i], 1, 0 TSRMLS_CC);
-	}
-	efree(args);
-}
-/* }}} */
-
-/* {{{ proto void var_inspect(mixed var) U
-   Dumps a string representation of variable to output (verbose form) */
-PHP_FUNCTION(var_inspect)
-{
-	zval ***args = NULL;
-	int argc;
-	int	i;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
-		return;
-	}
-
-	for (i = 0; i < argc; i++) {
-		php_var_dump(args[i], 1, 1 TSRMLS_CC);
+		php_var_dump(args[i], 1 TSRMLS_CC);
 	}
 	efree(args);
 }
@@ -293,24 +193,14 @@ static int zval_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list ar
 		/* XXX: perphaps when we are inside the class we should permit access to
 		 * private & protected values
 		 */
-		if (va_arg(args, int) &&
-			((hash_key->type == IS_STRING && hash_key->arKey.s[0] == 0) ||
-			(hash_key->type == IS_UNICODE && hash_key->arKey.u[0] == 0))
-		) {
+		if (va_arg(args, int) && hash_key->arKey[0] == '\0') {
 			return 0;
 		}
-		php_printf("%*c[", level + 1, ' ');
-		if (hash_key->type == IS_STRING) {
-			php_printf("\"");
-			PHPWRITE(hash_key->arKey.s, hash_key->nKeyLength - 1);
-			php_printf("\"");
-		} else if (hash_key->type == IS_UNICODE) {
-			php_printf("u");
-			php_var_dump_unicode(hash_key->arKey.u, hash_key->nKeyLength-1, 1, "\"", 0 TSRMLS_CC);
-		}
-		php_printf("]=>\n");
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
-	php_debug_zval_dump(zv, level + 2, 1 TSRMLS_CC);
+	php_debug_zval_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -318,40 +208,36 @@ static int zval_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list ar
 static int zval_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	zstr prop_name, class_name;
-	int verbose;
+	char *prop_name, *class_name;
 
 	level = va_arg(args, int);
-	verbose = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		int is_unicode = hash_key->type == IS_UNICODE;
-
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
+		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
-		if (class_name.s) {
-			if (class_name.s[0]=='*') {
-				php_printf("%s\"%R\":protected", is_unicode ? "u" : "", hash_key->type, prop_name);
+		if (class_name) {
+			if (class_name[0] == '*') {
+				php_printf("\"%s\":protected", prop_name);
 			} else {
-				php_printf("%s\"%R\":%s\"%R\":private", is_unicode ? "u" : "", hash_key->type, prop_name, is_unicode ? "u" : "", hash_key->type, class_name);
+				php_printf("\"%s\":\"%s\":private", prop_name, class_name);
 			}
 		} else {
-			php_printf("%s\"%R\"", is_unicode ? "u" : "", hash_key->type, prop_name);
+			php_printf("\"%s\"", prop_name);
 		}
 		ZEND_PUTS("]=>\n");
 	}
-	php_debug_zval_dump(zv, level + 2, 1 TSRMLS_CC);
+	php_debug_zval_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
-PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ */
+PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht = NULL;
-	zstr class_name;
+	char *class_name;
 	zend_uint class_name_len;
 	zend_class_entry *ce;
 	int (*zval_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
@@ -379,11 +265,6 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC) 
 		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 		php_printf("\" refcount(%u)\n", Z_REFCOUNT_PP(struc));
 		break;
-	case IS_UNICODE:
-		php_printf("%sunicode(%d) ", COMMON, u_countChar32((*struc)->value.ustr.val, (*struc)->value.ustr.len));
-		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose, "\"", 0 TSRMLS_CC);
-		php_printf(" refcount(%u)\n", Z_REFCOUNT_PP(struc));
-		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
 		if (myht->nApplyCount > 1) {
@@ -401,8 +282,8 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC) 
 		}
 		ce = Z_OBJCE_PP(struc);
 		Z_OBJ_HANDLER_PP(struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf("%sobject(%v)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
-		efree(class_name.v);
+		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
+		efree(class_name);
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
@@ -431,11 +312,11 @@ head_done:
 }
 /* }}} */
 
-/* {{{ proto void debug_zval_dump(mixed var) U
+/* {{{ proto void debug_zval_dump(mixed var)
    Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
-	zval ***args = NULL;
+	zval ***args;
 	int argc;
 	int	i;
 
@@ -444,7 +325,7 @@ PHP_FUNCTION(debug_zval_dump)
 	}
 
 	for (i = 0; i < argc; i++) {
-		php_debug_zval_dump(args[i], 1, 1 TSRMLS_CC);
+		php_debug_zval_dump(args[i], 1 TSRMLS_CC);
 	}
 	efree(args);
 }
@@ -459,19 +340,15 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
 	} else { /* string key */
+		char *key, *tmp_str;
+		int key_len, tmp_len;
+		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
+		tmp_str = php_str_to_str_ex(key, key_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
 		php_printf("%*c'", level + 1, ' ');
-		if (hash_key->type == IS_UNICODE) {
-			php_var_dump_unicode(hash_key->arKey.u, hash_key->nKeyLength-1, 0, "", 1 TSRMLS_CC);
-		} else {
-			char *key, *tmp_str;
-			int key_len, tmp_len;
-			key = php_addcslashes(hash_key->arKey.s, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
-	 		tmp_str = php_str_to_str_ex(key, key_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
-			PHPWRITE(tmp_str, tmp_len);
-			efree(key);
-	 		efree(tmp_str);
-		}
+		PHPWRITE(tmp_str, tmp_len);
 		php_printf("' => ");
+		efree(key);
+		efree(tmp_str);
 	}
 	php_var_export(zv, level + 2 TSRMLS_CC);
 	PUTS (",\n");
@@ -482,14 +359,14 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	zstr prop_name, class_name;
+	char *prop_name, *class_name;
 
 	level = va_arg(args, int);
 
 	php_printf("%*c", level + 1, ' ');
 	if (hash_key->nKeyLength != 0) {
-		zend_u_unmangle_property_name(hash_key->type, hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
-		php_printf(" '%R' => ", hash_key->type, prop_name);
+		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
+		php_printf(" '%s' => ", prop_name);
 	} else {
 		php_printf(" %ld => ", hash_key->h);
 	}
@@ -499,78 +376,12 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 }
 /* }}} */
 
-static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
-{
-	UChar32 cp;
-	int i = 0;
-	char buf[10];
-	int buf_len;
-	int state = 0; /* 0 = in single quotes, 1 = in double quotes */
-
-	/*
-	 * We export all codepoints > 128 in escaped form to avoid encoding issues
-	 * in case the result is used in a script.
-	 */
-	while (i < ustr_len) {
-		U16_NEXT(ustr, i, ustr_len, cp);
-		switch (cp) {
-			case 0x0: /* '\0' */
-				if (state == 0) {
-					PHPWRITE("' . \"", 5);
-					state = 1;
-				}
-				PHPWRITE("\\0", 2);
-				break;
-
-			case 0x27: /* '\'' */
-				if (state == 1) {
-					PHPWRITE("\" . '", 5);
-					state = 0;
-				}
-				PHPWRITE("\\'", 2);
-				break;
-
-			case 0x5c: /* '\\' */
-				PHPWRITE("\\\\", 2);
-				break;
-
-			default:
-				if ((uint32_t)cp < 128) {
-					if (state == 1) {
-						PHPWRITE("\" . '", 5);
-						state = 0;
-					}
-					buf[0] = (char) (short) cp;
-					buf_len = 1;
-				} else if (U_IS_BMP(cp)) {
-					if (state == 0) {
-						PHPWRITE("' . \"", 5);
-						state = 1;
-					}
-					buf_len = snprintf(buf, sizeof(buf), "\\u%04X", cp);
-				} else {
-					if (state == 0) {
-						PHPWRITE("' . \"", 5);
-						state = 1;
-					}
-					buf_len = snprintf(buf, sizeof(buf), "\\u%06X", cp);
-				}
-				PHPWRITE(buf, buf_len);
-				break;
-		}
-	}
-	if (state == 1) { /* if we are in double quotes, go back to single */
-		PHPWRITE("\" . '", 5);
-	}
-}
-/* }}} */
-
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
- 	char *tmp_str, *tmp_str2;
- 	int tmp_len, tmp_len2;
-	zstr class_name;
+	char *tmp_str, *tmp_str2;
+	int tmp_len, tmp_len2;
+	char *class_name;
 	zend_uint class_name_len;
 
 	switch (Z_TYPE_PP(struc)) {
@@ -595,11 +406,6 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 		efree(tmp_str2);
 		efree(tmp_str);
 		break;
-	case IS_UNICODE:
-		PUTS ("'");
-		php_unicode_export(Z_USTRVAL_PP(struc), Z_USTRLEN_PP(struc) TSRMLS_CC);
-		PUTS ("'");
-		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
 		if (level > 1) {
@@ -618,8 +424,8 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf ("%v::__set_state(array(\n", class_name);
-		efree(class_name.v);
+		php_printf ("%s::__set_state(array(\n", class_name);
+		efree(class_name);
 		if (myht) {
 			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level);
 		}
@@ -635,7 +441,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed var_export(mixed var [, bool return]) U
+/* {{{ proto mixed var_export(mixed var [, bool return])
    Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
 {
@@ -647,20 +453,14 @@ PHP_FUNCTION(var_export)
 	}
 
 	if (return_output) {
-		php_output_start_default(TSRMLS_C);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
-	/* UTODO
-	 * We need to escape non-ASCII chars with \uXXXX format. php_var_export()
-	 * currently uses output_encoding to export Unicode strings. Suppose it's
-	 * set to utf-8. If you use the result of var_export() in non-utf-8 context,
-	 * there may be trouble.
-	 */
 	php_var_export(&var, 1 TSRMLS_CC);
 
 	if (return_output) {
-		php_output_get_contents(return_value TSRMLS_CC);
-		php_output_discard(TSRMLS_C);
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -715,56 +515,10 @@ static inline void php_var_serialize_long(smart_str *buf, long val) /* {{{ */
 
 static inline void php_var_serialize_string(smart_str *buf, char *str, int len) /* {{{ */
 {
-	static const char hex[] = "0123456789abcdef";
-	unsigned char c;
-	int i;
-
-	smart_str_appendl(buf, "S:", 2);
+	smart_str_appendl(buf, "s:", 2);
 	smart_str_append_long(buf, len);
 	smart_str_appendl(buf, ":\"", 2);
-
-	for (i = 0; i < len; i++) {
-		c = (unsigned char) str[i];
-		if (c < 128 && c != 0x5c /*'\\'*/) {
-			smart_str_appendc(buf, c & 0xff);
-		} else {
-			smart_str_appendc(buf, 0x5c /*'\\'*/);
-			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
-			smart_str_appendc(buf, hex[(c >> 0) & 0xf]);
-		}
-	}
-
-	smart_str_appendl(buf, "\";", 2);
-}
-/* }}} */
-
-static inline void php_var_serialize_ustr(smart_str *buf, UChar *ustr, int len) /* {{{ */
-{
-	static const char hex[] = "0123456789abcdef";
-	UChar c;
-	int i;
-
-	for (i = 0; i < len; i++) {
-		c = ustr[i];
-		if (c < 128 && c != 0x5c /*'\\'*/) {
-			smart_str_appendc(buf, c & 0xff);
-		} else {
-			smart_str_appendc(buf, 0x5c /*'\\'*/);
-			smart_str_appendc(buf, hex[(c >> 12) & 0xf]);
-			smart_str_appendc(buf, hex[(c >> 8) & 0xf]);
-			smart_str_appendc(buf, hex[(c >> 4) & 0xf]);
-			smart_str_appendc(buf, hex[(c >> 0) & 0xf]);
-		}
-	}
-}
-/* }}} */
-
-static inline void php_var_serialize_unicode(smart_str *buf, UChar *ustr, int len) /* {{{ */
-{
-	smart_str_appendl(buf, "U:", 2);
-	smart_str_append_long(buf, len);
-	smart_str_appendl(buf, ":\"", 2);
-	php_var_serialize_ustr(buf, ustr, len);
+	smart_str_appendl(buf, str, len);
 	smart_str_appendl(buf, "\";", 2);
 }
 /* }}} */
@@ -777,7 +531,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	smart_str_appendl(buf, "O:", 2);
 	smart_str_append_long(buf, name_len);
 	smart_str_appendl(buf, ":\"", 2);
-	php_var_serialize_ustr(buf, class_name.u, name_len);
+	smart_str_appendl(buf, class_name, name_len);
 	smart_str_appendl(buf, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
@@ -788,9 +542,6 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 {
 	int count;
 	zend_bool incomplete_class;
-	zstr star;
-
-	star.s = "*";
 
 	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 	/* count after serializing name, since php_var_serialize_class_name
@@ -803,8 +554,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	smart_str_appendl(buf, ":{", 2);
 
 	if (count > 0) {
-		zstr key;
-		unsigned int key_len;
+		char *key;
 		zval **d, **name;
 		ulong index;
 		HashPosition pos;
@@ -817,80 +567,57 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
 
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
-			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, &key_len, &index, 0, &pos);
+			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos);
 
 			if (i == HASH_KEY_NON_EXISTANT) {
 				break;
 			}
 
-			if (incomplete_class &&
-				key_len == sizeof(MAGIC_MEMBER) &&
-				ZEND_U_EQUAL(i, key, key_len-1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)
-			) {
+			if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
 				continue;
 			}
 			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), (void **) &name, &pos);
 
-			if (Z_TYPE_PP(name) != IS_UNICODE) {
+			if (Z_TYPE_PP(name) != IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 				/* we should still add element even if it's not OK,
 				 * since we already wrote the length of the array before */
 				smart_str_appendl(buf,"N;", 2);
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
 				continue;
 			}
-			if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), Z_UNIVAL_PP(name), Z_UNILEN_PP(name) + 1, (void *) &d) == SUCCESS) {
-				if (Z_TYPE_PP(name) == IS_UNICODE) {
-					php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
-				} else {
-					php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
-				}
+			if (zend_hash_find(Z_OBJPROP_P(struc), Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
+				php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 				php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 			} else {
 				zend_class_entry *ce;
 				ce = zend_get_class_entry(struc TSRMLS_CC);
 				if (ce) {
-					zstr prot_name, priv_name;
+					char *prot_name, *priv_name;
 					int prop_name_length;
 
 					do {
-						zend_u_mangle_property_name(&priv_name, &prop_name_length, Z_TYPE_PP(name), ce->name, ce->name_length, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
-							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, priv_name.u, prop_name_length);
-							} else {
-								php_var_serialize_string(buf, priv_name.s, prop_name_length);
-							}
-							pefree(priv_name.v, ce->type & ZEND_INTERNAL_CLASS);
+						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name, ce->name_length, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
+						if (zend_hash_find(Z_OBJPROP_P(struc), priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+							php_var_serialize_string(buf, priv_name, prop_name_length);
+							pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 							break;
 						}
-						pefree(priv_name.v, ce->type & ZEND_INTERNAL_CLASS);
-						zend_u_mangle_property_name(&prot_name, &prop_name_length, Z_TYPE_PP(name), star, 1, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), prot_name, prop_name_length+1, (void *) &d) == SUCCESS) {
-							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, prot_name.u, prop_name_length);
-							} else {
-								php_var_serialize_string(buf, prot_name.s, prop_name_length);
-							}
-							pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
+						pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
+						zend_mangle_property_name(&prot_name, &prop_name_length, "*", 1, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
+						if (zend_hash_find(Z_OBJPROP_P(struc), prot_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+							php_var_serialize_string(buf, prot_name, prop_name_length);
+							pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 							break;
 						}
-						pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
-						if (Z_TYPE_PP(name) == IS_UNICODE) {
-							php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
-						} else {
-							php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
-						}
+						pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+						php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 						php_var_serialize_intern(buf, nvalp, var_hash TSRMLS_CC);
-						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%R\" returned as member variable from __sleep() but does not exist", Z_TYPE_PP(name), Z_UNIVAL_PP(name));
+						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_PP(name));
 					} while (0);
 				} else {
-					if (Z_TYPE_PP(name) == IS_UNICODE) {
-						php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
-					} else {
-						php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
-					}
+					php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 					php_var_serialize_intern(buf, nvalp, var_hash TSRMLS_CC);
 				}
 			}
@@ -951,10 +678,6 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			php_var_serialize_string(buf, Z_STRVAL_P(struc), Z_STRLEN_P(struc));
 			return;
 
-		case IS_UNICODE:
-			php_var_serialize_unicode(buf, Z_USTRVAL_P(struc), Z_USTRLEN_P(struc));
-			return;
-
 		case IS_OBJECT: {
 				zval *retval_ptr = NULL;
 				zval fname;
@@ -967,43 +690,34 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 				if (ce && ce->serialize != NULL) {
 					/* has custom handler */
-					int serialized_type;
-					zstr serialized_data;
+					unsigned char *serialized_data = NULL;
 					zend_uint serialized_length;
 
-					serialized_data.v = NULL;
-					if (ce->serialize(struc, &serialized_type, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
+					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_long(buf, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
-						php_var_serialize_ustr(buf, Z_OBJCE_P(struc)->name.u, Z_OBJCE_P(struc)->name_length);
+						smart_str_appendl(buf, Z_OBJCE_P(struc)->name, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, "\":", 2);
 
 						smart_str_append_long(buf, serialized_length);
-						if (serialized_type == IS_UNICODE) {
-							smart_str_appendl(buf, ":U:{", 4);
-							php_var_serialize_ustr(buf, serialized_data.u, serialized_length);
-						} else if (serialized_type == IS_STRING) {
-							smart_str_appendl(buf, ":{", 2);
-							smart_str_appendl(buf, serialized_data.s, serialized_length);
-						} else {
-							smart_str_appendc(buf, 'N');
-						}
+						smart_str_appendl(buf, ":{", 2);
+						smart_str_appendl(buf, serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
 					} else {
 						smart_str_appendl(buf, "N;", 2);
 					}
-					if (serialized_data.v) {
-						efree(serialized_data.v);
+					if (serialized_data) {
+						efree(serialized_data);
 					}
 					return;
 				}
 
 				if (ce && ce != PHP_IC_ENTRY && zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
-					ZVAL_ASCII_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 1);
+					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
 					res = call_user_function_ex(CG(function_table), &struc, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-					zval_dtor(&fname);
+
 					if (res == SUCCESS && !EG(exception)) {
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
@@ -1043,7 +757,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			smart_str_append_long(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
-				zstr key;
+				char *key;
 				zval **data;
 				ulong index;
 				uint key_len;
@@ -1055,11 +769,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					if (i == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-
-					if (incomplete_class &&
-						key_len == sizeof(MAGIC_MEMBER) &&
-						ZEND_U_EQUAL(i, key, key_len - 1, MAGIC_MEMBER, sizeof(MAGIC_MEMBER) - 1)
-					) {
+					if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
 						continue;
 					}
 
@@ -1068,10 +778,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 							php_var_serialize_long(buf, index);
 							break;
 						case HASH_KEY_IS_STRING:
-							php_var_serialize_string(buf, key.s, key_len - 1);
-							break;
-						case HASH_KEY_IS_UNICODE:
-							php_var_serialize_unicode(buf, key.u, key_len - 1);
+							php_var_serialize_string(buf, key, key_len - 1);
 							break;
 					}
 
@@ -1111,7 +818,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash 
 }
 /* }}} */
 
-/* {{{ proto string serialize(mixed variable) U
+/* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
@@ -1132,15 +839,14 @@ PHP_FUNCTION(serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.c) {
-		RETVAL_ASCII_STRINGL(buf.c, buf.len, 0);
-		smart_str_free(&buf);
+		RETURN_STRINGL(buf.c, buf.len, 0);
 	} else {
 		RETURN_NULL();
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation) U
+/* {{{ proto mixed unserialize(string variable_representation)
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -1149,7 +855,7 @@ PHP_FUNCTION(unserialize)
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &buf, &buf_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1169,7 +875,7 @@ PHP_FUNCTION(unserialize)
 }
 /* }}} */
 
-/* {{{ proto int memory_get_usage([real_usage]) U
+/* {{{ proto int memory_get_usage([real_usage])
    Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
 	zend_bool real_usage = 0;
@@ -1182,7 +888,7 @@ PHP_FUNCTION(memory_get_usage) {
 }
 /* }}} */
 
-/* {{{ proto int memory_get_peak_usage([real_usage]) U
+/* {{{ proto int memory_get_peak_usage([real_usage])
    Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
 	zend_bool real_usage = 0;

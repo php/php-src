@@ -56,11 +56,10 @@ file_put_contents($filename, "data");
 $fp = fopen($filename, "rt");
 var_dump(fscanf($fp, "%s%d", $v));
 
+@unlink($filename);
+echo "Done\n";
 ?>
-===DONE===
---CLEAN--
-<?php unlink(dirname(__FILE__)."/fscanf.dat"); ?>
---EXPECTF--
+--EXPECTF--	
 Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
@@ -72,11 +71,11 @@ NULL
 int(0)
 NULL
 int(1)
-unicode(4) "data"
+string(4) "data"
 
 Warning: fscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
 int(-1)
-unicode(4) "data"
+string(4) "data"
 NULL
 
 Warning: fscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
@@ -98,4 +97,4 @@ array(0) {
 
 Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
 int(-1)
-===DONE===
+Done

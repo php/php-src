@@ -30,9 +30,9 @@ $inputs =  array (
 /*1*/	  0,
 		  1,
 		  -2,
- 		  2147483647,
+		   2147483647,
 		  -2147483648,
-		  
+		
 		  // float values
 /*6*/	  10.5,
 		  -20.5,
@@ -109,15 +109,15 @@ array(0) {
 }
 -- Iteration 9 --
 
-Warning: sscanf() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: sscanf() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: sscanf() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 array(0) {
@@ -142,7 +142,7 @@ array(0) {
 }
 -- Iteration 19 --
 
-Warning: sscanf() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: sscanf() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 -- Iteration 20 --
 array(0) {

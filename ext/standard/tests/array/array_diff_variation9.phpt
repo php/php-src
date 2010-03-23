@@ -39,40 +39,8 @@ echo "Done";
 --EXPECTF--
 *** Testing array_diff() : usage variations ***
 -- Compare two 2-D arrays --
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(0) {
 }
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(0) {
 }
 
@@ -87,30 +55,20 @@ array(1) {
 }
 array(2) {
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(3) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "z"
+  string(1) "z"
   [2]=>
-  unicode(1) "y"
+  string(1) "y"
 }
 
 -- Compare a subarray from one 2-D array and one 2-D array --
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(3) {
   [0]=>
   int(1)
@@ -119,22 +77,8 @@ array(3) {
   [2]=>
   int(3)
 }
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(2) {
-  [u"sub_array1"]=>
+  ["sub_array1"]=>
   array(3) {
     [0]=>
     int(1)
@@ -143,14 +87,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"sub_array2"]=>
+  ["sub_array2"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 Done

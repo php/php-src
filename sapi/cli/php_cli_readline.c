@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -277,7 +277,7 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 
 static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
 {
-	zstr name;
+	char *name;
 	ulong number;
 
 	if (!(*state % 2)) {
@@ -286,12 +286,12 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number, 0);
-		if (!textlen || !zend_cmp_unicode_and_string(name.u, (char *)text, textlen)) {
+		if (!textlen || !strncmp(name, text, textlen)) {
 			if (pData) {
 				zend_hash_get_current_data(ht, pData);
 			}
 			zend_hash_move_forward(ht);
-			return name.s;
+			return name;
 		}
 		if (zend_hash_move_forward(ht) == FAILURE) {
 			break;
@@ -307,18 +307,10 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(active_symbol_table), NULL TSRMLS_CC);
 	if (retval) {
-		int32_t tmp_len, len;
-		UErrorCode status = U_ZERO_ERROR;
-
-		len = u_strlen((UChar *)retval);
-		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-								  (UChar *)retval, len, &status);
-
-		retval = malloc(tmp_len + 2);
+		retval = malloc(strlen(tmp) + 2);
 		retval[0] = '$';
 		strcpy(&retval[1], tmp);
 		rl_completion_append_character = '\0';
-		efree(tmp);
 	}
 	return retval;
 } /* }}} */
@@ -326,22 +318,10 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 static char *cli_completion_generator_func(const char *text, int textlen, int *state, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zend_function *func;
-	char *retval;
-
-	retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
+	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
 	if (retval) {
-		char *tmp;
-		int32_t tmp_len, len;
-		UErrorCode status = U_ZERO_ERROR;
-				
-		rl_completion_append_character = '(';	
-
-		len = u_strlen((UChar *)func->common.function_name.u);
-		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len,
-								  (UChar *)func->common.function_name.u, len, &status);
-
-		retval = strdup(tmp);
-		efree(tmp);
+		rl_completion_append_character = '(';
+		retval = strdup(func->common.function_name);
 	}
 	
 	return retval;
@@ -352,18 +332,8 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&pce TSRMLS_CC);
 	if (retval) {
-		char *tmp;
-		int32_t tmp_len, len;
-		UErrorCode status = U_ZERO_ERROR;
-			
 		rl_completion_append_character = '\0';
-
-		len = u_strlen((UChar *)(*pce)->name.u);
-		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-								  (UChar *)(*pce)->name.u, len, &status);
-
-		retval = strdup(tmp);
-		efree(tmp);
+		retval = strdup((*pce)->name);
 	}
 	
 	return retval;
@@ -374,18 +344,8 @@ static char *cli_completion_generator_define(const char *text, int textlen, int 
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce TSRMLS_CC);
 	if (retval) {
-		char *tmp;
-		int32_t tmp_len, len;
-		UErrorCode status = U_ZERO_ERROR;
-			
 		rl_completion_append_character = '\0';
-
-		len = u_strlen((UChar *)retval);
-		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-								  (UChar *)retval, len, &status);
-
-		retval = strdup(tmp);
-		efree(tmp);
+		retval = strdup(retval);
 	}
 	
 	return retval;
@@ -461,7 +421,7 @@ TODO:
 			int len = class_name_len + 2 + strlen(retval) + 1;
 			char *tmp = malloc(len);
 			
-			snprintf(tmp, len, "%s::%s", (*pce)->name.s, retval);
+			snprintf(tmp, len, "%s::%s", (*pce)->name, retval);
 			free(retval);
 			retval = tmp;
 		}

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -120,14 +120,14 @@ static void _php_ibase_free_xsqlda(XSQLDA *sqlda) /* {{{ */
 
 static void _php_ibase_free_stmt_handle(ibase_db_link *link, isc_stmt_handle stmt TSRMLS_DC) /* {{{ */
 {
+	static char info[] = { isc_info_base_level, isc_info_end };
+
 	if (stmt) {
-		/* Only free statement if db-connection is still open */
-		char db_items[] = {isc_info_page_size}, res_buf[40];
-
+		char res_buf[8];
 		IBDEBUG("Dropping statement handle (free_stmt_handle)...");
-
+		/* Only free statement if db-connection is still open */
 		if (SUCCESS == isc_database_info(IB_STATUS, &link->handle, 
-							sizeof(db_items), db_items, sizeof(res_buf), res_buf)) {
+							sizeof(info), info, sizeof(res_buf), res_buf)) {
 			if (isc_dsql_free_statement(IB_STATUS, &stmt, DSQL_drop)) {
 				_php_ibase_error(TSRMLS_C);
 			}
@@ -1332,7 +1332,12 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			data = ((IBVARY *) data)->vary_string;
 			/* no break */
 		case SQL_TEXT:
-			ZVAL_STRINGL(val,(char *) data,len,1);
+			if (PG(magic_quotes_runtime)) {
+				Z_STRVAL_P(val) = php_addslashes(data, len, &Z_STRLEN_P(val), 0 TSRMLS_CC);
+				Z_TYPE_P(val) = IS_STRING;
+			} else {
+				ZVAL_STRINGL(val,(char *) data,len,1);
+			}
 			break;
 		case SQL_SHORT:
 			n = *(short *) data;
@@ -1816,11 +1821,11 @@ PHP_FUNCTION(ibase_execute)
 				break;
 			}
 		}
-		
+
 		/* have variables to bind */
-		args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **), use_heap);
+		args = (zval ***) do_alloca((expected_n + 1) * sizeof(zval **), use_heap);
 	
-		if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)) {
+		if (FAILURE == zend_get_parameters_array_ex((expected_n + 1), args)) {
 			break;
 		}
 

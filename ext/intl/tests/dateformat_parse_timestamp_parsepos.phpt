@@ -2,7 +2,6 @@
 datefmt_parse_timestamp_code()  with parse pos
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php print 'skip'; ?>
 --FILE--
 <?php
 

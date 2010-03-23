@@ -13,6 +13,7 @@ var_dump($obj_vars);
 ?>
 --EXPECT--
 array(1) {
-  [u"public"]=>
-  unicode(6) "public"
+  ["public"]=>
+  string(6) "public"
 }
+

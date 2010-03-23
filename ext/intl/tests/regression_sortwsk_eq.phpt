@@ -12,14 +12,11 @@ function sort_using_locale( $locale, $test_array )
 {
     $coll = ut_coll_create( $locale );
 
-    // Convert strings to UTF-16 if needed.
-    $u_test_array = u( $test_array );
-
     // Sort array.
-    ut_coll_sort_with_sort_keys( $coll, $u_test_array );
+    ut_coll_sort_with_sort_keys( $coll, $test_array );
 
     // And return the sorted array.
-    return dump_array( $u_test_array ) . "\n";
+    return dump( $test_array ) . "\n";
 }
 
 function ut_main()

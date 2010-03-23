@@ -12,7 +12,7 @@ Test array_sum() function : usage variations - array with different integer valu
 *  integer, octal, hexadecimal, maximum and minimum integer values & mixed of all integers
 */
 
-echo "*** Testing array_sum() : with different integer array ***\n";
+echo "*** Testing array_sum() : different integer array ***\n";
 
 // Int array
 $int_values = array(3, 2, 100, 150, 25, 350, 0, -3, -1200);
@@ -36,8 +36,8 @@ var_dump( array_sum($mixed_int_value) );
 
 echo "Done"
 ?>
---EXPECT--
-*** Testing array_sum() : with different integer array ***
+--EXPECTF--
+*** Testing array_sum() : different integer array ***
 -- Sum of Integer array --
 int(-573)
 -- Sum of Octal array --

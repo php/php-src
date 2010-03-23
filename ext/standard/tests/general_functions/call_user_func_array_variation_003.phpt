@@ -169,27 +169,27 @@ Error: 2 - call_user_func_array() expects parameter 2 to be array, boolean given
 NULL
 
 --empty string DQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, %unicode_string_optional% given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
 NULL
 
 --instance of classWithToString--

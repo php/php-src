@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -124,7 +124,7 @@ typedef struct _spl_dual_it_object {
 	} inner;
 	struct {
 		zval                 *data;
-		zstr                 str_key;
+		char                 *str_key;
 		uint                 str_key_len;
 		ulong                int_key;
 		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */

@@ -8,7 +8,7 @@ class Test {
     function __copy()
     {
         $string = PHP_VERSION;
-        $version = $string{0};
+        $version = $string[0];
         if($string < 5)
         {
             return $this;

@@ -103,7 +103,7 @@ test(array('StaticClass', 'square'), array(1, 2));
 test(array('StaticClass', 'cube'), array(2));
 test(array('StaticClass', 'retVal'), array(3, 4));
 
-echo "\n-- class implementing an interface --\n";
+echo "-- class implementing an interface --\n";
 interface myInterface
 {
   public function toImplement();
@@ -195,7 +195,6 @@ StaticClass::retVal
 
 Warning: array_map() expects parameter 1 to be a valid callback, cannot access protected method StaticClass::retVal() in %sarray_map_object1.php on line %d
 NULL
-
 -- class implementing an interface --
 InterClass::square
 array(2) {

@@ -37,5 +37,5 @@ NULL
 
 Warning: ucwords() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-unicode(10) "string_val"
+string(10) "string_val"
 Done

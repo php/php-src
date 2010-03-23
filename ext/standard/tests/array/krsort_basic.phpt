@@ -10,7 +10,7 @@ Test krsort() function : basic functionality
 /*
  * Testing krsort() by providing array of integer/string values to check the basic functionality 
  * with following flag values :
- *  1.flag value as default
+ *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
@@ -23,12 +23,12 @@ $unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" );
 // an array containing unsorted numeric values with indices 
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
-echo "\n-- Testing krsort() by supplying string array, 'flag' value is default --\n";
+echo "\n-- Testing krsort() by supplying string array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_strings;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is default --\n";
+echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -55,21 +55,21 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing krsort() : basic functionality ***
 
--- Testing krsort() by supplying string array, 'flag' value is default --
+-- Testing krsort() by supplying string array, 'flag' value is defualt --
 bool(true)
 array(3) {
-  [u"orange"]=>
-  unicode(1) "o"
-  [u"lemon"]=>
-  unicode(1) "l"
-  [u"banana"]=>
-  unicode(1) "b"
+  ["orange"]=>
+  string(1) "o"
+  ["lemon"]=>
+  string(1) "l"
+  ["banana"]=>
+  string(1) "b"
 }
 
--- Testing krsort() by supplying numeric array, 'flag' value is default --
+-- Testing krsort() by supplying numeric array, 'flag' value is defualt --
 bool(true)
 array(4) {
   [555]=>
@@ -85,12 +85,12 @@ array(4) {
 -- Testing krsort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
-  [u"orange"]=>
-  unicode(1) "o"
-  [u"lemon"]=>
-  unicode(1) "l"
-  [u"banana"]=>
-  unicode(1) "b"
+  ["orange"]=>
+  string(1) "o"
+  ["lemon"]=>
+  string(1) "l"
+  ["banana"]=>
+  string(1) "b"
 }
 
 -- Testing krsort() by supplying numeric array, 'flag' = SORT_REGULAR --
@@ -109,12 +109,12 @@ array(4) {
 -- Testing krsort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
 array(3) {
-  [u"orange"]=>
-  unicode(1) "o"
-  [u"lemon"]=>
-  unicode(1) "l"
-  [u"banana"]=>
-  unicode(1) "b"
+  ["orange"]=>
+  string(1) "o"
+  ["lemon"]=>
+  string(1) "l"
+  ["banana"]=>
+  string(1) "b"
 }
 
 -- Testing krsort() by supplying numeric array, 'flag' = SORT_NUMERIC --

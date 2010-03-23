@@ -17,18 +17,18 @@ $unset_var = 10;
 unset ($unset_var);
 
 // define some classes
-class classWithTounicode
+class classWithToString
 {
-	public function __tounicode() {
+	public function __toString() {
 		return "Class A object";
 	}
 }
 
-class classWithoutTounicode
+class classWithoutToString
 {
 }
 
-// heredoc unicode
+// heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
@@ -71,18 +71,18 @@ $inputs = array(
       'uppercase FALSE' =>FALSE,
 
       // empty data
-      'empty unicode DQ' => "",
-      'empty unicode SQ' => '',
+      'empty string DQ' => "",
+      'empty string SQ' => '',
 
-      // unicode data
-      'unicode DQ' => "unicode",
-      'unicode SQ' => 'unicode',
-      'mixed case unicode' => "unicode",
+      // string data
+      'string DQ' => "string",
+      'string SQ' => 'string',
+      'mixed case string' => "sTrInG",
       'heredoc' => $heredoc,
 
       // object data
-      'instance of classWithTounicode' => new classWithTounicode(),
-      'instance of classWithoutTounicode' => new classWithoutTounicode(),
+      'instance of classWithToString' => new classWithToString(),
+      'instance of classWithoutToString' => new classWithoutToString(),
 
       // undefined data
       'undefined var' => @$undefined_var,
@@ -110,25 +110,25 @@ fclose( $file_handle );
 *** Testing date() : usage variation -  unexpected values to second argument $timestamp***
 
 -- int 0 --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- int 1 --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- int 12345 --
-unicode(24) "January 1, 1970, 4:25 am"
+string(24) "January 1, 1970, 4:25 am"
 
 -- int -12345 --
-unicode(26) "December 31, 1969, 9:34 pm"
+string(26) "December 31, 1969, 9:34 pm"
 
 -- float 10.5 --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- float -10.5 --
-unicode(25) "January 1, 1970, 12:59 am"
+string(25) "January 1, 1970, 12:59 am"
 
 -- float .5 --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- empty array --
 
@@ -151,68 +151,68 @@ Warning: date() expects parameter 2 to be long, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- lowercase null --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- lowercase true --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- lowercase false --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- uppercase TRUE --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- uppercase FALSE --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
--- empty unicode DQ --
+-- empty string DQ --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
--- empty unicode SQ --
+-- empty string SQ --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
--- unicode DQ --
+-- string DQ --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
--- unicode SQ --
+-- string SQ --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
--- mixed case unicode --
+-- mixed case string --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
--- instance of classWithTounicode --
+-- instance of classWithToString --
 
 Warning: date() expects parameter 2 to be long, object given in %s on line %d
 bool(false)
 
--- instance of classWithoutTounicode --
+-- instance of classWithoutToString --
 
 Warning: date() expects parameter 2 to be long, object given in %s on line %d
 bool(false)
 
 -- undefined var --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- unset var --
-unicode(24) "January 1, 1970, 1:00 am"
+string(24) "January 1, 1970, 1:00 am"
 
 -- resource --
 

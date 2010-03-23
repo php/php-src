@@ -62,12 +62,12 @@ echo "Done\n";
 -- Testing arsort() by supplying string array, 'flag' value is default --
 bool(true)
 array(3) {
-  [u"o"]=>
-  unicode(6) "orange"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"b"]=>
-  unicode(6) "banana"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
 }
 
 -- Testing arsort() by supplying numeric array, 'flag' value is default --
@@ -86,12 +86,12 @@ array(4) {
 -- Testing arsort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
-  [u"o"]=>
-  unicode(6) "orange"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"b"]=>
-  unicode(6) "banana"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
 }
 
 -- Testing arsort() by supplying numeric array, 'flag' = SORT_REGULAR --
@@ -110,12 +110,12 @@ array(4) {
 -- Testing arsort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
 array(3) {
-  [u"o"]=>
-  unicode(6) "orange"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"b"]=>
-  unicode(6) "banana"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
 }
 
 -- Testing arsort() by supplying numeric array, 'flag' = SORT_NUMERIC --

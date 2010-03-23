@@ -21,7 +21,7 @@ oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob->size());
-var_dump($blob->write((binary)str_repeat("string.", 1000)));
+var_dump($blob->write(str_repeat("string.", 1000)));
 var_dump($blob->size());
 oci_commit($c);
 
@@ -53,12 +53,12 @@ int(7000)
 array(2) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
-  [u"BLOB"]=>
+  ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

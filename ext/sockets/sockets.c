@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,8 +47,8 @@
 # ifdef ECONNRESET
 #  undef ECONNRESET
 # endif
-# define EPROTONOSUPPORT WSAEPROTONOSUPPORT
-# define ECONNRESET WSAECONNRESET
+# define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
+# define ECONNRESET		WSAECONNRESET
 # ifdef errno
 #  undef errno
 # endif
@@ -328,7 +328,6 @@ ZEND_GET_MODULE(sockets)
 
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
-
 
 PHP_SOCKETS_API int php_sockets_le_socket(void) /* {{{ */
 {
@@ -739,7 +738,10 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) /
 	zval		**dest_element;
 	php_socket	*php_sock;
 	HashTable	*new_hash;
+	char 		*key;
 	int			num = 0;
+	ulong       num_key;
+	uint 		key_len;
 
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
@@ -754,7 +756,14 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) /
 
 		if (PHP_SAFE_FD_ISSET(php_sock->bsd_socket, fds)) {
 			/* Add fd to new array */
-			zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(sock_array), &key, &key_len, &num_key, 0, NULL)) {
+				case HASH_KEY_IS_STRING:
+					zend_hash_add(new_hash, key, key_len, (void *)element, sizeof(zval *), (void **)&dest_element);
+					break;
+				case HASH_KEY_IS_LONG:
+					zend_hash_index_update(new_hash, num_key, (void *)element, sizeof(zval *), (void **)&dest_element);
+					break;
+			}
 			if (dest_element) zval_add_ref(dest_element);
 		}
 		num++;

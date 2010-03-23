@@ -40,42 +40,42 @@ foreach($time_formats as $key =>$value) {
 *** Testing gmdate() : usage variation ***
 
 --Lowercase Ante meridiem and post meridiem--
-unicode(2) "%s"
-unicode(2) "am"
+string(2) "%s"
+string(2) "am"
 
 --Uppercase Ante meridiem and post meridiem--
-unicode(2) "%s"
-unicode(2) "am"
+string(2) "%s"
+string(2) "am"
 
 --Swatch Internet time--
-unicode(3) "%d"
-unicode(3) "380"
+string(%d) "%d"
+string(3) "380"
 
 --12-hour format without leading zeros--
-unicode(%d) "%d"
-unicode(1) "8"
+string(%d) "%d"
+string(1) "8"
 
 --24-hour format without leading zeros--
-unicode(%d) "%d"
-unicode(1) "8"
+string(%d) "%d"
+string(1) "8"
 
 --12-hour format with leading zeros--
-unicode(2) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 
 --24-hour format with leading zeros--
-unicode(2) "%d"
-unicode(2) "08"
+string(2) "%d"
+string(2) "08"
 
 --Minutes with leading zeros--
-unicode(2) "%d"
-unicode(2) "08"
+string(2) "%d"
+string(2) "08"
 
 --Seconds with leading zeros--
-unicode(2) "%d"
-unicode(2) "08"
+string(2) "%d"
+string(2) "08"
 
 --Milliseconds--
-unicode(6) "%d"
-unicode(6) "000000"
+string(%d) "%d"
+string(6) "000000"
 ===DONE===

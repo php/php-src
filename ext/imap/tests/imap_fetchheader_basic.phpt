@@ -1,7 +1,5 @@
 --TEST--
-Test imap_fetchheader() function : basic functionality 
---XFAIL--
-To fix: change zend_hash_find() to zend_ascii_hash_find() in php_imap.c (imap_mail_compose()).
+Test imap_fetchheader() function : basic function
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');

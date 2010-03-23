@@ -23,8 +23,8 @@ var_dump(json_decode('{ "": { "": "" } }'));
 var_dump(json_decode('{ "": { "": "" }'));
 var_dump(json_decode('{ "": "": "" } }'));
 
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--
 Warning: json_decode() expects at least 1 parameter, 0 given in %s on line %d
 NULL
@@ -39,33 +39,33 @@ NULL
 NULL
 NULL
 object(stdClass)#%d (1) {
-  [u"test"]=>
+  ["test"]=>
   object(stdClass)#%d (1) {
-    [u"foo"]=>
-    unicode(3) "bar"
+    ["foo"]=>
+    string(3) "bar"
   }
 }
 object(stdClass)#%d (1) {
-  [u"test"]=>
+  ["test"]=>
   object(stdClass)#%d (1) {
-    [u"foo"]=>
-    unicode(0) ""
+    ["foo"]=>
+    string(0) ""
   }
 }
 object(stdClass)#%d (1) {
-  [u"_empty_"]=>
+  ["_empty_"]=>
   object(stdClass)#%d (1) {
-    [u"foo"]=>
-    unicode(0) ""
+    ["foo"]=>
+    string(0) ""
   }
 }
 object(stdClass)#%d (1) {
-  [u"_empty_"]=>
+  ["_empty_"]=>
   object(stdClass)#%d (1) {
-    [u"_empty_"]=>
-    unicode(0) ""
+    ["_empty_"]=>
+    string(0) ""
   }
 }
 NULL
 NULL
-Done
+===DONE===

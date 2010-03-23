@@ -92,7 +92,7 @@ $raw = ' !"#$%&\'()*+,-./0123456789:;<=>?'
      . "\0";
 
 echo "Testing rawurlencode: ";
-$encoded = rawurlencode((binary)$raw);
+$encoded = rawurlencode($raw);
 $correct = '%20%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F0123456789%3A%3B%3C%3D%3E%3F'
          . '%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_'
          . '%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~'
@@ -104,7 +104,7 @@ if ($encoded == $correct) {
 }
 
 echo "Testing rawurldecode: ";
-$decoded = rawurldecode((binary)$correct);
+$decoded = rawurldecode($correct);
 if ($decoded == $raw) {
 	echo("passed\n");
 } else {
@@ -112,7 +112,7 @@ if ($decoded == $raw) {
 }
 
 echo "Testing urlencode: ";
-$encoded = urlencode((binary)$raw);
+$encoded = urlencode($raw);
 $correct = '+%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F0123456789%3A%3B%3C%3D%3E%3F'
          . '%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_'
          . '%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D%7E'
@@ -124,7 +124,7 @@ if ($encoded == $correct) {
 }
 
 echo "Testing urldecode: ";
-$decoded = urldecode((binary)$correct);
+$decoded = urldecode($correct);
 if ($decoded == $raw) {
 	echo("passed\n");
 } else {

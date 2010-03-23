@@ -39,23 +39,23 @@ var_dump( array_flip($input) );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_flip() : 'input' array with repeatitive keys/values ***
 array(3) {
-  [u"VaLuE"]=>
+  ["VaLuE"]=>
   int(1)
-  [u"VALUE"]=>
+  ["VALUE"]=>
   int(2)
   [5]=>
   int(3)
 }
 array(3) {
-  [u"FOUR"]=>
-  unicode(3) "key"
-  [u"TWO"]=>
-  unicode(3) "two"
+  ["FOUR"]=>
+  string(3) "key"
+  ["TWO"]=>
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 array(2) {
   [-1]=>
@@ -65,18 +65,18 @@ array(2) {
 }
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(2) {
   [1]=>
-  unicode(5) "index"
+  string(5) "index"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(2) {
-  [u"value1"]=>
-  unicode(4) "key3"
+  ["value1"]=>
+  string(4) "key3"
   [2]=>
-  unicode(4) "key2"
+  string(4) "key2"
 }
 Done

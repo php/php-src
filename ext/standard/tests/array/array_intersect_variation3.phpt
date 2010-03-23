@@ -100,7 +100,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_intersect() : Passing different types of arrays to $arr1 argument ***
 -- Iterator 1 --
 array(2) {
@@ -154,30 +154,30 @@ array(1) {
 -- Iterator 6 --
 array(1) {
   [1]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
 }
 array(1) {
   [1]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
 }
 -- Iterator 7 --
 array(1) {
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
 }
 array(1) {
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
 }
 -- Iterator 8 --
 array(2) {
   [2]=>
-  unicode(88) "hello world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [3]=>
-  unicode(90) "11 < 12. 123 >22
+  string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
@@ -185,12 +185,12 @@ double quoted string. withdifferentwhitespaces"
 }
 array(2) {
   [2]=>
-  unicode(88) "hello world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [3]=>
-  unicode(90) "11 < 12. 123 >22
+  string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
@@ -199,27 +199,27 @@ double quoted string. withdifferentwhitespaces"
 -- Iterator 9 --
 array(2) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(2) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 -- Iterator 10 --
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 -- Iterator 11 --
@@ -229,79 +229,79 @@ array(0) {
 }
 -- Iterator 12 --
 array(1) {
-  [u"one"]=>
-  unicode(3) "ten"
+  ["one"]=>
+  string(3) "ten"
 }
 array(1) {
-  [u"one"]=>
-  unicode(3) "ten"
+  ["one"]=>
+  string(3) "ten"
 }
 -- Iterator 13 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 -- Iterator 14 --
 array(2) {
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
 }
 array(2) {
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
 }
 -- Iterator 15 --
 array(2) {
-  [u"false"]=>
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
 }
 array(2) {
-  [u"false"]=>
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
 }
 -- Iterator 16 --
 array(3) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 array(3) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 -- Iterator 17 --
 array(6) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
   NULL
   [4]=>
@@ -313,9 +313,9 @@ array(6) {
 }
 array(6) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
   NULL
   [4]=>

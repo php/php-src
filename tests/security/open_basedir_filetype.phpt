@@ -46,9 +46,10 @@ bool(false)
 
 Warning: filetype(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-unicode(3) "dir"
-unicode(4) "file"
-unicode(4) "file"
-unicode(4) "file"
-unicode(4) "file"
+string(3) "dir"
+string(4) "file"
+string(4) "file"
+string(4) "file"
+string(4) "file"
 *** Finished testing open_basedir configuration [filetype] ***
+

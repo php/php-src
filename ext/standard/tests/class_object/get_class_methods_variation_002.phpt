@@ -18,10 +18,10 @@ var_dump( get_class_methods('CasesensitivitytesT') );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing get_class_methods() : usage variations ***
 array(1) {
   [0]=>
-  unicode(8) "MyMeThOd"
+  string(8) "MyMeThOd"
 }
 Done

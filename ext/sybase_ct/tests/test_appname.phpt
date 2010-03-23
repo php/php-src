@@ -35,8 +35,8 @@ Sybase-CT application name
   );
   
   var_dump(
-    compare_string($program_name, $r[0][b'program_name']),
-    compare_string($hostname, $r[0][b'hostname'])
+    compare_string($program_name, $r[0]['program_name']),
+    compare_string($hostname, $r[0]['hostname'])
   );
  
   sybase_close($db);

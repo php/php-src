@@ -11,7 +11,7 @@ if (!extension_loaded("zlib")) {
 
 $filename = dirname(__FILE__)."/temp.txt.gz";
 $h = gzopen($filename, 'w');
-$str = b"Here is the string to be written. ";
+$str = "Here is the string to be written. ";
 $length = 10;
 gzwrite( $h, $str );
 var_dump(gzeof($h));

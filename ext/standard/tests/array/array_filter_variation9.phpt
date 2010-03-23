@@ -45,9 +45,7 @@ array(6) {
   [5]=>
   int(1000)
 }
-
-Warning: chr() expects parameter 1 to be long, Unicode string given in %s
-array(7) {
+array(8) {
   [0]=>
   int(0)
   [1]=>
@@ -60,6 +58,8 @@ array(7) {
   int(100)
   [5]=>
   int(1000)
+  [6]=>
+  string(5) "Hello"
   [7]=>
   NULL
 }

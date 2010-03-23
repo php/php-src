@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,9 +31,9 @@
 	if (Z_OBJ_HT_P(struc)->get_class_entry && \
             Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
 		class_name = php_lookup_class_name(struc, &name_len); \
-		if (!class_name.v) { \
+		if (!class_name) { \
 			name_len = sizeof(INCOMPLETE_CLASS) - 1; \
-			class_name.u = USTR_MAKE(INCOMPLETE_CLASS); \
+			class_name = estrndup(INCOMPLETE_CLASS, name_len); \
 		} \
 		free_class_name = 1; \
 		incomplete_class = 1; \
@@ -42,10 +42,10 @@
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	if (free_class_name) efree(class_name.v)
+	if (free_class_name) efree(class_name)
 
 #define PHP_CLASS_ATTRIBUTES											\
-	zstr class_name;													\
+	char *class_name;													\
 	zend_uint name_len;													\
 	zend_bool free_class_name = 0;										\
 	zend_bool incomplete_class = 0
@@ -58,8 +58,8 @@ extern "C" {
 #endif
 
 PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D);
-PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen);
-PHPAPI void  php_store_class_name(zval *object, zstr name, zend_uint len);
+PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen);
+PHPAPI void  php_store_class_name(zval *object, const char *name, zend_uint len);
 
 #ifdef __cplusplus
 };

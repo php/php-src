@@ -201,22 +201,22 @@ NULL
 
 Arg value  
 
-Warning: xml_parse() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_parse() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_parse() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_parse() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parse() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_parse() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parse() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_parse() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 

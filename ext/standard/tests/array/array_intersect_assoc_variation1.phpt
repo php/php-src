@@ -1,5 +1,5 @@
 --TEST--
-Test array_intersect_assoc() function : usage variations - unexpected values for 'arr1' argument
+Test array_intersect_assoc() function : usage variations - unexpected values for 'arr1' argument(Bug#43196)
 --FILE--
 <?php
 /* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])

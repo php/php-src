@@ -51,9 +51,9 @@ echo "ok\n";
 ?>
 --EXPECTF--
 object(book)#%d (2) {
-  [u"a"]=>
-  unicode(3) "foo"
-  [u"b"]=>
-  unicode(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
 }
 ok

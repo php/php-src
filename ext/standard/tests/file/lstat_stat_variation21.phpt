@@ -54,7 +54,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation21.tmp");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stat() on file by truncating it to given size ***
 bool(true)
 bool(true)

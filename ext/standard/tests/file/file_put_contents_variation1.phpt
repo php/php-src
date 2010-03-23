@@ -1,7 +1,5 @@
 --TEST--
 Test file_put_contents() function : variation - test append flag
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

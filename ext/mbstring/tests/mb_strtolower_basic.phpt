@@ -16,7 +16,7 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
  * Test basic functionality of mb_strtolower
  */
 
-echo "**** Testing mb_strtolower() : basic functionality****\n";
+echo "*** Testing mb_strtolower() : basic functionality***\n";
 
 $ascii_lower = 'abcdefghijklmnopqrstuvwxyz';
 $ascii_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -45,8 +45,8 @@ if ($mb == $greek_lower) {
 
 echo "Done";
 ?>
---EXPECT--
-**** Testing mb_strtolower() : basic functionality****
+--EXPECTF--
+*** Testing mb_strtolower() : basic functionality***
 
 -- ASCII String --
 string(26) "abcdefghijklmnopqrstuvwxyz"

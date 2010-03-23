@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,11 +32,13 @@
 
 #if HAVE_LIBGD
 
-/* open_basedir check */
+/* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
-	if (!filename || php_check_open_basedir(filename TSRMLS_CC)) {			\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                 	\
-		RETURN_FALSE;                                                         	\
+	if (!filename || php_check_open_basedir(filename TSRMLS_CC) ||                      \
+		(PG(safe_mode) && !php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))   \
+	) {                                                                                 \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                          \
+		RETURN_FALSE;                                                                   \
 	}
 
 #define PHP_GDIMG_TYPE_GIF      1
@@ -60,7 +62,7 @@
 
 PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
-PHPAPI extern const char php_sig_png[8];
+PHPAPI extern const char php_sig_png[3];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
@@ -188,12 +190,12 @@ PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);
 PHP_FUNCTION(image2wbmp);
 
+PHP_FUNCTION(imagecolormatch);
+
 #if HAVE_GD_BUNDLED
 PHP_FUNCTION(imagelayereffect);
 PHP_FUNCTION(imagexbm);
 #endif
-
-PHP_FUNCTION(imagecolormatch);
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);

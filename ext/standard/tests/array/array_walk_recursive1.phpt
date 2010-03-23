@@ -30,7 +30,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
@@ -41,16 +41,16 @@ Warning: array_walk_recursive() expects parameter 2 to be a valid callback, func
 NULL
 int(1)
 int(0)
-unicode(4) "data"
+string(4) "data"
 int(2)
 int(1)
-unicode(4) "data"
+string(4) "data"
 int(2)
 int(0)
-unicode(4) "data"
+string(4) "data"
 int(3)
 int(1)
-unicode(4) "data"
+string(4) "data"
 bool(true)
-unicode(4) "data"
+string(4) "data"
 Done

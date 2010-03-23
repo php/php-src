@@ -29,6 +29,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+OCI8 DEBUG: OCINlsEnvironmentVariableGet at (%s:%d) 
 OCI8 DEBUG L1: Got NO cached connection at (%s:%d) 
 OCI8 DEBUG: OCIEnvNlsCreate at (%s:%d) 
 OCI8 DEBUG: OCIHandleAlloc at (%s:%d) 

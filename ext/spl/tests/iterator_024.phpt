@@ -36,10 +36,10 @@ foreach(new RecursiveIteratorIterator($it) as $v) echo "$v\n";
 32
 331
 4
-unicode(13) "ArrayIterator"
+string(13) "ArrayIterator"
 An instance of RecursiveIterator or IteratorAggregate creating it is required
 ===MANUAL===
-unicode(22) "RecursiveArrayIterator"
+string(22) "RecursiveArrayIterator"
 1
 2
 31

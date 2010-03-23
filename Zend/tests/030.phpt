@@ -31,37 +31,37 @@ $test->bar();
 
 ?>
 --EXPECTF--
-object(Exception)#2 (%d) {
-  [u"message":protected]=>
-  unicode(3) "foo"
-  [u"string":u"Exception":private]=>
-  unicode(0) ""
-  [u"code":protected]=>
+object(Exception)#%d (7) {
+  ["message":protected]=>
+  string(3) "foo"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["code":protected]=>
   int(0)
-  [u"file":protected]=>
-  unicode(%d) "%s"
-  [u"line":protected]=>
+  ["file":protected]=>
+  string(%d) "%s030.php"
+  ["line":protected]=>
   int(%d)
-  [u"trace":u"Exception":private]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
-      [u"file"]=>
-      unicode(%d) "%s"
-      [u"line"]=>
+      ["file"]=>
+      string(%d) "%s030.php"
+      ["line"]=>
       int(%d)
-      [u"function"]=>
-      unicode(3) "bar"
-      [u"class"]=>
-      unicode(3) "foo"
-      [u"type"]=>
-      unicode(2) "->"
-      [u"args"]=>
+      ["function"]=>
+      string(3) "bar"
+      ["class"]=>
+      string(3) "foo"
+      ["type"]=>
+      string(2) "->"
+      ["args"]=>
       array(0) {
       }
     }
   }
-  [u"previous":u"Exception":private]=>
+  ["previous":"Exception":private]=>
   NULL
 }
 'test' => '0'

@@ -81,7 +81,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_reverse() : usage variations ***
 -- Iteration 1 --
 - with default argument -
@@ -219,102 +219,102 @@ array(1) {
 - with default argument -
 array(6) {
   [0]=>
-  unicode(5) "ccccc"
+  string(5) "ccccc"
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
   [2]=>
-  unicode(4) "bbbb"
+  string(4) "bbbb"
   [3]=>
-  unicode(1) "b"
+  string(1) "b"
   [4]=>
-  unicode(4) "aaaa"
+  string(4) "aaaa"
   [5]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 - with $preserve keys = true -
 array(6) {
   [5]=>
-  unicode(5) "ccccc"
+  string(5) "ccccc"
   [4]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(4) "bbbb"
+  string(4) "bbbb"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [1]=>
-  unicode(4) "aaaa"
+  string(4) "aaaa"
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 - with $preserve_keys = false -
 array(6) {
   [0]=>
-  unicode(5) "ccccc"
+  string(5) "ccccc"
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
   [2]=>
-  unicode(4) "bbbb"
+  string(4) "bbbb"
   [3]=>
-  unicode(1) "b"
+  string(1) "b"
   [4]=>
-  unicode(4) "aaaa"
+  string(4) "aaaa"
   [5]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 -- Iteration 8 --
 - with default argument -
 array(3) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 - with $preserve keys = true -
 array(3) {
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 - with $preserve_keys = false -
 array(3) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 -- Iteration 9 --
 - with default argument -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 - with $preserve keys = true -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 - with $preserve_keys = false -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 -- Iteration 10 --
@@ -354,148 +354,148 @@ array(4) {
 -- Iteration 11 --
 - with default argument -
 array(3) {
-  [u"three"]=>
-  unicode(6) "thirty"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"one"]=>
-  unicode(3) "ten"
+  ["three"]=>
+  string(6) "thirty"
+  ["two"]=>
+  string(6) "twenty"
+  ["one"]=>
+  string(3) "ten"
 }
 - with $preserve keys = true -
 array(3) {
-  [u"three"]=>
-  unicode(6) "thirty"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"one"]=>
-  unicode(3) "ten"
+  ["three"]=>
+  string(6) "thirty"
+  ["two"]=>
+  string(6) "twenty"
+  ["one"]=>
+  string(3) "ten"
 }
 - with $preserve_keys = false -
 array(3) {
-  [u"three"]=>
-  unicode(6) "thirty"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"one"]=>
-  unicode(3) "ten"
+  ["three"]=>
+  string(6) "thirty"
+  ["two"]=>
+  string(6) "twenty"
+  ["one"]=>
+  string(3) "ten"
 }
 -- Iteration 12 --
 - with default argument -
 array(3) {
   [0]=>
-  unicode(4) "four"
+  string(4) "four"
   [1]=>
-  unicode(3) "two"
-  [u"one"]=>
+  string(3) "two"
+  ["one"]=>
   int(1)
 }
 - with $preserve keys = true -
 array(3) {
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
   [2]=>
-  unicode(3) "two"
-  [u"one"]=>
+  string(3) "two"
+  ["one"]=>
   int(1)
 }
 - with $preserve_keys = false -
 array(3) {
   [0]=>
-  unicode(4) "four"
+  string(4) "four"
   [1]=>
-  unicode(3) "two"
-  [u"one"]=>
+  string(3) "two"
+  ["one"]=>
   int(1)
 }
 -- Iteration 13 --
 - with default argument -
 array(3) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 - with $preserve keys = true -
 array(3) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 - with $preserve_keys = false -
 array(3) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 -- Iteration 14 --
 - with default argument -
 array(4) {
-  [u"true"]=>
+  ["true"]=>
   bool(true)
-  [u"false"]=>
+  ["false"]=>
   bool(false)
   [0]=>
-  unicode(5) "false"
+  string(5) "false"
   [1]=>
-  unicode(4) "true"
+  string(4) "true"
 }
 - with $preserve keys = true -
 array(4) {
-  [u"true"]=>
+  ["true"]=>
   bool(true)
-  [u"false"]=>
+  ["false"]=>
   bool(false)
   [0]=>
-  unicode(5) "false"
+  string(5) "false"
   [1]=>
-  unicode(4) "true"
+  string(4) "true"
 }
 - with $preserve_keys = false -
 array(4) {
-  [u"true"]=>
+  ["true"]=>
   bool(true)
-  [u"false"]=>
+  ["false"]=>
   bool(false)
   [0]=>
-  unicode(5) "false"
+  string(5) "false"
   [1]=>
-  unicode(4) "true"
+  string(4) "true"
 }
 -- Iteration 15 --
 - with default argument -
 array(3) {
-  [u"emptys"]=>
-  unicode(0) ""
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u""]=>
-  unicode(6) "emptys"
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 - with $preserve keys = true -
 array(3) {
-  [u"emptys"]=>
-  unicode(0) ""
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u""]=>
-  unicode(6) "emptys"
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 - with $preserve_keys = false -
 array(3) {
-  [u"emptys"]=>
-  unicode(0) ""
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u""]=>
-  unicode(6) "emptys"
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 -- Iteration 16 --
 - with default argument -
@@ -509,9 +509,9 @@ array(6) {
   [3]=>
   NULL
   [4]=>
-  unicode(0) ""
+  string(0) ""
   [5]=>
-  unicode(0) ""
+  string(0) ""
 }
 - with $preserve keys = true -
 array(6) {
@@ -524,9 +524,9 @@ array(6) {
   [3]=>
   NULL
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 - with $preserve_keys = false -
 array(6) {
@@ -539,9 +539,9 @@ array(6) {
   [3]=>
   NULL
   [4]=>
-  unicode(0) ""
+  string(0) ""
   [5]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 17 --
 - with default argument -
@@ -550,7 +550,7 @@ array(3) {
   int(6)
   [1]=>
   int(5)
-  [u""]=>
+  [""]=>
   int(4)
 }
 - with $preserve keys = true -
@@ -559,7 +559,7 @@ array(3) {
   int(6)
   [0]=>
   int(5)
-  [u""]=>
+  [""]=>
   int(4)
 }
 - with $preserve_keys = false -
@@ -568,35 +568,35 @@ array(3) {
   int(6)
   [1]=>
   int(5)
-  [u""]=>
+  [""]=>
   int(4)
 }
 -- Iteration 18 --
 - with default argument -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"One"]=>
+  ["One"]=>
   int(10)
 }
 - with $preserve keys = true -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"One"]=>
+  ["One"]=>
   int(10)
 }
 - with $preserve_keys = false -
 array(3) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"One"]=>
+  ["One"]=>
   int(10)
 }
 Done

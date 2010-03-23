@@ -9,9 +9,8 @@ Test sort() function : usage variations - sort strings
 */
 
 /*
- * testing sort() by providing different string arrays for $array argument with
- * following flag values
- *  flag value as default
+ * testing sort() by providing different string arrays for $array argument with following flag values
+ *  flag  value as defualt
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */
@@ -52,7 +51,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various string arrays --
@@ -66,26 +65,26 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  unicode(1) "	"
+  string(1) "	"
   [3]=>
-  unicode(1) "
+  string(1) "
 "
   [4]=>
-  unicode(1) ""
+  string(1) ""
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [8]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [9]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [10]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [11]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
@@ -95,26 +94,26 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  unicode(1) "	"
+  string(1) "	"
   [3]=>
-  unicode(1) "
+  string(1) "
 "
   [4]=>
-  unicode(1) ""
+  string(1) ""
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [8]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [9]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [10]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [11]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
 }
 - Sort flag = SORT_STRING -
 bool(true)
@@ -124,26 +123,26 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  unicode(1) "	"
+  string(1) "	"
   [3]=>
-  unicode(1) "
+  string(1) "
 "
   [4]=>
-  unicode(1) ""
+  string(1) ""
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [8]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [9]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [10]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [11]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
 }
 
 -- Iteration 2 --
@@ -151,84 +150,84 @@ array(12) {
 bool(true)
 array(12) {
   [0]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
   [1]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [2]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [3]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [4]=>
-  unicode(1) "X"
+  string(1) "X"
   [5]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [6]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [7]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [8]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [9]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [10]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [11]=>
-  unicode(1) "x"
+  string(1) "x"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(12) {
   [0]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
   [1]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [2]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [3]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [4]=>
-  unicode(1) "X"
+  string(1) "X"
   [5]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [6]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [7]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [8]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [9]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [10]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [11]=>
-  unicode(1) "x"
+  string(1) "x"
 }
 - Sort flag = SORT_STRING -
 bool(true)
 array(12) {
   [0]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
   [1]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [2]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [3]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [4]=>
-  unicode(1) "X"
+  string(1) "X"
   [5]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [6]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [7]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [8]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [9]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [10]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [11]=>
-  unicode(1) "x"
+  string(1) "x"
 }
 Done

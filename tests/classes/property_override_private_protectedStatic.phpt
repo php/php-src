@@ -28,7 +28,7 @@ Redeclare inherited private property as protected static.
   $b->showA();
   B::showB();
 ?>
---EXPECT--
+--EXPECTF--
 A::p
 A::p
 B::p (static)

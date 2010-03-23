@@ -14,6 +14,6 @@ class b implements a { function f($a=1) {}}
 class c extends b {function f() {}}
 ?>
 --EXPECTF--
-unicode(62) "Declaration of c::f() should be compatible with that of b::f()"
+string(62) "Declaration of c::f() should be compatible with that of b::f()"
 
 

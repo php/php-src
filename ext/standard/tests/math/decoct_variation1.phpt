@@ -96,85 +96,85 @@ fclose($fp);
 *** Testing decoct() : usage variations ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 3 --
-unicode(5) "30071"
+string(5) "30071"
 
 -- Iteration 4 --
-unicode(11) "37777773327"
+string(11) "37777773327"
 
 -- Iteration 5 --
-unicode(11) "37777777777"
+string(11) "37777777777"
 
 -- Iteration 6 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 7 --
-unicode(2) "12"
+string(2) "12"
 
 -- Iteration 8 --
-unicode(11) "37777777766"
+string(11) "37777777766"
 
 -- Iteration 9 --
-unicode(11) "27646215010"
+string(11) "27646215010"
 
 -- Iteration 10 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 11 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 12 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 13 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 14 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 15 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 16 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 17 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 18 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 19 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 20 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 21 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 22 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 23 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 24 --
 
 Notice: Object of class classA could not be converted to int in %s on line %d
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 25 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 26 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 27 --
-unicode(%d) "%d"
+string(%d) "%d"
 ===Done===

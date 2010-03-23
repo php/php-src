@@ -8,7 +8,7 @@ Test natcasesort() function : usage variations - mixed array
  */
 
 /*
- * Pass an array containing sub-arrays, ints, floats, Unicode strings, boolean, null 
+ * Pass an array containing sub-arrays, ints, floats, strings, boolean, null 
  * and escape characters to test how natcasesort() re-orders it
  */
 
@@ -39,13 +39,13 @@ array(22) {
   [13]=>
   NULL
   [19]=>
-  unicode(0) ""
+  string(0) ""
   [21]=>
   bool(false)
   [12]=>
-  unicode(0) ""
+  string(0) ""
   [10]=>
-  unicode(3) "-.9"
+  string(3) "-.9"
   [7]=>
   int(-2)
   [8]=>
@@ -61,17 +61,17 @@ array(22) {
   [20]=>
   bool(true)
   [3]=>
-  unicode(1) "4"
+  string(1) "4"
   [4]=>
   float(4)
   [6]=>
-  unicode(1) "5"
+  string(1) "5"
   [14]=>
-  unicode(2) "ab"
+  string(2) "ab"
   [15]=>
-  unicode(4) "abcd"
+  string(4) "abcd"
   [18]=>
-  unicode(14) "%s"
+  string(14) "%s"
   [0]=>
   array(0) {
   }
@@ -103,8 +103,8 @@ array(22) {
     }
   }
   [5]=>
-  unicode(1) "b"
+  string(1) "b"
   [11]=>
-  unicode(4) "True"
+  string(4) "True"
 }
 Done

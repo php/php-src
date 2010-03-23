@@ -11,6 +11,7 @@ if (@iconv("ascii","UCS-4LE", "abcd") == '') {
 error_reporting=2039
 --FILE--
 <?php
+/* include('test.inc'); */
 /*
 Expected output:
 &#97;&#98;&#99;&#100;

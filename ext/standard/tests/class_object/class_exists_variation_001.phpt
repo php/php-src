@@ -122,30 +122,25 @@ bool(false)
 Arg value 0.5 
 In __autoload(0.5)
 bool(false)
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), array given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), array given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), array given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), array given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), array given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
 
 Arg value  
@@ -176,7 +171,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
 Arg value  
-Error: 2 - class_exists() expects parameter 1 to be string (Unicode or binary), object given, %s(77)
+Error: 2 - class_exists() expects parameter 1 to be string, object given, %s(77)
 NULL
 
 Arg value  

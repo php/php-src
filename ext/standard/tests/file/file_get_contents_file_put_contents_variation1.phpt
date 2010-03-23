@@ -22,43 +22,39 @@ $buffer_types = array("text", "numeric", "text_with_new_line", "alphanumeric");
 
 foreach( $buffer_types as $type) {
   fill_buffer($buffer, $type, 100);
-  file_put_contents( $file_path."/file_get_contents_variation1.tmp", $buffer, FILE_BINARY );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 0) );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 1) );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 0, NULL, 5) );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 1, NULL, 5) );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 0, NULL, 5, 20) );
-  var_dump( file_get_contents($file_path."/file_get_contents_variation1.tmp", 1, NULL, 5, 20) );
+  file_put_contents( $file_path."/file_put_contents_variation1.tmp", $buffer);
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0, NULL, 5) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1, NULL, 5) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0, NULL, 5, 20) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1, NULL, 5, 20) );
+
 }
 
 echo "--- Done ---";
 ?>
 --CLEAN--
 <?php
-//Deleting the temporary file
+//Deleting the temporary file 
+
 $file_path = dirname(__FILE__);
-unlink($file_path."/file_get_contents_variation1.tmp");
+unlink($file_path."/file_put_contents_variation1.tmp");
 ?>
 --EXPECTF--
 *** Testing with variations in the arguments values ***
-
-Notice: file_put_contents(): 100 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 string(100) "text text text text text text text text text text text text text text text text text text text text "
 string(100) "text text text text text text text text text text text text text text text text text text text text "
 string(95) "text text text text text text text text text text text text text text text text text text text "
 string(95) "text text text text text text text text text text text text text text text text text text text "
 string(20) "text text text text "
 string(20) "text text text text "
-
-Notice: file_put_contents(): 100 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 string(100) "2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
 string(100) "2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
 string(95) "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
 string(95) "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
 string(20) "22222222222222222222"
 string(20) "22222222222222222222"
-
-Notice: file_put_contents(): 100 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 string(100) "line
 line of text
 line
@@ -111,8 +107,6 @@ li"
 string(20) "line of text
 line
 li"
-
-Notice: file_put_contents(): 100 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 string(100) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 string(100) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 string(95) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "

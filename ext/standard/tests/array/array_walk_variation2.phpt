@@ -21,9 +21,6 @@ unset ($unset_var);
 
 $user_data = 20;
 
-// get resource variable
-$fp = fopen(__FILE__, 'r');
-
 // class definition
 class MyClass
 {
@@ -73,7 +70,7 @@ $funcname_values = array(
          new MyClass(),
 
          // resource data
-/* 23*/  $fp,
+/* 23*/  $fp = fopen(__FILE__, 'r'),
 
          // undefined data
          @$undefined_var,

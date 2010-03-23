@@ -38,8 +38,8 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : variation ***
-unicode(5) "files"
-unicode(4) "user"
+string(%d) "%s"
+string(4) "user"
 
 Fatal error: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
 Stack trace:
@@ -47,4 +47,3 @@ Stack trace:
 #1 %s(%d): session_start()
 #2 {main}
   thrown in %s on line %d
-

@@ -48,7 +48,7 @@ var_dump(array_diff($arr_float_str, $arr_int_str));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff() : usage variations ***
 -- Compare integers and floats: --
 array(0) {
@@ -71,11 +71,11 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(4) "1.00"
+  string(4) "1.00"
   [1]=>
-  unicode(4) "2.00"
+  string(4) "2.00"
   [2]=>
-  unicode(4) "3.00"
+  string(4) "3.00"
 }
 -- Compare floats and strings containing integers: --
 array(0) {
@@ -93,27 +93,27 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(4) "1.00"
+  string(4) "1.00"
   [1]=>
-  unicode(4) "2.00"
+  string(4) "2.00"
   [2]=>
-  unicode(4) "3.00"
+  string(4) "3.00"
 }
 -- Compare strings containing integers and strings containing floats: --
 array(3) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
   [2]=>
-  unicode(1) "3"
+  string(1) "3"
 }
 array(3) {
   [0]=>
-  unicode(4) "1.00"
+  string(4) "1.00"
   [1]=>
-  unicode(4) "2.00"
+  string(4) "2.00"
   [2]=>
-  unicode(4) "3.00"
+  string(4) "3.00"
 }
 Done

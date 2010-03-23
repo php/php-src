@@ -61,25 +61,25 @@ array(1) {
 array(3) {
   [1]=>
   int(2)
-  [u"hello"]=>
+  ["hello"]=>
   int(2)
-  [u"world"]=>
+  ["world"]=>
   int(1)
 }
 
 array(2) {
-  [u"hello"]=>
+  ["hello"]=>
   int(2)
-  [u"world"]=>
+  ["world"]=>
   int(1)
 }
 
 array(3) {
-  [u""]=>
+  [""]=>
   int(2)
-  [u"world"]=>
+  ["world"]=>
   int(3)
-  [u"hello"]=>
+  ["hello"]=>
   int(4)
 }
 

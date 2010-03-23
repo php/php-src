@@ -1,9 +1,10 @@
 --TEST--
-#38943, properties in extended class cannot be set
+#38943, properties in extended class cannot be set (< 5.3)
 --SKIPIF--
 <?php
 /* $Id$ */
 if(!extension_loaded('zip')) die('skip');
+if (!defined('PHP_VERSION_MAJOR')) die('skip');
 ?>
 --FILE--
 <?php
@@ -14,12 +15,12 @@ array(1) {
   [0]=>
   int(1)
 }
-object(myZip)#1 (8) {
-  [u"test":u"myZip":private]=>
+object(myZip)#1 (%d) {
+  ["test:private"]=>
   int(0)
-  [u"testp"]=>
-  unicode(6) "foobar"
-  [u"testarray":u"myZip":private]=>
+  ["testp"]=>
+  string(6) "foobar"
+  ["testarray:private"]=>
   array(1) {
     [0]=>
     int(1)

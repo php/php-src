@@ -8,4 +8,4 @@ $f = new ReflectionFunction("sleep");
 var_dump($f->getExtensionName());
 ?>
 --EXPECT--	
-unicode(8) "standard"
+string(8) "standard"

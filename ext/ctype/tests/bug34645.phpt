@@ -1,7 +1,7 @@
 --TEST--
 Bug #34645 (ctype corrupts memory when validating large numbers)
 --SKIPIF--
-<?php if (!extension_loaded("ctype")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 $id = 394829384;

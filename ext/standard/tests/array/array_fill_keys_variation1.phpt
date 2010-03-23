@@ -48,32 +48,32 @@ array(0) {
 -- Testing array_fill_keys() function with keyed array --
 array(4) {
   [2]=>
-  unicode(6) "simple"
-  [u"strv1"]=>
-  unicode(6) "simple"
+  string(6) "simple"
+  ["strv1"]=>
+  string(6) "simple"
   [4]=>
-  unicode(6) "simple"
-  [u"simple"]=>
-  unicode(6) "simple"
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
 }
 
 -- Testing array_fill_keys() function with mixed array --
 
 Notice: Array to string conversion in %sarray_fill_keys_variation1.php on line %d
 array(7) {
-  [u"Resource id #%d"]=>
-  unicode(6) "simple"
-  [u"Class A object"]=>
-  unicode(6) "simple"
-  [u"simple"]=>
-  unicode(6) "simple"
-  [u"Array"]=>
-  unicode(6) "simple"
+  ["Resource id #%d"]=>
+  string(6) "simple"
+  ["Class A object"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
+  ["Array"]=>
+  string(6) "simple"
   [2]=>
-  unicode(6) "simple"
-  [u""]=>
-  unicode(6) "simple"
-  [u"2.4"]=>
-  unicode(6) "simple"
+  string(6) "simple"
+  [""]=>
+  string(6) "simple"
+  ["2.4"]=>
+  string(6) "simple"
 }
 Done

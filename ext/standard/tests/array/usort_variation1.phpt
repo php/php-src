@@ -2,7 +2,7 @@
 Test usort() function : usage variations - Pass different data types as $array_arg arg
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -188,12 +188,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: usort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: usort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: usort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: usort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -201,17 +201,17 @@ bool(true)
 
 -- Iteration 19 --
 
-Warning: usort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: usort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: usort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: usort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: usort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: usort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

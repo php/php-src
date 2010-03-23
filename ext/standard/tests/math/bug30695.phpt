@@ -1,7 +1,5 @@
 --TEST--
 Bug #30695 (32 bit issues)
---INI--
-unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 	function toUTF8( $char_code )

@@ -38,21 +38,21 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-unicode(24) "!$#$^^&*(special)
+string(24) "!$#$^^&*(special)
 chars."
-unicode(31) "_")!#@@!$#$^^&*(special)
+string(31) "_")!#@@!$#$^^&*(special)
 chars."
-unicode(16) "(special)
+string(16) "(special)
 chars."
-unicode(21) "$^^&*(special)
+string(21) "$^^&*(special)
 chars."
-unicode(16) "(special)
+string(16) "(special)
 chars."
-unicode(19) "^&*(special)
+string(19) "^&*(special)
 chars."
-unicode(76) "Example of heredoc string contains
+string(76) "Example of heredoc string contains
 $#%^*&*_("_")!#@@!$#$^^&*(special)
 chars."
 *** Done ***

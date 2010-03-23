@@ -38,22 +38,22 @@ var_dump($arg);
 ------ Calling by_val() with unreferenced argument ------
 array(1) {
   [0]=>
-  %string|unicode%(8) "original"
+  string(8) "original"
 }
 ------ Calling by_ref() with unreferenced argument ------
 
 Warning: Parameter 1 to by_ref() expected to be a reference, value given in %s on line %d
 array(1) {
   [0]=>
-  %string|unicode%(8) "original"
+  string(8) "original"
 }
 ------ Calling by_val() with referenced argument ------
 array(1) {
   [0]=>
-  &%string|unicode%(7) "changed"
+  &string(7) "changed"
 }
 ------ Calling by_ref() with referenced argument ------
 array(1) {
   [0]=>
-  &%string|unicode%(7) "changed"
+  &string(7) "changed"
 }

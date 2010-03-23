@@ -212,32 +212,32 @@ NULL
 
 -- empty string DQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- empty string SQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- string DQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- string SQ --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- mixed case string --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- heredoc --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- instance of classWithToString --

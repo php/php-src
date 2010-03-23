@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -63,9 +63,10 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-	zval         autoload_extensions;
+	char *       autoload_extensions;
 	HashTable *  autoload_functions;
 	int          autoload_running;
+	int          autoload_extensions_len;
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;

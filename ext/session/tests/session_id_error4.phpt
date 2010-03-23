@@ -29,10 +29,9 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_id() : error functionality ***
-unicode(1) "0"
+string(1) "0"
 string(0) ""
 bool(true)
 string(40) "%s"
 bool(true)
 Done
-

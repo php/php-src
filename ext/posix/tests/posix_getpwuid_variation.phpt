@@ -103,35 +103,25 @@ valid output
 Arg value 0.5 
 valid output
 
-Notice: Array to string conversion in %s on line %d
+Arg value Array 
+
+Warning: posix_getpwuid() expects parameter 1 to be long, array given in %s on line %d
+valid output
 
 Arg value Array 
 
 Warning: posix_getpwuid() expects parameter 1 to be long, array given in %s on line %d
 valid output
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
 Warning: posix_getpwuid() expects parameter 1 to be long, array given in %s on line %d
 valid output
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
 Warning: posix_getpwuid() expects parameter 1 to be long, array given in %s on line %d
 valid output
-
-Notice: Array to string conversion in %s on line %d
-
-Arg value Array 
-
-Warning: posix_getpwuid() expects parameter 1 to be long, array given in %s on line %d
-valid output
-
-Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
@@ -158,22 +148,22 @@ valid output
 
 Arg value  
 
-Warning: posix_getpwuid() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: posix_getpwuid() expects parameter 1 to be long, string given in %s on line %d
 valid output
 
 Arg value  
 
-Warning: posix_getpwuid() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: posix_getpwuid() expects parameter 1 to be long, string given in %s on line %d
 valid output
 
 Arg value string 
 
-Warning: posix_getpwuid() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: posix_getpwuid() expects parameter 1 to be long, string given in %s on line %d
 valid output
 
 Arg value string 
 
-Warning: posix_getpwuid() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: posix_getpwuid() expects parameter 1 to be long, string given in %s on line %d
 valid output
 
 Arg value  

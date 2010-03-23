@@ -30,9 +30,9 @@ array(5) {
   [1]=>
   float(3)
   [2]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [3]=>
-  unicode(1) "2"
+  string(1) "2"
   [4]=>
   &array(5) {
     [0]=>
@@ -40,9 +40,9 @@ array(5) {
     [1]=>
     float(3)
     [2]=>
-    unicode(4) "zero"
+    string(4) "zero"
     [3]=>
-    unicode(1) "2"
+    string(1) "2"
     [4]=>
     &array(5) {
       [0]=>
@@ -50,9 +50,9 @@ array(5) {
       [1]=>
       float(3)
       [2]=>
-      unicode(4) "zero"
+      string(4) "zero"
       [3]=>
-      unicode(1) "2"
+      string(1) "2"
       [4]=>
       *RECURSION*
     }
@@ -63,7 +63,7 @@ array(5) {
   [0]=>
   int(1)
   [3]=>
-  unicode(1) "2"
+  string(1) "2"
   [1]=>
   float(3)
   [4]=>
@@ -71,7 +71,7 @@ array(5) {
     [0]=>
     int(1)
     [3]=>
-    unicode(1) "2"
+    string(1) "2"
     [1]=>
     float(3)
     [4]=>
@@ -79,18 +79,18 @@ array(5) {
       [0]=>
       int(1)
       [3]=>
-      unicode(1) "2"
+      string(1) "2"
       [1]=>
       float(3)
       [4]=>
       *RECURSION*
       [2]=>
-      unicode(4) "zero"
+      string(4) "zero"
     }
     [2]=>
-    unicode(4) "zero"
+    string(4) "zero"
   }
   [2]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 Done

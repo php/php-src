@@ -22,16 +22,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(2) "zx"
+    string(2) "zx"
     [1]=>
-    unicode(2) "ax"
+    string(2) "ax"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "z"
+    string(1) "z"
     [1]=>
-    unicode(1) "a"
+    string(1) "a"
   }
 }
 int(2)
@@ -39,53 +39,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(2) "zx"
+    string(2) "zx"
     [1]=>
-    unicode(1) "z"
+    string(1) "z"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(2) "yx"
+    string(2) "yx"
     [1]=>
-    unicode(1) "y"
-  }
-}
-int(2)
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    array(2) {
-      [0]=>
-      unicode(2) "zx"
-      [1]=>
-      int(0)
-    }
-    [1]=>
-    array(2) {
-      [0]=>
-      unicode(2) "yx"
-      [1]=>
-      int(2)
-    }
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    array(2) {
-      [0]=>
-      unicode(1) "z"
-      [1]=>
-      int(0)
-    }
-    [1]=>
-    array(2) {
-      [0]=>
-      unicode(1) "y"
-      [1]=>
-      int(2)
-    }
+    string(1) "y"
   }
 }
 int(2)
@@ -95,14 +58,51 @@ array(2) {
     [0]=>
     array(2) {
       [0]=>
-      unicode(2) "zx"
+      string(2) "zx"
       [1]=>
       int(0)
     }
     [1]=>
     array(2) {
       [0]=>
-      unicode(1) "z"
+      string(2) "yx"
+      [1]=>
+      int(2)
+    }
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(1) "z"
+      [1]=>
+      int(0)
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "y"
+      [1]=>
+      int(2)
+    }
+  }
+}
+int(2)
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(2) "zx"
+      [1]=>
+      int(0)
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "z"
       [1]=>
       int(0)
     }
@@ -112,14 +112,14 @@ array(2) {
     [0]=>
     array(2) {
       [0]=>
-      unicode(2) "yx"
+      string(2) "yx"
       [1]=>
       int(2)
     }
     [1]=>
     array(2) {
       [0]=>
-      unicode(1) "y"
+      string(1) "y"
       [1]=>
       int(2)
     }

@@ -33,8 +33,8 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: ReflectionClass::hasMethod() expects parameter 1 to be string (Unicode or binary), array given in %s on line 14
+Warning: ReflectionClass::hasMethod() expects parameter 1 to be string, array given in %s on line 14
 NULL
 
-Warning: ReflectionClass::hasMethod() expects parameter 1 to be string (Unicode or binary), object given in %s on line 15
+Warning: ReflectionClass::hasMethod() expects parameter 1 to be string, object given in %s on line 15
 NULL

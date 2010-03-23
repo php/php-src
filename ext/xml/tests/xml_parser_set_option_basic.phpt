@@ -43,15 +43,15 @@ echo "Done\n";
 --EXPECT--
 Simple testcase for xml_parser_get_option() function
 int(1)
-unicode(5) "UTF-8"
+string(5) "UTF-8"
 bool(true)
 bool(true)
 int(1)
-unicode(10) "ISO-8859-1"
+string(10) "ISO-8859-1"
 bool(true)
 bool(true)
 int(0)
-unicode(5) "UTF-8"
+string(5) "UTF-8"
 bool(true)
-unicode(8) "US-ASCII"
+string(8) "US-ASCII"
 Done

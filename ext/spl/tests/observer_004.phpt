@@ -61,15 +61,15 @@ int(2)
 int(1)
 int(2)
 object(MyStorage)#%d (2) {
-  [u"bla"]=>
+  ["bla"]=>
   int(26)
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         int(1)
       }
       ["inf"]=>
@@ -79,7 +79,7 @@ object(MyStorage)#%d (2) {
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         int(2)
       }
       ["inf"]=>
@@ -87,21 +87,21 @@ object(MyStorage)#%d (2) {
     }
   }
 }
-unicode(%d) "%s"
+string(%d) "%s"
 ===UNSERIALIZE===
 int(2)
 int(1)
 int(2)
 object(MyStorage)#%d (2) {
-  [u"bla"]=>
+  ["bla"]=>
   int(26)
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         int(1)
       }
       ["inf"]=>
@@ -111,7 +111,7 @@ object(MyStorage)#%d (2) {
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         int(2)
       }
       ["inf"]=>

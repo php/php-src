@@ -13,6 +13,6 @@ haricow();
 ?>
 ===DONE===
 --EXPECT--
-unicode(3) "one"
-unicode(3) "one"
+string(3) "one"
+string(3) "one"
 ===DONE===

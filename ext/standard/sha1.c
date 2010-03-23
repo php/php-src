@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -19,68 +19,54 @@
 /* $Id$ */
 
 #include "php.h"
-#include "ext/standard/file.h"
 
 /* This code is heavily based on the PHP md5 implementation */ 
 
 #include "sha1.h"
 #include "md5.h"
 
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest) /* {{{ */
+PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 {
 	make_digest_ex(sha1str, digest, 20);
 }
-/* }}} */
 
-/* {{{ proto string sha1(string str [, bool raw_output]) U
+/* {{{ proto string sha1(string str [, bool raw_output])
    Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
 	char *arg;
 	int arg_len;
-	zend_uchar arg_type;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
-	}
-
-	if (arg_type == IS_UNICODE) {
-		arg = zend_unicode_to_ascii((UChar*)arg, arg_len TSRMLS_CC);
-		if (!arg) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
 	}
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (unsigned char*)arg, arg_len);
+	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		RETVAL_STRINGL((char*)digest, 20, 1);
+		RETURN_STRINGL(digest, 20, 1);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_ASCII_STRING(sha1str, ZSTR_DUPLICATE);
+		RETVAL_STRING(sha1str, 1);
 	}
 
-	if (arg_type == IS_UNICODE) {
-		efree(arg);
-	}
 }
 
 /* }}} */
 
-/* {{{ proto string sha1_file(string filename [, bool raw_output]) U
+
+/* {{{ proto string sha1_file(string filename [, bool raw_output])
    Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
 	int           arg_len;
-	zend_uchar    arg_type;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
@@ -89,27 +75,18 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-
-	if (arg_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &arg, &arg_len, (UChar*)arg, arg_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
 	
-	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
-	if (arg_type == IS_UNICODE) {
-		efree(arg);
-	}
+	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}
 
 	PHP_SHA1Init(&context);
 
-	while ((n = php_stream_read(stream, (char*)buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		PHP_SHA1Update(&context, buf, n);
 	}
 
@@ -122,13 +99,14 @@ PHP_FUNCTION(sha1_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL((char*)digest, 20, 1);
+		RETURN_STRINGL(digest, 20, 1);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_ASCII_STRING(sha1str, ZSTR_DUPLICATE);
+		RETVAL_STRING(sha1str, 1);
 	}
 }
 /* }}} */
+
 
 static void SHA1Transform(php_uint32[5], const unsigned char[64]);
 static void SHA1Encode(unsigned char *, php_uint32 *, unsigned int);

@@ -123,22 +123,22 @@ bool(false)
 
 --empty array--
 
-Warning: get_class_vars() expects parameter 1 to be string (Unicode or binary), array given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, array given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --int indexed array--
 
-Warning: get_class_vars() expects parameter 1 to be string (Unicode or binary), array given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, array given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --associative array--
 
-Warning: get_class_vars() expects parameter 1 to be string (Unicode or binary), array given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, array given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --nested arrays--
 
-Warning: get_class_vars() expects parameter 1 to be string (Unicode or binary), array given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, array given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --uppercase NULL--
@@ -170,7 +170,7 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: get_class_vars() expects parameter 1 to be string (Unicode or binary), object given in %sget_class_vars_variation1.php on line %d
+Warning: get_class_vars() expects parameter 1 to be string, object given in %sget_class_vars_variation1.php on line %d
 NULL
 
 --undefined var--

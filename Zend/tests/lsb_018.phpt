@@ -57,39 +57,39 @@ $z->identify();
 ===DONE===
 --EXPECTF--
 object(Foo)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(0)
 }
 object(Bar)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(1)
 }
 object(Baz)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(2)
 }
 object(Foo)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(0)
 }
 object(Bar)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(1)
 }
 object(Baz)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(2)
 }
 object(Foo)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(0)
 }
 object(Bar)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(1)
 }
 object(Baz)#%d (1) {
-  [u"instanceId":u"Singleton":private]=>
+  ["instanceId":"Singleton":private]=>
   int(2)
 }
 ===DONE===

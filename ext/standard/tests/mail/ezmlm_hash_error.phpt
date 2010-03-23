@@ -51,16 +51,16 @@ NULL
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
 
-Warning: ezmlm_hash() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
 
-Warning: ezmlm_hash() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - RESOURCE --
 
-Warning: ezmlm_hash() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: ezmlm_hash() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 ===DONE===

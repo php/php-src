@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "safe_mode.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -169,7 +170,7 @@ static int inifile_read(inifile *dba, line_type *ln TSRMLS_DC) {
 	char *pos;
 
 	inifile_val_free(&ln->val);
-	while ((fline = php_stream_gets(dba->fp, NULL_ZSTR, 0)) != NULL) {
+	while ((fline = php_stream_gets(dba->fp, NULL, 0)) != NULL) {
 		if (fline) {
 			if (fline[0] == '[') {
 				/* A value name cannot start with '['

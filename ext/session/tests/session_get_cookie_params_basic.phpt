@@ -33,41 +33,41 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(0)
-  [u"path"]=>
-  unicode(1) "/"
-  [u"domain"]=>
-  unicode(0) ""
-  [u"secure"]=>
+  ["path"]=>
+  string(1) "/"
+  ["domain"]=>
+  string(0) ""
+  ["secure"]=>
   bool(false)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 NULL
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(3600)
-  [u"path"]=>
-  unicode(5) "/path"
-  [u"domain"]=>
-  unicode(4) "blah"
-  [u"secure"]=>
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(4) "blah"
+  ["secure"]=>
   bool(false)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 NULL
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(1234567890)
-  [u"path"]=>
-  unicode(5) "/guff"
-  [u"domain"]=>
-  unicode(3) "foo"
-  [u"secure"]=>
+  ["path"]=>
+  string(5) "/guff"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
   bool(true)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(true)
 }
 Done

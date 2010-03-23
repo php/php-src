@@ -11,7 +11,7 @@ bool(false)
 bool(true)
 object(SplFixedArray)#%d (2) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
   NULL
 }

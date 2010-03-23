@@ -14,7 +14,6 @@ Test array_combine() function : usage variations - different arrays(Bug#43424)
 */
 
 echo "*** Testing array_combine() : Passing different types of arrays to both \$keys and \$values argument ***\n";
-
 /* Different heredoc strings passed as argument to arrays */
 // heredoc with blank line
 $blank_line = <<<EOT
@@ -96,14 +95,14 @@ array(2) {
 }
 -- Iteration 2 --
 array(2) {
-  [u"1.1"]=>
+  ["1.1"]=>
   float(1.1)
-  [u"2.2"]=>
+  ["2.2"]=>
   float(2.2)
 }
 -- Iteration 3 --
 array(2) {
-  [u""]=>
+  [""]=>
   bool(false)
   [1]=>
   bool(true)
@@ -114,67 +113,67 @@ Warning: array_combine(): Both parameters should have at least 1 element in %s o
 bool(false)
 -- Iteration 5 --
 array(1) {
-  [u""]=>
+  [""]=>
   NULL
 }
 -- Iteration 6 --
 array(6) {
-  [u"a"]=>
-  unicode(3) "a"
-  [u"aaaa"]=>
-  unicode(5) "aaaa"
-  [u"b"]=>
-  unicode(1) "b"
-  [u"b	bbb"]=>
-  unicode(5) "b	bbb"
-  [u"c"]=>
-  unicode(1) "c"
-  [u"\[\]\!\@\#$\%\^\&\*\(\)\{\}"]=>
-  unicode(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  ["a"]=>
+  string(3) "a"
+  ["aaaa"]=>
+  string(5) "aaaa"
+  ["b"]=>
+  string(1) "b"
+  ["b	bbb"]=>
+  string(5) "b	bbb"
+  ["c"]=>
+  string(1) "c"
+  ["\[\]\!\@\#$\%\^\&\*\(\)\{\}"]=>
+  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
 array(6) {
-  [u"a\v\f"]=>
-  unicode(5) "a\v\f"
-  [u"aaaa\r"]=>
-  unicode(6) "aaaa\r"
-  [u"b"]=>
-  unicode(1) "b"
-  [u"b\tbbb"]=>
-  unicode(6) "b\tbbb"
-  [u"c"]=>
-  unicode(1) "c"
-  [u"\[\]\!\@\#\$\%\^\&\*\(\)\{\}"]=>
-  unicode(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  ["a\v\f"]=>
+  string(5) "a\v\f"
+  ["aaaa\r"]=>
+  string(6) "aaaa\r"
+  ["b"]=>
+  string(1) "b"
+  ["b\tbbb"]=>
+  string(6) "b\tbbb"
+  ["c"]=>
+  string(1) "c"
+  ["\[\]\!\@\#\$\%\^\&\*\(\)\{\}"]=>
+  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
 array(4) {
-  [u"
+  ["
 "]=>
-  unicode(1) "
+  string(1) "
 "
-  [u"hello world
+  ["hello world
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"]=>
-  unicode(88) "hello world
+  string(88) "hello world
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"hello world	
+  ["hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"]=>
-  unicode(88) "hello world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
-  [u"11 < 12. 123 >22
+  ["11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
 "]=>
-  unicode(90) "11 < 12. 123 >22
+  string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
@@ -182,12 +181,12 @@ double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 9 --
 array(3) {
-  [u"one"]=>
-  unicode(3) "one"
-  [u"two"]=>
-  unicode(3) "two"
-  [u"three"]=>
-  unicode(5) "three"
+  ["one"]=>
+  string(3) "one"
+  ["two"]=>
+  string(3) "two"
+  ["three"]=>
+  string(5) "three"
 }
 -- Iteration 10 --
 array(3) {
@@ -211,50 +210,50 @@ array(4) {
 }
 -- Iteration 12 --
 array(3) {
-  [u"ten"]=>
-  unicode(3) "ten"
-  [u"twenty"]=>
-  unicode(6) "twenty"
-  [u"thirty"]=>
-  unicode(6) "thirty"
+  ["ten"]=>
+  string(3) "ten"
+  ["twenty"]=>
+  string(6) "twenty"
+  ["thirty"]=>
+  string(6) "thirty"
 }
 -- Iteration 13 --
 array(3) {
   [1]=>
   int(1)
-  [u"two"]=>
-  unicode(3) "two"
-  [u"four"]=>
-  unicode(4) "four"
+  ["two"]=>
+  string(3) "two"
+  ["four"]=>
+  string(4) "four"
 }
 -- Iteration 14 --
 array(2) {
-  [u"null"]=>
-  unicode(4) "null"
-  [u""]=>
+  ["null"]=>
+  string(4) "null"
+  [""]=>
   NULL
 }
 -- Iteration 15 --
 array(4) {
-  [u"true"]=>
-  unicode(4) "true"
-  [u"false"]=>
-  unicode(5) "false"
-  [u""]=>
+  ["true"]=>
+  string(4) "true"
+  ["false"]=>
+  string(5) "false"
+  [""]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iteration 16 --
 array(2) {
-  [u"emptys"]=>
-  unicode(6) "emptys"
-  [u""]=>
-  unicode(0) ""
+  ["emptys"]=>
+  string(6) "emptys"
+  [""]=>
+  string(0) ""
 }
 -- Iteration 17 --
 array(2) {
-  [u""]=>
+  [""]=>
   bool(false)
   [1]=>
   bool(true)

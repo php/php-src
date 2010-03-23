@@ -980,7 +980,7 @@ bool(true)
 -- Innerloop Iteration 1 of Outerloop Iteration 8 --
 array(1) {
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -993,7 +993,7 @@ Notice: Undefined variable: key_val in %s on line %d
 bool(true)
 array(1) {
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 -- Innerloop Iteration 2 of Outerloop Iteration 8 --
 array(0) {
@@ -1024,8 +1024,8 @@ bool(false)
 bool(true)
 -- Innerloop Iteration 1 of Outerloop Iteration 9 --
 array(1) {
-  [u"Age"]=>
-  unicode(2) "30"
+  ["Age"]=>
+  string(2) "30"
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -1037,8 +1037,8 @@ bool(false)
 Notice: Undefined variable: key_val in %s on line %d
 bool(true)
 array(1) {
-  [u"Age"]=>
-  unicode(2) "30"
+  ["Age"]=>
+  string(2) "30"
 }
 -- Innerloop Iteration 2 of Outerloop Iteration 9 --
 array(0) {
@@ -1071,12 +1071,12 @@ bool(true)
 array(4) {
   [1]=>
   int(2)
-  [u"One"]=>
-  unicode(1) "1"
+  ["One"]=>
+  string(1) "1"
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -1090,21 +1090,21 @@ bool(true)
 array(4) {
   [1]=>
   int(2)
-  [u"One"]=>
-  unicode(1) "1"
+  ["One"]=>
+  string(1) "1"
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 -- Innerloop Iteration 2 of Outerloop Iteration 10 --
 array(3) {
-  [u"One"]=>
-  unicode(1) "1"
+  ["One"]=>
+  string(1) "1"
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -1116,19 +1116,19 @@ bool(true)
 Notice: Undefined variable: key_val in %s on line %d
 bool(true)
 array(3) {
-  [u"One"]=>
-  unicode(1) "1"
+  ["One"]=>
+  string(1) "1"
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 -- Innerloop Iteration 3 of Outerloop Iteration 10 --
 array(2) {
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -1141,14 +1141,14 @@ Notice: Undefined variable: key_val in %s on line %d
 bool(true)
 array(2) {
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
 }
 -- Innerloop Iteration 4 of Outerloop Iteration 10 --
 array(1) {
-  [u""]=>
-  unicode(0) ""
+  [""]=>
+  string(0) ""
 }
 
 Notice: Undefined variable: key_val in %s on line %d
@@ -1160,8 +1160,8 @@ bool(true)
 Notice: Undefined variable: key_val in %s on line %d
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(0) ""
+  [""]=>
+  string(0) ""
 }
 -- Innerloop Iteration 5 of Outerloop Iteration 10 --
 array(0) {
@@ -1219,11 +1219,11 @@ bool(true)
 
 *** Testing unset(), empty() & isset() with objects ***
 object(Point)#%d (3) {
-  [u"x"]=>
+  ["x"]=>
   int(30)
-  [u"y"]=>
+  ["y"]=>
   int(40)
-  [u"lable"]=>
+  ["lable"]=>
   NULL
 }
 bool(true)
@@ -1241,18 +1241,18 @@ bool(false)
 Notice: Undefined variable: lable in %s on line %d
 bool(true)
 object(Point)#%d (3) {
-  [u"x"]=>
+  ["x"]=>
   int(30)
-  [u"y"]=>
+  ["y"]=>
   int(40)
-  [u"lable"]=>
-  unicode(6) "Point1"
+  ["lable"]=>
+  string(6) "Point1"
 }
 object(Point)#%d (2) {
-  [u"y"]=>
+  ["y"]=>
   int(40)
-  [u"lable"]=>
-  unicode(6) "Point1"
+  ["lable"]=>
+  string(6) "Point1"
 }
 bool(false)
 bool(true)
@@ -1271,18 +1271,18 @@ bool(false)
 bool(true)
 array(3) {
   [0]=>
-  unicode(5) "Point"
+  string(5) "Point"
   [1]=>
-  unicode(8) "setLable"
+  string(8) "setLable"
   [2]=>
-  unicode(9) "testPoint"
+  string(9) "testPoint"
 }
 object(Point)#%d (3) {
-  [u"x"]=>
+  ["x"]=>
   int(5)
-  [u"y"]=>
+  ["y"]=>
   int(6)
-  [u"lable"]=>
+  ["lable"]=>
   NULL
 }
 
@@ -1318,10 +1318,10 @@ bool(true)
 value of static_var after new assignment: 20
 
 ** Testing unset() variation 2: unset on a variable passed by ref. inside of a function **
-unicode(5) "value"
+string(5) "value"
 bool(false)
 bool(true)
-unicode(5) "value"
+string(5) "value"
 
 ** Testing unset() variation 3: unset on a global variable inside of a function **
 int(10)

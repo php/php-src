@@ -15,19 +15,19 @@ var_dump($_POST, $php_errormsg);
 ?>
 --EXPECT--
 array(4) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(3) "ZYX"
-  [u"d"]=>
-  unicode(3) "123"
-  [u"e"]=>
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(3) "ZYX"
+  ["d"]=>
+  string(3) "123"
+  ["e"]=>
   array(1) {
     [0]=>
     array(1) {
       [0]=>
-      unicode(1) "3"
+      string(1) "3"
     }
   }
 }
-unicode(114) "main(): Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
+string(115) "Unknown: Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."

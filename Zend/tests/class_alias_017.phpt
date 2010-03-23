@@ -26,7 +26,7 @@ baz::test();
 bar::test();
 
 ?>
---EXPECT--
+--EXPECTF--
 foo
 baz
 foo

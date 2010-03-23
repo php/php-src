@@ -52,31 +52,31 @@ var_dump($ao, $original, $copy);
 --EXPECTF--
 --> exchangeArray() with objects:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
-    [u"pub1"]=>
-    unicode(7) "public1"
-    [u"addedToSwapIn"]=>
-    unicode(16) "added To Swap-In"
+    ["pub1"]=>
+    string(7) "public1"
+    ["addedToSwapIn"]=>
+    string(16) "added To Swap-In"
   }
 }
 object(C)#1 (2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToOriginal"]=>
-  unicode(17) "added To Original"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToOriginal"]=>
+  string(17) "added To Original"
 }
 object(C)#3 (2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToSwapIn"]=>
-  unicode(16) "added To Swap-In"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToSwapIn"]=>
+  string(16) "added To Swap-In"
 }
 array(2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToCopy"]=>
-  unicode(13) "added To Copy"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToCopy"]=>
+  string(13) "added To Copy"
 }
 
 
@@ -84,25 +84,25 @@ array(2) {
 
 Warning: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given in %s on line 27
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
-    [u"pub1"]=>
-    unicode(7) "public1"
-    [u"addedToOriginal"]=>
-    unicode(17) "added To Original"
+    ["pub1"]=>
+    string(7) "public1"
+    ["addedToOriginal"]=>
+    string(17) "added To Original"
   }
 }
 object(C)#3 (2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToOriginal"]=>
-  unicode(17) "added To Original"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToOriginal"]=>
+  string(17) "added To Original"
 }
 array(2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToCopy"]=>
-  unicode(13) "added To Copy"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToCopy"]=>
+  string(13) "added To Copy"
 }
 
 
@@ -111,18 +111,18 @@ Exception:Passed variable is not an array or object, using empty array instead
 
 Notice: Undefined variable: copy in %s on line 46
 object(ArrayObject)#3 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#2 (2) {
-    [u"pub1"]=>
-    unicode(7) "public1"
-    [u"addedToOriginal"]=>
-    unicode(17) "added To Original"
+    ["pub1"]=>
+    string(7) "public1"
+    ["addedToOriginal"]=>
+    string(17) "added To Original"
   }
 }
 object(C)#2 (2) {
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"addedToOriginal"]=>
-  unicode(17) "added To Original"
+  ["pub1"]=>
+  string(7) "public1"
+  ["addedToOriginal"]=>
+  string(17) "added To Original"
 }
 NULL

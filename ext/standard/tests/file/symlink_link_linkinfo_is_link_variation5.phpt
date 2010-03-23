@@ -38,7 +38,7 @@ $filename = "$dirname/symlink_link_linkinfo_is_link_variation5.tmp";
 // create the file
 $fp = fopen($filename, "w");
 $data = "Hello World";
-fwrite($fp, (binary)$data);
+fwrite($fp, $data);
 fclose($fp);
 
 var_dump( symlink($filename, $linkname) );  // create link

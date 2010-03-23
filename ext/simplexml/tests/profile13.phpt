@@ -5,7 +5,7 @@ SimpleXML [profile]: Accessing by namespace prefix
 --FILE--
 <?php
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope
 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
@@ -33,42 +33,42 @@ var_dump($sxe->Body->children('')->businessList);
 <?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
-  [u"Body"]=>
+  ["Body"]=>
   object(SimpleXMLElement)#%d (0) {
   }
 }
 object(SimpleXMLElement)#%d (0) {
 }
 object(SimpleXMLElement)#%d (1) {
-  [u"businessList"]=>
+  ["businessList"]=>
   object(SimpleXMLElement)#%d (2) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"foo"]=>
-      unicode(3) "bar"
+      ["foo"]=>
+      string(3) "bar"
     }
-    [u"businessInfo"]=>
+    ["businessInfo"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"businessKey"]=>
-        unicode(3) "bla"
+        ["businessKey"]=>
+        string(3) "bla"
       }
     }
   }
 }
 object(SimpleXMLElement)#%d (2) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"foo"]=>
-    unicode(3) "bar"
+    ["foo"]=>
+    string(3) "bar"
   }
-  [u"businessInfo"]=>
+  ["businessInfo"]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"businessKey"]=>
-      unicode(3) "bla"
+      ["businessKey"]=>
+      string(3) "bla"
     }
   }
 }

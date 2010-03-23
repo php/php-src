@@ -31,7 +31,7 @@ unset ($unset_var);
 class classA
 {
   public function __toString() {
-    return "hello, world";
+    return b"hello, world";
   }
 }
 
@@ -176,7 +176,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_strrpos() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: mb_strrpos() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 Done
-

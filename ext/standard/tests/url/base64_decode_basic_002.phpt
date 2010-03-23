@@ -29,7 +29,7 @@ var_dump(base64_decode($badChars, true));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 Decode 'hello world!':
 string(12) "hello world!"
 string(12) "hello world!"

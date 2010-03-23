@@ -22,10 +22,10 @@ var_dump(parse_ini_file($ini_location, false, INI_SCANNER_NORMAL));
 <?php @unlink(dirname(__FILE__) . '/bug48768.tmp'); ?>
 --EXPECT--
 array(1) {
-  [u"equal"]=>
-  unicode(1) "="
+  ["equal"]=>
+  string(1) "="
 }
 array(1) {
-  [u"equal"]=>
-  unicode(1) "="
+  ["equal"]=>
+  string(1) "="
 }

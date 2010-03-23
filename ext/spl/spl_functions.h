@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -64,6 +64,9 @@ void spl_add_class_name(zval * list, zend_class_entry * pce, int allow, int ce_f
 void spl_add_interfaces(zval * list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC);
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC);
 
+/* caller must efree(return) */
+char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC);
+
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
 	
@@ -76,9 +79,6 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 #define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
 	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */
-
-/* caller must efree(return.v) */
-zstr spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC);
 
 /*
  * Local Variables:

@@ -48,10 +48,9 @@ Warning: disk_total_space(): The system cannot find the path specified.
  in %s on line %d
 bool(false)
 
-Notice: fwrite(): 36 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-
 Warning: disk_total_space(): The directory name is invalid.
  in %s on line %d
 bool(false)
 
 --- Done ---
+

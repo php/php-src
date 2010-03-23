@@ -19,7 +19,7 @@ foreach($rms as $rm) {
 
 echo "---\n";
 
-$rm = new ReflectionMethod($closure);
+$rm = new ReflectionMethod($closure, '__invoke');
 var_dump($rm->getName());
 var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
@@ -54,7 +54,7 @@ int(1)
 int(2)
 int(1)
 ---
-unicode(8) "__invoke"
+string(8) "__invoke"
 int(2)
 int(1)
 ---

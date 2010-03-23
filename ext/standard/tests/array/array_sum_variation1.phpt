@@ -30,47 +30,47 @@ class MyClass
 $input_values = array(
 
          // int data
-/* 1 */  0,
+/*1*/    0,
          1,
          12345,
-/* 4 */  -2345,
+         -2345,
 
          // float data
-/* 5 */  10.5,
+/*5*/    10.5,
          -10.5,
          10.1234567e8,
          10.7654321E-8,
-/* 9 */  .5,
+         .5,
 
          // null data
-/* 10*/  NULL,
+/*10*/   NULL,
          null,
 
          // boolean data
-/* 12*/  true,
+/*12*/   true,
          false,
          TRUE,
          FALSE,
 
          // empty data
-/* 16*/  "",
+/*16*/   "",
          '',
 
          // string data
-/* 18*/  "string",
+/*18*/   "string",
          'string',
 
          // object data
-/* 20*/  new MyClass(),
+/*20*/   new MyClass(),
 
          // resource data
-         $fp = fopen(__FILE__,'r'),
+/*21*/   $fp = fopen(__FILE__,'r'),
 
          // undefined data
-         @$undefined_var,
+/*22*/   @$undefined_var,
 
          // unset data
-/* 23*/  @$unset_var,
+/*23*/   @$unset_var,
 );
 
 // loop through each element of the array for input
@@ -146,19 +146,19 @@ Warning: array_sum() expects parameter 1 to be array, boolean given in %s on lin
 NULL
 -- Iteration 16 --
 
-Warning: array_sum() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_sum() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: array_sum() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_sum() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: array_sum() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_sum() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_sum() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_sum() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 20 --
 

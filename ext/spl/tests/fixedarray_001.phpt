@@ -51,12 +51,12 @@ var_dump($b[0]);
 Exception: Index invalid or out of range
 Exception: Index invalid or out of range
 Exception: Index invalid or out of range
-unicode(6) "value0"
-unicode(6) "value2"
-unicode(6) "value3"
-unicode(6) "value4"
+string(6) "value0"
+string(6) "value2"
+string(6) "value3"
+string(6) "value4"
 int(10)
 int(10)
 bool(true)
-unicode(6) "value0"
+string(6) "value0"
 ===DONE===

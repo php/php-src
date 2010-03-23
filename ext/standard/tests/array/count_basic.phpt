@@ -31,7 +31,7 @@ var_dump(count($array_multi, 1));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing count() : basic functionality ***
 
 -- One Dimensional Array: --

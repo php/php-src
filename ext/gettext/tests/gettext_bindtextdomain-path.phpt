@@ -5,12 +5,9 @@ Test if bindtextdomain() returns false if path does not exist.
 if (!extension_loaded("gettext")) {
     die("skip gettext extension is not loaded.\n");
 }
-
 --FILE--
 <?php
-
 chdir(dirname(__FILE__));
-
 var_dump(bindtextdomain('example.org', 'foobar'));
 --EXPECTF--
 bool(false)

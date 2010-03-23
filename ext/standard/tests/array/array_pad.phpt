@@ -20,7 +20,7 @@ var_dump(array_pad("", 2000000, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: array_pad() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
@@ -41,7 +41,7 @@ array(1) {
 }
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   int(-1)
   [2]=>
@@ -53,7 +53,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   int(-1)
   [2]=>
@@ -67,7 +67,7 @@ array(5) {
 }
 array(3) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   int(-1)
   [2]=>
@@ -75,7 +75,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   int(-1)
   [2]=>
@@ -86,7 +86,7 @@ array(4) {
   array(0) {
   }
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   int(-1)
   [3]=>
@@ -96,6 +96,6 @@ array(4) {
 Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
 bool(false)
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 Done

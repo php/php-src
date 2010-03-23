@@ -1,7 +1,5 @@
 --TEST--
 fgets() with a socket stream
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -45,12 +43,12 @@ Write some data:
 
 
 Read a line from the client:
-unicode(6) "line1
+string(6) "line1
 "
 
 
 Read another line from the client:
-unicode(6) "line2
+string(6) "line2
 "
 
 

@@ -1,5 +1,5 @@
 --TEST--
-Test str_split() function : usage variations - unexpected values for 'split_length' argument(Bug#42866) 
+Test str_split() function : usage variations - unexpected values for 'split_length' argument
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -41,6 +41,7 @@ $values = array(
   // float data
   10.5,
   -10.5,
+  10.6E10,
   10.6E-10,
   .5,
 
@@ -98,188 +99,192 @@ echo "Done";
 --Iteration 1 --
 array(3) {
   [0]=>
-  unicode(10) "variation2"
+  string(10) "variation2"
   [1]=>
-  unicode(10) ":split_len"
+  string(10) ":split_len"
   [2]=>
-  unicode(3) "gth"
+  string(3) "gth"
 }
 --Iteration 2 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 3 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 4 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 5 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
-NULL
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
+bool(false)
 --Iteration 6 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 7 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 8 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 9 --
 
-Warning: str_split() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 10 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+Warning: str_split() expects parameter 2 to be long, array given in %sstr_split_variation2.php on line %d
+NULL
 --Iteration 11 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 12 --
-array(23) {
-  [0]=>
-  unicode(1) "v"
-  [1]=>
-  unicode(1) "a"
-  [2]=>
-  unicode(1) "r"
-  [3]=>
-  unicode(1) "i"
-  [4]=>
-  unicode(1) "a"
-  [5]=>
-  unicode(1) "t"
-  [6]=>
-  unicode(1) "i"
-  [7]=>
-  unicode(1) "o"
-  [8]=>
-  unicode(1) "n"
-  [9]=>
-  unicode(1) "2"
-  [10]=>
-  unicode(1) ":"
-  [11]=>
-  unicode(1) "s"
-  [12]=>
-  unicode(1) "p"
-  [13]=>
-  unicode(1) "l"
-  [14]=>
-  unicode(1) "i"
-  [15]=>
-  unicode(1) "t"
-  [16]=>
-  unicode(1) "_"
-  [17]=>
-  unicode(1) "l"
-  [18]=>
-  unicode(1) "e"
-  [19]=>
-  unicode(1) "n"
-  [20]=>
-  unicode(1) "g"
-  [21]=>
-  unicode(1) "t"
-  [22]=>
-  unicode(1) "h"
-}
+
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
+bool(false)
 --Iteration 13 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
---Iteration 14 --
 array(23) {
   [0]=>
-  unicode(1) "v"
+  string(1) "v"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(1) "r"
+  string(1) "r"
   [3]=>
-  unicode(1) "i"
+  string(1) "i"
   [4]=>
-  unicode(1) "a"
+  string(1) "a"
   [5]=>
-  unicode(1) "t"
+  string(1) "t"
   [6]=>
-  unicode(1) "i"
+  string(1) "i"
   [7]=>
-  unicode(1) "o"
+  string(1) "o"
   [8]=>
-  unicode(1) "n"
+  string(1) "n"
   [9]=>
-  unicode(1) "2"
+  string(1) "2"
   [10]=>
-  unicode(1) ":"
+  string(1) ":"
   [11]=>
-  unicode(1) "s"
+  string(1) "s"
   [12]=>
-  unicode(1) "p"
+  string(1) "p"
   [13]=>
-  unicode(1) "l"
+  string(1) "l"
   [14]=>
-  unicode(1) "i"
+  string(1) "i"
   [15]=>
-  unicode(1) "t"
+  string(1) "t"
   [16]=>
-  unicode(1) "_"
+  string(1) "_"
   [17]=>
-  unicode(1) "l"
+  string(1) "l"
   [18]=>
-  unicode(1) "e"
+  string(1) "e"
   [19]=>
-  unicode(1) "n"
+  string(1) "n"
   [20]=>
-  unicode(1) "g"
+  string(1) "g"
   [21]=>
-  unicode(1) "t"
+  string(1) "t"
   [22]=>
-  unicode(1) "h"
+  string(1) "h"
 }
---Iteration 15 --
+--Iteration 14 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
+--Iteration 15 --
+array(23) {
+  [0]=>
+  string(1) "v"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "r"
+  [3]=>
+  string(1) "i"
+  [4]=>
+  string(1) "a"
+  [5]=>
+  string(1) "t"
+  [6]=>
+  string(1) "i"
+  [7]=>
+  string(1) "o"
+  [8]=>
+  string(1) "n"
+  [9]=>
+  string(1) "2"
+  [10]=>
+  string(1) ":"
+  [11]=>
+  string(1) "s"
+  [12]=>
+  string(1) "p"
+  [13]=>
+  string(1) "l"
+  [14]=>
+  string(1) "i"
+  [15]=>
+  string(1) "t"
+  [16]=>
+  string(1) "_"
+  [17]=>
+  string(1) "l"
+  [18]=>
+  string(1) "e"
+  [19]=>
+  string(1) "n"
+  [20]=>
+  string(1) "g"
+  [21]=>
+  string(1) "t"
+  [22]=>
+  string(1) "h"
+}
 --Iteration 16 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
-NULL
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
+bool(false)
 --Iteration 17 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 18 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 19 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 20 --
 
-Warning: str_split() expects parameter 2 to be long, object given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %sstr_split_variation2.php on line %d
 NULL
 --Iteration 21 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+Warning: str_split() expects parameter 2 to be long, object given in %sstr_split_variation2.php on line %d
+NULL
 --Iteration 22 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 23 --
 
-Warning: str_split() expects parameter 2 to be long, resource given in %s on line %d
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
+bool(false)
+--Iteration 24 --
+
+Warning: str_split() expects parameter 2 to be long, resource given in %sstr_split_variation2.php on line %d
 NULL
 Done

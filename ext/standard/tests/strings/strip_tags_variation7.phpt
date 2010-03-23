@@ -43,30 +43,30 @@ foreach($strings as $string_value)
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-unicode(43) "<abc>hello</abc> 		world... strip_tags_test"
+string(43) "<abc>hello</abc> 		world... strip_tags_test"
 -- Iteration 2 --
-unicode(45) "<abc>hello</abc> \t\tworld... strip_tags_test"
+string(45) "<abc>hello</abc> \t\tworld... strip_tags_test"
 -- Iteration 3 --
-unicode(0) ""
+string(0) ""
 -- Iteration 4 --
-unicode(0) ""
+string(0) ""
 -- Iteration 5 --
-unicode(18) "<htmL>hello</htmL>"
+string(18) "<htmL>hello</htmL>"
 -- Iteration 6 --
-unicode(18) "<htmL>hello</htmL>"
+string(18) "<htmL>hello</htmL>"
 -- Iteration 7 --
-unicode(9) "HtMl text"
+string(9) "HtMl text"
 -- Iteration 8 --
-unicode(9) "HtMl text"
+string(9) "HtMl text"
 -- Iteration 9 --
-unicode(37) "<nnn>I am not a valid html text</nnn>"
+string(37) "<nnn>I am not a valid html text</nnn>"
 -- Iteration 10 --
-unicode(37) "<nnn>I am not a valid html text</nnn>"
+string(37) "<nnn>I am not a valid html text</nnn>"
 -- Iteration 11 --
-unicode(73) "<nnn>I am a quoted (") string with special chars like $,\!,\@,\%,\&</nnn>"
+string(73) "<nnn>I am a quoted (") string with special chars like $,\!,\@,\%,\&</nnn>"
 -- Iteration 12 --
-unicode(75) "<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>"
+string(75) "<nnn>I am a quoted (\") string with special chars like \$,\!,\@,\%,\&</nnn>"
 Done

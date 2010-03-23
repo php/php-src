@@ -10,10 +10,10 @@ mt_rand(1, "hundered");
 
 --EXPECTF--
 
-Warning: mt_rand() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: mt_rand() expects exactly 2 parameters, 1 given in %s on line 2
 
-Warning: mt_rand() expects exactly 2 parameters, 3 given in %s on line %d
+Warning: mt_rand() expects exactly 2 parameters, 3 given in %s on line 3
 
-Warning: mt_rand() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 1 to be long, string given in %s on line 4
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line 5

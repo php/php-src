@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -24,7 +24,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
 #include "ext/standard/php_var.h"
@@ -120,16 +119,6 @@ zend_module_entry sysvmsg_module_entry = {
 ZEND_GET_MODULE(sysvmsg)
 #endif
 
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("sysvmsg.value",  "42",     PHP_INI_ALL, OnUpdateLong,    global_value,  zend_sysvmsg_globals, sysvmsg_globals)
-	STD_PHP_INI_ENTRY("sysvmsg.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_sysvmsg_globals, sysvmsg_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
 static void sysvmsg_release(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sysvmsg_queue_t * mq = (sysvmsg_queue_t *) rsrc->ptr;
@@ -161,7 +150,7 @@ PHP_MINFO_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ proto bool msg_set_queue(resource queue, array data) U
+/* {{{ proto bool msg_set_queue(resource queue, array data)
    Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
 {
@@ -204,7 +193,7 @@ PHP_FUNCTION(msg_set_queue)
 }
 /* }}} */
 
-/* {{{ proto array msg_stat_queue(resource queue) U
+/* {{{ proto array msg_stat_queue(resource queue)
    Returns information about a message queue */
 PHP_FUNCTION(msg_stat_queue)
 {
@@ -237,6 +226,7 @@ PHP_FUNCTION(msg_stat_queue)
 }
 /* }}} */
 
+
 /* {{{ proto bool msg_queue_exists(int key)
    Check wether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
@@ -255,7 +245,8 @@ PHP_FUNCTION(msg_queue_exists)
 }
 /* }}} */
 
-/* {{{ proto resource msg_get_queue(int key [, int perms]) U
+
+/* {{{ proto resource msg_get_queue(int key [, int perms])
    Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
@@ -284,7 +275,7 @@ PHP_FUNCTION(msg_get_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_remove_queue(resource queue) U
+/* {{{ proto bool msg_remove_queue(resource queue)
    Destroy the queue */
 PHP_FUNCTION(msg_remove_queue)
 {
@@ -305,7 +296,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]]) U
+/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
@@ -393,7 +384,7 @@ PHP_FUNCTION(msg_receive)
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]]) U
+/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {
@@ -429,14 +420,8 @@ PHP_FUNCTION(msg_send)
 		message_len = msg_var.len;
 		smart_str_free(&msg_var);
 	} else {
-		char *p = NULL;
+		char *p;
 		switch (Z_TYPE_P(message)) {
-			case IS_UNICODE:
-				if (SUCCESS != zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &p, &message_len, Z_USTRVAL_P(message), Z_USTRLEN_P(message) TSRMLS_CC)) {
-					RETURN_FALSE;
-				}
-				break;
-
 			case IS_STRING:
 				p = Z_STRVAL_P(message);
 				message_len = Z_STRLEN_P(message);
@@ -448,11 +433,11 @@ PHP_FUNCTION(msg_send)
 				break;
 
 			case IS_DOUBLE:
-				message_len = spprintf(&p, 0, "%f", Z_DVAL_P(message));
+				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number.");
 				RETURN_FALSE;
 		}
 

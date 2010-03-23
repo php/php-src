@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -332,12 +332,6 @@ static PHP_MINIT_FUNCTION(posix)
 #ifdef S_IFREG
 	REGISTER_LONG_CONSTANT("POSIX_S_IFREG", S_IFREG, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef S_IFDIR
-	REGISTER_LONG_CONSTANT("POSIX_S_IFDIR", S_IFDIR, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFLNK
-	REGISTER_LONG_CONSTANT("POSIX_S_IFLNK", S_IFLNK, CONST_CS | CONST_PERSISTENT);
-#endif
 #ifdef S_IFCHR
 	REGISTER_LONG_CONSTANT("POSIX_S_IFCHR", S_IFCHR, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -350,35 +344,7 @@ static PHP_MINIT_FUNCTION(posix)
 #ifdef S_IFSOCK
 	REGISTER_LONG_CONSTANT("POSIX_S_IFSOCK", S_IFSOCK, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef S_IFWHT
-	REGISTER_LONG_CONSTANT("POSIX_S_IFWHT", S_IFWHT, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IRWXU
-	REGISTER_LONG_CONSTANT("POSIX_S_IRWXU", S_IRWXU, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IRUSR", S_IRUSR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IWUSR", S_IWUSR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IXUSR", S_IXUSR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IRWXG", S_IRWXG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IRGRP", S_IRGRP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IWGRP", S_IWGRP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IXGRP", S_IXGRP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IRWXO", S_IRWXO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IROTH", S_IROTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IWOTH", S_IWOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_S_IXOTH", S_IXOTH, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_ISUID
-	REGISTER_LONG_CONSTANT("POSIX_S_ISUID", S_ISUID, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_ISGID
-	REGISTER_LONG_CONSTANT("POSIX_S_ISGID", S_ISGID, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_ISVTX
-	REGISTER_LONG_CONSTANT("POSIX_S_ISVTX", S_ISVTX, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_ISTXT
-	REGISTER_LONG_CONSTANT("POSIX_S_ISTXT", S_ISTXT, CONST_CS | CONST_PERSISTENT);
-#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -422,7 +388,7 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
-/* {{{ proto bool posix_kill(int pid, int sig) U
+/* {{{ proto bool posix_kill(int pid, int sig)
    Send a signal to a process (POSIX.1, 3.3.2) */
 
 PHP_FUNCTION(posix_kill)
@@ -442,7 +408,7 @@ PHP_FUNCTION(posix_kill)
 }
 /* }}} */
 
-/* {{{ proto int posix_getpid(void) U
+/* {{{ proto int posix_getpid(void)
    Get the current process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getpid)
 {
@@ -450,7 +416,7 @@ PHP_FUNCTION(posix_getpid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getppid(void) U
+/* {{{ proto int posix_getppid(void)
    Get the parent process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getppid)
 {
@@ -458,7 +424,7 @@ PHP_FUNCTION(posix_getppid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getuid(void) U
+/* {{{ proto int posix_getuid(void)
    Get the current user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getuid)
 {
@@ -466,7 +432,7 @@ PHP_FUNCTION(posix_getuid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getgid(void) U
+/* {{{ proto int posix_getgid(void)
    Get the current group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getgid)
 {
@@ -474,7 +440,7 @@ PHP_FUNCTION(posix_getgid)
 }
 /* }}} */
 
-/* {{{ proto int posix_geteuid(void) U
+/* {{{ proto int posix_geteuid(void)
    Get the current effective user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_geteuid)
 {
@@ -482,7 +448,7 @@ PHP_FUNCTION(posix_geteuid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getegid(void) U
+/* {{{ proto int posix_getegid(void)
    Get the current effective group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getegid)
 {
@@ -490,7 +456,7 @@ PHP_FUNCTION(posix_getegid)
 }
 /* }}} */
 
-/* {{{ proto bool posix_setuid(int uid) U
+/* {{{ proto bool posix_setuid(long uid)
    Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
@@ -498,7 +464,7 @@ PHP_FUNCTION(posix_setuid)
 }
 /* }}} */
 
-/* {{{ proto bool posix_setgid(int uid) U
+/* {{{ proto bool posix_setgid(int uid)
    Set group id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setgid)
 {
@@ -506,7 +472,7 @@ PHP_FUNCTION(posix_setgid)
 }
 /* }}} */
 
-/* {{{ proto bool posix_seteuid(int uid) U
+/* {{{ proto bool posix_seteuid(long uid)
    Set effective user id */
 #ifdef HAVE_SETEUID
 PHP_FUNCTION(posix_seteuid)
@@ -516,7 +482,7 @@ PHP_FUNCTION(posix_seteuid)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_setegid(int uid) U
+/* {{{ proto bool posix_setegid(long uid)
    Set effective group id */
 #ifdef HAVE_SETEGID
 PHP_FUNCTION(posix_setegid)
@@ -526,7 +492,7 @@ PHP_FUNCTION(posix_setegid)
 #endif
 /* }}} */
 
-/* {{{ proto array posix_getgroups(void) U
+/* {{{ proto array posix_getgroups(void)
    Get supplementary group id's (POSIX.1, 4.2.3) */
 #ifdef HAVE_GETGROUPS
 PHP_FUNCTION(posix_getgroups)
@@ -570,7 +536,7 @@ PHP_FUNCTION(posix_getlogin)
 #endif
 /* }}} */
 
-/* {{{ proto int posix_getpgrp(void) U
+/* {{{ proto int posix_getpgrp(void)
    Get current process group id (POSIX.1, 4.3.1) */
 PHP_FUNCTION(posix_getpgrp)
 {
@@ -578,7 +544,7 @@ PHP_FUNCTION(posix_getpgrp)
 }
 /* }}} */
 
-/* {{{ proto int posix_setsid(void) U
+/* {{{ proto int posix_setsid(void)
    Create session and set process group id (POSIX.1, 4.3.2) */
 #ifdef HAVE_SETSID
 PHP_FUNCTION(posix_setsid)
@@ -588,7 +554,7 @@ PHP_FUNCTION(posix_setsid)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_setpgid(int pid, int pgid) U
+/* {{{ proto bool posix_setpgid(int pid, int pgid)
    Set process group id for job control (POSIX.1, 4.3.3) */
 PHP_FUNCTION(posix_setpgid)
 {
@@ -607,7 +573,7 @@ PHP_FUNCTION(posix_setpgid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getpgid(void) U
+/* {{{ proto int posix_getpgid(void)
    Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) */
 #ifdef HAVE_GETPGID
 PHP_FUNCTION(posix_getpgid)
@@ -626,7 +592,7 @@ PHP_FUNCTION(posix_getpgid)
 #endif
 /* }}} */
 
-/* {{{ proto int posix_getsid(void) U
+/* {{{ proto int posix_getsid(void)
    Get process group id of session leader (This is not a POSIX function, but a SVR4ism, so be compile conditionally) */
 #ifdef HAVE_GETSID
 PHP_FUNCTION(posix_getsid)
@@ -645,7 +611,7 @@ PHP_FUNCTION(posix_getsid)
 #endif
 /* }}} */
 
-/* {{{ proto array posix_uname(void) 
+/* {{{ proto array posix_uname(void)
    Get system name (POSIX.1, 4.4.1) */
 PHP_FUNCTION(posix_uname)
 {
@@ -660,13 +626,14 @@ PHP_FUNCTION(posix_uname)
 
 	array_init(return_value);
 
-	add_ascii_assoc_string(return_value, "sysname",  u.sysname,  1);
-	add_ascii_assoc_string(return_value, "nodename", u.nodename, 1);
-	add_ascii_assoc_string(return_value, "release",  u.release,  1);
-	add_ascii_assoc_string(return_value, "version",  u.version,  1);
-	add_ascii_assoc_string(return_value, "machine",  u.machine,  1);
+	add_assoc_string(return_value, "sysname",  u.sysname,  1);
+	add_assoc_string(return_value, "nodename", u.nodename, 1);
+	add_assoc_string(return_value, "release",  u.release,  1);
+	add_assoc_string(return_value, "version",  u.version,  1);
+	add_assoc_string(return_value, "machine",  u.machine,  1);
+
 #if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
-	add_ascii_assoc_string(return_value, "domainname", u.domainname, 1);
+	add_assoc_string(return_value, "domainname", u.domainname, 1);
 #endif
 }
 /* }}} */
@@ -691,11 +658,11 @@ PHP_FUNCTION(posix_times)
 
 	array_init(return_value);
 
-	add_ascii_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
-	add_ascii_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
-	add_ascii_assoc_long(return_value, "stime",	t.tms_stime);	/* system time */
-	add_ascii_assoc_long(return_value, "cutime",	t.tms_cutime);	/* user time of children */
-	add_ascii_assoc_long(return_value, "cstime",	t.tms_cstime);	/* system time of children */
+	add_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
+	add_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
+	add_assoc_long(return_value, "stime",	t.tms_stime);	/* system time */
+	add_assoc_long(return_value, "cutime",	t.tms_cutime);	/* user time of children */
+	add_assoc_long(return_value, "cstime",	t.tms_cstime);	/* system time of children */
 }
 /* }}} */
 
@@ -795,7 +762,7 @@ PHP_FUNCTION(posix_ttyname)
 }
 /* }}} */
 
-/* {{{ proto bool posix_isatty(int fd) U
+/* {{{ proto bool posix_isatty(int fd)
    Determine if filedesc is a tty (POSIX.1, 4.7.1) */
 PHP_FUNCTION(posix_isatty)
 {
@@ -873,7 +840,8 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
 		RETURN_FALSE;
 	}
 
@@ -907,7 +875,8 @@ PHP_FUNCTION(posix_mknod)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
 		RETURN_FALSE;
 	}
 
@@ -942,7 +911,6 @@ PHP_FUNCTION(posix_mknod)
 
 /* Takes a pointer to posix group and a pointer to an already initialized ZVAL
  * array container and fills the array with the posix group member data. */
-
 int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 {
 	zval *array_members;
@@ -957,13 +925,13 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	MAKE_STD_ZVAL(array_members);
 	array_init(array_members);
 	
-	add_ascii_assoc_string(array_group, "name", g->gr_name, 1);
-	add_ascii_assoc_string(array_group, "passwd", g->gr_passwd, 1);
+	add_assoc_string(array_group, "name", g->gr_name, 1);
+	add_assoc_string(array_group, "passwd", g->gr_passwd, 1);
 	for (count=0; g->gr_mem[count] != NULL; count++) {
 		add_next_index_string(array_members, g->gr_mem[count], 1);
 	}
-	zend_ascii_hash_update(Z_ARRVAL_P(array_group), "members", sizeof("members"), (void*)&array_members, sizeof(zval*), NULL);
-	add_ascii_assoc_long(array_group, "gid", g->gr_gid);
+	zend_hash_update(Z_ARRVAL_P(array_group), "members", sizeof("members"), (void*)&array_members, sizeof(zval*), NULL);
+	add_assoc_long(array_group, "gid", g->gr_gid);
 	return 1;
 }
 /* }}} */
@@ -993,7 +961,8 @@ PHP_FUNCTION(posix_access)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS)))) {
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;
@@ -1090,7 +1059,7 @@ PHP_FUNCTION(posix_getgrgid)
 	if (grbuflen < 1) {
 		RETURN_FALSE;
 	}
-	
+
 	grbuf = emalloc(grbuflen);
 
 	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
@@ -1126,13 +1095,13 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
 		return 0;
 
-	add_ascii_assoc_string(return_value, "name",      pw->pw_name, 1);
-	add_ascii_assoc_string(return_value, "passwd",    pw->pw_passwd, 1);
-	add_ascii_assoc_long  (return_value, "uid",       pw->pw_uid);
-	add_ascii_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_ascii_assoc_string(return_value, "gecos",     pw->pw_gecos, 1);
-	add_ascii_assoc_string(return_value, "dir",       pw->pw_dir, 1);
-	add_ascii_assoc_string(return_value, "shell",     pw->pw_shell, 1);
+	add_assoc_string(return_value, "name",      pw->pw_name, 1);
+	add_assoc_string(return_value, "passwd",    pw->pw_passwd, 1);
+	add_assoc_long  (return_value, "uid",       pw->pw_uid);
+	add_assoc_long  (return_value, "gid",		pw->pw_gid);
+	add_assoc_string(return_value, "gecos",     pw->pw_gecos, 1);
+	add_assoc_string(return_value, "dir",       pw->pw_dir, 1);
+	add_assoc_string(return_value, "shell",     pw->pw_shell, 1);
 	return 1;
 }
 /* }}} */
@@ -1243,8 +1212,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 /* {{{ posix_addlimit
  */
-static int posix_addlimit(int limit, char *name, zval *return_value TSRMLS_DC)
-{
+static int posix_addlimit(int limit, char *name, zval *return_value TSRMLS_DC) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -1260,15 +1228,15 @@ static int posix_addlimit(int limit, char *name, zval *return_value TSRMLS_DC)
 	}
 
 	if (rl.rlim_cur == RLIM_INFINITY) {
-		add_ascii_assoc_stringl(return_value, soft, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
+		add_assoc_stringl(return_value, soft, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
 	} else {
-		add_ascii_assoc_long(return_value, soft, rl.rlim_cur);
+		add_assoc_long(return_value, soft, rl.rlim_cur);
 	}
 
 	if (rl.rlim_max == RLIM_INFINITY) {
-		add_ascii_assoc_stringl(return_value, hard, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
+		add_assoc_stringl(return_value, hard, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1, 1);
 	} else {
-		add_ascii_assoc_long(return_value, hard, rl.rlim_max);
+		add_assoc_long(return_value, hard, rl.rlim_max);
 	}
 
 	return SUCCESS;
@@ -1355,7 +1323,7 @@ PHP_FUNCTION(posix_getrlimit)
 
 #endif /* HAVE_GETRLIMIT */
 
-/* {{{ proto int posix_get_last_error(void) U
+/* {{{ proto int posix_get_last_error(void)
    Retrieve the error number set by the last posix function which failed. */
 PHP_FUNCTION(posix_get_last_error)
 {

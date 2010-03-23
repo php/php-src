@@ -54,27 +54,25 @@ Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|U:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-
-Notice: fwrite(): 51 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 NULL
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
 Destroy [%s,%s]

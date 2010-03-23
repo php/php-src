@@ -51,7 +51,7 @@ $inputs = array (
 	          '1' => 1, 
 	          '0' => 0),
 	          
-//default keys => float values
+//defualt keys => float values
 /*7*/	array(2.00000000000001, 1.00, 0.01E-9),
 	          
 //numeric keys => float values
@@ -75,54 +75,54 @@ foreach($inputs as $input) {
 };
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
 array(2) {
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
+  string(4) "zero"
+  ["two"]=>
   float(2)
 }
 array(3) {
   [0]=>
-  unicode(16) "2.00000000000001"
+  string(16) "2.00000000000001"
   [2]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 
 -- Iteration 2 --
 array(1) {
-  [u"two"]=>
+  ["two"]=>
   float(2)
 }
 array(2) {
   [2]=>
-  unicode(16) "2.00000000000001"
+  string(16) "2.00000000000001"
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 
 -- Iteration 3 --
 array(1) {
-  [u"two"]=>
+  ["two"]=>
   float(2)
 }
 array(2) {
   [2]=>
-  unicode(16) "2.00000000000001"
+  string(16) "2.00000000000001"
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 
 -- Iteration 4 --
 array(2) {
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
+  string(4) "zero"
+  ["two"]=>
   float(2)
 }
 array(2) {
@@ -135,8 +135,8 @@ array(2) {
 -- Iteration 5 --
 array(2) {
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
+  string(4) "zero"
+  ["two"]=>
   float(2)
 }
 array(2) {
@@ -149,7 +149,7 @@ array(2) {
 -- Iteration 6 --
 array(1) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 array(1) {
   [0]=>
@@ -159,8 +159,8 @@ array(1) {
 -- Iteration 7 --
 array(2) {
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
+  string(4) "zero"
+  ["two"]=>
   float(2)
 }
 array(2) {
@@ -173,8 +173,8 @@ array(2) {
 -- Iteration 8 --
 array(2) {
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
+  string(4) "zero"
+  ["two"]=>
   float(2)
 }
 array(2) {
@@ -187,7 +187,7 @@ array(2) {
 -- Iteration 9 --
 array(1) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 array(1) {
   [0]=>

@@ -7,7 +7,7 @@ $filename = dirname(__FILE__)."/bug35781.txt";
 	
 $fp = fopen($filename, "w");
 stream_filter_append($fp, "string.rot13", -49);
-fwrite($fp, b"This is a test\n");
+fwrite($fp, "This is a test\n");
 rewind($fp);
 fpassthru($fp);
 fclose($fp);
@@ -18,7 +18,7 @@ var_dump(file_get_contents($filename));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 string(15) "Guvf vf n grfg
 "
 Done

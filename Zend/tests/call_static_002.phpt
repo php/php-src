@@ -21,6 +21,6 @@ call_user_func(array('Foo', 'aAa'));
 ?>
 --EXPECTF--
 nonstatic
-unicode(3) "aAa"
+string(3) "aAa"
 static
-unicode(3) "aAa"
+string(3) "aAa"

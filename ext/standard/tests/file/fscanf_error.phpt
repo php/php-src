@@ -64,15 +64,13 @@ unlink($filename);
 --EXPECTF--
 *** Testing fscanf() for error conditions ***
 
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-
 Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
 Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: fscanf(): 6 is not a valid File-Handle resource in %s on line %d
+Warning: fscanf(): %d is not a valid File-Handle resource in %s on line %d
 bool(false)
 
 Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d

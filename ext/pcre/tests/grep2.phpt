@@ -29,15 +29,15 @@ Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgre
 bool(false)
 array(3) {
   [5]=>
-  unicode(1) "a"
-  [u"xyz"]=>
-  unicode(2) "q6"
+  string(1) "a"
+  ["xyz"]=>
+  string(2) "q6"
   [6]=>
-  unicode(3) "h20"
+  string(3) "h20"
 }
 array(1) {
-  [u"x"]=>
-  unicode(1) "1"
+  ["x"]=>
+  string(1) "1"
 }
 bool(true)
 array(0) {

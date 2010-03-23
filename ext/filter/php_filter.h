@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -22,13 +22,13 @@
 #ifndef PHP_FILTER_H
 #define PHP_FILTER_H
 
+#include "SAPI.h"
+#include "zend_API.h"
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_variables.h"
-#include "SAPI.h"
-#include "zend_API.h"
 
 extern zend_module_entry filter_module_entry;
 #define phpext_filter_ptr &filter_module_entry
@@ -89,6 +89,7 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
+
 #endif	/* FILTER_H */
 
 /*

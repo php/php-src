@@ -32,7 +32,7 @@ var_dump($string)
 *** Testing ob_get_flush() : basic functionality ***
 testing ob_get_flush() with some
 Newlines too
-unicode(43) "this is printed before returning the string"
+string(43) "this is printed before returning the string"
 string(46) "testing ob_get_flush() with some
 Newlines too
 "

@@ -123,7 +123,6 @@ echo "Done\n";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing debug_zval_dump() on functions ***
 --- Variation 1: global variable inside a function ---
 
@@ -202,15 +201,15 @@ NULL refcount(1)
 NULL refcount(1)
 &NULL refcount(2)
 -- Iteration 5 --
-unicode(7) "TRUE123" { 0054 0052 0055 0045 0031 0032 0033 } refcount(3)
-&unicode(7) "TRUE123" { 0054 0052 0055 0045 0031 0032 0033 } refcount(2)
+string(7) "TRUE123" refcount(3)
+&string(7) "TRUE123" refcount(2)
 -- Iteration 6 --
-unicode(9) "123string" { 0031 0032 0033 0073 0074 0072 0069 006e 0067 } refcount(3)
-&unicode(9) "123string" { 0031 0032 0033 0073 0074 0072 0069 006e 0067 } refcount(2)
+string(9) "123string" refcount(3)
+&string(9) "123string" refcount(2)
 -- Iteration 7 --
-unicode(9) "string123" { 0073 0074 0072 0069 006e 0067 0031 0032 0033 } refcount(3)
-&unicode(9) "string123" { 0073 0074 0072 0069 006e 0067 0031 0032 0033 } refcount(2)
+string(9) "string123" refcount(3)
+&string(9) "string123" refcount(2)
 -- Iteration 8 --
-unicode(10) "NULLstring" { 004e 0055 004c 004c 0073 0074 0072 0069 006e 0067 } refcount(3)
-&unicode(10) "NULLstring" { 004e 0055 004c 004c 0073 0074 0072 0069 006e 0067 } refcount(2)
+string(10) "NULLstring" refcount(3)
+&string(10) "NULLstring" refcount(2)
 Done

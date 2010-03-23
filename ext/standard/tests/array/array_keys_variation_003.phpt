@@ -26,7 +26,7 @@ foreach ($values as $value){
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_keys() on all the types other than arrays ***
 bool(true)
 array(3) {
@@ -35,7 +35,7 @@ array(3) {
   [1]=>
   int(-1)
   [2]=>
-  unicode(3) "php"
+  string(3) "php"
 }
 bool(false)
 array(4) {
@@ -46,7 +46,7 @@ array(4) {
   [2]=>
   int(3)
   [3]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(1)
 array(1) {
@@ -60,26 +60,26 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(3) "php"
+  string(3) "php"
   [3]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(-1)
 array(1) {
   [0]=>
   int(-1)
 }
-unicode(1) "1"
+string(1) "1"
 array(1) {
   [0]=>
   int(1)
 }
-unicode(1) "0"
+string(1) "0"
 array(1) {
   [0]=>
   int(0)
 }
-unicode(2) "-1"
+string(2) "-1"
 array(1) {
   [0]=>
   int(-1)
@@ -91,7 +91,7 @@ array(3) {
   [1]=>
   int(3)
   [2]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(0) {
 }
@@ -101,16 +101,16 @@ array(2) {
   [1]=>
   int(3)
 }
-unicode(3) "php"
+string(3) "php"
 array(1) {
   [0]=>
-  unicode(3) "php"
+  string(3) "php"
 }
-unicode(0) ""
+string(0) ""
 array(2) {
   [0]=>
   int(2)
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 Done

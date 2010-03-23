@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -27,14 +27,14 @@ var_dump($stmt->fetchAll(PDO::FETCH_NUM|PDO::FETCH_UNIQUE));
 ?>
 --EXPECT--
 array(2) {
-  [u"A"]=>
+  ["A"]=>
   array(1) {
     [0]=>
-    unicode(1) "B"
+    string(1) "B"
   }
-  [u"C"]=>
+  ["C"]=>
   array(1) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
   }
 }

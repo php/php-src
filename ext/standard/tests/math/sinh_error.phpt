@@ -20,10 +20,10 @@ var_dump(sinh());
 --EXPECTF--
 Too many arguments
 
-Warning: sinh() expects exactly 1 parameter, 2 given in %s on line 11
+Warning: sinh() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Too few arguments
 
-Warning: sinh() expects exactly 1 parameter, 0 given in %s on line 14
+Warning: sinh() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

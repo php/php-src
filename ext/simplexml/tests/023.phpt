@@ -5,7 +5,7 @@ SimpleXML: Attributes with entities
 --FILE--
 <?php 
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE talks SYSTEM "nbsp.dtd" [
 <!ELEMENT root  EMPTY>
@@ -23,14 +23,14 @@ var_dump($sxe['attr']);
 ===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"attr"]=>
-    unicode(%d) "foo%sbar%sbaz"
+    ["attr"]=>
+    string(%d) "foo%sbar%sbaz"
   }
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(%d) "foo%sbar%sbaz"
+  string(%d) "foo%sbar%sbaz"
 }
 ===DONE===

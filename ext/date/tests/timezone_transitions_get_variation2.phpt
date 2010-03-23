@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_transitions_get() function : usage variation - Passing unexpected values to first argument $object.
+Test timezone_transitions_get() function : usage variation - Passing unexpected values to first argument $timestamp_begin.
 --FILE--
 <?php
 /* Prototype  : array timezone_transitions_get  ( DateTimeZone $object, [ int $timestamp_begin  [, int $timestamp_end  ]]  )
@@ -8,7 +8,7 @@ Test timezone_transitions_get() function : usage variation - Passing unexpected 
  * Alias to functions: DateTimeZone::getTransitions()
  */
  
-echo "*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument \$object***\n";
+echo "*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument \$timestamp_begin ***\n";
 
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
@@ -20,7 +20,7 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __tounicode() {
+	public function __toString() {
 		return "Class A object";
 	}
 }
@@ -111,143 +111,143 @@ fclose( $file_handle );
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument $object***
+*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument $timestamp_begin ***
 
 -- int 0 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- int 1 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- int 12345 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- int -12345 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- float 10.5 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- float -10.5 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- float .5 --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- empty array --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, array given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- int indexed array --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, array given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- associative array --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, array given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- nested arrays --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, array given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- uppercase NULL --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- lowercase null --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- lowercase true --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- lowercase false --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- uppercase TRUE --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- uppercase FALSE --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- empty string DQ --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- empty string SQ --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- string DQ --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- string SQ --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- mixed case string --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- heredoc --
 
-Warning: timezone_transitions_get() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(7) "boolean"
+Warning: timezone_transitions_get() expects parameter 2 to be long, string given in %s on line %d
+string(7) "boolean"
 int(1)
 
 -- instance of classWithToString --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, object given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- instance of classWithoutToString --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, object given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 
 -- undefined var --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- unset var --
-unicode(5) "array"
+string(5) "array"
 int(8)
 
 -- resource --
 
 Warning: timezone_transitions_get() expects parameter 2 to be long, resource given in %s on line %d
-unicode(7) "boolean"
+string(7) "boolean"
 int(1)
 ===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-Bug # 28817: (properties in extended class)
+Bug #28817 (properties in extended class)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -27,12 +27,12 @@ var_dump($z->p_variable);
 --EXPECTF--
 array(4) {
   [0]=>
-  unicode(5) "bonus"
+  string(5) "bonus"
   [1]=>
-  unicode(3) "vir"
+  string(3) "vir"
   [2]=>
-  unicode(6) "semper"
+  string(6) "semper"
   [3]=>
-  unicode(4) "tiro"
+  string(4) "tiro"
 }
-unicode(30) "Cessante causa cessat effectus"
+string(30) "Cessante causa cessat effectus"

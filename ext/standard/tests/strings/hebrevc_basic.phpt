@@ -10,7 +10,7 @@ Test hebrevc() function : basic functionality
 
 echo "*** Testing hebrevc() : basic functionality ***\n";
 
-$hebrew_text = b"The hebrevc function converts logical Hebrew text to visual text.\nThis function is similar to hebrev() with the difference that it converts newlines (\n) to '<br>\n'.\nThe function tries to avoid breaking words.\n";
+$hebrew_text = "The hebrevc function converts logical Hebrew text to visual text.\nThis function is similar to hebrev() with the difference that it converts newlines (\n) to '<br>\n'.\nThe function tries to avoid breaking words.\n";
 
 var_dump(hebrevc($hebrew_text));
 var_dump(hebrevc($hebrew_text, 15));

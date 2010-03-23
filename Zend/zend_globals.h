@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -35,9 +35,9 @@
 #include "zend_objects_API.h"
 #include "zend_modules.h"
 
-#include <unicode/ucnv.h>
-#include <unicode/ucol.h>
-#include <unicode/usearch.h>
+#ifdef ZEND_MULTIBYTE
+#include "zend_multibyte.h"
+#endif /* ZEND_MULTIBYTE */
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -59,6 +59,9 @@ END_EXTERN_C()
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
+#define ZEND_EARLY_BINDING_COMPILE_TIME 0
+#define ZEND_EARLY_BINDING_DELAYED      1
+#define ZEND_EARLY_BINDING_DELAYED_ALL  2
 
 typedef struct _zend_declarables {
 	zval ticks;
@@ -97,11 +100,11 @@ struct _zend_compiler_globals {
 	HashTable filenames_table;
 
 	HashTable *auto_globals;
-	zval ***auto_globals_cache;
 
 	zend_bool in_compilation;
 	zend_bool short_tags;
 	zend_bool asp_tags;
+	zend_bool allow_call_time_pass_reference;
 
 	zend_declarables declarables;
 
@@ -124,16 +127,8 @@ struct _zend_compiler_globals {
 
 	zend_uint access_type;
 
-	zstr doc_comment;
+	char *doc_comment;
 	zend_uint doc_comment_len;
-
-	zend_uchar literal_type;
-
-	HashTable script_encodings_table;
-	char *script_encoding;
-
-	HashTable *labels;
-	zend_stack labels_stack;
 
 	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
 
@@ -141,6 +136,23 @@ struct _zend_compiler_globals {
 	HashTable *current_import;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+
+	HashTable *labels;
+	zend_stack labels_stack;
+
+#ifdef ZEND_MULTIBYTE
+	zend_encoding **script_encoding_list;
+	size_t script_encoding_list_size;
+	zend_bool detect_unicode;
+	zend_bool encoding_declared;
+
+	zend_encoding *internal_encoding;
+
+	/* multibyte utility functions */
+	zend_encoding_detector encoding_detector;
+	zend_encoding_converter encoding_converter;
+	zend_encoding_oddlen encoding_oddlen;
+#endif /* ZEND_MULTIBYTE */
 
 #ifdef ZTS
 	HashTable **static_members;
@@ -259,6 +271,7 @@ struct _zend_ini_scanner_globals {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+
 	char *filename;
 	int lineno;
 
@@ -279,43 +292,21 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	
-	UConverter *input_conv;     /* converter for flex input */
-	UConverter *output_conv;    /* converter for data from flex output */
-	zend_bool encoding_checked;
-	char* rest_str;
-	int rest_len;
-};
+#ifdef ZEND_MULTIBYTE
+	/* original (unfiltered) script */
+	unsigned char *script_org;
+	size_t script_org_size;
 
-struct _zend_unicode_globals {
-	zend_bool unicode;                   /* indicates whether full Unicode mode is enabled */
+	/* filtered script */
+	unsigned char *script_filtered;
+	size_t script_filtered_size;
 
-	UConverter *fallback_encoding_conv;  /* converter for default encoding for IS_STRING type */
-	UConverter *runtime_encoding_conv;   /* runtime encoding converter */
-	UConverter *output_encoding_conv;    /* output layer converter */
-	UConverter *request_encoding_conv;   /* http request encoding converter */
-	UConverter *script_encoding_conv;    /* default script encoding converter */
-	UConverter *filesystem_encoding_conv;/* default filesystem converter (entries, not contents) */ 
-	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
-	UConverter *ascii_conv;				 /* all-purpose ASCII converter */
-
-	char *stream_encoding;		    /* default stream encoding (contents, not FS entries)
-						Uses name of encoding rather than a real converter
-						because each stream needs its own instance */
-	char *request_encoding_def;   /* the default http request encoding */
-
-	uint16_t from_error_mode;
-	UChar from_subst_char[3];
-	uint16_t to_error_mode;
-
-	char *default_locale;
-	zend_collator *default_collator;
-	UCollator *root_collator;
-	UStringSearch *root_search;
-
-	HashTable flex_compatible;			 /* table of flex-compatible encodings */
-
-	zval *conv_error_handler;			 /* user-defined conversion error handler */
-	zend_ptr_stack conv_error_handlers;  /* stack for user error handlers */
+	/* input/ouput filters */
+	zend_encoding_filter input_filter;
+	zend_encoding_filter output_filter;
+	zend_encoding *script_encoding;
+	zend_encoding *internal_encoding;
+#endif /* ZEND_MULTIBYTE */
 };
 
 #endif /* ZEND_GLOBALS_H */

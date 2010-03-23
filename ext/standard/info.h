@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -67,9 +67,8 @@ PHP_FUNCTION(php_sapi_name);
 PHP_FUNCTION(php_uname);
 PHP_FUNCTION(php_ini_scanned_files);
 PHP_FUNCTION(php_ini_loaded_file);
-
-/* NOTE: use UTF-8 if you print anything non-ASCII */
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC);
+PHPAPI void php_info_html_esc_write(char *string, int str_len TSRMLS_DC);
 PHPAPI void php_print_info_htmlhead(TSRMLS_D);
 PHPAPI void php_print_info(int flag TSRMLS_DC);
 PHPAPI void php_print_style(void);

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,6 +70,7 @@
 #endif
 
 #include "ext/standard/head.h"
+#include "safe_mode.h"
 #include "php_string.h"
 #include "file.h"
 
@@ -294,8 +295,9 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_TEXT",						PHP_FILE_TEXT,						CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_BINARY",					PHP_FILE_BINARY,					CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -321,7 +323,7 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-/* {{{ proto bool flock(resource fp, int operation [, int &wouldblock]) U
+/* {{{ proto bool flock(resource fp, int operation [, int &wouldblock])
    Portable file locking */
 PHP_FUNCTION(flock)
 {
@@ -361,11 +363,10 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, bool use_include_path]) U
+/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 PHP_FUNCTION(get_meta_tags)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
 	zend_bool use_include_path = 0;
@@ -380,41 +381,15 @@ PHP_FUNCTION(get_meta_tags)
 	memset(&md, 0, sizeof(md));
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &ppfilename, &use_include_path) == FAILURE ||
-		php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &filename, &filename_len, &use_include_path) == FAILURE) {
 		return;
 	}
 
-	md.stream = php_stream_open_wrapper(filename, "rt",
-			(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
+	md.stream = php_stream_open_wrapper(filename, "rb",
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (!md.stream)	{
 		RETURN_FALSE;
-	}
-
-	if (md.stream->readbuf_type == IS_UNICODE) {
-		/* Either stream auto-applied encoding (which http:// wrapper does do)
-		 * Or the streams layer unicodified it for us */
-		zval *filterparams;
-		php_stream_filter *filter;
-
-		/* Be lazy and convert contents to utf8 again
-		 * This could be made more efficient by detecting if
-		 * it's being upconverted from utf8 and cancelling all conversion
-		 * rather than reconverting, but this is a silly function anyway */
-
-		MAKE_STD_ZVAL(filterparams);
-		array_init(filterparams);
-		add_ascii_assoc_long(filterparams, "error_mode", UG(from_error_mode));
-		add_ascii_assoc_unicode(filterparams, "subst_char", UG(from_subst_char), 1);
-		filter = php_stream_filter_create("unicode.to.utf8", filterparams, 0 TSRMLS_CC);
-		zval_ptr_dtor(&filterparams);
-
-		if (!filter) {
-			php_stream_close(md.stream);
-			RETURN_FALSE;
-		}
-		php_stream_filter_append(&md.stream->readfilters, filter);
 	}
 
 	array_init(return_value);
@@ -447,7 +422,11 @@ PHP_FUNCTION(get_meta_tags)
 				} else if (saw_content) {
 					STR_FREE(value);
 					/* Get the CONTENT attr (Single word attr, non-quoted) */
-					value = estrndup(md.token_data, md.token_len);
+					if (PG(magic_quotes_runtime)) {
+						value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
+					} else {
+						value = estrndup(md.token_data, md.token_len);
+					}
 
 					have_content = 1;
 				}
@@ -483,7 +462,11 @@ PHP_FUNCTION(get_meta_tags)
 			} else if (saw_content) {
 				STR_FREE(value);
 				/* Get the CONTENT attr (Single word attr, non-quoted) */
-				value = estrndup(md.token_data, md.token_len);
+				if (PG(magic_quotes_runtime)) {
+					value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
+				} else {
+					value = estrndup(md.token_data, md.token_len);
+				}
 
 				have_content = 1;
 			}
@@ -501,9 +484,9 @@ PHP_FUNCTION(get_meta_tags)
 				/* For BC */
 				php_strtolower(name, strlen(name));
 				if (have_content) {
-					add_assoc_utf8_string(return_value, name, value, 1);
+					add_assoc_string(return_value, name, value, 1);
 				} else {
-					add_assoc_utf8_string(return_value, name, "", 1);
+					add_assoc_string(return_value, name, "", 1);
 				}
 
 				efree(name);
@@ -535,24 +518,23 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, long flags [, resource context [, long offset [, long maxlen]]]]) U
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	void *contents = NULL;
-	long flags = 0;
+	char *contents;
+	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len;
 	long offset = -1;
-	long maxlen = PHP_STREAM_COPY_ALL, real_maxlen;
+	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!ll", &ppfilename, &flags, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
@@ -562,12 +544,9 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_TEXT) ? "rt" : "rb",
-				((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS,
+	stream = php_stream_open_wrapper_ex(filename, "rb",
+				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
@@ -579,59 +558,40 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	if (maxlen <= 0 || stream->readbuf_type == IS_STRING) {
-		real_maxlen = maxlen;
-	} else {
-		/* Allows worst case scenario of each input char being turned into two UChars
-		 * UTODO: Have this take converter into account, since many never generate surrogate pairs */
-		real_maxlen = maxlen * 2;
-	}
-
 	/* uses mmap if possible */
-	len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, &contents, real_maxlen, maxlen, 0);
+	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
 
-	if (stream->readbuf_type == IS_STRING) {
-		if (len > 0) {
-			RETVAL_STRINGL(contents, len, 0);
-		} else {
-			if (contents) {
-				efree(contents);
-			}
-			RETVAL_EMPTY_STRING();
+		if (PG(magic_quotes_runtime)) {
+			contents = php_addslashes(contents, len, &len, 1 TSRMLS_CC); /* 1 = free source string */
 		}
+
+		RETVAL_STRINGL(contents, len, 0);
+	} else if (len == 0) {
+		RETVAL_EMPTY_STRING();
 	} else {
-		if (len > 0) {
-			RETVAL_UNICODEL(contents, len, 0);
-		} else {
-			if (contents) {
-				efree(contents);
-			}
-			RETVAL_EMPTY_UNICODE();
-		}
+		RETVAL_FALSE;
 	}
 
 	php_stream_close(stream);
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]]) U
+/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
    Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
-	int argc = ZEND_NUM_ARGS();
 	php_stream *stream;
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
 	zval *data;
-	int numchars = 0;
-	long flags = (argc < 3) ? PHP_FILE_TEXT : 0;
+	int numbytes = 0;
+	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
-	char mode[3] = { 'w', 0, 0 };
 	php_stream *srcstream = NULL;
+	char mode[3] = "wb";
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "Zz/|lr!", &ppfilename, &data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -640,21 +600,22 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
-	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
+	} else if (flags & LOCK_EX) {
+		/* check to make sure we are dealing with a regular file */
+		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
+			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Exclusive locks may only be set for regular files");
+				RETURN_FALSE;
+			}
+		}
+		mode[0] = 'c';
 	}
-	if (flags & PHP_FILE_BINARY || (Z_TYPE_P(data) == IS_STRING)) {
-		mode[1] = 'b';
-	} else if (flags & PHP_FILE_TEXT) {
-		mode[1] = 't';
-	}
+	mode[2] = '\0';
 
-	stream = php_stream_open_wrapper_ex(filename, mode,
-			((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -665,133 +626,107 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
+	if (mode[0] == 'c') {
+		php_stream_truncate_set_size(stream, 0);
+	}
+
 	switch (Z_TYPE_P(data)) {
 		case IS_RESOURCE: {
 			size_t len;
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				numchars = -1;
+				numbytes = -1;
 			} else {
-				numchars = len;
+				numbytes = len;
 			}
 			break;
 		}
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_CONSTANT:
+			convert_to_string_ex(&data);
+
+		case IS_STRING:
+			if (Z_STRLEN_P(data)) {
+				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
+				if (numbytes != Z_STRLEN_P(data)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					numbytes = -1;
+				}
+			}
+			break;
+
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
+				int bytes_written;
 				zval **tmp;
 				HashPosition pos;
 
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
-					if (Z_TYPE_PP(tmp) == IS_UNICODE) {
-						int ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
-						int wrote_u16 = php_stream_write_unicode(stream, Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
-						if (wrote_u16 < 0) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", ustrlen, filename);
-							numchars = -1;
-							break;
-						} else if (wrote_u16 != Z_USTRLEN_PP(tmp)) {
-							int numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_u16);
-
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
-							numchars = -1;
-							break;
-						}
-						numchars += ustrlen;
-					} else { /* non-unicode */
-						int free_val = 0;
-						zval strval = **tmp;
-						int wrote_bytes;
-
-						if (Z_TYPE(strval) != IS_STRING) {
-							zval_copy_ctor(&strval);
-							convert_to_string(&strval);
-							free_val = 1;
-						}
-						if (Z_STRLEN(strval)) {
-							numchars += Z_STRLEN(strval);
-							wrote_bytes = php_stream_write(stream, Z_STRVAL(strval), Z_STRLEN(strval));
-							if (wrote_bytes < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRLEN(strval), filename);
-								numchars = -1;
-								break;
+					if (Z_TYPE_PP(tmp) != IS_STRING) {
+						SEPARATE_ZVAL(tmp);
+						convert_to_string(*tmp);
+					}
+					if (Z_STRLEN_PP(tmp)) {
+						numbytes += Z_STRLEN_PP(tmp);
+						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						if (bytes_written < 0 || bytes_written != Z_STRLEN_PP(tmp)) {
+							if (bytes_written < 0) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRLEN_PP(tmp), filename);
+							} else {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, Z_STRLEN_PP(tmp));
 							}
-							if (wrote_bytes != Z_STRLEN(strval)) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", wrote_bytes, Z_STRLEN(strval));
-								numchars = -1;
-								break;
-							}
-						}
-						if (free_val) {
-							zval_dtor(&strval);
+							numbytes = -1;
+							break;
 						}
 					}
 					zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
 				}
 			}
 			break;
+
 		case IS_OBJECT:
-			/* TODO */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd parameter must be non-object (for now)");
-			numchars = -1;
-			break;
-		case IS_UNICODE:
-			if (Z_USTRLEN_P(data)) {
-				int ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
-				int wrote_u16 = php_stream_write_unicode(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+			if (Z_OBJ_HT_P(data) != NULL) {
+				zval out;
 
-				numchars = ustrlen;
-				if (wrote_u16 < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", ustrlen, filename);
-					numchars = -1;
-				} else if (wrote_u16 != Z_USTRLEN_P(data)) {
-					int written_numchars = u_countChar32(Z_USTRVAL_P(data), wrote_u16);
-
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", written_numchars, ustrlen);
-					numchars = -1;
+				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
+					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
+					if (numbytes != Z_STRLEN(out)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						numbytes = -1;
+					}
+					zval_dtor(&out);
+					break;
 				}
 			}
-			break;
-		case IS_NULL:
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_BOOL:
-		case IS_CONSTANT:
-		case IS_STRING:
 		default:
-			if (Z_TYPE_P(data) != IS_STRING) {
-				convert_to_string_ex(&data);
-			}
-			if (Z_STRLEN_P(data)) {
-				numchars = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numchars != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numchars, Z_STRLEN_P(data));
-					numchars = -1;
-				}
-			}
+			numbytes = -1;
 			break;
 	}
 	php_stream_close(stream);
 
-	if (numchars < 0) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(numchars);
+	RETURN_LONG(numbytes);
 }
 /* }}} */
 
 #define PHP_FILE_BUF_SIZE	80
 
-/* {{{ proto array file(string filename [, int flags[, resource context]]) U
+/* {{{ proto array file(string filename [, int flags[, resource context]])
    Read entire file into an array */
 PHP_FUNCTION(file)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
-	char *target_buf=NULL;
+	char *slashed, *target_buf=NULL, *p, *s, *e;
 	register int i = 0;
-	int target_len;
+	int target_len, len;
+	char eol_marker = '\n';
 	long flags = 0;
 	zend_bool use_include_path;
 	zend_bool include_new_line;
@@ -801,10 +736,10 @@ PHP_FUNCTION(file)
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!", &ppfilename, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
-	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT | PHP_FILE_TEXT | PHP_FILE_BINARY)) {
+	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
 		RETURN_FALSE;
 	}
@@ -814,11 +749,8 @@ PHP_FUNCTION(file)
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
-	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_TEXT) ? "rt" : "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -826,58 +758,11 @@ PHP_FUNCTION(file)
 	/* Initialize return array */
 	array_init(return_value);
 
-	target_len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, (void**)&target_buf, PHP_STREAM_COPY_ALL, -1, 0);
+	if ((target_len = php_stream_copy_to_mem(stream, &target_buf, PHP_STREAM_COPY_ALL, 0))) {
+		s = target_buf;
+		e = target_buf + target_len;
 
-	if (!target_len) {
-		/* Empty file, do nothing and return an empty array */
-	} else if (stream->readbuf_type == IS_UNICODE) {
-		UChar *s = (UChar*)target_buf, *p;
-		UChar *e = s + target_len, eol_marker = '\n';
-
-		if (!(p = php_stream_locate_eol(stream, ZSTR(target_buf), target_len TSRMLS_CC))) {
-			p = e;
-			goto uparse_eol;
-		}
-
-		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
-			eol_marker = '\r';
-		}
-
-		/* for performance reasons the code is quadruplicated, so that the if (include_new_line/unicode
-		 * will not need to be done for every single line in the file. */
-		if (include_new_line) {
-			do {
-				p++;
-uparse_eol:
-				add_index_unicodel(return_value, i++, eustrndup(s, p-s), p-s, 0);
-				s = p;
-			} while ((p = u_memchr(p, eol_marker, (e-p))));
-		} else {
-			do {
-				int windows_eol = 0;
-				if (p != (UChar*)target_buf && eol_marker == '\n' && *(p - 1) == '\r') {
-					windows_eol++;
-				}
-				if (skip_blank_lines && !(p-s-windows_eol)) {
-					s = ++p;
-					continue;
-				}
-				add_index_unicodel(return_value, i++, eustrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
-				s = ++p;
-			} while ((p = u_memchr(p, eol_marker, (e-p))));
-		}
-
-		/* handle any left overs of files without new lines */
-		if (s != e) {
-			p = e;
-			goto uparse_eol;
-		}
-
-	} else { /* !IS_UNICODE */
-		char *s = target_buf, *p;
-		char *e = target_buf + target_len, eol_marker = '\n';
-
-		if (!(p = php_stream_locate_eol(stream, ZSTR(target_buf), target_len TSRMLS_CC))) {
+		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
 			p = e;
 			goto parse_eol;
 		}
@@ -886,11 +771,19 @@ uparse_eol:
 			eol_marker = '\r';
 		}
 
+		/* for performance reasons the code is duplicated, so that the if (include_new_line)
+		 * will not need to be done for every single line in the file. */
 		if (include_new_line) {
 			do {
 				p++;
 parse_eol:
-				add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+				if (PG(magic_quotes_runtime)) {
+					/* s is in target_buf which is freed at the end of the function */
+					slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
+					add_index_stringl(return_value, i++, slashed, len, 0);
+				} else {
+					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+				}
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		} else {
@@ -903,7 +796,13 @@ parse_eol:
 					s = ++p;
 					continue;
 				}
-				add_index_stringl(return_value, i++, estrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
+				if (PG(magic_quotes_runtime)) {
+					/* s is in target_buf which is freed at the end of the function */
+					slashed = php_addslashes(s, (p-s-windows_eol), &len, 0 TSRMLS_CC);
+					add_index_stringl(return_value, i++, slashed, len, 0);
+				} else {
+					add_index_stringl(return_value, i++, estrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
+				}
 				s = ++p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		}
@@ -922,24 +821,22 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix) U
+/* {{{ proto string tempnam(string dir, string prefix)
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
-	zval **ppdir, **ppprefix;
 	char *dir, *prefix;
-	int dir_len, tmp_prefix_len;
+	int dir_len, prefix_len;
+	size_t p_len;
 	char *opened_path;
 	char *p;
 	int fd;
-	size_t p_len, prefix_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &ppdir, &ppprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
-	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
-		php_stream_path_param_encode(ppprefix, &prefix, &tmp_prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
@@ -947,7 +844,6 @@ PHP_FUNCTION(tempnam)
 		RETURN_FALSE;
 	}
 
-	prefix_len = tmp_prefix_len;
 	php_basename(prefix, prefix_len, NULL, 0, &p, &p_len TSRMLS_CC);
 	if (p_len > 64) {
 		p[63] = '\0';
@@ -956,21 +852,14 @@ PHP_FUNCTION(tempnam)
 	RETVAL_FALSE;
 
 	if ((fd = php_open_temporary_fd(dir, p, &opened_path TSRMLS_CC)) >= 0) {
-		UChar *utmpnam;
-		int utmpnam_len;
-
 		close(fd);
-
-		if (SUCCESS == php_stream_path_decode(NULL, &utmpnam, &utmpnam_len, opened_path, strlen(opened_path), REPORT_ERRORS, FG(default_context))) {
-			RETVAL_UNICODEL(utmpnam, utmpnam_len, 0);
-		}
-		efree(opened_path);
+		RETVAL_STRING(opened_path, 0);
 	}
 	efree(p);
 }
 /* }}} */
 
-/* {{{ proto resource tmpfile(void) U
+/* {{{ proto resource tmpfile(void)
    Create a temporary file that will be deleted automatically after use */
 PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
@@ -990,11 +879,10 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 }
 /* }}} */
 
-/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]]) U
+/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
    Open a file or a URL and return a file pointer */
 PHP_NAMED_FUNCTION(php_if_fopen)
 {
-	zval **ppfilename;
 	char *filename, *mode;
 	int filename_len, mode_len;
 	zend_bool use_include_path = 0;
@@ -1002,17 +890,14 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|br", &ppfilename, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (FAILURE == php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context)) {
-		RETURN_FALSE;
-	}
+	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
-	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -1021,7 +906,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 }
 /* }}} */
 
-/* {{{ proto bool fclose(resource fp) U
+/* {{{ proto bool fclose(resource fp)
    Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
 {
@@ -1029,7 +914,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1049,22 +934,18 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ proto resource popen(string command, string mode) U
+/* {{{ proto resource popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
-	zval **ppcommand;
 	char *command, *mode;
 	int command_len, mode_len;
 	FILE *fp;
-	char *posix_mode;
+	php_stream *stream;
+	char *posix_mode, *b, *buf = 0, *tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &ppcommand, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &command, &command_len, &mode, &mode_len) == FAILURE) {
 		return;
-	}
-
-	if (php_stream_path_param_encode(ppcommand, &command, &command_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-		RETURN_FALSE;
 	}
 
 	posix_mode = estrndup(mode, mode_len);
@@ -1076,26 +957,63 @@ PHP_FUNCTION(popen)
 		}
 	}
 #endif
-	fp = VCWD_POPEN(command, posix_mode);
-	if (!fp) {
+	if (PG(safe_mode)){
+		b = strchr(command, ' ');
+		if (!b) {
+			b = strrchr(command, '/');
+		} else {
+			char *c;
+
+			c = command;
+			while((*b != '/') && (b != c)) {
+				b--;
+			}
+			if (b == c) {
+				b = NULL;
+			}
+		}
+
+		if (b) {
+			spprintf(&buf, 0, "%s%s", PG(safe_mode_exec_dir), b);
+		} else {
+			spprintf(&buf, 0, "%s/%s", PG(safe_mode_exec_dir), command);
+		}
+
+		tmp = php_escape_shell_cmd(buf);
+		fp = VCWD_POPEN(tmp, posix_mode);
+		efree(tmp);
+
+		if (!fp) {
+			php_error_docref2(NULL TSRMLS_CC, buf, posix_mode, E_WARNING, "%s", strerror(errno));
+			efree(posix_mode);
+			efree(buf);
+			RETURN_FALSE;
+		}
+
+		efree(buf);
+
+	} else {
+		fp = VCWD_POPEN(command, posix_mode);
+		if (!fp) {
+			php_error_docref2(NULL TSRMLS_CC, command, posix_mode, E_WARNING, "%s", strerror(errno));
+			efree(posix_mode);
+			RETURN_FALSE;
+		}
+	}
+	stream = php_stream_fopen_from_pipe(fp, mode);
+
+	if (stream == NULL)	{
 		php_error_docref2(NULL TSRMLS_CC, command, mode, E_WARNING, "%s", strerror(errno));
 		RETVAL_FALSE;
 	} else {
-		php_stream *stream = php_stream_fopen_from_pipe(fp, mode);
-
-		if (stream == NULL)	{
-			php_error_docref2(NULL TSRMLS_CC, command, mode, E_WARNING, "%s", strerror(errno));
-			RETVAL_FALSE;
-		} else {
-			php_stream_to_zval(stream, return_value);
-		}
+		php_stream_to_zval(stream, return_value);
 	}
 
 	efree(posix_mode);
 }
 /* }}} */
 
-/* {{{ proto int pclose(resource fp) U
+/* {{{ proto int pclose(resource fp)
    Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
@@ -1103,7 +1021,7 @@ PHP_FUNCTION(pclose)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1113,7 +1031,7 @@ PHP_FUNCTION(pclose)
 }
 /* }}} */
 
-/* {{{ proto bool feof(resource fp) U
+/* {{{ proto bool feof(resource fp)
    Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
@@ -1121,7 +1039,7 @@ PHPAPI PHP_FUNCTION(feof)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1134,187 +1052,146 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* {{{ proto string fgets(resource fp[, int lengthish]) U
+/* {{{ proto string fgets(resource fp[, int length])
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
-	php_stream *stream;
-	zval *zstream;
-	int argc = ZEND_NUM_ARGS();
-	long length = -1;
-	long len;
-	zstr buf, line;
-	size_t retlen = 0;
-
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zstream, &length) == FAILURE) {
-		return;
-	}
-
-	php_stream_from_zval(stream, &zstream);
-
-	if (argc == 2 && length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
-	}
-
-	if (length == 1) {
-		/* For BC reasons, fgets() should only return length-1 bytes. */
-		RETURN_FALSE;
-	} else if (length > 1) {
-		len = length;
-		buf.v = ecalloc(len, (stream->readbuf_type == IS_UNICODE) ? sizeof(UChar) : sizeof(char));
-		length--;
-	} else {
-		buf.v = NULL;
-		len = -1;
-	}
-
-	line.v = php_stream_get_line_ex(stream, stream->readbuf_type, buf, len, length, &retlen);
-	if (!line.v) {
-		if (buf.v) {
-			efree(buf.v);
-		}
-		RETURN_FALSE;
-	}
-
-	if (stream->readbuf_type == IS_UNICODE) {
-		RETURN_UNICODEL(line.u, retlen, 0);
-	} else { /* IS_STRING */
-		RETURN_STRINGL(line.s, retlen, 0);
-	}
-}
-/* }}} */
-
-/* {{{ proto string fgetc(resource fp) U
-   Get a character from file pointer */
-PHPAPI PHP_FUNCTION(fgetc)
-{
 	zval *arg1;
+	long len = 1024;
+	char *buf = NULL;
+	int argc = ZEND_NUM_ARGS();
+	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-	if (stream->readbuf_type == IS_UNICODE) {
-		int buflen = 1;
-		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
-
-		if (!buf || !buflen) {
-			if (buf) {
-				efree(buf);
-			}
+	if (argc == 1) {
+		/* ask streams to give us a buffer of an appropriate size */
+		buf = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (buf == NULL) {
+			goto exit_failed;
+		}
+	} else if (argc > 1) {
+		if (len <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
-		RETURN_UNICODEL(buf, buflen, 0);
-	} else { /* IS_STRING */
-		char buf[2];
 
-		if ((buf[0] = php_stream_getc(stream)) == EOF) {
-			RETURN_FALSE;
+		buf = ecalloc(len + 1, sizeof(char));
+		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
+			goto exit_failed;
 		}
-		buf[1] = 0;
+	}
+
+	if (PG(magic_quotes_runtime)) {
+		Z_STRVAL_P(return_value) = php_addslashes(buf, line_len, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+		Z_TYPE_P(return_value) = IS_STRING;
+	} else {
+		ZVAL_STRINGL(return_value, buf, line_len, 0);
+		/* resize buffer if it's much larger than the result.
+		 * Only needed if the user requested a buffer size. */
+		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
+			Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
+		}
+	}
+	return;
+
+exit_failed:
+	RETVAL_FALSE;
+	if (buf) {
+		efree(buf);
+	}
+}
+/* }}} */
+
+/* {{{ proto string fgetc(resource fp)
+   Get a character from file pointer */
+PHPAPI PHP_FUNCTION(fgetc)
+{
+	zval *arg1;
+	char buf[2];
+	int result;
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
+
+	result = php_stream_getc(stream);
+
+	if (result == EOF) {
+		RETVAL_FALSE;
+	} else {
+		buf[0] = result;
+		buf[1] = '\0';
+
 		RETURN_STRINGL(buf, 1, 1);
 	}
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp [, int lengthish [, string allowable_tags]]) U
+/* {{{ proto string fgetss(resource fp [, int length [, string allowable_tags]])
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
-	zval *zstream;
+	zval *fd;
+	long bytes = 0;
+	size_t len = 0;
+	size_t actual_len, retval_len;
+	char *buf = NULL, *retval;
 	php_stream *stream;
-	long length = 0;
-	long len;
-	zval **allow = NULL;
-	size_t retlen = 0;
-	zstr buf;
+	char *allowed_tags=NULL;
+	int allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lZ", &zstream, &length, &allow) == FAILURE) {
-		return;
-	}
-
-	php_stream_from_zval(stream, &zstream);
-
-	if (ZEND_NUM_ARGS() >= 2 && length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ls", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (length == 1) {
-		/* For BC reasons, fgetss() should only return length-1 bytes. */
+	PHP_STREAM_TO_ZVAL(stream, &fd);
+
+	if (ZEND_NUM_ARGS() >= 2) {
+		if (bytes <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+			RETURN_FALSE;
+		}
+
+		len = (size_t) bytes;
+		buf = safe_emalloc(sizeof(char), (len + 1), 0);
+		/*needed because recv doesnt set null char at end*/
+		memset(buf, 0, len + 1);
+	}
+
+	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
+		if (buf != NULL) {
+			efree(buf);
+		}
 		RETURN_FALSE;
-	} else if (length > 1) {
-		len = length;
-		buf.v = ecalloc(len, (stream->readbuf_type == IS_UNICODE) ? sizeof(UChar) : sizeof(char));
-		length--;
-	} else {
-		buf.v = NULL;
-		len = -1;
 	}
 
-	if (stream->readbuf_type == IS_UNICODE) {
-		UChar *line;
-		UChar *allowed = NULL;
-		int allowed_len = 0;
+	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
-		line = php_stream_get_line_ex(stream, IS_UNICODE, buf, len, length, &retlen);
-		if (!line) {
-			if (buf.v) {
-				efree(buf.v);
-			}
-			RETURN_FALSE;
-		}
-
-		if (allow) {
-			convert_to_unicode_ex(allow);
-			allowed = Z_USTRVAL_PP(allow);
-			allowed_len = Z_USTRLEN_PP(allow);
-		}
-		retlen = php_u_strip_tags(line, retlen, &stream->fgetss_state, allowed, allowed_len TSRMLS_CC);
-
-		RETURN_UNICODEL(line, retlen, 0);
-	} else { /* IS_STRING */
-		char *line;
-		char *allowed = NULL;
-		int allowed_len = 0;
-
-		line = php_stream_get_line_ex(stream, IS_STRING, buf, len, length, &retlen);
-		if (!line) {
-			if (buf.v) {
-				efree(buf.v);
-			}
-			RETURN_FALSE;
-		}
-
-		if (allow) {
-			convert_to_string_ex(allow);
-			allowed = Z_STRVAL_PP(allow);
-			allowed_len = Z_STRLEN_PP(allow);
-		}
-		retlen = php_strip_tags(line, retlen, &stream->fgetss_state, allowed, allowed_len);
-
-		RETURN_STRINGL(line, retlen, 0);
-	}
+	RETURN_STRINGL(retval, retval_len, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed fscanf(resource stream, string format [, string ...]) U
+/* {{{ proto mixed fscanf(resource stream, string format [, string ...])
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int type, result, argc = 0;
+	int result, format_len, type, argc = 0;
 	zval ***args = NULL;
-	zval **format;
 	zval *file_handle;
-	char *buf;
-	UChar *u_buf;
+	char *buf, *format;
+	size_t len;
 	void *what;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rZ*", &file_handle, &format, &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs*", &file_handle, &format, &format_len, &args, &argc) == FAILURE) {
 		return;
 	}
 
@@ -1330,35 +1207,20 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	if (((php_stream *)what)->readbuf_type == IS_UNICODE) {
-		u_buf = php_stream_u_get_line((php_stream *) what, NULL_ZSTR, 0, 0, NULL);
-		if (u_buf == NULL) {
-			if (args) {
-				efree(args);
-			}
-			RETURN_FALSE;
+	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
+	if (buf == NULL) {
+		if (args) {
+			efree(args);
 		}
-
-		convert_to_unicode_ex(format);
-		result = php_u_sscanf_internal(u_buf, Z_USTRVAL_PP(format), argc, args, 0, &return_value TSRMLS_CC);
-		efree(u_buf);
-	} else {
-		buf = php_stream_get_line((php_stream *) what, NULL_ZSTR, 0, NULL);
-		if (buf == NULL) {
-			if (args) {
-				efree(args);
-			}
-			RETURN_FALSE;
-		}
-
-		convert_to_string_ex(format);
-		result = php_sscanf_internal(buf, Z_STRVAL_PP(format), argc, args, 0, &return_value TSRMLS_CC);
-		efree(buf);
+		RETURN_FALSE;
 	}
+
+	result = php_sscanf_internal(buf, format, argc, args, 0, &return_value TSRMLS_CC);
 
 	if (args) {
 		efree(args);
 	}
+	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
@@ -1366,56 +1228,50 @@ PHP_FUNCTION(fscanf)
 }
 /* }}} */
 
-/* {{{ proto int fwrite(resource fp, string str [, int length]) U
+/* {{{ proto int fwrite(resource fp, string str [, int length])
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
-	int ret, argc = ZEND_NUM_ARGS();
-	long write_len = -1;
+	zval *arg1;
+	char *arg2;
+	int arg2len;
+	int ret;
+	int num_bytes;
+	long arg3 = 0;
+	char *buffer = NULL;
 	php_stream *stream;
-	zval *zstream, *zstring;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rz/|l", &zstream, &zstring, &write_len) == FAILURE) {
-		RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	php_stream_from_zval(stream, &zstream);
+	if (ZEND_NUM_ARGS() == 2) {
+		num_bytes = arg2len;
+	} else {
+		num_bytes = MAX(0, MIN((int)arg3, arg2len));
+	}
 
-	if (argc > 2 && write_len <= 0) {
+	if (!num_bytes) {
 		RETURN_LONG(0);
 	}
 
-	if (Z_TYPE_P(zstring) == IS_UNICODE) {
-		int32_t write_uchars = 0;
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-		if (write_len < 0 || write_len > Z_USTRLEN_P(zstring)) {
-			write_len = Z_USTRLEN_P(zstring);
-		}
-		/* Convert code units to data points */
+	if (PG(magic_quotes_runtime)) {
+		buffer = estrndup(arg2, num_bytes);
+		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
+	}
 
-		U16_FWD_N(Z_USTRVAL_P(zstring), write_uchars, Z_USTRLEN_P(zstring), write_len);
-		write_len = write_uchars;
-
-		ret = php_stream_write_unicode(stream, Z_USTRVAL_P(zstring), write_len);
-
-		/* Convert data points back to code units */
-		if (ret > 0) {
-			ret = u_countChar32(Z_USTRVAL_P(zstring), ret);
-		}
-	} else {
-		convert_to_string(zstring);
-		if (write_len < 0 || write_len > Z_STRLEN_P(zstring)) {
-			write_len = Z_STRLEN_P(zstring);
-		}
-
-		ret = php_stream_write(stream, Z_STRVAL_P(zstring), write_len);
+	ret = php_stream_write(stream, buffer ? buffer : arg2, num_bytes);
+	if (buffer) {
+		efree(buffer);
 	}
 
 	RETURN_LONG(ret);
 }
 /* }}} */
 
-/* {{{ proto bool fflush(resource fp) U
+/* {{{ proto bool fflush(resource fp)
    Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
@@ -1424,7 +1280,7 @@ PHPAPI PHP_FUNCTION(fflush)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1437,7 +1293,7 @@ PHPAPI PHP_FUNCTION(fflush)
 }
 /* }}} */
 
-/* {{{ proto bool rewind(resource fp) U
+/* {{{ proto bool rewind(resource fp)
    Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
@@ -1445,7 +1301,7 @@ PHPAPI PHP_FUNCTION(rewind)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1457,7 +1313,7 @@ PHPAPI PHP_FUNCTION(rewind)
 }
 /* }}} */
 
-/* {{{ proto int ftell(resource fp) U
+/* {{{ proto int ftell(resource fp)
    Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
 {
@@ -1466,7 +1322,7 @@ PHPAPI PHP_FUNCTION(ftell)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1479,24 +1335,19 @@ PHPAPI PHP_FUNCTION(ftell)
 }
 /* }}} */
 
-/* {{{ proto int fseek(resource fp, int offset [, int whence]) U
+/* {{{ proto int fseek(resource fp, int offset [, int whence])
    Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
 {
 	zval *arg1;
-	long arg2, arg3;
-	int whence = SEEK_SET, argcount = ZEND_NUM_ARGS();
+	long arg2, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(argcount TSRMLS_CC, "rl|l", &arg1, &arg2, &arg3) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
-
-	if (argcount > 2) {
-		whence = arg3;
-	}
 
 	RETURN_LONG(php_stream_seek(stream, arg2, whence));
 }
@@ -1509,6 +1360,10 @@ PHPAPI PHP_FUNCTION(fseek)
 PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
+
+	if (PG(safe_mode) && (!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return -1;
+	}
 
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		return -1;
@@ -1527,11 +1382,10 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]]) U
+/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
    Create a directory */
 PHP_FUNCTION(mkdir)
 {
-	zval **ppdir;
 	char *dir;
 	int dir_len;
 	zval *zcontext = NULL;
@@ -1539,70 +1393,54 @@ PHP_FUNCTION(mkdir)
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lbr", &ppdir, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	RETVAL_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+	RETURN_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
 }
 /* }}} */
 
-/* {{{ proto bool rmdir(string dirname[, resource context]) U
+/* {{{ proto bool rmdir(string dirname[, resource context])
    Remove a directory */
 PHP_FUNCTION(rmdir)
 {
-	zval **ppdir;
 	char *dir;
 	int dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppdir, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	RETVAL_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
+	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
 }
 /* }}} */
 
-/* {{{ proto int readfile(string filename [, int flags[, resource context]]) U
+/* {{{ proto int readfile(string filename [, bool use_include_path[, resource context]])
    Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
 	int size = 0;
-	long flags = 0;
+	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
-	char *mode = "rb";
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!", &ppfilename, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	if (flags & PHP_FILE_TEXT) {
-		mode = "rt";
-	}
-
-	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
@@ -1613,7 +1451,7 @@ PHP_FUNCTION(readfile)
 }
 /* }}} */
 
-/* {{{ proto int umask([int mask]) U
+/* {{{ proto int umask([int mask])
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
@@ -1627,13 +1465,12 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (zend_parse_parameters(arg_count TSRMLS_CC, "|l", &arg1) == FAILURE) {
-		return;
-	}
-
 	if (arg_count == 0) {
 		umask(oldumask);
 	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+			RETURN_FALSE;
+		}
 		umask(arg1);
 	}
 
@@ -1641,7 +1478,7 @@ PHP_FUNCTION(umask)
 }
 /* }}} */
 
-/* {{{ proto int fpassthru(resource fp) U
+/* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
@@ -1650,7 +1487,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
@@ -1660,24 +1497,17 @@ PHPAPI PHP_FUNCTION(fpassthru)
 }
 /* }}} */
 
-/* {{{ proto bool rename(string old_name, string new_name[, resource context]) U
+/* {{{ proto bool rename(string old_name, string new_name[, resource context])
    Rename a file */
 PHP_FUNCTION(rename)
 {
-	zval **ppold, **ppnew;
 	char *old_name, *new_name;
 	int old_name_len, new_name_len;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|r", &ppold, &ppnew, &zcontext) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppold, &old_name, &old_name_len, REPORT_ERRORS, context) == FAILURE ||
-		php_stream_path_param_encode(ppnew, &new_name, &new_name_len, REPORT_ERRORS, context) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &old_name, &old_name_len, &new_name, &new_name_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1698,29 +1528,27 @@ PHP_FUNCTION(rename)
 		RETURN_FALSE;
 	}
 
-	RETVAL_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
 }
 /* }}} */
 
-/* {{{ proto bool unlink(string filename[, context context]) U
+/* {{{ proto bool unlink(string filename[, context context])
    Delete a file */
 PHP_FUNCTION(unlink)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
 	php_stream_wrapper *wrapper;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppfilename, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &filename, &filename_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
-		RETURN_FALSE;
-	}
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
 
@@ -1733,12 +1561,11 @@ PHP_FUNCTION(unlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
-
-	RETVAL_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context TSRMLS_CC));
+	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, ENFORCE_SAFE_MODE | REPORT_ERRORS, context TSRMLS_CC));
 }
 /* }}} */
 
-/* {{{ proto bool ftruncate(resource fp, int size) U
+/* {{{ proto bool ftruncate(resource fp, int size)
    Truncate file to 'size' length */
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
@@ -1747,7 +1574,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &fp);
@@ -1761,7 +1588,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 }
 /* }}} */
 
-/* {{{ proto array fstat(resource fp) U
+/* {{{ proto array fstat(resource fp)
    Stat() on a filehandle */
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
@@ -1776,7 +1603,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &fp) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &fp);
@@ -1828,41 +1655,46 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
 
 	/* Store string indexes referencing the same zval*/
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *)&stat_dev, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *)&stat_ino, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *)&stat_mode, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *)&stat_nlink, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *)&stat_uid, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *)&stat_gid, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *)&stat_rdev, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *)&stat_size, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *)&stat_atime, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *)&stat_mtime, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *)&stat_ctime, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *)&stat_blksize, sizeof(zval *), NULL);
-	zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *)&stat_blocks, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *)&stat_dev, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *)&stat_ino, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *)&stat_mode, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *)&stat_nlink, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *)&stat_uid, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *)&stat_gid, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *)&stat_rdev, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *)&stat_size, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *)&stat_atime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *)&stat_mtime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *)&stat_ctime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *)&stat_blksize, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *)&stat_blocks, sizeof(zval *), NULL);
 }
 /* }}} */
 
-/* {{{ proto bool copy(string source_file, string destination_file[, resource context]) U
+/* {{{ proto bool copy(string source_file, string destination_file [, resource context])
    Copy a file */
 PHP_FUNCTION(copy)
 {
-	zval **source, **target, *zcontext = NULL;
+	char *source, *target;
+	int source_len, target_len;
+	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|r", &source, &target, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &source, &source_len, &target, &target_len, &zcontext) == FAILURE) {
 		return;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
-	if (FAILURE == php_stream_path_param_encode(source, NULL, NULL, REPORT_ERRORS, context) ||
-		FAILURE == php_stream_path_param_encode(target, NULL, NULL, REPORT_ERRORS, context) ||
-		0 != php_check_open_basedir(Z_STRVAL_PP(source) TSRMLS_CC)) {
+	if (PG(safe_mode) &&(!php_checkuid(source, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target) TSRMLS_CC) == SUCCESS) {
+	if (php_check_open_basedir(source TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	if (php_copy_file(source, target TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1872,7 +1704,7 @@ PHP_FUNCTION(copy)
 
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
 {
-	return php_copy_file_ex(src, dest, 0 TSRMLS_CC);
+	return php_copy_file_ex(src, dest, ENFORCE_SAFE_MODE TSRMLS_CC);
 }
 /* }}} */
 
@@ -1955,7 +1787,7 @@ safe_to_copy:
 		return ret;
 	}
 
-	deststream = php_stream_open_wrapper(dest, "wb", REPORT_ERRORS, NULL);
+	deststream = php_stream_open_wrapper(dest, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 
 	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
@@ -1970,37 +1802,74 @@ safe_to_copy:
 }
 /* }}} */
 
-/* {{{ proto string fread(resource fp, int length) U
+/* {{{ proto string fread(resource fp, int length)
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
-	zval *zstream;
+	zval *arg1;
 	long len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &len) == FAILURE) {
-		RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	php_stream_from_zval(stream, &zstream);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
-	if (stream->readbuf_type == IS_UNICODE) {
-		int buflen = len;
-		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
+	Z_STRVAL_P(return_value) = emalloc(len + 1);
+	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
-		RETURN_UNICODEL(buf, buflen, 0);
-	} else { /* IS_STRING */
-		char *buf = emalloc(len + 1);
-		int buflen = php_stream_read(stream, buf, len);
+	/* needed because recv/read/gzread doesnt put a null at the end*/
+	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 
-		buf[buflen] = 0;
-		RETURN_STRINGL(buf, buflen, 0);
+	if (PG(magic_quotes_runtime)) {
+		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
+				Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 	}
+	Z_TYPE_P(return_value) = IS_STRING;
+}
+/* }}} */
+
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC) /* {{{ */
+{
+	int inc_len;
+	unsigned char last_chars[2] = { 0, 0 };
+
+	while (len > 0) {
+		inc_len = (*ptr == '\0' ? 1: php_mblen(ptr, len));
+		switch (inc_len) {
+			case -2:
+			case -1:
+				inc_len = 1;
+				php_mblen(NULL, 0);
+				break;
+			case 0:
+				goto quit_loop;
+			case 1:
+			default:
+				last_chars[0] = last_chars[1];
+				last_chars[1] = *ptr;
+				break;
+		}
+		ptr += inc_len;
+		len -= inc_len;
+	}
+quit_loop:
+	switch (last_chars[1]) {
+		case '\n':
+			if (last_chars[0] == '\r') {
+				return ptr - 2;
+			}
+			/* break is omitted intentionally */
+		case '\r':
+			return ptr - 1;
+	}
+	return ptr;
 }
 /* }}} */
 
@@ -2008,7 +1877,6 @@ PHPAPI PHP_FUNCTION(fread)
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
    Format line as CSV and write to file pointer */
-/* UTODO: Output unicode contents */
 PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
@@ -2108,696 +1976,422 @@ PHP_FUNCTION(fputcsv)
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);
 
-	ret = php_stream_write(stream, csvline.c, csvline.len);
+	if (!PG(magic_quotes_runtime)) {
+		ret = php_stream_write(stream, csvline.c, csvline.len);
+	} else {
+		char *buffer = estrndup(csvline.c, csvline.len);
+		int len = csvline.len;
+		php_stripslashes(buffer, &len TSRMLS_CC);
+		ret = php_stream_write(stream, buffer, len);
+		efree(buffer);
+	}
+
 	smart_str_free(&csvline);
 
 	RETURN_LONG(ret);
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure[, string escape]]]]) U
+/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
    Get line from file pointer and parse for CSV fields */
-#define PHP_FGETCSV_TRUNCATE(field) \
-if (argc > 4) { \
-	/* Caller knows about new semantics since they're using new param, allow multichar */ \
-} else if (field##_type == IS_STRING && field##_len > 1) { \
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, #field " must be a single character"); \
-	delimiter_len = 1; \
-} else if (field##_type == IS_UNICODE && u_countChar32((UChar*)field, field##_len) > 1) { \
-	int __tmp = 0; \
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, #field " must be a single character"); \
-	U16_FWD_1(((UChar*)field), __tmp, field##_len); \
-	field##_len = __tmp; \
-}
-
 PHP_FUNCTION(fgetcsv)
 {
-	zend_uchar delimiter_type = IS_STRING, enclosure_type = IS_STRING, escape_type = IS_STRING;
-	char *delimiter = ",", *enclosure = "\"", *escape = "\\";
-	int delimiter_len = 1, enclosure_len = 1, escape_len = 1;
-	long len = -1;
-	zstr buf;
+	char delimiter = ',';	/* allow this to be set as parameter */
+	char enclosure = '"';	/* allow this to be set as parameter */
+	char escape = '\\';
+
+	/* first section exactly as php_fgetss */
+
+	long len = 0;
 	size_t buf_len;
-	int argc = ZEND_NUM_ARGS();
+	char *buf;
 	php_stream *stream;
-	zval *zstream;
-	zend_uchar delimiter_free = 0, enclosure_free = 0, escape_free = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|lttt", &zstream, &len,
-						&delimiter, &delimiter_len, &delimiter_type,
-						&enclosure, &enclosure_len, &enclosure_type,
-						&escape,    &escape_len,    &escape_type) == FAILURE) {
-		return;
-	}
+	{
+		zval *fd, **len_zv = NULL;
+		char *delimiter_str = NULL;
+		int delimiter_str_len = 0;
+		char *enclosure_str = NULL;
+		int enclosure_str_len = 0;
+		char *escape_str = NULL;
+		int escape_str_len = 0;
 
-	PHP_STREAM_TO_ZVAL(stream, &zstream);
-
-	/* Make sure that there is at least one character in string,
-	 * For userspace BC purposes we generally limit delimiters and enclosures to 1 character,
-	 * though the code now supports multiple characters
-	 *
-	 * If this function is called with all five parameters however,
-	 * then multiple characters are allowed for all subarguments */
-	if (delimiter_len < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
-		RETURN_FALSE;
-	} else PHP_FGETCSV_TRUNCATE(delimiter);
-
-	if (enclosure_len < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
-		RETURN_FALSE;
-	} else PHP_FGETCSV_TRUNCATE(enclosure);
-
-	if (escape_len < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
-		RETURN_FALSE;
-	}
-
-	if (len < -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
-		RETURN_FALSE;
-	} else if (len == 0) {
-		len = -1;
-	}
-
-	if (stream->readbuf_type == IS_STRING) {
-		/* Binary mode stream needs binary delimiter/enclosure */
-		if (delimiter_type == IS_UNICODE) {
-			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &delimiter, &delimiter_len, (UChar*)delimiter, delimiter_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting delimiter from unicode");
-				RETVAL_FALSE;
-				goto cleanup;
-			}
-			delimiter_free = 1;
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zsss",
+			&fd, &len_zv, &delimiter_str, &delimiter_str_len,
+			&enclosure_str, &enclosure_str_len,
+			&escape_str, &escape_str_len) == FAILURE
+		) {
+			return;
 		}
-		if (enclosure_type == IS_UNICODE) {
-			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &enclosure, &enclosure_len, (UChar*)enclosure, enclosure_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting enclosure from unicode");
-				RETVAL_FALSE;
-				goto cleanup;
+
+		if (delimiter_str != NULL) {
+			/* Make sure that there is at least one character in string */
+			if (delimiter_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				RETURN_FALSE;
+			} else if (delimiter_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
 			}
-			enclosure_free = 1;
+
+			/* use first character from string */
+			delimiter = delimiter_str[0];
 		}
-		if (escape_type == IS_UNICODE) {
-			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &escape, &escape_len, (UChar*)escape, escape_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting escape from unicode");
-				RETVAL_FALSE;
-				goto cleanup;
+
+		if (enclosure_str != NULL) {
+			if (enclosure_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				RETURN_FALSE;
+			} else if (enclosure_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
 			}
-			escape_free = 1;
+
+			/* use first character from string */
+			enclosure = enclosure_str[0];
 		}
-	} else {
-		/* Unicode mode stream needs unicode delimiter/enclosure */
-		if (delimiter_type == IS_STRING) {
-			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&delimiter, &delimiter_len, delimiter, delimiter_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting delimiter to unicode");
-				RETVAL_FALSE;
-				goto cleanup;
+
+		if (escape_str != NULL) {
+			if (escape_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be character");
+				RETURN_FALSE;
+			} else if (escape_str_len > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
 			}
-			delimiter_free = 1;
+
+			escape = escape_str[0];
 		}
-		if (enclosure_type == IS_STRING) {
-			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&enclosure, &enclosure_len, enclosure, enclosure_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting enclosure to unicode");
-				RETVAL_FALSE;
-				goto cleanup;
+
+		if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
+			convert_to_long_ex(len_zv);
+			len = Z_LVAL_PP(len_zv);
+			if (len < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+				RETURN_FALSE;
+			} else if (len == 0) {
+				len = -1;
 			}
-			enclosure_free = 1;
+		} else {
+			len = -1;
 		}
-		if (escape_type == IS_STRING) {
-			if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&escape, &escape_len, escape, escape_len TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting escape to unicode");
-				RETVAL_FALSE;
-				goto cleanup;
-			}
-			escape_free = 1;
-		}
+
+		PHP_STREAM_TO_ZVAL(stream, &fd);
 	}
 
 	if (len < 0) {
-		buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, 0, &buf_len);
+		if ((buf = php_stream_get_line(stream, NULL, 0, &buf_len)) == NULL) {
+			RETURN_FALSE;
+		}
 	} else {
-		buf.v = stream->readbuf_type == IS_UNICODE ? eumalloc(len + 1) : emalloc(len + 1);
-		if (php_stream_get_line_ex(stream, stream->readbuf_type, buf, len + 1, len + 1, &buf_len) == NULL) {
-			efree(buf.v);
-			RETVAL_FALSE;
-			goto cleanup;
+		buf = emalloc(len + 1);
+		if (php_stream_get_line(stream, buf, len + 1, &buf_len) == NULL) {
+			efree(buf);
+			RETURN_FALSE;
 		}
 	}
 
-	if (!buf.v) {
-		/* No data */
-		RETVAL_FALSE;
-		goto cleanup;
-	}
-
-	if (stream->readbuf_type == IS_UNICODE) {
-		/* Unicode mode */
-		php_u_fgetcsv(stream, (UChar*)delimiter, delimiter_len, (UChar*)enclosure, enclosure_len, (UChar*)escape, escape_len, buf.u, buf_len, return_value TSRMLS_CC);
-	} else {
-		/* Binary mode */
-		php_fgetcsv_ex(stream, delimiter, delimiter_len, enclosure, enclosure_len, escape, escape_len, buf.s, buf_len, return_value TSRMLS_CC);
-	}
-
-cleanup:
-	if (delimiter_free) {
-		efree(delimiter);
-	}
-	if (enclosure_free) {
-		efree(enclosure);
-	}
-	if (escape_free) {
-		efree(escape);
-	}
+	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value TSRMLS_CC);
 }
 /* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
 {
-	char *delim = &delimiter, *enc = &enclosure, *buffer = buf, *esc = &escape;
-	int delim_len = 1, enc_len = 1, esc_len = 1, buffer_len = buf_len;
-	zend_uchar type = IS_STRING;
+	char *temp, *tptr, *bptr, *line_end, *limit;
+	size_t temp_len, line_end_len;
+	int inc_len;
+	zend_bool first_field = 1;
 
-	if (stream) {
-		type = stream->readbuf_type;
-	}
+	/* initialize internal state */
+	php_mblen(NULL, 0);
 
-	if (type == IS_UNICODE) {
+	/* Now into new section that parses buf for delimiter/enclosure fields */
 
-		/* Unicode stream, but binary delimiter/enclosures/prefetch, promote to unicode */
-		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&delim, &delim_len, &delimiter, 1 TSRMLS_CC)) {
-			INIT_PZVAL(return_value);
-			return;
-		}
-		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&enc, &enc_len, &enclosure, 1 TSRMLS_CC)) {
-			efree(delim);
-			INIT_PZVAL(return_value);
-			return;
-		}
-		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&esc, &esc_len, &escape, 1 TSRMLS_CC)) {
-			efree(delim);
-			efree(enc);
-			INIT_PZVAL(return_value);
-			return;
-		}
-		if (FAILURE == zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)&buffer, &buffer_len, buf, buf_len TSRMLS_CC)) {
-			efree(delim);
-			efree(enc);
-			efree(esc);
-			INIT_PZVAL(return_value);
-			return;
-		}
+	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
-		php_u_fgetcsv(stream, (UChar*)delim, delim_len, (UChar*)enc, enc_len, (UChar*)esc, esc_len,
-				(UChar*)buffer, buffer_len, return_value TSRMLS_CC);
+	bptr = buf;
+	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+	line_end_len = buf_len - (size_t)(tptr - buf);
+	line_end = limit = tptr;
 
-		/* Types converted, free storage */
-		efree(delim);
-		efree(enc);
-		efree(esc);
-	} else {
-		/* Binary stream with binary delimiter/enclosures/prefetch */
-		php_fgetcsv_ex(stream, delim, delim_len, enc, enc_len, esc, esc_len, buffer, buffer_len, return_value TSRMLS_CC);
-	}
-}
+	/* reserve workspace for building each individual field */
+	temp_len = buf_len;
+	temp = emalloc(temp_len + line_end_len + 1);
 
-typedef enum _php_fgetcsv_state {
-	PHP_FGETCSV_READY,
-	PHP_FGETCSV_FIELD_NO_ENC,
-	PHP_FGETCSV_FIELD_WITH_ENC,
-	PHP_FGETCSV_POST_ENC,
-} php_fgetcsv_state;
-
-#define PHP_FGETCSV_BIN_CHECK(p, e, m, mlen) ((p) < (e) && (((mlen) == 1 && *(p) == *(m)) || ((mlen) > 1 && (((e) - (p)) >= (mlen)) && memcmp((p), (m), (mlen)) == 0)))
-
-/* Binary mode fgetcsv */
-PHPAPI void php_fgetcsv_ex(php_stream *stream,
-		char *delimiter, int delimiter_len,
-		char *enclosure, int enclosure_len,
-		char *escape, int escape_len,
-		char *buffer, int buffer_len,
-		zval *return_value TSRMLS_DC)
-{
-	php_fgetcsv_state state = PHP_FGETCSV_READY;
-	char *p = buffer, *e = buffer + buffer_len, *field_start = NULL, *field_end = NULL;
-
+	/* Initialize return array */
 	array_init(return_value);
 
-	while (*p == ' ' || *p == '\t') {
-		p++;
-	}
+	/* Main loop to read CSV fields */
+	/* NB this routine will return a single null entry for a blank line */
 
-	if (*p == '\r' || *p == '\n') {
-		add_next_index_null(return_value);
-		goto end;
-	}
+	do {
+		char *comp_end, *hunk_begin;
 
-	while(p < e) {
-		switch (state) {
-			case PHP_FGETCSV_READY:
-ready_state:
-				/* Ready to start a new field */
+		tptr = temp;
 
-				/* Is there nothing left to scan? */
-				if (*p == '\r' || *p == '\n') {
-					/* Terminal delimiter, treat as empty field */
-					p++;
-					add_next_index_stringl(return_value, "", 0, 1);
+		/* 1. Strip any leading space */
+		for (;;) {
+			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+			switch (inc_len) {
+				case -2:
+				case -1:
+					inc_len = 1;
+					php_mblen(NULL, 0);
 					break;
-				}
-
-				/* Is it enclosed? */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, enclosure, enclosure_len)) {
-					/* Enclosure encountered, switch state */
-					state = PHP_FGETCSV_FIELD_WITH_ENC;
-					p += enclosure_len;
-					field_start = p;
-					break;
-				}
-
-				/* Is it an immediate delimiter? */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
-					/* Immediate delimiter, treate as empty field */
-					p += delimiter_len;
-					add_next_index_stringl(return_value, "", 0, 1);
-					break;
-				}
-
-				/* Whitespace? */
-				if (*p == ' ' || *p == '\t') {
-					p++;
-					if (p >= e) break;
-					goto ready_state;
-				}
-
-				/* Otherwise, starting a new field without enclosures */
-				state = PHP_FGETCSV_FIELD_NO_ENC;
-				field_start = p++;
-				field_end = NULL;
-
-				/* Is it an escape character? */
-				if ((PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len) && escape != enclosure) ||
-					(PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len) &&
-					PHP_FGETCSV_BIN_CHECK(p+1, e, escape, escape_len) && escape == enclosure)
-				) {
-					/* Skip escape sequence and let next char be treated as literal
-					 * If enclosure is the same character as esacpe, it is considered as esacped
-					 * if it appears twice */
-					p += escape_len - 1;
-					/* FALL THROUGH */
-				}
-				break;
-
-			case PHP_FGETCSV_FIELD_WITH_ENC:
-with_enc:
-				/* Check for ending enclosure */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, enclosure, enclosure_len)) {
-					/* Enclosure encountered, is it paired? */
-					if (PHP_FGETCSV_BIN_CHECK(p + enclosure_len, e, enclosure, enclosure_len)) {
-						/* Double enclosure gets translated to single enclosure */
-						memmove(p, p + enclosure_len, (e - p) - enclosure_len);
-						e -= enclosure_len;
-						p += enclosure_len;
-						goto with_enc;
-					} else {
-						/* Genuine end enclosure, switch state */
-						field_end = p;
-						p += enclosure_len;
-						state = PHP_FGETCSV_POST_ENC;
-						goto post_enc;
+				case 0:
+					goto quit_loop_1;
+				case 1:
+					if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter) {
+						goto quit_loop_1;
 					}
-				}
-
-				/* Check for field escapes */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
-					p += escape_len + 1;
-
-					/* Reprocess for ending enclosures */
-					goto with_enc;
-				}
-
-				/* Simple character */
-				if (e - p) {
-					p++;
-				}
-
-				/* Hungry? */
-				if (((e - p) < enclosure_len) && stream) {
-					/* Feed me! */
-					size_t new_len;
-					char *new_buf = php_stream_get_line(stream, NULL_ZSTR, 0, &new_len);
-
-					if (new_buf) {
-						int tmp_len = new_len + e - field_start;
-						char *tmp = emalloc(tmp_len);
-
-						/* Realign scan buffer */
-						memcpy(tmp, field_start, e - field_start);
-						memcpy(tmp + (e - field_start), new_buf, new_len);
-						field_start = tmp;
-						if (field_end) {
-							field_end = tmp + (field_end - field_start);
-						}
-						efree(buffer);
-						efree(new_buf);
-						buffer = tmp;
-						buffer_len = tmp_len;
-						p = buffer;
-						e = buffer + buffer_len;
-					}
-				}
-
-				if ((e - p) == 0) {
-					/* Nothing left to consume the buffer, use it */
-					add_next_index_stringl(return_value, field_start, p - field_start, 1);
-
-					/* Loop is dying anyway, but be pedantic */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
 					break;
-				}
-				break;
-
-			case PHP_FGETCSV_POST_ENC:
-post_enc:
-				/* Check for delimiters or EOL */
-				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
-					int field_len = field_end - field_start;
-					char *field;
-
-					if ((p - enclosure_len) > field_end) {
-						/* There's cruft, append it to the proper field */
-						int cruft_len = p - (field_end + enclosure_len);
-
-						field = emalloc(field_len + cruft_len + 1);
-						memcpy(field, field_start, field_len);
-						memcpy(field + field_len, field_end + enclosure_len, cruft_len);
-
-						field_len += cruft_len;
-						field[field_len] = 0;
-					} else {
-						field = estrndup(field_start, field_end - field_start);
-					}
-					add_next_index_stringl(return_value, field, field_len, 0);
-
-					/* Reset scanner */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-					if (p >= e) break;
-					goto ready_state;
-				}
-
-				/* Queue anything else as cruft */
-				p++;
-				break;
-
-			case PHP_FGETCSV_FIELD_NO_ENC:
-				/* Check for escapes */
-				if (!PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len) && PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
-					p += escape_len + 1;
-				}
-
-				/* Check for delimiter */
-				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len)) {
-					add_next_index_stringl(return_value, field_start, p - field_start, 1);
-
-					/* Reset scanner */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-					if (p >= e) break;
-					goto ready_state;
-				}
-
-				/* Simple character */
-				p++;
-
-				if (p == e) {
-					add_next_index_stringl(return_value, field_start, p - field_start, 1);
-					/* Reset scanner even though we're dying */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-				}
-				break;
+				default:
+					goto quit_loop_1;
+			}
+			bptr += inc_len;
 		}
-	}
-end:
-	if (stream) {
-		efree(buffer);
-	}
-}
-/* }}} */
 
-#define PHP_FGETCSV_UNI_CHECK(p, e, m, mlen) ((p) < (e) && (((mlen) == 1 && *(p) == *(m)) || ((mlen) > 1 && (((e) - (p)) >= (mlen)) && memcmp((p), (m), UBYTES(mlen)) == 0)))
-
-/* Unicode mode fgetcsv */
-PHPAPI void php_u_fgetcsv(php_stream *stream, UChar *delimiter, int delimiter_len, UChar *enclosure, int enclosure_len, UChar *escape, int escape_len, UChar *buffer, int buffer_len, zval *return_value TSRMLS_DC) /* {{{ */
-{
-	php_fgetcsv_state state = PHP_FGETCSV_READY;
-	UChar *p = buffer, *e = buffer + buffer_len, *field_start = NULL, *field_end = NULL;
-
-	array_init(return_value);
-
-	while (*p == ' ' || *p == '\t') {
-		p++;
-	}
-
-	if (*p == '\r' || *p == '\n') {
-		add_next_index_null(return_value);
-		goto end;
-	}
-
-	while(p < e) {
-		switch (state) {
-			case PHP_FGETCSV_READY:
-ready_state:
-				/* Ready to start a new field */
-
-				/* Is there nothing left to scan? */
-				if (*p == '\r' || *p == '\n') {
-					/* Terminal delimiter, treat as empty field */
-					p++;
-					add_next_index_unicodel(return_value, (UChar*)"", 0, 1);
-					break;
-				}
-
-				/* Is it enclosed? */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, enclosure, enclosure_len)) {
-					/* Enclosure encountered, switch state */
-					state = PHP_FGETCSV_FIELD_WITH_ENC;
-					p += enclosure_len;
-					field_start = p;
-					break;
-				}
-
-				/* Is it an immediate delimiter? */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
-					/* Immediate delimiter, treate as empty field */
-					p += delimiter_len;
-					add_next_index_unicodel(return_value, (UChar*)"", 0, 1);
-					break;
-				}
-
-				/* Whitespace? */
-				if (*p == ' ' || *p == '\t') {
-					p++;
-					if (p >= e) break;
-					goto ready_state;
-				}
-
-				/* Otherwise, starting a new field without enclosures */
-				state = PHP_FGETCSV_FIELD_NO_ENC;
-				field_start = p++;
-				field_end = NULL;
-
-				/* Is it an escape character? */
-				if ((PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len) && escape != enclosure) ||
-					(PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len) &&
-					PHP_FGETCSV_UNI_CHECK(p+1, e, escape, escape_len) && escape == enclosure)
-				) {
-					/* Skip escape sequence and let next char be treated as literal
-					 * If enclosure is the same character as escape, it is considered as escaped
-					 * if it appears twice */
-					p += escape_len - 1;
-					/* FALL THROUGH */
-				}
-				break;
-
-			case PHP_FGETCSV_FIELD_WITH_ENC:
-with_enc:
-				/* Check for ending enclosure */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, enclosure, enclosure_len)) {
-					/* Enclosure encountered, is it paired? */
-					if (PHP_FGETCSV_UNI_CHECK(p + enclosure_len, e, enclosure, enclosure_len)) {
-						/* Double enclosure gets translated to single enclosure */
-						memmove(p, p + enclosure_len, UBYTES((e - p) - enclosure_len));
-						e -= enclosure_len;
-						p += enclosure_len;
-						if (p >= e) break;
-						goto with_enc;
-					} else {
-						/* Genuine end enclosure, switch state */
-						field_end = p;
-						p += enclosure_len;
-						state = PHP_FGETCSV_POST_ENC;
-						goto post_enc;
-					}
-				}
-
-				/* Check for field escapes */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
-					p += escape_len + 1;
-
-					/* Reprocess for ending enclosures */
-					if (p >= e) break;
-					goto with_enc;
-				}
-
-				/* Simple character */
-				if (e - p) {
-					p++;
-				}
-
-				/* Hungry? */
-				if (((e - p) < enclosure_len) && stream) {
-					/* Feed me! */
-					size_t new_len;
-					UChar *new_buf = (UChar*)php_stream_get_line_ex(stream, IS_UNICODE, NULL_ZSTR, 0, 0, &new_len);
-
-					if (new_buf) {
-						int tmp_len = new_len + e - field_start;
-						UChar *tmp = eumalloc(tmp_len);
-
-						/* Realign scan buffer, ick -- expensive */
-						memcpy(tmp, field_start, UBYTES(e - field_start));
-						memcpy(tmp + (e - field_start), new_buf, UBYTES(new_len));
-						field_start = tmp;
-						if (field_end) {
-							field_end = tmp + (field_end - field_start);
-						}
-						efree(buffer);
-						efree(new_buf);
-						buffer = tmp;
-						buffer_len = tmp_len;
-						p = buffer;
-						e = buffer + buffer_len;
-					}
-				}
-
-				if ((e - p) == 0) {
-					/* Nothing left to consume the buffer */
-					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
-
-					/* Loop is dying, but cleanup anyway */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					break;
-				}
-				break;
-
-			case PHP_FGETCSV_POST_ENC:
-post_enc:
-				/* Check for delimiters or EOL */
-				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
-					int field_len = field_end - field_start;
-					UChar *field;
-
-					if ((p - enclosure_len) > field_end) {
-						/* There's cruft, append it to the regular field */
-						int cruft_len = p - (field_end + enclosure_len);
-
-						field = eumalloc(field_len + cruft_len + 1);
-						memcpy(field, field_start, UBYTES(field_len));
-						memcpy(field + field_len, field_end + enclosure_len, UBYTES(cruft_len));
-						field_len += cruft_len;
-						field[field_len] = 0;
-					} else {
-						field = eustrndup(field_start, field_len);
-					}
-					add_next_index_unicodel(return_value, field, field_len, 0);
-
-					/* Reset scanner state */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-					goto ready_state;
-				}
-
-				/* Queue anything else as cruft */
-				p++;
-				break;
-
-			case PHP_FGETCSV_FIELD_NO_ENC:
-				/* Check for escapes */
-				if (!PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len) && PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
-					p += escape_len + 1;
-				}
-
-				/* Check for delimiter */
-				if (p >= e || *p == '\r' || *p == '\n' || PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len)) {
-					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-					goto ready_state;
-				}
-
-				/* Simple character */
-				p++;
-
-				if (p == e) {
-					add_next_index_unicodel(return_value, field_start, p - field_start, 1);
-					/* Reset scanner even though we're dying */
-					state = PHP_FGETCSV_READY;
-					field_start = field_end = NULL;
-					p += delimiter_len;
-				}
-				break;
+	quit_loop_1:
+		if (first_field && bptr == line_end) {
+			add_next_index_null(return_value);
+			break;
 		}
-	}
-end:
+		first_field = 0;
+		/* 2. Read field, leaving bptr pointing at start of next field */
+		if (inc_len != 0 && *bptr == enclosure) {
+			int state = 0;
+
+			bptr++;	/* move on to first character in field */
+			hunk_begin = bptr;
+
+			/* 2A. handle enclosure delimited field */
+			for (;;) {
+				switch (inc_len) {
+					case 0:
+						switch (state) {
+							case 2:
+								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+								tptr += (bptr - hunk_begin - 1);
+								hunk_begin = bptr;
+								goto quit_loop_2;
+
+							case 1:
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								hunk_begin = bptr;
+								/* break is omitted intentionally */
+
+							case 0: {
+								char *new_buf;
+								size_t new_len;
+								char *new_temp;
+
+								if (hunk_begin != line_end) {
+									memcpy(tptr, hunk_begin, bptr - hunk_begin);
+									tptr += (bptr - hunk_begin);
+									hunk_begin = bptr;
+								}
+
+								/* add the embedded line end to the field */
+								memcpy(tptr, line_end, line_end_len);
+								tptr += line_end_len;
+
+								if (stream == NULL) {
+									goto quit_loop_2;
+								} else if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+									/* we've got an unterminated enclosure,
+									 * assign all the data from the start of
+									 * the enclosure to end of data to the
+									 * last element */
+									if ((size_t)temp_len > (size_t)(limit - buf)) {
+										goto quit_loop_2;
+									}
+									zval_dtor(return_value);
+									RETVAL_FALSE;
+									goto out;
+								}
+								temp_len += new_len;
+								new_temp = erealloc(temp, temp_len);
+								tptr = new_temp + (size_t)(tptr - temp);
+								temp = new_temp;
+
+								efree(buf);
+								buf_len = new_len;
+								bptr = buf = new_buf;
+								hunk_begin = buf;
+
+								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+								line_end_len = buf_len - (size_t)(limit - buf);
+
+								state = 0;
+							} break;
+						}
+						break;
+
+					case -2:
+					case -1:
+						php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						/* we need to determine if the enclosure is
+						 * 'real' or is it escaped */
+						switch (state) {
+							case 1: /* escaped */
+								bptr++;
+								state = 0;
+								break;
+							case 2: /* embedded enclosure ? let's check it */
+								if (*bptr != enclosure) {
+									/* real enclosure */
+									memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+									tptr += (bptr - hunk_begin - 1);
+									hunk_begin = bptr;
+									goto quit_loop_2;
+								}
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								bptr++;
+								hunk_begin = bptr;
+								state = 0;
+								break;
+							default:
+								if (*bptr == enclosure) {
+									state = 2;
+								} else if (*bptr == escape_char) {
+									state = 1;
+								}
+								bptr++;
+								break;
+						}
+						break;
+
+					default:
+						switch (state) {
+							case 2:
+								/* real enclosure */
+								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+								tptr += (bptr - hunk_begin - 1);
+								hunk_begin = bptr;
+								goto quit_loop_2;
+							case 1:
+								bptr += inc_len;
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								hunk_begin = bptr;
+								break;
+							default:
+								bptr += inc_len;
+								break;
+						}
+						break;
+				}
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+			}
+
+		quit_loop_2:
+			/* look up for a delimiter */
+			for (;;) {
+				switch (inc_len) {
+					case 0:
+						goto quit_loop_3;
+
+					case -2:
+					case -1:
+						inc_len = 1;
+						php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						if (*bptr == delimiter) {
+							goto quit_loop_3;
+						}
+						break;
+					default:
+						break;
+				}
+				bptr += inc_len;
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+			}
+
+		quit_loop_3:
+			memcpy(tptr, hunk_begin, bptr - hunk_begin);
+			tptr += (bptr - hunk_begin);
+			bptr += inc_len;
+			comp_end = tptr;
+		} else {
+			/* 2B. Handle non-enclosure field */
+
+			hunk_begin = bptr;
+
+			for (;;) {
+				switch (inc_len) {
+					case 0:
+						goto quit_loop_4;
+					case -2:
+					case -1:
+						inc_len = 1;
+						php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						if (*bptr == delimiter) {
+							goto quit_loop_4;
+						}
+						break;
+					default:
+						break;
+				}
+				bptr += inc_len;
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+			}
+		quit_loop_4:
+			memcpy(tptr, hunk_begin, bptr - hunk_begin);
+			tptr += (bptr - hunk_begin);
+
+			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter TSRMLS_CC);
+			if (*bptr == delimiter) {
+				bptr++;
+			}
+		}
+
+		/* 3. Now pass our field back to php */
+		*comp_end = '\0';
+		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
+	} while (inc_len > 0);
+
+out:
+	efree(temp);
 	if (stream) {
-		efree(buffer);
+		efree(buf);
 	}
 }
 /* }}} */
 
 #if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
-/* {{{ proto string realpath(string path) U
+/* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {
-	zval **ppfilename;
 	char *filename;
 	int filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppfilename) == FAILURE ||
-		php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
+		if (PG(safe_mode) && (!php_checkuid(resolved_path_buff, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			RETURN_FALSE;
+		}
+
+		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+
 #ifdef ZTS
 		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
-			RETVAL_FALSE;
-		} else
-#endif
-		{
-			UChar *path;
-			int path_len;
-
-			if (php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, resolved_path_buff, strlen(resolved_path_buff), REPORT_ERRORS, FG(default_context)) == SUCCESS) {
-				RETVAL_UNICODEL(path, path_len, 0);
-			} else {
-				/* Fallback */
-				RETVAL_STRING(resolved_path_buff, 1);
-			}
+			RETURN_FALSE;
 		}
+#endif
+		RETURN_STRING(resolved_path_buff, 1);
 	} else {
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -2911,58 +2505,33 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 /* }}} */
 
 #ifdef HAVE_FNMATCH
-/* {{{ proto bool fnmatch(string pattern, string filename [, int flags]) U
+/* {{{ proto bool fnmatch(string pattern, string filename [, int flags])
    Match filename against pattern */
 PHP_FUNCTION(fnmatch)
 {
-	zstr pattern, filename;
+	char *pattern, *filename;
 	int pattern_len, filename_len;
-	char *pattern_utf8, *filename_utf8;
-	int pattern_utf8_len, filename_utf8_len;
-	zend_uchar type;
 	long flags = 0;
-	UErrorCode status = U_ZERO_ERROR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|l", &pattern, &pattern_len, &type, &filename, &filename_len, &type, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
 
-	if (type == IS_UNICODE) {
-		zend_unicode_to_string_ex(UG(utf8_conv), &pattern_utf8, &pattern_utf8_len, pattern.u, pattern_len, &status);
-		zend_unicode_to_string_ex(UG(utf8_conv), &filename_utf8, &filename_utf8_len, filename.u, filename_len, &status);
-		pattern.s = pattern_utf8;
-		filename.s = filename_utf8;
-		filename_len = filename_utf8_len;
-	}
 	if (filename_len >= MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
-	RETVAL_BOOL( ! fnmatch( pattern.s, filename.s, flags ));
-
-	if (type == IS_UNICODE) {
-		efree(pattern_utf8);
-		efree(filename_utf8);
-	}
+	RETURN_BOOL( ! fnmatch( pattern, filename, flags ));
 }
 /* }}} */
 #endif
 
-/* {{{ proto string sys_get_temp_dir() U
+/* {{{ proto string sys_get_temp_dir()
    Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
-	UChar *utemp_dir;
-	char *temp_dir = (char *)php_get_temporary_directory();
-	int temp_dir_len = strlen(temp_dir), utemp_dir_len;
-
-	/* else UG(unicode) */
-	if (FAILURE == php_stream_path_decode(NULL, &utemp_dir, &utemp_dir_len, temp_dir, temp_dir_len, REPORT_ERRORS, FG(default_context))) {
-		RETURN_FALSE;
-	}
-
-	RETURN_UNICODEL(utemp_dir, utemp_dir_len, 0);
+	RETURN_STRING((char *)php_get_temporary_directory(), 1);
 }
 /* }}} */
 

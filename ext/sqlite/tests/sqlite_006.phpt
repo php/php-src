@@ -42,14 +42,14 @@ echo "DONE!\n";
 --EXPECT--
 array(1) {
   [0]=>
-  unicode(7) "one-uno"
+  string(7) "one-uno"
 }
 array(1) {
   [0]=>
-  unicode(7) "two-dos"
+  string(7) "two-dos"
 }
 array(1) {
   [0]=>
-  unicode(10) "three-tres"
+  string(10) "three-tres"
 }
 DONE!

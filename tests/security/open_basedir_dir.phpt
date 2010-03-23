@@ -68,21 +68,21 @@ Warning: dir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.
 Warning: dir(%s/test/bad/../bad/bad.txt): failed to open dir: %s in %s on line %d
 bool(false)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/test/ok/"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/test/ok/"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/test/ok"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/test/ok"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/test/ok/../ok"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/test/ok/../ok"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 *** Finished testing open_basedir configuration [dir] ***

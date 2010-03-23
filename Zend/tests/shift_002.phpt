@@ -18,7 +18,7 @@ var_dump($s2);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 int(30)
 int(0)
 int(5668)

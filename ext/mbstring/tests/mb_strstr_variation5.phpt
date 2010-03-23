@@ -51,9 +51,9 @@ else {
 --EXPECT--
 *** Testing mb_strstr() : variation ***
 -- Ascii data --
-unicode(24) "6263646566207a6263647978"
-unicode(2) "61"
+string(24) "6263646566207a6263647978"
+string(2) "61"
 -- mb data in utf-8 --
-unicode(88) "e8aa9ee38386e382ade382b9e383883334efbc95efbc96e697a5e69cace8aa9ee38386e382ade382b9e38388"
-unicode(12) "e697a5e69cac"
+string(88) "e8aa9ee38386e382ade382b9e383883334efbc95efbc96e697a5e69cace8aa9ee38386e382ade382b9e38388"
+string(12) "e697a5e69cac"
 ===DONE===

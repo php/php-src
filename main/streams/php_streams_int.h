@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@
 #define CHUNK_SIZE	8192
 
 #ifdef PHP_WIN32
-# ifdef EWOULDBLOCK
+# ifdef EWOULDBLOCK 
 #  undef EWOULDBLOCK
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK

@@ -19,6 +19,6 @@ var_dump(get_cfg_var( 'session.save_handler' ) );
 ?>
 --EXPECTF--
 *** Test by calling method or function with its expected arguments ***
-unicode(1) "0"
-unicode(3) "php"
-unicode(5) "files"
+string(1) "0"
+string(3) "php"
+string(5) "files"

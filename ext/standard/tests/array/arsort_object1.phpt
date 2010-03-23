@@ -37,7 +37,7 @@ class for_string_arsort
    }
 
   // return string value
-  function __tounicode() {
+  function __tostring() {
    return (string)$this->value;
   }
 

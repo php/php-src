@@ -111,190 +111,190 @@ foreach($inputs as $type => $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 : key type is int --
 $preserve_keys = TRUE
 array(4) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [12345]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [-2345]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 $preserve_keys = FALSE
 array(4) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [3]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 
 -- Iteration 2 : key type is float --
 $preserve_keys = TRUE
 array(3) {
   [10]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [-10]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [0]=>
-  unicode(4) "half"
+  string(4) "half"
 }
 $preserve_keys = FALSE
 array(3) {
   [0]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [1]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [2]=>
-  unicode(4) "half"
+  string(4) "half"
 }
 
 -- Iteration 3 : key type is extreme floats --
 $preserve_keys = TRUE
 array(2) {
   [12345678]=>
-  unicode(5) "large"
+  string(5) "large"
   [0]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 $preserve_keys = FALSE
 array(2) {
   [0]=>
-  unicode(5) "large"
+  string(5) "large"
   [1]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 
 -- Iteration 4 : key type is null uppercase --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(6) "null 1"
+  [""]=>
+  string(6) "null 1"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(6) "null 1"
+  [""]=>
+  string(6) "null 1"
 }
 
 -- Iteration 5 : key type is null lowercase --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 -- Iteration 6 : key type is bool lowercase --
 $preserve_keys = TRUE
 array(2) {
   [1]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
   [0]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
 }
 $preserve_keys = FALSE
 array(2) {
   [0]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
   [1]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
 }
 
 -- Iteration 7 : key type is bool uppercase --
 $preserve_keys = TRUE
 array(2) {
   [1]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
   [0]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
 }
 $preserve_keys = FALSE
 array(2) {
   [0]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
   [1]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
 }
 
 -- Iteration 8 : key type is empty double quotes --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(6) "emptyd"
+  [""]=>
+  string(6) "emptyd"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(6) "emptyd"
+  [""]=>
+  string(6) "emptyd"
 }
 
 -- Iteration 9 : key type is empty single quotes --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 
 -- Iteration 10 : key type is string --
 $preserve_keys = TRUE
 array(3) {
-  [u"stringd"]=>
-  unicode(7) "stringd"
-  [u"strings"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
 }
 $preserve_keys = FALSE
 array(3) {
-  [u"stringd"]=>
-  unicode(7) "stringd"
-  [u"strings"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
 }
 
 -- Iteration 11 : key type is undefined --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 -- Iteration 12 : key type is unset --
 $preserve_keys = TRUE
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 $preserve_keys = FALSE
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 Done

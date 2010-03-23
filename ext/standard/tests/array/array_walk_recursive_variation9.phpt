@@ -50,30 +50,30 @@ var_dump( array_walk_recursive($input, 'callback_two_parameter', 10));
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk_recursive() : callback function variation ***
 -- callback function with both parameters --
 int(0)
-unicode(5) "Apple"
+string(5) "Apple"
 
 int(1)
-unicode(6) "Banana"
+string(6) "Banana"
 
 int(1)
-unicode(5) "Mango"
+string(5) "Mango"
 
 int(0)
-unicode(6) "Orange"
+string(6) "Orange"
 
 bool(true)
 -- callback function with only one parameter --
-unicode(5) "Apple"
+string(5) "Apple"
 
-unicode(6) "Banana"
+string(6) "Banana"
 
-unicode(5) "Mango"
+string(5) "Mango"
 
-unicode(6) "Orange"
+string(6) "Orange"
 
 bool(true)
 -- callback function without parameters --
@@ -84,16 +84,16 @@ callback3() called
 bool(true)
 -- passing one more parameter to function with two parameters --
 int(0)
-unicode(5) "Apple"
+string(5) "Apple"
 
 int(1)
-unicode(6) "Banana"
+string(6) "Banana"
 
 int(1)
-unicode(5) "Mango"
+string(5) "Mango"
 
 int(0)
-unicode(6) "Orange"
+string(6) "Orange"
 
 bool(true)
 Done

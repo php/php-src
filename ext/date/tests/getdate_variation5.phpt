@@ -29,7 +29,6 @@ $inputs = array (
 );
 
 // loop through each element of the array for timestamp
-
 foreach($inputs as $timezone) {
       echo "\n--$timezone--\n";
       date_default_timezone_set($timezone);
@@ -42,182 +41,182 @@ foreach($inputs as $timezone) {
 
 --Pacific/Samoa--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(13)
-  [u"mday"]=>
+  ["mday"]=>
   int(31)
-  [u"wday"]=>
+  ["wday"]=>
   int(3)
-  [u"mon"]=>
+  ["mon"]=>
   int(12)
-  [u"year"]=>
+  ["year"]=>
   int(1969)
-  [u"yday"]=>
+  ["yday"]=>
   int(364)
-  [u"weekday"]=>
-  unicode(9) "Wednesday"
-  [u"month"]=>
-  unicode(8) "December"
+  ["weekday"]=>
+  string(9) "Wednesday"
+  ["month"]=>
+  string(8) "December"
   [0]=>
   int(0)
 }
 
 --US/Alaska--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(14)
-  [u"mday"]=>
+  ["mday"]=>
   int(31)
-  [u"wday"]=>
+  ["wday"]=>
   int(3)
-  [u"mon"]=>
+  ["mon"]=>
   int(12)
-  [u"year"]=>
+  ["year"]=>
   int(1969)
-  [u"yday"]=>
+  ["yday"]=>
   int(364)
-  [u"weekday"]=>
-  unicode(9) "Wednesday"
-  [u"month"]=>
-  unicode(8) "December"
+  ["weekday"]=>
+  string(9) "Wednesday"
+  ["month"]=>
+  string(8) "December"
   [0]=>
   int(0)
 }
 
 --Africa/Casablanca--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(0)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --Europe/Moscow--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(3)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --Asia/Hong_Kong--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(8)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --Australia/Brisbane--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(10)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --Pacific/Wallis--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(12)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }

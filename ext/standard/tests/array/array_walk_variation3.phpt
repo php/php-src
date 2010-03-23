@@ -48,7 +48,7 @@ $input_values = array(
        // empty array
        array(),
 
-       // binary value
+       // binary array
        array(b"binary"),
 
        // mixed array
@@ -61,7 +61,7 @@ for($count = 0; $count < count($input_values); $count++) {
 }  
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk() : 'input' array with different values***
 
 -- Iteration 1 --

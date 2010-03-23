@@ -1,7 +1,5 @@
 --TEST--
 msgfmt creation failures
---INI--
-display_errors=1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -28,11 +26,12 @@ function crt($t, $l, $s) {
 }
 
 $args = array(
+	array(null, null),
 	array("whatever", "{0,whatever}"),
 	array(array(), array()),
 	array("en", "{0,choice}"),
 	array("fr", "{0,"),
-	array("en_US", b"\xD0"),
+	array("en_US", "\xD0"),
 );
 
 $fmt = new MessageFormatter();
@@ -79,14 +78,17 @@ Warning: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s 
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: MessageFormatter::__construct() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: MessageFormatter::create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: msgfmt_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
@@ -94,3 +96,6 @@ Warning: msgfmt_create() expects parameter 1 to be binary string, array given in
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

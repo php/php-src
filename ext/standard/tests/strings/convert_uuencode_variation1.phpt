@@ -83,79 +83,55 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing convert_uuencode() function: with unexpected inputs for 'data' argument ***
 -- Iteration 1 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "212c6060600a600a"
 -- Iteration 2 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "212c3060600a600a"
 -- Iteration 3 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "232c4334550a600a"
 -- Iteration 4 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "232c4334560a600a"
 -- Iteration 5 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(40) "2a2c4324542d5330582c5338542d5060600a600a"
 -- Iteration 6 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(40) "2b2b3328512d233c542e232c562d2340600a600a"
 -- Iteration 7 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(24) "242c33604e2d3060600a600a"
 -- Iteration 8 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(24) "252b3328502b4334600a600a"
 -- Iteration 9 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(40) "2c2c3360512c432c542d3338572c2360500a600a"
 -- Iteration 10 --
 
-Warning: convert_uuencode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-unicode(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 -- Iteration 11 --
 
-Warning: convert_uuencode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-unicode(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 -- Iteration 12 --
 
-Warning: convert_uuencode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-unicode(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 -- Iteration 13 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "212c3060600a600a"
 -- Iteration 14 --
-unicode(0) ""
+string(0) ""
 -- Iteration 15 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(16) "212c3060600a600a"
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 -- Iteration 17 --
-unicode(0) ""
+string(0) ""
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 -- Iteration 19 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(48) "2d3c56254d3c26514528265d423a4635433d6060600a600a"
 -- Iteration 20 --
 
-Warning: convert_uuencode() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-unicode(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, resource given in %s on line %d
+string(0) ""
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 -- Iteration 22 --
-unicode(0) ""
+string(0) ""
 ===DONE===

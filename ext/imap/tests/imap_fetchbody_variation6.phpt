@@ -1,7 +1,5 @@
 --TEST--
 Test imap_fetchbody() function : usage variations - $msg_no arg
---XFAIL--
-Missing unicoe implementation in /ext/imap
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');

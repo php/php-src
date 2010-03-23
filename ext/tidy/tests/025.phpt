@@ -29,7 +29,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-unicode(16) "<!-- comment -->"
+string(16) "<!-- comment -->"
 bool(true)
 float(0)
 int(0)

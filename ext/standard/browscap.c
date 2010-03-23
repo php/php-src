@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -321,7 +321,7 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 }
 /* }}} */
 
-/* {{{ proto mixed get_browser([string browser_name [, bool return_array]]) U
+/* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
    Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
@@ -338,7 +338,7 @@ PHP_FUNCTION(get_browser)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&!b", &agent_name, &agent_name_len, UG(ascii_conv), &return_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!b", &agent_name, &agent_name_len, &return_array) == FAILURE) {
 		return;
 	}
 

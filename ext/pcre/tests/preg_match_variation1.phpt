@@ -17,6 +17,6 @@ var_dump($string);
 --EXPECT--
 array(1) {
   [0]=>
-  unicode(2) "-1"
+  string(2) "-1"
 }
 ===Done===

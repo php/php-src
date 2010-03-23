@@ -36,46 +36,45 @@ var_dump(pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME));
 --EXPECTF--
 *** Testing pathinfo() : usage variation ***
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "."
-  [u"basename"]=>
-  unicode(1) "."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(0) ""
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "%s"
-  [u"basename"]=>
-  unicode(1) "."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(0) ""
+  ["dirname"]=>
+  string(1) "%s"
+  ["basename"]=>
+  string(1) "."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "."
-  [u"basename"]=>
-  unicode(10) ".cvsignore"
-  [u"extension"]=>
-  unicode(9) "cvsignore"
-  [u"filename"]=>
-  unicode(0) ""
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(10) ".cvsignore"
+  ["extension"]=>
+  string(9) "cvsignore"
+  ["filename"]=>
+  string(0) ""
 }
-unicode(6) "inet.h"
-unicode(4) "inet"
-unicode(1) "h"
-unicode(17) "/usr/include/arpa"
-unicode(17) "/usr/include/arpa"
-unicode(6) "inet.h"
-unicode(1) "h"
-unicode(6) "inet.h"
-unicode(17) "/usr/include/arpa"
-unicode(6) "inet.h"
-unicode(17) "/usr/include/arpa"
-unicode(17) "/usr/include/arpa"
+string(6) "inet.h"
+string(4) "inet"
+string(1) "h"
+string(17) "/usr/include/arpa"
+string(17) "/usr/include/arpa"
+string(6) "inet.h"
+string(1) "h"
+string(6) "inet.h"
+string(17) "/usr/include/arpa"
+string(6) "inet.h"
+string(17) "/usr/include/arpa"
+string(17) "/usr/include/arpa"
 ===DONE===
-

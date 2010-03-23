@@ -18,7 +18,7 @@ echo "Done\n";
 Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_keys() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_keys() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: array_keys() expects parameter 1 to be array, object given in %s on line %d

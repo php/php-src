@@ -15,12 +15,12 @@ do {
 	$path2 = sprintf("%s/%s%db", dirname(__FILE__), uniqid(), time());
 } while ($path1 == $path2);
 
-$fp = fopen($path1, "wb") or die("Can not open $path1\n");
+$fp = fopen($path1, "w") or die("Can not open $path1\n");
 $str = "abcdefghijklmnopqrstuvwxyz\n";
 $str_len = strlen($str);
 $cnt = $size;
 while (($cnt -= $str_len) > 0) {
-	fwrite($fp, (binary)$str);
+	fwrite($fp, $str);
 }
 $cnt = $size - ($str_len + $cnt);
 fclose($fp);
@@ -40,5 +40,5 @@ unlink($path2);
 --EXPECT--
 int(65529)
 int(65529)
-unicode(32) "e10e3d1ae81b084b822e8592d019b57a"
-unicode(32) "931f0fbf8a72312e3bab9965b1d1081c"
+string(32) "e10e3d1ae81b084b822e8592d019b57a"
+string(32) "931f0fbf8a72312e3bab9965b1d1081c"

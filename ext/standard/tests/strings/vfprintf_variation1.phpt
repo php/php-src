@@ -1,5 +1,7 @@
 --TEST--
 Test vfprintf() function : variation functionality 
+--CREDITS--
+Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
 precision=14
 --FILE--
@@ -15,9 +17,6 @@ echo "*** Testing vfprintf() : variation functionality ***\n";
 // Open handle
 $file = 'vfprintf_test.txt';
 $fp = fopen( $file, 'a+' );
-
-// Set unicode encoding
-stream_encoding( $fp, 'unicode' );
 
 $funset = fopen( __FILE__, 'r' );
 unset( $funset );
@@ -66,19 +65,19 @@ unlink( $file );
 ?>
 --EXPECTF--
 *** Testing vfprintf() : variation functionality ***
-unicode(6) "format"
+string(6) "format"
 int(6)
-unicode(17) "Foo is 30 and bar"
+string(17) "Foo is 30 and bar"
 int(17)
-unicode(14) "Foobar testing"
+string(14) "Foobar testing"
 int(14)
-unicode(11) "bar bar bar"
+string(11) "bar bar bar"
 int(11)
-unicode(2) "50"
+string(2) "50"
 int(2)
-unicode(0) ""
+string(0) ""
 int(0)
-unicode(38) "Testing 1001 6 2.550200 30 foobar f 41"
+string(38) "Testing 1001 6 2.550200 30 foobar f 41"
 int(38)
 bool(false)
 bool(false)

@@ -23,7 +23,6 @@ fclose($file_handle);
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
@@ -37,7 +36,7 @@ NULL
 Warning: file() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: file() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: file() expects parameter 2 to be long, string given in %s on line %d
 NULL
 array(0) {
 }
@@ -46,3 +45,4 @@ Warning: file(temp.tmp): failed to open stream: No such file or directory in %s 
 bool(false)
 
 --- Done ---
+

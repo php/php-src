@@ -16,6 +16,6 @@ foo::$a();
 
 ?>
 --EXPECTF--
-unicode(3) "AaA"
+string(3) "AaA"
 
 Fatal error: Function name must be a string in %s on line %d

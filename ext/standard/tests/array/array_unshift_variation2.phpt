@@ -128,10 +128,10 @@ int(5)
 array(5) {
   [0]=>
   int(0)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -142,13 +142,13 @@ array(7) {
   [0]=>
   int(0)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -159,10 +159,10 @@ int(5)
 array(5) {
   [0]=>
   int(1)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -173,13 +173,13 @@ array(7) {
   [0]=>
   int(1)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -190,10 +190,10 @@ int(5)
 array(5) {
   [0]=>
   int(12345)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -204,13 +204,13 @@ array(7) {
   [0]=>
   int(12345)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -221,10 +221,10 @@ int(5)
 array(5) {
   [0]=>
   int(-2345)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -235,13 +235,13 @@ array(7) {
   [0]=>
   int(-2345)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -252,10 +252,10 @@ int(5)
 array(5) {
   [0]=>
   float(10.5)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -266,13 +266,13 @@ array(7) {
   [0]=>
   float(10.5)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -283,10 +283,10 @@ int(5)
 array(5) {
   [0]=>
   float(-10.5)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -297,13 +297,13 @@ array(7) {
   [0]=>
   float(-10.5)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -314,10 +314,10 @@ int(5)
 array(5) {
   [0]=>
   float(123456789000)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -328,13 +328,13 @@ array(7) {
   [0]=>
   float(123456789000)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -345,10 +345,10 @@ int(5)
 array(5) {
   [0]=>
   float(1.23456789E-9)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -359,13 +359,13 @@ array(7) {
   [0]=>
   float(1.23456789E-9)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -376,10 +376,10 @@ int(5)
 array(5) {
   [0]=>
   float(0.5)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -390,13 +390,13 @@ array(7) {
   [0]=>
   float(0.5)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -408,10 +408,10 @@ array(5) {
   [0]=>
   array(0) {
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -423,13 +423,13 @@ array(7) {
   array(0) {
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -443,10 +443,10 @@ array(5) {
     [0]=>
     int(0)
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -460,13 +460,13 @@ array(7) {
     int(0)
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -480,10 +480,10 @@ array(5) {
     [0]=>
     int(1)
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -497,13 +497,13 @@ array(7) {
     int(1)
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -519,10 +519,10 @@ array(5) {
     [1]=>
     int(2)
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -538,13 +538,13 @@ array(7) {
     int(2)
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -555,15 +555,15 @@ int(5)
 array(5) {
   [0]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -573,19 +573,19 @@ int(7)
 array(7) {
   [0]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -596,10 +596,10 @@ int(5)
 array(5) {
   [0]=>
   NULL
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -610,13 +610,13 @@ array(7) {
   [0]=>
   NULL
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -627,10 +627,10 @@ int(5)
 array(5) {
   [0]=>
   NULL
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -641,13 +641,13 @@ array(7) {
   [0]=>
   NULL
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -658,10 +658,10 @@ int(5)
 array(5) {
   [0]=>
   bool(true)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -672,13 +672,13 @@ array(7) {
   [0]=>
   bool(true)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -689,10 +689,10 @@ int(5)
 array(5) {
   [0]=>
   bool(false)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -703,13 +703,13 @@ array(7) {
   [0]=>
   bool(false)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -720,10 +720,10 @@ int(5)
 array(5) {
   [0]=>
   bool(true)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -734,13 +734,13 @@ array(7) {
   [0]=>
   bool(true)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -751,10 +751,10 @@ int(5)
 array(5) {
   [0]=>
   bool(false)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -765,13 +765,13 @@ array(7) {
   [0]=>
   bool(false)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -781,11 +781,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(0) ""
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(0) ""
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -794,15 +794,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -812,11 +812,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(0) ""
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(0) ""
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -825,15 +825,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -843,11 +843,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(6) "string"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(6) "string"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -856,15 +856,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -874,11 +874,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(6) "string"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(6) "string"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -887,15 +887,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -905,11 +905,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(11) "hello world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(11) "hello world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -918,15 +918,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -938,10 +938,10 @@ array(5) {
   [0]=>
   object(classA)#%d (0) {
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -953,13 +953,13 @@ array(7) {
   object(classA)#%d (0) {
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -970,10 +970,10 @@ int(5)
 array(5) {
   [0]=>
   NULL
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -984,13 +984,13 @@ array(7) {
   [0]=>
   NULL
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -1001,10 +1001,10 @@ int(5)
 array(5) {
   [0]=>
   NULL
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -1015,13 +1015,13 @@ array(7) {
   [0]=>
   NULL
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -1032,10 +1032,10 @@ int(5)
 array(5) {
   [0]=>
   resource(%d) of type (stream)
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -1046,13 +1046,13 @@ array(7) {
   [0]=>
   resource(%d) of type (stream)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>

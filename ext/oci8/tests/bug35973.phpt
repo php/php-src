@@ -32,12 +32,12 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(1) {
-  [u"NC"]=>
+  ["NC"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }
-unicode(%d) "%s5"
-unicode(%d) "%sa"
+string(%d) "%s5"
+string(%d) "%sa"
 Done

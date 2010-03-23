@@ -1,7 +1,5 @@
 --TEST--
 normalize()
---INI--
-unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -42,21 +40,21 @@ function ut_main()
 			$res_str .= "Invalid normalization form declarations!\n";
 	}
 		 
-	$char_a_diaeresis = b"\xC3\xA4";	// 'LATIN SMALL LETTER A WITH DIAERESIS' (U+00E4)
-	$char_a_ring = b"\xC3\xA5";		// 'LATIN SMALL LETTER A WITH RING ABOVE' (U+00E5)
-	$char_o_diaeresis = b"\xC3\xB6";    // 'LATIN SMALL LETTER O WITH DIAERESIS' (U+00F6)
+	$char_a_diaeresis = "\xC3\xA4";	// 'LATIN SMALL LETTER A WITH DIAERESIS' (U+00E4)
+	$char_a_ring = "\xC3\xA5";		// 'LATIN SMALL LETTER A WITH RING ABOVE' (U+00E5)
+	$char_o_diaeresis = "\xC3\xB6";    // 'LATIN SMALL LETTER O WITH DIAERESIS' (U+00F6)
 
-	$char_angstrom_sign = b"\xE2\x84\xAB"; // 'ANGSTROM SIGN' (U+212B)
-	$char_A_ring = b"\xC3\x85";	// 'LATIN CAPITAL LETTER A WITH RING ABOVE' (U+00C5)
+	$char_angstrom_sign = "\xE2\x84\xAB"; // 'ANGSTROM SIGN' (U+212B)
+	$char_A_ring = "\xC3\x85";	// 'LATIN CAPITAL LETTER A WITH RING ABOVE' (U+00C5)
 
-	$char_ohm_sign = b"\xE2\x84\xA6";	// 'OHM SIGN' (U+2126)
-	$char_omega = b"\xCE\xA9";  // 'GREEK CAPITAL LETTER OMEGA' (U+03A9)
+	$char_ohm_sign = "\xE2\x84\xA6";	// 'OHM SIGN' (U+2126)
+	$char_omega = "\xCE\xA9";  // 'GREEK CAPITAL LETTER OMEGA' (U+03A9)
 
-	$char_combining_ring_above = b"\xCC\x8A";  // 'COMBINING RING ABOVE' (U+030A)
+	$char_combining_ring_above = "\xCC\x8A";  // 'COMBINING RING ABOVE' (U+030A)
 
-	$char_fi_ligature = b"\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
+	$char_fi_ligature = "\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
 
-	$char_long_s_dot = b"\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
+	$char_long_s_dot = "\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
 			
 	$strs = array(
 		'ABC',
@@ -75,8 +73,8 @@ function ut_main()
 			$error_code = intl_get_error_code();
 			$error_message = intl_get_error_message();
 
-			$str_hex = urlencode((binary)$str);
-			$str_norm_hex = urlencode((binary)$str_norm);
+			$str_hex = urlencode($str);
+			$str_norm_hex = urlencode($str_norm);
 			$res_str .= "'$str_hex' normalized to form '{$forms_str[$form]}' is '$str_norm_hex'" 
 					 .	"\terror info: '$error_message' ($error_code)\n" 
 					 .	"";

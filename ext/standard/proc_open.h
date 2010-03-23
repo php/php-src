@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -48,8 +48,5 @@ struct php_process_handle {
 	char *command;
 	int is_persistent;
 	php_process_env_t env;
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-	char **argv;
-#endif
 };
 

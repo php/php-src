@@ -30,23 +30,23 @@ var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(4) "1024"
-unicode(4) "1024"
-unicode(5) "-2048"
-unicode(4) "1024"
-unicode(1) "1"
+--EXPECTF--	
+string(4) "1024"
+string(4) "1024"
+string(5) "-2048"
+string(4) "1024"
+string(1) "1"
 
 Warning: gmp_pow(): Negative exponent not supported in %s on line %d
-unicode(1) "0"
-unicode(4) "1024"
-unicode(14) "10240000000000"
-unicode(17) "97656250000000000"
+string(1) "0"
+string(4) "1024"
+string(14) "10240000000000"
+string(17) "97656250000000000"
 
 Warning: gmp_pow(): Negative exponent not supported in %s on line %d
-unicode(1) "0"
-unicode(14) "10240000000000"
-unicode(14) "10240000000000"
+string(1) "0"
+string(14) "10240000000000"
+string(14) "10240000000000"
 
 Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
 NULL

@@ -47,5 +47,5 @@ var_dump($ret);
 echo "ok\n";
 ?>
 --EXPECT--
-unicode(37) "SoapFault = Client - Conversion Error"
+string(37) "SoapFault = Client - Conversion Error"
 ok

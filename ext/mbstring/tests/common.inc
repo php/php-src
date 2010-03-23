@@ -36,13 +36,13 @@ set_error_handler('test_error_handler');
 
 // Var def for testing
 $t_ary = array(
-		's1' => 'Ã†Ã¼Ã‹ÃœÂ¸Ã¬EUC-JPÂ¤ÃÃŠÂ¸Â»ÃºÃÃ³',
+		's1' => 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó',
 		's2' => 'English Text'
 		);
 
 class tc
 {
-	public $s1 = 'Ã†Ã¼Ã‹ÃœÂ¸Ã¬EUC-JPÂ¤ÃÃŠÂ¸Â»ÃºÃÃ³';
+	public $s1 = 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó';
 	public $s2 = 'English Text';
 
 	function tc() 

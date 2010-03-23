@@ -45,16 +45,16 @@ unlink(dirname(__FILE__)."/007_variation16.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'x+t' mode ***
 resource(%d) of type (stream)
-unicode(6) "stream"
+string(6) "stream"
 int(0)
 int(37)
 int(37)
-unicode(37) "abcdefghij
+string(37) "abcdefghij
 mnopqrst	uvwxyz
 0123456789"
 int(37)
 bool(true)
-unicode(7) "Unknown"
+string(7) "Unknown"
 
 Warning: fopen(%s): failed to open stream: File exists in %s on line %d
 *** Done ***

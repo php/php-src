@@ -48,7 +48,7 @@ NULL
 Warning: extract() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: extract() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: extract() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: extract() expects at most 3 parameters, 4 given in %s on line %d

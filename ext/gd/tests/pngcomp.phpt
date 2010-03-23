@@ -25,7 +25,7 @@ png compression test
         if ($col == 0xffffff) {
                 echo "ok\n";
         }
-	
+
 	@unlink($cwd . "/test_pngcomp.png");
 ?>
 --EXPECT--

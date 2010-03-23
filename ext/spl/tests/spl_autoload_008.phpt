@@ -67,27 +67,27 @@ foreach($funcs as $idx => $func)
 <?php exit(0); ?>
 --EXPECTF--
 ====0====
-unicode(10) "MyAutoLoad"
+string(10) "MyAutoLoad"
 registered
 MyAutoLoad(NoExistingTestClass)
 Exception: Bla
 int(0)
 ====1====
-unicode(22) "MyAutoLoader::autoLoad"
+string(22) "MyAutoLoader::autoLoad"
 registered
 MyAutoLoader::autoLoad(NoExistingTestClass)
 Exception: Bla
 int(0)
 ====2====
-unicode(22) "MyAutoLoader::dynaLoad"
+string(22) "MyAutoLoader::dynaLoad"
 LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====3====
 array(2) {
   [0]=>
-  unicode(12) "MyAutoLoader"
+  string(12) "MyAutoLoader"
   [1]=>
-  unicode(8) "autoLoad"
+  string(8) "autoLoad"
 }
 registered
 MyAutoLoader::autoLoad(NoExistingTestClass)
@@ -96,9 +96,9 @@ int(0)
 ====4====
 array(2) {
   [0]=>
-  unicode(12) "MyAutoLoader"
+  string(12) "MyAutoLoader"
   [1]=>
-  unicode(8) "dynaLoad"
+  string(8) "dynaLoad"
 }
 LogicException: Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
@@ -108,7 +108,7 @@ array(2) {
   object(MyAutoLoader)#%d (0) {
   }
   [1]=>
-  unicode(8) "autoLoad"
+  string(8) "autoLoad"
 }
 registered
 MyAutoLoader::autoLoad(NoExistingTestClass)
@@ -120,7 +120,7 @@ array(2) {
   object(MyAutoLoader)#%d (0) {
   }
   [1]=>
-  unicode(8) "dynaLoad"
+  string(8) "dynaLoad"
 }
 registered
 MyAutoLoader::dynaLoad(NoExistingTestClass)

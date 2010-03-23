@@ -1,7 +1,7 @@
 --TEST--
 Bug #25745 (ctype functions fail with non-ascii characters)
 --SKIPIF--
-<?php if (!extension_loaded("ctype")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 $funcs = array(

@@ -56,4 +56,4 @@ $instance->run();
 
 ?>
 --EXPECT--
-unicode(0) ""
+string(0) ""

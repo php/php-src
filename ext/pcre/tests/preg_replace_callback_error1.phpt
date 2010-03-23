@@ -52,8 +52,8 @@ Warning: preg_replace_callback(): Unknown modifier 'F' in %s on line %d
 NULL
 
 Arg value is Array
-unicode(9) "number 1."
+string(9) "number 1."
 
 Arg value is /[a-zA-Z]/
-unicode(3) " 1."
+string(3) " 1."
 ===Done===

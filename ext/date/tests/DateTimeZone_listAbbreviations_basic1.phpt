@@ -25,46 +25,46 @@ var_dump( $abbr["acst"] );
 ===DONE===
 --EXPECT--
 *** Testing DateTimeZone::listAbbreviations() : basic functionality ***
-unicode(5) "array"
+string(5) "array"
 int(338)
 
 -- Format a sample entry --
 array(4) {
   [0]=>
   array(3) {
-    [u"dst"]=>
+    ["dst"]=>
     bool(true)
-    [u"offset"]=>
+    ["offset"]=>
     int(-14400)
-    [u"timezone_id"]=>
-    unicode(18) "America/Porto_Acre"
+    ["timezone_id"]=>
+    string(18) "America/Porto_Acre"
   }
   [1]=>
   array(3) {
-    [u"dst"]=>
+    ["dst"]=>
     bool(true)
-    [u"offset"]=>
+    ["offset"]=>
     int(-14400)
-    [u"timezone_id"]=>
-    unicode(16) "America/Eirunepe"
+    ["timezone_id"]=>
+    string(16) "America/Eirunepe"
   }
   [2]=>
   array(3) {
-    [u"dst"]=>
+    ["dst"]=>
     bool(true)
-    [u"offset"]=>
+    ["offset"]=>
     int(-14400)
-    [u"timezone_id"]=>
-    unicode(18) "America/Rio_Branco"
+    ["timezone_id"]=>
+    string(18) "America/Rio_Branco"
   }
   [3]=>
   array(3) {
-    [u"dst"]=>
+    ["dst"]=>
     bool(true)
-    [u"offset"]=>
+    ["offset"]=>
     int(-14400)
-    [u"timezone_id"]=>
-    unicode(11) "Brazil/Acre"
+    ["timezone_id"]=>
+    string(11) "Brazil/Acre"
   }
 }
 ===DONE===

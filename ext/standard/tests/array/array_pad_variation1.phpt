@@ -206,38 +206,38 @@ Warning: array_pad() expects parameter 1 to be array, boolean given in %s on lin
 NULL
 
 -- Iteration 16 --
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_pad() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_pad() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --

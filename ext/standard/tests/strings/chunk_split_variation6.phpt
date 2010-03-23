@@ -9,7 +9,8 @@ Test chunk_split() function : usage variations - single quoted strings for 'str'
 */
 
 /*
-* chunk_split() : passing single quoted strings for 'str' to the function
+* passing different single quoted strings as 'str' argument to the function
+* 'chunklen' is set to 7 and 'ending' is '):('
 */
 
 echo "*** Testing chunk_split() : with different single quoted 'str' ***\n";
@@ -30,7 +31,7 @@ $values = array(
   'This is string with \0 and ".chr(0)."null chars',  //for binary safe 
   'This is string with    multiple         space char',  
   'This is to check string with ()',                           
-  '     Testing with    Tab     ',  //string with TAB                         
+  '     Testing with    multiple spaces     ',                           
   'Testing invalid \k and \m escape char',            
   'This is to check with \\n and \\t'                     
 );                                                                         
@@ -44,32 +45,32 @@ for($count = 0;$count < count($values);$count++) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : with different single quoted 'str' ***
 -- Iteration 0 --
-unicode(3) "):("
+string(3) "):("
 -- Iteration 1 --
-unicode(4) " ):("
+string(4) " ):("
 -- Iteration 2 --
-unicode(30) "This is):( simple):( string):("
+string(30) "This is):( simple):( string):("
 -- Iteration 3 --
-unicode(35) "It's st):(ring wi):(th quot):(es):("
+string(35) "It's st):(ring wi):(th quot):(es):("
 -- Iteration 4 --
-unicode(46) "This co):(ntains ):(@ # $ %):( ^ & ch):(ars):("
+string(46) "This co):(ntains ):(@ # $ %):( ^ & ch):(ars):("
 -- Iteration 5 --
-unicode(59) "This st):(ring\tc):(ontains):(\rwhite):( space\):(nchars):("
+string(59) "This st):(ring\tc):(ontains):(\rwhite):( space\):(nchars):("
 -- Iteration 6 --
-unicode(47) "This is):( string):( with 1):(234 num):(bers):("
+string(47) "This is):( string):( with 1):(234 num):(bers):("
 -- Iteration 7 --
-unicode(68) "This is):( string):( with \):(0 and "):(.chr(0)):(."null ):(chars):("
+string(68) "This is):( string):( with \):(0 and "):(.chr(0)):(."null ):(chars):("
 -- Iteration 8 --
-unicode(74) "This is):( string):( with  ):(  multi):(ple    ):(     sp):(ace cha):(r):("
+string(74) "This is):( string):( with  ):(  multi):(ple    ):(     sp):(ace cha):(r):("
 -- Iteration 9 --
-unicode(46) "This is):( to che):(ck stri):(ng with):( ()):("
+string(46) "This is):( to che):(ck stri):(ng with):( ()):("
 -- Iteration 10 --
-unicode(44) "     Te):(sting w):(ith    ):(Tab    ):( ):("
+string(59) "     Te):(sting w):(ith    ):(multipl):(e space):(s     ):("
 -- Iteration 11 --
-unicode(55) "Testing):( invali):(d \k an):(d \m es):(cape ch):(ar):("
+string(55) "Testing):( invali):(d \k an):(d \m es):(cape ch):(ar):("
 -- Iteration 12 --
-unicode(46) "This is):( to che):(ck with):( \n and):( \t):("
+string(46) "This is):( to che):(ck with):( \n and):( \t):("
 Done

@@ -70,33 +70,33 @@ echo "Done\n";
 --EXPECT--
 Simple test of imagefilledpolygon() function
 array(4) {
-  [u"red"]=>
+  ["red"]=>
   int(0)
-  [u"green"]=>
+  ["green"]=>
   int(255)
-  [u"blue"]=>
+  ["blue"]=>
   int(0)
-  [u"alpha"]=>
+  ["alpha"]=>
   int(0)
 }
 array(4) {
-  [u"red"]=>
+  ["red"]=>
   int(0)
-  [u"green"]=>
+  ["green"]=>
   int(255)
-  [u"blue"]=>
+  ["blue"]=>
   int(0)
-  [u"alpha"]=>
+  ["alpha"]=>
   int(0)
 }
 array(4) {
-  [u"red"]=>
+  ["red"]=>
   int(0)
-  [u"green"]=>
+  ["green"]=>
   int(0)
-  [u"blue"]=>
+  ["blue"]=>
   int(0)
-  [u"alpha"]=>
+  ["alpha"]=>
   int(0)
 }
 Done

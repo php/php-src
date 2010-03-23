@@ -20,11 +20,11 @@ echo "Done\n";
 --EXPECTF--	
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(9) "something"
+  string(9) "something"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(9) "something"
+  string(9) "something"
 }
 
 Notice: Array to string conversion in %s on line %d

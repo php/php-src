@@ -8,7 +8,7 @@ Test eregi() function : basic functionality - a few non-matches
  * Alias to functions: 
  */
 
-$regs = b'original';
+$regs = 'original';
 
 var_dump(eregi('[A-Z]', '0', $regs));
 var_dump(eregi('(a){4}', 'aaa', $regs));
@@ -22,10 +22,19 @@ var_dump($regs);
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function eregi() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 bool(false)
 string(8) "original"
 Done

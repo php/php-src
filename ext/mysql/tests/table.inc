@@ -1,5 +1,5 @@
 <?PHP
-require_once('connect.inc');
+require_once 'connect.inc';
 
 // connect + select_db
 if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {

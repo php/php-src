@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -106,8 +106,6 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	int token_type;
 	zend_bool destroy;
 	int token_line = 1;
-
-	CG(literal_type) = IS_UNICODE;
 
 	array_init(return_value);
 

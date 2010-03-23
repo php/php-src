@@ -1,8 +1,8 @@
 --TEST--
-Test str_split() function : usage variations - unexpected values for 'str' argument(Bug#42866) 
+Test str_split() function : usage variations - unexpected values for 'str' argument 
 --FILE--
 <?php
-/* Prototype  : array str_split( $str [, int $split_length])
+/* Prototype  : array str_split(string $str [, int $split_length])
  * Description: Convert a string to an array. If split_length is 
                 specified, break the string down into chunks each 
                 split_length characters long. 
@@ -97,145 +97,145 @@ echo "Done";
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 3 --
 array(2) {
   [0]=>
-  unicode(3) "123"
+  string(3) "123"
   [1]=>
-  unicode(2) "45"
+  string(2) "45"
 }
 -- Iteration 4 --
 array(2) {
   [0]=>
-  unicode(3) "-23"
+  string(3) "-23"
   [1]=>
-  unicode(2) "45"
+  string(2) "45"
 }
 -- Iteration 5 --
 array(2) {
   [0]=>
-  unicode(3) "10."
+  string(3) "10."
   [1]=>
-  unicode(1) "5"
+  string(1) "5"
 }
 -- Iteration 6 --
 array(2) {
   [0]=>
-  unicode(3) "-10"
+  string(3) "-10"
   [1]=>
-  unicode(2) ".5"
+  string(2) ".5"
 }
 -- Iteration 7 --
 array(4) {
   [0]=>
-  unicode(3) "105"
+  string(3) "105"
   [1]=>
-  unicode(3) "000"
+  string(3) "000"
   [2]=>
-  unicode(3) "000"
+  string(3) "000"
   [3]=>
-  unicode(3) "000"
+  string(3) "000"
 }
 -- Iteration 8 --
 array(3) {
   [0]=>
-  unicode(3) "1.0"
+  string(3) "1.0"
   [1]=>
-  unicode(3) "6E-"
+  string(3) "6E-"
   [2]=>
-  unicode(1) "9"
+  string(1) "9"
 }
 -- Iteration 9 --
 array(1) {
   [0]=>
-  unicode(3) "0.5"
+  string(3) "0.5"
 }
 -- Iteration 10 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 16 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 17 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 18 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 19 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 20 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 21 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 22 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 23 --
 array(2) {
   [0]=>
-  unicode(3) "obj"
+  string(3) "obj"
   [1]=>
-  unicode(3) "ect"
+  string(3) "ect"
 }
 -- Iteration 24 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 25 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 26 --
 
-Warning: str_split() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: str_split() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

@@ -15,23 +15,23 @@ echo $d->format( DATE_ISO8601 ), "\n\n";
 echo $d->format( 'U' ), "\n\n";
 --EXPECT--
 object(DateTime)#1 (3) {
-  [u"date"]=>
-  unicode(19) "1955-05-23 00:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1955-05-23 00:00:00"
+  ["timezone_type"]=>
   int(1)
-  [u"timezone"]=>
-  unicode(6) "+02:00"
+  ["timezone"]=>
+  string(6) "+02:00"
 }
 1955-05-23T00:00:00+0200
 -461124000
 
 object(DateTime)#1 (3) {
-  [u"date"]=>
-  unicode(19) "1955-05-22 23:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1955-05-22 23:00:00"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(15) "Europe/Budapest"
+  ["timezone"]=>
+  string(15) "Europe/Budapest"
 }
 1955-05-22T23:00:00+0100
 

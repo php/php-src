@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -19,11 +19,12 @@
 /* $Id$ */
 
 #include "zend.h"
+
 #include <limits.h>
 
 #define QSORT_STACK_SIZE (sizeof(size_t) * CHAR_BIT)
 
-static void _zend_qsort_swap(void *a, void *b, size_t siz) /* {{{ */
+static void _zend_qsort_swap(void *a, void *b, size_t siz)
 {
 	register char  *tmp_a_char;
 	register char  *tmp_b_char;
@@ -51,9 +52,8 @@ static void _zend_qsort_swap(void *a, void *b, size_t siz) /* {{{ */
 		*tmp_b_char++ = t_c;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC) /* {{{ */
+ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC)
 {
 	void           *begin_stack[QSORT_STACK_SIZE];
 	void           *end_stack[QSORT_STACK_SIZE];
@@ -85,10 +85,10 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 
 				for (; seg2 >= seg1 && compare(seg2, begin TSRMLS_CC) > 0;
 				     seg2 -= siz);
-
+				
 				if (seg1 >= seg2)
 					break;
-
+				
 				_zend_qsort_swap(seg1, seg2, siz);
 
 				seg1 += siz;
@@ -98,7 +98,7 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 			_zend_qsort_swap(begin, seg2, siz);
 
 			seg2p = seg2;
-
+			
 			if ((seg2p - begin) <= (end - seg2p)) {
 				if ((seg2p + siz) < end) {
 					begin_stack[loop] = seg2p + siz;
@@ -116,11 +116,10 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 		}
 	}
 }
-/* }}} */
 
-/*
+/* 
  * Local Variables:
- * c-basic-offset: 4
+ * c-basic-offset: 4 
  * tab-width: 4
  * End:
  * vim600: fdm=marker

@@ -293,13 +293,13 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: iconv_set_encoding() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: iconv_set_encoding() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: iconv_set_encoding() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: iconv_set_encoding() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: iconv_set_encoding() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: iconv_set_encoding() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 string(0) ""
 string(0) ""

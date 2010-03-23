@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -344,7 +344,7 @@ PHP_FUNCTION(readline_list_history)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-
+	
 	history = history_list();
 	
 	array_init(return_value);
@@ -482,18 +482,18 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 PHP_FUNCTION(readline_completion_function)
 {
 	zval *arg = NULL;
-	zval name;
+	char *name = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg)) {
 		RETURN_FALSE;
 	}
 
 	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not callable", Z_TYPE(name), Z_UNIVAL(name));
-		zval_dtor(&name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		efree(name);
 		RETURN_FALSE;
 	}
-	zval_dtor(&name);
+	efree(name);
 
 	if (_readline_completion) {
 		zval_dtor(_readline_completion);
@@ -534,7 +534,7 @@ static void php_rl_callback_handler(char *the_line)
 PHP_FUNCTION(readline_callback_handler_install)
 {
 	zval *callback;
-	zval name;
+	char *name = NULL;
 	char *prompt;
 	int prompt_len;
 
@@ -543,11 +543,11 @@ PHP_FUNCTION(readline_callback_handler_install)
 	}
 
 	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not callable", Z_TYPE(name), Z_UNIVAL(name));
-		zval_dtor(&name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		efree(name);
 		RETURN_FALSE;
 	}
-	zval_dtor(&name);
+	efree(name);
 
 	if (_prepped_callback) {
 		rl_callback_handler_remove();

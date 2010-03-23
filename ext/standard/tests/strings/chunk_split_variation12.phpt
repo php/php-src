@@ -83,22 +83,22 @@ foreach($heredoc_arr as $value) {
  
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : different heredoc strings for 'ending' argument ***
 -- Iteration 1 --
-unicode(102) "This is str to check with heredoc ending.This	contains,
+string(102) "This is str to check with heredoc ending.This	contains,
 speci@! ch@r$ __with wrong \k escape char 222."
 -- Iteration 2 --
-unicode(102) "This is str to check with heredoc ending.This	contains,
+string(102) "This is str to check with heredoc ending.This	contains,
 speci@! ch@r$ __with wrong \k escape char 222."
 -- Iteration 3 --
-unicode(113) "This is star to checka with hereadoc endinga.This	contaains,
+string(113) "This is star to checka with hereadoc endinga.This	contaains,
 specai@! ch@r$ a__with wroang \k escaape char 22a2.a"
 -- Iteration 4 --
-unicode(421) "This is stThis is simple heredoc stringr to checkThis is simple heredoc string with hereThis is simple heredoc stringdoc endingThis is simple heredoc string.This	contThis is simple heredoc stringains,
+string(421) "This is stThis is simple heredoc stringr to checkThis is simple heredoc string with hereThis is simple heredoc stringdoc endingThis is simple heredoc string.This	contThis is simple heredoc stringains,
 specThis is simple heredoc stringi@! ch@r$ This is simple heredoc string__with wroThis is simple heredoc stringng \k escaThis is simple heredoc stringpe char 22This is simple heredoc string2.This is simple heredoc string"
 -- Iteration 5 --
-unicode(762) "This is stThis is to check chunk_split
+string(762) "This is stThis is to check chunk_split
 function with multiline
 heredocr to checkThis is to check chunk_split
 function with multiline
@@ -123,10 +123,10 @@ heredoc2.This is to check chunk_split
 function with multiline
 heredoc"
 -- Iteration 6 --
-unicode(443) "This is stThis checks with $, %, &, charsr to checkThis checks with $, %, &, chars with hereThis checks with $, %, &, charsdoc endingThis checks with $, %, &, chars.This	contThis checks with $, %, &, charsains,
+string(443) "This is stThis checks with $, %, &, charsr to checkThis checks with $, %, &, chars with hereThis checks with $, %, &, charsdoc endingThis checks with $, %, &, chars.This	contThis checks with $, %, &, charsains,
 specThis checks with $, %, &, charsi@! ch@r$ This checks with $, %, &, chars__with wroThis checks with $, %, &, charsng \k escaThis checks with $, %, &, charspe char 22This checks with $, %, &, chars2.This checks with $, %, &, chars"
 -- Iteration 7 --
-unicode(487) "This is stThis checks	 and 
+string(487) "This is stThis checks	 and 
 white space charsr to checkThis checks	 and 
 white space chars with hereThis checks	 and 
 white space charsdoc endingThis checks	 and 
@@ -140,6 +140,6 @@ white space charspe char 22This checks	 and
 white space chars2.This checks	 and 
 white space chars"
 -- Iteration 8 --
-unicode(597) "This is st"To check " in heredoc".I'm sure it'll \work!r to check"To check " in heredoc".I'm sure it'll \work! with here"To check " in heredoc".I'm sure it'll \work!doc ending"To check " in heredoc".I'm sure it'll \work!.This	cont"To check " in heredoc".I'm sure it'll \work!ains,
+string(597) "This is st"To check " in heredoc".I'm sure it'll \work!r to check"To check " in heredoc".I'm sure it'll \work! with here"To check " in heredoc".I'm sure it'll \work!doc ending"To check " in heredoc".I'm sure it'll \work!.This	cont"To check " in heredoc".I'm sure it'll \work!ains,
 spec"To check " in heredoc".I'm sure it'll \work!i@! ch@r$ "To check " in heredoc".I'm sure it'll \work!__with wro"To check " in heredoc".I'm sure it'll \work!ng \k esca"To check " in heredoc".I'm sure it'll \work!pe char 22"To check " in heredoc".I'm sure it'll \work!2."To check " in heredoc".I'm sure it'll \work!"
 Done

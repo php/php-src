@@ -27,7 +27,7 @@ var_dump( $object->getTimeZone()->getName() );
 ===DONE===
 --EXPECTF--
 *** Testing DateTime::getTimezone() : basic functionality ***
-unicode(13) "Europe/London"
-unicode(16) "America/New_York"
-unicode(19) "America/Los_Angeles"
+string(13) "Europe/London"
+string(16) "America/New_York"
+string(19) "America/Los_Angeles"
 ===DONE===

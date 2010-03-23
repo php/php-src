@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -300,7 +300,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	   that the streams layer puts out at times, but for libxml we
 	   may try to open files that don't exist, but it is not a failure
 	   in xml processing (eg. DTD files)  */
-	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL TSRMLS_CC) == -1) {
 			if (isescaped) {
@@ -314,7 +314,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
 	}
 
-	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
+	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
 	if (isescaped) {
 		xmlFree(resolved_path);
 	}
@@ -574,7 +574,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 	}
 }
 
-PHP_LIBXML_API void php_libxml_shutdown(void) 
+PHP_LIBXML_API void php_libxml_shutdown(void)
 {
 	if (_php_libxml_initialized) {
 #if defined(LIBXML_SCHEMAS_ENABLED)
@@ -694,7 +694,7 @@ static PHP_MINFO_FUNCTION(libxml)
 }
 /* }}} */
 
-/* {{{ proto void libxml_set_streams_context(resource streams_context) U
+/* {{{ proto void libxml_set_streams_context(resource streams_context) 
    Set the streams context for the next libxml document load or write */
 static PHP_FUNCTION(libxml_set_streams_context)
 {
@@ -712,7 +712,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
-/* {{{ proto bool libxml_use_internal_errors([boolean use_errors]) U
+/* {{{ proto bool libxml_use_internal_errors([boolean use_errors]) 
    Disable libxml errors and allow user to fetch error information as needed */
 static PHP_FUNCTION(libxml_use_internal_errors)
 {
@@ -752,7 +752,7 @@ static PHP_FUNCTION(libxml_use_internal_errors)
 }
 /* }}} */
 
-/* {{{ proto object libxml_get_last_error()
+/* {{{ proto object libxml_get_last_error() 
    Retrieve last error from libxml */
 static PHP_FUNCTION(libxml_get_last_error)
 {
@@ -824,7 +824,7 @@ static PHP_FUNCTION(libxml_get_errors)
 }
 /* }}} */
 
-/* {{{ proto void libxml_clear_errors() U
+/* {{{ proto void libxml_clear_errors() 
    Clear last error from libxml */
 static PHP_FUNCTION(libxml_clear_errors)
 {
@@ -895,7 +895,7 @@ int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node expo
 	php_libxml_initialize();
 	export_hnd.export_func = export_function;
 
-	return zend_u_hash_add(&php_libxml_exports, IS_UNICODE, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
+	return zend_hash_add(&php_libxml_exports, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
 }
 
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
@@ -909,13 +909,11 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		if (zend_u_hash_find(&php_libxml_exports, IS_UNICODE, ce->name, ce->name_length + 1, (void **) &export_hnd)  == SUCCESS) {
+		if (zend_hash_find(&php_libxml_exports, ce->name, ce->name_length + 1, (void **) &export_hnd)  == SUCCESS) {
 			node = export_hnd->export_func(object TSRMLS_CC);
 		}
 	}
-
 	return node;
-
 }
 
 PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC)
@@ -979,9 +977,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		ret_refcount = object->document->refcount;
 	} else if (docp != NULL) {
 		ret_refcount = 1;
-		object->document = pemalloc(sizeof(php_libxml_ref_obj), 0);
-		object->document->persistent = 0;
-		object->document->external_owner = 0;
+		object->document = emalloc(sizeof(php_libxml_ref_obj));
 		object->document->ptr = docp;
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
@@ -1007,23 +1003,9 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object T
 				}
 				efree(object->document->doc_props);
 			}
-			pefree(object->document, object->document->persistent);
+			efree(object->document);
 			object->document = NULL;
-		} else if (ret_refcount == 1 && object->document->external_owner) {
-			/* PHP is done with this object, but someone else owns the DomNodes,
-			 * Kill the non-persistent bits, but leave the persistable php_libxml_ref_obj around */
-			if (object->document->doc_props != NULL) {
-				if (object->document->doc_props->classmap) {
-					zend_hash_destroy(object->document->doc_props->classmap);
-					FREE_HASHTABLE(object->document->doc_props->classmap);
-				}
-				efree(object->document->doc_props);
-				object->document->doc_props = NULL;
-			}
-			/* Don't worry about the fact that this memory is left unfreed,
-			 * Whoever else owns it has the pointer stored somewhere */
-			object->document = NULL;
-		}			
+		}
 	}
 
 	return ret_refcount;
@@ -1089,107 +1071,6 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 	}
 }
 /* }}} */
-
-PHP_LIBXML_API char* php_libxml_unicode_to_string(UChar *ustr, int ustr_len, int *str_len TSRMLS_DC)
-{
-	UErrorCode errCode = 0;
-	char *tmp;
-	int tmp_len;
-
-	zend_unicode_to_string_ex(UG(utf8_conv), &tmp, &tmp_len, ustr, ustr_len, &errCode);
-	*str_len = tmp_len;
-
-	/* Substitute uncoding with "utf8" */
-	if (tmp[0] == '<' &&
-	    tmp[1] == '?' &&
-	    tmp[2] == 'x' &&
-	    tmp[3] == 'm' &&
-	    tmp[4] == 'l') {
-		char *s = tmp + sizeof("<?xml")-1;
-
-		while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-			++s;
-		}
-		while (*s != 0 && *s != '?' && *s != '>') {
-			if ((*s >= 'a' && *s <= 'z') || (*s >= 'A' && *s <= 'Z')) {
-				char *attr = s;
-				char *val;
-				int attr_len, val_len;
-
-				while ((*s >= 'a' && *s <= 'z') ||
-				       (*s >= 'A' && *s <= 'Z') ||
-				       (*s >= '0' && *s <= '9') ||
-				       (*s == '_')) {
-					++s;
-				}
-				attr_len = s - attr;
-				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-					++s;
-				}
-				if (*s == '=') {
-					++s;
-				} else {
-					break;
-				}
-				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-					++s;
-				}
-				if (*s == '"') {
-					++s;
-				} else {
-					break;
-				}
-				val = s;
-				while (*s != 0 && *s != '"') {
-					++s;
-				}
-				if (*s == '"') {
-					val_len = s - val;
-					++s;
-				} else {
-					break;
-				}
-
-				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-					++s;
-				}
-
-				if (attr_len == sizeof("encoding")-1 &&
-				    strncasecmp(attr, "encoding", sizeof("encoding")-1) == 0) {
-				    if (val_len >= sizeof("utf-8")-1) {
-				    	val[0] = 'u';
-				    	val[1] = 't';
-				    	val[2] = 'f';
-				    	val[3] = '-';
-				    	val[4] = '8';
-				    	val[5] = '"';
-				    	while (val_len > sizeof("utf-8")-1) {
-				    		val[val_len] = ' ';
-				    		--val_len;
-				    	}
-				    }else if (val_len >= sizeof("utf8")-1) {
-				    	val[0] = 'u';
-				    	val[1] = 't';
-				    	val[2] = 'f';
-				    	val[3] = '8';
-				    	val[4] = '"';
-				    	while (val_len > sizeof("utf8")-1) {
-				    		val[val_len] = ' ';
-				    		--val_len;
-				    	}
-				    } else {
-				    	/* Encoding name too short */
-				    	break;
-				    }
-				}
-
-			} else {
-				break;
-			}
-		}
-	}
-	return tmp;
-}
 
 #ifdef PHP_WIN32
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

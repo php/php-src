@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -91,10 +91,10 @@ int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 	
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, content, 1);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 
 	return SUCCESS;
@@ -118,7 +118,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
 		}
-		convert_to_string_with_converter(newval, UG(utf8_conv));
+		convert_to_string(newval);
 	}
 
 	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
@@ -166,7 +166,7 @@ int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto string dom_characterdata_substring_data(int offset, int count) U
+/* {{{ proto string dom_characterdata_substring_data(int offset, int count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since: 
 */
@@ -207,15 +207,15 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlFree(cur);
 
 	if (substring) {
-		RETVAL_XML_STRING(substring, ZSTR_DUPLICATE);
+		RETVAL_STRING(substring, 1);
 		xmlFree(substring);
 	} else {
-		RETVAL_EMPTY_UNICODE();
+		RETVAL_EMPTY_STRING();
 	}
 }
 /* }}} end dom_characterdata_substring_data */
 
-/* {{{ proto void dom_characterdata_append_data(string arg) U
+/* {{{ proto void dom_characterdata_append_data(string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since: 
 */
@@ -227,7 +227,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	char *arg;
 	int arg_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_characterdata_class_entry, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -249,7 +249,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 }
 /* }}} end dom_characterdata_append_data */
 
-/* {{{ proto void dom_characterdata_insert_data(int offset, string arg) U
+/* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since: 
 */
@@ -263,7 +263,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols&", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -297,7 +297,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 }
 /* }}} end dom_characterdata_insert_data */
 
-/* {{{ proto void dom_characterdata_delete_data(int offset, int count) U
+/* {{{ proto void dom_characterdata_delete_data(int offset, int count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since: 
 */
@@ -352,7 +352,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 }
 /* }}} end dom_characterdata_delete_data */
 
-/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg) U
+/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since: 
 */
@@ -366,7 +366,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls&", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 

@@ -162,19 +162,19 @@ array(3) {
 -- Iteration 5 --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 6 --
 array(3) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
 }
 
 -- Iteration 7 --

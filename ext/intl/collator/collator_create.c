@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,17 +47,15 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	intl_error_reset( COLLATOR_ERROR_P( co ) TSRMLS_CC );
-
 	if(locale_len == 0) {
-		locale = UG(default_locale);
+		locale = INTL_G(default_locale);
 	}
 
 	/* Open ICU collator. */
 	co->ucoll = ucol_open( locale, COLLATOR_ERROR_CODE_P( co ) );
 	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator");
 }
-/* }}} */
+/* }}} */ 
 
 /* {{{ proto Collator collator_create( string $locale )
  * Create collator.

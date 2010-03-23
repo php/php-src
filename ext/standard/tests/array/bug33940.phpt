@@ -1,7 +1,8 @@
 --TEST--
 Bug #33940 (array_map() fails to pass by reference when called recursively)
 --INI--
-error_reporting=16383
+allow_call_time_pass_reference=1
+error_reporting=4095
 --FILE--
 <?php
 function ref_map(&$item) {
@@ -24,9 +25,6 @@ echo 'Array: '; print_r($a);
 echo 'Return: '; print_r($ret);
 ?>
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %sbug33940.php on line 7
-
-Deprecated: Call-time pass-by-reference has been deprecated in %sbug33940.php on line 17
 Array: Array
 (
     [0] => Array

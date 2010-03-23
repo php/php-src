@@ -23,7 +23,7 @@ object(DOMNodeList)#%d (0) {
 int(0)
 bool(true)
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
 bool(true)
 bool(false)

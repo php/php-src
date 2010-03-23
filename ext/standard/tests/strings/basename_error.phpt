@@ -35,24 +35,24 @@ NULL
 Warning: basename() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 2 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 2 to be string, object given in %s on line %d
 NULL
 Done

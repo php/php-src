@@ -41,15 +41,15 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_id() : variation ***
-unicode(0) ""
+string(0) ""
 int(12)
-unicode(1) "0"
-unicode(1) "0"
+string(1) "0"
+string(1) "0"
 string(0) ""
 bool(true)
 string(%d) "%s"
 bool(true)
-unicode(1) "0"
+string(1) "0"
 string(0) ""
 bool(true)
 string(%d) "%s"

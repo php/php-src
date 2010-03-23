@@ -34,7 +34,7 @@ Notice: Undefined variable: var in %s on line %d
 NULL
 object(Object1)#%d (0) {
 }
-unicode(4) "test"
+string(4) "test"
 object(Object1)#%d (0) {
 }
 Done

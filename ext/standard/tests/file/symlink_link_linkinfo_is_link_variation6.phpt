@@ -2,12 +2,16 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - link & dir perms.
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
+if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip no symlinks on Windows');
 }
-if (substr(PHP_OS, 0, 3) == 'MAC') {
-    die('skip not valid for MacOS');
+if ( substr(PHP_OS, 0, 3) == 'MAC' ) {
+    die('skip Not valid for MacOS');
 }
+if (PHP_INT_SIZE != 4) {
+  die("skip this test is for 32bit platform only");
+}
+
 // Skip if being run by root (files are always readable, writeable and executable)
 $filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";
 $fp = fopen($filename, 'w');
@@ -18,7 +22,6 @@ if(fileowner($filename) == 0) {
 }
 
 unlink($filename);
-
 ?>
 --FILE--
 <?php
@@ -73,8 +76,12 @@ echo "Done\n";
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation6";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation6.tmp";
+if(file_exists($filename)) {
 unlink($filename);
+}
+if(file_exists($dirname)) {
 rmdir($dirname);
+}
 ?>
 --EXPECTF--
 *** Creating links in a directory without permission to allow the operation ***

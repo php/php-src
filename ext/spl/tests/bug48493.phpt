@@ -16,11 +16,11 @@ var_dump(spl_autoload_functions());
 --EXPECT--
 array(2) {
   [0]=>
-  unicode(9) "autoload1"
+  string(9) "autoload1"
   [1]=>
-  unicode(9) "autoload2"
+  string(9) "autoload2"
 }
 array(1) {
   [0]=>
-  unicode(9) "autoload1"
+  string(9) "autoload1"
 }

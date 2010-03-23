@@ -13,3 +13,4 @@ echo "NO LEAK\n";
 --EXPECT--
 clonned
 NO LEAK
+

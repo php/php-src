@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>PDO_MYSQL</name>
+ <channel>pecl.php.net</channel>
+ <summary>MySQL driver for PDO</summary>
+ <description>This extension provides a MySQL driver for PDO.
+ </description>
+ <lead>
+  <name>George Schlossnagle</name>
+  <user>gschlossnagle</user>
+  <email>george@omniti.com</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Ilia Alshanetsky</name>
+  <user>iliaa</user>
+  <email>iliaa@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Wez Furlong</name>
+  <user>wez</user>
+  <email>wez@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2006-05-01</date>
+ <version>
+  <release>1.0.2</release>
+  <api>1.0.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+This PECL release corresponds to PHP 5.1.3.
+
+Added PDO::ATTR_EMULATE_PREPARES which can be used to force use of emulated or
+native prepares. This attribute should can be set on the database handle, and
+will cause subsequent prepares to use emulation.
+
+- Fixed bug #36572 (cannot use native prepared statements with internal
+  queries like "show master status") (Ilia)
+- Repackage using package2.xml
+- Fixed Bug #35480 and #35415, crash when using persistent connections.
+- Improved error detection for OPTIMIZE queries
+- Added PDO::MYSQL_ATTR_LOCAL_INFILE, PDO::MYSQL_ATTR_INIT_COMMAND,
+  PDO::MYSQL_ATTR_READ_DEFAULT_FILE, PDO::MYSQL_ATTR_READ_DEFAULT_GROUP
+- Improved error reporting when using native prepared statements
+- Fixed PECL Bug #5193: improved bounds checking when calling getColumnMeta()
+- Fixed Bug #34630: improved (emulated) LOB support
+- Fixed Bug #34623: crash when selecting longtext fields
+- Fixed PECL Bug #5802; is_null flag was sticking
+- Fixed PECL Bug #5645; added mysql client library version information to phpinfo() output.
+
+Windows binaries can be found at http://pecl4win.php.net/ext.php/php_pdo_mysql.dll
+  
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="config.m4" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="mysql_driver.c" role="src" />
+   <file name="mysql_statement.c" role="src" />
+   <file name="pdo_mysql.c" role="src" />
+   <file name="php_pdo_mysql.h" role="src" />
+   <file name="php_pdo_mysql_int.h" role="src" />
+   <file name="php_pdo_mysql_sqlstate.h" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.0.3</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+   <package>
+    <name>pdo</name>
+    <channel>pecl.php.net</channel>
+    <min>1.0.3</min>
+    <providesextension>PDO</providesextension>
+   </package>
+  </required>
+ </dependencies>
+ <providesextension>PDO_MYSQL</providesextension>
+ <extsrcrelease />
+</package>

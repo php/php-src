@@ -12,5 +12,5 @@ date.timezone=UTC
 echo cal_days_in_month(CAL_GREGORIAN,0, 2009);
 ?>
 --EXPECTF--
-Warning: cal_days_in_month(): invalid date in %s on line %d
+Warning: cal_days_in_month(): invalid date. in %s on line %d
 

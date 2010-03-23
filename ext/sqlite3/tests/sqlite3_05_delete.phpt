@@ -49,13 +49,13 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 DELETING a row
 bool(true)
@@ -64,7 +64,7 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 Closing database
 bool(true)

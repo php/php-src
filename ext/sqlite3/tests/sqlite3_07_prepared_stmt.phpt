@@ -44,7 +44,7 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 Closing database
 bool(true)

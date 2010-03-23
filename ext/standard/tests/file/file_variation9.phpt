@@ -1,7 +1,5 @@
 --TEST--
 Test file function : variation - test various endings of a file
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -89,4 +87,3 @@ array(3) {
 }
 
 *** Done ***
-

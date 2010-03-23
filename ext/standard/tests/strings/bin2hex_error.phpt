@@ -17,9 +17,6 @@ echo "\n-- Testing bin2hex() function with more than expected no. of arguments -
 $extra_arg = 10;
 var_dump( bin2hex("Hello World", $extra_arg) );
 
-echo "\n-- Testing bin2hex() function with Unicode string --\n";
-var_dump( bin2hex("Hello World") );
-
 ?> 
 ===DONE===
 --EXPECTF--
@@ -33,11 +30,6 @@ NULL
 -- Testing bin2hex() function with more than expected no. of arguments --
 
 Warning: bin2hex() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
--- Testing bin2hex() function with Unicode string --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
 NULL
  
 ===DONE===

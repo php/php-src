@@ -41,49 +41,49 @@ bool(false)
 
 -- Testing date_parse() function with unexpected characters in $date argument --
 array(13) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   int(10)
-  [u"minute"]=>
+  ["minute"]=>
   int(0)
-  [u"second"]=>
+  ["second"]=>
   int(0)
-  [u"fraction"]=>
+  ["fraction"]=>
   float(0)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(1)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(1) {
     [4]=>
-    unicode(29) "Double timezone specification"
+    string(29) "Double timezone specification"
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(7)
-  [u"errors"]=>
+  ["errors"]=>
   array(7) {
     [0]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
     [1]=>
-    unicode(47) "The timezone could not be found in the database"
+    string(47) "The timezone could not be found in the database"
     [3]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
     [7]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
     [8]=>
-    unicode(29) "Double timezone specification"
+    string(29) "Double timezone specification"
     [17]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
     [18]=>
-    unicode(25) "Double time specification"
+    string(25) "Double time specification"
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(true)
-  [u"zone_type"]=>
+  ["zone_type"]=>
   int(0)
 }
 ===DONE===

@@ -28,15 +28,15 @@ var_dump($obj);
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "bar"
+string(3) "bar"
 
-Notice: Undefined offset: 2 in %sbug37667.php on line %d
+Notice: Undefined offset: 2 in %sbug37667.php on line 16
 NULL
 object(Test)#%d (1) {
-  [u"property":protected]=>
+  ["property":protected]=>
   array(1) {
-    [u"foo"]=>
-    unicode(3) "bar"
+    ["foo"]=>
+    string(3) "bar"
   }
 }
 
@@ -44,10 +44,10 @@ Notice: Indirect modification of overloaded property Test::$property has no effe
 
 Notice: Indirect modification of overloaded property Test::$property has no effect in %sbug37667.php on line 21
 object(Test)#%d (1) {
-  [u"property":protected]=>
+  ["property":protected]=>
   array(1) {
-    [u"foo"]=>
-    unicode(3) "bar"
+    ["foo"]=>
+    string(3) "bar"
   }
 }
 ===DONE===

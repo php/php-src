@@ -26,7 +26,8 @@ Redeclare inherited protected static property as public static.
   B::showA();
   B::showB();
 ?>
---EXPECT--
+--EXPECTF--
 A::p (static)
 A::p (static)
 B::p (static)
+

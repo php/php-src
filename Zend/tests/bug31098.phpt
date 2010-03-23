@@ -9,11 +9,11 @@ var_dump(isset($a->b));
 $a = '0';
 var_dump(isset($a->b));
 $a = '';
-var_dump(isset($a{'b'}));
+var_dump(isset($a['b']));
 $a = 'a';
-var_dump(isset($a{'b'}));
+var_dump(isset($a['b']));
 $a = '0';
-var_dump(isset($a{'b'}));
+var_dump(isset($a['b']));
 
 $simpleString = "Bogus String Text";
 echo isset($simpleString->wrong)?"bug\n":"ok\n";

@@ -16,13 +16,13 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
-unicode(3) "aaa"
+string(3) "aaa"
 int(1)
-unicode(3) "bbb"
+string(3) "bbb"
 array(1) {
-  [u"foo"]=>
-  &unicode(3) "bbb"
+  ["foo"]=>
+  &string(3) "bbb"
 }
 Done

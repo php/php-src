@@ -9,19 +9,19 @@ $t = $x[] = 'x';
 var_dump($correct);
 var_dump($wrong);
 
-$correct{1} = '*';
-$correct{3} = '*';
-$correct{5} = '*';
+$correct[1] = '*';
+$correct[3] = '*';
+$correct[5] = '*';
 
 // This produces the 
-$wrong{1} = $wrong{3} = $wrong{5} = '*';
+$wrong[1] = $wrong[3] = $wrong[5] = '*';
 
 var_dump($correct);
 var_dump($wrong);
 
 ?>
 --EXPECT--
-unicode(6) "abcdef"
-unicode(6) "abcdef"
-unicode(6) "a*c*e*"
-unicode(6) "a*c*e*"
+string(6) "abcdef"
+string(6) "abcdef"
+string(6) "a*c*e*"
+string(6) "a*c*e*"

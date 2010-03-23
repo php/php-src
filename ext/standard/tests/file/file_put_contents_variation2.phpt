@@ -158,13 +158,10 @@ fooArrayArray
 --empty string SQ--
 
 --instance of classWithToString--
-Error: 2 - file_put_contents(): 2nd parameter must be non-object (for now), %s(%d)
-
+Class A object
 --instance of classWithoutToString--
-Error: 2 - file_put_contents(): 2nd parameter must be non-object (for now), %s(%d)
 
 --undefined var--
 
 --unset var--
 ===DONE===
-

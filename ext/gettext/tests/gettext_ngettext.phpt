@@ -10,11 +10,7 @@ Test ngettext() functionality
 	}
 ?>
 --FILE--
-<?php
-
-// Using deprectated setlocale() in PHP6. The test needs to be changed
-// when there is an alternative available.
-
+<?php // $Id$
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');
@@ -22,8 +18,7 @@ textdomain('dngettextTest');
 var_dump(ngettext('item', 'items', 1));
 var_dump(ngettext('item', 'items', 2));
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s.php on line %d
+--EXPECT--
 string(7) "Produkt"
 string(8) "Produkte"
 --CREDITS--

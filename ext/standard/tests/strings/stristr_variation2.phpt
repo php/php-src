@@ -87,22 +87,14 @@ bool(false)
 -- Iteration 2 --
 bool(false)
 -- Iteration 3 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 4 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
 
@@ -133,6 +125,8 @@ bool(false)
 Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 18 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 19 --
 bool(false)

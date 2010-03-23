@@ -19,7 +19,7 @@ var_dump(min(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: min() expects at least 1 parameter, 0 given in %s on line 3
 NULL
 
@@ -33,7 +33,7 @@ Warning: min(): When only one parameter is given, it must be an array in %s on l
 NULL
 int(1)
 float(2.09)
-unicode(0) ""
+string(0) ""
 bool(false)
 bool(false)
 bool(false)

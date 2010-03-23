@@ -54,19 +54,19 @@ rmdir($dir_path);
 --EXPECTF--
 *** Testing dir() : operate on previously opened directory ***
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation4"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation4"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation4"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation4"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading directory contents with previous handle --
-unicode(%d) "%s"
+string(%d) "%s"
 -- reading directory contents with current handle --
-unicode(%d) "%s"
+string(%d) "%s"
 Done

@@ -28,134 +28,134 @@ var_dump(array_slice($input, -PHP_INT_MAX));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- $offset is -7 --
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -6 --
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -5 --
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -4 --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -3 --
 array(3) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
   [1]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -2 --
 array(2) {
   [0]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is -1 --
 array(1) {
-  [u"ten"]=>
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is 0 --
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is 1 --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is 2 --
 array(3) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
   [1]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is 3 --
 array(2) {
   [0]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $offset is 4 --
 array(1) {
-  [u"ten"]=>
+  ["ten"]=>
   int(10)
 }
 
@@ -177,15 +177,15 @@ array(0) {
 
 -- $offset is minimum integer value --
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 Done

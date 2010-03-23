@@ -27,26 +27,26 @@ var_dump($ao1, $c);
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"prop3":u"C":private]=>
-    unicode(1) "a"
-    [u"prop1"]=>
-    unicode(1) "x"
-    [u"prop4"]=>
-    unicode(1) "x"
-    [u"prop2"]=>
-    unicode(1) "z"
+    ["prop3":"C":private]=>
+    string(1) "a"
+    ["prop1"]=>
+    string(1) "x"
+    ["prop4"]=>
+    string(1) "x"
+    ["prop2"]=>
+    string(1) "z"
   }
 }
 object(C)#1 (4) {
-  [u"prop3":u"C":private]=>
-  unicode(1) "a"
-  [u"prop1"]=>
-  unicode(1) "x"
-  [u"prop4"]=>
-  unicode(1) "x"
-  [u"prop2"]=>
-  unicode(1) "z"
+  ["prop3":"C":private]=>
+  string(1) "a"
+  ["prop1"]=>
+  string(1) "x"
+  ["prop4"]=>
+  string(1) "x"
+  ["prop2"]=>
+  string(1) "z"
 }
 ===DONE===

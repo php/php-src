@@ -28,45 +28,53 @@ var_dump(gmp_strval($g, 10));
 
 var_dump(gmp_strval(array(1,2), array(1,2)));
 var_dump(gmp_strval(new stdclass, new stdclass));
+var_dump(gmp_strval(array(1,2)));
+var_dump(gmp_strval(new stdclass));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Warning: gmp_strval(): supplied resource is not a valid GMP integer resource in %s on line %d
 bool(false)
-unicode(7) "9765456"
+string(7) "9765456"
 
 Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
 bool(false)
 
 Warning: gmp_strval(): Bad base for conversion: 100000 in %s on line %d
 bool(false)
-unicode(7) "9765456"
-unicode(8) "-3373333"
+string(7) "9765456"
+string(8) "-3373333"
 
 Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
 bool(false)
 
 Warning: gmp_strval(): Bad base for conversion: 100000 in %s on line %d
 bool(false)
-unicode(8) "-3373333"
+string(8) "-3373333"
 
 Warning: gmp_strval() expects parameter 2 to be long, array given in %s on line %d
 NULL
 
 Warning: gmp_strval() expects parameter 2 to be long, object given in %s on line %d
 NULL
+
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
+
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
 Done

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -267,7 +267,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 }
 /* }}} */
 
-/* {{{ proto string convert_cyr_string(string str, string from, string to) U
+/* {{{ proto string convert_cyr_string(string str, string from, string to)
    Convert from one Cyrillic character set to another */
 PHP_FUNCTION(convert_cyr_string)
 {
@@ -275,7 +275,7 @@ PHP_FUNCTION(convert_cyr_string)
 	int input_len, fr_cs_len, to_cs_len;
 	unsigned char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 

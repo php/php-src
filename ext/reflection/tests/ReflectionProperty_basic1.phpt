@@ -52,17 +52,17 @@ reflectProperty("TestClass", "priv");
 Reflecting on property TestClass::pub
 
 __toString():
-unicode(35) "Property [ <default> public $pub ]
+string(35) "Property [ <default> public $pub ]
 "
 export():
-unicode(35) "Property [ <default> public $pub ]
+string(35) "Property [ <default> public $pub ]
 "
 export():
 Property [ <default> public $pub ]
 
 NULL
 getName():
-unicode(3) "pub"
+string(3) "pub"
 isPublic():
 bool(true)
 isPrivate():
@@ -74,24 +74,24 @@ bool(false)
 getValue():
 NULL
 getValue() after a setValue():
-unicode(8) "NewValue"
+string(8) "NewValue"
 
 **********************************
 **********************************
 Reflecting on property TestClass::stat
 
 __toString():
-unicode(33) "Property [ public static $stat ]
+string(33) "Property [ public static $stat ]
 "
 export():
-unicode(33) "Property [ public static $stat ]
+string(33) "Property [ public static $stat ]
 "
 export():
 Property [ public static $stat ]
 
 NULL
 getName():
-unicode(4) "stat"
+string(4) "stat"
 isPublic():
 bool(true)
 isPrivate():
@@ -101,26 +101,26 @@ bool(false)
 isStatic():
 bool(true)
 getValue():
-unicode(15) "static property"
+string(15) "static property"
 getValue() after a setValue():
-unicode(8) "NewValue"
+string(8) "NewValue"
 
 **********************************
 **********************************
 Reflecting on property TestClass::prot
 
 __toString():
-unicode(39) "Property [ <default> protected $prot ]
+string(39) "Property [ <default> protected $prot ]
 "
 export():
-unicode(39) "Property [ <default> protected $prot ]
+string(39) "Property [ <default> protected $prot ]
 "
 export():
 Property [ <default> protected $prot ]
 
 NULL
 getName():
-unicode(4) "prot"
+string(4) "prot"
 isPublic():
 bool(false)
 isPrivate():
@@ -135,17 +135,17 @@ bool(false)
 Reflecting on property TestClass::priv
 
 __toString():
-unicode(37) "Property [ <default> private $priv ]
+string(37) "Property [ <default> private $priv ]
 "
 export():
-unicode(37) "Property [ <default> private $priv ]
+string(37) "Property [ <default> private $priv ]
 "
 export():
 Property [ <default> private $priv ]
 
 NULL
 getName():
-unicode(4) "priv"
+string(4) "priv"
 isPublic():
 bool(false)
 isPrivate():

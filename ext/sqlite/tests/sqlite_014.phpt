@@ -47,17 +47,17 @@ array(3) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 
@@ -67,18 +67,18 @@ array(0) {
 unbuffered with fetch_array
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 buffered
@@ -86,17 +86,17 @@ array(3) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 bool(false)
@@ -104,17 +104,17 @@ array(3) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 DONE!

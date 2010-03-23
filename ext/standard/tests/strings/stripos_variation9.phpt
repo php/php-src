@@ -15,7 +15,7 @@ echo "*** Testing stripos() function with unexpected values for haystack ***\n";
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring a class
+// defining a class
 class sample  {
   public function __toString() {
     return "object";
@@ -121,27 +121,27 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 15 --
@@ -173,7 +173,7 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
 -- Iteration 25 --

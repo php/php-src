@@ -44,29 +44,29 @@ echo "Converted Strings:\n";
 var_dump(bin2hex(iconv('SJIS', 'UTF-8', $sjis_string)));
 var_dump(bin2hex(iconv('EUC-JP', 'UTF-8', $euc_jp_string)));
 
+echo "Done";
 ?>
-===DONE===
 --EXPECT--
 *** Testing iconv() : basic functionality ***
 
 -- Convert to EUC-JP --
 Expected EUC-JP encoded string in base64:
-unicode(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
+string(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
 Converted Strings:
-unicode(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
-unicode(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
+string(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
+string(74) "c6fccbdcb8eca5c6a5ada5b9a5c8a4c7a4b9a1a33031323334a3b5a3b6a3b7a3b8a3b9a1a3"
 
 -- Convert to SJIS --
 Expected SJIS encoded string in base64:
-unicode(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
+string(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
 Converted Strings:
-unicode(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
-unicode(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
+string(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
+string(74) "93fa967b8cea8365834c8358836782c582b781423031323334825482558256825782588142"
 
 -- Convert to UTF-8 --
 Expected UTF-8 encoded string in base64:
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 Converted Strings:
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
-===DONE===
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+Done

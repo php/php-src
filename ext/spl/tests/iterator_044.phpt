@@ -87,10 +87,10 @@ NULL
 object(stdClass)#%d (0) {
 }
 
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string (Unicode or binary), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetExists() expects parameter 1 to be string, object given in %siterator_044.php on line %d
 NULL
 
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string (Unicode or binary), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetGet() expects parameter 1 to be string, object given in %siterator_044.php on line %d
 NULL
 ===2===
 object(MyFoo)#%d (0) {
@@ -112,7 +112,7 @@ bool(false)
 Notice: Undefined index:  2 in %siterator_044.php on line %d
 NULL
 ===5===
-unicode(3) "foo"
+string(3) "foo"
 bool(false)
 
 Notice: Undefined index:  foo in %siterator_044.php on line %d
@@ -132,10 +132,10 @@ int(0)
 object(stdClass)#1 (0) {
 }
 
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string (Unicode or binary), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetExists() expects parameter 1 to be string, object given in %siterator_044.php on line %d
 NULL
 
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string (Unicode or binary), object given in %siterator_044.php on line %d
+Warning: CachingIterator::offsetGet() expects parameter 1 to be string, object given in %siterator_044.php on line %d
 NULL
 ===2===
 object(MyFoo)#2 (0) {
@@ -153,7 +153,7 @@ int(2)
 bool(true)
 int(4)
 ===5===
-unicode(3) "foo"
+string(3) "foo"
 bool(true)
 int(1)
 ===6===

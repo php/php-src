@@ -46,14 +46,14 @@ echo "Done";
 *** Testing iconv_substr() : basic functionality ***
 
 -- ASCII string 1 --
-unicode(6) "444546"
+string(6) "444546"
 
 -- ASCII string 2 --
-unicode(6) "444546"
+string(6) "444546"
 
 -- Multibyte string 1 --
-unicode(14) "a5e69cace8aa9e"
+string(14) "a5e69cace8aa9e"
 
 -- Multibyte string 2 --
-unicode(42) "e8aa9ee38386e382ade382b9e38388e381a7e38199"
+string(42) "e8aa9ee38386e382ade382b9e38388e381a7e38199"
 Done

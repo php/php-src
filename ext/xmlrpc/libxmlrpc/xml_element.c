@@ -44,14 +44,13 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
- *   Revision 1.12  2008/12/09 17:20:57  iliaa
- *   Comment out fprintf() use inside the library
+ *   Revision 1.9.4.1.2.1  2008/12/09 17:22:12  iliaa
  *
- *   Revision 1.11  2007/01/01 09:29:33  sebastian
- *   Bump year.
+ *   MFH: Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error
+ *   when given bad data).
  *
- *   Revision 1.10  2007/07/30 11:33:49  tony2001
- *   fix compile warnings (#38257)
+ *   Revision 1.9.4.1  2006/07/30 11:34:02  tony2001
+ *   MFH: fix compile warnings (#38257)
  *
  *   Revision 1.9  2005/04/22 11:06:53  jorton
  *   Fixed bug #32797 (invalid C code in xmlrpc extension).

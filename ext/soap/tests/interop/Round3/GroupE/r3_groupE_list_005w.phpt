@@ -28,41 +28,41 @@ echo "ok\n";
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/WSDLInteropTestRpcEnc" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="http://soapinterop.org/xsd" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:echoLinkedListResponse><return id="ref1" xsi:type="ns2:List"><varInt xsi:type="xsd:int">1</varInt><varString xsi:type="xsd:string">arg1</varString><child xsi:type="ns2:List"><varInt xsi:type="xsd:int">2</varInt><varString xsi:type="xsd:string">arg2</varString><child xsi:type="ns2:List"><varInt xsi:type="xsd:int">3</varInt><varString xsi:type="xsd:string">arg3</varString><child href="#ref1"/></child></child></return></ns1:echoLinkedListResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 object(stdClass)#7 (3) {
-  [u"varInt"]=>
+  ["varInt"]=>
   int(1)
-  [u"varString"]=>
-  unicode(4) "arg1"
-  [u"child"]=>
+  ["varString"]=>
+  string(4) "arg1"
+  ["child"]=>
   object(stdClass)#8 (3) {
-    [u"varInt"]=>
+    ["varInt"]=>
     int(2)
-    [u"varString"]=>
-    unicode(4) "arg2"
-    [u"child"]=>
+    ["varString"]=>
+    string(4) "arg2"
+    ["child"]=>
     object(stdClass)#9 (3) {
-      [u"varInt"]=>
+      ["varInt"]=>
       int(3)
-      [u"varString"]=>
-      unicode(4) "arg3"
-      [u"child"]=>
+      ["varString"]=>
+      string(4) "arg3"
+      ["child"]=>
       object(stdClass)#7 (3) {
-        [u"varInt"]=>
+        ["varInt"]=>
         int(1)
-        [u"varString"]=>
-        unicode(4) "arg1"
-        [u"child"]=>
+        ["varString"]=>
+        string(4) "arg1"
+        ["child"]=>
         object(stdClass)#8 (3) {
-          [u"varInt"]=>
+          ["varInt"]=>
           int(2)
-          [u"varString"]=>
-          unicode(4) "arg2"
-          [u"child"]=>
+          ["varString"]=>
+          string(4) "arg2"
+          ["child"]=>
           object(stdClass)#9 (3) {
-            [u"varInt"]=>
+            ["varInt"]=>
             int(3)
-            [u"varString"]=>
-            unicode(4) "arg3"
-            [u"child"]=>
+            ["varString"]=>
+            string(4) "arg3"
+            ["child"]=>
             *RECURSION*
           }
         }

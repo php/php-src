@@ -78,7 +78,7 @@ $inputs =  array (
 // loop through with each element of the $texts array to test hebrev() function
 $count = 1;
 
-$hebrew_text = b"The hebrev function converts logical Hebrew text to visual text.\nThe function tries to avoid breaking words.\n";
+$hebrew_text = "The hebrev function converts logical Hebrew text to visual text.\nThe function tries to avoid breaking words.\n";
 
 foreach($inputs as $max_chars_per_line) {
   echo "-- Iteration $count --\n";
@@ -230,11 +230,11 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 "
 -- Iteration 19 --
 
-Warning: hebrev() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrev() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 21 --
 

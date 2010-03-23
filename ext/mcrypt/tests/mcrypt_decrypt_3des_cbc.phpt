@@ -1,7 +1,5 @@
 --TEST--
 Test mcrypt_decrypt() function : basic functionality 
---XFAIL--
-Bug #46834
 --SKIPIF--
 <?php 
 if (!extension_loaded("mcrypt")) {
@@ -73,31 +71,31 @@ function special_var_dump($str) {
 --- testing different key lengths
 
 key length=8
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 key length=20
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 key length=24
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 key length=26
 
 Warning: mcrypt_decrypt(): Size of key is too large for this algorithm in %s on line %d
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 --- testing different iv lengths
 
 iv length=4
 
 Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 iv length=8
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 
 iv length=9
 
 Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
-unicode(32) "736563726574206d6573736167650000"
+string(32) "736563726574206d6573736167650000"
 ===DONE===

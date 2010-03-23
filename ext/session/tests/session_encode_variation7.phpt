@@ -29,6 +29,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 bool(true)
-string(0) ""
+string(24) "A2Zvb2k6MTIzNDU2Nzg5MDs="
 bool(true)
 Done

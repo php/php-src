@@ -124,59 +124,59 @@ var_dump($people[0]['name']);
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "Foo"
-unicode(6) "FooBar"
-unicode(9) "FooBarBaz"
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayProxy::__construct(0)
 object(ArrayProxy)#%d (2) {
-  [u"object":u"ArrayProxy":private]=>
+  ["object":"ArrayProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     array(1) {
       [0]=>
       array(1) {
-        [u"name"]=>
-        unicode(3) "Foo"
+        ["name"]=>
+        string(3) "Foo"
       }
     }
   }
-  [u"element":u"ArrayProxy":private]=>
+  ["element":"ArrayProxy":private]=>
   int(0)
 }
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-unicode(3) "Foo"
+string(3) "Foo"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetSet(0, name, FooBar)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-unicode(6) "FooBar"
+string(6) "FooBar"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetSet(0, name, FooBarBar)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-unicode(9) "FooBarBar"
+string(9) "FooBarBar"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 ArrayProxy::offsetSet(0, name, FooBarBarBaz)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-unicode(12) "FooBarBarBaz"
+string(12) "FooBarBarBaz"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetUnset(0, name)
 ArrayProxy::__construct(0)
 object(ArrayProxy)#%d (2) {
-  [u"object":u"ArrayProxy":private]=>
+  ["object":"ArrayProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     array(1) {
       [0]=>
       array(0) {
       }
     }
   }
-  [u"element":u"ArrayProxy":private]=>
+  ["element":"ArrayProxy":private]=>
   int(0)
 }
 ArrayProxy::__construct(0)
@@ -186,5 +186,5 @@ ArrayProxy::__construct(0)
 ArrayProxy::offsetSet(0, name, BlaBla)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-unicode(6) "BlaBla"
+string(6) "BlaBla"
 ===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-Bug #42850 (array_walk_recursive() leaves references)
+Bug #42850 (array_walk_recursive() leaves references) 
 --FILE--
 <?php
 
@@ -25,35 +25,35 @@ var_dump($data);
 
 --EXPECT--
 array(2) {
-  [u"key1"]=>
-  unicode(4) "val1"
+  ["key1"]=>
+  string(4) "val1"
   [0]=>
   array(1) {
-    [u"key2"]=>
-    unicode(4) "val2"
+    ["key2"]=>
+    string(4) "val2"
   }
 }
 array(2) {
-  [u"key1"]=>
-  unicode(4) "val1"
+  ["key1"]=>
+  string(4) "val1"
   [0]=>
   array(1) {
-    [u"key2"]=>
-    unicode(4) "val2"
+    ["key2"]=>
+    string(4) "val2"
   }
 }
 array(2) {
-  [u"key1"]=>
-  unicode(4) "val1"
+  ["key1"]=>
+  string(4) "val1"
   [0]=>
-  unicode(7) "altered"
+  string(7) "altered"
 }
 array(2) {
-  [u"key1"]=>
-  unicode(4) "val1"
+  ["key1"]=>
+  string(4) "val1"
   [0]=>
   array(1) {
-    [u"key2"]=>
-    unicode(4) "val2"
+    ["key2"]=>
+    string(4) "val2"
   }
 }

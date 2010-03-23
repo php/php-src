@@ -139,8 +139,8 @@ int(0)
 int(100)
 int(100)
 -- Iteration 3 --
-unicode(1) "y"
-unicode(1) "y"
+string(1) "y"
+string(1) "y"
 -- Iteration 4 --
 NULL
 NULL
@@ -157,19 +157,19 @@ float(-4.9999999)
 bool(false)
 bool(false)
 -- Iteration 9 --
-unicode(3) "SOA"
-unicode(3) "SOA"
+string(3) "SOA"
+string(3) "SOA"
 -- Iteration 10 --
 array(0) {
 }
 array(0) {
 }
 -- Iteration 11 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 12 --
-unicode(1) " "
-unicode(1) " "
+string(1) " "
+string(1) " "
 -- Iteration 13 --
 int(-2147483648)
 int(-2147483648)
@@ -183,18 +183,18 @@ float(2)
 *** Testing end() with sub-arrays ***
 array(3) {
   [1]=>
-  unicode(3) "one"
-  [u"two"]=>
+  string(3) "one"
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(1) "f"
+  [""]=>
+  string(1) "f"
 }
-unicode(1) "f"
+string(1) "f"
 
 *** Testing end() when array elements are deleted ***
 
 -- Remove first element from array --
-unicode(7) "neg.008"
+string(7) "neg.008"
 
 -- Remove last element from array --
 int(-4)
@@ -202,7 +202,7 @@ int(-4)
 
 -- Remove any element from array apart from first and last element --
 int(-4)
-unicode(1) "b"
+string(1) "b"
 int(-4)
 
 *** Testing end() on objects ***
@@ -232,7 +232,7 @@ NULL
 Warning: end() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: end() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: end() expects parameter 1 to be array, string given in %s on line %d
 NULL
 bool(false)
 Done

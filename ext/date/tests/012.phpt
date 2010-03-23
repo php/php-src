@@ -1,9 +1,8 @@
 --TEST--
 date_isodate_set() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 $dto = date_create("2006-12-12");
 var_dump(date_isodate_set($dto, 2006, 2, 15));
@@ -21,38 +20,38 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(DateTime)#1 (3) {
-  [u"date"]=>
-  unicode(19) "2006-01-23 00:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2006-01-23 00:00:00"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(3) "UTC"
+  ["timezone"]=>
+  string(3) "UTC"
 }
-unicode(19) "2006/01/23 00:00:00"
+string(19) "2006/01/23 00:00:00"
 
 Warning: date_isodate_set() expects at least 3 parameters, 2 given in %s on line %d
 bool(false)
-unicode(19) "2006/01/23 00:00:00"
+string(19) "2006/01/23 00:00:00"
 object(DateTime)#1 (3) {
-  [u"date"]=>
-  unicode(19) "2006-01-30 00:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2006-01-30 00:00:00"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(3) "UTC"
+  ["timezone"]=>
+  string(3) "UTC"
 }
-unicode(19) "2006/01/30 00:00:00"
+string(19) "2006/01/30 00:00:00"
 object(DateTime)#1 (3) {
-  [u"date"]=>
-  unicode(19) "2007-12-10 00:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2007-12-10 00:00:00"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(3) "UTC"
+  ["timezone"]=>
+  string(3) "UTC"
 }
-unicode(19) "2007/12/10 00:00:00"
+string(19) "2007/12/10 00:00:00"
 
 Warning: date_isodate_set() expects at most 4 parameters, 5 given in %s on line %d
 bool(false)
-unicode(19) "2007/12/10 00:00:00"
+string(19) "2007/12/10 00:00:00"
 Done

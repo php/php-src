@@ -4,7 +4,7 @@ SimpleXML: modifying attributes of singular subnode
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
    <person name="Joe"></person>
 </people>
@@ -31,27 +31,27 @@ var_dump($people->person[0]['name']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(6) "JoeFoo"
+  string(6) "JoeFoo"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(9) "JoeFooBar"
+  string(9) "JoeFooBar"
 }
 ---[0]---
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(6) "JoeFoo"
+  string(6) "JoeFoo"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(9) "JoeFooBar"
+  string(9) "JoeFooBar"
 }
 ===DONE===

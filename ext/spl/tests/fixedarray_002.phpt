@@ -92,10 +92,10 @@ A::offsetGet
 A::offsetGet
 A::offsetGet
 A::offsetGet
-unicode(6) "value0"
-unicode(6) "value2"
-unicode(6) "value3"
-unicode(6) "value4"
+string(6) "value0"
+string(6) "value2"
+string(6) "value3"
+string(6) "value4"
 int(2)
 int(10)
 bool(false)

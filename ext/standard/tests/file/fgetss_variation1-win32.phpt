@@ -50,7 +50,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
-  fwrite($file_handle,(binary)$string_with_tags);
+  fwrite($file_handle,$string_with_tags);
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
     exit();

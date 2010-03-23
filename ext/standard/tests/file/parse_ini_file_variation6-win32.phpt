@@ -1,7 +1,5 @@
 --TEST--
 Test parse_ini_file() function : variation - various absolute and relative paths
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -75,60 +73,60 @@ echo "\n*** Done ***\n";
 
 -- Iteration 1 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 2 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 3 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 4 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 5 --
 
-Warning: parse_ini_file(%s\parseIniFileVar6.dir\parseIniFileVar6Sub\..\\\parseIniFileVar6Sub\\..\\..\parseIniFileVar6Sub\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\..\\\parseIniFileVar6Sub\\..\\..\parseIniFileVar6Sub\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: parse_ini_file(%s\parseIniFileVar6.dir\parseIniFileVar6Sub\BADDIR\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\BADDIR\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 8 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 9 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 10 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 -- Iteration 11 --
@@ -138,9 +136,8 @@ bool(false)
 
 -- Iteration 12 --
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 *** Done ***
-

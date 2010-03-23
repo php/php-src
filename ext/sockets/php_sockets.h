@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -71,12 +71,12 @@ PHP_FUNCTION(socket_shutdown);
 PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
 
-#ifdef PHP_WIN32
-typedef SOCKET PHP_SOCKET;
-# define PHP_SOCKETS_API __declspec(dllexport)
-#else
+#ifndef PHP_WIN32
 typedef int PHP_SOCKET;
 # define PHP_SOCKETS_API PHPAPI
+#else
+# define PHP_SOCKETS_API __declspec(dllexport)
+typedef SOCKET PHP_SOCKET;
 #endif
 
 typedef struct {

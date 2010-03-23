@@ -145,24 +145,20 @@ Error: 2 - file(0.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --empty array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - file(Array): failed to open stream: No such file or directory, %s(%d)
-bool(false)
+Error: 2 - file() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --int indexed array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - file(Array): failed to open stream: No such file or directory, %s(%d)
-bool(false)
+Error: 2 - file() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --associative array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - file(Array): failed to open stream: No such file or directory, %s(%d)
-bool(false)
+Error: 2 - file() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - file(Array): failed to open stream: No such file or directory, %s(%d)
-bool(false)
+Error: 2 - file() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --uppercase NULL--
 Error: 2 - file(): Filename cannot be empty, %s(%d)
@@ -197,14 +193,12 @@ Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --instance of classWithToString--
-Error: 2 - file(Class A object): failed to open stream: No such file or directory, %s(%d)
+Error: 2 - file(Class A object): failed to open stream: %s, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 4096 - Object of class classWithoutToString could not be converted to binary string, %s(%d)
-Error: 8 - Object of class classWithoutToString to string conversion, %s(%d)
-Error: 2 - file(Object): failed to open stream: No such file or directory, %s(%d)
-bool(false)
+Error: 2 - file() expects parameter 1 to be string, object given, %s(%d)
+NULL
 
 --undefined var--
 Error: 2 - file(): Filename cannot be empty, %s(%d)

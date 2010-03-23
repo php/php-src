@@ -41,9 +41,9 @@ unset($a->a);
 ?>
 --EXPECT--
 call
-unicode(6) "sdfdsa"
+string(6) "sdfdsa"
 callstatic
 clone
-unicode(3) "foo"
+string(3) "foo"
 unset
-unicode(1) "a"
+string(1) "a"

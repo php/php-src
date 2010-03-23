@@ -19,10 +19,10 @@ var_dump(Baz);
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "Foo"
+string(3) "Foo"
 
 Warning: Constants may only evaluate to scalar values in %sbug37811.php on line %d
 
 Notice: Use of undefined constant Baz - assumed 'Baz' in %sbug37811.php on line %d
-unicode(3) "Baz"
+string(3) "Baz"
 ===DONE===

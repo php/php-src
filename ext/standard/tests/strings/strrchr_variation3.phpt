@@ -22,7 +22,7 @@ $needles = array(
   "ing", 
   "", 
   " ",
-  $multi_line_str //needle as heredoc string
+  $multi_line_str //needle as haystack 
 );
 
 //loop through to test strrchr() with each needle
@@ -32,12 +32,12 @@ foreach($needles as $needle) {
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-unicode(19) "ing heredoc syntax."
+string(19) "ing heredoc syntax."
 bool(false)
-unicode(8) " syntax."
-unicode(63) "Example of string
+string(8) " syntax."
+string(63) "Example of string
 spanning multiple lines
 using heredoc syntax."
 *** Done ***

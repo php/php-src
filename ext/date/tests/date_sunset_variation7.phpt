@@ -38,38 +38,38 @@ foreach($inputs as $timezone => $value) {
 *** Testing date_sunset() : usage variation ***
 
 --Pacific/Samoa--
-unicode(5) "18:13"
-unicode(5) "18:13"
+string(5) "18:13"
+string(5) "18:13"
 
 --US/Alaska--
-unicode(5) "21:00"
-unicode(5) "20:57"
+string(5) "21:00"
+string(5) "20:57"
 
 --America/Chicago--
-unicode(5) "19:51"
-unicode(5) "19:50"
+string(5) "19:51"
+string(5) "19:50"
 
 --America/Montevideo--
-unicode(5) "18:08"
-unicode(5) "18:09"
+string(5) "18:08"
+string(5) "18:09"
 
 --Africa/Casablanca--
-unicode(5) "19:17"
-unicode(5) "19:16"
+string(5) "19:17"
+string(5) "19:16"
 
 --Europe/Moscow--
-unicode(5) "21:09"
-unicode(5) "21:07"
+string(5) "21:09"
+string(5) "21:07"
 
 --Asia/Hong_Kong--
-unicode(5) "18:55"
-unicode(5) "18:54"
+string(5) "18:55"
+string(5) "18:54"
 
 --Australia/Brisbane--
-unicode(5) "17:21"
-unicode(5) "17:21"
+string(5) "17:21"
+string(5) "17:21"
 
 --Pacific/Wallis--
-unicode(5) "17:36"
-unicode(5) "17:36"
+string(5) "17:36"
+string(5) "17:36"
 ===DONE===

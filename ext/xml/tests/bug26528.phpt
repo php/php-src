@@ -16,16 +16,16 @@ require_once("skipif.inc");
 array(1) {
   [0]=>
   array(4) {
-    [u"tag"]=>
-    unicode(4) "TEST"
-    [u"type"]=>
-    unicode(8) "complete"
-    [u"level"]=>
+    ["tag"]=>
+    string(4) "TEST"
+    ["type"]=>
+    string(8) "complete"
+    ["level"]=>
     int(1)
-    [u"attributes"]=>
+    ["attributes"]=>
     array(1) {
-      [u"ATTR"]=>
-      unicode(13) "angle<bracket"
+      ["ATTR"]=>
+      string(13) "angle<bracket"
     }
   }
 }

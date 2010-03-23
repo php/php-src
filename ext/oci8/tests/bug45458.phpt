@@ -44,41 +44,41 @@ Test 1
 array(1) {
   [0]=>
   array(2) {
-    [u"a"]=>
-    unicode(1) "X"
+    ["a"]=>
+    string(1) "X"
     [20]=>
-    unicode(1) "X"
+    string(1) "X"
   }
 }
 array(2) {
-  [u"a"]=>
-  unicode(1) "X"
+  ["a"]=>
+  string(1) "X"
   [20]=>
-  unicode(1) "X"
+  string(1) "X"
 }
-unicode(1) "X"
-unicode(1) "X"
+string(1) "X"
+string(1) "X"
 Test 2
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   array(1) {
     [0]=>
-    unicode(1) "X"
+    string(1) "X"
   }
   [20]=>
   array(1) {
     [0]=>
-    unicode(1) "X"
+    string(1) "X"
   }
 }
 array(1) {
   [0]=>
-  unicode(1) "X"
+  string(1) "X"
 }
 array(1) {
   [0]=>
-  unicode(1) "X"
+  string(1) "X"
 }
-unicode(1) "X"
-unicode(1) "X"
+string(1) "X"
+string(1) "X"
 ===DONE===

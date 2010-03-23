@@ -107,82 +107,82 @@ foreach($inputs as $key =>$value) {
 *** Testing basename() : usage variation ***
 
 --int 0--
-unicode(4) "path"
+string(4) "path"
 
 --int 1--
-unicode(4) "path"
+string(4) "path"
 
 --int 12345--
-unicode(4) "path"
+string(4) "path"
 
 --int -12345--
-unicode(4) "path"
+string(4) "path"
 
 --float 10.5--
-unicode(4) "path"
+string(4) "path"
 
 --float -10.5--
-unicode(4) "path"
+string(4) "path"
 
 --float 12.3456789000e10--
-unicode(4) "path"
+string(4) "path"
 
 --float -12.3456789000e10--
-unicode(4) "path"
+string(4) "path"
 
 --float .5--
-unicode(4) "path"
+string(4) "path"
 
 --empty array--
-Error: 2 - basename() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - basename() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - basename() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - basename() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-unicode(4) "path"
+string(4) "path"
 
 --lowercase null--
-unicode(4) "path"
+string(4) "path"
 
 --lowercase true--
-unicode(4) "path"
+string(4) "path"
 
 --lowercase false--
-unicode(4) "path"
+string(4) "path"
 
 --uppercase TRUE--
-unicode(4) "path"
+string(4) "path"
 
 --uppercase FALSE--
-unicode(4) "path"
+string(4) "path"
 
 --empty string DQ--
-unicode(4) "path"
+string(4) "path"
 
 --empty string SQ--
-unicode(4) "path"
+string(4) "path"
 
 --instance of classWithToString--
-unicode(4) "path"
+string(4) "path"
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 2 to be string (Unicode or binary), object given, %s(%d)
+Error: 2 - basename() expects parameter 2 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
-unicode(4) "path"
+string(4) "path"
 
 --unset var--
-unicode(4) "path"
+string(4) "path"
 ===DONE===

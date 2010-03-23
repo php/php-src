@@ -51,31 +51,31 @@ echo "Done";
 
 -- Testing array_fill_keys() function with reference value --
 array(2) {
-  [u"one"]=>
-  unicode(6) "simple"
-  [u"two"]=>
-  unicode(6) "simple"
+  ["one"]=>
+  string(6) "simple"
+  ["two"]=>
+  string(6) "simple"
 }
 
 -- Testing array_fill_keys() function with reference keys --
 array(2) {
-  [u"one"]=>
-  unicode(6) "simple"
-  [u"simple"]=>
-  unicode(6) "simple"
+  ["one"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
 }
 array(2) {
-  [u"one"]=>
-  unicode(6) "simple"
-  [u"simple"]=>
-  unicode(6) "simple"
+  ["one"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
 }
 
 -- Testing array_fill_keys() function with reference array input --
 array(2) {
-  [u"one"]=>
-  unicode(3) "bob"
-  [u"two"]=>
-  unicode(3) "bob"
+  ["one"]=>
+  string(3) "bob"
+  ["two"]=>
+  string(3) "bob"
 }
 Done

@@ -1,4 +1,4 @@
-In PHP6 all additional configure options (except --enable-cgi) are removed:
+In PHP5.3 all additional configure options (except --enable-cgi) are removed:
 
   --enable-fastcgi          CGI: If this is enabled, the cgi module will
                             be built with support for fastcgi also

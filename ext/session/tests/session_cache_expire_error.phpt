@@ -165,8 +165,6 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-
-Warning: session_cache_expire() expects parameter 1 to be binary string, resource given in %s on line %d
-NULL
+int(0)
 Done
 

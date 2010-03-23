@@ -45,16 +45,17 @@ var_dump(array_diff($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
+
 *** Testing array_diff() : usage variations ***
 -- Basic Comparison --
 array(3) {
   [0]=>
-  unicode(2) "&a"
+  string(2) "&a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(3) {
   [0]=>
@@ -67,11 +68,11 @@ array(3) {
 -- $a changed --
 array(3) {
   [0]=>
-  unicode(2) "&a"
+  string(2) "&a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(3) {
   [0]=>

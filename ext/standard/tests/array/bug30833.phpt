@@ -13,23 +13,23 @@ var_dump($foo);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECT--	
 array(2) {
   [0]=>
-  unicode(3) "abc"
+  string(3) "abc"
   [1]=>
-  unicode(4) "0000"
+  string(4) "0000"
 }
 array(2) {
-  [u"abc"]=>
+  ["abc"]=>
   int(1)
-  [u"0000"]=>
+  ["0000"]=>
   int(1)
 }
 array(2) {
   [0]=>
-  unicode(3) "abc"
+  string(3) "abc"
   [1]=>
-  unicode(4) "0000"
+  string(4) "0000"
 }
 Done

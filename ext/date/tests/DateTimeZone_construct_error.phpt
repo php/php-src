@@ -7,7 +7,6 @@ Test new DateTimeZone() : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
 //Set the default time zone 
 date_default_timezone_set("GMT");
 

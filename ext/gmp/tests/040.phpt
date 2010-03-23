@@ -17,9 +17,9 @@ var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 resource(%d) of type (GMP integer)
-unicode(8) "98765678"
+string(8) "98765678"
 
 Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d
 
@@ -36,5 +36,5 @@ Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 36) in
 bool(false)
 bool(false)
 bool(false)
-unicode(1) "0"
+string(1) "0"
 Done

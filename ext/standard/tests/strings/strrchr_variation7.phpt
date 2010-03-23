@@ -21,7 +21,6 @@ $needles = array(
   '\n',
   "\r",
   "\r\n",
-  "    ",
   "\t",
   "",
   $blank_line //needle as haystack
@@ -33,9 +32,8 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-bool(false)
 bool(false)
 bool(false)
 bool(false)

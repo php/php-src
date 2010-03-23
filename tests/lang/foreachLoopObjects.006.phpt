@@ -69,35 +69,35 @@ foreach ($a as $v) {
 var_dump($obj);
 
 ?>
-===DONE===
 --EXPECTF--
+
 Substituting the iterated object for a different object.
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(5) "new a"
-unicode(5) "new b"
-unicode(5) "new c"
-unicode(5) "new d"
-unicode(5) "new e"
-unicode(5) "new f"
+string(10) "Original a"
+string(10) "Original b"
+string(5) "new a"
+string(5) "new b"
+string(5) "new c"
+string(5) "new d"
+string(5) "new e"
+string(5) "new f"
 object(stdClass)#%d (6) {
-  [u"a"]=>
-  unicode(5) "new a"
-  [u"b"]=>
-  unicode(5) "new b"
-  [u"c"]=>
-  unicode(5) "new c"
-  [u"d"]=>
-  unicode(5) "new d"
-  [u"e"]=>
-  unicode(5) "new e"
-  [u"f"]=>
-  unicode(5) "new f"
+  ["a"]=>
+  string(5) "new a"
+  ["b"]=>
+  string(5) "new b"
+  ["c"]=>
+  string(5) "new c"
+  ["d"]=>
+  string(5) "new d"
+  ["e"]=>
+  string(5) "new e"
+  ["f"]=>
+  string(5) "new f"
 }
 
 Substituting the iterated object for an array.
-unicode(10) "Original a"
-unicode(10) "Original b"
+string(10) "Original a"
+string(10) "Original b"
 int(1)
 int(2)
 int(3)
@@ -128,21 +128,20 @@ array(8) {
 Substituting the iterated array for an object.
 int(1)
 int(2)
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
-object(C)#1 (5) {
-  [u"a"]=>
-  unicode(10) "Original a"
-  [u"b"]=>
-  unicode(10) "Original b"
-  [u"c"]=>
-  unicode(10) "Original c"
-  [u"d"]=>
-  unicode(10) "Original d"
-  [u"e"]=>
-  unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
+object(C)#%d (5) {
+  ["a"]=>
+  string(10) "Original a"
+  ["b"]=>
+  string(10) "Original b"
+  ["c"]=>
+  string(10) "Original c"
+  ["d"]=>
+  string(10) "Original d"
+  ["e"]=>
+  string(10) "Original e"
 }
-===DONE===

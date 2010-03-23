@@ -1,7 +1,5 @@
 --TEST--
 Test fseek() function : usage variations  - different types for whence
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -128,25 +126,25 @@ int(3)
 
 Arg value  
 
-Warning: fseek() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: fseek() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value  
 
-Warning: fseek() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: fseek() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value string 
 
-Warning: fseek() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: fseek() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value string 
 
-Warning: fseek() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: fseek() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 int(3)
 

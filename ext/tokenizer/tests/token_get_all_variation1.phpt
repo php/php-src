@@ -95,7 +95,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(1) "0"
     [2]=>
@@ -107,7 +107,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(1) "1"
     [2]=>
@@ -119,7 +119,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(5) "12345"
     [2]=>
@@ -131,7 +131,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(5) "-2345"
     [2]=>
@@ -143,7 +143,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(4) "10.5"
     [2]=>
@@ -155,7 +155,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(5) "-10.5"
     [2]=>
@@ -167,7 +167,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(10) "1012345670"
     [2]=>
@@ -179,7 +179,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(13) "1.07654321E-7"
     [2]=>
@@ -191,7 +191,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(3) "0.5"
     [2]=>
@@ -200,23 +200,23 @@ array(1) {
 }
 --Iteration 10 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 --Iteration 11 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 --Iteration 12 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 --Iteration 13 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 --Iteration 14 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 --Iteration 15 --
 array(0) {
@@ -229,7 +229,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(1) "1"
     [2]=>
@@ -244,7 +244,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(1) "1"
     [2]=>
@@ -265,7 +265,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(6) "object"
     [2]=>
@@ -274,7 +274,7 @@ array(1) {
 }
 --Iteration 24 --
 
-Warning: token_get_all() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 --Iteration 25 --
 array(0) {

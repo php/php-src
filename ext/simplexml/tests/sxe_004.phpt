@@ -90,32 +90,32 @@ SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(10) "Bla bla 1."
+string(7) "SXETest"
+string(10) "Bla bla 1."
 SXETest::getChildren
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(28) "Here we have some text data."
+string(7) "SXETest"
+string(28) "Here we have some text data."
 SXETest::getChildren
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(19) "And here some more."
+string(7) "SXETest"
+string(19) "And here some more."
 SXETest::getChildren
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(15) "Wow once again."
+string(7) "SXETest"
+string(15) "Wow once again."
 SXETest::next
 SXETest::valid
 SXETest::next
@@ -127,16 +127,16 @@ SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(10) "Bla bla 2."
+string(7) "SXETest"
+string(10) "Bla bla 2."
 SXETest::getChildren
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren
 SXETest::valid
 SXETest::current
-unicode(7) "SXETest"
-unicode(7) "Foo Bar"
+string(7) "SXETest"
+string(7) "Foo Bar"
 SXETest::next
 SXETest::valid
 SXETest::next

@@ -13,10 +13,10 @@ if(PHP_INT_SIZE != 4 ) {
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
- 
-date_default_timezone_set("Asia/Calcutta"); 
 
 echo "*** Testing gmstrftime() : usage variation ***\n";
+
+date_default_timezone_set("Asia/Calcutta");
 
 // Initialise function arguments not being substituted (if any)
 $format = '%b %d %Y %H:%M:%S';
@@ -106,19 +106,19 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --float 10.5--
-unicode(20) "Jan 01 1970 00:00:10"
+string(20) "Jan 01 1970 00:00:10"
 
 --float -10.5--
-unicode(20) "Dec 31 1969 23:59:50"
+string(20) "Dec 31 1969 23:59:50"
 
 --float 12.3456789000e10--
-unicode(20) "Mar 26 1935 04:50:16"
+string(20) "Mar 26 1935 04:50:16"
 
 --float -12.3456789000e10--
-unicode(20) "Oct 08 2004 19:09:44"
+string(20) "Oct 08 2004 19:09:44"
 
 --float .5--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --empty array--
 
@@ -141,51 +141,51 @@ Warning: gmstrftime() expects parameter 2 to be long, array given in %s on line 
 bool(false)
 
 --uppercase NULL--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --lowercase null--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --lowercase true--
-unicode(20) "Jan 01 1970 00:00:01"
+string(20) "Jan 01 1970 00:00:01"
 
 --lowercase false--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --uppercase TRUE--
-unicode(20) "Jan 01 1970 00:00:01"
+string(20) "Jan 01 1970 00:00:01"
 
 --uppercase FALSE--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --empty string DQ--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmstrftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -199,8 +199,8 @@ Warning: gmstrftime() expects parameter 2 to be long, object given in %s on line
 bool(false)
 
 --undefined var--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 
 --unset var--
-unicode(20) "Jan 01 1970 00:00:00"
+string(20) "Jan 01 1970 00:00:00"
 ===DONE===

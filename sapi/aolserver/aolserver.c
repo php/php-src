@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -391,7 +391,7 @@ static sapi_module_struct aolserver_sapi_module = {
 	php_ns_sapi_register_variables,
 	NULL,									/* Log message */
 	NULL,									/* Get request time */
-	NULL,									/* child terminate */
+	NULL,							/* child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

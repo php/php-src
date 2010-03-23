@@ -32,7 +32,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fprintf() for scientific type ***
 
 0.000000e+0

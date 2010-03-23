@@ -30,6 +30,6 @@ xml_parse($parser, $xml);
 xml_parser_free($parser);
 ?>
 --EXPECT--
-unicode(24) "http://example.com/foo@a"
-unicode(24) "http://example.com/bar@b"
-unicode(24) "http://example.com/baz@c"
+string(24) "http://example.com/foo@a"
+string(24) "http://example.com/bar@b"
+string(24) "http://example.com/baz@c"

@@ -16,5 +16,5 @@ var_dump($address);
 
 ?>
 --EXPECT--
-unicode(27) "John Doe <john@example.com>"
-unicode(27) "John Doe <john@example.com>"
+string(27) "John Doe <john@example.com>"
+string(27) "John Doe <john@example.com>"

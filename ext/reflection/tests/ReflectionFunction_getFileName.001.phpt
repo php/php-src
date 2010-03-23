@@ -15,4 +15,4 @@ var_dump($funcInfo->getFileName());
 --EXPECTF--
 %sincluded4.inc
 %d
-unicode(%d) "%sincluded4.inc"
+string(%d) "%sincluded4.inc"

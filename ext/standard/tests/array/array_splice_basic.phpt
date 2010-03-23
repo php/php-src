@@ -46,72 +46,72 @@ var_dump ($input);
 test truncation 
 array(2) {
   [0]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [1]=>
-  unicode(6) "yellow"
+  string(6) "yellow"
 }
 array(2) {
   [0]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(5) "green"
+  string(5) "green"
 }
 test removing entries from the middle 
 array(2) {
   [0]=>
-  unicode(5) "green"
+  string(5) "green"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
 }
 array(2) {
   [0]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(6) "yellow"
+  string(6) "yellow"
 }
 test substitution at end 
 array(3) {
   [0]=>
-  unicode(5) "green"
+  string(5) "green"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [2]=>
-  unicode(6) "yellow"
+  string(6) "yellow"
 }
 array(2) {
   [0]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 array(1) {
   [0]=>
-  unicode(6) "yellow"
+  string(6) "yellow"
 }
 array(5) {
   [0]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(5) "green"
+  string(5) "green"
   [2]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [3]=>
-  unicode(5) "black"
+  string(5) "black"
   [4]=>
-  unicode(6) "maroon"
+  string(6) "maroon"
 }
 test insertion 
 array(0) {
 }
 array(5) {
   [0]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(5) "green"
+  string(5) "green"
   [2]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [3]=>
-  unicode(6) "purple"
+  string(6) "purple"
   [4]=>
-  unicode(6) "yellow"
+  string(6) "yellow"
 }

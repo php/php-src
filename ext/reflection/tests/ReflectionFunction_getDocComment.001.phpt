@@ -33,7 +33,7 @@ dumpFuncInfo('extract');
 
 ?>
 --EXPECTF--
-unicode(%d) "/**
+string(%d) "/**
  * my doc comment
  */"
 bool(false)

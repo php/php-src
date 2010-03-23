@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,6 +27,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_cdatasection_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
@@ -45,7 +46,7 @@ const zend_function_entry php_dom_cdatasection_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMCdataSection::__construct(string value) U */
+/* {{{ proto void DOMCdataSection::__construct(string value); */
 PHP_METHOD(domcdatasection, __construct)
 {
 
@@ -57,12 +58,12 @@ PHP_METHOD(domcdatasection, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_cdatasection_class_entry, &value, &value_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_cdatasection_class_entry, &value, &value_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
-	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);
 
 	if (!nodep) {

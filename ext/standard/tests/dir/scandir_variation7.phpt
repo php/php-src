@@ -74,96 +74,96 @@ foreach ($permission_values as $perm) {
 $dir_path = dirname(__FILE__) . "/scandir_variation7";
 rmdir($dir_path);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing scandir() : usage variations ***
 
 -- Iteration 1 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 2 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 3 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 4 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 5 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 6 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 7 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 8 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 9 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 10 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 ===DONE===

@@ -25,9 +25,9 @@ var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'SimpleXMLElemen
 --EXPECTF--
 array(1) {
   [0]=>
-  object(SimpleXMLElement)#3 (1) {
-    [u"a"]=>
-    unicode(3) "xyz"
+  object(SimpleXMLElement)#%d (1) {
+    ["a"]=>
+    string(3) "xyz"
   }
 }
 ===DONE===

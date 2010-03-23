@@ -22,17 +22,21 @@ END;
 var_dump(eregi('words', $string, $match1));
 var_dump($match1);
 
-var_dump(eregi(b'[[:lower:]]+[[:space:]]case', $string, $match2));  //character class lower should just match [a-z] but in case insensitive search matches [a-zA-Z]
+var_dump(eregi('[[:lower:]]+[[:space:]]case', $string, $match2));  //character class lower should just match [a-z] but in case insensitive search matches [a-zA-Z]
 var_dump($match2);
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing eregi() : basic functionality ***
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 int(5)
 array(1) {
   [0]=>
   string(5) "WORDS"
 }
+
+Deprecated: Function eregi() is deprecated in %s on line %d
 int(10)
 array(1) {
   [0]=>

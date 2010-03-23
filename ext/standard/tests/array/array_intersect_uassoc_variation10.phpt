@@ -39,17 +39,17 @@ var_dump( array_intersect_uassoc($array1, $array2, array($obj,'class_compare_fun
 
 -- Testing array_intersect_uassoc() function using class with static method as callback --
 array(1) {
-  [u"a"]=>
-  unicode(5) "green"
+  ["a"]=>
+  string(5) "green"
 }
 array(1) {
-  [u"a"]=>
-  unicode(5) "green"
+  ["a"]=>
+  string(5) "green"
 }
 
 -- Testing array_intersect_uassoc() function using class with regular method as callback --
 array(1) {
-  [u"a"]=>
-  unicode(5) "green"
+  ["a"]=>
+  string(5) "green"
 }
 ===DONE===

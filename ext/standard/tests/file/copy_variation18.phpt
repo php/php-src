@@ -1,7 +1,5 @@
 --TEST--
 Test copy() function: usage variations - stat after copy 
---XFAIL--
-Pending completion of Unicode streams
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
@@ -56,4 +54,3 @@ unlink(dirname(__FILE__)."/copy_variation18.tmp");
 Copy operation => bool(true)
 Comparing the stats of file before and after copy operation => bool(true)
 *** Done ***
-

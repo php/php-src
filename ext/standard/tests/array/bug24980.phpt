@@ -47,7 +47,7 @@ running_total is 4, current_value is 3
 running_total is 13, current_value is 5
 running_total is 38, current_value is 7
 Total is 87
-unicode(3) "abc"
+string(3) "abc"
 int(15)
 int(1200)
 int(1)

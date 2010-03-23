@@ -5,7 +5,7 @@ Bug #27010 (segfault and node text not displayed when returned from children())
 --FILE--
 <?php
 
-$xml=b<<<EOF
+$xml=<<<EOF
 <drinks xmlns:hot="http://www.example.com/hot">
  <hot:drink><hot:name>Coffee</hot:name></hot:drink>
  <hot:drink><hot:name>Tea</hot:name></hot:drink>

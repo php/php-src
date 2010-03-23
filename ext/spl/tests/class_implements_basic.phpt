@@ -23,11 +23,11 @@ var_dump(class_implements('bar'));
 --EXPECT--
 *** Testing class_implements() : basic ***
 array(1) {
-  [u"foo"]=>
-  unicode(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
 }
 ===DONE===

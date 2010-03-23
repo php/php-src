@@ -18,7 +18,7 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 echo "\n-- Testing gmstrftime() function with  Abbreviated month name format %h --\n";
@@ -32,6 +32,6 @@ var_dump( gmstrftime($format, $timestamp) );
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with  Abbreviated month name format %h --
-unicode(%d) "%s"
-unicode(3) "Aug"
+string(%d) "%s"
+string(3) "Aug"
 ===DONE===

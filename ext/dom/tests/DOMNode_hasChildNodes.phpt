@@ -33,7 +33,7 @@ $dom->loadXML('<root><a/><b/></root>');
 var_dump($dom->documentElement->hasChildNodes());
 
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0"?>
 <root/>
 Document has child nodes

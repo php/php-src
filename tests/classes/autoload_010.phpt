@@ -13,6 +13,6 @@ Ensure implements does trigger autoload.
   }
 ?>
 --EXPECTF--
-In autoload: unicode(6) "UndefI"
+In autoload: string(6) "UndefI"
 
 Fatal error: Interface 'UndefI' not found in %s on line %d

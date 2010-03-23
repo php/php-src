@@ -36,7 +36,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 NULL
 NULL
 NULL

@@ -19,7 +19,6 @@ $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 touch( $file );
 
 $fp = fopen( $file, 'w+' );
-stream_encoding( $fp, 'unicode' );
 
 $filter = stream_filter_append( $fp, "string.rot13", STREAM_FILTER_WRITE );
 fwrite( $fp, "Testing the rot13 filter which shifts some things around." );

@@ -103,7 +103,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff() : usage variations ***
 
  Iteration: 1 
@@ -153,19 +153,19 @@ array(2) {
  Iteration: 6 
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 
  Iteration: 7 
 array(3) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
-  unicode(17) "This is a heredoc"
+  string(17) "This is a heredoc"
 }
 
  Iteration: 8 

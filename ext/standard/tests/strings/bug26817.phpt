@@ -22,5 +22,5 @@ $obj->foo();
 var_dump(http_build_query($obj));
 ?>
 --EXPECT--
-unicode(27) "foo=lala&bar=meuh&test=test"
-unicode(9) "test=test"
+string(27) "foo=lala&bar=meuh&test=test"
+string(9) "test=test"

@@ -173,22 +173,22 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: shuffle() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: shuffle() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: shuffle() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: shuffle() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
@@ -211,3 +211,4 @@ bool(false)
 Warning: shuffle() expects parameter 1 to be array, resource given in %s on line %d
 bool(false)
 Done
+

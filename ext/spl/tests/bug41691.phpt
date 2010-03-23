@@ -19,11 +19,11 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(3) {
-  [u"a"]=>
+  ["a"]=>
   NULL
-  [u"b"]=>
+  ["b"]=>
   NULL
-  [u"c"]=>
+  ["c"]=>
   NULL
 }
 Done

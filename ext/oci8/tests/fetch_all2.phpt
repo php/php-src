@@ -53,34 +53,25 @@ echo "Done\n";
 --EXPECT--
 int(3)
 array(5) {
-  [u"ID"]=>
+  ["ID"]=>
   array(3) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
-    unicode(1) "1"
+    string(1) "1"
   }
-  [u"VALUE"]=>
+  ["VALUE"]=>
   array(3) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
-    unicode(1) "1"
+    string(1) "1"
   }
-  [u"BLOB"]=>
-  array(3) {
-    [0]=>
-    NULL
-    [1]=>
-    NULL
-    [2]=>
-    NULL
-  }
-  [u"CLOB"]=>
+  ["BLOB"]=>
   array(3) {
     [0]=>
     NULL
@@ -89,7 +80,16 @@ array(5) {
     [2]=>
     NULL
   }
-  [u"STRING"]=>
+  ["CLOB"]=>
+  array(3) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+  }
+  ["STRING"]=>
   array(3) {
     [0]=>
     NULL
@@ -103,41 +103,41 @@ int(3)
 array(3) {
   [0]=>
   array(5) {
-    [u"ID"]=>
-    unicode(1) "1"
-    [u"VALUE"]=>
-    unicode(1) "1"
-    [u"BLOB"]=>
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(1) "1"
+    ["BLOB"]=>
     NULL
-    [u"CLOB"]=>
+    ["CLOB"]=>
     NULL
-    [u"STRING"]=>
+    ["STRING"]=>
     NULL
   }
   [1]=>
   array(5) {
-    [u"ID"]=>
-    unicode(1) "1"
-    [u"VALUE"]=>
-    unicode(1) "1"
-    [u"BLOB"]=>
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(1) "1"
+    ["BLOB"]=>
     NULL
-    [u"CLOB"]=>
+    ["CLOB"]=>
     NULL
-    [u"STRING"]=>
+    ["STRING"]=>
     NULL
   }
   [2]=>
   array(5) {
-    [u"ID"]=>
-    unicode(1) "1"
-    [u"VALUE"]=>
-    unicode(1) "1"
-    [u"BLOB"]=>
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(1) "1"
+    ["BLOB"]=>
     NULL
-    [u"CLOB"]=>
+    ["CLOB"]=>
     NULL
-    [u"STRING"]=>
+    ["STRING"]=>
     NULL
   }
 }
@@ -149,9 +149,9 @@ array(2) {
   [0]=>
   array(5) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
     NULL
     [3]=>
@@ -162,9 +162,9 @@ array(2) {
   [1]=>
   array(5) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
     NULL
     [3]=>
@@ -178,16 +178,16 @@ array(5) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [2]=>
   array(2) {
@@ -216,12 +216,12 @@ array(5) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [2]=>
   array(1) {

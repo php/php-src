@@ -69,14 +69,13 @@ NULL
 Instance without property:
 
 Static property / too many args:
-unicode(15) "static property"
+string(15) "static property"
 
 Static property / wrong type of arg:
-unicode(15) "static property"
+string(15) "static property"
 
 Protected property:
 Cannot access non-public member TestClass::prot
 
 Instance without property:
 NULL
-  

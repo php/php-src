@@ -49,7 +49,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
-  fwrite($file_handle,(binary)$string_with_tags); //writing data to the file
+  fwrite($file_handle,$string_with_tags); //writing data to the file
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
     exit();
@@ -197,51 +197,51 @@ int(453)
 bool(false)
 -- Reading line by line with allowable tags: <test>, <html>, <?> --
 -- Line 1 --
-unicode(40) "<test>Testing fgetss() functions</test>
+string(40) "<test>Testing fgetss() functions</test>
 "
 int(40)
 bool(false)
 -- Line 2 --
-unicode(10) " {;} this
+string(10) " {;} this
 "
 int(99)
 bool(false)
 -- Line 3 --
-unicode(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
+string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 "
 int(152)
 bool(false)
 -- Line 4 --
-unicode(21) "<html> html </html> 
+string(21) "<html> html </html> 
 "
 int(193)
 bool(false)
 -- Line 5 --
-unicode(43) "this line is without any html and php tags
+string(43) "this line is without any html and php tags
 "
 int(236)
 bool(false)
 -- Line 6 --
-unicode(79) "this is a line with more than eighty character,want to check line splitting cor"
+string(79) "this is a line with more than eighty character,want to check line splitting cor"
 int(315)
 bool(false)
 -- Line 7 --
-unicode(27) "rectly after 80 characters
+string(27) "rectly after 80 characters
 "
 int(342)
 bool(false)
 -- Line 8 --
-unicode(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br 
 "
 int(410)
 bool(false)
 -- Line 9 --
-unicode(23) "this is the line with 
+string(23) "this is the line with 
 "
 int(433)
 bool(false)
 -- Line 10 --
-unicode(12) " character. "
+string(12) " character. "
 int(445)
 bool(true)
 
@@ -359,51 +359,51 @@ int(453)
 bool(false)
 -- Reading line by line with allowable tags: <test>, <html>, <?> --
 -- Line 1 --
-unicode(40) "<test>Testing fgetss() functions</test>
+string(40) "<test>Testing fgetss() functions</test>
 "
 int(40)
 bool(false)
 -- Line 2 --
-unicode(10) " {;} this
+string(10) " {;} this
 "
 int(99)
 bool(false)
 -- Line 3 --
-unicode(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
+string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 "
 int(152)
 bool(false)
 -- Line 4 --
-unicode(21) "<html> html </html> 
+string(21) "<html> html </html> 
 "
 int(193)
 bool(false)
 -- Line 5 --
-unicode(43) "this line is without any html and php tags
+string(43) "this line is without any html and php tags
 "
 int(236)
 bool(false)
 -- Line 6 --
-unicode(79) "this is a line with more than eighty character,want to check line splitting cor"
+string(79) "this is a line with more than eighty character,want to check line splitting cor"
 int(315)
 bool(false)
 -- Line 7 --
-unicode(27) "rectly after 80 characters
+string(27) "rectly after 80 characters
 "
 int(342)
 bool(false)
 -- Line 8 --
-unicode(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br 
 "
 int(410)
 bool(false)
 -- Line 9 --
-unicode(23) "this is the line with 
+string(23) "this is the line with 
 "
 int(433)
 bool(false)
 -- Line 10 --
-unicode(12) " character. "
+string(12) " character. "
 int(445)
 bool(true)
 
@@ -521,51 +521,51 @@ int(453)
 bool(false)
 -- Reading line by line with allowable tags: <test>, <html>, <?> --
 -- Line 1 --
-unicode(40) "<test>Testing fgetss() functions</test>
+string(40) "<test>Testing fgetss() functions</test>
 "
 int(40)
 bool(false)
 -- Line 2 --
-unicode(10) " {;} this
+string(10) " {;} this
 "
 int(99)
 bool(false)
 -- Line 3 --
-unicode(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
+string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 "
 int(152)
 bool(false)
 -- Line 4 --
-unicode(21) "<html> html </html> 
+string(21) "<html> html </html> 
 "
 int(193)
 bool(false)
 -- Line 5 --
-unicode(43) "this line is without any html and php tags
+string(43) "this line is without any html and php tags
 "
 int(236)
 bool(false)
 -- Line 6 --
-unicode(79) "this is a line with more than eighty character,want to check line splitting cor"
+string(79) "this is a line with more than eighty character,want to check line splitting cor"
 int(315)
 bool(false)
 -- Line 7 --
-unicode(27) "rectly after 80 characters
+string(27) "rectly after 80 characters
 "
 int(342)
 bool(false)
 -- Line 8 --
-unicode(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br 
 "
 int(410)
 bool(false)
 -- Line 9 --
-unicode(23) "this is the line with 
+string(23) "this is the line with 
 "
 int(433)
 bool(false)
 -- Line 10 --
-unicode(12) " character. "
+string(12) " character. "
 int(445)
 bool(true)
 Done

@@ -225,29 +225,29 @@ Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 15 --
 
@@ -282,29 +282,29 @@ Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
 -- Iteration 18 --
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: wordwrap() expects parameter 2 to be long, string given in %s on line %d
 NULL
 -- Iteration 20 --
 

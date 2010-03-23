@@ -110,7 +110,7 @@ $needles =  array (
   '',
  
   //resource variable in string form
-  "$file_handle",
+  "\$file_handle",
 
   //undefined variable in string form
   @"$undefined_var",
@@ -132,42 +132,42 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrchr() function: with unexpected inputs for haystack ***
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(4) "2345"
+string(4) "2345"
 -- Iteration 4 --
-unicode(5) "-2345"
+string(5) "-2345"
 -- Iteration 5 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 6 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 -- Iteration 7 --
-unicode(12) "105000000000"
+string(12) "105000000000"
 -- Iteration 8 --
-unicode(7) "1.06E-9"
+string(7) "1.06E-9"
 -- Iteration 9 --
-unicode(2) ".5"
+string(2) ".5"
 -- Iteration 10 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 bool(false)
@@ -182,14 +182,14 @@ bool(false)
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --
-unicode(6) "object"
+string(6) "object"
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)

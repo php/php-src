@@ -24,18 +24,18 @@ var_dump(sqlite_single_query($db, "SELECT id FROM test_db WHERE id=5", FALSE));
 sqlite_close($db);
 ?>
 --EXPECTF--
-unicode(1) "5"
-unicode(1) "4"
-unicode(5) "5data"
+string(1) "5"
+string(1) "4"
+string(5) "5data"
 array(4) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
   [2]=>
-  unicode(1) "3"
+  string(1) "3"
   [3]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 
 Warning: sqlite_single_query(): no such table: test in %s on line %d
@@ -43,5 +43,5 @@ bool(false)
 NULL
 array(1) {
   [0]=>
-  unicode(1) "5"
+  string(1) "5"
 }

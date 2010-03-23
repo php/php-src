@@ -17,12 +17,12 @@ Warning: Class __PHP_Incomplete_Class has no unserializer in %sbug45706.php on l
 array(2) {
   [0]=>
   object(__PHP_Incomplete_Class)#%d (1) {
-    [u"__PHP_Incomplete_Class_Name"]=>
-    unicode(4) "Bar1"
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(4) "Bar1"
   }
   [1]=>
   object(__PHP_Incomplete_Class)#%d (1) {
-    [u"__PHP_Incomplete_Class_Name"]=>
-    unicode(4) "Bar2"
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(4) "Bar2"
   }
 }

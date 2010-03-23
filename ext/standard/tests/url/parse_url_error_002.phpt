@@ -22,22 +22,22 @@ echo "Done"
 --EXPECTF--
 *** Testing parse_url() : error conditions: url component specifier out of range ***
 --> Below range:array(8) {
-  [u"scheme"]=>
-  unicode(4) "http"
-  [u"host"]=>
-  unicode(11) "www.php.net"
-  [u"port"]=>
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "www.php.net"
+  ["port"]=>
   int(80)
-  [u"user"]=>
-  unicode(6) "secret"
-  [u"pass"]=>
-  unicode(7) "hideout"
-  [u"path"]=>
-  unicode(10) "/index.php"
-  [u"query"]=>
-  unicode(31) "test=1&test2=char&test3=mixesCI"
-  [u"fragment"]=>
-  unicode(16) "some_page_ref123"
+  ["user"]=>
+  string(6) "secret"
+  ["pass"]=>
+  string(7) "hideout"
+  ["path"]=>
+  string(10) "/index.php"
+  ["query"]=>
+  string(31) "test=1&test2=char&test3=mixesCI"
+  ["fragment"]=>
+  string(16) "some_page_ref123"
 }
 
 

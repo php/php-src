@@ -79,21 +79,21 @@ if (!($s = oci_parse($c, $drop_table))) {
 --EXPECT--	
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 bool(false)
 Done

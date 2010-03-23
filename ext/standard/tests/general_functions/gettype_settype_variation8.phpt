@@ -152,20 +152,7 @@ $var_values = array (
 
   /* undefined/unset vars */
   $unset_var,
-  $undef_var,
- 
-  /* binary strings */
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
+  $undef_var
 );
 
 /* test conversion to string type */
@@ -192,7 +179,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -200,464 +187,409 @@ echo "Done\n";
 
 -- Setting type of data to string --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) "Ã¿"
-unicode(7) "unicode"
+string(1) "ÿ"
+string(6) "string"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) "f"
-unicode(7) "unicode"
+string(1) "f"
+string(6) "string"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) "
+string(2) "
 3"
-unicode(7) "unicode"
+string(6) "string"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) " "
-unicode(7) "unicode"
+string(1) " "
+string(6) "string"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) " "
-unicode(7) "unicode"
+string(1) " "
+string(6) "string"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) "10"
-unicode(7) "unicode"
+string(2) "10"
+string(6) "string"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) "10"
-unicode(7) "unicode"
+string(2) "10"
+string(6) "string"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
+string(8) "10string"
+string(6) "string"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
+string(8) "10string"
+string(6) "string"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) "-1"
-unicode(7) "unicode"
+string(2) "-1"
+string(6) "string"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(3) "1e2"
-unicode(7) "unicode"
+string(3) "1e2"
+string(6) "string"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) " 1"
-unicode(7) "unicode"
+string(2) " 1"
+string(6) "string"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(22) "2974394749328742328432"
-unicode(7) "unicode"
+string(22) "2974394749328742328432"
+string(6) "string"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "-1e-2"
-unicode(7) "unicode"
+string(5) "-1e-2"
+string(6) "string"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) "-1"
-unicode(7) "unicode"
+string(2) "-1"
+string(6) "string"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(3) "1e2"
-unicode(7) "unicode"
+string(3) "1e2"
+string(6) "string"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(2) " 1"
-unicode(7) "unicode"
+string(2) " 1"
+string(6) "string"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(22) "2974394749328742328432"
-unicode(7) "unicode"
+string(22) "2974394749328742328432"
+string(6) "string"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "-1e-2"
-unicode(7) "unicode"
+string(5) "-1e-2"
+string(6) "string"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(4) "0xff"
-unicode(7) "unicode"
+string(4) "0xff"
+string(6) "string"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(4) "0x55"
-unicode(7) "unicode"
+string(4) "0x55"
+string(6) "string"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "0XA55"
-unicode(7) "unicode"
+string(5) "0XA55"
+string(6) "string"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "0X123"
-unicode(7) "unicode"
+string(5) "0X123"
+string(6) "string"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(4) "0123"
-unicode(7) "unicode"
+string(4) "0123"
+string(6) "string"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(4) "0123"
-unicode(7) "unicode"
+string(4) "0123"
+string(6) "string"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "-0123"
-unicode(7) "unicode"
+string(5) "-0123"
+string(6) "string"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "+0123"
-unicode(7) "unicode"
+string(5) "+0123"
+string(6) "string"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "-0123"
-unicode(7) "unicode"
+string(5) "-0123"
+string(6) "string"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(5) "+0123"
-unicode(7) "unicode"
+string(5) "+0123"
+string(6) "string"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(8) "-0x80001"
-unicode(7) "unicode"
+string(8) "-0x80001"
+string(6) "string"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(8) "+0x80001"
-unicode(7) "unicode"
+string(8) "+0x80001"
+string(6) "string"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(10) "-0x80001.5"
-unicode(7) "unicode"
+string(10) "-0x80001.5"
+string(6) "string"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(9) "0x80001.5"
-unicode(7) "unicode"
+string(9) "0x80001.5"
+string(6) "string"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
-unicode(12) "@$%#$%^$%^&^"
-unicode(7) "unicode"
+string(12) "@$%#$%^$%^&^"
+string(6) "string"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 8: Array to string conversion
 bool(true)
-unicode(5) "Array"
-unicode(7) "unicode"
+string(5) "Array"
+string(6) "string"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 8: Array to string conversion
 bool(true)
-unicode(5) "Array"
-unicode(7) "unicode"
+string(5) "Array"
+string(6) "string"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 8: Array to string conversion
 bool(true)
-unicode(5) "Array"
-unicode(7) "unicode"
+string(5) "Array"
+string(6) "string"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 8: Array to string conversion
 bool(true)
-unicode(5) "Array"
-unicode(7) "unicode"
+string(5) "Array"
+string(6) "string"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 8: Array to string conversion
 bool(true)
-unicode(5) "Array"
-unicode(7) "unicode"
+string(5) "Array"
+string(6) "string"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(11) "-2147483648"
-unicode(7) "unicode"
+string(11) "-2147483648"
+string(6) "string"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
-unicode(10) "2147483647"
-unicode(7) "unicode"
+string(10) "2147483647"
+string(6) "string"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(10) "2147483649"
-unicode(7) "unicode"
+string(10) "2147483649"
+string(6) "string"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(13) "1232147483649"
-unicode(7) "unicode"
+string(13) "1232147483649"
+string(6) "string"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
-unicode(2) "85"
-unicode(7) "unicode"
+string(2) "85"
+string(6) "string"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(13) "1058513956921"
-unicode(7) "unicode"
+string(13) "1058513956921"
+string(6) "string"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
-unicode(6) "-21903"
-unicode(7) "unicode"
+string(6) "-21903"
+string(6) "string"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
-unicode(3) "365"
-unicode(7) "unicode"
+string(3) "365"
+string(6) "string"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
-unicode(4) "-365"
-unicode(7) "unicode"
+string(4) "-365"
+string(6) "string"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(14) "80561044571754"
-unicode(7) "unicode"
+string(14) "80561044571754"
+string(6) "string"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "100000"
-unicode(7) "unicode"
+string(6) "100000"
+string(6) "string"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-100000"
-unicode(7) "unicode"
+string(7) "-100000"
+string(6) "string"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "100000"
-unicode(7) "unicode"
+string(6) "100000"
+string(6) "string"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-100000"
-unicode(7) "unicode"
+string(7) "-100000"
+string(6) "string"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(4) "-1.5"
-unicode(7) "unicode"
+string(4) "-1.5"
+string(6) "string"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(3) "0.5"
-unicode(7) "unicode"
+string(3) "0.5"
+string(6) "string"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(4) "-0.5"
-unicode(7) "unicode"
+string(4) "-0.5"
+string(6) "string"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "500000"
-unicode(7) "unicode"
+string(6) "500000"
+string(6) "string"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-500000"
-unicode(7) "unicode"
+string(7) "-500000"
+string(6) "string"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-5.0E-7"
-unicode(7) "unicode"
+string(7) "-5.0E-7"
+string(6) "string"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "500000"
-unicode(7) "unicode"
+string(6) "500000"
+string(6) "string"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-500000"
-unicode(7) "unicode"
+string(7) "-500000"
+string(6) "string"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "512000"
-unicode(7) "unicode"
+string(6) "512000"
+string(6) "string"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-512000"
-unicode(7) "unicode"
+string(7) "-512000"
+string(6) "string"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "5.12E-7"
-unicode(7) "unicode"
+string(7) "5.12E-7"
+string(6) "string"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "5.12E-7"
-unicode(7) "unicode"
+string(7) "5.12E-7"
+string(6) "string"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(6) "512000"
-unicode(7) "unicode"
+string(6) "512000"
+string(6) "string"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
-unicode(7) "-512000"
-unicode(7) "unicode"
+string(7) "-512000"
+string(6) "string"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
-unicode(11) "ObjectPoint"
-unicode(7) "unicode"
+string(11) "ObjectPoint"
+string(6) "string"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
-unicode(11) "ObjectPoint"
-unicode(7) "unicode"
+string(11) "ObjectPoint"
+string(6) "string"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
-unicode(11) "ObjectPoint"
-unicode(7) "unicode"
+string(11) "ObjectPoint"
+string(6) "string"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
-unicode(0) ""
-unicode(7) "unicode"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-unicode(5) "+0123"
-unicode(7) "unicode"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-unicode(5) "-0123"
-unicode(7) "unicode"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-unicode(4) "0xff"
-unicode(7) "unicode"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-unicode(4) "0x55"
-unicode(7) "unicode"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-unicode(3) "1e2"
-unicode(7) "unicode"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-unicode(22) "2974394749328742328432"
-unicode(7) "unicode"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-unicode(3) "1e2"
-unicode(7) "unicode"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-unicode(8) "10string"
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 Done

@@ -16,7 +16,7 @@ $xmlstr = <<< XML
     </movies>
 XML;
 
-$doc = simplexml_load_string((binary)$xmlstr);
+$doc = simplexml_load_string($xmlstr);
 $xml = explode("\n", $xmlstr);
 
 if (!$doc) {
@@ -70,18 +70,18 @@ Fatal Error 76: Opening and ending tag mismatch: titles line 4 and title
 --------------------------------------------
 
 object(LibXMLError)#%d (6) {
-  [u"level"]=>
+  ["level"]=>
   int(3)
-  [u"code"]=>
+  ["code"]=>
   int(76)
-  [u"column"]=>
+  ["column"]=>
   int(%d)
-  [u"message"]=>
+  ["message"]=>
   string(57) "Opening and ending tag mismatch: titles line 4 and title
 "
-  [u"file"]=>
+  ["file"]=>
   string(0) ""
-  [u"line"]=>
+  ["line"]=>
   int(4)
 }
 Done

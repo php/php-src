@@ -38,7 +38,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fprintf() with floats ***
 
 -- Iteration 1 --

@@ -62,10 +62,10 @@ $inputs =  array (
 /*20*/	  $file_handle,
 		
 		  // undefined variable
-/*22*/	  @$undefined_var,
+/*21*/	  @$undefined_var,
 		
 		  // unset variable
-/*23*/	  @$unset_var
+/*22*/	  @$unset_var
 );
 
 // loop through with each element of the $inputs array to test ltrim() function
@@ -84,55 +84,55 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing ltrim() function: with unexpected inputs for 'str' argument ***
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(3) "255"
+string(3) "255"
 -- Iteration 4 --
-unicode(3) "256"
+string(3) "256"
 -- Iteration 5 --
-unicode(10) "2147483647"
+string(10) "2147483647"
 -- Iteration 6 --
-unicode(10) "2147483648"
+string(10) "2147483648"
 -- Iteration 7 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 8 --
-unicode(4) "20.5"
+string(4) "20.5"
 -- Iteration 9 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 -- Iteration 10 --
 
-Warning: ltrim() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: ltrim() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: ltrim() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 14 --
-unicode(0) ""
+string(0) ""
 -- Iteration 15 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 -- Iteration 17 --
-unicode(0) ""
+string(0) ""
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 -- Iteration 19 --
-unicode(15) "sample object  "
+string(15) "sample object  "
 -- Iteration 20 --
 
-Warning: ltrim() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: ltrim() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 -- Iteration 22 --
-unicode(0) ""
+string(0) ""
 ===DONE===

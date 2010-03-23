@@ -1,5 +1,5 @@
 --TEST--
-Bug #33382 (array_reverse() fails after *sort())
+Bug #33382 (array_reverse() fails after *sort() )
 --FILE--
 <?php
 
@@ -11,7 +11,7 @@ var_dump(array_reverse($array));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECT--	
 array(5) {
   [0]=>
   int(5)

@@ -42,7 +42,7 @@ function test_gzopen($mode) {
    
    // create a file in the middle directory
    $h = gzopen($secondFile, "w");
-   gzwrite($h, b"This is a file in dir2");
+   gzwrite($h, "This is a file in dir2");
    gzclose($h);
 
    echo "\n** testing with mode=$mode **\n";
@@ -54,7 +54,7 @@ function test_gzopen($mode) {
 
    //create a file in dir1
    $h = gzopen($firstFile, "w");
-   gzwrite($h, b"This is a file in dir1");
+   gzwrite($h, "This is a file in dir1");
    gzclose($h);
    
    //should now read dir1 file
@@ -65,7 +65,7 @@ function test_gzopen($mode) {
    
    // create a file in working directory
    $h = gzopen($filename, "w");
-   gzwrite($h, b"This is a file in working dir");
+   gzwrite($h, "This is a file in working dir");
    gzclose($h);
    
    //should still read dir1 file
@@ -85,7 +85,7 @@ function test_gzopen($mode) {
    
    // create a file in the script directory
    $h = gzopen($scriptFile, "w");
-   gzwrite($h, b"This is a file in script dir");
+   gzwrite($h, "This is a file in script dir");
    gzclose($h);
    
    //should read the file in script dir
@@ -152,40 +152,10 @@ Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on li
 
 
 ** testing with mode=rt **
-
-Warning: gzopen(): cannot cast a filtered stream on this system in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot cast a filtered stream on this system in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot cast a filtered stream on this system in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot cast a filtered stream on this system in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot cast a filtered stream on this system in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
+This is a file in dir2
+This is a file in dir1
+This is a file in dir1
+This is a file in working dir
+This is a file in script dir
 ===DONE===
 

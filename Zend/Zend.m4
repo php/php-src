@@ -176,6 +176,13 @@ AC_ARG_ENABLE(inline-optimization,
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
+AC_ARG_ENABLE(zend-multibyte,
+[  --enable-zend-multibyte Compile with zend multibyte support], [
+  ZEND_MULTIBYTE=$enableval
+],[
+  ZEND_MULTIBYTE=no
+])
+
 AC_MSG_CHECKING([virtual machine dispatch method])
 AC_MSG_RESULT($PHP_ZEND_VM)
 
@@ -187,6 +194,9 @@ AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
+
+AC_MSG_CHECKING(whether to enable Zend multibyte)
+AC_MSG_RESULT($ZEND_MULTIBYTE)
 
 case $PHP_ZEND_VM in
   SWITCH)
@@ -207,20 +217,9 @@ if test "$ZEND_DEBUG" = "yes"; then
   if test "$CFLAGS" = "-g -O2"; then
   	CFLAGS=-g
   fi
-  changequote({,})
-  if test -n "$GCC"; then
-
-    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
-
-    "$CC" --help=warnings|grep -q -- '-Wpointer-arith[ \t]' && \
-      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wpointer-arith"
-    "$CC" --help=warnings|grep -q -- '-Wdeclaration-after-statement[ \t]' && \
-      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wdeclaration-after-statement"
-
-    test "$USE_MAINTAINER_MODE" = "yes" && \
-      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
-  fi
-  changequote([,])
+  test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
+  test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
 else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
@@ -232,6 +231,10 @@ if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
 fi  
+
+if test "$ZEND_MULTIBYTE" = "yes"; then
+  AC_DEFINE(ZEND_MULTIBYTE, 1, [ ])
+fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then

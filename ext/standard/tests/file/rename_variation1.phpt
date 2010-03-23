@@ -52,11 +52,9 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing rename() : renaming directory across directories ***
 -- Iteration 1 --
 bool(true)

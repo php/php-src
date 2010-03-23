@@ -39,7 +39,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_chunk() : basic functionality ***
 
 -- Iteration 1 --
@@ -91,28 +91,28 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(6) "value1"
+    string(6) "value1"
     [1]=>
-    unicode(6) "value2"
+    string(6) "value2"
   }
   [1]=>
   array(1) {
     [2]=>
-    unicode(6) "value3"
+    string(6) "value3"
   }
 }
 array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(6) "value1"
+    string(6) "value1"
     [1]=>
-    unicode(6) "value2"
+    string(6) "value2"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(6) "value3"
+    string(6) "value3"
   }
 }
 
@@ -120,14 +120,14 @@ array(2) {
 array(2) {
   [0]=>
   array(2) {
-    [u"key1"]=>
+    ["key1"]=>
     int(1)
-    [u"key2"]=>
+    ["key2"]=>
     int(2)
   }
   [1]=>
   array(1) {
-    [u"key3"]=>
+    ["key3"]=>
     int(3)
   }
 }
@@ -151,28 +151,28 @@ array(2) {
   [0]=>
   array(2) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(1) {
     [3]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 
@@ -181,20 +181,20 @@ array(3) {
   [0]=>
   array(2) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(2) {
     [3]=>
-    unicode(5) "three"
+    string(5) "three"
     [4]=>
     int(4)
   }
   [2]=>
   array(1) {
-    [u"five"]=>
+    ["five"]=>
     int(5)
   }
 }
@@ -202,14 +202,14 @@ array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
     [1]=>
     int(4)
   }

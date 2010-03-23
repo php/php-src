@@ -194,22 +194,22 @@ NULL
 
 Arg value  
 
-Warning: xml_set_object() expects parameter 2 to be object, Unicode string given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_set_object() expects parameter 2 to be object, Unicode string given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_set_object() expects parameter 2 to be object, Unicode string given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_set_object() expects parameter 2 to be object, Unicode string given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, string given in %s on line %d
 NULL
 
 Arg value Resource id %s

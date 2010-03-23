@@ -23,10 +23,10 @@ $error = 1 / 0;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
-unicode(1) "1"
-unicode(5) "32767"
-unicode(1) "0"
-unicode(1) "1"
-unicode(1) "0"
+string(1) "1"
+string(5) "32767"
+string(1) "0"
+string(1) "1"
+string(1) "0"
 NULL
-unicode(%d) "%sivision by zer%s"
+string(%d) "%sivision by zer%s"

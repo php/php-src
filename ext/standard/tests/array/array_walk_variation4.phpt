@@ -40,7 +40,7 @@ var_dump( array_walk( $input, "callback"));
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk() : array with subarray ***
 int(0)
 array(0) {
@@ -65,9 +65,9 @@ array(3) {
 int(3)
 array(2) {
   [0]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [1]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
 }
 
 int(4)

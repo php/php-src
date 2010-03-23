@@ -39,5 +39,5 @@ require dirname(__FILE__)."/drop_type.inc";
 bool(true)
 bool(true)
 bool(true)
-unicode(6) "string"
+string(6) "string"
 Done

@@ -4,7 +4,7 @@
  * @ingroup Examples
  * @brief class DbaArray
  * @author  Marcus Boerger
- * @date    2003 - 2006
+ * @date    2003 - 2005
  *
  * SPL - Standard PHP Library
  */
@@ -51,6 +51,9 @@ class DbaArray extends DbaReader implements ArrayAccess
 	{
 		$data = dba_fetch($name, $this->db); 
 		if($data) {
+			if (ini_get('magic_quotes_runtime')) {
+				$data = stripslashes($data);
+			}
 			//return unserialize($data);
 			return $data;
 		}

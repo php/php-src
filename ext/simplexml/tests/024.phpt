@@ -5,7 +5,7 @@ SimpleXML: XPath and attributes
 --FILE--
 <?php
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version='1.0'?>
 <root>
 <elem attr1='11' attr2='12' attr3='13'/>
@@ -36,26 +36,26 @@ test('elem[2]/@attr2');
 array(3) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "12"
+      ["attr2"]=>
+      string(2) "12"
     }
   }
   [1]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "22"
+      ["attr2"]=>
+      string(2) "22"
     }
   }
   [2]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "32"
+      ["attr2"]=>
+      string(2) "32"
     }
   }
 }
@@ -63,26 +63,26 @@ array(3) {
 array(3) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "12"
+      ["attr2"]=>
+      string(2) "12"
     }
   }
   [1]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "22"
+      ["attr2"]=>
+      string(2) "22"
     }
   }
   [2]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "32"
+      ["attr2"]=>
+      string(2) "32"
     }
   }
 }
@@ -90,74 +90,74 @@ array(3) {
 array(9) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr1"]=>
-      unicode(2) "11"
+      ["attr1"]=>
+      string(2) "11"
     }
   }
   [1]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "12"
+      ["attr2"]=>
+      string(2) "12"
     }
   }
   [2]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr3"]=>
-      unicode(2) "13"
+      ["attr3"]=>
+      string(2) "13"
     }
   }
   [3]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr1"]=>
-      unicode(2) "21"
+      ["attr1"]=>
+      string(2) "21"
     }
   }
   [4]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "22"
+      ["attr2"]=>
+      string(2) "22"
     }
   }
   [5]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr3"]=>
-      unicode(2) "23"
+      ["attr3"]=>
+      string(2) "23"
     }
   }
   [6]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr1"]=>
-      unicode(2) "31"
+      ["attr1"]=>
+      string(2) "31"
     }
   }
   [7]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "32"
+      ["attr2"]=>
+      string(2) "32"
     }
   }
   [8]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr3"]=>
-      unicode(2) "33"
+      ["attr3"]=>
+      string(2) "33"
     }
   }
 }
@@ -165,10 +165,10 @@ array(9) {
 array(1) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr2"]=>
-      unicode(2) "22"
+      ["attr2"]=>
+      string(2) "22"
     }
   }
 }

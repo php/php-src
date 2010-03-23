@@ -27,7 +27,7 @@ var_dump( array_pad($input, -$pad_size, $binary) );  // negative 'pad_size'
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_pad() : Passing binary values to $pad_value argument ***
 array(6) {
   [0]=>

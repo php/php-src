@@ -7,10 +7,10 @@
        delete_links() : delete links 
        fill_files()   : fill file with specified contents 
        change_file_perms() : Change permission of files 
-       fill_buffer()    : fill buffer with specified contents
+       fill_buffer()  : fills buffer with specified contents
        compare_self_stat() : compares the first 13 elements of the 
-                             stat with the corresponding named key values of 
-                             the same stat. 
+                            stat with the corresponding named key values of
+                            the same stat.
        compare_stats() : Compares two stat values
 
 */ 
@@ -38,11 +38,11 @@ function create_file($filename, $mode = "w") {
  Function : bool fill_buffer(string &$buffer, string $fill_type, int $fill_size);
  Description: Fills the $buffer with data as specified with requested size.
    $buffer = buffer to be filled
-   $fill_type: 
+   $fill_type:
        "text" = fills with string of size $file_size
        "numeric" = fills with numeric value of size $file_size
        "text_with_new_line" = similar to "text" fill type but writes with new line
-       "alphanumeric" = fills with alphnumeric values 
+       "alphanumeric" = fills with alphnumeric values
  Returns: true on success, false on invalid fill type
 */
 function fill_buffer(&$buffer, $fill_type, $fill_size) {
@@ -69,7 +69,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
   }
 
   $tmp_buff = str_repeat($data, ($fill_size/$size_divider) + $add_value );
-  
+
   if ( strlen($tmp_buff) > $fill_size ) {
     $buffer = substr($tmp_buff, 0, $fill_size);
   } else {
@@ -80,7 +80,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
 }
 
 /*
- Function : bool fill_file(resource $file_handle, string $fill_type, int $file_size);
+ Function : bool fill_file(resource $file_handle, string $fill_type, string $file_size);
  Description: Fills the file with data as specified with requested size.
    $file_handle = file handle, opened with write options,
    $fill_type: 
@@ -129,7 +129,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
         $chunk_size = $size;
       }
       $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
-      $bytes_written = fwrite($file_handle, (binary)$num_values, $chunk_size);
+      $bytes_written = fwrite($file_handle, $num_values, $chunk_size);
       if ( $bytes_written != $chunk_size ) {
             return false;
       }
@@ -137,7 +137,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
     } while ( $size > 0 );
   } else {
     $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
-    $bytes_written = fwrite($file_handle, (binary)$num_values, $file_size);
+    $bytes_written = fwrite($file_handle, $num_values, $file_size);
     if ( $bytes_written != $file_size ) {
       return false;
     }
@@ -235,7 +235,7 @@ function create_files( $file_path,
                        $content_type = "numeric",
                        $permission = 0755,
                        $size = 1,
-                       $mode = "wb",
+                       $mode = "w",
                        $name_prefix = "file",
                        $name_suffix = 1,
                        $flag = "kilobytes",
@@ -279,7 +279,7 @@ function create_files( $file_path,
   if ( $content_type == "empty" ) {
     $return_value['filled'] = $count;
   } else {
-    //fill the file with specifiec type of data and size
+    // fill the file with specifiec type of data and size
     $tmp_name_suffix = $name_suffix;
     for($loop_counter = 1; $loop_counter <= $count; $loop_counter ++) {
       $filename = $file_path."/".$name_prefix.$tmp_name_suffix.$file_extension;
@@ -347,16 +347,16 @@ function create_files( $file_path,
      filled => total files filled, always returned as 1
      perms_changed => total files permission changed
 */
-function create_links( $file_path,
-		       $filename,
-                       $link_count = 1,
-                       $link_type = "soft",
-                       $link_size = 1024,
-                       $link_name_prefix = "link",
-                       $link_name_suffix = 1,
-                       $link_file_content = "text",
-                       $link_perms = 0755,
-                       $link_file_extension = ".tmp"
+function create_links($file_path,
+                      $filename,
+                      $link_count = 1,
+                      $link_type = "soft",
+                      $link_size = 1024,
+                      $link_name_prefix = "link",
+                      $link_name_suffix = 1,
+                      $link_file_content = "text",
+                      $link_perms = 0755,
+                      $link_file_extension = ".tmp"
                      )
 {
   $return_value = array('created' => 0, 'filled' => 0, 'perms_changed' => 0);
@@ -557,7 +557,7 @@ function compare_self_stat( array $stat )
     }
   } // end of foreach
 
-  // if the $return_value is false, i.e all the element do not match then
+  // if the $return_value is false, i.e all the element do not match then 
   // dump the stat array so that its easy to figure out the error
   if ($return_value == false ) {
     echo "\n Dumping stat array ...\n";
@@ -577,7 +577,7 @@ Description:
   $stat2 = second stat array
   $op = type of the comparision to be perform between elements of stat1 and stat2
     "!=" compare for not equal
-    "==" comprae for equality
+    "==" compare for equality
     ">"  if each element of stat1 is > than stat2
     "<"  if each element of stat1 is < than stat2
   $fields = contains the key of the elements that needs to be compared. 
@@ -585,7 +585,10 @@ Description:
   $flag = specify true to dump the stat1 and stat2 
 */
 
-$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "dev", "ino", "mode", "nlink", "uid", "gid", "rdev", "size", "atime", "mtime", "ctime", "blksize", "blocks");
+$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
+                       "dev", "ino", "mode", "nlink", "uid", "gid",
+                       "rdev", "size", "atime", "mtime", "ctime",
+                       "blksize", "blocks");
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // dump the stat if requested
@@ -632,7 +635,7 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
          break;
     }
   }
-  // if the result is false(i.e values are not as expected),
+  // if the result is false(i.e values are not as expected), 
   // dump the stat array so that easy to figure out the error
   if ( $result == false ) {
     echo "\n Dumping stat array 1...\n";

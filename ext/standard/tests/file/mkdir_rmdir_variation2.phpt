@@ -50,7 +50,6 @@ echo "Done\n";
 --CLEAN--
 <?php
 rmdir(dirname(__FILE__)."/mkdir_variation2/test/");
-rmdir(dirname(__FILE__)."/mkdir_variation2/test1/");
 rmdir(dirname(__FILE__)."/mkdir_variation2/");
 ?>
 --EXPECTF--

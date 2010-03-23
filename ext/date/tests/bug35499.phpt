@@ -13,66 +13,66 @@ var_dump(date_parse(" \n "));
 2005-11-20T08:00:00+0000
 2005-11-20T08:00:00+0000
 array(16) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(true)
-  [u"zone_type"]=>
+  ["zone_type"]=>
   int(2)
-  [u"zone"]=>
+  ["zone"]=>
   int(-60)
-  [u"is_dst"]=>
+  ["is_dst"]=>
   bool(false)
-  [u"tz_abbr"]=>
-  unicode(1) "A"
+  ["tz_abbr"]=>
+  string(1) "A"
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }

@@ -1,5 +1,7 @@
 --TEST--
 Test array_change_key_case() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
@@ -36,55 +38,55 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_change_key_case() : usage variations ***
 
 -- $input argument is a reference to array --
 Result:
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"ABC"]=>
-  unicode(3) "xyz"
+  ["ABC"]=>
+  string(3) "xyz"
 }
 Original:
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"ABC"]=>
-  unicode(3) "xyz"
+  ["ABC"]=>
+  string(3) "xyz"
 }
 Referenced:
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"ABC"]=>
-  unicode(3) "xyz"
+  ["ABC"]=>
+  string(3) "xyz"
 }
 
 -- $input is an array passed by reference --
 Result:
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"ABC"]=>
-  unicode(3) "xyz"
+  ["ABC"]=>
+  string(3) "xyz"
 }
 Original:
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"ABC"]=>
-  unicode(3) "xyz"
+  ["ABC"]=>
+  string(3) "xyz"
 }
 Done
+

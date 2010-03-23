@@ -24,7 +24,7 @@ require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 21, "bytes");
 $file = $file_path."/007_variation21.tmp";
-$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 
 echo "*** Test fopen() & fclose() functions:  with 'ab' mode ***\n";
 $file_handle = fopen($file, "ab");  //opening the file "ab" mode
@@ -49,12 +49,12 @@ unlink(dirname(__FILE__)."/007_variation21.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'ab' mode ***
 resource(%d) of type (stream)
-%unicode|string%(6) "stream"
+string(6) "stream"
 int(37)
 string(0) ""
 int(0)
 bool(true)
-%unicode|string%(7) "Unknown"
+string(7) "Unknown"
 int(57)
 bool(true)
 *** Done ***

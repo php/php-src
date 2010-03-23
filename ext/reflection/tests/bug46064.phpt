@@ -48,27 +48,27 @@ new bar;
 ===DONE===
 --EXPECTF--
 object(ReflectionProperty)#%d (2) {
-  [u"name"]=>
-  unicode(1) "z"
-  [u"class"]=>
-  unicode(1) "x"
+  ["name"]=>
+  string(1) "z"
+  ["class"]=>
+  string(1) "x"
 }
 bool(false)
 bool(true)
 bool(false)
-unicode(1) "z"
+string(1) "z"
 array(1) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
 }
 int(1000)
 ---------------------------
-unicode(30) "Property x::$zz does not exist"
+string(30) "Property x::$zz does not exist"
 object(ReflectionProperty)#%d (2) {
-  [u"name"]=>
-  unicode(3) "zzz"
-  [u"class"]=>
-  unicode(1) "x"
+  ["name"]=>
+  string(3) "zzz"
+  ["class"]=>
+  string(1) "x"
 }
 int(2)
 bool(false)

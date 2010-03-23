@@ -2,7 +2,6 @@
 datefmt_get_pattern_code and datefmt_set_pattern_code()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php print 'skip'; ?>
 --FILE--
 
 <?php

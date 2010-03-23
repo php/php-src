@@ -1,5 +1,7 @@
 --TEST--
 Test array_slice() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
@@ -37,22 +39,21 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_slice() : usage variations ***
 
 -- Array of referenced variables ($preserve_keys = default) --
 array(2) {
   [0]=>
-  &unicode(3) "two"
+  &string(3) "two"
   [1]=>
-  &unicode(5) "three"
+  &string(5) "three"
 }
 -- Change $val2 ($preserve_keys = TRUE) --
 array(2) {
   [2]=>
-  &unicode(12) "hello, world"
+  &string(12) "hello, world"
   [1]=>
-  &unicode(5) "three"
+  &string(5) "three"
 }
 
 -- Pass array by reference --

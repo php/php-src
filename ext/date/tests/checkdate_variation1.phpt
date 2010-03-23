@@ -150,32 +150,32 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: checkdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: checkdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
@@ -199,3 +199,4 @@ bool(false)
 Warning: checkdate() expects parameter 1 to be long, resource given in %s on line %d
 bool(false)
 ===DONE===
+

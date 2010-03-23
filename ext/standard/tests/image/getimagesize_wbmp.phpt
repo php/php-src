@@ -30,9 +30,9 @@ array(5) {
   [2]=>
   int(15)
   [3]=>
-  unicode(22) "width="75" height="50""
-  [u"mime"]=>
-  unicode(18) "image/vnd.wap.wbmp"
+  string(22) "width="75" height="50""
+  ["mime"]=>
+  string(18) "image/vnd.wap.wbmp"
 }
 array(0) {
 }

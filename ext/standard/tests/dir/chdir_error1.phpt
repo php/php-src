@@ -30,10 +30,10 @@ var_dump( chdir($directory, $extra_arg) );
 -- Testing chdir() function with Zero arguments --
 
 Warning: chdir() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 -- Testing chdir() function with more than expected no. of arguments --
 
 Warning: chdir() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 ===DONE===

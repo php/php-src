@@ -108,53 +108,53 @@ Notice: Undefined variable: unset_var in %s on line %d
 
 --- Testing strtok() by supplying different values for 'str' argument ---
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(5) "12345"
+string(5) "12345"
 -- Iteration 4 --
-unicode(4) "2345"
+string(4) "2345"
 -- Iteration 5 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 6 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 7 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 -- Iteration 8 --
-unicode(11) "1.07654321E"
+string(11) "1.07654321E"
 -- Iteration 9 --
-unicode(3) "0.5"
+string(3) "0.5"
 -- Iteration 10 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-unicode(3) "obj"
+string(3) "obj"
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --
@@ -169,6 +169,6 @@ bool(false)
 bool(false)
 -- Iteration 26 --
 
-Warning: strtok() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtok() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

@@ -41,11 +41,11 @@ Opening
 Closing up!
 array(4) {
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
   [1]=>
-  unicode(6) "fourth"
+  string(6) "fourth"
   [2]=>
-  unicode(6) "second"
+  string(6) "second"
   [3]=>
-  unicode(5) "third"
+  string(5) "third"
 }

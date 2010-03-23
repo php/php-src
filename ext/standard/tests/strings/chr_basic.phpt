@@ -10,12 +10,8 @@ Test chr() function : basic functionality
 
 echo "*** Testing chr() : basic functionality ***\n";
 
-echo chr(72);
-echo chr(101);
-echo chr(108);
-echo chr(108);
-echo chr(111);
-echo chr(10);
+echo chr(72). chr(101) . chr(108) . chr(108). chr(111); // Hello
+echo chr(10); // "\n"
 echo "World";
 echo "\n";
 ?>

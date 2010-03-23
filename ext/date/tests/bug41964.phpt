@@ -41,19 +41,19 @@ NULL
 NULL
 
 int(-60)
-unicode(1) "A"
+string(1) "A"
 
 int(-60)
-unicode(1) "A"
+string(1) "A"
 
 int(-60)
-unicode(1) "A"
+string(1) "A"
 
 int(-60)
-unicode(1) "A"
+string(1) "A"
 
 int(-60)
-unicode(1) "A"
+string(1) "A"
 
 int(-60)
-unicode(1) "A"
+string(1) "A"

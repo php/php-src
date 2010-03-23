@@ -49,7 +49,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation11.tmp");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stat() on a file after using is_file() on it ***
 bool(true)
 bool(true)

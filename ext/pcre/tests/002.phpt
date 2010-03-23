@@ -28,8 +28,8 @@ NULL
 
 Warning: preg_quote() expects at least 1 parameter, 0 given in %s002.php on line 7
 NULL
-unicode(0) ""
-unicode(12) "a${1b${1c${1"
+string(0) ""
+string(12) "a${1b${1c${1"
 
 Warning: preg_replace(): Compilation failed: missing terminating ] for character class at offset 8 in %s002.php on line 11
 NULL

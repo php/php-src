@@ -40,35 +40,35 @@ function s_var_dump($arr) {
 --EXPECT--
 *** Testing class_implements() : basic ***
 array(2) {
-  [u"foo"]=>
-  unicode(3) "foo"
-  [u"bar"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
 }
 array(2) {
-  [u"foo"]=>
-  unicode(3) "foo"
-  [u"bar"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
 }
 array(2) {
-  [u"foo"]=>
-  unicode(3) "foo"
-  [u"bar"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
 }
 array(2) {
-  [u"foo"]=>
-  unicode(3) "foo"
-  [u"bar"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
 }
 ===DONE===

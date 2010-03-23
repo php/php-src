@@ -13,9 +13,7 @@ if(fileowner($filename) == 0) {
         unlink ($filename);
         die('skip cannot be run as root');
 }
-
 unlink($filename);
-
 ?>
 --FILE--
 <?php

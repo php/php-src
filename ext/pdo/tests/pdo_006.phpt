@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -30,48 +30,48 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_GROUP));
 ?>
 --EXPECT--
 array(2) {
-  [u"A"]=>
+  ["A"]=>
   array(2) {
     [0]=>
     array(1) {
       [0]=>
-      unicode(1) "1"
+      string(1) "1"
     }
     [1]=>
     array(1) {
       [0]=>
-      unicode(1) "2"
+      string(1) "2"
     }
   }
-  [u"C"]=>
+  ["C"]=>
   array(1) {
     [0]=>
     array(1) {
       [0]=>
-      unicode(1) "3"
+      string(1) "3"
     }
   }
 }
 array(2) {
-  [u"A"]=>
+  ["A"]=>
   array(2) {
     [0]=>
     array(1) {
-      [u"id"]=>
-      unicode(1) "1"
+      ["id"]=>
+      string(1) "1"
     }
     [1]=>
     array(1) {
-      [u"id"]=>
-      unicode(1) "2"
+      ["id"]=>
+      string(1) "2"
     }
   }
-  [u"C"]=>
+  ["C"]=>
   array(1) {
     [0]=>
     array(1) {
-      [u"id"]=>
-      unicode(1) "3"
+      ["id"]=>
+      string(1) "3"
     }
   }
 }

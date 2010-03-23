@@ -14,10 +14,9 @@ Test uasort() function : usage variations - anonymous function as 'cmp_function'
 */
 
 echo "*** Testing uasort() : anonymous function as 'cmp_function' ***\n";
-// Initializing variables
 
-$cmp_function = 'if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else {return -1;}';
- 
+$cmp_function = 'if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;}';
+
 $array_arg = array(0 => 100, 1 => 3, 2 => -70, 3 => 24, 4 => 90);
 echo "-- Anonymous 'cmp_function' with parameters passed by value --\n";
 var_dump( uasort($array_arg, create_function('$value1, $value2',$cmp_function) ) );
@@ -30,7 +29,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)
@@ -49,13 +48,13 @@ array(5) {
 -- Anonymous 'cmp_function' with parameters passed by reference --
 bool(true)
 array(4) {
-  [u"a"]=>
-  unicode(5) "Apple"
-  [u"b"]=>
-  unicode(6) "Banana"
-  [u"m"]=>
-  unicode(5) "Mango"
-  [u"p"]=>
-  unicode(9) "Pineapple"
+  ["a"]=>
+  string(5) "Apple"
+  ["b"]=>
+  string(6) "Banana"
+  ["m"]=>
+  string(5) "Mango"
+  ["p"]=>
+  string(9) "Pineapple"
 }
 Done

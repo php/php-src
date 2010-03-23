@@ -28,12 +28,12 @@ function fubar($text){
 --EXPECTF--
 Strict Standards: Only variables should be assigned by reference in %sbug21600.php on line 4
 array(1) {
-  [u"foo"]=>
-  unicode(4) "test"
+  ["foo"]=>
+  string(4) "test"
 }
 
 Strict Standards: Only variables should be assigned by reference in %sbug21600.php on line 11
 array(1) {
-  [u"foo"]=>
-  unicode(4) "test"
+  ["foo"]=>
+  string(4) "test"
 }

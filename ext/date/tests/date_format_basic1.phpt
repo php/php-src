@@ -2,7 +2,7 @@
 Test date_format() function : basic functionality 
 --FILE--
 <?php
-/* Prototype  : unicode date_format  ( DateTime $object  , unicode $format  )
+/* Prototype  : string date_format  ( DateTime $object  , string $format  )
  * Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::format
@@ -28,13 +28,13 @@ var_dump( date_format($date, "H:i:s") );
 ===DONE===
 --EXPECTF--
 *** Testing date_format() : basic functionality ***
-unicode(23) "July 14, 2005, 10:30 pm"
-unicode(8) "07.14.05"
-unicode(11) "14, 7, 2005"
-unicode(8) "20050714"
-unicode(39) "10-30-41, 14-07-05, 3031 3041 4 Thupm05"
-unicode(19) "it is the 14th day."
-unicode(28) "Thu Jul 14 22:30:41 BST 2005"
-unicode(19) "22:07:41 m is month"
-unicode(8) "22:30:41"
+string(23) "July 14, 2005, 10:30 pm"
+string(8) "07.14.05"
+string(11) "14, 7, 2005"
+string(8) "20050714"
+string(39) "10-30-41, 14-07-05, 3031 3041 4 Thupm05"
+string(19) "it is the 14th day."
+string(28) "Thu Jul 14 22:30:41 BST 2005"
+string(19) "22:07:41 m is month"
+string(8) "22:30:41"
 ===DONE===

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -36,7 +36,6 @@ extern zend_module_entry tidy_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
-	zend_bool clean_output;
 ZEND_END_MODULE_GLOBALS(tidy)
 
 #ifdef ZTS

@@ -25,7 +25,7 @@ $t2->show();
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Call to function first::show()
 Call to function second::show()
 Done

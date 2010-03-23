@@ -18,45 +18,45 @@ var_dump(preg_grep('@^HTTP(.*?)\w{2,}$@i', $array, PREG_GREP_INVERT)); //same as
 --EXPECT--
 array(5) {
   [0]=>
-  unicode(22) "HTTP://WWW.EXAMPLE.COM"
+  string(22) "HTTP://WWW.EXAMPLE.COM"
   [1]=>
-  unicode(11) "/index.html"
+  string(11) "/index.html"
   [2]=>
-  unicode(11) "/info/stat/"
+  string(11) "/info/stat/"
   [3]=>
-  unicode(29) "http://test.uk.com/index/html"
+  string(29) "http://test.uk.com/index/html"
   [4]=>
-  unicode(17) "/display/dept.php"
+  string(17) "/display/dept.php"
 }
 array(2) {
   [0]=>
-  unicode(22) "HTTP://WWW.EXAMPLE.COM"
+  string(22) "HTTP://WWW.EXAMPLE.COM"
   [3]=>
-  unicode(29) "http://test.uk.com/index/html"
+  string(29) "http://test.uk.com/index/html"
 }
 array(5) {
   [0]=>
-  unicode(22) "HTTP://WWW.EXAMPLE.COM"
+  string(22) "HTTP://WWW.EXAMPLE.COM"
   [1]=>
-  unicode(11) "/index.html"
+  string(11) "/index.html"
   [2]=>
-  unicode(11) "/info/stat/"
+  string(11) "/info/stat/"
   [3]=>
-  unicode(29) "http://test.uk.com/index/html"
+  string(29) "http://test.uk.com/index/html"
   [4]=>
-  unicode(17) "/display/dept.php"
+  string(17) "/display/dept.php"
 }
 array(1) {
   [3]=>
-  unicode(29) "http://test.uk.com/index/html"
+  string(29) "http://test.uk.com/index/html"
 }
 array(0) {
 }
 array(3) {
   [1]=>
-  unicode(11) "/index.html"
+  string(11) "/index.html"
   [2]=>
-  unicode(11) "/info/stat/"
+  string(11) "/info/stat/"
   [4]=>
-  unicode(17) "/display/dept.php"
+  string(17) "/display/dept.php"
 }

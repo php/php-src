@@ -38,7 +38,7 @@ foreach ( $variation_array as $var ) {
 ?>
 --EXPECTF--
 *** Test substituting argument 1 with object values ***
-unicode(1) "0"
+string(1) "0"
 
-Warning: get_cfg_var() expects parameter 1 to be binary string, object given in %s.php on line %d
+Warning: get_cfg_var() expects parameter 1 to be string, object given in %s.php on line %d
 NULL

@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -24,7 +24,7 @@
 ZEND_API zend_llist zend_extensions;
 static int last_resource_number;
 
-int zend_load_extension(const char *path) /* {{{ */
+int zend_load_extension(const char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
@@ -117,9 +117,9 @@ int zend_load_extension(const char *path) /* {{{ */
 	return FAILURE;
 #endif
 }
-/* }}} */
 
-int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle) /* {{{ */
+
+int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
@@ -136,9 +136,9 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle) /* 
 
 	return SUCCESS;
 }
-/* }}} */
 
-static void zend_extension_shutdown(zend_extension *extension TSRMLS_DC) /* {{{ */
+
+static void zend_extension_shutdown(zend_extension *extension TSRMLS_DC)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->shutdown) {
@@ -146,9 +146,8 @@ static void zend_extension_shutdown(zend_extension *extension TSRMLS_DC) /* {{{ 
 	}
 #endif
 }
-/* }}} */
 
-static int zend_extension_startup(zend_extension *extension) /* {{{ */
+static int zend_extension_startup(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->startup) {
@@ -160,32 +159,32 @@ static int zend_extension_startup(zend_extension *extension) /* {{{ */
 #endif
 	return 0;
 }
-/* }}} */
 
-int zend_startup_extensions_mechanism(void) /* {{{ */
+
+int zend_startup_extensions_mechanism()
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
 	last_resource_number = 0;
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_startup_extensions(void) /* {{{ */
+
+int zend_startup_extensions()
 {
 	zend_llist_apply_with_del(&zend_extensions, (int (*)(void *)) zend_extension_startup);
 	return SUCCESS;
 }
-/* }}} */
 
-void zend_shutdown_extensions(TSRMLS_D) /* {{{ */
+
+void zend_shutdown_extensions(TSRMLS_D)
 {
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_shutdown TSRMLS_CC);
 	zend_llist_destroy(&zend_extensions);
 }
-/* }}} */
 
-void zend_extension_dtor(zend_extension *extension) /* {{{ */
+
+void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
 	if (extension->handle) {
@@ -193,9 +192,9 @@ void zend_extension_dtor(zend_extension *extension) /* {{{ */
 	}
 #endif
 }
-/* }}} */
 
-static void zend_extension_message_dispatcher(const zend_extension *extension, int num_args, va_list args TSRMLS_DC) /* {{{ */
+
+static void zend_extension_message_dispatcher(const zend_extension *extension, int num_args, va_list args TSRMLS_DC)
 {
 	int message;
 	void *arg;
@@ -207,17 +206,17 @@ static void zend_extension_message_dispatcher(const zend_extension *extension, i
 	arg = va_arg(args, void *);
 	extension->message_handler(message, arg);
 }
-/* }}} */
 
-ZEND_API void zend_extension_dispatch_message(int message, void *arg) /* {{{ */
+
+ZEND_API void zend_extension_dispatch_message(int message, void *arg)
 {
 	TSRMLS_FETCH();
 
 	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher TSRMLS_CC, 2, message, arg);
 }
-/* }}} */
 
-ZEND_API int zend_get_resource_handle(zend_extension *extension) /* {{{ */
+
+ZEND_API int zend_get_resource_handle(zend_extension *extension)
 {
 	if (last_resource_number<ZEND_MAX_RESERVED_RESOURCES) {
 		extension->resource_number = last_resource_number;
@@ -226,9 +225,9 @@ ZEND_API int zend_get_resource_handle(zend_extension *extension) /* {{{ */
 		return -1;
 	}
 }
-/* }}} */
 
-ZEND_API zend_extension *zend_get_extension(const char *extension_name) /* {{{ */
+
+ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 {
 	zend_llist_element *element;
 
@@ -241,7 +240,6 @@ ZEND_API zend_extension *zend_get_extension(const char *extension_name) /* {{{ *
 	}
 	return NULL;
 }
-/* }}} */
 
 /*
  * Local variables:

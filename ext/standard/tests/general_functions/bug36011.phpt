@@ -37,7 +37,7 @@ TestClass::whee5();
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 TestClass::test()
 TestClass::test()
 TestClass::test()

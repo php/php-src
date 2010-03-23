@@ -21,35 +21,35 @@ echo "*** Testing crc32() : with different strings in single quotes ***\n";
 
 // defining an array of strings
 $string_array = array(
-  b'',
-  b' ',
-  b'hello world',
-  b'HELLO WORLD',
-  b' helloworld ',
+  '',
+  ' ',
+  'hello world',
+  'HELLO WORLD',
+  ' helloworld ',
 
-  b'(hello world)',
-  b'hello(world)',
-  b'helloworld()',
-  b'hello()(world',
+  '(hello world)',
+  'hello(world)',
+  'helloworld()',
+  'hello()(world',
 
-  b'"hello" world',
-  b'hello "world"',
-  b'hello""world',
+  '"hello" world',
+  'hello "world"',
+  'hello""world',
 
-  b'hello\tworld',
-  b'hellowor\\tld',
-  b'\thello world\t',
-  b'hello\nworld',
-  b'hellowor\\nld',
-  b'\nhello world\n',
-  b'\n\thelloworld',
-  b'hel\tlo\n world',
+  'hello\tworld',
+  'hellowor\\tld',
+  '\thello world\t',
+  'hello\nworld',
+  'hellowor\\nld',
+  '\nhello world\n',
+  '\n\thelloworld',
+  'hel\tlo\n world',
 
-  b'!@#$%&',
-  b'#hello@world.com',
-  b'$hello$world',
+  '!@#$%&',
+  '#hello@world.com',
+  '$hello$world',
 
-  b'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbb
    cccccccccccccccccccccccccccccccccddddddddddddddddddddddddddddddddd
    eeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffff
    gggggggggggggggggggggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhh
@@ -72,7 +72,7 @@ foreach($string_array as $str) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing crc32() : with different strings in single quotes ***
 
 -- Iteration 1 --

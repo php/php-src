@@ -19,87 +19,88 @@ var_dump( array_map("cb2", $arr,$arr));
 var_dump( array_map(null,  $arr));
 var_dump( array_map(null, $arr, $arr));
 
-//Break cycles
+// break cycles
 $arr[0] = null;
 $arr[1] = null;
 
 echo "Done";
 ?>
+
 --EXPECT--
 *** Testing array_map() : references ***
-unicode(2) "v1"
-unicode(2) "v2"
-unicode(2) "v1"
+string(2) "v1"
+string(2) "v2"
+string(2) "v1"
 array(4) {
-  [u"k1"]=>
-  &unicode(2) "v1"
-  [u"k2"]=>
-  unicode(2) "v2"
+  ["k1"]=>
+  &string(2) "v1"
+  ["k2"]=>
+  string(2) "v2"
   [0]=>
-  &unicode(2) "v1"
+  &string(2) "v1"
   [1]=>
   &array(4) {
-    [u"k1"]=>
-    &unicode(2) "v1"
-    [u"k2"]=>
-    unicode(2) "v2"
+    ["k1"]=>
+    &string(2) "v1"
+    ["k2"]=>
+    string(2) "v2"
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
     [1]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       *RECURSION*
     }
   }
 }
 array(4) {
-  [u"k1"]=>
+  ["k1"]=>
   array(1) {
     [0]=>
-    unicode(2) "v1"
+    string(2) "v1"
   }
-  [u"k2"]=>
+  ["k2"]=>
   array(1) {
     [0]=>
-    unicode(2) "v2"
+    string(2) "v2"
   }
   [0]=>
   array(1) {
     [0]=>
-    unicode(2) "v1"
+    string(2) "v1"
   }
   [1]=>
   array(1) {
     [0]=>
     array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       &array(4) {
-        [u"k1"]=>
-        &unicode(2) "v1"
-        [u"k2"]=>
-        unicode(2) "v2"
+        ["k1"]=>
+        &string(2) "v1"
+        ["k2"]=>
+        string(2) "v2"
         [0]=>
-        &unicode(2) "v1"
+        &string(2) "v1"
         [1]=>
         &array(4) {
-          [u"k1"]=>
-          &unicode(2) "v1"
-          [u"k2"]=>
-          unicode(2) "v2"
+          ["k1"]=>
+          &string(2) "v1"
+          ["k2"]=>
+          string(2) "v2"
           [0]=>
-          &unicode(2) "v1"
+          &string(2) "v1"
           [1]=>
           *RECURSION*
         }
@@ -107,32 +108,32 @@ array(4) {
     }
   }
 }
-unicode(2) "v1"
-unicode(2) "v2"
-unicode(2) "v1"
+string(2) "v1"
+string(2) "v2"
+string(2) "v1"
 array(4) {
-  [u"k1"]=>
-  &unicode(2) "v1"
-  [u"k2"]=>
-  unicode(2) "v2"
+  ["k1"]=>
+  &string(2) "v1"
+  ["k2"]=>
+  string(2) "v2"
   [0]=>
-  &unicode(2) "v1"
+  &string(2) "v1"
   [1]=>
   &array(4) {
-    [u"k1"]=>
-    &unicode(2) "v1"
-    [u"k2"]=>
-    unicode(2) "v2"
+    ["k1"]=>
+    &string(2) "v1"
+    ["k2"]=>
+    string(2) "v2"
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
     [1]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       *RECURSION*
     }
@@ -142,36 +143,36 @@ array(4) {
   [0]=>
   array(1) {
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(2) "v2"
+    string(2) "v2"
   }
   [2]=>
   array(1) {
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
   }
   [3]=>
   array(1) {
     [0]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       &array(4) {
-        [u"k1"]=>
-        &unicode(2) "v1"
-        [u"k2"]=>
-        unicode(2) "v2"
+        ["k1"]=>
+        &string(2) "v1"
+        ["k2"]=>
+        string(2) "v2"
         [0]=>
-        &unicode(2) "v1"
+        &string(2) "v1"
         [1]=>
         *RECURSION*
       }
@@ -179,28 +180,28 @@ array(4) {
   }
 }
 array(4) {
-  [u"k1"]=>
-  &unicode(2) "v1"
-  [u"k2"]=>
-  unicode(2) "v2"
+  ["k1"]=>
+  &string(2) "v1"
+  ["k2"]=>
+  string(2) "v2"
   [0]=>
-  &unicode(2) "v1"
+  &string(2) "v1"
   [1]=>
   &array(4) {
-    [u"k1"]=>
-    &unicode(2) "v1"
-    [u"k2"]=>
-    unicode(2) "v2"
+    ["k1"]=>
+    &string(2) "v1"
+    ["k2"]=>
+    string(2) "v2"
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
     [1]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       *RECURSION*
     }
@@ -210,62 +211,62 @@ array(4) {
   [0]=>
   array(2) {
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
     [1]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(2) "v2"
+    string(2) "v2"
     [1]=>
-    unicode(2) "v2"
+    string(2) "v2"
   }
   [2]=>
   array(2) {
     [0]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
     [1]=>
-    &unicode(2) "v1"
+    &string(2) "v1"
   }
   [3]=>
   array(2) {
     [0]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       &array(4) {
-        [u"k1"]=>
-        &unicode(2) "v1"
-        [u"k2"]=>
-        unicode(2) "v2"
+        ["k1"]=>
+        &string(2) "v1"
+        ["k2"]=>
+        string(2) "v2"
         [0]=>
-        &unicode(2) "v1"
+        &string(2) "v1"
         [1]=>
         *RECURSION*
       }
     }
     [1]=>
     &array(4) {
-      [u"k1"]=>
-      &unicode(2) "v1"
-      [u"k2"]=>
-      unicode(2) "v2"
+      ["k1"]=>
+      &string(2) "v1"
+      ["k2"]=>
+      string(2) "v2"
       [0]=>
-      &unicode(2) "v1"
+      &string(2) "v1"
       [1]=>
       &array(4) {
-        [u"k1"]=>
-        &unicode(2) "v1"
-        [u"k2"]=>
-        unicode(2) "v2"
+        ["k1"]=>
+        &string(2) "v1"
+        ["k2"]=>
+        string(2) "v2"
         [0]=>
-        &unicode(2) "v1"
+        &string(2) "v1"
         [1]=>
         *RECURSION*
       }

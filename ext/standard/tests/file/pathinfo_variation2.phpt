@@ -109,19 +109,19 @@ foreach($inputs as $key =>$value) {
 *** Testing pathinfo() : usage variation ***
 
 --float 10.5--
-unicode(6) "inet.h"
+string(6) "inet.h"
 
 --float -10.5--
-unicode(6) "inet.h"
+string(6) "inet.h"
 
 --float 12.3456789000e10--
-unicode(%d) %s
+string(%d) %s
 
 --float -12.3456789000e10--
-unicode(%d) %s
+string(%d) %s
 
 --float .5--
-unicode(0) ""
+string(%d) %s
 
 --empty array--
 Error: 2 - pathinfo() expects parameter 2 to be long, array given, %s(%d)
@@ -140,45 +140,45 @@ Error: 2 - pathinfo() expects parameter 2 to be long, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-unicode(0) ""
+string(0) ""
 
 --lowercase null--
-unicode(0) ""
+string(0) ""
 
 --lowercase true--
-unicode(17) "/usr/include/arpa"
+string(17) "/usr/include/arpa"
 
 --lowercase false--
-unicode(0) ""
+string(0) ""
 
 --uppercase TRUE--
-unicode(17) "/usr/include/arpa"
+string(17) "/usr/include/arpa"
 
 --uppercase FALSE--
-unicode(0) ""
+string(0) ""
 
 --empty string DQ--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - pathinfo() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
@@ -190,9 +190,8 @@ Error: 2 - pathinfo() expects parameter 2 to be long, object given, %s(%d)
 NULL
 
 --undefined var--
-unicode(0) ""
+string(0) ""
 
 --unset var--
-unicode(0) ""
+string(0) ""
 ===DONE===
-

@@ -15,7 +15,7 @@ $xmlstr = <<< XML
     </movies>
 XML;
 
-simplexml_load_string((binary)$xmlstr);
+simplexml_load_string($xmlstr);
 
 // test memleaks here
 var_dump(libxml_use_internal_errors(false));

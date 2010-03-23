@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as default/SORT_REGULAR
+Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as defualt/SORT_REGULAR
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort diff. associative arrays, 'sort_f
 /*
  * Testing sort() by providing arrays  with key values for $array argument
  * with following flag values.
- * 1.flag value as default
+ * 1.flag value as defualt
  * 2.SORT_REGULAR - compare items normally
  * To test the new keys for the elements in the sorted array.
  */
@@ -38,7 +38,7 @@ echo "\n-- Testing sort() by supplying various arrays with key values --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With default sort flag -\n";
+  echo "- With Defualt sort flag -\n";
   $temp_array = $array;
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -52,13 +52,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various arrays with key values --
 
 -- Iteration 1 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(5) {
   [0]=>
@@ -88,26 +88,26 @@ array(5) {
 }
 
 -- Iteration 2 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(3) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(5) "first"
+    string(5) "first"
     [5]=>
-    unicode(6) "second"
+    string(6) "second"
     [6]=>
-    unicode(5) "third"
+    string(5) "third"
   }
   [1]=>
   array(3) {
-    [u"a"]=>
-    unicode(6) "orange"
-    [u"b"]=>
-    unicode(6) "banana"
-    [u"c"]=>
-    unicode(5) "apple"
+    ["a"]=>
+    string(6) "orange"
+    ["b"]=>
+    string(6) "banana"
+    ["c"]=>
+    string(5) "apple"
   }
   [2]=>
   array(6) {
@@ -131,20 +131,20 @@ array(3) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(5) "first"
+    string(5) "first"
     [5]=>
-    unicode(6) "second"
+    string(6) "second"
     [6]=>
-    unicode(5) "third"
+    string(5) "third"
   }
   [1]=>
   array(3) {
-    [u"a"]=>
-    unicode(6) "orange"
-    [u"b"]=>
-    unicode(6) "banana"
-    [u"c"]=>
-    unicode(5) "apple"
+    ["a"]=>
+    string(6) "orange"
+    ["b"]=>
+    string(6) "banana"
+    ["c"]=>
+    string(5) "apple"
   }
   [2]=>
   array(6) {
@@ -164,7 +164,7 @@ array(3) {
 }
 
 -- Iteration 3 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(6) {
   [0]=>
@@ -198,11 +198,11 @@ array(6) {
 }
 
 -- Iteration 4 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(2) {
   [0]=>
-  unicode(3) "baz"
+  string(3) "baz"
   [1]=>
   int(1)
 }
@@ -210,13 +210,13 @@ array(2) {
 bool(true)
 array(2) {
   [0]=>
-  unicode(3) "baz"
+  string(3) "baz"
   [1]=>
   int(1)
 }
 
 -- Iteration 5 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(4) {
   [0]=>
@@ -225,14 +225,14 @@ array(4) {
   int(5)
   [2]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
   [3]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
 }
@@ -245,14 +245,14 @@ array(4) {
   int(5)
   [2]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
   [3]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
 }

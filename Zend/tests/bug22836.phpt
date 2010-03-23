@@ -15,20 +15,20 @@ for ($i = 0; $i < 8; $i++) {
 	$h =& f();
 }
 ?>
---EXPECT--
-unicode(3) "foo"
+--EXPECTF--
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'
-unicode(3) "foo"
+string(3) "foo"
 'foo'

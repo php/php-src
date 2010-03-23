@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -40,8 +40,8 @@
 	var_name = 0;                                                                                                        \
 	var_name##_set = 0;                                                                                                  \
 	if (option_array) {                                                                                                  \
-		if (zend_ascii_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
-			PHP_FILTER_GET_LONG_OPT(option_val, var_name);								                                 \
+		if (zend_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
+			PHP_FILTER_GET_LONG_OPT(option_val, var_name);								\
 			var_name##_set = 1;                                                                                          \
 		}                                                                                                                \
 	}
@@ -53,7 +53,7 @@
 	var_name##_set = 0;                                                                                                  \
 	var_name##_len = 0;                                                                                                  \
 	if (option_array) {                                                                                                  \
-		if (zend_ascii_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
+		if (zend_hash_find(HASH_OF(option_array), option_name, sizeof(option_name), (void **) &option_val) == SUCCESS) { \
 			if (Z_TYPE_PP(option_val) == IS_STRING) {                                                                    \
 				var_name = Z_STRVAL_PP(option_val);                                                                      \
 				var_name##_len = Z_STRLEN_PP(option_val);                                                                \

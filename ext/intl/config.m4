@@ -6,11 +6,11 @@ PHP_ARG_ENABLE(intl, whether to enable internationalization support,
 [  --enable-intl           Enable internationalization support])
 
 if test "$PHP_INTL" != "no"; then
-  PHP_SETUP_ICU
-  PHP_REQUIRE_CXX
+  PHP_SETUP_ICU(INTL_SHARED_LIBADD)
+  PHP_SUBST(INTL_SHARED_LIBADD)
+  PHP_REQUIRE_CXX()
 
-  PHP_NEW_EXTENSION(intl,
-    php_intl.c \
+  PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
     collator/collator.c \
@@ -37,6 +37,12 @@ if test "$PHP_INTL" != "no"; then
     locale/locale.c \
     locale/locale_class.c \
     locale/locale_methods.c \
+    dateformat/dateformat.c \
+    dateformat/dateformat_class.c \
+    dateformat/dateformat_attr.c \
+    dateformat/dateformat_data.c \
+    dateformat/dateformat_format.c \
+    dateformat/dateformat_parse.c \
     msgformat/msgformat.c \
     msgformat/msgformat_attr.c \
     msgformat/msgformat_class.c \
@@ -49,15 +55,16 @@ if test "$PHP_INTL" != "no"; then
     resourcebundle/resourcebundle.c \
     resourcebundle/resourcebundle_class.c \
     resourcebundle/resourcebundle_iterator.c \
-    idn/idn.c,$ext_shared,,$ICU_INCS)
+    idn/idn.c, $ext_shared,,$ICU_INCS)
 
-  PHP_ADD_BUILD_DIR([$ext_builddir/collator])
-  PHP_ADD_BUILD_DIR([$ext_builddir/common])
-  PHP_ADD_BUILD_DIR([$ext_builddir/formatter])
-  PHP_ADD_BUILD_DIR([$ext_builddir/normalizer])
-  PHP_ADD_BUILD_DIR([$ext_builddir/locale])
-  PHP_ADD_BUILD_DIR([$ext_builddir/msgformat])
-  PHP_ADD_BUILD_DIR([$ext_builddir/grapheme])
-  PHP_ADD_BUILD_DIR([$ext_builddir/idn])
-  PHP_ADD_BUILD_DIR([$ext_builddir/resourcebundle])
+  PHP_ADD_BUILD_DIR($ext_builddir/collator)
+  PHP_ADD_BUILD_DIR($ext_builddir/common)
+  PHP_ADD_BUILD_DIR($ext_builddir/formatter)
+  PHP_ADD_BUILD_DIR($ext_builddir/normalizer)
+  PHP_ADD_BUILD_DIR($ext_builddir/dateformat)
+  PHP_ADD_BUILD_DIR($ext_builddir/locale)
+  PHP_ADD_BUILD_DIR($ext_builddir/msgformat)
+  PHP_ADD_BUILD_DIR($ext_builddir/grapheme)
+  PHP_ADD_BUILD_DIR($ext_builddir/resourcebundle)
+  PHP_ADD_BUILD_DIR($ext_builddir/idn)
 fi

@@ -30,20 +30,20 @@ var_dump(unserialize($s));
 ?>
 --EXPECT--
 array(2) {
-  [u"one"]=>
-  unicode(3) "ABC"
-  [u"two"]=>
+  ["one"]=>
+  string(3) "ABC"
+  ["two"]=>
   object(test)#1 (2) {
-    [u"a"]=>
+    ["a"]=>
     int(7)
-    [u"b"]=>
+    ["b"]=>
     int(2)
   }
 }
-a:2:{U:3:"one";U:3:"ABC";U:3:"two";N;}
+a:2:{s:3:"one";s:3:"ABC";s:3:"two";N;}
 array(2) {
-  [u"one"]=>
-  unicode(3) "ABC"
-  [u"two"]=>
+  ["one"]=>
+  string(3) "ABC"
+  ["two"]=>
   NULL
 }

@@ -10,13 +10,13 @@ for ($i = 0; $i < 10; $i++) {
 
 ?>
 --EXPECTF--
-unicode(0) ""
-unicode(2) "%s"
-unicode(4) "%s"
-unicode(6) "%s"
-unicode(8) "%s"
-unicode(10) "%s"
-unicode(12) "%s"
-unicode(14) "%s"
-unicode(16) "%s"
-unicode(18) "%s"
+string(0) ""
+string(2) "%s"
+string(4) "%s"
+string(6) "%s"
+string(8) "%s"
+string(10) "%s"
+string(12) "%s"
+string(14) "%s"
+string(16) "%s"
+string(18) "%s"

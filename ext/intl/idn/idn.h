@@ -23,7 +23,7 @@
 #include <php.h>
 
 PHP_FUNCTION(idn_to_ascii);
-PHP_FUNCTION(idn_to_unicode);
+PHP_FUNCTION(idn_to_utf8);
 
 void idn_register_constants(INIT_FUNC_ARGS);
 

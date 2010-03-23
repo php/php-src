@@ -15,10 +15,10 @@ var_dump(
 );
 ?>
 --EXPECT--
-unicode(0) ""
+string(0) ""
 NULL
 NULL
 NULL
 string(4) ""\"""
-unicode(1) """
-unicode(2) """"
+string(1) """
+string(2) """"

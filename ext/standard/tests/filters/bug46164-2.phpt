@@ -16,7 +16,7 @@ stream_filter_register('user_filter','user_filter');
 
 $fd = fopen('php://memory','w');
 $filter = stream_filter_append($fd, 'user_filter');
-fwrite($fd, b"foo");
+fwrite($fd, "foo");
 fflush($fd);
 var_dump(fclose($fd));
 ?>

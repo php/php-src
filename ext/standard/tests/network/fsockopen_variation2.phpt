@@ -14,7 +14,7 @@ $client = fsockopen($hostname, $port);
 var_dump($client);
 
 echo "\nPass some data between the sockets:\n";
-fwrite($client, b"0123456789");
+fwrite($client, "0123456789");
 var_dump(fread($server, 10));
 fclose($client);
 
@@ -24,7 +24,7 @@ $second_client = fsockopen($address);
 var_dump($second_client);
 
 echo "\nPass some data between the sockets:\n";
-fwrite($second_client, b"0123456789");
+fwrite($second_client, "0123456789");
 var_dump(fread($server, 10));
 fclose($second_client);
 

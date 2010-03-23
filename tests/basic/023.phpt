@@ -1,5 +1,7 @@
 --TEST--
 Cookies test#2
+--INI--
+magic_quotes_gpc=0
 --COOKIE--
 c o o k i e=value; c o o k i e= v a l u e ;;c%20o+o k+i%20e=v;name="value","value",UEhQIQ==;UEhQIQ==foo
 --FILE--
@@ -8,10 +10,10 @@ var_dump($_COOKIE);
 ?>
 --EXPECT--
 array(3) {
-  [u"c_o_o_k_i_e"]=>
-  unicode(5) "value"
-  [u"name"]=>
-  unicode(24) ""value","value",UEhQIQ=="
-  [u"UEhQIQ"]=>
-  unicode(4) "=foo"
+  ["c_o_o_k_i_e"]=>
+  string(5) "value"
+  ["name"]=>
+  string(24) ""value","value",UEhQIQ=="
+  ["UEhQIQ"]=>
+  string(4) "=foo"
 }

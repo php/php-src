@@ -30,7 +30,7 @@ function test_gzfile() {
    
    // create a file in the middle directory
    $h = gzopen($secondFile, "w");
-   gzwrite($h, b"This is a file in dir2");
+   gzwrite($h, "This is a file in dir2");
    gzclose($h);
 
    // should read dir2 file
@@ -39,7 +39,7 @@ function test_gzfile() {
 
    //create a file in dir1
    $h = gzopen($firstFile, "w");
-   gzwrite($h, b"This is a file in dir1");
+   gzwrite($h, "This is a file in dir1");
    gzclose($h);
    
    //should now read dir1 file
@@ -48,7 +48,7 @@ function test_gzfile() {
    
    // create a file in working directory
    $h = gzopen($filename, "w");
-   gzwrite($h, b"This is a file in working dir");
+   gzwrite($h, "This is a file in working dir");
    gzclose($h);
    
    //should still read dir1 file
@@ -64,7 +64,7 @@ function test_gzfile() {
    
    // create a file in the script directory
    $h = gzopen($scriptFile, "w");
-   gzwrite($h, b"This is a file in script dir");
+   gzwrite($h, "This is a file in script dir");
    gzclose($h);
    
    //should read the file in script dir

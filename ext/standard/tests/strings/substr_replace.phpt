@@ -447,24 +447,24 @@ echo "\n";
 ?>
 --EXPECT--
 substr_replace('try this', 'bala ', 2)
-unicode(7) "trbala "
+string(7) "trbala "
 
 substr_replace('try this', 'bala ', 2, 3)
-unicode(10) "trbala his"
+string(10) "trbala his"
 
 substr_replace('try this', 'bala ', 2, 0)
-unicode(13) "trbala y this"
+string(13) "trbala y this"
 
 substr_replace('try this', 'bala ', 2, -2)
-unicode(9) "trbala is"
+string(9) "trbala is"
 
 
 
 substr_replace('try this', array (  0 => 'bala ',), 4
-unicode(9) "try bala "
+string(9) "try bala "
 
 substr_replace('try this', array (  0 => 'bala ',), 4
-unicode(10) "try bala s"
+string(10) "try bala s"
 
 
 
@@ -472,25 +472,25 @@ unicode(10) "try bala s"
 substr_replace(array (  0 => 'ala portokala',), array (  0 => 'bala ',), array (  0 => 4,)
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 substr_replace(array (  0 => 'ala portokala',), array (  0 => 'bala ',), array (  0 => 4,), array (  0 => 3,))
 array(1) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
 }
 
 substr_replace(array (  0 => 'ala portokala',), array (  0 => 'bala ',), array (  0 => 4,), array (  0 => 0,))
 array(1) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
 }
 
 substr_replace(array (  0 => 'ala portokala',), array (  0 => 'bala ',), array (  0 => 4,), array (  0 => -2,))
 array(1) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
 }
 
 
@@ -498,59 +498,59 @@ array(1) {
 substr_replace(array (  0 => 'ala portokala',), 'bala ',4)
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),4, 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(5) "try s"
+  string(5) "try s"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',4, 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(10) "try bala s"
+  string(10) "try bala s"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),4, 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(8) "try this"
+  string(8) "try this"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',4, 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(13) "try bala this"
+  string(13) "try bala this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),4, -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(6) "try is"
+  string(6) "try is"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',4, -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(11) "try bala is"
+  string(11) "try bala is"
 }
 
 
@@ -561,59 +561,59 @@ array(2) {
 substr_replace(array (  0 => 'ala portokala',), 'bala ',array (  0 => 4,))
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,), 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(5) " this"
+  string(5) " this"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,), 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(10) "bala  this"
+  string(10) "bala  this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,), 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(8) "try this"
+  string(8) "try this"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,), 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(13) "bala try this"
+  string(13) "bala try this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,), -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(2) "is"
+  string(2) "is"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,), -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(7) "bala is"
+  string(7) "bala is"
 }
 
 
@@ -625,59 +625,59 @@ array(2) {
 substr_replace(array (  0 => 'ala portokala',), 'bala ',array (  0 => 4,  1 => 2,))
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(5) "trhis"
+  string(5) "trhis"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), 3)
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(10) "trbala his"
+  string(10) "trbala his"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(8) "try this"
+  string(8) "try this"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), 0)
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(13) "trbala y this"
+  string(13) "trbala y this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(4) "tris"
+  string(4) "tris"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), -2)
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(9) "trbala is"
+  string(9) "trbala is"
 }
 
 
@@ -689,59 +689,59 @@ array(2) {
 substr_replace(array (  0 => 'ala portokala',), 'bala ',array (  0 => 4,  1 => 2,))
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => 3,))
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(2) "tr"
+  string(2) "tr"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => 3,))
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(7) "trbala "
+  string(7) "trbala "
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => 0,))
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(2) "tr"
+  string(2) "tr"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => 0,))
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(7) "trbala "
+  string(7) "trbala "
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => -2,))
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(2) "tr"
+  string(2) "tr"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => -2,))
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(7) "trbala "
+  string(7) "trbala "
 }
 
 
@@ -753,57 +753,58 @@ array(2) {
 substr_replace(array (  0 => 'ala portokala',), 'bala ',array (  0 => 4,  1 => 2,))
 array(1) {
   [0]=>
-  unicode(9) "ala bala "
+  string(9) "ala bala "
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => 3,  1 => 2,))
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(6) "trthis"
+  string(6) "trthis"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => 3,  1 => 2,))
 array(2) {
   [0]=>
-  unicode(15) "ala bala tokala"
+  string(15) "ala bala tokala"
   [1]=>
-  unicode(11) "trbala this"
+  string(11) "trbala this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => 0,  1 => 0,))
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(8) "try this"
+  string(8) "try this"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => 0,  1 => 0,))
 array(2) {
   [0]=>
-  unicode(18) "ala bala portokala"
+  string(18) "ala bala portokala"
   [1]=>
-  unicode(13) "trbala y this"
+  string(13) "trbala y this"
 }
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), array (  0 => 'bala ',),array (  0 => 4,  1 => 2,), array (  0 => -2,  1 => -3,))
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(5) "trhis"
+  string(5) "trhis"
 }
 
 
 substr_replace(array (  0 => 'ala portokala',  1 => 'try this',), 'bala ',array (  0 => 4,  1 => 2,), array (  0 => -2,  1 => -3,))
 array(2) {
   [0]=>
-  unicode(11) "ala bala la"
+  string(11) "ala bala la"
   [1]=>
-  unicode(10) "trbala his"
+  string(10) "trbala his"
 }
+

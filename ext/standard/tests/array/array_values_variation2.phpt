@@ -169,9 +169,9 @@ array(4) {
 -- Iteration 5: empty string data --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 6: empty array data --
@@ -181,11 +181,11 @@ array(0) {
 -- Iteration 7: string data --
 array(3) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
 }
 
 -- Iteration 8: object data --

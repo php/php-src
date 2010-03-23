@@ -163,8 +163,6 @@ function get_scope() {
 	oci_close($sc1);
 }
 ?>
---XFAIL--
-OCI does not have UTF16 support for OCI_ATTR_EDITION
 --EXPECTF--
 **Test 1.1 - Default value for  the attribute **************
 The value of current EDITION is ORA$BASE

@@ -6,8 +6,8 @@ PHP_ARG_WITH(sqlite, for sqlite support,
 [  --without-sqlite=DIR    Do not include sqlite support.  DIR is the sqlite base
                           install directory [BUNDLED]], yes)
 
-PHP_ARG_ENABLE(sqlite-utf8, whether to disable UTF-8 support in libsqlite (charset changes to ISO-8859-1),
-[  --disable-sqlite-utf8     SQLite: Disable UTF-8 support for SQLite (use ISO8859)], yes, no)
+PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
+[  --enable-sqlite-utf8      SQLite: Enable UTF-8 support for SQLite], no, no)
 
 
 
@@ -48,8 +48,9 @@ AC_DEFUN([PHP_PROG_LEMON],[
 if test "$PHP_SQLITE" != "no"; then
   if test "$PHP_PDO" != "no"; then
     PHP_CHECK_PDO_INCLUDES([], [AC_MSG_WARN([Cannot find php_pdo_driver.h.])])
-    if test -n "$pdo_cv_inc_path"; then
+    if test -n "$pdo_inc_path"; then
       AC_DEFINE([PHP_SQLITE2_HAVE_PDO], [1], [Have PDO])
+      pdo_inc_path="-I$pdo_inc_path"
     fi
   fi  
 
@@ -82,13 +83,13 @@ if test "$PHP_SQLITE" != "no"; then
       -L$SQLITE_DIR/$PHP_LIBDIR -lm
     ])
     SQLITE_MODULE_TYPE=external
-    PHP_SQLITE_CFLAGS="-I$pdo_cv_inc_path"
+    PHP_SQLITE_CFLAGS=$pdo_inc_path
     sqlite_extra_sources="libsqlite/src/encode.c"
   else
     # use bundled library
     PHP_PROG_LEMON
     SQLITE_MODULE_TYPE=builtin
-    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src -I@ext_builddir@/libsqlite/src -I$pdo_cv_inc_path"
+    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src -I@ext_builddir@/libsqlite/src $pdo_inc_path"
     sqlite_extra_sources="libsqlite/src/opcodes.c \
         libsqlite/src/parse.c libsqlite/src/encode.c \
         libsqlite/src/auth.c libsqlite/src/btree.c libsqlite/src/build.c \
@@ -110,7 +111,7 @@ if test "$PHP_SQLITE" != "no"; then
   PHP_NEW_EXTENSION(sqlite, $sqlite_sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
   PHP_ADD_EXTENSION_DEP(sqlite, spl, true)
   PHP_ADD_EXTENSION_DEP(sqlite, pdo, true)
-  
+
   PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST(SQLITE_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([$ext_builddir/libsqlite/src/sqlite.h])
@@ -122,11 +123,11 @@ if test "$PHP_SQLITE" != "no"; then
     dnl use latin 1 for SQLite older than 2.8.9; the utf-8 handling 
     dnl in funcs.c uses assert(), which is a bit silly and something 
     dnl we want to avoid. This assert() was removed in SQLite 2.8.9.
-    if test "$PHP_SQLITE_UTF8" = "no"; then
-      SQLITE_ENCODING="ISO8859"
-    else
+    if test "$PHP_SQLITE_UTF8" = "yes"; then
       SQLITE_ENCODING="UTF8"
       AC_DEFINE(SQLITE_UTF8, 1, [ ])
+    else
+      SQLITE_ENCODING="ISO8859"
     fi
     PHP_SUBST(SQLITE_ENCODING)
 

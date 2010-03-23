@@ -26,29 +26,30 @@ foreach ($obj as $v) {
 }
 var_dump($obj);
 
+
 ?>
 ===DONE===
 --EXPECTF--
 Removing the current element from an iterated object.
-unicode(10) "Original a"
-unicode(10) "Original b"
+string(10) "Original a"
+string(10) "Original b"
 
 Notice: Undefined property: C::$b in %s on line %d
-unicode(10) "Original c"
+string(10) "Original c"
 
 Notice: Undefined property: C::$b in %s on line %d
-unicode(10) "Original d"
+string(10) "Original d"
 
 Notice: Undefined property: C::$b in %s on line %d
-unicode(10) "Original e"
+string(10) "Original e"
 object(C)#%d (4) {
-  [u"a"]=>
-  unicode(10) "Original a"
-  [u"c"]=>
-  unicode(10) "Original c"
-  [u"d"]=>
-  unicode(10) "Original d"
-  [u"e"]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(10) "Original a"
+  ["c"]=>
+  string(10) "Original c"
+  ["d"]=>
+  string(10) "Original d"
+  ["e"]=>
+  string(10) "Original e"
 }
 ===DONE===

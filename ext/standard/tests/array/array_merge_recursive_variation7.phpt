@@ -40,43 +40,43 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge_recursive() : array with reference variables for $arr1 argument ***
 -- With default argument --
 array(6) {
   [0]=>
   int(0)
   [1]=>
-  &unicode(5) "hello"
+  &string(5) "hello"
   [2]=>
-  &unicode(5) "hello"
+  &string(5) "hello"
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [4]=>
   &int(0)
-  [u"hello"]=>
-  &unicode(5) "hello"
+  ["hello"]=>
+  &string(5) "hello"
 }
 -- With more arguments --
 array(7) {
   [0]=>
   int(0)
   [1]=>
-  &unicode(5) "hello"
+  &string(5) "hello"
   [2]=>
-  &unicode(5) "hello"
+  &string(5) "hello"
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [4]=>
   &int(0)
-  [u"hello"]=>
+  ["hello"]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "hello"
+    string(5) "hello"
   }
   [5]=>
-  &unicode(5) "hello"
+  &string(5) "hello"
 }
 Done

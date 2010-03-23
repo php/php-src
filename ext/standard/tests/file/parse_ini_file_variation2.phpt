@@ -51,62 +51,61 @@ unlink($output_file);
 --EXPECT--
 *** Testing parse_ini_file() : variation ***
 array(8) {
-  [u"section1"]=>
+  ["section1"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(1) "1"
-    [u"value2"]=>
-    unicode(0) ""
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
   }
-  [u"section2"]=>
+  ["section2"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(1) "1"
-    [u"value2"]=>
-    unicode(0) ""
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
   }
-  [u"section3"]=>
+  ["section3"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(1) "1"
-    [u"value2"]=>
-    unicode(0) ""
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
   }
-  [u"section4"]=>
+  ["section4"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(0) ""
-    [u"value2"]=>
-    unicode(0) ""
+    ["value1"]=>
+    string(0) ""
+    ["value2"]=>
+    string(0) ""
   }
-  [u"section5"]=>
+  ["section5"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(2) "on"
-    [u"value2"]=>
-    unicode(3) "off"
+    ["value1"]=>
+    string(2) "on"
+    ["value2"]=>
+    string(3) "off"
   }
-  [u"section6"]=>
+  ["section6"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(4) "true"
-    [u"value2"]=>
-    unicode(5) "false"
+    ["value1"]=>
+    string(4) "true"
+    ["value2"]=>
+    string(5) "false"
   }
-  [u"section7"]=>
+  ["section7"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(3) "yes"
-    [u"value2"]=>
-    unicode(2) "no"
+    ["value1"]=>
+    string(3) "yes"
+    ["value2"]=>
+    string(2) "no"
   }
-  [u"section8"]=>
+  ["section8"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(4) "null"
-    [u"value2"]=>
-    unicode(0) ""
+    ["value1"]=>
+    string(4) "null"
+    ["value2"]=>
+    string(0) ""
   }
 }
 ===DONE===
-

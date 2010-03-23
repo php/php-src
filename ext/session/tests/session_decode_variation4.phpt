@@ -35,20 +35,20 @@ bool(true)
 array(0) {
 }
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1234567890)
-  [u"bar"]=>
-  unicode(5) "Blah!"
-  [u"guff"]=>
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
   float(123.456)
 }
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1234567890)
-  [u"bar"]=>
-  unicode(5) "Blah!"
-  [u"guff"]=>
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
   float(123.456)
 }
 bool(true)

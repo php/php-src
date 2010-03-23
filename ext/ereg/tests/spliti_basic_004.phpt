@@ -18,24 +18,31 @@ var_dump(spliti('[[:upper:]]', '--- a ---'));
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(4) "--- "
   [1]=>
   string(4) " ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(4) "--- "
   [1]=>
   string(4) " ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(4) "--- "
   [1]=>
   string(4) " ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(4) "--- "

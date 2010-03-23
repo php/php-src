@@ -38,32 +38,32 @@ var_dump($k, $v);
 
 
 Simple loop.
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(1) "a"
-unicode(10) "Original a"
-unicode(1) "b"
-unicode(10) "Original b"
-unicode(1) "c"
-unicode(10) "Original c"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(1) "a"
+string(10) "Original a"
+string(1) "b"
+string(10) "Original b"
+string(1) "c"
+string(10) "Original c"
 
 Check key and value after the loop.
-unicode(1) "c"
-unicode(10) "Original c"
+string(1) "c"
+string(10) "Original c"
 
 
 Object instantiated inside loop.
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(1) "a"
-unicode(10) "Original a"
-unicode(1) "b"
-unicode(10) "Original b"
-unicode(1) "c"
-unicode(10) "Original c"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(1) "a"
+string(10) "Original a"
+string(1) "b"
+string(10) "Original b"
+string(1) "c"
+string(10) "Original c"
 
 Check key and value after the loop.
-unicode(1) "c"
-unicode(10) "Original c"
+string(1) "c"
+string(10) "Original c"

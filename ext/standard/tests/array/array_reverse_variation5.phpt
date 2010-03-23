@@ -132,184 +132,184 @@ array(1) {
 array(4) {
   [0]=>
   int(4)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 - $preserve keys = true -
 array(4) {
   [4]=>
   int(4)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 - $preserve_keys = false -
 array(4) {
   [0]=>
   int(4)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 -- Iteration 5 --
 - default argument -
 array(1) {
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 - $preserve keys = true -
 array(1) {
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 - $preserve_keys = false -
 array(1) {
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 -- Iteration 6 --
 - default argument -
 array(4) {
-  [u"f4"]=>
+  ["f4"]=>
   float(33333333.3333)
   [0]=>
   float(4.8999992284)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
 }
 - $preserve keys = true -
 array(4) {
-  [u"f4"]=>
+  ["f4"]=>
   float(33333333.3333)
   [3]=>
   float(4.8999992284)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
 }
 - $preserve_keys = false -
 array(4) {
-  [u"f4"]=>
+  ["f4"]=>
   float(33333333.3333)
   [0]=>
   float(4.8999992284)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
 }
 -- Iteration 7 --
 - default argument -
 array(4) {
   [0]=>
-  unicode(4) "pen
+  string(4) "pen
 "
   [1]=>
-  unicode(7) "world"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(7) "world"
+  ["red"]=>
+  string(6) "col	or"
   [2]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
 }
 - $preserve keys = true -
 array(4) {
   [3]=>
-  unicode(4) "pen
+  string(4) "pen
 "
   [2]=>
-  unicode(7) "world"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(7) "world"
+  ["red"]=>
+  string(6) "col	or"
   [111]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
 }
 - $preserve_keys = false -
 array(4) {
   [0]=>
-  unicode(4) "pen
+  string(4) "pen
 "
   [1]=>
-  unicode(7) "world"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(7) "world"
+  ["red"]=>
+  string(6) "col	or"
   [2]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
 }
 -- Iteration 8 --
 - default argument -
 array(4) {
   [0]=>
-  unicode(5) "pen\n"
+  string(5) "pen\n"
   [1]=>
-  unicode(9) "\v\fworld"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(9) "\v\fworld"
+  ["red"]=>
+  string(7) "col\tor"
   [2]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
 }
 - $preserve keys = true -
 array(4) {
   [3]=>
-  unicode(5) "pen\n"
+  string(5) "pen\n"
   [2]=>
-  unicode(9) "\v\fworld"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(9) "\v\fworld"
+  ["red"]=>
+  string(7) "col\tor"
   [111]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
 }
 - $preserve_keys = false -
 array(4) {
   [0]=>
-  unicode(5) "pen\n"
+  string(5) "pen\n"
   [1]=>
-  unicode(9) "\v\fworld"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(9) "\v\fworld"
+  ["red"]=>
+  string(7) "col\tor"
   [2]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
 }
 -- Iteration 9 --
 - default argument -
 array(2) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve keys = true -
 array(2) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve_keys = false -
 array(2) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 -- Iteration 10 --
 - default argument -
 array(3) {
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"unset"]=>
+  ["unset"]=>
   NULL
   [0]=>
   object(classA)#%d (0) {
@@ -317,9 +317,9 @@ array(3) {
 }
 - $preserve keys = true -
 array(3) {
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"unset"]=>
+  ["unset"]=>
   NULL
   [11]=>
   object(classA)#%d (0) {
@@ -327,9 +327,9 @@ array(3) {
 }
 - $preserve_keys = false -
 array(3) {
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"unset"]=>
+  ["unset"]=>
   NULL
   [0]=>
   object(classA)#%d (0) {
@@ -338,62 +338,62 @@ array(3) {
 -- Iteration 11 --
 - default argument -
 array(8) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
-  [u"unset"]=>
+  ["heredoc"]=>
+  string(11) "Hello world"
+  ["unset"]=>
   NULL
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"int"]=>
+  ["int"]=>
   int(133)
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [0]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [1]=>
   object(classA)#%d (0) {
   }
   [2]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve keys = true -
 array(8) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
-  [u"unset"]=>
+  ["heredoc"]=>
+  string(11) "Hello world"
+  ["unset"]=>
   NULL
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"int"]=>
+  ["int"]=>
   int(133)
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [222]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [2]=>
   object(classA)#%d (0) {
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve_keys = false -
 array(8) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
-  [u"unset"]=>
+  ["heredoc"]=>
+  string(11) "Hello world"
+  ["unset"]=>
   NULL
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"int"]=>
+  ["int"]=>
   int(133)
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [0]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [1]=>
   object(classA)#%d (0) {
   }
   [2]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 Done

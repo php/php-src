@@ -30,13 +30,10 @@ var_dump(bin2hex(mb_convert_encoding($string_mb, "ISO-8859-1", "UTF-8")));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing mb_substitute_character() : variation ***
-unicode(14) "3f3f3f3f3f3f3f"
-unicode(14) "42424242424242"
-
-Warning: mb_substitute_character(): Unknown character. in %s on line %d
-unicode(14) "42424242424242"
-unicode(0) ""
+string(14) "3f3f3f3f3f3f3f"
+string(14) "42424242424242"
+string(0) ""
+string(0) ""
 ===DONE===
-

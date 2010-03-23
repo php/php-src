@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -106,8 +106,6 @@ PHPAPI HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **)
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC);
 PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
-PHPAPI int php_array_data_compare(const void *a, const void *b TSRMLS_DC);
-PHPAPI void php_set_compare_func(int sort_type TSRMLS_DC);
 
 #define PHP_SORT_REGULAR            0
 #define PHP_SORT_NUMERIC            1

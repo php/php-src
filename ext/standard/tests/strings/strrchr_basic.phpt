@@ -37,21 +37,21 @@ var_dump( strrchr("Hello, World", "ooo") );
 var_dump( strrchr("Hello, World", "Zzzz") ); //non-existant needle in haystack
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: basic functionality ***
-unicode(12) "Hello, World"
-unicode(12) "Hello, World"
-unicode(12) "Hello, World"
-unicode(12) "Hello, World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(12) "Hello, World"
 bool(false)
 bool(false)
-unicode(5) "World"
-unicode(5) "World"
-unicode(7) ", World"
-unicode(7) ", World"
-unicode(12) "Hello, World"
-unicode(12) "Hello, World"
-unicode(4) "orld"
-unicode(4) "orld"
+string(5) "World"
+string(5) "World"
+string(7) ", World"
+string(7) ", World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(4) "orld"
+string(4) "orld"
 bool(false)
 *** Done ***

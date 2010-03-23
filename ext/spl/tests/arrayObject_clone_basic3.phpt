@@ -23,58 +23,58 @@ var_dump($wrappedObject, $innerArrayObject, $outerArrayObject, $clonedOuterArray
 ?>
 --EXPECTF--
 object(C)#1 (5) {
-  [u"p"]=>
-  unicode(9) "C::p.orig"
-  [u"dynamic1"]=>
-  unicode(45) "new prop added to $wrappedObject before clone"
-  [u"dynamic2"]=>
-  unicode(44) "new prop added to $wrappedObject after clone"
-  [u"new.iAO"]=>
-  unicode(35) "new element added $innerArrayObject"
-  [u"new.oAO"]=>
-  unicode(38) "new element added to $outerArrayObject"
+  ["p"]=>
+  string(9) "C::p.orig"
+  ["dynamic1"]=>
+  string(45) "new prop added to $wrappedObject before clone"
+  ["dynamic2"]=>
+  string(44) "new prop added to $wrappedObject after clone"
+  ["new.iAO"]=>
+  string(35) "new element added $innerArrayObject"
+  ["new.oAO"]=>
+  string(38) "new element added to $outerArrayObject"
 }
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (5) {
-    [u"p"]=>
-    unicode(9) "C::p.orig"
-    [u"dynamic1"]=>
-    unicode(45) "new prop added to $wrappedObject before clone"
-    [u"dynamic2"]=>
-    unicode(44) "new prop added to $wrappedObject after clone"
-    [u"new.iAO"]=>
-    unicode(35) "new element added $innerArrayObject"
-    [u"new.oAO"]=>
-    unicode(38) "new element added to $outerArrayObject"
+    ["p"]=>
+    string(9) "C::p.orig"
+    ["dynamic1"]=>
+    string(45) "new prop added to $wrappedObject before clone"
+    ["dynamic2"]=>
+    string(44) "new prop added to $wrappedObject after clone"
+    ["new.iAO"]=>
+    string(35) "new element added $innerArrayObject"
+    ["new.oAO"]=>
+    string(38) "new element added to $outerArrayObject"
   }
 }
 object(ArrayObject)#3 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(ArrayObject)#2 (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     object(C)#1 (5) {
-      [u"p"]=>
-      unicode(9) "C::p.orig"
-      [u"dynamic1"]=>
-      unicode(45) "new prop added to $wrappedObject before clone"
-      [u"dynamic2"]=>
-      unicode(44) "new prop added to $wrappedObject after clone"
-      [u"new.iAO"]=>
-      unicode(35) "new element added $innerArrayObject"
-      [u"new.oAO"]=>
-      unicode(38) "new element added to $outerArrayObject"
+      ["p"]=>
+      string(9) "C::p.orig"
+      ["dynamic1"]=>
+      string(45) "new prop added to $wrappedObject before clone"
+      ["dynamic2"]=>
+      string(44) "new prop added to $wrappedObject after clone"
+      ["new.iAO"]=>
+      string(35) "new element added $innerArrayObject"
+      ["new.oAO"]=>
+      string(38) "new element added to $outerArrayObject"
     }
   }
 }
 object(ArrayObject)#4 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
-    [u"p"]=>
-    unicode(9) "C::p.orig"
-    [u"dynamic1"]=>
-    unicode(45) "new prop added to $wrappedObject before clone"
-    [u"new.coAO"]=>
-    unicode(44) "new element added to $clonedOuterArrayObject"
+    ["p"]=>
+    string(9) "C::p.orig"
+    ["dynamic1"]=>
+    string(45) "new prop added to $wrappedObject before clone"
+    ["new.coAO"]=>
+    string(44) "new element added to $clonedOuterArrayObject"
   }
 }

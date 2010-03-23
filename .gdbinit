@@ -15,116 +15,6 @@ document ____executor_globals
 	ZTS detection is automatically based on ext/standard module struct
 end
 
-define printztype
-	____printz_type $arg0
-	printf "\n"
-end
-
-document printztype
-	prints the type name of a zval type
-end
-
-define ____printz_type
-	set $type = $arg0
-	if $type == 0
-		printf "NULL"
-	end
-	if $type == 1
-		printf "long"
-	end
-	if $type == 2
-		printf "double"
-	end
-	if $type == 3
-		printf "bool"
-	end
-	if $type == 4
-		printf "array"
-	end
-	if $type == 5
-		printf "object"
-	end
-	if $type == 6
-		printf "string"
-	end
-	if $type == 7
-		printf "resource"
-	end
-	if $type == 8 
-		printf "constant"
-	end
-	if $type == 9
-		printf "const_array"
-	end
-	if $type == 10
-		printf "unicode string"
-	end
-	if $type > 10
-		printf "unknown type %d", $type
-	end
-end
-
-define printzv
-	set $ind = 1
-	____printzv $arg0 0 
-end
-
-document printzv
-	prints zval contents
-end
-
-define printu
-	set $str = (UChar*)$arg0
-	if $arg1 > 0
-		set $max = $arg1
-	else
-		set $max = 1024
-	end
-	set $pos = 0
-	while $pos < $max && *(char*)(($str+$pos))
-		if $str[$pos] < 256
-			printf "%c", $str[$pos]
-		else
-			printf "\\u%04X", $str[$pos]
-		end
-		set $pos = $pos + 1
-	end
-	if $pos < $max && *((char*)($str+$pos))
-		printf "[...]"
-	end
-end
-
-document printu
-	prints a unicode string, optionally with given length
-	usage: printu str [len]
-	The function stops at the first zero byte (not char) or when len is reached.
-	If len is less than or equal to one then a maximum of 1024 characters are 
-	printed.
-end
-
-define printt
-	if $arg0
-		printu $arg1 $arg2
-	else
-		set $len = strlen($arg1)
-		if $arg2 > 0 && $len > $arg2
-			set $copy = strdup($arg1)
-			printf "%p: %s\n", $copy, $copy
-			set ((char*)$copy)[$arg2] = 0
-			printf "%s[...]", $copy
-			call free($copy)
-		else
-			printf "%s", $arg1
-		end
-	end
-end
-
-document printt
-	prints a binary or unicode string, optionally with given length
-	usage: printt unicode str [len]
-	If unicode is 1 the function calls printu, else it uses printf.
-end
-
 define print_cvs
 	____executor_globals
 	set $p = $eg.current_execute_data.CVs
@@ -149,8 +39,7 @@ define dump_bt
 	while $t
 		printf "[0x%08x] ", $t
 		if $t->function_state.function->common.function_name
-			printu $t->function_state.function->common.function_name.u 50
-			printf "() "
+			printf "%s() ", $t->function_state.function->common.function_name
 		else
 			printf "??? "
 		end
@@ -166,6 +55,15 @@ document dump_bt
 	dumps the current execution stack. usage: dump_bt executor_globals.current_execute_data
 end
 
+define printzv
+	set $ind = 1
+	____printzv $arg0 0 
+end
+
+document printzv
+	prints zval contents
+end
+
 define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->type
@@ -177,28 +75,27 @@ define ____printzv_contents
 	printf ") "
 	if $type == 0
 		printf "NULL"
-	else
-		____printz_type $type
 	end
 	if $type == 1
-		printf ": %ld", $zvalue->value.lval
+		printf "long: %ld", $zvalue->value.lval
 	end
 	if $type == 2
-		printf ": %lf", $zvalue->value.dval
+		printf "double: %lf", $zvalue->value.dval
 	end
 	if $type == 3
+		printf "bool: "
 		if $zvalue->value.lval
-			printf ": true"
+			printf "true"
 		else
-			printf ": false"
+			printf "false"
 		end
 	end
 	if $type == 4
-		printf "(%d): ", $zvalue->value.ht->nNumOfElements
+		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
 		if ! $arg1
 			printf "{\n"
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.ht 0 1
+			____print_ht $zvalue->value.ht 1
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
@@ -210,6 +107,7 @@ define ____printzv_contents
 		set $type = 0
 	end
 	if $type == 5
+		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
@@ -219,7 +117,7 @@ define ____printzv_contents
 			set $zobj = zend_objects_get_address($zvalue)
 		end
 		if $handlers->get_class_entry == &zend_std_object_get_class
-			set $cname = $zobj->ce.name.s
+			set $cname = $zobj->ce.name
 		else
 			set $cname = "Unknown"
 		end
@@ -231,7 +129,7 @@ define ____printzv_contents
 					printf "(%d): ", $ht->nNumOfElements
 					printf "{\n"
 					set $ind = $ind + 1
-					____print_ht $ht 1 1
+					____print_ht $ht 1
 					set $ind = $ind - 1
 					set $i = $ind
 					while $i > 0
@@ -247,21 +145,20 @@ define ____printzv_contents
 		set $type = 0
 	end
 	if $type == 6
-		printf "(%d): \"%s\"", $zvalue->value.str.len, $zvalue->value.str.val
+		printf "string(%d): ", $zvalue->value.str.len
+		____print_str $zvalue->value.str.val $zvalue->value.str.len
 	end
 	if $type == 7
-		printf ": #%d", $zvalue->value.lval
+		printf "resource: #%d", $zvalue->value.lval
 	end
 	if $type == 8 
+		printf "constant"
 	end
 	if $type == 9
+		printf "const_array"
 	end
-	if $type == 10
-		printf "(%d): [%p]: \"", $zvalue->value.str.len, $zvalue->value.str.val
-		printu $zvalue->value.ustr.val $zvalue->value.str.len
-		printf "\""
-	end
-	if $type > 10
+	if $type > 9
+		printf "unknown type %d", $type
 	end
 	printf "\n"
 end
@@ -297,8 +194,9 @@ define ____print_const_table
 			set $i = $i - 1
 		end
 
-		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->key.arKey.s
+		if $p->nKeyLength > 0
+			____print_str $p->arKey $p->nKeyLength
+			printf " => "
 		else
 			printf "%d => ", $p->h
 		end
@@ -316,10 +214,8 @@ define print_const_table
 end
 
 define ____print_ht
-	set $ht = $arg0
-	set $obj = $arg1
+	set $ht = (HashTable*)$arg0
 	set $p = $ht->pListHead
-	set $unicode = $ht->unicode
 
 	while $p != 0
 		set $i = $ind
@@ -329,25 +225,12 @@ define ____print_ht
 		end
 
 		if $p->nKeyLength > 0
-			if $obj && $p->key.arKey.s[0] == 0
-				if $p->key.arKey.s[1] == '*'
-					printf "\"protected %s\" => ", $p->key.arKey.s+3
-				else
-					set $n = 1
-					while $n < $p->nKeyLength && $p->key.arKey.s[$n] != 0
-						set $n = $n + 1
-					end
-					printf "\"private %s::%s\" => ", $p->key.arKey.s+1, $p->key.arKey.s+$n+1
-				end
-			else
-				printf "\""
-				printt $p->key.type $p->key.arKey.s $p->nKeyLength
-				printf "\" => "
-			end
+			____print_str $p->arKey $p->nKeyLength
+			printf " => "
 		else
 			printf "%d => ", $p->h
 		end
-
+		
 		if $arg1 == 0
 			printf "%p\n", (void*)$p->pData
 		end
@@ -365,7 +248,7 @@ end
 
 define print_ht
 	set $ind = 1
-	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
+	printf "[0x%08x] {\n", $arg0
 	____print_ht $arg0 1
 	printf "}\n"
 end
@@ -376,7 +259,7 @@ end
 
 define print_htptr
 	set $ind = 1
-	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
+	printf "[0x%08x] {\n", $arg0
 	____print_ht $arg0 0
 	printf "}\n"
 end
@@ -387,7 +270,7 @@ end
 
 define print_htstr
 	set $ind = 1
-	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
+	printf "[0x%08x] {\n", $arg0
 	____print_ht $arg0 2
 	printf "}\n"
 end
@@ -399,7 +282,6 @@ end
 define ____print_ft
 	set $ht = $arg0
 	set $p = $ht->pListHead
-	set $unicode = $ht->unicode
 
 	while $p != 0
 		set $func = (zend_function*)$p->pData
@@ -411,50 +293,133 @@ define ____print_ft
 		end
 
 		if $p->nKeyLength > 0
-			printf "\""
-			if $p->key.arKey.u.s[1] == '\0'
-				printu $p->key.arKey.u $p->nKeyLength
-			else
-				printt $unicode $p->key.arKey.u $p->nKeyLength
-			end
-			printf "\" => "
+			____print_str $p->arKey $p->nKeyLength
+			printf " => "
 		else
 			printf "%d => ", $p->h
 		end
-		printf "[%p]: ", $func
-		if $func->common.fn_flags & 0x01
-			printf "static "
-		end
-		if $func->common.fn_flags & 0x02
-			printf "abstract "
-		end
-		if $func->common.fn_flags & 0x04
-			printf "final "
-		end
-		set $visibility = zend_visibility_string($func->common.fn_flags)
-		printf "%s", $visibility
-		if *$visibility
-			printf " "
-		end
-		if $func->common.return_reference
-			printf "& "
-		end
-		printt $unicode $func->common.function_name.s 0
-		
-		printf "()\n"
+
+		printf "\"%s\"\n", $func->common.function_name
 		set $p = $p->pListNext
 	end
 end
 
 define print_ft
 	set $ind = 1
-	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
+	printf "[0x%08x] {\n", $arg0
 	____print_ft $arg0
 	printf "}\n"
 end
 
 document print_ft
 	dumps a function table (HashTable)
+end
+
+define ____print_inh_class
+	set $ce = $arg0
+	if $ce->ce_flags & 0x10 || $ce->ce_flags & 0x20
+		printf "abstract "
+	else
+		if $ce->ce_flags & 0x40
+			printf "final "
+		end
+	end
+	printf "class %s", $ce->name
+	if $ce->parent != 0
+		printf " extends %s", $ce->parent->name
+	end
+	if $ce->num_interfaces != 0
+		printf " implements"
+		set $tmp = 0
+		while $tmp < $ce->num_interfaces
+			printf " %s", $ce->interfaces[$tmp]->name
+			set $tmp = $tmp + 1
+			if $tmp < $ce->num_interfaces
+				printf ","
+			end
+		end
+	end
+	set $ce = $ce->parent
+end
+
+define ____print_inh_iface
+	set $ce = $arg0
+	printf "interface %s", $ce->name
+	if $ce->num_interfaces != 0
+		set $ce = $ce->interfaces[0]
+		printf " extends %s", $ce->name
+	else
+		set $ce = 0
+	end
+end
+
+define print_inh
+	set $ce = $arg0
+	set $depth = 0
+	while $ce != 0
+		set $tmp = $depth
+		while $tmp != 0
+			printf " "
+			set $tmp = $tmp - 1
+		end
+		set $depth = $depth + 1
+		if $ce->ce_flags & 0x80
+			____print_inh_iface $ce
+		else
+			____print_inh_class $ce
+		end
+		printf " {\n"
+	end
+	while $depth != 0
+		set $tmp = $depth
+		while $tmp != 1
+			printf " "
+			set $tmp = $tmp - 1
+		end
+		printf "}\n"
+		set $depth = $depth - 1
+	end
+end
+
+define print_pi
+	set $pi = $arg0
+	printf "[0x%08x] {\n", $pi
+	printf "    h     = %lu\n", $pi->h
+	printf "    flags = %d (", $pi->flags
+	if $pi->flags & 0x100
+		printf "ZEND_ACC_PUBLIC"
+	else
+		if $pi->flags & 0x200
+			printf "ZEND_ACC_PROTECTED"
+		else
+			if $pi->flags & 0x400
+				printf "ZEND_ACC_PRIVATE"
+			else
+				if $pi->flags & 0x800
+					printf "ZEND_ACC_CHANGED"
+				end
+			end
+		end
+	end
+	printf ")\n"
+	printf "    name  = "
+	____print_str $pi->name $pi->name_length
+	printf "\n}\n"
+end
+
+define ____print_str
+	set $tmp = 0
+	set $str = $arg0
+	printf "\""
+	while $tmp < $arg1
+		if $str[$tmp] > 32 && $str[$tmp] < 127
+			printf "%c", $str[$tmp]
+		else
+			printf "\\%o", $str[$tmp]
+		end
+		set $tmp = $tmp + 1
+	end
+	printf "\""
 end
 
 define printzn
@@ -472,9 +437,6 @@ define printzn
 	end
 	if $znode->op_type == 8
 		set $optype = "IS_UNUSED"
-	end
-	if $znode->op_type == 16
-		set $optype = "IS_CV"
 	end
 
 	printf "[0x%08x] %s", $znode, $optype
@@ -494,9 +456,6 @@ define printzn
 		____printzv *$tvar->var.ptr_ptr 0
 	end
 	if $znode->op_type == 8
-		printf "\n"
-	end
-	if $znode->op_type == 16
 		printf "\n"
 	end
 end

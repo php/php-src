@@ -16,4 +16,4 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-unicode(1) "A"
+string(1) "A"

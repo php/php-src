@@ -63,24 +63,24 @@ Function [ <user> function test ] {
 
 NULL
 --getName--
-unicode(4) "test"
+string(4) "test"
 --isInternal--
 bool(false)
 --isUserDefined--
 bool(true)
 --getFilename--
-unicode(%d) "%s025.php"
+string(%d) "%s025.php"
 --getStartline--
 int(6)
 --getEndline--
 int(8)
 --getDocComment--
-unicode(11) "/**
+string(11) "/**
 hoho
 */"
 --getStaticVariables--
 array(1) {
-  [u"var"]=>
+  ["var"]=>
   int(1)
 }
 --invoke--
@@ -93,18 +93,18 @@ bool(false)
 array(3) {
   [0]=>
   &object(ReflectionParameter)#2 (1) {
-    [u"name"]=>
-    unicode(1) "a"
+    ["name"]=>
+    string(1) "a"
   }
   [1]=>
   &object(ReflectionParameter)#3 (1) {
-    [u"name"]=>
-    unicode(1) "b"
+    ["name"]=>
+    string(1) "b"
   }
   [2]=>
   &object(ReflectionParameter)#4 (1) {
-    [u"name"]=>
-    unicode(1) "c"
+    ["name"]=>
+    string(1) "c"
   }
 }
 --getNumberOfParameters--

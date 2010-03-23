@@ -52,4 +52,23 @@ try {
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: The magic method __call() must have public visibility and cannot be static in %s on line 3
+Warning: The magic method __call() must have public visibility and cannot be static in %s on line 3
+---> Invoke __call via simple method call.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via scope resolution operator within instance.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via scope resolution operator within child instance.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via callback.
+NULL
+Exception caught OK; continuing.
+==DONE==

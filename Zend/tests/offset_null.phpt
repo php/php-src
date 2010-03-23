@@ -24,7 +24,7 @@ var_dump($null[$arr]);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 NULL
 NULL
 NULL

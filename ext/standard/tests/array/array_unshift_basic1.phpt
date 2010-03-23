@@ -36,7 +36,7 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unshift() : basic functionality with default key array ***
 int(3)
 array(3) {
@@ -52,7 +52,7 @@ array(5) {
   [0]=>
   int(222)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
   float(12.33)
   [3]=>

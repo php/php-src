@@ -31,20 +31,20 @@ var_dump(array_diff_assoc($array2, $array1));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff_assoc() : usage variations ***
 array(3) {
   [0]=>
   string(1) "1"
-  [u"str1"]=>
-  unicode(5) "hello"
-  [u"str2"]=>
-  unicode(5) "world"
+  ["str1"]=>
+  string(5) "hello"
+  ["str2"]=>
+  string(5) "world"
 }
 array(2) {
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [4]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 Done

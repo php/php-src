@@ -160,20 +160,24 @@ Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, array given, %s(%d)
-NULL
+Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 
 --int indexed array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, array given, %s(%d)
-NULL
+Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 
 --associative array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, array given, %s(%d)
-NULL
+Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 
 --nested arrays--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, array given, %s(%d)
-NULL
+Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 
 --uppercase NULL--
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
@@ -212,8 +216,10 @@ Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, object given, %s(%d)
-NULL
+Error: 4096 - Object of class classWithoutToString could not be converted to string, %s(%d)
+Error: 8 - Object of class classWithoutToString to string conversion, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 
 --undefined var--
 Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
@@ -224,7 +230,6 @@ Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be binary string, resource given, %s(%d)
-NULL
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+bool(false)
 ===DONE===
-

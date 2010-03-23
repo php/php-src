@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php_compat.h"
 
 #define GD_MAJOR_VERSION 2

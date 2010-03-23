@@ -35,15 +35,6 @@ var_dump( dir($dir_path."/sub?dir1") );
 
 echo "Done";
 ?>
---CLEAN--
-<?php
-$file_path = dirname(__FILE__);
-$dir_path = $file_path."/dir_variation81";
-$sub_dir_path = $dir_path."/sub_dir1";
-
-rmdir($dir_path1);
-rmdir($dir_path2);
-?>
 --EXPECTF--
 *** Testing dir() : checking with wildcard characters ***
 -- wildcard = '*' --

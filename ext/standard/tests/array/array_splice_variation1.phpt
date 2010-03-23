@@ -69,7 +69,7 @@ array(3) {
   int(4)
   [1]=>
   &int(5)
-  [u"six"]=>
+  ["six"]=>
   &int(6)
 }
 array(7) {
@@ -79,13 +79,13 @@ array(7) {
   int(1)
   [2]=>
   &int(2)
-  [u"three"]=>
+  ["three"]=>
   &int(3)
   [3]=>
   int(7)
   [4]=>
   &int(8)
-  [u"nine"]=>
+  ["nine"]=>
   &int(9)
 }
 Test behaviour of replacement array containing references 

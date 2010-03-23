@@ -41,7 +41,7 @@ foreach( $strings_with_nulls as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with embedded nulls in the strings ***
 
 --- Iteration 1 ---
@@ -53,7 +53,7 @@ bool(false)
 bool(false)
 
 --- Iteration 2 ---
-unicode(2) "\0"
+string(2) "\0"
 bool(false)
 bool(false)
 bool(false)
@@ -61,23 +61,23 @@ bool(false)
 bool(false)
 
 --- Iteration 3 ---
-unicode(5) "hello"
-unicode(5) "world"
+string(5) "hello"
+string(5) "world"
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 4 ---
-unicode(3) "hel"
-unicode(2) "lo"
+string(3) "hel"
+string(2) "lo"
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 5 ---
-unicode(5) "hello"
+string(5) "hello"
 bool(false)
 bool(false)
 bool(false)
@@ -85,7 +85,7 @@ bool(false)
 bool(false)
 
 --- Iteration 6 ---
-unicode(11) "hello	world"
+string(11) "hello	world"
 bool(false)
 bool(false)
 bool(false)
@@ -93,15 +93,15 @@ bool(false)
 bool(false)
 
 --- Iteration 7 ---
-unicode(4) "\0he"
-unicode(5) "llo\0"
+string(4) "\0he"
+string(5) "llo\0"
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 8 ---
-unicode(9) "hello\0\0"
+string(9) "hello\0\0"
 bool(false)
 bool(false)
 bool(false)

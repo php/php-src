@@ -66,12 +66,12 @@ var_dump($obj->getArrayCopy());
 --EXPECTF--
 array(4) {
   [0]=>
-  unicode(3) "1st"
+  string(3) "1st"
   [1]=>
   int(1)
   [2]=>
-  unicode(3) "3rd"
-  [u"4th"]=>
+  string(3) "3rd"
+  ["4th"]=>
   int(4)
 }
 ===EMPTY===
@@ -89,9 +89,9 @@ bool(true)
 bool(false)
 bool(false)
 ===offsetGet===
-unicode(3) "1st"
+string(3) "1st"
 int(1)
-unicode(3) "3rd"
+string(3) "3rd"
 int(4)
 
 Notice: Undefined index:  5th in %sarray_010.php on line %d
@@ -101,31 +101,31 @@ Notice: Undefined offset:  6 in %sarray_010.php on line %d
 NULL
 ===offsetSet===
 WRITE 1
-unicode(9) "Changed 1"
+string(9) "Changed 1"
 WRITE 2
-unicode(11) "Changed 4th"
+string(11) "Changed 4th"
 WRITE 3
-unicode(9) "Added 5th"
+string(9) "Added 5th"
 WRITE 4
-unicode(7) "Added 6"
-unicode(3) "1st"
-unicode(3) "3rd"
-unicode(9) "changed 6"
-unicode(9) "changed 6"
+string(7) "Added 6"
+string(3) "1st"
+string(3) "3rd"
+string(9) "changed 6"
+string(9) "changed 6"
 ===unset===
 array(6) {
   [0]=>
-  unicode(3) "1st"
+  string(3) "1st"
   [1]=>
-  unicode(9) "Changed 1"
+  string(9) "Changed 1"
   [2]=>
-  unicode(3) "3rd"
-  [u"4th"]=>
-  unicode(11) "Changed 4th"
-  [u"5th"]=>
-  unicode(9) "Added 5th"
+  string(3) "3rd"
+  ["4th"]=>
+  string(11) "Changed 4th"
+  ["5th"]=>
+  string(9) "Added 5th"
   [6]=>
-  unicode(9) "changed 6"
+  string(9) "changed 6"
 }
 
 Notice: Undefined offset:  7 in %sarray_010.php on line %d
@@ -133,12 +133,12 @@ Notice: Undefined offset:  7 in %sarray_010.php on line %d
 Notice: Undefined index:  8th in %sarray_010.php on line %d
 array(4) {
   [0]=>
-  unicode(3) "1st"
+  string(3) "1st"
   [1]=>
-  unicode(9) "Changed 1"
-  [u"5th"]=>
-  unicode(9) "Added 5th"
+  string(9) "Changed 1"
+  ["5th"]=>
+  string(9) "Added 5th"
   [6]=>
-  unicode(9) "changed 6"
+  string(9) "changed 6"
 }
 ===DONE===

@@ -19,10 +19,10 @@ var_dump($_SERVER);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 bool(true)
 bool(false)
-unicode(5) "array"
+string(5) "array"
 int(%d)
 string(%d) "%s"
 

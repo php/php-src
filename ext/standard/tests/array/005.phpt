@@ -90,7 +90,7 @@ NULL
 Warning: array_shift() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_shift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_shift() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: array_shift() expects exactly 1 parameter, 2 given in %s on line %d
@@ -135,7 +135,7 @@ Array
 )
 
 Output after shift is :
-unicode(3) "One"
+string(3) "One"
 
 -- Input Array for Iteration 4 is -- 
 Array
@@ -164,7 +164,7 @@ Array
 )
 
 Output after shift is :
-unicode(3) "aaa"
+string(3) "aaa"
 
 -- Input Array for Iteration 6 is -- 
 Array
@@ -177,7 +177,7 @@ Array
 )
 
 Output after shift is :
-unicode(3) "one"
+string(3) "one"
 
 -- Input Array for Iteration 7 is -- 
 Array
@@ -190,7 +190,7 @@ Array
 )
 
 Output after shift is :
-unicode(3) "one"
+string(3) "one"
 
 -- Input Array for Iteration 8 is -- 
 Array
@@ -210,7 +210,7 @@ Array
 )
 
 Output after shift is :
-unicode(3) "fff"
+string(3) "fff"
 
 -- Input Array for Iteration 9 is -- 
 Array
@@ -252,9 +252,9 @@ Array
 Output after shift is :
 array(3) {
   [0]=>
-  unicode(3) "oNe"
+  string(3) "oNe"
   [1]=>
-  unicode(3) "tWo"
+  string(3) "tWo"
   [2]=>
   int(4)
 }

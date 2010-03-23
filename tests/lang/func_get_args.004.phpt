@@ -30,38 +30,38 @@ refVal($b, $b);
 var_dump($b);
 ?>
 --EXPECTF--
+
 -- Val, Ref --
-unicode(10) "original.a"
-unicode(10) "original.a"
+string(10) "original.a"
+string(10) "original.a"
 array(2) {
   [0]=>
-  unicode(10) "original.a"
+  string(10) "original.a"
   [1]=>
-  unicode(10) "original.a"
+  string(10) "original.a"
 }
 array(2) {
   [0]=>
-  unicode(10) "original.a"
+  string(10) "original.a"
   [1]=>
-  unicode(9) "changed.y"
+  string(9) "changed.y"
 }
-unicode(9) "changed.y"
+string(9) "changed.y"
 
 
 -- Ref, Val --
-unicode(10) "original.b"
-unicode(10) "original.b"
+string(10) "original.b"
+string(10) "original.b"
 array(2) {
   [0]=>
-  unicode(10) "original.b"
+  string(10) "original.b"
   [1]=>
-  unicode(10) "original.b"
+  string(10) "original.b"
 }
 array(2) {
   [0]=>
-  unicode(9) "changed.x"
+  string(9) "changed.x"
   [1]=>
-  unicode(10) "original.b"
+  string(10) "original.b"
 }
-unicode(9) "changed.x"
-
+string(9) "changed.x"

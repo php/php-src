@@ -16,8 +16,8 @@ var_dump($matches);
 --EXPECTF--
 array(2) {
   [0]=>
-  unicode(2) "My"
+  string(2) "My"
   [1]=>
-  unicode(1) "y"
+  string(1) "y"
 }
 ===Done===

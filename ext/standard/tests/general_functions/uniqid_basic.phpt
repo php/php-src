@@ -39,35 +39,35 @@ for ($i = 0; $i < count($prefix); $i++) {
 *** Testing uniqid() : basic functionality ***
 
 uniqid() without a prefix
-unicode(13) "%s"
-unicode(23) "%s.%s"
-unicode(13) "%s"
+string(13) "%s"
+string(23) "%s.%s"
+string(13) "%s"
 
 
 uniqid() with a prefix
-unicode(18) "99999%s"
-unicode(28) "99999%s.%s"
-unicode(18) "99999%s"
+string(18) "99999%s"
+string(28) "99999%s.%s"
+string(18) "99999%s"
 
-unicode(18) "999994%s"
-unicode(28) "999994%s.%s"
-unicode(18) "999994%s"
+string(18) "999994%s"
+string(28) "999994%s.%s"
+string(18) "999994%s"
 
-unicode(17) "1050%s"
-unicode(27) "1050%s.%s"
-unicode(17) "1050%s"
+string(17) "1050%s"
+string(27) "1050%s.%s"
+string(17) "1050%s"
 
-unicode(13) "%s"
-unicode(23) "%s.%s"
-unicode(13) "%s"
+string(13) "%s"
+string(23) "%s.%s"
+string(13) "%s"
 
-unicode(14) "1%s"
-unicode(24) "1%s.%s"
-unicode(14) "1%s"
+string(14) "1%s"
+string(24) "1%s.%s"
+string(14) "1%s"
 
-unicode(13) "%s"
-unicode(23) "%s.%s"
-unicode(13) "%s"
+string(13) "%s"
+string(23) "%s.%s"
+string(13) "%s"
 
 ===DONE===
 	

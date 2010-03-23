@@ -21,5 +21,7 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing sql_regcase() : basic functionality ***
+
+Deprecated: Function sql_regcase() is deprecated in %s on line %d
 string(39) "[Ss][Tt][Rr][Ii][Nn][Gg]_[Vv][Aa][Ll]-0"
 Done

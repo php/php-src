@@ -255,63 +255,64 @@ echo "Done\n";
 Test 1.1 In Length: default.  In Type: default.  Out Length: default.          Out Type: default
   Executing:
     Oci_execute error ORA-6502
-unicode(3) "abc"
+string(3) "abc"
 NULL
 Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
-unicode(3) "abc"
-unicode(3) "abc"
+string(3) "abc"
+string(3) "abc"
 Test 1.3 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: default
   Executing:
-unicode(3) "abc"
-unicode(3) "abc"
+string(3) "abc"
+string(3) "abc"
 Test 1.4 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
-unicode(3) "abc"
-unicode(20) "abc                 "
+string(3) "abc"
+string(10) "abc       "
 Test 1.5 In Length: strlen.   In Type: AFC.      Out Length: strlen(input).    Out Type: AFC
   Executing:
-unicode(3) "abc"
-unicode(6) "abc   "
+string(3) "abc"
+string(3) "abc"
 Test 1.6 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)-1.  Out Type: AFC
   Executing:
-unicode(3) "abc"
-unicode(4) "abc "
+    Oci_execute error ORA-6502
+string(3) "abc"
+string(3) "abc"
 Test 1.7 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)+1.  Out Type: AFC
   Executing:
-unicode(3) "abc"
-unicode(8) "abc     "
+string(3) "abc"
+string(4) "abc "
 
 
 Tests with ''
 
 Test 2.1 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.3 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: default
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.4 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.5 In Length: -1.       In Type: AFC.      Out Length: 0.                Out Type: AFC
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.6 In Length: 0.        In Type: AFC.      Out Length: 0.                Out Type: AFC
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 Test 2.7 In Length: 1.        In Type: AFC.      Out Length: 1.                Out Type: AFC
   Executing:
-unicode(0) ""
+string(0) ""
 NULL
 
 

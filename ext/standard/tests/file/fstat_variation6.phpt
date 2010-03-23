@@ -40,7 +40,7 @@ foreach ( $variation_array as $var ) {
 ===DONE===
 --EXPECTF--
 Error: 2 - fstat() expects parameter 1 to be resource, object given, %s(%d)
-NULL
+bool(false)
 Error: 2 - fstat() expects parameter 1 to be resource, object given, %s(%d)
-NULL
+bool(false)
 ===DONE===

@@ -21,18 +21,18 @@ var_dump(gmp_abs(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(1) "0"
-unicode(1) "0"
-unicode(1) "0"
+--EXPECTF--	
+string(1) "0"
+string(1) "0"
+string(1) "0"
 
 Warning: gmp_abs(): Unable to convert variable to GMP - wrong type in %s on line %d
-unicode(1) "0"
-unicode(21) "111111111111111111111"
-unicode(21) "111111111111111111111"
-unicode(1) "0"
-unicode(1) "0"
-unicode(1) "0"
+string(1) "0"
+string(21) "111111111111111111111"
+string(21) "111111111111111111111"
+string(1) "0"
+string(1) "0"
+string(1) "0"
 
 Warning: gmp_abs() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

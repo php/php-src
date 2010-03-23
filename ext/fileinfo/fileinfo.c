@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2004 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -86,7 +86,7 @@ static void finfo_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC
 		magic_close(intern->ptr->magic);
 		efree(intern->ptr);
 	}
-	
+
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
 	efree(intern);
 }
@@ -297,7 +297,7 @@ PHP_FUNCTION(finfo_open)
 		}
 		file = resolved_path;
 
-		if (php_check_open_basedir(file TSRMLS_CC)) {
+		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 	}
@@ -397,14 +397,9 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &what) == FAILURE) {
 			return;
 		}
-		
+
 		switch (Z_TYPE_P(what)) {
-			case IS_UNICODE:
 			case IS_STRING:
-				if (Z_TYPE_P(what) == IS_UNICODE) {
-					convert_to_string_ex(&what);
-				}
-				
 				buffer = Z_STRVAL_P(what);
 				buffer_len = Z_STRLEN_P(what);
 				mode = FILEINFO_MODE_FILE;
@@ -492,12 +487,13 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				RETVAL_FALSE;
 				goto clean;
 			}
+
 			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
 
 			if (wrap) {
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
 
-				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
+				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
 				if (!stream) {
 					RETVAL_FALSE;
@@ -512,7 +508,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only process string or stream arguments");
- 	}
+	}
 
 common:
 	if (ret_val) {

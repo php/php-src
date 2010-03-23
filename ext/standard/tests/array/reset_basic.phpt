@@ -35,11 +35,11 @@ var_dump(reset($array));
 0 => zero
 
 -- Call to next() --
-unicode(3) "one"
+string(3) "one"
 
 -- Current Position: --
 1 => one
 
 -- Call to reset() --
-unicode(4) "zero"
+string(4) "zero"
 ===DONE===

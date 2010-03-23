@@ -47,43 +47,43 @@ var_dump(array_diff_assoc($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 
 *** Testing array_diff_assoc() : usage variations ***
 -- Results when $a = a: --
 array(3) {
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
 }
 -- Results when $a has been changed to 4: --
 array(4) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
   [0]=>
   &int(4)

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -50,9 +50,6 @@
 #include "TSRM.h"
 #endif
 
-#include "unicode/uchar.h"
-#include "unicode/ubrk.h"
-
 /* For str_getcsv() support */
 #include "ext/standard/file.h"
 
@@ -81,7 +78,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_LOCALECONV
-	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
+	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */	
 
 /* This is bad, but since we are going to be hardcoding in the POSIX stuff anyway... */
 # ifndef HAVE_LIMITS_H
@@ -102,13 +99,11 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
 # endif
 #endif
-
+	
 }
 /* }}} */
 
 int php_tag_find(char *tag, int len, char *set);
-static void php_ucwords(char *str, int str_len);
-static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minlen, int maxlen, int *outlen TSRMLS_DC);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -126,17 +121,17 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	size_t i, j;
 
 	result = (unsigned char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
-
+	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
 	}
 	result[j] = '\0';
 
-	if (newlen)
+	if (newlen) 
 		*newlen = oldlen * 2 * sizeof(char);
 
-	return (char*)result;
+	return (char *)result;
 }
 /* }}} */
 
@@ -186,48 +181,45 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 # endif
 #endif
 
-/* {{{ proto string bin2hex(string data) U
+/* {{{ proto string bin2hex(string data)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
-	unsigned char *data;
-	int data_len;
-	char *result;
+	char *result, *data;
 	size_t newlen;
+	int datalen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
 		return;
 	}
 
-	result = php_bin2hex(data, data_len, &newlen);
-
+	result = php_bin2hex((unsigned char *)data, datalen, &newlen);
+	
 	if (!result) {
 		RETURN_FALSE;
 	}
 
-	RETVAL_ASCII_STRINGL(result, newlen, ZSTR_AUTOFREE);
+	RETURN_STRINGL(result, newlen, 0);
 }
 /* }}} */
 
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
-	void *s1, *s2;
+	char *s11, *s22;
 	int len1, len2;
-	zend_uchar type1, type2;
-	long start = 0, len = 0; /* For UNICODE, these are codepoint units */
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|ll",
-							  &s1, &len1, &type1, &s2, &len2, &type2,
-							  &start, &len) == FAILURE) {
+	long start = 0, len = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
+				&s22, &len2, &start, &len) == FAILURE) {
 		return;
 	}
-
+	
 	if (ZEND_NUM_ARGS() < 4) {
 		len = len1;
 	}
-
+	
 	/* look at substr() function for more information */
-
+	
 	if (start < 0) {
 		start += len1;
 		if (start < 0) {
@@ -236,14 +228,14 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	} else if (start > len1) {
 		RETURN_FALSE;
 	}
-
+	
 	if (len < 0) {
 		len += (len1 - start);
 		if (len < 0) {
 			len = 0;
 		}
 	}
-
+	
 	if (len > len1 - start) {
 		len = len1 - start;
 	}
@@ -252,44 +244,22 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		RETURN_LONG(0);
 	}
 
-	if (type1 == IS_UNICODE) {
-		UChar *u_start, *u_end;
-		int32_t i = 0;
-
-		U16_FWD_N((UChar*)s1, i, len1, start);
-		u_start = (UChar *)s1 + i;
-		U16_FWD_N((UChar *)s1, i, len1, len);
-		u_end = (UChar *)s1 + i;
-
-		if (behavior == STR_STRSPN) {
-			RETURN_LONG(php_u_strspn(u_start /*str1_start*/,
-									 (UChar *)s2 /*str2_start*/,
-									 u_end /*str1_end*/,
-									 (UChar *)s2 + len2 /*str2_end*/));
-		} else if (behavior == STR_STRCSPN) {
-			RETURN_LONG(php_u_strcspn(u_start /*str1_start*/,
-									  (UChar *)s2 /*str2_start*/,
-									  u_end /*str1_end*/,
-									  (UChar *)s2 + len2 /*str2_end*/));
-		}
-	} else {
-		if (behavior == STR_STRSPN) {
-			RETURN_LONG(php_strspn((char *)s1 + start /*str1_start*/,
-								   (char *)s2 /*str2_start*/,
-								   (char *)s1 + start + len /*str1_end*/,
-								   (char *)s2 + len2 /*str2_end*/));
-		} else if (behavior == STR_STRCSPN) {
-			RETURN_LONG(php_strcspn((char *)s1 + start /*str1_start*/,
-									(char *)s2 /*str2_start*/,
-									(char *)s1 + start + len /*str1_end*/,
-									(char *)s2 + len2 /*str2_end*/));
-		}
+	if (behavior == STR_STRSPN) {
+		RETURN_LONG(php_strspn(s11 + start /*str1_start*/,
+						s22 /*str2_start*/,
+						s11 + start + len /*str1_end*/,
+						s22 + len2 /*str2_end*/));
+	} else if (behavior == STR_STRCSPN) {
+		RETURN_LONG(php_strcspn(s11 + start /*str1_start*/,
+						s22 /*str2_start*/,
+						s11 + start + len /*str1_end*/,
+						s22 + len2 /*str2_end*/));
 	}
-
+	
 }
 /* }}} */
 
-/* {{{ proto int strspn(string str, string mask [, start [, len]]) U
+/* {{{ proto int strspn(string str, string mask [, start [, len]])
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
@@ -297,7 +267,7 @@ PHP_FUNCTION(strspn)
 }
 /* }}} */
 
-/* {{{ proto int strcspn(string str, string mask [, start [, len]]) U
+/* {{{ proto int strcspn(string str, string mask [, start [, len]])
    Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
@@ -475,18 +445,16 @@ PHP_MINIT_FUNCTION(nl_langinfo)
 }
 /* }}} */
 
-/* {{{ proto string nl_langinfo(int item) U
+/* {{{ proto string nl_langinfo(int item)
    Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
 	long item;
 	char *value;
-
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &item) == FAILURE) {
 		return;
 	}
-
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 
 	switch(item) { /* {{{ */
 #ifdef ABDAY_1
@@ -664,36 +632,27 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 /* }}} */
 
-/* {{{ proto int strcoll(string str1, string str2) U
+#ifdef HAVE_STRCOLL
+/* {{{ proto int strcoll(string str1, string str2)
    Compares two strings using the current locale */
 PHP_FUNCTION(strcoll)
 {
-	zstr s1, s2;
-	int s1_len, s2_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
-							  &str_type, &s2, &s2_len, &str_type) == FAILURE) {
+	char *s1, *s2;
+	int s1len, s2len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1len, &s2, &s2len) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		RETURN_LONG(ZEND_COLL_RESULT(ucol_strcoll(UG(default_collator)->coll, s1.u, s1_len, s2.u, s2_len)));
-	} else {
-#ifdef HAVE_STRCOLL
-		RETURN_LONG(strcoll((const char *) s1.s,
-							(const char *) s2.s));
-#else
-		RETURN_FALSE;
-#endif
-	}
-
+	RETURN_LONG(strcoll((const char *) s1, 
+	                    (const char *) s2));
 }
 /* }}} */
+#endif
 
 /* {{{ php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
- * it needs to be incrementing.
+ * it needs to be incrementing.  
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
 static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
@@ -704,8 +663,8 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
 
 	memset(mask, 0, 256);
 	for (end = input+len; input < end; input++) {
-		c=*input;
-		if ((input+3 < end) && input[1] == '.' && input[2] == '.'
+		c=*input; 
+		if ((input+3 < end) && input[1] == '.' && input[2] == '.' 
 				&& input[3] >= c) {
 			memset(mask+c, 1, input[3] - c + 1);
 			input+=3;
@@ -726,7 +685,7 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
 				result = FAILURE;
 				continue;
-			}
+			} 
 			/* FIXME: better error (a..b..c is the only left possibility?) */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range");
 			result = FAILURE;
@@ -787,192 +746,24 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_v
 }
 /* }}} */
 
-/* {{{ php_expand_uchar_range()
- * Expands possible ranges of the form 'a..b' in input charlist,
- * where a < b in code-point order
- */
-static int php_expand_uchar_range(UChar **range, int *range_len TSRMLS_DC)
-{
-	UChar32 *codepts, *tmp, *input, *end, c;
-	int32_t len, tmp_len, idx;
-	UErrorCode err;
-	int expanded = 0;
-	int result = SUCCESS;
-
-	/* First, convert UTF-16 to UTF-32 */
-	len = *range_len;
-	codepts = (UChar32 *)emalloc((len+1)*sizeof(UChar32));
-	err = U_ZERO_ERROR;
-	u_strToUTF32((UChar32 *)codepts, len+1, &len, *range, len, &err);
-
-	/* Expand ranges, if any - taken from php_charmask() */
-	tmp_len = len;
-	tmp = (UChar32 *)emalloc((tmp_len+1)*sizeof(UChar32));
-	input = codepts;
-	for ( idx = 0, end = input+len ; input < end ; input++ ) {
-		c = input[0];
-		if ( (input+3 < end) && input[1] == '.' && input[2] == '.' && input[3] >= c ) {
-			tmp_len += (input[3] - c + 1 - 4);
-			tmp = (UChar32 *)erealloc(tmp, (tmp_len+1)*sizeof(UChar32));
-			for ( ; c <= input[3] ; c++ ) {
-				if ( U_IS_UNICODE_CHAR(c) ) tmp[idx++] = c;
-			}
-			input += 3;
-			expanded++;
-		} else if ( (input+1 < end) && input[0] == '.' && input[1] == '.' ) {
-			/* Error, try to be as helpful as possible:
-			   (a range ending/starting with '.' won't be captured here) */
-			if ( end-len >= input ) { /* There is no 'left' char */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the left of '..'");
-				result = FAILURE;
-				continue;
-			}
-			if ( input+2 >= end ) { /* There is no 'right' char */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the right of '..'");
-				result = FAILURE;
-				continue;
-			}
-			if ( input[-1] > input[2] ) { /* Wrong order */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
-				result = FAILURE;
-				continue;
-			}
-			/* FIXME: Better error (a..b..c is the only left possibility?) */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range");
-			result = FAILURE;
-			continue;
-		} else {
-			tmp[idx++] = c;
-		}
-	}
-
-	/* If any ranges were expanded, convert the expanded results back to UTF-16 */
-	if ( expanded > 0 ) {
-		len = tmp_len;
-		*range = (UChar *)erealloc(*range, (len+1)*sizeof(UChar));
-		err = U_ZERO_ERROR;
-		u_strFromUTF32(*range, len+1, &len, tmp, tmp_len, &err);
-		if ( err == U_BUFFER_OVERFLOW_ERROR ) {
-			err = U_ZERO_ERROR;
-			*range = (UChar *)erealloc(*range, (len+1)*sizeof(UChar));
-			u_strFromUTF32(*range, len+1, NULL, tmp, tmp_len, &err);
-			if ( U_FAILURE(err) ) { /* Internal ICU error */
-				result = FAILURE;
-			}
-		}
-		*range_len = len;
-	}
-
-	efree(tmp);
-	efree(codepts);
-
-	return result;
-}
-/* }}} */
-
-/* {{{ php_u_trim()
- * Unicode capable version of php_trim()
- */
-static UChar *php_u_trim(UChar *c, int len, UChar *what, int what_len, zval *return_value, int mode TSRMLS_DC)
-{
-	int32_t	i, k;
-	UChar	ch = 0;
-	int32_t	start = 0, end = len;
-
-	if ( what ) {
-		what = eustrndup(what, what_len);
-		php_expand_uchar_range(&what, &what_len TSRMLS_CC);
-	} else {
-		what = USTR_MAKE(" \n\r\t\v\0");
-		what_len = sizeof(" \n\r\t\v\0") - 1;
-	}
-
-	if ( mode & 1 ) {
-		for ( i = k = 0 ; i < end ; ) {
-			U16_NEXT(c, k, end, ch);
-			if ( what ) {
-				if (u_memchr32(what, ch, what_len) == NULL) {
-					break;
-				}
-			} else {
-				if ( u_isWhitespace(ch) == FALSE ) {
-					break;
-				}
-			}
-			i = k;
-		}
-		start = i;
-	}
-	if ( mode & 2 ) {
-		for ( i = k = end ; i > start ; ) {
-			U16_PREV(c, 0, k, ch);
-			if ( what ) {
-				if (u_memchr32(what, ch, what_len) == NULL) {
-					break;
-				}
-			} else {
-				if ( u_isWhitespace(ch) == FALSE ) {
-					break;
-				}
-			}
-			i = k;
-		}
-		end = i;
-	}
-	if ( what )
-	{
-		efree( what );
-	}
-
-	if ( start < len ) {
-		if ( return_value ) {
-			RETVAL_UNICODEL(c+start, end-start, 1);
-			return NULL;
-		} else {
-			return eustrndup(c+start, end-start);
-		}
-	} else { /* Trimmed the whole string */
-		if ( return_value ) {
-			RETVAL_EMPTY_UNICODE();
-			return NULL;
-		} else {
-			return (USTR_MAKE(""));
-		}
-	}
-}
-/* }}} */
-
 /* {{{ php_do_trim
  * Base for trim(), rtrim() and ltrim() functions.
  */
 static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zstr str, what = NULL_ZSTR;
-	int str_len, what_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &str, &str_len,
-							  &str_type, &what, &what_len, &str_type) == FAILURE) {
+	char *str;
+	char *what = NULL;
+	int str_len, what_len = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &what, &what_len) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_NUM_ARGS() > 1) {
-		if (str_type == IS_UNICODE) {
-			php_u_trim(str.u, str_len, what.u, what_len, return_value, mode TSRMLS_CC);
-		} else {
-			php_trim(str.s, str_len, what.s, what_len, return_value, mode TSRMLS_CC);
-		}
-	} else {
-		if (str_type == IS_UNICODE) {
-			php_u_trim(str.u, str_len, NULL, 0, return_value, mode TSRMLS_CC);
-		} else {
-			php_trim(str.s, str_len, NULL, 0, return_value, mode TSRMLS_CC);
-		}
-	}
+	
+	php_trim(str, str_len, what, what_len, return_value, mode TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto string trim(string str [, string character_mask]) U
+/* {{{ proto string trim(string str [, string character_mask])
    Strips whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
@@ -980,7 +771,7 @@ PHP_FUNCTION(trim)
 }
 /* }}} */
 
-/* {{{ proto string rtrim(string str [, string character_mask]) U
+/* {{{ proto string rtrim(string str [, string character_mask])
    Removes trailing whitespace */
 PHP_FUNCTION(rtrim)
 {
@@ -988,7 +779,7 @@ PHP_FUNCTION(rtrim)
 }
 /* }}} */
 
-/* {{{ proto string ltrim(string str [, string character_mask]) U
+/* {{{ proto string ltrim(string str [, string character_mask])
    Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
@@ -1137,42 +928,43 @@ PHP_FUNCTION(wordwrap)
 
 /* {{{ php_explode
  */
-PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, long limit)
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit) 
 {
 	char *p1, *p2, *endp;
 
-	endp = str + str_len;
-	p1 = str;
-	p2 = php_memnstr(str, delim, delim_len, endp);
+	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
 
-	if ( p2 == NULL ) {
-		add_next_index_stringl(return_value, p1, str_len, 1);
+	p1 = Z_STRVAL_P(str);
+	p2 = php_memnstr(Z_STRVAL_P(str), Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp);
+
+	if (p2 == NULL) {
+		add_next_index_stringl(return_value, p1, Z_STRLEN_P(str), 1);
 	} else {
 		do {
-			add_next_index_stringl(return_value, p1, p2-p1, 1);
-			p1 = p2 + delim_len;
-		} while ( (p2 = php_memnstr(p1, delim, delim_len, endp)) != NULL &&
-				  --limit > 1 );
+			add_next_index_stringl(return_value, p1, p2 - p1, 1);
+			p1 = p2 + Z_STRLEN_P(delim);
+		} while ((p2 = php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL &&
+				 --limit > 1);
 
-		if ( p1 <= endp ) {
+		if (p1 <= endp)
 			add_next_index_stringl(return_value, p1, endp-p1, 1);
-		}
 	}
 }
 /* }}} */
 
 /* {{{ php_explode_negative_limit
  */
-PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, long limit)
+PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, long limit) 
 {
 #define EXPLODE_ALLOC_STEP 64
 	char *p1, *p2, *endp;
+	
+	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
 
-	endp = str + str_len;
-	p1 = str;
-	p2 = php_memnstr(str, delim, delim_len, endp);
+	p1 = Z_STRVAL_P(str);
+	p2 = php_memnstr(Z_STRVAL_P(str), Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp);
 
-	if ( p2 == NULL ) {
+	if (p2 == NULL) {
 		/*
 		do nothing since limit <= -1, thus if only one chunk - 1 + (limit) <= 0
 		by doing nothing we return empty array
@@ -1184,18 +976,20 @@ PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, u
 
 		positions[found++] = p1;
 		do {
-			if ( found >= allocated ) {
+			if (found >= allocated) {
 				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
 				positions = erealloc(positions, allocated*sizeof(char *));
 			}
-			positions[found++] = p1 = p2 + delim_len;
-		} while ( (p2 = php_memnstr(p1, delim, delim_len, endp)) != NULL );
-
+			positions[found++] = p1 = p2 + Z_STRLEN_P(delim);
+		} while ((p2 = php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL);
+		
 		to_return = limit + found;
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
-		for ( i = 0 ; i < to_return ; i++ ) { /* this checks also for to_return > 0 */
-			add_next_index_stringl(return_value, positions[i],
-									   (positions[i+1]-delim_len) - positions[i], 1);
+		for (i = 0;i < to_return;i++) { /* this checks also for to_return > 0 */
+			add_next_index_stringl(return_value, positions[i], 
+					(positions[i+1] - Z_STRLEN_P(delim)) - positions[i],
+					1
+				);
 		}
 		efree(positions);
 	}
@@ -1203,423 +997,262 @@ PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, u
 }
 /* }}} */
 
-/* {{{ php_u_explode
- * Unicode capable version of php_explode()
- */
-static void php_u_explode(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, long limit)
-{
-	UChar *p1, *p2, *endp;
-
-	endp = str + str_len;
-	p1 = str;
-	p2 = zend_u_memnstr(str, delim, delim_len, endp);
-
-	if ( p2 == NULL ) {
-		add_next_index_unicodel(return_value, p1, str_len, 1);
-	} else {
-		do {
-			add_next_index_unicodel(return_value, p1, p2-p1, 1);
-			p1 = (UChar *)p2 + delim_len;
-		} while ((p2 = zend_u_memnstr(p1, delim, delim_len, endp)) != NULL &&
-				  --limit > 1 );
-
-		if ( p1 <= endp ) {
-			add_next_index_unicodel(return_value, p1, endp-p1, 1);
-		}
-	}
-}
-/* }}} */
-
-/* {{{ php_u_explode_negative_limit
- * Unicode capable version of php_explode_negative_limit()
- */
-static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, long limit)
-{
-#define EXPLODE_ALLOC_STEP 64
-	UChar *p1, *p2, *endp;
-
-	endp = str + str_len;
-	p1 = str;
-	p2 = zend_u_memnstr(str, delim, delim_len, endp);
-
-	if ( p2 == NULL ) {
-		/*
-		do nothing since limit <= -1, thus if only one chunk - 1 + (limit) <= 0
-		by doing nothing we return empty array
-		*/
-	} else {
-		int allocated = EXPLODE_ALLOC_STEP, found = 0;
-		long i, to_return;
-		UChar **positions = emalloc(allocated * sizeof(UChar *));
-
-		positions[found++] = p1;
-		do {
-			if ( found >= allocated ) {
-				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
-				positions = erealloc(positions, allocated*sizeof(UChar *));
-			}
-			positions[found++] = p1 = p2 + delim_len;
-		} while ( (p2 = zend_u_memnstr(p1, delim, delim_len, endp)) != NULL );
-
-		to_return = limit + found;
-		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
-		for ( i = 0 ; i < to_return ; i++ ) { /* this checks also for to_return > 0 */
-			add_next_index_unicodel(return_value, positions[i],
-									(positions[i+1]-delim_len) - positions[i], 1);
-		}
-		efree(positions);
-	}
-#undef EXPLODE_ALLOC_STEP
-}
-/* }}} */
-
-/* {{{ proto array explode(string separator, string str [, int limit]) U
+/* {{{ proto array explode(string separator, string str [, int limit])
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
-	void		*str, *delim;
-	int			str_len, delim_len;
-	zend_uchar	str_type, delim_type;
-	long		limit = LONG_MAX; /* No limit */
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|l", &delim, &delim_len, &delim_type,
-							  &str, &str_len, &str_type, &limit) == FAILURE) {
+	char *str, *delim;
+	int str_len = 0, delim_len = 0;
+	long limit = LONG_MAX; /* No limit */
+	zval zdelim, zstr;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &delim, &delim_len, &str, &str_len, &limit) == FAILURE) {
 		return;
 	}
-
-	if ( delim_len == 0 ) {
+	
+	if (delim_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	if ( str_len == 0 ) {
+	if (str_len == 0) {
 	  	if (limit >= 0) {
-			if ( str_type == IS_UNICODE ) {
-				add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 0);
-			} else {
-				add_next_index_stringl(return_value, "", sizeof("")-1, 1);
-			}
-		}
+			add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
+		} 
 		return;
 	}
 
+	ZVAL_STRINGL(&zstr, str, str_len, 0);
+	ZVAL_STRINGL(&zdelim, delim, delim_len, 0);
 	if (limit > 1) {
-		if ( str_type == IS_UNICODE ) {
-			php_u_explode((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
-		} else {
-			php_explode((char *)delim, delim_len, (char *)str, str_len, str_type, return_value, limit);
-		}
+		php_explode(&zdelim, &zstr, return_value, limit);
 	} else if (limit < 0) {
-		if ( str_type == IS_UNICODE ) {
-			php_u_explode_negative_limit((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
-		} else {
-			php_explode_negative_limit((char *)delim, delim_len, (char *)str, str_len, str_type, return_value, limit);
-		}
+		php_explode_negative_limit(&zdelim, &zstr, return_value, limit);
 	} else {
-		if ( str_type == IS_UNICODE ) {
-			add_index_unicodel(return_value, 0, (UChar *)str, str_len, 1);
-		} else {
-			add_index_stringl(return_value, 0, (char *)str, str_len, 1);
-		}
+		add_index_stringl(return_value, 0, str, str_len, 1);
 	}
 }
 /* }}} */
 
-/* {{{ proto string join([string glue,] array pieces) U
+/* {{{ proto string join(array src, string glue)
    An alias for implode */
 /* }}} */
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(zval *delim, zval *arr, zval *retval TSRMLS_DC)
+PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC) 
 {
-	zend_uchar		return_type;
-	int				numelems, i=0;
-	HashPosition	pos;
-	zval			**tmp;
-
-	Z_TYPE_P(retval) = return_type = Z_TYPE_P(delim); /* ... to start off */
-
-	/* Setup return value */
-	if (return_type == IS_UNICODE) {
-		ZVAL_EMPTY_UNICODE(retval);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	zval         **tmp;
+	HashPosition   pos;
+	smart_str      implstr = {0};
+	int            numelems, i = 0;
+	zval tmp_val;
+	int str_len;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
+
 	if (numelems == 0) {
-		return;
+		RETURN_EMPTY_STRING();
 	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&tmp, &pos) == SUCCESS) {
-		if (Z_TYPE_PP(tmp) != return_type) {
-			if (return_type == IS_UNICODE) {
-				if (Z_TYPE_PP(tmp) != IS_UNICODE) {
-					SEPARATE_ZVAL(tmp);
-					convert_to_unicode_ex(tmp);
+
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
+		switch ((*tmp)->type) {
+			case IS_STRING:
+				smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				break;
+
+			case IS_LONG: {
+				char stmp[MAX_LENGTH_OF_LONG + 1];
+				str_len = slprintf(stmp, sizeof(stmp), "%ld", Z_LVAL_PP(tmp));
+				smart_str_appendl(&implstr, stmp, str_len);
+			}
+				break;
+
+			case IS_BOOL:
+				if (Z_LVAL_PP(tmp) == 1) {
+					smart_str_appendl(&implstr, "1", sizeof("1")-1);
 				}
-			} else if (return_type == IS_STRING) {
-				if (Z_TYPE_PP(tmp) != IS_STRING) {
-					SEPARATE_ZVAL(tmp);
-					convert_to_string_ex(tmp);
-				}
-			} else {
-				if (Z_TYPE_PP(tmp) == IS_UNICODE) {
-					/* Convert IS_STRING up to IS_UNICODE */
-					convert_to_unicode_ex(&retval);
-					convert_to_unicode_ex(&delim);
-					Z_TYPE_P(retval) = return_type = IS_UNICODE;
-				} else {
-					SEPARATE_ZVAL(tmp);
-					convert_to_string_ex(tmp);
+				break;
+			
+			case IS_NULL:
+				break;
+
+			case IS_DOUBLE: {
+				char *stmp;
+				str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_PP(tmp));
+				smart_str_appendl(&implstr, stmp, str_len);
+				efree(stmp);
+			}
+				break;
+
+			case IS_OBJECT: {
+				int copy;
+				zval expr;
+				zend_make_printable_zval(*tmp, &expr, &copy);
+				smart_str_appendl(&implstr, Z_STRVAL(expr), Z_STRLEN(expr));
+				if (copy) {
+					zval_dtor(&expr);
 				}
 			}
+				break;
+
+			default:
+				tmp_val = **tmp;
+				zval_copy_ctor(&tmp_val);
+				convert_to_string(&tmp_val);
+				smart_str_appendl(&implstr, Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
+				zval_dtor(&tmp_val);
+				break;
+				
 		}
 
-		/* Append elem */
-		if (return_type == IS_UNICODE) {
-			Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-											Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp)+1);
-			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_PP(tmp), UBYTES(Z_USTRLEN_PP(tmp)+1));
-			Z_USTRLEN_P(retval) += Z_USTRLEN_PP(tmp);
-			if (++i < numelems) { /* Append delim */
-				Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-												Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim)+1);
-				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_P(delim), UBYTES(Z_USTRLEN_P(delim)+1));
-				Z_USTRLEN_P(retval) += Z_USTRLEN_P(delim);
-			}
-		} else {
-			Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
-												  Z_STRLEN_P(retval)+Z_STRLEN_PP(tmp)+1);
-			memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp)+1);
-			Z_STRLEN_P(retval) += Z_STRLEN_PP(tmp);
-			if (++i < numelems) { /* Append delim */
-				Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
-													  Z_STRLEN_P(retval)+Z_STRLEN_P(delim)+1);
-				memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_P(delim), Z_STRLEN_P(delim)+1);
-				Z_STRLEN_P(retval) += Z_STRLEN_P(delim);
-			}
+		if (++i != numelems) {
+			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 		}
-
 		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
 	}
+	smart_str_0(&implstr);
 
-	return;
+	if (implstr.len) {
+		RETURN_STRINGL(implstr.c, implstr.len, 0);
+	} else {
+		smart_str_free(&implstr);
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
-/* {{{ proto string implode([string glue,] array pieces) U
+/* {{{ proto string implode([string glue,] array pieces)
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
 	zval **arg1 = NULL, **arg2 = NULL, *delim, *arr;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|Z", &arg1, &arg2) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_NUM_ARGS() == 1) {
+	
+	if (arg2 == NULL) {
 		if (Z_TYPE_PP(arg1) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument must be an array");
 			return;
-		} else {
-			SEPARATE_ZVAL(arg1);
-			arr = *arg1; 
-			MAKE_STD_ZVAL(delim);
-			ZVAL_UNICODEL(delim, EMPTY_STR, sizeof("")-1, 0);
 		}
+
+		MAKE_STD_ZVAL(delim);
+#define _IMPL_EMPTY ""
+		ZVAL_STRINGL(delim, _IMPL_EMPTY, sizeof(_IMPL_EMPTY) - 1, 0);
+
+		SEPARATE_ZVAL(arg1);
+		arr = *arg1;
 	} else {
 		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
-			SEPARATE_ZVAL(arg1);
 			arr = *arg1;
-			if (Z_TYPE_PP(arg2) != IS_UNICODE && Z_TYPE_PP(arg2) != IS_STRING) {
-				convert_to_unicode_ex(arg2);
-			}
+			convert_to_string_ex(arg2);
 			delim = *arg2;
 		} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
-			SEPARATE_ZVAL(arg2);
 			arr = *arg2;
-			if (Z_TYPE_PP(arg1) != IS_UNICODE && Z_TYPE_PP(arg1) != IS_STRING) {
-				convert_to_unicode_ex(arg1);
-			}
+			convert_to_string_ex(arg1);
 			delim = *arg1;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments passed");
 			return;
 		}
 	}
-
+	
 	php_implode(delim, arr, return_value TSRMLS_CC);
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (arg2 == NULL) {
 		FREE_ZVAL(delim);
 	}
 }
 /* }}} */
 
-#define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]
+#define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]	
 
-/* {{{ proto string strtok([string str,] string token) U
+/* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
-{
-	void *tok, *str;
-	int tok_len, str_len;
-	zend_uchar tok_type, str_type;
+{		
+	char *str, *tok = NULL;
+	int str_len, tok_len = 0;
 	zval *zv;
-	char *token, *token_end, *p, *pe;
-	UChar *u_token, *u_p, *u_pe;
-
-	UChar32 ch, th;
-	int32_t start = 0, end, i, j, rem_len;
-	int delim_found, token_present;
+	
+	char *token;
+	char *token_end;
+	char *p;
+	char *pe;
 	int skipped = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T",
-							  &str, &str_len, &str_type,
-							  &tok, &tok_len, &tok_type) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &tok, &tok_len) == FAILURE) {
 		return;
 	}
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			tok = str;
-			tok_len = str_len;
-			tok_type = str_type;
-			break;
+	if (ZEND_NUM_ARGS() == 1) {
+		tok = str;
+		tok_len = str_len;
+	} else {
+		if (BG(strtok_zval)) {
+			zval_ptr_dtor(&BG(strtok_zval));
+		}
+		MAKE_STD_ZVAL(zv);
+		ZVAL_STRINGL(zv, str, str_len, 1);
 
-		default:
-		case 2:
-			if (BG(strtok_zval)) {
-				zval_ptr_dtor(&BG(strtok_zval));
-			}
-			MAKE_STD_ZVAL(zv);
-			if (str_type == IS_UNICODE) {
-				ZVAL_UNICODEL(zv, (UChar *)str, str_len, 1);
-				BG(strtok_last) = BG(strtok_string) = Z_USTRVAL_P(zv);
-			} else {
-				ZVAL_STRINGL(zv, (char *)str, str_len, 1);
-				BG(strtok_last) = BG(strtok_string) = Z_STRVAL_P(zv);
-			}
-			BG(strtok_zval) = zv;
-			BG(strtok_len) = str_len;
-			break;
+		BG(strtok_zval) = zv;
+		BG(strtok_last) = BG(strtok_string) = Z_STRVAL_P(zv);
+		BG(strtok_len) = str_len;
 	}
+	
+	p = BG(strtok_last); /* Where we start to search */
+	pe = BG(strtok_string) + BG(strtok_len);
 
-	if (BG(strtok_zval) && tok_type != Z_TYPE_P(BG(strtok_zval))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Delimiter type must match string type");
+	if (!p || p >= pe) {
 		RETURN_FALSE;
 	}
+	
+	token = tok;
+	token_end = token + tok_len;
 
-	if (tok_type == IS_UNICODE) {
-		u_p = (UChar *)BG(strtok_last); /* Where we start to search */
-		u_pe = (UChar *)BG(strtok_string) + BG(strtok_len);
-		u_token = (UChar *)tok;
-		if (!u_p || u_p >= u_pe) {
-			RETURN_FALSE;
-		}
-		rem_len = u_pe - u_p;
-
-		/* Skip leading delimiters */
-		token_present = 0;
-		for (i = 0 ; (u_p + i) < u_pe ; ) {
-			delim_found = 0;
-			U16_NEXT(u_p, i, rem_len, ch);
-			for (j = 0 ; j < tok_len ; ) {
-				U16_NEXT(u_token, j, tok_len, th);
-				if ( ch == th ) {
-					delim_found = 1;
-					break;
-				}
-			}
-			if (delim_found == 0) {
-				U16_BACK_1(u_p, 0, i); /* U16_NEXT() post-incrs 'i' */
-				start = i;
-				token_present = 1;
-				break;
-			}
-		}
-		if (token_present == 0) {
+	while (token < token_end) {
+		STRTOK_TABLE(token++) = 1;
+	}
+	
+	/* Skip leading delimiters */
+	while (STRTOK_TABLE(p)) {
+		if (++p >= pe) {
+			/* no other chars left */
 			BG(strtok_last) = NULL;
-			RETURN_FALSE;
-		}
-
-		/* Seek to next delimiter */
-		delim_found = 0;
-		for (i = start ; (u_p + i) < u_pe ; ) {
-			U16_NEXT(u_p, i, rem_len, ch);
-			for (j = 0 ; j < tok_len ; ) {
-				U16_NEXT(u_token, j, tok_len, th);
-				if ( ch == th ) {
-					delim_found = 1;
-					break;
-				}
-			}
-			if (delim_found) {
-				U16_BACK_1(u_p, 0, i); /* 'i' was beyond delimiter */
-				break;
-			}
-		}
-		end = i;
-
-		if (end - start) {
-			RETVAL_UNICODEL(u_p + start, end - start, 1);
-			/* skip matched token */
-			U16_FWD_1(u_p, end, rem_len);
-			BG(strtok_last) = u_p + end;
-			return;
-		} else {
-			BG(strtok_last) = NULL;
-			RETURN_FALSE;
-		}
-	} else {
-		p = (char *)BG(strtok_last); /* Where we start to search */
-		pe = (char *)BG(strtok_string) + BG(strtok_len);
-		if (!p || p >= pe) {
-			RETURN_FALSE;
-		}
-		token = (char *)tok;
-		token_end = token + tok_len;
-		while (token < token_end) {
-			STRTOK_TABLE(token++) = 1;
-		}
-
-		/* Skip leading delimiters */
-		while (STRTOK_TABLE(p)) {
-			if (++p >= pe) {
-				/* no other chars left */
-				BG(strtok_last) = NULL;
-				RETVAL_FALSE;
-				goto restore;
-			}
-			skipped++;
-		}
-		/* We know at this place that *p is no delimiter, so skip it */
-		while (++p < pe) {
-			if (STRTOK_TABLE(p)) {
-				goto return_token;
-			}
-		}
-
-		if (p - (char *)BG(strtok_last)) {
-return_token:
-			RETVAL_STRINGL((char *)BG(strtok_last) + skipped, (p - (char *)BG(strtok_last)) - skipped, 1);
-			BG(strtok_last) = p + 1;
-		} else {
 			RETVAL_FALSE;
-			BG(strtok_last) = NULL;
+			goto restore;
 		}
+		skipped++;
+	}
+	
+	/* We know at this place that *p is no delimiter, so skip it */	
+	while (++p < pe) {
+		if (STRTOK_TABLE(p)) {
+			goto return_token;	
+		}
+	}
+	
+	if (p - BG(strtok_last)) {
+return_token:
+		RETVAL_STRINGL(BG(strtok_last) + skipped, (p - BG(strtok_last)) - skipped, 1);
+		BG(strtok_last) = p + 1;
+	} else {
+		RETVAL_FALSE;
+		BG(strtok_last) = NULL;
+	}
 
-		/* Restore table -- usually faster then memset'ing the table on every invocation */
+	/* Restore table -- usually faster then memset'ing the table on every invocation */
 restore:
-		token = (char *)tok;
-		while (token < token_end) {
-			STRTOK_TABLE(token++) = 0;
-		}
+	token = tok;
+	
+	while (token < token_end) {
+		STRTOK_TABLE(token++) = 0;
 	}
 }
 /* }}} */
@@ -1629,9 +1262,9 @@ restore:
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
 	unsigned char *c, *e;
-
-	c = (unsigned char*)s;
-	e = c+len;
+	
+	c = (unsigned char *)s;
+	e = (unsigned char *)c+len;
 
 	while (c < e) {
 		*c = toupper(*c);
@@ -1641,87 +1274,20 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 }
 /* }}} */
 
-/* {{{ php_u_strtoupper
- */
-PHPAPI UChar* php_u_strtoupper(UChar *s, int *len, const char* locale)
-{
-	UChar *dest = NULL;
-	int dest_len;
-	UErrorCode status;
-
-	dest_len = *len;
-	while (1) {
-		status = U_ZERO_ERROR;
-		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToUpper(dest, dest_len, s, *len, locale, &status);
-		if (status != U_BUFFER_OVERFLOW_ERROR) {
-			break;
-		}
-	}
-
-	if (U_SUCCESS(status)) {
-		dest[dest_len] = 0;
-		*len = dest_len;
-		return dest;
-	} else {
-		efree(dest);
-		return NULL;
-	}
-}
-/* }}} */
-
-/* {{{ proto string strtoupper(string str) U
+/* {{{ proto string strtoupper(string str)
    Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *arg;
+	int arglen;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arglen) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		UChar *result;
-		if ((result = php_u_strtoupper(str.u, &str_len, UG(default_locale)))) {
-			RETURN_UNICODEL(result, str_len, 0);
-		} else {
-			RETURN_EMPTY_UNICODE();
-		}
-	} else {
-		RETVAL_STRINGL(str.s, str_len, 1);
-		php_strtoupper(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
-	}
-}
-/* }}} */
-
-/* {{{ php_u_strtolower
- */
-PHPAPI UChar *php_u_strtolower(UChar *s, int *len, const char* locale)
-{
-	UChar *dest = NULL;
-	int dest_len;
-	UErrorCode status = U_ZERO_ERROR;
-
-	dest_len = *len;
-	while (1) {
-		status = U_ZERO_ERROR;
-		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToLower(dest, dest_len, s, *len, locale, &status);
-		if (status != U_BUFFER_OVERFLOW_ERROR) {
-			break;
-		}
-	}
-
-	if (U_SUCCESS(status)) {
-		dest[dest_len] = 0;
-		*len = dest_len;
-		return dest;
-	} else {
-		efree(dest);
-		return NULL;
-	}
+	arg = estrndup(arg, arglen);
+	php_strtoupper(arg, arglen);	
+	RETURN_STRINGL(arg, arglen, 0);
 }
 /* }}} */
 
@@ -1730,8 +1296,8 @@ PHPAPI UChar *php_u_strtolower(UChar *s, int *len, const char* locale)
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
 	unsigned char *c, *e;
-
-	c = (unsigned char*)s;
+	
+	c = (unsigned char *)s;
 	e = c+len;
 
 	while (c < e) {
@@ -1742,150 +1308,20 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string strtolower(string str) U
+/* {{{ proto string strtolower(string str)
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *str;
+	int arglen;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &arglen) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		UChar *result;
-		if ((result = php_u_strtolower(str.u, &str_len, UG(default_locale)))) {
-			RETURN_UNICODEL(result, str_len, 0);
-		} else {
-			RETURN_EMPTY_UNICODE();
-		}
-	} else {
-		RETVAL_STRINGL(str.s, str_len, 1);
-		php_strtolower(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
-	}
-}
-/* }}} */
-
-/* {{{ php_strtotitle
- */
-PHPAPI char *php_strtotitle(char *s, size_t len)
-{
-	s[0] = toupper(s[0]);
-	return s;
-}
-/* }}} */
-
-/* {{{ php_u_strtotitle
- */
-PHPAPI UChar* php_u_strtotitle(UChar *s, int32_t *len, const char* locale)
-{
-	UChar *dest = NULL;
-	int32_t dest_len;
-	UErrorCode status = U_ZERO_ERROR;
-	UBreakIterator *brkiter;
-
-	dest_len = *len;
-	brkiter = ubrk_open(UBRK_WORD, locale, s, *len, &status);
-	while (1) {
-		status = U_ZERO_ERROR;
-		dest = eurealloc(dest, dest_len+1);
-		dest_len = u_strToTitle(dest, dest_len, s, *len, NULL, locale, &status);
-		if (status != U_BUFFER_OVERFLOW_ERROR) {
-			break;
-		}
-	}
-	ubrk_close(brkiter);
-
-	if (U_SUCCESS(status)) {
-		dest[dest_len] = 0;
-		*len = dest_len;
-		return dest;
-	} else {
-		efree(dest);
-		return NULL;
-	}
-}
-/* }}} */
-
-/* {{{ proto string strtotitle(string str) U
-   Makes a string titlecase */
-PHP_FUNCTION(strtotitle)
-{
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
-		return;
-	}
-
-	if (str_type == IS_UNICODE && str_len == 0) {
-		RETURN_EMPTY_UNICODE();
-	} else if (str_len == 0) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (str_type == IS_UNICODE) {
-		UChar *result;
-		if ((result = php_u_strtotitle(str.u, &str_len, UG(default_locale)))) {
-			RETURN_UNICODEL(result, str_len, 0);
-		} else {
-			RETURN_EMPTY_UNICODE();
-		}
-	} else {
-		RETVAL_STRINGL(str.s, str_len, 1);
-		php_ucwords(Z_STRVAL_P(return_value), str_len);
-	}
-}
-/* }}} */
-
-/* {{{ php_u_basename
- */
-PHPAPI void php_u_basename(UChar *s, size_t len, UChar *suffix, size_t sufflen, UChar **p_ret, size_t *p_len TSRMLS_DC)
-{
-	UChar *end, *c, *comp, *cend;
-	int state;
-
-	c = comp = cend = s;
-	end = s + len;
-	state = 0;
-	while (c < end) {
-#if defined(PHP_WIN32) || defined(NETWARE)
-		if (*c == (UChar) 0x2f /*'/'*/ || *c == (UChar) 0x5c /*'\\'*/) {
-#else
-		if (*c == (UChar) 0x2f /*'/'*/) {
-#endif
-			if (state == 1) {
-				state = 0;
-				cend = c;
-			}
-		} else {
-			if (state == 0) {
-				comp = c;
-				state = 1;
-			}
-		}
-		c++;
-	}
-
-	if (state == 1) {
-		cend = c;
-	}
-	if (suffix != NULL && sufflen < (cend - comp) &&
-			u_memcmp(cend - sufflen, suffix, sufflen) == 0) {
-		cend -= sufflen;
-	}
-
-	len = cend - comp;
-
-	if (p_ret) {
-		*p_ret = eustrndup(comp, len);
-	}
-	if (p_len) {
-		*p_len = len;
-	}
+	str = estrndup(str, arglen);
+	php_strtolower(str, arglen);
+	RETURN_STRINGL(str, arglen, 0);
 }
 /* }}} */
 
@@ -1943,12 +1379,13 @@ quit_loop:
 	if (state == 1) {
 		cend = c;
 	}
-	if (suffix != NULL && sufflen < (cend - comp) &&
+	if (suffix != NULL && sufflen < (uint)(cend - comp) &&
 			memcmp(cend - sufflen, suffix, sufflen) == 0) {
 		cend -= sufflen;
 	}
 
 	len = cend - comp;
+
 	if (p_ret) {
 		ret = emalloc(len + 1);
 		memcpy(ret, comp, len);
@@ -1961,34 +1398,20 @@ quit_loop:
 }
 /* }}} */
 
-/* {{{ proto string basename(string path [, string suffix]) U
+/* {{{ proto string basename(string path [, string suffix])
    Returns the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	zstr string, suffix = NULL_ZSTR, ret;
-	int string_len, suffix_len = 0;
-	zend_uchar string_type, suffix_type;
+	char *string, *suffix = NULL, *ret;
+	int   string_len, suffix_len = 0;
 	size_t ret_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &string, &string_len, &string_type, &suffix, &suffix_len, &suffix_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
 		return;
 	}
 
-	if (string_type == IS_UNICODE) {
-		php_u_basename(string.u, string_len, suffix.u, suffix_len, &ret.u, &ret_len TSRMLS_CC);
-		RETURN_UNICODEL(ret.u, (int)ret_len, 0);
-	} else {
-		php_basename(string.s, string_len, suffix.s, suffix_len, &ret.s, &ret_len TSRMLS_CC);
-		RETURN_STRINGL(ret.s, (int)ret_len, 0);
-	}
-}
-/* }}} */
-
-/* {{{ php_u_dirname
-   Returns directory name component of path */
-PHPAPI size_t php_u_dirname(UChar *path, size_t len)
-{
-	return zend_u_dirname(path, len);
+	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len TSRMLS_CC);
+	RETURN_STRINGL(ret, (int)ret_len, 0);
 }
 /* }}} */
 
@@ -2000,122 +1423,93 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string dirname(string path) U
+/* {{{ proto string dirname(string path)
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
-	zstr str;
+	char *str;
+	char *ret;
 	int str_len;
-	zend_uchar str_type;
-	zstr ret;
 	size_t ret_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len,
-							  &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
+	
+	ret = estrndup(str, str_len);
+	ret_len = php_dirname(ret, str_len);
 
-	if (str_type == IS_UNICODE) {
-		ret.u = eustrndup(str.u, str_len);
-		ret_len = php_u_dirname(ret.u, str_len);
-	} else {
-		ret.s = estrndup(str.s, str_len);
-		ret_len = php_dirname(ret.s, str_len);
-	}
-
-	RETURN_ZSTRL(str_type, ret, (int)ret_len, 0);
+	RETURN_STRINGL(ret, ret_len, 0);
 }
 /* }}} */
 
-/* {{{ proto array pathinfo(string path[, int options]) U
+/* {{{ proto array pathinfo(string path[, int options])
    Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
 {
-	zstr path, ret = NULL_ZSTR;
-	int path_len, have_basename, have_ext, have_filename;
-	zend_uchar path_type;
-	size_t ret_len;
 	zval *tmp;
+	char *path, *ret = NULL;
+	int path_len, have_basename;
+	size_t ret_len;
 	long opt = PHP_PATHINFO_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &path, &path_len, &path_type, &opt) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
 		return;
 	}
 
 	have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
-	have_filename = ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME);
-	have_ext = ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION);
-
+	
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
-
+	
 	if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
-		if (path_type == IS_UNICODE) {
-			ret.u = eustrndup(path.u, path_len);
-			ret_len = php_u_dirname(ret.u, path_len);
-		} else {
-			ret.s = estrndup(path.s, path_len);
-			ret_len = php_dirname(ret.s, path_len);
+		ret = estrndup(path, path_len);
+		php_dirname(ret, path_len);
+		if (*ret) {
+			add_assoc_string(tmp, "dirname", ret, 1);
 		}
-		if (ret_len > 0) {
-			add_ascii_assoc_zstrl(tmp, "dirname", path_type, ret, ret_len, 1);
-		}
-		efree(ret.v);
-		ret = NULL_ZSTR;
-	}
-
-	if (have_basename || have_ext || have_filename) {
-		if (path_type == IS_UNICODE) {
-			php_u_basename(path.u, path_len, NULL, 0, &ret.u, &ret_len TSRMLS_CC);
-		} else {
-			php_basename(path.s, path_len, NULL, 0, &ret.s, &ret_len TSRMLS_CC);
-		}
+		efree(ret);
+		ret = NULL;
 	}
 	
 	if (have_basename) {
-		add_ascii_assoc_zstrl(tmp, "basename", path_type, ret, ret_len, 0);
+		php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
+		add_assoc_stringl(tmp, "basename", ret, ret_len, 0);
 	}
-
-	if (have_ext) {
-		zstr ext;
-		int ext_len = 0;
-
-		if (path_type == IS_UNICODE) {
-			ext.u = u_memrchr32(ret.u, (UChar) 0x2e /*'.'*/, ret_len);
-			if (ext.u) {
-				ext.u++;
-				ext_len = ret_len - (ext.u - ret.u);
-			}
-		} else {
-			ext.s = zend_memrchr(ret.s, '.', ret_len);
-			if (ext.s) {
-				ext.s++;
-				ext_len = ret_len - (ext.s - ret.s);
-			}
-		}
-
-		if (ext.v) {
-			add_ascii_assoc_zstrl(tmp, "extension", path_type, ext, ext_len, 1);
-		}
-	}
-
-	if (have_filename) {
-		zstr p;
+	
+	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
+		char *p;
 		int idx;
 
-		if (path_type == IS_UNICODE) {
-			p.u = u_memrchr32(ret.u, (UChar) 0x2e /*'.'*/, ret_len);
-			idx = p.u ? (p.u - ret.u) : ret_len;
-		} else {
-			p.s = zend_memrchr(ret.s, '.', ret_len);
-			idx = p.s ? (p.s - ret.s) : ret_len;
+		if (!have_basename) {
+			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
 
-		add_ascii_assoc_zstrl(tmp, "filename", path_type, ret, idx, 1);
+		p = zend_memrchr(ret, '.', ret_len);
+
+		if (p) {
+			idx = p - ret;
+			add_assoc_stringl(tmp, "extension", ret + idx + 1, ret_len - idx - 1, 1);
+		}
+	}
+	
+	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
+		char *p;
+		int idx;
+
+		/* Have we alrady looked up the basename? */
+		if (!have_basename && !ret) {
+			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
+		}
+
+		p = zend_memrchr(ret, '.', ret_len);
+
+		idx = p ? (p - ret) : ret_len;
+		add_assoc_stringl(tmp, "filename", ret, idx, 1);
 	}
 
-	if (!have_basename && ret.v) {
-		efree(ret.v);
+	if (!have_basename && ret) {
+		efree(ret);
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
@@ -2125,106 +1519,12 @@ PHP_FUNCTION(pathinfo)
 		if (zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element) == SUCCESS) {
 			RETVAL_ZVAL(*element, 1, 0);
 		} else {
-			ZVAL_EMPTY_UNICODE(return_value);
+			ZVAL_EMPTY_STRING(return_value);
 		}
 	}
 
 	zval_ptr_dtor(&tmp);
 }
-/* }}} */
-
-/* {{{ php_u_stristr
-   Unicode version of case insensitve strstr */
-PHPAPI UChar *php_u_stristr(UChar *str, UChar *pat, int str_len, int pat_len, zend_bool find_first TSRMLS_DC)
-{
-	UChar *str_fold, *pat_fold;
-	int str_fold_len, pat_fold_len;
-	UChar *result, *found;
-	int offset;
-	UErrorCode status = U_ZERO_ERROR;
-
-	zend_case_fold_string(&str_fold, &str_fold_len, str, str_len, U_FOLD_CASE_DEFAULT, &status);
-	if (str_fold_len == str_len) {
-		zend_case_fold_string(&pat_fold, &pat_fold_len, pat, pat_len, U_FOLD_CASE_DEFAULT, &status);
-		if (find_first) {
-			found = u_strFindFirst(str_fold, str_fold_len, pat_fold, pat_fold_len);
-		} else {
-			found = u_strFindLast(str_fold, str_fold_len, pat_fold, pat_fold_len);
-		}
-		if (found) {
-			result = str + (found - str_fold);
-		} else {
-			result = NULL;
-		}
-		efree(pat_fold);
-	} else {
-		usearch_setText(UG(root_search), str, str_len, &status);
-		usearch_setPattern(UG(root_search), pat, pat_len, &status);
-		usearch_setOffset(UG(root_search), 0, &status);
-
-		if (find_first) {
-			offset = usearch_first(UG(root_search), &status);
-		} else {
-			offset = usearch_last(UG(root_search), &status);
-		}
-		if (offset != USEARCH_DONE) {
-			result = str + offset;
-		} else {
-			result = NULL;
-		}
-	}
-	efree(str_fold);
-
-	return result;
-}
-
-#if 0
-PHPAPI UChar *php_u_stristr(UChar *s, UChar *t, int s_len, int t_len TSRMLS_DC)
-{
-	int32_t i,j, last;
-	UChar32 ch1, ch2;
-
-	/* Have to do this by hand since lower-casing can change lengths
-	   by changing codepoints, and an offset within the lower-case &
-	   upper-case strings might be different codepoints.
-
-	   Find an occurrence of the first codepoint of 't' in 's', and
-	   starting from this point, match the rest of the codepoints of
-	   't' with those in 's'. Comparisons are performed against
-	   lower-case equivalents of the codepoints being matched.
-
-	   'i' & 'j' are indices used for extracting codepoints 'ch1' &
-	   'ch2'. 'last' is offset in 's' where the search for 't'
-	   started, and indicates beginning of 't' in 's' for a successful
-	   match.
-	*/
-
-	i = 0;
-	while (i <= (s_len-t_len)) {
-		last = i;
-		U16_NEXT(s, i, s_len, ch1);
-		j = 0;
-		U16_NEXT(t, j, t_len, ch2);
-		if (u_tolower(ch1) == u_tolower(ch2)) {
-			while (j < t_len) {
-				U16_NEXT(s, i, s_len, ch1);
-				U16_NEXT(t, j, t_len, ch2);
-				if (u_tolower(ch1) != u_tolower(ch2)) {
-					/* U16_NEXT() incr 'i' beyond 'ch1', re-adjust to
-					   restart compare
-					*/
-					U16_BACK_1(s, 0, i);
-					break;
-				}
-			}
-			if (u_tolower(ch1) == u_tolower(ch2)) {
-				return s+last;
-			}
-		}
-	}
-	return NULL;
-}
-#endif
 /* }}} */
 
 /* {{{ php_stristr
@@ -2234,26 +1534,6 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 	php_strtolower(s, s_len);
 	php_strtolower(t, t_len);
 	return php_memnstr(s, t, t_len, s + s_len);
-}
-/* }}} */
-
-/* {{{ php_u_strspn
- */
-PHPAPI int php_u_strspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
-{
-	int32_t len1 = s1_end - s1;
-	int32_t len2 = s2_end - s2;
-	int32_t i;
-	int codepts;
-	UChar32 ch;
-
-	for (i = 0, codepts = 0 ; i < len1 ; codepts++) {
-		U16_NEXT(s1, i, len1, ch);
-		if (u_memchr32(s2, ch, len2) == NULL) {
-			break;
-		}
-	}
-	return codepts;
 }
 /* }}} */
 
@@ -2272,31 +1552,6 @@ cont:
 		}
 	}
 	return (p - s1);
-}
-/* }}} */
-
-/* {{{ php_u_strcspn
- */
-PHPAPI int php_u_strcspn(UChar *s1, UChar *s2, UChar *s1_end, UChar *s2_end)
-{
-	int32_t len1 = s1_end - s1;
-	int32_t len2 = s2_end - s2;
-	int32_t i;
-	int codepts;
-	UChar32 ch;
-
-	for (i = 0, codepts = 0 ; i < len1 ; ) {
-		U16_NEXT(s1, i, len1, ch);
-		if (len2) {
-			if (u_memchr32(s2, ch, len2)) {
-				break;
-			}
-		} else if (ch == (UChar32)0x00){
-			break;
-		}
-		codepts++;
-	}
-	return codepts;
 }
 /* }}} */
 
@@ -2322,291 +1577,206 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 
 /* {{{ php_needle_char
  */
-static long php_needle_char(zval *needle TSRMLS_DC)
+static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 {
 	switch (Z_TYPE_P(needle)) {
 		case IS_LONG:
 		case IS_BOOL:
-		case IS_RESOURCE:
-			return Z_LVAL_P(needle);
-		case IS_DOUBLE:
-			return (long)Z_DVAL_P(needle);
+			*target = (char)Z_LVAL_P(needle);
+			return SUCCESS;
 		case IS_NULL:
-			return 0;
+			*target = '\0';
+			return SUCCESS;
+		case IS_DOUBLE:
+			*target = (char)(int)Z_DVAL_P(needle);
+			return SUCCESS;
 		case IS_OBJECT:
 			{
 				zval holder = *needle;
 				zval_copy_ctor(&(holder));
 				convert_to_long(&(holder));
 				if(Z_TYPE(holder) != IS_LONG) {
-					return -1;
+					return FAILURE;
 				}
-				return (char)Z_LVAL(holder);
+				*target = (char)Z_LVAL(holder);
+				return SUCCESS;
 			}
 		default: {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "needle is not a string or an integer");
-			return -1;
+			return FAILURE;
 		 }
 	}
 }
 /* }}} */
 
-static zstr php_needle_to_type(zval **needle, zend_uchar haystack_type, int *target_len, char *char_buf, UChar *uchar_buf TSRMLS_DC)
-{
-	zstr target;
-
-	target.v = NULL;
-	if (Z_TYPE_PP(needle) == IS_UNICODE || Z_TYPE_PP(needle) == IS_STRING) {
-		if (!Z_UNILEN_PP(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
-			return target;
-		}
-		if (haystack_type != Z_TYPE_PP(needle)) {
-			convert_to_explicit_type_ex(needle, haystack_type);
-		}
-		target = Z_UNIVAL_PP(needle);
-		*target_len = Z_UNILEN_PP(needle);
-	} else {
-		long needleval = php_needle_char(*needle TSRMLS_CC);
-		if(needleval == -1) {
-			return target;
-		}
-		*target_len = 0;
-		if (haystack_type == IS_UNICODE) {
-			if (needleval < 0 || needleval > 0x10FFFF) {
-				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
-				return target;
-			}
-			*target_len = zend_codepoint_to_uchar((UChar)needleval, uchar_buf);
-			uchar_buf[*target_len] = 0;
-			target.u = uchar_buf;
-		} else {
-			char_buf[(*target_len)++] = (char)needleval;
-			char_buf[*target_len] = 0;
-			target.s = char_buf;
-		}
-	}
-	return target;
-}
-
-/* {{{ proto string stristr(string haystack, string needle[, bool part]) U
+/* {{{ proto string stristr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
+	zval *needle;
+	char *haystack;
+	int haystack_len;
+	char *found = NULL;
+	int  found_offset;
+	char *haystack_dup;
 	char needle_char[2];
-	UChar u_needle_char[3];
-	void *found = NULL;
 	zend_bool part = 0;
-	char *haystack_copy = NULL;
-	int found_offset;
-	void *start, *end;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|b", &haystack, &haystack_len, &haystack_type, &needle, &part) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &haystack, &haystack_len, &needle, &part) == FAILURE) {
 		return;
 	}
 
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
+	haystack_dup = estrndup(haystack, haystack_len);
 
-	if(target.v == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if (haystack_type == IS_UNICODE) {
-		found = php_u_stristr(haystack.u, target.u, haystack_len, needle_len, 1 TSRMLS_CC);
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		char *orig_needle;
+		if (!Z_STRLEN_P(needle)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			efree(haystack_dup);
+			RETURN_FALSE;
+		}
+		orig_needle = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
+		found = php_stristr(haystack_dup, orig_needle,	haystack_len, Z_STRLEN_P(needle));
+		efree(orig_needle);
 	} else {
-		haystack_copy = estrndup(haystack.s, haystack_len);
-		found = php_stristr(haystack.s, target.s, haystack_len, needle_len);
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
+			efree(haystack_dup);
+			RETURN_FALSE;
+		}
+		needle_char[1] = 0;
+
+		found = php_stristr(haystack_dup, needle_char,	haystack_len, 1);
 	}
 
 	if (found) {
-		if (haystack_type == IS_UNICODE) {
-			start = part ? haystack.u : found;
-			end = part ? found : (haystack.u + haystack_len);
-			RETVAL_UNICODEL((UChar *)start, (UChar *)end-(UChar *)start, 1);
+		found_offset = found - haystack_dup;
+		if (part) {
+			RETVAL_STRINGL(haystack, found_offset, 1);
 		} else {
-			found_offset = (char *)found - haystack.s;
-			start = part ? haystack_copy : haystack_copy + found_offset;
-			end = part ? haystack_copy + found_offset : (haystack_copy + haystack_len);
-			RETVAL_STRINGL((char *)start, (char *)end-(char *)start, 1);
-		}
+			RETVAL_STRINGL(haystack + found_offset, haystack_len - found_offset, 1);
+		}			
 	} else {
 		RETVAL_FALSE;
 	}
 
-	if (haystack_type != IS_UNICODE) {
-		efree(haystack_copy);
-	}
+	efree(haystack_dup);
 }
 /* }}} */
 
-/* {{{ proto string strstr(string haystack, string needle[, bool part]) U
+/* {{{ proto string strstr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
+	zval *needle;
+	char *haystack;
+	int haystack_len;
+	char *found = NULL;
 	char needle_char[2];
-	UChar u_needle_char[3];
-	void *found = NULL;
-	size_t found_offset;
+	long found_offset;
 	zend_bool part = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|b", &haystack, &haystack_len, &haystack_type, &needle, &part) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &haystack, &haystack_len, &needle, &part) == FAILURE) {
 		return;
 	}
 
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_STRLEN_P(needle)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			RETURN_FALSE;
+		}
 
-	if(target.v == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if (haystack_type == IS_UNICODE) {
-		found = zend_u_memnstr(haystack.u, target.u, needle_len, haystack.u + haystack_len);
+		found = php_memnstr(haystack, Z_STRVAL_P(needle), Z_STRLEN_P(needle), haystack + haystack_len);
 	} else {
-		found = php_memnstr(haystack.s,	target.s, needle_len, haystack.s + haystack_len);
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
+			RETURN_FALSE;
+		}
+		needle_char[1] = 0;
+
+		found = php_memnstr(haystack, needle_char,	1, haystack + haystack_len);
 	}
 
 	if (found) {
-		switch (haystack_type) {
-			case IS_UNICODE:
-				found_offset = (UChar*)found - haystack.u;
-				if (part) {
-					UChar *ret;
-					ret = eumalloc(found_offset + 1);
-					u_strncpy(ret, haystack.u, found_offset);
-					ret[found_offset] = '\0';
-					RETURN_UNICODEL(ret , found_offset, 0);
-				} else {
-					RETURN_UNICODEL(found, haystack_len - found_offset, 1);
-				}
-				break;
-
-			case IS_STRING:
-				found_offset = (char *)found - haystack.s;
-				if (part) {
-					char *ret;
-					ret = emalloc(found_offset + 1);
-					strncpy(ret, haystack.s, found_offset);
-					ret[found_offset] = '\0';
-					RETURN_STRINGL(ret , found_offset, 0);
-				} else {
-					RETURN_STRINGL(found, haystack_len - found_offset, 1);
-				}
-				break;
+		found_offset = found - haystack;
+		if (part) {
+			RETURN_STRINGL(haystack, found_offset, 1);
+		} else {
+			RETURN_STRINGL(found, haystack_len - found_offset, 1);
 		}
-	} else {
-		RETURN_FALSE;
 	}
+	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string strchr(string haystack, string needle[, bool part]) U
+/* {{{ proto string strchr(string haystack, string needle)
    An alias for strstr */
 /* }}} */
 
-/* {{{ proto int strpos(string haystack, mixed needle [, int offset]) U
+/* {{{ proto int strpos(string haystack, string needle [, int offset])
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
-	char needle_char[2];
-	UChar u_needle_char[3];
-	void *found = NULL;
-	long   offset = 0;
-	int32_t cu_offset = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack,
-							  &haystack_len, &haystack_type, &needle, &offset) == FAILURE) {
+	zval *needle;
+	char *haystack;
+	char *found = NULL;
+	char  needle_char[2];
+	long  offset = 0;
+	int   haystack_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
 		return;
 	}
 
-	/*
-	 * Unicode note: it's okay to not convert offset to code unit offset here.
-	 * We'll just do a rough check that the offset does not exceed length in
-	 * code units, and leave the rest to zend_u_memnstr().
-	 */
 	if (offset < 0 || offset > haystack_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_STRLEN_P(needle)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			RETURN_FALSE;
+		}
 
-	if(target.v == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if (haystack_type == IS_UNICODE) {
-		/* calculate code unit offset */
-		U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
-		found = zend_u_memnstr(haystack.u + cu_offset, target.u, needle_len, haystack.u + haystack_len);
+		found = php_memnstr(haystack + offset,
+			                Z_STRVAL_P(needle),
+			                Z_STRLEN_P(needle),
+			                haystack + haystack_len);
 	} else {
-		found = php_memnstr(haystack.s + offset, target.s, needle_len, haystack.s + haystack_len);
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
+			RETURN_FALSE;
+		}
+		needle_char[1] = 0;
+
+		found = php_memnstr(haystack + offset,
+							needle_char,
+							1,
+		                    haystack + haystack_len);
 	}
 
 	if (found) {
-		if (haystack_type == IS_UNICODE) {
-			/* Simple subtraction will not suffice, since there may be
-			   supplementary codepoints. We count how many codepoints there are
-			   between the starting offset and the found location and add them
-			   to the starting codepoint offset. */
-			RETURN_LONG(offset + u_countChar32(haystack.u + cu_offset,
-											   (UChar*)found - (haystack.u + cu_offset)));
-		} else {
-			RETURN_LONG((char *)found - haystack.s);
-		}
+		RETURN_LONG(found - haystack);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto int stripos(string haystack, string needle [, int offset]) U
+/* {{{ proto int stripos(string haystack, string needle [, int offset])
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
-	char needle_char[2];
-	UChar u_needle_char[3];
-	void *found = NULL;
+	char *found = NULL;
+	char *haystack;
+	int haystack_len;
 	long offset = 0;
-	char *haystack_dup = NULL, *needle_dup = NULL;
-	int cu_offset = 0;
+	char *needle_dup = NULL, *haystack_dup;
+	char needle_char[2];
+	zval *needle;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack, &haystack_len, &haystack_type, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
 		return;
 	}
 
-	/*
-	 * Unicode note: it's okay to not convert offset to code unit offset here.
-	 * We'll just do a rough check that the offset does not exceed length in
-	 * code units, and leave the rest to zend_u_memnstr().
-	 */
 	if (offset < 0 || offset > haystack_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2616,360 +1786,249 @@ PHP_FUNCTION(stripos)
 		RETURN_FALSE;
 	}
 
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
+	haystack_dup = estrndup(haystack, haystack_len);
+	php_strtolower(haystack_dup, haystack_len);
 
-	if(target.v == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if(haystack_type == IS_UNICODE) {
-		U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
-		found = php_u_stristr(haystack.u + cu_offset, target.u, haystack_len - cu_offset, needle_len, 1 TSRMLS_CC);
-	} else {
-			haystack_dup = estrndup(haystack.s, haystack_len);
-			php_strtolower(haystack_dup, haystack_len);
-			needle_dup = estrndup(target.s, needle_len);
-			php_strtolower(needle_dup, Z_STRLEN_PP(needle));
-			found = php_memnstr(haystack_dup + offset,
-								needle_dup, needle_len,
-								haystack_dup + haystack_len);
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (Z_STRLEN_P(needle) == 0 || Z_STRLEN_P(needle) > haystack_len) {
 			efree(haystack_dup);
-			efree(needle_dup);
+			RETURN_FALSE;
+		}
+
+		needle_dup = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
+		php_strtolower(needle_dup, Z_STRLEN_P(needle));
+		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack_len);
+	} else {
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
+			efree(haystack_dup);
+			RETURN_FALSE;
+		}
+		needle_char[0] = tolower(needle_char[0]);
+		needle_char[1] = '\0';
+		found = php_memnstr(haystack_dup + offset, 
+							needle_char, 
+							sizeof(needle_char) - 1, 
+							haystack_dup + haystack_len);
+	}
+
+	efree(haystack_dup);
+	if (needle_dup) {
+		efree(needle_dup);
 	}
 
 	if (found) {
-		if (haystack_type == IS_UNICODE) {
-			/* Simple subtraction will not suffice, since there may be
-			   supplementary codepoints. We count how many codepoints there are
-			   between the starting offset and the found location and add them
-			   to the starting codepoint offset. */
-			RETURN_LONG(offset + u_countChar32(haystack.u + cu_offset,
-											   (UChar*)found - (haystack.u + cu_offset)));
-		} else {
-			RETURN_LONG((char *)found - haystack_dup);
-		}
+		RETURN_LONG(found - haystack_dup);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto int strrpos(string haystack, string needle [, int offset]) U
+/* {{{ proto int strrpos(string haystack, string needle [, int offset])
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
-	char needle_char[2];
-	UChar u_needle_char[3];
+	zval *zneedle;
+	char *needle, *haystack;
+	int needle_len, haystack_len;
 	long offset = 0;
-	char *p, *e;
-	UChar *pos, *u_p, *u_e;
-	int cu_offset = 0;
+	char *p, *e, ord_needle[2];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack, &haystack_len, &haystack_type, &needle, &offset) == FAILURE) {
-		return;
-	}
-
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
-
-	if(target.v == NULL) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if ((haystack_len == 0) || (needle_len == 0) || needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if (haystack_type == IS_UNICODE) {
-		if (offset >= 0) {
-			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
-			if (cu_offset > haystack_len - needle_len) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			}
-			u_p = haystack.u + cu_offset;
-			u_e = haystack.u + haystack_len - needle_len;
-		} else {
-			u_p = haystack.u;
-			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			} else {
-				cu_offset = haystack_len;
-				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
-				if (cu_offset == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-					RETURN_FALSE;
-				}
-				if (needle_len > haystack_len - cu_offset) {
-					u_e = haystack.u + haystack_len - needle_len;
-				} else {
-					u_e = haystack.u + cu_offset;
-				}
-			}
-		}
-
-		pos = u_strFindLast(u_p, u_e-u_p+needle_len, target.u, needle_len);
-		if (pos) {
-			if (offset > 0) {
-				RETURN_LONG(offset + u_countChar32(u_p, (UChar*)pos - u_p));
-			} else {
-				RETURN_LONG(u_countChar32(haystack.u, (UChar*)pos - haystack.u));
-			}
-		} else {
-			RETURN_FALSE;
-		}
+	if (Z_TYPE_P(zneedle) == IS_STRING) {
+		needle = Z_STRVAL_P(zneedle);
+		needle_len = Z_STRLEN_P(zneedle);
 	} else {
-		if (offset >= 0) {
-			if (offset > haystack_len) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			}
-			p = haystack.s + offset;
-			e = haystack.s + haystack_len - needle_len;
-		} else {
-			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			}
-
-			p = haystack.s;
-			if (needle_len > -offset) {
-				e = haystack.s + haystack_len - needle_len;
-			} else {
-				e = haystack.s + haystack_len + offset;
-			}
+		if (php_needle_char(zneedle, ord_needle TSRMLS_CC) != SUCCESS) {
+			RETURN_FALSE;
 		}
+		ord_needle[1] = '\0';
+		needle = ord_needle;
+		needle_len = 1;
+	}
 
-		if (needle_len == 1) {
-			/* Single character search can shortcut memcmps */
-			while (e >= p) {
-				if (*e == *target.s) {
-					RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-				}
-				e--;
-			}
+	if ((haystack_len == 0) || (needle_len == 0)) {
+		RETURN_FALSE;
+	}
+
+	if (offset >= 0) {
+		if (offset > haystack_len) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
+		p = haystack + offset;
+		e = haystack + haystack_len - needle_len;
+	} else {
+		if (-offset > haystack_len || offset < -INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
+		p = haystack;
+		if (needle_len > -offset) {
+			e = haystack + haystack_len - needle_len;
+		} else {
+			e = haystack + haystack_len + offset;
+		}
+	}
+
+	if (needle_len == 1) {
+		/* Single character search can shortcut memcmps */
 		while (e >= p) {
-			if (memcmp(e, target.s, needle_len) == 0) {
+			if (*e == *needle) {
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
+		RETURN_FALSE;
+	}
+
+	while (e >= p) {
+		if (memcmp(e, needle, needle_len) == 0) {
+			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+		}
+		e--;
 	}
 
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto int strripos(string haystack, string needle [, int offset]) U
+/* {{{ proto int strripos(string haystack, string needle [, int offset])
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
 {
-	zstr haystack, target;
-	int haystack_len, needle_len = 0;
-	zend_uchar haystack_type;
-	zval **needle;
-	char needle_char[2];
-	UChar u_needle_char[3];
+	zval *zneedle;
+	char *needle, *haystack;
+	int needle_len, haystack_len;
 	long offset = 0;
-	char *p, *e;
-	UChar *u_p, *u_e, *pos;
-	char *needle_dup = NULL, *haystack_dup = NULL;
-	int cu_offset = 0;
+	char *p, *e, ord_needle[2];
+	char *needle_dup, *haystack_dup;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ|l", &haystack, &haystack_len, &haystack_type, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	target = php_needle_to_type(needle, haystack_type, &needle_len, needle_char, u_needle_char TSRMLS_CC);
-
-	if(target.v == NULL) {
-		RETURN_FALSE;
-	}
-
-	if ((haystack_len == 0) || (needle_len == 0) || needle_len > haystack_len) {
-		RETURN_FALSE;
-	}
-
-	if (haystack_type == IS_UNICODE) {
-		if (offset >= 0) {
-			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
-			if (cu_offset > haystack_len) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			}
-			u_p = haystack.u + cu_offset;
-			u_e = haystack.u + haystack_len - needle_len;
-		} else {
-			u_p = haystack.u;
-			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-				RETURN_FALSE;
-			} else {
-				cu_offset = haystack_len;
-				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
-				if (cu_offset == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-					RETURN_FALSE;
-				}
-				if (needle_len > haystack_len - cu_offset) {
-					u_e = haystack.u + haystack_len - needle_len;
-				} else {
-					u_e = haystack.u + cu_offset;
-				}
-			}
-		}
-
-		pos = php_u_stristr(u_p, target.u, u_e-u_p+needle_len, needle_len, 0 TSRMLS_CC);
-		if (pos) {
-			if (offset > 0) {
-				RETURN_LONG(offset + u_countChar32(u_p, (UChar*)pos - u_p));
-			} else {
-				RETURN_LONG(u_countChar32(haystack.u, (UChar*)pos - haystack.u));
-			}
-		} else {
-			RETURN_FALSE;
-		}
+	if (Z_TYPE_P(zneedle) == IS_STRING) {
+		needle = Z_STRVAL_P(zneedle);
+		needle_len = Z_STRLEN_P(zneedle);
 	} else {
-		if (needle_len == 1) {
-			/* Single character search can shortcut memcmps
-			   Can also avoid tolower emallocs */
-			if (offset >= 0) {
-				if (offset > haystack_len) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-					RETURN_FALSE;
-				}
-				p = haystack.s + offset;
-				e = haystack.s + haystack_len - 1;
-			} else {
-				p = haystack.s;
-				if (-offset > haystack_len || offset < INT_MAX) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
-					RETURN_FALSE;
-				} else {
-					e = haystack.s + haystack_len + offset;
-				}
-			}
-			/* Borrow that needle_char buffer to avoid repeatedly tolower()ing needle */
-			*needle_char = tolower(*target.s);
-			while (e >= p) {
-				if (tolower(*e) == *needle_char) {
-					RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-				}
-				e--;
-			}
+		if (php_needle_char(zneedle, ord_needle TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
+		ord_needle[1] = '\0';
+		needle = ord_needle;
+		needle_len = 1;
+	}
 
-		needle_dup = estrndup(target.s, needle_len);
-		php_strtolower(needle_dup, needle_len);
-		haystack_dup = estrndup(haystack.s, haystack_len);
-		php_strtolower(haystack_dup, haystack_len);
+	if ((haystack_len == 0) || (needle_len == 0)) {
+		RETURN_FALSE;
+	}
 
+	if (needle_len == 1) {
+		/* Single character search can shortcut memcmps 
+		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
 			if (offset > haystack_len) {
-				efree(haystack_dup);
-				efree(needle_dup);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			p = haystack_dup + offset;
-			e = haystack_dup + haystack_len - needle_len;
+			p = haystack + offset;
+			e = haystack + haystack_len - 1;
 		} else {
+			p = haystack;
 			if (-offset > haystack_len || offset < -INT_MAX) {
-				efree(haystack_dup);
-				efree(needle_dup);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
-			} 
-			p = haystack_dup;
-			if (needle_len > -offset) {
-				e = haystack_dup + haystack_len - needle_len;
-			} else {
-				e = haystack_dup + haystack_len + offset;
 			}
+			e = haystack + haystack_len + offset;
 		}
-
+		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
+		*ord_needle = tolower(*needle);
 		while (e >= p) {
-			if (memcmp(e, needle_dup, needle_len) == 0) {
-				efree(haystack_dup);
-				efree(needle_dup);
+			if (tolower(*e) == *ord_needle) {
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
-
-		efree(haystack_dup);
-		efree(needle_dup);
-
 		RETURN_FALSE;
 	}
+
+	needle_dup = estrndup(needle, needle_len);
+	php_strtolower(needle_dup, needle_len);
+	haystack_dup = estrndup(haystack, haystack_len);
+	php_strtolower(haystack_dup, haystack_len);
+
+	if (offset >= 0) {
+		if (offset > haystack_len) {
+			efree(needle_dup);
+			efree(haystack_dup);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
+		p = haystack_dup + offset;
+		e = haystack_dup + haystack_len - needle_len;
+	} else {
+		if (-offset > haystack_len || offset < -INT_MAX) {
+			efree(needle_dup);
+			efree(haystack_dup);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
+		p = haystack_dup;
+		if (needle_len > -offset) {
+			e = haystack_dup + haystack_len - needle_len;
+		} else {
+			e = haystack_dup + haystack_len + offset;
+		}
+	}
+
+	while (e >= p) {
+		if (memcmp(e, needle_dup, needle_len) == 0) {
+			efree(haystack_dup);
+			efree(needle_dup);
+			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+		}
+		e--;
+	}
+
+	efree(haystack_dup);
+	efree(needle_dup);
+	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string strrchr(string haystack, string needle) U
+/* {{{ proto string strrchr(string haystack, string needle)
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
 {
-	zstr haystack;
-	int haystack_len;
-	zend_uchar haystack_type;
-	zval **needle;
-	UChar32 ch;
-	void *found = NULL;
-	int found_offset;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tZ", &haystack, &haystack_len, &haystack_type, &needle) == FAILURE) {
+	zval *needle;
+	char *haystack;
+	char *found = NULL;
+	long found_offset;
+	int  haystack_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &haystack, &haystack_len, &needle) == FAILURE) {
 		return;
 	}
 
-	if (Z_TYPE_PP(needle) == IS_UNICODE || Z_TYPE_PP(needle) == IS_STRING) {
-		if (Z_TYPE_PP(needle) != haystack_type) {
-			convert_to_explicit_type_ex(needle, haystack_type);
-		}
-		if (Z_USTRLEN_PP(needle) == 0) {
-			RETURN_FALSE;
-		}
-		if (haystack_type == IS_UNICODE) {
-			ch = zend_get_codepoint_at(Z_USTRVAL_PP(needle), Z_USTRLEN_PP(needle), 0);
-			found = u_memrchr32(haystack.u, ch, haystack_len);
-		} else {
-			found = zend_memrchr(haystack.s, *Z_STRVAL_PP(needle), haystack_len);
-		}
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		found = zend_memrchr(haystack, *Z_STRVAL_P(needle), haystack_len);
 	} else {
-		long needleval = php_needle_char(*needle TSRMLS_CC);
-		if(needleval == -1) {
+		char needle_chr;
+		if (php_needle_char(needle, &needle_chr TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
-		if (haystack_type == IS_UNICODE) {
-			if (needleval < 0 || needleval > 0x10FFFF) {
-				php_error(E_WARNING, "Needle argument codepoint value out of range (0 - 0x10FFFF)");
-				RETURN_FALSE;
-			}
-			found = u_memrchr32(haystack.u, (UChar32)needleval, haystack_len);
-		} else {
-			found = zend_memrchr(haystack.s, (char)needleval, haystack_len);
-		}
+
+		found = zend_memrchr(haystack,  needle_chr, haystack_len);
 	}
 
 	if (found) {
-		if (haystack_type == IS_UNICODE) {
-			found_offset = (UChar *)found - haystack.u;
-			RETURN_UNICODEL((UChar *)found, haystack_len - found_offset, 1);
-		} else {
-			found_offset = (char *)found - haystack.s;
-			RETURN_STRINGL((char *)found, haystack_len - found_offset, 1);
-		}
+		found_offset = found - haystack;
+		RETURN_STRINGL(found, haystack_len - found_offset, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2978,18 +2037,13 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static char* php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen, zend_uchar str_type)
+static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen)
 {
 	char *dest;
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
-	int charsize = sizeof(char);
-	int out_len;
-
-	if (str_type == IS_UNICODE) {
-		charsize = sizeof(UChar);
-	}
+	int out_len; 
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
@@ -3007,55 +2061,45 @@ static char* php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 	}
 	out_len += srclen + 1;
 
-	if (out_len > INT_MAX/charsize) {
-		return NULL;
-	}
+	dest = safe_emalloc((int)out_len, sizeof(char), 0);
 
-	dest = safe_emalloc(out_len, charsize, 0);
-
-	for (p = src, q = dest; p < (src + charsize * (srclen - chunklen + 1)); ) {
-		memcpy(q, p, chunklen * charsize);
-		q += chunklen * charsize;
-		memcpy(q, end, endlen * charsize);
-		q += endlen * charsize;
-		p += chunklen * charsize;
+	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
+		memcpy(q, p, chunklen);
+		q += chunklen;
+		memcpy(q, end, endlen);
+		q += endlen;
+		p += chunklen;
 	}
 
 	if (restlen) {
-		memcpy(q, p, restlen * charsize);
-		q += restlen * charsize;
-		memcpy(q, end, endlen * charsize);
-		q += endlen * charsize;
+		memcpy(q, p, restlen);
+		q += restlen;
+		memcpy(q, end, endlen);
+		q += endlen;
 	}
 
-	if (str_type == IS_UNICODE) {
-		*(UChar*)q = 0;
-	} else {
-		*q = '\0';
-	}
+	*q = '\0';
 	if (destlen) {
-		*destlen = (q - dest) / charsize;
+		*destlen = q - dest;
 	}
 
-	return (dest);
+	return(dest);
 }
 /* }}} */
 
-/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]]) U
+/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
    Returns split line */
-PHP_FUNCTION(chunk_split)
+PHP_FUNCTION(chunk_split) 
 {
-	zstr str, ending = NULL_ZSTR;
-	int str_len, ending_len;
-	zstr result;
+	char *str;
+	char *result;
 	char *end    = "\r\n";
-	UChar u_end[3] = { 0x0d, 0x0a, 0x0 };
+	int endlen   = 2;
 	long chunklen = 76;
 	int result_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|lT", &str, &str_len,
-							  &str_type, &chunklen, &ending, &ending_len, &str_type) == FAILURE) {
+	int str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &chunklen, &end, &endlen) == FAILURE) {
 		return;
 	}
 
@@ -3064,72 +2108,68 @@ PHP_FUNCTION(chunk_split)
 		RETURN_FALSE;
 	}
 
-	if (!ending.v) {
-		ending = (str_type == IS_UNICODE) ? ZSTR(u_end) : ZSTR(end);
-		ending_len = 2;
-	}
-
 	if (chunklen > str_len) {
 		/* to maintain BC, we must return original string + ending */
-		result_len = ending_len + str_len;
-		if (str_type == IS_UNICODE) {
-			result.u = eumalloc(result_len + 1);
-			u_memcpy(result.u, str.u, str_len);
-			u_memcpy(result.u + str_len, ending.u, ending_len);
-			result.u[result_len] = 0;
-		} else {
-			result.s = emalloc(result_len + 1);
-			memcpy(result.s, str.s, str_len);
-			memcpy(result.s + str_len, ending.s, ending_len);
-			result.s[result_len] = '\0';
-		}
-		RETURN_ZSTRL(str_type, result, result_len, 0);
+		result_len = endlen + str_len;
+		result = emalloc(result_len + 1);
+		memcpy(result, str, str_len);
+		memcpy(result + str_len, end, endlen);
+		result[result_len] = '\0'; 
+		RETURN_STRINGL(result, result_len, 0);	
 	}
 
 	if (!str_len) {
-		RETURN_EMPTY_UNICODE();
+		RETURN_EMPTY_STRING();
 	}
 
-	result.v = php_chunk_split(str.v, str_len, ending.v, ending_len, chunklen, &result_len, str_type);
+	result = php_chunk_split(str, str_len, end, endlen, chunklen, &result_len);
 
-	if (result.v) {
-		RETURN_ZSTRL(str_type, result, result_len, 0);
+	if (result) {
+		RETURN_STRINGL(result, result_len, 0);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto string substr(string str, int start [, int length]) U
+/* {{{ proto string substr(string str, int start [, int length])
    Returns part of a string */
 PHP_FUNCTION(substr)
 {
-	void *str;
+	char *str;
+	long l = 0, f;
 	int str_len;
-	int cp_len;
-	zend_uchar str_type;
-	long l = -1;
-	long f;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|l", &str, &str_len, &str_type, &f, &l) == FAILURE) {
+	int argc = ZEND_NUM_ARGS();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &str, &str_len, &f, &l) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		cp_len = u_countChar32(str, str_len);
+	if (argc > 2) {
+		if ((l < 0 && -l > str_len)) {
+			RETURN_FALSE;
+		} else if (l > str_len) {
+			l = str_len;
+		}
 	} else {
-		cp_len = str_len;
+		l = str_len;
+	}
+	
+	if (f > str_len) {
+		RETURN_FALSE;
+	} else if (f < 0 && -f > str_len) {
+		f = 0;
 	}
 
-	if (ZEND_NUM_ARGS() == 2) {
-		l = cp_len;
+	if (l < 0 && (l + str_len - f) < 0) {
+		RETURN_FALSE;
 	}
 
 	/* if "from" position is negative, count start position from the end
 	 * of the string
 	 */
 	if (f < 0) {
-		f = cp_len + f;
+		f = str_len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -3139,129 +2179,25 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = (cp_len - f) + l;
+		l = (str_len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= cp_len) {
+	if (f >= str_len) {
 		RETURN_FALSE;
 	}
 
-	if (((unsigned) f + (unsigned) l) > cp_len) {
-		l = cp_len - f;
+	if ((f + l) > str_len) {
+		l = str_len - f;
 	}
 
-	if (str_type == IS_UNICODE) {
-		int32_t start = 0, end = 0;
-		U16_FWD_N((UChar*)str, end, str_len, f);
-		start = end;
-		U16_FWD_N((UChar*)str, end, str_len, l);
-		RETURN_UNICODEL((UChar*)str + start, end-start, 1);
-	} else {
-		RETURN_STRINGL((char*)str + f, l, 1);
-	}
+	RETURN_STRINGL(str + f, l, 1);
 }
 /* }}} */
 
-/* {{{ php_adjust_limits
- */
-static int php_adjust_limits(zval **str, int *f, int *l)
-{
-	int str_codepts;
-	int ret = 1;
-
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		str_codepts = u_countChar32(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str));
-	} else {
-		str_codepts = Z_STRLEN_PP(str);
-	}
-
-	/* If "from" position is negative, count start position from the end
-	 * of the string */
-	if (*f < 0) {
-		*f = str_codepts + *f;
-		if (*f < 0) {
-			*f = 0;
-		}
-	} else if (*f > str_codepts) {
-		*f = str_codepts;
-	}
-	/* If "length" position is negative, set it to the length
-	 * needed to stop that many codepts/chars from the end of the string */
-	if (*l < 0) {
-		*l = str_codepts - *f + *l;
-		if (*l < 0) {
-			*l = 0;
-		}
-	}
-	if (*f > str_codepts || (*f < 0 && -(*f) > str_codepts)) {
-		ret = 0;
-	} else if (*l > str_codepts || (*l < 0 && -(*l) > str_codepts)) {
-		*l = str_codepts;
-	}
-	if (((unsigned)(*f) + (unsigned)(*l)) > str_codepts) {
-		*l = str_codepts - *f;
-	}
-	return ret;
-}
-/* }}} */
-
-/* {{{ php_do_substr_replace
- */
-PHPAPI int php_do_substr_replace(void **result, zval **str, zval **repl, int f, int l TSRMLS_DC)
-{
-	void *buf;
-	int32_t buf_len, idx;
-	UChar ch;
-	int repl_len;
-
-	if (repl) {
-		repl_len = Z_UNILEN_PP(repl);
-	} else {
-		repl_len = 0;
-	}
-
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		buf = eumalloc(Z_USTRLEN_PP(str) -l + repl_len + 1);
-
-		/* buf_len is codept count here */
-		buf_len = 0; idx = 0;
-		while (f-- > 0) {
-			U16_NEXT(Z_USTRVAL_PP(str), idx, Z_USTRLEN_PP(str), ch);
-			buf_len += zend_codepoint_to_uchar(ch, (UChar *)buf + buf_len);
-		}
-		if (repl != NULL) {
-			u_memcpy((UChar *)buf + buf_len, Z_USTRVAL_PP(repl), repl_len);
-			buf_len += repl_len;
-		}
-		U16_FWD_N(Z_USTRVAL_PP(str), idx, Z_USTRLEN_PP(str), l);
-		u_memcpy((UChar *)buf + buf_len, Z_USTRVAL_PP(str) + idx, Z_USTRLEN_PP(str) - idx);
-		buf_len += (Z_USTRLEN_PP(str) - idx);
-
-		*((UChar *)buf + buf_len) = 0;
-		buf = eurealloc(buf, buf_len + 1);
-	} else {
-		/* buf_len is char count here */
-		buf_len = Z_STRLEN_PP(str) - l + repl_len;
-		buf = emalloc(buf_len + 1);
-
-		memcpy(buf, Z_STRVAL_PP(str), f);
-		if (repl != NULL) {
-			memcpy((char *)buf + f, Z_STRVAL_PP(repl), repl_len);
-		}
-		memcpy((char *)buf + f + repl_len, Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
-
-		*((char *)buf + buf_len) = '\0';
-	}
-
-	*result = buf;
-	return buf_len;
-}
-/* }}} */
-
-/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length]) U
+/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length])
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
@@ -3269,7 +2205,7 @@ PHP_FUNCTION(substr_replace)
 	zval **from;
 	zval **len = NULL;
 	zval **repl;
-	void *result;
+	char *result;
 	int result_len;
 	int l = 0;
 	int f;
@@ -3277,24 +2213,21 @@ PHP_FUNCTION(substr_replace)
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
 	zval **tmp_str = NULL, **tmp_from = NULL, **tmp_repl = NULL, **tmp_len= NULL;
-	zend_uchar str_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|Z", &str, &repl, &from, &len) == FAILURE) {
 		return;
 	}
-
-	if (Z_TYPE_PP(str) != IS_ARRAY && Z_TYPE_PP(str) != IS_UNICODE &&
-	    Z_TYPE_PP(str) != IS_STRING) {
-		convert_to_unicode_ex(str);
+	
+	if (Z_TYPE_PP(str) != IS_ARRAY) {
+		convert_to_string_ex(str);
 	}
-	if (Z_TYPE_PP(repl) != IS_ARRAY && Z_TYPE_PP(repl) != IS_UNICODE &&
-	    Z_TYPE_PP(repl) != IS_STRING) {
-		convert_to_unicode_ex(repl);
+	if (Z_TYPE_PP(repl) != IS_ARRAY) {
+		convert_to_string_ex(repl);
 	}
 	if (Z_TYPE_PP(from) != IS_ARRAY) {
 		convert_to_long_ex(from);
-		f = Z_LVAL_PP(from);
 	}
+
 	if (argc > 3) {
 		SEPARATE_ZVAL(len);
 		if (Z_TYPE_PP(len) != IS_ARRAY) {
@@ -3303,59 +2236,84 @@ PHP_FUNCTION(substr_replace)
 		}
 	} else {
 		if (Z_TYPE_PP(str) != IS_ARRAY) {
-			l = Z_UNILEN_PP(str);
+			l = Z_STRLEN_PP(str);
 		}
 	}
 
-	if (Z_TYPE_PP(str) != IS_ARRAY) {
+	if (Z_TYPE_PP(str) == IS_STRING) {
 		if (
-			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) ||
+			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) || 
 			(argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len))
 		) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array");
-			RETURN_ZVAL(*str, 1, 0);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
+			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);		
 		}
 		if (argc == 4 && Z_TYPE_PP(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_PP(from)) != zend_hash_num_elements(Z_ARRVAL_PP(len))) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should have the same number of elements");
-				RETURN_ZVAL(*str, 1, 0);
+				RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);		
 			}
 		}
 	}
-
+	
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
-		if (Z_TYPE_PP(from) != IS_ARRAY ) {
+		if (Z_TYPE_PP(from) != IS_ARRAY) {
+			int repl_len = 0;
+
+			f = Z_LVAL_PP(from);
+
+			/* if "from" position is negative, count start position from the end
+			 * of the string
+			 */
+			if (f < 0) {
+				f = Z_STRLEN_PP(str) + f;
+				if (f < 0) {
+					f = 0;
+				}
+			} else if (f > Z_STRLEN_PP(str)) {
+				f = Z_STRLEN_PP(str);
+			}
+			/* if "length" position is negative, set it to the length
+			 * needed to stop that many chars from the end of the string
+			 */
+			if (l < 0) {
+				l = (Z_STRLEN_PP(str) - f) + l;
+				if (l < 0) {
+					l = 0;
+				}
+			}
+
+			if (f > Z_STRLEN_PP(str) || (f < 0 && -f > Z_STRLEN_PP(str))) {
+				RETURN_FALSE;
+			} else if (l > Z_STRLEN_PP(str) || (l < 0 && -l > Z_STRLEN_PP(str))) {
+				l = Z_STRLEN_PP(str);
+			}
+
+			if ((f + l) > Z_STRLEN_PP(str)) {
+				l = Z_STRLEN_PP(str) - f;
+			}
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(repl), &pos_repl);
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
-					if (Z_TYPE_PP(repl) != IS_UNICODE && Z_TYPE_PP(repl) != IS_STRING) {
-						convert_to_unicode_ex(tmp_repl);
-					}
-				} else {
-					tmp_repl = NULL;
+					convert_to_string_ex(tmp_repl);
+					repl_len = Z_STRLEN_PP(tmp_repl);
 				}
 			} else {
-				tmp_repl = repl;
+				repl_len = Z_STRLEN_PP(repl);
 			}
+			result_len = Z_STRLEN_PP(str) - l + repl_len;
+			result = emalloc(result_len + 1);
 
-			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl)) {
-				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(str), Z_TYPE_PP(tmp_repl));
-				convert_to_explicit_type_ex(str, str_type);
-				convert_to_explicit_type_ex(tmp_repl, str_type);
+			memcpy(result, Z_STRVAL_PP(str), f);
+			if (repl_len) {
+				memcpy((result + f), (Z_TYPE_PP(repl) == IS_ARRAY ? Z_STRVAL_PP(tmp_repl) : Z_STRVAL_PP(repl)), repl_len);
 			}
-			if (!php_adjust_limits(str, &f, &l)) {
-				RETURN_FALSE;
-			}
-			result_len = php_do_substr_replace(&result, str, tmp_repl, f, l TSRMLS_CC);
-
-			if (Z_TYPE_PP(str) == IS_UNICODE) {
-				RETURN_UNICODEL((UChar *)result, result_len, 0);
-			} else {
-				RETURN_STRINGL((char *)result, result_len, 0);
-			}
+			memcpy((result + f + repl_len), Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+			result[result_len] = '\0';
+			RETURN_STRINGL(result, result_len, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
-			RETURN_ZVAL(*str, 1, 0);
+			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);	
 		}
 	} else { /* str is array of strings */
 		array_init(return_value);
@@ -3363,70 +2321,104 @@ PHP_FUNCTION(substr_replace)
 		if (Z_TYPE_PP(from) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(from), &pos_from);
 		}
+
 		if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(len), &pos_len);
 		}
+
 		if (Z_TYPE_PP(repl) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(repl), &pos_repl);
 		}
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(str), &pos_str);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(str), (void **) &tmp_str, &pos_str) == SUCCESS) {
-			if (Z_TYPE_PP(tmp_str) != IS_UNICODE && Z_TYPE_PP(tmp_str) != IS_STRING) {
-				convert_to_unicode_ex(tmp_str);
-			}
+			convert_to_string_ex(tmp_str);
 
 			if (Z_TYPE_PP(from) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(from), (void **) &tmp_from, &pos_from)) {
 					convert_to_long_ex(tmp_from);
+
 					f = Z_LVAL_PP(tmp_from);
+					if (f < 0) {
+						f = Z_STRLEN_PP(tmp_str) + f;
+						if (f < 0) {
+							f = 0;
+						}
+					} else if (f > Z_STRLEN_PP(tmp_str)) {
+						f = Z_STRLEN_PP(tmp_str);
+					}
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(from), &pos_from);
 				} else {
 					f = 0;
 				}
+			} else {
+				f = Z_LVAL_PP(from);
+				if (f < 0) {
+					f = Z_STRLEN_PP(tmp_str) + f;
+					if (f < 0) {
+						f = 0;
+					}
+				} else if (f > Z_STRLEN_PP(tmp_str)) {
+					f = Z_STRLEN_PP(tmp_str);
+				}
 			}
 
-			if (argc > 3 && (Z_TYPE_PP(len) == IS_ARRAY)) {
+			if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(len), (void **) &tmp_len, &pos_len)) {
 					convert_to_long_ex(tmp_len);
+
 					l = Z_LVAL_PP(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(len), &pos_len);
 				} else {
-					l = Z_UNILEN_PP(tmp_str);
+					l = Z_STRLEN_PP(tmp_str);
 				}
-			} else if (argc > 3) {
-				/* 'l' parsed & set at top of funcn */
+			} else if (argc > 3) { 
 				l = Z_LVAL_PP(len);
 			} else {
-				l = Z_UNILEN_PP(tmp_str);
+				l = Z_STRLEN_PP(tmp_str);
 			}
+
+			if (l < 0) {
+				l = (Z_STRLEN_PP(tmp_str) - f) + l;
+				if (l < 0) {
+					l = 0;
+				}
+			}
+
+			if ((f + l) > Z_STRLEN_PP(tmp_str)) {
+				l = Z_STRLEN_PP(tmp_str) - f;
+			}
+
+			result_len = Z_STRLEN_PP(tmp_str) - l;
 
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
-					if (Z_TYPE_PP(tmp_repl) != IS_UNICODE && Z_TYPE_PP(tmp_repl) != IS_STRING) {
-						convert_to_unicode_ex(tmp_repl);
-					}
-					zend_hash_move_forward_ex(Z_ARRVAL_PP(repl), &pos_repl);
+					convert_to_string_ex(tmp_repl);
+					result_len += Z_STRLEN_PP(tmp_repl);
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(repl), &pos_repl);	
+					result = emalloc(result_len + 1);
+
+					memcpy(result, Z_STRVAL_PP(tmp_str), f);
+					memcpy((result + f), Z_STRVAL_PP(tmp_repl), Z_STRLEN_PP(tmp_repl));
+					memcpy((result + f + Z_STRLEN_PP(tmp_repl)), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 				} else {
-					tmp_repl = NULL;
+					result = emalloc(result_len + 1);
+	
+					memcpy(result, Z_STRVAL_PP(tmp_str), f);
+					memcpy((result + f), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 				}
 			} else {
-				tmp_repl = repl;
+				result_len += Z_STRLEN_PP(repl);
+
+				result = emalloc(result_len + 1);
+
+				memcpy(result, Z_STRVAL_PP(tmp_str), f);
+				memcpy((result + f), Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
+				memcpy((result + f + Z_STRLEN_PP(repl)), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 			}
 
-			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl)) {
-				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(tmp_str), Z_TYPE_PP(tmp_repl));
-				convert_to_explicit_type_ex(tmp_str, str_type);
-				convert_to_explicit_type_ex(tmp_repl, str_type);
-			}
-			php_adjust_limits(tmp_str, &f, &l);
-			result_len = php_do_substr_replace(&result, tmp_str, tmp_repl, f, l TSRMLS_CC);
-
-			if (Z_TYPE_PP(tmp_str) == IS_UNICODE) {
-				add_next_index_unicodel(return_value, (UChar *)result, result_len, 0);
-			} else {
-				add_next_index_stringl(return_value, (char *)result, result_len, 0);
-			}
+			result[result_len] = '\0';
+			add_next_index_stringl(return_value, result, result_len, 0);
 
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(str), &pos_str);
 		} /*while*/
@@ -3434,149 +2426,122 @@ PHP_FUNCTION(substr_replace)
 }
 /* }}} */
 
-/* {{{ proto string quotemeta(string str) U
+/* {{{ proto string quotemeta(string str)
    Quotes meta characters */
 PHP_FUNCTION(quotemeta)
 {
-	zstr str, old;
-	zstr old_end;
-	int  old_len;
-	zstr p, q;
+	char *str, *old;
+	char *old_end;
+	char *p, *q;
 	char c;
-	UChar cp;
-	zend_uchar type;
+	int  old_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &old, &old_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &old, &old_len) == FAILURE) {
 		return;
 	}
-
-	if (old_len == 0) {
+	
+	old_end = old + old_len;
+		
+	if (old == old_end) {
 		RETURN_FALSE;
 	}
-
-
-	if (type == IS_UNICODE) {
-		old_end.u = old.u + old_len;
-		str.u = safe_emalloc(2, UBYTES(old_len), UBYTES(1));
-
-		for (p.u = old.u, q.u = str.u; p.u != old_end.u; p.u++) {
-			cp = *p.u;
-			switch (cp) {
-				case '.':
-				case '\\':
-				case '+':
-				case '*':
-				case '?':
-				case '[':
-				case '^':
-				case ']':
-				case '$':
-				case '(':
-				case ')':
-					*q.u++ = '\\';
-					/* break is missing _intentionally_ */
-				default:
-					*q.u++ = cp;
-			}
+	
+	str = safe_emalloc(2, old_len, 1);
+	
+	for (p = old, q = str; p != old_end; p++) {
+		c = *p;
+		switch (c) {
+			case '.':
+			case '\\':
+			case '+':
+			case '*':
+			case '?':
+			case '[':
+			case '^':
+			case ']':
+			case '$':
+			case '(':
+			case ')':
+				*q++ = '\\';
+				/* break is missing _intentionally_ */
+			default:
+				*q++ = c;
 		}
-		*q.u = 0;
-		RETURN_UNICODEL(eurealloc(str.u, q.u - str.u + 1), q.u - str.u, 0);
-	} else {
-		old_end.s = old.s + old_len;
-		str.s = safe_emalloc(2, old_len, 1);
-
-		for (p.s = old.s, q.s = str.s; p.s != old_end.s; p.s++) {
-			c = *p.s;
-			switch (c) {
-				case '.':
-				case '\\':
-				case '+':
-				case '*':
-				case '?':
-				case '[':
-				case '^':
-				case ']':
-				case '$':
-				case '(':
-				case ')':
-					*q.s++ = '\\';
-					/* break is missing _intentionally_ */
-				default:
-					*q.s++ = c;
-			}
-		}
-		*q.s = 0;
-		RETURN_STRINGL(erealloc(str.s, q.s - str.s + 1), q.s - str.s, 0);
 	}
+	*q = 0;
 
+	RETURN_STRINGL(erealloc(str, q - str + 1), q - str, 0);
 }
 /* }}} */
 
-/* {{{ proto int ord(string character) U
-   Returns the codepoint value of a character */
+/* {{{ proto int ord(string character)
+   Returns ASCII value of character */
 PHP_FUNCTION(ord)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *str;
+	int   str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-
-	if (str_type == IS_UNICODE) {
-		RETURN_LONG(zend_get_codepoint_at(str.u, str_len, 0));
-	} else {
-		RETURN_LONG((unsigned char) str.s[0]);
-	}
+	
+	RETURN_LONG((unsigned char) str[0]);
 }
 /* }}} */
 
-/* {{{ proto string chr(int codepoint) U
-   Converts a codepoint number to a character */
+/* {{{ proto string chr(int ascii)
+   Converts ASCII code to a character */
 PHP_FUNCTION(chr)
 {
-	UChar buf[2];
-	int buf_len;
-	long num;
+	long c;
+	char temp[2];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1) {
+		WRONG_PARAM_COUNT;
 	}
 
-	if (num > UCHAR_MAX_VALUE) {
-		php_error(E_WARNING, "Codepoint value cannot be greater than %X", UCHAR_MAX_VALUE);
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &c) == FAILURE) {
+		c = 0;
 	}
-	buf_len = zend_codepoint_to_uchar((uint32_t) num, buf);
-	RETURN_UNICODEL(buf, buf_len, 1);
+
+	temp[0] = (char)c;
+	temp[1] = '\0';
+
+	RETURN_STRINGL(temp, 1, 1);
 }
 /* }}} */
 
-/* {{{ php_u_lcfirst()
-   Makes an Unicode string's first character lowercase */
-static void php_u_lcfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_DC)
+/* {{{ php_ucfirst
+   Uppercase the first character of the word in a native string */
+static void php_ucfirst(char *str) 
 {
-	UChar tmp[3] = { 0, 0, 0 }; /* UChar32 will be converted to upto 2 UChar units */
-	int tmp_len = 0;
-	int pos = 0;
-	UErrorCode status = U_ZERO_ERROR;
-
-	U16_FWD_1(ustr, pos, ustr_len);
-	tmp_len = u_strToLower(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
-
-	Z_USTRVAL_P(return_value) = eumalloc(tmp_len + ustr_len - pos+1);
-	
-	Z_USTRVAL_P(return_value)[0] = tmp[0];
-	if (tmp_len > 1) {
-		Z_USTRVAL_P(return_value)[1] = tmp[1];
-	}
-	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, ustr + pos, ustr_len - pos+1);
-	Z_USTRLEN_P(return_value) = tmp_len + ustr_len - pos;
+	register char *r;
+	r = str;
+	*r = toupper((unsigned char) *r);
 }
 /* }}} */
 
-/* {{{ php_lcfirst 
+/* {{{ proto string ucfirst(string str)
+   Makes a string's first character uppercase */
+PHP_FUNCTION(ucfirst)
+{
+	char *str;
+	int  str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (!str_len) {
+		RETURN_EMPTY_STRING();
+	}
+
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	php_ucfirst(Z_STRVAL_P(return_value));
+}
+/* }}} */
+
+/* {{{
    Lowercase the first character of the word in a native string */
 static void php_lcfirst(char *str)
 {
@@ -3586,194 +2551,50 @@ static void php_lcfirst(char *str)
 }
 /* }}} */
 
-/* {{{ proto string lcfirst(string str) U
-   Makes a string's first character lowercase */
+/* {{{ proto string ucfirst(string str)
+   Make a string's first character lowercase */
 PHP_FUNCTION(lcfirst)
 {
-	zstr       str;
-	int        str_len;
-	zend_uchar str_type;
+	char  *str;
+	int   str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-	
-	if (str_len == 0) {
-		if (str_type == IS_UNICODE) {
-			RETURN_EMPTY_UNICODE();
-		} else {
-			RETURN_EMPTY_STRING();
-		}
-	}	
 
-	if (str_type == IS_UNICODE) {
-		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_lcfirst(str.u, str_len, return_value TSRMLS_CC);
-	} else {
-		ZVAL_STRINGL(return_value, str.s, str_len, ZSTR_DUPLICATE);
-		php_lcfirst(Z_STRVAL_P(return_value));
-	}	
-}
-/* }}} */
-
-/* {{{ php_u_ucfirst()
-   Makes an Unicode string's first character uppercase */
-static void php_u_ucfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_DC)
-{
-	UChar tmp[3] = { 0, 0, 0 }; /* UChar32 will be converted to upto 2 UChar units */
-	int tmp_len = 0;
-	int pos = 0;
-	UErrorCode status = U_ZERO_ERROR;
-
-	U16_FWD_1(ustr, pos, ustr_len);
-	tmp_len = u_strToUpper(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
-
-	Z_USTRVAL_P(return_value) = eumalloc(tmp_len + ustr_len - pos+1);
-	
-	Z_USTRVAL_P(return_value)[0] = tmp[0];
-	if (tmp_len > 1) {
-		Z_USTRVAL_P(return_value)[1] = tmp[1];
+	if (!str_len) {
+		RETURN_EMPTY_STRING();
 	}
-	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, ustr + pos, ustr_len - pos+1);
-	Z_USTRLEN_P(return_value) = tmp_len + ustr_len - pos;
+
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	php_lcfirst(Z_STRVAL_P(return_value));
 }
 /* }}} */
 
-/* {{{ php_ucfirst 
-   Uppercase the first character of the word in a native string */
-static void php_ucfirst(char *str)
-{
-	register char *r;
-	r = str;
-	*r = toupper((unsigned char) *r);
-}
-/* }}} */
-
-/* {{{ proto string ucfirst(string str) U
-   Makes a string's first character uppercase */
-PHP_FUNCTION(ucfirst)
-{
-	zstr       str;
-	int        str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
-		return;
-	}
-	
-	if (str_len == 0) {
-		if (str_type == IS_UNICODE) {
-			RETURN_EMPTY_UNICODE();
-		} else {
-			RETURN_EMPTY_STRING();
-		}
-	}	
-
-	if (str_type == IS_UNICODE) {
-		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucfirst(str.u, str_len, return_value TSRMLS_CC);
-	} else {
-		ZVAL_STRINGL(return_value, str.s, str_len, ZSTR_DUPLICATE);
-		php_ucfirst(Z_STRVAL_P(return_value));
-	}	
-}
-/* }}} */
-
-/* {{{ php_ucwords()
-   Uppercase the first character of every word in a native string */
-static void php_ucwords(char *str, int str_len)
-{
-	register char *r, *r_end;
-
-	r = str;
-	*r = toupper((unsigned char) *r);
-	for (r_end = r + str_len - 1; r < r_end; ) {
-		if (isspace((int) *(unsigned char *)r++)) {
-			*r = toupper((unsigned char) *r);
-		}
-	}
-}
-/* }}} */
-
-/* {{{ php_u_ucwords() U
-   Uppercase the first character of every word in an Unicode string */
-static void php_u_ucwords(UChar *ustr, int ustr_len, zval *retval TSRMLS_DC)
-{
-	UChar32 cp = 0;
-	UChar *tmp;
-	int retval_len;
-	int pos = 0, last_pos = 0;
-	int tmp_len = 0;
-	zend_bool last_was_space = TRUE;
-	UErrorCode status = U_ZERO_ERROR;
-
-	/*
-	 * We can calculate maximum resulting length precisely considering that not
-	 * more than half of the codepoints in the string can follow a whitespace
-	 * and that maximum expansion is 2 UChar's.
-	 */
-	retval_len = ((3 * ustr_len) >> 1) + 2;
-	tmp = eumalloc(retval_len);
-
-	while (pos < ustr_len) {
-
-		U16_NEXT(ustr, pos, ustr_len, cp);
-
-		if (u_isWhitespace(cp) == TRUE) {
-			tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
-			last_was_space = TRUE;
-		} else {
-			if (last_was_space) {
-				tmp_len += u_strToUpper(tmp + tmp_len, retval_len - tmp_len, ustr + last_pos, 1, UG(default_locale), &status);
-				last_was_space = FALSE;
-			} else {
-				tmp_len += zend_codepoint_to_uchar(cp, tmp + tmp_len);
-			}
-		}
-
-		last_pos = pos;
-	}
-	tmp[tmp_len] = 0;
-
-	/*
-	 * Try to avoid another alloc if the difference between allocated size and
-	 * real length is "small".
-	 */
-	if (retval_len - tmp_len > 256) {
-		ZVAL_UNICODEL(retval, tmp, tmp_len, 1);
-		efree(tmp);
-	} else {
-		ZVAL_UNICODEL(retval, tmp, tmp_len, 0);
-	}
-}
-/* }}} */
-
-/* {{{ proto string ucwords(string str) U
+/* {{{ proto string ucwords(string str)
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
 {
-	zstr str;
+	char *str;
+	register char *r, *r_end;
 	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	if (str_len == 0) {
-		if (str_type == IS_UNICODE) {
-			RETURN_EMPTY_UNICODE();
-		} else {
-			RETURN_EMPTY_STRING();
-		}
+	if (!str_len) {
+		RETURN_EMPTY_STRING();
 	}
 
-	if (str_type == IS_UNICODE) {
-		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucwords(str.u, str_len, return_value TSRMLS_CC);
-	} else {
-		ZVAL_STRINGL(return_value, str.s, str_len, 1);
-		php_ucwords(Z_STRVAL_P(return_value), str_len);
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	r = Z_STRVAL_P(return_value);
+
+	*r = toupper((unsigned char) *r);
+	for (r_end = r + Z_STRLEN_P(return_value) - 1; r < r_end; ) {
+		if (isspace((int) *(unsigned char *)r++)) {
+			*r = toupper((unsigned char) *r);
+		}
 	}
 }
 /* }}} */
@@ -3803,277 +2624,12 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from, char *str_to, int trl
 }
 /* }}} */
 
-/* {{{ php_u_strtr
- */
-static void text_iter_helper_move(UChar *text, int32_t text_len, int32_t *offset, int32_t *cp_offset)
-{
-    UChar32 cp;
-    int32_t tmp, tmp2;
-
-    if (*offset == UBRK_DONE) {
-        return;
-    }
-
-	if (*offset == text_len) {
-		*offset    = UBRK_DONE;
-		*cp_offset = UBRK_DONE;
-	} else {
-		U16_NEXT(text, (*offset), text_len, cp);
-		(*cp_offset)++;
-																										
-		if (u_getCombiningClass(cp) == 0) {
-			tmp = *offset;
-			tmp2 = *cp_offset;
-			/*
-			 * At the end of the from cp will be 0 because of the NULL
-			 * terminating NULL, so combining class will be 0 as well.
-			 */
-			while (tmp < text_len) {
-				U16_NEXT(text, tmp, text_len, cp);
-				tmp2++;
-				if (u_getCombiningClass(cp) == 0) {
-					break;
-				} else {
-					*offset    = tmp;
-					*cp_offset = tmp2;
-				}
-			}
-		}
-	}
-}
-
-PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len, UChar *str_to, int str_to_len, int trlen, int *outlen TSRMLS_DC)
-{
-	int i;
-	int can_optimize = 1;
-
-	if ((trlen < 1) || (len < 1)) {
-		*outlen = len;
-		return str;
-	}
-
-	/* First loop to see if we can use the optimized version */
-	for (i = 0; i < trlen; i++)	{
-		if (str_from[i] > 255 || str_to[i] > 255) {
-			can_optimize = 0;
-			break;
-		}
-	}
-	if (can_optimize) {
-		for (i = trlen; i < str_from_len; i++) {
-			if (str_from[i] > 255) {
-				can_optimize = 0;
-				break;
-			}
-		}
-	}
-	if (can_optimize) {
-		for (i = trlen; i < str_to_len; i++) {
-			if (str_to[i] > 255) {
-				can_optimize = 0;
-				break;
-			}
-		}
-	}
-
-	if (can_optimize) {
-		UChar xlat[256];
-		UChar *tmp_str = eustrndup(str, len);
-
-		for (i = 0; i < 256; xlat[i] = i, i++);
-
-		for (i = 0; i < trlen; i++) {
-			xlat[str_from[i]] = str_to[i];
-		}
-
-		for (i = 0; i < len; i++) {
-			if (str[i] < 256) {
-				tmp_str[i] = xlat[str[i]];
-			}
-		}
-
-		*outlen = len;
-		return tmp_str;
-	} else {
-		/* We use the character break iterator here to assemble an mapping
-		 * array in such a way that we can reuse the code in php_u_strtr_array
-		 * to do the replacements in order to avoid duplicating code. */
-		HashTable *tmp_hash;
-		int minlen = 128*1024, maxlen = 0;
-		int32_t prev_from_offset = 0, from_offset = 0, from_cp_offset = 0;
-		int32_t prev_to_offset = 0, to_offset = 0, to_cp_offset = 0;
-		zval *entry;
-		UChar *key_string;
-
-		tmp_hash = emalloc(sizeof(HashTable));
-		zend_hash_init(tmp_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-		/* Loop over the two strings and prepare the hash entries */
-		do
-		{
-			text_iter_helper_move(str_from, str_from_len, &from_offset, &from_cp_offset);
-			text_iter_helper_move(str_to, str_to_len, &to_offset, &to_cp_offset);
-
-			if (from_offset != -1 && to_offset != -1) {
-				if (from_cp_offset - prev_from_offset > maxlen) {
-					maxlen = from_cp_offset - prev_from_offset;
-				}
-				if (from_cp_offset - prev_from_offset < minlen) {
-					minlen = from_cp_offset - prev_from_offset;
-				}
-
-				MAKE_STD_ZVAL(entry);
-				ZVAL_UNICODEL(entry, str_to + prev_to_offset, to_cp_offset - prev_to_offset, 1);
-				Z_USTRVAL_P(entry)[to_cp_offset - prev_to_offset] = 0;
-
-				key_string = eumalloc(from_cp_offset - prev_from_offset + 1);
-				u_memcpy(key_string, str_from + prev_from_offset, from_cp_offset - prev_from_offset);
-				key_string[from_cp_offset - prev_from_offset] = 0;
-
-				zend_u_hash_add(tmp_hash, IS_UNICODE, ZSTR(key_string), from_cp_offset - prev_from_offset + 1, &entry, sizeof(zval*), NULL);
-				efree(key_string);
-			}
-
-			prev_from_offset = from_offset;
-			prev_to_offset = to_offset;
-		} while (from_offset != -1 && to_offset != -1);
-
-		/* Run the replacement */
-		str = php_u_strtr_array(str, len, tmp_hash, minlen, maxlen, outlen TSRMLS_CC);
-		zend_hash_destroy(tmp_hash);
-		efree(tmp_hash);
-
-		return str;
-	}
-}
-/* }}} */
-
-static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minlen_out, int *maxlen_out TSRMLS_DC) /* {{{ */
-{
-	HashTable *tmp_hash = emalloc(sizeof(HashTable));
-	HashPosition hpos;
-	zval **entry;
-	zstr   string_key;
-	uint   string_key_len;
-	int minlen = 128*1024;
-	ulong num_key;
-	int maxlen = 0, len;
-	zval   ctmp;
-
-	zend_hash_init(tmp_hash, zend_hash_num_elements(hash), NULL, NULL, 0);
-	zend_hash_internal_pointer_reset_ex(hash, &hpos);
-	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
-		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
-			case HASH_KEY_IS_UNICODE:
-				len = string_key_len-1;
-				if (len < 1) {
-					zend_hash_destroy(tmp_hash);
-					efree(tmp_hash);
-					return NULL;
-				}
-				zend_u_hash_add(tmp_hash, IS_UNICODE, string_key, string_key_len, entry, sizeof(zval*), NULL);
-				if (len > maxlen) {
-					maxlen = len;
-				}
-				if (len < minlen) {
-					minlen = len;
-				}
-				break;
-
-			case HASH_KEY_IS_LONG:
-				Z_TYPE(ctmp) = IS_LONG;
-				Z_LVAL(ctmp) = num_key;
-
-				convert_to_unicode(&ctmp);
-				len = Z_USTRLEN(ctmp);
-				zend_u_hash_add(tmp_hash, IS_UNICODE, Z_UNIVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
-				zval_dtor(&ctmp);
-
-				if (len > maxlen) {
-					maxlen = len;
-				}
-				if (len < minlen) {
-					minlen = len;
-				}
-				break;
-		}
-		zend_hash_move_forward_ex(hash, &hpos);
-	}
-	*minlen_out = minlen;
-	*maxlen_out = maxlen;
-	return tmp_hash;
-}
-/* }}} */
-
-/* {{{ php_u_strtr_array
- */
-static UChar* php_u_strtr_array(UChar *str, int slen, HashTable *hash, int minlen, int maxlen, int *outlen TSRMLS_DC)
-{
-	zval **trans;
-	UChar *key;
-	int pos, found, len;
-	smart_str result = {0};
-
-	key = eumalloc(maxlen+1);
-	pos = 0;
-
-	while (pos < slen) {
-		if ((pos + maxlen) > slen) {
-			maxlen = slen - pos;
-		}
-
-		found = 0;
-		u_memcpy(key, str+pos, maxlen);
-
-		for (len = maxlen; len >= minlen; len--) {
-			key[len] = 0;
-
-			if (zend_u_hash_find(hash, IS_UNICODE, ZSTR(key), len+1, (void**)&trans) == SUCCESS) {
-				UChar *tval;
-				int tlen;
-				zval tmp;
-
-				if (Z_TYPE_PP(trans) != IS_UNICODE) {
-					tmp = **trans;
-					zval_copy_ctor(&tmp);
-					convert_to_unicode(&tmp);
-					tval = Z_USTRVAL(tmp);
-					tlen = Z_USTRLEN(tmp);
-				} else {
-					tval = Z_USTRVAL_PP(trans);
-					tlen = Z_USTRLEN_PP(trans);
-				}
-
-				smart_str_appendl(&result, tval, UBYTES(tlen));
-				pos += len;
-				found = 1;
-
-				if (Z_TYPE_PP(trans) != IS_UNICODE) {
-					zval_dtor(&tmp);
-				}
-				break;
-			}
-		}
-
-		if (! found) {
-			smart_str_append2c(&result, str[pos]);
-			pos++;
-		}
-	}
-
-	efree(key);
-	smart_str_0(&result);
-	*outlen = result.len >> 1;
-	return (UChar*) result.c;
-}
-/* }}} */
-
 /* {{{ php_strtr_array
  */
 static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *hash)
 {
 	zval **entry;
-	zstr   string_key;
+	char  *string_key;
 	uint   string_key_len;
 	zval **trans;
 	zval   ctmp;
@@ -4084,8 +2640,8 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	HashPosition hpos;
 	smart_str result = {0};
 	HashTable tmp_hash;
-
-	zend_hash_init(&tmp_hash, 0, NULL, NULL, 0);
+	
+	zend_hash_init(&tmp_hash, zend_hash_num_elements(hash), NULL, NULL, 0);
 	zend_hash_internal_pointer_reset_ex(hash, &hpos);
 	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
 		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
@@ -4095,19 +2651,19 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 					zend_hash_destroy(&tmp_hash);
 					RETURN_FALSE;
 				}
-				zend_u_hash_add(&tmp_hash, IS_STRING, string_key, string_key_len, entry, sizeof(zval*), NULL);
+				zend_hash_add(&tmp_hash, string_key, string_key_len, entry, sizeof(zval*), NULL);
 				if (len > maxlen) {
 					maxlen = len;
 				}
 				if (len < minlen) {
 					minlen = len;
 				}
-				break;
-
+				break; 
+			
 			case HASH_KEY_IS_LONG:
 				Z_TYPE(ctmp) = IS_LONG;
 				Z_LVAL(ctmp) = num_key;
-
+			
 				convert_to_string(&ctmp);
 				len = Z_STRLEN(ctmp);
 				zend_hash_add(&tmp_hash, Z_STRVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
@@ -4137,7 +2693,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 
 		for (len = maxlen; len >= minlen; len--) {
 			key[len] = 0;
-
+			
 			if (zend_hash_find(&tmp_hash, key, len+1, (void**)&trans) == SUCCESS) {
 				char *tval;
 				int tlen;
@@ -4162,7 +2718,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 					zval_dtor(&tmp);
 				}
 				break;
-			}
+			} 
 		}
 
 		if (! found) {
@@ -4177,21 +2733,19 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from[, string to]) U
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
-{
-	zstr str, to = NULL_ZSTR;
-	int str_len, to_len = 0;
-	zend_uchar str_type, to_type;
+{								
 	zval **from;
+	char *str, *to = NULL;
+	int str_len, to_len = 0;
 	int ac = ZEND_NUM_ARGS();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TZ|T", &str, &str_len, &str_type, &from,
-		&to, &to_len, &to_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|s", &str, &str_len, &from, &to, &to_len) == FAILURE) {
 		return;
 	}
-
+	
 	if (ac == 2 && Z_TYPE_PP(from) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument is not an array");
 		RETURN_FALSE;
@@ -4199,149 +2753,50 @@ PHP_FUNCTION(strtr)
 
 	/* shortcut for empty string */
 	if (str_len == 0) {
-		if (str_type == IS_UNICODE) {
-			RETURN_EMPTY_UNICODE();
-		} else {
-			RETURN_EMPTY_STRING();
-		}
+		RETURN_EMPTY_STRING();
 	}
 
-	if (str_type == IS_UNICODE) {
-		int outlen = 0;
-		UChar *outstr;
-
-		if (ac == 2) {
-			int minlen = 0, maxlen = 0;
-			HashTable *hash;
-
-			hash = php_u_strtr_array_prepare_hashtable(HASH_OF(*from), &minlen, &maxlen TSRMLS_CC);
-			if (hash) {
-				outstr = php_u_strtr_array(str.u, str_len, hash, minlen, maxlen, &outlen TSRMLS_CC);
-				zend_hash_destroy(hash);
-				efree(hash);
-				RETVAL_UNICODEL(outstr, outlen, 0);
-				Z_TYPE_P(return_value) = IS_UNICODE;
-			} else {
-				RETURN_UNICODEL(str.u, str_len, 1);
-			}
-		} else {
-			convert_to_unicode_ex(from);
-
-			outstr = php_u_strtr(str.u, str_len, Z_USTRVAL_PP(from), Z_USTRLEN_PP(from), to.u, to_len,
-					  MIN(Z_USTRLEN_PP(from), to_len), &outlen TSRMLS_CC);
-
-			if (str.u == outstr) {
-				ZVAL_UNICODEL(return_value, outstr, outlen, 1);
-			} else {
-				ZVAL_UNICODEL(return_value, outstr, outlen, 0);
-			}
-		}
+	if (ac == 2) {
+		php_strtr_array(return_value, str, str_len, HASH_OF(*from));
 	} else {
-		if (ac == 2) {
-			php_strtr_array(return_value, str.s, str_len, HASH_OF(*from));
-		} else {
-			convert_to_string_ex(from);
+		convert_to_string_ex(from);
 
-			ZVAL_STRINGL(return_value, str.s, str_len, 1);
-
-			php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), Z_STRVAL_PP(from), to.s, MIN(Z_STRLEN_PP(from), to_len));
-		}
+		ZVAL_STRINGL(return_value, str, str_len, 1);
+		
+		php_strtr(Z_STRVAL_P(return_value),
+				  Z_STRLEN_P(return_value),
+				  Z_STRVAL_PP(from),
+				  to,
+				  MIN(Z_STRLEN_PP(from), 
+				  to_len));
 	}
 }
 /* }}} */
 
-/* {{{ proto string strrev(string str) U
+/* {{{ proto string strrev(string str)
    Reverse a string */
 PHP_FUNCTION(strrev)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-	char *s, *e, *n = NULL, *p;
-	int32_t i, x1, x2;
-	UChar32 ch;
-	UChar *u_s, *u_n = NULL, *u_p;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *str;
+	char *e, *n, *p;
+	int  str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-
-	if (str_type == IS_UNICODE) {
-		u_n = eumalloc(str_len+1);
-		u_p = u_n;
-		u_s = str.u;
-
-		i = str_len;
-		while (i > 0) {
-			U16_PREV(u_s, 0, i, ch);
-			if (u_getCombiningClass(ch) == 0) {
-				u_p += zend_codepoint_to_uchar(ch, u_p);
-			} else {
-				x2 = i;
-				do {
-					U16_PREV(u_s, 0, i, ch);
-				} while (u_getCombiningClass(ch) != 0);
-				x1 = i;
-				while (x1 <= x2) {
-					U16_NEXT(u_s, x1, str_len, ch);
-					u_p += zend_codepoint_to_uchar(ch, u_p);
-				}
-			}
-		}
-		*u_p = 0;
-	} else {
-		n = emalloc(str_len+1);
-		p = n;
-		s = str.s;
-		e = s + str_len;
-
-		while (--e >= s) {
-			*(p++) = *e;
-		}
-		*p = '\0';
+	
+	n = emalloc(str_len+1);
+	p = n;
+	
+	e = str + str_len;
+	
+	while (--e>=str) {
+		*p++ = *e;
 	}
-
-	if (str_type == IS_UNICODE) {
-		RETVAL_UNICODEL(u_n, str_len, 0);
-	} else {
-		RETVAL_STRINGL(n, str_len, 0);
-	}
-}
-/* }}} */
-
-/* {{{ php_u_similar_str
- */
-static void php_u_similar_str(const UChar *txt1, int len1,
-							  const UChar *txt2, int len2,
-							  int *pos1, int *end1,
-							  int *pos2, int *end2, int *max)
-{
-	int32_t i1, i2, j1, j2, l;
-	UChar32 ch1, ch2;
-
-	*max = 0;
-	for (i1 = 0 ; i1 < len1 ; ) {
-		for (i2 = 0 ; i2 < len2 ; ) {
-			l = 0 ; j1 = 0 ; j2 = 0;
-			while ((i1+j1 < len1) && (i2+j2 < len2)) {
-				U16_NEXT(txt1+i1, j1, len1-i1, ch1);
-				U16_NEXT(txt2+i2, j2, len2-i2, ch2);
-				if (ch1 != ch2) {
-					U16_BACK_1(txt1+i1, 0, j1);
-					U16_BACK_1(txt2+i2, 0, j2);
-					break;
-				}
-				l++;
-			}
-			if (l > *max) {
-				*max = l;
-				*pos1 = i1; *end1 = j1;
-				*pos2 = i2; *end2 = j2;
-			}
-			U16_FWD_1(txt2, i2, len2);
-		}
-		U16_FWD_1(txt1, i1, len1);
-	}
+	
+	*p = '\0';
+	
+	RETVAL_STRINGL(n, str_len, 0);
 }
 /* }}} */
 
@@ -4353,7 +2808,7 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2, int le
 	char *end1 = (char *) txt1 + len1;
 	char *end2 = (char *) txt2 + len2;
 	int l;
-
+	
 	*max = 0;
 	for (p = (char *) txt1; p < end1; p++) {
 		for (q = (char *) txt2; q < end2; q++) {
@@ -4378,11 +2833,11 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
 		if (pos1 && pos2) {
-			sum += php_similar_char(txt1, pos1,
+			sum += php_similar_char(txt1, pos1, 
 									txt2, pos2);
 		}
 		if ((pos1 + max < len1) && (pos2 + max < len2)) {
-			sum += php_similar_char(txt1 + pos1 + max, len1 - pos1 - max,
+			sum += php_similar_char(txt1 + pos1 + max, len1 - pos1 - max, 
 									txt2 + pos2 + max, len2 - pos2 - max);
 		}
 	}
@@ -4391,102 +2846,39 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 }
 /* }}} */
 
-/* {{{ php_u_similar_char
- */
-static int php_u_similar_char(const UChar *txt1, int len1, const UChar *txt2, int len2)
-{
-	int sum, max;
-	int pos1, pos2, end1, end2;
-
-	php_u_similar_str(txt1, len1, txt2, len2, &pos1, &end1, &pos2, &end2, &max);
-	if ((sum = max)) {
-		if (pos1 && pos2) {
-			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
-		}
-		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
-			sum += php_u_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
-									(UChar *)txt2+pos2+end2, len2-pos2-end2);
-		}
-	}
-	return sum;
-}
-/* }}} */
-
-/* {{{ proto int similar_text(string str1, string str2 [, float percent]) U
+/* {{{ proto int similar_text(string str1, string str2 [, float percent])
    Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
 {
-	zstr t1, t2;
-	int t1_len, t2_len;
-	zend_uchar t1_type, t2_type;
-	zval *percent = NULL;
+	char *t1, *t2;
+	zval **percent = NULL;
+	int ac = ZEND_NUM_ARGS();
 	int sim;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|z", &t1, &t1_len,
-							  &t1_type, &t2, &t2_len, &t2_type, &percent) == FAILURE)  {
+	int t1_len, t2_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|Z", &t1, &t1_len, &t2, &t2_len, &percent) == FAILURE) {
 		return;
 	}
-
-	if (percent) {
-		zval_dtor(percent);
-		Z_TYPE_P(percent) = IS_DOUBLE;
+	
+	if (ac > 2) {
+		convert_to_double_ex(percent);
 	}
-
+	
 	if (t1_len + t2_len == 0) {
-		if (percent) {
-			Z_DVAL_P(percent) = 0;
+		if (ac > 2) {
+			Z_DVAL_PP(percent) = 0;
 		}
 
 		RETURN_LONG(0);
 	}
+	
+	sim = php_similar_char(t1, t1_len, t2, t2_len);	
 
-	/* t1_type and t2_type are guaranteed to be the same */
-	if (t1_type == IS_UNICODE) {
-		sim = php_u_similar_char(t1.u, t1_len, t2.u, t2_len);
-	} else {
-		sim = php_similar_char(t1.s, t1_len, t2.s, t2_len);
-	}
-
-	if (percent) {
-		if (t1_type == IS_UNICODE) {
-			Z_DVAL_P(percent) = sim * 200.0 / (u_countChar32(t1.u, t1_len) + u_countChar32(t2.u, t2_len));
-		} else {
-			Z_DVAL_P(percent) = sim * 200.0 / (t1_len + t2_len);
-		}
+	if (ac > 2) {
+		Z_DVAL_PP(percent) = sim * 200.0 / (t1_len + t2_len);
 	}
 
 	RETURN_LONG(sim);
-}
-/* }}} */
-
-/* {{{ php_u_stripslashes
- *
- * be careful, this edits the string in-place */
-PHPAPI void php_u_stripslashes(UChar *str, int *len TSRMLS_DC)
-{
-	int32_t tmp_len = 0, i = 0, src_len = *len;
-	UChar32 ch1, ch2;
-
-	ch1 = -1; ch2 = -1;
-	while (i < src_len) {
-		U16_NEXT(str, i, src_len, ch1);
-		if (ch1 == '\\') {
-			if (i < src_len) {
-				U16_NEXT(str, i, src_len, ch2);
-				if (ch2 == '0') {
-					tmp_len += zend_codepoint_to_uchar('\0', str+tmp_len);
-				} else {
-					tmp_len += zend_codepoint_to_uchar(ch2, str+tmp_len);
-				}
-			}
-		} else {
-			tmp_len += zend_codepoint_to_uchar(ch1, str+tmp_len);
-		}
-	}
-	*(str+tmp_len) = 0;
-	str = eurealloc(str, tmp_len+1);
-	*len = tmp_len;
-	return;
 }
 /* }}} */
 
@@ -4505,6 +2897,34 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	}
 	s = str;
 	t = str;
+
+	if (PG(magic_quotes_sybase)) {
+		while (l > 0) {
+			if (*t == '\'') {
+				if ((l > 0) && (t[1] == '\'')) {
+					t++;
+					if (len != NULL) {
+						(*len)--;
+					}
+					l--;
+				}
+				*s++ = *t++;
+			} else if (*t == '\\' && t[1] == '0' && l > 0) {
+				*s++='\0';
+				t+=2;
+				if (len != NULL) {
+					(*len)--;
+				}
+				l--;
+			} else {
+				*s++ = *t++;
+			}
+			l--;
+		}
+		*s = '\0';
+		
+		return;
+	}
 
 	while (l > 0) {
 		if (*t == '\\') {
@@ -4533,15 +2953,14 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto binary addcslashes(binary str, binary charlist) U
+/* {{{ proto string addcslashes(string str, string charlist)
    Escapes all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
 {
 	char *str, *what;
 	int str_len, what_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &str, &str_len,
-							  &what, &what_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &str, &str_len, &what, &what_len) == FAILURE) {
 		return;
 	}
 
@@ -4558,43 +2977,36 @@ PHP_FUNCTION(addcslashes)
 }
 /* }}} */
 
-/* {{{ proto string addslashes(string str) U
+/* {{{ proto string addslashes(string str)
    Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	zstr str;
-	int str_len, tmp_len = 0;
-	zend_uchar str_type;
-	void *tmp = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *str;
+	int  str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE && str_len == 0) {
-		RETURN_EMPTY_UNICODE();
-	} else if (str_type == IS_STRING && str_len == 0) {
+	if (str_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (str_type == IS_UNICODE) {
-		tmp = (UChar *)php_u_addslashes(str.u, str_len, &tmp_len, 0 TSRMLS_CC);
-		RETURN_UNICODEL((UChar *)tmp, tmp_len, 0);
-	} else {
-		tmp = (char *)php_addslashes(str.s, str_len, &tmp_len, 0 TSRMLS_CC);
-		RETURN_STRINGL((char *)tmp, tmp_len, 0);
-	}
+	RETURN_STRING(php_addslashes(str,
+	                             str_len, 
+	                             &Z_STRLEN_P(return_value), 0 
+	                             TSRMLS_CC), 0);
 }
 /* }}} */
 
-/* {{{ proto binary stripcslashes(binary str) U
+/* {{{ proto string stripcslashes(string str)
    Strips backslashes from a string. Uses C-style conventions */
 PHP_FUNCTION(stripcslashes)
 {
 	char *str;
-	int str_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
+	int  str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -4603,32 +3015,26 @@ PHP_FUNCTION(stripcslashes)
 }
 /* }}} */
 
-/* {{{ proto string stripslashes(string str) U
+/* {{{ proto string stripslashes(string str)
    Strips backslashes from a string */
 PHP_FUNCTION(stripslashes)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	char *str;
+	int  str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	if (str_type == IS_UNICODE) {
-		ZVAL_UNICODEL(return_value, str.u, str_len, 1);
-		php_u_stripslashes(Z_USTRVAL_P(return_value), &Z_USTRLEN_P(return_value) TSRMLS_CC);
-	} else {
-		ZVAL_STRINGL(return_value, str.s, str_len, 1);
-		php_stripslashes(Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC);
-	}
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	php_stripslashes(Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC);
 }
 /* }}} */
 
 #ifndef HAVE_STRERROR
 /* {{{ php_strerror
  */
-char *php_strerror(int errnum)
+char *php_strerror(int errnum) 
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
@@ -4679,8 +3085,8 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 						break;
 					}
 					/* break is left intentionally */
-				default:
-					i=0;
+				default: 
+					i=0; 
 					while (source < end && *source >= '0' && *source <= '7' && i<3) {
 						numtmp[i++] = *source++;
 					}
@@ -4706,7 +3112,7 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 	*len = nlen;
 }
 /* }}} */
-
+			
 /* {{{ php_addcslashes
  */
 PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
@@ -4722,14 +3128,10 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		wlength = strlen(what);
 	}
 
-	if (!length) {
-		length = strlen(str);
-	}
-
-	php_charmask((unsigned char*)what, wlength, flags TSRMLS_CC);
+	php_charmask((unsigned char *)what, wlength, flags TSRMLS_CC);
 
 	for (source = str, end = source + length, target = new_str; source < end; source++) {
-		c = *source;
+		c = *source; 
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char) c < 32 || (unsigned char) c > 126) {
 				*target++ = '\\';
@@ -4744,7 +3146,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 					default: target += sprintf(target, "%03o", (unsigned char) c);
 				}
 				continue;
-			}
+			} 
 			*target++ = '\\';
 		}
 		*target++ = c;
@@ -4764,79 +3166,24 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 }
 /* }}} */
 
-/* {{{ php_u_addslashes
- */
-PHPAPI UChar *php_u_addslashes(UChar *str, int length, int *new_length, int should_free TSRMLS_DC)
-{
-	return php_u_addslashes_ex(str, length, new_length, should_free TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ php_u_addslashes_ex
- */
-PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int should_free TSRMLS_DC)
-{
-	UChar *buf;
-	int32_t buf_len = 0, i = 0;
-	UChar32 ch;
-
-	if (!new_length) {
-		new_length = &buf_len;
-	}
-	if (!str) {
-		*new_length = 0;
-		return str;
-	}
-
-	buf = eumalloc(length * 2 + 1);
-
-	while (i < length) {
-		U16_NEXT(str, i, length, ch);
-		switch (ch) {
-			case '\0':
-				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
-				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
-				break;
-			case '\'':
-			case '\"':
-			case '\\':
-					*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
-					/* break is missing *intentionally* */
-			default:
-					buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
-					break;
-		}
-	}
-
-	*(buf+buf_len) = 0;
-
-	if (should_free) {
-		STR_FREE(str);
-	}
-	buf = eurealloc(buf, buf_len+1);
-	*new_length = buf_len;
-	return buf;
-}
-/* }}} */
-
 /* {{{ php_addslashes
  */
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
-	return php_addslashes_ex(str, length, new_length, should_free TSRMLS_CC);
+	return php_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_addslashes_ex
  */
-PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free TSRMLS_DC)
+PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free, int ignore_sybase TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
 	char *new_str;
 	char *source, *target;
 	char *end;
 	int local_new_length;
-
+ 	        
 	if (!new_length) {
 		new_length = &local_new_length;
 	}
@@ -4848,26 +3195,45 @@ PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int shoul
 	source = str;
 	end = source + length;
 	target = new_str;
-
-	while (source < end) {
-		switch (*source) {
-			case '\0':
-				*target++ = '\\';
-				*target++ = '0';
-				break;
-			case '\'':
-				case '\"':
-			case '\\':
+	
+	if (!ignore_sybase && PG(magic_quotes_sybase)) {
+		while (source < end) {
+			switch (*source) {
+				case '\0':
 					*target++ = '\\';
-					/* break is missing *intentionally* */
-			default:
+					*target++ = '0';
+					break;
+				case '\'':
+					*target++ = '\'';
+					*target++ = '\'';
+					break;
+				default:
 					*target++ = *source;
 					break;
+			}
+			source++;
 		}
-
-		source++;
+	} else {
+		while (source < end) {
+			switch (*source) {
+				case '\0':
+					*target++ = '\\';
+					*target++ = '0';
+					break;
+				case '\'':
+				case '\"':
+				case '\\':
+					*target++ = '\\';
+					/* break is missing *intentionally* */
+				default:
+					*target++ = *source;
+					break;	
+			}
+		
+			source++;
+		}
 	}
-
+	
 	*target = 0;
 	*new_length = target - new_str;
 	if (should_free) {
@@ -4891,7 +3257,7 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 	int char_count = 0;
 	int replaced = 0;
 	char *source, *target, *tmp, *source_end=str+len, *tmp_end = NULL;
-
+		
 	if (case_sensitivity) {
 		char *p = str, *e = p + len;
 		while ((p = memchr(p, from, (e - p)))) {
@@ -4910,7 +3276,7 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 		ZVAL_STRINGL(result, str, len, 1);
 		return 0;
 	}
-
+	
 	Z_STRLEN_P(result) = len + (char_count * (to_len - 1));
 	Z_STRVAL_P(result) = target = safe_emalloc(char_count, to_len, len + 1);
 	Z_TYPE_P(result) = IS_STRING;
@@ -4962,56 +3328,9 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 }
 /* }}} */
 
-/* {{{ php_u_char_to_str_ex */
-PHPAPI int php_u_char_to_str_ex(UChar *str, uint len, UChar from, UChar *to, int to_len, zval *result, int *replace_count)
-{
-	int char_count = 0;
-	int replaced = 0;
-	UChar *target;
-	UChar *p, *e, *s;
-
-	p = str;
-	e = p + len;
-	while ((p = u_memchr(p, from, (e - p)))) {
-		char_count++;
-		p++;
-	}
-
-	if (char_count == 0) {
-		ZVAL_UNICODEL(result, str, len, 1);
-		return 0;
-	}
-
-	Z_USTRLEN_P(result) = len + (char_count * (to_len - 1));
-	Z_USTRVAL_P(result) = target = eumalloc(Z_USTRLEN_P(result) + 1);
-	Z_TYPE_P(result) = IS_UNICODE;
-
-	p = str;
-	e = p + len;
-   	s = str;
-	while ((p = u_memchr(p, from, (e - p)))) {
-		u_memcpy(target, s, (p - s));
-		target += p - s;
-		u_memcpy(target, to, to_len);
-		target += to_len;
-		p++;
-		s = p;
-		if (replace_count) {
-			*replace_count += 1;
-		}
-	}
-	if (s < e) {
-		u_memcpy(target, s, (e - s));
-		target += e - s;
-	}
-	*target = 0;
-	return replaced;
-}
-/* }}} */
-
 /* {{{ php_str_to_str_ex
  */
-PHPAPI char *php_str_to_str_ex(char *haystack, int length,
+PHPAPI char *php_str_to_str_ex(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count)
 {
 	char *new_str;
@@ -5181,267 +3500,54 @@ nothing_todo:
 }
 /* }}} */
 
-/* {{{ php_str_to_str */
-PHPAPI char *php_str_to_str(char *haystack, int length,
+/* {{{ php_str_to_str
+ */
+PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
 	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1, NULL);
-}
-/* }}} */
-
-/* {{{ php_u_str_to_str_ex */
-PHPAPI UChar *php_u_str_to_str_ex(UChar *haystack, int length,
-	UChar *needle, int needle_len, UChar *repl, int repl_len, int *_new_length, int *replace_count)
-{
-	UChar *new_str;
-
-	if (needle_len < length) {
-		UChar *end;
-		UChar *e, *s, *p, *r;
-
-		if (needle_len == repl_len) {
-			new_str = eustrndup(haystack, length);
-			*_new_length = length;
-
-			end = new_str + length;
-			for (p = new_str; (r = zend_u_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
-				u_memcpy(r, repl, repl_len);
-				if (replace_count) {
-					(*replace_count)++;
-				}
-			}
-			return new_str;
-		} else {
-
-			if (repl_len < needle_len) {
-				new_str = eumalloc(length + 1);
-			} else {
-				int count = 0;
-				UChar *o, *n, *endp;
-
-				o = haystack;
-				n = needle;
-				endp = o + length;
-
-				while ((o = zend_u_memnstr(o, n, needle_len, endp))) {
-					o += needle_len;
-					count++;
-				}
-				if (count == 0) {
-					/* Needle doesn't occur, shortcircuit the actual replacement. */
-					new_str = eustrndup(haystack, length);
-					if (_new_length) {
-						*_new_length = length;
-					}
-					return new_str;
-				} else {
-					new_str = safe_emalloc(count, UBYTES(repl_len - needle_len), UBYTES(length + 1));
-				}
-			}
-
-			e = s = new_str;
-
-			end = haystack + length;
-			for (p = haystack; (r = zend_u_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
-				u_memcpy(e, p, r - p);
-				e += r - p;
-				u_memcpy(e, repl, repl_len);
-				e += repl_len;
-				if (replace_count) {
-					(*replace_count)++;
-				}
-			}
-
-			if (p < end) {
-				u_memcpy(e, p, end - p);
-				e += end - p;
-			}
-
-			*e = 0;
-			*_new_length = e - s;
-
-			new_str = eurealloc(new_str, *_new_length + 1);
-			return new_str;
-		}
-	} else if (needle_len > length) {
-nothing_todo:
-		*_new_length = length;
-		new_str = eustrndup(haystack, length);
-		return new_str;
-	} else {
-		if (u_memcmp(haystack, needle, length)) {
-			goto nothing_todo;
-		} else {
-			*_new_length = repl_len;
-			new_str = eustrndup(repl, repl_len);
-			if (replace_count) {
-				(*replace_count)++;
-			}
-			return new_str;
-		}
-	}
-}
-/* }}} */
-
-/* {{{ php_u_str_to_str_case_ex */
-/* TODO 
- *  - optimize for cases where pat_len >= str_len
- */
-PHPAPI UChar *php_u_str_to_str_case_ex(UChar *str, int str_len,
-	UChar *pat, int pat_len, UChar *repl, int repl_len, int *result_len, int *replace_count TSRMLS_DC)
-{
-	UChar *str_fold, *pat_fold, *result;
-	int str_fold_len, pat_fold_len, alloc_len;
-	UChar *p, *found, *end;
-	int offset, found_len;
-	UErrorCode status = U_ZERO_ERROR;
-
-	zend_case_fold_string(&str_fold, &str_fold_len, str, str_len, U_FOLD_CASE_DEFAULT, &status);
-	if (str_fold_len == str_len) {
-		alloc_len = str_len;
-		result = eumalloc(alloc_len + 1);
-		*result_len = 0;
-
-		zend_case_fold_string(&pat_fold, &pat_fold_len, pat, pat_len, U_FOLD_CASE_DEFAULT, &status);
-
-		end = str_fold + str_fold_len;
-		for (p = str_fold;
-			 (found = u_strFindFirst(p, end - p, pat_fold, pat_fold_len));
-			 p = found + pat_fold_len) { /* we can increment by pattern length since the match in
-											the subject string is guaranteed to be of the same length */
-
-			if (*result_len + (found - p + repl_len) > alloc_len) {
-				alloc_len += (alloc_len >> 1); /* grow by 1.5x factor */
-				result = eurealloc(result, alloc_len + 1);
-			}
-			u_memcpy(result + *result_len, str + (p - str_fold), found - p);
-			*result_len += found - p;
-			u_memcpy(result + *result_len, repl, repl_len);
-			*result_len += repl_len;
-			if (replace_count) {
-				(*replace_count)++;
-			}
-		}
-
-		/* add remaining chunk, if any */
-		if (p < end) {
-			int chunk_len = end - p;
-			if (*result_len + chunk_len > alloc_len) {
-				alloc_len += *result_len + chunk_len - alloc_len;
-				result = eurealloc(result, alloc_len + 1);
-			}
-			u_memcpy(result + *result_len, str + (p - str_fold), chunk_len);
-			*result_len += chunk_len;
-		}
-
-		result[*result_len] = 0;
-		if (*result_len < alloc_len) {
-			result = eurealloc(result, *result_len + 1);
-		}
-
-		efree(pat_fold);
-	} else {
-		usearch_setText(UG(root_search), str, str_len, &status);
-		usearch_setPattern(UG(root_search), pat, pat_len, &status);
-		usearch_setOffset(UG(root_search), 0, &status);
-
-		alloc_len = str_len;
-		result = eumalloc(alloc_len + 1);
-		*result_len = 0;
-
-		p = str;
-		end = str + str_len;
-		for (offset = usearch_first(UG(root_search), &status);
-			 offset != USEARCH_DONE;
-			 offset = usearch_next(UG(root_search), &status)) {
-
-			found = str + offset;
-			/* matched length is not simply pattern length */
-			found_len = usearch_getMatchedLength(UG(root_search));
-
-			if (*result_len + (found - p + repl_len) > alloc_len) {
-				alloc_len += (alloc_len >> 1); /* grow by 1.5x factor */
-				result = eurealloc(result, alloc_len + 1);
-			}
-			u_memcpy(result + *result_len, p, found - p);
-			*result_len += found - p;
-			u_memcpy(result + *result_len, repl, repl_len);
-			*result_len += repl_len;
-
-			p = found + found_len;
-
-			if (replace_count) {
-				(*replace_count)++;
-			}
-		}
-
-		/* add remaining chunk, if any */
-		if (p < end) {
-			int chunk_len = end - p;
-			if (*result_len + chunk_len > alloc_len) {
-				alloc_len += *result_len + chunk_len - alloc_len;
-				result = eurealloc(result, alloc_len + 1);
-			}
-			u_memcpy(result + *result_len, p, chunk_len);
-			*result_len += chunk_len;
-		}
-
-		result[*result_len] = 0;
-		if (*result_len < alloc_len) {
-			result = eurealloc(result, *result_len + 1);
-		}
-	}
-	efree(str_fold);
-
-	return result;
-}
+} 
 /* }}} */
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count TSRMLS_DC)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count)
 {
 	zval		**search_entry,
-				**replace_entry,
-				 *replace_value,
-				  temp_replace,
+				**replace_entry = NULL,
 				  temp_result;
+	char		*replace_value = NULL;
+	int			 replace_len = 0;
 
-	/* Make sure we're dealing with strings. */
-	if (Z_TYPE_PP(subject) == IS_STRING) {
-		Z_TYPE_P(result) = IS_STRING;
-		if (Z_UNILEN_PP(subject) == 0) {
-			ZVAL_EMPTY_STRING(result);
-			return;
-		}
-	} else {
-		convert_to_unicode_ex(subject);
-		Z_TYPE_P(result) = IS_UNICODE;
-		if (Z_UNILEN_PP(subject) == 0) {
-			ZVAL_EMPTY_UNICODE(result);
-			return;
-		}
+	/* Make sure we're dealing with strings. */	
+	convert_to_string_ex(subject);
+	Z_TYPE_P(result) = IS_STRING;
+	if (Z_STRLEN_PP(subject) == 0) {
+		ZVAL_STRINGL(result, "", 0, 1);
+		return;
 	}
-
+	
 	/* If search is an array */
 	if (Z_TYPE_P(search) == IS_ARRAY) {
 		/* Duplicate subject string for repeated replacement */
 		MAKE_COPY_ZVAL(subject, result);
-
+		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(search));
 
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
 		} else {
 			/* Set replacement value to the passed one */
-			replace_value = replace;
+			replace_value = Z_STRVAL_P(replace);
+			replace_len = Z_STRLEN_P(replace);
 		}
 
 		/* For each entry in the search array, get the entry */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **) &search_entry) == SUCCESS) {
-			/* Make sure we're dealing with strings. */
+			/* Make sure we're dealing with strings. */	
 			SEPARATE_ZVAL(search_entry);
-			if (Z_UNILEN_PP(search_entry) == 0) {
+			convert_to_string(*search_entry);
+			if (Z_STRLEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
@@ -5453,84 +3559,62 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
 				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
-					SEPARATE_ZVAL(replace_entry);
-					replace_value = *replace_entry;
+					/* Make sure we're dealing with strings. */	
+					convert_to_string_ex(replace_entry);
+					
+					/* Set replacement value to the one we got from array */
+					replace_value = Z_STRVAL_PP(replace_entry);
+					replace_len = Z_STRLEN_PP(replace_entry);
+
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
-					replace_value = &temp_replace;
-					Z_UNILEN_P(replace_value) = 0;
-					Z_UNIVAL_P(replace_value) = EMPTY_ZSTR;
-					if (Z_TYPE_PP(subject) == IS_STRING) {
-						Z_TYPE_P(replace_value) = IS_STRING;
-					} else {
-						Z_TYPE_P(replace_value) = IS_UNICODE;
-					}
+					replace_value = "";
+					replace_len = 0;
 				}
 			}
+			
+			if (Z_STRLEN_PP(search_entry) == 1) {
+				php_char_to_str_ex(Z_STRVAL_P(result),
+								Z_STRLEN_P(result),
+								Z_STRVAL_PP(search_entry)[0],
+								replace_value,
+								replace_len,
+								&temp_result,
+								case_sensitivity,
+								replace_count);
+			} else if (Z_STRLEN_PP(search_entry) > 1) {
+				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
+														   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
+														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity, replace_count);
+			}
 
-			php_str_replace_in_subject(*search_entry, replace_value, &result, &temp_result, case_sensitivity, replace_count TSRMLS_CC);
+			efree(Z_STRVAL_P(result));
+			Z_STRVAL_P(result) = Z_STRVAL(temp_result);
+			Z_STRLEN_P(result) = Z_STRLEN(temp_result);
 
-			efree(Z_UNIVAL_P(result).v);
-			Z_UNIVAL_P(result) = Z_UNIVAL(temp_result);
-			Z_UNILEN_P(result) = Z_UNILEN(temp_result);
-
-			if (Z_UNILEN_P(result) == 0) {
+			if (Z_STRLEN_P(result) == 0) {
 				return;
 			}
 
 			zend_hash_move_forward(Z_ARRVAL_P(search));
 		}
 	} else {
-		if (Z_TYPE_PP(subject) == IS_STRING) {
-			convert_to_string(search);
-			convert_to_string(replace);
-			if (Z_STRLEN_P(search) == 1) {
-				php_char_to_str_ex(Z_STRVAL_PP(subject),
-								Z_STRLEN_PP(subject),
-								Z_STRVAL_P(search)[0],
-								Z_STRVAL_P(replace),
-								Z_STRLEN_P(replace),
-								result,
-								case_sensitivity,
-								replace_count);
-			} else if (Z_STRLEN_P(search) > 1) {
-				Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
-														Z_STRVAL_P(search), Z_STRLEN_P(search),
-														Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
-			} else {
-				MAKE_COPY_ZVAL(subject, result);
-			}
+		if (Z_STRLEN_P(search) == 1) {
+			php_char_to_str_ex(Z_STRVAL_PP(subject),
+							Z_STRLEN_PP(subject),
+							Z_STRVAL_P(search)[0],
+							Z_STRVAL_P(replace),
+							Z_STRLEN_P(replace),
+							result,
+							case_sensitivity,
+							replace_count);
+		} else if (Z_STRLEN_P(search) > 1) {
+			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+													Z_STRVAL_P(search), Z_STRLEN_P(search),
+													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
 		} else {
-			convert_to_unicode(search);
-			convert_to_unicode(replace);
-			if (Z_UNILEN_P(search) == 1) {
-				if (case_sensitivity) {
-					php_u_char_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-										 Z_USTRVAL_P(search)[0],
-										 Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-										 result, replace_count);
-				} else {
-					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
-				}
-			} else if (Z_STRLEN_P(search) > 1) {
-				if (case_sensitivity) {
-					Z_USTRVAL_P(result) = php_u_str_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-															  Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-															  Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-															  &Z_USTRLEN_P(result), replace_count);
-				} else {
-					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
-				}
-			} else {
-				MAKE_COPY_ZVAL(subject, result);
-			}
+			MAKE_COPY_ZVAL(subject, result);
 		}
 	}
 }
@@ -5540,64 +3624,72 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval *subject, *search, *replace, **subject_entry, *zcount = NULL;
+	zval **subject, **search, **replace, **subject_entry, **zcount = NULL;
 	zval *result;
-	zstr string_key;
+	char *string_key;
 	uint string_key_len;
 	ulong num_key;
 	int count = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/z/|z", &search,
-							  &replace, &subject, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|Z", &search, &replace, &subject, &zcount) == FAILURE) {
 		return;
 	}
 
+	SEPARATE_ZVAL(search);
+	SEPARATE_ZVAL(replace);
+	SEPARATE_ZVAL(subject);
+
+	/* Make sure we're dealing with strings and do the replacement. */
+	if (Z_TYPE_PP(search) != IS_ARRAY) {
+		convert_to_string_ex(search);
+		convert_to_string_ex(replace);
+	} else if (Z_TYPE_PP(replace) != IS_ARRAY) {
+		convert_to_string_ex(replace);
+	}
+
 	/* if subject is an array */
-	if (Z_TYPE_P(subject) == IS_ARRAY) {
+	if (Z_TYPE_PP(subject) == IS_ARRAY) {
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(subject));
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(subject));
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_P(subject), (void **)&subject_entry) == SUCCESS) {
-			zend_uchar utype;
-
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
 			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
 				MAKE_STD_ZVAL(result);
 				SEPARATE_ZVAL(subject_entry);
-				php_str_replace_in_subject(search, replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
+				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
 			} else {
 				ALLOC_ZVAL(result);
 				Z_ADDREF_P(*subject_entry);
 				COPY_PZVAL_TO_ZVAL(*result, *subject_entry);
 			}
 			/* Add to return array */
-			switch ((utype = zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key,
-														  &string_key_len, &num_key, 0, NULL))) {
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
+												&string_key_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
-				case HASH_KEY_IS_UNICODE:
-					add_u_assoc_zval_ex(return_value, utype, string_key, string_key_len, result);
+					add_assoc_zval_ex(return_value, string_key, string_key_len, result);
 					break;
 
 				case HASH_KEY_IS_LONG:
 					add_index_zval(return_value, num_key, result);
 					break;
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(subject));
+		
+			zend_hash_move_forward(Z_ARRVAL_PP(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(search, replace, &subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
-	}
+		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
+	}	
 	if (argc > 3) {
-		zval_dtor(zcount);
-		ZVAL_LONG(zcount, count);
+		zval_dtor(*zcount);
+		ZVAL_LONG(*zcount, count);
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count]) U
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count])
    Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
@@ -5605,7 +3697,7 @@ PHP_FUNCTION(str_replace)
 }
 /* }}} */
 
-/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count]) U
+/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count])
    Replaces all occurrences of search in haystack with replace / case-insensitive */
 PHP_FUNCTION(str_ireplace)
 {
@@ -5621,14 +3713,13 @@ PHP_FUNCTION(str_ireplace)
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
 	char *str;
-	int str_len;
 	char *heb_str, *tmp, *target, *broken_str;
 	int block_start, block_end, block_type, block_length, i;
 	long max_chars=0;
 	int begin, end, char_count, orig_begin;
-
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &str_len, &max_chars) == FAILURE) {
+	int str_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &max_chars) == FAILURE) {
 		return;
 	}
 	
@@ -5651,7 +3742,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	} else {
 		block_type = _HEB_BLOCK_TYPE_ENG;
 	}
-
+	
 	do {
 		if (block_type == _HEB_BLOCK_TYPE_HEB) {
 			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
@@ -5721,7 +3812,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	broken_str = (char *) emalloc(str_len+1);
 	begin=end=str_len-1;
 	target = broken_str;
-
+		
 	while (1) {
 		char_count=0;
 		while ((!max_chars || char_count < max_chars) && begin > 0) {
@@ -5737,7 +3828,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		}
 		if (char_count == max_chars) { /* try to avoid breaking words */
 			int new_char_count=char_count, new_begin=begin;
-
+			
 			while (new_char_count > 0) {
 				if (_isblank(heb_str[new_begin]) || _isnewline(heb_str[new_begin])) {
 					break;
@@ -5751,7 +3842,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			}
 		}
 		orig_begin=begin;
-
+		
 		if (_isblank(heb_str[begin])) {
 			heb_str[begin]='\n';
 		}
@@ -5788,7 +3879,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 }
 /* }}} */
 
-/* {{{ proto string hebrev(string str [, int max_chars_per_line]) U
+/* {{{ proto string hebrev(string str [, int max_chars_per_line])
    Converts logical Hebrew text to visual text */
 PHP_FUNCTION(hebrev)
 {
@@ -5796,7 +3887,7 @@ PHP_FUNCTION(hebrev)
 }
 /* }}} */
 
-/* {{{ proto string hebrevc(string str [, int max_chars_per_line]) U
+/* {{{ proto string hebrevc(string str [, int max_chars_per_line])
    Converts logical Hebrew text to visual text with newline conversion */
 PHP_FUNCTION(hebrevc)
 {
@@ -5804,65 +3895,45 @@ PHP_FUNCTION(hebrevc)
 }
 /* }}} */
 
-/* {{{ proto string nl2br(string str [, bool is_xhtml]) U
+/* {{{ proto string nl2br(string str [, bool is_xhtml])
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
-	zstr		str;
-	int 		str_len;
-	zend_uchar	str_type;
-	zstr		p, end, tmp, target;
+	char		*tmp, *str;
 	int		new_length;
+	char		*end, *target;
 	int		repl_cnt = 0;
+	int		str_len;
 	zend_bool	is_xhtml = 1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &str, &str_len, &str_type, &is_xhtml) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &is_xhtml) == FAILURE) {
 		return;
 	}
-
-	p = str;
-
+	
+	tmp = str;
+	end = str + str_len;
+	
 	/* it is really faster to scan twice and allocate mem once instead of scanning once
 	   and constantly reallocing */
-	if (str_type == IS_UNICODE) {
-		end.u = p.u + str_len;
-		while (p.u < end.u) {
-			if (*p.u == (UChar) 0x0d /*'\r'*/) {
-				if (*(p.u+1) == (UChar) 0x0a /*'\n'*/) {
-					p.u++;
-				}
-				repl_cnt++;
-			} else if (*p.u == (UChar) 0x0a /*'\n'*/) {
-				if (*(p.u+1) == (UChar) 0x0d /*'\r'*/) {
-					p.u++;
-				}
-				repl_cnt++;
+	while (tmp < end) {
+		if (*tmp == '\r') {
+			if (*(tmp+1) == '\n') {
+				tmp++;
 			}
-
-			p.u++;
-		}
-	} else {
-		end.s = p.s + str_len;
-		while (p.s < end.s) {
-			if (*p.s == '\r') {
-				if (*(p.s+1) == '\n') {
-					p.s++;
-				}
-				repl_cnt++;
-			} else if (*p.s == '\n') {
-				if (*(p.s+1) == '\r') {
-					p.s++;
-				}
-				repl_cnt++;
+			repl_cnt++;
+		} else if (*tmp == '\n') {
+			if (*(tmp+1) == '\r') {
+				tmp++;
 			}
-
-			p.s++;
+			repl_cnt++;
 		}
+		
+		tmp++;
 	}
-
+	
 	if (repl_cnt == 0) {
-		RETURN_ZSTRL(str_type, str, str_len, 1);
+		RETURN_STRINGL(str, str_len, 1);
 	}
 
 	if (is_xhtml) {
@@ -5871,121 +3942,85 @@ PHP_FUNCTION(nl2br)
 		new_length = str_len + repl_cnt * (sizeof("<br>") - 1);
 	}
 
-	if (str_type == IS_UNICODE) {
-		tmp.u = target.u = eumalloc(new_length + 1);
-		p = str;
+	tmp = target = emalloc(new_length + 1);
 
-		while (p.u < end.u) {
-			switch (*p.u) {
-				case 0x0d /*'\r'*/:
-				case 0x0a /*'\n'*/:
-					*target.u++ = (UChar) 0x3c /*'<'*/;
-					*target.u++ = (UChar) 0x62 /*'b'*/;
-					*target.u++ = (UChar) 0x72 /*'r'*/;
+	while (str < end) {
+		switch (*str) {
+			case '\r':
+			case '\n':
+				*target++ = '<';
+				*target++ = 'b';
+				*target++ = 'r';
 
-					if (is_xhtml) {
-						*target.u++ = (UChar) 0x20 /*' '*/;
-						*target.u++ = (UChar) 0x2f /*'/'*/;
-					}
+				if (is_xhtml) {
+					*target++ = ' ';
+					*target++ = '/';
+				}
 
-					*target.u++ = (UChar) 0x3e /*'>'*/;
-
-					if ((*p.u == (UChar) 0x0d /*'\r'*/ && *(p.u+1) == (UChar) 0x0a /*'\n'*/)
-						|| (*p.u == (UChar) 0x0a /*'\n'*/ && *(p.u+1) == (UChar) 0x0d /*'\r'*/)) {
-						*target.u++ = *p.u++;
-					}
-					/* lack of a break; is intentional */
-				default:
-					*target.u++ = *p.u;
-			}
-
-			p.u++;
+				*target++ = '>';
+				
+				if ((*str == '\r' && *(str+1) == '\n') || (*str == '\n' && *(str+1) == '\r')) {
+					*target++ = *str++;
+				}
+				/* lack of a break; is intentional */
+			default:
+				*target++ = *str;
 		}
-
-		*target.u = 0;
-	} else {
-		tmp.s = target.s = emalloc(new_length + 1);
-		p = str;
-
-		while (p.s < end.s) {
-			switch (*p.s) {
-				case '\r':
-				case '\n':
-					*target.s++ = '<';
-					*target.s++ = 'b';
-					*target.s++ = 'r';
-
-					if (is_xhtml) {
-						*target.s++ = ' ';
-						*target.s++ = '/';
-					}
-
-					*target.s++ = '>';
-
-					if ((*p.s == '\r' && *(p.s+1) == '\n') || (*p.s == '\n' && *(p.s+1) == '\r')) {
-						*target.s++ = *p.s++;
-					}
-					/* lack of a break; is intentional */
-				default:
-					*target.s++ = *p.s;
-			}
-
-			p.s++;
-		}
-
-		*target.s = '\0';
+	
+		str++;
 	}
+	
+	*target = '\0';
 
-
-	RETURN_ZSTRL(str_type, tmp, new_length, 0);
+	RETURN_STRINGL(tmp, new_length, 0);
 }
 /* }}} */
 
-/* {{{ proto string strip_tags(string str [, string allowable_tags]) U
+/* {{{ proto string strip_tags(string str [, string allowable_tags])
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
-	void *str, *allow = NULL;
-	int str_len, allow_len = 0;
-	zend_uchar str_type, allow_type;
-	void *buf;
-	int retval_len;
+	char *buf;
+	char *str;
+	zval **allow=NULL;
+	char *allowed_tags=NULL;
+	int allowed_tags_len=0;
+	int str_len;
+	size_t retval_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &str, &str_len, &str_type,
-							  &allow, &allow_len, &allow_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Z", &str, &str_len, &allow) == FAILURE) {
 		return;
 	}
-
-	if (str_type == IS_UNICODE) {
-		buf = eustrndup(str, str_len);
-		retval_len = php_u_strip_tags((UChar *)buf, str_len, NULL, (UChar *)allow, allow_len TSRMLS_CC);
-		RETURN_UNICODEL((UChar *)buf, retval_len, 0);
-	} else {
-		buf = estrndup(str, str_len);
-		retval_len = php_strip_tags_ex((char *)buf, str_len, NULL, (char *)allow, allow_len, 0);
-		RETURN_STRINGL((char *)buf, retval_len, 0);
+	
+	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
+	if (allow != NULL) {
+		convert_to_string_ex(allow);
+		allowed_tags = Z_STRVAL_PP(allow);
+		allowed_tags_len = Z_STRLEN_PP(allow);
 	}
+
+	buf = estrndup(str, str_len);
+	retval_len = php_strip_tags_ex(buf, str_len, NULL, allowed_tags, allowed_tags_len, 0);
+	RETURN_STRINGL(buf, retval_len, 0);
 }
 /* }}} */
 
-/* {{{ proto string setlocale(mixed category, string locale [, string ...]) U
+/* {{{ proto string setlocale(mixed category, string locale [, string ...])
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
 	zval ***args = NULL;
 	zval **pcategory, **plocale;
-	int cat, num_args, i = 0;
+	int num_args, cat, i = 0;
 	char *loc, *retval;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z+", &pcategory, &args, &num_args) == FAILURE) {
 		return;
 	}
-	
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 
 #ifdef HAVE_SETLOCALE
 	if (Z_TYPE_PP(pcategory) == IS_LONG) {
-		convert_to_long_ex(pcategory);
+		convert_to_long_ex(pcategory);	
 		cat = Z_LVAL_PP(pcategory);
 	} else {
 		/* FIXME: The following behaviour should be removed. */
@@ -5996,28 +4031,28 @@ PHP_FUNCTION(setlocale)
 		convert_to_string_ex(pcategory);
 		category = Z_STRVAL_PP(pcategory);
 
-		if (!strcasecmp ("LC_ALL", category)) {
+		if (!strcasecmp("LC_ALL", category)) {
 			cat = LC_ALL;
-		} else if (!strcasecmp ("LC_COLLATE", category)) {
+		} else if (!strcasecmp("LC_COLLATE", category)) {
 			cat = LC_COLLATE;
-		} else if (!strcasecmp ("LC_CTYPE", category)) {
+		} else if (!strcasecmp("LC_CTYPE", category)) {
 			cat = LC_CTYPE;
 #ifdef LC_MESSAGES
-		} else if (!strcasecmp ("LC_MESSAGES", category)) {
+		} else if (!strcasecmp("LC_MESSAGES", category)) {
 			cat = LC_MESSAGES;
 #endif
-		} else if (!strcasecmp ("LC_MONETARY", category)) {
+		} else if (!strcasecmp("LC_MONETARY", category)) {
 			cat = LC_MONETARY;
-		} else if (!strcasecmp ("LC_NUMERIC", category)) {
+		} else if (!strcasecmp("LC_NUMERIC", category)) {
 			cat = LC_NUMERIC;
-		} else if (!strcasecmp ("LC_TIME", category)) {
+		} else if (!strcasecmp("LC_TIME", category)) {
 			cat = LC_TIME;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category);
 			
 			if (args) {
 				efree(args);
-			}
+			}			
 			RETURN_FALSE;
 		}
 	}
@@ -6025,7 +4060,7 @@ PHP_FUNCTION(setlocale)
 	if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args[0]));
 	}
-
+	
 	while (1) {
 		if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			if (!zend_hash_num_elements(Z_ARRVAL_PP(args[0]))) {
@@ -6037,7 +4072,7 @@ PHP_FUNCTION(setlocale)
 		}
 
 		convert_to_string_ex(plocale);
-
+		
 		if (!strcmp ("0", Z_STRVAL_PP(plocale))) {
 			loc = NULL;
 		} else {
@@ -6062,7 +4097,7 @@ PHP_FUNCTION(setlocale)
 			}
 			RETURN_STRING(retval, 1);
 		}
-
+		
 		if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			if (zend_hash_move_forward(Z_ARRVAL_PP(args[0])) == FAILURE) break;
 		} else {
@@ -6082,17 +4117,18 @@ PHP_FUNCTION(setlocale)
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
-	char *enc_string, *res = NULL;
-	int enc_string_len;
-	zval *result = NULL;
+	char *arg;
+	zval *arrayArg = NULL;
+	char *res = NULL;
+	int arglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &enc_string, &enc_string_len, &result) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &arg, &arglen, &arrayArg) == FAILURE) {
 		return;
 	}
-	
-	res = estrndup(enc_string, enc_string_len);
 
-	if (ZEND_NUM_ARGS() == 1) {
+	res = estrndup(arg, arglen);
+
+	if (arrayArg == NULL) {
 		zval tmp;
 
 		if (!EG(active_symbol_table)) {
@@ -6102,83 +4138,24 @@ PHP_FUNCTION(parse_str)
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
 	} else 	{
 		/* Clear out the array that was passed in. */
-		zval_dtor(result);
-		array_init(result);
-
-		sapi_module.treat_data(PARSE_STRING, res, result TSRMLS_CC);
+		zval_dtor(arrayArg);
+		array_init(arrayArg);
+		
+		sapi_module.treat_data(PARSE_STRING, res, arrayArg TSRMLS_CC);
 	}
 }
 /* }}} */
 
 #define PHP_TAG_BUF_SIZE 1023
 
-/* php_u_tag_find / php_tag_find
+/* {{{ php_tag_find
  *
- * Check if tag is in a set of tags
+ * Check if tag is in a set of tags 
  *
  * states:
- *
+ * 
  * 0 start tag
  * 1 first non-whitespace char seen
- */
-
-/* {{{ php_u_tag_find
- */
-int php_u_tag_find(UChar *tag, int len, UChar *set, int set_len)
-{
-	int32_t idx = 0;
-	UChar32 ch;
-	UChar *norm, *n;
-	int state = 0, done = 0;
-
-	if (len <= 0) {
-		return 0;
-	}
-
-	norm = eumalloc(len+1);
-	n = norm;
-
-	while (!done) {
-		U16_NEXT(tag, idx, len, ch);
-		ch = u_tolower(ch);
-		switch (ch) {
-		case '<':
-			*(n++) = ch;
-			break;
-		case '>':
-			done = 1;
-			break;
-		default:
-			if (u_isWhitespace(ch) == FALSE) {
-				if (state == 0) {
-					state = 1;
-					if (ch != '/')
-						*(n++) = ch;
-				} else {
-					*(n++) = ch;
-				}
-			} else {
-				if (state == 1)
-					done = 1;
-			}
-			break;
-		}
-	}
-	*(n++) = '>';
-	*n = 0;
-
-	if (u_strFindFirst(set, set_len, norm, n-norm) != NULL) {
-		done = 1;
-	} else {
-		done = 0;
-	}
-
-	efree(norm);
-	return done;
-}
-/* }}} */
-
-/* {{{ php_tag_find
  */
 int php_tag_find(char *tag, int len, char *set) {
 	char c, *n, *t;
@@ -6194,7 +4171,7 @@ int php_tag_find(char *tag, int len, char *set) {
 	n = norm;
 	t = tag;
 	c = tolower(*t);
-	/*
+	/* 
 	   normalize the tag removing leading and trailing whitespace
 	   and turn any <a whatever...> into just <a> and any </tag>
 	   into <tag>
@@ -6223,9 +4200,9 @@ int php_tag_find(char *tag, int len, char *set) {
 				break;
 		}
 		c = tolower(*(++t));
-	}
+	}  
 	*(n++) = '>';
-	*n = '\0';
+	*n = '\0'; 
 	if (strstr(set, norm)) {
 		done=1;
 	} else {
@@ -6236,10 +4213,16 @@ int php_tag_find(char *tag, int len, char *set) {
 }
 /* }}} */
 
-/* php_u_strip_tags / php_strip_tags
+PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len) /* {{{ */
+{
+	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
+}
+/* }}} */
 
-	A simple little state-machine to strip out html and php tags
-
+/* {{{ php_strip_tags
+ 
+	A simple little state-machine to strip out html and php tags 
+	
 	State 0 is the output state, State 1 means we are inside a
 	normal html tag and state 2 means we are inside a php tag.
 
@@ -6256,262 +4239,10 @@ int php_tag_find(char *tag, int len, char *set) {
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-/* {{{ php_u_strip_tags
- */
-PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, int allow_len TSRMLS_DC)
-{
-	UChar *tbuf = NULL, *tp = NULL;
-	UChar *buf, *rp;
-	int32_t idx = 0, tmp, codepts;
-	UChar32 ch, next, prev1, prev2, last, doctype[6];
-	int br = 0, depth = 0, state = 0, i;
-	UChar in_q = 0;
-
-	if (stateptr)
-		state = *stateptr;
-
-	buf = eustrndup(rbuf, len);
-	rp = rbuf;
-	if (allow_len != 0) {
-		allow = php_u_strtolower(allow, &allow_len, UG(default_locale));
-		tbuf = eumalloc(PHP_TAG_BUF_SIZE+1);
-		tp = tbuf;
-	}
-
-	last = 0x00;
-	ch = prev1 = prev2 = next = -1;
-	codepts = 0;
-	while (idx < len) {
-		prev2 = prev1; prev1 = ch;
-		U16_NEXT(buf, idx, len, ch);
-		codepts++;
-
-		switch (ch) {
-		case 0x00: /* '\0' */
-			break;
-
-		case 0x3C: /* '<' */
-			if (in_q) {
-				break;
-			}
-			U16_GET(buf, 0, idx, len, next);
-			if (u_isWhitespace(next) == TRUE) {
-				goto reg_u_char;
-			}
-			if (state == 0) {
-				last = 0x3C;
-				state = 1;
-				if (allow_len) {
-					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-					*(tp++) = ch;
-				}
-			} else if (state == 1) {
-				depth++;
-			}
-			break;
-
-		case 0x28: /* '(' */
-			if (state == 2) {
-				if (last != 0x22 && last != 0x27) { /* '"' & '\'' */
-					last = 0x28;
-					br++;
-				}
-			} else if (allow_len && state == 1) {
-				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-				*(tp++) = ch;
-			} else if (state == 0) {
-				*(rp++) = ch;
-			}
-			break;
-
-		case 0x29: /* ')' */
-			if (state == 2) {
-				if (last != 0x22 && last != 0x27) { /* '"' & '\'' */
-					last = ch;
-					br--;
-				}
-			} else if (allow_len && state == 1) {
-				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-				*(tp++) = ch;
-			} else if (state == 0) {
-				*(rp++) = ch;
-			}
-			break;
-
-		case 0x3E: /* '>' */
-			if (depth) {
-				depth--;
-				break;
-			}
-
-			if (in_q) {
-				break;
-			}
-			
-			switch (state) {
-			case 1: /* HTML/XML */
-				last = ch;
-				in_q = state = 0;
-				if (allow_len) {
-					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-					*(tp++) = ch;
-					*(tp) = 0;
-					if (php_u_tag_find(tbuf, tp-tbuf, allow, allow_len)) {
-						u_memcpy(rp, tbuf, tp-tbuf);
-						rp += tp-tbuf;
-					}
-					tp = tbuf;
-				}
-				break;
-
-			case 2: /* PHP */
-				if (!br && last != 0x22 && prev1 == 0x3F) { /* '"' & '?' */
-					in_q = state = 0;
-					tp = tbuf;
-				}
-				break;
-
-			case 3:
-				in_q = state = 0;
-				tp = tbuf;
-				break;
-
-			case 4: /* JavaScript/CSS/etc... */
-				if (codepts >= 2 && prev1 == 0x2D && prev2 == 0x2D) { /* '-' */
-					in_q = state = 0;
-					tp = tbuf;
-				}
-				break;
-
-			default:
-				*(rp++) = ch;
-				break;
-			}
-			break;
-
-		case 0x22: /* '"' */
-		case 0x27: /* '\'' */
-			if (state == 4){
-				/* Inside <!-- comment --> */
-				break;
-			} else if (state == 2 && prev1 != 0x5C) { /* '\\' */
-				if (last == ch) {
-					last = 0x00;
-				} else if (last != 0x5C) {
-					last = ch;
-				}
-			} else if (state == 0) {
-				*(rp++) = ch;
-			} else if (allow_len && state == 1) {
-				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-				*(tp++) = ch;
-			}
-			if (state && (state ==1 || prev1 != 0x5C /*'\\'*/) && (!in_q || ch == in_q)) {
-				if (in_q) {
-					in_q = 0;
-				} else {
-					in_q = ch;
-				}
-			}
-			break;
-
-		case 0x21: /* '!' */
-			/* JavaScript & Other HTML scripting languages */
-			if (state == 1 && prev1 == 0x3C) { /* '<' */
-				state = 3;
-				last = ch;
-			} else {
-				if (state == 0) {
-					*(rp++) = ch;
-				} else if (allow_len && state == 1) {
-					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-					*(tp++) = ch;
-				}
-			}
-			break;
-
-		case 0x2D: /* '-' */
-			if (state == 3 && codepts >= 2 && prev1 == 0x2D && prev2 == 0x21) { /* '-' & '!' */
-				state = 4;
-			} else {
-				goto reg_u_char;
-			}
-			break;
-
-		case 0x3F: /* '?' */
-			if (state == 1 && prev1 == 0x3C) { /* '<' */
-				br = 0;
-				state = 2;
-				break;
-			}
-
-		case 'E':
-		case 'e':
-			/* !DOCTYPE exception */
-			if (state==3 && codepts > 6) {
-				tmp = idx;
-				for (i = 0 ; i < 6 ; i++) {
-					U16_PREV(buf, 0, tmp, doctype[i]);
-				}
-				if (u_tolower(doctype[0])=='p' && u_tolower(doctype[1])=='y' &&
-					u_tolower(doctype[2])=='t' && u_tolower(doctype[3])=='c' &&
-					u_tolower(doctype[4])=='o' && u_tolower(doctype[5])=='d') {
-					state = 1;
-					break;
-				}
-			}
-			/* fall-through */
-
-		case 'l':
-		case 'L':
-
-			/* swm: If we encounter '<?xml' then we shouldn't be in
-			 * state == 2 (PHP). Switch back to HTML.
-			 */
-
-			if (state == 2 && codepts > 2 && (prev1 == 'm' || prev1 == 'M') && (prev2 == 'x' || prev2 == 'X')) {
-				state = 1;
-				break;
-			}
-			/* fall-through */
-
-		default:
-reg_u_char:
-			if (state == 0) {
-				rp += zend_codepoint_to_uchar(ch, rp);
-			} else if (allow_len && state == 1) {
-				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
-				tp += zend_codepoint_to_uchar(ch, tp);
-			}
-			break;
-		}
-	}
-
-	*rp = 0;
-	efree(buf);
-	if (allow_len) {
-		efree(tbuf);
-		efree(allow);
-	}
-	if (stateptr)
-		*stateptr = state;
-
-	return (int)(rp-rbuf);
-}
-/* }}} */
-
-PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len) /* {{{ */
-{
-	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
-}
-/* }}} */
-
-/* {{{ php_strip_tags
- */
 PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow, int allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
-	int br, i=0, depth=0, in_q=0;
+	int br, i=0, depth=0, in_q = 0;
 	int state = 0, pos;
 
 	if (stateptr)
@@ -6552,7 +4283,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 							tp = tbuf + pos;
 						}
 						*(tp++) = '<';
-					}
+				 	}
 				} else if (state == 1) {
 					depth++;
 				}
@@ -6574,7 +4305,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				} else if (state == 0) {
 					*(rp++) = c;
 				}
-				break;
+				break;	
 
 			case ')':
 				if (state == 2) {
@@ -6592,7 +4323,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				} else if (state == 0) {
 					*(rp++) = c;
 				}
-				break;
+				break;	
 
 			case '>':
 				if (depth) {
@@ -6623,14 +4354,14 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 							tp = tbuf;
 						}
 						break;
-
+						
 					case 2: /* PHP */
 						if (!br && lc != '\"' && *(p-1) == '?') {
 							in_q = state = 0;
 							tp = tbuf;
 						}
 						break;
-
+						
 					case 3:
 						in_q = state = 0;
 						tp = tbuf;
@@ -6678,10 +4409,10 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					}
 				}
 				break;
-
-			case '!':
+			
+			case '!': 
 				/* JavaScript & Other HTML scripting languages */
-				if (state == 1 && *(p-1) == '<') {
+				if (state == 1 && *(p-1) == '<') { 
 					state = 3;
 					lc = c;
 				} else {
@@ -6708,7 +4439,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 
 			case '?':
 
-				if (state == 1 && *(p-1) == '<') {
+				if (state == 1 && *(p-1) == '<') { 
 					br=0;
 					state=2;
 					break;
@@ -6753,12 +4484,12 @@ reg_char:
 						tp = tbuf + pos;
 					}
 					*(tp++) = c;
-				}
+				} 
 				break;
 		}
 		c = *(++p);
 		i++;
-	}
+	}	
 	if (rp < rbuf + len) {
 		*rp = '\0';
 	}
@@ -6772,240 +4503,143 @@ reg_char:
 }
 /* }}} */
 
-/* {{{ proto array str_getcsv(string input[, string delimiter[, string enclosure[, string escape]]]) U
+/* {{{ proto array str_getcsv(string input[, string delimiter[, string enclosure[, string escape]]])
 Parse a CSV string into an array */
 PHP_FUNCTION(str_getcsv)
 {
-	zend_uchar str_type, delim_type = IS_STRING, enc_type = IS_STRING, esc_type = IS_STRING;
-	zstr str, delim = ZSTR(","), enc = ZSTR("\""), esc = ZSTR("\\");
-	int str_len, delim_len = 1, enc_len = 1, esc_len = 1;
+	char *str, delim = ',', enc = '"', esc = '\\';
+	char *delim_str = NULL, *enc_str = NULL, *esc_str = NULL;
+	int str_len = 0, delim_len = 0, enc_len = 0, esc_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|TTT",
-			&str,   &str_len,   &str_type,
-			&delim, &delim_len, &delim_type,
-			&enc,   &enc_len,   &enc_type,
-			&esc,   &esc_len,   &esc_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss", &str, &str_len, &delim_str, &delim_len, 
+		&enc_str, &enc_len, &esc_str, &esc_len) == FAILURE) {
 		return;
 	}
+	
+	delim = delim_len ? delim_str[0] : delim;
+	enc = enc_len ? enc_str[0] : enc;
+	esc = esc_len ? esc_str[0] : esc;
 
-	if (str_type == IS_UNICODE) {
-		UChar udelim = ',', uenc = '"', uesc = '\\';
-
-		/* When a unicode string is passed for the main argument,
-		 * the 'T' specifiers will atuomatically align any remaining
-		 * arguments that are actually passed to be Unicode as well.
-		 *
-		 * However, since they are optional, they may have reached
-		 * this point still in IS_STRING form (because they wern't passed).
-		 *
-		 * The "clean" way to handle this would be to use zend_string_to_unicode()
-		 * to convert the binary defaults to their unicode counterparts.
-		 *
-		 * However, since these are simple fixed constants, it's cheaper
-		 * to declare them as UChars locally and point at these versions.
-		 */
-		if (delim_type == IS_STRING) {
-			delim.u = &udelim;
-			delim_len = 1;
-		}
-		if (enc_type == IS_STRING) {
-			enc.u = &uenc;
-			enc_len = 1;
-		}
-		if (esc_type == IS_STRING) {
-			esc.u = &uesc;
-			esc_len = 1;
-		}
-
-		php_u_fgetcsv(NULL, delim.u, delim_len, enc.u, enc_len, esc.u, esc_len, str.u, str_len, return_value TSRMLS_CC);
-	} else {
-		php_fgetcsv_ex(NULL, delim.s, delim_len, enc.s, enc_len, esc.s, esc_len, str.s, str_len, return_value TSRMLS_CC);
-	}
+	php_fgetcsv(NULL, delim, enc, esc, str_len, str, return_value TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto string str_repeat(string input, int mult) U
+/* {{{ proto string str_repeat(string input, int mult)
    Returns the input string repeat mult times */
 PHP_FUNCTION(str_repeat)
 {
-	void		*input_str;		/* Input string */
-	int			input_str_len;
-	int			input_str_chars;
-	zend_uchar	input_str_type;
-	long		mult;			/* Multiplier */
-	void		*result;		/* Resulting string */
-	size_t			result_len;		/* Length of the resulting string, in bytes */
-	size_t			result_chars;	/* Chars/UChars in resulting string */
-
-	if ( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl", &input_str,
-							   &input_str_chars, &input_str_type, &mult) == FAILURE ) {
+	char		*input_str;		/* Input string */
+	int 		input_len;
+	long 		mult;			/* Multiplier */
+	char		*result;		/* Resulting string */
+	size_t		result_len;		/* Length of the resulting string */
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &input_str, &input_len, &mult) == FAILURE) {
 		return;
 	}
 
-	if ( mult < 0 ) {
+	if (mult < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument has to be greater than or equal to 0");
 		return;
 	}
 
-	/* Don't waste our time if input is empty or if the multiplier is zero */
-	if ( input_str_chars == 0 || mult == 0 ) {
-		if ( input_str_type == IS_UNICODE ) {
-			RETURN_UNICODEL(USTR_MAKE(""), 0, 0);
-		} else {
-			RETURN_STRINGL("", 0, 1);
-		}
-	}
+	/* Don't waste our time if it's empty */
+	/* ... or if the multiplier is zero */
+	if (input_len == 0 || mult == 0)
+		RETURN_EMPTY_STRING();
 
-	/* Initialize the result string */
-	result_chars = (input_str_chars * mult) + 1;
-	if ( input_str_type == IS_UNICODE ) {
-		input_str_len = UBYTES(input_str_chars);
-		result_len = UBYTES(result_chars);
-		result = (char *)safe_emalloc(UBYTES(input_str_chars), UBYTES(mult), UBYTES(1));
-	} else {
-		input_str_len = input_str_chars;
-		result_len = result_chars;
-		result = (char *)safe_emalloc(input_str_chars, mult, 1);
-	}
-
+	/* Initialize the result string */	
+	result_len = input_len * mult;
+	result = (char *)safe_emalloc(input_len, mult, 1);
+	
 	/* Heavy optimization for situations where input string is 1 byte long */
-	if ( input_str_len == 1 ) {
-		memset(result, *((char *)input_str), mult);
+	if (input_len == 1) {
+		memset(result, *(input_str), mult); 
 	} else {
 		char *s, *e, *ee;
 		int l=0;
-		memcpy(result, input_str, input_str_len);
+		memcpy(result, input_str, input_len);
 		s = result;
-		e = (char *) result + input_str_len;
-		ee = (char *) result + result_len;
-
-		while ( e < ee ) {
+		e = result + input_len;
+		ee = result + result_len;
+		
+		while (e<ee) {
 			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
 			memmove(e, s, l);
 			e += l;
 		}
 	}
 
-	if ( input_str_type == IS_UNICODE ) {
-		*(((UChar *)result)+result_chars-1) = 0;
-		RETURN_UNICODEL((UChar *)result, result_chars-1, 0);
-	} else {
-		*(((char *)result)+result_chars-1) = '\0';
-		RETURN_STRINGL((char *)result, result_chars-1, 0);
-	}
+	result[result_len] = '\0';
+	
+	RETURN_STRINGL(result, result_len, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed count_chars(string input [, int mode]) U
+/* {{{ proto mixed count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
-	zstr input;
-	int input_len;
-	zend_uchar type;
-	long mode = 0;
+	char *input;
 	int chars[256];
-	HashTable uchars;
-	UChar32 cp;
-	int *uchar_cnt_ptr, uchar_cnt;
+	long mymode=0;
 	unsigned char *buf;
-	int inx;
+	int len, inx;
 	char retstr[256];
 	int retlen=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &input, &input_len,
-							  &type, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &input, &len, &mymode) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
-		if (mode < 0 || mode > 4) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown mode");
-			RETURN_FALSE;
-		}
-		if (mode != 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only mode=1 is supported with Unicode strings");
-			RETURN_FALSE;
-		}
+	if (mymode < 0 || mymode > 4) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown mode");
+		RETURN_FALSE;
 	}
 
-	if (type == IS_UNICODE) {
-		UChar buf[3];
-		int buf_len;
+	buf = (unsigned char *) input;
+	memset((void*) chars, 0, sizeof(chars));
 
-		zend_hash_init(&uchars, 0, NULL, NULL, 0);
+	while (len > 0) {
+		chars[*buf]++;
+		buf++;
+		len--;
+	}
 
-		inx = 0;
-		while (inx < input_len) {
-			U16_NEXT_UNSAFE(input.u, inx, cp);
-			if (zend_hash_index_find(&uchars, cp, (void**)&uchar_cnt_ptr) == SUCCESS) {
-				(*uchar_cnt_ptr)++;
-			} else {
-				uchar_cnt = 1;
-				zend_hash_index_update(&uchars, cp, &uchar_cnt, sizeof(int), NULL);
-			}
-		}
+	if (mymode < 3) {
+		array_init(return_value);
+	}
 
-		if (mode < 3) {
-			array_init(return_value);
-		}
-
-		for (zend_hash_internal_pointer_reset(&uchars);
-			 zend_hash_get_current_data(&uchars, (void**)&uchar_cnt_ptr) == SUCCESS;
-			 zend_hash_move_forward(&uchars)) {
-
-			zend_hash_get_current_key(&uchars, NULL, (ulong*)&cp, 0);
-
-			buf_len = zend_codepoint_to_uchar(cp, buf);
-			buf[buf_len] = 0;
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(buf), buf_len+1, *uchar_cnt_ptr);
-		}
-
-		zend_hash_destroy(&uchars);
-	} else {
-		buf = (unsigned char *) input.s;
-		memset((void*) chars, 0, sizeof(chars));
-
-		while (input_len > 0) {
-			chars[*buf]++;
-			buf++;
-			input_len--;
-		}
-
-		if (mode < 3) {
-			array_init(return_value);
-		}
-
-		for (inx = 0; inx < 256; inx++) {
-			switch (mode) {
-				case 0:
+	for (inx = 0; inx < 256; inx++) {
+		switch (mymode) {
+	 		case 0:
+				add_index_long(return_value, inx, chars[inx]);
+				break;
+	 		case 1:
+				if (chars[inx] != 0) {
 					add_index_long(return_value, inx, chars[inx]);
-					break;
-				case 1:
-					if (chars[inx] != 0) {
-						add_index_long(return_value, inx, chars[inx]);
-					}
-					break;
-				case 2:
-					if (chars[inx] == 0) {
-						add_index_long(return_value, inx, chars[inx]);
-					}
-					break;
-				case 3:
-					if (chars[inx] != 0) {
-						retstr[retlen++] = inx;
-					}
-					break;
-				case 4:
-					if (chars[inx] == 0) {
-						retstr[retlen++] = inx;
-					}
-					break;
-			}
+				}
+				break;
+  			case 2:
+				if (chars[inx] == 0) {
+					add_index_long(return_value, inx, chars[inx]);
+				}
+				break;
+	  		case 3:
+				if (chars[inx] != 0) {
+					retstr[retlen++] = inx;
+				}
+				break;
+  			case 4:
+				if (chars[inx] == 0) {
+					retstr[retlen++] = inx;
+				}
+				break;
 		}
-		if (mode >= 3 && mode <= 4) {
-			RETURN_STRINGL(retstr, retlen, 1);
-		}
+	}
+	
+	if (mymode >= 3 && mymode <= 4) {
+		RETURN_STRINGL(retstr, retlen, 1);
 	}
 }
 /* }}} */
@@ -7014,24 +4648,20 @@ PHP_FUNCTION(count_chars)
  */
 static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
-	zstr s1, s2;
+	char *s1, *s2;
 	int s1_len, s2_len;
-	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
-							  &type, &s2, &s2_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &s1, &s1_len, &s2, &s2_len) == FAILURE) {
 		return;
 	}
 
-	if (type == IS_UNICODE) {
-		RETURN_LONG(u_strnatcmp_ex(s1.u, s1_len, s2.u, s2_len, fold_case));
-	} else {
-		RETURN_LONG(strnatcmp_ex(s1.s, s1_len, s2.s, s2_len, fold_case));
-	}
+	RETURN_LONG(strnatcmp_ex(s1, s1_len,
+							 s2, s2_len,
+							 fold_case));
 }
 /* }}} */
 
-/* {{{ proto int strnatcmp(string s1, string s2) U
+/* {{{ proto int strnatcmp(string s1, string s2)
    Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)
 {
@@ -7039,7 +4669,7 @@ PHP_FUNCTION(strnatcmp)
 }
 /* }}} */
 
-/* {{{ proto array localeconv(void) U
+/* {{{ proto array localeconv(void)
    Returns numeric formatting information based on the current locale */
 PHP_FUNCTION(localeconv)
 {
@@ -7050,8 +4680,6 @@ PHP_FUNCTION(localeconv)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 
 	MAKE_STD_ZVAL(grouping);
 	MAKE_STD_ZVAL(mon_grouping);
@@ -7065,7 +4693,7 @@ PHP_FUNCTION(localeconv)
 		struct lconv currlocdata;
 
 		localeconv_r( &currlocdata );
-
+   
 		/* Grab the grouping data out of the array */
 		len = strlen(currlocdata.grouping);
 
@@ -7080,22 +4708,22 @@ PHP_FUNCTION(localeconv)
 			add_index_long(mon_grouping, i, currlocdata.mon_grouping[i]);
 		}
 
-		add_ascii_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
-		add_ascii_assoc_string(return_value, "thousands_sep",     currlocdata.thousands_sep,     1);
-		add_ascii_assoc_string(return_value, "int_curr_symbol",   currlocdata.int_curr_symbol,   1);
-		add_ascii_assoc_string(return_value, "currency_symbol",   currlocdata.currency_symbol,   1);
-		add_ascii_assoc_string(return_value, "mon_decimal_point", currlocdata.mon_decimal_point, 1);
-		add_ascii_assoc_string(return_value, "mon_thousands_sep", currlocdata.mon_thousands_sep, 1);
-		add_ascii_assoc_string(return_value, "positive_sign",     currlocdata.positive_sign,     1);
-		add_ascii_assoc_string(return_value, "negative_sign",     currlocdata.negative_sign,     1);
-		add_ascii_assoc_long(  return_value, "int_frac_digits",   currlocdata.int_frac_digits     );
-		add_ascii_assoc_long(  return_value, "frac_digits",       currlocdata.frac_digits         );
-		add_ascii_assoc_long(  return_value, "p_cs_precedes",     currlocdata.p_cs_precedes       );
-		add_ascii_assoc_long(  return_value, "p_sep_by_space",    currlocdata.p_sep_by_space      );
-		add_ascii_assoc_long(  return_value, "n_cs_precedes",     currlocdata.n_cs_precedes       );
-		add_ascii_assoc_long(  return_value, "n_sep_by_space",    currlocdata.n_sep_by_space      );
-		add_ascii_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn         );
-		add_ascii_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn         );
+		add_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
+		add_assoc_string(return_value, "thousands_sep",     currlocdata.thousands_sep,     1);
+		add_assoc_string(return_value, "int_curr_symbol",   currlocdata.int_curr_symbol,   1);
+		add_assoc_string(return_value, "currency_symbol",   currlocdata.currency_symbol,   1);
+		add_assoc_string(return_value, "mon_decimal_point", currlocdata.mon_decimal_point, 1);
+		add_assoc_string(return_value, "mon_thousands_sep", currlocdata.mon_thousands_sep, 1);
+		add_assoc_string(return_value, "positive_sign",     currlocdata.positive_sign,     1);
+		add_assoc_string(return_value, "negative_sign",     currlocdata.negative_sign,     1);
+		add_assoc_long(  return_value, "int_frac_digits",   currlocdata.int_frac_digits     );
+		add_assoc_long(  return_value, "frac_digits",       currlocdata.frac_digits         );
+		add_assoc_long(  return_value, "p_cs_precedes",     currlocdata.p_cs_precedes       );
+		add_assoc_long(  return_value, "p_sep_by_space",    currlocdata.p_sep_by_space      );
+		add_assoc_long(  return_value, "n_cs_precedes",     currlocdata.n_cs_precedes       );
+		add_assoc_long(  return_value, "n_sep_by_space",    currlocdata.n_sep_by_space      );
+		add_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn         );
+		add_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn         );
 	}
 #else
 	/* Ok, it doesn't look like we have locale info floating around, so I guess it
@@ -7104,30 +4732,30 @@ PHP_FUNCTION(localeconv)
 	add_index_long(grouping, 0, -1);
 	add_index_long(mon_grouping, 0, -1);
 
-	add_ascii_assoc_string(return_value, "decimal_point",     "\x2E", 1);
-	add_ascii_assoc_string(return_value, "thousands_sep",     "",     1);
-	add_ascii_assoc_string(return_value, "int_curr_symbol",   "",     1);
-	add_ascii_assoc_string(return_value, "currency_symbol",   "",     1);
-	add_ascii_assoc_string(return_value, "mon_decimal_point", "\x2E", 1);
-	add_ascii_assoc_string(return_value, "mon_thousands_sep", "",     1);
-	add_ascii_assoc_string(return_value, "positive_sign",     "",     1);
-	add_ascii_assoc_string(return_value, "negative_sign",     "",     1);
-	add_ascii_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "frac_digits",       CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX );
-	add_ascii_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX );
+	add_assoc_string(return_value, "decimal_point",     "\x2E", 1);
+	add_assoc_string(return_value, "thousands_sep",     "",     1);
+	add_assoc_string(return_value, "int_curr_symbol",   "",     1);
+	add_assoc_string(return_value, "currency_symbol",   "",     1);
+	add_assoc_string(return_value, "mon_decimal_point", "\x2E", 1);
+	add_assoc_string(return_value, "mon_thousands_sep", "",     1);
+	add_assoc_string(return_value, "positive_sign",     "",     1);
+	add_assoc_string(return_value, "negative_sign",     "",     1);
+	add_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX );
+	add_assoc_long(  return_value, "frac_digits",       CHAR_MAX );
+	add_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX );
+	add_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX );
+	add_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX );
+	add_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX );
+	add_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX );
+	add_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX );
 #endif
 
-	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "grouping", 9, &grouping, sizeof(zval *), NULL);
-	zend_ascii_hash_update(Z_ARRVAL_P(return_value), "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
+	zend_hash_update(Z_ARRVAL_P(return_value), "grouping", 9, &grouping, sizeof(zval *), NULL);
+	zend_hash_update(Z_ARRVAL_P(return_value), "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
 }
 /* }}} */
 
-/* {{{ proto int strnatcasecmp(string s1, string s2) U
+/* {{{ proto int strnatcasecmp(string s1, string s2)
    Returns the result of case-insensitive string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcasecmp)
 {
@@ -7135,24 +4763,18 @@ PHP_FUNCTION(strnatcasecmp)
 }
 /* }}} */
 
-/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]]) U
+/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]])
    Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
-	zstr haystack, needle;
-	int haystack_len, needle_len;
-	zend_uchar haystack_type, needle_type;
+	char *haystack, *needle;
 	long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
-	zstr p, endp, tmp;
-	int32_t i = 0, j;
-	char cmp;
+	int haystack_len, needle_len;
+	char *p, *endp, cmp;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "TT|ll",
-							  &haystack, &haystack_len, &haystack_type,
-							  &needle, &needle_len, &needle_type,
-							  &offset, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &haystack, &haystack_len, &needle, &needle_len, &offset, &length) == FAILURE) {
 		return;
 	}
 
@@ -7160,229 +4782,145 @@ PHP_FUNCTION(substr_count)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty substring");
 		RETURN_FALSE;
 	}
+	
+	p = haystack;
+	endp = p + haystack_len;
 
-	p.v = haystack.v;
-	if (haystack_type == IS_UNICODE) {
-		endp.u = haystack.u + haystack_len;
-	} else {
-		endp.s = haystack.s + haystack_len;
+	if (offset < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0");
+		RETURN_FALSE;		
 	}
 
-	if (ac > 2) {
-		if (offset < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset should be greater than or equal to 0");
-			RETURN_FALSE;
-		}
-		if (haystack_type == IS_UNICODE) {
-			int off = offset;
-			while(off > 0) {
-				U16_FWD_1(haystack.u, i, offset);
-				if(i > haystack_len) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
-					RETURN_FALSE;
-				}
-				off--;
-			}
-			p.u = haystack.u + i;
-		} else {
-			p.s = haystack.s + offset;
-		}
-		if (p.v > endp.v) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
-			RETURN_FALSE;
-		}
-		if (ac == 4) {
-			if (length < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be greater than 0");
-				RETURN_FALSE;
-			}
-			if (haystack_type == IS_UNICODE) {
-				j = i;
-				i = 0;
-				U16_FWD_N(p.u, i, haystack_len-j, length);
-				tmp.u = p.u + i;
-			} else {
-				tmp.s = p.s + length;
-			}
-			if (tmp.v > endp.v) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length", length);
-				RETURN_FALSE;
-			} else {
-				endp.v = tmp.v;
-			}
-		}
+	if (offset > haystack_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
+		RETURN_FALSE;		
 	}
+	p += offset;
 
-	if (haystack_type == IS_UNICODE) {
-		while ((p.u = zend_u_memnstr(p.u, needle.u, needle_len, endp.u)) != NULL) {
-			/*(UChar *)p += needle_len; // GCC 4.0.0 cannot compile this */
-			p.u = p.u + needle_len;
+	if (ac == 4) {
+
+		if (length <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length should be greater than 0");
+			RETURN_FALSE;		
+		}
+		if (length > (haystack_len - offset)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length", length);
+			RETURN_FALSE;
+		}
+		endp = p + length;
+	}
+	
+	if (needle_len == 1) {
+		cmp = needle[0];
+
+		while ((p = memchr(p, cmp, endp - p))) {
 			count++;
+			p++;
 		}
 	} else {
-		if (needle_len == 1) {
-			cmp = needle.s[0];
-			while ((p.s = memchr(p.s, cmp, endp.s - p.s))) {
-				count++;
-				p.s++;
-			}
-		} else {
-			while ((p.s = php_memnstr(p.s, needle.s, needle_len, endp.s))) {
-				/*(char *)p += needle_len; // GCC 4.0.0 cannot compile this */
-				p.s += needle_len;
-				count++;
-			}
+		while ((p = php_memnstr(p, needle, needle_len, endp))) {
+			p += needle_len;
+			count++;
 		}
 	}
 
 	RETURN_LONG(count);
 }
-/* }}} */
+/* }}} */	
 
-/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]]) U
+/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]])
    Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
 {
 	/* Input arguments */
-	zstr    input;		/* Input string */
-	long    pad_length;	/* Length to pad to, in codepoints for Unicode */
-	zstr    padstr;		/* Padding string */
-	long    pad_type;	/* Padding type (left/right/both) */
-	int input_len, padstr_len; /* Lengths in code units for Unicode */
-	zend_uchar input_type;
-
+	char *input;				/* Input string */
+	int  input_len;
+	long pad_length;			/* Length to pad to */
+	
 	/* Helper variables */
-	int input_codepts;	/* Number of codepts in Unicode input */
-	int	num_pad_chars;	/* Number of padding characters (total - input size) */
-	zstr   result;	    /* Resulting string */
-	int32_t	result_len = 0;	/* Length of the resulting string */
-	int32_t	i, j, left_pad=0, right_pad=0;
-	UChar32 ch;
+	int	   num_pad_chars;		/* Number of padding characters (total - input size) */
+	char  *result = NULL;		/* Resulting string */
+	int	   result_len = 0;		/* Length of the resulting string */
+	char  *pad_str_val = " ";	/* Pointer to padding string */
+	int    pad_str_len = 1;		/* Length of the padding string */
+	long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	int	   i, left_pad=0, right_pad=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Tl|Tl",
-							  &input, &input_len, &input_type, &pad_length,
-							  &padstr, &padstr_len, &input_type, &pad_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|sl", &input, &input_len, &pad_length,
+																  &pad_str_val, &pad_str_len, &pad_type_val) == FAILURE) {
 		return;
 	}
 
-	if (input_type == IS_UNICODE) {
-		/* For Unicode, num_pad_chars/pad_length is number of codepoints */
-		i = 0; input_codepts = 0;
-		input_codepts = u_countChar32(input.u, input_len);
-		num_pad_chars = pad_length - input_codepts;
-	} else {
-		num_pad_chars = pad_length - input_len;
-	}
+	num_pad_chars = pad_length - input_len;
+
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length < 0 || num_pad_chars < 0) {
-		RETURN_ZSTRL(input_type, input, input_len, 1);
+	if (pad_length <= 0 || num_pad_chars <= 0) {
+		RETURN_STRINGL(input, input_len, 1);
 	}
 
-	/* Setup the padding string values if NOT specified. */
-	if (ZEND_NUM_ARGS() > 2) {
-		if (padstr_len == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty");
-			return;
-		}
-		if (ZEND_NUM_ARGS() > 3) {
-			if (pad_type < STR_PAD_LEFT || pad_type > STR_PAD_BOTH) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
-				return;
-			}
-		} else {
-			pad_type = STR_PAD_RIGHT;
-		}
-	} else {
-		if (input_type == IS_UNICODE) {
-			padstr.u = USTR_MAKE(" ");
-		} else {
-			padstr.s = " ";
-		}
-		padstr_len = 1;
-		pad_type = STR_PAD_RIGHT;
+	if (pad_str_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty");
+		return;
+	}
+	
+	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
+		return;
 	}
 
-	if (input_type == IS_UNICODE) {
-		result.u = eumalloc(input_len + num_pad_chars*2 + 1);
-	} else {
-		result.s = emalloc(input_len + num_pad_chars + 1);
-	}
+	result = (char *)emalloc(input_len + num_pad_chars + 1);
 
 	/* We need to figure out the left/right padding lengths. */
-	switch (pad_type) {
+	switch (pad_type_val) {
 		case STR_PAD_RIGHT:
 			left_pad = 0;
 			right_pad = num_pad_chars;
 			break;
+
 		case STR_PAD_LEFT:
 			left_pad = num_pad_chars;
 			right_pad = 0;
 			break;
+
 		case STR_PAD_BOTH:
 			left_pad = num_pad_chars / 2;
 			right_pad = num_pad_chars - left_pad;
 			break;
 	}
 
-	/* Pad left, copy input, pad right, terminate */
-	if (input_type == IS_UNICODE) {
-		j = 0;
-		for (i = 0; i < left_pad; i++) {
-			if (j >= padstr_len) {
-				j = 0;
-			}
-			U16_NEXT(padstr.u, j, padstr_len, ch);
-			result_len += zend_codepoint_to_uchar(ch, result.u + result_len);
-		}
-		memcpy(result.u + result_len, input.u, UBYTES(input_len));
-		result_len += input_len;
-		j = 0;
-		for (i = 0; i < right_pad; i++) {
-			if (j >= padstr_len) {
-				j = 0;
-			}
-			U16_NEXT(padstr.u, j, padstr_len, ch);
-			result_len += zend_codepoint_to_uchar(ch, result.u + result_len);
-		}
-		result.u[result_len] = 0;
-		result.u = eurealloc(result.u, result_len+1);
-	} else {
-		for (i = 0; i < left_pad; i++)
-			result.s[result_len++] = padstr.s[i % padstr_len];
-		memcpy(result.s + result_len, input.s, input_len);
-		result_len += input_len;
-		for (i = 0; i < right_pad; i++)
-			result.s[result_len++] = padstr.s[i % padstr_len];
-		result.s[result_len] = '\0';
-	}
+	/* First we pad on the left. */
+	for (i = 0; i < left_pad; i++)
+		result[result_len++] = pad_str_val[i % pad_str_len];
 
-	if (input_type == IS_UNICODE && ZEND_NUM_ARGS() < 3) {
-			efree(padstr.u);
-	}
-	RETURN_ZSTRL(input_type, result, result_len, 0);
+	/* Then we copy the input string. */
+	memcpy(result + result_len, input, input_len);
+	result_len += input_len;
+
+	/* Finally, we pad on the right. */
+	for (i = 0; i < right_pad; i++)
+		result[result_len++] = pad_str_val[i % pad_str_len];
+
+	result[result_len] = '\0';
+
+	RETURN_STRINGL(result, result_len, 0);
 }
 /* }}} */
-
-/* {{{ proto mixed sscanf(string str, string format [, string ...]) U
+   
+/* {{{ proto mixed sscanf(string str, string format [, string ...])
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
 	zval ***args = NULL;
-	zstr str, format;
+	char *str, *format;
 	int str_len, format_len, result, num_args = 0;
-	zend_uchar str_type, format_type;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT*", &str, &str_len, &str_type, 
-		&format, &format_len, &format_type, &args, &num_args) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss*", &str, &str_len, &format, &format_len, 
+		&args, &num_args) == FAILURE) {
 		return;
 	}
-
-	if (str_type == IS_UNICODE) {
-		result = php_u_sscanf_internal(str.u, format.u, num_args, args, 0, &return_value TSRMLS_CC);
-	} else {
-		result = php_sscanf_internal(str.s, format.s, num_args, args, 0, &return_value TSRMLS_CC);
-	}
+	
+	result = php_sscanf_internal(str, format, num_args, args, 0, &return_value TSRMLS_CC);
 	
 	if (args) {
 		efree(args);
@@ -7396,169 +4934,112 @@ PHP_FUNCTION(sscanf)
 
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
-U_STRING_DECL(u_rot13_from, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", sizeof(rot13_from)-1);
-U_STRING_DECL(u_rot13_to, "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM", sizeof(rot13_to)-1);
 
-/* {{{ proto string str_rot13(string str) U
+/* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */
 PHP_FUNCTION(str_rot13)
 {
-	static int did_init_strings = FALSE;
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
+	char *arg;
+	int arglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arglen) == FAILURE) {
 		return;
 	}
 
-	if (!did_init_strings) {
-		U_STRING_INIT(u_rot13_from, rot13_from, sizeof(rot13_from)-1);
-		U_STRING_INIT(u_rot13_to, rot13_to, sizeof(rot13_to)-1);
-		did_init_strings = TRUE;
-	}
+	RETVAL_STRINGL(arg, arglen, 1);
 
-
-	if (str_type == IS_UNICODE) {
-		RETVAL_UNICODEL(str.u, str_len, 0);
-		Z_USTRVAL_P(return_value) = php_u_strtr(Z_USTRVAL_P(return_value), Z_USTRLEN_P(return_value), u_rot13_from, 52, u_rot13_to, 52, 52, &Z_USTRLEN_P(return_value) TSRMLS_CC);
-	} else {
-		RETVAL_STRINGL(str.s, str_len, 1);
-		php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
-	}
+	php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
 }
 /* }}} */
 
-static void php_string_shuffle(zstr str, int len, zend_uchar str_type TSRMLS_DC) /* {{{ */
+static void php_string_shuffle(char *str, long len TSRMLS_DC) /* {{{ */
 {
-	int rnd_idx, n_left;
+	long n_elems, rnd_idx, n_left;
 	char temp;
-	UChar u_temp;
 	/* The implementation is stolen from array_data_shuffle       */
 	/* Thus the characteristics of the randomization are the same */
-
-	if (len <= 1) {
+	n_elems = len;
+	
+	if (n_elems <= 1) {
 		return;
 	}
 
-	n_left = len;
-
+	n_left = n_elems;
+	
 	while (--n_left) {
 		rnd_idx = php_rand(TSRMLS_C);
 		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
-		if (str_type == IS_UNICODE) {
-			if (rnd_idx != n_left) {
-				u_temp = str.u[n_left];
-				str.u[n_left] = str.u[rnd_idx];
-				str.u[rnd_idx] = u_temp;
-			}
-		} else {
-			if (rnd_idx != n_left) {
-				temp = str.s[n_left];
-				str.s[n_left] = str.s[rnd_idx];
-				str.s[rnd_idx] = temp;
-			}
+		if (rnd_idx != n_left) {
+			temp = str[n_left];
+			str[n_left] = str[rnd_idx];
+			str[rnd_idx] = temp;
 		}
 	}
 }
 /* }}} */
 
-/* {{{ proto void str_shuffle(string str) U
+/* {{{ proto void str_shuffle(string str)
    Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
-	zstr str;
-	int str_len;
-	zend_uchar str_type;
+	char *arg;
+	int arglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arglen) == FAILURE) {
 		return;
 	}
 
-	RETVAL_ZSTRL(str_type, str, str_len, 1);
-	if (Z_UNILEN_P(return_value) > 1) {
-		php_string_shuffle(Z_UNIVAL_P(return_value), Z_UNILEN_P(return_value), Z_TYPE_P(return_value) TSRMLS_CC);
+	RETVAL_STRINGL(arg, arglen, 1);
+	if (Z_STRLEN_P(return_value) > 1) { 
+		php_string_shuffle(Z_STRVAL_P(return_value), (long) Z_STRLEN_P(return_value) TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ php_u_str_word_count */
-static int php_u_str_word_count(UChar *str, int str_len, long type, UChar *char_list, int char_list_len, zval *return_value TSRMLS_DC)
+/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]])
+   	Counts the number of words inside a string. If format of 1 is specified,
+   	then the function will return an array containing all the words
+   	found inside the string. If format of 2 is specified, then the function
+   	will return an associated array where the position of the word is the key
+   	and the word itself is the value.
+   	
+   	For the purpose of this function, 'word' is defined as a locale dependent
+   	string containing alphabetic characters, which also may contain, but not start
+   	with "'" and "-" characters.
+*/
+PHP_FUNCTION(str_word_count)
 {
-	UChar *s, *buf;
-	UChar32 ch;
-	int ws, we, tmp, idx, last_idx;
-	int word_count = 0;
+	char *buf, *str, *char_list = NULL, *p, *e, *s, ch[256];
+	int str_len, char_list_len = 0, word_count = 0;
+	long type = 0;
 
-	if (char_list) {
-		char_list = eustrndup(char_list, char_list_len);
-		php_expand_uchar_range(&char_list, &char_list_len TSRMLS_CC);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &type, &char_list, &char_list_len) == FAILURE) {
+		return;
 	}
 
-	ws = idx = 0;
-	/* first character cannot be ' or -, unless explicitly allowed by the user */
-	if ((str[ws] == (UChar)0x27 /*'\''*/ && (!char_list || !u_memchr(char_list, 0x27 /*'\''*/, char_list_len))) ||
-		(str[ws] == (UChar)0x2d /*'-'*/  && (!char_list || !u_memchr(char_list, 0x2d /*'-'*/, char_list_len)))) {
-		ws++;
-		idx++;
-	}
-	/* last character cannot be -, unless explicitly allowed by the user */
-	if (str_len && str[str_len-1] == (UChar)0x2d /*'-'*/ &&
-		(!char_list || !u_memchr(char_list, 0x2d /*'-'*/, char_list_len))) {
-		str_len--;
-	}
-
-	last_idx = idx;
-	tmp = we = ws;
-	while (we < str_len) {
-		s = str + ws;
-		while (we < str_len) {
-			U16_NEXT(str, tmp, str_len, ch);
-			idx++;
-			if (!(u_isalpha(ch) || (char_list && u_memchr32(char_list, ch, char_list_len)) ||
-				  ch == (UChar32) 0x27 /*'\''*/ || ch == (UChar32) 0x2d /*'-'*/)) {
-				break;
+	switch(type) {
+		case 1:
+		case 2:
+			array_init(return_value);
+			if (!str_len) {
+				return;
 			}
-			we = tmp;
-		}
-		if (we > ws) {
-			switch (type)
-			{
-				case 1:
-					buf = eustrndup(s, (we-ws));
-					add_next_index_unicodel(return_value, buf, (we-ws), 0);
-					break;
-				case 2:
-					buf = eustrndup(s, (we-ws));
-					add_index_unicodel(return_value, last_idx, buf, we-ws, 0);
-					break;
-				default:
-					word_count++;
-					break;
+			break;
+		case 0:
+			if (!str_len) {
+				RETURN_LONG(0);
 			}
-		}
-		ws = we = tmp;
-		last_idx = idx;
+			/* nothing to be done */
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
+			RETURN_FALSE;
 	}
 
 	if (char_list) {
-		efree(char_list);
+		php_charmask((unsigned char *)char_list, char_list_len, ch TSRMLS_CC);
 	}
-
-	return word_count;
-}
-/* }}} */
-
-/* {{{ php_str_word_count */
-static int php_str_word_count(char *str, int str_len, long type, char *char_list, int char_list_len, zval *return_value TSRMLS_DC)
-{
-	char ch[256], *p, *e, *s, *buf;
-	int word_count = 0;
-
-	if (char_list) {
-		php_charmask((unsigned char*)char_list, char_list_len, ch TSRMLS_CC);
-	}
-
+	
 	p = str;
 	e = str + str_len;
 
@@ -7567,7 +5048,7 @@ static int php_str_word_count(char *str, int str_len, long type, char *char_list
 		p++;
 	}
 	/* last character cannot be -, unless explicitly allowed by the user */
-	if (str_len && *(e - 1) == '-' && (!char_list || !ch['-'])) {
+	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
 		e--;
 	}
 
@@ -7589,73 +5070,21 @@ static int php_str_word_count(char *str, int str_len, long type, char *char_list
 					break;
 				default:
 					word_count++;
-					break;
+					break;		
 			}
 		}
 		p++;
 	}
-
-	return word_count;
-}
-/* }}} */
-
-/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]]) U
-   	Counts the number of words inside a string. If format of 1 is specified,
-   	then the function will return an array containing all the words
-   	found inside the string. If format of 2 is specified, then the function
-   	will return an associated array where the position of the word is the key
-   	and the word itself is the value.
-
-   	For the purpose of this function, 'word' is defined as a locale dependent
-   	string containing alphabetic characters, which also may contain, but not start
-   	with "'" and "-" characters.
-*/
-PHP_FUNCTION(str_word_count)
-{
-	zstr str, char_list = NULL_ZSTR;
-	int str_len, char_list_len = 0, word_count = 0;
-	zend_uchar str_type;
-	long type = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|lT", &str, &str_len,
-							  &str_type, &type, &char_list, &char_list_len, &str_type) == FAILURE) {
-		return;
-	}
-
-	switch (type) {
-  		case 1:
-  		case 2:
-  			array_init(return_value);
-			if (!str_len) {
-				return;
-			}
-  			break;
-  		case 0:
-			if (!str_len) {
-				RETURN_LONG(0);
-			}
-  			break;
-  		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
-			RETURN_FALSE;
-			break;
-	}
-
-	if (str_type == IS_UNICODE) {
-		word_count = php_u_str_word_count(str.u, str_len, type, char_list.u, char_list_len, return_value TSRMLS_CC);
-	} else {
-		word_count = php_str_word_count(str.s, str_len, type, char_list.s, char_list_len, return_value TSRMLS_CC);
-	}
-
+	
 	if (!type) {
-		RETURN_LONG(word_count);
+		RETURN_LONG(word_count);		
 	}
 }
 
 /* }}} */
 
 #if HAVE_STRFMON
-/* {{{ proto string money_format(string format , float value) U
+/* {{{ proto string money_format(string format , float value)
    Convert monetary value(s) to string */
 PHP_FUNCTION(money_format)
 {
@@ -7690,24 +5119,22 @@ PHP_FUNCTION(money_format)
 	}
 	str[str_len] = 0;
 
-	RETURN_RT_STRINGL(erealloc(str, str_len + 1), str_len, ZSTR_AUTOFREE);
+	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
 }
 /* }}} */
 #endif
 
-/* {{{ proto array str_split(string str [, int split_length]) U
+/* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
-	zstr str;
+	char *str;
 	int str_len;
 	long split_length = 1;
 	char *p;
-	zend_uchar str_type;
 	int n_reg_segments;
-	int charsize = 1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &str, &str_len, &str_type, &split_length) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &split_length) == FAILURE) {
 		return;
 	}
 
@@ -7719,94 +5146,60 @@ PHP_FUNCTION(str_split)
 	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
 
 	if (split_length >= str_len) {
-		add_next_index_zstrl(return_value, str_type, str, str_len, 1);
+		add_next_index_stringl(return_value, str, str_len, 1);
 		return;
 	}
 
 	n_reg_segments = str_len / split_length;
-	p = str.s;
-	if (str_type == IS_UNICODE) {
-		charsize = 2;
-	}
+	p = str;
 
 	while (n_reg_segments-- > 0) {
-		add_next_index_zstrl(return_value, str_type, ZSTR(p), split_length, 1);
-		p += split_length * charsize;
+		add_next_index_stringl(return_value, p, split_length, 1);
+		p += split_length;
 	}
 
-	if (p != (str.s + str_len * charsize)) {
-		add_next_index_zstrl(return_value, str_type, ZSTR(p), (str.s + str_len * charsize - p)/charsize, 1);
+	if (p != (str + str_len)) {
+		add_next_index_stringl(return_value, p, (str + str_len - p), 1);
 	}
 }
 /* }}} */
 
-/* {{{ proto array strpbrk(string haystack, string char_list) U
+/* {{{ proto array strpbrk(string haystack, string char_list)
    Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)
 {
-	void *haystack, *char_list;
+	char *haystack, *char_list;
 	int haystack_len, char_list_len;
-	zend_uchar haystack_type, char_list_type;
-	void *p = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT",
-							  &haystack, &haystack_len, &haystack_type,
-							  &char_list, &char_list_len, &char_list_type) == FAILURE) {
+	char *p;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &haystack, &haystack_len, &char_list, &char_list_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (!char_list_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The character list cannot be empty");
-		RETURN_FALSE;
+		RETURN_FALSE;	
 	}
 
-	if (haystack_type == IS_UNICODE) {
-		int32_t i, j;
-		UChar32 ch1, ch2 = 0;
-
-		for (i = 0 ; i < haystack_len ; ) {
-			U16_NEXT((UChar *)haystack, i, haystack_len, ch1);
-			for (j = 0 ; j < char_list_len ; ) {
-				U16_NEXT((UChar *)char_list, j, char_list_len, ch2);
-				if (ch1 == ch2) {
-					U16_BACK_1((UChar *)haystack, 0, i);
-					p = (UChar *)haystack + i;
-					break;
-				}
-			}
-			if (ch1 == ch2) {
-				break;
-			}
-		}
-	} else {
-		p = strpbrk((char *)haystack, (char *)char_list);
-	}
-
-	if (p) {
-		if (haystack_type == IS_UNICODE) {
-			RETURN_UNICODEL((UChar *)p, ((UChar *)haystack + haystack_len - (UChar *)p), 1);
-		} else {
-			RETURN_STRINGL((char *)p, ((char *)haystack + haystack_len - (char *)p), 1);
-		}
+	if ((p = strpbrk(haystack, char_list))) {
+		RETURN_STRINGL(p, (haystack + haystack_len - p), 1);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]]) U
+/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
    Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
 PHP_FUNCTION(substr_compare)
 {
-	zstr s1, s2;
+	char *s1, *s2;
 	int s1_len, s2_len;
-	zend_uchar str_type;
-	long offset, start_offset, end_offset, len=0;
+	long offset, len=0;
 	zend_bool cs=0;
 	uint cmp_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TTl|lb", &s1, &s1_len,
-							  &str_type, &s2, &s2_len, &str_type, &offset, &len, &cs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -7815,60 +5208,26 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
+	if (offset < 0) {
+		offset = s1_len + offset;
+		offset = (offset < 0) ? 0 : offset;
+	}
+
 	if (offset >= s1_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
 
-	if (str_type == IS_UNICODE) {
-		/* calculate starting offset of the segment */
-		if (offset < 0) {
-			if (-offset > s1_len) {
-				start_offset = 0;
-			} else {
-				start_offset = s1_len;
-				U16_BACK_N(s1.u, 0, start_offset, -offset);
-			}
-		} else {
-			start_offset = 0;
-			U16_FWD_N(s1.u, start_offset, s1_len, offset);
-		}
+	if (len > s1_len - offset) {
+		len = s1_len - offset;
+	}
 
-		/* calculate ending offset of the segment */
-		if (len) {
-			end_offset = start_offset;
-			while (len > 0 && end_offset < s1_len) {
-				U16_FWD_1_UNSAFE(s1.u, end_offset);
-				--len;
-			}
-			cmp_len = end_offset - start_offset; 
-		} else {
-			end_offset = s1_len;
-			cmp_len = MAX(s2_len, (end_offset - start_offset));
-		}
+	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
 
-		if (!cs) {
-			RETURN_LONG(zend_u_binary_strncmp(s1.u + start_offset, (s1_len - start_offset), s2.u, s2_len, cmp_len));
-		} else {
-			RETURN_LONG(zend_u_binary_strncasecmp(s1.u + start_offset, (s1_len - start_offset), s2.u, s2_len, cmp_len));
-		}
+	if (!cs) {
+		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	} else {
-		if (offset < 0) {
-			offset = s1_len + offset;
-			offset = (offset < 0) ? 0 : offset;
-		}
-
-		if (len > s1_len - offset) {
-			len = s1_len - offset;
-		}
-
-		cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
-
-		if (!cs) {
-			RETURN_LONG(zend_binary_strncmp(s1.s + offset, (s1_len - offset), s2.s, s2_len, cmp_len));
-		} else {
-			RETURN_LONG(zend_binary_strncasecmp(s1.s + offset, (s1_len - offset), s2.s, s2_len, cmp_len));
-		}
+		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	}
 }
 /* }}} */

@@ -149,19 +149,19 @@ bool(false)
 bool(false)
 
 --empty array--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, array given, %s(%d)
 bool(false)
 
 --int indexed array--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, array given, %s(%d)
 bool(false)
 
 --associative array--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, array given, %s(%d)
 bool(false)
 
 --nested arrays--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
@@ -189,11 +189,10 @@ bool(false)
 bool(false)
 
 --instance of classWithToString--
-Error: 4096 - Method classWithToString::__toString() must return a string value, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, object given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, object given, %s(%d)
 bool(false)
 
 --undefined var--
@@ -203,7 +202,6 @@ bool(false)
 bool(false)
 
 --resource--
-Error: 2 - mb_strstr() expects parameter 1 to be binary string, resource given, %s(%d)
+Error: 2 - mb_strstr() expects parameter 1 to be string, resource given, %s(%d)
 bool(false)
 ===DONE===
-

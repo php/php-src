@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -98,7 +98,7 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto DOMNode dom_nodelist_item(int index) U
+/* {{{ proto DOMNode dom_nodelist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since: 
 */

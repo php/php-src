@@ -25,7 +25,7 @@ var_dump($array);
 --EXPECTF--
 array(9) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
   int(2)
   [2]=>
@@ -40,9 +40,9 @@ array(9) {
   array(0) {
   }
   [7]=>
-  unicode(1) "a"
+  string(1) "a"
   [8]=>
-  &unicode(1) "b"
+  &string(1) "b"
 }
 
 Notice: Array to string conversion in %sbug44925.php on line 9
@@ -52,7 +52,7 @@ array(0) {
 Notice: Array to string conversion in %sbug44925.php on line 11
 array(7) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
   int(2)
   [2]=>
@@ -63,13 +63,13 @@ array(7) {
   array(0) {
   }
   [7]=>
-  unicode(1) "a"
+  string(1) "a"
   [8]=>
-  &unicode(1) "b"
+  &string(1) "b"
 }
 array(7) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
   int(2)
   [2]=>
@@ -80,13 +80,13 @@ array(7) {
   array(0) {
   }
   [7]=>
-  unicode(1) "a"
+  string(1) "a"
   [8]=>
-  &unicode(1) "y"
+  &string(1) "y"
 }
 array(9) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
   int(2)
   [2]=>
@@ -101,7 +101,7 @@ array(9) {
   array(0) {
   }
   [7]=>
-  unicode(1) "a"
+  string(1) "a"
   [8]=>
-  &unicode(1) "y"
+  &string(1) "y"
 }

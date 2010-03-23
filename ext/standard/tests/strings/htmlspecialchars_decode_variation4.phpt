@@ -35,31 +35,31 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
-unicode(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
-unicode(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
-unicode(100) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... &quot; double quote string &quot;"
-unicode(85) "Roy&#039s height > Sam's \$height... 1111 &ap; 0000 = 0000... " double quote string ""
+string(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
+string(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
+string(100) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... &quot; double quote string &quot;"
+string(85) "Roy&#039s height > Sam's \$height... 1111 &ap; 0000 = 0000... " double quote string ""
 -- Iteration 2 --
-unicode(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
-unicode(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
-unicode(98) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r &quot; double quote\f\v string &quot;"
-unicode(78) "Roy's height > Sam's height... \t\t 13 < 15...\n\r " double quote\f\v string ""
+string(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
+string(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
+string(98) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r &quot; double quote\f\v string &quot;"
+string(78) "Roy's height > Sam's height... \t\t 13 < 15...\n\r " double quote\f\v string ""
 -- Iteration 3 --
-unicode(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
-unicode(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
-unicode(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
-unicode(38) "\nRoy's height &gt\t; Sam's\v height\f"
+string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
+string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
+string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
+string(38) "\nRoy's height &gt\t; Sam's\v height\f"
 -- Iteration 4 --
-unicode(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
-unicode(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
-unicode(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
-unicode(38) "\r\tRoy's height &gt\r; Sam\t's height"
+string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
+string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
+string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
+string(38) "\r\tRoy's height &gt\r; Sam\t's height"
 -- Iteration 5 --
-unicode(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
-unicode(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
-unicode(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
-unicode(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
+string(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
+string(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
+string(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
+string(34) "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12"
 Done

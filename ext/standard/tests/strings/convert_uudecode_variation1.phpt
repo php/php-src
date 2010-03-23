@@ -32,7 +32,7 @@ $inputs =  array (
 		  1,
 		  255,
 		  256,
-	  	  2147483647,
+	      2147483647,
 		  -2147483648,
 		
 		  // float values
@@ -112,33 +112,33 @@ Warning: convert_uudecode(): The given parameter is not a valid uuencoded string
 bool(false)
 -- Iteration 8 --
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 -- Iteration 10 --
 
-Warning: convert_uudecode() expects parameter 1 to be string (Unicode or binary), array given in %s
+Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: convert_uudecode() expects parameter 1 to be string (Unicode or binary), array given in %s
+Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: convert_uudecode() expects parameter 1 to be string (Unicode or binary), array given in %s
+Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 -- Iteration 14 --
 bool(false)
 -- Iteration 15 --
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 -- Iteration 16 --
 bool(false)
@@ -148,11 +148,11 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: convert_uudecode() expects parameter 1 to be string (Unicode or binary), resource given in %s
+Warning: convert_uudecode() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 -- Iteration 21 --
 bool(false)

@@ -85,17 +85,17 @@ bool\(true\)
 The output array is:
 array\(6\) {
   \[0\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[1\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[2\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[3\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[4\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[5\]=>
-  unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
+  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
 }
 
 -- with array having heredoc strings as keys --
@@ -104,16 +104,17 @@ bool\(true\)
 The output array is:
 array\(6\) {
   \[0\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
   \[1\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
   \[2\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
   \[3\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
   \[4\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
   \[5\]=>
-  unicode\(8\) "[heredoc 1-5]*"
+  string\(8\) "[heredoc 1-5]*"
 }
 Done
+

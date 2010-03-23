@@ -36,9 +36,9 @@ $values = array (
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
-  PHP_INT_MAX,  //max positive integer number
-  PHP_INT_MAX * 3,  // Will overflow 32 bits on 32 bt system and 64 bits on 64 bit system
-  -PHP_INT_MAX -1,  //min negative integer
+  PHP_INT_MAX,      // max positive integer number
+  PHP_INT_MAX * 3,  // integer overflow
+  -PHP_INT_MAX - 1, // min negative integer
 
 );
 
@@ -58,7 +58,7 @@ echo "Done"
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 2 --
-unicode(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
+string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
 ::: :::w:::h:::i:::t:::e::: :::s:::p:::a:::c:::e::: :::c:::h:::a:::r:::.:::
 :::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
@@ -67,25 +67,24 @@ unicode(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 4 --
-unicode(129) "This's heredoc string with 	 and 
+string(129) "This's heredoc string with 	 and 
  white space char.
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 5 --
-unicode(141) "This's heredoc string with::: 	 and 
+string(141) "This's heredoc string with::: 	 and 
  white space char.:::
 It has _speci@l ch@r$ 222:::2 !!!Now \k as escape char::: to test
 chunk_split():::"
 -- Iteration 6 --
-unicode(129) "This's heredoc string with 	 and 
+string(129) "This's heredoc string with 	 and 
  white space char.
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-unicode(129) "This's heredoc string with 	 and 
- white space char.
-It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
-chunk_split():::"
+
+Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+bool(false)
 -- Iteration 8 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d

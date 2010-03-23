@@ -26,14 +26,15 @@ refVal($b, $b);
 var_dump($b);
 ?>
 --EXPECTF--
+
+
 -- Val, Ref --
-unicode(10) "original.a"
-unicode(10) "original.a"
-unicode(9) "changed.y"
+string(10) "original.a"
+string(10) "original.a"
+string(9) "changed.y"
 
 
 -- Ref, Val --
-unicode(10) "original.b"
-unicode(10) "original.b"
-unicode(9) "changed.x"
-
+string(10) "original.b"
+string(10) "original.b"
+string(9) "changed.x"

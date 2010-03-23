@@ -26,17 +26,17 @@ var_dump(array_merge($arr2, $arr1[3]));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_merge() : usage variations ***
 
 -- Merge a two-dimensional and a one-dimensional array --
 array(7) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
   array(1) {
     [0]=>

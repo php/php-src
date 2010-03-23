@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -52,7 +52,7 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 		if ((PG(always_populate_raw_post_data) || NULL == SG(request_info).post_entry) && SG(request_info).post_data) {
 			length = SG(request_info).post_data_length;
 			data = estrndup(SG(request_info).post_data, length);
-			SET_VAR_ASCII_STRINGL("HTTP_RAW_POST_DATA", data, length);
+			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
 		}
 	}
 

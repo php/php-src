@@ -107,9 +107,9 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
 }
 -- Iteration 2 --
 int(2)
@@ -124,9 +124,9 @@ array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
   int(0)
 }
@@ -143,9 +143,9 @@ array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
   int(1)
 }
@@ -154,11 +154,11 @@ int(5)
 array(5) {
   [0]=>
   int(10)
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -168,14 +168,14 @@ array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"one"]=>
+  string(5) "world"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [3]=>
   int(4)
@@ -185,7 +185,7 @@ int(2)
 array(2) {
   [0]=>
   int(10)
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 int(4)
@@ -193,10 +193,10 @@ array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"float"]=>
+  string(5) "world"
+  ["float"]=>
   float(2.3333)
 }
 -- Iteration 6 --
@@ -204,13 +204,13 @@ int(5)
 array(5) {
   [0]=>
   int(10)
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [1]=>
   float(4.8999992284)
-  [u"f4"]=>
+  ["f4"]=>
   float(33333333.3333)
 }
 int(7)
@@ -218,16 +218,16 @@ array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f1"]=>
+  string(5) "world"
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [3]=>
   float(4.8999992284)
-  [u"f4"]=>
+  ["f4"]=>
   float(33333333.3333)
 }
 -- Iteration 7 --
@@ -236,13 +236,13 @@ array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(6) "	Hello"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(6) "	Hello"
+  ["red"]=>
+  string(6) "col	or"
   [2]=>
-  unicode(7) "world"
+  string(7) "world"
   [3]=>
-  unicode(4) "pen
+  string(4) "pen
 "
 }
 int(7)
@@ -250,17 +250,17 @@ array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(6) "	Hello"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(6) "	Hello"
+  ["red"]=>
+  string(6) "col	or"
   [4]=>
-  unicode(7) "world"
+  string(7) "world"
   [5]=>
-  unicode(4) "pen
+  string(4) "pen
 "
 }
 -- Iteration 8 --
@@ -269,30 +269,30 @@ array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(7) "\tHello"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(7) "\tHello"
+  ["red"]=>
+  string(7) "col\tor"
   [2]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
   [3]=>
-  unicode(5) "pen\n"
+  string(5) "pen\n"
 }
 int(7)
 array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(7) "\tHello"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(7) "\tHello"
+  ["red"]=>
+  string(7) "col\tor"
   [4]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
   [5]=>
-  unicode(5) "pen\n"
+  string(5) "pen\n"
 }
 -- Iteration 9 --
 int(3)
@@ -300,22 +300,22 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  string(5) "hello"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 int(5)
 array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(5) "hello"
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  string(5) "hello"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 -- Iteration 10 --
 int(4)
@@ -325,9 +325,9 @@ array(4) {
   [1]=>
   object(classA)#%d (0) {
   }
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
 }
 int(6)
@@ -335,15 +335,15 @@ array(6) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
   object(classA)#%d (0) {
   }
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
 }
 -- Iteration 11 --
@@ -352,47 +352,47 @@ array(9) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
   object(classA)#%d (0) {
   }
   [3]=>
-  unicode(5) "fruit"
-  [u"resource"]=>
+  string(5) "fruit"
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"int"]=>
+  ["int"]=>
   int(133)
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 int(11)
 array(11) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [4]=>
   object(classA)#%d (0) {
   }
   [5]=>
-  unicode(5) "fruit"
-  [u"resource"]=>
+  string(5) "fruit"
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"int"]=>
+  ["int"]=>
   int(133)
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 Done

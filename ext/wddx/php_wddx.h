@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,7 +31,7 @@ PHP_FUNCTION(wddx_serialize_vars);
 PHP_FUNCTION(wddx_packet_start);
 PHP_FUNCTION(wddx_packet_end);
 PHP_FUNCTION(wddx_add_vars);
-PHP_FUNCTION(wddx_unserialize);
+PHP_FUNCTION(wddx_deserialize);
 
 #else
 

@@ -21,7 +21,7 @@ $extra_arg = 10;
 var_dump( explode($delimeter, $string, $limit, $extra_arg) );
 
 ?>
-===DONE===
+===Done===
 --EXPECTF--
 *** Testing explode() : error conditions ***
 
@@ -34,4 +34,4 @@ NULL
 
 Warning: explode() expects at most 3 parameters, 4 given in %s on line %d
 NULL
-===DONE===
+===Done===

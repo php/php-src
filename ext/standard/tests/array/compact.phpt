@@ -16,11 +16,9 @@ $result = compact("event", $location_vars);
 var_dump($result);
 ?>
 --EXPECT--
-array(3) {
-  [u"event"]=>
-  unicode(8) "SIGGRAPH"
-  [u"çity"]=>
-  unicode(13) "San Francisco"
-  [u"state"]=>
-  unicode(2) "CA"
+array(2) {
+  ["event"]=>
+  string(8) "SIGGRAPH"
+  ["state"]=>
+  string(2) "CA"
 }

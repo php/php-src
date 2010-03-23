@@ -101,11 +101,11 @@ array(2) {
 }
 array(7) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(2)
   [4]=>
@@ -146,11 +146,11 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(4)
   [6]=>
@@ -191,11 +191,11 @@ array(7) {
   [3]=>
   int(3)
   [4]=>
-  unicode(1) "A"
+  string(1) "A"
   [5]=>
-  unicode(1) "B"
+  string(1) "B"
   [6]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 absolute offset - absolute length - attempt to cut past end
   - No replacement
@@ -232,11 +232,11 @@ array(7) {
   [3]=>
   int(3)
   [4]=>
-  unicode(1) "A"
+  string(1) "A"
   [5]=>
-  unicode(1) "B"
+  string(1) "B"
   [6]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 absolute offset - absolute length - cut everything
   - No replacement
@@ -273,11 +273,11 @@ array(6) {
 }
 array(3) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 absolute offset - absolute length - cut nothing
   - No replacement
@@ -308,11 +308,11 @@ array(9) {
   [2]=>
   int(2)
   [3]=>
-  unicode(1) "A"
+  string(1) "A"
   [4]=>
-  unicode(1) "B"
+  string(1) "B"
   [5]=>
-  unicode(1) "C"
+  string(1) "C"
   [6]=>
   int(3)
   [7]=>
@@ -347,11 +347,11 @@ array(2) {
 }
 array(7) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(2)
   [4]=>
@@ -392,11 +392,11 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(4)
   [6]=>
@@ -425,11 +425,11 @@ array(0) {
 }
 array(9) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(0)
   [4]=>
@@ -470,11 +470,11 @@ array(9) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(2)
   [6]=>
@@ -511,11 +511,11 @@ array(2) {
 }
 array(7) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(2)
   [4]=>
@@ -556,11 +556,11 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(4)
   [6]=>
@@ -601,11 +601,11 @@ array(7) {
   [3]=>
   int(3)
   [4]=>
-  unicode(1) "A"
+  string(1) "A"
   [5]=>
-  unicode(1) "B"
+  string(1) "B"
   [6]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 relative offset - absolute length - attempt to cut past end
   - No replacement
@@ -642,11 +642,11 @@ array(7) {
   [3]=>
   int(3)
   [4]=>
-  unicode(1) "A"
+  string(1) "A"
   [5]=>
-  unicode(1) "B"
+  string(1) "B"
   [6]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 relative offset - absolute length - cut everything
   - No replacement
@@ -683,11 +683,11 @@ array(6) {
 }
 array(3) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
 }
 relative offset - absolute length - cut nothing
   - No replacement
@@ -712,11 +712,11 @@ array(0) {
 }
 array(9) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(0)
   [4]=>
@@ -757,11 +757,11 @@ array(2) {
 }
 array(7) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(1) "B"
+  string(1) "B"
   [2]=>
-  unicode(1) "C"
+  string(1) "C"
   [3]=>
   int(2)
   [4]=>
@@ -802,11 +802,11 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(4)
   [6]=>
@@ -839,11 +839,11 @@ array(9) {
   [1]=>
   int(1)
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
   [3]=>
-  unicode(1) "B"
+  string(1) "B"
   [4]=>
-  unicode(1) "C"
+  string(1) "C"
   [5]=>
   int(2)
   [6]=>

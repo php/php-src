@@ -115,25 +115,25 @@ fclose( $file_handle );
 -- int 0 --
 array(1) {
   [0]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- int 1 --
 array(1) {
   [0]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- int 12345 --
 array(1) {
   [4]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- int -12345 --
 array(1) {
   [5]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- float 10.5 --
@@ -143,7 +143,7 @@ array(0) {
 -- float -10.5 --
 array(1) {
   [4]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- float .5 --
@@ -152,123 +152,123 @@ array(0) {
 
 -- empty array --
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- lowercase null --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- lowercase true --
 array(1) {
   [0]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- lowercase false --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- uppercase TRUE --
 array(1) {
   [0]=>
-  unicode(20) "Unexpected character"
+  string(20) "Unexpected character"
 }
 
 -- uppercase FALSE --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- empty string DQ --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- empty string SQ --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- string DQ --
 array(1) {
   [0]=>
-  unicode(47) "The timezone could not be found in the database"
+  string(47) "The timezone could not be found in the database"
 }
 
 -- string SQ --
 array(1) {
   [0]=>
-  unicode(47) "The timezone could not be found in the database"
+  string(47) "The timezone could not be found in the database"
 }
 
 -- mixed case string --
 array(1) {
   [0]=>
-  unicode(47) "The timezone could not be found in the database"
+  string(47) "The timezone could not be found in the database"
 }
 
 -- heredoc --
 array(1) {
   [0]=>
-  unicode(47) "The timezone could not be found in the database"
+  string(47) "The timezone could not be found in the database"
 }
 
 -- instance of classWithToString --
 array(2) {
   [0]=>
-  unicode(47) "The timezone could not be found in the database"
+  string(47) "The timezone could not be found in the database"
   [8]=>
-  unicode(29) "Double timezone specification"
+  string(29) "Double timezone specification"
 }
 
 -- instance of classWithoutToString --
 
-Warning: date_parse() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- unset var --
 array(1) {
   [0]=>
-  unicode(12) "Empty string"
+  string(12) "Empty string"
 }
 
 -- resource --
 
-Warning: date_parse() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

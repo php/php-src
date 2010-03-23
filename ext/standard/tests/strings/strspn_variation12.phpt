@@ -2,7 +2,7 @@
 Test strspn() function : usage variations - with varying start and len args
 --FILE--
 <?php
-/* Prototype  : int strspn(string str, string mask [, int start [, int len]])
+/* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
                 If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
  * Source code: ext/standard/string.c
@@ -79,7 +79,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strspn() : with different start and len values ***
 
 -- Iteration 1 --

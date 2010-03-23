@@ -17,17 +17,17 @@ var_dump($result);
 array(4) {
   [0]=>
   array(2) {
-    [u"b"]=>
-    unicode(5) "brown"
-    [u"c"]=>
-    unicode(4) "blue"
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
   }
   [1]=>
   array(2) {
-    [u"b"]=>
-    unicode(5) "brown"
-    [u"c"]=>
-    unicode(4) "blue"
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
   }
   [2]=>
   array(1) {
@@ -36,9 +36,9 @@ array(4) {
   }
   [3]=>
   array(2) {
-    [u"b"]=>
-    unicode(5) "brown"
-    [u"c"]=>
-    unicode(4) "blue"
+    ["b"]=>
+    string(5) "brown"
+    ["c"]=>
+    string(4) "blue"
   }
 }

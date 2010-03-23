@@ -14,7 +14,7 @@ for ($i = 0; $i < (sizeof($array) + 1); $i++) {
 ?>
 --EXPECT--
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 [0]
@@ -33,7 +33,7 @@ array(1) {
 array(1) {
   [0]=>
   array(1) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
   }
 }

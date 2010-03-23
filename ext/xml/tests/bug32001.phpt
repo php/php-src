@@ -23,16 +23,8 @@ class testcase {
 	}
 
 	function start_element($parser, $name, $attrs) {
-		if (is_unicode($name)) {
-			$name = utf8_encode($name);
-			$binatts = array();
-			foreach ($attrs AS $att) {
-				$binatts[] = (binary)bin2hex(utf8_encode($att));
-			}
-		} else {
-			$binatts = array_map('bin2hex', $attrs);
-		}
-		$this->tags[] = (binary)bin2hex($name).(binary)": ".(binary)implode(', ', $binatts);
+		$attrs = array_map('bin2hex', $attrs);
+		$this->tags[] = bin2hex($name).": ".implode(', ', $attrs);
 	}
 
 	function end_element($parser, $name) {
@@ -43,10 +35,10 @@ class testcase {
 
 		if ($this->prologue) {
 			$canonical_name = preg_replace('/BE|LE/i', '', $this->encoding);
-			$data .= b"<?xml version=\"1.0\" encoding=\"$canonical_name\" ?>\n";
+			$data .= "<?xml version=\"1.0\" encoding=\"$canonical_name\" ?>\n";
 		}
 
-		$data .= b<<<HERE
+		$data .= <<<HERE
 <テスト:テスト1 xmlns:テスト="http://www.example.com/テスト/" テスト="テスト">
   <テスト:テスト2 テスト="テスト">
 	<テスト:テスト3>
@@ -62,7 +54,7 @@ HERE;
 			switch (strtoupper($this->encoding)) {
 				case 'UTF-8':
 				case 'UTF8':
-					$data = b"\xef\xbb\xbf".$data;
+					$data = "\xef\xbb\xbf".$data;
 					break;
 
 				case 'UTF-16':
@@ -73,14 +65,14 @@ HERE;
 				case 'UCS2':
 				case 'UCS-2BE':
 				case 'UCS2BE':
-					$data = b"\xfe\xff".$data;
+					$data = "\xfe\xff".$data;
 					break;
 
 				case 'UTF-16LE':
 				case 'UTF16LE':
 				case 'UCS-2LE':
 				case 'UCS2LE':
-					$data = b"\xff\xfe".$data;
+					$data = "\xff\xfe".$data;
 					break;
 
 				case 'UTF-32':
@@ -91,14 +83,14 @@ HERE;
 				case 'UCS4':
 				case 'UCS-4BE':
 				case 'UCS4BE':
-					$data = b"\x00\x00\xfe\xff".$data;
+					$data = "\x00\x00\xfe\xff".$data;
 					break;
 
 				case 'UTF-32LE':
 				case 'UTF32LE':
 				case 'UCS-4LE':
 				case 'UCS4LE':
-					$data = b"\xff\xfe\x00\x00".$data;
+					$data = "\xff\xfe\x00\x00".$data;
 					break;
 			}
 		}

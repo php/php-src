@@ -74,71 +74,71 @@ var_dump($ao);
 --> Write existent, non-existent and dynamic:
   Original wrapped object:
 object(C)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"C":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(35) "This should never appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(35) "This should never appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"C":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
 --> Read existent, non-existent and dynamic:
-unicode(7) "changed"
+string(7) "changed"
 
 Notice: Undefined index:  nonexistent in %s on line 45
 NULL
-unicode(11) "new.changed"
+string(11) "new.changed"
   Original wrapped object:
 object(C)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"C":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(35) "This should never appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(35) "This should never appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"C":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
@@ -148,33 +148,33 @@ bool(false)
 bool(true)
   Original wrapped object:
 object(C)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"C":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(35) "This should never appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(35) "This should never appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"C":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
@@ -183,24 +183,24 @@ object(UsesMagic)#2 (2) {
 Notice: Undefined index:  nonexistent in %s on line 63
   Original wrapped object:
 object(C)#1 (3) {
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
+  ["priv":"C":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(35) "This should never appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(35) "This should never appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (3) {
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
+    ["priv":"C":private]=>
+    string(6) "secret"
   }
 }

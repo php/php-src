@@ -152,45 +152,45 @@ int(1218174483)
 int(1218174483)
 
 --lowercase true--
-unicode(5) "06:48"
+string(5) "06:48"
 
 --lowercase false--
 int(1218174483)
 
 --uppercase TRUE--
-unicode(5) "06:48"
+string(5) "06:48"
 
 --uppercase FALSE--
 int(1218174483)
 
 --empty string DQ--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunrise() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

@@ -6,10 +6,10 @@ openssl_pkcs7_decrypt() tests
 <?php
 $infile = dirname(__FILE__) . "/cert.crt";
 $privkey = "file://" . dirname(__FILE__) . "/private.key";
-$encrypted = tempnam(b"/tmp", b"ssl");
+$encrypted = tempnam("/tmp", "ssl");
 if ($encrypted === false)
 	die("failed to get a temporary filename!");
-$outfile = tempnam(b"/tmp", b"ssl");
+$outfile = tempnam("/tmp", "ssl");
 if ($outfile === false) {
 	unlink($outfile);
 	die("failed to get a temporary filename!");
@@ -18,15 +18,12 @@ if ($outfile === false) {
 $single_cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $headers = array("test@test", "testing openssl_pkcs7_encrypt()");
 $wrong = "wrong";
-$wrong2 = b"wrong";
-$empty = b"";
+$empty = "";
 
 openssl_pkcs7_encrypt($infile, $encrypted, $single_cert, $headers);
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $wrong));
-var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $wrong2));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $wrong, $privkey));
-var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $wrong2, $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, null, $privkey));
 var_dump(openssl_pkcs7_decrypt($wrong, $outfile, $single_cert, $privkey));
 var_dump(openssl_pkcs7_decrypt($empty, $outfile, $single_cert, $privkey));
@@ -46,17 +43,7 @@ if (file_exists($outfile)) {
 --EXPECTF--
 bool(true)
 
-Warning: openssl_pkcs7_decrypt(): Binary string expected, Unicode string received in %s on line %d
-
 Warning: openssl_pkcs7_decrypt(): unable to get private key in %s on line %d
-bool(false)
-
-Warning: openssl_pkcs7_decrypt(): unable to get private key in %s on line %d
-bool(false)
-
-Warning: openssl_pkcs7_decrypt(): Binary string expected, Unicode string received in %s on line %d
-
-Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
 bool(false)
 
 Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d

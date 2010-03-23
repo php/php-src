@@ -55,7 +55,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_unicode($value)) {
+			if (is_string($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -77,84 +77,83 @@ echo "Done";
 int(3)
 array(1) {
   [0]=>
-  string(3) "aB1"
+  string(4) "YUIx"
 }
 
 -- Iteration 2 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "aBcD"
+  string(8) "YUJjRA=="
 }
 
 -- Iteration 3 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "ab/="
+  string(8) "YWIvPQ=="
 }
 
 -- Iteration 4 --
 int(2)
 array(1) {
   [0]=>
-  string(2) " 	"
+  string(4) "IAk="
 }
 
 -- Iteration 5 --
 int(3)
 array(1) {
   [0]=>
-  string(3) "234"
+  string(4) "MjM0"
 }
 
 -- Iteration 6 --
 int(9)
 array(1) {
   [0]=>
-  string(9) "日本語"
+  string(12) "5pel5pys6Kqe"
 }
 
 -- Iteration 7 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "fjds"
+  string(8) "Zmpkcw=="
 }
 
 -- Iteration 8 --
 int(10)
 array(1) {
   [0]=>
-  string(10) "日本語	"
+  string(16) "5pel5pys6KqeCQ=="
 }
 
 -- Iteration 9 --
 int(5)
 array(1) {
   [0]=>
-  string(5) ".!"*@"
+  string(8) "LiEiKkA="
 }
 
 -- Iteration 10 --
 int(1)
 array(1) {
   [0]=>
-  string(1) "	"
+  string(4) "CQ=="
 }
 
 -- Iteration 11 --
 int(5)
 array(1) {
   [0]=>
-  string(5) "IDSJV"
+  string(8) "SURTSlY="
 }
 
 -- Iteration 12 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "3b5D"
+  string(8) "M2I1RA=="
 }
 Done
-

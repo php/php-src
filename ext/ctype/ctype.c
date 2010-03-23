@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -146,47 +146,39 @@ static PHP_MINFO_FUNCTION(ctype)
 	zval *c, tmp; \
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE) \
 		return; \
- 	switch (Z_TYPE_P(c)) { \
-	case IS_LONG: \
-		RETURN_BOOL(u_##iswhat(Z_LVAL_P(c))); \
-		break; \
-	case IS_UNICODE: \
-		{ \
-			int ofs = 0; \
-			while (ofs < Z_USTRLEN_P(c)) { \
-				UChar32 ch; \
-				U16_GET(Z_USTRVAL_P(c), 0, ofs, Z_USTRLEN_P(c), ch); \
-				if (!u_##iswhat(ch)) { \
-					RETURN_FALSE; \
-				} \
-				U16_FWD_1(Z_USTRVAL_P(c), ofs, Z_USTRLEN_P(c)); \
-			} \
-			RETURN_TRUE; \
+	if (Z_TYPE_P(c) == IS_LONG) { \
+		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
+			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
+			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
 		} \
-	case IS_STRING: \
-		{ \
-			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
-			if (e == p) {	\
-				if (c == &tmp) zval_dtor(&tmp); \
-				RETURN_FALSE;	\
-			}	\
-			while (p < e) { \
-				if(!iswhat((int)*(unsigned char *)(p++))) { \
-					if (c == &tmp) zval_dtor(&tmp); \
-					RETURN_FALSE; \
-				} \
-			} \
-			if (c == &tmp) zval_dtor(&tmp); \
-			RETURN_TRUE; \
-		} \
-	default: \
-		break; \
+		tmp = *c; \
+		zval_copy_ctor(&tmp); \
+		convert_to_string(&tmp); \
+	} else { \
+		tmp = *c; \
 	} \
-	RETURN_FALSE; 
- 
+	if (Z_TYPE(tmp) == IS_STRING) { \
+		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRLEN(tmp); \
+		if (e == p) {	\
+			if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+			RETURN_FALSE;	\
+		}	\
+		while (p < e) { \
+			if(!iswhat((int)*(unsigned char *)(p++))) { \
+				if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+				RETURN_FALSE; \
+			} \
+		} \
+		if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+		RETURN_TRUE; \
+	} else { \
+		RETURN_FALSE; \
+	} \
+
 /* }}} */
 
-/* {{{ proto bool ctype_alnum(mixed c) U
+/* {{{ proto bool ctype_alnum(mixed c)
    Checks for alphanumeric character(s) */
 static PHP_FUNCTION(ctype_alnum)
 {
@@ -194,7 +186,7 @@ static PHP_FUNCTION(ctype_alnum)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_alpha(mixed c) U
+/* {{{ proto bool ctype_alpha(mixed c)
    Checks for alphabetic character(s) */
 static PHP_FUNCTION(ctype_alpha)
 {
@@ -202,7 +194,7 @@ static PHP_FUNCTION(ctype_alpha)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_cntrl(mixed c) U
+/* {{{ proto bool ctype_cntrl(mixed c)
    Checks for control character(s) */
 static PHP_FUNCTION(ctype_cntrl)
 {
@@ -210,7 +202,7 @@ static PHP_FUNCTION(ctype_cntrl)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_digit(mixed c) U
+/* {{{ proto bool ctype_digit(mixed c)
    Checks for numeric character(s) */
 static PHP_FUNCTION(ctype_digit)
 {
@@ -218,7 +210,7 @@ static PHP_FUNCTION(ctype_digit)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_lower(mixed c) U
+/* {{{ proto bool ctype_lower(mixed c)
    Checks for lowercase character(s)  */
 static PHP_FUNCTION(ctype_lower)
 {
@@ -226,7 +218,7 @@ static PHP_FUNCTION(ctype_lower)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_graph(mixed c) U
+/* {{{ proto bool ctype_graph(mixed c)
    Checks for any printable character(s) except space */
 static PHP_FUNCTION(ctype_graph)
 {
@@ -234,7 +226,7 @@ static PHP_FUNCTION(ctype_graph)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_print(mixed c) U
+/* {{{ proto bool ctype_print(mixed c)
    Checks for printable character(s) */
 static PHP_FUNCTION(ctype_print)
 {
@@ -242,7 +234,7 @@ static PHP_FUNCTION(ctype_print)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_punct(mixed c) U
+/* {{{ proto bool ctype_punct(mixed c)
    Checks for any printable character which is not whitespace or an alphanumeric character */
 static PHP_FUNCTION(ctype_punct)
 {
@@ -250,7 +242,7 @@ static PHP_FUNCTION(ctype_punct)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_space(mixed c) U
+/* {{{ proto bool ctype_space(mixed c)
    Checks for whitespace character(s)*/
 static PHP_FUNCTION(ctype_space)
 {
@@ -258,7 +250,7 @@ static PHP_FUNCTION(ctype_space)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_upper(mixed c) U
+/* {{{ proto bool ctype_upper(mixed c)
    Checks for uppercase character(s) */
 static PHP_FUNCTION(ctype_upper)
 {
@@ -266,7 +258,7 @@ static PHP_FUNCTION(ctype_upper)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_xdigit(mixed c) U
+/* {{{ proto bool ctype_xdigit(mixed c)
    Checks for character(s) representing a hexadecimal digit */
 static PHP_FUNCTION(ctype_xdigit)
 {

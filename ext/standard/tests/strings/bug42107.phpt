@@ -15,24 +15,24 @@ var_dump(sscanf('one two', '%1$d %2$d'));
 var_dump(sscanf('one two', '%1$d'));
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(2) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 --
-unicode(3) "one"
-unicode(3) "two"
-unicode(3) "two"
-unicode(3) "one"
+string(3) "one"
+string(3) "two"
+string(3) "two"
+string(3) "one"
 --
 array(2) {
   [0]=>

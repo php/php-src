@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,27 +44,18 @@ static void php_dba_db4_errcall_fcn(
 {
 	TSRMLS_FETCH();
 
-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8 && DB_VERSION_PATCH <= 26)
+#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8 && DB_VERSION_PATCH <= 26) 
 /* Bug 51086, Berkeley DB 4.8.26 */
 /* This code suppresses a BDB 4.8 error message that BDB incorrectly emits */
 	{
-		zstr funcname = get_active_function_name(TSRMLS_C);
-		int s_funcname_len;
-		char *s_funcname;
-		if (funcname.u != NULL) {
-			zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_funcname, &s_funcname_len, funcname.u, u_strlen(funcname.u) TSRMLS_CC);
-
-			if (s_funcname != NULL && (!strcmp(s_funcname,"dba_popen") || !strcmp(s_funcname,"dba_open"))
-				&& !strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)) {
-				efree(s_funcname);
-				return;
-			}
-			if (s_funcname != NULL)
-				efree(s_funcname);
+		char *function = get_active_function_name(TSRMLS_C);
+		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
+			&& !strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)) {
+			return;
 		}
 	}
 #endif
-	
+
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 

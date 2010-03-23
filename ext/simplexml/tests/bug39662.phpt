@@ -5,7 +5,7 @@ Bug #39662 (Segfault when calling asXML() of a cloned SimpleXMLElement)
 --FILE--
 <?php
 
-$xml = b'<?xml version="1.0" encoding="utf-8" ?>
+$xml = '<?xml version="1.0" encoding="utf-8" ?>
 <test>
 
 </test>';
@@ -21,13 +21,13 @@ echo "Done\n";
 --EXPECTF--	
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(2) "
+  string(2) "
 
 "
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(2) "
+  string(2) "
 
 "
 }

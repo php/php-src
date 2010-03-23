@@ -1,5 +1,5 @@
 --TEST--
-Test uasort() function : usage variations - unexpected values for 'cmp_function'
+Test uasort() function : usage variations - unexpected values for 'cmp_function' argument
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
@@ -22,7 +22,6 @@ class MyClass
   }
 }
 
-// Initialise variables
 $array_arg = array(0 => 1, 1 => -1, 2 => 3, 3 => 10, 4 => 4, 5 => 2, 6 => 8, 7 => 5);
 
 // Get an unset variable

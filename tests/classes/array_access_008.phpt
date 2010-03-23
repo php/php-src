@@ -50,18 +50,18 @@ var_dump($people[0]['name']);
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "Foo"
-unicode(6) "FooBar"
-unicode(9) "FooBarBaz"
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
 ===ArrayOverloading===
-unicode(3) "Foo"
+string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 40
-unicode(3) "Foo"
+string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 42
-unicode(3) "Foo"
+string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 44
-unicode(3) "Foo"
+string(3) "Foo"
 ===DONE===

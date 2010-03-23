@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -150,7 +150,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 };
 /* }}} */
 
-/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]) U */
+/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]); */
 PHP_METHOD(domelement, __construct)
 {
 
@@ -165,7 +165,7 @@ PHP_METHOD(domelement, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s!&s&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv), &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s!s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -254,10 +254,10 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		qname = xmlStrdup(ns->prefix);
 		qname = xmlStrcat(qname, (xmlChar *)":");
 		qname = xmlStrcat(qname, nodep->name);
-		ZVAL_XML_STRING(*retval, (char *)qname, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *)qname, 1);
 		xmlFree(qname);
 	} else {
-		ZVAL_XML_STRING(*retval, (char *) nodep->name, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) nodep->name, 1);
 	}
 
 	return SUCCESS;
@@ -322,7 +322,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto string dom_element_get_attribute(string name) U
+/* {{{ proto string dom_element_get_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
 Since:
 */
@@ -355,17 +355,17 @@ PHP_FUNCTION(dom_element_get_attribute)
 				value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
 		}
 	}
-
+	
 	if (value == NULL) {
-		RETURN_EMPTY_UNICODE();
+		RETURN_EMPTY_STRING();
 	} else {
-		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
+		RETVAL_STRING((char *)value, 1);
 		xmlFree(value);
 	}
 }
 /* }}} end dom_element_get_attribute */
 
-/* {{{ proto void dom_element_set_attribute(string name, string value) U
+/* {{{ proto void dom_element_set_attribute(string name, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since: 
 */
@@ -378,7 +378,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	dom_object *intern;
 	char *name, *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_element_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -431,7 +431,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 }
 /* }}} end dom_element_set_attribute */
 
-/* {{{ proto void dom_element_remove_attribute(string name) U
+/* {{{ proto void dom_element_remove_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
 */
@@ -443,7 +443,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	int name_len;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -462,12 +462,12 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	switch (attrp->type) {
 		case XML_ATTRIBUTE_NODE:
 			if (php_dom_object_get_data(attrp) == NULL) {
-				node_list_unlink(attrp->children TSRMLS_CC);
+			node_list_unlink(attrp->children TSRMLS_CC);
 				xmlUnlinkNode(attrp);
 				xmlFreeProp((xmlAttrPtr)attrp);
-			} else {
+		} else {
 				xmlUnlinkNode(attrp);
-			}
+		}
 			break;
 		case XML_NAMESPACE_DECL:
 			RETURN_FALSE;
@@ -479,7 +479,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 }
 /* }}} end dom_element_remove_attribute */
 
-/* {{{ proto DOMAttr dom_element_get_attribute_node(string name) U
+/* {{{ proto DOMAttr dom_element_get_attribute_node(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
 Since: 
 */
@@ -491,7 +491,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	dom_object *intern;
 	char *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -525,7 +525,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 }
 /* }}} end dom_element_get_attribute_node */
 
-/* {{{ proto DOMAttr dom_element_set_attribute_node(DOMAttr newAttr) U
+/* {{{ proto DOMAttr dom_element_set_attribute_node(DOMAttr newAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
 Since: 
 */
@@ -591,7 +591,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 }
 /* }}} end dom_element_set_attribute_node */
 
-/* {{{ proto DOMAttr dom_element_remove_attribute_node(DOMAttr oldAttr) U
+/* {{{ proto DOMAttr dom_element_remove_attribute_node(DOMAttr oldAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since: 
 */
@@ -628,7 +628,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 }
 /* }}} end dom_element_remove_attribute_node */
 
-/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name(string name) U
+/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
 Since: 
 */
@@ -641,7 +641,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	char *name;
 	xmlChar *local;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -654,7 +654,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
-/* {{{ proto string dom_element_get_attribute_ns(string namespaceURI, string localName) U
+/* {{{ proto string dom_element_get_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
 Since: DOM Level 2
 */
@@ -668,7 +668,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	char *uri, *name;
 	xmlChar *strattr;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -677,18 +677,18 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
 
 	if (strattr != NULL) {
-		RETVAL_XML_STRING((char *)strattr, ZSTR_DUPLICATE);
+		RETVAL_STRING((char *)strattr, 1);
 		xmlFree(strattr);
 	} else {
 		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
-				RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
+				RETVAL_STRING((char *) nsptr->href, 1);
 			} else {
-				RETVAL_EMPTY_UNICODE();
+				RETVAL_EMPTY_STRING();
 			}
 		} else {
-			RETVAL_EMPTY_UNICODE();
+			RETVAL_EMPTY_STRING();
 		}
 	}
 
@@ -734,7 +734,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /*
 }
 /* }}} */
 
-/* {{{ proto void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value) U
+/* {{{ proto void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
@@ -750,7 +750,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	dom_object *intern;
 	int errorcode = 0, stricterror, is_xmlns = 0, name_valid;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!ss", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -862,7 +862,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 }
 /* }}} end dom_element_set_attribute_ns */
 
-/* {{{ proto void dom_element_remove_attribute_ns(string namespaceURI, string localName) U
+/* {{{ proto void dom_element_remove_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
@@ -876,7 +876,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	int name_len, uri_len;
 	char *name, *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -919,7 +919,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 }
 /* }}} end dom_element_remove_attribute_ns */
 
-/* {{{ proto DOMAttr dom_element_get_attribute_node_ns(string namespaceURI, string localName) U
+/* {{{ proto DOMAttr dom_element_get_attribute_node_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
 Since: DOM Level 2
 */
@@ -932,7 +932,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	int uri_len, name_len, ret;
 	char *uri, *name;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -949,7 +949,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 }
 /* }}} end dom_element_get_attribute_node_ns */
 
-/* {{{ proto DOMAttr dom_element_set_attribute_node_ns(DOMAttr newAttr) U
+/* {{{ proto DOMAttr dom_element_set_attribute_node_ns(DOMAttr newAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
 Since: DOM Level 2
 */
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 }
 /* }}} end dom_element_set_attribute_node_ns */
 
-/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name_ns(string namespaceURI, string localName) U
+/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
 Since: DOM Level 2
 */
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 	char *uri, *name;
 	xmlChar *local, *nsuri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1050,7 +1050,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
-/* {{{ proto boolean dom_element_has_attribute(string name) U
+/* {{{ proto boolean dom_element_has_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
 Since: DOM Level 2
 */
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	int name_len;
 	xmlNodePtr attr;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1078,7 +1078,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 }
 /* }}} end dom_element_has_attribute */
 
-/* {{{ proto boolean dom_element_has_attribute_ns(string namespaceURI, string localName) U
+/* {{{ proto boolean dom_element_has_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
 Since: DOM Level 2
 */
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 	char *uri, *name;
 	xmlChar *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1135,7 +1135,7 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void dom_element_set_id_attribute(string name, boolean isId) U
+/* {{{ proto void dom_element_set_id_attribute(string name, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
 Since: DOM Level 3
 */
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	int name_len;
 	zend_bool is_id;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&b", &id, dom_element_class_entry, &name, &name_len, UG(utf8_conv), &is_id) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osb", &id, dom_element_class_entry, &name, &name_len, &is_id) == FAILURE) {
 		return;
 	}
 
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 }
 /* }}} end dom_element_set_id_attribute */
 
-/* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId) U
+/* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
 */
@@ -1185,7 +1185,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	char *uri, *name;
 	zend_bool is_id;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&s&b", &id, dom_element_class_entry, &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &is_id) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ossb", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len, &is_id) == FAILURE) {
 		return;
 	}
 
@@ -1207,7 +1207,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 }
 /* }}} end dom_element_set_id_attribute_ns */
 
-/* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, boolean isId) U
+/* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */

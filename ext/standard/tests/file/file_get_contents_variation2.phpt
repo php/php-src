@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : variation - include path testing
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

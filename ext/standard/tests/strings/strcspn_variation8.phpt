@@ -1,5 +1,5 @@
 --TEST--
-Test strcspn() function : usage variations - with heredoc strings, varying start and len args (Bug #42731)
+Test strcspn() function : usage variations - with heredoc strings, varying start and len args
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
@@ -109,7 +109,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strcspn() : with different start and len values ***
 
 -- Iteration 1 --

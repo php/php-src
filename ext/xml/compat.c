@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -443,7 +443,7 @@ php_xml_compat_handlers = {
 	NULL,
 	_start_element_handler_ns,
 	_end_element_handler_ns,
-	NULL
+	NULL	
 };
 
 PHPAPI XML_Parser 

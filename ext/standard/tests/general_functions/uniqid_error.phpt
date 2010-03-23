@@ -38,9 +38,9 @@ NULL
 
 -- Testing uniqid() function with invalid values for $prefix --
 
-Warning: uniqid() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: uniqid() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: uniqid() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: uniqid() expects parameter 1 to be string, resource given in %s on line %d
 
-Warning: uniqid() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: uniqid() expects parameter 1 to be string, object given in %s on line %d
 ===DONE===

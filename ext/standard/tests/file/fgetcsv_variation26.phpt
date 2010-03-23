@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - reading files opened in write only mode 
+Test fgetcsv() : usage variations - reading files opened in write only mode (Bug #42036)
 --FILE--
 <?php
 /* 
@@ -47,12 +47,12 @@ foreach ($csv_lists as $csv_list) {
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
     
-    @fwrite($file_handle, $csv_field . "\n");
+    fwrite($file_handle, $csv_field . "\n");
     // write another line of text and a blank line
     // this will be used to test, if the fgetcsv() read more than a line and its
     // working when only a blank line is read
-    @fwrite($file_handle, "This is line of text without csv fields\n");
-    @fwrite($file_handle, "\n"); // blank line
+    fwrite($file_handle, "This is line of text without csv fields\n");
+    fwrite($file_handle, "\n"); // blank line
 
     // rewind the file pointer to bof
       rewind($file_handle);

@@ -19,7 +19,7 @@ array(1) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(5) "aeiou"
+    string(5) "aeiou"
   }
 }
 int(0)
@@ -33,7 +33,7 @@ array(1) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(6) "aeiou
+    string(6) "aeiou
 "
   }
 }

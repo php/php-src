@@ -34,7 +34,7 @@ $filename = "$file_path/symlink__link_linkinfo_is_link_variation4.tmp";
 // create temp file
 $file = fopen($filename, "w");
 // fill data into file
-fwrite($file, (binary)str_repeat("text", 20) );
+fwrite($file, str_repeat("text", 20) );
 fclose($file);
 
 echo "\n-- Access data of the file through the hard link --\n";
@@ -53,7 +53,7 @@ else
 echo "\n-- Updating file with data through hard link --\n";
 // append link with data
 $fp = fopen($linkname, "a");  // open in append mode
-fwrite($fp, (binary)"Hello World");
+fwrite($fp, "Hello World");
 fclose($fp);
 
 // now check temp file for data; it should append "Hello World"
@@ -69,7 +69,7 @@ else
 echo "\n-- Updating file with data and check data through hard link --\n";
 // write to temp file
 $file = fopen($filename, "w");
-fwrite($file, (binary)"Hello World");
+fwrite($file, "Hello World");
 fclose($file);
 
 // now check link for data; it should echo "Hello World"
@@ -91,7 +91,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Accessing and updating data of file through hard link ***
 
 -- Access data of the file through the hard link --

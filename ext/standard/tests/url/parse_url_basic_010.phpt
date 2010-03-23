@@ -19,7 +19,7 @@ foreach(get_defined_constants() as $constantName => $constantValue) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 PHP_URL_SCHEME: 0 
 PHP_URL_HOST: 1 
 PHP_URL_PORT: 2 

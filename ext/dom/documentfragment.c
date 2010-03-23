@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@ const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMDocumentFragment::__construct() U */
+/* {{{ proto void DOMDocumentFragment::__construct(); */
 PHP_METHOD(domdocumentfragment, __construct)
 {
 
@@ -118,7 +118,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void DOMDocumentFragment::appendXML(string data) U */
+/* {{{ proto void DOMDocumentFragment::appendXML(string data); */
 PHP_METHOD(domdocumentfragment, appendXML) {
 	zval *id;
 	xmlNode *nodep;
@@ -128,7 +128,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	int err;
 	xmlNodePtr lst;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_documentfragment_class_entry, &data, &data_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_documentfragment_class_entry, &data, &data_len) == FAILURE) {
 		return;
 	}
 

@@ -8,12 +8,12 @@ Bug #24098 (pathinfo() crash)
 ?>
 --EXPECT--
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "/"
-  [u"basename"]=>
-  unicode(8) "dsds.asa"
-  [u"extension"]=>
-  unicode(3) "asa"
-  [u"filename"]=>
-  unicode(4) "dsds"
+  ["dirname"]=>
+  string(1) "/"
+  ["basename"]=>
+  string(8) "dsds.asa"
+  ["extension"]=>
+  string(3) "asa"
+  ["filename"]=>
+  string(4) "dsds"
 }

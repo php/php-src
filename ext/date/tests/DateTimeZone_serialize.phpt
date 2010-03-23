@@ -20,7 +20,7 @@ var_dump( $tz2->getName() );
 --EXPECTF--
 object(DateTimeZone)#%d (0) {
 }
-unicode(24) "O:12:"DateTimeZone":0:{}"
+string(24) "O:12:"DateTimeZone":0:{}"
 object(DateTimeZone)#%d (0) {
 }
 

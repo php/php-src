@@ -77,7 +77,7 @@ var_dump( array_walk($input, "callback_protected"));
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk() : array of objects ***
 -- For private member --
 value : int(3)

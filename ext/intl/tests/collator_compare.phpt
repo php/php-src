@@ -42,17 +42,13 @@ function compare_pairs( $locale, $test_array )
     {
         list( $str1, $str2 ) = $test_strings;
 
-        // Convert both strings to UTF-16 if needed.
-        $str1 = u( $str1 );
-        $str2 = u( $str2 );
-
         // Compare strings.
         $res_val = cmp_to_char( ut_coll_compare( $coll, $str1, $str2 ) );
 
         // Concatenate result strings.
-        $res_str .= dump_str( $str1 ) .
+        $res_str .= dump( $str1 ) .
                     ' ' . $res_val . ' ' .
-                    dump_str( $str2 ) . "\n";
+                    dump( $str2 ) . "\n";
     }
 
     return $res_str;

@@ -101,13 +101,13 @@ var_dump($myvar);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: Missing argument 1 for VariableStream::__construct() in %s on line %d
-unicode(12) "constructor!"
+string(12) "constructor!"
 line1
 line2
 line3
-unicode(18) "line1
+string(18) "line1
 line2
 line3
 "

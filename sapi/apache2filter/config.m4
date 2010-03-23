@@ -72,14 +72,14 @@ if test "$PHP_APXS2FILTER" != "no"; then
   if test -z `$APXS -q SYSCONFDIR`; then
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
-                       -i -n php6"
+                       -i -n php5"
   else
     APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                 \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                       -i -a -n php6"
+                       -i -a -n php5"
   fi
 
   case $host_alias in
@@ -102,7 +102,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    SAPI_SHARED=libs/libphp6.so
+    SAPI_SHARED=libs/libphp5.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *beos*)
@@ -118,7 +118,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
     ;;
   esac
 
-  if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser" && test "$APXS_MPM" != "itk"; then
+  if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser"; then
     PHP_BUILD_THREAD_SAFE
   fi
   AC_MSG_RESULT(yes)

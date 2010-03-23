@@ -13,20 +13,19 @@ $$test->a->b[] = 2;
 var_dump($$test);
 
 ?>
---EXPECTF--
-Strict Standards: Creating default object from empty value in %s on line %d
+--EXPECT--
 object(stdClass)#1 (2) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#1 (2) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     array(1) {
       [0]=>
       int(2)
     }
   }
-  [u"b"]=>
+  ["b"]=>
   array(1) {
     [0]=>
     int(2)

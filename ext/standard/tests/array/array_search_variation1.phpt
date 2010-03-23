@@ -60,7 +60,7 @@ foreach($arrays as $array) {
 		
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_search() with different needle values ***
 -- Iteration 1 --
 bool(false)
@@ -175,17 +175,17 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 29 --
-unicode(0) ""
+string(0) ""
 bool(false)
-unicode(0) ""
+string(0) ""
 -- Iteration 30 --
-unicode(0) ""
+string(0) ""
 bool(false)
-unicode(0) ""
+string(0) ""
 -- Iteration 31 --
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 32 --
 int(6)
 int(6)
@@ -195,13 +195,13 @@ int(7)
 int(7)
 int(7)
 -- Iteration 34 --
-unicode(1) "a"
+string(1) "a"
 bool(false)
-unicode(1) "a"
+string(1) "a"
 -- Iteration 35 --
-unicode(1) "a"
+string(1) "a"
 bool(false)
-unicode(1) "a"
+string(1) "a"
 -- Iteration 36 --
 bool(false)
 bool(false)
@@ -311,9 +311,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 63 --
-unicode(3) "-.9"
+string(3) "-.9"
 bool(false)
-unicode(3) "-.9"
+string(3) "-.9"
 -- Iteration 64 --
 bool(false)
 bool(false)

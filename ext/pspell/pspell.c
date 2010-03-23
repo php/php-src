@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -307,22 +307,16 @@ static PHP_FUNCTION(pspell_new)
 
 	pspell_config_replace(config, "language-tag", language);
 
-	if (argc > 1) {
-	 	if (spelling_len > 0) {
-			pspell_config_replace(config, "spelling", spelling);
-		}
+	if (spelling_len) {
+		pspell_config_replace(config, "spelling", spelling);
 	}
 
-	if (argc > 2) {
-		if (jargon_len > 0) {
-			pspell_config_replace(config, "jargon", jargon);
-		}
+	if (jargon_len) {
+		pspell_config_replace(config, "jargon", jargon);
 	}
 
-	if (argc > 3) {
-		if (encoding_len > 0) {
-			pspell_config_replace(config, "encoding", encoding);
-		}
+	if (encoding_len) {
+		pspell_config_replace(config, "encoding", encoding);
 	}
 
 	if (argc > 4) {
@@ -379,7 +373,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|sssl", &personal, &personal_len, &language, &language_len, 
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
 		return;
@@ -408,6 +402,11 @@ static PHP_FUNCTION(pspell_new_personal)
 	}
 #endif
 
+	if (PG(safe_mode) && (!php_checkuid(personal, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		delete_pspell_config(config);
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(personal TSRMLS_CC)) {
 		delete_pspell_config(config);
 		RETURN_FALSE;
@@ -415,24 +414,19 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	pspell_config_replace(config, "personal", personal);
 	pspell_config_replace(config, "save-repl", "false");
+
 	pspell_config_replace(config, "language-tag", language);
 
-	if (argc > 2) {
-	 	if (spelling_len > 0) {
-			pspell_config_replace(config, "spelling", spelling);
-		}
+	if (spelling_len) {
+		pspell_config_replace(config, "spelling", spelling);
 	}
 
-	if (argc > 3) {
-		if (jargon_len > 0) {
-			pspell_config_replace(config, "jargon", jargon);
-		}
+	if (jargon_len) {
+		pspell_config_replace(config, "jargon", jargon);
 	}
 
-	if (argc > 4) {
-		if (encoding_len > 0) {
-			pspell_config_replace(config, "encoding", encoding);
-		}
+	if (encoding_len) {
+		pspell_config_replace(config, "encoding", encoding);
 	}
 
 	if (argc > 5) {
@@ -473,7 +467,7 @@ static PHP_FUNCTION(pspell_new_personal)
 static PHP_FUNCTION(pspell_new_config)
 {
 	int type, ind;
-	long conf;
+	long conf;	
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
@@ -622,7 +616,7 @@ static PHP_FUNCTION(pspell_add_to_session)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &scin, &word, &word_len) == FAILURE) {
 		return;
 	}
-    
+
 	PSPELL_FETCH_MANAGER;
 
 	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
@@ -737,7 +731,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	pspell_config_replace(config, "language-tag", language);
 
-	if (spelling_len) {
+ 	if (spelling_len) {
 		pspell_config_replace(config, "spelling", spelling);
 	}
 
@@ -786,7 +780,7 @@ static PHP_FUNCTION(pspell_config_mode)
 	int type;
 	long conf, mode;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &mode) == FAILURE) {
 		return;
 	}
@@ -842,6 +836,10 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 
 	PSPELL_FETCH_CONFIG;
 
+	if (PG(safe_mode) && (!php_checkuid(value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(value TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -892,6 +890,10 @@ static PHP_FUNCTION(pspell_config_repl)
 	PSPELL_FETCH_CONFIG;
 
 	pspell_config_replace(config, "save-repl", "true");
+
+	if (PG(safe_mode) && (!php_checkuid(repl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
 
 	if (php_check_open_basedir(repl TSRMLS_CC)) {
 		RETURN_FALSE;

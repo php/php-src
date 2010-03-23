@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@ PHPAPI int flock(int fd, int operation)
 }
 #endif /* !defined(HAVE_FLOCK) */
 
-PHPAPI int php_flock(int fd, int operation) 
+PHPAPI int php_flock(int fd, int operation)
 #if HAVE_STRUCT_FLOCK /* {{{ */
 {
 	struct flock flck;
@@ -227,7 +227,8 @@ int inet_aton(const char *cp, struct in_addr *ap)
 }
 /* }}} */
 #endif /* !HAVE_INET_ATON */
-#endif /* !PHP_WIN32 */
+#endif
+
 /*
  * Local variables:
  * tab-width: 4

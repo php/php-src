@@ -69,27 +69,27 @@ echo"Done";
 -- Iteration 1 --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 2 --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 3 --
 array(2) {
   [0]=>
   object(test)#%d (1) {
-    [u"t"]=>
+    ["t"]=>
     int(10)
   }
   [1]=>
   object(test)#%d (1) {
-    [u"t"]=>
+    ["t"]=>
     int(10)
   }
 }

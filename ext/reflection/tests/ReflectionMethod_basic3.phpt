@@ -58,7 +58,7 @@ Reflecting on method DerivedClass::foo()
 
 
 getName():
-unicode(3) "foo"
+string(3) "foo"
 
 isInternal():
 bool(false)
@@ -72,7 +72,7 @@ Reflecting on method TestClass::stat()
 
 
 getName():
-unicode(4) "stat"
+string(4) "stat"
 
 isInternal():
 bool(false)
@@ -86,7 +86,7 @@ Reflecting on method TestClass::priv()
 
 
 getName():
-unicode(4) "priv"
+string(4) "priv"
 
 isInternal():
 bool(false)
@@ -100,7 +100,7 @@ Reflecting on method TestClass::prot()
 
 
 getName():
-unicode(4) "prot"
+string(4) "prot"
 
 isInternal():
 bool(false)
@@ -114,7 +114,7 @@ Reflecting on method DerivedClass::prot()
 
 
 getName():
-unicode(4) "prot"
+string(4) "prot"
 
 isInternal():
 bool(false)
@@ -128,7 +128,7 @@ Reflecting on method TestInterface::int()
 
 
 getName():
-unicode(3) "int"
+string(3) "int"
 
 isInternal():
 bool(false)
@@ -142,7 +142,7 @@ Reflecting on method ReflectionProperty::__construct()
 
 
 getName():
-unicode(11) "__construct"
+string(11) "__construct"
 
 isInternal():
 bool(true)
@@ -156,7 +156,7 @@ Reflecting on method TestClass::__destruct()
 
 
 getName():
-unicode(10) "__destruct"
+string(10) "__destruct"
 
 isInternal():
 bool(false)

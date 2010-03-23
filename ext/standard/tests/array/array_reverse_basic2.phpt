@@ -30,31 +30,31 @@ echo "Done";
 array(4) {
   [0]=>
   float(13.33)
-  [u"string"]=>
-  unicode(4) "blue"
+  ["string"]=>
+  string(4) "blue"
   [1]=>
-  unicode(6) "number"
-  [u"a"]=>
-  unicode(5) "hello"
+  string(6) "number"
+  ["a"]=>
+  string(5) "hello"
 }
 array(4) {
   [10]=>
   float(13.33)
-  [u"string"]=>
-  unicode(4) "blue"
+  ["string"]=>
+  string(4) "blue"
   [123]=>
-  unicode(6) "number"
-  [u"a"]=>
-  unicode(5) "hello"
+  string(6) "number"
+  ["a"]=>
+  string(5) "hello"
 }
 array(4) {
   [0]=>
   float(13.33)
-  [u"string"]=>
-  unicode(4) "blue"
+  ["string"]=>
+  string(4) "blue"
   [1]=>
-  unicode(6) "number"
-  [u"a"]=>
-  unicode(5) "hello"
+  string(6) "number"
+  ["a"]=>
+  string(5) "hello"
 }
 Done

@@ -70,7 +70,7 @@ $inputs =  array (
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  var_dump( bin2hex((binary)chr($input)) );
+  var_dump( bin2hex(chr($input)) );
   $count ++;
 }
 
@@ -81,55 +81,43 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 2 --
-unicode(2) "01"
+string(2) "01"
 -- Iteration 3 --
-unicode(2) "ff"
+string(2) "ff"
 -- Iteration 4 --
-unicode(2) "3f"
+string(2) "00"
 -- Iteration 5 --
-unicode(2) "0a"
+string(2) "0a"
 -- Iteration 6 --
-unicode(4) "3f3f"
+string(2) "ec"
 -- Iteration 7 --
-
-Warning: Codepoint value cannot be greater than 10FFFF in %s on line %d
-unicode(0) ""
+string(2) "48"
 -- Iteration 8 --
-
-Warning: chr() expects parameter 1 to be long, array given in %s on line %d
-unicode(0) ""
+string(2) "00"
 -- Iteration 9 --
-
-Warning: chr() expects parameter 1 to be long, array given in %s on line %d
-unicode(0) ""
+string(2) "00"
 -- Iteration 10 --
-
-Warning: chr() expects parameter 1 to be long, array given in %s on line %d
-unicode(0) ""
+string(2) "00"
 -- Iteration 11 --
-unicode(2) "01"
+string(2) "01"
 -- Iteration 12 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 13 --
-unicode(2) "01"
+string(2) "01"
 -- Iteration 14 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 15 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 16 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 17 --
-
-Warning: chr() expects parameter 1 to be long, object given in %s on line %d
-unicode(0) ""
+string(2) "00"
 -- Iteration 18 --
-
-Warning: chr() expects parameter 1 to be long, resource given in %s on line %d
-unicode(0) ""
+string(2) "00"
 -- Iteration 19 --
-unicode(2) "00"
+string(2) "00"
 -- Iteration 20 --
-unicode(2) "00"
+string(2) "00"
 ===DONE===

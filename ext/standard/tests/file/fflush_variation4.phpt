@@ -40,7 +40,7 @@ foreach( $file_modes as $mode ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fflush(): with file handles of files opened in various read modes ***
 -- Iteration 1 with file opened in r mode --
 bool(true)
@@ -50,3 +50,4 @@ bool(true)
 bool(true)
 
 *** Done ***
+

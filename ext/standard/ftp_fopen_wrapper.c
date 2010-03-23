@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -76,7 +76,7 @@
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC)
 {
-	while (php_stream_gets(stream, ZSTR(buffer), buffer_size-1) &&
+	while (php_stream_gets(stream, buffer, buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
 	return strtol(buffer, NULL, 10);
@@ -143,7 +143,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 		goto connect_errexit;
 	}
 
-	php_stream_context_set(stream, context TSRMLS_CC);
+	php_stream_context_set(stream, context);
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
 	/* Start talking to ftp server */
@@ -213,7 +213,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	}
 
 #define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
-	unsigned char *s = (unsigned char*)val, *e = s + val_len;	\
+	unsigned char *s = val, *e = s + val_len;	\
 	while (s < e) {	\
 		if (iscntrl(*s)) {	\
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, err_msg, val);	\
@@ -375,8 +375,7 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 		/* pull out the port */
 		portno = (unsigned short) strtoul(tpath + 1, &ttpath, 10);
 	}
-#endif
-	
+#endif	
 	if (ttpath == NULL) {
 		/* didn't get correct response from EPSV/PASV */
 		return 0;
@@ -551,7 +550,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		goto errexit;	
 	}
 	
-	php_stream_context_set(datastream, context TSRMLS_CC);
+	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
@@ -602,7 +601,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	if (!php_stream_get_line(innerstream, ZSTR(ent->d_name), sizeof(ent->d_name), &tmp_len)) {
+	if (!php_stream_get_line(innerstream, ent->d_name, sizeof(ent->d_name), &tmp_len)) {
 		return 0;
 	}
 
@@ -716,7 +715,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 		goto opendir_errexit;	
 	}
 	
-	php_stream_context_set(datastream, context TSRMLS_CC);
+	php_stream_context_set(datastream, context);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
@@ -782,7 +781,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 	if(result < 200 || result > 299) {
 		goto stat_errexit;
 	}
-
+	
 	php_stream_printf(stream TSRMLS_CC, "SIZE %s\r\n", (resource->path != NULL ? resource->path : "/"));
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {

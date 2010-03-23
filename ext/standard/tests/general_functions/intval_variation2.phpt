@@ -156,27 +156,27 @@ int(1)
 int(1)
 
 --empty string DQ--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - intval() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - intval() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --instance of classWithToString--

@@ -61,39 +61,39 @@ bool(true)
 array(4) {
   [0]=>
   object(for_string_natcasesort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(3) "axx"
-    [u"private_class_value":u"for_string_natcasesort":private]=>
-    unicode(3) "AXX"
-    [u"protected_class_value":protected]=>
-    unicode(3) "ass"
+    ["public_class_value"]=>
+    string(3) "axx"
+    ["private_class_value":"for_string_natcasesort":private]=>
+    string(3) "AXX"
+    ["protected_class_value":protected]=>
+    string(3) "ass"
   }
   [3]=>
   object(for_string_natcasesort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(2) "py"
-    [u"private_class_value":u"for_string_natcasesort":private]=>
-    unicode(2) "PY"
-    [u"protected_class_value":protected]=>
-    unicode(2) "pt"
+    ["public_class_value"]=>
+    string(2) "py"
+    ["private_class_value":"for_string_natcasesort":private]=>
+    string(2) "PY"
+    ["protected_class_value":protected]=>
+    string(2) "pt"
   }
   [1]=>
   object(for_string_natcasesort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "t"
-    [u"private_class_value":u"for_string_natcasesort":private]=>
-    unicode(3) "eee"
-    [u"protected_class_value":protected]=>
-    unicode(3) "abb"
+    ["public_class_value"]=>
+    string(1) "t"
+    ["private_class_value":"for_string_natcasesort":private]=>
+    string(3) "eee"
+    ["protected_class_value":protected]=>
+    string(3) "abb"
   }
   [2]=>
   object(for_string_natcasesort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "w"
-    [u"private_class_value":u"for_string_natcasesort":private]=>
-    unicode(1) "W"
-    [u"protected_class_value":protected]=>
-    unicode(1) "c"
+    ["public_class_value"]=>
+    string(1) "w"
+    ["private_class_value":"for_string_natcasesort":private]=>
+    string(1) "W"
+    ["protected_class_value":protected]=>
+    string(1) "c"
   }
 }
 Done

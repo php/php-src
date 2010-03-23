@@ -57,7 +57,7 @@ foreach ($classes as $class) {
 
 
 ---> Doc comment for class A:
-unicode(%d) "/**
+string(%d) "/**
 
 
 		My
@@ -69,7 +69,7 @@ for A
 
 
 ---> Doc comment for class B:
-unicode(26) "/** My DocComment for B */"
+string(26) "/** My DocComment for B */"
 
 
 ---> Doc comment for class C:
@@ -89,10 +89,10 @@ bool(false)
 
 
 ---> Doc comment for class G:
-unicode(27) "/**	** Doc comment for G */"
+string(27) "/**	** Doc comment for G */"
 
 
 ---> Doc comment for class I:
-unicode(%d) "/**
+string(%d) "/**
  * Interface doc comment
  */"

@@ -158,19 +158,19 @@ Error: 2 - gzopen(0.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -210,7 +210,7 @@ Error: 2 - gzopen(Class A object): failed to open stream: No such file or direct
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), object given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
@@ -222,6 +222,7 @@ Error: 2 - gzopen(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - gzopen() expects parameter 1 to be string (Unicode or binary), resource given, %s(%d)
+Error: 2 - gzopen() expects parameter 1 to be string, resource given, %s(%d)
 NULL
 ===DONE===
+

@@ -47,7 +47,7 @@ Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line
 
 Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %s on line %d
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 Done

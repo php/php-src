@@ -29,15 +29,15 @@ new C;
 ?>
 --EXPECTF--
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 array(3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"aa"]=>
+  ["aa"]=>
   int(4)
-  [u"cc"]=>
+  ["cc"]=>
   int(6)
 }
 

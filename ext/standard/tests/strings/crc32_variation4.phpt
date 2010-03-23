@@ -82,13 +82,13 @@ $heredoc_strings = array(
 $count = 1;
 foreach($heredoc_strings as $str) {
   echo "\n-- Iteration $count --\n";
-  var_dump( crc32((binary)$str) );
+  var_dump( crc32($str) );
   $count++;
 }
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing crc32() : with different heredoc strings ***
 
 -- Iteration 1 --

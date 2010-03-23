@@ -10,10 +10,7 @@ Gettext basic test with en_US locale that should be on nearly every system
 	}
 ?>
 --FILE--
-<?php
-
-// Using deprectated setlocale() in PHP6. The test needs to be changed
-// when there is an alternative available.
+<?php 
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
@@ -23,8 +20,7 @@ echo gettext("Basic test"), "\n";
 echo _("Basic test"), "\n";
 
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s.php on line %d
+--EXPECT--
 A basic test
 A basic test
 --CREDITS--

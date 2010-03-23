@@ -125,8 +125,6 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---XFAIL--
-Fails in PHP 6 due to an Oracle XML issue with the character set
 --EXPECTF--
 Test 1 Insert new XML data using a temporary CLOB
 array(1) {

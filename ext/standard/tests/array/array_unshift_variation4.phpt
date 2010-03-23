@@ -119,9 +119,9 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
 }
 -- Iteration 2 --
 int(2)
@@ -129,18 +129,18 @@ array(2) {
   [0]=>
   int(10)
   [1]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 int(4)
 array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 3 --
 int(2)
@@ -148,18 +148,18 @@ array(2) {
   [0]=>
   int(10)
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(4)
 array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 4 --
 int(5)
@@ -167,30 +167,30 @@ array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(1) "3"
+  string(1) "3"
   [4]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 int(7)
 array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(1) "1"
+  string(1) "1"
   [4]=>
-  unicode(1) "2"
+  string(1) "2"
   [5]=>
-  unicode(1) "3"
+  string(1) "3"
   [6]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 -- Iteration 5 --
 int(2)
@@ -198,18 +198,18 @@ array(2) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 int(4)
 array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iteration 6 --
 int(5)
@@ -217,43 +217,43 @@ array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(2) "f1"
+  string(2) "f1"
   [2]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [3]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [4]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 int(7)
 array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(2) "f1"
+  string(2) "f1"
   [4]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [5]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [6]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iteration 7 --
 int(5)
 array(5) {
   [0]=>
   int(10)
-  [u"\tHello"]=>
+  ["\tHello"]=>
   int(111)
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
-  [u"pen\n"]=>
+  ["pen\n"]=>
   int(33)
 }
 int(7)
@@ -261,16 +261,16 @@ array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"\tHello"]=>
+  string(5) "world"
+  ["\tHello"]=>
   int(111)
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
-  [u"pen\n"]=>
+  ["pen\n"]=>
   int(33)
 }
 -- Iteration 8 --
@@ -278,13 +278,13 @@ int(5)
 array(5) {
   [0]=>
   int(10)
-  [u"	Hello"]=>
+  ["	Hello"]=>
   int(111)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
-  [u"pen
+  ["pen
 "]=>
   int(33)
 }
@@ -293,16 +293,16 @@ array(7) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"	Hello"]=>
+  string(5) "world"
+  ["	Hello"]=>
   int(111)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
-  [u"pen
+  ["pen
 "]=>
   int(33)
 }
@@ -312,79 +312,79 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 int(5)
 array(5) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 10 --
 int(2)
 array(2) {
   [0]=>
   int(10)
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 int(4)
 array(4) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u""]=>
-  unicode(5) "hello"
+  string(5) "world"
+  [""]=>
+  string(5) "hello"
 }
 -- Iteration 11 --
 int(7)
 array(7) {
   [0]=>
   int(10)
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
-  [u"fruit"]=>
+  ["fruit"]=>
   float(2.2)
   [1]=>
-  unicode(3) "int"
+  string(3) "int"
   [2]=>
-  unicode(5) "float"
-  [u""]=>
-  unicode(5) "unset"
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
+  string(5) "float"
+  [""]=>
+  string(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
 }
 int(9)
 array(9) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"hello"]=>
+  string(5) "world"
+  ["hello"]=>
   int(1)
-  [u"fruit"]=>
+  ["fruit"]=>
   float(2.2)
   [3]=>
-  unicode(3) "int"
+  string(3) "int"
   [4]=>
-  unicode(5) "float"
-  [u""]=>
-  unicode(5) "unset"
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
+  string(5) "float"
+  [""]=>
+  string(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
 }
 Done

@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -43,58 +43,58 @@ var_dump($select2->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_GROUP));
 --EXPECT--
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(2) {
   [0]=>
-  unicode(2) "A2"
+  string(2) "A2"
   [1]=>
-  unicode(2) "B2"
+  string(2) "B2"
 }
 array(2) {
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
 }
 array(2) {
   [1]=>
-  unicode(1) "A"
+  string(1) "A"
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
 }
 array(2) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(2) {
   [1]=>
-  unicode(1) "A"
+  string(1) "A"
   [2]=>
-  unicode(1) "A"
+  string(1) "A"
 }
 array(2) {
   [1]=>
-  unicode(2) "A2"
+  string(2) "A2"
   [2]=>
-  unicode(2) "B2"
+  string(2) "B2"
 }
 array(1) {
-  [u"A"]=>
+  ["A"]=>
   array(2) {
     [0]=>
-    unicode(2) "A2"
+    string(2) "A2"
     [1]=>
-    unicode(2) "B2"
+    string(2) "B2"
   }
 }

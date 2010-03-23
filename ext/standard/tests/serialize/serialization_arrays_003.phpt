@@ -70,7 +70,7 @@ check($a);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 
 
 --- 0 refs external:
@@ -82,7 +82,7 @@ array(3) {
   [2]=>
   int(1)
 }
-unicode(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
+string(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
 array(3) {
   [0]=>
   int(1)
@@ -93,7 +93,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
@@ -101,19 +101,19 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
-  unicode(10) "b2.changed"
+  string(10) "b2.changed"
 }
 
 
@@ -126,7 +126,7 @@ array(3) {
   [2]=>
   int(1)
 }
-unicode(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
+string(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
 array(3) {
   [0]=>
   int(1)
@@ -137,7 +137,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
@@ -145,19 +145,19 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
-  unicode(10) "b2.changed"
+  string(10) "b2.changed"
 }
 
 
@@ -170,7 +170,7 @@ array(3) {
   [2]=>
   &int(1)
 }
-unicode(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
+string(30) "a:3:{i:0;i:1;i:1;i:1;i:2;i:1;}"
 array(3) {
   [0]=>
   int(1)
@@ -181,7 +181,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
@@ -189,19 +189,19 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
-  unicode(10) "b2.changed"
+  string(10) "b2.changed"
 }
 
 
@@ -214,7 +214,7 @@ array(3) {
   [2]=>
   int(1)
 }
-unicode(30) "a:3:{i:0;i:1;i:1;R:2;i:2;i:1;}"
+string(30) "a:3:{i:0;i:1;i:1;R:2;i:2;i:1;}"
 array(3) {
   [0]=>
   &int(1)
@@ -225,27 +225,27 @@ array(3) {
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
-  unicode(10) "b2.changed"
+  string(10) "b2.changed"
 }
 
 
@@ -258,7 +258,7 @@ array(3) {
   [2]=>
   &int(1)
 }
-unicode(30) "a:3:{i:0;i:1;i:1;R:2;i:2;R:2;}"
+string(30) "a:3:{i:0;i:1;i:1;R:2;i:2;R:2;}"
 array(3) {
   [0]=>
   &int(1)
@@ -269,26 +269,26 @@ array(3) {
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [2]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
 }
 array(3) {
   [0]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
 }
 array(3) {
   [0]=>
-  &unicode(10) "b2.changed"
+  &string(10) "b2.changed"
   [1]=>
-  &unicode(10) "b2.changed"
+  &string(10) "b2.changed"
   [2]=>
-  &unicode(10) "b2.changed"
+  &string(10) "b2.changed"
 }
 Done

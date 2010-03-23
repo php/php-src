@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -56,7 +56,6 @@ PHP_FUNCTION(date_parse);
 PHP_FUNCTION(date_parse_from_format);
 PHP_FUNCTION(date_get_last_errors);
 PHP_FUNCTION(date_format);
-PHP_FUNCTION(date_format_locale);
 PHP_FUNCTION(date_modify);
 PHP_FUNCTION(date_add);
 PHP_FUNCTION(date_sub);
@@ -81,9 +80,6 @@ PHP_FUNCTION(timezone_location_get);
 PHP_FUNCTION(timezone_identifiers_list);
 PHP_FUNCTION(timezone_abbreviations_list);
 PHP_FUNCTION(timezone_version_get);
-
-PHP_METHOD(timezone, identifiers_list);
-PHP_METHOD(timezone, abbreviations_list);
 
 PHP_METHOD(DateInterval, __construct);
 PHP_FUNCTION(date_interval_format);
@@ -171,7 +167,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime);
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI UChar *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
+PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);

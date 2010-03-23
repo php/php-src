@@ -27,49 +27,45 @@ unlink($filename);
 ?>
 --EXPECTF--
 Create a file:
-array(10) {
-  [u"wrapper_type"]=>
-  unicode(9) "plainfile"
-  [u"stream_type"]=>
-  unicode(5) "STDIO"
-  [u"mode"]=>
-  unicode(2) "w+"
-  [u"unread_bytes"]=>
+array(9) {
+  ["wrapper_type"]=>
+  string(9) "plainfile"
+  ["stream_type"]=>
+  string(5) "STDIO"
+  ["mode"]=>
+  string(2) "w+"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(%i) "File://%sstream_get_meta_data_file_variation4.php.tmp"
-  [u"timed_out"]=>
+  ["uri"]=>
+  string(%i) "File://%sstream_get_meta_data_file_variation4.php.tmp"
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }
 
 Change to file's directory and open with a relative path:
-array(10) {
-  [u"wrapper_type"]=>
-  unicode(9) "plainfile"
-  [u"stream_type"]=>
-  unicode(5) "STDIO"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(9) {
+  ["wrapper_type"]=>
+  string(9) "plainfile"
+  ["stream_type"]=>
+  string(5) "STDIO"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(%i) "stream_get_meta_data_file_variation4.php.tmp"
-  [u"timed_out"]=>
+  ["uri"]=>
+  string(%i) "stream_get_meta_data_file_variation4.php.tmp"
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }

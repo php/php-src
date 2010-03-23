@@ -189,12 +189,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: opendir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: opendir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -204,17 +204,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: opendir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: opendir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: opendir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

@@ -152,20 +152,7 @@ $var_values = array (
 
   /* undefined/unset vars */
   $unset_var,
-  $undef_var,
-
-  /* binary strings */
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
+  $undef_var
 );
 
 /* test conversion to array type */
@@ -191,9 +178,10 @@ foreach ($var_values as $var) {
   var_dump( gettype($var) );
 }
 
+
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -201,356 +189,356 @@ echo "Done\n";
 
 -- Setting type of data to array --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 array(0) {
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 array(1) {
   [0]=>
   bool(false)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 array(1) {
   [0]=>
   bool(true)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 array(1) {
   [0]=>
   bool(true)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "Ã¿"
+  string(1) "ÿ"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "f"
+  string(1) "f"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) "
+  string(2) "
 3"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) " "
+  string(1) " "
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) " "
+  string(1) " "
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) "10"
+  string(2) "10"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) "10"
+  string(2) "10"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(8) "10string"
+  string(8) "10string"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(8) "10string"
+  string(8) "10string"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) "-1"
+  string(2) "-1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(3) "1e2"
+  string(3) "1e2"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) " 1"
+  string(2) " 1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(22) "2974394749328742328432"
+  string(22) "2974394749328742328432"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "-1e-2"
+  string(5) "-1e-2"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) "-1"
+  string(2) "-1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(3) "1e2"
+  string(3) "1e2"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(2) " 1"
+  string(2) " 1"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(22) "2974394749328742328432"
+  string(22) "2974394749328742328432"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "-1e-2"
+  string(5) "-1e-2"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(4) "0xff"
+  string(4) "0xff"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(4) "0x55"
+  string(4) "0x55"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "0XA55"
+  string(5) "0XA55"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "0X123"
+  string(5) "0X123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(4) "0123"
+  string(4) "0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(4) "0123"
+  string(4) "0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "-0123"
+  string(5) "-0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "+0123"
+  string(5) "+0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "-0123"
+  string(5) "-0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(5) "+0123"
+  string(5) "+0123"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(8) "-0x80001"
+  string(8) "-0x80001"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(8) "+0x80001"
+  string(8) "+0x80001"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(10) "-0x80001.5"
+  string(10) "-0x80001.5"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(9) "0x80001.5"
+  string(9) "0x80001.5"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  unicode(12) "@$%#$%^$%^&^"
+  string(12) "@$%#$%^$%^&^"
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 array(0) {
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 array(1) {
   [0]=>
   NULL
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 array(4) {
   [0]=>
@@ -562,23 +550,23 @@ array(4) {
   [3]=>
   int(4)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 array(4) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
-  [u"four"]=>
+  string(5) "three"
+  ["four"]=>
   int(4)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 array(3) {
   [0]=>
@@ -588,359 +576,271 @@ array(3) {
   [2]=>
   float(6500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-2147483648)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 array(1) {
   [0]=>
   int(2147483647)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(2147483649)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(1232147483649)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 array(1) {
   [0]=>
   int(85)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(1058513956921)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 array(1) {
   [0]=>
   int(-21903)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 array(1) {
   [0]=>
   int(365)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 array(1) {
   [0]=>
   int(-365)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(80561044571754)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(100000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-100000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(100000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-100000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-1.5)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(0.5)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-0.5)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-5.0E-7)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(512000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-512000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(5.12E-7)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(5.12E-7)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(512000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 array(1) {
   [0]=>
   float(-512000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 array(2) {
-  [u"x"]=>
+  ["x"]=>
   NULL
-  [u"y"]=>
+  ["y"]=>
   NULL
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 array(2) {
-  [u"x"]=>
+  ["x"]=>
   float(2.5)
-  [u"y"]=>
+  ["y"]=>
   float(40.5)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 array(2) {
-  [u"x"]=>
+  ["x"]=>
   int(0)
-  [u"y"]=>
+  ["y"]=>
   int(0)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 array(0) {
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 array(0) {
 }
-unicode(5) "array"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(8) "10string"
-}
-unicode(5) "array"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(8) "10string"
-}
-unicode(5) "array"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(5) "+0123"
-}
-unicode(5) "array"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(5) "-0123"
-}
-unicode(5) "array"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(4) "0xff"
-}
-unicode(5) "array"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(4) "0x55"
-}
-unicode(5) "array"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(3) "1e2"
-}
-unicode(5) "array"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(22) "2974394749328742328432"
-}
-unicode(5) "array"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(3) "1e2"
-}
-unicode(5) "array"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(8) "10string"
-}
-unicode(5) "array"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-array(1) {
-  [0]=>
-  string(8) "10string"
-}
-unicode(5) "array"
+string(5) "array"
 Done

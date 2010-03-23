@@ -108,37 +108,37 @@ foreach($inputs as $key =>$value) {
 *** Testing date_sunset() : usage variation ***
 
 --int 0--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --int 1--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --int 12345--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --int -12345--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --float 10.5--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --float -10.5--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --float .5--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
@@ -187,99 +187,99 @@ Warning: date_sunset() expects parameter 1 to be long, array given in %s on line
 bool(false)
 
 --uppercase NULL--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --lowercase null--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --lowercase true--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --lowercase false--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --uppercase TRUE--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --uppercase FALSE--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -305,12 +305,12 @@ Warning: date_sunset() expects parameter 1 to be long, object given in %s on lin
 bool(false)
 
 --undefined var--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 
 --unset var--
-unicode(5) "18:22"
+string(5) "18:22"
 float(18.377%d)
 int(62558)
 ===DONE===

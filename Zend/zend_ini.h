@@ -133,7 +133,7 @@ END_EXTERN_C()
 
 #define ZEND_INI_ENTRY1(name, default_value, modifiable, on_modify, arg1) \
 	ZEND_INI_ENTRY1_EX(name, default_value, modifiable, on_modify, arg1, NULL)
-
+	
 #define ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, displayer) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, NULL, NULL, NULL, displayer)
 
@@ -181,7 +181,6 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
 ZEND_API ZEND_INI_MH(OnUpdateString);
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
-ZEND_API ZEND_INI_MH(OnUpdateUTF8String);
 END_EXTERN_C()
 
 #define ZEND_INI_DISPLAY_ORIG	1

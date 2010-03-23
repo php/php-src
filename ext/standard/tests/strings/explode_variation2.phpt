@@ -38,7 +38,7 @@ $strings =  array (
 		  // float values
 /*7*/	  10.5,
 		  -20.5,
-		  10.1234567e5,
+		  10.1234567e10,
 		
 		  // array values
 /*10*/	  array(),
@@ -81,115 +81,115 @@ foreach($strings as $string) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===Done===
+===DONE===
 --EXPECTF--
 *** Testing explode() function: with unexpected inputs for 'string' argument ***
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  unicode(3) "255"
+  string(3) "255"
 }
 -- Iteration 4 --
 array(1) {
   [0]=>
-  unicode(3) "256"
+  string(3) "256"
 }
 -- Iteration 5 --
 array(1) {
   [0]=>
-  unicode(10) "2147483647"
+  string(10) "2147483647"
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  unicode(11) "-2147483648"
+  string(11) "-2147483648"
 }
 -- Iteration 7 --
 array(1) {
   [0]=>
-  unicode(4) "10.5"
+  string(4) "10.5"
 }
 -- Iteration 8 --
 array(1) {
   [0]=>
-  unicode(5) "-20.5"
+  string(5) "-20.5"
 }
 -- Iteration 9 --
 array(1) {
   [0]=>
-  unicode(10) "1012345.67"
+  string(12) "101234567000"
 }
 -- Iteration 10 --
 
-Warning: explode() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: explode() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: explode() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 14 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 15 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 16 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 17 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 18 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 19 --
 array(2) {
   [0]=>
-  unicode(6) "sample"
+  string(6) "sample"
   [1]=>
-  unicode(6) "object"
+  string(6) "object"
 }
 -- Iteration 20 --
 
-Warning: explode() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: explode() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 22 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
-===Done===
+===DONE===

@@ -70,74 +70,74 @@ echo "Done\n";
 \*\*\* Testing possible variations in path \*\*\*
 
 --Iteration 1 --
-unicode\(11\) "~(\\|\/)home(\\|\/)user"
+string\(11\) "~(\\|\/)home(\\|\/)user"
 
 --Iteration 2 --
-unicode\(11\) "~(\\|\/)home(\\|\/)user"
+string\(11\) "~(\\|\/)home(\\|\/)user"
 
 --Iteration 3 --
-unicode\(11\) "~(\\|\/)home(\\|\/)user"
+string\(11\) "~(\\|\/)home(\\|\/)user"
 
 --Iteration 4 --
-unicode\(11\) "~(\\|\/)home(\\|\/)user"
+string\(11\) "~(\\|\/)home(\\|\/)user"
 
 --Iteration 5 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 6 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 7 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 8 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 9 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 10 --
-unicode\(19\) "hostname:(\\|\/)home(\\|\/)user"
+string\(19\) "hostname:(\\|\/)home(\\|\/)user"
 
 --Iteration 11 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 12 --
-unicode\(1\) "(\\|\/)"
+string\(1\) "(\\|\/)"
 
 --Iteration 13 --
-unicode\(1\) "(\\|\/)"
+string\(1\) "(\\|\/)"
 
 --Iteration 14 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 15 --
-unicode\(2\) "10"
+string\(2\) "10"
 
 --Iteration 16 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 17 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 18 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 19 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 20 --
-unicode\(1\) "."
+string\(1\) "."
 
 --Iteration 21 --
-unicode\(0\) ""
+string\(0\) ""
 
 --Iteration 22 --
-unicode\(0\) ""
+string\(0\) ""
 
 --Iteration 23 --
-unicode\(0\) ""
+string\(0\) ""
 
 --Iteration 24 --
-unicode\(0\) ""
+string\(0\) ""
 Done

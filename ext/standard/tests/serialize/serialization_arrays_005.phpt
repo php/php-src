@@ -78,7 +78,7 @@ $a[1] = &$c;
 check($c);
 
 ?>
---EXPECT--
+--EXPECTF--
 
 
 --- Nested array references 1 element in containing array:
@@ -95,57 +95,57 @@ array(3) {
     int(1)
   }
 }
-unicode(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;i:1;}}"
+string(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;i:1;}}"
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
     int(1)
   }
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
     int(1)
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
     int(1)
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    unicode(12) "b2.1.changed"
+    string(12) "b2.1.changed"
   }
 }
 
@@ -164,58 +164,58 @@ array(3) {
   [2]=>
   int(1)
 }
-unicode(48) "a:3:{i:0;i:1;i:1;a:2:{i:0;i:1;i:1;R:2;}i:2;i:1;}"
+string(48) "a:3:{i:0;i:1;i:1;a:2:{i:0;i:1;i:1;R:2;}i:2;i:1;}"
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
   array(2) {
     [0]=>
     int(1)
     [1]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
   }
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
   array(2) {
     [0]=>
-    unicode(12) "b1.0.changed"
+    string(12) "b1.0.changed"
     [1]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
   }
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  &unicode(12) "b1.1.changed"
+  &string(12) "b1.1.changed"
   [1]=>
   array(2) {
     [0]=>
-    unicode(12) "b1.0.changed"
+    string(12) "b1.0.changed"
     [1]=>
-    &unicode(12) "b1.1.changed"
+    &string(12) "b1.1.changed"
   }
   [2]=>
   int(1)
 }
 array(3) {
   [0]=>
-  &unicode(12) "b1.1.changed"
+  &string(12) "b1.1.changed"
   [1]=>
   array(2) {
     [0]=>
-    unicode(12) "b1.0.changed"
+    string(12) "b1.0.changed"
     [1]=>
-    &unicode(12) "b1.1.changed"
+    &string(12) "b1.1.changed"
   }
   [2]=>
-  unicode(10) "b2.changed"
+  string(10) "b2.changed"
 }
 
 
@@ -233,57 +233,57 @@ array(3) {
     &int(1)
   }
 }
-unicode(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;R:3;}}"
+string(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;R:3;}}"
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
   &int(1)
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
     &int(1)
   }
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
-    &unicode(10) "b1.changed"
+    &string(10) "b1.changed"
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    &unicode(10) "b1.changed"
+    &string(10) "b1.changed"
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  &unicode(12) "b2.1.changed"
+  &string(12) "b2.1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    &unicode(12) "b2.1.changed"
+    &string(12) "b2.1.changed"
   }
 }
 
@@ -302,10 +302,10 @@ array(3) {
     int(1)
   }
 }
-unicode(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:3;i:1;i:1;}}"
+string(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:3;i:1;i:1;}}"
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   &int(1)
   [2]=>
@@ -318,41 +318,41 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b1.changed"
+    &string(10) "b1.changed"
     [1]=>
     int(1)
   }
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
     int(1)
   }
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    unicode(12) "b2.1.changed"
+    string(12) "b2.1.changed"
   }
 }
 
@@ -371,57 +371,57 @@ array(3) {
     &int(1)
   }
 }
-unicode(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;R:3;}}"
+string(48) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;R:2;i:1;R:3;}}"
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
   &int(1)
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
     &int(1)
   }
 }
 array(3) {
   [0]=>
-  &unicode(10) "b0.changed"
+  &string(10) "b0.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(10) "b0.changed"
+    &string(10) "b0.changed"
     [1]=>
-    &unicode(10) "b1.changed"
+    &string(10) "b1.changed"
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  &unicode(10) "b1.changed"
+  &string(10) "b1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    &unicode(10) "b1.changed"
+    &string(10) "b1.changed"
   }
 }
 array(3) {
   [0]=>
-  &unicode(12) "b2.0.changed"
+  &string(12) "b2.0.changed"
   [1]=>
-  &unicode(12) "b2.1.changed"
+  &string(12) "b2.1.changed"
   [2]=>
   array(2) {
     [0]=>
-    &unicode(12) "b2.0.changed"
+    &string(12) "b2.0.changed"
     [1]=>
-    &unicode(12) "b2.1.changed"
+    &string(12) "b2.1.changed"
   }
 }
 
@@ -459,10 +459,10 @@ array(3) {
     }
   }
 }
-unicode(74) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;i:1;i:1;a:3:{i:0;i:1;i:1;i:1;i:2;R:4;}}}"
+string(74) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;i:1;i:1;a:3:{i:0;i:1;i:1;i:1;i:2;R:4;}}}"
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
@@ -494,9 +494,9 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   &array(2) {
     [0]=>
@@ -526,13 +526,13 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   &array(2) {
     [0]=>
-    unicode(12) "b2.0.changed"
+    string(12) "b2.0.changed"
     [1]=>
     array(3) {
       [0]=>
@@ -542,7 +542,7 @@ array(3) {
       [2]=>
       &array(2) {
         [0]=>
-        unicode(12) "b2.0.changed"
+        string(12) "b2.0.changed"
         [1]=>
         array(3) {
           [0]=>
@@ -558,14 +558,14 @@ array(3) {
 }
 array(3) {
   [0]=>
-  unicode(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
-  unicode(10) "b1.changed"
+  string(10) "b1.changed"
   [2]=>
   &array(2) {
     [0]=>
-    unicode(12) "b2.0.changed"
+    string(12) "b2.0.changed"
     [1]=>
-    unicode(12) "b2.1.changed"
+    string(12) "b2.1.changed"
   }
 }

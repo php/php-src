@@ -21,72 +21,72 @@ array(10) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(10) "2006-05-13"
+    string(10) "2006-05-13"
     [1]=>
-    unicode(9) "12-Aug-37"
+    string(9) "12-Aug-37"
   }
-  [u"date"]=>
+  ["date"]=>
   array(2) {
     [0]=>
-    unicode(10) "2006-05-13"
+    string(10) "2006-05-13"
     [1]=>
-    unicode(9) "12-Aug-37"
+    string(9) "12-Aug-37"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(10) "2006-05-13"
+    string(10) "2006-05-13"
     [1]=>
-    unicode(9) "12-Aug-37"
+    string(9) "12-Aug-37"
   }
-  [u"year"]=>
+  ["year"]=>
   array(2) {
     [0]=>
-    unicode(4) "2006"
+    string(4) "2006"
     [1]=>
-    unicode(2) "12"
+    string(2) "12"
   }
   [2]=>
   array(2) {
     [0]=>
-    unicode(4) "2006"
+    string(4) "2006"
     [1]=>
-    unicode(2) "12"
+    string(2) "12"
   }
   [3]=>
   array(2) {
     [0]=>
-    unicode(2) "20"
+    string(2) "20"
     [1]=>
-    unicode(0) ""
+    string(0) ""
   }
-  [u"month"]=>
+  ["month"]=>
   array(2) {
     [0]=>
-    unicode(2) "05"
+    string(2) "05"
     [1]=>
-    unicode(3) "Aug"
+    string(3) "Aug"
   }
   [4]=>
   array(2) {
     [0]=>
-    unicode(2) "05"
+    string(2) "05"
     [1]=>
-    unicode(3) "Aug"
+    string(3) "Aug"
   }
-  [u"day"]=>
+  ["day"]=>
   array(2) {
     [0]=>
-    unicode(2) "13"
+    string(2) "13"
     [1]=>
-    unicode(2) "37"
+    string(2) "37"
   }
   [5]=>
   array(2) {
     [0]=>
-    unicode(2) "13"
+    string(2) "13"
     [1]=>
-    unicode(2) "37"
+    string(2) "37"
   }
 }
 int(2)
@@ -94,47 +94,47 @@ array(2) {
   [0]=>
   array(10) {
     [0]=>
-    unicode(10) "2006-05-13"
-    [u"date"]=>
-    unicode(10) "2006-05-13"
+    string(10) "2006-05-13"
+    ["date"]=>
+    string(10) "2006-05-13"
     [1]=>
-    unicode(10) "2006-05-13"
-    [u"year"]=>
-    unicode(4) "2006"
+    string(10) "2006-05-13"
+    ["year"]=>
+    string(4) "2006"
     [2]=>
-    unicode(4) "2006"
+    string(4) "2006"
     [3]=>
-    unicode(2) "20"
-    [u"month"]=>
-    unicode(2) "05"
+    string(2) "20"
+    ["month"]=>
+    string(2) "05"
     [4]=>
-    unicode(2) "05"
-    [u"day"]=>
-    unicode(2) "13"
+    string(2) "05"
+    ["day"]=>
+    string(2) "13"
     [5]=>
-    unicode(2) "13"
+    string(2) "13"
   }
   [1]=>
   array(10) {
     [0]=>
-    unicode(9) "12-Aug-37"
-    [u"date"]=>
-    unicode(9) "12-Aug-37"
+    string(9) "12-Aug-37"
+    ["date"]=>
+    string(9) "12-Aug-37"
     [1]=>
-    unicode(9) "12-Aug-37"
-    [u"year"]=>
-    unicode(2) "12"
+    string(9) "12-Aug-37"
+    ["year"]=>
+    string(2) "12"
     [2]=>
-    unicode(2) "12"
+    string(2) "12"
     [3]=>
-    unicode(0) ""
-    [u"month"]=>
-    unicode(3) "Aug"
+    string(0) ""
+    ["month"]=>
+    string(3) "Aug"
     [4]=>
-    unicode(3) "Aug"
-    [u"day"]=>
-    unicode(2) "37"
+    string(3) "Aug"
+    ["day"]=>
+    string(2) "37"
     [5]=>
-    unicode(2) "37"
+    string(2) "37"
   }
 }

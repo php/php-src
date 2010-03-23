@@ -30,7 +30,7 @@ $it->show();
 <?php exit(0); ?>
 --EXPECTF--
 int(0)
-unicode(3) "Bar"
+string(3) "Bar"
 int(2)
-unicode(6) "FooBar"
+string(6) "FooBar"
 ===DONE===

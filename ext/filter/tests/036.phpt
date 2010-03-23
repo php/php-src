@@ -24,16 +24,16 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(2) {
-  [u"test1"]=>
+  ["test1"]=>
   int(1)
-  [u"test2"]=>
+  ["test2"]=>
   int(1)
 }
 array(2) {
-  [u"test1"]=>
+  ["test1"]=>
   int(1)
-  [u"test2"]=>
-  &unicode(1) "1"
+  ["test2"]=>
+  &string(1) "1"
 }
-unicode(1) "1"
+string(1) "1"
 Done

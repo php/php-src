@@ -3,8 +3,6 @@ iconv_strpos()
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --INI--
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 iconv.internal_charset=ISO-8859-1
 --FILE--
 <?php
@@ -30,12 +28,13 @@ foo("abecdbcdabef", "bcd", 100000);
 foo("abcabcabcdabcababcdabc", "bcd", 0);
 foo("abcabcabcdabcababcdabc", "bcd", 10);
 foo(str_repeat("abcab", 60)."abcdb".str_repeat("adabc", 60), "abcd", 0);
-foo(str_repeat(b"あいうえお", 30).b"いうおえあ".str_repeat(b"あいえおう", 30), b"うお", 0, "EUC-JP");
-$str = str_repeat(b"あいうえお", 60).b'$'.str_repeat(b"あいえおう", 60);
-foo($str, b'$', 0, "ISO-2022-JP", "EUC-JP");
+foo(str_repeat("あいうえお", 30)."いうおえあ".str_repeat("あいえおう", 30), "うお", 0, "EUC-JP");
+$str = str_repeat("あいうえお", 60).'$'.str_repeat("あいえおう", 60);
+foo($str, '$', 0, "ISO-2022-JP", "EUC-JP");
 
 var_dump(iconv_strpos("string", ""));
 var_dump(iconv_strpos("", "string"));
+
 ?>
 --EXPECTF--
 2: %s

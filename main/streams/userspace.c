@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -57,7 +57,7 @@ static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_mkdir,
 	user_wrapper_rmdir
 };
-php_stream_wrapper_ops *php_stream_user_wrapper_ops = &user_stream_wops;
+
 
 static void stream_wrapper_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -281,8 +281,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 		were restricted we wouldn't get here */
 	old_in_user_include = PG(in_user_include);
 	if(uwrap->wrapper.is_url == 0 && 
-		(options & STREAM_OPEN_FOR_INCLUDE) && 
-		(PG(allow_url_include_list) == NULL || strlen(PG(allow_url_include_list)) !=1 || PG(allow_url_include_list)[0] != '*')) {
+		(options & STREAM_OPEN_FOR_INCLUDE) &&
+		!PG(allow_url_include)) {
 		PG(in_user_include) = 1;
 	}
 
@@ -399,7 +399,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	zval_ptr_dtor(&zfilename);
 
 	FG(user_stream_current_filename) = NULL;
-
+		
 	PG(in_user_include) = old_in_user_include;
 	return stream;
 }
@@ -515,8 +515,8 @@ PHP_FUNCTION(stream_wrapper_register)
 			RETURN_TRUE;
 		} else {
 			/* We failed.  But why? */
-			if (zend_hash_exists(php_stream_get_url_stream_wrappers_hash(), protocol, protocol_len+1)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol %s:// is already defined", protocol);
+			if (zend_hash_exists(php_stream_get_url_stream_wrappers_hash(), protocol, protocol_len + 1)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol %s:// is already defined.", protocol);
 			} else {
 				/* Hash doesn't exist so it must have been an invalid protocol scheme */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid protocol scheme specified. Unable to register wrapper class %s to %s://", classname, protocol);
@@ -855,7 +855,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 	zval **elem;
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
 		convert_to_long(*elem);                                                                   \
 		ssb->sb.st_##name2 = Z_LVAL_PP(elem);                                                      \
 	}

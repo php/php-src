@@ -22,7 +22,7 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-$str = b"this is a biiiig faaat test string. why are you reading it, I wonder? =)";
+$str = "this is a biiiig faaat test string. why are you reading it, I wonder? =)";
 var_dump($blob->write($str));
 
 oci_commit($c);
@@ -65,19 +65,19 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(72)
 array(2) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
-  [u"BLOB"]=>
+  ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

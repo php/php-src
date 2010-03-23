@@ -115,56 +115,56 @@ unlink($filename);
 
 --int 0--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --int 1--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --int 12345--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --int -12345--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --float 10.5--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --float -10.5--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --float 12.3456789000e10--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --float -12.3456789000e10--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --float .5--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --empty array--
@@ -185,50 +185,50 @@ bool(false)
 
 --uppercase NULL--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --lowercase null--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --empty string DQ--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --empty string SQ--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --string DQ--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --string SQ--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --mixed case string--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --heredoc--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --instance of classWithToString--
@@ -241,14 +241,14 @@ bool(false)
 
 --undefined var--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 
 --unset var--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 ===DONE===
 

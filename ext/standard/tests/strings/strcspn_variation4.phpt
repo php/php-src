@@ -160,22 +160,22 @@ int(0)
 
 -- Iteration with len value as "" --
 
-Warning: strcspn() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "" --
 
-Warning: strcspn() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strcspn() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "string" --
 
-Warning: strcspn() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with len value as "object" --
@@ -189,7 +189,7 @@ int(0)
 -- Iteration with len value as "" --
 int(0)
 
--- Iteration with len value as "Resource id #5" --
+-- Iteration with len value as "Resource id #%d" --
 
 Warning: strcspn() expects parameter 4 to be long, resource given in %s on line %d
 NULL

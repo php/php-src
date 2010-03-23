@@ -28,7 +28,7 @@ stripos() function test
 
 	echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(5)
 int(5)
@@ -38,8 +38,6 @@ int(2)
 int(0)
 int(0)
 bool(false)
-
-Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 bool(false)
 bool(false)

@@ -31,7 +31,7 @@ var_dump($ao);
 --EXPECTF--
 *** Testing ArrayObject::uasort() : basic functionality ***
 object(ArrayObject)#1 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [1]=>
     int(3)

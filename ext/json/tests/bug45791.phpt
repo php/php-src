@@ -10,6 +10,6 @@ var_dump(json_decode('{"zero": 0e0}'));
 ?>
 --EXPECT--
 object(stdClass)#1 (1) {
-  [u"zero"]=>
+  ["zero"]=>
   float(0)
 }

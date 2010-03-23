@@ -1,13 +1,13 @@
 --TEST--
-Test sizeof() function : objects - object with Countable interface 
+Test sizeof() function : object functionality - object with Countable interface
 --SKIPIF--
-<?php
+<?php 
 // Skip the test case if Standard PHP Library(spl) is not installed
-if( !extension_loaded('spl') )
-{
-   die('skip SPL not installed');
-}
-?> 
+  if( !extension_loaded('spl'))
+  {
+     die('skip spl is not installed');
+  }
+?>
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode])
@@ -17,7 +17,7 @@ if( !extension_loaded('spl') )
  * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() with object functionality ***\n";
+echo "*** Testing sizeof() : object functionality ***\n";
 
 echo "-- Testing sizeof() with an object which implements Countable interface --\n";
 class sizeof_class implements Countable 
@@ -43,8 +43,8 @@ var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECT--
-*** Testing sizeof() with object functionality ***
+--EXPECTF--
+*** Testing sizeof() : object functionality ***
 -- Testing sizeof() with an object which implements Countable interface --
 -- Testing sizeof() in default mode --
 int(3)

@@ -120,11 +120,7 @@ bool(false)
 int(8)
 bool(false)
 -- Iteration 16 --
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(43)
@@ -182,7 +178,5 @@ bool(false)
 bool(false)
 -- Iteration 35 --
 int(0)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 *** Done ***

@@ -20,5 +20,5 @@ throw new Exception();
 
 echo "Done\n";
 ?>
---EXPECT--
-unicode(17) "Exception thrown!"
+--EXPECTF--	
+string(17) "Exception thrown!"

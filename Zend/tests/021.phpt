@@ -27,7 +27,7 @@ print_r($e);
 bool(true)
 bool(true)
 int(23)
-unicode(3) "bar"
+string(3) "bar"
 int(23)
 float(23.5)
 int(1)

@@ -5,7 +5,7 @@ Bug #38424 (Different attribute assignment if new or exists)
 --FILE--
 <?php
 
-$xml = simplexml_load_string(b'<xml></xml>');
+$xml = simplexml_load_string('<xml></xml>');
 
 $str = "abc & def" ;
 

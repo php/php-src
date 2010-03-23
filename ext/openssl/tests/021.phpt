@@ -7,7 +7,6 @@ openssl_csr_sign() tests
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $priv = "file://" . dirname(__FILE__) . "/private.key";
 $wrong = "wrong";
-$wrong2 = b"wrong";
 $pub = "file://" . dirname(__FILE__) . "/public.key";
 
 $dn = array(
@@ -31,12 +30,10 @@ var_dump(openssl_csr_sign($csr, null, $privkey, 365, $args));
 var_dump(openssl_csr_sign($csr, null, $privkey, 365));
 var_dump(openssl_csr_sign($csr, $cert, $priv, 365));
 var_dump(openssl_csr_sign($csr, $wrong, $privkey, 365));
-var_dump(openssl_csr_sign($csr, $wrong2, $privkey, 365));
 var_dump(openssl_csr_sign($csr, null, $wrong, 365));
-var_dump(openssl_csr_sign($csr, null, $wrong2, 365));
 var_dump(openssl_csr_sign($csr, null, $privkey, $wrong));
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $wrong));
-var_dump(openssl_csr_sign($wrong2, null, $privkey, 365));
+var_dump(openssl_csr_sign($wrong, null, $privkey, 365));
 var_dump(openssl_csr_sign(array(), null, $privkey, 365));
 var_dump(openssl_csr_sign($csr, array(), $privkey, 365));
 var_dump(openssl_csr_sign($csr, null, array(), 365));
@@ -48,26 +45,16 @@ resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 
-Warning: openssl_csr_sign(): Binary string expected, Unicode string received in %s on line %d
-
 Warning: openssl_csr_sign(): cannot get cert from parameter 2 in %s on line %d
-bool(false)
-
-Warning: openssl_csr_sign(): cannot get cert from parameter 2 in %s on line %d
-bool(false)
-
-Warning: openssl_csr_sign(): Binary string expected, Unicode string received in %s on line %d
-
-Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
-Warning: openssl_csr_sign() expects parameter 5 to be array, Unicode string given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 5 to be array, string given in %s on line %d
 NULL
 
 Warning: openssl_csr_sign(): cannot get CSR from parameter 1 in %s on line %d

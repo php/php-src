@@ -63,8 +63,6 @@ Warning: diskfreespace(): The system cannot find the path specified.
  in %s on line %d
 bool(false)
 
-Notice: fwrite(): 36 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
-
 Warning: disk_free_space(): The directory name is invalid.
  in %s on line %d
 bool(false)
@@ -74,3 +72,4 @@ Warning: diskfreespace(): The directory name is invalid.
 bool(false)
 
 -- Done --
+

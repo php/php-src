@@ -83,23 +83,21 @@ Warning: flock() expects parameter 2 to be long, array given in %s on line %d
 NULL
 
 --- Iteration 6 ---
-Warning: flock() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: flock() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 --- Iteration 7 ---
-Warning: flock() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: flock() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 --- Iteration 8 ---
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: flock() expects parameter 2 to be long, string given in %s on line %d
+NULL
 
-Warning: flock(): Illegal operation argument in %s on line %d
+Warning: flock(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: flock(): 6 is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: flock() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
@@ -112,4 +110,3 @@ Warning: flock() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 *** Done ***
-

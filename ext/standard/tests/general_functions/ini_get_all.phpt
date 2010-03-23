@@ -20,8 +20,8 @@ var_dump(ini_get_all("", ""));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(5) "array"
+--EXPECTF--	
+string(5) "array"
 
 Warning: ini_get_all(): Unable to find extension '' in %s on line %d
 bool(false)
@@ -31,30 +31,30 @@ bool(false)
 array(0) {
 }
 array(2) {
-  [u"pcre.backtrack_limit"]=>
+  ["pcre.backtrack_limit"]=>
   array(3) {
-    [u"global_value"]=>
-    unicode(6) "100000"
-    [u"local_value"]=>
-    unicode(6) "100000"
-    [u"access"]=>
+    ["global_value"]=>
+    string(6) "100000"
+    ["local_value"]=>
+    string(6) "100000"
+    ["access"]=>
     int(7)
   }
-  [u"pcre.recursion_limit"]=>
+  ["pcre.recursion_limit"]=>
   array(3) {
-    [u"global_value"]=>
-    unicode(6) "100000"
-    [u"local_value"]=>
-    unicode(6) "100000"
-    [u"access"]=>
+    ["global_value"]=>
+    string(6) "100000"
+    ["local_value"]=>
+    string(6) "100000"
+    ["access"]=>
     int(7)
   }
 }
 array(2) {
-  [u"pcre.backtrack_limit"]=>
-  unicode(6) "100000"
-  [u"pcre.recursion_limit"]=>
-  unicode(6) "100000"
+  ["pcre.backtrack_limit"]=>
+  string(6) "100000"
+  ["pcre.recursion_limit"]=>
+  string(6) "100000"
 }
 array(0) {
 }

@@ -22,6 +22,6 @@ var_dump($r->getProperty('protectedVar')->getDeclaringClass()->getName());
 echo "Done\n";
 ?>
 --EXPECTF--	
-unicode(7) "CParent"
-unicode(7) "CParent"
+string(7) "CParent"
+string(7) "CParent"
 Done

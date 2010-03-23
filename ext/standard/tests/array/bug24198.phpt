@@ -8,18 +8,18 @@ var_dump(array_merge_recursive($c, $c));
 ?>
 --EXPECT--
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   array(2) {
     [0]=>
-    unicode(2) "aa"
+    string(2) "aa"
     [1]=>
-    unicode(2) "aa"
+    string(2) "aa"
   }
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
-    unicode(2) "bb"
+    string(2) "bb"
     [1]=>
-    unicode(2) "bb"
+    string(2) "bb"
   }
 }

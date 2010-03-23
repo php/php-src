@@ -23,26 +23,26 @@ var_dump($rp->isDefault(1));
 --EXPECTF--
 Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 0 given in %s on line %d
 object(ReflectionProperty)#%d (2) {
-  [u"name"]=>
-  unicode(0) ""
-  [u"class"]=>
-  unicode(0) ""
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
 }
 
 Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 1 given in %s on line %d
 object(ReflectionProperty)#%d (2) {
-  [u"name"]=>
-  unicode(0) ""
-  [u"class"]=>
-  unicode(0) ""
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
 }
 
 Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 3 given in %s on line %d
 object(ReflectionProperty)#%d (2) {
-  [u"name"]=>
-  unicode(0) ""
-  [u"class"]=>
-  unicode(0) ""
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
 }
 
 Warning: ReflectionProperty::getName() expects exactly 0 parameters, 1 given in %s on line %d

@@ -2,7 +2,7 @@
 Test uksort() function : usage variation 
 --FILE--
 <?php
-/* Prototype  : bool uksort(array array_arg, Unicode string cmp_function)
+/* Prototype  : bool uksort(array array_arg, string cmp_function)
  * Description: Sort an array by keys using a user-defined comparison function 
  * Source code: ext/standard/array.c
  * Alias to functions: 
@@ -174,32 +174,32 @@ NULL
 
 --empty string DQ--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --string DQ--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --string SQ--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --heredoc--
 
-Warning: uksort() expects parameter 1 to be array, Unicode string given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, string given in %suksort_variation1.php on line %d
 NULL
 
 --instance of classWithToString--

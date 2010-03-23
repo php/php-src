@@ -42,38 +42,37 @@ var_dump($obj);
 
 
 ?>
-===DONE===
 --EXPECTF--
+
 Removing properties before the current element from an iterated object.
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original d"
+string(10) "Original e"
 object(C)#%d (4) {
-  [u"a"]=>
-  unicode(10) "Original a"
-  [u"b"]=>
-  unicode(10) "Original b"
-  [u"d"]=>
-  unicode(10) "Original d"
-  [u"e"]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(10) "Original a"
+  ["b"]=>
+  string(10) "Original b"
+  ["d"]=>
+  string(10) "Original d"
+  ["e"]=>
+  string(10) "Original e"
 }
 
 Removing properties before the current element from an iterated object.
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(C)#%d (4) {
-  [u"b"]=>
-  unicode(10) "Original b"
-  [u"c"]=>
-  unicode(10) "Original c"
-  [u"d"]=>
-  unicode(10) "Original d"
-  [u"e"]=>
-  unicode(10) "Original e"
+  ["b"]=>
+  string(10) "Original b"
+  ["c"]=>
+  string(10) "Original c"
+  ["d"]=>
+  string(10) "Original d"
+  ["e"]=>
+  string(10) "Original e"
 }
-===DONE===

@@ -25,18 +25,37 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-unicode(%d) "%s\test\bad"
-unicode(%d) "%s\test\bad\bad.txt"
-unicode(%d) "%s\test"
-unicode(%d) "%s\test"
-unicode(%d) "%s"
-unicode(%d) "%s\test\bad"
-unicode(%d) "%s\test\bad\bad.txt"
-unicode(%d) "%s\test\bad\bad.txt"
-unicode(%d) "%s\test"
-unicode(%d) "%s\test\ok"
-unicode(%d) "%s\test\ok\ok.txt"
-unicode(%d) "%s\test\ok\ok.txt"
-unicode(%d) "%s\test\ok\ok.txt"
-unicode(%d) "%s\test\ok\ok.txt"
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test\bad) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test\bad\bad.txt) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test\bad) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test\bad\bad.txt) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test\bad\bad.txt) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+
+Warning: realpath(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+string(%d) "%s\test\ok"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
 *** Finished testing open_basedir configuration [realpath] ***
+

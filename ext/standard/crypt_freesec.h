@@ -6,7 +6,7 @@
 #if PHP_WIN32
 # include "win32/php_stdint.h"
 # ifndef inline
-#  define inline __inline
+# define inline __inline
 # endif
 #else
 # include "php_config.h"

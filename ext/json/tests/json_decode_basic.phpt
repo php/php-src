@@ -48,7 +48,7 @@ foreach($inputs as $input) {
 }
 
 ?>
-===DONE===
+===Done===
 --EXPECTF-- 
 *** Testing json_decode() : basic functionality ***
 -- Iteration 1 --
@@ -85,12 +85,12 @@ bool(false)
 NULL
 NULL
 -- Iteration 12 --
-unicode(3) "abc"
-unicode(3) "abc"
+string(3) "abc"
+string(3) "abc"
 -- Iteration 13 --
-unicode(13) "Hello World
+string(13) "Hello World
 "
-unicode(13) "Hello World
+string(13) "Hello World
 "
 -- Iteration 14 --
 array(0) {
@@ -124,64 +124,64 @@ array(5) {
 }
 -- Iteration 16 --
 object(stdClass)#%d (5) {
-  [u"myInt"]=>
+  ["myInt"]=>
   int(99)
-  [u"myFloat"]=>
+  ["myFloat"]=>
   float(123.45)
-  [u"myNull"]=>
+  ["myNull"]=>
   NULL
-  [u"myBool"]=>
+  ["myBool"]=>
   bool(true)
-  [u"myString"]=>
-  unicode(11) "Hello World"
+  ["myString"]=>
+  string(11) "Hello World"
 }
 array(5) {
-  [u"myInt"]=>
+  ["myInt"]=>
   int(99)
-  [u"myFloat"]=>
+  ["myFloat"]=>
   float(123.45)
-  [u"myNull"]=>
+  ["myNull"]=>
   NULL
-  [u"myBool"]=>
+  ["myBool"]=>
   bool(true)
-  [u"myString"]=>
-  unicode(11) "Hello World"
+  ["myString"]=>
+  string(11) "Hello World"
 }
 -- Iteration 17 --
 object(stdClass)#%d (6) {
-  [u"Jan"]=>
+  ["Jan"]=>
   int(31)
-  [u"Feb"]=>
+  ["Feb"]=>
   int(29)
-  [u"Mar"]=>
+  ["Mar"]=>
   int(31)
-  [u"April"]=>
+  ["April"]=>
   int(30)
-  [u"May"]=>
+  ["May"]=>
   int(31)
-  [u"June"]=>
+  ["June"]=>
   int(30)
 }
 array(6) {
-  [u"Jan"]=>
+  ["Jan"]=>
   int(31)
-  [u"Feb"]=>
+  ["Feb"]=>
   int(29)
-  [u"Mar"]=>
+  ["Mar"]=>
   int(31)
-  [u"April"]=>
+  ["April"]=>
   int(30)
-  [u"May"]=>
+  ["May"]=>
   int(31)
-  [u"June"]=>
+  ["June"]=>
   int(30)
 }
 -- Iteration 18 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 19 --
 object(stdClass)#%d (0) {
 }
 array(0) {
 }
-===DONE===
+===Done===

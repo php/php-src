@@ -94,67 +94,67 @@ array(6) {
   [1]=>
   int(0)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 2 --
 -- With default argument --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(1)
   [0]=>
   int(1)
 }
 -- With more arguments --
 array(8) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(1)
   [0]=>
   int(1)
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 3 --
 -- With default argument --
 array(3) {
-  [u"f1"]=>
+  ["f1"]=>
   float(2.3333)
-  [u"f2"]=>
+  ["f2"]=>
   float(2.3333)
-  [u"f3"]=>
+  ["f3"]=>
   array(2) {
     [0]=>
     float(1.1)
@@ -164,11 +164,11 @@ array(3) {
 }
 -- With more arguments --
 array(7) {
-  [u"f1"]=>
+  ["f1"]=>
   float(2.3333)
-  [u"f2"]=>
+  ["f2"]=>
   float(2.3333)
-  [u"f3"]=>
+  ["f3"]=>
   array(2) {
     [0]=>
     float(1.1)
@@ -176,180 +176,180 @@ array(7) {
     float(2.22)
   }
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 4 --
 -- With default argument --
 array(4) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [0]=>
   float(4.8999992284)
-  [u"f4"]=>
+  ["f4"]=>
   array(2) {
     [0]=>
     float(1.2)
-    [u"f4"]=>
+    ["f4"]=>
     float(1.2)
   }
 }
 -- With more arguments --
 array(8) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [0]=>
   float(4.8999992284)
-  [u"f4"]=>
+  ["f4"]=>
   array(2) {
     [0]=>
     float(1.2)
-    [u"f4"]=>
+    ["f4"]=>
     float(1.2)
   }
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 5 --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(6) "	Hello"
-  [u"array"]=>
-  unicode(6) "col	or"
+  string(6) "	Hello"
+  ["array"]=>
+  string(6) "col	or"
   [1]=>
-  unicode(7) "world"
+  string(7) "world"
   [2]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
 }
 -- With more arguments --
 array(7) {
   [0]=>
-  unicode(6) "	Hello"
-  [u"array"]=>
+  string(6) "	Hello"
+  ["array"]=>
   array(4) {
     [0]=>
-    unicode(6) "col	or"
+    string(6) "col	or"
     [1]=>
-    unicode(1) "a"
+    string(1) "a"
     [2]=>
-    unicode(1) "b"
+    string(1) "b"
     [3]=>
-    unicode(1) "c"
+    string(1) "c"
   }
   [1]=>
-  unicode(7) "world"
+  string(7) "world"
   [2]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
   [3]=>
-  unicode(3) "one"
+  string(3) "one"
   [4]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
+  ["string"]=>
+  string(5) "hello"
 }
 -- Iteration 6 --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(7) "\tHello"
-  [u"array"]=>
-  unicode(7) "col\tor"
+  string(7) "\tHello"
+  ["array"]=>
+  string(7) "col\tor"
   [1]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
   [2]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
 }
 -- With more arguments --
 array(7) {
   [0]=>
-  unicode(7) "\tHello"
-  [u"array"]=>
+  string(7) "\tHello"
+  ["array"]=>
   array(4) {
     [0]=>
-    unicode(7) "col\tor"
+    string(7) "col\tor"
     [1]=>
-    unicode(1) "a"
+    string(1) "a"
     [2]=>
-    unicode(1) "b"
+    string(1) "b"
     [3]=>
-    unicode(1) "c"
+    string(1) "c"
   }
   [1]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
   [2]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
   [3]=>
-  unicode(3) "one"
+  string(3) "one"
   [4]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
+  ["string"]=>
+  string(5) "hello"
 }
 -- Iteration 7 --
 -- With default argument --
 array(3) {
   [0]=>
-  unicode(5) "hello"
-  [u"string"]=>
-  unicode(11) "Hello world"
+  string(5) "hello"
+  ["string"]=>
+  string(11) "Hello world"
   [1]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
 }
 -- With more arguments --
 array(6) {
   [0]=>
-  unicode(5) "hello"
-  [u"string"]=>
+  string(5) "hello"
+  ["string"]=>
   array(2) {
     [0]=>
-    unicode(11) "Hello world"
+    string(11) "Hello world"
     [1]=>
-    unicode(5) "hello"
+    string(5) "hello"
   }
   [1]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"array"]=>
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 8 --
@@ -358,9 +358,9 @@ array(5) {
   [0]=>
   object(classA)#%d (0) {
   }
-  [u"string"]=>
+  ["string"]=>
   NULL
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [1]=>
   object(classA)#%d (0) {
@@ -373,14 +373,14 @@ array(8) {
   [0]=>
   object(classA)#%d (0) {
   }
-  [u"string"]=>
+  ["string"]=>
   array(2) {
     [0]=>
     NULL
     [1]=>
-    unicode(5) "hello"
+    string(5) "hello"
   }
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [1]=>
   object(classA)#%d (0) {
@@ -388,17 +388,17 @@ array(8) {
   [2]=>
   resource(%d) of type (stream)
   [3]=>
-  unicode(3) "one"
+  string(3) "one"
   [4]=>
   int(2)
-  [u"array"]=>
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 Done

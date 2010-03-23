@@ -27,7 +27,6 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
 /*1*/	  0,
 		  1,
 		  255,
@@ -102,15 +101,15 @@ int(45)
 int(49)
 -- Iteration 10 --
 
-Warning: ord() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ord() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: ord() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ord() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: ord() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ord() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 int(49)
@@ -128,7 +127,7 @@ int(0)
 int(115)
 -- Iteration 20 --
 
-Warning: ord() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: ord() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 int(0)

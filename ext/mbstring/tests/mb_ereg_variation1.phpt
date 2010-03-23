@@ -57,36 +57,20 @@ $inputs = array(
        12.3456789000E-10,
        .5,
 
-// null data
-/*10*/ NULL,
-       null,
-
 // boolean data
-/*12*/ true,
-       false,
+/*10*/ true,
        TRUE,
-       FALSE,
- 
-// empty data
-/*16*/ "",
-       '',
 
 // string data
-/*18*/ "string",
+/*12*/ "string",
        'string',
        $heredoc,
  
 // object data
-/*21*/ new classA(),
-
-// undefined data
-/*22*/ @$undefined_var,
-
-// unset data
-/*23*/ @$unset_var,
+/*15*/ new classA(),
 
 // resource variable
-/*24*/ $fp
+/*16*/ $fp
 );
 
 // loop through each element of $inputs to check the behavior of mb_ereg()
@@ -106,7 +90,7 @@ fclose($fp);
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --
@@ -146,76 +130,36 @@ bool(false)
 NULL
 
 -- Iteration 10 --
-int(1)
 bool(false)
 NULL
 
 -- Iteration 11 --
-int(1)
 bool(false)
 NULL
 
 -- Iteration 12 --
-bool(false)
-NULL
+int(6)
+array(1) {
+  [0]=>
+  string(6) "string"
+}
 
 -- Iteration 13 --
-int(1)
-bool(false)
-NULL
+int(6)
+array(1) {
+  [0]=>
+  string(6) "string"
+}
 
 -- Iteration 14 --
 bool(false)
 NULL
 
 -- Iteration 15 --
-int(1)
 bool(false)
 NULL
 
 -- Iteration 16 --
-int(1)
-bool(false)
-NULL
-
--- Iteration 17 --
-int(1)
-bool(false)
-NULL
-
--- Iteration 18 --
-int(6)
-array(1) {
-  [0]=>
-  unicode(6) "string"
-}
-
--- Iteration 19 --
-int(6)
-array(1) {
-  [0]=>
-  unicode(6) "string"
-}
-
--- Iteration 20 --
-bool(false)
-NULL
-
--- Iteration 21 --
-bool(false)
-NULL
-
--- Iteration 22 --
-int(1)
-bool(false)
-NULL
-
--- Iteration 23 --
-int(1)
-bool(false)
-NULL
-
--- Iteration 24 --
 bool(false)
 NULL
 Done

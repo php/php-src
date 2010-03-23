@@ -44,24 +44,24 @@ var_dump( timezone_name_from_abbr("", 62400) ); // offset = 24 hrs
 --EXPECTF--
 *** Testing timezone_name_from_abbr() : basic functionality ***
 -- Tests with special cases first - no lookup needed --
-unicode(3) "UTC"
-unicode(3) "UTC"
+string(3) "UTC"
+string(3) "UTC"
 -- Lookup with just name --
-unicode(13) "Europe/Berlin"
-unicode(16) "America/New_York"
+string(13) "Europe/Berlin"
+string(16) "America/New_York"
 -- Lookup with name and offset--
-unicode(15) "America/Halifax"
-unicode(12) "Asia/Baghdad"
-unicode(11) "Asia/Aqtobe"
-unicode(11) "Asia/Aqtobe"
-unicode(11) "Asia/Aqtobe"
-unicode(17) "America/Boa_Vista"
-unicode(12) "Asia/Yerevan"
+string(15) "America/Halifax"
+string(12) "Asia/Baghdad"
+string(11) "Asia/Aqtobe"
+string(11) "Asia/Aqtobe"
+string(11) "Asia/Aqtobe"
+string(17) "America/Boa_Vista"
+string(12) "Asia/Yerevan"
 -- Tests without valid name - uses gmtOffset and isdst to find match --
-unicode(13) "Europe/London"
-unicode(17) "America/Sao_Paulo"
-unicode(16) "America/New_York"
-unicode(15) "America/Halifax"
+string(13) "Europe/London"
+string(17) "America/Sao_Paulo"
+string(16) "America/New_York"
+string(15) "America/Halifax"
 -- Tests with invalid offsets --
 bool(false)
 bool(false)

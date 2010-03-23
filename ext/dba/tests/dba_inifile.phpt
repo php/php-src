@@ -12,8 +12,6 @@ DBA INIFILE handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
---XFAIL--
-Unicode status incomplete
 --EXPECT--
 database handler: inifile
 3NYNYY
@@ -23,11 +21,11 @@ Read during write: not allowed
 Content 2 replaced 2nd time
 The 6th value
 array(3) {
-  [u"key number 6"]=>
+  ["key number 6"]=>
   string(13) "The 6th value"
-  [u"key2"]=>
+  ["key2"]=>
   string(27) "Content 2 replaced 2nd time"
-  [u"key5"]=>
+  ["key5"]=>
   string(23) "The last content string"
 }
 --NO-LOCK--
@@ -38,11 +36,11 @@ Read during write: not allowed
 Content 2 replaced 2nd time
 The 6th value
 array(3) {
-  [u"key number 6"]=>
+  ["key number 6"]=>
   string(13) "The 6th value"
-  [u"key2"]=>
+  ["key2"]=>
   string(27) "Content 2 replaced 2nd time"
-  [u"key5"]=>
+  ["key5"]=>
   string(23) "The last content string"
 }
 ===DONE===

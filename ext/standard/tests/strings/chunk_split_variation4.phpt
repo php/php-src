@@ -9,7 +9,8 @@ Test chunk_split() function : usage variations - different heredoc strings as 's
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the chunk_split() with 'chunklen' 4 and default 'ending'
+* Passing different heredoc strings as 'str' argument to the chunk_split() 
+* with 'chunklen' 4 and default value of 'ending' that is "\r\n"
 */
 
 echo "*** Testing chunk_split() : heredoc strings as 'str' argument ***\n";
@@ -83,19 +84,19 @@ foreach($heredoc_arr as $str) {
  
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
-unicode(2) "
+string(2) "
 "
 -- Iteration 2 --
-unicode(2) "
+string(2) "
 "
 -- Iteration 3 --
-unicode(3) "a
+string(3) "a
 "
 -- Iteration 4 --
-unicode(45) "This
+string(45) "This
  is 
 simp
 le h
@@ -105,7 +106,7 @@ trin
 g
 "
 -- Iteration 5 --
-unicode(90) "This
+string(90) "This
  is 
 to c
 heck
@@ -124,7 +125,7 @@ her
 edoc
 "
 -- Iteration 6 --
-unicode(59) "This
+string(59) "This
  che
 cks 
 here
@@ -136,7 +137,7 @@ with
 ars
 "
 -- Iteration 7 --
-unicode(59) "This
+string(59) "This
  che
 cks	
  chu
@@ -149,7 +150,7 @@ ech
 ars
 "
 -- Iteration 8 --
-unicode(117) ""To 
+string(117) ""To 
 chec
 k " 
 in h

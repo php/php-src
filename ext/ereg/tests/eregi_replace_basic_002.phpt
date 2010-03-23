@@ -10,19 +10,28 @@ Test eregi_replace() function : basic functionality - a few non-matches
 
 $replacement = 'r';
 
-var_dump(eregi_replace(b'[A-Z]', $replacement, '0'));
-var_dump(eregi_replace(b'(a){4}', $replacement, 'aaa'));
-var_dump(eregi_replace(b'^a', $replacement, 'ba'));
-var_dump(eregi_replace(b'b$', $replacement, 'ba'));
-var_dump(eregi_replace(b'[:alpha:]', $replacement, 'x'));
+var_dump(eregi_replace('[A-Z]', $replacement, '0'));
+var_dump(eregi_replace('(a){4}', $replacement, 'aaa'));
+var_dump(eregi_replace('^a', $replacement, 'ba'));
+var_dump(eregi_replace('b$', $replacement, 'ba'));
+var_dump(eregi_replace('[:alpha:]', $replacement, 'x'));
 
 
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(1) "0"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(3) "aaa"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(2) "ba"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(2) "ba"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(1) "x"
 Done

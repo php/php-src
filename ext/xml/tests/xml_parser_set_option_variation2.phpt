@@ -179,22 +179,22 @@ bool(false)
 
 Arg value  
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_parser_set_option() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: xml_parser_set_option() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 

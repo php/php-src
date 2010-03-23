@@ -27,6 +27,7 @@ extern "C" {
 #include "msgformat_class.h"
 #include "msgformat_format.h"
 #include "msgformat_helpers.h"
+#include "intl_convert.h"
 }
 
 U_NAMESPACE_BEGIN
@@ -96,8 +97,14 @@ U_CFUNC void umsg_format_helper(UMessageFormat *fmt, int arg_count, zval **args,
 				break;
             
 	        case Formattable::kString:
-		        convert_to_unicode_ex(&args[i]);
-				fargs[i].setString(Z_STRVAL_P(args[i]));
+		        convert_to_string_ex(&args[i]);
+				intl_convert_utf8_to_utf16(&stringVal, &stringLen, Z_STRVAL_P(args[i]), Z_STRLEN_P(args[i]), status);
+				if(U_FAILURE(*status)){
+					delete[] fargs;
+					return;
+				}
+				fargs[i].setString(stringVal);
+				efree(stringVal);
 			    break;
             
 			case Formattable::kArray:
@@ -143,6 +150,8 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 	    int64_t aInt64;
 		double aDate;
 		UnicodeString temp;
+		char *stmp;
+		int stmp_len;
 
 		ALLOC_INIT_ZVAL((*args)[i]);
 		
@@ -175,7 +184,12 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 
         case Formattable::kString:
             fargs[i].getString(temp);
-			ZVAL_UNICODEL((*args)[i], (UChar *)temp.getBuffer(), temp.length(), 1);
+			intl_convert_utf16_to_utf8(&stmp, &stmp_len, temp.getBuffer(), temp.length(), status);
+			if(U_FAILURE(*status)) {
+				cleanup_zvals();
+				return;
+			}
+			ZVAL_STRINGL((*args)[i], stmp, stmp_len, 0);
             break;
 
         case Formattable::kObject:

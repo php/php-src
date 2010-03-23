@@ -16,27 +16,27 @@ nl2br() function
 	
 ?>
 --EXPECT--
-unicode(4) "test"
-unicode(0) ""
-unicode(0) ""
-unicode(8) "<br />
+string(4) "test"
+string(0) ""
+string(0) ""
+string(8) "<br />
 "
-unicode(7) "<br />
+string(7) "<br />
 "
-unicode(7) "<br />"
-unicode(8) "<br />
+string(7) "<br />"
+string(8) "<br />
 "
-unicode(44) "<br />
+string(44) "<br />
 <br />
 <br /><br /><br /><br />"
-unicode(47) "<br />
+string(47) "<br />
 <br />
 <br />
 <br />
 <br />
 <br />
 "
-unicode(66) "<br />
+string(66) "<br />
 <br />
 <br />
 <br />

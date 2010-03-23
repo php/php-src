@@ -94,8 +94,6 @@ oci_close($conn2);
 echo "Done\n";
 
 ?>
---XFAIL--
-OCI does not have UTF16 support for OCI_ATTR_EDITION
 --EXPECTF--
 The value of edition has been successfully set
 The value of current EDITION is MYEDITION

@@ -75,8 +75,6 @@ echo "\n*** Done ***\n";
 *** Testing fpassthru() function with files ***
 
 --- Testing with different offsets ---
-
-Notice: fwrite(): 36 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Iteration 0 --
 1234567890abcdefghijklmnopqrstuvwxyzint(36)
 -- Iteration 1 --

@@ -34,46 +34,46 @@ var_dump (compact(array("g")));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing compact() : basic functionality ***
 array(6) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   float(0.2)
-  [u"c"]=>
+  ["c"]=>
   bool(true)
-  [u"d"]=>
+  ["d"]=>
   array(1) {
-    [u"key"]=>
-    unicode(3) "val"
+    ["key"]=>
+    string(3) "val"
   }
-  [u"e"]=>
+  ["e"]=>
   NULL
-  [u"f"]=>
-  unicode(6) "string"
+  ["f"]=>
+  string(6) "string"
 }
 array(6) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   float(0.2)
-  [u"c"]=>
+  ["c"]=>
   bool(true)
-  [u"d"]=>
+  ["d"]=>
   array(1) {
-    [u"key"]=>
-    unicode(3) "val"
+    ["key"]=>
+    string(3) "val"
   }
-  [u"e"]=>
+  ["e"]=>
   NULL
-  [u"f"]=>
-  unicode(6) "string"
+  ["f"]=>
+  string(6) "string"
 }
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   float(0.2)
 }
 array(0) {

@@ -124,7 +124,6 @@ gdImagePtr gdImageCreateFromGif(FILE *fdFile) /* {{{ */
 
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 {
-	/* 1.4       int imageNumber; */
 	int BitPixel;
 #if 0
 	int ColorResolution;
@@ -231,7 +230,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 		}
 		im->interlace = BitSet(buf[8], INTERLACE);
 		if (!useGlobalColormap) {
-			if (ReadColorMap(fd, bitPixel, localColorMap)) {
+			if (ReadColorMap(fd, bitPixel, localColorMap)) { 
 				gdImageDestroy(im);
 				return 0;
 			}
@@ -243,7 +242,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 				return 0;
 			}
 			ReadImage(im, fd, width, height,
-					ColorMap,
+						ColorMap, 
 						BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		}
 		if (Transparent != (-1)) {
@@ -257,12 +256,10 @@ terminated:
 	if (!im) {
 		return 0;
 	}
-
 	if (!im->colorsTotal) {
 		gdImageDestroy(im);
 		return 0;
 	}
-
 	/* Check for open colors at the end, so
 	   we can reduce colorsTotal and ultimately
 	   BitsPerPixel */
@@ -351,7 +348,6 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 	int rv;
 	int i;
 
-
 	rv = GetDataBlock_(fd,buf, ZeroDataBlockP);
 	if (VERBOSE) {
 		char *tmp = NULL;
@@ -394,7 +390,7 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
 		scd->buf[0] = scd->buf[scd->last_byte-2];
 		scd->buf[1] = scd->buf[scd->last_byte-1];
 
-		if ((count = GetDataBlock(fd, &scd->buf[2], ZeroDataBlockP)) <= 0)
+               if ((count = GetDataBlock(fd, &scd->buf[2], ZeroDataBlockP)) <= 0)
 			scd->done = TRUE;
 
 		scd->last_byte = 2 + count;
@@ -540,8 +536,8 @@ LWZReadByte(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, in
 {
 	int rv;
 
-	rv = LWZReadByte_(fd, sd, flag, input_code_size, ZeroDataBlockP);
-	if (VERBOSE) printf("[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
+ rv = LWZReadByte_(fd, sd, flag, input_code_size, ZeroDataBlockP);
+ if (VERBOSE) printf("[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
 	return(rv);
 }
 /* }}} */
@@ -554,6 +550,7 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
 	int             xpos = 0, ypos = 0, pass = 0;
 	int i;
 	LZW_STATIC_DATA sd;
+
 
 	/*
 	 **  Initialize the Compression routines
@@ -589,11 +586,10 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
 	/*        return; */
 	/*} */
 
-	while ((v = LWZReadByte(fd, &sd, FALSE, c, ZeroDataBlockP)) >= 0 ) {
+	while ((v = LWZReadByte(fd, &sd, FALSE, c, ZeroDataBlockP)) >= 0) {
 		if (v >= gdMaxColors) {
 			v = 0;
 		}
-
 		/* This how we recognize which colors are actually used. */
 		if (im->open[v]) {
 			im->open[v] = 0;

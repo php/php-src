@@ -15,9 +15,9 @@ echo "ok\n"
 ?>
 --EXPECT--
 object(stdClass)#2 (1) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#2 (1) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
   }
 }

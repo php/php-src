@@ -8,10 +8,10 @@ Test chop() function : usage variations  - unexpected values for charlist argume
 */
 
 /*
- * Testing chop() : with different unexpected values of charlist argument passed tot he function
+ * Testing chop() : with different unexpected values for charlist argument passes to the function
 */
 
-echo "*** Testing chop() : with unexpected values of charlist argument passed to the function ***\n";
+echo "*** Testing chop() : with different unexpected values for charlist argument ***\n";
 // initialize all required variables
 $str = 'hello world12345 ';
 
@@ -65,7 +65,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -83,6 +83,7 @@ $values =  array (
 
 // loop through each element of the array and check the working of chop()
 // when $charlist arugment is supplied with different values
+
 echo "\n--- Testing chop() by supplying different values for 'charlist' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
@@ -100,7 +101,7 @@ fclose($file_handle);
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing chop() : with unexpected values of charlist argument passed to the function ***
+*** Testing chop() : with different unexpected values for charlist argument ***
 
 Notice: Undefined variable: undefined_var in %s on line %d
 
@@ -108,67 +109,67 @@ Notice: Undefined variable: unset_var in %s on line %d
 
 --- Testing chop() by supplying different values for 'charlist' argument ---
 -- Iteration 1 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 2 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 3 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 4 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 5 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 6 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 7 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 8 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 9 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 10 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 16 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 17 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 18 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 19 --
-unicode(11) "hello world"
+string(11) "hello world"
 -- Iteration 20 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 21 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 22 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 23 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 24 --
 
-Warning: chop() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: chop() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 -- Iteration 26 --
-unicode(17) "hello world12345 "
+string(17) "hello world12345 "
 Done

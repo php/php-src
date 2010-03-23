@@ -103,15 +103,15 @@ string(5) "-20.5"
 string(10) "1012345.67"
 -- Iteration 10 --
 
-Warning: hebrev() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: hebrev() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: hebrev() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: hebrev() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: hebrev() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: hebrev() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(1) "1"
@@ -129,7 +129,7 @@ bool(false)
 string(13) "sample object"
 -- Iteration 20 --
 
-Warning: hebrev() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: hebrev() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 bool(false)

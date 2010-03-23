@@ -174,12 +174,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -187,21 +187,21 @@ NULL
 
 -- Iteration 19 --
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-unicode(4) "var1"
+string(4) "var1"
 
 -- Iteration 23 --
 
@@ -218,4 +218,3 @@ NULL
 Warning: key() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 ===DONE===
-

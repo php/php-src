@@ -76,7 +76,7 @@ for($i = 0; $i < count($values); $i++)
       
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sizeof() : usage variations ***
 --- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---
 -- Iteration 1 --

@@ -103,147 +103,147 @@ bool(true)
 -- Iteration 1 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   int(0)
 }
 
 -- Iteration 2 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   int(1)
 }
 
 -- Iteration 3 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   int(12345)
 }
 
 -- Iteration 4 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   int(-2345)
 }
 
 -- Iteration 5 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   float(10.5)
 }
 
 -- Iteration 6 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   float(-10.5)
 }
 
 -- Iteration 7 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   float(123456789000)
 }
 
 -- Iteration 8 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   float(1.23456789E-9)
 }
 
 -- Iteration 9 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   float(0.5)
 }
 
 -- Iteration 10 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   NULL
 }
 
 -- Iteration 11 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   NULL
 }
 
 -- Iteration 12 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   bool(true)
 }
 
 -- Iteration 13 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   bool(false)
 }
 
 -- Iteration 14 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   bool(true)
 }
 
 -- Iteration 15 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   bool(false)
 }
 
 -- Iteration 16 --
 bool(true)
 array(1) {
-  [u"data"]=>
-  unicode(0) ""
+  ["data"]=>
+  string(0) ""
 }
 
 -- Iteration 17 --
 bool(true)
 array(1) {
-  [u"data"]=>
-  unicode(0) ""
+  ["data"]=>
+  string(0) ""
 }
 
 -- Iteration 18 --
 bool(true)
 array(1) {
-  [u"data"]=>
-  unicode(7) "Nothing"
+  ["data"]=>
+  string(7) "Nothing"
 }
 
 -- Iteration 19 --
 bool(true)
 array(1) {
-  [u"data"]=>
-  unicode(7) "Nothing"
+  ["data"]=>
+  string(7) "Nothing"
 }
 
 -- Iteration 20 --
 bool(true)
 array(1) {
-  [u"data"]=>
-  unicode(12) "Hello World!"
+  ["data"]=>
+  string(12) "Hello World!"
 }
 
 -- Iteration 21 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   object(classA)#2 (0) {
   }
 }
@@ -251,21 +251,21 @@ array(1) {
 -- Iteration 22 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   NULL
 }
 
 -- Iteration 23 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   NULL
 }
 
 -- Iteration 24 --
 bool(true)
 array(1) {
-  [u"data"]=>
+  ["data"]=>
   int(0)
 }
 bool(true)

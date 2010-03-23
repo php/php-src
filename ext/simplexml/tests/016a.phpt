@@ -4,7 +4,7 @@ SimpleXML: concatenating attributes
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
    <person name="Foo"></person>
 </people>
@@ -20,10 +20,10 @@ var_dump($people->person['name']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Foo"
+  string(3) "Foo"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(6) "FooBar"
+  string(6) "FooBar"
 }
 ===DONE===

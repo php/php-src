@@ -1,5 +1,5 @@
 --TEST--
-Bug #29210 (Function: is_callable - no support for private and protected classes)
+Bug #29210 (Function is_callable does not support private and protected methods)
 --FILE--
 <?php
 class test_class {
@@ -89,7 +89,7 @@ if (is_callable(array('test_class','test_func4'))) {
 $object = new foo();
 $object->test();
 ?>
---EXPECT--
+--EXPECTF--
 test_func1
 test_func2
 test_func3

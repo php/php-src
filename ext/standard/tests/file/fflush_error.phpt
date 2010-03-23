@@ -55,35 +55,36 @@ unlink("$file_path/fflush_error.tmp");
 -- Testing fflush(): with zero argument --
 
 Warning: fflush() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing fflush(): with more than expected number of arguments --
 
 Warning: fflush() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 -- Testing fflush(): with invalid arguments --
 -- Iteration 1 --
 
-Warning: fflush() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: fflush() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: fflush() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: fflush() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: fflush() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: fflush() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: fflush() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 
 *** Done ***
+

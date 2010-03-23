@@ -149,164 +149,155 @@ var_dump( strval() );
 var_dump( strval( $scalars[0], $scalars[1]) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing str_val() with scalar values***
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(2) "-1"
+string(2) "-1"
 -- Iteration 4 --
-unicode(11) "-2147483648"
+string(11) "-2147483648"
 -- Iteration 5 --
-unicode(11) "-2147483647"
+string(11) "-2147483647"
 -- Iteration 6 --
-unicode(10) "2147483647"
+string(10) "2147483647"
 -- Iteration 7 --
-unicode(10) "2147483640"
+string(10) "2147483640"
 -- Iteration 8 --
-unicode(4) "4667"
+string(4) "4667"
 -- Iteration 9 --
-unicode(4) "4779"
+string(4) "4779"
 -- Iteration 10 --
-unicode(4) "4095"
+string(4) "4095"
 -- Iteration 11 --
-unicode(3) "250"
+string(3) "250"
 -- Iteration 12 --
-unicode(11) "-2147483648"
+string(11) "-2147483648"
 -- Iteration 13 --
-unicode(10) "2147483647"
+string(10) "2147483647"
 -- Iteration 14 --
-unicode(10) "2147483647"
+string(10) "2147483647"
 -- Iteration 15 --
-unicode(2) "83"
+string(2) "83"
 -- Iteration 16 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 17 --
-unicode(11) "-2147483648"
+string(11) "-2147483648"
 -- Iteration 18 --
-unicode(10) "2147483647"
+string(10) "2147483647"
 -- Iteration 19 --
-unicode(11) "-2147483649"
+string(11) "-2147483649"
 -- Iteration 20 --
-unicode(10) "2147483648"
+string(10) "2147483648"
 -- Iteration 21 --
-unicode(11) "-2147483649"
+string(11) "-2147483649"
 -- Iteration 22 --
-unicode(11) "34359738369"
+string(11) "34359738369"
 -- Iteration 23 --
-unicode(10) "2147483649"
+string(10) "2147483649"
 -- Iteration 24 --
-unicode(11) "-2147483649"
+string(11) "-2147483649"
 -- Iteration 25 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 26 --
-unicode(4) "-0.1"
+string(4) "-0.1"
 -- Iteration 27 --
-unicode(2) "10"
+string(2) "10"
 -- Iteration 28 --
-unicode(7) "1050000"
+string(7) "1050000"
 -- Iteration 29 --
-unicode(6) "1.0E-5"
+string(6) "1.0E-5"
 -- Iteration 30 --
-unicode(7) "5000000"
+string(7) "5000000"
 -- Iteration 31 --
-unicode(7) "6.0E-20"
+string(7) "6.0E-20"
 -- Iteration 32 --
-unicode(7) "5.0E+42"
+string(7) "5.0E+42"
 -- Iteration 33 --
-unicode(7) "3.4E-33"
+string(7) "3.4E-33"
 -- Iteration 34 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 35 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 36 --
-unicode(0) ""
+string(0) ""
 -- Iteration 37 --
-unicode(0) ""
+string(0) ""
 -- Iteration 38 --
-unicode(0) ""
+string(0) ""
 -- Iteration 39 --
-unicode(0) ""
+string(0) ""
 -- Iteration 40 --
-unicode(1) " "
+string(1) " "
 -- Iteration 41 --
-unicode(1) " "
+string(1) " "
 -- Iteration 42 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 43 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 44 --
-unicode(7) "testing"
+string(7) "testing"
 -- Iteration 45 --
-unicode(5) "0x564"
+string(5) "0x564"
 -- Iteration 46 --
-unicode(4) "0123"
+string(4) "0123"
 -- Iteration 47 --
-unicode(4) "new
+string(4) "new
 "
 -- Iteration 48 --
-unicode(5) "new\n"
+string(5) "new\n"
 -- Iteration 49 --
-unicode(11) "@#$$%^&&*()"
+string(11) "@#$$%^&&*()"
 -- Iteration 50 --
-unicode(8) "        "
+string(8) "        "
 -- Iteration 51 --
-unicode(4) "null"
+string(4) "null"
 -- Iteration 52 --
-unicode(4) "null"
+string(4) "null"
 -- Iteration 53 --
-unicode(4) "true"
+string(4) "true"
 -- Iteration 54 --
-unicode(4) "true"
+string(4) "true"
 -- Iteration 55 --
-unicode(5%d) "This is a multiline heredoc
+string(5%d) "This is a multiline heredoc
 string. Numeric = 1232455."
 -- Iteration 56 --
-unicode(1%d) "12345
+string(1%d) "12345
 2345"
 -- Iteration 57 --
-unicode(0) ""
+string(0) ""
 
 *** Testing strval() with non_scalar values ***
 -- Iteration 1 --
-unicode(6) "Object"
+string(6) "Object"
 -- Iteration 2 --
-unicode(14) "Resource id #%d"
+string(14) "Resource id #5"
 -- Iteration 3 --
-unicode(14) "Resource id #%d"
+string(14) "Resource id #6"
 -- Iteration 4 --
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+string(5) "Array"
 -- Iteration 5 --
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+string(5) "Array"
 -- Iteration 6 --
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+string(5) "Array"
 -- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+string(5) "Array"
 -- Iteration 8 --
-unicode(0) ""
+string(0) ""
 -- Iteration 9 --
-unicode(0) ""
+string(0) ""
 -- Iteration 10 --
-unicode(0) ""
+string(0) ""
 -- Iteration 11 --
-unicode(0) ""
+string(0) ""
 
 *** Testing error conditions ***
 

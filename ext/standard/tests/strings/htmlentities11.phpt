@@ -11,4 +11,4 @@ default_charset=ISO-8859-15
 ?>
 --EXPECT--
 ISO-8859-15
-unicode(20) "&OElig;&oelig;&Yuml;"
+string(20) "&OElig;&oelig;&Yuml;"

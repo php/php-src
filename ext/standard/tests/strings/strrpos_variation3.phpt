@@ -32,8 +32,6 @@ echo "*** Done ***";
 int(44)
 int(44)
 int(44)
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 int(55)
 *** Done ***

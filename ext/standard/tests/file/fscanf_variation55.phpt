@@ -88,7 +88,7 @@ $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation55.tmp";
 unlink($filename);
 ?>
---EXPECT--
+--EXPECTF--
 *** Test fscanf(): tracking file pointer along with reading data from file ***
 
 *** File opened in r mode ***
@@ -1217,6 +1217,8 @@ array(1) {
   int(0)
 }
 int(68)
+bool(false)
+int(68)
 int(0)
 
 -- iteration 2 --
@@ -1281,69 +1283,73 @@ array(1) {
   float(0.01)
 }
 int(68)
+bool(false)
+int(68)
 int(0)
 
 -- iteration 3 --
 int(0)
 array(1) {
   [0]=>
-  unicode(5) "12345"
+  string(5) "12345"
 }
 int(6)
 array(1) {
   [0]=>
-  unicode(6) "-12345"
+  string(6) "-12345"
 }
 int(13)
 array(1) {
   [0]=>
-  unicode(6) "123.45"
+  string(6) "123.45"
 }
 int(20)
 array(1) {
   [0]=>
-  unicode(7) "-123.45"
+  string(7) "-123.45"
 }
 int(28)
 array(1) {
   [0]=>
-  unicode(4) "4667"
+  string(4) "4667"
 }
 int(33)
 array(1) {
   [0]=>
-  unicode(4) "4779"
+  string(4) "4779"
 }
 int(38)
 array(1) {
   [0]=>
-  unicode(2) "83"
+  string(2) "83"
 }
 int(41)
 array(1) {
   [0]=>
-  unicode(3) "-83"
+  string(3) "-83"
 }
 int(45)
 array(1) {
   [0]=>
-  unicode(5) "abcde"
+  string(5) "abcde"
 }
 int(51)
 array(1) {
   [0]=>
-  unicode(5) "abcde"
+  string(5) "abcde"
 }
 int(57)
 array(1) {
   [0]=>
-  unicode(5) "10000"
+  string(5) "10000"
 }
 int(63)
 array(1) {
   [0]=>
-  unicode(4) "0.01"
+  string(4) "0.01"
 }
+int(68)
+bool(false)
 int(68)
 int(0)
 
@@ -1409,6 +1415,8 @@ array(1) {
   int(0)
 }
 int(68)
+bool(false)
+int(68)
 int(0)
 
 -- iteration 5 --
@@ -1473,6 +1481,8 @@ array(1) {
   int(0)
 }
 int(68)
+bool(false)
+int(68)
 int(0)
 
 -- iteration 6 --
@@ -1484,7 +1494,7 @@ array(1) {
 int(6)
 array(1) {
   [0]=>
-  unicode(10) "4294954951"
+  string(10) "4294954951"
 }
 int(13)
 array(1) {
@@ -1494,7 +1504,7 @@ array(1) {
 int(20)
 array(1) {
   [0]=>
-  unicode(10) "4294967173"
+  string(10) "4294967173"
 }
 int(28)
 array(1) {
@@ -1514,7 +1524,7 @@ array(1) {
 int(41)
 array(1) {
   [0]=>
-  unicode(10) "4294967213"
+  string(10) "4294967213"
 }
 int(45)
 array(1) {
@@ -1537,69 +1547,73 @@ array(1) {
   int(0)
 }
 int(68)
+bool(false)
+int(68)
 int(0)
 
 -- iteration 7 --
 int(0)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(6)
 array(1) {
   [0]=>
-  unicode(1) "-"
+  string(1) "-"
 }
 int(13)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(20)
 array(1) {
   [0]=>
-  unicode(1) "-"
+  string(1) "-"
 }
 int(28)
 array(1) {
   [0]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 int(33)
 array(1) {
   [0]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 int(38)
 array(1) {
   [0]=>
-  unicode(1) "8"
+  string(1) "8"
 }
 int(41)
 array(1) {
   [0]=>
-  unicode(1) "-"
+  string(1) "-"
 }
 int(45)
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 int(51)
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 int(57)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(63)
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
+int(68)
+bool(false)
 int(68)
 int(0)
 
@@ -1664,5 +1678,8 @@ array(1) {
   [0]=>
   float(0.01)
 }
+int(68)
+bool(false)
 
 *** Done ***
+

@@ -51,32 +51,32 @@ rmdir("$file_path/glob_basic/");
 *** Testing glob() : basic functions ***
 array(3) {
   [0]=>
-  unicode(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/file.text"
   [1]=>
-  unicode(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder.txt"
   [2]=>
-  unicode(%d) "%s/glob_basic/wonder12345"
+  string(%d) "%s/glob_basic/wonder12345"
 }
 array(1) {
   [0]=>
-  unicode(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder.txt"
 }
 array(1) {
   [0]=>
-  unicode(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder.txt"
 }
 array(2) {
   [0]=>
-  unicode(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/file.text"
   [1]=>
-  unicode(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder.txt"
 }
 array(0) {
 }
 array(2) {
   [0]=>
-  unicode(%d) "%s/glob_basic/file.text"
+  string(%d) "%s/glob_basic/file.text"
   [1]=>
-  unicode(%d) "%s/glob_basic/wonder.txt"
+  string(%d) "%s/glob_basic/wonder.txt"
 }
 Done

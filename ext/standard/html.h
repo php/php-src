@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -39,7 +39,8 @@ PHP_FUNCTION(htmlspecialchars_decode);
 PHP_FUNCTION(html_entity_decode);
 PHP_FUNCTION(get_html_translation_table);
 
-PHPAPI char *php_escape_html_entities(char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC);
-PHPAPI char *php_unescape_html_entities(char *orig, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC);
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC);
+PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset, zend_bool double_encode TSRMLS_DC);
+PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC);
 
 #endif /* HTML_H */

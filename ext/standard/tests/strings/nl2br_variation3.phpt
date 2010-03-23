@@ -34,9 +34,9 @@ var_dump(nl2br($heredoc_str2) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing nl2br() : usage variations ***
-unicode(147) "<br />
+string(147) "<br />
 <br />
 <br />
 <br />
@@ -52,7 +52,7 @@ n<br />
 <br />
 <br />
 r<br />n"
-unicode(118) "Hello<br />
+string(118) "Hello<br />
 World<br />
 This is 	es	 for <br />
  <br />

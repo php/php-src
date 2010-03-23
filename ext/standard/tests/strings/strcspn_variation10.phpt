@@ -1,5 +1,5 @@
 --TEST--
-Test strcspn() function : usage variations - with varying mask & default start and len args (Bug #42731)
+Test strcspn() function : usage variations - with varying mask & default start and len args
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
@@ -54,7 +54,7 @@ $mask_array = array(
 // loop through each element of the array for mask argument
 $count = 1;
 foreach($strings as $str) {
-  echo "\n-- Iteration $count --\n";
+  echo "\n-- Itearation $count --\n";
   foreach($mask_array as $mask) {
       var_dump( strcspn($str,$mask) );
   }
@@ -63,10 +63,10 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strcspn() : with different mask strings and default start and len arguments ***
 
--- Iteration 1 --
+-- Itearation 1 --
 int(0)
 int(0)
 int(0)
@@ -78,7 +78,7 @@ int(0)
 int(0)
 int(0)
 
--- Iteration 2 --
+-- Itearation 2 --
 int(0)
 int(0)
 int(0)
@@ -90,7 +90,7 @@ int(0)
 int(0)
 int(0)
 
--- Iteration 3 --
+-- Itearation 3 --
 int(1)
 int(1)
 int(0)
@@ -102,7 +102,7 @@ int(1)
 int(1)
 int(0)
 
--- Iteration 4 --
+-- Itearation 4 --
 int(2)
 int(2)
 int(0)
@@ -114,7 +114,7 @@ int(0)
 int(2)
 int(0)
 
--- Iteration 5 --
+-- Itearation 5 --
 int(24)
 int(24)
 int(2)
@@ -126,7 +126,7 @@ int(5)
 int(5)
 int(5)
 
--- Iteration 6 --
+-- Itearation 6 --
 int(28)
 int(28)
 int(2)
@@ -138,7 +138,7 @@ int(5)
 int(28)
 int(5)
 
--- Iteration 7 --
+-- Itearation 7 --
 int(20)
 int(20)
 int(6)
@@ -150,7 +150,7 @@ int(16)
 int(16)
 int(16)
 
--- Iteration 8 --
+-- Itearation 8 --
 int(21)
 int(21)
 int(6)
@@ -162,7 +162,7 @@ int(16)
 int(21)
 int(16)
 
--- Iteration 9 --
+-- Itearation 9 --
 int(5)
 int(5)
 int(2)
@@ -174,7 +174,7 @@ int(12)
 int(12)
 int(11)
 
--- Iteration 10 --
+-- Itearation 10 --
 int(16)
 int(16)
 int(2)
@@ -186,7 +186,7 @@ int(5)
 int(16)
 int(5)
 
--- Iteration 11 --
+-- Itearation 11 --
 int(0)
 int(0)
 int(2)
@@ -198,23 +198,23 @@ int(2)
 int(2)
 int(2)
 
--- Iteration 12 --
-int(0)
-int(0)
-int(3)
-int(3)
-int(13)
-int(13)
-int(13)
-int(13)
-int(13)
-int(13)
-
--- Iteration 13 --
+-- Itearation 12 --
 int(0)
 int(0)
 int(3)
 int(3)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+int(13)
+
+-- Itearation 13 --
+int(0)
+int(0)
+int(3)
+int(3)
 int(14)
 int(6)
 int(6)
@@ -222,7 +222,7 @@ int(6)
 int(14)
 int(6)
 
--- Iteration 14 --
+-- Itearation 14 --
 int(5)
 int(5)
 int(2)
@@ -234,7 +234,7 @@ int(11)
 int(11)
 int(11)
 
--- Iteration 15 --
+-- Itearation 15 --
 int(5)
 int(5)
 int(2)
@@ -246,7 +246,7 @@ int(11)
 int(11)
 int(11)
 
--- Iteration 16 --
+-- Itearation 16 --
 int(5)
 int(5)
 int(2)
@@ -258,7 +258,7 @@ int(14)
 int(14)
 int(6)
 
--- Iteration 17 --
+-- Itearation 17 --
 int(21)
 int(21)
 int(2)

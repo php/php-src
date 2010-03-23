@@ -641,47 +641,47 @@ array(12) {
   [0]=>
   int(1)
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
   NULL
   [3]=>
   float(-2.344)
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
-  unicode(6) "string"
-  [u"c"]=>
+  ["b"]=>
+  string(6) "string"
+  ["c"]=>
   NULL
-  [u"d"]=>
+  ["d"]=>
   float(-2.344)
   [4]=>
   NULL
   [5]=>
-  unicode(2) "Hi"
-  [u"string"]=>
-  unicode(5) "hello"
+  string(2) "Hi"
+  ["string"]=>
+  string(5) "hello"
   [6]=>
   array(3) {
-    [u""]=>
-    unicode(5) "World"
-    [u"-2.34"]=>
-    unicode(1) "a"
+    [""]=>
+    string(5) "World"
+    ["-2.34"]=>
+    string(1) "a"
     [0]=>
-    unicode(1) "b"
+    string(1) "b"
   }
 }
 array(6) {
   [0]=>
   int(1)
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
   NULL
   [3]=>
   float(-2.344)
   [4]=>
-  unicode(12) "array on fly"
-  [u"nullarray"]=>
+  string(12) "array on fly"
+  ["nullarray"]=>
   array(0) {
   }
 }
@@ -690,20 +690,20 @@ array(6) {
 array(0) {
 }
 array(4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
-  unicode(6) "string"
-  [u"c"]=>
+  ["b"]=>
+  string(6) "string"
+  ["c"]=>
   NULL
-  [u"d"]=>
+  ["d"]=>
   float(-2.344)
 }
 array(4) {
   [0]=>
   int(1)
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
   NULL
   [3]=>
@@ -713,32 +713,32 @@ array(4) {
   [0]=>
   NULL
   [1]=>
-  unicode(2) "Hi"
-  [u"string"]=>
-  unicode(5) "hello"
+  string(2) "Hi"
+  ["string"]=>
+  string(5) "hello"
   [2]=>
   array(3) {
-    [u""]=>
-    unicode(5) "World"
-    [u"-2.34"]=>
-    unicode(1) "a"
+    [""]=>
+    string(5) "World"
+    ["-2.34"]=>
+    string(1) "a"
     [0]=>
-    unicode(1) "b"
+    string(1) "b"
   }
 }
 
 *** Testing array_merge() with typecasting non-array to array ***
 array(7) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
-  unicode(6) "string"
-  [u"c"]=>
+  ["b"]=>
+  string(6) "string"
+  ["c"]=>
   NULL
-  [u"d"]=>
+  ["d"]=>
   float(-2.344)
   [0]=>
-  unicode(5) "type1"
+  string(5) "type1"
   [1]=>
   int(10)
   [2]=>

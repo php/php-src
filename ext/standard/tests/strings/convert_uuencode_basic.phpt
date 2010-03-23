@@ -43,45 +43,45 @@ foreach($strings as $string) {
 --EXPECTF--
 *** Testing convert_uuencode() : basic functionality ***
 -- Iteration 1 --
-unicode(8) "#,3(S
+string(8) "#,3(S
 `
 "
 -- Iteration 2 --
-unicode(8) "#86)C
+string(8) "#86)C
 `
 "
 -- Iteration 3 --
-unicode(12) "&,6$R8C-C
+string(12) "&,6$R8C-C
 `
 "
 -- Iteration 4 --
-unicode(82) "M2&5R92!I<R!A('-I;7!L92!S=')I;F<@=&\@=&5S="!C;VYV97)T7W5U96YC
+string(82) "M2&5R92!I<R!A('-I;7!L92!S=')I;F<@=&\@=&5S="!C;VYV97)T7W5U96YC
 *;V1E+V1E8V]D90``
 `
 "
 -- Iteration 5 --
-unicode(74) "M"2!4:&ES(%-T<FEN9R!C;VYT86EN<R`)"2!S;VUE(&-O;G1R;VP@8VAA<F%C
+string(74) "M"2!4:&ES(%-T<FEN9R!C;VYT86EN<R`)"2!S;VUE(&-O;G1R;VP@8VAA<F%C
 &=&5R<PT*
 `
 "
 -- Iteration 6 --
-unicode(28) "2D)$`DY20D966EYB9FIN<G9Z?
+string(28) "2D)$`DY20D966EYB9FIN<G9Z?
 `
 "
 -- Iteration 7 --
-unicode(8) "#,3(S
+string(8) "#,3(S
 `
 "
 -- Iteration 8 --
-unicode(8) "#86)C
+string(8) "#86)C
 `
 "
 -- Iteration 9 --
-unicode(12) "&,6$R8C-C
+string(12) "&,6$R8C-C
 `
 "
 -- Iteration 10 --
-unicode(82) "M7'0@5&AI<R!3=')I;F<@8V]N=&%I;G,@7'1<="!S;VUE(&-O;G1R;VP@8VAA
+string(82) "M7'0@5&AI<R!3=')I;F<@8V]N=&%I;G,@7'1<="!S;VUE(&-O;G1R;VP@8VAA
 +<F%C=&5R<UQR7&X`
 `
 "

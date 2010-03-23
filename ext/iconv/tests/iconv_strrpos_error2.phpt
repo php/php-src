@@ -25,11 +25,11 @@ $encoding = 'unknown-encoding';
 
 var_dump(iconv_strrpos($haystack, $needle , $encoding));
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_strrpos() : error conditions ***
 
 Notice: iconv_strrpos(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
 bool(false)
-===DONE===
+Done

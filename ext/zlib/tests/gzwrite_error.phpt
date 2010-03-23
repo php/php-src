@@ -10,7 +10,7 @@ if (!extension_loaded("zlib")) {
 <?php
 $filename = "temp.txt.gz";
 $h = gzopen($filename, 'w');
-$str = b"Here is the string to be written. ";
+$str = "Here is the string to be written. ";
 $length = 10;
 $extra_arg = 'nothing'; 
 var_dump(gzwrite($h, $str, $length, $extra_arg));
@@ -25,11 +25,11 @@ unlink($filename);
 --EXPECTF--
 
 Warning: gzwrite() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+bool(false)
 
 Warning: gzwrite() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+bool(false)
 
 Warning: gzwrite() expects at least 2 parameters, 0 given in %s on line %d
-NULL
+bool(false)
 ===DONE===

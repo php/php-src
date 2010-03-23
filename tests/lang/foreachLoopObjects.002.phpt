@@ -172,74 +172,74 @@ Iterate over various generations from within overridden methods:
 
 --> Using instance of C:
 in C::doForEachOnThis
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 
 --> Using instance of D:
 in D::doForEachOnThis
-unicode(10) "Original f"
-unicode(10) "Original g"
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
+string(10) "Original f"
+string(10) "Original g"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(9) "changed.f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["f":"D":private]=>
+  string(9) "changed.f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 --> Using instance of E:
 in E::doForEachOnThis
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
-unicode(12) "Overridden d"
-unicode(12) "Overridden e"
-unicode(10) "Original g"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
+string(12) "Overridden d"
+string(12) "Overridden e"
+string(10) "Original g"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"E":private]=>
-  unicode(9) "changed.e"
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"E":private]=>
+  string(9) "changed.e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 
@@ -247,74 +247,74 @@ Iterate over various generations from within an inherited method:
 
 --> Using instance of C:
 in C::doForEachC
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 
 --> Using instance of D:
 in C::doForEachC
-unicode(10) "Original g"
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original g"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 
 --> Using instance of E:
 in C::doForEachC
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
-unicode(12) "Overridden d"
-unicode(10) "Original g"
-unicode(10) "Original e"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
+string(12) "Overridden d"
+string(10) "Original g"
+string(10) "Original e"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"E":private]=>
-  unicode(12) "Overridden e"
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 
 
@@ -322,266 +322,266 @@ Iterate over various generations from within an overridden static method:
 
 --> Using instance of C:
 in C::doForEach
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 in D::doForEach
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 in E::doForEach
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 --> Using instance of D:
 in C::doForEach
-unicode(10) "Original g"
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
-unicode(10) "Original e"
+string(10) "Original g"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original e"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 in D::doForEach
-unicode(10) "Original f"
-unicode(10) "Original g"
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
+string(10) "Original f"
+string(10) "Original g"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(9) "changed.f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["f":"D":private]=>
+  string(9) "changed.f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 in E::doForEach
-unicode(10) "Original g"
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
-unicode(10) "Original d"
+string(10) "Original g"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 --> Using instance of E:
 in C::doForEach
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
-unicode(12) "Overridden d"
-unicode(10) "Original g"
-unicode(10) "Original e"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
+string(12) "Overridden d"
+string(10) "Original g"
+string(10) "Original e"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"E":private]=>
-  unicode(12) "Overridden e"
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"e":u"C":private]=>
-  unicode(9) "changed.e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["e":"C":private]=>
+  string(9) "changed.e"
 }
 in D::doForEach
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
-unicode(12) "Overridden d"
-unicode(10) "Original f"
-unicode(10) "Original g"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
+string(12) "Overridden d"
+string(10) "Original f"
+string(10) "Original g"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"E":private]=>
-  unicode(12) "Overridden e"
-  [u"f":u"D":private]=>
-  unicode(9) "changed.f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
+  ["f":"D":private]=>
+  string(9) "changed.f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 in E::doForEach
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
-unicode(12) "Overridden d"
-unicode(12) "Overridden e"
-unicode(10) "Original g"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
+string(12) "Overridden d"
+string(12) "Overridden e"
+string(10) "Original g"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(9) "changed.d"
-  [u"e":u"E":private]=>
-  unicode(9) "changed.e"
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(9) "changed.g"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"E":private]=>
+  string(9) "changed.e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 
 Iterate over various generations from outside the object:
 
 --> Using instance of C:
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
 object(C)#%d (5) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  &unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(10) "Original d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  &string(9) "changed.c"
+  ["d":protected]=>
+  string(10) "Original d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 --> Using instance of D:
-unicode(10) "Original a"
-unicode(10) "Original b"
-unicode(10) "Original c"
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
 object(D)#%d (7) {
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(10) "Original g"
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  &unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(10) "Original d"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(10) "Original g"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  &string(9) "changed.c"
+  ["d":protected]=>
+  string(10) "Original d"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 
 --> Using instance of E:
-unicode(12) "Overridden a"
-unicode(12) "Overridden b"
-unicode(12) "Overridden c"
+string(12) "Overridden a"
+string(12) "Overridden b"
+string(12) "Overridden c"
 object(E)#%d (8) {
-  [u"a"]=>
-  unicode(9) "changed.a"
-  [u"b"]=>
-  unicode(9) "changed.b"
-  [u"c"]=>
-  &unicode(9) "changed.c"
-  [u"d":protected]=>
-  unicode(12) "Overridden d"
-  [u"e":u"E":private]=>
-  unicode(12) "Overridden e"
-  [u"f":u"D":private]=>
-  unicode(10) "Original f"
-  [u"g":protected]=>
-  unicode(10) "Original g"
-  [u"e":u"C":private]=>
-  unicode(10) "Original e"
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  &string(9) "changed.c"
+  ["d":protected]=>
+  string(12) "Overridden d"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(10) "Original g"
+  ["e":"C":private]=>
+  string(10) "Original e"
 }
 ===DONE===

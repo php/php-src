@@ -40,9 +40,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(1) {
-  [u"BLOB"]=>
+  ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

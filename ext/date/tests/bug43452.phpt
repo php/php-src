@@ -1,9 +1,8 @@
 --TEST--
 Bug #43452 ("weekday" is not equivalent to "1 weekday" of the current weekday is "weekday")
---INI--
-date.timezone=Europe/Oslo
 --FILE--
 <?php
+date_default_timezone_set('Europe/Oslo');
 // <day> is equivalent to 1 <day> and will *not* forward if the current day
 // (November 1st) is the same day of week.
 $day = strtotime( "Thursday Nov 2007" );

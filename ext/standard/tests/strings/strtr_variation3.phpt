@@ -65,39 +65,39 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtr() : string containing escape sequences for 'str' arg ***
 -- Iteration 1 --
-unicode(9) "SesSTsttE"
-unicode(9) "	es	\stt"
+string(9) "SesSTsttE"
+string(9) "	es	\stt"
 -- Iteration 2 --
-unicode(12) "TtestTTstrtr"
-unicode(12) "\test\\strtr"
+string(12) "TtestTTstrtr"
+string(12) "\test\\strtr"
 -- Iteration 3 --
-unicode(12) "TtestETstrtr"
-unicode(11) "ttestTstrtr"
+string(12) "TtestETstrtr"
+string(11) "ttestTstrtr"
 -- Iteration 4 --
-unicode(9) "$variable"
-unicode(9) "$variable"
+string(9) "$variable"
+string(9) "$variable"
 -- Iteration 5 --
-unicode(7) ""quotes"
-unicode(7) ""quotes"
+string(7) ""quotes"
+string(7) ""quotes"
 -- Iteration 6 --
-unicode(12) "TtesTtTsttTr"
-unicode(12) "\tes\t\stt\r"
+string(12) "TtesTtTsttTr"
+string(12) "\tes\t\stt\r"
 -- Iteration 7 --
-unicode(12) "TtestTTstrtr"
-unicode(12) "\test\\strtr"
+string(12) "TtestTTstrtr"
+string(12) "\test\\strtr"
 -- Iteration 8 --
-unicode(15) "TntestTrTnstrtr"
-unicode(15) "\ntest\r\nstrtr"
+string(15) "TntestTrTnstrtr"
+string(15) "\ntest\r\nstrtr"
 -- Iteration 9 --
-unicode(10) "T$variable"
-unicode(10) "\$variable"
+string(10) "T$variable"
+string(10) "\$variable"
 -- Iteration 10 --
-unicode(8) "T"quotes"
-unicode(8) "\"quotes"
+string(8) "T"quotes"
+string(8) "\"quotes"
 -- Iteration 11 --
-unicode(54) "SesSTsttETTtestTTstrtrTTtestETstrtrT$variableTT"quotes"
-unicode(52) "	es	\sttT\test\\strtrtttestTstrtrt$variablet\"quotes"
+string(54) "SesSTsttETTtestTTstrtrTTtestETstrtrT$variableTT"quotes"
+string(52) "	es	\sttT\test\\strtrtttestTstrtrt$variablet\"quotes"
 *** Done ***

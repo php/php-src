@@ -30,24 +30,24 @@ array(3) {
   [0]=>
   int(2)
   [1]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(3) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
   int(2)
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(3) {
   [0]=>
   int(2)
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(2) "aa"
+  string(2) "aa"
 }
 ===DONE===

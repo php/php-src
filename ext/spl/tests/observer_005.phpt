@@ -77,47 +77,47 @@ var_dump($storage2);
 --EXPECTF--
 int(2)
 object(TestClass)#%d (4) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(4)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(5)
-  [u"pri":u"TestClass":private]=>
+  ["pri":"TestClass":private]=>
   int(6)
 }
 object(TestClass)#%d (4) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(7)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(8)
-  [u"pri":u"TestClass":private]=>
+  ["pri":"TestClass":private]=>
   int(9)
 }
 object(MyStorage)#%d (5) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(1)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(2)
-  [u"pri":u"MyStorage":private]=>
+  ["pri":"MyStorage":private]=>
   int(3)
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
-        [u"def"]=>
+        ["def"]=>
         int(24)
-        [u"pub"]=>
+        ["pub"]=>
         int(4)
-        [u"pro":protected]=>
+        ["pro":protected]=>
         int(5)
-        [u"pri":u"TestClass":private]=>
+        ["pri":"TestClass":private]=>
         int(6)
       }
       ["inf"]=>
@@ -127,13 +127,13 @@ object(MyStorage)#%d (5) {
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
-        [u"def"]=>
+        ["def"]=>
         int(24)
-        [u"pub"]=>
+        ["pub"]=>
         int(7)
-        [u"pro":protected]=>
+        ["pro":protected]=>
         int(8)
-        [u"pri":u"TestClass":private]=>
+        ["pri":"TestClass":private]=>
         int(9)
       }
       ["inf"]=>
@@ -141,51 +141,51 @@ object(MyStorage)#%d (5) {
     }
   }
 }
-unicode(%d) "%s"
+string(%d) "%s"
 ===UNSERIALIZE===
 int(2)
 object(TestClass)#%d (4) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(4)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(5)
-  [u"pri":u"TestClass":private]=>
+  ["pri":"TestClass":private]=>
   int(6)
 }
 object(TestClass)#%d (4) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(7)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(8)
-  [u"pri":u"TestClass":private]=>
+  ["pri":"TestClass":private]=>
   int(9)
 }
 object(MyStorage)#%d (5) {
-  [u"def"]=>
+  ["def"]=>
   int(24)
-  [u"pub"]=>
+  ["pub"]=>
   int(1)
-  [u"pro":protected]=>
+  ["pro":protected]=>
   int(2)
-  [u"pri":u"MyStorage":private]=>
+  ["pri":"MyStorage":private]=>
   int(3)
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
-        [u"def"]=>
+        ["def"]=>
         int(24)
-        [u"pub"]=>
+        ["pub"]=>
         int(4)
-        [u"pro":protected]=>
+        ["pro":protected]=>
         int(5)
-        [u"pri":u"TestClass":private]=>
+        ["pri":"TestClass":private]=>
         int(6)
       }
       ["inf"]=>
@@ -195,13 +195,13 @@ object(MyStorage)#%d (5) {
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
-        [u"def"]=>
+        ["def"]=>
         int(24)
-        [u"pub"]=>
+        ["pub"]=>
         int(7)
-        [u"pro":protected]=>
+        ["pro":protected]=>
         int(8)
-        [u"pri":u"TestClass":private]=>
+        ["pri":"TestClass":private]=>
         int(9)
       }
       ["inf"]=>

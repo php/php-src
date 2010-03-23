@@ -106,12 +106,10 @@ var_dump( is_array() );
 var_dump( is_array ($fp, $fp) );
  
 echo "Done\n";
-?>
---CLEAN--
 /* close resources */
 fclose($fp);
 closedir($dfp);
-
+?>
 --EXPECTF--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
@@ -208,8 +206,8 @@ bool(false)
 *** Testing error conditions ***
 
 Warning: is_array() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_array() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 Done

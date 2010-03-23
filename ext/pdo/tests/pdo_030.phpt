@@ -35,7 +35,7 @@ class PDOStatementX extends PDOStatement
     	echo __METHOD__ . "()\n";
     }
     
-    function execute()
+    function execute($params = array())
     {
     	echo __METHOD__ . "()\n";
 		parent::execute();    	
@@ -88,16 +88,16 @@ echo "===DONE===\n";
 exit(0);
 ?>
 --EXPECTF--
-unicode(11) "PDODatabase"
-unicode(12) "PDOStatement"
+string(11) "PDODatabase"
+string(12) "PDOStatement"
 ===QUERY===
 array(1) {
   [0]=>
-  unicode(12) "PDOStatement"
+  string(12) "PDOStatement"
 }
 array(2) {
   [0]=>
-  unicode(13) "PDOStatementX"
+  string(13) "PDOStatementX"
   [1]=>
   array(1) {
     [0]=>
@@ -107,32 +107,32 @@ array(2) {
 }
 PDODatabase::query()
 PDOStatementX::__construct()
-unicode(13) "PDOStatementX"
-unicode(11) "PDODatabase"
+string(13) "PDOStatementX"
+string(11) "PDODatabase"
 ===FOREACH===
 array(3) {
-  [u"id"]=>
-  unicode(2) "10"
-  [u"val"]=>
-  unicode(3) "Abc"
-  [u"val2"]=>
-  unicode(3) "zxy"
+  ["id"]=>
+  string(2) "10"
+  ["val"]=>
+  string(3) "Abc"
+  ["val2"]=>
+  string(3) "zxy"
 }
 array(3) {
-  [u"id"]=>
-  unicode(2) "20"
-  [u"val"]=>
-  unicode(3) "Def"
-  [u"val2"]=>
-  unicode(3) "wvu"
+  ["id"]=>
+  string(2) "20"
+  ["val"]=>
+  string(3) "Def"
+  ["val2"]=>
+  string(3) "wvu"
 }
 array(3) {
-  [u"id"]=>
-  unicode(2) "30"
-  [u"val"]=>
-  unicode(3) "Ghi"
-  [u"val2"]=>
-  unicode(3) "tsr"
+  ["id"]=>
+  string(2) "30"
+  ["val"]=>
+  string(3) "Ghi"
+  ["val2"]=>
+  string(3) "tsr"
 }
 ===DONE===
 PDOStatementX::__destruct()

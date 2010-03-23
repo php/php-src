@@ -44,26 +44,26 @@ var_dump( gmdate('T', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with Timezone identifier format --
-unicode(3) "UTC"
-unicode(3) "UTC"
+string(3) "UTC"
+string(3) "UTC"
 
 -- Testing gmdate() function with checking whether date is in daylight saving time format --
-unicode(1) "%d"
-unicode(1) "%d"
+string(1) "%d"
+string(1) "%d"
 
 -- Testing gmdate() function with difference to GMT in hours format --
-unicode(5) "+0000"
-unicode(5) "+0000"
+string(5) "+0000"
+string(5) "+0000"
 
 -- Testing gmdate() function with Difference to GMT in hours using colon as separator format --
-unicode(6) "+00:00"
-unicode(6) "+00:00"
+string(6) "+00:00"
+string(6) "+00:00"
 
 -- Testing gmdate() function with timezone abbreviation format --
-unicode(3) "GMT"
-unicode(3) "GMT"
+string(3) "GMT"
+string(3) "GMT"
 
 -- Testing gmdate() function with timezone offset format --
-unicode(3) "GMT"
-unicode(3) "GMT"
+string(3) "GMT"
+string(3) "GMT"
 ===DONE===

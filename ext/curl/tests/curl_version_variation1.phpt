@@ -125,11 +125,11 @@ Warning: curl_version() expects parameter 1 to be long, array given in %s on lin
 bool(false)
 -- Iteration 13 --
 
-Warning: curl_version() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: curl_version() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: curl_version() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: curl_version() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 -- Iteration 15 --
 

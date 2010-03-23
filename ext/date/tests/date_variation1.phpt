@@ -110,98 +110,99 @@ fclose( $file_handle );
 *** Testing date() : usage variation -  unexpected values to first argument $format***
 
 -- int 0 --
-unicode(1) "0"
+string(1) "0"
 
 -- int 1 --
-unicode(1) "1"
+string(1) "1"
 
 -- int 12345 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- int -12345 --
-unicode(6) "-12345"
+string(6) "-12345"
 
 -- float 10.5 --
-unicode(4) "10.5"
+string(4) "10.5"
 
 -- float -10.5 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 -- float .5 --
-unicode(3) "0.5"
+string(3) "0.5"
 
 -- empty array --
 
-Warning: date() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
-unicode(0) ""
+string(0) ""
 
 -- lowercase null --
-unicode(0) ""
+string(0) ""
 
 -- lowercase true --
-unicode(1) "1"
+string(1) "1"
 
 -- lowercase false --
-unicode(0) ""
+string(0) ""
 
 -- uppercase TRUE --
-unicode(1) "1"
+string(1) "1"
 
 -- uppercase FALSE --
-unicode(0) ""
+string(0) ""
 
 -- empty string DQ --
-unicode(0) ""
+string(0) ""
 
 -- empty string SQ --
-unicode(0) ""
+string(0) ""
 
 -- string DQ --
-unicode(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
 
 -- string SQ --
-unicode(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
 
 -- mixed case string --
-unicode(40) "30GMTFri, 27 Feb 2009 10:44:30 +00000210"
+string(40) "30GMTFri, 27 Feb 2009 10:44:30 +00000210"
 
 -- heredoc --
-unicode(76) "10Europe/LondonFridayFriday2009 52009Fri, 27 Feb 2009 10:44:30 +0000Friday27"
+string(76) "10Europe/LondonFridayFriday2009 52009Fri, 27 Feb 2009 10:44:30 +0000Friday27"
 
 -- instance of classWithToString --
-unicode(64) "CFridayam3030 AM 2009b27Europe/London2009-02-27T10:44:30+00:0028"
+string(64) "CFridayam3030 AM 2009b27Europe/London2009-02-27T10:44:30+00:0028"
 
 -- instance of classWithoutToString --
 
-Warning: date() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: date() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
-unicode(0) ""
+string(0) ""
 
 -- unset var --
-unicode(0) ""
+string(0) ""
 
 -- resource --
 
-Warning: date() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: date() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===
+

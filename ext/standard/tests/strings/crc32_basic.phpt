@@ -22,7 +22,7 @@ echo "*** Testing crc32() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$str = b'string_val1234';
+$str = 'string_val1234';
 
 // Calling crc32() with all possible arguments
 
@@ -34,7 +34,7 @@ printf("%u\n", crc32($str) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing crc32() : basic functionality ***
 bool(true)
 256895812

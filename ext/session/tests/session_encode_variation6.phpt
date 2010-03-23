@@ -34,13 +34,18 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 bool(true)
+
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 bool(true)
+
+Notice: session_encode(): Skipping numeric key 1234567890 in %s on line %d
 bool(false)
 bool(true)
 bool(true)
+
+Notice: session_encode(): Skipping numeric key -1234567890 in %s on line %d
 bool(false)
 bool(true)
 Done
-

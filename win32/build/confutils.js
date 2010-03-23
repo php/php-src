@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.83 2009-05-29 07:41:46 kalle Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.33 2009-05-29 07:43:07 kalle Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1132,23 +1132,18 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 			if (ext_shared) {
 				WARNING(extname + " cannot be built: missing dependency, " + dependson + " not found");
 
-				if (configure_hdr.Exists('HAVE_' + EXT)) {
-					configure_hdr.Remove('HAVE_' + EXT);
-				}
-
-				dllname = ' php_' + extname + '.dll';
+				var dllname = ' php_' + extname + '.dll';
 
 				if (!REMOVE_TARGET(dllname, 'EXT_TARGETS')) {
 					REMOVE_TARGET(dllname, 'PECL_TARGETS');
 				}
 
-				extensions_enabled.pop();
 				return false;
 
-			} else {
-				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
-				return false;
 			}
+
+			ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+			return false;
 		}
 	} // dependency is statically built-in to PHP
 	return true;
@@ -1343,12 +1338,22 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 function REMOVE_TARGET(dllname, flag)
 {
+	var dllname = dllname.replace(/\s/g, "");
+	var EXT = dllname.replace(/php_(\S+)\.dll/, "$1").toUpperCase();
+	var php_flags = configure_subst.Item("CFLAGS_PHP");
+
 	if (configure_subst.Exists(flag)) {
-		targets = configure_subst.Item(flag);
+		var targets = configure_subst.Item(flag);
+
 		if (targets.match(dllname)) {
 			configure_subst.Remove(flag);
 			targets = targets.replace(dllname, "");
+			targets = targets.replace(/\s+/, " ");
+			targets = targets.replace(/\s$/, "");
 			configure_subst.Add(flag, targets);
+			configure_hdr.Add("HAVE_" + EXT, new Array(0, ""));
+			configure_subst.Item("CFLAGS_PHP") = php_flags.replace(" /D COMPILE_DL_" + EXT, "");
+			extensions_enabled.pop();
 			return true;
 		}
 	}
@@ -1570,7 +1575,6 @@ function generate_config_h()
 		if (item[1] != undefined) {
 			outfile.WriteLine("/* " + item[1] + " */");
 		}
-
 
 		if (typeof(pieces) == "string" && pieces.charCodeAt(0) == 34) {
 			/* quoted string have a maximal length of 2k under vc.
@@ -1844,6 +1848,7 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
+
 // for snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
 // by running "nmake snap"
@@ -1854,4 +1859,5 @@ ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and i
 // several objects at once, reducing overhead of starting new
 // compiler processes.
 ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
+
 

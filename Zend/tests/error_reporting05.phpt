@@ -3,7 +3,7 @@ testing @ and error_reporting - 5
 --FILE--
 <?php
 
-error_reporting(E_ALL & ~E_STRICT);
+error_reporting(E_ALL);
 	
 class test {
 	function __get($name) {
@@ -26,7 +26,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Notice: Undefined variable: undef_value in %s on line %d
 
 Notice: Undefined variable: undef_name in %s on line %d

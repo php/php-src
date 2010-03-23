@@ -113,128 +113,113 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "0" in %s on line %d
 bool(false)
 
 -- Iteration 2 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "12345" in %s on line %d
 bool(false)
 
 -- Iteration 4 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "-2345" in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "10.5" in %s on line %d
 bool(false)
 
 -- Iteration 6 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "-10.5" in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "123456789000" in %s on line %d
 bool(false)
 
 -- Iteration 8 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "1.23456789E-9" in %s on line %d
 bool(false)
 
 -- Iteration 9 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "0.5" in %s on line %d
 bool(false)
 
 -- Iteration 10 --
-unicode(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
+bool(false)
 
 -- Iteration 11 --
-unicode(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
+bool(false)
 
 -- Iteration 12 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 13 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-unicode(24) "68656c6c6f2c20776f726c64"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
 -- Iteration 14 --
-
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtolower(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 15 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-unicode(24) "68656c6c6f2c20776f726c64"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
 -- Iteration 16 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-unicode(24) "68656c6c6f2c20776f726c64"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-unicode(24) "68656c6c6f2c20776f726c64"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
 -- Iteration 18 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 19 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 20 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 21 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 22 --
-unicode(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
+bool(false)
 
 -- Iteration 23 --
-unicode(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
+bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_strtolower() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: mb_strtolower() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 Done
-

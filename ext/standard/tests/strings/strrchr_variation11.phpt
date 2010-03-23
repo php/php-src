@@ -37,8 +37,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -97,18 +97,12 @@ bool(false)
 -- Iteration 3 --
 bool(false)
 -- Iteration 4 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)
@@ -116,23 +110,23 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 bool(false)
@@ -156,7 +150,7 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: strrchr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)

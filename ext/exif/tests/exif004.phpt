@@ -22,17 +22,17 @@ echo var_dump($image['WINXP']);
 ?>
 --EXPECT--
 array(5) {
-  [u"Subject"]=>
-  unicode(10) "Subject..."
-  [u"Keywords"]=>
-  unicode(11) "Keywords..."
-  [u"Author"]=>
-  unicode(9) "Rui Carmo"
-  [u"Comments"]=>
-  unicode(29) "Comments
+  ["Subject"]=>
+  string(10) "Subject..."
+  ["Keywords"]=>
+  string(11) "Keywords..."
+  ["Author"]=>
+  string(9) "Rui Carmo"
+  ["Comments"]=>
+  string(29) "Comments
 Line2
 Line3
 Line4"
-  [u"Title"]=>
-  unicode(8) "Title..."
+  ["Title"]=>
+  string(8) "Title..."
 }

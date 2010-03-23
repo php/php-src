@@ -39,23 +39,23 @@ echo "Done";
 
 -- Testing array_map() function with Zero arguments --
 
-Warning: array_map() expects at least 2 parameters, 0 given in %s on line %d
+Warning: array_map() expects at least 2 parameters, 0 given in %s on line %d%d
 NULL
 
 -- Testing array_map() function with one less than expected no. of arguments --
 
-Warning: array_map() expects at least 2 parameters, 1 given in %s on line %d
+Warning: array_map() expects at least 2 parameters, 1 given in %s on line %d%d
 NULL
 
 -- Testing array_map() function with less no. of arrays than callback function arguments --
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: q in %s on line %d
+Notice: Undefined variable: q in %s on line %d%d
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: q in %s on line %d
+Notice: Undefined variable: q in %s on line %d%d
 array(2) {
   [0]=>
   int(0)

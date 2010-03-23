@@ -20,13 +20,13 @@ var_dump($foo, $x);
 array(2) {
   [0]=>
   object(stdClass)#1 (1) {
-    [u"a"]=>
+    ["a"]=>
     &int(2)
   }
   [1]=>
   object(stdClass)#2 (1) {
-    [u"a"]=>
+    ["a"]=>
     &int(2)
   }
 }
-unicode(3) "foo"
+string(3) "foo"

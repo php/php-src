@@ -11,7 +11,7 @@ Test uasort() function : usage variations - different associative arrays
  *   string, integer, default & duplicate keys
  */
 
-echo "*** Testing uasort() : Sorting different associative arrays ***\n";
+echo "*** Testing uasort() : sorting different associative arrays ***\n";
 
 // comparison function
 /* Prototype : int cmp(mixed $value1, mixed $value2)
@@ -19,7 +19,7 @@ echo "*** Testing uasort() : Sorting different associative arrays ***\n";
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2
+ * Description : compares value1 and value2 
  */
 function cmp($value1, $value2)
 {
@@ -47,8 +47,8 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECT--
-*** Testing uasort() : Sorting different associative arrays ***
+--EXPECTF--
+*** Testing uasort() : sorting different associative arrays ***
 -- Array with duplicate keys --
 bool(true)
 array(7) {
@@ -56,27 +56,27 @@ array(7) {
   int(1)
   [5]=>
   int(2)
-  [u"z"]=>
+  ["z"]=>
   int(3)
   [3]=>
   int(3)
-  [u"o"]=>
+  ["o"]=>
   int(6)
-  [u"a"]=>
+  ["a"]=>
   int(8)
-  [u"d"]=>
+  ["d"]=>
   int(9)
 }
 -- Array with default/assigned keys --
 bool(true)
 array(4) {
   [2]=>
-  unicode(5) "Apple"
+  string(5) "Apple"
   [0]=>
-  unicode(6) "Banana"
+  string(6) "Banana"
   [1]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [3]=>
-  unicode(9) "Pineapple"
+  string(9) "Pineapple"
 }
 Done

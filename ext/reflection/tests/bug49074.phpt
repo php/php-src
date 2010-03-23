@@ -24,8 +24,8 @@ var_dump($r->getStaticProperties());
 ?>
 --EXPECT--
 array(2) {
-  [u"data2"]=>
+  ["data2"]=>
   int(2)
-  [u"data3"]=>
+  ["data3"]=>
   int(3)
 }

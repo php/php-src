@@ -96,8 +96,8 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_get_encoding() : error functionality ***
 
@@ -172,6 +172,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: iconv_get_encoding() expects parameter 1 to be binary string, resource given %s on line %d
+Warning: iconv_get_encoding() expects parameter 1 to be string, resource given in %s on line %d
 NULL
-===DONE===
+Done

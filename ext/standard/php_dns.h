@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,13 +25,13 @@
 
 #if defined(HAVE_DNS_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
-    		((int)dns_search(res, dname, class, type, answer, anslen, (struct sockaddr *)&from, &fromsize))
+    	((int)dns_search(res, dname, class, type, answer, anslen, (struct sockaddr *)&from, &fromsize))
 #define php_dns_free_handle(res) \
-			dns_free(res)
+		dns_free(res)
 
 #elif defined(HAVE_RES_NSEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
-			res_nsearch(res, dname, class, type, answer, anslen)
+			res_nsearch(res, dname, class, type, answer, anslen);
 #define php_dns_free_handle(res) \
 			res_nclose(res); \
 			php_dns_free_res(*res)

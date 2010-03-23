@@ -8,7 +8,6 @@ zend.enable_gc=1
 <?php
 $a = new ArrayObject();
 $a[0] = $a;
-//var_dump($a);
 unset($a);
 var_dump(gc_collect_cycles());
 echo "ok\n";

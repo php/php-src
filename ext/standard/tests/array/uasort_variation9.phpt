@@ -10,12 +10,11 @@ Test uasort() function : usage variations - 'cmp_function' with reference argume
 /* Testing uasort() functionality with comparison function having arguments as reference
  */
 
-
 echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
 
 // comparison function
 /* Prototype : int cmp(mixed &$value1, mixed &$value2)
- * Parameters : $value1 and $value2 - values to be compared
+ * Parameters : $value1 and $value2 - values recieved by reference 
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
@@ -47,7 +46,7 @@ var_dump($string_values);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : 'cmp_function' with reference arguments ***
 -- Passing integer values to 'cmp_function' --
 bool(true)
@@ -71,12 +70,12 @@ array(7) {
 bool(true)
 array(4) {
   [1]=>
-  unicode(5) "Apple"
+  string(5) "Apple"
   [3]=>
-  unicode(6) "Banana"
+  string(6) "Banana"
   [0]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [2]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
 }
 Done

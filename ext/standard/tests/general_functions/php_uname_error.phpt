@@ -42,15 +42,15 @@ bool(true)
 
 -- Testing php_uname() function with invalid argument types --
 
-Warning: php_uname() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: php_uname() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: php_uname() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: php_uname() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: php_uname() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: php_uname() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: php_uname() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: php_uname() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 ===DONE===

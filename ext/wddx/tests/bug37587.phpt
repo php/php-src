@@ -27,7 +27,7 @@ EOF
 array(1) {
   [0]=>
   array(1) {
-    [u"test"]=>
+    ["test"]=>
     string(11) "Hello World"
   }
 }

@@ -15,7 +15,7 @@ Class [ <user> class Foo ] {
   @@ %s017.php 2-4
 
   - Constants [1] {
-    Constant [ Unicode string test ] { ok }
+    Constant [ string test ] { ok }
   }
 
   - Static properties [0] {

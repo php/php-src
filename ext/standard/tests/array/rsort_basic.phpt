@@ -59,11 +59,11 @@ echo "Done";
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "banana"
+  string(6) "banana"
 }
 
 -- Testing rsort() by supplying numeric array, 'flag' value is defualt --
@@ -83,11 +83,11 @@ array(4) {
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "banana"
+  string(6) "banana"
 }
 
 -- Testing rsort() by supplying numeric array, 'flag' = SORT_REGULAR --
@@ -107,11 +107,11 @@ array(4) {
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "banana"
+  string(6) "banana"
 }
 
 -- Testing rsort() by supplying numeric array, 'flag' = SORT_NUMERIC --

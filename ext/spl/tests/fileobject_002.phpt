@@ -30,45 +30,45 @@ test('fileobject_001b.txt');
 ===fileobject_001a.txt===
 int(0)
 int(0)
-unicode(1) "0"
+string(1) "0"
 bool(false)
 int(1)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(1)
-unicode(1) "1"
+string(1) "1"
 bool(false)
 int(2)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(2)
-unicode(1) "2"
+string(1) "2"
 bool(false)
 int(3)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(3)
-unicode(1) "3"
+string(1) "3"
 bool(false)
 int(4)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(4)
-unicode(1) "4"
+string(1) "4"
 bool(false)
 int(5)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(5)
-unicode(1) "5"
+string(1) "5"
 bool(false)
 int(6)
-unicode(1) "
+string(1) "
 "
 bool(false)
 ===EOF?===
@@ -78,42 +78,42 @@ bool(true)
 ===fileobject_001b.txt===
 int(0)
 int(0)
-unicode(1) "0"
+string(1) "0"
 bool(false)
 int(1)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(1)
-unicode(1) "1"
+string(1) "1"
 bool(false)
 int(2)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(2)
-unicode(1) "2"
+string(1) "2"
 bool(false)
 int(3)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(3)
-unicode(1) "3"
+string(1) "3"
 bool(false)
 int(4)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(4)
-unicode(1) "4"
+string(1) "4"
 bool(false)
 int(5)
-unicode(1) "
+string(1) "
 "
 bool(false)
 int(5)
-unicode(1) "5"
+string(1) "5"
 bool(false)
 ===EOF?===
 bool(true)

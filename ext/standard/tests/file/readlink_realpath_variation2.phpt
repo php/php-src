@@ -74,8 +74,8 @@ rmdir("$name_prefix/");
 
 -- Testing readlink() and realpath() with softlink, linkname stored inside an array --
 bool(true)
-unicode(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
-unicode(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
+string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
+string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 
 Warning: symlink(): No such file or directory in %s on line %d
 bool(false)
@@ -91,7 +91,7 @@ bool(true)
 
 Warning: readlink(): Invalid argument in %s on line %d
 bool(false)
-unicode(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
+string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
 
 Warning: link(): No such file or directory in %s on line %d
 bool(false)

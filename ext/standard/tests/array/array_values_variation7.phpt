@@ -32,24 +32,24 @@ echo "Done";
 -- $input argument: --
 array(4) {
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 
 -- Result of array_values() --
 array(4) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 Done

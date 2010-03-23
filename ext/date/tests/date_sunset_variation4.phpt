@@ -103,22 +103,22 @@ foreach($inputs as $key =>$value) {
 *** Testing date_sunset() : usage variation ***
 
 --int 0--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --int 1--
-unicode(5) "23:59"
+string(5) "23:59"
 float(23.992%d)
 int(1218220174)
 
 --int 12345--
-unicode(5) "17:15"
+string(5) "17:15"
 float(17.259%d)
 int(1218195932)
 
 --int -12345--
-unicode(5) "12:18"
+string(5) "12:18"
 float(12.316%d)
 int(1218178138)
 
@@ -167,99 +167,99 @@ Warning: date_sunset() expects parameter 4 to be double, array given in %s on li
 bool(false)
 
 --uppercase NULL--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --lowercase null--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --lowercase true--
-unicode(5) "23:59"
+string(5) "23:59"
 float(23.992%d)
 int(1218220174)
 
 --lowercase false--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --uppercase TRUE--
-unicode(5) "23:59"
+string(5) "23:59"
 float(23.992%d)
 int(1218220174)
 
 --uppercase FALSE--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 4 to be double, Unicode string given in %s on line %d
+Warning: date_sunset() expects parameter 4 to be double, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -285,12 +285,12 @@ Warning: date_sunset() expects parameter 4 to be double, object given in %s on l
 bool(false)
 
 --undefined var--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 
 --unset var--
-unicode(5) "00:03"
+string(5) "00:03"
 float(0.059%d)
 int(1218220414)
 ===DONE===

@@ -23,18 +23,18 @@ var_dump( array_values($input) );
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_values() : basic functionality ***
 array(5) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
   int(3)
   [4]=>
-  unicode(3) "ten"
+  string(3) "ten"
 }
 Done

@@ -1,7 +1,7 @@
 --TEST--
 ctype on strings
 --SKIPIF--
-<?php if (!extension_loaded("ctype")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php 
 
@@ -34,9 +34,6 @@ ctype_test_002("ctype_xdigit");
 
 ?>
 --EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
 LOCALE is '%s'
 ctype_lower 26 26 0
 ctype_upper 26 26 0

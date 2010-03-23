@@ -31,25 +31,26 @@ foreach ($bad_args as $bad_arg) {
 ?>
 ===DONE===
 --EXPECTF--
+
 -- Too many arguments --
 
-Warning: microtime() expects at most 1 parameter, 2 given in %s on line %d
+Warning: microtime() expects at most 1 parameter, 2 given in %s on line 11
 NULL
 
 -- Bad Arg types --
 
 --> bad arg: NULL
-unicode(%d) "%s"
+string(%d) "%s %s"
 
 --> bad arg: float(1.5)
-float(%f)
+float(%s)
 
---> bad arg: unicode(5) "hello"
-float(%f)
+--> bad arg: string(5) "hello"
+float(%s)
 
 --> bad arg: array(2) {
-  [u"k"]=>
-  unicode(1) "v"
+  ["k"]=>
+  string(1) "v"
   [0]=>
   array(1) {
     [0]=>
@@ -57,15 +58,15 @@ float(%f)
   }
 }
 
-Warning: microtime() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: microtime() expects parameter 1 to be boolean, array given in %s on line 25
 NULL
 
---> bad arg: object(stdClass)#1 (0) {
+--> bad arg: object(stdClass)#%d (0) {
 }
 
-Warning: microtime() expects parameter 1 to be boolean, object given in %s on line %d
+Warning: microtime() expects parameter 1 to be boolean, object given in %s on line 25
 NULL
 
 --> bad arg: int(1)
-float(%f)
+float(%s)
 ===DONE===

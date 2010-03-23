@@ -1,5 +1,5 @@
 --TEST--
-Test asort() function : usage variations - sort array with diff. sub arrays, 'sort_flag' as default/SORT_REGULAR 
+Test asort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR 
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
@@ -57,7 +57,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying various arrays containing sub arrays --
@@ -76,14 +76,14 @@ array(0) {
 - With default sort_flag -
 bool(true)
 array(1) {
-  [u"sub_array[1][0]"]=>
+  ["sub_array[1][0]"]=>
   array(0) {
   }
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(1) {
-  [u"sub_array[1][0]"]=>
+  ["sub_array[1][0]"]=>
   array(0) {
   }
 }
@@ -92,11 +92,11 @@ array(1) {
 - With default sort_flag -
 bool(true)
 array(3) {
-  [u"data[2,1]"]=>
+  ["data[2,1]"]=>
   int(11)
-  [u"data[2,0]"]=>
+  ["data[2,0]"]=>
   int(44)
-  [u"sub_array[2][0] "]=>
+  ["sub_array[2][0] "]=>
   array(2) {
     [0]=>
     int(64)
@@ -107,11 +107,11 @@ array(3) {
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
-  [u"data[2,1]"]=>
+  ["data[2,1]"]=>
   int(11)
-  [u"data[2,0]"]=>
+  ["data[2,0]"]=>
   int(44)
-  [u"sub_array[2][0] "]=>
+  ["sub_array[2][0] "]=>
   array(2) {
     [0]=>
     int(64)
@@ -124,22 +124,22 @@ array(3) {
 - With default sort_flag -
 bool(true)
 array(4) {
-  [u"sub_array[3][3]"]=>
+  ["sub_array[3][3]"]=>
   array(0) {
   }
-  [u"sub_array[3][1]"]=>
+  ["sub_array[3][1]"]=>
   array(1) {
     [0]=>
     int(11)
   }
-  [u"sub_array[3][2]"]=>
+  ["sub_array[3][2]"]=>
   array(2) {
     [0]=>
     int(22)
     [1]=>
     int(-55)
   }
-  [u"sub_array[3][0]"]=>
+  ["sub_array[3][0]"]=>
   array(3) {
     [0]=>
     int(33)
@@ -152,22 +152,22 @@ array(4) {
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(4) {
-  [u"sub_array[3][3]"]=>
+  ["sub_array[3][3]"]=>
   array(0) {
   }
-  [u"sub_array[3][1]"]=>
+  ["sub_array[3][1]"]=>
   array(1) {
     [0]=>
     int(11)
   }
-  [u"sub_array[3][2]"]=>
+  ["sub_array[3][2]"]=>
   array(2) {
     [0]=>
     int(22)
     [1]=>
     int(-55)
   }
-  [u"sub_array[3][0]"]=>
+  ["sub_array[3][0]"]=>
   array(3) {
     [0]=>
     int(33)

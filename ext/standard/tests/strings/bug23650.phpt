@@ -28,3 +28,4 @@ echo strip_tags($str, '<abc>');
 4:<abc - def>
 5:abc - def
 6:</abc>
+

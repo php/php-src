@@ -14,6 +14,8 @@ if (!extension_loaded("zlib")) {
  * Alias to functions: 
  */
 
+
+
 echo "*** Testing gzuncompress() : error conditions ***\n";
 
 // Zero arguments
@@ -27,14 +29,13 @@ $length = 10;
 $extra_arg = 10;
 var_dump( gzuncompress($data, $length, $extra_arg) );
 
-echo "\n-- Testing with Unicode string --\n";
-var_dump(gzuncompress($data, $length));
 
 echo "\n-- Testing with a buffer that is too small --\n";
 $short_len = strlen($data) - 1;
-$compressed = gzcompress(b"$data");
+$compressed = gzcompress($data);
 
 var_dump(gzuncompress($compressed, $short_len));
+
 
 echo "\n-- Testing with incorrect arguments --\n";
 var_dump(gzuncompress(123));
@@ -65,14 +66,9 @@ NULL
 Warning: gzuncompress() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
--- Testing with Unicode string --
-
-Warning: gzuncompress() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
-
 -- Testing with a buffer that is too small --
 
-Warning: gzuncompress(): insufficient memory in %s on line %d
+Warning: gzuncompress(): buffer error in %s on line %d
 bool(false)
 
 -- Testing with incorrect arguments --
@@ -80,9 +76,9 @@ bool(false)
 Warning: gzuncompress(): data error in %s on line %d
 bool(false)
 
-Warning: gzuncompress() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gzuncompress() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: gzuncompress() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gzuncompress() expects parameter 2 to be long, string given in %s on line %d
 NULL
 ===DONE===

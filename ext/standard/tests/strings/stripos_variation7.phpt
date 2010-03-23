@@ -7,7 +7,9 @@ Test stripos() function : usage variations - empty heredoc string for 'haystack'
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing empty heredoc string for 'haystack' argument */
+/* Test stripos() function by passing empty heredoc string for haystack 
+ *  and with various needles & offsets
+*/
 
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With empty heredoc string --\n";

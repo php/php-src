@@ -129,177 +129,177 @@ array(9) {
 
 --int 1--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --int 12345--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --int -12345--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --float 10.5--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --float -10.5--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --float 12.3456789000e10--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --float -12.3456789000e10--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --float .5--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -369,23 +369,23 @@ array(9) {
 
 --lowercase true--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -413,23 +413,23 @@ array(9) {
 
 --uppercase TRUE--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -501,89 +501,89 @@ array(9) {
 
 --string DQ--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --string SQ--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --mixed case string--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --heredoc--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 

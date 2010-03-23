@@ -37,7 +37,7 @@ var_dump($ar);
 <?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
     int(0)
@@ -61,9 +61,9 @@ array(6) {
   [5]=>
   int(5)
 }
-unicode(1) "a"
+string(1) "a"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(5) {
     [0]=>
     int(0)
@@ -73,8 +73,8 @@ object(ArrayObject)#%d (1) {
     int(2)
     [3]=>
     int(3)
-    [u"a"]=>
-    unicode(1) "a"
+    ["a"]=>
+    string(1) "a"
   }
 }
 int(0)
@@ -89,7 +89,7 @@ Notice: Undefined offset:  7 in %sarray_001.php on line %d
 
 Notice: Undefined index:  c in %sarray_001.php on line %d
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
     int(0)
@@ -98,14 +98,14 @@ object(ArrayObject)#%d (1) {
   }
 }
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(4) {
     [0]=>
     int(0)
     [2]=>
     int(2)
     [4]=>
-    unicode(1) "3"
+    string(1) "3"
     [5]=>
     int(4)
   }

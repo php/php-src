@@ -39,75 +39,75 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_get_cookie_params() : variation ***
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(0)
-  [u"path"]=>
-  unicode(1) "/"
-  [u"domain"]=>
-  unicode(0) ""
-  [u"secure"]=>
+  ["path"]=>
+  string(1) "/"
+  ["domain"]=>
+  string(0) ""
+  ["secure"]=>
   bool(false)
-  [u"httponly"]=>
-  bool(false)
-}
-array(5) {
-  [u"lifetime"]=>
-  int(3600)
-  [u"path"]=>
-  unicode(1) "/"
-  [u"domain"]=>
-  unicode(0) ""
-  [u"secure"]=>
-  bool(false)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(3600)
-  [u"path"]=>
-  unicode(5) "/path"
-  [u"domain"]=>
-  unicode(0) ""
-  [u"secure"]=>
+  ["path"]=>
+  string(1) "/"
+  ["domain"]=>
+  string(0) ""
+  ["secure"]=>
   bool(false)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(3600)
-  [u"path"]=>
-  unicode(5) "/path"
-  [u"domain"]=>
-  unicode(3) "foo"
-  [u"secure"]=>
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(0) ""
+  ["secure"]=>
   bool(false)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(3600)
-  [u"path"]=>
-  unicode(5) "/path"
-  [u"domain"]=>
-  unicode(3) "foo"
-  [u"secure"]=>
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
+  bool(false)
+  ["httponly"]=>
+  bool(false)
+}
+array(5) {
+  ["lifetime"]=>
+  int(3600)
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
   bool(true)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(false)
 }
 array(5) {
-  [u"lifetime"]=>
+  ["lifetime"]=>
   int(3600)
-  [u"path"]=>
-  unicode(5) "/path"
-  [u"domain"]=>
-  unicode(3) "foo"
-  [u"secure"]=>
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
   bool(true)
-  [u"httponly"]=>
+  ["httponly"]=>
   bool(true)
 }
 Done

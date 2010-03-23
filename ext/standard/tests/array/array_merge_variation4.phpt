@@ -107,262 +107,262 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1: int data --
 array(6) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [3]=>
-  unicode(8) "negative"
-  [u"one"]=>
+  string(8) "negative"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(6) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [3]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 
 -- Iteration 2: float data --
 array(5) {
   [0]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [1]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [2]=>
-  unicode(4) "half"
-  [u"one"]=>
+  string(4) "half"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [1]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [2]=>
-  unicode(4) "half"
+  string(4) "half"
 }
 
 -- Iteration 3: extreme floats data --
 array(4) {
   [0]=>
-  unicode(5) "large"
+  string(5) "large"
   [1]=>
-  unicode(5) "small"
-  [u"one"]=>
+  string(5) "small"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
-  unicode(5) "large"
+  string(5) "large"
   [1]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 
 -- Iteration 4: null uppercase data --
 array(3) {
-  [u""]=>
-  unicode(6) "null 1"
-  [u"one"]=>
+  [""]=>
+  string(6) "null 1"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(6) "null 1"
+  [""]=>
+  string(6) "null 1"
 }
 
 -- Iteration 5: null lowercase data --
 array(3) {
-  [u""]=>
-  unicode(6) "null 2"
-  [u"one"]=>
+  [""]=>
+  string(6) "null 2"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 -- Iteration 6: bool lowercase data --
 array(4) {
   [0]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
   [1]=>
-  unicode(6) "lowerf"
-  [u"one"]=>
+  string(6) "lowerf"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
   [1]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
 }
 
 -- Iteration 7: bool uppercase data --
 array(4) {
   [0]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
   [1]=>
-  unicode(6) "upperf"
-  [u"one"]=>
+  string(6) "upperf"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
   [1]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
 }
 
 -- Iteration 8: empty double quotes data --
 array(3) {
-  [u""]=>
-  unicode(6) "emptyd"
-  [u"one"]=>
+  [""]=>
+  string(6) "emptyd"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(6) "emptyd"
+  [""]=>
+  string(6) "emptyd"
 }
 
 -- Iteration 9: empty single quotes data --
 array(3) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"one"]=>
+  [""]=>
+  string(6) "emptys"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 
 -- Iteration 10: string data --
 array(5) {
-  [u"stringd"]=>
-  unicode(7) "stringd"
-  [u"strings"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
-  [u"one"]=>
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"stringd"]=>
-  unicode(7) "stringd"
-  [u"strings"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
+  ["stringd"]=>
+  string(7) "stringd"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
 }
 
 -- Iteration 11: undefined data --
 array(3) {
-  [u""]=>
-  unicode(9) "undefined"
-  [u"one"]=>
+  [""]=>
+  string(9) "undefined"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 -- Iteration 12: unset data --
 array(3) {
-  [u""]=>
-  unicode(5) "unset"
-  [u"one"]=>
+  [""]=>
+  string(5) "unset"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 Done

@@ -17,15 +17,15 @@ var_dump($m);
 int(1)
 array(1) {
   [0]=>
-  unicode(14) "<aa> <bb> <cc>"
+  string(14) "<aa> <bb> <cc>"
 }
 int(1)
 array(1) {
   [0]=>
-  unicode(4) "<aa>"
+  string(4) "<aa>"
 }
 int(1)
 array(1) {
   [0]=>
-  unicode(4) "<aa>"
+  string(4) "<aa>"
 }

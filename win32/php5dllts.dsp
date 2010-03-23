@@ -213,6 +213,10 @@ SOURCE=..\main\php_scandir.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_sprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
@@ -234,6 +238,10 @@ SOURCE=..\main\reentrancy.c
 # Begin Source File
 
 SOURCE=..\main\rfc1867.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\safe_mode.c
 # End Source File
 # Begin Source File
 
@@ -293,6 +301,10 @@ SOURCE=..\main\php.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php3_compat.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_compat.h
 # End Source File
 # Begin Source File
@@ -349,6 +361,10 @@ SOURCE=..\main\rfc1867.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\safe_mode.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\SAPI.h
 # End Source File
 # Begin Source File
@@ -376,28 +392,83 @@ SOURCE=..\main\win95nt.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\chartables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+SOURCE=..\ext\pcre\pcrelib\pcre_chartables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\get.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_compile.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\maketables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_exec.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\pcre.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_fullinfo.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\pcre\pcrelib\study.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+SOURCE=..\ext\pcre\pcrelib\pcre_get.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_globals.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_info.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_maketables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ord2utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_study.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_tables.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_try_flipped.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_ucp_searchfuncs.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_valid_utf8.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_version.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\pcrelib\pcre_xclass.c
+# ADD CPP /D "SUPPORT_UTF8" /D LINK_SIZE=2 /D MATCH_LIMIT=10000000 /D MATCH_LIMIT_RECURSION=10000000 /D NEWLINE=10 /D "SUPPORT_UCP" /D MAX_NAME_SIZE=32 /D MAX_NAME_COUNT=10000 /D MAX_DUPLENGTH=30000 /D "NO_RECURSE"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
@@ -702,34 +773,42 @@ SOURCE=..\ext\ftp\php_ftp.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\cal_unix.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\calendar.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\dow.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\easter.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\french.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\gregor.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\jewish.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\calendar\julian.c
+# PROP Intermediate_Dir "calendar"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 7"
@@ -742,6 +821,171 @@ SOURCE=..\ext\calendar\php_calendar.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\sdncal.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "SPL"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 11"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\spl\php_spl.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_directory.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_engine.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_exceptions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_functions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_iterators.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_observer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_sxe.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 12"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\spl\php_spl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_array.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_directory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_engine.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_exceptions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_functions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_iterators.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_observer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\spl\spl_sxe.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Reflection"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 12"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\reflection\php_reflection.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 13"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\reflection\php_reflection.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "XMLReader"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 13"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlreader\php_xmlreader.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 14"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlreader\php_xmlreader.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "XMLwriter"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 14"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlwriter\php_xmlwriter.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 15"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\xmlwriter\php_xmlwriter.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "IConv"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 15"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\iconv\iconv.c
+# ADD CPP /D "PHP_ICONV_EXPORTS"
+# End Source File
+# End Group
+# Begin Group "Header Files No. 16"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\iconv\php_iconv.h
 # End Source File
 # End Group
 # End Group
@@ -1741,10 +1985,6 @@ SOURCE=..\ext\standard\strnatcmp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\sunfuncs.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\syslog.c
 # End Source File
 # Begin Source File
@@ -2003,6 +2243,125 @@ SOURCE=..\ext\libxml\libxml.c
 # End Source File
 # End Group
 # End Group
+# Begin Group "Date"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\parse_tz.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib_config.h.win32
+
+!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+
+# Begin Custom Build
+InputDir=\Projects\php-5.2\ext\date\lib
+InputPath=..\ext\date\lib\timelib_config.h.win32
+
+"..\ext\date\lib\timelib_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\timelib_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+
+# Begin Custom Build
+InputDir=\Projects\php-5.2\ext\date\lib
+InputPath=..\ext\date\lib\timelib_config.h.win32
+
+"..\ext\date\lib\timelib_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\timelib_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputDir=\Projects\php-5.2\ext\date\lib
+InputPath=..\ext\date\lib\timelib_config.h.win32
+
+"..\ext\date\lib\timelib_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\timelib_config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+
+# Begin Custom Build
+InputDir=\Projects\php-5.2\ext\date\lib
+InputPath=..\ext\date\lib\timelib_config.h.win32
+
+"..\ext\date\lib\timelib_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\timelib_config.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\tm2unixtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\unixtime2tm.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 11"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\date\lib\astro.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\fallbackmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\php_date.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timelib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonedb.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\date\lib\timezonemap.h
+# End Source File
+# End Group
+# End Group
 # End Group
 # Begin Group "Win32"
 
@@ -2053,6 +2412,31 @@ SOURCE=..\win32\winutil.c
 # Begin Source File
 
 SOURCE=..\win32\wsyslog.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\build\wsyslog.mc
+
+!IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
+
+!ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
+
+# Begin Custom Build
+InputDir=.\build
+IntDir=.\Release_TSDbg
+InputPath=.\build\wsyslog.mc
+
+"wsyslog.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	mc -h $(InputDir)/.. -r $(InputDir) -x $(IntDir) $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header Files No. 2"
@@ -2164,10 +2548,6 @@ SOURCE=..\main\streams\php_stream_filter_api.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\streams\php_stream_glob_wrapper.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\streams\php_stream_mmap.h
 # End Source File
 # Begin Source File
@@ -2194,10 +2574,6 @@ SOURCE=..\main\streams\cast.c
 # Begin Source File
 
 SOURCE=..\main\streams\filter.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\streams\glob_wrapper.c
 # End Source File
 # Begin Source File
 
@@ -2310,7 +2686,7 @@ SOURCE=.\phpts.def
 
 !IF  "$(CFG)" == "php5dllts - Win32 Debug_TS"
 
-USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
 InputPath=.\phpts.def
 
@@ -2321,7 +2697,7 @@ InputPath=.\phpts.def
 
 !ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS"
 
-USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
 InputPath=.\phpts.def
 
@@ -2332,7 +2708,7 @@ InputPath=.\phpts.def
 
 !ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TS_inline"
 
-USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
 InputPath=.\phpts.def
 
@@ -2343,7 +2719,7 @@ InputPath=.\phpts.def
 
 !ELSEIF  "$(CFG)" == "php5dllts - Win32 Release_TSDbg"
 
-USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	"..\ext\libxml\php_libxml2.def"	
 # Begin Custom Build - Generating $(InputPath)
 InputPath=.\phpts.def
 

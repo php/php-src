@@ -10,5 +10,5 @@ Ensure __autoload() recursion is guarded for multiple lookups of same class usin
   
   class_exists("unDefinedClass");
 ?>
---EXPECT--
+--EXPECTF--
 __autoload unDefinedClass

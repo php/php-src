@@ -57,15 +57,15 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 invoke() on a non-object:
-unicode(29) "Non-object passed to Invoke()"
+string(29) "Non-object passed to Invoke()"
 
 invoke() on a non-instance:
-unicode(72) "Given object is not an instance of the class this method was declared in"
+string(72) "Given object is not an instance of the class this method was declared in"
 
 Private method:
-unicode(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
+string(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
 
 Abstract method:
-unicode(53) "Trying to invoke abstract method AbstractClass::foo()"
+string(53) "Trying to invoke abstract method AbstractClass::foo()"

@@ -51,7 +51,7 @@ catch(FatalException $e)
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 FailClass::__destruct
 Caught: FailClass
 FatalException::__construct

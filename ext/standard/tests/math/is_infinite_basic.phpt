@@ -22,7 +22,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);		
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 bool(false)
@@ -37,3 +37,6 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
+
+
+

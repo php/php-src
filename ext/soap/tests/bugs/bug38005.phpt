@@ -3,8 +3,6 @@ Bug #38005 (SoapFault faultstring doesn't follow encoding rules)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
@@ -37,10 +35,9 @@ $client = new TestSoapClient(NULL, array(
 	'exceptions'=>0));
 $res = $client->Test();
 echo($res->faultstring."\n");
-var_dump($client->__getLastResponse());
+echo($client->__getLastResponse());
 ?>
 --EXPECT--
 This is our fault: Ä
-unicode(279) "<?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value>Test</env:Value></env:Code><env:Reason><env:Text>This is our fault: Ä</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>
-"
+<?xml version="1.0" encoding="UTF-8"?>
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value>Test</env:Value></env:Code><env:Reason><env:Text>This is our fault: Ã„</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>

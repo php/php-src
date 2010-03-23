@@ -13,127 +13,127 @@ Accessing root, body, html, and head nodes..
 ?>
 --EXPECT--
 object(tidyNode)#2 (8) {
-  [u"value"]=>
-  unicode(94) "<html>
+  ["value"]=>
+  string(94) "<html>
 <head>
 <title></title>
 </head>
 <body bgcolor="#FFFFFF" alink="#000000">
 </body>
 </html>"
-  [u"name"]=>
-  unicode(0) ""
-  [u"type"]=>
+  ["name"]=>
+  string(0) ""
+  ["type"]=>
   int(0)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(1)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(1) {
     [0]=>
     &object(tidyNode)#3 (9) {
-      [u"value"]=>
-      unicode(94) "<html>
+      ["value"]=>
+      string(94) "<html>
 <head>
 <title></title>
 </head>
 <body bgcolor="#FFFFFF" alink="#000000">
 </body>
 </html>"
-      [u"name"]=>
-      unicode(4) "html"
-      [u"type"]=>
+      ["name"]=>
+      string(4) "html"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(1)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(48)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       array(2) {
         [0]=>
         &object(tidyNode)#4 (9) {
-          [u"value"]=>
-          unicode(31) "<head>
+          ["value"]=>
+          string(31) "<head>
 <title></title>
 </head>
 "
-          [u"name"]=>
-          unicode(4) "head"
-          [u"type"]=>
+          ["name"]=>
+          string(4) "head"
+          ["type"]=>
           int(5)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(7)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"id"]=>
+          ["id"]=>
           int(46)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           array(1) {
             [0]=>
             &object(tidyNode)#5 (9) {
-              [u"value"]=>
-              unicode(16) "<title></title>
+              ["value"]=>
+              string(16) "<title></title>
 "
-              [u"name"]=>
-              unicode(5) "title"
-              [u"type"]=>
+              ["name"]=>
+              string(5) "title"
+              ["type"]=>
               int(5)
-              [u"line"]=>
+              ["line"]=>
               int(1)
-              [u"column"]=>
+              ["column"]=>
               int(57)
-              [u"proprietary"]=>
+              ["proprietary"]=>
               bool(false)
-              [u"id"]=>
+              ["id"]=>
               int(111)
-              [u"attribute"]=>
+              ["attribute"]=>
               NULL
-              [u"child"]=>
+              ["child"]=>
               NULL
             }
           }
         }
         [1]=>
         &object(tidyNode)#6 (9) {
-          [u"value"]=>
-          unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
+          ["value"]=>
+          string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
-          [u"name"]=>
-          unicode(4) "body"
-          [u"type"]=>
+          ["name"]=>
+          string(4) "body"
+          ["type"]=>
           int(5)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(7)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"id"]=>
+          ["id"]=>
           int(16)
-          [u"attribute"]=>
+          ["attribute"]=>
           array(2) {
-            [u"bgcolor"]=>
-            unicode(7) "#FFFFFF"
-            [u"alink"]=>
-            unicode(7) "#000000"
+            ["bgcolor"]=>
+            string(7) "#FFFFFF"
+            ["alink"]=>
+            string(7) "#000000"
           }
-          [u"child"]=>
+          ["child"]=>
           NULL
         }
       }
@@ -141,176 +141,176 @@ object(tidyNode)#2 (8) {
   }
 }
 object(tidyNode)#2 (9) {
-  [u"value"]=>
-  unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
+  ["value"]=>
+  string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
-  [u"name"]=>
-  unicode(4) "body"
-  [u"type"]=>
+  ["name"]=>
+  string(4) "body"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(7)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(16)
-  [u"attribute"]=>
+  ["attribute"]=>
   array(2) {
-    [u"bgcolor"]=>
-    unicode(7) "#FFFFFF"
-    [u"alink"]=>
-    unicode(7) "#000000"
+    ["bgcolor"]=>
+    string(7) "#FFFFFF"
+    ["alink"]=>
+    string(7) "#000000"
   }
-  [u"child"]=>
+  ["child"]=>
   NULL
 }
 object(tidyNode)#2 (9) {
-  [u"value"]=>
-  unicode(94) "<html>
+  ["value"]=>
+  string(94) "<html>
 <head>
 <title></title>
 </head>
 <body bgcolor="#FFFFFF" alink="#000000">
 </body>
 </html>"
-  [u"name"]=>
-  unicode(4) "html"
-  [u"type"]=>
+  ["name"]=>
+  string(4) "html"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(1)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(48)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(2) {
     [0]=>
     &object(tidyNode)#3 (9) {
-      [u"value"]=>
-      unicode(31) "<head>
+      ["value"]=>
+      string(31) "<head>
 <title></title>
 </head>
 "
-      [u"name"]=>
-      unicode(4) "head"
-      [u"type"]=>
+      ["name"]=>
+      string(4) "head"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(7)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(46)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       array(1) {
         [0]=>
         &object(tidyNode)#6 (9) {
-          [u"value"]=>
-          unicode(16) "<title></title>
+          ["value"]=>
+          string(16) "<title></title>
 "
-          [u"name"]=>
-          unicode(5) "title"
-          [u"type"]=>
+          ["name"]=>
+          string(5) "title"
+          ["type"]=>
           int(5)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(57)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"id"]=>
+          ["id"]=>
           int(111)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           NULL
         }
       }
     }
     [1]=>
     &object(tidyNode)#4 (9) {
-      [u"value"]=>
-      unicode(49) "<body bgcolor="#FFFFFF" alink="#000000">
+      ["value"]=>
+      string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
 "
-      [u"name"]=>
-      unicode(4) "body"
-      [u"type"]=>
+      ["name"]=>
+      string(4) "body"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(7)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(16)
-      [u"attribute"]=>
+      ["attribute"]=>
       array(2) {
-        [u"bgcolor"]=>
-        unicode(7) "#FFFFFF"
-        [u"alink"]=>
-        unicode(7) "#000000"
+        ["bgcolor"]=>
+        string(7) "#FFFFFF"
+        ["alink"]=>
+        string(7) "#000000"
       }
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
   }
 }
 object(tidyNode)#2 (9) {
-  [u"value"]=>
-  unicode(31) "<head>
+  ["value"]=>
+  string(31) "<head>
 <title></title>
 </head>
 "
-  [u"name"]=>
-  unicode(4) "head"
-  [u"type"]=>
+  ["name"]=>
+  string(4) "head"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(7)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(46)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(1) {
     [0]=>
     &object(tidyNode)#4 (9) {
-      [u"value"]=>
-      unicode(16) "<title></title>
+      ["value"]=>
+      string(16) "<title></title>
 "
-      [u"name"]=>
-      unicode(5) "title"
-      [u"type"]=>
+      ["name"]=>
+      string(5) "title"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(57)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(111)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
   }

@@ -26,22 +26,22 @@ var_dump( array_diff_uassoc($float_indx_array, $input_array, "strcasecmp") );
 -- Testing array_diff_key() function with float indexed array --
 array(5) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
   [-10]=>
-  unicode(3) "-10"
+  string(3) "-10"
   [20]=>
-  unicode(2) "20"
+  string(2) "20"
   [-20]=>
-  unicode(3) "-20"
+  string(3) "-20"
 }
 array(3) {
   [0]=>
-  unicode(3) "0.5"
+  string(3) "0.5"
   [10]=>
-  unicode(4) "10.5"
+  string(4) "10.5"
   [-10]=>
-  unicode(5) "-10.5"
+  string(5) "-10.5"
 }
 ===DONE===

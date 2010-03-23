@@ -16,10 +16,10 @@ var_dump($_1, $_2, $_3, $_4, $_5);
 
 echo "Done\n";
 ?>
---EXPECT--
-unicode(2) "10"
-unicode(2) "11"
-unicode(2) "12"
-unicode(2) "13"
-unicode(2) "14"
+--EXPECTF--
+string(2) "10"
+string(2) "11"
+string(2) "12"
+string(2) "13"
+string(2) "14"
 Done

@@ -151,57 +151,57 @@ int(9)
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "" --
@@ -259,14 +259,14 @@ int(10)
 int(9)
 int(9)
 
--- Iteration with mask value as "Resource id #5" --
+-- Iteration with mask value as "Resource id #%d" --
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 Done

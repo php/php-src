@@ -45,11 +45,11 @@ float(4872401723)
 float(7641446995)
 float(7641446995)
 
-Warning: cosh() expects parameter 1 to be double, Unicode string given in %s on line 27
+Warning: cosh() expects parameter 1 to be double, string given in %s on line %d
 NULL
 float(INF)
 
-Notice: A non well formed numeric value encountered in %s on line 27
+Notice: A non well formed numeric value encountered in %s on line %d
 float(INF)
 float(1)
 float(1.543080635)

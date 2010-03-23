@@ -17,7 +17,7 @@ var_dump(test::$ar);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
 array(1) {

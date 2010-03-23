@@ -90,11 +90,9 @@ foreach ($stmts as $q) {
 echo "Done\n";
 
 ?>
---XFAIL--
-Fails in PHP 6 due to an Oracle XML issue with the character set
 --EXPECT--
 Initial Data
-unicode(250) "<?xml version="1.0"?>
+string(250) "<?xml version="1.0"?>
 		<Xt>
 		  <XtId>1</XtId>
 		  <Size>Big</Size>
@@ -107,7 +105,7 @@ unicode(250) "<?xml version="1.0"?>
 		  <Material>Steel</Material>
 		</Xt>"
 Verify
-unicode(249) "<?xml version="1.0"?>
+string(249) "<?xml version="1.0"?>
 <Xt>
 		  <XtId>1</XtId>
 		  <Size>Big</Size>

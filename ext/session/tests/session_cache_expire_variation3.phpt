@@ -18,7 +18,7 @@ echo "*** Testing session_cache_expire() : variation ***\n";
 var_dump(ini_get("session.cache_expire"));
 var_dump(session_cache_expire());
 var_dump(ini_get("session.cache_expire"));
-var_dump(session_cache_expire(999));
+var_dump(session_cache_expire(1234567890));
 var_dump(ini_get("session.cache_expire"));
 var_dump(session_start());
 var_dump(session_cache_expire());
@@ -32,16 +32,16 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_cache_expire() : variation ***
-unicode(3) "180"
+string(3) "180"
 int(180)
-unicode(3) "180"
+string(3) "180"
 int(180)
-unicode(3) "999"
+string(10) "1234567890"
 bool(true)
-int(999)
-unicode(3) "999"
+int(1234567890)
+string(10) "1234567890"
 bool(true)
-int(999)
-unicode(3) "999"
+int(1234567890)
+string(10) "1234567890"
 Done
 

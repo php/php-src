@@ -29,27 +29,27 @@ B::test();
 --EXPECT--
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(2) {
   [0]=>
-  unicode(4) "test"
+  string(4) "test"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(4) {
   [0]=>
-  unicode(2) "bb"
+  string(2) "bb"
   [1]=>
-  unicode(4) "test"
+  string(4) "test"
   [2]=>
-  unicode(1) "a"
+  string(1) "a"
   [3]=>
-  unicode(1) "c"
+  string(1) "c"
 }

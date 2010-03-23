@@ -9,6 +9,7 @@ if (version_compare(PHP_VERSION, "6.0", "<")) die("skip Unicode support required
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = b"<?php
@@ -20,6 +21,7 @@ $files['a'] = 'a';
 $files['b/a'] = 'b';
 $files['b/c/d'] = 'c';
 $files['bad/c'] = 'd';
+
 include 'files/phar_test.inc';
 include $fname;
 

@@ -5,7 +5,7 @@ SimpleXML: CDATA
 --FILE--
 <?php 
 
-$sxe = simplexml_load_string(b<<<EOF
+$sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -35,28 +35,28 @@ var_dump(trim((string)$elem2));
 ===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"id"]=>
-    unicode(5) "elem1"
+    ["id"]=>
+    string(5) "elem1"
   }
-  [u"elem1"]=>
+  ["elem1"]=>
   object(SimpleXMLElement)#%d (3) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr1"]=>
-      unicode(5) "first"
+      ["attr1"]=>
+      string(5) "first"
     }
-    [u"comment"]=>
+    ["comment"]=>
     object(SimpleXMLElement)#%d (0) {
     }
-    [u"elem2"]=>
+    ["elem2"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"elem3"]=>
+      ["elem3"]=>
       object(SimpleXMLElement)#%d (1) {
-        [u"elem4"]=>
+        ["elem4"]=>
         object(SimpleXMLElement)#%d (1) {
-          [u"test"]=>
+          ["test"]=>
           object(SimpleXMLElement)#%d (0) {
           }
         }
@@ -64,5 +64,5 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-unicode(11) "CDATA block"
+string(11) "CDATA block"
 ===DONE===

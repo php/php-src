@@ -208,19 +208,19 @@ array(2) {
 }
 -- Iteration 17 --
 
-Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_fill() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 21 --
 

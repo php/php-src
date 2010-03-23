@@ -10,7 +10,7 @@ var_dump(array(ini_get('precision'),.012,-.012,.12,-.12,1.2,-1.2,12.,-12.,0.0001
 --EXPECT--
 array(14) {
   [0]=>
-  unicode(2) "12"
+  string(2) "12"
   [1]=>
   float(0.012)
   [2]=>

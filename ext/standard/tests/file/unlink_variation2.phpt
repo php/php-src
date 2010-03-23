@@ -30,7 +30,7 @@ fclose($fp);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing unlink() on a file which is in use ***
 bool(true)
 bool(false)

@@ -105,10 +105,22 @@ INI;
 file_put_contents($filename, $ini);
 var_dump(parse_ini_file($filename, true));
 
+/* #44575, comments starting with '#' */
+$ini = <<<'INI'
+foo=bar1
+; comment
+_foo=bar2
+# comment
+foo_=bar3
+INI;
+file_put_contents($filename, $ini);
+var_dump(parse_ini_file($filename, true));
+
+
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
 bool(false)
 
@@ -121,76 +133,86 @@ bool(false)
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 9
 bool(false)
 array(1) {
-  [u"test"]=>
-  unicode(0) ""
+  ["test"]=>
+  string(0) ""
 }
 
-Warning: %s error%sin %sparse_ini_file.dat on line 2
+Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 20
 bool(false)
 
-Warning: %serror%sin %sparse_ini_file.dat on line 2
+Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 26
 bool(false)
 array(1) {
-  [u"test"]=>
-  unicode(8) "new
+  ["test"]=>
+  string(8) "new
 line"
 }
 array(1) {
-  [u"test"]=>
-  unicode(16) "test const value"
+  ["test"]=>
+  string(16) "test const value"
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
-    [u"test"]=>
-    unicode(5) "hello"
+    ["test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [u"test"]=>
-  unicode(5) "hello"
+  ["test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [u"section.test"]=>
-  unicode(5) "hello"
+  ["section.test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
-    [u"section.test"]=>
-    unicode(5) "hello"
+    ["section.test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
     [1]=>
-    unicode(1) "2"
+    string(1) "2"
   }
 }
 array(1) {
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(1) {
-  [u"test"]=>
-  unicode(5) "test4"
+  ["test"]=>
+  string(5) "test4"
 }
 array(1) {
-  [u"section1"]=>
+  ["section1"]=>
   array(1) {
-    [u"name"]=>
-    unicode(5) "value"
+    ["name"]=>
+    string(5) "value"
   }
 }
 array(3) {
-  [u"foo"]=>
-  unicode(4) "bar1"
-  [u"_foo"]=>
-  unicode(4) "bar2"
-  [u"foo_"]=>
-  unicode(4) "bar3"
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
+}
+
+Deprecated: Comments starting with '#' are deprecated in %s
+array(3) {
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
 }
 Done

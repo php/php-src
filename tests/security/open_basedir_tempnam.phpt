@@ -65,11 +65,11 @@ bool(false)
 
 Warning: tempnam(): open_basedir restriction in effect. File() is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-unicode(%d) "%s"
+string(%d) "%s"
 bool(true)
-unicode(%d) "%s"
+string(%d) "%s"
 bool(true)
-unicode(%d) "%s"
+string(%d) "%s"
 bool(true)
 *** Finished testing open_basedir configuration [tempnam] ***
 

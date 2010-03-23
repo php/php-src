@@ -1,4 +1,3 @@
-#include "config.w32.h"
 #if _MSC_VER >= 1500
 # include <In6addr.h>
 #endif

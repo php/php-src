@@ -1,5 +1,5 @@
 --TEST--
-Test intval() function.
+Test intval() function
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -297,10 +297,10 @@ int(0)
 
 *** Testing error conditions ***
 
-Warning: intval() expects at least 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for intval() in %s on line %d
 NULL
 
-Warning: intval() expects at most 2 parameters, 3 given in %s on line %d
+Warning: Wrong parameter count for intval() in %s on line %d
 NULL
 
 --- Done ---

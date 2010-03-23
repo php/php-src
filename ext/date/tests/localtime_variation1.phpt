@@ -120,23 +120,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(10)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -162,23 +162,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(50)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(59)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(23)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(31)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(11)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(69)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(3)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(364)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -204,23 +204,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -278,23 +278,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -320,23 +320,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -362,23 +362,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(1)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -404,23 +404,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -446,23 +446,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(1)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -488,72 +488,72 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
 --empty string DQ--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: localtime() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -594,23 +594,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 
@@ -636,23 +636,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(1)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(0)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(70)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(4)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(0)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 ===DONE===

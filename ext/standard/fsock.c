@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -76,7 +76,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
+	stream = php_stream_xport_create(hostname, hostname_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, hashkey, &tv, NULL, &errstr, &err);
 
 	if (port > 0) {
@@ -98,7 +98,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			ZVAL_RT_STRING(zerrstr, errstr, ZSTR_AUTOFREE);
+			ZVAL_STRING(zerrstr, errstr, 0);
 		}
 		else if (!zerrstr && errstr) {
 			efree(errstr);
@@ -116,15 +116,14 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* }}} */
 
-/* {{{ proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]]) U
+/* {{{ proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
    Open Internet or Unix domain socket connection */
 PHP_FUNCTION(fsockopen)
 {
 	php_fsockopen_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-
-/* {{{ proto resource pfsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]]) U
+/* {{{ proto resource pfsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
    Open persistent Internet or Unix domain socket connection */
 PHP_FUNCTION(pfsockopen)
 {

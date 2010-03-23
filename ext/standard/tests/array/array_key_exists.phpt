@@ -255,7 +255,7 @@ NULL
 Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)
 
-Warning: array_key_exists() expects parameter 2 to be array, Unicode string given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, string given in %s on line %d
 NULL
 
 Warning: array_key_exists() expects parameter 2 to be array, integer given in %s on line %d

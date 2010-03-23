@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : basic functionality - default 'preserve_keys'
+Test array_chunk() function : basic functionality - defualt 'preserve_keys'
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
@@ -39,7 +39,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_chunk() : basic functionality ***
 
 -- Iteration 1 --
@@ -70,14 +70,14 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(6) "value1"
+    string(6) "value1"
     [1]=>
-    unicode(6) "value2"
+    string(6) "value2"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(6) "value3"
+    string(6) "value3"
   }
 }
 
@@ -102,14 +102,14 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
   }
 }
 
@@ -118,14 +118,14 @@ array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(5) "three"
+    string(5) "three"
     [1]=>
     int(4)
   }

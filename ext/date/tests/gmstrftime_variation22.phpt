@@ -5,6 +5,9 @@ Test gmstrftime() function : usage variation - Checking Preferred date and time 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if (!setlocale(LC_ALL, "en_US.utf8", "en_US")) {
+    die("skip Locale en_US or en_US.utf8 is required to run this test");
+}
 ?>
 --FILE--
 <?php
@@ -18,7 +21,7 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US.utf8", "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
@@ -42,14 +45,14 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Preferred date and time representation--
-unicode(%d) "%s %s %d %d:%d:%d %d"
-unicode(24) "Fri Aug  8 08:08:08 2008"
+string(%d) "%s %d %s %d %d:%d:%d %s GMT"
+string(31) "Fri 08 Aug 2008 08:08:08 AM GMT"
 
 --Preferred date representation--
-unicode(%d) "%d/%d/%d"
-unicode(8) "08/08/08"
+string(%d) "%d/%d/%d"
+string(10) "08/08/2008"
 
 --Preferred time representation--
-unicode(%d) "%d:%d:%d"
-unicode(8) "08:08:08"
+string(%d) "%d:%d:%d %s"
+string(11) "08:08:08 AM"
 ===DONE===

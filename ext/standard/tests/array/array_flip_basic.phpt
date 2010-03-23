@@ -30,7 +30,7 @@ $input = array(1 => 'one','two', 3 => 'three', 4, "five" => 5);
 var_dump( array_flip($input) );
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_flip() : basic functionality ***
 array(2) {
   [1]=>
@@ -39,33 +39,33 @@ array(2) {
   int(1)
 }
 array(2) {
-  [u"value1"]=>
+  ["value1"]=>
   int(0)
-  [u"value2"]=>
+  ["value2"]=>
   int(1)
 }
 array(2) {
   [1]=>
-  unicode(4) "key1"
+  string(4) "key1"
   [2]=>
-  unicode(4) "key2"
+  string(4) "key2"
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(5) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [4]=>
   int(4)
   [5]=>
-  unicode(4) "five"
+  string(4) "five"
 }
 Done

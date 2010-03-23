@@ -152,20 +152,7 @@ $var_values = array (
 
   /* undefined/unset vars */
   $unset_var,
-  $undef_var,
-
-  /* binary strings */
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
+  $undef_var
 );
 
 // test conversion to these types                 
@@ -197,7 +184,7 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -205,921 +192,811 @@ echo "Done\n";
 
 -- Setting type of data to float --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(3)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(100)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(2.9743947493287E+21)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0.01)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(100)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(2.9743947493287E+21)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0.01)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-2147483648)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(2147483647)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(2147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(1232147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(85)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(1058513956921)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(-21903)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(365)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(-365)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(80561044571754)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-1.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-5.0E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-float(123)
-unicode(6) "double"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-float(-123)
-unicode(6) "double"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-float(0)
-unicode(6) "double"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-float(0)
-unicode(6) "double"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-float(100)
-unicode(6) "double"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-float(2.9743947493287E+21)
-unicode(6) "double"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-float(100)
-unicode(6) "double"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
+string(6) "double"
 
 -- Setting type of data to double --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(3)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(10)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(100)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(2.9743947493287E+21)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0.01)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(100)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(2.9743947493287E+21)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0.01)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(123)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(-0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-2147483648)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(2147483647)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(2147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(1232147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(85)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(1058513956921)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(-21903)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(365)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 float(-365)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(80561044571754)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-1.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-5.0E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 8: Object of class point could not be converted to double
 bool(true)
 float(1)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 float(0)
-unicode(6) "double"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-float(123)
-unicode(6) "double"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-float(-123)
-unicode(6) "double"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-float(0)
-unicode(6) "double"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-float(0)
-unicode(6) "double"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-float(100)
-unicode(6) "double"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-float(2.9743947493287E+21)
-unicode(6) "double"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-float(100)
-unicode(6) "double"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-float(10)
-unicode(6) "double"
+string(6) "double"
 Done

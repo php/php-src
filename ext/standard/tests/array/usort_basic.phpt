@@ -2,7 +2,7 @@
 Test usort() function : basic functionality 
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -80,13 +80,13 @@ array(7) {
 bool(true)
 array(4) {
   [0]=>
-  unicode(4) "This"
+  string(4) "This"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(2) "is"
+  string(2) "is"
   [3]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 
 -- Associative array with numeric keys --

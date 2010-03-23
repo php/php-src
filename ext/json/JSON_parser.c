@@ -291,7 +291,7 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
+static void json_create_zval(zval **z, smart_str *buf, int type)
 {
     ALLOC_INIT_ZVAL(*z);
 
@@ -322,7 +322,7 @@ use_double:
     }
     else if (type == IS_STRING)
     {
-        ZVAL_UTF8_STRINGL(*z, buf->c, buf->len, ZSTR_DUPLICATE);
+        ZVAL_STRINGL(*z, buf->c, buf->len, 1);
     }
     else if (type == IS_BOOL)
     {
@@ -387,12 +387,12 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     {
         if (!assoc)
         {
-            add_utf8_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
+            add_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
             Z_DELREF_P(child);
         }
         else
         {
-            add_utf8_assoc_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child);
+            add_assoc_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child);
         }
         key->len = 0;
     }
@@ -530,13 +530,13 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
 
                     if (!assoc) {
-                        add_utf8_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                        add_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
                         Z_DELREF_P(mval);
                     } else {
-                        add_utf8_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
+                        add_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
                     }
                     key.len = 0;
                     buf.len = 0;
@@ -558,7 +558,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
                     add_next_index_zval(jp->the_zstack[jp->top], mval);
                     buf.len = 0;
                     JSON_RESET_TYPE();
@@ -649,7 +649,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 				case MODE_DONE:
 					if (type == IS_STRING) {
 						smart_str_0(&buf);
-						ZVAL_UTF8_STRINGL(z, buf.c, buf.len, ZSTR_DUPLICATE);
+						ZVAL_STRINGL(z, buf.c, buf.len, 1);
 						jp->state = OK;
 						break;
 					}
@@ -669,7 +669,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                      jp->stack[jp->top] == MODE_ARRAY))
                 {
                     smart_str_0(&buf);
-                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type);
                 }
 
                 switch (jp->stack[jp->top]) {
@@ -677,10 +677,10 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                         if (pop(jp, MODE_OBJECT) && push(jp, MODE_KEY)) {
                             if (type != -1) {
                                 if (!assoc) {
-                                    add_utf8_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                                    add_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
                                     Z_DELREF_P(mval);
                                 } else {
-                                    add_utf8_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
+                                    add_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
                                 }
                                 key.len = 0;
                             }
@@ -728,6 +728,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 	jp->error_code = PHP_JSON_ERROR_SYNTAX;
 	return false;
 }
+
 
 /*
  * Local variables:

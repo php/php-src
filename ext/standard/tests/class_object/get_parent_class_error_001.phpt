@@ -24,6 +24,6 @@ echo "Done";
 
 -- Testing get_parent_class() function with more than expected no. of arguments --
 
-Warning: get_parent_class() expects at most 1 parameter, 2 given in %s on line %d
+Warning: get_parent_class() expects at most 1 parameter, 2 given in %s on line 15
 NULL
 Done

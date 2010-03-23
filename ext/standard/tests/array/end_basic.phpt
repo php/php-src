@@ -36,11 +36,11 @@ var_dump(end($array));
 0 => zero
 
 -- Call to end() --
-unicode(3) "two"
+string(3) "two"
 
 -- Current Position: --
 200 => two
 
 -- Add a new element to array --
-unicode(3) "foo"
+string(3) "foo"
 ===DONE===

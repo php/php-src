@@ -3,34 +3,34 @@ bitwise AND and strings
 --FILE--
 <?php
 
-$s = b"123";
-$s1 = b"234";
+$s = "123";
+$s1 = "234";
 
 var_dump($s & $s1);
 
-$s = b"test";
-$s1 = b"some";
+$s = "test";
+$s1 = "some";
 
 var_dump($s & $s1);
 
-$s = b"test long";
-$s1 = b"some";
+$s = "test long";
+$s1 = "some";
 
 var_dump($s & $s1);
 
-$s = b"test";
-$s1 = b"some long";
+$s = "test";
+$s1 = "some long";
 
 var_dump($s & $s1);
 
-$s = b"test";
-$s &= b"some long";
+$s = "test";
+$s &= "some long";
 
 var_dump($s);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 string(3) "020"
 string(4) "pead"
 string(4) "pead"

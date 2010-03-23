@@ -10,5 +10,4 @@ bcscale(-4);
 echo bcdiv("20.56", "4");
 ?>
 --EXPECTF--
-Notice: bcscale(): Invalid scale given, using zero in %s on line %d
 5

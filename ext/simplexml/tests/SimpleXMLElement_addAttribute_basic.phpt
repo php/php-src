@@ -12,10 +12,10 @@ SimpleXMLElement->addAttribute()
 ?>
 --EXPECTF--
 object(SimpleXMLElement)#2 (1) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"type"]=>
-    unicode(6) "novels"
+    ["type"]=>
+    string(6) "novels"
   }
 }
 Done

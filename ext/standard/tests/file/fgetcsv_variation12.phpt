@@ -48,12 +48,13 @@ foreach ($csv_lists as $csv_list) {
     $delimiter = $csv_list[0];
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
-    @fwrite($file_handle, $csv_field . "\n");
+    fwrite($file_handle, $csv_field . "\n");
+ 
     // write another line of text and a blank line
     // this will be used to test, if the fgetcsv() read more than a line and its
     // working when only a blank line is read
-    @fwrite($file_handle, "This is line of text without csv fields\n");
-    @fwrite($file_handle, "\n"); // blank line
+    fwrite($file_handle, "This is line of text without csv fields\n");
+    fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
     // else rewind the file pointer to begining of the file 
@@ -121,7 +122,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(13) ""water",fruit"
+  string(13) ""water",fruit"
 }
 int(14)
 bool(false)
@@ -157,7 +158,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(13) ""water",fruit"
+  string(13) ""water",fruit"
 }
 int(14)
 bool(false)
@@ -193,7 +194,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(13) ""water",fruit"
+  string(13) ""water",fruit"
 }
 int(14)
 bool(false)
@@ -229,7 +230,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) ""water","fruit""
+  string(15) ""water","fruit""
 }
 int(16)
 bool(false)
@@ -265,7 +266,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) ""water","fruit""
+  string(15) ""water","fruit""
 }
 int(16)
 bool(false)
@@ -301,7 +302,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) ""water","fruit""
+  string(15) ""water","fruit""
 }
 int(16)
 bool(false)
@@ -337,7 +338,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "^water^ ^fruit^"
+  string(15) "^water^ ^fruit^"
 }
 int(16)
 bool(false)
@@ -373,7 +374,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "^water^ ^fruit^"
+  string(15) "^water^ ^fruit^"
 }
 int(16)
 bool(false)
@@ -409,7 +410,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "^water^ ^fruit^"
+  string(15) "^water^ ^fruit^"
 }
 int(16)
 bool(false)
@@ -445,7 +446,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "&water&:&fruit&"
+  string(15) "&water&:&fruit&"
 }
 int(16)
 bool(false)
@@ -481,7 +482,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "&water&:&fruit&"
+  string(15) "&water&:&fruit&"
 }
 int(16)
 bool(false)
@@ -517,7 +518,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "&water&:&fruit&"
+  string(15) "&water&:&fruit&"
 }
 int(16)
 bool(false)
@@ -553,7 +554,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "=water===fruit="
+  string(15) "=water===fruit="
 }
 int(16)
 bool(false)
@@ -589,7 +590,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "=water===fruit="
+  string(15) "=water===fruit="
 }
 int(16)
 bool(false)
@@ -625,7 +626,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "=water===fruit="
+  string(15) "=water===fruit="
 }
 int(16)
 bool(false)
@@ -661,7 +662,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(17) "-water--fruit-air"
+  string(17) "-water--fruit-air"
 }
 int(18)
 bool(false)
@@ -697,7 +698,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(17) "-water--fruit-air"
+  string(17) "-water--fruit-air"
 }
 int(18)
 bool(false)
@@ -733,7 +734,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(17) "-water--fruit-air"
+  string(17) "-water--fruit-air"
 }
 int(18)
 bool(false)
@@ -769,7 +770,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(21) "-water---fruit---air-"
+  string(21) "-water---fruit---air-"
 }
 int(22)
 bool(false)
@@ -805,7 +806,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(21) "-water---fruit---air-"
+  string(21) "-water---fruit---air-"
 }
 int(22)
 bool(false)
@@ -841,7 +842,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(21) "-water---fruit---air-"
+  string(21) "-water---fruit---air-"
 }
 int(22)
 bool(false)
@@ -877,7 +878,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(23) "&""""&:&"&:,:":&,&:,,,,"
+  string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
 bool(false)
@@ -913,7 +914,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(23) "&""""&:&"&:,:":&,&:,,,,"
+  string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
 bool(false)
@@ -949,7 +950,7 @@ Notice: fgetcsv(): delimiter must be a single character in %s on line %d
 Notice: fgetcsv(): enclosure must be a single character in %s on line %d
 array(1) {
   [0]=>
-  unicode(23) "&""""&:&"&:,:":&,&:,,,,"
+  string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
 bool(false)

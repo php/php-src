@@ -219,20 +219,20 @@ array(2) {
 array(2) {
   [0]=>
   object(Test1)#%d (3) {
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Test1)#%d (3) {
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -240,24 +240,24 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test1)#%d (4) {
-    [u"member2"]=>
+    ["member2"]=>
     int(102)
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Child_test1)#%d (4) {
-    [u"member2"]=>
+    ["member2"]=>
     int(102)
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -265,20 +265,20 @@ array(2) {
 array(2) {
   [0]=>
   object(Test2)#%d (3) {
-    [u"member1":u"Test2":private]=>
+    ["member1":"Test2":private]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Test2)#%d (3) {
-    [u"member1":u"Test2":private]=>
+    ["member1":"Test2":private]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -286,24 +286,24 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test2)#%d (4) {
-    [u"member1":u"Child_test2":private]=>
+    ["member1":"Child_test2":private]=>
     int(102)
-    [u"member1":u"Test2":private]=>
+    ["member1":"Test2":private]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Child_test2)#%d (4) {
-    [u"member1":u"Child_test2":private]=>
+    ["member1":"Child_test2":private]=>
     int(102)
-    [u"member1":u"Test2":private]=>
+    ["member1":"Test2":private]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -311,20 +311,20 @@ array(2) {
 array(2) {
   [0]=>
   object(Test3)#%d (3) {
-    [u"member1":protected]=>
+    ["member1":protected]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Test3)#%d (3) {
-    [u"member1":protected]=>
+    ["member1":protected]=>
     int(100)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -332,20 +332,20 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test3)#%d (3) {
-    [u"member1":protected]=>
+    ["member1":protected]=>
     int(102)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
   [1]=>
   object(Child_test3)#%d (3) {
-    [u"member1":protected]=>
+    ["member1":protected]=>
     int(102)
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
-    [u"var2"]=>
+    ["var2"]=>
     int(101)
   }
 }
@@ -353,20 +353,20 @@ array(2) {
 array(2) {
   [0]=>
   object(Test4)#%d (3) {
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"member2":u"Test4":private]=>
+    ["member2":"Test4":private]=>
     int(101)
-    [u"member3":protected]=>
+    ["member3":protected]=>
     int(102)
   }
   [1]=>
   object(Test4)#%d (3) {
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"member2":u"Test4":private]=>
+    ["member2":"Test4":private]=>
     int(101)
-    [u"member3":protected]=>
+    ["member3":protected]=>
     int(102)
   }
 }
@@ -374,24 +374,24 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test4)#%d (4) {
-    [u"var1"]=>
+    ["var1"]=>
     int(103)
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"member2":u"Test4":private]=>
+    ["member2":"Test4":private]=>
     int(101)
-    [u"member3":protected]=>
+    ["member3":protected]=>
     int(102)
   }
   [1]=>
   object(Child_test4)#%d (4) {
-    [u"var1"]=>
+    ["var1"]=>
     int(103)
-    [u"member1"]=>
+    ["member1"]=>
     int(100)
-    [u"member2":u"Test4":private]=>
+    ["member2":"Test4":private]=>
     int(101)
-    [u"member3":protected]=>
+    ["member3":protected]=>
     int(102)
   }
 }
@@ -399,24 +399,24 @@ array(2) {
 array(2) {
   [0]=>
   object(ConcreteClass1)#%d (4) {
-    [u"member1"]=>
+    ["member1"]=>
     NULL
-    [u"member2":u"AbstractClass":private]=>
+    ["member2":"AbstractClass":private]=>
     NULL
-    [u"member3":protected]=>
+    ["member3":protected]=>
     NULL
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
   }
   [1]=>
   object(ConcreteClass1)#%d (4) {
-    [u"member1"]=>
+    ["member1"]=>
     NULL
-    [u"member2":u"AbstractClass":private]=>
+    ["member2":"AbstractClass":private]=>
     NULL
-    [u"member3":protected]=>
+    ["member3":protected]=>
     NULL
-    [u"var1"]=>
+    ["var1"]=>
     int(30)
   }
 }

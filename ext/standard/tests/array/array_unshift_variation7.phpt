@@ -54,17 +54,17 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unshift() : double quoted strings for $var argument ***
 -- Iteration 1 --
 int(5)
 array(5) {
   [0]=>
-  unicode(53) "$ -> This represents the dollar sign. hello dollar!!!"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(53) "$ -> This represents the dollar sign. hello dollar!!!"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -73,15 +73,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(53) "$ -> This represents the dollar sign. hello dollar!!!"
+  string(53) "$ -> This represents the dollar sign. hello dollar!!!"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -91,11 +91,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(49) "	 The quick brown fox jumped over the lazy dog"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(49) "	 The quick brown fox jumped over the lazy dog"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -104,15 +104,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(49) "	 The quick brown fox jumped over the lazy dog"
+  string(49) "	 The quick brown fox jumped over the lazy dog"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -122,11 +122,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -135,15 +135,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
+  string(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -153,11 +153,11 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(13) "hello world\t"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(13) "hello world\t"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -166,15 +166,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(13) "hello world\t"
+  string(13) "hello world\t"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -184,12 +184,12 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(70) "This is 	a text in bold letters\s\malong with slashes
+  string(70) "This is 	a text in bold letters\s\malong with slashes
  : HELLO WORLD	"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -198,16 +198,16 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(70) "This is 	a text in bold letters\s\malong with slashes
+  string(70) "This is 	a text in bold letters\s\malong with slashes
  : HELLO WORLD	"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>

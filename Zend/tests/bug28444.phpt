@@ -57,7 +57,7 @@ var_dump($y->z->x = 6);
 ===DONE===
 --EXPECTF--
 object(Object)#%d (1) {
-  [u"x"]=>
+  ["x"]=>
   int(2)
 }
 int(2)
@@ -66,10 +66,10 @@ Overloaded::__set(y,3)
 int(3)
 Overloaded::__get(y)
 int(3)
-unicode(55) "Object of class Object could not be converted to string"
+string(55) "Object of class Object could not be converted to string"
 Overloaded::__set(z,)
 object(Object)#%d (1) {
-  [u"x"]=>
+  ["x"]=>
   int(4)
 }
 Overloaded::__get(z)

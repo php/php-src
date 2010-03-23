@@ -29,5 +29,5 @@ foreach (glob($sessdir. "*") as $sessfile) {
 rmdir($sessdir);
 --EXPECT--
 hello world
-unicode(6) "100777"
+string(6) "100777"
 

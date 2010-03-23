@@ -1,5 +1,5 @@
 --TEST--
-Bug #27287 (segfault with unserializing object data)
+Bug #27287 (segfault with deserializing object data)
 --SKIPIF--
 <?php if (!extension_loaded("wddx")) print "skip"; ?>
 --FILE--
@@ -11,7 +11,7 @@ Bug #27287 (segfault with unserializing object data)
 	$foo->abc = 'def';
 	
 	$string = wddx_serialize_value($foo);
-	$bar = wddx_unserialize($string);
+	$bar = wddx_deserialize($string);
 
 	echo "OK\n";
 

@@ -55,9 +55,11 @@ bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 Notice: Undefined variable: str in %s on line %d
-int(0)
+
+Warning: substr_count(): Length should be greater than 0 in %s on line %d
+bool(false)
 Done

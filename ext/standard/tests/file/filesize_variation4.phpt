@@ -91,15 +91,11 @@ unlink($file_path."/filesize_variation4_empty.tmp");
 *** Testing filesize() with data written using different file modes and by creating holes in file ***
 -- opening the file in 'w' mode and get the size --
 int(192)
-
-Notice: fwrite(): 192 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(192)
 -- opening the file in 'wt' mode and get the size --
 int(192)
 int(192)
 -- opening the file in 'a' mode, adding data and checking the file --
-
-Notice: fwrite(): 12 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(204)
 -- opening the file in 'at' mode, adding data and checking the file --
 int(217)
@@ -107,8 +103,6 @@ int(217)
 bool(true)
 int(220)
 -- writing data after hole and checking the size --
-
-Notice: fwrite(): 6 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(226)
 -- opening the existing file in write mode --
 int(0)

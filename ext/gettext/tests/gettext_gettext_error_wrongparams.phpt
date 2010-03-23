@@ -11,7 +11,7 @@ Check how gettext() with wrong parameters behaves.
 gettext (array());
 ?>
 --EXPECTF--
-Warning: gettext() expects parameter 1 to be %binary_string_optional%, array given in %s on line 2
+Warning: gettext() expects parameter 1 to be string, array given in %s on line 2
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-09

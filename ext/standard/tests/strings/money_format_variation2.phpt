@@ -45,7 +45,7 @@ $numbers =  array (
 		  1,
 		  255,
 		  256,
-	      2147483647,
+		  2147483647,
 		  -2147483648,
 		
 		  // float values
@@ -94,34 +94,35 @@ $format = '%14#8.2i';
 
 foreach($numbers as $number) {
   echo "-- Iteration $count --\n";
-  echo gettype( money_format($format, $number) )."\n";
+  echo gettype(money_format($format, $number))."\n";
   $count ++;
 }
 
 // close the file handle
-fclose($file_handle);  
+fclose($file_handle);
+
 ?>
-===DONE===
+===Done===
 --EXPECTF--
 *** Testing money_format() function: with unexpected inputs for 'number' argument ***
 -- Iteration 1 --
-unicode
+string
 -- Iteration 2 --
-unicode
+string
 -- Iteration 3 --
-unicode
+string
 -- Iteration 4 --
-unicode
+string
 -- Iteration 5 --
-unicode
+string
 -- Iteration 6 --
-unicode
+string
 -- Iteration 7 --
-unicode
+string
 -- Iteration 8 --
-unicode
+string
 -- Iteration 9 --
-unicode
+string
 -- Iteration 10 --
 
 Warning: money_format() expects parameter 2 to be double, array given in %s on line %d
@@ -135,30 +136,30 @@ NULL
 Warning: money_format() expects parameter 2 to be double, array given in %s on line %d
 NULL
 -- Iteration 13 --
-unicode
+string
 -- Iteration 14 --
-unicode
+string
 -- Iteration 15 --
-unicode
+string
 -- Iteration 16 --
-unicode
+string
 -- Iteration 17 --
-unicode
+string
 -- Iteration 18 --
-unicode
+string
 -- Iteration 19 --
 
-Warning: money_format() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: money_format() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
 NULL
 -- Iteration 21 --
-unicode
+string
 -- Iteration 22 --
 
-Warning: money_format() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: money_format() expects parameter 2 to be double, string given in %s on line %d
 NULL
 -- Iteration 23 --
 
@@ -173,7 +174,7 @@ NULL
 Warning: money_format() expects parameter 2 to be double, resource given in %s on line %d
 NULL
 -- Iteration 26 --
-unicode
+string
 -- Iteration 27 --
-unicode
-===DONE===
+string
+===Done===

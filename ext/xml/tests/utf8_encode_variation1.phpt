@@ -117,28 +117,28 @@ string(3) "0.5"
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_encode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_encode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value  
 string(0) ""

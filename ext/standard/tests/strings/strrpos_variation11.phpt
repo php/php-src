@@ -92,40 +92,24 @@ echo "*** Done ***";
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
 bool(false)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 2 --
 bool(false)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 3 --
 bool(false)
 bool(false)
 -- Iteration 4 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
 -- Iteration 6 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)
@@ -135,51 +119,47 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
--- Iteration 11 --
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
--- Iteration 12 --
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
--- Iteration 13 --
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
--- Iteration 14 --
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
--- Iteration 15 --
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+-- Iteration 11 --
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+-- Iteration 12 --
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+-- Iteration 13 --
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+-- Iteration 14 --
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
+-- Iteration 15 --
+bool(false)
 bool(false)
 -- Iteration 16 --
 bool(false)
 bool(false)
 -- Iteration 17 --
 bool(false)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 18 --
 bool(false)
@@ -192,18 +172,10 @@ bool(false)
 Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 20 --
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 21 --
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
-
-Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)
@@ -213,11 +185,11 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
+bool(false)
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
+bool(false)
 -- Iteration 25 --
 bool(false)
 bool(false)

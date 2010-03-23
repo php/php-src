@@ -29,10 +29,10 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing addslashes() : basic functionality ***
-unicode(16) "How\'s everybody"
-unicode(17) "Are you \"JOHN\"?"
-unicode(19) "c:\\php\\addslashes"
-unicode(12) "hello\0world"
+string(16) "How\'s everybody"
+string(17) "Are you \"JOHN\"?"
+string(19) "c:\\php\\addslashes"
+string(12) "hello\0world"
 Done

@@ -32,14 +32,14 @@ var_dump( gmdate('U', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with ISO 8601 date format --
-unicode(%d) "%s"
-unicode(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
+string(25) "2008-08-08T08:08:08+00:00"
 
 -- Testing gmdate() function with RFC 2822 date format --
-unicode(%d) "%s"
-unicode(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
 
 -- Testing gmdate() function with seconds since Unix Epoch format --
-unicode(%d) "%d"
-unicode(10) "1218182888"
+string(%d) "%d"
+string(10) "1218182888"
 ===DONE===

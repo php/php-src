@@ -18,8 +18,9 @@ Basic class support - defining and reading a class constant.
   var_dump($myInstance)
 ?>
 --EXPECTF--
+
 Read class constant.
-unicode(5) "hello"
+string(5) "hello"
 
 Fail to read class constant from instance.
 

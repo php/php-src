@@ -12,43 +12,39 @@ var_dump(stream_get_meta_data($dirObject->handle));
 
 ?>
 --EXPECT--
-array(9) {
-  [u"wrapper_type"]=>
-  unicode(9) "plainfile"
-  [u"stream_type"]=>
-  unicode(3) "dir"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(8) {
+  ["wrapper_type"]=>
+  string(9) "plainfile"
+  ["stream_type"]=>
+  string(3) "dir"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"timed_out"]=>
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }
-array(9) {
-  [u"wrapper_type"]=>
-  unicode(9) "plainfile"
-  [u"stream_type"]=>
-  unicode(3) "dir"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(8) {
+  ["wrapper_type"]=>
+  string(9) "plainfile"
+  ["stream_type"]=>
+  string(3) "dir"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"timed_out"]=>
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }

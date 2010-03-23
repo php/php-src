@@ -47,7 +47,8 @@ bool(false)
 array(2) {
   [0]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 Done
+

@@ -50,19 +50,19 @@ var_dump($data);
  -- Testing array_replace() --
 array(5) {
   [0]=>
-  unicode(11) "dontclobber"
+  string(11) "dontclobber"
   [1]=>
-  unicode(9) "clobbered"
-  [u"test2"]=>
+  string(9) "clobbered"
+  ["test2"]=>
   float(0)
-  [u"test3"]=>
+  ["test3"]=>
   array(1) {
-    [u"testarray2"]=>
+    ["testarray2"]=>
     bool(false)
   }
-  [u"test4"]=>
+  ["test4"]=>
   array(1) {
-    [u"clobbered3"]=>
+    ["clobbered3"]=>
     array(3) {
       [0]=>
       int(0)
@@ -76,26 +76,26 @@ array(5) {
  -- Testing array_replace_recursive() --
 array(5) {
   [0]=>
-  unicode(11) "dontclobber"
+  string(11) "dontclobber"
   [1]=>
-  unicode(9) "clobbered"
-  [u"test2"]=>
+  string(9) "clobbered"
+  ["test2"]=>
   float(0)
-  [u"test3"]=>
+  ["test3"]=>
   array(2) {
-    [u"testarray2"]=>
+    ["testarray2"]=>
     bool(false)
     [1]=>
     array(2) {
-      [u"testsubarray1"]=>
-      unicode(12) "dontclobber2"
-      [u"testsubarray2"]=>
-      unicode(12) "dontclobber3"
+      ["testsubarray1"]=>
+      string(12) "dontclobber2"
+      ["testsubarray2"]=>
+      string(12) "dontclobber3"
     }
   }
-  [u"test4"]=>
+  ["test4"]=>
   array(1) {
-    [u"clobbered3"]=>
+    ["clobbered3"]=>
     array(3) {
       [0]=>
       int(0)

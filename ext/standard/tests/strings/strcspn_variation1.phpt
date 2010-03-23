@@ -152,57 +152,57 @@ int(1)
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with str value as "Array"
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with str value as "Array"
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as ""
@@ -260,14 +260,14 @@ int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "Resource id #5"
+-- Iteration with str value as "Resource id #%d"
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strcspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

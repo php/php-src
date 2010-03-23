@@ -1,9 +1,9 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2006 The PHP Group                                |
+  | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 
 
 define('REPORT_LEVEL', 2); // 0 reports less false-positives. up to level 5.
-define('VERSION', '6');  // minimum is 5.2
+define('VERSION', '5.2');  // minimum is 5.2
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
 

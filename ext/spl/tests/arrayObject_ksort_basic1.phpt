@@ -22,7 +22,7 @@ var_dump($ao2);
 *** Testing ArrayObject::ksort() : basic functionality ***
 bool(true)
 object(ArrayObject)#1 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(4)
@@ -34,16 +34,16 @@ object(ArrayObject)#1 (1) {
 }
 bool(true)
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(4) {
-    [u"a"]=>
+    ["a"]=>
     int(2)
-    [u"b"]=>
+    ["b"]=>
     int(4)
-    [u"q"]=>
+    ["q"]=>
     int(3)
     [99]=>
-    unicode(1) "x"
+    string(1) "x"
   }
 }
 ===DONE===

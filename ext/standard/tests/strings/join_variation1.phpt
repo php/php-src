@@ -103,65 +103,65 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'glue' argument ---
 -- Iteration 1 --
-unicode(17) "element10element2"
+string(17) "element10element2"
 -- Iteration 2 --
-unicode(17) "element11element2"
+string(17) "element11element2"
 -- Iteration 3 --
-unicode(21) "element112345element2"
+string(21) "element112345element2"
 -- Iteration 4 --
-unicode(21) "element1-2345element2"
+string(21) "element1-2345element2"
 -- Iteration 5 --
-unicode(20) "element110.5element2"
+string(20) "element110.5element2"
 -- Iteration 6 --
-unicode(21) "element1-10.5element2"
+string(21) "element1-10.5element2"
 -- Iteration 7 --
-unicode(28) "element1101234567000element2"
+string(28) "element1101234567000element2"
 -- Iteration 8 --
-unicode(29) "element11.07654321E-9element2"
+string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
-unicode(19) "element10.5element2"
+string(19) "element10.5element2"
 -- Iteration 10 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 11 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(1) "0"
+string(1) "0"
 -- Iteration 12 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(1) "1"
+string(1) "1"
 -- Iteration 13 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(7) "1Array2"
+string(7) "1Array2"
 -- Iteration 14 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(11) "redArraypen"
+string(11) "redArraypen"
 -- Iteration 15 --
-unicode(17) "element11element2"
+string(17) "element11element2"
 -- Iteration 16 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 17 --
-unicode(17) "element11element2"
+string(17) "element11element2"
 -- Iteration 18 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 19 --
-unicode(26) "element1testObjectelement2"
+string(26) "element1testObjectelement2"
 -- Iteration 20 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 21 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 22 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 23 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 24 --
-unicode(30) "element1Resource id #%delement2"
+string(%d) "element1Resource id #%delement2"
 -- Iteration 25 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 -- Iteration 26 --
-unicode(16) "element1element2"
+string(16) "element1element2"
 Done

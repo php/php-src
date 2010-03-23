@@ -10,7 +10,7 @@ Test krsort() function : usage variations - sort hexadecimal values
 /*
  * testing krsort() by providing array of hexa-decimal values for $array argument
  * with following flag values:
- *  1.flag value as default
+ *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
 */
@@ -23,7 +23,7 @@ $unsorted_hex_array = array (
   0x1ab => 0x1ab, 0xff => 0xff, -0xff => -0xFF, 0 => 0, -0x2aa => -0x2aa
 );
 
-echo "\n-- Testing krsort() by supplying hexadecimal value array, 'flag' value is default  --\n";
+echo "\n-- Testing krsort() by supplying hexadecimal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_hex_array;
 var_dump(krsort( $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -40,10 +40,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing krsort() : usage variations ***
 
--- Testing krsort() by supplying hexadecimal value array, 'flag' value is default  --
+-- Testing krsort() by supplying hexadecimal value array, 'flag' value is defualt  --
 bool(true)
 array(9) {
   [4095]=>

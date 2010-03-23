@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : usage variation - different type for use_include_path
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -126,31 +124,31 @@ unlink($absFile);
 *** Testing file_get_contents() : usage variation ***
 
 --int 0--
-unicode(13) "contents read"
+string(13) "contents read"
 
 --int 1--
-unicode(13) "contents read"
+string(13) "contents read"
 
 --int 12345--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --int -12345--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --float 10.5--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --float -10.5--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --float 12.3456789000e10--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --float -12.3456789000e10--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --float .5--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --empty array--
 Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
@@ -169,40 +167,40 @@ Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %
 NULL
 
 --uppercase NULL--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --lowercase null--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --lowercase true--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --lowercase false--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --uppercase TRUE--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --uppercase FALSE--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --empty string DQ--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --empty string SQ--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --string DQ--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --string SQ--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --mixed case string--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --heredoc--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --instance of classWithToString--
 Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
@@ -213,8 +211,8 @@ Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, 
 NULL
 
 --undefined var--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --unset var--
-unicode(%d) "contents read"
+string(%d) "contents read"
 ===DONE===

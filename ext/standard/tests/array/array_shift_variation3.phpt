@@ -103,86 +103,86 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_shift() : usage variations ***
 
 -- Iteration 1 : int data --
-unicode(4) "zero"
+string(4) "zero"
 array(3) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [2]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 
 -- Iteration 2 : float data --
-unicode(8) "positive"
+string(8) "positive"
 array(2) {
   [0]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [1]=>
-  unicode(4) "half"
+  string(4) "half"
 }
 
 -- Iteration 3 : extreme floats data --
-unicode(5) "large"
+string(5) "large"
 array(1) {
   [0]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 
 -- Iteration 4 : null uppercase data --
-unicode(6) "null 1"
+string(6) "null 1"
 array(0) {
 }
 
 -- Iteration 5 : null lowercase data --
-unicode(6) "null 2"
+string(6) "null 2"
 array(0) {
 }
 
 -- Iteration 6 : bool lowercase data --
-unicode(6) "lowert"
+string(6) "lowert"
 array(1) {
   [0]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
 }
 
 -- Iteration 7 : bool uppercase data --
-unicode(6) "uppert"
+string(6) "uppert"
 array(1) {
   [0]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
 }
 
 -- Iteration 8 : empty double quotes data --
-unicode(6) "emptyd"
+string(6) "emptyd"
 array(0) {
 }
 
 -- Iteration 9 : empty single quotes data --
-unicode(6) "emptys"
+string(6) "emptys"
 array(0) {
 }
 
 -- Iteration 10 : string data --
-unicode(7) "stringd"
+string(7) "stringd"
 array(2) {
-  [u"strings"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
+  ["strings"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
 }
 
 -- Iteration 11 : undefined data --
-unicode(9) "undefined"
+string(9) "undefined"
 array(0) {
 }
 
 -- Iteration 12 : unset data --
-unicode(5) "unset"
+string(5) "unset"
 array(0) {
 }
 Done

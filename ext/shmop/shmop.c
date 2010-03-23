@@ -102,7 +102,7 @@ zend_module_entry shmop_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(shmop),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -152,7 +152,7 @@ PHP_MINFO_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ proto int shmop_open (int key, string flags, int mode, int size) U
+/* {{{ proto int shmop_open (int key, string flags, int mode, int size)
    gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
@@ -162,24 +162,12 @@ PHP_FUNCTION(shmop_open)
 	int rsid;
 	char *flags;
 	int flags_len;
-	zend_uchar flag_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ltll", &key, &flags, &flags_len, &flag_type, &mode, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
 		return;
 	}
 
-	if (flag_type == IS_UNICODE) {
-		flags = zend_unicode_to_ascii((UChar*)flags, flags_len TSRMLS_CC);
-		if (!flags) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
-	}
-	
 	if (flags_len != 1) {
-		if (flag_type == IS_UNICODE) {
-			efree(flags);
-		}
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a valid flag", flags);
 		RETURN_FALSE;
 	}
@@ -239,20 +227,14 @@ PHP_FUNCTION(shmop_open)
 	shmop->size = shm.shm_segsz;
 
 	rsid = zend_list_insert(shmop, shm_type);
-	if (flag_type == IS_UNICODE) {
-		efree(flags);
-	}
 	RETURN_LONG(rsid);
 err:
-	if (flag_type == IS_UNICODE) {
-		efree(flags);
-	}
 	efree(shmop);
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string shmop_read (int shmid, int start, int count) U
+/* {{{ proto string shmop_read (int shmid, int start, int count)
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
@@ -261,6 +243,7 @@ PHP_FUNCTION(shmop_read)
 	int type;
 	char *startaddr;
 	int bytes;
+	char *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &shmid, &start, &count) == FAILURE) {
 		return;
@@ -281,11 +264,15 @@ PHP_FUNCTION(shmop_read)
 	startaddr = shmop->addr + start;
 	bytes = count ? count : shmop->size - start;
 
-	RETURN_STRINGL(startaddr, bytes, 1);
+	return_string = emalloc(bytes+1);
+	memcpy(return_string, startaddr, bytes);
+	return_string[bytes] = 0;
+
+	RETURN_STRINGL(return_string, bytes, 0);
 }
 /* }}} */
 
-/* {{{ proto void shmop_close (int shmid) U
+/* {{{ proto void shmop_close (int shmid)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
@@ -303,7 +290,7 @@ PHP_FUNCTION(shmop_close)
 }
 /* }}} */
 
-/* {{{ proto int shmop_size (int shmid) U
+/* {{{ proto int shmop_size (int shmid)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
@@ -321,18 +308,18 @@ PHP_FUNCTION(shmop_size)
 }
 /* }}} */
 
-/* {{{ proto int shmop_write (int shmid, string data, int offset) U
+/* {{{ proto int shmop_write (int shmid, string data, int offset)
    writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
 	int type;
 	int writesize;
-	long shmid, offset=0;
+	long shmid, offset;
 	char *data;
 	int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS|l", &shmid, &data, &data_len, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsl", &shmid, &data, &data_len, &offset) == FAILURE) {
 		return;
 	}
 
@@ -355,7 +342,7 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-/* {{{ proto bool shmop_delete (int shmid) U
+/* {{{ proto bool shmop_delete (int shmid)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {

@@ -112,251 +112,251 @@ fclose( $file_handle );
 
 -- int 0 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int 1 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int 12345 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int -12345 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float 10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float -10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float .5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty array --
 
-Warning: date_modify() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_modify() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_modify() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_modify() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase null --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase true --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase false --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string DQ --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string SQ --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- string DQ --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- string SQ --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- mixed case string --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- heredoc --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- instance of classWithToString --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- instance of classWithoutToString --
 
-Warning: date_modify() expects parameter 2 to be binary string, object given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- unset var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-01-31 14:28:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-01-31 14:28:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- resource --
 
-Warning: date_modify() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

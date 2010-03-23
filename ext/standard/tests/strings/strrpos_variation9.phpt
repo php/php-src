@@ -121,28 +121,28 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Iteration 11 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Iteration 12 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Iteration 13 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Iteration 14 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Iteration 15 --
 bool(false)
@@ -173,8 +173,8 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
+Warning: strrpos() expects parameter 1 to be string, resource given in %s on line %d
+bool(false)
 
 -- Iteration 25 --
 bool(false)

@@ -46,7 +46,7 @@ NULL
 Warning: ReflectionClass::getStaticPropertyValue() expects at least 1 parameter, 0 given in %s on line 13
 NULL
 Class C does not have a property named 
-unicode(3) "def"
+string(3) "def"
 
-Warning: ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string (Unicode or binary), array given in %s on line 28
+Warning: ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string, array given in %s on line 28
 NULL

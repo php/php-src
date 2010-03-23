@@ -4,7 +4,7 @@
 
 #include "php.h"
 #include "readdir.h"
-
+#include "TSRM.h"
 /**********************************************************************
  * Implement dirent-style opendir/readdir/rewinddir/closedir on Win32
  *

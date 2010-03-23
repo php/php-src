@@ -21,7 +21,7 @@ if (($fp = fopen( $file, "w+")) == FALSE) {
 }	
 
 /* Writing into file */ 
-$content = b"This is a sample string used to test the hash_file function with various hashing algorithms";
+$content = "This is a sample string used to test the hash_file function with various hashing algorithms";
 if (is_writable($file)) {
   if (fwrite($fp, $content) === FALSE) {
     echo "Cannot write to file ($file)";

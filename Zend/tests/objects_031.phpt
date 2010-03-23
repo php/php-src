@@ -16,7 +16,7 @@ var_dump($x);
 array(3) {
   [0]=>
   object(stdClass)#%d (1) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
   }
   [1]=>

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 
-/* {{{ proto string gettype(mixed var) U
+/* {{{ proto string gettype(mixed var)
    Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
@@ -33,35 +33,31 @@ PHP_FUNCTION(gettype)
 
 	switch (Z_TYPE_PP(arg)) {
 		case IS_NULL:
-			RETVAL_ASCII_STRING("NULL", 1);
+			RETVAL_STRING("NULL", 1);
 			break;
 
 		case IS_BOOL:
-			RETVAL_ASCII_STRING("boolean", 1);
+			RETVAL_STRING("boolean", 1);
 			break;
 
 		case IS_LONG:
-			RETVAL_ASCII_STRING("integer", 1);
+			RETVAL_STRING("integer", 1);
 			break;
 
 		case IS_DOUBLE:
-			RETVAL_ASCII_STRING("double", 1);
+			RETVAL_STRING("double", 1);
 			break;
 	
 		case IS_STRING:
-			RETVAL_ASCII_STRING("string", 1);
+			RETVAL_STRING("string", 1);
 			break;
 	
-		case IS_UNICODE:
-			RETVAL_ASCII_STRING("unicode", 1);
-			break;
-
 		case IS_ARRAY:
-			RETVAL_ASCII_STRING("array", 1);
+			RETVAL_STRING("array", 1);
 			break;
 
 		case IS_OBJECT:
-			RETVAL_ASCII_STRING("object", 1);
+			RETVAL_STRING("object", 1);
 		/*
 		   {
 		   char *result;
@@ -79,54 +75,50 @@ PHP_FUNCTION(gettype)
 				char *type_name;
 				type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
 				if (type_name) {
-					RETVAL_ASCII_STRING("resource", 1);
+					RETVAL_STRING("resource", 1);
 					break;
 				}
 			}
 
 		default:
-			RETVAL_ASCII_STRING("unknown type", 1);
+			RETVAL_STRING("unknown type", 1);
 	}
 }
 /* }}} */
 
-/* {{{ proto bool settype(mixed var, string type) U
+/* {{{ proto bool settype(mixed var, string type)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
 	zval **var;
-	char *new_type;
-	int new_type_len;
+	char *type;
+	int type_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &var, &new_type, &new_type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &var, &type, &type_len) == FAILURE) {
 		return;
 	}
 
-	if (!strcasecmp(new_type, "integer")) {
+	if (!strcasecmp(type, "integer")) {
 		convert_to_long(*var);
-	} else if (!strcasecmp(new_type, "int")) {
+	} else if (!strcasecmp(type, "int")) {
 		convert_to_long(*var);
-	} else if (!strcasecmp(new_type, "float")) {
+	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(*var);
-	} else if (!strcasecmp(new_type, "double")) { /* deprecated */
+	} else if (!strcasecmp(type, "double")) { /* deprecated */
 		convert_to_double(*var);
-	} else if (!strcasecmp(new_type, "binary")) { /* explicit binary cast */
+	} else if (!strcasecmp(type, "string")) {
 		convert_to_string(*var);
-	} else if (!strcasecmp(new_type, "string")) { /* runtime string type */
-		convert_to_unicode(*var);
-	} else if (!strcasecmp(new_type, "unicode")) { /* explicit unicode cast */
-		convert_to_unicode(*var);
-	} else if (!strcasecmp(new_type, "array")) {
+	} else if (!strcasecmp(type, "array")) {
 		convert_to_array(*var);
-	} else if (!strcasecmp(new_type, "object")) {
+	} else if (!strcasecmp(type, "object")) {
 		convert_to_object(*var);
-	} else if (!strcasecmp(new_type, "bool")) {
+	} else if (!strcasecmp(type, "bool")) {
 		convert_to_boolean(*var);
-	} else if (!strcasecmp(new_type, "boolean")) {
+	} else if (!strcasecmp(type, "boolean")) {
 		convert_to_boolean(*var);
-	} else if (!strcasecmp(new_type, "null")) {
+	} else if (!strcasecmp(type, "null")) {
 		convert_to_null(*var);
-	} else if (!strcasecmp(new_type, "resource")) {
+	} else if (!strcasecmp(type, "resource")) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;
 	} else {
@@ -137,20 +129,31 @@ PHP_FUNCTION(settype)
 }
 /* }}} */
 
-/* {{{ proto int intval(mixed var [, int base]) U
+/* {{{ proto int intval(mixed var [, int base])
    Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
 	zval **num;
-	long arg_base = 0;
-	int base = 10;
+	long arg_base;
+	int base;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &num, &arg_base) == FAILURE) {
-		return;
-	}
-	
-	if (ZEND_NUM_ARGS() == 2) {
-		base = arg_base;
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+				return;
+			}
+			base = 10;
+			break;
+
+		case 2:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &num, &arg_base) == FAILURE) {
+				return;
+			}
+			base = arg_base;
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
 	}
 
 	RETVAL_ZVAL(*num, 1, 0);
@@ -158,7 +161,7 @@ PHP_FUNCTION(intval)
 }
 /* }}} */
 
-/* {{{ proto float floatval(mixed var) U
+/* {{{ proto float floatval(mixed var)
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
@@ -173,7 +176,7 @@ PHP_FUNCTION(floatval)
 }
 /* }}} */
 
-/* {{{ proto string strval(mixed var) U
+/* {{{ proto string strval(mixed var)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
@@ -185,7 +188,7 @@ PHP_FUNCTION(strval)
 		return;
 	}
 
-	zend_make_unicode_zval(*num, &expr_copy, &use_copy);
+	zend_make_printable_zval(*num, &expr_copy, &use_copy);
 	if (use_copy) {
 		tmp = &expr_copy;
 		RETVAL_ZVAL(tmp, 0, 0);
@@ -195,52 +198,29 @@ PHP_FUNCTION(strval)
 }
 /* }}} */
 
-static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	zval *arg;
+	zval **arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(arg) == type) {
+	if (Z_TYPE_PP(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
-
-			if(Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
-				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
+			if(Z_OBJ_HT_PP(arg)->get_class_entry == NULL) {
+			/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
 				RETURN_TRUE;
 			}
-			ce = Z_OBJCE_P(arg);
-
-			if (ce->name_length != sizeof(INCOMPLETE_CLASS) - 1) {
-				/* We can get away with this because INCOMPLETE_CLASS is ascii and has a 1:1 relationship with unicode */
-				RETURN_TRUE;
-			} else {
-#ifndef PHP_WIN32
-				U_STRING_DECL(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
-				U_STRING_INIT(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
-
-				if (!memcmp(ce->name.u, uIncompleteClass, UBYTES(sizeof(INCOMPLETE_CLASS)))) {
-					RETURN_FALSE;
-				}
-#else /* WIN32 -- U_STRING_DECL breaks under Win32 with string macros */
-				char *ascii_name = zend_unicode_to_ascii(ce->name.u, ce->name_length TSRMLS_CC);
-
-				if (ascii_name) {
-					if (memcmp(INCOMPLETE_CLASS, ascii_name, sizeof(INCOMPLETE_CLASS) - 1) == 0) {
-						efree(ascii_name);
-						RETURN_FALSE;
-					}
-					efree(ascii_name);
-				}
-				/* Non-ascii class name means it can't be INCOMPLETE_CLASS and is therefore okay */
-#endif
+			ce = Z_OBJCE_PP(arg);
+			if (!strcmp(ce->name, INCOMPLETE_CLASS)) {
+				RETURN_FALSE;
 			}
 		}
 		if (type == IS_RESOURCE) {
 			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_P(arg) TSRMLS_CC);
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}
@@ -250,9 +230,9 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ proto bool is_null(mixed var) U
+
+/* {{{ proto bool is_null(mixed var)
    Returns true if variable is null */
 PHP_FUNCTION(is_null)
 {
@@ -260,7 +240,7 @@ PHP_FUNCTION(is_null)
 }
 /* }}} */
 
-/* {{{ proto bool is_resource(mixed var) U
+/* {{{ proto bool is_resource(mixed var)
    Returns true if variable is a resource */
 PHP_FUNCTION(is_resource)
 {
@@ -268,7 +248,7 @@ PHP_FUNCTION(is_resource)
 }
 /* }}} */
 
-/* {{{ proto bool is_bool(mixed var) U
+/* {{{ proto bool is_bool(mixed var)
    Returns true if variable is a boolean */
 PHP_FUNCTION(is_bool)
 {
@@ -276,7 +256,7 @@ PHP_FUNCTION(is_bool)
 }
 /* }}} */
 
-/* {{{ proto bool is_long(mixed var) U
+/* {{{ proto bool is_long(mixed var)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
@@ -284,7 +264,7 @@ PHP_FUNCTION(is_long)
 }
 /* }}} */
 
-/* {{{ proto bool is_float(mixed var) U
+/* {{{ proto bool is_float(mixed var)
    Returns true if variable is float point*/
 PHP_FUNCTION(is_float)
 {
@@ -292,58 +272,15 @@ PHP_FUNCTION(is_float)
 }
 /* }}} */
 
-/* {{{ proto bool is_binary(mixed var) U
-   Returns true if variable is a native (binary) string */
-PHP_FUNCTION(is_binary)
+/* {{{ proto bool is_string(mixed var)
+   Returns true if variable is a string */
+PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
 }
 /* }}} */
 
-/* {{{ proto bool is_string(mixed var) U
-   Returns true if variable is a Unicode or binary string */
-PHP_FUNCTION(is_string)
-{
-	zval *arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
-		return;
-	}
-
-	if (Z_TYPE_P(arg) == IS_UNICODE || Z_TYPE_P(arg) == IS_STRING) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto bool is_unicode(mixed var) U
-   Returns true if variable is a unicode string */
-PHP_FUNCTION(is_unicode)
-{
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_UNICODE);
-}
-/* }}} */
-
-/* {{{ proto bool is_buffer(mixed var) U
-   Returns true if variable is a native, unicode or binary string */
-PHP_FUNCTION(is_buffer)
-{
-	zval *arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
-		return;
-	}
-
-	if (Z_TYPE_P(arg) == IS_STRING || Z_TYPE_P(arg) == IS_UNICODE) {
-		RETURN_TRUE;
-	}
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto bool is_array(mixed var) U
+/* {{{ proto bool is_array(mixed var)
    Returns true if variable is an array */
 PHP_FUNCTION(is_array)
 {
@@ -351,7 +288,7 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
-/* {{{ proto bool is_object(mixed var) U
+/* {{{ proto bool is_object(mixed var)
    Returns true if variable is an object */
 PHP_FUNCTION(is_object)
 {
@@ -359,12 +296,11 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ proto bool is_numeric(mixed value) U
+/* {{{ proto bool is_numeric(mixed value)
    Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
 {
 	zval **arg;
-	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
 		return;
@@ -377,17 +313,7 @@ PHP_FUNCTION(is_numeric)
 			break;
 
 		case IS_STRING:
-			result = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0);
-			if (result == IS_LONG || result == IS_DOUBLE) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
-			break;
-
-		case IS_UNICODE:
-			result = is_numeric_unicode(Z_USTRVAL_PP(arg), Z_USTRLEN_PP(arg), NULL, NULL, 0);
-			if (result == IS_LONG || result == IS_DOUBLE) {
+			if (is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -401,12 +327,12 @@ PHP_FUNCTION(is_numeric)
 }
 /* }}} */
 
-/* {{{ proto bool is_scalar(mixed value) U
+/* {{{ proto bool is_scalar(mixed value)
    Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
 {
 	zval **arg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
 		return;
 	}
@@ -416,7 +342,6 @@ PHP_FUNCTION(is_scalar)
 		case IS_DOUBLE:
 		case IS_LONG:
 		case IS_STRING:
-		case IS_UNICODE:
 			RETURN_TRUE;
 			break;
 
@@ -427,12 +352,12 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]])  U
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
 	zval *var, **callable_name = NULL;
-	zval name;
+	char *name;
 	char *error;
 	zend_bool retval;
 	zend_bool syntax_only = 0;
@@ -442,15 +367,16 @@ PHP_FUNCTION(is_callable)
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
-
+	
 	if (syntax_only) {
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
-		REPLACE_ZVAL_VALUE(callable_name, &name, 0);
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL, &error TSRMLS_CC);
+		zval_dtor(*callable_name);
+		ZVAL_STRING(*callable_name, name, 0);
 	} else {
-		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, NULL, &error TSRMLS_CC);
 	}
 	if (error) {
 		/* ignore errors */

@@ -22,11 +22,11 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(3) {
-  [u"prop1"]=>
-  unicode(1) "1"
-  [u"prop2"]=>
-  unicode(1) "2"
-  [u"prop3"]=>
-  unicode(1) "3"
+  ["prop1"]=>
+  string(1) "1"
+  ["prop2"]=>
+  string(1) "2"
+  ["prop3"]=>
+  string(1) "3"
 }
 Done

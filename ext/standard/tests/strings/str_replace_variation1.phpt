@@ -33,360 +33,360 @@ foreach( $search_arr as $value ) {
 -- Iteration 0 --
 array(12) {
   [0]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [5]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(5)
 
 -- Iteration 1 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(0)
 
 -- Iteration 2 --
 array(12) {
   [0]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [5]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(5)
 
 -- Iteration 3 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(2)
 
 -- Iteration 4 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(2)
 
 -- Iteration 5 --
 array(12) {
   [0]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [5]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(6) "-FOUND"
+  string(6) "-FOUND"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(5)
 
 -- Iteration 6 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(2)
 
 -- Iteration 7 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(2)
 
 -- Iteration 8 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(0)
 
 -- Iteration 9 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(0)
 
 -- Iteration 10 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(5) "FOUND"
+  string(5) "FOUND"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(1)
 
 -- Iteration 11 --
 array(12) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [5]=>
-  unicode(1) "1"
+  string(1) "1"
   [6]=>
-  unicode(1) "0"
+  string(1) "0"
   [7]=>
-  unicode(2) "-1"
+  string(2) "-1"
   [8]=>
-  unicode(0) ""
+  string(0) ""
   [9]=>
   array(0) {
   }
   [10]=>
-  unicode(3) "php"
+  string(3) "php"
   [11]=>
-  unicode(0) ""
+  string(0) ""
 }
 int(0)
 ===DONE===

@@ -3,7 +3,7 @@ testing @ and error_reporting - 10
 --FILE--
 <?php
 
-error_reporting(E_ALL & ~E_STRICT);
+error_reporting(E_ALL);
 
 function make_exception()
 {
@@ -19,7 +19,7 @@ try {
 
 var_dump(error_reporting());
 
-error_reporting(E_ALL&~E_NOTICE&~E_STRICT);
+error_reporting(E_ALL&~E_NOTICE);
 
 try {
 	@make_exception();
@@ -29,7 +29,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 int(30719)
 int(30711)
 Done

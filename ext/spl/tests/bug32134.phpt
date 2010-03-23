@@ -41,8 +41,8 @@ var_dump($myArray['two']);
 --EXPECT--
 myArray::offsetSet(one,one)
 myArray::offsetGet(one)
-unicode(3) "one"
+string(3) "one"
 myArray::offsetSet(two,two)
 myArray::offsetGet(two)
-unicode(3) "two"
+string(3) "two"
 ===DONE===

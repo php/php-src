@@ -60,29 +60,29 @@ Notice: Undefined variable: theIncrement in %s on line 8
 parameter names from staticMethod method:
 
 object(ReflectionParameter)#%d (1) {
-  [u"name"]=>
-  unicode(8) "paramOne"
+  ["name"]=>
+  string(8) "paramOne"
 }
 this parameter is not optional
 this parameter has no default value
 
 object(ReflectionParameter)#%d (1) {
-  [u"name"]=>
-  unicode(12) "anotherParam"
+  ["name"]=>
+  string(12) "anotherParam"
 }
 this parameter is optional
 this parameter has a default value
 
 object(ReflectionParameter)#%d (1) {
-  [u"name"]=>
-  unicode(10) "thirdParam"
+  ["name"]=>
+  string(10) "thirdParam"
 }
 this parameter is optional
 this parameter has a default value
 
 object(ReflectionParameter)#%d (1) {
-  [u"name"]=>
-  unicode(10) "arrayParam"
+  ["name"]=>
+  string(10) "arrayParam"
 }
 this parameter is optional
 this parameter has a default value

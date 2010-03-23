@@ -24,21 +24,21 @@ echo "Done!\n";
 ?>
 --EXPECTF--
 array(8) {
-  [u"command"]=>
-  unicode(14) "/bin/sleep 120"
-  [u"pid"]=>
+  ["command"]=>
+  string(14) "/bin/sleep 120"
+  ["pid"]=>
   int(%d)
-  [u"running"]=>
+  ["running"]=>
   bool(false)
-  [u"signaled"]=>
+  ["signaled"]=>
   bool(true)
-  [u"stopped"]=>
+  ["stopped"]=>
   bool(false)
-  [u"exitcode"]=>
+  ["exitcode"]=>
   int(-1)
-  [u"termsig"]=>
+  ["termsig"]=>
   int(15)
-  [u"stopsig"]=>
+  ["stopsig"]=>
   int(0)
 }
 Done!

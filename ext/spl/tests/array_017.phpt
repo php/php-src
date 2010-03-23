@@ -136,34 +136,34 @@ ArrayObjectEx::__construct()
 ArrayObjectEx::setFlags(0)
 ArrayObjectEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(2) {
-    [u"a"]=>
+    ["a"]=>
     int(25)
-    [u"pub1"]=>
+    ["pub1"]=>
     int(42)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayObjectEx)#%d (6) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1":protected]=>
+    ["pro1":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(3) {
       [0]=>
       int(1)
-      [u"a"]=>
+      ["a"]=>
       int(25)
-      [u"pub1"]=>
+      ["pub1"]=>
       int(42)
     }
   }
@@ -173,46 +173,46 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(2) {
-    [u"a"]=>
+    ["a"]=>
     int(25)
-    [u"pub1"]=>
+    ["pub1"]=>
     int(42)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (6) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(3) {
         [0]=>
         int(1)
-        [u"a"]=>
+        ["a"]=>
         int(25)
-        [u"pub1"]=>
+        ["pub1"]=>
         int(42)
       }
     }
@@ -223,11 +223,11 @@ array(1) {
   int(1)
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(25)
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(42)
 }
 ===FOREACH===
@@ -235,46 +235,46 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(2) {
-    [u"a"]=>
+    ["a"]=>
     int(25)
-    [u"pub1"]=>
+    ["pub1"]=>
     int(42)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (6) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(3) {
         [0]=>
         int(1)
-        [u"a"]=>
+        ["a"]=>
         int(25)
-        [u"pub1"]=>
+        ["pub1"]=>
         int(42)
       }
     }
@@ -285,11 +285,11 @@ array(1) {
   int(1)
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(25)
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(42)
 }
 ===PROPERTY===
@@ -307,40 +307,40 @@ bool(true)
 ArrayObjectEx::setFlags(1)
 ArrayObjectEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1"]=>
+    ["pro1"]=>
     int(2)
-    [u"pri1"]=>
+    ["pri1"]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayObjectEx)#%d (6) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1":protected]=>
+    ["pro1":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(3) {
       [0]=>
       int(1)
-      [u"a"]=>
+      ["a"]=>
       int(25)
-      [u"pub1"]=>
+      ["pub1"]=>
       int(42)
     }
   }
@@ -350,52 +350,52 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2"]=>
+    ["pro2"]=>
     int(2)
-    [u"pri2"]=>
+    ["pri2"]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (6) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(3) {
         [0]=>
         int(1)
-        [u"a"]=>
+        ["a"]=>
         int(25)
-        [u"pub1"]=>
+        ["pub1"]=>
         int(42)
       }
     }
@@ -406,11 +406,11 @@ array(1) {
   int(1)
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(25)
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(42)
 }
 ===FOREACH===
@@ -418,52 +418,52 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2"]=>
+    ["pro2"]=>
     int(2)
-    [u"pri2"]=>
+    ["pri2"]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (6) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(3) {
         [0]=>
         int(1)
-        [u"a"]=>
+        ["a"]=>
         int(25)
-        [u"pub1"]=>
+        ["pub1"]=>
         int(42)
       }
     }
@@ -474,11 +474,11 @@ array(1) {
   int(1)
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(25)
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(42)
 }
 ===PROPERTY===
@@ -498,32 +498,32 @@ ArrayObjectEx::exchange()
 ArrayObjectEx::setFlags(0)
 ArrayObjectEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1"]=>
+    ["pro1"]=>
     int(2)
-    [u"pri1"]=>
+    ["pri1"]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayObjectEx)#%d (5) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1":protected]=>
+    ["pro1":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
 }
@@ -532,56 +532,56 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(4) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1"]=>
+    ["pro1"]=>
     int(2)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (5) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
     }
   }
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(1)
 }
 array(1) {
-  [u"imp1"]=>
+  ["imp1"]=>
   int(4)
 }
 array(1) {
-  [u"dyn1"]=>
+  ["dyn1"]=>
   int(5)
 }
 ===FOREACH===
@@ -589,56 +589,56 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(0)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(4) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1"]=>
+    ["pro1"]=>
     int(2)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (5) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
     }
   }
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(1)
 }
 array(1) {
-  [u"imp1"]=>
+  ["imp1"]=>
   int(4)
 }
 array(1) {
-  [u"dyn1"]=>
+  ["dyn1"]=>
   int(5)
 }
 ===PROPERTY===
@@ -656,32 +656,32 @@ bool(true)
 ArrayObjectEx::setFlags(1)
 ArrayObjectEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1"]=>
+    ["pro1"]=>
     int(2)
-    [u"pri1"]=>
+    ["pri1"]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayObjectEx)#%d (5) {
-    [u"pub1"]=>
+    ["pub1"]=>
     int(1)
-    [u"pro1":protected]=>
+    ["pro1":protected]=>
     int(2)
-    [u"pri1":u"ArrayObjectEx":private]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
-    [u"imp1"]=>
+    ["imp1"]=>
     int(4)
-    [u"dyn1"]=>
+    ["dyn1"]=>
     int(5)
   }
 }
@@ -690,58 +690,58 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2"]=>
+    ["pro2"]=>
     int(2)
-    [u"pri2"]=>
+    ["pri2"]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (5) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
     }
   }
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(1)
 }
 array(1) {
-  [u"imp1"]=>
+  ["imp1"]=>
   int(4)
 }
 array(1) {
-  [u"dyn1"]=>
+  ["dyn1"]=>
   int(5)
 }
 ===FOREACH===
@@ -749,58 +749,58 @@ ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
 ArrayIteratorEx::dump()
 array(3) {
-  [u"Flags"]=>
+  ["Flags"]=>
   int(1)
-  [u"OVars"]=>
+  ["OVars"]=>
   array(5) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2"]=>
+    ["pro2"]=>
     int(2)
-    [u"pri2"]=>
+    ["pri2"]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
   }
-  [u"$this"]=>
+  ["$this"]=>
   object(ArrayIteratorEx)#%d (6) {
-    [u"pub2"]=>
+    ["pub2"]=>
     int(1)
-    [u"pro2":protected]=>
+    ["pro2":protected]=>
     int(2)
-    [u"pri2":u"ArrayIteratorEx":private]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
-    [u"imp2"]=>
+    ["imp2"]=>
     int(4)
-    [u"dyn2"]=>
+    ["dyn2"]=>
     int(5)
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     object(ArrayObjectEx)#%d (5) {
-      [u"pub1"]=>
+      ["pub1"]=>
       int(1)
-      [u"pro1":protected]=>
+      ["pro1":protected]=>
       int(2)
-      [u"pri1":u"ArrayObjectEx":private]=>
+      ["pri1":"ArrayObjectEx":private]=>
       int(3)
-      [u"imp1"]=>
+      ["imp1"]=>
       int(4)
-      [u"dyn1"]=>
+      ["dyn1"]=>
       int(5)
     }
   }
 }
 array(1) {
-  [u"pub1"]=>
+  ["pub1"]=>
   int(1)
 }
 array(1) {
-  [u"imp1"]=>
+  ["imp1"]=>
   int(4)
 }
 array(1) {
-  [u"dyn1"]=>
+  ["dyn1"]=>
   int(5)
 }
 ===PROPERTY===

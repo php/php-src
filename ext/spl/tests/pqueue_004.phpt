@@ -15,37 +15,37 @@ var_dump($pq);
 <?php exit(0); ?>
 --EXPECTF--
 object(SplPriorityQueue)#1 (3) {
-  [u"flags":u"SplPriorityQueue":private]=>
+  ["flags":"SplPriorityQueue":private]=>
   int(1)
-  [u"isCorrupted":u"SplPriorityQueue":private]=>
+  ["isCorrupted":"SplPriorityQueue":private]=>
   bool(false)
-  [u"heap":u"SplPriorityQueue":private]=>
+  ["heap":"SplPriorityQueue":private]=>
   array(4) {
     [0]=>
     array(2) {
       ["data"]=>
-      unicode(1) "c"
+      string(1) "c"
       ["priority"]=>
       int(5)
     }
     [1]=>
     array(2) {
       ["data"]=>
-      unicode(1) "a"
+      string(1) "a"
       ["priority"]=>
       int(0)
     }
     [2]=>
     array(2) {
       ["data"]=>
-      unicode(1) "b"
+      string(1) "b"
       ["priority"]=>
       int(1)
     }
     [3]=>
     array(2) {
       ["data"]=>
-      unicode(1) "d"
+      string(1) "d"
       ["priority"]=>
       int(-2)
     }

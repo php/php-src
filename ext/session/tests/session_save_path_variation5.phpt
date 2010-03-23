@@ -42,19 +42,16 @@ echo "Done";
 ob_end_flush();
 ?>
 --CLEAN--
-<?php
 $directory = dirname(__FILE__);
 $sessions = ($directory."/sessions");
 var_dump(rmdir($sessions));
-?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
 bool(true)
 bool(true)
 
 Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
-unicode(0) ""
+string(0) ""
 bool(true)
 Done
-
 

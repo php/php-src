@@ -42,8 +42,6 @@ unlink($file_path."/filesize_variation3.tmp");
 ?>
 --EXPECTF--
 *** Testing filesize(): usage variations ***
-
-Notice: fwrite(): 12000 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Testing filesize() after truncating the file to a new length --
 bool(true)
 int(12000)

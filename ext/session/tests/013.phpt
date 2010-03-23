@@ -5,6 +5,9 @@ redefining SID should not cause warnings
 --INI--
 session.use_cookies=0
 session.cache_limiter=
+register_globals=1
+session.bug_compat_42=1
+session.bug_compat_warn=0
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -21,4 +24,5 @@ session_destroy();
 print "I live\n";
 ?>
 --EXPECT--
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 I live

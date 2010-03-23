@@ -244,9 +244,9 @@ array(6) {
 -- Iteration 5: empty string data --
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   int(1)
   [3]=>
@@ -258,9 +258,9 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 6: empty array data --
@@ -280,11 +280,11 @@ array(2) {
 -- Iteration 7: string data --
 array(5) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [3]=>
   int(1)
   [4]=>
@@ -296,11 +296,11 @@ array(5) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
   [3]=>
-  unicode(6) "string"
+  string(6) "string"
   [4]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
 }
 
 -- Iteration 8: object data --

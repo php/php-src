@@ -5,6 +5,7 @@ Test fgets() function : usage variations - seek n read
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
+?>
 --FILE--
 <?php
 /*
@@ -64,7 +65,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --
@@ -184,40 +185,40 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "222222222222222222222222222222222222222222222"
+string(45) "222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "2222222222222222222"
+string(19) "2222222222222222222"
 int(44)
 bool(false)
 -- File content type : text --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "text text text text text text text text text "
+string(45) "text text text text text text text text text "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "text text text text"
+string(19) "text text text text"
 int(44)
 bool(false)
 -- File content type : text_with_new_line --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(13) "line of text
+string(13) "line of text
 "
 int(18)
 bool(false)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(11) "ne of text
+string(11) "ne of text
 "
 int(36)
 bool(false)
@@ -225,13 +226,13 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "ab12 ab12 ab12 ab12"
+string(19) "ab12 ab12 ab12 ab12"
 int(44)
 bool(false)
 
@@ -352,40 +353,40 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "222222222222222222222222222222222222222222222"
+string(45) "222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "2222222222222222222"
+string(19) "2222222222222222222"
 int(44)
 bool(false)
 -- File content type : text --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "text text text text text text text text text "
+string(45) "text text text text text text text text text "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "text text text text"
+string(19) "text text text text"
 int(44)
 bool(false)
 -- File content type : text_with_new_line --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(13) "line of text
+string(13) "line of text
 "
 int(18)
 bool(false)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(11) "ne of text
+string(11) "ne of text
 "
 int(36)
 bool(false)
@@ -393,13 +394,13 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "ab12 ab12 ab12 ab12"
+string(19) "ab12 ab12 ab12 ab12"
 int(44)
 bool(false)
 
@@ -520,40 +521,40 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "222222222222222222222222222222222222222222222"
+string(45) "222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "2222222222222222222"
+string(19) "2222222222222222222"
 int(44)
 bool(false)
 -- File content type : text --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "text text text text text text text text text "
+string(45) "text text text text text text text text text "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "text text text text"
+string(19) "text text text text"
 int(44)
 bool(false)
 -- File content type : text_with_new_line --
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(13) "line of text
+string(13) "line of text
 "
 int(18)
 bool(false)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(11) "ne of text
+string(11) "ne of text
 "
 int(36)
 bool(false)
@@ -561,13 +562,13 @@ bool(false)
 -- fgets() with location set by fseek() with default length --
 int(0)
 int(5)
-unicode(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(45) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 -- fgets() with location set by fseek() with length = 20 --
 int(0)
 int(25)
-unicode(19) "ab12 ab12 ab12 ab12"
+string(19) "ab12 ab12 ab12 ab12"
 int(44)
 bool(false)
 Done

@@ -68,7 +68,7 @@ catch (Exception $e) {
 --EXPECTF--
 Hello World!
 ===NONE===
-unicode(52) "Method None::__toString() must return a string value"
+string(52) "Method None::__toString() must return a string value"
 ===THROW===
 
 Fatal error: Method Error::__toString() must not throw an exception in %sbug26166.php on line %d

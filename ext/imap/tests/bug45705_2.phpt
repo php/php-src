@@ -24,30 +24,30 @@ var_dump($envelope);
 ?>
 --EXPECT--
 array(6) {
-  [u"return_path"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"from"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"reply_to"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"to"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"cc"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"bcc"]=>
-  unicode(27) "John Doe <john@example.com>"
+  ["return_path"]=>
+  string(27) "John Doe <john@example.com>"
+  ["from"]=>
+  string(27) "John Doe <john@example.com>"
+  ["reply_to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["cc"]=>
+  string(27) "John Doe <john@example.com>"
+  ["bcc"]=>
+  string(27) "John Doe <john@example.com>"
 }
 array(6) {
-  [u"return_path"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"from"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"reply_to"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"to"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"cc"]=>
-  unicode(27) "John Doe <john@example.com>"
-  [u"bcc"]=>
-  unicode(27) "John Doe <john@example.com>"
+  ["return_path"]=>
+  string(27) "John Doe <john@example.com>"
+  ["from"]=>
+  string(27) "John Doe <john@example.com>"
+  ["reply_to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["cc"]=>
+  string(27) "John Doe <john@example.com>"
+  ["bcc"]=>
+  string(27) "John Doe <john@example.com>"
 }

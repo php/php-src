@@ -361,87 +361,87 @@ bool(false)
 -- Iteration 16 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 17 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 18 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 19 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 Flag = default:

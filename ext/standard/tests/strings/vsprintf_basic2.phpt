@@ -28,9 +28,9 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : basic functionality - using integer format ***
-unicode(3) "111"
-unicode(7) "111 222"
-unicode(11) "111 222 333"
+string(3) "111"
+string(7) "111 222"
+string(11) "111 222 333"
 Done

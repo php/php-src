@@ -53,7 +53,7 @@ echo "Done";
 --> http://www.php.net:80/this/is/a/very/deep/directory/../file.php   : NULL
 --> http://www.php.net:80/index.php   : NULL
 --> http://www.php.net:80/index.php?   : NULL
---> http://www.php.net:80/#foo   : unicode(3) "foo"
+--> http://www.php.net:80/#foo   : string(3) "foo"
 --> http://www.php.net:80/?#   : NULL
 --> http://www.php.net:80/?test=1   : NULL
 --> http://www.php.net/?test=1&   : NULL
@@ -63,13 +63,13 @@ echo "Done";
 --> http://www.php.net:80/index.php?foo&   : NULL
 --> http://www.php.net/index.php?&foo   : NULL
 --> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI   : NULL
---> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
---> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(16) "some_page_ref123"
+--> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
+--> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(16) "some_page_ref123"
 --> nntp://news.php.net   : NULL
 --> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz   : NULL
 --> zlib:http://foo@bar   : NULL
@@ -84,11 +84,11 @@ echo "Done";
 --> file://path/to/file   : NULL
 --> file:/path/to/file   : NULL
 --> http://1.2.3.4:/abc.asp?a=1&b=2   : NULL
---> http://foo.com#bar   : unicode(3) "bar"
+--> http://foo.com#bar   : string(3) "bar"
 --> scheme:   : NULL
 --> foo+bar://baz@bang/bla   : NULL
 --> gg:9130731   : NULL
---> http://user:@pass@host/path?argument?value#etc   : unicode(3) "etc"
+--> http://user:@pass@host/path?argument?value#etc   : string(3) "etc"
 --> http://10.10.10.10/:80   : NULL
 --> http://x:?   : NULL
 --> x:blah.com   : NULL

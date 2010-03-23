@@ -27,7 +27,7 @@ var_dump(get_include_path(TRUE));
 ===DONE===
 --EXPECTF--
 *** Testing get_include_path()
-unicode(1) "."
+string(1) "."
 PASSED
 
 Error cases:

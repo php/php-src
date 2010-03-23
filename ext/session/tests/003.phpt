@@ -5,6 +5,7 @@ session object deserialization
 --INI--
 session.use_cookies=0
 session.cache_limiter=
+register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -18,10 +19,7 @@ class foo {
 
 session_id("abtest");
 session_start();
-session_decode('baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}}');
-
-$baz = $_SESSION['baz'];
-$arr = $_SESSION['arr'];
+session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
 
 $baz->method();
 $arr[3]->method();
@@ -30,18 +28,20 @@ var_dump($baz);
 var_dump($arr);
 session_destroy();
 --EXPECT--
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 object(foo)#1 (2) {
-  [u"bar"]=>
-  unicode(2) "ok"
-  [u"yes"]=>
+  ["bar"]=>
+  string(2) "ok"
+  ["yes"]=>
   int(2)
 }
 array(1) {
   [3]=>
   object(foo)#2 (2) {
-    [u"bar"]=>
-    unicode(2) "ok"
-    [u"yes"]=>
+    ["bar"]=>
+    string(2) "ok"
+    ["yes"]=>
     int(2)
   }
 }
+

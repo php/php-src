@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -195,24 +195,24 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 * Decoding  Quoted-printable string.
 *
 */
-/* {{{ proto binary quoted_printable_decode(string str) U
+/* {{{ proto string quoted_printable_decode(string str)
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	char *str_in, *str_out;
-	int str_in_len;
-	int i = 0, j = 0, k;
+	char *arg1, *str_in, *str_out;
+	int arg1_len, i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str_in, &str_in_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
 		return;
 	}
     
-	if (str_in_len == 0) {
+	if (arg1_len == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-	str_out = emalloc(str_in_len + 1);
+	str_in = arg1;
+	str_out = emalloc(arg1_len + 1);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
@@ -256,7 +256,7 @@ PHP_FUNCTION(quoted_printable_decode)
 }
 /* }}} */
 
-/* {{{ proto string quoted_printable_encode(string str) U */
+/* {{{ proto string quoted_printable_encode(string str) */
 PHP_FUNCTION(quoted_printable_encode)
 {
 	char *str, *new_str;

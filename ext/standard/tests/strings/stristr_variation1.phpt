@@ -98,15 +98,15 @@ bool(false)
 bool(false)
 -- Iteration 8 --
 
-Warning: stristr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
 NULL
 -- Iteration 9 --
 
-Warning: stristr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
 NULL
 -- Iteration 10 --
 
-Warning: stristr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
 NULL
 -- Iteration 11 --
 bool(false)
@@ -121,10 +121,10 @@ bool(false)
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-unicode(7) " object"
+string(7) " object"
 -- Iteration 18 --
 
-Warning: stristr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: stristr() expects parameter 1 to be string, resource given in %s on line %d2
 NULL
 -- Iteration 19 --
 bool(false)

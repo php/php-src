@@ -33,34 +33,34 @@ function __autoload($cname) {
 <?php exit(0); ?>
 --EXPECTF--
 Warning: class_parents(): Class foo does not exist in %sspl_003.php on line %d
-unicode(3) "foo"
+string(3) "foo"
 
 Warning: class_parents(): Class foo does not exist and could not be loaded in %sspl_003.php on line %d
 array(2) {
-  [u"b"]=>
-  unicode(1) "b"
-  [u"a"]=>
-  unicode(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["a"]=>
+  string(1) "a"
 }
 array(2) {
-  [u"b"]=>
-  unicode(1) "b"
-  [u"a"]=>
-  unicode(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["a"]=>
+  string(1) "a"
 }
 array(1) {
-  [u"a"]=>
-  unicode(1) "a"
+  ["a"]=>
+  string(1) "a"
 }
 array(1) {
-  [u"a"]=>
-  unicode(1) "a"
+  ["a"]=>
+  string(1) "a"
 }
 array(0) {
 }
 bool(false)
 bool(false)
-unicode(3) "aaa"
+string(3) "aaa"
 
 Warning: class_implements(): Class aaa does not exist and could not be loaded in %sspl_003.php on line %d
 

@@ -25,15 +25,15 @@ var_dump(gmp_or(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(7) "2226831"
-unicode(6) "517363"
-unicode(10) "2342341163"
-unicode(2) "-1"
-unicode(3) "-19"
-unicode(1) "0"
-unicode(15) "987657876576252"
-unicode(21) "987658441719689394144"
+--EXPECTF--	
+string(7) "2226831"
+string(6) "517363"
+string(10) "2342341163"
+string(2) "-1"
+string(3) "-19"
+string(1) "0"
+string(15) "987657876576252"
+string(21) "987658441719689394144"
 
 Warning: gmp_or() expects exactly 2 parameters, 3 given in %s on line %d
 NULL

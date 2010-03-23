@@ -17,7 +17,7 @@ Test uasort() function : usage variations - sort array having subarrays
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
 {
@@ -32,7 +32,7 @@ function cmp_function($value1, $value2)
   }
 }
 
-echo "*** Testing uasort() : Array with different subarrays ***\n";
+echo "*** Testing uasort() : sorting array having different subarrays ***\n";
 
 $array_args = array(
   0 => array(2, 10, -1),
@@ -49,10 +49,9 @@ $temp_array = $array_args;
 var_dump( uasort($temp_array, 'cmp_function') );  // expecting: bool(true)
 var_dump($temp_array);
 
-echo "Done"
 ?>
---EXPECT--
-*** Testing uasort() : Array with different subarrays ***
+--EXPECTF--
+*** Testing uasort() : sorting array having different subarrays ***
 bool(true)
 array(8) {
   [2]=>
@@ -66,7 +65,7 @@ array(8) {
   [6]=>
   array(1) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
   }
   [3]=>
   array(1) {
@@ -103,15 +102,14 @@ array(8) {
   [7]=>
   array(5) {
     [0]=>
-    unicode(5) "apple"
+    string(5) "apple"
     [1]=>
-    unicode(5) "Apple"
+    string(5) "Apple"
     [2]=>
-    unicode(5) "APPLE"
+    string(5) "APPLE"
     [3]=>
-    unicode(5) "aPPle"
+    string(5) "aPPle"
     [4]=>
-    unicode(5) "aPpLe"
+    string(5) "aPpLe"
   }
 }
-Done

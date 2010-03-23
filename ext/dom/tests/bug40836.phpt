@@ -1,5 +1,5 @@
 --TEST--
-Bug # 40836 (Segfault in insertBefore)
+Bug #40836 (Segfault in insertBefore)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

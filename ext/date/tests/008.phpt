@@ -1,9 +1,8 @@
 --TEST--
 getdate() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 $t = mktime(0,0,0, 6, 27, 2006);
 var_dump(getdate(1,1));
@@ -13,54 +12,54 @@ var_dump(getdate());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: getdate() expects at most 1 parameter, 2 given in %s on line %d
 bool(false)
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(0)
-  [u"hours"]=>
+  ["hours"]=>
   int(0)
-  [u"mday"]=>
+  ["mday"]=>
   int(27)
-  [u"wday"]=>
+  ["wday"]=>
   int(2)
-  [u"mon"]=>
+  ["mon"]=>
   int(6)
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"yday"]=>
+  ["yday"]=>
   int(177)
-  [u"weekday"]=>
-  unicode(7) "Tuesday"
-  [u"month"]=>
-  unicode(4) "June"
+  ["weekday"]=>
+  string(7) "Tuesday"
+  ["month"]=>
+  string(4) "June"
   [0]=>
   int(1151366400)
 }
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(%d)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(%d)
-  [u"hours"]=>
+  ["hours"]=>
   int(%d)
-  [u"mday"]=>
+  ["mday"]=>
   int(%d)
-  [u"wday"]=>
+  ["wday"]=>
   int(%d)
-  [u"mon"]=>
+  ["mon"]=>
   int(%d)
-  [u"year"]=>
+  ["year"]=>
   int(%d)
-  [u"yday"]=>
+  ["yday"]=>
   int(%d)
-  [u"weekday"]=>
-  unicode(%d) "%s"
-  [u"month"]=>
-  unicode(%d) "%s"
+  ["weekday"]=>
+  string(%d) "%s"
+  ["month"]=>
+  string(%d) "%s"
   [0]=>
   int(%d)
 }

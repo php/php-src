@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -56,13 +56,34 @@ union semun {
 
 #endif
 
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, max_acquire)
+	ZEND_ARG_INFO(0, perm)
+	ZEND_ARG_INFO(0, auto_release)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_acquire, 0, 0, 1)
+	ZEND_ARG_INFO(0, sem_identifier)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_release, 0, 0, 1)
+	ZEND_ARG_INFO(0, sem_identifier)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_remove, 0, 0, 1)
+	ZEND_ARG_INFO(0, sem_identifier)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ sysvsem_functions[]
  */
 const zend_function_entry sysvsem_functions[] = {
-	PHP_FE(sem_get,			NULL)
-	PHP_FE(sem_acquire,		NULL)
-	PHP_FE(sem_release,		NULL)
-	PHP_FE(sem_remove,		NULL)
+	PHP_FE(sem_get,			arginfo_sem_get)
+	PHP_FE(sem_acquire,		arginfo_sem_acquire)
+	PHP_FE(sem_release,		arginfo_sem_release)
+	PHP_FE(sem_remove,		arginfo_sem_remove)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -89,8 +110,6 @@ ZEND_GET_MODULE(sysvsem)
 
 
 THREAD_LS sysvsem_module php_sysvsem_module;
-
-#define SEM_FETCH_RESOURCE(sem_ptr, z_ptr) ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &z_ptr, -1, PHP_SEM_RSRC_NAME, php_sysvsem_module.le_sem)
 
 /* Semaphore functions using System V semaphores.  Each semaphore
  * actually consists of three semaphores allocated as a unit under the
@@ -153,7 +172,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, PHP_SEM_RSRC_NAME, module_number);
+	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -164,7 +183,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto resource sem_get(int key [, int max_acquire [, int perm [, int auto_release]]) U
+/* {{{ proto resource sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
@@ -282,10 +301,11 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id)) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
+		return;
 	}
-	SEM_FETCH_RESOURCE(sem_ptr, arg_id);
+
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
 
 	if (!acquire && sem_ptr->count == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
@@ -308,7 +328,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(resource id) U
+/* {{{ proto bool sem_acquire(resource id)
    Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
@@ -316,7 +336,7 @@ PHP_FUNCTION(sem_acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(resource id) U
+/* {{{ proto bool sem_release(resource id)
    Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
@@ -324,7 +344,7 @@ PHP_FUNCTION(sem_release)
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(resource id) U
+/* {{{ proto bool sem_remove(resource id)
    Removes semaphore from Unix systems */
 
 /*
@@ -341,10 +361,11 @@ PHP_FUNCTION(sem_remove)
 	struct semid_ds buf;
 #endif
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id)) {
-		RETURN_FALSE
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
+		return;
 	}
-	SEM_FETCH_RESOURCE(sem_ptr, arg_id);
+
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, &arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
 
 #if HAVE_SEMUN
 	un.buf = &buf;
@@ -361,7 +382,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV semaphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 	

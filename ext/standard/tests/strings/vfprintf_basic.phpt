@@ -1,5 +1,7 @@
 --TEST--
 Test vfprintf() function : basic functionality 
+--CREDITS--
+Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
 precision=14
 --FILE--
@@ -26,9 +28,6 @@ echo "*** Testing vfprintf() : basic functionality ***\n";
 $file = 'vfprintf_test.txt';
 $fp = fopen( $file, "a+" );
 
-// Set unicode encoding
-stream_encoding( $fp, 'unicode' );
-
 // Test vfprintf()
 writeAndDump( $fp, "Foo is %d and %s", array( 30, 'bar' ) );
 writeAndDump( $fp, "%s %s %s", array( 'bar', 'bar', 'bar' ) );
@@ -53,20 +52,20 @@ unlink( $file );
 ?>
 --EXPECTF--
 *** Testing vfprintf() : basic functionality ***
-unicode(17) "Foo is 30 and bar"
+string(17) "Foo is 30 and bar"
 int(17)
-unicode(11) "bar bar bar"
+string(11) "bar bar bar"
 int(11)
-unicode(8) "54 digit"
+string(8) "54 digit"
 int(8)
-unicode(3) "1 0"
+string(3) "1 0"
 int(3)
-unicode(5) "A B C"
+string(5) "A B C"
 int(5)
-unicode(35) "1.000000e+3 2.000000E+4 2.000000e+2"
+string(35) "1.000000e+3 2.000000E+4 2.000000e+2"
 int(35)
-unicode(2) "50"
+string(2) "50"
 int(2)
-unicode(35) "Testing 1001 6 2.550200 foobar f 41"
+string(35) "Testing 1001 6 2.550200 foobar f 41"
 int(35)
 ===DONE===

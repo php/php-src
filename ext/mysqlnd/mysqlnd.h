@@ -209,7 +209,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND * const conn, const char * 
 #define mysqlnd_select_db(conn, db, db_len)	(conn)->m->select_db((conn), (db), (db_len) TSRMLS_CC)
 #define mysqlnd_ping(conn)					(conn)->m->ping((conn) TSRMLS_CC)
 #define mysqlnd_kill(conn, pid)				(conn)->m->kill_connection((conn), (pid) TSRMLS_CC)
-#define mysqlnd_refresh(conn, options)		(conn)->m->refresh_server((conn), (options) TSRMLS_CC) 
+#define mysqlnd_refresh(conn, options)		(conn)->m->refresh_server((conn), (options) TSRMLS_CC)
 #define mysqlnd_shutdown(conn, level)		(conn)->m->shutdown_server((conn), (level) TSRMLS_CC)
 #define mysqlnd_get_server_version(conn)	(conn)->m->get_server_version((conn) TSRMLS_CC)
 #define mysqlnd_set_character_set(conn, cs)	(conn)->m->set_charset((conn), (cs) TSRMLS_CC)

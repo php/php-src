@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -167,7 +167,7 @@ PHP_FUNCTION(recode_string)
 	
 	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 error_exit:
 		RETVAL_FALSE;
 	} else {
@@ -219,7 +219,7 @@ PHP_FUNCTION(recode_file)
 	}
 	
 	if (!recode_file_to_file(request, in_fp, out_fp)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 

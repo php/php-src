@@ -35,7 +35,7 @@ $t3->do_show();
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Call show()
 Call show()
 Done

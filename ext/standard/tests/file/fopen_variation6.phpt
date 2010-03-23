@@ -1,7 +1,5 @@
 --TEST--
 Test fopen() function : variation: use include path and stream context relative/absolute file 
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

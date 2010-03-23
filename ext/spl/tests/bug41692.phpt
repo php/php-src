@@ -22,7 +22,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 object(Bar)#%d (2) {
-  [u"foo":u"Bar":private]=>
+  ["foo":"Bar":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -31,7 +31,7 @@ object(Bar)#%d (2) {
     [2]=>
     int(3)
   }
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -42,7 +42,7 @@ object(Bar)#%d (2) {
   }
 }
 object(Bar)#%d (2) {
-  [u"foo":u"Bar":private]=>
+  ["foo":"Bar":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -51,7 +51,7 @@ object(Bar)#%d (2) {
     [2]=>
     int(3)
   }
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)

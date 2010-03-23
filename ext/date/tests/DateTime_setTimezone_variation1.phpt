@@ -197,32 +197,32 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

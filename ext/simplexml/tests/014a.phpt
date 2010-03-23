@@ -4,7 +4,7 @@ SimpleXML: adding/removing attributes (single)
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
    <person name="Joe"></person>
 </people>
@@ -32,16 +32,16 @@ var_dump($people->person[0]['age']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 NULL
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "XXX"
+  string(3) "XXX"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(2) "30"
+  string(2) "30"
 }
 ---Unset:---
 ---Unset?---
@@ -51,6 +51,6 @@ bool(false)
 NULL
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(1) "5"
+  string(1) "5"
 }
 ===DONE===

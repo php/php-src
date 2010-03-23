@@ -34,19 +34,14 @@ list($a, $b, $c) = $a;
 var_dump($a, $b, $c);
 
 ?>
---EXPECT--
-NULL
-NULL
-NULL
+--EXPECTF--
+string(1) "f"
+string(1) "o"
+string(1) "o"
 ----
 NULL
 NULL
 NULL
 ----
-NULL
-NULL
-NULL
-----
-int(1)
-int(2)
-int(3)
+
+Fatal error: Cannot use object of type stdClass as array in %s on line %d

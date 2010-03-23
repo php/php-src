@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -279,7 +279,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 	if (_src_encoding == mbfl_no_encoding_invalid) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", src_encoding);
 		return NULL;
-	}       
+	}	
 
 	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len TSRMLS_CC);
 	if (unicode == NULL)
@@ -291,14 +291,14 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 		case PHP_UNICODE_CASE_UPPER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-						php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
+					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
 			for (i = 0; i < unicode_len; i+=4) {
 				UINT32_TO_BE_ARY(&unicode_ptr[i],
-						php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
+					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 			}
 			break;
 
@@ -320,7 +320,7 @@ MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, s
 					if (res) {
 						mode = 1;
 						UINT32_TO_BE_ARY(&unicode_ptr[i],
-							 php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
+							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i]), _src_encoding TSRMLS_CC));
 					}
 				}
 			}

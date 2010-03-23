@@ -38,8 +38,8 @@ echo "Done";
 Strict Standards: Only variables should be passed by reference in %s on line %d
 
 Strict Standards: Only variables should be passed by reference in %s on line %d
-unicode(4) "zero"
+string(4) "zero"
 
 -- Correct Method: --
-unicode(4) "zero"
+string(4) "zero"
 Done

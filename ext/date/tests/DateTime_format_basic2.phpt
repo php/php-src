@@ -2,7 +2,7 @@
 Test date_format() function : basic functionality  
 --FILE--
 <?php
-/* Prototype  : public unicode DateTime::format  ( unicode $format  )
+/* Prototype  : public string DateTime::format  ( string $format  )
  * Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
@@ -30,15 +30,15 @@ var_dump( $date->format( DateTime::W3C) ) ;
 ===DONE===
 --EXPECT--
 *** Testing date_format() : basic functionality - formatting coinstants ***
-unicode(25) "2005-07-14T22:30:41+01:00"
-unicode(32) "Thursday, 14-Jul-05 22:30:41 BST"
-unicode(24) "2005-07-14T22:30:41+0100"
-unicode(29) "Thu, 14 Jul 05 22:30:41 +0100"
-unicode(32) "Thursday, 14-Jul-05 22:30:41 BST"
-unicode(29) "Thu, 14 Jul 05 22:30:41 +0100"
-unicode(31) "Thu, 14 Jul 2005 22:30:41 +0100"
-unicode(31) "Thu, 14 Jul 2005 22:30:41 +0100"
-unicode(25) "2005-07-14T22:30:41+01:00"
-unicode(31) "Thu, 14 Jul 2005 22:30:41 +0100"
-unicode(25) "2005-07-14T22:30:41+01:00"
+string(25) "2005-07-14T22:30:41+01:00"
+string(32) "Thursday, 14-Jul-05 22:30:41 BST"
+string(24) "2005-07-14T22:30:41+0100"
+string(29) "Thu, 14 Jul 05 22:30:41 +0100"
+string(32) "Thursday, 14-Jul-05 22:30:41 BST"
+string(29) "Thu, 14 Jul 05 22:30:41 +0100"
+string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
+string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
+string(25) "2005-07-14T22:30:41+01:00"
+string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
+string(25) "2005-07-14T22:30:41+01:00"
 ===DONE===

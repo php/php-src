@@ -21,31 +21,31 @@ var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) 
 echo "end\n";
 ?>
 --EXPECTF--
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 array(4) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
-  [u"FOUR"]=>
-  unicode(4) "four"
+  ["FOUR"]=>
+  string(4) "four"
 }
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(4)
 }
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(3)
 }
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(2)
 }
 end

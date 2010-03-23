@@ -19,23 +19,23 @@ var_dump(A::test());
 ?>
 --EXPECT--
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   NULL
-  [u"aa"]=>
+  ["aa"]=>
   NULL
 }
 array(6) {
-  [u"a"]=>
+  ["a"]=>
   NULL
-  [u"aa"]=>
+  ["aa"]=>
   NULL
-  [u"b"]=>
+  ["b"]=>
   NULL
-  [u"bb"]=>
+  ["bb"]=>
   NULL
-  [u"c"]=>
+  ["c"]=>
   NULL
-  [u"cc"]=>
+  ["cc"]=>
   NULL
 }
 NULL

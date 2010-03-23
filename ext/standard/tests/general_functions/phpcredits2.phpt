@@ -16,7 +16,7 @@ var_dump(phpcredits(CREDITS_GROUP));
 
 ?>
 --EXPECTF--
-<!DOCTYPE %s>%a</html>
+<!DOCTYPE %a>%s</html>
 bool(true)
 
 Warning: phpcredits() expects parameter 1 to be long, array given in %sphpcredits2.php on line 4

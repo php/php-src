@@ -90,31 +90,31 @@ array(26) {
   int(%d)
   [12]=>
   int(%d)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(%d)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(%d)
-  [u"gid"]=>
+  ["gid"]=>
   int(%d)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%d)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%d)
 }
 array(26) {
@@ -144,31 +144,31 @@ array(26) {
   int(%d)
   [12]=>
   int(%d)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(%d)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(%d)
-  [u"gid"]=>
+  ["gid"]=>
   int(%d)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%d)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%d)
 }
 
@@ -200,31 +200,31 @@ array(26) {
   int(%d)
   [12]=>
   int(%d)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(%d)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(%d)
-  [u"gid"]=>
+  ["gid"]=>
   int(%d)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%d)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%d)
 }
 array(26) {
@@ -254,31 +254,31 @@ array(26) {
   int(%d)
   [12]=>
   int(%d)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(%d)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(%d)
-  [u"gid"]=>
+  ["gid"]=>
   int(%d)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%d)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%d)
 }
 

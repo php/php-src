@@ -24,6 +24,6 @@ var_dump( gmdate('W', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with ISO-8601 week number of year format --
-unicode(%d) "%d"
-unicode(2) "32"
+string(%d) "%d"
+string(2) "32"
 ===DONE===

@@ -116,7 +116,7 @@ var_dump( reset($string) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing basic operations ***
 -- Iteration 1 --
 int(0)
@@ -225,114 +225,114 @@ array(6) {
 }
 
 -- Iteration 5 --
-unicode(1) "a"
+string(1) "a"
 int(0)
-unicode(1) "b"
-unicode(1) "b"
+string(1) "b"
+string(1) "b"
 int(1)
-unicode(1) "c"
-unicode(1) "c"
+string(1) "c"
+string(1) "c"
 int(2)
-unicode(2) "ab"
-unicode(2) "ab"
+string(2) "ab"
+string(2) "ab"
 int(3)
-unicode(2) "ac"
-unicode(2) "ac"
+string(2) "ac"
+string(2) "ac"
 int(4)
-unicode(2) "ad"
-unicode(2) "ad"
+string(2) "ad"
+string(2) "ad"
 int(5)
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(1) "a"
+string(1) "a"
 int(0)
 array(6) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(2) "ab"
+  string(2) "ab"
   [4]=>
-  unicode(2) "ac"
+  string(2) "ac"
   [5]=>
-  unicode(2) "ad"
+  string(2) "ad"
 }
 
 -- Iteration 6 --
-unicode(5) "apple"
-unicode(1) "a"
-unicode(4) "book"
-unicode(4) "book"
-unicode(1) "b"
-unicode(4) "cook"
-unicode(4) "cook"
-unicode(1) "c"
+string(5) "apple"
+string(1) "a"
+string(4) "book"
+string(4) "book"
+string(1) "b"
+string(4) "cook"
+string(4) "cook"
+string(1) "c"
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(5) "apple"
-unicode(1) "a"
+string(5) "apple"
+string(1) "a"
 array(3) {
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"b"]=>
-  unicode(4) "book"
-  [u"c"]=>
-  unicode(4) "cook"
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(4) "book"
+  ["c"]=>
+  string(4) "cook"
 }
 
 -- Iteration 7 --
-unicode(5) "drink"
-unicode(1) "d"
-unicode(4) "port"
-unicode(4) "port"
-unicode(1) "p"
-unicode(3) "set"
-unicode(3) "set"
-unicode(1) "s"
+string(5) "drink"
+string(1) "d"
+string(4) "port"
+string(4) "port"
+string(1) "p"
+string(3) "set"
+string(3) "set"
+string(1) "s"
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(5) "drink"
-unicode(1) "d"
+string(5) "drink"
+string(1) "d"
 array(3) {
-  [u"d"]=>
-  unicode(5) "drink"
-  [u"p"]=>
-  unicode(4) "port"
-  [u"s"]=>
-  unicode(3) "set"
+  ["d"]=>
+  string(5) "drink"
+  ["p"]=>
+  string(4) "port"
+  ["s"]=>
+  string(3) "set"
 }
 
 -- Iteration 8 --
-unicode(3) "One"
+string(3) "One"
 int(1)
-unicode(3) "two"
-unicode(3) "two"
+string(3) "two"
+string(3) "two"
 int(2)
-unicode(5) "three"
-unicode(5) "three"
+string(5) "three"
+string(5) "three"
 int(3)
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(3) "One"
+string(3) "One"
 int(1)
 array(3) {
   [1]=>
-  unicode(3) "One"
+  string(3) "One"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 
 
@@ -347,17 +347,17 @@ array(0) {
 }
 
 -- Iteration 2 --
-unicode(0) ""
+string(0) ""
 int(0)
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(0) ""
+string(0) ""
 int(0)
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 3 --
@@ -397,8 +397,8 @@ int(1)
 NULL
 NULL
 int(2)
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 int(3)
 int(1)
 int(1)
@@ -417,43 +417,43 @@ array(5) {
   [2]=>
   NULL
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
   int(1)
 }
 
 -- Iteration 6 --
-unicode(4) "test"
+string(4) "test"
 int(-1)
-unicode(4) "rest"
-unicode(4) "rest"
+string(4) "rest"
+string(4) "rest"
 int(-2)
-unicode(3) "two"
-unicode(3) "two"
+string(3) "two"
+string(3) "two"
 int(2)
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
-unicode(4) "zero"
-unicode(4) "zero"
+string(0) ""
+string(0) ""
+string(0) ""
+string(4) "zero"
+string(4) "zero"
 int(0)
 bool(false)
 bool(false)
 NULL
 bool(false)
-unicode(4) "test"
+string(4) "test"
 int(-1)
 array(5) {
   [-1]=>
-  unicode(4) "test"
+  string(4) "test"
   [-2]=>
-  unicode(4) "rest"
+  string(4) "rest"
   [2]=>
-  unicode(3) "two"
-  [u""]=>
-  unicode(0) ""
+  string(3) "two"
+  [""]=>
+  string(0) ""
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 
 
@@ -503,7 +503,7 @@ NULL
 Warning: key() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
-Warning: key() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: current() expects parameter 1 to be array, integer given in %s on line %d
@@ -512,7 +512,7 @@ NULL
 Warning: current() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
-Warning: current() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: current() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: next() expects parameter 1 to be array, integer given in %s on line %d
@@ -521,7 +521,7 @@ NULL
 Warning: next() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
-Warning: next() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: next() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
@@ -530,6 +530,6 @@ NULL
 Warning: reset() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 Done

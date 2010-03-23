@@ -34,6 +34,6 @@ var_dump($result == $dom->saveXML());
 
 unlink($filename);
 
---EXPECT--
+--EXPECTF--
 int(151)
 bool(true)

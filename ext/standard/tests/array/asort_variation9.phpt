@@ -1,5 +1,5 @@
 --TEST--
-Test asort() function : usage variations - sorting array with/without keys, 'sort_flags' as default/SORT_REGULAR 
+Test asort() function : usage variations - sorting arrays with/without keys, 'sort_flags' as default/SORT_REGULAR  
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
@@ -49,7 +49,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying various arrays with key values --
@@ -88,22 +88,22 @@ array(5) {
 - With default sort_flag -
 bool(true)
 array(3) {
-  [u"c"]=>
-  unicode(5) "apple"
+  ["c"]=>
+  string(5) "apple"
   [0]=>
-  unicode(6) "banana"
-  [u"a"]=>
-  unicode(6) "orange"
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
-  [u"c"]=>
-  unicode(5) "apple"
+  ["c"]=>
+  string(5) "apple"
   [0]=>
-  unicode(6) "banana"
-  [u"a"]=>
-  unicode(6) "orange"
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
 }
 
 -- Iteration 3 --
@@ -145,21 +145,21 @@ array(6) {
 bool(true)
 array(3) {
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [6]=>
-  unicode(5) "third"
+  string(5) "third"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [6]=>
-  unicode(5) "third"
+  string(5) "third"
 }
 
 -- Iteration 5 --
@@ -200,17 +200,17 @@ array(6) {
 - With default sort_flag -
 bool(true)
 array(2) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"foo"]=>
+  ["bar"]=>
+  string(3) "baz"
+  ["foo"]=>
   int(1)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(2) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"foo"]=>
+  ["bar"]=>
+  string(3) "baz"
+  ["foo"]=>
   int(1)
 }
 
@@ -218,40 +218,40 @@ array(2) {
 - With default sort_flag -
 bool(true)
 array(4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
 }

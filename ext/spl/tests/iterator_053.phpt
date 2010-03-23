@@ -168,12 +168,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "0"
+    string(1) "0"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "0"
+    string(1) "0"
   }
 }
 bool(true)
@@ -182,12 +182,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
 }
 bool(true)
@@ -196,12 +196,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "2"
+    string(1) "2"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "2"
+    string(1) "2"
   }
 }
 bool(true)
@@ -210,12 +210,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "3"
+    string(1) "3"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "3"
+    string(1) "3"
   }
 }
 bool(true)
@@ -224,12 +224,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "4"
+    string(1) "4"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "4"
+    string(1) "4"
   }
 }
 bool(true)
@@ -238,12 +238,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "5"
+    string(1) "5"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "5"
+    string(1) "5"
   }
 }
 bool(true)
@@ -252,12 +252,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "6"
+    string(1) "6"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "6"
+    string(1) "6"
   }
 }
 bool(true)
@@ -266,12 +266,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "7"
+    string(1) "7"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "7"
+    string(1) "7"
   }
 }
 bool(true)
@@ -280,36 +280,36 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "8"
+    string(1) "8"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "8"
+    string(1) "8"
   }
 }
 object(ArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(9) {
     [0]=>
-    unicode(1) "1"
+    %s(1) "1"
     [1]=>
-    unicode(3) "1,2"
+    %s(3) "1,2"
     [2]=>
-    unicode(5) "1,2,3"
+    %s(5) "1,2,3"
     [3]=>
-    unicode(0) ""
+    %s(0) ""
     [4]=>
     NULL
     [5]=>
     array(0) {
     }
     [6]=>
-    unicode(6) "FooBar"
+    %s(6) "FooBar"
     [7]=>
-    unicode(1) ","
+    %s(1) ","
     [8]=>
-    unicode(2) ",,"
+    %s(2) ",,"
   }
 }
 ===DONE===

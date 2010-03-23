@@ -3,6 +3,7 @@ SOAP Interop Round2 base 012 (php/wsdl): echoFloat
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
+precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php

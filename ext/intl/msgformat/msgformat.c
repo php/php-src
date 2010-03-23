@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,24 +23,24 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "intl_data.h"
+#include "intl_convert.h"
 
 /* {{{ */
 static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	char*       locale;
-	int         locale_len = 0;
+	char*       pattern;
+	int         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	zval*       object;
-	int free_pattern = 0;
 	MessageFormatter_object* mfo;
-
 	intl_error_reset( NULL TSRMLS_CC );
+
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "su",
-		&locale, &locale_len, &spattern, &spattern_len ) == FAILURE )
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"msgfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
@@ -52,20 +52,29 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	/* Convert pattern (if specified) to UTF-16. */
-	if(locale_len == 0) {
-		locale = UG(default_locale);
+	if(pattern && pattern_len) {
+		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
+		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to UTF-16");
+	} else {
+		spattern_len = 0;
+		spattern = NULL;
 	}
 
-	(mfo)->mf_data.orig_format = eustrndup(spattern, spattern_len);
-	(mfo)->mf_data.orig_format_len = spattern_len;
-	
-	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo), &free_pattern) != SUCCESS) {
+	if(locale_len == 0) {
+		locale = INTL_G(default_locale);
+	}
+
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
 	}
 
+	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
+	(mfo)->mf_data.orig_format_len = pattern_len;
+	
 	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(mfo));
-	if(free_pattern) {
+
+	if(spattern) {
 		efree(spattern);
 	}
 

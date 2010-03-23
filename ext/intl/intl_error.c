@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ static void intl_free_custom_error_msg( intl_error* err TSRMLS_DC )
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
 		return;
 
-	if( err->free_custom_error_message ) {
+	if(err->free_custom_error_message ) {
 		efree( err->custom_error_message );
 	}
 

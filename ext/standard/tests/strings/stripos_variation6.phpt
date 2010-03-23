@@ -7,7 +7,9 @@ Test stripos() function : usage variations - heredoc string containing quotes fo
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing heredoc string containing quotes for 'haystack' */
+/* Test stripos() function by passing heredoc string containing quotes for haystack 
+ *  and with various needles & offsets
+*/
 
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing quote & slash chars --\n";
@@ -23,7 +25,7 @@ var_dump( stripos($quote_char_str, 'things', 0) );
 var_dump( stripos($quote_char_str, "things", 20) );
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing quote & slash chars --
 int(88)

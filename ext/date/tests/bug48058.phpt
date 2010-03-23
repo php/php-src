@@ -15,15 +15,15 @@ echo date_format( $dt, DATE_ISO8601 );
 ?>
 --EXPECTF--
 array(5) {
-  [u"ts"]=>
+  ["ts"]=>
   int(-%d)
-  [u"time"]=>
-  unicode(%d) "%s"
-  [u"offset"]=>
+  ["time"]=>
+  string(%d) "%s"
+  ["offset"]=>
   int(3600)
-  [u"isdst"]=>
+  ["isdst"]=>
   bool(true)
-  [u"abbr"]=>
-  unicode(3) "BST"
+  ["abbr"]=>
+  string(3) "BST"
 }
 10000002008-02-28T12:00:00+0000

@@ -12,6 +12,7 @@ $h->insert(4);
 $h->rewind();
 echo "count(\$h) = ".count($h)."\n";
 echo "\$h->count() = ".$h->count()."\n";
+
 while ($h->valid()) {
     $k = $h->key();
     $v = $h->current();

@@ -177,12 +177,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -190,17 +190,17 @@ int(1)
 
 -- Iteration 19 --
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

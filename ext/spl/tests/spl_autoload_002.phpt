@@ -45,26 +45,26 @@ var_dump(spl_autoload_functions());
 bool(false)
 array(1) {
   [0]=>
-  unicode(12) "spl_autoload"
+  string(12) "spl_autoload"
 }
 array(3) {
   [0]=>
-  unicode(12) "spl_autoload"
+  string(12) "spl_autoload"
   [1]=>
-  unicode(16) "SplAutoloadTest1"
+  string(16) "SplAutoloadTest1"
   [2]=>
-  unicode(16) "SplAutoloadTest2"
+  string(16) "SplAutoloadTest2"
 }
 array(2) {
   [0]=>
-  unicode(12) "spl_autoload"
+  string(12) "spl_autoload"
   [1]=>
-  unicode(16) "SplAutoloadTest2"
+  string(16) "SplAutoloadTest2"
 }
 bool(false)
 array(1) {
   [0]=>
-  unicode(12) "spl_autoload"
+  string(12) "spl_autoload"
 }
 bool(false)
 ===DONE===

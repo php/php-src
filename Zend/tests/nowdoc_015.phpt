@@ -49,22 +49,22 @@ echo "ok\n";
 ?>
 --EXPECT--
 6
-unicode(0) ""
+string(0) ""
 10
-unicode(0) ""
+string(0) ""
 14
-unicode(4) "test"
+string(4) "test"
 19
-unicode(4) "test"
+string(4) "test"
 24
-unicode(20) "test1
+string(20) "test1
 test2
 
 test3
 
 "
 34
-unicode(20) "test1
+string(20) "test1
 test2
 
 test3

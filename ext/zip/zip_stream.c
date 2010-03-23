@@ -48,7 +48,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 			self->cursor += n;
 		}
 	}
-	return n<1 ? 0 : n;
+	return (n < 1 ? 0 : n);
 }
 /* }}} */
 
@@ -72,6 +72,7 @@ static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
 			zip_fclose(self->zf);
 			self->zf = NULL;
 		}
+
 		if (self->za) {
 			zip_close(self->za);
 			self->za = NULL;

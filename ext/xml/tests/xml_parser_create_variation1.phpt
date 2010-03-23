@@ -152,27 +152,27 @@ bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 Arg value Array 
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 Arg value  
@@ -234,7 +234,7 @@ bool(false)
 
 Arg value Resource id %s
 
-Warning: xml_parser_create() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: xml_parser_create() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 
 Arg value  
@@ -243,4 +243,3 @@ resource(%d) of type (xml)
 Arg value  
 resource(%d) of type (xml)
 Done
-

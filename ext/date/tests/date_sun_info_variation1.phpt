@@ -83,342 +83,342 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 2 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 3 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 4 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(-69665)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(-33260)
-  [u"transit"]=>
+  ["transit"]=>
   int(-51462)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(-71269)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(-31655)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(-73092)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(-29832)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(-74874)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(-28050)
 }
 
 -- Iteration 5 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 6 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(-69665)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(-33260)
-  [u"transit"]=>
+  ["transit"]=>
   int(-51462)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(-71269)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(-31655)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(-73092)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(-29832)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(-74874)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(-28050)
 }
 
 -- Iteration 7 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1226363)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1263468)
-  [u"transit"]=>
+  ["transit"]=>
   int(1244916)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1224788)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1265044)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1222993)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1266839)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1221233)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1268599)
 }
 
 -- Iteration 8 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 9 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 10 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 11 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 12 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 13 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 14 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 15 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
@@ -428,60 +428,60 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 
 -- Iteration 23 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(16748)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(53182)
-  [u"transit"]=>
+  ["transit"]=>
   int(34965)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(15145)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(54786)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(13324)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(56607)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(11542)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(58389)
 }
 

@@ -41,42 +41,42 @@ foreach($inputs as $key =>$value) {
 *** Testing gmdate() : usage variation ***
 
 --DATE_ATOM Constant--
-unicode(25) "2008-08-08T08:08:08+00:00"
-unicode(%d) "%s"
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
 
 --DATE_COOKIE Constant--
-unicode(30) "Friday, 08-Aug-08 08:08:08 GMT"
-unicode(%d) "%s"
+string(30) "Friday, 08-Aug-08 08:08:08 GMT"
+string(%d) "%s"
 
 --DATE_RFC822 Constant--
-unicode(29) "Fri, 08 Aug 08 08:08:08 +0000"
-unicode(%d) "%s"
+string(29) "Fri, 08 Aug 08 08:08:08 +0000"
+string(%d) "%s"
 
 --DATE_RFC850 Constant--
-unicode(30) "Friday, 08-Aug-08 08:08:08 GMT"
-unicode(%d) "%s"
+string(30) "Friday, 08-Aug-08 08:08:08 GMT"
+string(%d) "%s"
 
 --DATE_RFC1036 Constant--
-unicode(29) "Fri, 08 Aug 08 08:08:08 +0000"
-unicode(%d) "%s"
+string(29) "Fri, 08 Aug 08 08:08:08 +0000"
+string(%d) "%s"
 
 --DATE_RFC1123 Constant--
-unicode(31) "Fri, 08 Aug 2008 08:08:08 +0000"
-unicode(%d) "%s"
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
 
 --DATE_RFC2822 Constant--
-unicode(31) "Fri, 08 Aug 2008 08:08:08 +0000"
-unicode(%d) "%s"
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
 
 --DATE_RFC3339 Constant--
-unicode(25) "2008-08-08T08:08:08+00:00"
-unicode(%d) "%s"
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
 
 --DATE_RSS Constant--
-unicode(31) "Fri, 08 Aug 2008 08:08:08 +0000"
-unicode(%d) "%s"
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
 
 --DATE_W3C Constant--
-unicode(25) "2008-08-08T08:08:08+00:00"
-unicode(%d) "%s"
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
 ===DONE===

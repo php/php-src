@@ -92,28 +92,28 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : object functionality ***
 bool(true)
 array(4) {
   [1]=>
   object(SimpleClass1)#2 (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(1)
   }
   [0]=>
   object(SimpleClass1)#1 (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(10)
   }
   [3]=>
   object(SimpleClass1)#4 (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(50)
   }
   [2]=>
   object(SimpleClass1)#3 (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(100)
   }
 }
@@ -121,30 +121,30 @@ bool(true)
 array(3) {
   [0]=>
   object(SimpleClass2)#5 (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(2)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(3.4)
-    [u"string_value"]=>
-    unicode(5) "mango"
+    ["string_value"]=>
+    string(5) "mango"
   }
   [2]=>
   object(SimpleClass2)#7 (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(5)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(2.5)
-    [u"string_value"]=>
-    unicode(6) "orange"
+    ["string_value"]=>
+    string(6) "orange"
   }
   [1]=>
   object(SimpleClass2)#6 (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(10)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(1.2)
-    [u"string_value"]=>
-    unicode(5) "apple"
+    ["string_value"]=>
+    string(5) "apple"
   }
 }
 Done

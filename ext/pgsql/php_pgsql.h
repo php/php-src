@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -271,8 +271,8 @@ typedef struct _php_pgsql_result_handle {
 } pgsql_result_handle;
 
 typedef struct _php_pgsql_notice {
-	UChar *message;
-	int len;
+	char *message;
+	size_t len;
 } php_pgsql_notice;
 
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)

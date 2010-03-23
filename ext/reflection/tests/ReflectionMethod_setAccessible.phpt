@@ -93,14 +93,14 @@ $protectedStatic->invoke(NULL, NULL);
 $protectedStatic->invokeArgs(NULL, array(NULL));
 ?>
 --EXPECT--
-unicode(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
-unicode(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
-unicode(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
-unicode(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
-unicode(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
-unicode(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
-unicode(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
-unicode(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
+string(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
+string(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
+string(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
+string(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
+string(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
+string(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
+string(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
+string(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
 A::aPrivate
 A::aPrivate
 A::aPrivateStatic

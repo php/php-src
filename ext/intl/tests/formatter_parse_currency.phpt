@@ -12,7 +12,7 @@ numfmt_parse_currency()
 function ut_main()
 {
     $res_str = '';
-    
+
     $fmt = ut_nfmt_create( "en_US", NumberFormatter::CURRENCY );
     $pos = 0;
     $currency = '';

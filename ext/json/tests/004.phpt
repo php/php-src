@@ -13,11 +13,11 @@ var_dump(json_encode($a));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 object(stdClass)#%d (1) {
-  [u"prop"]=>
+  ["prop"]=>
   object(stdClass)#%d (1) {
-    [u"prop"]=>
+    ["prop"]=>
     *RECURSION*
   }
 }

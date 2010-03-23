@@ -76,16 +76,16 @@ test data
 Test 2 - implicit statement close
 test data
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 
 Test 3 - no preallocated descriptor
 test data
 array(1) {
-  [u"C1"]=>
+  ["C1"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

@@ -108,24 +108,24 @@ array(0) {
 -- Iteration 5 --
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iteration 6 --
 array(2) {
   [4]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 array(2) {
   [4]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iteration 7 --
 array(0) {
@@ -134,27 +134,27 @@ array(0) {
 }
 -- Iteration 8 --
 array(2) {
-  [u"	Hello"]=>
+  ["	Hello"]=>
   int(111)
-  [u"pen
+  ["pen
 "]=>
   int(33)
 }
 array(2) {
-  [u"	Hello"]=>
+  ["	Hello"]=>
   int(111)
-  [u"pen
+  ["pen
 "]=>
   int(33)
 }
 -- Iteration 9 --
 array(1) {
-  [u"Hello world"]=>
-  unicode(6) "string"
+  ["Hello world"]=>
+  string(6) "string"
 }
 array(1) {
-  [u"Hello world"]=>
-  unicode(6) "string"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 10 --
 array(0) {
@@ -164,10 +164,10 @@ array(0) {
 -- Iteration 11 --
 array(1) {
   [133]=>
-  unicode(3) "int"
+  string(3) "int"
 }
 array(1) {
   [133]=>
-  unicode(3) "int"
+  string(3) "int"
 }
 Done

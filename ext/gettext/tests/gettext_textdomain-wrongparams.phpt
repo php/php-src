@@ -10,10 +10,7 @@ Check how textdomain() with wrong parameters behaves.
 	}
 ?>
 --FILE--
-<?php
-
-// Using deprectated setlocale() in PHP6. The test needs to be changed
-// when there is an alternative available.
+<?php // $Id$
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
@@ -22,9 +19,7 @@ textdomain (array());
 
 ?>
 --EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s.php on line %d
-
-Warning: textdomain() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+Warning: textdomain() expects parameter 1 to be string, array given in %s on line 6
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

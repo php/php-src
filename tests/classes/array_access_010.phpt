@@ -98,121 +98,71 @@ var_dump($people[0]['name']);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-unicode(3) "Foo"
-unicode(6) "FooBar"
-unicode(9) "FooBarBaz"
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
 ===ArrayOverloading===
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
 object(ArrayReferenceProxy)#%d (2) {
-  [u"object":u"ArrayReferenceProxy":private]=>
+  ["object":"ArrayReferenceProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     array(1) {
       [0]=>
       &array(1) {
-        [u"name"]=>
-        unicode(3) "Foo"
+        ["name"]=>
+        string(3) "Foo"
       }
     }
   }
-  [u"element":u"ArrayReferenceProxy":private]=>
+  ["element":"ArrayReferenceProxy":private]=>
   &array(1) {
-    [u"name"]=>
-    unicode(3) "Foo"
+    ["name"]=>
+    string(3) "Foo"
   }
 }
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-unicode(3) "Foo"
-
-Notice: Array to string conversion in %s on line %d
+string(3) "Foo"
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetSet(Array, name, FooBar)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-unicode(6) "FooBar"
-
-Notice: Array to string conversion in %s on line %d
+string(6) "FooBar"
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetSet(Array, name, FooBarBar)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-unicode(9) "FooBarBar"
-
-Notice: Array to string conversion in %s on line %d
+string(9) "FooBarBar"
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetSet(Array, name, FooBarBarBaz)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-unicode(12) "FooBarBarBaz"
-
-Notice: Array to string conversion in %s on line %d
+string(12) "FooBarBarBaz"
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetUnset(Array, name)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
 object(ArrayReferenceProxy)#%d (2) {
-  [u"object":u"ArrayReferenceProxy":private]=>
+  ["object":"ArrayReferenceProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     array(1) {
       [0]=>
       &array(0) {
       }
     }
   }
-  [u"element":u"ArrayReferenceProxy":private]=>
+  ["element":"ArrayReferenceProxy":private]=>
   &array(0) {
   }
 }
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
 NULL
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetSet(Array, name, BlaBla)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-
-Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::offsetGet(Array, name)
-unicode(6) "BlaBla"
+string(6) "BlaBla"
 ===DONE===

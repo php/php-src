@@ -25,5 +25,6 @@ array(3) {
   [1]=>
   bool(false)
   [2]=>
-  unicode(1) "f"
+  string(1) "f"
 }
+

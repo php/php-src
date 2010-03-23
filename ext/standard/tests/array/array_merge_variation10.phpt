@@ -35,29 +35,29 @@ echo key($arr3) . " => " . current ($arr3) . "\n";
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_merge() : usage variations ***
 
 -- Call array_merge() --
 array(9) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [4]=>
-  unicode(2) "un"
+  string(2) "un"
   [5]=>
-  unicode(4) "deux"
+  string(4) "deux"
   [6]=>
-  unicode(4) "null"
+  string(4) "null"
   [7]=>
-  unicode(4) "eins"
+  string(4) "eins"
   [8]=>
-  unicode(4) "zwei"
+  string(4) "zwei"
 }
 
 -- Position of Internal Pointer in Result: --

@@ -24,9 +24,9 @@ var_dump(__namespace__);
 ?>
 --EXPECTF--
 string(%d) "%s"
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 int(%d)
-%string|unicode%(21) "test\foo::__construct"
-%string|unicode%(8) "test\foo"
-%string|unicode%(11) "__construct"
-%string|unicode%(4) "test"
+string(21) "test\foo::__construct"
+string(8) "test\foo"
+string(11) "__construct"
+string(4) "test"

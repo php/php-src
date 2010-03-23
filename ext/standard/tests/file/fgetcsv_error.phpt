@@ -3,7 +3,7 @@ Test fgetcsv() function : error conditions
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure, string $escape]]] );
+ Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure [, string $escape]]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
 
@@ -18,8 +18,8 @@ $fp = fopen(__FILE__, "r");
 $len = 1024;
 $delim = ";";
 $enclosure ="\"";
-$escape = "\\";
-var_dump( fgetcsv($fp, $len, $delim, $enclosure, $escape, $len ) );
+$escape = '"';
+var_dump( fgetcsv($fp, $len, $delim, $enclosure, $escape, $fp) );
 fclose($fp);
 
 // test invalid arguments : non-resources
@@ -53,10 +53,10 @@ NULL
 -- Testing fgetcsv() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetcsv() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fgetcsv() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Warning: fgetcsv() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fgetcsv() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 -- Iteration 2 --
 

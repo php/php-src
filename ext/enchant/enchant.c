@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -587,7 +587,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(pwl TSRMLS_CC)) {
+	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 

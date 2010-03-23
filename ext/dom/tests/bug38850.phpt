@@ -1,10 +1,10 @@
 --TEST--
-Bug # 38850 (lookupNamespaceURI does not return default namespace)
+Bug #38850 (lookupNamespaceURI does not return default namespace)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$xml = b<<<HERE
+$xml = <<<HERE
 <?xml version="1.0" ?>
 <foo xmlns="http://www.example.com/ns/foo" />
 HERE;

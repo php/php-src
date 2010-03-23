@@ -108,67 +108,67 @@ Notice: Undefined variable: unset_var in %s on line %d
 
 --- Testing strtok() by supplying different values for 'token' argument ---
 -- Iteration 1 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 2 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 3 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 4 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 5 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 6 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 7 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 8 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 9 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 10 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 16 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 17 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 18 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 19 --
-unicode(4) "his "
+string(4) "his "
 -- Iteration 20 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 21 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 22 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 23 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 24 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 25 --
-unicode(37) "this testcase test strtok() function "
+string(37) "this testcase test strtok() function "
 -- Iteration 26 --
 
-Warning: strtok() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtok() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 Done

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -89,17 +89,9 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	streamp = &(data->strm);
 
 	while (buckets_in->head) {
-		int bin = 0;
-		size_t desired;
+		size_t bin = 0, desired;
 
-		bucket = buckets_in->head;
-
-		if (bucket->buf_type == IS_UNICODE) {
-			/* decompression not allowed for unicode data */
-			return PSFS_ERR_FATAL;
-		}
-
-		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 		while (bin < bucket->buflen) {
 			if (data->status == PHP_BZ2_UNITIALIZED) {
 				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
@@ -120,7 +112,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf.s + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = BZ2_bzDecompress(&(data->strm));
@@ -203,8 +195,7 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_filter,
 	php_bz2_decompress_dtor,
-	"bzip2.decompress",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"bzip2.decompress"
 };
 /* }}} */
 
@@ -235,24 +226,16 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	streamp = &(data->strm);
 
 	while (buckets_in->head) {
-		int bin = 0;
-		size_t desired;
+		size_t bin = 0, desired;
 
-		bucket = buckets_in->head;
-
-		if (bucket->buf_type == IS_UNICODE) {
-			/* compression not allowed for unicode data */
-			return PSFS_ERR_FATAL;
-		}
-
-		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 
 		while (bin < bucket->buflen) {
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf.s + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = BZ2_bzCompress(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? BZ_FINISH : (flags & PSFS_FLAG_FLUSH_INC ? BZ_FLUSH : BZ_RUN));
@@ -318,8 +301,7 @@ static void php_bz2_compress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops php_bz2_compress_ops = {
 	php_bz2_compress_filter,
 	php_bz2_compress_dtor,
-	"bzip2.compress",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"bzip2.compress"
 };
 
 /* }}} */

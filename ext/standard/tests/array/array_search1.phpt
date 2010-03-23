@@ -18,7 +18,7 @@ var_dump(array_search(-1,$a, true));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
@@ -29,7 +29,7 @@ bool(false)
 int(1)
 int(1)
 int(2)
-unicode(1) "c"
+string(1) "c"
 int(1)
 bool(false)
 Done

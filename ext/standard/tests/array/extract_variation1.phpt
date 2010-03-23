@@ -17,11 +17,11 @@ debug_zval_dump($str);
 echo "\nDone";
 ?>
 
---EXPECT--
+--EXPECTF--
 long(4) refcount(2)
-unicode(4) "John" { 004a 006f 0068 006e } refcount(2)
-int(10)
+string(4) "John" refcount(2)
+int(%d)
 long(4) refcount(2)
-unicode(4) "John" { 004a 006f 0068 006e } refcount(2)
+string(4) "John" refcount(2)
 
 Done

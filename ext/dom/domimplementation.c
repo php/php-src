@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -64,7 +64,7 @@ const zend_function_entry php_dom_domimplementation_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version)
+/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since: 
 */
@@ -85,7 +85,7 @@ PHP_METHOD(domimplementation, hasFeature)
 }
 /* }}} end dom_domimplementation_has_feature */
 
-/* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId) U
+/* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
@@ -98,7 +98,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&", &name, &name_len, UG(utf8_conv), &publicid, &publicid_len, UG(utf8_conv), &systemid, &systemid_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
 		return;
 	}
 
@@ -145,7 +145,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 }
 /* }}} end dom_domimplementation_create_document_type */
 
-/* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype) U
+/* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
@@ -161,7 +161,7 @@ PHP_METHOD(domimplementation, createDocument)
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&O", &uri, &uri_len, UG(utf8_conv), &name, &name_len, UG(utf8_conv), &node, dom_documenttype_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -247,7 +247,7 @@ PHP_METHOD(domimplementation, createDocument)
 }
 /* }}} end dom_domimplementation_create_document */
 
-/* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version) U
+/* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */

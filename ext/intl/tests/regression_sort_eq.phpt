@@ -16,7 +16,7 @@ function sort_using_locale( $locale, $test_array )
     ut_coll_sort( $coll, $test_array );
 
     // And return the sorted array.
-    return dump_array( $test_array ) . "\n";
+    return dump( $test_array ) . "\n";
 }
 
 function ut_main()

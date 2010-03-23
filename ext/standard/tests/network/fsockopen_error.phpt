@@ -53,7 +53,7 @@ echo "Done";
 
 Warning: fsockopen() expects at most 5 parameters, 6 given in %s on line %d
 bool(false)
-unicode(10) "string_val"
+string(10) "string_val"
 int(10)
 
 -- Testing fsockopen() function with less than expected no. of arguments --
@@ -65,11 +65,11 @@ bool(false)
 
 Warning: fsockopen(): unable to connect to tcp://127.0.0.1:31337 (%a) in %s on line %d
 bool(false)
-unicode(%d) "%a"
+string(%d) "%a"
 
 -- Attempting to connect using an invalid protocol --
 
 Warning: fsockopen(): unable to connect to invalid://127.0.0.1:31337 (Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?) in %s on line %d
 bool(false)
-unicode(100) "Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?"
+string(100) "Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?"
 Done

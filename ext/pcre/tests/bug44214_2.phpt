@@ -16,10 +16,10 @@ var_dump(preg_replace_callback( '`a+`', 'myCallBack', $string));
 var_dump($array);
 ?>
 --EXPECT--
-unicode(31) "xxx bbb ccc ddd eee ccc xxx bbb"
+string(31) "xxx bbb ccc ddd eee ccc xxx bbb"
 array(2) {
   [0]=>
-  unicode(3) "aaa"
+  string(3) "aaa"
   [1]=>
-  unicode(3) "aaa"
+  string(3) "aaa"
 }

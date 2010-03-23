@@ -18,3 +18,4 @@ echo "$a\n";
 ?>
 --EXPECT--
 ok
+

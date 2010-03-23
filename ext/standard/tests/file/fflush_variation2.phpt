@@ -65,7 +65,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fflush(): with soft links to files opened in diff modes ***
 -- Iteration 1 with file containing empty data --
 -- link opened in w mode --
@@ -440,3 +440,4 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(60)
 
 *** Done ***
+

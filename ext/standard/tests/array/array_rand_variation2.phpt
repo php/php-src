@@ -179,22 +179,22 @@ NULL
 
 -- Iteration 16 --
 
-Warning: array_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
@@ -212,3 +212,4 @@ NULL
 Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
 NULL
 Done
+

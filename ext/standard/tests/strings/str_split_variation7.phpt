@@ -1,5 +1,5 @@
 --TEST--
-Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'(Bug#42866)
+Test str_split() function : usage variations - different integer values for 'split_length' with heredoc 'str'
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -52,65 +52,65 @@ bool(false)
 -- Iteration 2 --
 array(30) {
   [0]=>
-  unicode(1) "s"
+  string(1) "s"
   [1]=>
-  unicode(1) "t"
+  string(1) "t"
   [2]=>
-  unicode(1) "r"
+  string(1) "r"
   [3]=>
-  unicode(1) "i"
+  string(1) "i"
   [4]=>
-  unicode(1) "n"
+  string(1) "n"
   [5]=>
-  unicode(1) "g"
+  string(1) "g"
   [6]=>
-  unicode(1) " "
+  string(1) " "
   [7]=>
-  unicode(1) "w"
+  string(1) "w"
   [8]=>
-  unicode(1) "i"
+  string(1) "i"
   [9]=>
-  unicode(1) "t"
+  string(1) "t"
   [10]=>
-  unicode(1) "h"
+  string(1) "h"
   [11]=>
-  unicode(1) " "
+  string(1) " "
   [12]=>
-  unicode(1) "1"
+  string(1) "1"
   [13]=>
-  unicode(1) "2"
+  string(1) "2"
   [14]=>
-  unicode(1) "3"
+  string(1) "3"
   [15]=>
-  unicode(1) ","
+  string(1) ","
   [16]=>
-  unicode(1) "e"
+  string(1) "e"
   [17]=>
-  unicode(1) "s"
+  string(1) "s"
   [18]=>
-  unicode(1) "c"
+  string(1) "c"
   [19]=>
-  unicode(1) "a"
+  string(1) "a"
   [20]=>
-  unicode(1) "p"
+  string(1) "p"
   [21]=>
-  unicode(1) "e"
+  string(1) "e"
   [22]=>
-  unicode(1) " "
+  string(1) " "
   [23]=>
-  unicode(1) "c"
+  string(1) "c"
   [24]=>
-  unicode(1) "h"
+  string(1) "h"
   [25]=>
-  unicode(1) "a"
+  string(1) "a"
   [26]=>
-  unicode(1) "r"
+  string(1) "r"
   [27]=>
-  unicode(1) " "
+  string(1) " "
   [28]=>
-  unicode(1) "	"
+  string(1) "	"
   [29]=>
-  unicode(1) "."
+  string(1) "."
 }
 -- Iteration 3 --
 
@@ -119,19 +119,19 @@ bool(false)
 -- Iteration 4 --
 array(1) {
   [0]=>
-  unicode(30) "string with 123,escape char 	."
+  string(30) "string with 123,escape char 	."
 }
 -- Iteration 5 --
 array(2) {
   [0]=>
-  unicode(26) "string with 123,escape cha"
+  string(26) "string with 123,escape cha"
   [1]=>
-  unicode(4) "r 	."
+  string(4) "r 	."
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  unicode(30) "string with 123,escape char 	."
+  string(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
 

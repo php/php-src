@@ -117,7 +117,7 @@ array(3) {
   [1]=>
   int(42)
   [3]=>
-  unicode(6) "FooBar"
+  string(6) "FooBar"
 }
 MyCachingIterator::testUnset()
 unset(0)
@@ -127,7 +127,7 @@ array(2) {
   [1]=>
   int(42)
   [3]=>
-  unicode(6) "FooBar"
+  string(6) "FooBar"
 }
 MyCachingIterator::fill()
 MyCachingIterator::show()
@@ -154,7 +154,7 @@ array(4) {
   [2]=>
   int(2)
   [3]=>
-  unicode(6) "FooBar"
+  string(6) "FooBar"
 }
 MyCachingIterator::testUnset()
 unset(0)
@@ -164,6 +164,6 @@ array(2) {
   [1]=>
   int(42)
   [3]=>
-  unicode(6) "FooBar"
+  string(6) "FooBar"
 }
 ===DONE===

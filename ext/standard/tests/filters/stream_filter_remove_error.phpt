@@ -64,7 +64,7 @@ bool(false)
 
 -- Testing stream_filter_remove() function with unexisting stream filter --
 
-Warning: stream_filter_remove() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: stream_filter_remove() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 -- Testing stream_filter_remove() function with bad resource --

@@ -28,9 +28,9 @@ var_dump( array_uintersect_assoc($arr1, $arr2, $arr3, $arr4, $data_compare_funct
 --EXPECTF--
 *** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***
 array(2) {
-  [u"one"]=>
-  unicode(3) "one"
+  ["one"]=>
+  string(3) "one"
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ===DONE===

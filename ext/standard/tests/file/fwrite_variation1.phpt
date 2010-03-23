@@ -54,14 +54,14 @@ foreach($file_content_types as $file_content_type) {
         filesize & by displaying the content */
 
     var_dump( ftell($file_handle) );  // expected: 0
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written )); 
+    var_dump( fwrite($file_handle, $data_to_be_written )); 
     var_dump( ftell($file_handle) );  // expected: 0
     var_dump( feof($file_handle) );  // expected: false 
   
     // move the file pointer to end of the file and try fwrite()
     fseek($file_handle, SEEK_END, 0);
     var_dump( ftell($file_handle) );  // expecting 1024
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written) ); // fwrite to fail
+    var_dump( fwrite($file_handle, $data_to_be_written) ); // fwrite to fail
     var_dump( ftell($file_handle) );  //check that file pointer points at eof, expected: 1024
     var_dump( feof($file_handle) );  // ensure that  feof() points to eof, expected: true
 
@@ -76,7 +76,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --
@@ -91,7 +91,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in rb --
 int(0)
 int(0)
@@ -103,7 +103,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in rt --
 int(0)
 int(0)
@@ -115,7 +115,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 
 -- Testing fwrite() with file having content of type text --
 -- Opening file in r --
@@ -129,7 +129,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Opening file in rb --
 int(0)
 int(0)
@@ -141,7 +141,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Opening file in rt --
 int(0)
 int(0)
@@ -153,7 +153,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 
 -- Testing fwrite() with file having content of type text_with_new_line --
 -- Opening file in r --
@@ -167,7 +167,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Opening file in rb --
 int(0)
 int(0)
@@ -179,7 +179,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Opening file in rt --
 int(0)
 int(0)
@@ -191,7 +191,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 
 -- Testing fwrite() with file having content of type alphanumeric --
 -- Opening file in r --
@@ -205,7 +205,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Opening file in rb --
 int(0)
 int(0)
@@ -217,7 +217,7 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Opening file in rt --
 int(0)
 int(0)
@@ -229,5 +229,5 @@ int(2)
 bool(false)
 bool(true)
 int(1024)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 Done

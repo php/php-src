@@ -43,7 +43,7 @@ foreach($array as $name => $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_key_exists() : usage variations ***
 
 -- Key in $search array is : null --

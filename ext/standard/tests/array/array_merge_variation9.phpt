@@ -1,5 +1,7 @@
 --TEST--
 Test array_merge() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
@@ -38,76 +40,75 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_merge() : usage variations ***
 
 -- Merge an array made up of referenced variables to an assoc. array --
 array(6) {
   [0]=>
-  &unicode(3) "foo"
+  &string(3) "foo"
   [1]=>
-  &unicode(3) "bar"
+  &string(3) "bar"
   [2]=>
-  &unicode(3) "baz"
-  [u"key1"]=>
-  unicode(4) "val1"
-  [u"key2"]=>
-  unicode(4) "val2"
-  [u"key3"]=>
-  unicode(4) "val3"
+  &string(3) "baz"
+  ["key1"]=>
+  string(4) "val1"
+  ["key2"]=>
+  string(4) "val2"
+  ["key3"]=>
+  string(4) "val3"
 }
 array(6) {
-  [u"key1"]=>
-  unicode(4) "val1"
-  [u"key2"]=>
-  unicode(4) "val2"
-  [u"key3"]=>
-  unicode(4) "val3"
+  ["key1"]=>
+  string(4) "val1"
+  ["key2"]=>
+  string(4) "val2"
+  ["key3"]=>
+  string(4) "val3"
   [0]=>
-  &unicode(3) "foo"
+  &string(3) "foo"
   [1]=>
-  &unicode(3) "bar"
+  &string(3) "bar"
   [2]=>
-  &unicode(3) "baz"
+  &string(3) "baz"
 }
 
 -- Change $val2 --
 array(6) {
   [0]=>
-  &unicode(3) "foo"
+  &string(3) "foo"
   [1]=>
-  &unicode(11) "hello world"
+  &string(11) "hello world"
   [2]=>
-  &unicode(3) "baz"
-  [u"key1"]=>
-  unicode(4) "val1"
-  [u"key2"]=>
-  unicode(4) "val2"
-  [u"key3"]=>
-  unicode(4) "val3"
+  &string(3) "baz"
+  ["key1"]=>
+  string(4) "val1"
+  ["key2"]=>
+  string(4) "val2"
+  ["key3"]=>
+  string(4) "val3"
 }
 array(6) {
-  [u"key1"]=>
-  unicode(4) "val1"
-  [u"key2"]=>
-  unicode(4) "val2"
-  [u"key3"]=>
-  unicode(4) "val3"
+  ["key1"]=>
+  string(4) "val1"
+  ["key2"]=>
+  string(4) "val2"
+  ["key3"]=>
+  string(4) "val3"
   [0]=>
-  &unicode(3) "foo"
+  &string(3) "foo"
   [1]=>
-  &unicode(11) "hello world"
+  &string(11) "hello world"
   [2]=>
-  &unicode(3) "baz"
+  &string(3) "baz"
 }
 
 -- Merge an array and a reference to the first array --
 array(3) {
-  [u"key1"]=>
-  unicode(4) "val1"
-  [u"key2"]=>
-  unicode(4) "val2"
-  [u"key3"]=>
-  unicode(4) "val3"
+  ["key1"]=>
+  string(4) "val1"
+  ["key2"]=>
+  string(4) "val2"
+  ["key3"]=>
+  string(4) "val3"
 }
 Done

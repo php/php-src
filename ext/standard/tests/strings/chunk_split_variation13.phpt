@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - default 'chunklen' with long string as 'str'
+Test chunk_split() function : usage variations - default 'chunklen' with long string as 'str'argument
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -9,7 +9,7 @@ Test chunk_split() function : usage variations - default 'chunklen' with long st
 */
 
 /*
-* passing long string as 'str' and testing for default value of chunklen which is 76
+* passing long string as 'str' and testing default value of chunklen which is 76
 */
 
 echo "*** Testing chunk_split() : default 'chunklen' with long string 'str' ***\n";
@@ -28,14 +28,14 @@ for($count = 0; $count < count($values); $count++) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : default 'chunklen' with long string 'str' ***
 -- Iteration 0 --
-unicode(85) "1234567890123456789012345678901234567890123456789012345678901234567890123456
+string(85) "1234567890123456789012345678901234567890123456789012345678901234567890123456
 78901
 "
 -- Iteration 1 --
-unicode(217) "1234567890123456789012345678901234567890123456789012345678901234567890123456
+string(217) "1234567890123456789012345678901234567890123456789012345678901234567890123456
 7890123456789012345678901234567890123456789012345678901234567890123456789012
 34567890123456789012345678901234567890123456789012345678901
 "

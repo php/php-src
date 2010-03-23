@@ -1,7 +1,5 @@
 --TEST--
 collator_get_sort_key()
---INI--
-unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -18,7 +16,7 @@ function sort_arrays( $locale, $data )
 
 	foreach($data as $value) {
 		$res_val = ut_coll_get_sort_key( $coll, $value );
-		$res_str .= "source: ".urlencode((binary)$value)."\n".
+		$res_str .= "source: ".urlencode($value)."\n".
 					"key: ".urlencode($res_val)."\n";
 	}
 

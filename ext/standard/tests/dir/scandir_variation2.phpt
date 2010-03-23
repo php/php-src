@@ -108,131 +108,131 @@ rmdir($dir);
 -- Iteration 1 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 2 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 3 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 4 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 5 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 6 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 7 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 8 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 9 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 10 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 11 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 12 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 13 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 14 --
 array(2) {
   [0]=>
-  unicode(2) ".."
+  string(2) ".."
   [1]=>
-  unicode(1) "."
+  string(1) "."
 }
 
 -- Iteration 15 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 16 --
 
-Warning: scandir() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: scandir() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -242,17 +242,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: scandir() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: scandir() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: scandir() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -263,17 +263,17 @@ NULL
 -- Iteration 23 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 24 --
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 
 -- Iteration 25 --

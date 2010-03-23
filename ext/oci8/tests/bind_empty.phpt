@@ -82,10 +82,10 @@ bool(true)
 Test 3
 bool(true)
 array(1) {
-  [u"NAME"]=>
+  ["NAME"]=>
   array(2) {
     [0]=>
-    unicode(3) "def"
+    string(3) "def"
     [1]=>
     NULL
   }
@@ -93,7 +93,7 @@ array(1) {
 Test 4
 bool(true)
 array(1) {
-  [u"NAME"]=>
+  ["NAME"]=>
   array(2) {
     [0]=>
     NULL

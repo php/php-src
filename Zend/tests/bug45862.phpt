@@ -31,13 +31,13 @@ $child->test();
 
  From parent scope
 array(1) {
-  [u"prot"]=>
-  unicode(13) "protected var"
+  ["prot"]=>
+  string(13) "protected var"
 }
-unicode(13) "protected var"
+string(13) "protected var"
 
  From child scope
 array(1) {
-  [u"prot"]=>
-  unicode(13) "protected var"
+  ["prot"]=>
+  string(13) "protected var"
 }

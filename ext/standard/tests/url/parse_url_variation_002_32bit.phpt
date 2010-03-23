@@ -1,5 +1,5 @@
 --TEST--
-Test parse_url() function : usage variations  - unexpected type for arg 2
+Test parse_url() function : usage variations  - unexpected type for arg 2.
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only"); ?>
 --FILE--
@@ -89,107 +89,102 @@ bool(false)
 
 Arg value -10.5 
 array(8) {
-  [u"scheme"]=>
-  unicode(4) "http"
-  [u"host"]=>
-  unicode(11) "www.php.net"
-  [u"port"]=>
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "www.php.net"
+  ["port"]=>
   int(80)
-  [u"user"]=>
-  unicode(6) "secret"
-  [u"pass"]=>
-  unicode(7) "hideout"
-  [u"path"]=>
-  unicode(10) "/index.php"
-  [u"query"]=>
-  unicode(31) "test=1&test2=char&test3=mixesCI"
-  [u"fragment"]=>
-  unicode(16) "some_page_ref123"
+  ["user"]=>
+  string(6) "secret"
+  ["pass"]=>
+  string(7) "hideout"
+  ["path"]=>
+  string(10) "/index.php"
+  ["query"]=>
+  string(31) "test=1&test2=char&test3=mixesCI"
+  ["fragment"]=>
+  string(16) "some_page_ref123"
 }
 
 Arg value 101234567000 
 array(8) {
-  [u"scheme"]=>
-  unicode(4) "http"
-  [u"host"]=>
-  unicode(11) "www.php.net"
-  [u"port"]=>
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "www.php.net"
+  ["port"]=>
   int(80)
-  [u"user"]=>
-  unicode(6) "secret"
-  [u"pass"]=>
-  unicode(7) "hideout"
-  [u"path"]=>
-  unicode(10) "/index.php"
-  [u"query"]=>
-  unicode(31) "test=1&test2=char&test3=mixesCI"
-  [u"fragment"]=>
-  unicode(16) "some_page_ref123"
+  ["user"]=>
+  string(6) "secret"
+  ["pass"]=>
+  string(7) "hideout"
+  ["path"]=>
+  string(10) "/index.php"
+  ["query"]=>
+  string(31) "test=1&test2=char&test3=mixesCI"
+  ["fragment"]=>
+  string(16) "some_page_ref123"
 }
 
 Arg value 1.07654321E-9 
-unicode(4) "http"
+string(4) "http"
 
 Arg value 0.5 
-unicode(4) "http"
-Error: 8 - Array to string conversion, %s(70)
+string(4) "http"
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
-Error: 8 - Array to string conversion, %s(70)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
-Error: 8 - Array to string conversion, %s(70)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
-Error: 8 - Array to string conversion, %s(70)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
-Error: 8 - Array to string conversion, %s(70)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 
 Arg value 1 
-unicode(11) "www.php.net"
+string(11) "www.php.net"
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 
 Arg value 1 
-unicode(11) "www.php.net"
+string(11) "www.php.net"
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, Unicode string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
 NULL
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be long, Unicode string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, Unicode string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be long, Unicode string given, %s(71)
+Error: 2 - parse_url() expects parameter 2 to be long, string given, %s(71)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 
@@ -198,8 +193,8 @@ Error: 2 - parse_url() expects parameter 2 to be long, object given, %s(71)
 NULL
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 
 Arg value  
-unicode(4) "http"
+string(4) "http"
 Done

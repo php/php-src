@@ -29,15 +29,15 @@ var_dump($res, $arg1, $arg2, $arg3, $arg4);
 *** Testing sscanf() : basic functionality - using char format ***
 
 -- Try sccanf() WITHOUT optional args --
-unicode(1) "X"
-unicode(1) "A"
-unicode(1) "B"
-unicode(1) "C"
+string(1) "X"
+string(1) "A"
+string(1) "B"
+string(1) "C"
 
 -- Try sccanf() WITH optional args --
 int(4)
-unicode(1) "X"
-unicode(1) "A"
-unicode(1) "B"
-unicode(1) "C"
+string(1) "X"
+string(1) "A"
+string(1) "B"
+string(1) "C"
 ===DONE===

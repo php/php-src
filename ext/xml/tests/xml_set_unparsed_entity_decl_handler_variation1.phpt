@@ -204,22 +204,22 @@ NULL
 
 Arg value  
 
-Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: xml_set_unparsed_entity_decl_handler() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 

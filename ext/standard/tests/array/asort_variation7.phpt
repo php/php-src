@@ -1,6 +1,5 @@
 --TEST--
-Test asort() function : usage variations - sort bool values
---INI--
+Test asort() function : usage variations - sort bool values 
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
@@ -11,7 +10,7 @@ Test asort() function : usage variations - sort bool values
 
 /*
  * testing asort() by providing bool value array for $array argument with following flag values.
- * flag value as default
+ * flag value as defualt
  * SORT_REGULAR - compare items normally
 */
 
@@ -20,7 +19,7 @@ echo "*** Testing asort() : usage variations ***\n";
 // bool value array
 $bool_values = array (1 => true, 2 => false, 3 => TRUE, 4 => FALSE);
 
-echo "\n-- Testing asort() by supplying bool value array, 'flag' value is default --\n";
+echo "\n-- Testing asort() by supplying bool value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
@@ -42,10 +41,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing asort() : usage variations ***
 
--- Testing asort() by supplying bool value array, 'flag' value is default --
+-- Testing asort() by supplying bool value array, 'flag' value is defualt --
 bool(true)
 array(4) {
   [4]=>

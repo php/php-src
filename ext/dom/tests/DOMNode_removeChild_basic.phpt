@@ -62,12 +62,12 @@ orignal has 5 nodes
 node 4
 Course: no title:object(DOMText)#4 (0) {
 }
-~unicode(1) "
+~string(1) "
 "
 node 3
 Course: two:object(DOMElement)#5 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c2n1
 			c2n2
@@ -76,12 +76,12 @@ Course: two:object(DOMElement)#5 (0) {
 node 2
 Course: no title:object(DOMText)#6 (0) {
 }
-~unicode(2) "
+~string(2) "
 	"
 node 1
 Course: one:object(DOMElement)#4 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c1n1
 			c1n2
@@ -90,13 +90,13 @@ Course: one:object(DOMElement)#4 (0) {
 node 0
 Course: no title:object(DOMText)#5 (0) {
 }
-~unicode(2) "
+~string(2) "
 	"
 after text removed it now has 2 nodes
 node 0
 Course: one:object(DOMElement)#3 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c1n1
 			c1n2
@@ -105,7 +105,7 @@ Course: one:object(DOMElement)#3 (0) {
 node 1
 Course: two:object(DOMElement)#4 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c2n1
 			c2n2

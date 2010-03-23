@@ -16,9 +16,11 @@ $foo = simplexml_load_string($string);
 $p = $foo->bar->p;
 echo $p."\n";
 echo $p->__toString()."\n";
+echo $p."\n";
 ?>
 ==Done==
 --EXPECT--
+Blah 1
 Blah 1
 Blah 1
 ==Done==

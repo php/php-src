@@ -27,7 +27,7 @@ foreach ($file_modes as $file_mode ) {
     exit();
   }
   $data = "fgetc\n test";
-  fwrite($file_handle, (binary)$data);
+  fwrite($file_handle, $data);
 
   // rewind the file pointer to begining of the file
   var_dump( rewind($file_handle) ); 
@@ -50,8 +50,8 @@ foreach ($file_modes as $file_mode ) {
 
 echo "Done\n";
 ?>
---EXPECT--
-*** Testing fgetc() : usage variations ***
+--EXPECTF--
+ *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with files opened with different read modes --
 -- File opened in mode : a+ --
 bool(true)
@@ -109,26 +109,26 @@ bool(false)
 bool(true)
 int(0)
 bool(false)
-unicode(1) "f"
+string(1) "f"
 int(1)
 bool(false)
-unicode(1) "g"
+string(1) "g"
 int(2)
 bool(false)
-unicode(1) "e"
+string(1) "e"
 int(3)
 bool(false)
-unicode(1) "t"
+string(1) "t"
 int(4)
 bool(false)
-unicode(1) "c"
+string(1) "c"
 int(5)
 bool(false)
-unicode(1) "
+string(1) "
 "
 int(6)
 bool(false)
-unicode(1) " "
+string(1) " "
 int(7)
 bool(false)
 -- File opened in mode : x+ --
@@ -187,26 +187,26 @@ bool(false)
 bool(true)
 int(0)
 bool(false)
-unicode(1) "f"
+string(1) "f"
 int(1)
 bool(false)
-unicode(1) "g"
+string(1) "g"
 int(2)
 bool(false)
-unicode(1) "e"
+string(1) "e"
 int(3)
 bool(false)
-unicode(1) "t"
+string(1) "t"
 int(4)
 bool(false)
-unicode(1) "c"
+string(1) "c"
 int(5)
 bool(false)
-unicode(1) "
+string(1) "
 "
 int(6)
 bool(false)
-unicode(1) " "
+string(1) " "
 int(7)
 bool(false)
 -- File opened in mode : w+ --
@@ -265,26 +265,26 @@ bool(false)
 bool(true)
 int(0)
 bool(false)
-unicode(1) "f"
+string(1) "f"
 int(1)
 bool(false)
-unicode(1) "g"
+string(1) "g"
 int(2)
 bool(false)
-unicode(1) "e"
+string(1) "e"
 int(3)
 bool(false)
-unicode(1) "t"
+string(1) "t"
 int(4)
 bool(false)
-unicode(1) "c"
+string(1) "c"
 int(5)
 bool(false)
-unicode(1) "
+string(1) "
 "
 int(6)
 bool(false)
-unicode(1) " "
+string(1) " "
 int(7)
 bool(false)
 Done

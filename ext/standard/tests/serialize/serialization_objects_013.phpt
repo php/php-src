@@ -99,396 +99,396 @@ echo "Done";
 
 --- a refs b:
 object(stdClass)#%d (3) {
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"b";i:1;U:1:"a";R:2;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- a refs c:
 object(stdClass)#%d (3) {
-  [u"c"]=>
+  ["c"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"c";i:1;U:1:"a";R:2;U:1:"b";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";i:1;}"
 object(stdClass)#%d (3) {
-  [u"c"]=>
+  ["c"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
+  ["b"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  int(1)
 }
 object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["c"]=>
+  &string(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
 }
 
 
 --- b refs a:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";i:1;U:1:"b";R:2;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- b refs c:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";i:1;U:1:"c";i:1;U:1:"b";R:3;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"c";i:1;s:1:"b";R:3;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
-  [u"b"]=>
-  &int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["c"]=>
+  &int(1)
+  ["b"]=>
+  &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- c refs a:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";i:1;U:1:"b";i:1;U:1:"c";R:2;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:2;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
   int(1)
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- c refs b:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";i:1;U:1:"b";i:1;U:1:"c";R:3;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:3;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"c"]=>
-  &int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  &int(1)
+  ["c"]=>
+  &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->c.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- a,b refs c:
 object(stdClass)#%d (3) {
-  [u"c"]=>
+  ["c"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
-  &int(1)
-}
-unicode(55) "O:8:"stdClass":3:{U:1:"c";i:1;U:1:"a";R:2;U:1:"b";R:2;}"
-object(stdClass)#%d (3) {
-  [u"c"]=>
-  &int(1)
-  [u"a"]=>
-  &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
 }
+string(55) "O:8:"stdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";R:2;}"
 object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
+  ["c"]=>
+  &int(1)
+  ["a"]=>
+  &int(1)
+  ["b"]=>
+  &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["c"]=>
+  &string(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- a,c refs b:
 object(stdClass)#%d (3) {
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"c"]=>
-  &int(1)
-}
-unicode(55) "O:8:"stdClass":3:{U:1:"b";i:1;U:1:"a";R:2;U:1:"c";R:2;}"
-object(stdClass)#%d (3) {
-  [u"b"]=>
-  &int(1)
-  [u"a"]=>
-  &int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
+string(55) "O:8:"stdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";R:2;}"
 object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
+  ["b"]=>
+  &int(1)
+  ["a"]=>
+  &int(1)
+  ["c"]=>
+  &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["b"]=>
+  &string(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- b,c refs a:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &int(1)
-  [u"b"]=>
+  ["b"]=>
   &int(1)
-  [u"c"]=>
-  &int(1)
-}
-unicode(55) "O:8:"stdClass":3:{U:1:"a";i:1;U:1:"b";R:2;U:1:"c";R:2;}"
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  &int(1)
-  [u"b"]=>
-  &int(1)
-  [u"c"]=>
+  ["c"]=>
   &int(1)
 }
+string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";R:2;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
+  ["a"]=>
+  &int(1)
+  ["b"]=>
+  &int(1)
+  ["c"]=>
+  &int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->c.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
 }
 Done

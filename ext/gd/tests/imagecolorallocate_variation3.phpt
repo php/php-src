@@ -163,32 +163,32 @@ int(655370)
 
 --empty string DQ--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: imagecolorallocate() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 --instance of classWithToString--

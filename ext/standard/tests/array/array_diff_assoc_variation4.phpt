@@ -101,77 +101,77 @@ foreach($inputs as $key => $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
 array(4) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [12345]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [-2345]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 
 -- Iteration 2 --
 array(3) {
   [10]=>
-  unicode(7) "float 1"
+  string(7) "float 1"
   [-10]=>
-  unicode(7) "float 2"
+  string(7) "float 2"
   [0]=>
-  unicode(7) "float 3"
+  string(7) "float 3"
 }
 
 -- Iteration 3 --
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 -- Iteration 4 --
 array(2) {
   [1]=>
-  unicode(5) "boolT"
+  string(5) "boolT"
   [0]=>
-  unicode(5) "boolF"
+  string(5) "boolF"
 }
 
 -- Iteration 5 --
 array(1) {
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 
 -- Iteration 6 --
 array(2) {
-  [u"string"]=>
-  unicode(7) "strings"
-  [u"hello world"]=>
-  unicode(7) "stringh"
+  ["string"]=>
+  string(7) "strings"
+  ["hello world"]=>
+  string(7) "stringh"
 }
 
 -- Iteration 7 --
 array(2) {
   ["binary1"]=>
-  unicode(8) "binary 1"
+  string(8) "binary 1"
   ["binary2"]=>
-  unicode(8) "binary 2"
+  string(8) "binary 2"
 }
 
 -- Iteration 8 --
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 -- Iteration 9 --
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 Done

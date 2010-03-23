@@ -70,43 +70,43 @@ foreach($values as $key => $value) {
 --EXPECTF--
 *** Testing php_uname() - usage variations
 -- Iterator 0 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator 1 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator 12345 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator -2345 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator 10.5 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator -10.5 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator 10.1234567e10 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator 10.7654321E-10 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator .5 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator NULL --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator null --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator true --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator false --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator TRUE --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator FALSE --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator "" --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator '' --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator new fooClass() --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator undefined var --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iterator unset var --
-unicode(%d) "%s"
+string(%d) "%s"
 ===DONE===

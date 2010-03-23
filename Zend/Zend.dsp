@@ -139,6 +139,10 @@ SOURCE=.\zend_default_classes.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_dynamic_array.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_execute.c
 # End Source File
 # Begin Source File
@@ -227,10 +231,6 @@ SOURCE=.\zend_qsort.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_reflection_api.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_sprintf.c
 # End Source File
 # Begin Source File
@@ -292,6 +292,10 @@ SOURCE=.\zend_constants.h
 # Begin Source File
 
 SOURCE=.\zend_default_classes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_dynamic_array.h
 # End Source File
 # Begin Source File
 
@@ -396,10 +400,6 @@ SOURCE=.\zend_ptr_stack.h
 # Begin Source File
 
 SOURCE=.\zend_qsort.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_reflection_api.h
 # End Source File
 # Begin Source File
 

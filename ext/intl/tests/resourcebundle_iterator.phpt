@@ -43,7 +43,8 @@ Here comes testint:
 2
 
 Here comes teststring:
-Hello World!
+48656c6c6f20576f726c6421
+
 Here comes testtable:
 ResourceBundle Object
 (

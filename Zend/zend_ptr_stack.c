@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -25,26 +25,25 @@
 # include <stdarg.h>
 #endif
 
-ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent) /* {{{ */
+ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent)
 {
 	stack->top_element = stack->elements = (void **) pemalloc(sizeof(void *)*PTR_STACK_BLOCK_SIZE, persistent);
 	stack->max = PTR_STACK_BLOCK_SIZE;
 	stack->top = 0;
 	stack->persistent = persistent;
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack) /* {{{ */
+ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
 {
 	zend_ptr_stack_init_ex(stack, 0);
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...) /* {{{ */
+
+ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...)
 {
 	va_list ptr;
 	void *elem;
-
+	
 	ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, count)
 
 	va_start(ptr, count);
@@ -56,13 +55,13 @@ ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...) /* {{
 	}
 	va_end(ptr);
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...) /* {{{ */
+
+ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
 {
 	va_list ptr;
 	void **elem;
-
+	
 	va_start(ptr, count);
 	while (count>0) {
 		elem = va_arg(ptr, void **);
@@ -72,17 +71,18 @@ ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...) /* {{{
 	}
 	va_end(ptr);
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack) /* {{{ */
+
+
+ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack)
 {
 	if (stack->elements) {
 		pefree(stack->elements, stack->persistent);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *)) /* {{{ */
+
+ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *))
 {
 	int i = stack->top;
 
@@ -90,9 +90,9 @@ ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *)) 
 		func(stack->elements[i]);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements) /* {{{ */
+
+ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements)
 {
 	zend_ptr_stack_apply(stack, func);
 	if (free_elements) {
@@ -105,13 +105,12 @@ ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), 
 	stack->top = 0;
 	stack->top_element = stack->elements;
 }
-/* }}} */
 
-ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack) /* {{{ */
+
+ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
 {
 	return stack->top;
 }
-/* }}} */
 
 /*
  * Local variables:

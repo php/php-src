@@ -1,5 +1,5 @@
 --TEST--
-Test str_split() function : usage variations - different single quoted strings for 'str' argument(Bug#42866) 
+Test str_split() function : usage variations - different single quoted strings for 'str' argument 
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
@@ -43,154 +43,154 @@ for($count = 0; $count < count($values); $count++) {
 }
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing str_split() : single quoted strings for 'str' ***
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) " "
+  string(1) " "
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  unicode(4) "1234"
+  string(4) "1234"
 }
 -- Iteration 4 --
 array(3) {
   [0]=>
-  unicode(5) "simpl"
+  string(5) "simpl"
   [1]=>
-  unicode(5) "e str"
+  string(5) "e str"
   [2]=>
-  unicode(3) "ing"
+  string(3) "ing"
 }
 -- Iteration 5 --
 array(5) {
   [0]=>
-  unicode(5) "It's "
+  string(5) "It's "
   [1]=>
-  unicode(5) "strin"
+  string(5) "strin"
   [2]=>
-  unicode(5) "g wit"
+  string(5) "g wit"
   [3]=>
-  unicode(5) "h quo"
+  string(5) "h quo"
   [4]=>
-  unicode(2) "te"
+  string(2) "te"
 }
 -- Iteration 6 --
 array(8) {
   [0]=>
-  unicode(5) "strin"
+  string(5) "strin"
   [1]=>
-  unicode(5) "g\tco"
+  string(5) "g\tco"
   [2]=>
-  unicode(5) "ntain"
+  string(5) "ntain"
   [3]=>
-  unicode(5) "s\rwh"
+  string(5) "s\rwh"
   [4]=>
-  unicode(5) "ite s"
+  string(5) "ite s"
   [5]=>
-  unicode(5) "pace\"
+  string(5) "pace\"
   [6]=>
-  unicode(5) "nchar"
+  string(5) "nchar"
   [7]=>
-  unicode(1) "s"
+  string(1) "s"
 }
 -- Iteration 7 --
 array(6) {
   [0]=>
-  unicode(5) "conta"
+  string(5) "conta"
   [1]=>
-  unicode(5) "ining"
+  string(5) "ining"
   [2]=>
-  unicode(5) " @ # "
+  string(5) " @ # "
   [3]=>
-  unicode(5) "$ % ^"
+  string(5) "$ % ^"
   [4]=>
-  unicode(5) " & ch"
+  string(5) " & ch"
   [5]=>
-  unicode(3) "ars"
+  string(3) "ars"
 }
 -- Iteration 8 --
 array(4) {
   [0]=>
-  unicode(5) "with "
+  string(5) "with "
   [1]=>
-  unicode(5) "1234 "
+  string(5) "1234 "
   [2]=>
-  unicode(5) "numbe"
+  string(5) "numbe"
   [3]=>
-  unicode(2) "rs"
+  string(2) "rs"
 }
 -- Iteration 9 --
 array(7) {
   [0]=>
-  unicode(5) "with "
+  string(5) "with "
   [1]=>
-  unicode(5) "\0 an"
+  string(5) "\0 an"
   [2]=>
-  unicode(5) "d ".c"
+  string(5) "d ".c"
   [3]=>
-  unicode(5) "hr(0)"
+  string(5) "hr(0)"
   [4]=>
-  unicode(5) "."nul"
+  string(5) "."nul"
   [5]=>
-  unicode(5) "l cha"
+  string(5) "l cha"
   [6]=>
-  unicode(2) "rs"
+  string(2) "rs"
 }
 -- Iteration 10 --
 array(7) {
   [0]=>
-  unicode(5) "with "
+  string(5) "with "
   [1]=>
-  unicode(5) "   mu"
+  string(5) "   mu"
   [2]=>
-  unicode(5) "ltipl"
+  string(5) "ltipl"
   [3]=>
-  unicode(5) "e    "
+  string(5) "e    "
   [4]=>
-  unicode(5) " spac"
+  string(5) " spac"
   [5]=>
-  unicode(5) "e cha"
+  string(5) "e cha"
   [6]=>
-  unicode(1) "r"
+  string(1) "r"
 }
 -- Iteration 11 --
 array(8) {
   [0]=>
-  unicode(5) "Testi"
+  string(5) "Testi"
   [1]=>
-  unicode(5) "ng in"
+  string(5) "ng in"
   [2]=>
-  unicode(5) "valid"
+  string(5) "valid"
   [3]=>
-  unicode(5) " \k a"
+  string(5) " \k a"
   [4]=>
-  unicode(5) "nd \m"
+  string(5) "nd \m"
   [5]=>
-  unicode(5) " esca"
+  string(5) " esca"
   [6]=>
-  unicode(5) "pe ch"
+  string(5) "pe ch"
   [7]=>
-  unicode(2) "ar"
+  string(2) "ar"
 }
 -- Iteration 12 --
 array(5) {
   [0]=>
-  unicode(5) "to ch"
+  string(5) "to ch"
   [1]=>
-  unicode(5) "eck w"
+  string(5) "eck w"
   [2]=>
-  unicode(5) "ith \"
+  string(5) "ith \"
   [3]=>
-  unicode(5) "n and"
+  string(5) "n and"
   [4]=>
-  unicode(3) " \t"
+  string(3) " \t"
 }
 Done

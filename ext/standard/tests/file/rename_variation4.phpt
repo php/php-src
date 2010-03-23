@@ -38,12 +38,9 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
 rmdir($file_path."/12345");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing rename() by renaming a file, link and directory to numeric name ***
 bool(true)
 bool(false)

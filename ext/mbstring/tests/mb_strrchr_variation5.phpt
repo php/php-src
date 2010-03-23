@@ -51,9 +51,9 @@ else {
 --EXPECT--
 *** Testing mb_strrchr() : variation ***
 -- Ascii data --
-unicode(10) "6263647978"
-unicode(16) "616263646566207a"
+string(10) "6263647978"
+string(16) "616263646566207a"
 -- mb data in utf-8 --
-unicode(30) "e8aa9ee38386e382ade382b9e38388"
-unicode(70) "e697a5e69cace8aa9ee38386e382ade382b9e383883334efbc95efbc96e697a5e69cac"
+string(30) "e8aa9ee38386e382ade382b9e38388"
+string(70) "e697a5e69cace8aa9ee38386e382ade382b9e383883334efbc95efbc96e697a5e69cac"
 ===DONE===

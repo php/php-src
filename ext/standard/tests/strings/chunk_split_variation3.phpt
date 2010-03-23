@@ -94,67 +94,67 @@ fclose($fp);
 --EXPECTF--
 *** Testing chunk_split() : unexpected values for 'ending' ***
 -- Iteration 1 --
-unicode(28) "This0 is 0simp0le s0trin0g.0"
+string(28) "This0 is 0simp0le s0trin0g.0"
 -- Iteration 2 --
-unicode(28) "This1 is 1simp1le s1trin1g.1"
+string(28) "This1 is 1simp1le s1trin1g.1"
 -- Iteration 3 --
-unicode(52) "This12345 is 12345simp12345le s12345trin12345g.12345"
+string(52) "This12345 is 12345simp12345le s12345trin12345g.12345"
 -- Iteration 4 --
-unicode(52) "This-2345 is -2345simp-2345le s-2345trin-2345g.-2345"
+string(52) "This-2345 is -2345simp-2345le s-2345trin-2345g.-2345"
 -- Iteration 5 --
-unicode(46) "This10.5 is 10.5simp10.5le s10.5trin10.5g.10.5"
+string(46) "This10.5 is 10.5simp10.5le s10.5trin10.5g.10.5"
 -- Iteration 6 --
-unicode(52) "This-10.5 is -10.5simp-10.5le s-10.5trin-10.5g.-10.5"
+string(52) "This-10.5 is -10.5simp-10.5le s-10.5trin-10.5g.-10.5"
 -- Iteration 7 --
-unicode(94) "This101234560000 is 101234560000simp101234560000le s101234560000trin101234560000g.101234560000"
+string(94) "This101234560000 is 101234560000simp101234560000le s101234560000trin101234560000g.101234560000"
 -- Iteration 8 --
-unicode(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-9trin1.07654321E-9g.1.07654321E-9"
+string(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-9trin1.07654321E-9g.1.07654321E-9"
 -- Iteration 9 --
-unicode(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
+string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 16 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 17 --
-unicode(28) "This1 is 1simp1le s1trin1g.1"
+string(28) "This1 is 1simp1le s1trin1g.1"
 -- Iteration 18 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 19 --
-unicode(28) "This1 is 1simp1le s1trin1g.1"
+string(28) "This1 is 1simp1le s1trin1g.1"
 -- Iteration 20 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 21 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 22 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 23 --
-unicode(58) "Thisobject is objectsimpobjectle sobjecttrinobjectg.object"
+string(58) "Thisobject is objectsimpobjectle sobjecttrinobjectg.object"
 -- Iteration 24 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 25 --
-unicode(22) "This is simple string."
+string(22) "This is simple string."
 -- Iteration 26 --
 
-Warning: chunk_split() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d
+Warning: chunk_split() expects parameter 3 to be string, resource given in %s on line %d
 NULL
 Done

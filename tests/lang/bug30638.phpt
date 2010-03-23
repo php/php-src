@@ -3,7 +3,7 @@ Bug #30638 (localeconv returns wrong LC_NUMERIC settings) (ok to fail on MacOS X
 --SKIPIF--
 <?php  # try to activate a german locale
 if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge") === FALSE) {
-	print "skip";
+	print "skip setlocale() failed";
 } elseif (strtolower(php_uname('s')) == 'darwin') {
     print "skip ok to fail on MacOS X";
 }
@@ -17,9 +17,6 @@ $lc = localeconv();
 printf("decimal_point: %s\n", $lc['decimal_point']);
 printf("thousands_sep: %s\n", $lc['thousands_sep']);
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
-Deprecated: localeconv(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+--EXPECT--
 decimal_point: ,
 thousands_sep: .

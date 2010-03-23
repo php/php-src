@@ -85,19 +85,19 @@ TestDerived::testing();
 ===DONE===
 <?php exit(0); ?>
 --EXPECT--
-unicode(3) "pub"
-unicode(3) "pub"
-unicode(7) "updated"
+string(3) "pub"
+string(3) "pub"
+string(7) "updated"
 EXCEPTION
 EXCEPTION
-unicode(7) "updated"
-unicode(7) "updated"
-unicode(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
 EXCEPTION
 EXCEPTION
-unicode(7) "updated"
-unicode(7) "updated"
-unicode(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
 EXCEPTION
 EXCEPTION
 ===DONE===

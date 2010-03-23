@@ -19,11 +19,11 @@ var_dump($function->getShortName());
 ?>
 --EXPECT--
 bool(false)
-unicode(4) "sort"
-unicode(0) ""
-unicode(4) "sort"
+string(4) "sort"
+string(0) ""
+string(4) "sort"
 bool(true)
-unicode(7) "A\B\foo"
-unicode(3) "A\B"
-unicode(3) "foo"
+string(7) "A\B\foo"
+string(3) "A\B"
+string(3) "foo"
 

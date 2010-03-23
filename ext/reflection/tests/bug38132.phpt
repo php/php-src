@@ -16,16 +16,16 @@ var_dump(isset($properties["bar"]));
 ?>
 --EXPECT--
 array(2) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"a"]=>
-  unicode(1) "a"
+  ["bar"]=>
+  string(3) "baz"
+  ["a"]=>
+  string(1) "a"
 }
 array(2) {
   [0]=>
-  unicode(3) "bar"
+  string(3) "bar"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 bool(false)
 bool(false)

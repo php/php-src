@@ -7,7 +7,7 @@ XMLReader: Schema validation
 <?php 
 /* $Id$ */
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <items>
   <item>123</item>
@@ -17,7 +17,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . b'/013.xsd');
+$reader->setSchema(dirname(__FILE__) . '/013.xsd');
 while($reader->read()) {
 	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
 		$reader->read();
@@ -30,22 +30,22 @@ $reader->close();
 ===FAIL===
 <?php
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <foo/>
 EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . b'/013.xsd');
+$reader->setSchema(dirname(__FILE__) . '/013.xsd');
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "123"
-unicode(3) "456"
+string(3) "123"
+string(3) "456"
 ===FAIL===
 
 Warning: XMLReader::read(): Element 'foo': %s

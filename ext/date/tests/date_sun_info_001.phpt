@@ -1,32 +1,31 @@
 --TEST--
 Test basic date_sun_info()
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 $sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);
 var_dump($sun_info);
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165897782)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165934168)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165896176)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165935773)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165894353)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165937597)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165892570)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165939380)
 }
 Done

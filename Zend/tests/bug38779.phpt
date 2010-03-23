@@ -1,7 +1,5 @@
 --TEST--
 Bug #38779 (engine crashes when require()'ing file with syntax error through userspace stream wrapper)
---INI--
-allow_url_include="*"
 --FILE--
 <?php
 
@@ -30,5 +28,5 @@ require 'Loader://qqq.php';
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Parse error: %s error%sin Loader://qqq.php on line %d

@@ -217,6 +217,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_strpos() expects parameter 4 to be binary string, resource given in %s on line %d
+Warning: mb_strpos() expects parameter 4 to be string, resource given in %s on line %d
 bool(false)
 Done

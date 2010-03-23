@@ -58,50 +58,50 @@ A::test($b);
 echo "\n---( Unrelated class: )---\n";
 X::test($b);
 ?>
---EXPECT--
+--EXPECTF--
 
 ---( Global scope: )---
 array(1) {
-  [u"pub"]=>
-  unicode(6) "B::pub"
+  ["pub"]=>
+  string(6) "B::pub"
 }
 
 ---( Declaring class: )---
 B::test
 array(4) {
-  [u"hiddenPriv"]=>
-  unicode(13) "B::hiddenPriv"
-  [u"priv"]=>
-  unicode(7) "B::priv"
-  [u"prot"]=>
-  unicode(7) "B::prot"
-  [u"pub"]=>
-  unicode(6) "B::pub"
+  ["hiddenPriv"]=>
+  string(13) "B::hiddenPriv"
+  ["priv"]=>
+  string(7) "B::priv"
+  ["prot"]=>
+  string(7) "B::prot"
+  ["pub"]=>
+  string(6) "B::pub"
 }
 
 ---( Subclass: )---
 C::test
 array(2) {
-  [u"prot"]=>
-  unicode(7) "B::prot"
-  [u"pub"]=>
-  unicode(6) "B::pub"
+  ["prot"]=>
+  string(7) "B::prot"
+  ["pub"]=>
+  string(6) "B::pub"
 }
 
 ---( Superclass: )---
 A::test
 array(3) {
-  [u"prot"]=>
-  unicode(7) "B::prot"
-  [u"pub"]=>
-  unicode(6) "B::pub"
-  [u"hiddenPriv"]=>
-  unicode(13) "A::hiddenPriv"
+  ["prot"]=>
+  string(7) "B::prot"
+  ["pub"]=>
+  string(6) "B::pub"
+  ["hiddenPriv"]=>
+  string(13) "A::hiddenPriv"
 }
 
 ---( Unrelated class: )---
 X::test
 array(1) {
-  [u"pub"]=>
-  unicode(6) "B::pub"
+  ["pub"]=>
+  string(6) "B::pub"
 }

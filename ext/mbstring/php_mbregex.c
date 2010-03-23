@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,7 +32,7 @@
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"
-
+ 
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
 #undef UChar
@@ -842,10 +842,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 	}
 	if (Z_TYPE_PP(arg_pattern_zval) == IS_STRING) {
-		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
-	} else if (Z_TYPE_PP(arg_pattern_zval) == IS_UNICODE) {
-		convert_to_string_ex(arg_pattern_zval);
 		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
 		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
 	} else {

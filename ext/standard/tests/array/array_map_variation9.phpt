@@ -42,27 +42,27 @@ array(4) {
   [1]=>
   string(5) "world"
   [2]=>
-  unicode(1) "1"
+  string(1) "1"
   [3]=>
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: b in %s on line %d
+Notice: Undefined variable: b in %s on line %d%d
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: b in %s on line %d
+Notice: Undefined variable: b in %s on line %d%d
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: b in %s on line %d
+Notice: Undefined variable: b in %s on line %d%d
 
-Warning: Missing argument 2 for callback2() in %s on line %d
+Warning: Missing argument 2 for callback2() in %s on line %d%d
 
-Notice: Undefined variable: b in %s on line %d
+Notice: Undefined variable: b in %s on line %d%d
 array(4) {
   [0]=>
   array(1) {

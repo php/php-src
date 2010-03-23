@@ -12,7 +12,7 @@ Bug #19943 (memleaks)
 		echo $ar[$count]." -- ".$ar[$count]['idx']."\n";
 	}
 	$a = "0123456789";
-	$a[9] = $a{0};
+	$a[9] = $a[0];
 	var_dump($a);
 ?>
 --EXPECT--
@@ -26,4 +26,4 @@ Bug #19943 (memleaks)
 7 -- 7
 8 -- 8
 9 -- 9
-unicode(10) "0123456780"
+string(10) "0123456780"

@@ -27,7 +27,7 @@ echo "Done\n";
 -- creating an array with low = 'ABCD' and high = 'ABCD' --
 array(1) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
 }
 
 -- creating an array with low = 'ABCD' and high = '-10.5555' --
@@ -81,8 +81,6 @@ array(1) {
   [0]=>
   int(0)
 }
-
-Notice: Array to string conversion in %s on line %d
 
 -- creating an array with low = 'ABCD' and high = 'Array' --
 array(2) {
@@ -230,8 +228,6 @@ array(11) {
   float(-0.5555)
 }
 
-Notice: Array to string conversion in %s on line %d
-
 -- creating an array with low = '-10.5555' and high = 'Array' --
 array(12) {
   [0]=>
@@ -326,8 +322,6 @@ array(2) {
   int(0)
 }
 
-Notice: Array to string conversion in %s on line %d
-
 -- creating an array with low = '1' and high = 'Array' --
 array(1) {
   [0]=>
@@ -392,7 +386,71 @@ array(1) {
   int(0)
 }
 
-Notice: Array to string conversion in %s on line %d
+-- creating an array with low = '' and high = 'Array' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = 'ABCD' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '-10.5555' --
+array(11) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(-1)
+  [2]=>
+  float(-2)
+  [3]=>
+  float(-3)
+  [4]=>
+  float(-4)
+  [5]=>
+  float(-5)
+  [6]=>
+  float(-6)
+  [7]=>
+  float(-7)
+  [8]=>
+  float(-8)
+  [9]=>
+  float(-9)
+  [10]=>
+  float(-10)
+}
+
+-- creating an array with low = '' and high = '1' --
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
+
+-- creating an array with low = '' and high = '' --
+array(1) {
+  [0]=>
+  int(0)
+}
 
 -- creating an array with low = '' and high = 'Array' --
 array(2) {
@@ -460,8 +518,6 @@ array(1) {
   int(0)
 }
 
-Notice: Array to string conversion in %s on line %d
-
 -- creating an array with low = '' and high = 'Array' --
 array(2) {
   [0]=>
@@ -469,76 +525,6 @@ array(2) {
   [1]=>
   int(1)
 }
-
--- creating an array with low = '' and high = 'ABCD' --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- creating an array with low = '' and high = '-10.5555' --
-array(11) {
-  [0]=>
-  float(0)
-  [1]=>
-  float(-1)
-  [2]=>
-  float(-2)
-  [3]=>
-  float(-3)
-  [4]=>
-  float(-4)
-  [5]=>
-  float(-5)
-  [6]=>
-  float(-6)
-  [7]=>
-  float(-7)
-  [8]=>
-  float(-8)
-  [9]=>
-  float(-9)
-  [10]=>
-  float(-10)
-}
-
--- creating an array with low = '' and high = '1' --
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
-
--- creating an array with low = '' and high = '' --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- creating an array with low = '' and high = '' --
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- creating an array with low = '' and high = '' --
-array(1) {
-  [0]=>
-  int(0)
-}
-
-Notice: Array to string conversion in %s on line %d
-
--- creating an array with low = '' and high = 'Array' --
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
-
-Notice: Array to string conversion in %s on line %d
 
 -- creating an array with low = 'Array' and high = 'ABCD' --
 array(2) {
@@ -547,8 +533,6 @@ array(2) {
   [1]=>
   int(0)
 }
-
-Notice: Array to string conversion in %s on line %d
 
 -- creating an array with low = 'Array' and high = '-10.5555' --
 array(12) {
@@ -578,15 +562,19 @@ array(12) {
   float(-10)
 }
 
-Notice: Array to string conversion in %s on line %d
-
 -- creating an array with low = 'Array' and high = '1' --
 array(1) {
   [0]=>
   int(1)
 }
 
-Notice: Array to string conversion in %s on line %d
+-- creating an array with low = 'Array' and high = '' --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
 
 -- creating an array with low = 'Array' and high = '' --
 array(2) {
@@ -596,8 +584,6 @@ array(2) {
   int(0)
 }
 
-Notice: Array to string conversion in %s on line %d
-
 -- creating an array with low = 'Array' and high = '' --
 array(2) {
   [0]=>
@@ -605,20 +591,6 @@ array(2) {
   [1]=>
   int(0)
 }
-
-Notice: Array to string conversion in %s on line %d
-
--- creating an array with low = 'Array' and high = '' --
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(0)
-}
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 
 -- creating an array with low = 'Array' and high = 'Array' --
 array(1) {

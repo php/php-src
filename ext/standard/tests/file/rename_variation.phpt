@@ -47,13 +47,6 @@ rmdir("$file_path/rename_variation");
 
 echo "Done\n";
 ?>
---CLEAN--
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
-?>
 --EXPECTF--
 *** Testing rename() : rename files across directories ***
 -- Iteration 1 --

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,40 +31,40 @@
 #endif
 
 #include "php_globals.h"
+#include "safe_mode.h"
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header [, bool replace, [int http_response_code]]) U
+/* {{{ proto void header(string header [, bool replace, [int http_response_code]])
    Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|bl", &ctr.line,
-				&ctr.line_len, UG(ascii_conv), &rep, &ctr.response_code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
+				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
 		return;
-	}
 	
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto void header_remove([string name]) U
+/* {{{ proto void header_remove([string name])
    Removes an HTTP header previously set using header() */
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &ctr.line,
-	                          &ctr.line_len, UG(ascii_conv)) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ctr.line,
+	                          &ctr.line_len) == FAILURE)
 		return;
 
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
 }
 /* }}} */
 
-PHPAPI int php_header(TSRMLS_D) /* {{{ */
+PHPAPI int php_header(TSRMLS_D)
 {
 	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
@@ -72,14 +72,13 @@ PHPAPI int php_header(TSRMLS_D) /* {{{ */
 		return 1; /* allow output */
 	}
 }
-/* }}} */
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC) /* {{{ */
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
-	UChar *dt;
+	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
 	
@@ -120,25 +119,24 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 */
 		time_t t = time(NULL) - 31536001;
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%v", name, dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s", name, dt);
 		efree(dt);
 	} else {
-		/* check to make sure that the year does not exceed 4 digits in length */
-		if (expires >= 253402300800) {
-			efree(cookie);
-			efree(encoded_value);
-			zend_error(E_WARNING, "Expiry date cannot have a year greater then 9999");
-			return FAILURE;
-		}
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			char *p;
-			p = emalloc(48);
-
+			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
-			snprintf(p, 48, "; expires=%v", dt );
-			strlcat(cookie, p, len + 100);
-			efree(p);
+			/* check to make sure that the year does not exceed 4 digits in length */
+			p = zend_memrchr(dt, '-', strlen(dt));
+			if (*(p + 5) != ' ') {
+				efree(dt);
+				efree(cookie);
+				efree(encoded_value);
+				zend_error(E_WARNING, "Expiry date cannot have a year greater then 9999");
+				return FAILURE;
+			}
+			strlcat(cookie, dt, len + 100);
 			efree(dt);
 		}
 	}
@@ -169,10 +167,10 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	efree(cookie);
 	return result;
 }
-/* }}} */
+
 
 /* php_set_cookie(name, value, expires, path, domain, secure) */
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]]) U
+/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
@@ -181,11 +179,9 @@ PHP_FUNCTION(setcookie)
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&ls&s&bb", &name,
-							  &name_len, UG(ascii_conv), &value, &value_len,
-							  UG(ascii_conv), &expires, &path, &path_len,
-							  UG(ascii_conv), &domain, &domain_len,
-							  UG(ascii_conv), &secure, &httponly) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+							  &name_len, &value, &value_len, &expires, &path,
+							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
@@ -197,7 +193,7 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
-/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]]) U
+/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
@@ -206,11 +202,9 @@ PHP_FUNCTION(setrawcookie)
 	zend_bool secure = 0, httponly = 0;
 	int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&ls&s&bb", &name,
-							  &name_len, UG(ascii_conv), &value, &value_len,
-							  UG(ascii_conv), &expires, &path, &path_len,
-							  UG(ascii_conv), &domain, &domain_len,
-							  UG(ascii_conv), &secure, &httponly) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+							  &name_len, &value, &value_len, &expires, &path,
+							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
@@ -222,7 +216,8 @@ PHP_FUNCTION(setrawcookie)
 }
 /* }}} */
 
-/* {{{ proto bool headers_sent([string &$file [, int &$line]]) U
+
+/* {{{ proto bool headers_sent([string &$file [, int &$line]])
    Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
@@ -234,27 +229,22 @@ PHP_FUNCTION(headers_sent)
 		return;
 
 	if (SG(headers_sent)) {
-		line = php_output_get_start_lineno(TSRMLS_C);
-		file = php_output_get_start_filename(TSRMLS_C);
+		line = php_get_output_start_lineno(TSRMLS_C);
+		file = php_get_output_start_filename(TSRMLS_C);
 	}
 
 	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			zval_dtor(arg2);
-			ZVAL_LONG(arg2, line);
-		case 1: {
-				UChar *ufile;
-				int ufile_len;
-
-				zval_dtor(arg1);
-
-				if (file && SUCCESS == php_stream_path_decode(NULL, &ufile, &ufile_len, file, strlen(file), REPORT_ERRORS, FG(default_context))) {
-					ZVAL_UNICODEL(arg1, ufile, ufile_len, 0);
-				} else {
-					ZVAL_EMPTY_UNICODE(arg1);
-				}
-			}
-			break;
+	case 2:
+		zval_dtor(arg2);
+		ZVAL_LONG(arg2, line);
+	case 1:
+		zval_dtor(arg1);
+		if (file) { 
+			ZVAL_STRING(arg1, file, 1);
+		} else {
+			ZVAL_STRING(arg1, "", 1);
+		}	
+		break;
 	}
 
 	if (SG(headers_sent)) {
@@ -272,12 +262,11 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
 	sapi_header_struct *sapi_header = (sapi_header_struct *)data;
 
 	if (arg && sapi_header) {
-		add_next_index_ascii_string((zval *)arg, (char *)(sapi_header->header), 1);
+		add_next_index_string((zval *)arg, (char *)(sapi_header->header), 1);
 	}
 }
-/* }}} */
 
-/* {{{ proto array headers_list(void) U
+/* {{{ proto array headers_list(void)
    Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {

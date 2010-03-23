@@ -3,6 +3,7 @@ SOAP handling of <any>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
+precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
@@ -56,34 +57,34 @@ var_dump($ret);
 ?>
 --EXPECT--
 object(stdClass)#5 (1) {
-  [u"inputAny"]=>
+  ["inputAny"]=>
   object(stdClass)#6 (1) {
-    [u"any"]=>
+    ["any"]=>
     array(1) {
-      [u"SOAPComplexType"]=>
+      ["SOAPComplexType"]=>
       object(SOAPComplexType)#7 (3) {
-        [u"varInt"]=>
+        ["varInt"]=>
         int(34)
-        [u"varString"]=>
-        unicode(3) "arg"
-        [u"varFloat"]=>
+        ["varString"]=>
+        string(3) "arg"
+        ["varFloat"]=>
         float(325.325)
       }
     }
   }
 }
 object(stdClass)#8 (1) {
-  [u"return"]=>
+  ["return"]=>
   object(stdClass)#9 (1) {
-    [u"any"]=>
+    ["any"]=>
     array(1) {
-      [u"SOAPComplexType"]=>
+      ["SOAPComplexType"]=>
       object(SOAPComplexType)#10 (3) {
-        [u"varInt"]=>
+        ["varInt"]=>
         int(34)
-        [u"varString"]=>
-        unicode(3) "arg"
-        [u"varFloat"]=>
+        ["varString"]=>
+        string(3) "arg"
+        ["varFloat"]=>
         float(325.325)
       }
     }

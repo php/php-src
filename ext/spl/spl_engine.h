@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,7 +24,6 @@
 #include "php.h"
 #include "php_spl.h"
 #include "zend_interfaces.h"
-#include "zend_unicode.h"
 
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
 
@@ -34,8 +33,8 @@ PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
 static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC)
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
-
-	zend_u_call_method(retval, pce, &pce->constructor, IS_UNICODE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
+	
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -45,7 +44,7 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, 
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
 	
-	zend_u_call_method(retval, pce, &pce->constructor, IS_UNICODE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */

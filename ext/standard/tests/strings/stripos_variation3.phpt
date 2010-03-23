@@ -1,5 +1,5 @@
 --TEST--
-Test stripos() function : usage variations - multiline heredoc strings for 'haystack' arguments
+Test stripos() function : usage variations - multi line heredoc string for 'haystack' argument
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
@@ -7,7 +7,9 @@ Test stripos() function : usage variations - multiline heredoc strings for 'hays
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing multi-line heredoc string for 'haystack' arguments */
+/* Test stripos() function by passing multi-line heredoc string for haystack and 
+ *  with various needles & offsets
+*/
 
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing multi lines --\n";
@@ -30,8 +32,6 @@ echo "*** Done ***";
 int(14)
 int(23)
 int(23)
-
-Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 int(7)
 *** Done ***

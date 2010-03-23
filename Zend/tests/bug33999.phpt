@@ -19,8 +19,8 @@ var_dump($baz);
 ?>
 --EXPECTF--
 object(Foo)#1 (1) {
-  [u"bar"]=>
-  unicode(3) "bat"
+  ["bar"]=>
+  string(3) "bat"
 }
 
 Notice: Object of class Foo could not be converted to int in %sbug33999.php on line 9

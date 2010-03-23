@@ -33,217 +33,217 @@ Accessing children nodes
 --EXPECT--
 bool(true)
 object(tidyNode)#3 (9) {
-  [u"value"]=>
-  unicode(31) "<head>
+  ["value"]=>
+  string(31) "<head>
 <title></title>
 </head>
 "
-  [u"name"]=>
-  unicode(4) "head"
-  [u"type"]=>
+  ["name"]=>
+  string(4) "head"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(7)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(46)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(1) {
     [0]=>
     &object(tidyNode)#4 (9) {
-      [u"value"]=>
-      unicode(16) "<title></title>
+      ["value"]=>
+      string(16) "<title></title>
 "
-      [u"name"]=>
-      unicode(5) "title"
-      [u"type"]=>
+      ["name"]=>
+      string(5) "title"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(87)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(111)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
   }
 }
 bool(true)
 object(tidyNode)#4 (9) {
-  [u"value"]=>
-  unicode(16) "<title></title>
+  ["value"]=>
+  string(16) "<title></title>
 "
-  [u"name"]=>
-  unicode(5) "title"
-  [u"type"]=>
+  ["name"]=>
+  string(5) "title"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(87)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(111)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   NULL
 }
 object(tidyNode)#5 (9) {
-  [u"value"]=>
-  unicode(80) "<body bgcolor="#FFFFFF" alink="#000000">
+  ["value"]=>
+  string(80) "<body bgcolor="#FFFFFF" alink="#000000">
 <b>Hi</b><i>Bye<u>Test</u></i>
 </body>
 "
-  [u"name"]=>
-  unicode(4) "body"
-  [u"type"]=>
+  ["name"]=>
+  string(4) "body"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(7)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(16)
-  [u"attribute"]=>
+  ["attribute"]=>
   array(2) {
-    [u"bgcolor"]=>
-    unicode(7) "#FFFFFF"
-    [u"alink"]=>
-    unicode(7) "#000000"
+    ["bgcolor"]=>
+    string(7) "#FFFFFF"
+    ["alink"]=>
+    string(7) "#000000"
   }
-  [u"child"]=>
+  ["child"]=>
   array(2) {
     [0]=>
     &object(tidyNode)#6 (9) {
-      [u"value"]=>
-      unicode(9) "<b>Hi</b>"
-      [u"name"]=>
-      unicode(1) "b"
-      [u"type"]=>
+      ["value"]=>
+      string(9) "<b>Hi</b>"
+      ["name"]=>
+      string(1) "b"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(43)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(8)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       array(1) {
         [0]=>
         &object(tidyNode)#7 (8) {
-          [u"value"]=>
-          unicode(2) "Hi"
-          [u"name"]=>
-          unicode(0) ""
-          [u"type"]=>
+          ["value"]=>
+          string(2) "Hi"
+          ["name"]=>
+          string(0) ""
+          ["type"]=>
           int(4)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(46)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           NULL
         }
       }
     }
     [1]=>
     &object(tidyNode)#8 (9) {
-      [u"value"]=>
-      unicode(21) "<i>Bye<u>Test</u></i>"
-      [u"name"]=>
-      unicode(1) "i"
-      [u"type"]=>
+      ["value"]=>
+      string(21) "<i>Bye<u>Test</u></i>"
+      ["name"]=>
+      string(1) "i"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(52)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(49)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       array(2) {
         [0]=>
         &object(tidyNode)#9 (8) {
-          [u"value"]=>
-          unicode(3) "Bye"
-          [u"name"]=>
-          unicode(0) ""
-          [u"type"]=>
+          ["value"]=>
+          string(3) "Bye"
+          ["name"]=>
+          string(0) ""
+          ["type"]=>
           int(4)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(55)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           NULL
         }
         [1]=>
         &object(tidyNode)#10 (9) {
-          [u"value"]=>
-          unicode(11) "<u>Test</u>"
-          [u"name"]=>
-          unicode(1) "u"
-          [u"type"]=>
+          ["value"]=>
+          string(11) "<u>Test</u>"
+          ["name"]=>
+          string(1) "u"
+          ["type"]=>
           int(5)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(58)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"id"]=>
+          ["id"]=>
           int(114)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           array(1) {
             [0]=>
             &object(tidyNode)#11 (8) {
-              [u"value"]=>
-              unicode(4) "Test"
-              [u"name"]=>
-              unicode(0) ""
-              [u"type"]=>
+              ["value"]=>
+              string(4) "Test"
+              ["name"]=>
+              string(0) ""
+              ["type"]=>
               int(4)
-              [u"line"]=>
+              ["line"]=>
               int(1)
-              [u"column"]=>
+              ["column"]=>
               int(61)
-              [u"proprietary"]=>
+              ["proprietary"]=>
               bool(false)
-              [u"attribute"]=>
+              ["attribute"]=>
               NULL
-              [u"child"]=>
+              ["child"]=>
               NULL
             }
           }
@@ -254,139 +254,139 @@ object(tidyNode)#5 (9) {
 }
 bool(true)
 object(tidyNode)#6 (9) {
-  [u"value"]=>
-  unicode(9) "<b>Hi</b>"
-  [u"name"]=>
-  unicode(1) "b"
-  [u"type"]=>
+  ["value"]=>
+  string(9) "<b>Hi</b>"
+  ["name"]=>
+  string(1) "b"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(43)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(8)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(1) {
     [0]=>
     &object(tidyNode)#7 (8) {
-      [u"value"]=>
-      unicode(2) "Hi"
-      [u"name"]=>
-      unicode(0) ""
-      [u"type"]=>
+      ["value"]=>
+      string(2) "Hi"
+      ["name"]=>
+      string(0) ""
+      ["type"]=>
       int(4)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(46)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
   }
 }
 bool(true)
 object(tidyNode)#7 (8) {
-  [u"value"]=>
-  unicode(2) "Hi"
-  [u"name"]=>
-  unicode(0) ""
-  [u"type"]=>
+  ["value"]=>
+  string(2) "Hi"
+  ["name"]=>
+  string(0) ""
+  ["type"]=>
   int(4)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(46)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   NULL
 }
 object(tidyNode)#8 (9) {
-  [u"value"]=>
-  unicode(21) "<i>Bye<u>Test</u></i>"
-  [u"name"]=>
-  unicode(1) "i"
-  [u"type"]=>
+  ["value"]=>
+  string(21) "<i>Bye<u>Test</u></i>"
+  ["name"]=>
+  string(1) "i"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(52)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(49)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(2) {
     [0]=>
     &object(tidyNode)#9 (8) {
-      [u"value"]=>
-      unicode(3) "Bye"
-      [u"name"]=>
-      unicode(0) ""
-      [u"type"]=>
+      ["value"]=>
+      string(3) "Bye"
+      ["name"]=>
+      string(0) ""
+      ["type"]=>
       int(4)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(55)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
     [1]=>
     &object(tidyNode)#10 (9) {
-      [u"value"]=>
-      unicode(11) "<u>Test</u>"
-      [u"name"]=>
-      unicode(1) "u"
-      [u"type"]=>
+      ["value"]=>
+      string(11) "<u>Test</u>"
+      ["name"]=>
+      string(1) "u"
+      ["type"]=>
       int(5)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(58)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"id"]=>
+      ["id"]=>
       int(114)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       array(1) {
         [0]=>
         &object(tidyNode)#11 (8) {
-          [u"value"]=>
-          unicode(4) "Test"
-          [u"name"]=>
-          unicode(0) ""
-          [u"type"]=>
+          ["value"]=>
+          string(4) "Test"
+          ["name"]=>
+          string(0) ""
+          ["type"]=>
           int(4)
-          [u"line"]=>
+          ["line"]=>
           int(1)
-          [u"column"]=>
+          ["column"]=>
           int(61)
-          [u"proprietary"]=>
+          ["proprietary"]=>
           bool(false)
-          [u"attribute"]=>
+          ["attribute"]=>
           NULL
-          [u"child"]=>
+          ["child"]=>
           NULL
         }
       }
@@ -395,79 +395,79 @@ object(tidyNode)#8 (9) {
 }
 bool(true)
 object(tidyNode)#9 (8) {
-  [u"value"]=>
-  unicode(3) "Bye"
-  [u"name"]=>
-  unicode(0) ""
-  [u"type"]=>
+  ["value"]=>
+  string(3) "Bye"
+  ["name"]=>
+  string(0) ""
+  ["type"]=>
   int(4)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(55)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   NULL
 }
 object(tidyNode)#10 (9) {
-  [u"value"]=>
-  unicode(11) "<u>Test</u>"
-  [u"name"]=>
-  unicode(1) "u"
-  [u"type"]=>
+  ["value"]=>
+  string(11) "<u>Test</u>"
+  ["name"]=>
+  string(1) "u"
+  ["type"]=>
   int(5)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(58)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"id"]=>
+  ["id"]=>
   int(114)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   array(1) {
     [0]=>
     &object(tidyNode)#11 (8) {
-      [u"value"]=>
-      unicode(4) "Test"
-      [u"name"]=>
-      unicode(0) ""
-      [u"type"]=>
+      ["value"]=>
+      string(4) "Test"
+      ["name"]=>
+      string(0) ""
+      ["type"]=>
       int(4)
-      [u"line"]=>
+      ["line"]=>
       int(1)
-      [u"column"]=>
+      ["column"]=>
       int(61)
-      [u"proprietary"]=>
+      ["proprietary"]=>
       bool(false)
-      [u"attribute"]=>
+      ["attribute"]=>
       NULL
-      [u"child"]=>
+      ["child"]=>
       NULL
     }
   }
 }
 bool(true)
 object(tidyNode)#11 (8) {
-  [u"value"]=>
-  unicode(4) "Test"
-  [u"name"]=>
-  unicode(0) ""
-  [u"type"]=>
+  ["value"]=>
+  string(4) "Test"
+  ["name"]=>
+  string(0) ""
+  ["type"]=>
   int(4)
-  [u"line"]=>
+  ["line"]=>
   int(1)
-  [u"column"]=>
+  ["column"]=>
   int(61)
-  [u"proprietary"]=>
+  ["proprietary"]=>
   bool(false)
-  [u"attribute"]=>
+  ["attribute"]=>
   NULL
-  [u"child"]=>
+  ["child"]=>
   NULL
 }

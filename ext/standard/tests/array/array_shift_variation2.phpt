@@ -165,10 +165,10 @@ array(3) {
 }
 
 -- Iteration 5: empty string data --
-unicode(0) ""
+string(0) ""
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 6: empty array data --
@@ -177,12 +177,12 @@ array(0) {
 }
 
 -- Iteration 7: string data --
-unicode(6) "string"
+string(6) "string"
 array(2) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
 }
 
 -- Iteration 8: object data --

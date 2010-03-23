@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -496,6 +496,11 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			}
 			return 1;
 
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			convert_to_boolean(val);
+			H->fetch_table_names = Z_BVAL_P(val);
+			return 1;
+
 		case PDO_FB_ATTR_DATE_FORMAT:
 			convert_to_string(val);
 			if (H->date_format) {
@@ -606,7 +611,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 			strcpy(&buf[i++], " ");
 		}
 		add_next_index_string(info, buf, 1);
-	} else {
+	} else if (H->last_app_error) {
 		add_next_index_long(info, -999);
 		add_next_index_string(info, const_cast(H->last_app_error),1);
 	}
@@ -671,7 +676,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		dbh->methods = &firebird_methods;
 		dbh->native_case = PDO_CASE_UPPER;
 		dbh->alloc_own_columns = 1;
-
+		
 		ret = 1;
 		
 	} while (0);

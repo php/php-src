@@ -11,3 +11,4 @@ $obj = new foo("Hello world");
 ?>
 --EXPECTF--
 Fatal error: Cannot re-assign $this in %sbug41117_1.php on line 3
+

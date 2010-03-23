@@ -57,20 +57,20 @@ echo "done\n";
 Parameters from twoArgMethod:
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(12) "theIncrement"
+  ["name"]=>
+  string(12) "theIncrement"
 }
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(12) "anotherParam"
+  ["name"]=>
+  string(12) "anotherParam"
 }
 
 Parameters from oneArgNonStatic:
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(8) "theParam"
+  ["name"]=>
+  string(8) "theParam"
 }
 
 Parameters from noArgs:

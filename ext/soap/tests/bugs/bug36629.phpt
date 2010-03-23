@@ -27,7 +27,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -42,7 +42,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ?>
 --EXPECT--

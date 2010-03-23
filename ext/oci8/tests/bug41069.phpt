@@ -10,9 +10,9 @@ if ($test_drcp) die("skip DRCP does not support shared database links");
 --INI--
 oci8.default_prefetch=5
 --FILE--
-<?php
+	<?php
 
-require(dirname(__FILE__).'/connect.inc');
+	require(dirname(__FILE__).'/connect.inc');
 
 // Initialization
 
@@ -96,180 +96,180 @@ Test 1: non-DB link case that always worked
 array(3) {
   [0]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "111"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
+    ["C1"]=>
+    string(3) "111"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
     NULL
-    [u"C4"]=>
+    ["C4"]=>
     NULL
-    [u"C5"]=>
-    unicode(1) "b"
-    [u"C6"]=>
-    unicode(1) "c"
-    [u"C7"]=>
+    ["C5"]=>
+    string(1) "b"
+    ["C6"]=>
+    string(1) "c"
+    ["C7"]=>
     NULL
-    [u"C8"]=>
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "01/17/2008"
-    [u"C10"]=>
-    unicode(10) "01/07/2017"
-    [u"C12"]=>
-    unicode(4) "2222"
-    [u"C13"]=>
+    ["C9"]=>
+    string(10) "01/17/2008"
+    ["C10"]=>
+    string(10) "01/07/2017"
+    ["C12"]=>
+    string(4) "2222"
+    ["C13"]=>
     NULL
-    [u"C15"]=>
-    unicode(10) "zzzzzzzzzz"
+    ["C15"]=>
+    string(10) "zzzzzzzzzz"
   }
   [1]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "112"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
-    unicode(8) "bbbbbbbb"
-    [u"C4"]=>
-    unicode(7) "ccccccc"
-    [u"C5"]=>
-    unicode(1) "d"
-    [u"C6"]=>
-    unicode(1) "e"
-    [u"C7"]=>
-    unicode(7) "rrrrrrr"
-    [u"C8"]=>
+    ["C1"]=>
+    string(3) "112"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
+    string(8) "bbbbbbbb"
+    ["C4"]=>
+    string(7) "ccccccc"
+    ["C5"]=>
+    string(1) "d"
+    ["C6"]=>
+    string(1) "e"
+    ["C7"]=>
+    string(7) "rrrrrrr"
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "04/16/2007"
-    [u"C10"]=>
-    unicode(10) "04/16/2007"
-    [u"C12"]=>
-    unicode(4) "2223"
-    [u"C13"]=>
-    unicode(8) "xxxxxxxx"
-    [u"C15"]=>
-    unicode(8) "zzzzzzzz"
+    ["C9"]=>
+    string(10) "04/16/2007"
+    ["C10"]=>
+    string(10) "04/16/2007"
+    ["C12"]=>
+    string(4) "2223"
+    ["C13"]=>
+    string(8) "xxxxxxxx"
+    ["C15"]=>
+    string(8) "zzzzzzzz"
   }
   [2]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "113"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
-    unicode(10) "bbbbbbbbbb"
-    [u"C4"]=>
-    unicode(6) "cccccc"
-    [u"C5"]=>
-    unicode(1) "e"
-    [u"C6"]=>
-    unicode(1) "f"
-    [u"C7"]=>
-    unicode(4) "dddd"
-    [u"C8"]=>
+    ["C1"]=>
+    string(3) "113"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
+    string(10) "bbbbbbbbbb"
+    ["C4"]=>
+    string(6) "cccccc"
+    ["C5"]=>
+    string(1) "e"
+    ["C6"]=>
+    string(1) "f"
+    ["C7"]=>
+    string(4) "dddd"
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "12/04/2006"
-    [u"C10"]=>
-    unicode(10) "12/04/2006"
-    [u"C12"]=>
-    unicode(4) "2224"
-    [u"C13"]=>
+    ["C9"]=>
+    string(10) "12/04/2006"
+    ["C10"]=>
+    string(10) "12/04/2006"
+    ["C12"]=>
+    string(4) "2224"
+    ["C13"]=>
     NULL
-    [u"C15"]=>
-    unicode(7) "zzzzzzz"
+    ["C15"]=>
+    string(7) "zzzzzzz"
   }
 }
 Test 2: Should not crash
 array(3) {
   [0]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "111"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
+    ["C1"]=>
+    string(3) "111"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
     NULL
-    [u"C4"]=>
+    ["C4"]=>
     NULL
-    [u"C5"]=>
-    unicode(1) "b"
-    [u"C6"]=>
-    unicode(1) "c"
-    [u"C7"]=>
+    ["C5"]=>
+    string(1) "b"
+    ["C6"]=>
+    string(1) "c"
+    ["C7"]=>
     NULL
-    [u"C8"]=>
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "01/17/2008"
-    [u"C10"]=>
-    unicode(10) "01/07/2017"
-    [u"C12"]=>
-    unicode(4) "2222"
-    [u"C13"]=>
+    ["C9"]=>
+    string(10) "01/17/2008"
+    ["C10"]=>
+    string(10) "01/07/2017"
+    ["C12"]=>
+    string(4) "2222"
+    ["C13"]=>
     NULL
-    [u"C15"]=>
-    unicode(10) "zzzzzzzzzz"
+    ["C15"]=>
+    string(10) "zzzzzzzzzz"
   }
   [1]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "112"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
-    unicode(8) "bbbbbbbb"
-    [u"C4"]=>
-    unicode(7) "ccccccc"
-    [u"C5"]=>
-    unicode(1) "d"
-    [u"C6"]=>
-    unicode(1) "e"
-    [u"C7"]=>
-    unicode(7) "rrrrrrr"
-    [u"C8"]=>
+    ["C1"]=>
+    string(3) "112"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
+    string(8) "bbbbbbbb"
+    ["C4"]=>
+    string(7) "ccccccc"
+    ["C5"]=>
+    string(1) "d"
+    ["C6"]=>
+    string(1) "e"
+    ["C7"]=>
+    string(7) "rrrrrrr"
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "04/16/2007"
-    [u"C10"]=>
-    unicode(10) "04/16/2007"
-    [u"C12"]=>
-    unicode(4) "2223"
-    [u"C13"]=>
-    unicode(8) "xxxxxxxx"
-    [u"C15"]=>
-    unicode(8) "zzzzzzzz"
+    ["C9"]=>
+    string(10) "04/16/2007"
+    ["C10"]=>
+    string(10) "04/16/2007"
+    ["C12"]=>
+    string(4) "2223"
+    ["C13"]=>
+    string(8) "xxxxxxxx"
+    ["C15"]=>
+    string(8) "zzzzzzzz"
   }
   [2]=>
   array(13) {
-    [u"C1"]=>
-    unicode(3) "113"
-    [u"C2"]=>
-    unicode(7) "aaaaaaa"
-    [u"C3"]=>
-    unicode(10) "bbbbbbbbbb"
-    [u"C4"]=>
-    unicode(6) "cccccc"
-    [u"C5"]=>
-    unicode(1) "e"
-    [u"C6"]=>
-    unicode(1) "f"
-    [u"C7"]=>
-    unicode(4) "dddd"
-    [u"C8"]=>
+    ["C1"]=>
+    string(3) "113"
+    ["C2"]=>
+    string(7) "aaaaaaa"
+    ["C3"]=>
+    string(10) "bbbbbbbbbb"
+    ["C4"]=>
+    string(6) "cccccc"
+    ["C5"]=>
+    string(1) "e"
+    ["C6"]=>
+    string(1) "f"
+    ["C7"]=>
+    string(4) "dddd"
+    ["C8"]=>
     NULL
-    [u"C9"]=>
-    unicode(10) "12/04/2006"
-    [u"C10"]=>
-    unicode(10) "12/04/2006"
-    [u"C12"]=>
-    unicode(4) "2224"
-    [u"C13"]=>
+    ["C9"]=>
+    string(10) "12/04/2006"
+    ["C10"]=>
+    string(10) "12/04/2006"
+    ["C12"]=>
+    string(4) "2224"
+    ["C13"]=>
     NULL
-    [u"C15"]=>
-    unicode(7) "zzzzzzz"
+    ["C15"]=>
+    string(7) "zzzzzzz"
   }
 }
 Done

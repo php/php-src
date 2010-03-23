@@ -59,66 +59,66 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripslashes() : with strings containing newline and tab characters ***
 
 -- Iteration 1 --
-unicode(1) "
+string(1) "
 "
 
 -- Iteration 2 --
-unicode(1) "n"
+string(1) "n"
 
 -- Iteration 3 --
-unicode(12) "Hello 
+string(12) "Hello 
 world"
 
 -- Iteration 4 --
-unicode(12) "Hello nworld"
+string(12) "Hello nworld"
 
 -- Iteration 5 --
-unicode(1) "n"
+string(1) "n"
 
 -- Iteration 6 --
-unicode(1) "n"
+string(1) "n"
 
 -- Iteration 7 --
-unicode(12) "Hello nworld"
+string(12) "Hello nworld"
 
 -- Iteration 8 --
-unicode(12) "Hello nworld"
+string(12) "Hello nworld"
 
 -- Iteration 9 --
-unicode(71) "This is line 1 
+string(71) "This is line 1 
 of 'heredoc' string
 This is line 2 
 of "heredoc" string"
 
 -- Iteration 10 --
-unicode(1) "	"
+string(1) "	"
 
 -- Iteration 11 --
-unicode(1) "t"
+string(1) "t"
 
 -- Iteration 12 --
-unicode(12) "Hello 	world"
+string(12) "Hello 	world"
 
 -- Iteration 13 --
-unicode(12) "Hello tworld"
+string(12) "Hello tworld"
 
 -- Iteration 14 --
-unicode(1) "t"
+string(1) "t"
 
 -- Iteration 15 --
-unicode(1) "t"
+string(1) "t"
 
 -- Iteration 16 --
-unicode(12) "Hello tworld"
+string(12) "Hello tworld"
 
 -- Iteration 17 --
-unicode(12) "Hello tworld"
+string(12) "Hello tworld"
 
 -- Iteration 18 --
-unicode(71) "This is line 1 	of 'heredoc' string
+string(71) "This is line 1 	of 'heredoc' string
 This is line 2 	of "heredoc" string"
 Done

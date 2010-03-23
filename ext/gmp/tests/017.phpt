@@ -24,20 +24,20 @@ var_dump(gmp_sqrt(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: gmp_sqrt(): Number has to be greater than or equal to 0 in %s on line %d
-unicode(1) "0"
+string(1) "0"
 
 Warning: gmp_sqrt(): Number has to be greater than or equal to 0 in %s on line %d
-unicode(1) "0"
-unicode(1) "0"
-unicode(1) "1"
-unicode(2) "12"
-unicode(1) "0"
+string(1) "0"
+string(1) "0"
+string(1) "1"
+string(2) "12"
+string(1) "0"
 
 Warning: gmp_sqrt(): Number has to be greater than or equal to 0 in %s on line %d
-unicode(1) "0"
-unicode(2) "27"
+string(1) "0"
+string(2) "27"
 
 Warning: gmp_sqrt() expects exactly 1 parameter, 2 given in %s on line %d
 NULL

@@ -5,7 +5,7 @@ SimpleXML: casting instances
 --FILE--
 <?php
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
 test
   <person name="Joe"/>
@@ -18,7 +18,7 @@ test
 </people>
 EOF;
 
-$foo = simplexml_load_string( b"<foo />" );
+$foo = simplexml_load_string( "<foo />" );
 $people = simplexml_load_string($xml);
 
 var_dump((bool)$foo);
@@ -43,8 +43,8 @@ int(0)
 int(0)
 float(0)
 float(0)
-unicode(0) ""
-unicode(15) "
+string(0) ""
+string(15) "
 test
   
   
@@ -53,41 +53,41 @@ test
 array(0) {
 }
 array(1) {
-  [u"person"]=>
+  ["person"]=>
   array(3) {
     [0]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(3) "Joe"
+        ["name"]=>
+        string(3) "Joe"
       }
     }
     [1]=>
     object(SimpleXMLElement)#%d (2) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(4) "John"
+        ["name"]=>
+        string(4) "John"
       }
-      [u"children"]=>
+      ["children"]=>
       object(SimpleXMLElement)#%d (1) {
-        [u"person"]=>
+        ["person"]=>
         object(SimpleXMLElement)#%d (1) {
-          [u"@attributes"]=>
+          ["@attributes"]=>
           array(1) {
-            [u"name"]=>
-            unicode(3) "Joe"
+            ["name"]=>
+            string(3) "Joe"
           }
         }
       }
     }
     [2]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(4) "Jane"
+        ["name"]=>
+        string(4) "Jane"
       }
     }
   }
@@ -95,41 +95,41 @@ array(1) {
 object(SimpleXMLElement)#%d (0) {
 }
 object(SimpleXMLElement)#%d (1) {
-  [u"person"]=>
+  ["person"]=>
   array(3) {
     [0]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(3) "Joe"
+        ["name"]=>
+        string(3) "Joe"
       }
     }
     [1]=>
     object(SimpleXMLElement)#%d (2) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(4) "John"
+        ["name"]=>
+        string(4) "John"
       }
-      [u"children"]=>
+      ["children"]=>
       object(SimpleXMLElement)#%d (1) {
-        [u"person"]=>
+        ["person"]=>
         object(SimpleXMLElement)#%d (1) {
-          [u"@attributes"]=>
+          ["@attributes"]=>
           array(1) {
-            [u"name"]=>
-            unicode(3) "Joe"
+            ["name"]=>
+            string(3) "Joe"
           }
         }
       }
     }
     [2]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(1) {
-        [u"name"]=>
-        unicode(4) "Jane"
+        ["name"]=>
+        string(4) "Jane"
       }
     }
   }

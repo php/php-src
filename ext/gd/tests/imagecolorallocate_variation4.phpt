@@ -15,7 +15,6 @@ if(!function_exists('imagecreatetruecolor')) {
  * Description:  Allocate a color for an image
  * Source code: ext/gd/gd.c
  */
-
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $im = imagecreatetruecolor(200, 200);
@@ -163,32 +162,32 @@ int(657920)
 
 --empty string DQ--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: imagecolorallocate() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: imagecolorallocate() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 --instance of classWithToString--

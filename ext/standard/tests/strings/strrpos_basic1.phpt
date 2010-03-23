@@ -28,13 +28,9 @@ var_dump( strrpos($heredoc_str, "Hello, World") );
 var_dump( strrpos($heredoc_str, 'Hello') );
 var_dump( strrpos($heredoc_str, $heredoc_str) );
 
-//unicodes
-var_dump( strrpos("Hello, World", (unicode)"o") );
-var_dump( strrpos((unicode)"Hello, World", ",") );
-
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: basic functionality ***
 -- With default arguments --
 int(0)
@@ -46,6 +42,4 @@ int(5)
 int(0)
 int(0)
 int(0)
-int(8)
-int(5)
 *** Done ***

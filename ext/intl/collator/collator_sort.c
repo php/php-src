@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,6 +47,8 @@ static const size_t DEF_SORT_KEYS_BUF_INCREMENT = 1048576;
 static const size_t DEF_SORT_KEYS_INDX_BUF_SIZE = 1048576;
 static const size_t DEF_SORT_KEYS_INDX_BUF_INCREMENT = 1048576;
 
+static const size_t DEF_UTF16_BUF_SIZE = 1024;
+
 /* {{{ collator_regular_compare_function */
 static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
@@ -63,9 +65,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 	zval* norm2 = NULL;
 
 	/* If both args are strings AND either of args is not numeric string
-	 * then use ICU-compare. Otherwise PHP-compare.
-	 */
-	if( Z_TYPE_P(str1) == IS_UNICODE && Z_TYPE_P(str2) == IS_UNICODE &&
+	 * then use ICU-compare. Otherwise PHP-compare. */
+	if( Z_TYPE_P(str1) == IS_STRING && Z_TYPE_P(str2) == IS_STRING &&
 		( str1 == ( num1 = collator_convert_string_to_number_if_possible( str1 ) ) ||
 		  str2 == ( num2 = collator_convert_string_to_number_if_possible( str2 ) ) ) )
 	{
@@ -86,9 +87,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		{
 			if( num1 == str1 )
 			{
-				/* str1 is string but not numeric string */
-				zval_add_ref( &num1 );
-				norm1 = num1;
+				/* str1 is string but not numeric string
+				 * just convert it to utf8. 
+				 */
+				norm1 = collator_convert_zstr_utf16_to_utf8( str1 );
 
 				/* num2 is not set but str2 is string => do normalization. */
 				norm2 = collator_normalize_sort_argument( str2 );
@@ -141,13 +143,13 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2 
 	zval* num1 = NULL;
 	zval* num2 = NULL;
 
-	if( Z_TYPE_P(op1) == IS_UNICODE )
+	if( Z_TYPE_P(op1) == IS_STRING )
 	{
 		num1 = collator_convert_string_to_double( op1 );
 		op1 = num1;
 	}
 
-	if( Z_TYPE_P(op2) == IS_UNICODE )
+	if( Z_TYPE_P(op2) == IS_STRING )
 	{
 		num2 = collator_convert_string_to_double( op2 );
 		op2 = num2;
@@ -304,6 +306,10 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	hash = HASH_OF( array );
 
+	/* Convert strings in the specified array from UTF-8 to UTF-16. */
+	collator_convert_hash_from_utf8_to_utf16( hash, COLLATOR_ERROR_CODE_P( co ) );
+	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-8 to UTF-16" );
+
 	/* Save specified collator in the request-global (?) variable. */
 	saved_collator = INTL_G( current_collator );
 	INTL_G( current_collator ) = object;
@@ -313,6 +319,10 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	/* Restore saved collator. */
 	INTL_G( current_collator ) = saved_collator;
+
+	/* Convert strings in the specified array back to UTF-8. */
+	collator_convert_hash_from_utf16_to_utf8( hash, COLLATOR_ERROR_CODE_P( co ) );
+	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-16 to UTF-8" );
 
 	RETURN_TRUE;
 }
@@ -357,6 +367,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	uint32_t    j                    = 0;
 
 	UChar*      utf16_buf            = NULL;                     /* tmp buffer to hold current processing string in utf-16 */
+	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;       /* the length of utf16_buf */
 	int         utf16_len            = 0;                        /* length of converted string */
 
 	HashTable* sortedHash            = NULL;
@@ -388,24 +399,44 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/* Create bufers */
 	sortKeyBuf     = ecalloc( sortKeyBufSize,     sizeof( char    ) );
 	sortKeyIndxBuf = ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) );
+	utf16_buf      = eumalloc( utf16_buf_size );
 
 	/* Iterate through input hash and create a sort key for each value. */
 	zend_hash_internal_pointer_reset( hash );
 	while( zend_hash_get_current_data( hash, (void**) &hashData ) == SUCCESS )
 	{
-		/* Process string values only. */
+		/* Convert current hash item from UTF-8 to UTF-16LE and save the result to utf16_buf. */
 
-		if( Z_TYPE_PP( hashData ) == IS_UNICODE )
+		utf16_len = utf16_buf_size;
+
+		/* Process string values only. */
+		if( Z_TYPE_PP( hashData ) == IS_STRING )
 		{
-			utf16_buf = INTL_Z_STRVAL_P( *hashData );
-			utf16_len = INTL_Z_STRLEN_P( *hashData );
+			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_PP( hashData ), Z_STRLEN_PP( hashData ), COLLATOR_ERROR_CODE_P( co ) );
+
+			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
+			{
+				intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+				intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Sort with sort keys failed", 0 TSRMLS_CC );
+
+				if( utf16_buf )
+					efree( utf16_buf );
+
+				efree( sortKeyIndxBuf );
+				efree( sortKeyBuf );
+
+				RETURN_FALSE;
+			}
 		}
 		else
 		{
 			/* Set empty string */
 			utf16_len = 0;
-			utf16_buf = (UChar*) "";
+			utf16_buf[utf16_len] = 0;
 		}
+
+		if( (utf16_len + 1) > utf16_buf_size )
+			utf16_buf_size = utf16_len + 1;
 
 		/* Get sort key, reallocating the buffer if needed. */
 		bufLeft = sortKeyBufSize - sortKeyBufOffset;
@@ -429,7 +460,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			sortKeyLen = ucol_getSortKey( co->ucoll, utf16_buf, utf16_len, (uint8_t*)sortKeyBuf + sortKeyBufOffset, bufLeft );
 		}
 
-		/* check sortKeyIndxBuf overflow, increasing its size of the buffer if needed */
+		/*  check sortKeyIndxBuf overflow, increasing its size of the buffer if needed */
 		if( ( sortKeyCount + 1 ) * sortKeyIndxSize > sortKeyIndxBufSize )
 		{
 			bufIncrement = ( sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT ) ? sortKeyIndxSize : DEF_SORT_KEYS_INDX_BUF_INCREMENT;
@@ -471,6 +502,9 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	(array)->value.ht = sortedHash;
 	(array)->type = IS_ARRAY;
 
+	if( utf16_buf )
+		efree( utf16_buf );
+
 	efree( sortKeyIndxBuf );
 	efree( sortKeyBuf );
 
@@ -495,6 +529,8 @@ PHP_FUNCTION( collator_asort )
  * Get a sort key for a string from a Collator. }}} */
 PHP_FUNCTION( collator_get_sort_key )
 {
+	char*            str      = NULL;
+	int              str_len  = 0;
 	UChar*           ustr     = NULL;
 	int              ustr_len = 0;
 	uint8_t*         key     = NULL;
@@ -503,8 +539,8 @@ PHP_FUNCTION( collator_get_sort_key )
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
-		&object, Collator_ce_ptr, &ustr, &ustr_len ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "collator_get_sort_key: unable to parse input params", 0 TSRMLS_CC );
@@ -515,12 +551,34 @@ PHP_FUNCTION( collator_get_sort_key )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+
+	/*
+	 * Compare given strings (converting them to UTF-16 first).
+	 */
+
+	/* First convert the strings to UTF-16. */
+	intl_convert_utf8_to_utf16(
+		&ustr, &ustr_len, str, str_len, COLLATOR_ERROR_CODE_P( co ) );
+	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
+	{
+		/* Set global error code. */
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+
+		/* Set error messages. */
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
+			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
+		efree( ustr );
+		RETURN_FALSE;
+	}
+
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
 	if(!key_len) {
+		efree( ustr );
 		RETURN_FALSE;
 	}
 	key = emalloc(key_len);
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, key_len);
+	efree( ustr );
 	if(!key_len) {
 		RETURN_FALSE;
 	}

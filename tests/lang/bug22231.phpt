@@ -29,14 +29,14 @@ var_dump($foo->fubar);
 --EXPECTF--
 Deprecated: Assigning the return value of new by reference is deprecated in %s on line %d
 object(foo)#%d (1) {
-  [u"fubar"]=>
-  unicode(5) "fubar"
+  ["fubar"]=>
+  string(5) "fubar"
 }
-unicode(5) "fubar"
-unicode(5) "fubar"
+string(5) "fubar"
+string(5) "fubar"
 object(foo)#%d (1) {
-  [u"fubar"]=>
-  unicode(5) "fubar"
+  ["fubar"]=>
+  string(5) "fubar"
 }
-unicode(5) "fubar"
-unicode(5) "fubar"
+string(5) "fubar"
+string(5) "fubar"

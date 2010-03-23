@@ -114,13 +114,12 @@ var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) );
 var_dump( is_scalar( new stdclass, new stdclass) );
 
 echo "Done\n";  
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing basic operations ***
 -- Iteration 1 --

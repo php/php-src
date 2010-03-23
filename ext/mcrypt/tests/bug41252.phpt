@@ -5,9 +5,9 @@ Bug #41252 (Calling mcrypt_generic without first calling mcrypt_generic_init cra
 --FILE--
 <?php
 $td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-echo mcrypt_generic($td,b'aaaaaaaa');
+echo mcrypt_generic($td,'aaaaaaaa');
 print "I'm alive!\n";
 ?>
 --EXPECTF--
-Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init() in %sbug41252.php on line 3
+Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init(). in %sbug41252.php on line 3
 I'm alive!

@@ -99,71 +99,71 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --int 0--
-unicode(1) "0"
-unicode(1) "0"
+string(1) "0"
+string(1) "0"
 
 --int 1--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --int 12345--
-unicode(5) "12345"
-unicode(5) "12345"
+string(5) "12345"
+string(5) "12345"
 
 --int -12345--
-unicode(6) "-12345"
-unicode(6) "-12345"
+string(6) "-12345"
+string(6) "-12345"
 
 --float 10.5--
-unicode(4) "10.5"
-unicode(4) "10.5"
+string(4) "10.5"
+string(4) "10.5"
 
 --float -10.5--
-unicode(5) "-10.5"
-unicode(5) "-10.5"
+string(5) "-10.5"
+string(5) "-10.5"
 
 --float 12.3456789000e10--
-unicode(12) "123456789000"
-unicode(12) "123456789000"
+string(12) "123456789000"
+string(12) "123456789000"
 
 --float -12.3456789000e10--
-unicode(13) "-123456789000"
-unicode(13) "-123456789000"
+string(13) "-123456789000"
+string(13) "-123456789000"
 
 --float .5--
-unicode(3) "0.5"
-unicode(3) "0.5"
+string(3) "0.5"
+string(3) "0.5"
 
 --empty array--
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmstrftime() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -175,16 +175,16 @@ bool(false)
 bool(false)
 
 --lowercase true--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --lowercase false--
 bool(false)
 bool(false)
 
 --uppercase TRUE--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --uppercase FALSE--
 bool(false)
@@ -199,15 +199,15 @@ bool(false)
 bool(false)
 
 --instance of classWithToString--
-unicode(14) "Class A object"
-unicode(14) "Class A object"
+string(14) "Class A object"
+string(14) "Class A object"
 
 --instance of classWithoutToString--
 
-Warning: gmstrftime() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
-Warning: gmstrftime() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 --undefined var--

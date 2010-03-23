@@ -6,4 +6,4 @@ date.timezone=UTC
 <?php
 var_dump(date("Y", 1245623227));
 --EXPECT--
-unicode(4) "2009"
+string(4) "2009"

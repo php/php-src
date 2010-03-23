@@ -26,4 +26,4 @@ var_dump(decoct($dirIterator->getInode()));
 rmdir('test_dir_ptfi');
 ?>
 --EXPECTF--
-unicode(%d) "%d"
+string(%d) "%d"

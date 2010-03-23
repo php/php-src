@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -29,31 +29,26 @@
 
 #include "zend_vm.h"
 
-extern int zend_spprintf(char **message, int max_len, char *format, ...);
-
-static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_ctor) {
 		extension->op_array_ctor(op_array);
 	}
 }
-/* }}} */
 
-static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_dtor) {
 		extension->op_array_dtor(op_array);
 	}
 }
-/* }}} */
 
-static void op_array_alloc_ops(zend_op_array *op_array) /* {{{ */
+static void op_array_alloc_ops(zend_op_array *op_array)
 {
 	op_array->opcodes = erealloc(op_array->opcodes, (op_array->size)*sizeof(zend_op));
 }
-/* }}} */
 
-void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC) /* {{{ */
+void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC)
 {
 	op_array->type = type;
 
@@ -78,10 +73,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->T = 0;
 
-	op_array->function_name.v = NULL;
+	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
-	op_array->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
-	op_array->doc_comment.v = NULL;
+	op_array->doc_comment = NULL;
 	op_array->doc_comment_len = 0;
 
 	op_array->arg_info = NULL;
@@ -113,9 +107,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
 }
-/* }}} */
 
-ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC) /* {{{ */
+ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 {
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:
@@ -126,52 +119,22 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_function_dtor(zend_function *function) /* {{{ */
+ZEND_API void zend_function_dtor(zend_function *function)
 {
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
 }
-/* }}} */
 
-ZEND_API void zend_u_function_dtor(zend_function *function) /* {{{ */
-{
-	TSRMLS_FETCH();
-
-	destroy_zend_function(function TSRMLS_CC);
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		if (function->common.function_name.v) {
-			free(function->common.function_name.v);
-		}
-		if (function->common.arg_info) {
-			int n = function->common.num_args;
-
-			while (n > 0) {
-				--n;
-				if (function->common.arg_info[n].name.v) {
-					free(function->common.arg_info[n].name.v);
-				}
-				if (function->common.arg_info[n].class_name.v) {
-					free(function->common.arg_info[n].class_name.v);
-				}
-			}
-			free(function->common.arg_info);
-		}
-	}
-}
-/* }}} */
-
-static void zend_cleanup_op_array_data(zend_op_array *op_array) /* {{{ */
+static void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
 		zend_hash_clean(op_array->static_variables);
 	}
 }
-/* }}} */
 
-ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC) /* {{{ */
+ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
@@ -180,18 +143,16 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC) /* {{
 		return ZEND_HASH_APPLY_STOP;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC) /* {{{ */
+ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 	}
 	return 0;
 }
-/* }}} */
 
-ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 {
 	if ((*pce)->type == ZEND_USER_CLASS) {
 		/* Clean all parts that can contain run-time data */
@@ -210,12 +171,11 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-ZEND_API void destroy_zend_class(zend_class_entry **pce) /* {{{ */
+ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
-
+	
 	if (--ce->refcount > 0) {
 		return;
 	}
@@ -224,14 +184,14 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce) /* {{{ */
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->default_static_members);
-			efree(ce->name.v);
+			efree(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
-			if (ce->doc_comment.v) {
-				efree(ce->doc_comment.v);
+			if (ce->doc_comment) {
+				efree(ce->doc_comment);
 			}
 			efree(ce);
 			break;
@@ -239,28 +199,26 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce) /* {{{ */
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->default_static_members);
-			free(ce->name.v);
+			free(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
-			if (ce->doc_comment.v) {
-				free(ce->doc_comment.v);
+			if (ce->doc_comment) {
+				free(ce->doc_comment);
 			}
 			free(ce);
 			break;
 	}
 }
-/* }}} */
 
-void zend_class_add_ref(zend_class_entry **ce) /* {{{ */
+void zend_class_add_ref(zend_class_entry **ce)
 {
 	(*ce)->refcount++;
 }
-/* }}} */
 
-ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
@@ -281,7 +239,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			efree(op_array->vars[i].name.v);
+			efree(op_array->vars[i].name);
 		}
 		efree(op_array->vars);
 	}
@@ -303,11 +261,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name.v) {
-		efree(op_array->function_name.v);
+	if (op_array->function_name) {
+		efree(op_array->function_name);
 	}
-	if (op_array->doc_comment.v) {
-		efree(op_array->doc_comment.v);
+	if (op_array->doc_comment) {
+		efree(op_array->doc_comment);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
@@ -320,25 +278,23 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	}
 	if (op_array->arg_info) {
 		for (i=0; i<op_array->num_args; i++) {
-			efree(op_array->arg_info[i].name.v);
-			if (op_array->arg_info[i].class_name.v) {
-				efree(op_array->arg_info[i].class_name.v);
+			efree((char*)op_array->arg_info[i].name);
+			if (op_array->arg_info[i].class_name) {
+				efree((char*)op_array->arg_info[i].class_name);
 			}
 		}
 		efree(op_array->arg_info);
 	}
 }
-/* }}} */
 
-void init_op(zend_op *op TSRMLS_DC) /* {{{ */
+void init_op(zend_op *op TSRMLS_DC)
 {
 	memset(op, 0, sizeof(zend_op));
 	op->lineno = CG(zend_lineno);
 	SET_UNUSED(op->result);
 }
-/* }}} */
 
-zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_uint next_op_num = op_array->last++;
 	zend_op *next_op;
@@ -353,30 +309,27 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 		op_array->size *= 4;
 		op_array_alloc_ops(op_array);
 	}
-
+	
 	next_op = &(op_array->opcodes[next_op_num]);
-
+	
 	init_op(next_op TSRMLS_CC);
 
 	return next_op;
 }
-/* }}} */
 
-int get_next_op_number(zend_op_array *op_array) /* {{{ */
+int get_next_op_number(zend_op_array *op_array)
 {
 	return op_array->last;
 }
-/* }}} */
 
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array) /* {{{ */
+zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
 {
 	op_array->last_brk_cont++;
 	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
 	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
 }
-/* }}} */
 
-static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
 
@@ -398,17 +351,15 @@ static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC) /* {{{ 
 		opline++;
 	}
 }
-/* }}} */
 
-static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_handler) {
 		extension->op_array_handler(op_array);
 	}
 }
-/* }}} */
 
-ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
 
@@ -458,28 +409,20 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
-
+	
 	op_array->done_pass_two = 1;
 	return 0;
 }
-/* }}} */
 
-int print_class(zend_class_entry *class_entry TSRMLS_DC) /* {{{ */
+int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
-	char *tmp;
-
-	zend_spprintf(&tmp, 0, "Class %v:\n", class_entry->name);
-	printf("%s", tmp);
-	efree(tmp);
+	printf("Class %s:\n", class_entry->name);
 	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two TSRMLS_CC);
-	zend_spprintf(&tmp, 0, "End of class %v.\n\n", class_entry->name);
-	printf("%s", tmp);
-	efree(tmp);
+	printf("End of class %s.\n\n", class_entry->name);
 	return 0;
 }
-/* }}} */
 
-ZEND_API unary_op_type get_unary_op(int opcode) /* {{{ */
+ZEND_API unary_op_type get_unary_op(int opcode)
 {
 	switch (opcode) {
 		case ZEND_BW_NOT:
@@ -493,9 +436,8 @@ ZEND_API unary_op_type get_unary_op(int opcode) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
-ZEND_API binary_op_type get_binary_op(int opcode) /* {{{ */
+ZEND_API binary_op_type get_binary_op(int opcode)
 {
 	switch (opcode) {
 		case ZEND_ADD:
@@ -568,7 +510,6 @@ ZEND_API binary_op_type get_binary_op(int opcode) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
 /*
  * Local variables:

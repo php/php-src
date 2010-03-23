@@ -19,7 +19,7 @@ include (dirname(__FILE__) . '/../file/file.inc');
 // set up directory
 $directory = dirname(__FILE__) . '/scandir_basic';
 mkdir($directory);
-@create_files($directory, 3);
+create_files($directory, 3);
 
 echo "\n-- scandir() with mandatory arguments --\n";
 var_dump(scandir($directory));
@@ -37,34 +37,34 @@ delete_files($directory, 3);
 $directory = dirname(__FILE__) . '/scandir_basic';
 rmdir($directory);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing scandir() : basic functionality ***
 
 -- scandir() with mandatory arguments --
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [3]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [4]=>
-  unicode(9) "file3.tmp"
+  string(9) "file3.tmp"
 }
 
 -- scandir() with all arguments --
 array(5) {
   [0]=>
-  unicode(9) "file3.tmp"
+  string(9) "file3.tmp"
   [1]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [2]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [3]=>
-  unicode(2) ".."
+  string(2) ".."
   [4]=>
-  unicode(1) "."
+  string(1) "."
 }
 ===DONE===

@@ -37,7 +37,7 @@ var_dump(gmp_strval($n));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
 bool(false)
 bool(false)
@@ -49,12 +49,12 @@ Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on lin
 bool(false)
 bool(false)
 bool(true)
-unicode(7) "1000002"
+string(7) "1000002"
 bool(true)
-unicode(7) "1000034"
+string(7) "1000034"
 bool(false)
 bool(true)
-unicode(30) "238462734628347239571823641266"
+string(30) "238462734628347239571823641266"
 bool(false)
-unicode(30) "238462734628347239571823641234"
+string(30) "238462734628347239571823641234"
 Done

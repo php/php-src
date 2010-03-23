@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -22,7 +22,6 @@
 #define PHP_PDO_DRIVER_H
 
 #include "php_pdo.h"
-#include "php_pdo_phpvers_compat.h"
 
 /* forward declarations */
 typedef struct _pdo_dbh_t 	pdo_dbh_t;

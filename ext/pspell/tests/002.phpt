@@ -29,14 +29,14 @@ if ($res) {
 }
 ?>
 --EXPECTF--
-Warning: pspell_check() expects exactly 2 parameters, 1 given in %s002.php on line %d
+Warning: pspell_check() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 bool(false)
 bool(false)
 bool(true)
 bool(true)
 
-Warning: pspell_clear_session() expects parameter 1 to be long, object given in %s002.php on line %d
+Warning: pspell_clear_session() expects parameter 1 to be long, object given in %s on line %d
 NULL
 bool(true)
 bool(false)

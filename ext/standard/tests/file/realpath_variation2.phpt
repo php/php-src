@@ -52,7 +52,7 @@ bool(false)
 bool(false)
 
 --/--
-unicode(1) "/"
+string(1) "/"
 
 --c:temp--
 bool(false)
@@ -61,7 +61,7 @@ bool(false)
 bool(false)
 
 --/tmp/--
-unicode(%d) %s/tmp"
+string(%d) %s/tmp"
 
 --/tmp/\--
 bool(false)

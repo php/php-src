@@ -23,6 +23,6 @@ echo "Done";
 
 -- Testing get_class() function with more than expected no. of arguments --
 
-Warning: get_class() expects at most 1 parameter, 2 given in %s on line %d
+Warning: get_class() expects at most 1 parameter, 2 given in %s on line 14
 bool(false)
 Done

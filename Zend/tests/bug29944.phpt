@@ -13,3 +13,4 @@ switch ($a) {
 ?>
 --EXPECT--
 ok
+

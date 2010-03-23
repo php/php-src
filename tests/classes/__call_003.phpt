@@ -21,12 +21,13 @@ Force pass-by-reference to __call
   
   var_dump($a, $b);
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 array(1) {
   [0]=>
-  &unicode(7) "changed"
+  &string(7) "changed"
 }
+

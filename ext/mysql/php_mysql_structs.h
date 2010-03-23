@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -17,12 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
+
 /* $Id$ */
 
 #ifndef PHP_MYSQL_STRUCTS_H
 #define PHP_MYSQL_STRUCTS_H
-
-#if HAVE_MYSQL
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -50,13 +49,9 @@
 #define MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
 #endif
 
-#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || MYSQL_USE_MYSQLND
+#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || defined(MYSQL_USE_MYSQLND)
 #define MYSQL_HAS_SET_CHARSET
 #endif
-
-extern zend_module_entry mysql_module_entry;
-
-#define mysql_module_ptr &mysql_module_entry
 
 PHP_MINIT_FUNCTION(mysql);
 PHP_RINIT_FUNCTION(mysql);
@@ -111,7 +106,9 @@ PHP_FUNCTION(mysql_stat);
 PHP_FUNCTION(mysql_thread_id);
 PHP_FUNCTION(mysql_client_encoding);
 PHP_FUNCTION(mysql_ping);
+#ifdef MYSQL_HAS_SET_CHARSET
 PHP_FUNCTION(mysql_set_charset);
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;
@@ -135,13 +132,5 @@ ZEND_END_MODULE_GLOBALS(mysql)
 # define MySG(v) (mysql_globals.v)
 #endif
 
-
-#else
-
-#define mysql_module_ptr NULL
-
-#endif
-
-#define phpext_mysql_ptr mysql_module_ptr
 
 #endif /* PHP_MYSQL_STRUCTS_H */

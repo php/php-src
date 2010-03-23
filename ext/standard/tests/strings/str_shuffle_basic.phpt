@@ -54,6 +54,6 @@ if ($combinations != 24) {
 ===DONE===
 --EXPECTF--
 *** Testing str_shuffle() : basic functionality ***
-unicode(47) "%s"
+string(47) "%s"
 TEST PASSED
 ===DONE===

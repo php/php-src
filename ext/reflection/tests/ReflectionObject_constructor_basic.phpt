@@ -15,14 +15,14 @@ var_dump($r3);
 ?>
 --EXPECTF--
 object(ReflectionObject)#%d (1) {
-  [u"name"]=>
-  unicode(8) "stdClass"
+  ["name"]=>
+  string(8) "stdClass"
 }
 object(ReflectionObject)#%d (1) {
-  [u"name"]=>
-  unicode(1) "C"
+  ["name"]=>
+  string(1) "C"
 }
 object(ReflectionObject)#%d (1) {
-  [u"name"]=>
-  unicode(16) "ReflectionObject"
+  ["name"]=>
+  string(16) "ReflectionObject"
 }

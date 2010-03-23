@@ -9,11 +9,11 @@ Test token_get_all() function : usage variations - with predefined language cons
 
 /*
  * Testing token_get_all() with following predefined language constants:
- *   __FILE__ - T_FILE(365)
- *   __CLASS__ - T_CLASS_C(363)
- *   __FUNCTION__ - T_FUNC_C(365)
- *   __LINE__ - T_LINE(366)
- *   __METHOD__ - T_METHOD_C(364)
+ *   __FILE__ - T_FILE(364)
+ *   __CLASS__ - T_CLASS_C(360)
+ *   __FUNCTION__ - T_FUNC_C(362)
+ *   __LINE__ - T_LINE(363)
+ *   __METHOD__ - T_METHOD_C(361)
 */
 
 echo "*** Testing token_get_all() : with language constants ***\n";
@@ -54,7 +54,7 @@ array(16) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -63,7 +63,7 @@ array(16) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -73,7 +73,7 @@ array(16) {
   [2]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(3) "$fp"
     [2]=>
@@ -82,7 +82,7 @@ array(16) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -93,7 +93,7 @@ array(16) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(2) "  "
     [2]=>
@@ -102,7 +102,7 @@ array(16) {
   [6]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(5) "fopen"
     [2]=>
@@ -113,7 +113,7 @@ array(16) {
   [8]=>
   array(3) {
     [0]=>
-    int(367)
+    int(365)
     [1]=>
     string(8) "__FILE__"
     [2]=>
@@ -124,7 +124,7 @@ array(16) {
   [10]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -133,7 +133,7 @@ array(16) {
   [11]=>
   array(3) {
     [0]=>
-    int(317)
+    int(315)
     [1]=>
     string(3) "'r'"
     [2]=>
@@ -146,7 +146,7 @@ array(16) {
   [14]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -156,7 +156,7 @@ array(16) {
   [15]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -168,7 +168,7 @@ array(30) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php
 "
@@ -178,7 +178,7 @@ array(30) {
   [1]=>
   array(3) {
     [0]=>
-    int(355)
+    int(353)
     [1]=>
     string(5) "class"
     [2]=>
@@ -187,7 +187,7 @@ array(30) {
   [2]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -196,7 +196,7 @@ array(30) {
   [3]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(7) "MyClass"
     [2]=>
@@ -205,7 +205,7 @@ array(30) {
   [4]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -217,7 +217,7 @@ array(30) {
   [6]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -227,7 +227,7 @@ array(30) {
   [7]=>
   array(3) {
     [0]=>
-    int(318)
+    int(316)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -236,7 +236,7 @@ array(30) {
   [8]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(2) "  "
     [2]=>
@@ -245,7 +245,7 @@ array(30) {
   [9]=>
   array(3) {
     [0]=>
-    int(363)
+    int(361)
     [1]=>
     string(9) "__CLASS__"
     [2]=>
@@ -256,7 +256,7 @@ array(30) {
   [11]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -266,7 +266,7 @@ array(30) {
   [12]=>
   array(3) {
     [0]=>
-    int(336)
+    int(334)
     [1]=>
     string(8) "function"
     [2]=>
@@ -275,7 +275,7 @@ array(30) {
   [13]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -284,7 +284,7 @@ array(30) {
   [14]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(10) "myFunction"
     [2]=>
@@ -297,7 +297,7 @@ array(30) {
   [17]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -309,7 +309,7 @@ array(30) {
   [19]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(2) "  "
     [2]=>
@@ -318,7 +318,7 @@ array(30) {
   [20]=>
   array(3) {
     [0]=>
-    int(318)
+    int(316)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -327,7 +327,7 @@ array(30) {
   [21]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(2) "  "
     [2]=>
@@ -336,7 +336,7 @@ array(30) {
   [22]=>
   array(3) {
     [0]=>
-    int(365)
+    int(363)
     [1]=>
     string(12) "__FUNCTION__"
     [2]=>
@@ -347,7 +347,7 @@ array(30) {
   [24]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -358,7 +358,7 @@ array(30) {
   [26]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -370,7 +370,7 @@ array(30) {
   [28]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -380,7 +380,7 @@ array(30) {
   [29]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -392,7 +392,7 @@ array(19) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php
 "
@@ -402,7 +402,7 @@ array(19) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(2) "  "
     [2]=>
@@ -411,7 +411,7 @@ array(19) {
   [2]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -420,7 +420,7 @@ array(19) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -431,7 +431,7 @@ array(19) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -440,7 +440,7 @@ array(19) {
   [6]=>
   array(3) {
     [0]=>
-    int(366)
+    int(364)
     [1]=>
     string(8) "__LINE__"
     [2]=>
@@ -451,7 +451,7 @@ array(19) {
   [8]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -461,7 +461,7 @@ array(19) {
   [9]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -470,7 +470,7 @@ array(19) {
   [10]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -481,7 +481,7 @@ array(19) {
   [12]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -490,7 +490,7 @@ array(19) {
   [13]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -501,7 +501,7 @@ array(19) {
   [15]=>
   array(3) {
     [0]=>
-    int(364)
+    int(362)
     [1]=>
     string(10) "__METHOD__"
     [2]=>
@@ -512,7 +512,7 @@ array(19) {
   [17]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -522,7 +522,7 @@ array(19) {
   [18]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>

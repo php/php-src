@@ -28,12 +28,12 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_cache_limiter() : variation ***
-unicode(7) "nocache"
+string(7) "nocache"
 bool(true)
-unicode(7) "nocache"
-unicode(7) "nocache"
-unicode(6) "public"
+string(7) "nocache"
+string(7) "nocache"
+string(6) "public"
 bool(true)
-unicode(6) "public"
+string(6) "public"
 Done
 

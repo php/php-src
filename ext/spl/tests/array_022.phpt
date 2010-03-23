@@ -47,34 +47,34 @@ var_dump($b);
 --EXPECTF--	
 ==ArrayObject===
 object(MyArrayObject)#%d (1) {
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 object(MyArrayObject)#%d (3) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"baz"]=>
-  unicode(3) "Foo"
-  [u"storage":u"ArrayObject":private]=>
+  ["bar"]=>
+  string(3) "baz"
+  ["baz"]=>
+  string(3) "Foo"
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    [u"bar"]=>
-    unicode(3) "baz"
+    ["bar"]=>
+    string(3) "baz"
   }
 }
 ==ArrayIterator===
 object(MyArrayIterator)#%d (1) {
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 object(MyArrayIterator)#%d (3) {
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"baz"]=>
-  unicode(3) "Foo"
-  [u"storage":u"ArrayIterator":private]=>
+  ["bar"]=>
+  string(3) "baz"
+  ["baz"]=>
+  string(3) "Foo"
+  ["storage":"ArrayIterator":private]=>
   object(MyArrayIterator)#%d (1) {
-    [u"bar"]=>
-    unicode(3) "baz"
+    ["bar"]=>
+    string(3) "baz"
   }
 }
 ===DONE===

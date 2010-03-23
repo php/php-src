@@ -11,7 +11,7 @@ Test strftime() function : usage variation - Checking large positive and negativ
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("UTC");
 $format = '%b %d %Y %H:%M:%S';
 
@@ -29,8 +29,8 @@ var_dump( strftime($format, $timestamp) );
 \*\*\* Testing strftime\(\) : usage variation \*\*\*
 
 -- Testing strftime\(\) function with float 12.3456789000e10 to timestamp --
-unicode\(\d*\)\s"Mar\s(26|11)\s(1935|5882)\s(04|00):(50|30):(16|00)"
+string\(\d*\)\s"Mar\s(26|11)\s(1935|5882)\s(04|00):(50|30):(16|00)"
 
 -- Testing strftime\(\) function with float -12.3456789000e10 to timestamp --
-unicode\(\d*\)\s"(Oct|Dec)\s(08|13|22)\s(2004|1901|-1943)\s(19|20|23):(09|45|30):(44|52|00)"
+string\(\d*\)\s"(Oct|Dec)\s(08|13|22)\s(2004|1901|-1943)\s(19|20|23):(09|45|30):(44|52|00)"
 ===DONE===

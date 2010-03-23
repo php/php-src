@@ -94,10 +94,10 @@ The value of CLIENT_IDENTIFIER is ID00100
 
 **Get values using pconnect-3**
 resource(%d) of type (oci8 persistent connection)
-The value of MODULE is PHP TEST100
-The value of ACTION is TASK100
-The value of CLIENT_INFO is INFO1100
-The value of CLIENT_IDENTIFIER is ID00100
+The value of MODULE is %s
+The value of ACTION is 
+The value of CLIENT_INFO is 
+The value of CLIENT_IDENTIFIER is 
 
 **Re-open a pconnect()**
 resource(%d) of type (oci8 persistent connection)

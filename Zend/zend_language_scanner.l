@@ -43,7 +43,7 @@
 #include "zend_operators.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
-#include "zend_unicode.h"
+#include "zend_exceptions.h"
 #include "tsrm_virtual_cwd.h"
 #include "tsrm_config_common.h"
 
@@ -63,8 +63,8 @@
 #define YYSTATE      YYGETCONDITION()
 #define yytext       ((char*)SCNG(yy_text))
 #define yyleng       SCNG(yy_leng)
-#define yyless(x)    do { YYCURSOR = (unsigned char*)yytext + (x); \
-                          yyleng   = (unsigned int)(x); } while(0)
+#define yyless(x)    do { YYCURSOR = (unsigned char*)yytext + x; \
+                          yyleng   = (unsigned int)x; } while(0)
 #define yymore()     goto yymore_restart
 
 /* perform sanity check. If this message is triggered you should
@@ -89,12 +89,6 @@ ZEND_API ts_rsrc_id language_scanner_globals_id;
 #else
 ZEND_API zend_php_scanner_globals language_scanner_globals;
 #endif
-
-/*
-#define YY_INPUT(buf, result, max_size) \
-	if ( ((result = zend_unicode_yyinput(yyin, buf, max_size TSRMLS_CC)) == 0)) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
-*/
 
 #define HANDLE_NEWLINES(s, l)													\
 do {																			\
@@ -147,24 +141,16 @@ static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 	YYCURSOR       = (YYCTYPE*)str;
 	SCNG(yy_start) = YYCURSOR;
 	YYLIMIT        = YYCURSOR + len;
- }
+}
 
 void startup_scanner(TSRMLS_D)
 {
 	CG(heredoc) = NULL;
 	CG(heredoc_len) = 0;
-	CG(doc_comment) = NULL_ZSTR;
+	CG(doc_comment) = NULL;
 	CG(doc_comment_len) = 0;
-
-	SCNG(input_conv) = NULL;
-	SCNG(output_conv) = NULL;
-	SCNG(encoding_checked) = 0;
-	SCNG(rest_str) = NULL;
-	SCNG(rest_len) = 0;
-
 	zend_stack_init(&SCNG(state_stack));
 }
-
 
 void shutdown_scanner(TSRMLS_D)
 {
@@ -174,21 +160,6 @@ void shutdown_scanner(TSRMLS_D)
 	}
 	zend_stack_destroy(&SCNG(state_stack));
 	RESET_DOC_COMMENT();
-
-	if (SCNG(input_conv)) {
-		ucnv_close(SCNG(input_conv));
-		SCNG(input_conv) = NULL;
-	}
-	if (SCNG(output_conv)) {
-		ucnv_close(SCNG(output_conv));
-		SCNG(output_conv) = NULL;
-	}
-	SCNG(encoding_checked) = 0;
-	if (SCNG(rest_str)) {
-		efree(SCNG(rest_str));
-		SCNG(rest_str) = NULL;
-	}
-	SCNG(rest_len) = 0;
 }
 
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
@@ -208,16 +179,16 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	lex_state->filename = zend_get_compiled_filename(TSRMLS_C);
 	lex_state->lineno = CG(zend_lineno);
 
-	lex_state->input_conv = SCNG(input_conv);
-	lex_state->output_conv = SCNG(output_conv);
-	lex_state->encoding_checked = SCNG(encoding_checked);
-	lex_state->rest_str = SCNG(rest_str);
-	lex_state->rest_len = SCNG(rest_len);
-	SCNG(input_conv) = NULL;
-	SCNG(output_conv) = NULL;
-	SCNG(encoding_checked) = 0;
-	SCNG(rest_str) = NULL;
-	SCNG(rest_len) = 0;
+#ifdef ZEND_MULTIBYTE
+	lex_state->script_org = SCNG(script_org);
+	lex_state->script_org_size = SCNG(script_org_size);
+	lex_state->script_filtered = SCNG(script_filtered);
+	lex_state->script_filtered_size = SCNG(script_filtered_size);
+	lex_state->input_filter = SCNG(input_filter);
+	lex_state->output_filter = SCNG(output_filter);
+	lex_state->script_encoding = SCNG(script_encoding);
+	lex_state->internal_encoding = SCNG(internal_encoding);
+#endif /* ZEND_MULTIBYTE */
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
@@ -236,22 +207,24 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	YYSETCONDITION(lex_state->yy_state);
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
-	zend_restore_compiled_script_encoding(lex_state->script_encoding TSRMLS_CC);
-
-	if (SCNG(input_conv)) {
-		ucnv_close(SCNG(input_conv));
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
 	}
-	SCNG(input_conv) = lex_state->input_conv;
-	if (SCNG(output_conv)) {
-		ucnv_close(SCNG(output_conv));
+	if (SCNG(script_filtered)) {
+		efree(SCNG(script_filtered));
+		SCNG(script_filtered) = NULL;
 	}
-	SCNG(output_conv) = lex_state->output_conv;
-	SCNG(encoding_checked) = lex_state->encoding_checked;
-	if (SCNG(rest_str)) {
-		efree(SCNG(rest_str));
-	}
-	SCNG(rest_str) = lex_state->rest_str;
-	SCNG(rest_len) = lex_state->rest_len;
+	SCNG(script_org) = lex_state->script_org;
+	SCNG(script_org_size) = lex_state->script_org_size;
+	SCNG(script_filtered) = lex_state->script_filtered;
+	SCNG(script_filtered_size) = lex_state->script_filtered_size;
+	SCNG(input_filter) = lex_state->input_filter;
+	SCNG(output_filter) = lex_state->output_filter;
+	SCNG(script_encoding) = lex_state->script_encoding;
+	SCNG(internal_encoding) = lex_state->internal_encoding;
+#endif /* ZEND_MULTIBYTE */
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
@@ -264,411 +237,10 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
 	}
 }
 
-/* Convert one octal digit to a numeric value 0..7, or -1 on failure */
-static inline int8_t zend_get_octal_digit(UChar c) {
-    if (c >= 0x0030 && c <= 0x0037) {
-        return (int8_t)(c - 0x0030);
-    }
-    return -1;
-}
-
-/*
- * Convert one hex digit to a numeric value 0..F, or -1 on failure.
- * Borrowed from ICU.
- */
-static inline int8_t zend_get_hex_digit(UChar c) {
-    if (c >= 0x0030 && c <= 0x0039) {
-        return (int8_t)(c - 0x0030);
-    }
-    if (c >= 0x0041 && c <= 0x0046) {
-        return (int8_t)(c - (0x0041 - 10));
-    }
-    if (c >= 0x0061 && c <= 0x0066) {
-        return (int8_t)(c - (0x0061 - 10));
-    }
-    return -1;
-}
-
-static inline zend_bool zend_udigits_to_codepoint(UChar *s, UChar *end, UChar32 *c, int8_t digits)
-{
-	int8_t n = 0;
-	int8_t digit = 0;
-	UChar32 codepoint = 0;
-
-	while (s < end && n < digits) {
-		digit = zend_get_hex_digit(*s);
-		if (digit < 0) {
-			break;
-		}
-		codepoint = (codepoint << 4) | digit;
-		++s;
-		++n;
-	}
-
-	if (n < digits) {
-		return 0;
-	}
-
-	*c = codepoint;
-	return 1;
-}
-
-static inline int zend_uchar_from_uname(UChar *name, int name_len, UChar32 *c TSRMLS_DC)
-{
-	UChar32 codepoint = 0;
-	UErrorCode status = U_ZERO_ERROR;
-	char *buf;
-
-	buf = zend_unicode_to_ascii(name, name_len TSRMLS_CC);
-	if (!buf) return 0;
-	codepoint = u_charFromName(U_UNICODE_CHAR_NAME, buf, &status);
-	efree(buf);
-	if (U_SUCCESS(status)) {
-		*c = codepoint;
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-static inline int zend_parse_charname_sequence(UChar **s, UChar *end, UChar32 *c TSRMLS_DC)
-{
-	UChar *start;
-
-	if (**s == '{') {
-		start = ++(*s);
-		while ((*s)++ != end) {
-			if (**s == '}') {
-				if (zend_uchar_from_uname(start, *s - start, c TSRMLS_CC)) {
-					return 1;
-				} else {
-					/* safe, since *s points to '}' */
-					**s = 0;
-					zend_error(E_COMPILE_WARNING, "Invalid Unicode character name: '%r'", start);
-					break;
-				}
-			}
-		}
-	}
-
-	return 0;
-}
-
-ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_len, zend_uchar type, UConverter *conv TSRMLS_DC)
-{
-	UErrorCode status = U_ZERO_ERROR;
-	int consumed = 0;
-
-	if (type == IS_UNICODE) {
-		consumed = zend_convert_scanner_output(conv, &Z_USTRVAL_P(zendlval), &Z_USTRLEN_P(zendlval), str, str_len, &status TSRMLS_CC);
-
-		if (U_FAILURE(status)) {
-			zend_error(E_COMPILE_WARNING,"Illegal or truncated character in input: offset %d, state=%d", consumed, YYSTATE);
-			efree(Z_USTRVAL_P(zendlval));
-			return 0;
-		}
-		Z_TYPE_P(zendlval) = IS_UNICODE;
-	} else {
-		Z_STRVAL_P(zendlval) = (char *)estrndup(str, str_len);
-		Z_STRLEN_P(zendlval) = str_len;
-		Z_TYPE_P(zendlval) = IS_STRING;
-	}
-
-	return 1;
-}
-
-static inline int zend_check_and_normalize_identifier(zval *zendlval)
-{
-	UChar *norm;
-	int norm_len;
-
-	if (!zend_is_valid_identifier(Z_USTRVAL_P(zendlval), Z_USTRLEN_P(zendlval))) {
-		zend_error(E_COMPILE_WARNING, "Invalid identifier syntax: %r", Z_USTRVAL_P(zendlval));
-		efree(Z_USTRVAL_P(zendlval));
-		return 0;
-	}
-	if (zend_normalize_identifier(&norm, &norm_len, Z_USTRVAL_P(zendlval), Z_USTRLEN_P(zendlval), 0) == FAILURE) {
-		zend_error(E_COMPILE_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(zendlval));
-		efree(Z_USTRVAL_P(zendlval));
-		return 0;
-	}
-	if (norm != Z_USTRVAL_P(zendlval)) {
-		efree(Z_USTRVAL_P(zendlval));
-		ZVAL_UNICODEL(zendlval, norm, norm_len, 0);
-	}
-	return 1;
-}
-
-static void zend_scanner_output_callback(
-    const void *context,
-    UConverterToUnicodeArgs *toUArgs,
-    const char *codeUnits,
-    int32_t length,
-    UConverterCallbackReason reason,
-    UErrorCode *err
-    )
-{
-    if (*err == U_TRUNCATED_CHAR_FOUND ||
-        *err == U_ILLEGAL_CHAR_FOUND ||
-		*err == U_INVALID_CHAR_FOUND) {
-        *(const char **)context = toUArgs->source - length;
-    }
-
-    return;
-}
-
-static int is_encoding_flex_compatible(const char *enc TSRMLS_DC)
-{
-	int key_len = strlen(enc)+1;
-	unsigned char ret;
-	unsigned char *ret_ptr;
-
-	if (zend_hash_find(&UG(flex_compatible), (char*)enc, key_len, (void**)&ret_ptr) == SUCCESS) {
-		return *ret_ptr;
-	} else {
-		UErrorCode status = U_ZERO_ERROR;
-		UConverter *conv = ucnv_open(enc, &status);
-
-		if (U_FAILURE(status)) {
-			return 0;
-		}
-
-		switch (ucnv_getType(conv)) {
-			case UCNV_DBCS:
-			case UCNV_UTF16_BigEndian:
-			case UCNV_UTF16_LittleEndian:
-			case UCNV_UTF32_BigEndian:
-			case UCNV_UTF32_LittleEndian:
-			case UCNV_EBCDIC_STATEFUL:
-			case UCNV_ISO_2022:
-			case UCNV_LMBCS_1:
-			case UCNV_LMBCS_2:
-			case UCNV_LMBCS_3:
-			case UCNV_LMBCS_4:
-			case UCNV_LMBCS_5:
-			case UCNV_LMBCS_6:
-			case UCNV_LMBCS_8:
-			case UCNV_LMBCS_11:
-			case UCNV_LMBCS_16:
-			case UCNV_LMBCS_17:
-			case UCNV_LMBCS_18:
-			case UCNV_LMBCS_19:
-			case UCNV_HZ:
-			case UCNV_SCSU:
-			case UCNV_UTF7:
-			case UCNV_BOCU1:
-			case UCNV_UTF16:
-			case UCNV_UTF32:
-			case UCNV_IMAP_MAILBOX:
-				ret = 0;
-				break;
-			case UCNV_LATIN_1:
-			case UCNV_UTF8:
-			case UCNV_ISCII:
-			case UCNV_US_ASCII:
-			case UCNV_CESU8:
-				ret = 1;
-				break;
-			default: {
-				static const UChar ascii[] = {
-					0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-					0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
-					0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
-					0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F,
-					0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F,
-					0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F,
-					0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F,
-					0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E
-				};
-				static const char expected[] =
-					"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
-					"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
-					"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2D\x2E\x2F"
-					"\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3A\x3B\x3C\x3D\x3E\x3F"
-					"\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4A\x4B\x4C\x4D\x4E\x4F"
-					"\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5A\x5B\x5C\x5D\x5E\x5F"
-					"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6A\x6B\x6C\x6D\x6E\x6F"
-					"\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x7B\x7C\x7D\x7E";
-				char output[sizeof(expected)];
-
-				if (ucnv_fromUChars(conv,
-				                    output, sizeof(output)-1,
-				                    ascii, sizeof(expected)-1,
-				                    &status) != sizeof(expected)-1 ||
-				    U_FAILURE(status)) {
-					ret = 0;
-				} else {
-					ret = (memcmp(expected, output, sizeof(expected)-1) == 0);
-				}
-			}
-		}
-		ucnv_close(conv);
-
-		zend_hash_add(&UG(flex_compatible), (char*)enc, key_len, (void**)&ret, sizeof(ret), NULL);
-
-		return ret;
-	}
-}
-
-ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int run_time TSRMLS_DC)
-{
-	const char *encoding = NULL;
-
-	if (SCNG(input_conv)) {
-		/* Script is already converted to UTF-8 */
-		return zend_set_converter_encoding(&SCNG(output_conv), "UTF-8");
-	} else {
-		encoding = onetime_encoding;
-	}
-
-	/* We need to convert the input stream only if script_encoding is not ASCII compatible */
-	if (!is_encoding_flex_compatible(encoding TSRMLS_CC)) {
-		if (zend_set_converter_encoding(&SCNG(input_conv), encoding) == FAILURE) {
-			return FAILURE;
-		}
-#ifdef scottmac_0
-		if (run_time) {
-			/* Convert rest of the buffer to unicode.runtime_encoding. */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
-			int offset, length, size;
-			const char *src, *old_src;
-			char rt_buf[8192];
-			char *target = rt_buf;
-			UErrorCode status = U_ZERO_ERROR;
-
-			old_src = src = yy_c_buf_p;
-			offset = yy_c_buf_p - b->yy_ch_buf;
-			length = b->yy_n_chars - offset;
-			size = b->yy_buf_size - offset;
-
-			ucnv_convertEx(UG(utf8_conv),
-			               SCNG(input_conv),
-			               &target, rt_buf+size-2,
-			               &src, src+length,
-			               NULL, NULL, NULL, NULL,
-			               TRUE, TRUE,
-			               &status);
-
-			if (src - old_src < length) {
-				/* Cannot fit into buffer. Schedule for next read. */
-				SCNG(rest_len) = length - (src - old_src);
-				SCNG(rest_str) = emalloc(SCNG(rest_len));
-				memcpy(SCNG(rest_str), src, SCNG(rest_len));
-			}
-			length = target - rt_buf;
-			memcpy(yy_c_buf_p, rt_buf, length);
-			SCNG(yy_n_chars) = b->yy_n_chars = length + offset;
-			b->yy_ch_buf[b->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
-			b->yy_ch_buf[b->yy_n_chars+1] = YY_END_OF_BUFFER_CHAR;
-		}
-#endif
-		encoding = "UTF-8";
-	}
-	return zend_set_converter_encoding(&SCNG(output_conv), encoding);
-}
-
-ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC)
-{
-	const char *source_consumed = NULL;
-
-	/* set our custom callback with context */
-	ucnv_setToUCallBack(conv, zend_scanner_output_callback, &source_consumed, NULL, NULL, status);
-
-	/* reset the error and perform conversion */
-	*status = U_ZERO_ERROR;
-	zend_string_to_unicode_ex(conv, target, target_len, source, source_len, status);
-
-	/* figure out how many source bytes were consumed */
-	if (U_SUCCESS(*status)) {
-		return source_len;
-	} else if (source_consumed) {
-		return source_consumed - source;
-	} else {
-		return 0;
-	}
-}
-
-int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
-{
-	size_t n = len;
-	const char *src = buf;
-
-#ifdef scottmac_0
-	/* Look of we have rest from previous call */
-	if (SCNG(rest_str)) {
-		if (len >= SCNG(rest_len)) {
-			memcpy(buf, SCNG(rest_str), SCNG(rest_len));
-			efree(SCNG(rest_str));
-			SCNG(rest_str) = NULL;
-			n = SCNG(rest_len);
-			SCNG(rest_len) = 0;
-		} else {
-			memcpy(buf, SCNG(rest_str), len);
-			memcpy(SCNG(rest_str), SCNG(rest_str)+len, SCNG(rest_len)-len);
-			n = len;
-			SCNG(rest_len) -= len;
-		}
-	} else {
-		n = zend_stream_read(file_handle, buf, len TSRMLS_CC);
-	}
-#endif
-	/* Autodetect encoding */
-	if (!SCNG(encoding_checked)) {
-		int32_t    signatureLength;
-		UErrorCode status = U_ZERO_ERROR;
-		const char *encoding;
-
-		encoding = ucnv_detectUnicodeSignature(buf, n, &signatureLength, &status);
-		if (encoding && U_SUCCESS(status)) {
-			src += signatureLength;
-			n -= signatureLength;
-			if (is_encoding_flex_compatible(encoding TSRMLS_CC)) {
-				if (SCNG(input_conv)) {
-					ucnv_close(SCNG(input_conv));
-					SCNG(input_conv) = NULL;
-				}
-				zend_set_converter_encoding(&SCNG(output_conv), encoding);
-				if (signatureLength > 0) {
-					memcpy(buf, src, n);
-				}
-			} else {
-				zend_set_converter_encoding(&SCNG(input_conv), encoding);
-				zend_set_converter_encoding(&SCNG(output_conv), "UTF-8");
-			}
-		}
-		status = U_ZERO_ERROR;
-		SCNG(encoding_checked) = 1;
-	}
-
-	if (SCNG(input_conv) && n >= 0) {
-		UErrorCode status = U_ZERO_ERROR;
-		char rt_buf[8192];
-		char *target = rt_buf;
-		const char *old_src = src;
-
-		ucnv_convertEx(UG(utf8_conv),
-		               SCNG(input_conv),
-		               &target, rt_buf+len,
-		               &src, src+n,
-		               NULL, NULL, NULL, NULL,
-		               TRUE, TRUE,
-		               &status);
-		if (src - old_src < n) {
-			/* Cannot fit into buffer. Schedule for next read. */
-			SCNG(rest_len) = n - (src - old_src);
-			SCNG(rest_str) = emalloc(SCNG(rest_len));
-			memcpy(SCNG(rest_str), src, SCNG(rest_len));
-		}
-		n = target - rt_buf;
-		memcpy(buf, rt_buf, n);
-	}
-	return n;
-}
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
-	char *file_path=NULL, *buf;
-	UErrorCode status = U_ZERO_ERROR;
+	char *file_path = NULL, *buf;
 	size_t size;
 
 	if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
@@ -676,7 +248,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	}
 
 	zend_llist_add_element(&CG(open_files), file_handle);
-
 	if (file_handle->handle.stream.handle >= (void*)file_handle && file_handle->handle.stream.handle <= (void*)(file_handle+1)) {
 		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&CG(open_files));
 		size_t diff = (char*)file_handle->handle.stream.handle - (char*)file_handle;
@@ -687,14 +258,31 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
 
-	zend_prepare_scanner_converters(ucnv_getName(ZEND_U_CONVERTER(UG(script_encoding_conv)), &status), 0 TSRMLS_CC);
-
 	if (size != -1) {
-		/* Re-encode for Unicode if needed */
+#ifdef ZEND_MULTIBYTE
+		if (zend_multibyte_read_script((unsigned char *)buf, size TSRMLS_CC) != 0) {
+			return FAILURE;
+		}
+
+		SCNG(yy_in) = NULL;
+
+		zend_multibyte_set_filter(NULL TSRMLS_CC);
+
+		if (!SCNG(input_filter)) {
+			SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
+			memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
+			SCNG(script_filtered_size) = SCNG(script_org_size);
+		} else {
+			SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
+		}
+
+		yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);
+#else /* !ZEND_MULTIBYTE */
 		yy_scan_buffer(buf, size TSRMLS_CC);
- 	} else {
+#endif /* ZEND_MULTIBYTE */
+	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
- 	}
+	}
 
 	BEGIN(INITIAL);
 
@@ -705,7 +293,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	}
 
 	zend_set_compiled_filename(file_path TSRMLS_CC);
-	zend_set_compiled_script_encoding((char*)ucnv_getName(SCNG(output_conv), &status) TSRMLS_CC);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -732,8 +319,8 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_bool original_in_compilation = CG(in_compilation);
 
 	retval_znode.op_type = IS_CONST;
-	Z_TYPE(retval_znode.u.constant) = IS_LONG;
-	Z_LVAL(retval_znode.u.constant) = 1;
+	retval_znode.u.constant.type = IS_LONG;
+	retval_znode.u.constant.value.lval = 1;
 	Z_UNSET_ISREF(retval_znode.u.constant);
 	Z_SET_REFCOUNT(retval_znode.u.constant, 1);
 
@@ -784,13 +371,13 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	zend_op_array *retval;
 	char *opened_path = NULL;
 
-	if (Z_TYPE_P(filename) != IS_STRING) {
+	if (filename->type != IS_STRING) {
 		tmp = *filename;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		filename = &tmp;
 	}
-	file_handle.filename = Z_STRVAL_P(filename);
+	file_handle.filename = filename->value.str.val;
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
@@ -801,7 +388,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 		int dummy = 1;
 
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = estrndup(Z_STRVAL_P(filename), Z_STRLEN_P(filename));
+			file_handle.opened_path = opened_path = estrndup(filename->value.str.val, filename->value.str.len);
 		}
 
 		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
@@ -820,28 +407,33 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
-	const char *encoding;
-	UErrorCode status = U_ZERO_ERROR;
-
-	if (Z_TYPE_P(str) == IS_UNICODE) {
-		convert_to_string_with_converter(str, UG(utf8_conv));
-		encoding = "UTF-8";
-	} else {
-		UErrorCode status = U_ZERO_ERROR;
-		encoding = ucnv_getName(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &status);
-	}
-
+	/* enforce two trailing NULLs for flex... */
 	str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
+
 	memset(str->value.str.val + str->value.str.len, 0, ZEND_MMAP_AHEAD);
 
 	SCNG(yy_in)=NULL;
 
-	zend_prepare_scanner_converters(encoding, 0 TSRMLS_CC);
-	/* Re-encode for Unicode if needed */
-	yy_scan_buffer(Z_STRVAL_P(str), Z_STRLEN_P(str) TSRMLS_CC);
+#ifdef ZEND_MULTIBYTE
+	SCNG(script_org) = (unsigned char *)estrdup(str->value.str.val);
+	SCNG(script_org_size) = str->value.str.len;
+
+	zend_multibyte_set_filter(CG(internal_encoding) TSRMLS_CC);
+
+	if (!SCNG(input_filter)) {
+		SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
+		memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
+		SCNG(script_filtered_size) = SCNG(script_org_size);
+	} else {
+		SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
+	}
+
+	yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);	
+#else /* !ZEND_MULTIBYTE */
+	yy_scan_buffer(str->value.str.val, str->value.str.len TSRMLS_CC);
+#endif /* ZEND_MULTIBYTE */
 
 	zend_set_compiled_filename(filename TSRMLS_CC);
-	zend_set_compiled_script_encoding((char*)ucnv_getName(SCNG(output_conv), &status) TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	return SUCCESS;
@@ -850,7 +442,25 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
-	return SCNG(yy_cursor) - SCNG(yy_start);
+	size_t offset = SCNG(yy_cursor) - SCNG(yy_start);
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(input_filter)) {
+		size_t original_offset = offset, length = 0; do {
+			unsigned char *p = NULL;
+			SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
+			if (!p) {
+				break;
+			}
+			efree(p);
+			if (length > original_offset) {
+				offset--;
+			} else if (length < original_offset) {
+				offset++;
+			}
+		} while (original_offset != length);
+	}
+#endif
+	return offset;
 }
 
 
@@ -864,24 +474,20 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
 
-	tmp = *source_string;
-	zval_copy_ctor(&tmp);
-	if (Z_TYPE(tmp) != IS_STRING && Z_TYPE(tmp) != IS_UNICODE) {
-		convert_to_unicode(&tmp);
-	}
-	source_string = &tmp;
-
-	if (Z_UNILEN_P(source_string)==0) {
+	if (source_string->value.str.len==0) {
 		efree(op_array);
-		zval_dtor(&tmp);
 		return NULL;
 	}
 
 	CG(in_compilation) = 1;
 
+	tmp = *source_string;
+	zval_copy_ctor(&tmp);
+	convert_to_string(&tmp);
+	source_string = &tmp;
+
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
-		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 		efree(op_array);
 		retval = NULL;
 	} else {
@@ -894,6 +500,17 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
 
+#ifdef ZEND_MULTIBYTE
+		if (SCNG(script_org)) {
+			efree(SCNG(script_org));
+			SCNG(script_org) = NULL;
+		}
+		if (SCNG(script_filtered)) {
+			efree(SCNG(script_filtered));
+			SCNG(script_filtered) = NULL;
+		}
+#endif /* ZEND_MULTIBYTE */
+
 		if (compiler_result==1) {
 			CG(active_op_array) = original_active_op_array;
 			CG(unclean_shutdown)=1;
@@ -905,8 +522,8 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			zend_release_labels(TSRMLS_C);
 			retval = op_array;
 		}
-		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	}
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
 	return retval;
@@ -925,11 +542,21 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
-		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename TSRMLS_CC);
+		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
+	}
+	if (SCNG(script_filtered)) {
+		efree(SCNG(script_filtered));
+		SCNG(script_filtered) = NULL;
+	}
+#endif /* ZEND_MULTIBYTE */
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	return SUCCESS;
@@ -949,229 +576,141 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	}
 	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
+	}
+	if (SCNG(script_filtered)) {
+		efree(SCNG(script_filtered));
+		SCNG(script_filtered) = NULL;
+	}
+#endif /* ZEND_MULTIBYTE */
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(str);
 	return SUCCESS;
 }
 END_EXTERN_C()
 
-#define zend_copy_value(zendlval, yytext, yyleng) \
-	Z_STRVAL_P(zendlval) = (char *)estrndup(yytext, yyleng); \
-	Z_STRLEN_P(zendlval) = yyleng;
+#ifdef ZEND_MULTIBYTE
 
-static int zend_scan_unicode_escape_string(zval *zendlval, char *str, int len, UChar quote_type, int type TSRMLS_DC)
+BEGIN_EXTERN_C()
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC)
 {
-	register UChar *s, *t, c;
-	UChar *end;
-	UChar32 codepoint = 0;
-	int8_t digit;
-	int8_t min_digits = 0, max_digits = 0;
-	int8_t bits;
-	int8_t n;
+	size_t original_offset, offset, free_flag, new_len, length;
+	unsigned char *p;
 
-	if (!zend_copy_scanner_string(zendlval, str, len, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
+	/* calculate current position */
+	offset = original_offset = YYCURSOR - SCNG(yy_start);
+	if (old_input_filter && offset > 0) {
+		zend_encoding *new_encoding = SCNG(script_encoding);
+		zend_encoding_filter new_filter = SCNG(input_filter);
+		SCNG(script_encoding) = old_encoding;
+		SCNG(input_filter) = old_input_filter;
+		offset = zend_get_scanned_file_offset(TSRMLS_C);
+		SCNG(script_encoding) = new_encoding;
+		SCNG(input_filter) = new_filter;
 	}
 
-	/* convert escape sequences */
-	s = t = Z_USTRVAL_P(zendlval);
-	end = s+Z_USTRLEN_P(zendlval);
-	while (s<end) {
-		if (*s==0x5C /*'\\'*/) {
-			s++;
-			c = *s;
-			if (s >= end) {
-				*t++ = 0x5C; /*'\\'*/
-				break;
-			}
-
-			min_digits = 0;
-			codepoint = 0;
-			bits = 4;
-			n = 0;
-
-			switch(c) {
-				case 0x6E:               /*'n'*/
-					*t++ = (UChar) 0x0A; /*'\n'*/
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x72:               /*'r'*/
-					*t++ = (UChar) 0x0D; /*'\r'*/
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x74:               /*'t'*/
-					*t++ = (UChar) 0x09; /*'\t'*/
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x66:				 /*'f'*/
-					*t++ = (UChar) 0x0C; /*'\f'*/
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x76:				 /*'v'*/
-					*t++ = (UChar) 0x0B; /*'\v'*/
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x22:               /*'"'*/
-				case 0x60:               /*'`'*/
-					if (c != quote_type) {
-						*t++ = 0x5C; /*'\\'*/
-						*t++ = *s;
-						break;
-					}
-				case 0x5C:               /*'\\'*/
-				case 0x24:               /*'$'*/
-					*t++ = *s;
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x43:				 /*'C'*/
-					{
-						UChar *p = s+1;
-						if (p < end && zend_parse_charname_sequence(&p, end, &codepoint TSRMLS_CC)) {
-							Z_USTRLEN_P(zendlval) -= p - s + 1;
-							s = p;
-							if (U_IS_BMP(codepoint)) {
-								*t++ = (UChar) codepoint;
-							} else {
-								*t++ = (UChar) U16_LEAD(codepoint);
-								*t++ = (UChar) U16_TRAIL(codepoint);
-								Z_USTRLEN_P(zendlval)++;
-							}
-						} else {
-							zend_error(E_COMPILE_WARNING, "Invalid \\C{..} sequence");
-							efree(Z_USTRVAL_P(zendlval));
-							return 0;
-						}
-						break;
-					}
-				case 0x75:               /*'u'*/
-					min_digits = 4;
-					max_digits = 4;
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x55:               /*'U'*/
-					min_digits = 6;
-					max_digits = 6;
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				case 0x78:               /*'x'*/
-				case 0x58:               /*'X'*/
-					if ((digit = zend_get_hex_digit(*(s+1))) >= 0) {
-						min_digits = 1;
-						max_digits = 2;
-						Z_USTRLEN_P(zendlval)--;
-						s++;
-						n = 1; /* already have one digit */
-						codepoint = digit;
-					} else {
-						*t++ = 0x5C; /*'\\'*/
-						*t++ = *s;
-					}
-					break;
-				default:
-					digit = zend_get_octal_digit(*s);
-					if (digit >= 0) {
-						min_digits = 1;
-						max_digits = 3;
-						bits = 3;
-						n = 1; /* already have one digit */
-						codepoint = digit;
-					} else {
-						*t++ = 0x5C; /*'\\'*/
-						*t++ = *s;
-					}
-					break;
-			}
-
-			/* need to parse a number for one of the escape sequences */
-			if (min_digits != 0) {
-				while (s++ < end && n < max_digits) {
-					digit = (bits == 4) ? zend_get_hex_digit(*s) : zend_get_octal_digit(*s);
-					if (digit < 0) {
-						break;
-					}
-					codepoint = (codepoint << bits) | digit;
-					n++;
-				}
-
-				if (n < min_digits) {
-					/* can only happen for \u and \U sequences */
-					zend_error(E_COMPILE_WARNING,"\\%c escape sequence requires exactly %d hexadecimal digits", (char) c, min_digits);
-					efree(Z_USTRVAL_P(zendlval));
-					return 0;
-				}
-
-				if (U_IS_BMP(codepoint)) {
-					*t++ = (UChar) codepoint;
-					Z_USTRLEN_P(zendlval) -= n;
-				} else if (codepoint <= 0x10FFFF) {
-					*t++ = (UChar) U16_LEAD(codepoint);
-					*t++ = (UChar) U16_TRAIL(codepoint);
-					Z_USTRLEN_P(zendlval) -= n-1;
-				} else {
-					zend_error(E_COMPILE_WARNING,"\\U%06x is above the highest valid codepoint 0x10FFFF", codepoint);
-					efree(Z_USTRVAL_P(zendlval));
-					return 0;
-				}
-
-				/* s is already incremented and not past a newline */
-				continue;
-			}
-		} else {
-			*t++ = *s;
-		}
-
-		if (*s == 0x0A /*'\n'*/ || (*s == 0x0D /*'\r'*/ && (*(s+1) != 0x0A /*'\n'*/))) {
-			CG(zend_lineno)++;
-		}
-		s++;
+	/* convert and set */
+	if (!SCNG(input_filter)) {
+		length = SCNG(script_org_size) - offset;
+		p = SCNG(script_org) + offset;
+		free_flag = 0;
+	} else {
+		SCNG(input_filter)(&p, &length, SCNG(script_org) + offset, SCNG(script_org_size) - offset TSRMLS_CC);
+		free_flag = 1;
 	}
-	*t = 0;
 
-	return type;
+	new_len = original_offset + length;
+
+	if (new_len > YYLIMIT - SCNG(yy_start)) {
+		unsigned char *new_yy_start = erealloc(SCNG(yy_start), new_len);
+		SCNG(yy_cursor) = new_yy_start + (SCNG(yy_cursor) - SCNG(yy_start));
+		SCNG(yy_marker) = new_yy_start + (SCNG(yy_marker) - SCNG(yy_start));
+		SCNG(yy_text) = new_yy_start + (SCNG(yy_text) - SCNG(yy_start));
+		SCNG(yy_start) = new_yy_start;
+		SCNG(script_filtered) = new_yy_start;
+		SCNG(script_filtered_size) = new_len;
+	}
+
+	SCNG(yy_limit) = SCNG(yy_start) + new_len;
+	memmove(SCNG(yy_start) + original_offset, p, length);
+
+	if (free_flag) {
+		efree(p);
+	}
 }
 
-static int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
+
+ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
 {
-	register UChar *s, *t;
-	UChar *end;
+	size_t n;
 
-	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
+	if (CG(interactive) == 0) {
+		if (zend_stream_fixup(file_handle, &buf, &len TSRMLS_CC) == FAILURE) {
+			return FAILURE;
+		}
+		n = len;
+		return n;
 	}
 
-	/* convert escape sequences */
-	s = t = Z_USTRVAL_P(zendlval);
-	end = s+Z_USTRLEN_P(zendlval);
-	while (s<end) {
-		if (*s==0x5C /*'\\'*/) {
-			s++;
-
-			switch(*s) {
-				case 0x5C: /*'\\'*/
-				case 0x27: /*'\''*/
-					*t++ = *s;
-					Z_USTRLEN_P(zendlval)--;
-					break;
-				default:
-					*t++ = 0x5C; /*'\\'*/
-					*t++ = *s;
-					break;
-			}
-		} else {
-			*t++ = *s;
-		}
-
-		if (*s == 0x0A /*'\n'*/ || (*s == 0x0D /*'\r'*/ && (*(s+1) != 0x0A /*'\n'*/))) {
-			CG(zend_lineno)++;
-		}
-		s++;
+	/* interactive */
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
 	}
-	*t = 0;
+	if (SCNG(script_filtered)) {
+		efree(SCNG(script_filtered));
+	}
+	SCNG(script_org) = NULL;
+	SCNG(script_org_size) = 0;
 
-	return T_CONSTANT_ENCAPSED_STRING;
+	/* TODO: support widechars */
+	if (zend_stream_fixup(file_handle, &buf, &len TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+	n = len;
+
+	SCNG(script_org_size) = n;
+	SCNG(script_org) = (unsigned char*)emalloc(SCNG(script_org_size) + 1);
+	memcpy(SCNG(script_org), buf, n);
+
+	return n;
 }
 
-static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
+
+ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC)
+{
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
+	}
+	SCNG(script_org_size) = n;	
+	
+	SCNG(script_org) = (unsigned char*)emalloc(SCNG(script_org_size) + 1);
+	memcpy(SCNG(script_org), buf, n);
+	*(SCNG(script_org)+SCNG(script_org_size)) = '\0';
+
+	return 0;
+}
+
+
+# define zend_copy_value(zendlval, yytext, yyleng) \
+	if (SCNG(output_filter)) { \
+		size_t sz = 0; \
+		SCNG(output_filter)((unsigned char **)&(zendlval->value.str.val), &sz, (unsigned char *)yytext, (size_t)yyleng TSRMLS_CC); \
+		zendlval->value.str.len = sz; \
+	} else { \
+		zendlval->value.str.val = (char *) estrndup(yytext, yyleng); \
+		zendlval->value.str.len = yyleng; \
+	}
+#else /* ZEND_MULTIBYTE */
+# define zend_copy_value(zendlval, yytext, yyleng) \
+	zendlval->value.str.val = (char *)estrndup(yytext, yyleng); \
+	zendlval->value.str.len = yyleng;
+#endif /* ZEND_MULTIBYTE */
+
+static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
@@ -1179,8 +718,8 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 	ZVAL_STRINGL(zendlval, str, len, 1);
 
 	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
-	end = s+Z_STRLEN_P(zendlval);
+	s = t = zendlval->value.str.val;
+	end = s+zendlval->value.str.len;
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -1192,15 +731,15 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
-					Z_STRLEN_P(zendlval)--;
+					zendlval->value.str.len--;
 					break;
 				case 'r':
 					*t++ = '\r';
-					Z_STRLEN_P(zendlval)--;
+					zendlval->value.str.len--;
 					break;
 				case 't':
 					*t++ = '\t';
-					Z_STRLEN_P(zendlval)--;
+					zendlval->value.str.len--;
 					break;
 				case 'f':
 					*t++ = '\f';
@@ -1220,20 +759,20 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
+					zendlval->value.str.len--;
 					break;
 				case 'x':
 				case 'X':
 					if (ZEND_IS_HEX(*(s+1))) {
 						char hex_buf[3] = { 0, 0, 0 };
 
-						Z_STRLEN_P(zendlval)--; /* for the 'x' */
+						zendlval->value.str.len--; /* for the 'x' */
 
 						hex_buf[0] = *(++s);
-						Z_STRLEN_P(zendlval)--;
+						zendlval->value.str.len--;
 						if (ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
+							zendlval->value.str.len--;
 						}
 						*t++ = (char) strtol(hex_buf, NULL, 16);
 					} else {
@@ -1247,13 +786,13 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 						char octal_buf[4] = { 0, 0, 0, 0 };
 
 						octal_buf[0] = *s;
-						Z_STRLEN_P(zendlval)--;
+						zendlval->value.str.len--;
 						if (ZEND_IS_OCT(*(s+1))) {
 							octal_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
+							zendlval->value.str.len--;
 							if (ZEND_IS_OCT(*(s+1))) {
 								octal_buf[2] = *(++s);
-								Z_STRLEN_P(zendlval)--;
+								zendlval->value.str.len--;
 							}
 						}
 						*t++ = (char) strtol(octal_buf, NULL, 8);
@@ -1273,43 +812,15 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 		s++;
 	}
 	*t = 0;
-}
-
-static void zend_scan_binary_single_string(zval *zendlval, char *str, int len TSRMLS_DC)
-{
-	register char *s, *t;
-	char *end;
-
-	ZVAL_STRINGL(zendlval, str, len, 1);
-
-	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
-	end = s+Z_STRLEN_P(zendlval);
-	while (s<end) {
-		if (*s=='\\') {
-			s++;
-
-			switch(*s) {
-				case '\\':
-				case '\'':
-					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
-					break;
-				default:
-					*t++ = '\\';
-					*t++ = *s;
-					break;
-			}
-		} else {
-			*t++ = *s;
-		}
-
-		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
-			CG(zend_lineno)++;
-		}
-		s++;
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(output_filter)) {
+		size_t sz = 0;
+		s = zendlval->value.str.val;
+		SCNG(output_filter)((unsigned char **)&(zendlval->value.str.val), &sz, (unsigned char *)s, (size_t)zendlval->value.str.len TSRMLS_CC);
+		zendlval->value.str.len = sz;
+		efree(s);
 	}
-	*t = 0;
+#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -1487,9 +998,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1500,12 +1011,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state(TSRMLS_C);
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, yytext, yyleng);
+	zendlval->type = IS_STRING;
 	return T_STRING;
 }
 
@@ -1547,12 +1054,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STRING_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"unicode"{TABS_AND_SPACES}")" {
-	return T_UNICODE_CAST;
-}
-
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"binary"{TABS_AND_SPACES}")" {
-	return T_BINARY_CAST;
+	return T_STRING_CAST;
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
@@ -1786,12 +1289,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_LOOKING_FOR_VARNAME>{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, yytext, yyleng);
+	zendlval->type = IS_STRING;
 	yy_pop_state(TSRMLS_C);
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return T_STRING_VARNAME;
@@ -1808,22 +1307,22 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{LNUM} {
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		zendlval->value.lval = strtol(yytext, NULL, 0);
 	} else {
 		errno = 0;
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		zendlval->value.lval = strtol(yytext, NULL, 0);
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
-				Z_DVAL_P(zendlval) = zend_oct_strtod(yytext, NULL);
+				zendlval->value.dval = zend_oct_strtod(yytext, NULL);
 			} else {
-				Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
+				zendlval->value.dval = zend_strtod(yytext, NULL);
 			}
-			Z_TYPE_P(zendlval) = IS_DOUBLE;
+			zendlval->type = IS_DOUBLE;
 			return T_DNUMBER;
 		}
 	}
 
-	Z_TYPE_P(zendlval) = IS_LONG;
+	zendlval->type = IS_LONG;
 	return T_LNUMBER;
 }
 
@@ -1838,105 +1337,97 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
-		Z_LVAL_P(zendlval) = strtol(hex, NULL, 16);
-		Z_TYPE_P(zendlval) = IS_LONG;
+		zendlval->value.lval = strtol(hex, NULL, 16);
+		zendlval->type = IS_LONG;
 		return T_LNUMBER;
 	} else {
-		Z_DVAL_P(zendlval) = zend_hex_strtod(hex, NULL);
-		Z_TYPE_P(zendlval) = IS_DOUBLE;
+		zendlval->value.dval = zend_hex_strtod(hex, NULL);
+		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	}
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 10);
-		Z_TYPE_P(zendlval) = IS_LONG;
+		zendlval->value.lval = strtol(yytext, NULL, 10);
+		zendlval->type = IS_LONG;
 	} else {
-		if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-			return 0;
-		}
+		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 	}
 	return T_NUM_STRING;
 }
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
+	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	return T_NUM_STRING;
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
-	Z_TYPE_P(zendlval) = IS_DOUBLE;
+	zendlval->value.dval = zend_strtod(yytext, NULL);
+	zendlval->type = IS_DOUBLE;
 	return T_DNUMBER;
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	zstr class_name = NULL_ZSTR;
+	char *class_name = NULL;
 
 	if (CG(active_class_entry)) {
 		class_name = CG(active_class_entry)->name;
 	}
 
-	if (!class_name.v) {
-		ZVAL_EMPTY_UNICODE(zendlval);
-	} else {
-		ZVAL_UNICODE(zendlval, class_name.u, 1);
+	if (!class_name) {
+		class_name = "";
 	}
+	zendlval->value.str.len = strlen(class_name);
+	zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
 	return T_CLASS_C;
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	zstr func_name = NULL_ZSTR;
+	char *func_name = NULL;
 
 	if (CG(active_op_array)) {
 		func_name = CG(active_op_array)->function_name;
 	}
 
-	if (!func_name.v) {
-		ZVAL_EMPTY_UNICODE(zendlval);
-	} else {
-		ZVAL_UNICODE(zendlval, func_name.u, 1);
+	if (!func_name) {
+		func_name = "";
 	}
+	zendlval->value.str.len = strlen(func_name);
+	zendlval->value.str.val = estrndup(func_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
 	return T_FUNC_C;
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL_ZSTR;
-	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL_ZSTR;
+	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
+	char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
 	size_t len = 0;
-	size_t len1;
 
-	if (class_name.u) {
-		len += len1 = u_strlen(class_name.u);
-		len += 2;
+	if (class_name) {
+		len += strlen(class_name) + 2;
 	}
-	if (func_name.u) {
-		len += u_strlen(func_name.u);
-	} else {
-		func_name.u = EMPTY_STR;
+	if (func_name) {
+		len += strlen(func_name);
 	}
-	Z_USTRLEN_P(zendlval) = len;
-	Z_USTRVAL_P(zendlval) = eumalloc(len+1);
-	if (class_name.u) {
-		u_strcpy(Z_USTRVAL_P(zendlval), class_name.u);
-		Z_USTRVAL_P(zendlval)[len1] = 0x3a;   /* ':' */
-		Z_USTRVAL_P(zendlval)[len1+1] = 0x3a; /* ':' */
-		Z_USTRVAL_P(zendlval)[len1+2] = 0;
-	} else {
-		Z_USTRVAL_P(zendlval)[0] = 0;
-	}
-	u_strcat(Z_USTRVAL_P(zendlval), func_name.u);
-	Z_TYPE_P(zendlval) = IS_UNICODE;
 
+	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s", 
+		class_name ? class_name : "",
+		class_name && func_name ? "::" : "",
+		func_name ? func_name : ""
+		);
+	zendlval->type = IS_STRING;
 	return T_METHOD_C;
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	Z_LVAL_P(zendlval) = CG(zend_lineno);
-	Z_TYPE_P(zendlval) = IS_LONG;
+	zendlval->value.lval = CG(zend_lineno);
+	zendlval->type = IS_LONG;
 	return T_LINE;
 }
 
@@ -1946,7 +1437,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!filename) {
 		filename = "";
 	}
-	ZVAL_RT_STRING(zendlval, filename, 1);
+	zendlval->value.str.len = strlen(filename);
+	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
 	return T_FILE;
 }
 
@@ -1982,7 +1475,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		*zendlval = *CG(current_namespace);
 		zval_copy_ctor(zendlval);
 	} else {
-		ZVAL_EMPTY_UNICODE(zendlval);
+		ZVAL_EMPTY_STRING(zendlval);
 	}
 	return T_NS_C;
 }
@@ -1997,18 +1490,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng);
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
 
+
 <INITIAL>"<%=" {
 	if (CG(asp_tags)) {
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-		Z_STRLEN_P(zendlval) = yyleng;
-		Z_TYPE_P(zendlval) = IS_STRING;
+		zendlval->value.str.val = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -2019,9 +1513,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?=" {
 	if (CG(short_tags)) {
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-		Z_STRLEN_P(zendlval) = yyleng;
-		Z_TYPE_P(zendlval) = IS_STRING;
+		zendlval->value.str.val = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -2032,9 +1526,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-		Z_STRLEN_P(zendlval) = yyleng;
-		Z_TYPE_P(zendlval) = IS_STRING;
+		zendlval->value.str.val = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -2044,9 +1538,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -2055,9 +1549,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-		Z_STRLEN_P(zendlval) = yyleng;
-		Z_TYPE_P(zendlval) = IS_STRING;
+		zendlval->value.str.val = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -2108,12 +1602,28 @@ inline_char_handler:
 inline_html:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(output_filter)) {
+		int readsize;
+		size_t sz = 0;
+		readsize = SCNG(output_filter)((unsigned char **)&(zendlval->value.str.val), &sz, (unsigned char *)yytext, (size_t)yyleng TSRMLS_CC);
+		zendlval->value.str.len = sz;
+		if (readsize < yyleng) {
+			yyless(readsize);
+		}
+	} else {
+	  zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
+	  zendlval->value.str.len = yyleng;
+	}
+#else /* !ZEND_MULTIBYTE */
+	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
+ 	zendlval->value.str.len = yyleng;
+#endif
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
 }
+
 
 /* Make sure a label character follows "->", otherwise there is no property
  * and "->" will be taken literally
@@ -2121,13 +1631,8 @@ inline_html:
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
-
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
+	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -2136,23 +1641,14 @@ inline_html:
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
-
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
+	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
+	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -2173,20 +1669,9 @@ inline_html:
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_IN_SCRIPTING>{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
-	if (!zend_check_and_normalize_identifier(zendlval)) {
-		return 0;
-	}
-	return T_STRING;
-}
-
-<ST_VAR_OFFSET>{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
+<ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
+	zend_copy_value(zendlval, yytext, yyleng);
+	zendlval->type = IS_STRING;
 	return T_STRING;
 }
 
@@ -2251,13 +1736,8 @@ inline_html:
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (doc_com) {
-		zval tmp;
-
-		if (!zend_copy_scanner_string(&tmp, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-			return 0;
-		}
-		CG(doc_comment) = tmp.value.uni.val;
-		CG(doc_comment_len) = tmp.value.uni.len;
+		CG(doc_comment) = estrndup(yytext, yyleng);
+		CG(doc_comment_len) = yyleng;
 		return T_DOC_COMMENT;
 	}
 
@@ -2265,9 +1745,9 @@ inline_html:
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -2276,9 +1756,9 @@ inline_html:
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-		Z_STRLEN_P(zendlval) = yyleng;
-		Z_TYPE_P(zendlval) = IS_STRING;
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
+		zendlval->value.str.val = yytext; /* no copying - intentional */
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
@@ -2288,6 +1768,8 @@ inline_html:
 
 
 <ST_IN_SCRIPTING>b?['] {
+	register char *s, *t;
+	char *end;
 	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 
 	while (1) {
@@ -2310,12 +1792,49 @@ inline_html:
 		}
 	}
 
-	if (bprefix) {
-		zend_scan_binary_single_string(zendlval, yytext+2, yyleng-3 TSRMLS_CC);
-		return T_CONSTANT_ENCAPSED_STRING;
-	} else {
-		return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
+	zendlval->value.str.val = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
+	zendlval->value.str.len = yyleng-bprefix-2;
+	zendlval->type = IS_STRING;
+
+	/* convert escape sequences */
+	s = t = zendlval->value.str.val;
+	end = s+zendlval->value.str.len;
+	while (s<end) {
+		if (*s=='\\') {
+			s++;
+
+			switch(*s) {
+				case '\\':
+				case '\'':
+					*t++ = *s;
+					zendlval->value.str.len--;
+					break;
+				default:
+					*t++ = '\\';
+					*t++ = *s;
+					break;
+			}
+		} else {
+			*t++ = *s;
+		}
+
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
 	}
+	*t = 0;
+
+#ifdef ZEND_MULTIBYTE
+	if (SCNG(output_filter)) {
+		size_t sz = 0;
+		s = zendlval->value.str.val;
+		SCNG(output_filter)((unsigned char **)&(zendlval->value.str.val), &sz, (unsigned char *)s, (size_t)zendlval->value.str.len TSRMLS_CC);
+		zendlval->value.str.len = sz;
+		efree(s);
+	}
+#endif /* ZEND_MULTIBYTE */
+	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 
@@ -2326,13 +1845,8 @@ inline_html:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-
-				if (bprefix) {
-					zend_scan_binary_escape_string(zendlval, yytext+2, yyleng-3, '"' TSRMLS_CC);
-					return T_CONSTANT_ENCAPSED_STRING;
-				} else {
-					return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
-				}
+				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"' TSRMLS_CC);
+				return T_CONSTANT_ENCAPSED_STRING;
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
@@ -2362,7 +1876,7 @@ inline_html:
 	YYCURSOR = SCNG(yy_text) + yyleng;
 
 	BEGIN(ST_DOUBLE_QUOTES);
-	return bprefix ? T_BINARY_DOUBLE : '"';
+	return '"';
 }
 
 
@@ -2411,7 +1925,7 @@ inline_html:
 		}
 	}
 
-	return bprefix ? T_BINARY_HEREDOC : T_START_HEREDOC;
+	return T_START_HEREDOC;
 }
 
 
@@ -2435,7 +1949,7 @@ inline_html:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_LVAL_P(zendlval) = (long) '{';
+	zendlval->value.lval = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
@@ -2498,12 +2012,8 @@ inline_html:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -2544,12 +2054,8 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -2620,12 +2126,8 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng - newline, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng - newline, 0 TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0 TSRMLS_CC);
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -2678,9 +2180,8 @@ heredoc_scan_done:
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng - newline, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
-	}
+	zend_copy_value(zendlval, yytext, yyleng - newline);
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	return T_ENCAPSED_AND_WHITESPACE;
 }

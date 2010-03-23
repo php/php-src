@@ -17,7 +17,7 @@ var_dump(quotemeta("\+*?[^]($)"));
 ===DONE===
 --EXPECTF--
 *** Testing quotemeta() : basic functionality ***
-unicode(20) "Hello how are you \?"
-unicode(19) "\(100 \+ 50\) \* 10"
-unicode(20) "\\\+\*\?\[\^\]\(\$\)"
+string(20) "Hello how are you \?"
+string(19) "\(100 \+ 50\) \* 10"
+string(20) "\\\+\*\?\[\^\]\(\$\)"
 ===DONE===

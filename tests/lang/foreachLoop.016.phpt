@@ -122,77 +122,77 @@ Ensure foreach splits the iterated entity from its cow reference set, for all so
 $a
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 ${'a'}
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $$a
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a[0]
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a[0][0]
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a->b
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a->b->c
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a->b[0]
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a->b[0][0]
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 $a->b[0]->c
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 C::$a
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 C::$a[0]
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }
 
 C::$a[0]->b
 array(1) {
   [0]=>
-  unicode(8) "original"
+  string(8) "original"
 }

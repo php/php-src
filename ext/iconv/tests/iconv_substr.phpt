@@ -3,15 +3,13 @@ iconv_substr()
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --INI--
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 iconv.internal_charset=ISO-8859-1
 --FILE--
 <?php
 function hexdump($str) {
 	$len = strlen($str);
 	for ($i = 0; $i < $len; ++$i) {
-		printf("%02x", ord($str{$i}));
+		printf("%02x", ord($str[$i]));
 	}
 	print "\n";
 }
@@ -32,14 +30,14 @@ function bar($str, $offset, $len = false) {
 }
 
 foo("abcdefghijklmnopqrstuvwxyz", 5, 7, "ASCII");
-foo(b"あいうえおかきくけこさしす", 5, 7, "EUC-JP");
+foo("あいうえおかきくけこさしす", 5, 7, "EUC-JP");
 bar("This is a test", 100000);
 bar("This is a test", 0, 100000);
 bar("This is a test", -3);
 bar("This is a test", 0, -9);
 bar("This is a test", 0, -100000);
 bar("This is a test", -9, -100000);
-var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", b"こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
+var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", "こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
 ?>
 --EXPECT--
 666768696a6b6c
@@ -47,15 +45,15 @@ var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-J
 a6a4a8a4aaa4ab
 a4aba4ada4afa4b1a4b3a4b5a4b7
 bool(false)
-unicode(0) ""
-unicode(14) "This is a test"
-unicode(14) "This is a test"
-unicode(3) "est"
-unicode(3) "est"
-unicode(5) "This "
-unicode(5) "This "
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
-unicode(10) "ちは ISO-2"
+bool(false)
+string(14) "This is a test"
+string(14) "This is a test"
+string(3) "est"
+string(3) "est"
+string(5) "This "
+string(5) "This "
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(10) "ちは ISO-2"

@@ -22,9 +22,9 @@ var_dump(B::$test2);
 var_dump(B::$test3);
 ?>
 --EXPECT--
-unicode(1) "x"
-unicode(1) "y"
-unicode(1) "z"
-unicode(1) "x"
-unicode(1) "y"
-unicode(1) "z"
+string(1) "x"
+string(1) "y"
+string(1) "z"
+string(1) "x"
+string(1) "y"
+string(1) "z"

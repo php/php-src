@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -819,13 +819,13 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			if (bindto) {
 				struct sockaddr *local_address = NULL;
 				int local_address_len = 0;
-	
+
 				if (sa->sa_family == AF_INET) {
 					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
 
 					local_address = (struct sockaddr*)in4;
 					local_address_len = sizeof(struct sockaddr_in);
-
+				
 					in4->sin_family = sa->sa_family;
 					in4->sin_port = htons(bindport);
 					if (!inet_aton(bindto, &in4->sin_addr)) {
@@ -1046,7 +1046,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
 
-	stream = php_stream_xport_create(res, reslen, REPORT_ERRORS,
+	stream = php_stream_xport_create(res, reslen, ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, persistent_id, timeout, NULL, NULL, NULL);
 
 	efree(res);

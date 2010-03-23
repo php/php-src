@@ -38,11 +38,11 @@ function ut_main()
         $str_res .= "\nLocale is: $locale\n";
         $fmt = ut_msgfmt_create( $locale, $pattern );
 		if(!$fmt) {
-			$str_res .= dump_str(intl_get_error_message())."\n";
+			$str_res .= dump(intl_get_error_message())."\n";
 			continue;
 		}
-        $str_res .= dump_str( ut_msgfmt_parse( $fmt, $results[$locale] ) ) . "\n";
-		$str_res .= dump_str( ut_msgfmt_parse_message($locale, $pattern, $results[$locale])) . "\n";
+        $str_res .= dump( ut_msgfmt_parse( $fmt, $results[$locale] ) ) . "\n";
+		$str_res .= dump( ut_msgfmt_parse_message($locale, $pattern, $results[$locale])) . "\n";
     }
     return $str_res;
 }

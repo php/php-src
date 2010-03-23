@@ -25,9 +25,6 @@ class A
   public function init() {
     $this->var = 10;
   }
-  public function __toString() {
-    return "ClassAObject";
-  }
 }
 
 // get a resource variable
@@ -89,38 +86,28 @@ echo "Done";
 
 -- Iteration 1 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: dir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 2 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: dir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 3 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: dir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 4 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: dir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 5 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: dir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 6 --
 bool(false)
@@ -158,16 +145,16 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: dir(Resource id #%d): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: dir(Resource id #%d): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: dir(ClassAObject): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: dir() expects parameter 1 to be string, object given in %s on line %d
+NULL
 Done

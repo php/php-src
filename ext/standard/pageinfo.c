@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -88,16 +88,15 @@ long php_getuid(void)
 }
 /* }}} */
 
-long php_getgid(void) /* {{{ */
+long php_getgid(void)
 {
 	TSRMLS_FETCH();
 
 	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
 }
-/* }}} */
 
-/* {{{ proto int getmyuid(void) U
+/* {{{ proto int getmyuid(void)
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
 {
@@ -112,7 +111,7 @@ PHP_FUNCTION(getmyuid)
 }
 /* }}} */
 
-/* {{{ proto int getmygid(void) U
+/* {{{ proto int getmygid(void)
    Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
 {
@@ -127,7 +126,7 @@ PHP_FUNCTION(getmygid)
 }
 /* }}} */
 
-/* {{{ proto int getmypid(void) U
+/* {{{ proto int getmypid(void)
    Get current process ID */
 PHP_FUNCTION(getmypid)
 {
@@ -142,7 +141,7 @@ PHP_FUNCTION(getmypid)
 }
 /* }}} */
 
-/* {{{ proto int getmyinode(void) U
+/* {{{ proto int getmyinode(void)
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
@@ -155,14 +154,13 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI time_t php_getlastmod(TSRMLS_D) /* {{{ */
+PHPAPI long php_getlastmod(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return BG(page_mtime);
 }
-/* }}} */
 
-/* {{{ proto int getlastmod(void) U
+/* {{{ proto int getlastmod(void)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {

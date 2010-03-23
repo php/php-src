@@ -28,14 +28,14 @@ var_dump( date("H:i:s", $timestamp) );
 ===DONE===
 --EXPECT--
 *** Testing date() : basic functionality ***
-unicode(27) "February 27, 2009, 10:44 am"
-unicode(8) "02.27.09"
-unicode(11) "27, 2, 2009"
-unicode(8) "20090227"
-unicode(39) "10-44-30, 27-02-09, 4428 4430 5 Friam09"
-unicode(19) "it is the 27th day."
-unicode(28) "Fri Feb 27 10:44:30 GMT 2009"
-unicode(19) "10:02:30 m is month"
-unicode(8) "10:44:30"
+string(27) "February 27, 2009, 10:44 am"
+string(8) "02.27.09"
+string(11) "27, 2, 2009"
+string(8) "20090227"
+string(39) "10-44-30, 27-02-09, 4428 4430 5 Friam09"
+string(19) "it is the 27th day."
+string(28) "Fri Feb 27 10:44:30 GMT 2009"
+string(19) "10:02:30 m is month"
+string(8) "10:44:30"
 ===DONE===
 

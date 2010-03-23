@@ -94,17 +94,17 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unshift() : heredoc strings for $var argument ***
 -- Iteration 1 --
 int(5)
 array(5) {
   [0]=>
-  unicode(0) ""
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(0) ""
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -113,15 +113,15 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -131,12 +131,12 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(1) "
+  string(1) "
 "
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -145,16 +145,16 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(1) "
+  string(1) "
 "
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -164,14 +164,14 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(86) "hello world
+  string(86) "hello world
 The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -180,18 +180,18 @@ This is a double quoted string"
 int(7)
 array(7) {
   [0]=>
-  unicode(86) "hello world
+  string(86) "hello world
 The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -201,14 +201,14 @@ This is a double quoted string"
 int(5)
 array(5) {
   [0]=>
-  unicode(88) "hello world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -217,18 +217,18 @@ double quoted string. withdifferentwhitespaces"
 int(7)
 array(7) {
   [0]=>
-  unicode(88) "hello world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -238,13 +238,13 @@ double quoted string. withdifferentwhitespaces"
 int(5)
 array(5) {
   [0]=>
-  unicode(44) "11 < 12. 123 >22
+  string(44) "11 < 12. 123 >22
 2222 != 1111.	 0000 = 0000
 "
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -253,17 +253,17 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  unicode(44) "11 < 12. 123 >22
+  string(44) "11 < 12. 123 >22
 2222 != 1111.	 0000 = 0000
 "
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -273,14 +273,14 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  unicode(123) "This's a string with quotes:
+  string(123) "This's a string with quotes:
 "strings in double quote";
 'strings in single quote';
 this\line is single quoted /with\slashes"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -289,18 +289,18 @@ this\line is single quoted /with\slashes"
 int(7)
 array(7) {
   [0]=>
-  unicode(123) "This's a string with quotes:
+  string(123) "This's a string with quotes:
 "strings in double quote";
 'strings in single quote';
 this\line is single quoted /with\slashes"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>

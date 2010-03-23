@@ -67,7 +67,7 @@ foreach($heredoc_strings as $string)  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with heredoc strings ***
 
 --- Iteration 1 ---
@@ -97,25 +97,25 @@ bool(false)
 bool(false)
 
 --- Iteration 3 ---
-unicode(11) "first line "
-unicode(7) "f hered"
-unicode(8) "c string"
-unicode(3) "sec"
-unicode(8) "nd line "
-unicode(7) "f hered"
-unicode(8) "c string"
-unicode(11) "third line "
-unicode(7) "f hered"
-unicode(7) "cstring"
+string(11) "first line "
+string(7) "f hered"
+string(8) "c string"
+string(3) "sec"
+string(8) "nd line "
+string(7) "f hered"
+string(8) "c string"
+string(11) "third line "
+string(7) "f hered"
+string(7) "cstring"
 bool(false)
 
 --- Iteration 4 ---
-unicode(4) "hell"
-unicode(1) "w"
-unicode(3) "rld"
-unicode(4) "hell"
-unicode(1) "w"
-unicode(3) "rld"
+string(4) "hell"
+string(1) "w"
+string(3) "rld"
+string(4) "hell"
+string(1) "w"
+string(3) "rld"
 bool(false)
 bool(false)
 bool(false)
@@ -123,12 +123,12 @@ bool(false)
 bool(false)
 
 --- Iteration 5 ---
-unicode(4) "hell"
-unicode(4) "123w"
-unicode(4) "rld4"
-unicode(1) "6"
-unicode(8) "1234hell"
-unicode(4) "1234"
+string(4) "hell"
+string(4) "123w"
+string(4) "rld4"
+string(1) "6"
+string(8) "1234hell"
+string(4) "1234"
 bool(false)
 bool(false)
 bool(false)
@@ -136,11 +136,11 @@ bool(false)
 bool(false)
 
 --- Iteration 6 ---
-unicode(4) "hell"
-unicode(1) "w"
-unicode(3) "rld"
-unicode(4) "hell"
-unicode(4) "hell"
+string(4) "hell"
+string(1) "w"
+string(3) "rld"
+string(4) "hell"
+string(4) "hell"
 bool(false)
 bool(false)
 bool(false)

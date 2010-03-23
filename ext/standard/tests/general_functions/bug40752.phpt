@@ -22,16 +22,16 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
 }
 array(1) {
-  [u"foo"]=>
-  unicode(1) "1"
+  ["foo"]=>
+  string(1) "1"
 }
 Done

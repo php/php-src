@@ -66,14 +66,14 @@ echo "Done";
 --EXPECTF--
 ---> Various types of access on complete class:
 object(C)#%d (1) {
-  [u"p"]=>
+  ["p"]=>
   int(1)
 }
 bool(true)
 int(1)
-unicode(13) "ref1.original"
-unicode(12) "ref1.changed"
-unicode(9) "p.changed"
+string(13) "ref1.original"
+string(12) "ref1.changed"
+string(9) "p.changed"
 bool(false)
 bool(true)
 
@@ -83,9 +83,9 @@ NULL
 
 ---> Same types of access on incomplete class:
 object(__PHP_Incomplete_Class)#%d (2) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(1) "C"
-  [u"p"]=>
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "C"
+  ["p"]=>
   int(1)
 }
 bool(false)
@@ -102,7 +102,7 @@ Notice: main(): The script tried to execute a method or access a property of an 
 NULL
 
 Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide a __autoload() function to load the class definition  in %s on line 50
-unicode(9) "p.changed"
+string(9) "p.changed"
 
 Notice: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "C" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide a __autoload() function to load the class definition  in %s on line 53
 bool(false)

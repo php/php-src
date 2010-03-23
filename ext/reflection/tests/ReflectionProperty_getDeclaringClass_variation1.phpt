@@ -19,8 +19,8 @@ $propInfo->getDeclaringClass(1);
 ?> 
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(1) "A"
+  ["name"]=>
+  string(1) "A"
 }
 Wrong number of params:
 

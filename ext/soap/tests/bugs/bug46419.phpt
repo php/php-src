@@ -32,12 +32,12 @@ var_dump($x->bar());
 ?>
 --EXPECT--
 array(4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   NULL
-  [u"c"]=>
+  ["c"]=>
   int(2)
-  [u"d"]=>
-  unicode(0) ""
+  ["d"]=>
+  string(0) ""
 }

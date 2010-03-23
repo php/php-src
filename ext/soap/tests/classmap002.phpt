@@ -38,9 +38,9 @@ echo "ok\n";
 ?>
 --EXPECT--
 object(book)#2 (2) {
-  [u"a"]=>
-  unicode(5) "Blaat"
-  [u"b"]=>
-  unicode(3) "aap"
+  ["a"]=>
+  string(5) "Blaat"
+  ["b"]=>
+  string(3) "aap"
 }
 ok

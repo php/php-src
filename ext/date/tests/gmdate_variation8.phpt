@@ -40,21 +40,21 @@ var_dump( gmdate('y', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with checking non leap year using Leap Year format --
-unicode(1) "0"
+string(1) "0"
 
 -- Testing gmdate() function with checking leap year using Leap Year format --
-unicode(1) "%d"
-unicode(1) "1"
+string(1) "%d"
+string(1) "1"
 
 -- Testing gmdate() function with ISO-8601 year number format --
-unicode(4) "%d"
-unicode(4) "2008"
+string(4) "%d"
+string(4) "2008"
 
 -- Testing gmdate() function with full numeric representation of year format --
-unicode(4) "%d"
-unicode(4) "2008"
+string(4) "%d"
+string(4) "2008"
 
 -- Testing gmdate() function with 2 digit representation year format --
-unicode(2) "%d"
-unicode(2) "08"
+string(2) "%d"
+string(2) "08"
 ===DONE===

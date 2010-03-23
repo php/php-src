@@ -33,21 +33,21 @@ var_dump( $tran[97] );
 *** Testing timezone_transitions_get() : basic functionality ***
 
 -- Get all transitions --
-unicode(5) "array"
+string(5) "array"
 
 -- Total number of transitions: 243 --
 
 -- Format a sample entry pfor Spring 1963 --
 array(5) {
-  [u"ts"]=>
+  ["ts"]=>
   int(-213228000)
-  [u"time"]=>
-  unicode(24) "1963-03-31T02:00:00+0000"
-  [u"offset"]=>
+  ["time"]=>
+  string(24) "1963-03-31T02:00:00+0000"
+  ["offset"]=>
   int(3600)
-  [u"isdst"]=>
+  ["isdst"]=>
   bool(true)
-  [u"abbr"]=>
-  unicode(3) "BST"
+  ["abbr"]=>
+  string(3) "BST"
 }
 ===DONE===

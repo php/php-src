@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -63,38 +63,38 @@ Test1::__construct()
 Test2::__construct()
 Test3::__construct()
 array(2) {
-  [u"Group1"]=>
+  ["Group1"]=>
   array(2) {
     [0]=>
     object(stdClass)#%d (2) {
-      [u"id"]=>
-      unicode(1) "1"
-      [u"val"]=>
-      unicode(1) "A"
+      ["id"]=>
+      string(1) "1"
+      ["val"]=>
+      string(1) "A"
     }
     [1]=>
     object(Test1)#%d (2) {
-      [u"id"]=>
-      unicode(1) "2"
-      [u"val"]=>
-      unicode(1) "B"
+      ["id"]=>
+      string(1) "2"
+      ["val"]=>
+      string(1) "B"
     }
   }
-  [u"Group2"]=>
+  ["Group2"]=>
   array(2) {
     [0]=>
     object(Test2)#%d (2) {
-      [u"id"]=>
-      unicode(1) "3"
-      [u"val"]=>
-      unicode(1) "C"
+      ["id"]=>
+      string(1) "3"
+      ["val"]=>
+      string(1) "C"
     }
     [1]=>
     object(Test3)#%d (2) {
-      [u"id"]=>
-      unicode(1) "4"
-      [u"val"]=>
-      unicode(1) "D"
+      ["id"]=>
+      string(1) "4"
+      ["val"]=>
+      string(1) "D"
     }
   }
 }
@@ -102,18 +102,18 @@ Test1::__construct()
 Test2::__construct()
 Test3::__construct()
 array(2) {
-  [u"Group1"]=>
+  ["Group1"]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val"]=>
-    unicode(1) "B"
+    ["id"]=>
+    string(1) "2"
+    ["val"]=>
+    string(1) "B"
   }
-  [u"Group2"]=>
+  ["Group2"]=>
   object(Test3)#%d (2) {
-    [u"id"]=>
-    unicode(1) "4"
-    [u"val"]=>
-    unicode(1) "D"
+    ["id"]=>
+    string(1) "4"
+    ["val"]=>
+    string(1) "D"
   }
 }

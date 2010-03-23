@@ -24,7 +24,7 @@ GetImageSize() with 384x385 pixels
 ?>
 --EXPECT--
 array(1) {
-  [u"384x385.png"]=>
+  ["384x385.png"]=>
   array(6) {
     [0]=>
     int(384)
@@ -33,10 +33,10 @@ array(1) {
     [2]=>
     int(3)
     [3]=>
-    unicode(24) "width="384" height="385""
-    [u"bits"]=>
+    string(24) "width="384" height="385""
+    ["bits"]=>
     int(1)
-    [u"mime"]=>
-    unicode(9) "image/png"
+    ["mime"]=>
+    string(9) "image/png"
   }
 }

@@ -36,78 +36,78 @@ foreach($inputs as $key =>$value) {
 
 --octal 05--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(5)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(5)
 }
 
 --octal 010--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(8)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(8)
 }
 
 --octal -010--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(52)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(29)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(-8)
 }

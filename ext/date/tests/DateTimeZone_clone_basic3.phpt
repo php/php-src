@@ -35,41 +35,41 @@ object(DateTimeZone)#%d (0) {
 
 -- Add some properties --
 object(DateTimeZone)#%d (2) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 
 -- clone it --
 object(DateTimeZone)#%d (2) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 
 -- Add some more properties --
 object(DateTimeZone)#%d (4) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
-  [u"property3"]=>
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
 }
 
 -- clone it --
 object(DateTimeZone)#%d (4) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
-  [u"property3"]=>
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
 }
 ===DONE===

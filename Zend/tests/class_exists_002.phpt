@@ -22,5 +22,5 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: class_exists() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: class_exists() expects parameter 1 to be string, object given in %s on line %d
 NULL

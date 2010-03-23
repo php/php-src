@@ -3,7 +3,7 @@ str_getcsv(): Testing using various arguments
 --FILE--
 <?php
 
-// unicode input[, unicode delimiter[, unicode enclosure[, unicode escape]]]
+// string input[, string delimiter[, string enclosure[, string escape]]]
 var_dump(str_getcsv('"f", "o", ""'));
 print "-----\n";
 var_dump(str_getcsv('foo||bar', '|'));
@@ -33,55 +33,55 @@ print "-----\n";
 --EXPECT--
 array(3) {
   [0]=>
-  unicode(1) "f"
+  string(1) "f"
   [1]=>
-  unicode(1) "o"
+  string(1) "o"
   [2]=>
-  unicode(0) ""
+  string(0) ""
 }
 -----
 array(3) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }
 -----
 array(2) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }
 -----
 array(2) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }
 -----
 array(3) {
   [0]=>
-  unicode(2) "f."
+  string(2) "f."
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
   [2]=>
-  unicode(4) "-|-."
+  string(4) "-|-."
 }
 -----
 array(1) {
   [0]=>
-  unicode(7) "foo.bar"
+  string(7) "foo.bar"
 }
 -----
 array(2) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }
 -----
 array(2) {
@@ -93,14 +93,14 @@ array(2) {
 -----
 array(2) {
   [0]=>
-  unicode(5) "foo  "
+  string(5) "foo  "
   [1]=>
-  unicode(7) "  bar  "
+  string(7) "  bar  "
 }
 -----
 array(1) {
   [0]=>
-  unicode(3) " " "
+  string(3) " " "
 }
 -----
 array(1) {

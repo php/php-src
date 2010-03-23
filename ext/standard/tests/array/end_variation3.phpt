@@ -33,9 +33,9 @@ var_dump(current($array2));
 *** Testing end() : usage variations ***
 
 -- Initial position of internal pointer --
-unicode(4) "zero"
+string(4) "zero"
 
 -- Position after calling end() --
-$array1: unicode(3) "two"
-$array2: unicode(3) "two"
+$array1: string(3) "two"
+$array2: string(3) "two"
 ===DONE===

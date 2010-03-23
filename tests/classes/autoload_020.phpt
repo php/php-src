@@ -12,6 +12,6 @@ Ensure __autoload() is triggered during unserialization.
 --EXPECTF--
 in autoload: C
 object(__PHP_Incomplete_Class)#%d (1) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(1) "C"
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "C"
 }

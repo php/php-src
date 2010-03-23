@@ -25,6 +25,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 resource(%d) of type (oci8 connection)
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 Done

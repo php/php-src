@@ -1,7 +1,5 @@
 --TEST--
 Test pclose() function : usage variation 
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -192,27 +190,27 @@ Error: 2 - pclose() expects parameter 1 to be resource, boolean given, %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --empty string SQ--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --string DQ--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --string SQ--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --mixed case string--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --heredoc--
-Error: 2 - pclose() expects parameter 1 to be resource, Unicode string given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, string given, %s(%d)
 bool(false)
 
 --instance of classWithToString--

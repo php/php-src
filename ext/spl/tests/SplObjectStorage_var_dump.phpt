@@ -9,7 +9,7 @@ $o[new StdClass] = $o;
 var_dump($o);
 --EXPECTF--
 object(SplObjectStorage)#1 (1) {
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(1) {
     ["%s"]=>
     array(2) {
@@ -18,7 +18,7 @@ object(SplObjectStorage)#1 (1) {
       }
       ["inf"]=>
       object(SplObjectStorage)#1 (1) {
-        [u"storage":u"SplObjectStorage":private]=>
+        ["storage":"SplObjectStorage":private]=>
         array(1) {
           ["%s"]=>
           array(2) {

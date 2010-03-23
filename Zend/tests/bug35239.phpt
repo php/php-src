@@ -14,26 +14,26 @@ echo $a->x0;
 ?>
 --EXPECT--
 object(stdClass)#1 (1) {
-  [u"x0"]=>
+  ["x0"]=>
   &object(stdClass)#2 (3) {
-    [u"y0"]=>
-    unicode(1) "b"
-    [u"y1"]=>
+    ["y0"]=>
+    string(1) "b"
+    ["y1"]=>
     &object(stdClass)#2 (3) {
-      [u"y0"]=>
-      unicode(1) "b"
-      [u"y1"]=>
+      ["y0"]=>
+      string(1) "b"
+      ["y1"]=>
       *RECURSION*
-      [u"y2"]=>
+      ["y2"]=>
       *RECURSION*
     }
-    [u"y2"]=>
+    ["y2"]=>
     &object(stdClass)#2 (3) {
-      [u"y0"]=>
-      unicode(1) "b"
-      [u"y1"]=>
+      ["y0"]=>
+      string(1) "b"
+      ["y1"]=>
       *RECURSION*
-      [u"y2"]=>
+      ["y2"]=>
       *RECURSION*
     }
   }

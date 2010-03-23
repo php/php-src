@@ -31,11 +31,11 @@ foreach ($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 bool(false)
 string(4) "0000"
 
-Warning: soundex() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: soundex() expects parameter 1 to be string, array given in %s on line %d
 NULL
 string(4) "F650"
 string(4) "T300"

@@ -47,114 +47,114 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with invalid escape sequences in token ***
 
 --- Iteration 1 ---
-unicode(5) "hello"
-unicode(6) " world"
+string(5) "hello"
+string(6) " world"
 bool(false)
 bool(false)
 
-unicode(7) "khellok"
-unicode(6) "worldk"
+string(7) "khellok"
+string(6) "worldk"
 bool(false)
 bool(false)
 
-unicode(5) "hello"
-unicode(6) " world"
+string(5) "hello"
+string(6) " world"
 bool(false)
 bool(false)
 
-unicode(5) "hello"
-unicode(6) " world"
+string(5) "hello"
+string(6) " world"
 bool(false)
 bool(false)
 
-unicode(1) " "
-unicode(1) "r"
+string(1) " "
+string(1) "r"
 bool(false)
 bool(false)
 
 
 --- Iteration 2 ---
-unicode(1) "\"
-unicode(6) "hello\"
-unicode(7) " world\"
+string(1) "\"
+string(6) "hello\"
+string(7) " world\"
 bool(false)
 
-unicode(9) "\khello\k"
-unicode(7) "world\k"
-bool(false)
-bool(false)
-
-unicode(1) "\"
-unicode(6) "hello\"
-unicode(7) " world\"
-bool(false)
-
-unicode(5) "hello"
-unicode(6) " world"
+string(9) "\khello\k"
+string(7) "world\k"
 bool(false)
 bool(false)
 
-unicode(1) " "
-unicode(1) "r"
+string(1) "\"
+string(6) "hello\"
+string(7) " world\"
+bool(false)
+
+string(5) "hello"
+string(6) " world"
+bool(false)
+bool(false)
+
+string(1) " "
+string(1) "r"
 bool(false)
 bool(false)
 
 
 --- Iteration 3 ---
-unicode(1) "/"
-unicode(6) "hello\"
-unicode(7) " world/"
+string(1) "/"
+string(6) "hello\"
+string(7) " world/"
 bool(false)
 
-unicode(8) "khello\k"
-unicode(5) "world"
-unicode(1) "k"
+string(8) "khello\k"
+string(5) "world"
+string(1) "k"
 bool(false)
 
-unicode(6) "hello\"
-unicode(6) " world"
+string(6) "hello\"
+string(6) " world"
 bool(false)
 bool(false)
 
-unicode(1) "/"
-unicode(5) "hello"
-unicode(7) " world/"
+string(1) "/"
+string(5) "hello"
+string(7) " world/"
 bool(false)
 
-unicode(1) "/"
-unicode(1) " "
-unicode(1) "r"
-unicode(1) "/"
+string(1) "/"
+string(1) " "
+string(1) "r"
+string(1) "/"
 
 
 --- Iteration 4 ---
-unicode(6) "/hello"
-unicode(7) "/ world"
+string(6) "/hello"
+string(7) "/ world"
 bool(false)
 bool(false)
 
-unicode(6) "hellok"
-unicode(5) "world"
+string(6) "hellok"
+string(5) "world"
 bool(false)
 bool(false)
 
-unicode(5) "hello"
-unicode(6) " world"
+string(5) "hello"
+string(6) " world"
 bool(false)
 bool(false)
 
-unicode(6) "/hello"
-unicode(7) "/ world"
+string(6) "/hello"
+string(7) "/ world"
 bool(false)
 bool(false)
 
-unicode(1) "/"
-unicode(2) "/ "
-unicode(1) "r"
+string(1) "/"
+string(2) "/ "
+string(1) "r"
 bool(false)
 
 Done

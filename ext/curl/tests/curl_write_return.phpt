@@ -14,7 +14,7 @@ of curl_write().
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');
-fwrite($fp, b"test");
+fwrite($fp, "test");
 fclose($fp);
 
 $ch = curl_init();

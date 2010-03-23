@@ -103,23 +103,23 @@ array(9) {
 -- input array of strings before shuffle() function is applied --
 array(9) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
   [3]=>
-  unicode(4) "four"
+  string(4) "four"
   [4]=>
-  unicode(4) "five"
+  string(4) "five"
   [5]=>
-  unicode(1) " "
+  string(1) " "
   [6]=>
-  unicode(3) "six"
+  string(3) "six"
   [7]=>
-  unicode(1) " "
+  string(1) " "
   [8]=>
-  unicode(5) "seven"
+  string(5) "seven"
 }
 
 -- return value from shuffle() function --
@@ -128,22 +128,23 @@ bool(true)
 -- resultant array after shuffle() function is applied --
 array(9) {
   [0]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [1]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [2]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [3]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [4]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [5]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [6]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [7]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [8]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
 }
 Done
+

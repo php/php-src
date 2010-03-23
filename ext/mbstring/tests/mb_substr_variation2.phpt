@@ -198,16 +198,16 @@ Warning: mb_substr(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 18 --
-unicode(10) "7472696e67"
+string(10) "7472696e67"
 
 -- Iteration 19 --
-unicode(10) "7472696e67"
+string(10) "7472696e67"
 
 -- Iteration 20 --
-unicode(10) "7472696e67"
+string(10) "7472696e67"
 
 -- Iteration 21 --
-unicode(10) "7472696e67"
+string(10) "7472696e67"
 
 -- Iteration 22 --
 
@@ -221,7 +221,7 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_substr() expects parameter 4 to be binary string, resource given in %s on line %d
-unicode(0) ""
+Warning: mb_substr() expects parameter 4 to be string, resource given in %s on line %d
+string(0) ""
 Done
 

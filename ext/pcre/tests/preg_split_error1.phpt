@@ -50,18 +50,18 @@ bool(false)
 
 Arg value is Array
 
-Warning: preg_split() expects parameter 1 to be string (Unicode or binary), array given in %spreg_split_error1.php on line %d
+Warning: preg_split() expects parameter 1 to be string, array given in %spreg_split_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]/
 array(3) {
   [0]=>
-  unicode(4) "1 2 "
+  string(4) "1 2 "
   [1]=>
-  unicode(5) " 3 4 "
+  string(5) " 3 4 "
   [2]=>
-  unicode(4) " 5 6"
+  string(4) " 5 6"
 }
 
-Warning: preg_split() expects parameter 1 to be string (Unicode or binary), object given in %spreg_split_error1.php on line %d
+Warning: preg_split() expects parameter 1 to be string, object given in %spreg_split_error1.php on line %d
 bool(false)

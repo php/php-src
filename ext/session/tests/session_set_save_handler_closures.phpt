@@ -50,7 +50,7 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : using closures as callbacks ***
 
-unicode(%d) "%s"
+string(%d) "%s"
 
 Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d
 bool(false)
@@ -63,37 +63,33 @@ bool(false)
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|U:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-
-Notice: fwrite(): %d character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
 Starting session again..!
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
-Write [%s,%s,Blah|U:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-
-Notice: fwrite(): %d character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]

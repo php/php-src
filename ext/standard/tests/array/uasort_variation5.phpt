@@ -18,7 +18,7 @@ Test uasort() function : usage variations - sort diff. strings
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
 {
@@ -33,7 +33,7 @@ function cmp_function($value1, $value2)
   }
 }
 
-// Different heredoc strings 
+// Different heredoc strings to be sorted 
 $empty_heredoc =<<<EOT
 EOT;
 
@@ -79,67 +79,67 @@ var_dump($heredoc_values);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : different string arrays as 'array_arg' ***
 -- Sorting Single Quoted String values --
 bool(true)
 array(10) {
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [0]=>
-  unicode(1) " "
+  string(1) " "
   [9]=>
-  unicode(1) "'"
+  string(1) "'"
   [7]=>
-  unicode(1) "0"
+  string(1) "0"
   [8]=>
-  unicode(8) "123Hello"
+  string(8) "123Hello"
   [10]=>
-  unicode(4) "@#$%"
+  string(4) "@#$%"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [6]=>
-  unicode(2) "\t"
+  string(2) "\t"
   [1]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 -- Sorting Double Quoted String values --
 bool(true)
 array(10) {
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(1) "	"
+  string(1) "	"
   [0]=>
-  unicode(1) " "
+  string(1) " "
   [9]=>
-  unicode(1) """
+  string(1) """
   [7]=>
-  unicode(1) "0"
+  string(1) "0"
   [8]=>
-  unicode(8) "123Hello"
+  string(8) "123Hello"
   [10]=>
-  unicode(4) "@#$%"
+  string(4) "@#$%"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [1]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 -- Sorting Heredoc String values --
 bool(true)
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(7) "HEREDOC"
+  string(7) "HEREDOC"
   [1]=>
-  unicode(7) "Heredoc"
+  string(7) "Heredoc"
   [3]=>
-  unicode(4%d) "heredoc string	with!@# and 123
+  string(4%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
 Done

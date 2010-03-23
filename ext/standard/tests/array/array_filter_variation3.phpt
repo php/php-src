@@ -49,7 +49,7 @@ for($count = 0; $count < count($input_values); $count++)
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_filter() : usage variations - different types of array for 'input' argument***
 -- Iteration 1 --
 array(5) {
@@ -104,23 +104,23 @@ array(0) {
 -- Iteration 3 --
 array(3) {
   [0]=>
-  unicode(6) "value1"
+  string(6) "value1"
   [1]=>
-  unicode(6) "value2"
+  string(6) "value2"
   [3]=>
-  unicode(1) " "
+  string(1) " "
 }
 array(5) {
   [0]=>
-  unicode(6) "value1"
+  string(6) "value1"
   [1]=>
-  unicode(6) "value2"
+  string(6) "value2"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(1) " "
+  string(1) " "
   [4]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(0) {
 }
@@ -157,38 +157,38 @@ array(0) {
 -- Iteration 6 --
 array(2) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [-2]=>
-  unicode(5) "value"
+  string(5) "value"
 }
 array(3) {
   [1]=>
-  unicode(3) "one"
-  [u"zero"]=>
+  string(3) "one"
+  ["zero"]=>
   int(0)
   [-2]=>
-  unicode(5) "value"
+  string(5) "value"
 }
 array(0) {
 }
 -- Iteration 7 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u""]=>
-  unicode(5) "empty"
+  [""]=>
+  string(5) "empty"
   [5]=>
-  unicode(5) "float"
+  string(5) "float"
   [1]=>
   int(1)
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u""]=>
-  unicode(5) "empty"
+  [""]=>
+  string(5) "empty"
   [5]=>
-  unicode(5) "float"
+  string(5) "float"
   [1]=>
   int(1)
 }
@@ -197,19 +197,19 @@ array(0) {
 -- Iteration 8 --
 array(3) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"key"]=>
-  unicode(5) "value"
+  ["key"]=>
+  string(5) "value"
 }
 array(3) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"key"]=>
-  unicode(5) "value"
+  ["key"]=>
+  string(5) "value"
 }
 array(0) {
 }

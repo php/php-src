@@ -53,7 +53,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation15_link.tmp");
 unlink("$file_path/lstat_stat_variation15.tmp");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing lstat() on a link after changing its access permission ***
 bool(true)
 bool(true)

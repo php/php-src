@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@ PHP_FUNCTION(getmyinode);
 PHP_FUNCTION(getlastmod);
 
 PHPAPI void php_statpage(TSRMLS_D);
-PHPAPI time_t php_getlastmod(TSRMLS_D);
+PHPAPI long php_getlastmod(TSRMLS_D);
 extern long php_getuid(void);
 extern long php_getgid(void);
 

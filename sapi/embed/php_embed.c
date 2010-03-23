@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -18,7 +18,7 @@
 /* $Id$ */
 
 #include "php_embed.h"
-#include <ext/standard/dl.h>
+#include "ext/standard/php_standard.h"
 
 #ifdef PHP_WIN32
 #include <io.h>
@@ -135,7 +135,7 @@ extern EMBED_SAPI_API sapi_module_struct php_embed_module = {
 	php_embed_register_variables,   /* register server variables */
 	php_embed_log_message,          /* Log message */
 	NULL,							/* Get request time */
-	NULL,                           /* Child terminate */
+	NULL,							/* Child terminate */
   
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

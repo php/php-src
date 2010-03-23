@@ -9,16 +9,16 @@ $a[] =& $a;
 var_dump(each($a[1]));
 
 ?>
---EXPECT--
+--EXPECTF--
 array(4) {
   [1]=>
   array(0) {
   }
-  [u"value"]=>
+  ["value"]=>
   array(0) {
   }
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }

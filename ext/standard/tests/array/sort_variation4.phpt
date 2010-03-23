@@ -10,7 +10,7 @@ Test sort() function : usage variations - sort reference values
 
 /*
  * Testing sort() by providing reference variable array with following flag values
- *  flag value as default
+ *  flag value as defualt
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
 */
@@ -24,7 +24,7 @@ $value3 = 555;
 // an array containing integer references 
 $unsorted_numerics =  array( &$value1 , &$value2, &$value3);
 
-echo "\n-- Testing sort() by supplying reference variable array, 'flag' value is default --\n";
+echo "\n-- Testing sort() by supplying reference variable array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -41,10 +41,10 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sort() :usage variations  ***
 
--- Testing sort() by supplying reference variable array, 'flag' value is default --
+-- Testing sort() by supplying reference variable array, 'flag' value is defualt --
 bool(true)
 array(3) {
   [0]=>

@@ -24,7 +24,7 @@ echo "\nDone";
 ?>
 --EXPECTF--
 --- Testing Resource ---
-unicode(4) "i:%d;"
+string(4) "i:%d;"
 int(%d)
 
 Done

@@ -65,7 +65,7 @@ fclose($fp);
   
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unique() : assoc. array with diff. values to $input argument ***
 -- Iteration 1 --
 array(1) {
@@ -74,21 +74,21 @@ array(1) {
 }
 -- Iteration 2 --
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 -- Iteration 3 --
 array(1) {
-  [u"float1"]=>
+  ["float1"]=>
   float(2.3333)
 }
 -- Iteration 4 --
 array(3) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [3]=>
   float(4.8999992284)
@@ -96,36 +96,36 @@ array(3) {
 -- Iteration 5 --
 array(3) {
   [111]=>
-  unicode(6) "	Hello"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(6) "	Hello"
+  ["red"]=>
+  string(6) "col	or"
   [2]=>
-  unicode(7) "world"
+  string(7) "world"
 }
 -- Iteration 6 --
 array(3) {
   [111]=>
-  unicode(7) "\tHello"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(7) "\tHello"
+  ["red"]=>
+  string(7) "col\tor"
   [2]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
 }
 -- Iteration 7 --
 array(2) {
   [1]=>
-  unicode(5) "hello"
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  string(5) "hello"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 -- Iteration 8 --
 array(3) {
   [11]=>
-  object(classA)#1 (0) {
+  object(classA)#%d (0) {
   }
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"resource"]=>
-  resource(5) of type (stream)
+  ["resource"]=>
+  resource(%d) of type (stream)
 }
 Done

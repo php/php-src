@@ -1,7 +1,7 @@
 --TEST--
 Test strip_tags() function : usage variations - double quoted strings
 --INI--
-set short_open_tag = on
+short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -36,19 +36,19 @@ foreach($double_quote_string as $string_value)
 }
 
 echo "Done";
---EXPECT--
+--EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-unicode(50) "<html> $ -> This represents the dollar sign</html>"
+string(50) "<html> $ -> This represents the dollar sign</html>"
 -- Iteration 2 --
-unicode(59) "<html>	 The quick brown fox jumped over the lazy dog</p>"
+string(59) "<html>	 The quick brown fox jumped over the lazy dog</p>"
 -- Iteration 3 --
-unicode(31) "<a>This is a hyper text tag</a>"
+string(31) "<a>This is a hyper text tag</a>"
 -- Iteration 4 --
-unicode(0) ""
+string(0) ""
 -- Iteration 5 --
-unicode(26) "<p>This is a paragraph</p>"
+string(26) "<p>This is a paragraph</p>"
 -- Iteration 6 --
-unicode(62) "<b>This is 	a text in bold letters\s\malong with slashes
+string(62) "<b>This is 	a text in bold letters\s\malong with slashes
 </b>"
 Done

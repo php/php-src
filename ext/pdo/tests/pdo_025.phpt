@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -61,53 +61,53 @@ foreach($stmt as $obj) {
 ?>
 --EXPECTF--
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "10"
-  [u"val"]=>
-  unicode(3) "Abc"
-  [u"val2"]=>
-  unicode(3) "zxy"
+  ["id"]=>
+  string(2) "10"
+  ["val"]=>
+  string(3) "Abc"
+  ["val2"]=>
+  string(3) "zxy"
 }
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "20"
-  [u"val"]=>
-  unicode(3) "Def"
-  [u"val2"]=>
-  unicode(3) "wvu"
+  ["id"]=>
+  string(2) "20"
+  ["val"]=>
+  string(3) "Def"
+  ["val2"]=>
+  string(3) "wvu"
 }
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "30"
-  [u"val"]=>
-  unicode(3) "Ghi"
-  [u"val2"]=>
-  unicode(3) "tsr"
+  ["id"]=>
+  string(2) "30"
+  ["val"]=>
+  string(3) "Ghi"
+  ["val2"]=>
+  string(3) "tsr"
 }
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "40"
-  [u"val"]=>
-  unicode(3) "Jkl"
-  [u"val2"]=>
-  unicode(3) "qpo"
+  ["id"]=>
+  string(2) "40"
+  ["val"]=>
+  string(3) "Jkl"
+  ["val2"]=>
+  string(3) "qpo"
 }
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "50"
-  [u"val"]=>
-  unicode(3) "Mno"
-  [u"val2"]=>
-  unicode(3) "nml"
+  ["id"]=>
+  string(2) "50"
+  ["val"]=>
+  string(3) "Mno"
+  ["val2"]=>
+  string(3) "nml"
 }
 object(Test)#%d (3) {
-  [u"id"]=>
-  unicode(2) "60"
-  [u"val"]=>
-  unicode(3) "Pqr"
-  [u"val2"]=>
-  unicode(3) "kji"
+  ["id"]=>
+  string(2) "60"
+  ["val"]=>
+  string(3) "Pqr"
+  ["val2"]=>
+  string(3) "kji"
 }
 ===FAIL===
 
-Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d
+Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d%a

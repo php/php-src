@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,14 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@php.net>                               |
-  |          Andrey Hristov <andrey@php.net>                             |
-  |          Ulf Wendel <uw@php.net>                                     |
+  | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
+
 */
-
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -82,7 +78,7 @@ static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
-	/* FIXME */
+	/*FIXME*/
 	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC); */
 	return SUCCESS;
 }
@@ -114,7 +110,7 @@ static int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_D
 static int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
-	ZVAL_RT_STRING(*retval, (char *)mysql_get_client_info(), 1);
+	ZVAL_STRING(*retval, (char *)mysql_get_client_info(), 1);
 	return SUCCESS;
 }
 /* }}} */
@@ -156,13 +152,13 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 
 /* {{{ mysqli_warning_property_info_entries */
 zend_property_info mysqli_driver_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, {"client_info"},	sizeof("client_info") - 1,		0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"client_version"},sizeof("client_version") - 1,	0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"driver_version"},sizeof("driver_version") - 1,	0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"embedded"},		sizeof("embedded") - 1,			0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"reconnect"},	sizeof("reconnect") - 1,		0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"report_mode"},	sizeof("report_mode") - 1,		0, {NULL}, 0, NULL},
-	{0,					{NULL}, 		0,								0, {NULL}, 0, NULL},
+	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "driver_version",	sizeof("driver_version") - 1,	0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "embedded",		sizeof("embedded") - 1,			0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "reconnect",		sizeof("reconnect") - 1,		0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "report_mode",	sizeof("report_mode") - 1,		0, NULL, 0, NULL},
+	{0,					NULL, 			0,								0, NULL, 0, NULL},
 };
 /* }}} */
 

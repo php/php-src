@@ -24,7 +24,7 @@ $stmt = oci_parse($c, "SELECT fileimage FROM phptestrawtable");
 oci_execute($stmt);
 
 $row = oci_fetch_row($stmt);
-var_dump(md5((binary)$row[0]));
+var_dump(md5($row[0]));
 var_dump(strlen($row[0]));
 
 $stmt = oci_parse($c, "drop table phptestrawtable");
@@ -34,6 +34,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-unicode(32) "88b274d7a257ac6f70435b83abd4e26e"
+string(32) "88b274d7a257ac6f70435b83abd4e26e"
 int(300)
 Done

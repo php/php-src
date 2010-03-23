@@ -33,7 +33,7 @@ dumpFuncInfo('extract');
 
 ?>
 --EXPECTF--
-unicode(%d) "%sReflectionFunction_getFileName.002.php"
-unicode(%d) "%sReflectionFunction_getFileName.002.php"
+string(%d) "%sReflectionFunction_getFileName.002.php"
+string(%d) "%sReflectionFunction_getFileName.002.php"
 bool(false)
 

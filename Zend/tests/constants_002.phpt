@@ -14,5 +14,5 @@ var_dump(foo);
 Warning: Constants may only evaluate to scalar values in %s on line %d
 
 Notice: Use of undefined constant foo - assumed 'foo' in %s on line %d
-unicode(%d) "foo"
+string(%d) "foo"
 resource(%d) of type (stream)

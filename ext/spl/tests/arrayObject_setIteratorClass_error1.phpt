@@ -52,5 +52,5 @@ Warning: ArrayObject::setIteratorClass() expects parameter 1 to be a class name 
   a=>1
   b=>2
   c=>3
-unicode(113) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'nonExistentClass' given"
-unicode(105) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'stdClass' given"
+string(113) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'nonExistentClass' given"
+string(105) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'stdClass' given"

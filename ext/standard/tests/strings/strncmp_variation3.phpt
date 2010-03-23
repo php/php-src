@@ -7,7 +7,7 @@ Test strncmp() function: usage variations - different lengths
  * Source code: Zend/zend_builtin_functions.c
 */
 
-/* Test strncmp() with various lengths including zero and considering case sensitivity */
+/* Test strncmp() with various lengths */
 
 echo "*** Test strncmp() function: with different lengths ***\n";
 /* definitions of required variables */

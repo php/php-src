@@ -82,12 +82,12 @@ foreach($values as $value) {
       var_dump( is_subclass_of($value, $class_name) );
 };
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %sis_subclass_of_variation_004.php(69)
-Error: 8 - Undefined variable: unset_var, %sis_subclass_of_variation_004.php(72)
+Error: 8 - Undefined variable: undefined_var, %s(69)
+Error: 8 - Undefined variable: unset_var, %s(72)
 
 Arg value 0 
 bool(false)
@@ -115,23 +115,18 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(78)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(78)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(78)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(78)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(78)
 
 Arg value Array 
 bool(false)
@@ -155,21 +150,21 @@ Arg value
 bool(false)
 
 Arg value  
-Error: 2 - Unknown class passed as parameter, %sis_subclass_of_variation_004.php(79)
+Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value  
-Error: 2 - Unknown class passed as parameter, %sis_subclass_of_variation_004.php(79)
+Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value string 
 In __autoload(string)
-Error: 2 - Unknown class passed as parameter, %sis_subclass_of_variation_004.php(79)
+Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value String 
 In __autoload(String)
-Error: 2 - Unknown class passed as parameter, %sis_subclass_of_variation_004.php(79)
+Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value  
@@ -177,4 +172,4 @@ bool(false)
 
 Arg value  
 bool(false)
-===DONE===
+Done

@@ -28,111 +28,111 @@ echo "Done";
 
 -- $sort argument is -5 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is -4 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is -3 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is -2 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is -1 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 0 --
 array(3) {
-  [u"one"]=>
-  unicode(2) "un"
-  [u"two"]=>
-  unicode(4) "deux"
-  [u"three"]=>
-  unicode(5) "trois"
+  ["one"]=>
+  string(2) "un"
+  ["two"]=>
+  string(4) "deux"
+  ["three"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 1 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 2 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 3 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 4 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 
 -- $sort argument is 5 --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 Done

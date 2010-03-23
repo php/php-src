@@ -19,9 +19,9 @@ var_dump(unserialize($ss));
 ?>
 ===DONE===
 --EXPECTF--
-C:16:"SplObjectStorage":113:{x:i:2;O:8:"stdClass":0:{},a:2:{U:4:"prev";i:2;U:4:"next";O:8:"stdClass":0:{}};r:4;,a:1:{U:4:"prev";r:1;};m:a:0:{}}
+C:16:"SplObjectStorage":113:{x:i:2;O:8:"stdClass":0:{},a:2:{s:4:"prev";i:2;s:4:"next";O:8:"stdClass":0:{}};r:4;,a:1:{s:4:"prev";r:1;};m:a:0:{}}
 object(SplObjectStorage)#2 (1) {
-  [u"storage":u"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
     array(2) {
@@ -30,9 +30,9 @@ object(SplObjectStorage)#2 (1) {
       }
       ["inf"]=>
       array(2) {
-        [u"prev"]=>
+        ["prev"]=>
         int(2)
-        [u"next"]=>
+        ["next"]=>
         object(stdClass)#3 (0) {
         }
       }
@@ -44,7 +44,7 @@ object(SplObjectStorage)#2 (1) {
       }
       ["inf"]=>
       array(1) {
-        [u"prev"]=>
+        ["prev"]=>
         object(stdClass)#1 (0) {
         }
       }

@@ -35,52 +35,52 @@ var_dump($res);
 Test string with badly formed strings
 NULL
 array(2) {
-  [u"arr_1"]=>
-  unicode(3) "sid"
-  [u"arr"]=>
+  ["arr_1"]=>
+  string(3) "sid"
+  ["arr"]=>
   array(1) {
     [4]=>
-    unicode(4) "fred"
+    string(4) "fred"
   }
 }
 NULL
 array(2) {
-  [u"arr1]"]=>
-  unicode(3) "sid"
-  [u"arr"]=>
+  ["arr1]"]=>
+  string(3) "sid"
+  ["arr"]=>
   array(1) {
     [4]=>
-    unicode(4) "fred"
+    string(4) "fred"
   }
 }
 NULL
 array(2) {
-  [u"arr_one"]=>
-  unicode(3) "sid"
-  [u"arr"]=>
+  ["arr_one"]=>
+  string(3) "sid"
+  ["arr"]=>
   array(1) {
     [4]=>
-    unicode(4) "fred"
+    string(4) "fred"
   }
 }
 
 Test string with badly formed % numbers
 NULL
-unicode(1) "A"
-unicode(2) "%a"
-unicode(2) "%b"
+string(1) "A"
+string(2) "%a"
+string(2) "%b"
 
 Test string with non-binary safe name
 NULL
 array(1) {
-  [u"arr_test"]=>
+  ["arr_test"]=>
   array(2) {
     [1]=>
-    unicode(3) "sid"
+    string(3) "sid"
     [4]=>
     array(1) {
-      [u"two"]=>
-      unicode(4) "fred"
+      ["two"]=>
+      string(4) "fred"
     }
   }
 }

@@ -86,109 +86,109 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing addslashes() : with various strings containing characters to be backslashed ***
 
 -- Iteration 1 --
-unicode(11) "Hello world"
+string(11) "Hello world"
 
 -- Iteration 2 --
-unicode(18) "how\'re you doing?"
+string(18) "how\'re you doing?"
 
 -- Iteration 3 --
-unicode(30) "don\'t disturb u\'r neighbours"
+string(30) "don\'t disturb u\'r neighbours"
 
 -- Iteration 4 --
-unicode(34) "don\'t disturb u\'r neighbours\'\'"
+string(34) "don\'t disturb u\'r neighbours\'\'"
 
 -- Iteration 5 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 6 --
-unicode(2) "\'"
+string(2) "\'"
 
 -- Iteration 7 --
-unicode(2) "\'"
+string(2) "\'"
 
 -- Iteration 8 --
-unicode(32) "he said, \"he will be on leave\""
+string(32) "he said, \"he will be on leave\""
 
 -- Iteration 9 --
-unicode(34) "he said, \"\"he will be on leave\""
+string(34) "he said, \"\"he will be on leave\""
 
 -- Iteration 10 --
-unicode(15) "\"\"\"PHP\"\"\""
+string(15) "\"\"\"PHP\"\"\""
 
 -- Iteration 11 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 12 --
-unicode(2) "\""
+string(2) "\""
 
 -- Iteration 13 --
-unicode(2) "\""
+string(2) "\""
 
 -- Iteration 14 --
-unicode(7) "hello\""
+string(7) "hello\""
 
 -- Iteration 15 --
-unicode(26) "Is your name Ram\\Krishna?"
+string(26) "Is your name Ram\\Krishna?"
 
 -- Iteration 16 --
-unicode(9) "\\0.0.0.0"
+string(9) "\\0.0.0.0"
 
 -- Iteration 17 --
-unicode(29) "c:\\php\\testcase\\addslashes"
+string(29) "c:\\php\\testcase\\addslashes"
 
 -- Iteration 18 --
-unicode(2) "\\"
+string(2) "\\"
 
 -- Iteration 19 --
-unicode(12) "hello\0world"
+string(12) "hello\0world"
 
 -- Iteration 20 --
-unicode(9) "\0hello\0"
+string(9) "\0hello\0"
 
 -- Iteration 21 --
-unicode(9) "\0\0hello"
+string(9) "\0\0hello"
 
 -- Iteration 22 --
-unicode(2) "\0"
+string(2) "\0"
 
 -- Iteration 23 --
-unicode(13) "\'\\0.0.0.0\'"
+string(13) "\'\\0.0.0.0\'"
 
 -- Iteration 24 --
-unicode(15) "\'\\0.0.0.0\'\0"
+string(15) "\'\\0.0.0.0\'\0"
 
 -- Iteration 25 --
-unicode(15) "\0\'c:\\php\\\'"
+string(15) "\0\'c:\\php\\\'"
 
 -- Iteration 26 --
-unicode(13) "\"\\0.0.0.0\""
+string(13) "\"\\0.0.0.0\""
 
 -- Iteration 27 --
-unicode(17) "\"c:\\php\\\"\0\'"
+string(17) "\"c:\\php\\\"\0\'"
 
 -- Iteration 28 --
-unicode(22) "\"hello\"\'world\'\0//"
+string(22) "\"hello\"\'world\'\0//"
 
 -- Iteration 29 --
-unicode(18) "0xABCDEF0123456789"
+string(18) "0xABCDEF0123456789"
 
 -- Iteration 30 --
-unicode(2) "\0"
+string(2) "\0"
 
 -- Iteration 31 --
-unicode(18) "!@#$%&*@$%#&/;:,<>"
+string(18) "!@#$%&*@$%#&/;:,<>"
 
 -- Iteration 32 --
-unicode(12) "hello\0world"
+string(12) "hello\0world"
 
 -- Iteration 33 --
-unicode(73) "This is line 1 of \'heredoc\' string
+string(73) "This is line 1 of \'heredoc\' string
 This is line 2 of \"heredoc\" string"
 
 -- Iteration 34 --
-unicode(0) ""
+string(0) ""
 Done

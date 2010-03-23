@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2009 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -24,7 +24,7 @@
 
 #include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
 
-/* Here comes non-libmysql API to have less ifdefs in mysql */
+/* Here comes non-libmysql API to have less ifdefs in mysqli */
 #define mysql_result_is_unbuffered(r)	((r)->unbuf)
 
 #endif

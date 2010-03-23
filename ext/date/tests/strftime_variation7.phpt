@@ -11,7 +11,7 @@ Test strftime() function : usage variation - Passing day related format strings 
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(18, 8, 8, 8, 8, 2008);
 
@@ -37,14 +37,14 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Day of the month as a decimal number--
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 
 --Day of the year as a decimal number--
-unicode(%d) "%d"
-unicode(3) "221"
+string(%d) "%d"
+string(3) "221"
 
 --Day of the week as a decimal number--
-unicode(%d) "%d"
-unicode(1) "5"
+string(%d) "%d"
+string(1) "5"
 ===DONE===

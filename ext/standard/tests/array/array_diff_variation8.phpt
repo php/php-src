@@ -72,12 +72,12 @@ echo "Done";
 *** Testing array_diff() : usage variations ***
 -- Iteration 1 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(2) {
   [0]=>
@@ -87,121 +87,121 @@ array(2) {
 }
 -- Iteration 2 --
 array(1) {
-  [u"c"]=>
-  unicode(1) "3"
+  ["c"]=>
+  string(1) "3"
 }
 array(0) {
 }
 -- Iteration 3 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(2) {
-  [u"float1"]=>
+  ["float1"]=>
   float(2.3333)
-  [u"float2"]=>
+  ["float2"]=>
   float(2.3333)
 }
 -- Iteration 4 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(4) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
-  [u"f2"]=>
+  ["f2"]=>
   float(3.33)
   [3]=>
   float(4.8999992284)
-  [u"f4"]=>
+  ["f4"]=>
   float(1.2)
 }
 -- Iteration 5 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(4) {
   [111]=>
-  unicode(6) "	Hello"
-  [u"red"]=>
-  unicode(6) "col	or"
+  string(6) "	Hello"
+  ["red"]=>
+  string(6) "col	or"
   [2]=>
-  unicode(7) "world"
+  string(7) "world"
   [3]=>
-  unicode(6) "	Hello"
+  string(6) "	Hello"
 }
 -- Iteration 6 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(4) {
   [111]=>
-  unicode(7) "\tHello"
-  [u"red"]=>
-  unicode(7) "col\tor"
+  string(7) "\tHello"
+  ["red"]=>
+  string(7) "col\tor"
   [2]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
   [3]=>
-  unicode(7) "\tHello"
+  string(7) "\tHello"
 }
 -- Iteration 7 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(3) {
   [1]=>
-  unicode(5) "hello"
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  string(5) "hello"
+  ["heredoc"]=>
+  string(11) "Hello world"
   [2]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
 }
 -- Iteration 8 --
 array(3) {
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
 }
 array(5) {
   [11]=>
   object(classA)#%d (0) {
   }
-  [u"unset"]=>
+  ["unset"]=>
   NULL
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
   [12]=>
   object(classA)#%d (0) {
   }
   [13]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 Done

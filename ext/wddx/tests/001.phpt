@@ -1,5 +1,5 @@
 --TEST--
-wddx unserialization test (32-bit)
+wddx deserialization test (32-bit)
 --SKIPIF--
 <?php if (!extension_loaded("wddx")) print "skip"; ?>
 <?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK" ?>
@@ -8,50 +8,50 @@ precision=14
 --FILE--
 <?php
 	$path = dirname(__FILE__);
-	var_dump(wddx_unserialize(file_get_contents("{$path}/wddx.xml")));
+	var_dump(wddx_deserialize(file_get_contents("{$path}/wddx.xml")));
 ?>
 --EXPECT--
 array(11) {
-  [u"aNull"]=>
+  ["aNull"]=>
   NULL
-  [u"aString"]=>
+  ["aString"]=>
   string(8) "a string"
-  [u"aNumber"]=>
+  ["aNumber"]=>
   float(-12.456)
-  [u"aDateTime"]=>
+  ["aDateTime"]=>
   int(897625932)
-  [u"aDateTime2"]=>
+  ["aDateTime2"]=>
   int(329632332)
-  [u"aDateTime3"]=>
+  ["aDateTime3"]=>
   string(22) "2040-06-12T04:32:12+00"
-  [u"aBoolean"]=>
+  ["aBoolean"]=>
   bool(true)
-  [u"anArray"]=>
+  ["anArray"]=>
   array(2) {
     [0]=>
     int(10)
     [1]=>
     string(14) "second element"
   }
-  [u"aBinary"]=>
+  ["aBinary"]=>
   string(11) "binary data"
-  [u"anObject"]=>
+  ["anObject"]=>
   array(2) {
-    [u"s"]=>
+    ["s"]=>
     string(8) "a string"
-    [u"n"]=>
+    ["n"]=>
     float(-12.456)
   }
-  [u"aRecordset"]=>
+  ["aRecordset"]=>
   array(2) {
-    [u"NAME"]=>
+    ["NAME"]=>
     array(2) {
       [0]=>
       string(8) "John Doe"
       [1]=>
       string(8) "Jane Doe"
     }
-    [u"AGE"]=>
+    ["AGE"]=>
     array(2) {
       [0]=>
       int(34)

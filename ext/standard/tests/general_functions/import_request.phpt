@@ -4,6 +4,8 @@ import_request_variables() tests
 a=1&b=heh&c=3&d[]=5&GLOBALS=test&1=hm
 --POST--
 ap=25&bp=test&cp=blah3&dp[]=ar
+--INI--
+register_globals=0
 --FILE--
 <?php
 
@@ -25,7 +27,7 @@ var_dump($r_a, $r_b, $r_c, $r_ap);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
@@ -41,34 +43,34 @@ Warning: import_request_variables(): Numeric key detected - possible security ha
 bool(true)
 
 Notice: Undefined variable: ap in %s on line %d
-unicode(1) "1"
-unicode(3) "heh"
-unicode(1) "3"
+string(1) "1"
+string(3) "heh"
+string(1) "3"
 NULL
 bool(true)
 
 Notice: Undefined variable: g_ap in %s on line %d
-unicode(1) "1"
-unicode(3) "heh"
-unicode(1) "3"
+string(1) "1"
+string(3) "heh"
+string(1) "3"
 NULL
-unicode(2) "hm"
+string(2) "hm"
 bool(true)
-unicode(1) "1"
-unicode(3) "heh"
-unicode(1) "3"
-unicode(2) "25"
-unicode(4) "test"
-unicode(5) "blah3"
+string(1) "1"
+string(3) "heh"
+string(1) "3"
+string(2) "25"
+string(4) "test"
+string(5) "blah3"
 array(1) {
   [0]=>
-  unicode(2) "ar"
+  string(2) "ar"
 }
 bool(true)
 
 Notice: Undefined variable: r_ap in %s on line %d
-unicode(1) "1"
-unicode(3) "heh"
-unicode(1) "3"
+string(1) "1"
+string(3) "heh"
+string(1) "3"
 NULL
 Done

@@ -1,5 +1,7 @@
 --TEST--
 Test each() function : usage variations - Referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array each(array $arr)
@@ -39,29 +41,28 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing each() : usage variations ***
 
 -- Array made up of referenced variables: --
 -- Call each until at the end of the array: --
 array(4) {
   [1]=>
-  unicode(3) "foo"
-  [u"value"]=>
-  unicode(3) "foo"
+  string(3) "foo"
+  ["value"]=>
+  string(3) "foo"
   [0]=>
-  unicode(3) "one"
-  [u"key"]=>
-  unicode(3) "one"
+  string(3) "one"
+  ["key"]=>
+  string(3) "one"
 }
 array(4) {
   [1]=>
-  unicode(3) "bar"
-  [u"value"]=>
-  unicode(3) "bar"
+  string(3) "bar"
+  ["value"]=>
+  string(3) "bar"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 bool(false)
@@ -69,21 +70,21 @@ bool(false)
 -- Pass an array by reference to each(): --
 array(4) {
   [1]=>
-  unicode(4) "zero"
-  [u"value"]=>
-  unicode(4) "zero"
+  string(4) "zero"
+  ["value"]=>
+  string(4) "zero"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 -- Check original array: --
 array(3) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 Done

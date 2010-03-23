@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -226,7 +226,7 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ proto void srand([int seed]) U
+/* {{{ proto void srand([int seed])
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
@@ -242,7 +242,7 @@ PHP_FUNCTION(srand)
 }
 /* }}} */
 
-/* {{{ proto void mt_srand([int seed]) U
+/* {{{ proto void mt_srand([int seed])
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
@@ -285,7 +285,7 @@ PHP_FUNCTION(mt_srand)
  * -RL
  */    
 
-/* {{{ proto int rand([int min, int max]) U
+/* {{{ proto int rand([int min, int max])
    Returns a random number */
 PHP_FUNCTION(rand)
 {
@@ -306,7 +306,7 @@ PHP_FUNCTION(rand)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand([int min, int max]) U
+/* {{{ proto int mt_rand([int min, int max])
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
@@ -339,7 +339,7 @@ PHP_FUNCTION(mt_rand)
 }
 /* }}} */
 
-/* {{{ proto int getrandmax(void) U
+/* {{{ proto int getrandmax(void)
    Returns the maximum value a random number can have */
 PHP_FUNCTION(getrandmax)
 {
@@ -351,7 +351,7 @@ PHP_FUNCTION(getrandmax)
 }
 /* }}} */
 
-/* {{{ proto int mt_getrandmax(void) U
+/* {{{ proto int mt_getrandmax(void)
    Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {

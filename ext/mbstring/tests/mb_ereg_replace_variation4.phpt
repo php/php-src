@@ -174,6 +174,6 @@ string(10) "str1n1_v1l"
 
 -- Iteration 24 --
 
-Warning: mb_ereg_replace() expects parameter 4 to be binary string, resource given in %s on line %d
+Warning: mb_ereg_replace() expects parameter 4 to be string, resource given in %s on line %d
 bool(false)
 Done

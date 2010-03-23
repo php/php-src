@@ -27,26 +27,26 @@ var_dump($ao1, $c);
 *** Testing ArrayObject::ksort() : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"b":u"C":private]=>
-    unicode(5) "prop4"
-    [u"a"]=>
-    unicode(5) "prop3"
-    [u"x"]=>
-    unicode(5) "prop1"
-    [u"z"]=>
-    unicode(5) "prop2"
+    ["b":"C":private]=>
+    string(5) "prop4"
+    ["a"]=>
+    string(5) "prop3"
+    ["x"]=>
+    string(5) "prop1"
+    ["z"]=>
+    string(5) "prop2"
   }
 }
 object(C)#1 (4) {
-  [u"b":u"C":private]=>
-  unicode(5) "prop4"
-  [u"a"]=>
-  unicode(5) "prop3"
-  [u"x"]=>
-  unicode(5) "prop1"
-  [u"z"]=>
-  unicode(5) "prop2"
+  ["b":"C":private]=>
+  string(5) "prop4"
+  ["a"]=>
+  string(5) "prop3"
+  ["x"]=>
+  string(5) "prop1"
+  ["z"]=>
+  string(5) "prop2"
 }
 ===DONE===

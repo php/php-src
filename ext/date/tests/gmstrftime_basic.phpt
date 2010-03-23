@@ -24,6 +24,6 @@ var_dump( gmstrftime($format) );
 ===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : basic functionality ***
-unicode(20) "Aug 08 2008 08:08:08"
-unicode(%d) "%s %d %d %d:%d:%d"
+string(20) "Aug 08 2008 08:08:08"
+string(%d) "%s %d %d %d:%d:%d"
 ===DONE===

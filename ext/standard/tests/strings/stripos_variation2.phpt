@@ -67,12 +67,13 @@ $needle = array(
   '\x23',  //hexadecimal numeric string
   '#',  //hexadecimal numeric string
   '\101',  //octal numeric string
+  'A',
   '456HEE',  //numerics + chars
   42, //needle as int(ASCII value of '*')
   $haystack  //haystack as needle
 );
 
-/* loop through 'needle' array to get the position of the needle in haystack string */
+/* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
   echo "-- Iteration $count --\n";
@@ -130,11 +131,7 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 16 --
-
-Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
-
-Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(14)
@@ -218,9 +215,12 @@ int(58)
 bool(false)
 bool(false)
 -- Iteration 44 --
-int(26)
+bool(false)
 bool(false)
 -- Iteration 45 --
+int(26)
+bool(false)
+-- Iteration 46 --
 int(0)
 bool(false)
 *** Done ***

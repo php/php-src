@@ -30,9 +30,6 @@ echo "Done";
 --EXPECTF--
 *** Testing mb_strripos() : error conditions ***
 
-Warning: mb_strripos(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strripos(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
-

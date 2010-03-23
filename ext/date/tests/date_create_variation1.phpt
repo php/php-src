@@ -129,20 +129,20 @@ bool(false)
 
 -- float 10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float -10.5 --
@@ -151,88 +151,88 @@ bool(false)
 
 -- float .5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty array --
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase null --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase true --
@@ -241,20 +241,20 @@ bool(false)
 
 -- lowercase false --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase TRUE --
@@ -263,56 +263,56 @@ bool(false)
 
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string DQ --
-object(DateTime)#18 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string SQ --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- string DQ --
@@ -337,53 +337,53 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_create() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- unset var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- resource --
 
-Warning: date_create() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 
-Warning: date_create() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: date_create() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

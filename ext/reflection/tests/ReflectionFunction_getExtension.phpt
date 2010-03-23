@@ -12,8 +12,8 @@ var_dump($function->getExtension());
 ?>
 --EXPECTF--
 object(ReflectionExtension)#%i (1) {
-  [u"name"]=>
-  unicode(8) "standard"
+  ["name"]=>
+  string(8) "standard"
 }
 NULL
 

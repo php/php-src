@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,6 @@
 #include "zend_interfaces.h"
 #include "lib/timelib.h"
 #include <time.h>
-#include <unicode/udat.h>
 
 #ifdef PHP_WIN32
 static __inline __int64 php_date_llabs( __int64 i ) { return i >= 0? i: -i; }
@@ -363,11 +362,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, interval_spec)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format_locale, 0, 0, 2)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, format)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
@@ -396,7 +390,6 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(date_parse_from_format, arginfo_date_parse_from_format)
 	PHP_FE(date_get_last_errors, arginfo_date_get_last_errors)
 	PHP_FE(date_format, arginfo_date_format)
-	PHP_FE(date_format_locale, arginfo_date_format_locale)
 	PHP_FE(date_modify, arginfo_date_modify)
 	PHP_FE(date_add, arginfo_date_add)
 	PHP_FE(date_sub, arginfo_date_sub)
@@ -845,9 +838,16 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
+	char *env;
+
 	/* Checking configure timezone */
 	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
 		return DATEG(timezone);
+	}
+	/* Check environment variable */
+	env = getenv("TZ");
+	if (env && *env && timelib_timezone_id_is_valid(env, tzdb)) {
+		return env;
 	}
 	/* Check config setting for default timezone */
 	if (!DATEG(default_timezone)) {
@@ -967,9 +967,6 @@ static char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-static char *am_pm_lower_names[] = { "am", "pm" };
-static char *am_pm_upper_names[] = { "AM", "PM" };
-
 static char *english_suffix(timelib_sll number)
 {
 	if (number >= 10 && number <= 19) {
@@ -1006,110 +1003,18 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-
-typedef struct {
-	int day_shortname_lengths[7];
-	int day_fullname_lengths[7];
-	int month_shortname_lengths[12];
-	int month_fullname_lengths[12];
-	int am_pm_lenghts[2];
-
-	char* day_shortname[7];
-	char* day_fullname[7];
-	char* month_shortname[12];
-	char* month_fullname[12];
-	char* am_pm_name[2];
-} php_locale_data;
-
-static const UChar sLongPat [] = { 0x004D, 0x004D, 0x004D, 0x004D, 0x0020,
-	    0x0079, 0x0079, 0x0079, 0x0079 };
-
-
-#define DATE_LOC_READ(type, var, cor)                                          \
-	count = udat_countSymbols(fmt, (type));                                    \
-	for (i = 0 - (cor); i < count; i++) {                                      \
-		array[i] = (UChar *) malloc(sizeof(UChar) * 15);                       \
-		                                                                       \
-		status = U_ZERO_ERROR;                                                 \
-		j = udat_getSymbols(fmt, (type), i, array[i], 15, &status);            \
-		                                                                       \
-		tmp->var[i + (cor)] = (char*)array[i];                                 \
-	}
-
-static php_locale_data* date_get_locale_data(char *locale)
-{
-	php_locale_data *tmp = malloc(sizeof(php_locale_data));
-	UDateFormat *fmt;
-	UErrorCode status = 0;
-	int32_t count, i, j;
-	UChar *array[15];
-	UChar *pat = (UChar*)sLongPat;
-	int32_t len = 9;
-
-	fmt = udat_open(UDAT_IGNORE,UDAT_IGNORE, locale, NULL, 0, pat, len, &status);
-
-	DATE_LOC_READ(UDAT_WEEKDAYS, day_fullname, -1);
-	DATE_LOC_READ(UDAT_SHORT_WEEKDAYS, day_shortname, -1);
-	DATE_LOC_READ(UDAT_MONTHS, month_fullname, 0);
-	DATE_LOC_READ(UDAT_SHORT_MONTHS, month_shortname, 0);
-	DATE_LOC_READ(UDAT_AM_PMS, am_pm_name, 0);
-
-	udat_close(fmt);
-
-	return tmp;
-}
-
-static void date_free_locale_data(php_locale_data *data)
-{
-	int i;
-	for (i = 0; i < 7; ++i) {
-		free(data->day_shortname[i]);
-		free(data->day_fullname[i]);
-	}
-	for (i = 0; i < 12; ++i) {
-		free(data->month_shortname[i]);
-		free(data->month_fullname[i]);
-	}
-	free(data->am_pm_name[0]);
-	free(data->am_pm_name[1]);
-	free(data);
-}
-
-static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *format, ...)
-{
-	int      c;
-	va_list  ap;
-
-	va_start(ap, format);
-
-	c = vuspprintf((UChar**)str, size, format, ap) * sizeof(UChar);
-	va_end(ap);
-	return c;
-}
-
-#define dayname_short(s,l) s < 0 ? "Unknown" : (l ? loc_dat->day_shortname[s] : day_short_names[s])
-#define dayname_full(s,l) s < 0 ? "Unknown" : (l ? loc_dat->day_fullname[s] : day_full_names[s])
-#define monthname_short(s,l) l ? loc_dat->month_shortname[s] : mon_short_names[s]
-#define monthname_full(s,l) l ? loc_dat->month_fullname[s] : mon_full_names[s]
-#define am_pm_lower_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_lower_names[s]
-#define am_pm_upper_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_upper_names[s]
-
-static UChar *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized TSRMLS_DC)
+static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
-	int                  i, no_free, length;
-	char                *buffer;
+	int                  i, length;
+	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
-	php_locale_data *loc_dat;
 	int                  rfc_colon;
 
 	if (!format_len) {
-		*return_len = 0;
-		return eustrdup(EMPTY_STR);
+		return estrdup("");
 	}
-
-	loc_dat = date_get_locale_data(UG(default_locale));
 
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
@@ -1135,78 +1040,77 @@ static UChar *date_format(char *format, int format_len, int *return_len, timelib
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
-		no_free = 0;
 		rfc_colon = 0;
 		switch (format[i]) {
 			/* day */
-			case 'd': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->d); break;
-			case 'D': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, dayname_short(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
-			case 'j': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->d); break;
-			case 'l': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, dayname_full(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
-			case 'S': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", english_suffix(t->d)); break;
-			case 'w': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'N': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': length = slprintf(buffer, 32, "%02d", (int) t->d); break;
+			case 'D': length = slprintf(buffer, 32, "%s", php_date_short_day_name(t->y, t->m, t->d)); break;
+			case 'j': length = slprintf(buffer, 32, "%d", (int) t->d); break;
+			case 'l': length = slprintf(buffer, 32, "%s", php_date_full_day_name(t->y, t->m, t->d)); break;
+			case 'S': length = slprintf(buffer, 32, "%s", english_suffix(t->d)); break;
+			case 'w': length = slprintf(buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'N': length = slprintf(buffer, 32, "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': length = slprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) isoweek); break; /* iso weeknr */
-			case 'o': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) isoyear); break; /* iso year */
+			case 'W': length = slprintf(buffer, 32, "%02d", (int) isoweek); break; /* iso weeknr */
+			case 'o': length = slprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, monthname_full(t->m - 1, localized)); break;
-			case 'm': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->m); break;
-			case 'M': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, monthname_short(t->m - 1, localized)); break;
-			case 'n': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->m); break;
-			case 't': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': length = slprintf(buffer, 32, "%s", mon_full_names[t->m - 1]); break;
+			case 'm': length = slprintf(buffer, 32, "%02d", (int) t->m); break;
+			case 'M': length = slprintf(buffer, 32, "%s", mon_short_names[t->m - 1]); break;
+			case 'n': length = slprintf(buffer, 32, "%d", (int) t->m); break;
+			case 't': length = slprintf(buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->y % 100); break;
-			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s%04lld", t->y < 0 ? "-" : "", llabs(t->y)); break;
+			case 'L': length = slprintf(buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': length = slprintf(buffer, 32, "%02d", (int) t->y % 100); break;
+			case 'Y': length = slprintf(buffer, 32, "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
-			case 'a': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
-			case 'A': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_upper_full(t->h >= 12 ? 1 : 0, localized)); break;
+			case 'a': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
+			case 'A': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
 			case 'B': {
-				int retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);
+				int retval = (((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10) / 864);			
 				while (retval < 0) {
 					retval += 1000;
 				}
 				retval = retval % 1000;
-				length = date_spprintf(&buffer, 32 TSRMLS_CC, "%03d", retval);
+				length = slprintf(buffer, 32, "%03d", retval);
 				break;
 			}
-			case 'g': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->h); break;
-			case 'h': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->h); break;
-			case 'i': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->i); break;
-			case 's': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->s); break;
-			case 'u': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%06d", (int) floor(t->f * 1000000)); break;
+			case 'g': length = slprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': length = slprintf(buffer, 32, "%d", (int) t->h); break;
+			case 'h': length = slprintf(buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': length = slprintf(buffer, 32, "%02d", (int) t->h); break;
+			case 'i': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
+			case 's': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
+			case 'u': length = slprintf(buffer, 32, "%06d", (int) floor(t->f * 1000000)); break;
 
 			/* timezone */
-			case 'I': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", localtime ? offset->is_dst : 0); break;
- 			case 'P': rfc_colon = 1; /* break intentionally missing */
-			case 'O': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c%02d%s%02d",
+			case 'I': length = slprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
+			case 'P': rfc_colon = 1; /* break intentionally missing */
+			case 'O': length = slprintf(buffer, 32, "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
- 											rfc_colon ? ":" : "",
+											rfc_colon ? ":" : "",
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'T': length = slprintf(buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
 			case 'e': if (!localtime) {
-					      length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", "UTC");
+					      length = slprintf(buffer, 32, "%s", "UTC");
 					  } else {
 						  switch (t->zone_type) {
 							  case TIMELIB_ZONETYPE_ID:
-								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", t->tz_info->name);
+								  length = slprintf(buffer, 32, "%s", t->tz_info->name);
 								  break;
 							  case TIMELIB_ZONETYPE_ABBR:
-								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", offset->abbr);
+								  length = slprintf(buffer, 32, "%s", offset->abbr);
 								  break;
 							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c%02d:%02d",
+								  length = slprintf(buffer, 32, "%c%02d:%02d",
 												((offset->offset < 0) ? '-' : '+'),
 												abs(offset->offset / 3600),
 												abs((offset->offset % 3600) / 60)
@@ -1215,10 +1119,10 @@ static UChar *date_format(char *format, int format_len, int *return_len, timelib
 						  }
 					  }
 					  break;
-			case 'Z': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", localtime ? offset->offset : 0); break;
+			case 'Z': length = slprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = date_spprintf(&buffer, 96 TSRMLS_CC, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': length = slprintf(buffer, 96, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -1226,7 +1130,7 @@ static UChar *date_format(char *format, int format_len, int *return_len, timelib
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = date_spprintf(&buffer, 96 TSRMLS_CC, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = slprintf(buffer, 96, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -1235,28 +1139,22 @@ static UChar *date_format(char *format, int format_len, int *return_len, timelib
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%lld", (timelib_sll) t->sse); break;
+			case 'U': length = slprintf(buffer, 32, "%lld", (timelib_sll) t->sse); break;
 
-			case '\\': if (i < format_len) i++; length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c", format[i]); break;
+			case '\\': if (i < format_len) i++; /* break intentionally missing */
 
-			default: length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c", format[i]);
-					 break;
+			default: buffer[0] = format[i]; buffer[1] = '\0'; length = 1; break;
 		}
 		smart_str_appendl(&string, buffer, length);
-		if (!no_free) {
-			efree(buffer);
-		}
 	}
 
 	smart_str_0(&string);
-	date_free_locale_data(loc_dat);
 
 	if (localtime) {
 		timelib_time_offset_dtor(offset);
 	}
 
-	*return_len = string.len / 2;
-	return (UChar*) string.c;
+	return string.c;
 }
 
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
@@ -1264,7 +1162,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	char   *format;
 	int     format_len;
 	long    ts;
-	UChar  *string;
+	char   *string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
@@ -1274,17 +1172,16 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	}
 
 	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
-
-	RETVAL_UNICODE(string, 0);
+	
+	RETVAL_STRING(string, 0);
 }
 /* }}} */
 
-PHPAPI UChar *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
+PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	UChar          *string;
-	int             return_len;
+	char *string;
 
 	t = timelib_time_ctor();
 
@@ -1298,7 +1195,7 @@ PHPAPI UChar *php_format_date(char *format, int format_len, time_t ts, int local
 		timelib_unixtime2gmt(t, ts);
 	}
 
-	string = date_format(format, format_len, &return_len, t, localtime, 0 TSRMLS_CC);
+	string = date_format(format, format_len, t, localtime);
 	
 	timelib_time_dtor(t);
 	return string;
@@ -1402,7 +1299,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 }
 /* }}} */
 
-/* {{{ proto string date(string format [, long timestamp]) U
+/* {{{ proto string date(string format [, long timestamp])
    Format a local date/time */
 PHP_FUNCTION(date)
 {
@@ -1410,7 +1307,7 @@ PHP_FUNCTION(date)
 }
 /* }}} */
 
-/* {{{ proto string gmdate(string format [, long timestamp]) U
+/* {{{ proto string gmdate(string format [, long timestamp])
    Format a GMT date/time */
 PHP_FUNCTION(gmdate)
 {
@@ -1418,7 +1315,7 @@ PHP_FUNCTION(gmdate)
 }
 /* }}} */
 
-/* {{{ proto int idate(string format [, int timestamp]) U
+/* {{{ proto int idate(string format [, int timestamp])
    Format a local time/date as integer */
 PHP_FUNCTION(idate)
 {
@@ -1442,7 +1339,7 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(format[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token.");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
@@ -1480,7 +1377,7 @@ PHPAPI signed long php_parse_date(char *string, signed long *now)
 /* }}} */
 
 
-/* {{{ proto int strtotime(string time [, int now ]) U
+/* {{{ proto int strtotime(string time [, int now ])
    Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
 {
@@ -1633,7 +1530,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 }
 /* }}} */
 
-/* {{{ proto int mktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]]) U
+/* {{{ proto int mktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
    Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
@@ -1641,7 +1538,7 @@ PHP_FUNCTION(mktime)
 }
 /* }}} */
 
-/* {{{ proto int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]]) U
+/* {{{ proto int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
    Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {
@@ -1650,7 +1547,7 @@ PHP_FUNCTION(gmmktime)
 /* }}} */
 
 
-/* {{{ proto bool checkdate(int month, int day, int year) U
+/* {{{ proto bool checkdate(int month, int day, int year)
    Returns true(1) if it is a valid date in gregorian calendar */
 PHP_FUNCTION(checkdate)
 {
@@ -1660,7 +1557,7 @@ PHP_FUNCTION(checkdate)
 		RETURN_FALSE;
 	}
 
- 	if (y < 1 || y > 32767 || !timelib_valid_date(y, m, d)) {
+	if (y < 1 || y > 32767 || !timelib_valid_date(y, m, d)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;	/* True : This month, day, year arguments are valid */
@@ -1745,16 +1642,14 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 
 	if (real_len && real_len != buf_len) {
 		buf = (char *) erealloc(buf, real_len + 1);
-		RETVAL_RT_STRINGL(buf, real_len, 1);
-		efree(buf);
-		return;
+		RETURN_STRINGL(buf, real_len, 0);
 	}
 	efree(buf);
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string strftime(string format [, int timestamp]) U
+/* {{{ proto string strftime(string format [, int timestamp])
    Format a local time/date according to locale settings */
 PHP_FUNCTION(strftime)
 {
@@ -1762,7 +1657,7 @@ PHP_FUNCTION(strftime)
 }
 /* }}} */
 
-/* {{{ proto string gmstrftime(string format [, int timestamp]) U
+/* {{{ proto string gmstrftime(string format [, int timestamp])
    Format a GMT/UCT time/date according to locale settings */
 PHP_FUNCTION(gmstrftime)
 {
@@ -1771,7 +1666,7 @@ PHP_FUNCTION(gmstrftime)
 /* }}} */
 #endif
 
-/* {{{ proto int time(void) U
+/* {{{ proto int time(void)
    Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
@@ -1779,7 +1674,7 @@ PHP_FUNCTION(time)
 }
 /* }}} */
 
-/* {{{ proto array localtime([int timestamp [, bool associative_array]]) U
+/* {{{ proto array localtime([int timestamp [, bool associative_array]])
    Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
@@ -1801,15 +1696,15 @@ PHP_FUNCTION(localtime)
 	array_init(return_value);
 
 	if (associative) {
-		add_ascii_assoc_long(return_value, "tm_sec",   ts->s);
-		add_ascii_assoc_long(return_value, "tm_min",   ts->i);
-		add_ascii_assoc_long(return_value, "tm_hour",  ts->h);
-		add_ascii_assoc_long(return_value, "tm_mday",  ts->d);
-		add_ascii_assoc_long(return_value, "tm_mon",   ts->m - 1);
-		add_ascii_assoc_long(return_value, "tm_year",  ts->y - 1900);
-		add_ascii_assoc_long(return_value, "tm_wday",  timelib_day_of_week(ts->y, ts->m, ts->d));
-		add_ascii_assoc_long(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
-		add_ascii_assoc_long(return_value, "tm_isdst", ts->dst);
+		add_assoc_long(return_value, "tm_sec",   ts->s);
+		add_assoc_long(return_value, "tm_min",   ts->i);
+		add_assoc_long(return_value, "tm_hour",  ts->h);
+		add_assoc_long(return_value, "tm_mday",  ts->d);
+		add_assoc_long(return_value, "tm_mon",   ts->m - 1);
+		add_assoc_long(return_value, "tm_year",  ts->y - 1900);
+		add_assoc_long(return_value, "tm_wday",  timelib_day_of_week(ts->y, ts->m, ts->d));
+		add_assoc_long(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
+		add_assoc_long(return_value, "tm_isdst", ts->dst);
 	} else {
 		add_next_index_long(return_value, ts->s);
 		add_next_index_long(return_value, ts->i);
@@ -1826,7 +1721,7 @@ PHP_FUNCTION(localtime)
 }
 /* }}} */
 
-/* {{{ proto array getdate([int timestamp]) U
+/* {{{ proto array getdate([int timestamp])
    Get date/time information */
 PHP_FUNCTION(getdate)
 {
@@ -1846,16 +1741,16 @@ PHP_FUNCTION(getdate)
 
 	array_init(return_value);
 
-	add_ascii_assoc_long(return_value, "seconds", ts->s);
-	add_ascii_assoc_long(return_value, "minutes", ts->i);
-	add_ascii_assoc_long(return_value, "hours", ts->h);
-	add_ascii_assoc_long(return_value, "mday", ts->d);
-	add_ascii_assoc_long(return_value, "wday", timelib_day_of_week(ts->y, ts->m, ts->d));
-	add_ascii_assoc_long(return_value, "mon", ts->m);
-	add_ascii_assoc_long(return_value, "year", ts->y);
-	add_ascii_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
-	add_ascii_assoc_ascii_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
-	add_ascii_assoc_ascii_string(return_value, "month", mon_full_names[ts->m - 1], 1);
+	add_assoc_long(return_value, "seconds", ts->s);
+	add_assoc_long(return_value, "minutes", ts->i);
+	add_assoc_long(return_value, "hours", ts->h);
+	add_assoc_long(return_value, "mday", ts->d);
+	add_assoc_long(return_value, "wday", timelib_day_of_week(ts->y, ts->m, ts->d));
+	add_assoc_long(return_value, "mon", ts->m);
+	add_assoc_long(return_value, "year", ts->y);
+	add_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
+	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
+	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
 	add_index_long(return_value, 0, timestamp);
 
 	timelib_time_dtor(ts);
@@ -1968,7 +1863,7 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 
 
 /* {{{ date_period_it_current_key */
-static int date_period_it_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int date_period_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	date_period_it   *iterator = (date_period_it *)iter;
 	*int_key = iterator->current_index;
@@ -2177,11 +2072,10 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 {
-	HashTable    *props;
-	zval         *zv;
-	php_date_obj *dateobj;
-	UChar        *str;
-	int           return_len;
+	HashTable *props;
+	zval *zv;
+	php_date_obj     *dateobj;
+
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -2192,9 +2086,8 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	}
 
 	/* first we add the date and time in ISO format */
-	str = date_format("Y-m-d H:i:s", 12, &return_len, dateobj->time, 1, 0 TSRMLS_CC);
 	MAKE_STD_ZVAL(zv);
-	ZVAL_UNICODEL(zv, str, return_len - 1, 0);
+	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
 	zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
 
 	/* then we add the timezone name (or similar) */
@@ -2206,7 +2099,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 		MAKE_STD_ZVAL(zv);
 		switch (dateobj->time->zone_type) {
 			case TIMELIB_ZONETYPE_ID:
-				ZVAL_ASCII_STRING(zv, dateobj->time->tz_info->name, 1);
+				ZVAL_STRING(zv, dateobj->time->tz_info->name, 1);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
 				char *tmpstr = emalloc(sizeof("UTC+05:00"));
@@ -2217,11 +2110,11 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				ZVAL_ASCII_STRING(zv, tmpstr, ZSTR_AUTOFREE);
+				ZVAL_STRING(zv, tmpstr, 0);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
-				ZVAL_ASCII_STRING(zv, dateobj->time->tz_abbr, 1);
+				ZVAL_STRING(zv, dateobj->time->tz_abbr, 1);
 				break;
 		}
 		zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
@@ -2548,7 +2441,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 	return 1;
 }
 
-/* {{{ proto DateTime date_create([string time[, DateTimeZone object]]) U
+/* {{{ proto DateTime date_create([string time[, DateTimeZone object]])
    Returns new DateTime object
 */
 PHP_FUNCTION(date_create)
@@ -2568,7 +2461,7 @@ PHP_FUNCTION(date_create)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_create_from_format(string format, string time[, DateTimeZone object]) 
+/* {{{ proto DateTime date_create_from_format(string format, string time[, DateTimeZone object])
    Returns new DateTime object formatted according to the specified format
 */
 PHP_FUNCTION(date_create_from_format)
@@ -2597,7 +2490,7 @@ PHP_METHOD(DateTime, __construct)
 	char *time_str = NULL;
 	int time_str_len = 0;
 	zend_error_handling error_handling;
-	
+
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
 		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC);
@@ -2638,7 +2531,7 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						tzi = php_date_parse_tzfile(Z_STRVAL_PP(z_timezone), DATE_TIMEZONEDB TSRMLS_CC);
 
 						ALLOC_INIT_ZVAL(tmp_obj);
-						tzobj = zend_object_store_get_object(tmp_obj = date_instantiate(date_ce_timezone, tmp_obj TSRMLS_CC) TSRMLS_CC);
+						tzobj = zend_object_store_get_object(date_instantiate(date_ce_timezone, tmp_obj TSRMLS_CC) TSRMLS_CC);
 						tzobj->type = TIMELIB_ZONETYPE_ID;
 						tzobj->tzi.tz = tzi;
 						tzobj->initialized = 1;
@@ -2695,24 +2588,24 @@ static void zval_from_error_container(zval *z, timelib_error_container *error)
 	int   i;
 	zval *element;
 
-	add_ascii_assoc_long(z, "warning_count", error->warning_count);
+	add_assoc_long(z, "warning_count", error->warning_count);
 	MAKE_STD_ZVAL(element);
 	array_init(element);
 	for (i = 0; i < error->warning_count; i++) {
-		add_index_ascii_string(element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
+		add_index_string(element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
 	}
-	add_ascii_assoc_zval(z, "warnings", element);
+	add_assoc_zval(z, "warnings", element);
 
-	add_ascii_assoc_long(z, "error_count", error->error_count);
+	add_assoc_long(z, "error_count", error->error_count);
 	MAKE_STD_ZVAL(element);
 	array_init(element);
 	for (i = 0; i < error->error_count; i++) {
-		add_index_ascii_string(element, error->error_messages[i].position, error->error_messages[i].message, 1);
+		add_index_string(element, error->error_messages[i].position, error->error_messages[i].message, 1);
 	}
-	add_ascii_assoc_zval(z, "errors", element);
+	add_assoc_zval(z, "errors", element);
 }
 
-/* {{{ proto array date_get_last_errors() U
+/* {{{ proto array date_get_last_errors()
    Returns the warnings and errors found while parsing a date/time string.
 */
 PHP_FUNCTION(date_get_last_errors)
@@ -2733,9 +2626,9 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	array_init(return_value);
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
 	if (parsed_time->elem == -99999) {               \
-		add_ascii_assoc_bool(return_value, #name, 0); \
+		add_assoc_bool(return_value, #name, 0); \
 	} else {                                       \
-		add_ascii_assoc_long(return_value, #name, parsed_time->elem); \
+		add_assoc_long(return_value, #name, parsed_time->elem); \
 	}
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(year,      y);
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(month,     m);
@@ -2745,63 +2638,63 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(second,    s);
 	
 	if (parsed_time->f == -99999) {
-		add_ascii_assoc_bool(return_value, "fraction", 0);
+		add_assoc_bool(return_value, "fraction", 0);
 	} else {
-		add_ascii_assoc_double(return_value, "fraction", parsed_time->f);
+		add_assoc_double(return_value, "fraction", parsed_time->f);
 	}
 
 	zval_from_error_container(return_value, error);
 
 	timelib_error_container_dtor(error);
 
-	add_ascii_assoc_bool(return_value, "is_localtime", parsed_time->is_localtime);
+	add_assoc_bool(return_value, "is_localtime", parsed_time->is_localtime);
 
 	if (parsed_time->is_localtime) {
 		PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone_type, zone_type);
 		switch (parsed_time->zone_type) {
 			case TIMELIB_ZONETYPE_OFFSET:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-				add_ascii_assoc_bool(return_value, "is_dst", parsed_time->dst);
+				add_assoc_bool(return_value, "is_dst", parsed_time->dst);
 				break;
 			case TIMELIB_ZONETYPE_ID:
 				if (parsed_time->tz_abbr) {
-					add_ascii_assoc_ascii_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+					add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				}
 				if (parsed_time->tz_info) {
-					add_ascii_assoc_ascii_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
+					add_assoc_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-				add_ascii_assoc_bool(return_value, "is_dst", parsed_time->dst);
-				add_ascii_assoc_ascii_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+				add_assoc_bool(return_value, "is_dst", parsed_time->dst);
+				add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
 				break;
 		}
 	}
 	if (parsed_time->have_relative) {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
-		add_ascii_assoc_long(element, "year",   parsed_time->relative.y);
-		add_ascii_assoc_long(element, "month",  parsed_time->relative.m);
-		add_ascii_assoc_long(element, "day",    parsed_time->relative.d);
-		add_ascii_assoc_long(element, "hour",   parsed_time->relative.h);
-		add_ascii_assoc_long(element, "minute", parsed_time->relative.i);
-		add_ascii_assoc_long(element, "second", parsed_time->relative.s);
+		add_assoc_long(element, "year",   parsed_time->relative.y);
+		add_assoc_long(element, "month",  parsed_time->relative.m);
+		add_assoc_long(element, "day",    parsed_time->relative.d);
+		add_assoc_long(element, "hour",   parsed_time->relative.h);
+		add_assoc_long(element, "minute", parsed_time->relative.i);
+		add_assoc_long(element, "second", parsed_time->relative.s);
 		if (parsed_time->relative.have_weekday_relative) {
-			add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
+			add_assoc_long(element, "weekday", parsed_time->relative.weekday);
 		}
 		if (parsed_time->relative.have_special_relative && (parsed_time->relative.special.type == TIMELIB_SPECIAL_WEEKDAY)) {
-			add_ascii_assoc_long(element, "weekdays", parsed_time->relative.special.amount);
+			add_assoc_long(element, "weekdays", parsed_time->relative.special.amount);
 		}
 		if (parsed_time->relative.first_last_day_of) {
-			add_ascii_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
+			add_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
 		}
-		add_ascii_assoc_zval(return_value, "relative", element);
+		add_assoc_zval(return_value, "relative", element);
 	}
 	timelib_time_dtor(parsed_time);
 }
 
-/* {{{ proto array date_parse(string date) U
+/* {{{ proto array date_parse(string date)
    Returns associative array with detailed info about given date
 */
 PHP_FUNCTION(date_parse)
@@ -2820,7 +2713,7 @@ PHP_FUNCTION(date_parse)
 }
 /* }}} */
 
-/* {{{ proto array date_parse_from_format(string format, string date) U
+/* {{{ proto array date_parse_from_format(string format, string date)
    Returns associative array with detailed info about given date
 */
 PHP_FUNCTION(date_parse_from_format)
@@ -2839,7 +2732,7 @@ PHP_FUNCTION(date_parse_from_format)
 }
 /* }}} */
 
-/* {{{ proto string date_format(DateTime object, string format) U
+/* {{{ proto string date_format(DateTime object, string format)
    Returns date formatted according to given format
 */
 PHP_FUNCTION(date_format)
@@ -2847,40 +2740,18 @@ PHP_FUNCTION(date_format)
 	zval         *object;
 	php_date_obj *dateobj;
 	char         *format;
-	UChar        *str;
-	int           format_len, length;
+	int           format_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0 TSRMLS_CC);
-	RETURN_UNICODEL(str, length, 0);
+	RETURN_STRING(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime), 0);
 }
 /* }}} */
 
-/* {{{ proto string date_format_locale(DateTime object, string format) U
-*/
-PHP_FUNCTION(date_format_locale)
-{
-	zval         *object;
-	php_date_obj *dateobj;
-	char         *format;
-	UChar        *str;
-	int           format_len, length;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1 TSRMLS_CC);
-	RETURN_UNICODEL(str, length, 0);
-}
-/* }}} */
-
-/* {{{ proto DateTime date_modify(DateTime object, string modify) U
+/* {{{ proto DateTime date_modify(DateTime object, string modify)
    Alters the timestamp.
 */
 PHP_FUNCTION(date_modify)
@@ -2923,7 +2794,7 @@ PHP_FUNCTION(date_modify)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_add(DateTime object, DateInterval interval) U
+/* {{{ proto DateTime date_add(DateTime object, DateInterval interval)
    Adds an interval to the current date in object.
 */
 PHP_FUNCTION(date_add)
@@ -2968,7 +2839,7 @@ PHP_FUNCTION(date_add)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_sub(DateTime object, DateInterval interval) U
+/* {{{ proto DateTime date_sub(DateTime object, DateInterval interval)
    Subtracts an interval to the current date in object.
 */
 PHP_FUNCTION(date_sub)
@@ -3015,7 +2886,7 @@ PHP_FUNCTION(date_sub)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone date_timezone_get(DateTime object) U
+/* {{{ proto DateTimeZone date_timezone_get(DateTime object)
    Return new DateTimeZone object relative to give DateTime
 */
 PHP_FUNCTION(date_timezone_get)
@@ -3053,7 +2924,7 @@ PHP_FUNCTION(date_timezone_get)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone date_timezone_set(DateTime object, DateTimeZone object) U
+/* {{{ proto DateTime date_timezone_set(DateTime object, DateTimeZone object)
    Sets the timezone for the DateTime object.
 */
 PHP_FUNCTION(date_timezone_set)
@@ -3080,7 +2951,7 @@ PHP_FUNCTION(date_timezone_set)
 }
 /* }}} */
 
-/* {{{ proto long date_offset_get(DateTime object) U
+/* {{{ proto long date_offset_get(DateTime object)
    Returns the DST offset.
 */
 PHP_FUNCTION(date_offset_get)
@@ -3115,7 +2986,7 @@ PHP_FUNCTION(date_offset_get)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_time_set(DateTime object, long hour, long minute[, long second]) U
+/* {{{ proto DateTime date_time_set(DateTime object, long hour, long minute[, long second])
    Sets the time.
 */
 PHP_FUNCTION(date_time_set)
@@ -3138,7 +3009,7 @@ PHP_FUNCTION(date_time_set)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_date_set(DateTime object, long year, long month, long day) U
+/* {{{ proto DateTime date_date_set(DateTime object, long year, long month, long day)
    Sets the date.
 */
 PHP_FUNCTION(date_date_set)
@@ -3161,7 +3032,7 @@ PHP_FUNCTION(date_date_set)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_isodate_set(DateTime object, long year, long week[, long day]) U
+/* {{{ proto DateTime date_isodate_set(DateTime object, long year, long week[, long day])
    Sets the ISO date.
 */
 PHP_FUNCTION(date_isodate_set)
@@ -3187,7 +3058,7 @@ PHP_FUNCTION(date_isodate_set)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_timestamp_set(DateTime object, long unixTimestamp) U
+/* {{{ proto DateTime date_timestamp_set(DateTime object, long unixTimestamp)
    Sets the date and time based on an Unix timestamp.
 */
 PHP_FUNCTION(date_timestamp_set)
@@ -3208,7 +3079,7 @@ PHP_FUNCTION(date_timestamp_set)
 }
 /* }}} */
 
-/* {{{ proto long date_timestamp_get(DateTime object) U
+/* {{{ proto long date_timestamp_get(DateTime object)
    Gets the Unix timestamp.
 */
 PHP_FUNCTION(date_timestamp_get)
@@ -3234,7 +3105,7 @@ PHP_FUNCTION(date_timestamp_get)
 }
 /* }}} */
 
-/* {{{ proto DateInterval date_diff(DateTime object [, bool absolute]) U
+/* {{{ proto DateInterval date_diff(DateTime object [, bool absolute])
    Returns the difference between two DateTime objects.
 */
 PHP_FUNCTION(date_diff)
@@ -3284,7 +3155,7 @@ static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_D
 	}
 }
 
-/* {{{ proto DateTimeZone timezone_open(string timezone) U
+/* {{{ proto DateTimeZone timezone_open(string timezone)
    Returns new DateTimeZone object
 */
 PHP_FUNCTION(timezone_open)
@@ -3333,7 +3204,7 @@ PHP_METHOD(DateTimeZone, __construct)
 }
 /* }}} */
 
-/* {{{ proto string timezone_name_get(DateTimeZone object) U
+/* {{{ proto string timezone_name_get(DateTimeZone object)
    Returns the name of the timezone.
 */
 PHP_FUNCTION(timezone_name_get)
@@ -3349,7 +3220,7 @@ PHP_FUNCTION(timezone_name_get)
 
 	switch (tzobj->type) {
 		case TIMELIB_ZONETYPE_ID:
-			RETURN_ASCII_STRING(tzobj->tzi.tz->name, 1);
+			RETURN_STRING(tzobj->tzi.tz->name, 1);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
 			char *tmpstr = emalloc(sizeof("UTC+05:00"));
@@ -3360,17 +3231,17 @@ PHP_FUNCTION(timezone_name_get)
 				abs(utc_offset / 60),
 				abs((utc_offset % 60)));
 
-			RETURN_ASCII_STRING(tmpstr, ZSTR_AUTOFREE);
+			RETURN_STRING(tmpstr, 0);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
-			RETURN_ASCII_STRING(tzobj->tzi.z.abbr, 1);
+			RETURN_STRING(tzobj->tzi.z.abbr, 1);
 			break;
 	}
 }
 /* }}} */
 
-/* {{{ proto string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]]) U
+/* {{{ proto string timezone_name_from_abbr(string abbr[, long gmtOffset[, long isdst]])
    Returns the timezone name from abbrevation
 */
 PHP_FUNCTION(timezone_name_from_abbr)
@@ -3387,14 +3258,14 @@ PHP_FUNCTION(timezone_name_from_abbr)
 	tzid = timelib_timezone_id_from_abbr(abbr, gmtoffset, isdst);
 
 	if (tzid) {
-		RETURN_ASCII_STRING(tzid, 1);
+		RETURN_STRING(tzid, 1);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object) U
+/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object)
    Returns the timezone offset.
 */
 PHP_FUNCTION(timezone_offset_get)
@@ -3428,7 +3299,7 @@ PHP_FUNCTION(timezone_offset_get)
 }
 /* }}} */
 
-/* {{{ proto array timezone_transitions_get(DateTimeZone object [, long timestamp_begin [, long timestamp_end ]]) U
+/* {{{ proto array timezone_transitions_get(DateTimeZone object [, long timestamp_begin [, long timestamp_end ]])
    Returns numerically indexed array containing associative array for all transitions in the specified range for the timezone.
 */
 PHP_FUNCTION(timezone_transitions_get)
@@ -3450,21 +3321,21 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_nominal() \
 		MAKE_STD_ZVAL(element); \
 		array_init(element); \
-		add_ascii_assoc_long(element, "ts",     timestamp_begin); \
-		add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
-		add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[0].offset); \
-		add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
-		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx], 1); \
+		add_assoc_long(element, "ts",     timestamp_begin); \
+		add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
+		add_assoc_long(element, "offset", tzobj->tzi.tz->type[0].offset); \
+		add_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
+		add_assoc_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx], 1); \
 		add_next_index_zval(return_value, element);
 
 #define add(i,ts) \
 		MAKE_STD_ZVAL(element); \
 		array_init(element); \
-		add_ascii_assoc_long(element, "ts",     ts); \
-		add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
-		add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
-		add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
-		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1); \
+		add_assoc_long(element, "ts",     ts); \
+		add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
+		add_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
+		add_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
+		add_assoc_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1); \
 		add_next_index_zval(return_value, element);
 
 #define add_last() add(tzobj->tzi.tz->timecnt - 1, timestamp_begin)
@@ -3664,7 +3535,7 @@ PHP_METHOD(DateInterval, __construct)
 	zend_error_handling error_handling;
 	
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &interval_string, &interval_string_length) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &interval_string, &interval_string_length) == SUCCESS) {
 		if (date_interval_initialize(&reltime, interval_string, interval_string_length TSRMLS_CC) == SUCCESS) {
 			diobj = zend_object_store_get_object(getThis() TSRMLS_CC);
 			diobj->diff = reltime;
@@ -3765,7 +3636,7 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 }
 /* }}} */
 
-/* {{{ proto string date_interval_format(DateInterval object, string format) U
+/* {{{ proto string date_interval_format(DateInterval object, string format)
    Formats the interval.
 */
 PHP_FUNCTION(date_interval_format)
@@ -3781,7 +3652,7 @@ PHP_FUNCTION(date_interval_format)
 	diobj = (php_interval_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(diobj->initialized, DateInterval);
 
-	RETURN_ASCII_STRING(date_interval_format(format, format_len, diobj->diff), ZSTR_AUTOFREE);
+	RETURN_STRING(date_interval_format(format, format_len, diobj->diff), 0);
 }
 /* }}} */
 
@@ -3896,6 +3767,7 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->recurrences = recurrences + dpobj->include_start_date;
 
 	dpobj->initialized = 1;
+
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
@@ -3916,7 +3788,7 @@ static int check_id_allowed(char *id, long what)
 	return 0;
 }
 
-/* {{{ proto array timezone_identifiers_list([long what[, string country]]) U
+/* {{{ proto array timezone_identifiers_list([long what[, string country]])
    Returns numerically index array with all timezone identifiers.
 */
 PHP_FUNCTION(timezone_identifiers_list)
@@ -3947,10 +3819,10 @@ PHP_FUNCTION(timezone_identifiers_list)
 	for (i = 0; i < item_count; ++i) {
 		if (what == PHP_DATE_TIMEZONE_PER_COUNTRY) {
 			if (tzdb->data[table[i].pos + 5] == option[0] && tzdb->data[table[i].pos + 6] == option[1]) {
-				add_next_index_ascii_string(return_value, table[i].id, 1);
+				add_next_index_string(return_value, table[i].id, 1);
 			}
 		} else if (what == PHP_DATE_TIMEZONE_GROUP_ALL_W_BC || (check_id_allowed(table[i].id, what) && (tzdb->data[table[i].pos + 4] == '\1'))) {
-			add_next_index_ascii_string(return_value, table[i].id, 1);
+			add_next_index_string(return_value, table[i].id, 1);
 		}
 	};
 }
@@ -3964,11 +3836,11 @@ PHP_FUNCTION(timezone_version_get)
 	const timelib_tzdb *tzdb;
 
 	tzdb = DATE_TIMEZONEDB;
-	RETURN_ASCII_STRING(tzdb->version, 1);
+	RETURN_STRING(tzdb->version, 1);
 }
 /* }}} */
 
-/* {{{ proto array timezone_abbreviations_list() U
+/* {{{ proto array timezone_abbreviations_list()
    Returns associative array containing dst, offset and the timezone name
 */
 PHP_FUNCTION(timezone_abbreviations_list)
@@ -3983,18 +3855,18 @@ PHP_FUNCTION(timezone_abbreviations_list)
 	do {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
-		add_ascii_assoc_bool(element, "dst", entry->type);
-		add_ascii_assoc_long(element, "offset", entry->gmtoffset);
+		add_assoc_bool(element, "dst", entry->type);
+		add_assoc_long(element, "offset", entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_ascii_assoc_ascii_string(element, "timezone_id", entry->full_tz_name, 1);
+			add_assoc_string(element, "timezone_id", entry->full_tz_name, 1);
 		} else {
-			add_ascii_assoc_null(element, "timezone_id");
+			add_assoc_null(element, "timezone_id");
 		}
 
-		if (zend_ascii_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
+		if (zend_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
 			MAKE_STD_ZVAL(abbr_array);
 			array_init(abbr_array);
-			add_ascii_assoc_zval(return_value, entry->name, abbr_array);
+			add_assoc_zval(return_value, entry->name, abbr_array);
 		} else {
 			abbr_array = *abbr_array_pp;
 		}
@@ -4004,7 +3876,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 }
 /* }}} */
 
-/* {{{ proto bool date_default_timezone_set(string timezone_identifier) U
+/* {{{ proto bool date_default_timezone_set(string timezone_identifier)
    Sets the default timezone used by all date/time functions in a script */
 PHP_FUNCTION(date_default_timezone_set)
 {
@@ -4027,14 +3899,14 @@ PHP_FUNCTION(date_default_timezone_set)
 }
 /* }}} */
 
-/* {{{ proto string date_default_timezone_get() U
+/* {{{ proto string date_default_timezone_get()
    Gets the default timezone used by all date/time functions in a script */
 PHP_FUNCTION(date_default_timezone_get)
 {
 	timelib_tzinfo *default_tz;
 
 	default_tz = get_timezone_info(TSRMLS_C);
-	RETVAL_ASCII_STRING(default_tz->name, 1);
+	RETVAL_STRING(default_tz->name, 1);
 }
 /* }}} */
 
@@ -4050,7 +3922,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	char            retstr[6];
+	char           *retstr;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ldddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
 		RETURN_FALSE;
@@ -4115,8 +3987,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
-			sprintf(retstr, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-			RETURN_RT_STRINGL(retstr, 5, 1);
+			spprintf(&retstr, 0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
+			RETURN_STRINGL(retstr, 5, 0);
 			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);
@@ -4125,7 +3997,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]]) U
+/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
    Returns time of sunrise for a given day and location */
 PHP_FUNCTION(date_sunrise)
 {
@@ -4133,7 +4005,7 @@ PHP_FUNCTION(date_sunrise)
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]]) U
+/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
    Returns time of sunset for a given day and location */
 PHP_FUNCTION(date_sunset)
 {
@@ -4141,7 +4013,7 @@ PHP_FUNCTION(date_sunset)
 }
 /* }}} */
 
-/* {{{ proto array date_sun_info(long time, float latitude, float longitude) U
+/* {{{ proto array date_sun_info(long time, float latitude, float longitude)
    Returns an array with information about sun set/rise and twilight begin/end */
 PHP_FUNCTION(date_sun_info)
 {
@@ -4172,74 +4044,74 @@ PHP_FUNCTION(date_sun_info)
 	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -35.0/60, 1, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_ascii_assoc_bool(return_value, "sunrise", 0);
-			add_ascii_assoc_bool(return_value, "sunset", 0);
+			add_assoc_bool(return_value, "sunrise", 0);
+			add_assoc_bool(return_value, "sunset", 0);
 			break;
 		case 1: /* always above */
-			add_ascii_assoc_bool(return_value, "sunrise", 1);
-			add_ascii_assoc_bool(return_value, "sunset", 1);
+			add_assoc_bool(return_value, "sunrise", 1);
+			add_assoc_bool(return_value, "sunset", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_ascii_assoc_long(return_value, "sunrise", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "sunrise", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_ascii_assoc_long(return_value, "sunset", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "sunset", timelib_date_to_int(t2, &dummy));
 	}
 	t2->sse = transit;
-	add_ascii_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
+	add_assoc_long(return_value, "transit", timelib_date_to_int(t2, &dummy));
 
 	/* Get civil twilight */
 	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -6.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_ascii_assoc_bool(return_value, "civil_twilight_begin", 0);
-			add_ascii_assoc_bool(return_value, "civil_twilight_end", 0);
+			add_assoc_bool(return_value, "civil_twilight_begin", 0);
+			add_assoc_bool(return_value, "civil_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_ascii_assoc_bool(return_value, "civil_twilight_begin", 1);
-			add_ascii_assoc_bool(return_value, "civil_twilight_end", 1);
+			add_assoc_bool(return_value, "civil_twilight_begin", 1);
+			add_assoc_bool(return_value, "civil_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_ascii_assoc_long(return_value, "civil_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "civil_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_ascii_assoc_long(return_value, "civil_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "civil_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 
 	/* Get nautical twilight */
 	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -12.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_ascii_assoc_bool(return_value, "nautical_twilight_begin", 0);
-			add_ascii_assoc_bool(return_value, "nautical_twilight_end", 0);
+			add_assoc_bool(return_value, "nautical_twilight_begin", 0);
+			add_assoc_bool(return_value, "nautical_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_ascii_assoc_bool(return_value, "nautical_twilight_begin", 1);
-			add_ascii_assoc_bool(return_value, "nautical_twilight_end", 1);
+			add_assoc_bool(return_value, "nautical_twilight_begin", 1);
+			add_assoc_bool(return_value, "nautical_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_ascii_assoc_long(return_value, "nautical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "nautical_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_ascii_assoc_long(return_value, "nautical_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "nautical_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 
 	/* Get astronomical twilight */
 	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, -18.0, 0, &ddummy, &ddummy, &rise, &set, &transit);
 	switch (rs) {
 		case -1: /* always below */
-			add_ascii_assoc_bool(return_value, "astronomical_twilight_begin", 0);
-			add_ascii_assoc_bool(return_value, "astronomical_twilight_end", 0);
+			add_assoc_bool(return_value, "astronomical_twilight_begin", 0);
+			add_assoc_bool(return_value, "astronomical_twilight_end", 0);
 			break;
 		case 1: /* always above */
-			add_ascii_assoc_bool(return_value, "astronomical_twilight_begin", 1);
-			add_ascii_assoc_bool(return_value, "astronomical_twilight_end", 1);
+			add_assoc_bool(return_value, "astronomical_twilight_begin", 1);
+			add_assoc_bool(return_value, "astronomical_twilight_end", 1);
 			break;
 		default:
 			t2->sse = rise;
-			add_ascii_assoc_long(return_value, "astronomical_twilight_begin", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "astronomical_twilight_begin", timelib_date_to_int(t2, &dummy));
 			t2->sse = set;
-			add_ascii_assoc_long(return_value, "astronomical_twilight_end", timelib_date_to_int(t2, &dummy));
+			add_assoc_long(return_value, "astronomical_twilight_end", timelib_date_to_int(t2, &dummy));
 	}
 	timelib_time_dtor(t);
 	timelib_time_dtor(t2);

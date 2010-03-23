@@ -1,7 +1,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -48,6 +48,14 @@ define('PCRE_MISSING_ERROR',
 | with --with-pcre-regex or if you have compiled pcre as a  |
 | shared module load it via php.ini.                        |
 +-----------------------------------------------------------+');
+define('SAFE_MODE_WARNING',
+'+-----------------------------------------------------------+
+|                       ! WARNING !                         |
+| You are running the test-suite with "safe_mode" ENABLED ! |
+|                                                           |
+| Chances are high that no test will work at all,           |
+| depending on how you configured "safe_mode" !             |
++-----------------------------------------------------------+');
 define('TMP_MISSING',
 '+-----------------------------------------------------------+
 |                       ! ERROR   !                         |
@@ -89,14 +97,6 @@ define('PHP_INI_SETTINGS_SCRIPT','<?php echo serialize(ini_get_all()); ?>');
 /**********************************************************************
  * various utility functions
  */
-
-function save_to_file($filename,$text)
-{
-	$fp = @fopen($filename,'w')
-		or die("Cannot open file '" . $filename . "' (save_to_file)");
-	fwrite($fp,$text);
-	fclose($fp);
-}
 
 function settings2array($settings, &$ini_settings)
 {
@@ -440,7 +440,7 @@ class testHarness {
 	public $exts_tested = 0;
 	public $exts_skipped = 0;
 	public $ignored_by_ext = 0;
-	public $test_dirs = array('tests', 'ext', 'sapi');
+	public $test_dirs = array('tests', 'pear', 'ext', 'sapi');
 	public $start_time;
 	public $end_time;
 	public $exec_info;
@@ -456,6 +456,7 @@ class testHarness {
 			'output_handler'=>'',
 			'zlib.output_compression'=>'Off',
 			'open_basedir'=>'',
+			'safe_mode'=>'0',
 			'disable_functions'=>'',
 			'output_buffering'=>'Off',
 			'error_reporting'=>'4095',
@@ -569,7 +570,7 @@ class testHarness {
 			$tmp_file = "$cwd$pi";
 			$pi = substr($cwd,strlen($this->conf['TEST_BASE_PATH'])) . $pi;
 			$url = $this->conf['TEST_WEB_BASE_URL'] . $pi;
-			save_to_file($tmp_file,$script);
+			file_put_contents($tmp_file,$script);
 			$fd = fopen($url, "rb");
 			$out = '';
 			if ($fd) {
@@ -752,6 +753,9 @@ class testHarness {
 		if (!extension_loaded("pcre")) {
 			$this->writemsg(PCRE_MISSING_ERROR);
 			exit;
+		}
+		if (ini_get('safe_mode')) {
+			$this->writemsg(SAFE_MODE_WARNING);
 		}
 	}
 	
@@ -1273,7 +1277,7 @@ class testHarness {
 		}
 
 		// We've satisfied the preconditions - run the test!
-		save_to_file($tmp_file,$section_text['FILE']);
+		file_put_contents($tmp_file,$section_text['FILE']);
 
 		$post = NULL;
 		$args = "";
@@ -1495,25 +1499,25 @@ class testHarness {
 		// write .exp
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'E') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.exp',$file);
-			save_to_file($logname,$wanted);
+			file_put_contents($logname,$wanted);
 		}
 	
 		// write .out
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'O') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.out',$file);
-			save_to_file($logname,$output);
+			file_put_contents($logname,$output);
 		}
 	
 		// write .diff
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'D') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.diff',$file);
-			save_to_file($logname,generate_diff($wanted,$output));
+			file_put_contents($logname,generate_diff($wanted,$output));
 		}
 	
 		// write .log
 		if (strpos($this->conf['TEST_PHP_LOG_FORMAT'],'L') !== FALSE) {
 			$logname = ereg_replace('\.phpt$','.log',$file);
-			save_to_file($logname,
+			file_put_contents($logname,
 						"\n---- EXPECTED OUTPUT\n$wanted\n".
 						"---- ACTUAL OUTPUT\n$output\n".
 						"---- FAILED\n");

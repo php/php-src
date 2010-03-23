@@ -109,7 +109,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo"Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fread() : usage variations ***
 
 -- Testing fread() with file having content of type numeric --
@@ -120,7 +120,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -134,7 +134,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -148,7 +148,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -162,7 +162,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -176,7 +176,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -190,7 +190,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -204,7 +204,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -218,7 +218,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -232,7 +232,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -248,7 +248,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -262,7 +262,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -276,7 +276,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -290,7 +290,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -304,7 +304,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -318,7 +318,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -332,7 +332,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -346,7 +346,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -360,7 +360,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -376,7 +376,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -390,7 +390,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -404,7 +404,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -418,7 +418,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -432,7 +432,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -446,7 +446,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -460,7 +460,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -474,7 +474,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
@@ -488,7 +488,7 @@ bool(false)
 Reading 1030 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)

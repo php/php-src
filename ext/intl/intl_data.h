@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,14 +46,15 @@ typedef struct _intl_data {
     intl_error_reset( INTL_DATA_ERROR_P(obj) TSRMLS_CC );						\
 
 /* Check status by error code, if error - exit */
-#define INTL_CHECK_STATUS(err, msg)                                                                                     \
-    intl_error_set_code( NULL, (err) TSRMLS_CC );                                                       \
-    if( U_FAILURE((err)) )                                                                                                      \
-    {                                                                                                                                           \
-        intl_error_set_custom_msg( NULL, msg, 0 TSRMLS_CC );                           \
-        RETURN_FALSE;                                                                                                           \
+#define INTL_CHECK_STATUS(err, msg)											\
+    intl_error_set_code( NULL, (err) TSRMLS_CC );							\
+    if( U_FAILURE((err)) )													\
+    {																		\
+        intl_error_set_custom_msg( NULL, msg, 0 TSRMLS_CC );				\
+        RETURN_FALSE;														\
     }
 
+/* Check status in object, if error - exit */
 #define INTL_METHOD_CHECK_STATUS(obj, msg)											\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) TSRMLS_CC );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
@@ -61,8 +62,6 @@ typedef struct _intl_data {
         intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 TSRMLS_CC );	\
         RETURN_FALSE;										\
     }
-
-#define INTL_MAX_LOCALE_LEN 80
 
 /* Check status, if error - destroy value and exit */
 #define INTL_CTOR_CHECK_STATUS(obj, msg)											\
@@ -73,6 +72,20 @@ typedef struct _intl_data {
 		zval_dtor(return_value);													\
         RETURN_NULL();																\
     }
+
+#define INTL_METHOD_RETVAL_UTF8(obj, ustring, ulen, free_it)									\
+{																								\
+	char *u8value;																				\
+	int u8len;																					\
+	intl_convert_utf16_to_utf8(&u8value, &u8len, ustring, ulen, &INTL_DATA_ERROR_CODE((obj)));	\
+	if((free_it)) {																				\
+		efree(ustring);																			\
+	}																							\
+	INTL_METHOD_CHECK_STATUS((obj), "Error converting value to UTF-8");							\
+	RETVAL_STRINGL(u8value, u8len, 0);															\
+}
+
+#define INTL_MAX_LOCALE_LEN 80
 
 #define INTL_CHECK_LOCALE_LEN(locale_len)												\
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\

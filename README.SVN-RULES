@@ -43,7 +43,7 @@ Having said that, here are the organizational rules::
 
 Currently we have the following branches in use::
 
-  trunk             Will become PHP 6.0. This branch is for active development.
+  trunk             Will become PHP 6.0. This CVS branch is for active development.
 
   branches/PHP_5_3  Is used to release the PHP 5.3.x series. It still allows for
                     larger enhancements.
@@ -122,7 +122,7 @@ get notified about your commit through the php-doc mailing list.
 
 If you fix some bugs, you should note the bug ID numbers in your
 commit message. Bug ID should be prefixed by "#" for easier access to
-bug report when developers are browsing SVN via LXR or Bonsai.
+bug report when developers are browsing CVS via LXR or Bonsai.
 
 Example::
 

@@ -34,7 +34,7 @@ NULL
 Warning: getservbyport() expects parameter 1 to be long, array given in %s on line %d
 NULL
 bool(false)
-unicode(%d) "%s"
+string(%d) "%s"
 
 Warning: getservbyport() expects parameter 1 to be long, object given in %s on line %d
 NULL

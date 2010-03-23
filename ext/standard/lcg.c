@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -114,7 +114,7 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto float lcg_value() U
+/* {{{ proto float lcg_value()
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {

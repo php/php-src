@@ -91,8 +91,7 @@
 
 /* $Id$ */
 
-#include <zend.h>
-#include <unicode/utypes.h>
+#include <zend_operators.h>
 #include <zend_strtod.h>
 
 #ifdef ZTS
@@ -454,7 +453,6 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 	return 1;
 }
 /* }}} */
-
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
@@ -469,10 +467,14 @@ ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 }
 /* }}} */
 
-static Bigint * Balloc(int k) /* {{{ */
+static Bigint * Balloc(int k)
 {
 	int x;
 	Bigint *rv;
+
+	if (k > Kmax) {
+		zend_error(E_ERROR, "Balloc() allocation exceeds list boundary");
+	}
 
 	_THREAD_PRIVATE_MUTEX_LOCK(dtoa_mutex);
 	if ((rv = freelist[k])) {
@@ -480,6 +482,10 @@ static Bigint * Balloc(int k) /* {{{ */
 	} else {
 		x = 1 << k;
 		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
+		if (!rv) {
+			_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
+			zend_error(E_ERROR, "Balloc() failed to allocate memory");
+		}
 		rv->k = k;
 		rv->maxwds = x;
 	}
@@ -487,9 +493,8 @@ static Bigint * Balloc(int k) /* {{{ */
 	rv->sign = rv->wds = 0;
 	return rv;
 }
-/* }}} */
 
-static void Bfree(Bigint *v) /* {{{ */
+static void Bfree(Bigint *v)
 {
 	if (v) {
 		_THREAD_PRIVATE_MUTEX_LOCK(dtoa_mutex);
@@ -498,7 +503,6 @@ static void Bfree(Bigint *v) /* {{{ */
 		_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
 	}
 }
-/* }}} */
 
 #define Bcopy(x,y) memcpy((char *)&x->sign, (char *)&y->sign, \
 		y->wds*sizeof(Long) + 2*sizeof(int))
@@ -506,10 +510,8 @@ static void Bfree(Bigint *v) /* {{{ */
 /* return value is only used as a simple string, so mis-aligned parts
  * inside the Bigint are not at risk on strict align architectures
  */
-static char * rv_alloc(unsigned int i) /* {{{ */
-{
-	unsigned int k;
-	int j, *r;
+static char * rv_alloc(int i) {
+	int j, k, *r;
 
 	j = sizeof(ULong);
 	for(k = 0;
@@ -521,9 +523,9 @@ static char * rv_alloc(unsigned int i) /* {{{ */
 	*r = k;
 	return (char *)(r+1);
 }
-/* }}} */
 
-static char * nrv_alloc(char *s, char **rve, int n) /* {{{ */
+
+static char * nrv_alloc(char *s, char **rve, int n)
 {
 	char *rv, *t;
 
@@ -536,9 +538,8 @@ static char * nrv_alloc(char *s, char **rve, int n) /* {{{ */
 	}
 	return rv;
 }
-/* }}} */
 
-static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */ /* {{{ */
+static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */
 {
 	int i, wds;
 	ULong *x, y;
@@ -576,9 +577,8 @@ static Bigint * multadd(Bigint *b, int m, int a) /* multiply by m and add a */ /
 	}
 	return b;
 }
-/* }}} */
 
-static int hi0bits(ULong x) /* {{{ */
+static int hi0bits(ULong x)
 {
 	int k = 0;
 
@@ -606,9 +606,8 @@ static int hi0bits(ULong x) /* {{{ */
 	}
 	return k;
 }
-/* }}} */
 
-static int lo0bits(ULong *y) /* {{{ */
+static int lo0bits(ULong *y)
 {
 	int k;
 	ULong x = *y;
@@ -651,9 +650,8 @@ static int lo0bits(ULong *y) /* {{{ */
 	*y = x;
 	return k;
 }
-/* }}} */
 
-static Bigint * i2b(int i) /* {{{ */
+static Bigint * i2b(int i)
 {
 	Bigint *b;
 
@@ -662,9 +660,8 @@ static Bigint * i2b(int i) /* {{{ */
 	b->wds = 1;
 	return b;
 }
-/* }}} */
 
-static Bigint * mult(Bigint *a, Bigint *b) /* {{{ */
+static Bigint * mult(Bigint *a, Bigint *b)
 {
 	Bigint *c;
 	int k, wa, wb, wc;
@@ -747,9 +744,8 @@ static Bigint * mult(Bigint *a, Bigint *b) /* {{{ */
 	c->wds = wc;
 	return c;
 }
-/* }}} */
 
-static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9) /* {{{ */
+static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9)
 {
 	Bigint *b;
 	int i, k;
@@ -781,9 +777,8 @@ static Bigint * s2b (CONST char *s, int nd0, int nd, ULong y9) /* {{{ */
 	}
 	return b;
 }
-/* }}} */
 
-static Bigint * pow5mult(Bigint *b, int k) /* {{{ */
+static Bigint * pow5mult(Bigint *b, int k)
 {
 	Bigint *b1, *p5, *p51;
 	int i;
@@ -823,9 +818,9 @@ static Bigint * pow5mult(Bigint *b, int k) /* {{{ */
 	_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 	return b;
 }
-/* }}} */
 
-static Bigint *lshift(Bigint *b, int k) /* {{{ */
+
+static Bigint *lshift(Bigint *b, int k)
 {
 	int i, k1, n, n1;
 	Bigint *b1;
@@ -882,9 +877,8 @@ static Bigint *lshift(Bigint *b, int k) /* {{{ */
 	Bfree(b);
 	return b1;
 }
-/* }}} */
 
-static int cmp(Bigint *a, Bigint *b) /* {{{ */
+static int cmp(Bigint *a, Bigint *b)
 {
 	ULong *xa, *xa0, *xb, *xb0;
 	int i, j;
@@ -911,9 +905,9 @@ static int cmp(Bigint *a, Bigint *b) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-static Bigint * diff(Bigint *a, Bigint *b) /* {{{ */
+
+static Bigint * diff(Bigint *a, Bigint *b)
 {
 	Bigint *c;
 	int i, wa, wb;
@@ -987,9 +981,8 @@ static Bigint * diff(Bigint *a, Bigint *b) /* {{{ */
 	c->wds = wa;
 	return c;
 }
-/* }}} */
 
-static double ulp (double _x) /* {{{ */
+static double ulp (double _x)
 {
 	volatile _double x;
 	register Long L;
@@ -1022,9 +1015,7 @@ static double ulp (double _x) /* {{{ */
 #endif
 	return value(a);
 }
-/* }}} */
 
-/* static double b2d () {{{ */
 static double
 b2d
 #ifdef KR_headers
@@ -1094,9 +1085,9 @@ ret_d:
 #endif
 	return value(d);
 }
-/* }}} */
 
-static Bigint * d2b(double _d, int *e, int *bits) /* {{{ */
+
+static Bigint * d2b(double _d, int *e, int *bits)
 {
 	Bigint *b;
 	int de, i, k;
@@ -1216,12 +1207,11 @@ static Bigint * d2b(double _d, int *e, int *bits) /* {{{ */
 #endif
 	return b;
 }
-/* }}} */
-
 #undef d0
 #undef d1
 
-static double ratio (Bigint *a, Bigint *b) /* {{{ */
+
+static double ratio (Bigint *a, Bigint *b)
 {
 	volatile _double da, db;
 	int k, ka, kb;
@@ -1255,7 +1245,6 @@ static double ratio (Bigint *a, Bigint *b) /* {{{ */
 #endif
 	return value(da) / value(db);
 }
-/* }}} */
 
 static CONST double
 tens[] = {
@@ -1283,7 +1272,8 @@ static CONST double tinytens[] = { 1e-16, 1e-32 };
 #endif
 #endif
 
-static int quorem(Bigint *b, Bigint *S) /* {{{ */
+
+static int quorem(Bigint *b, Bigint *S)
 {
 	int n;
 	Long borrow, y;
@@ -1382,9 +1372,8 @@ static int quorem(Bigint *b, Bigint *S) /* {{{ */
 	}
 	return q;
 }
-/* }}} */
 
-static void destroy_freelist(void) /* {{{ */
+static void destroy_freelist(void)
 {
 	int i;
 	Bigint *tmp;
@@ -1401,15 +1390,14 @@ static void destroy_freelist(void) /* {{{ */
 	_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
 	
 }
-/* }}} */
 
-ZEND_API void zend_freedtoa(char *s) /* {{{ */
+
+ZEND_API void zend_freedtoa(char *s)
 {
 	Bigint *b = (Bigint *)((int *)s - 1);
 	b->maxwds = 1 << (b->k = *(int*)b);
 	Bfree(b);
 }
-/* }}} */
 
 /* dtoa for IEEE arithmetic (dmg): convert double to ASCII string.
  *
@@ -1445,7 +1433,7 @@ ZEND_API void zend_freedtoa(char *s) /* {{{ */
  *     calculation.
  */
 
-ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve) /* {{{ */
+ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
  /* Arguments ndigits, decpt, sign are similar to those
     of ecvt and fcvt; trailing zeros are suppressed from
@@ -2041,9 +2029,8 @@ ret1:
 		*rve = s;
 	return s0;
 }
-/* }}} */
 
-ZEND_API double zend_strtod (CONST char *s00, char **se) /* {{{ */
+ZEND_API double zend_strtod (CONST char *s00, char **se)
 {
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
@@ -2589,157 +2576,67 @@ ret:
 
 	return result;
 }
-/* }}} */
 
-ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
+ZEND_API double zend_hex_strtod(const char *str, char **endptr)
 {
-	const UChar *u = nptr, *nstart;
-	UChar c = *u;
+	const char *s = str;
+	char c;
 	int any = 0;
-	ALLOCA_FLAG(use_heap)
+	double value = 0;
 
-	while (u_isspace(c)) {
-		c = *++u;
-	}
-	nstart = u;
-
-	if (c == 0x2D /*'-'*/ || c == 0x2B /*'+'*/) {
-		c = *++u;
+	if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
+		s += 2;
 	}
 
-	while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
-		any = 1;
-		c = *++u;
-	}
-
-	if (c == 0x2E /*'.'*/) {
-		c = *++u;
-		while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
-			any = 1;
-			c = *++u;
-		}
-	}
-
-	if ((c == 0x65 /*'e'*/ || c == 0x45 /*'E'*/) && any) {
-		const UChar *e = u;
-		int any_exp = 0;
-
-		c = *++u;
-		if (c == 0x2D /*'-'*/ || c == 0x2B /*'+'*/) {
-			c = *++u;
-		}
-
-		while (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/) {
-			any_exp = 1;
-			c = *++u;
-		}
-
-		if (!any_exp) {
-			u = e;
-		}
-	}
-
-	if (any) {
-		char buf[64], *numbuf, *bufpos;
-		int length = u - nstart;
-		double value;
-
-		if (length < sizeof(buf)) {
-			numbuf = buf;
+	while ((c = *s++)) {
+		if (c >= '0' && c <= '9') {
+			c -= '0';
+		} else if (c >= 'A' && c <= 'F') {
+			c -= 'A' - 10;
+		} else if (c >= 'a' && c <= 'f') {
+			c -= 'a' - 10;
 		} else {
-			numbuf = (char *) do_alloca(length + 1, use_heap);
+			break;
 		}
 
-		bufpos = numbuf;
-
-		while (nstart < u) {
-			*bufpos++ = (char) *nstart++;
-		}
-
-		*bufpos = '\0';
-		value = zend_strtod(numbuf, NULL);
-
-		if (numbuf != buf) {
-			free_alloca(numbuf, use_heap);
-		}
-
-		if (endptr != NULL) {
-			*endptr = (UChar *)u;
-		}
-
-		return value;
+		any = 1;
+		value = value * 16 + c;
 	}
 
 	if (endptr != NULL) {
-		*endptr = (UChar *)nptr;
+		*endptr = (char *)(any ? s - 1 : str);
 	}
 
-	return 0;
+	return value;
 }
-/* }}} */
 
-ZEND_API double zend_hex_strtod(const char *str, char **endptr) /* {{{ */
+ZEND_API double zend_oct_strtod(const char *str, char **endptr)
 {
-    const char *s = str;
-    char c;
-    int any = 0;
-    double value = 0;
+	const char *s = str;
+	char c;
+	double value = 0;
+	int any = 0;
 
-    if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
-        s += 2;
-    }
+	/* skip leading zero */
+	s++;
 
-    while ((c = *s++)) {
-        if (c >= '0' && c <= '9') {
-            c -= '0';
-        } else if (c >= 'A' && c <= 'F') {
-            c -= 'A' - 10;
-        } else if (c >= 'a' && c <= 'f') {
-            c -= 'a' - 10;
-        } else {
-            break;
-        }
+	while ((c = *s++)) {
+		if (c < '0' || c > '7') {
+			/* break and return the current value if the number is not well-formed
+			 * that's what Linux strtol() does 
+			 */
+			break;
+		}
+		value = value * 8 + c - '0';
+		any = 1;
+	}
 
-        any = 1;
-        value = value * 16 + c;
-    }
+	if (endptr != NULL) {
+		*endptr = (char *)(any ? s - 1 : str);
+	}
 
-    if (endptr != NULL) {
-        *endptr = (char *)(any ? s - 1 : str);
-    }
-
-    return value;
+	return value;
 }
-/* }}} */
-
-ZEND_API double zend_oct_strtod(const char *str, char **endptr) /* {{{ */
-{
-    const char *s = str;
-    char c;
-    double value = 0;
-    int any = 0;
-
-    /* skip leading zero */
-    s++;
-
-    while ((c = *s++)) {
-	if (c < '0' || c > '7') {
-            /* break and return the current value if the number is not well-formed
-             * that's what Linux strtol() does
-             */
-            break;
-        }
-        value = value * 8 + c - '0';
-        any = 1;
-    }
-
-    if (endptr != NULL) {
-        *endptr = (char *)(any ? s - 1 : str);
-    }
-
-    return value;
-}
-/* }}} */
 
 /*
  * Local variables:

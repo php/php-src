@@ -19,7 +19,7 @@ var_dump($arr);
 array(1) {
   [0]=>
   object(stdClass)#1 (1) {
-    [u"a"]=>
+    ["a"]=>
     object(stdClass)#2 (0) {
     }
   }
@@ -27,10 +27,10 @@ array(1) {
 array(1) {
   [0]=>
   object(stdClass)#1 (2) {
-    [u"a"]=>
+    ["a"]=>
     object(stdClass)#2 (0) {
     }
-    [u"b"]=>
+    ["b"]=>
     object(stdClass)#3 (0) {
     }
   }
@@ -38,13 +38,13 @@ array(1) {
 array(1) {
   [0]=>
   object(stdClass)#1 (3) {
-    [u"a"]=>
+    ["a"]=>
     object(stdClass)#2 (0) {
     }
-    [u"b"]=>
+    ["b"]=>
     object(stdClass)#3 (0) {
     }
-    [u"c"]=>
+    ["c"]=>
     object(stdClass)#2 (0) {
     }
   }

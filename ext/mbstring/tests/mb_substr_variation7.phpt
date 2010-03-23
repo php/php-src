@@ -60,79 +60,79 @@ echo "Done";
 
 **-- Offset is: -60 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: -50 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: -40 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: -30 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: -20 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: -10 --**
 -- ASCII String --
-unicode(20) "497320616e20456e676c"
+string(20) "497320616e20456e676c"
 --Multibyte String --
-unicode(56) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e3808230"
+string(56) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e3808230"
 
 **-- Offset is: 0 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: 10 --**
 -- ASCII String --
-unicode(20) "497320616e20456e676c"
+string(20) "497320616e20456e676c"
 --Multibyte String --
-unicode(56) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e3808230"
+string(56) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e3808230"
 
 **-- Offset is: 20 --**
 -- ASCII String --
-unicode(40) "497320616e20456e676c69736820737472696e67"
+string(40) "497320616e20456e676c69736820737472696e67"
 --Multibyte String --
-unicode(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 
 **-- Offset is: 30 --**
 -- ASCII String --
-unicode(40) "497320616e20456e676c69736820737472696e67"
+string(40) "497320616e20456e676c69736820737472696e67"
 --Multibyte String --
-unicode(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 
 **-- Offset is: 40 --**
 -- ASCII String --
-unicode(40) "497320616e20456e676c69736820737472696e67"
+string(40) "497320616e20456e676c69736820737472696e67"
 --Multibyte String --
-unicode(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 
 **-- Offset is: 50 --**
 -- ASCII String --
-unicode(40) "497320616e20456e676c69736820737472696e67"
+string(40) "497320616e20456e676c69736820737472696e67"
 --Multibyte String --
-unicode(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 
 **-- Offset is: 60 --**
 -- ASCII String --
-unicode(40) "497320616e20456e676c69736820737472696e67"
+string(40) "497320616e20456e676c69736820737472696e67"
 --Multibyte String --
-unicode(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(100) "e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 Done

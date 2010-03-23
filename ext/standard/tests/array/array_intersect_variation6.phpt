@@ -109,75 +109,75 @@ array(1) {
 -- Iterator 5 --
 array(1) {
   [1]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 array(1) {
   [1]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iterator 6 --
 array(1) {
   [2]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 array(1) {
   [2]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iterator 7 --
 array(2) {
   [4]=>
   float(2.2)
   [5]=>
-  unicode(5) "color"
+  string(5) "color"
 }
 array(2) {
   [4]=>
   float(2.2)
   [5]=>
-  unicode(5) "color"
+  string(5) "color"
 }
 -- Iterator 8 --
 array(2) {
   [4]=>
   float(2.2)
   [5]=>
-  unicode(5) "color"
+  string(5) "color"
 }
 array(2) {
   [4]=>
   float(2.2)
   [5]=>
-  unicode(5) "color"
+  string(5) "color"
 }
 -- Iterator 9 --
 array(2) {
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [6]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(2) {
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [6]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 -- Iterator 10 --
 array(1) {
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 array(1) {
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 -- Iterator 11 --
 array(3) {
   [0]=>
   int(1)
   [1]=>
-  unicode(5) "float"
+  string(5) "float"
   [4]=>
   float(2.2)
 }
@@ -185,7 +185,7 @@ array(3) {
   [0]=>
   int(1)
   [1]=>
-  unicode(5) "float"
+  string(5) "float"
   [4]=>
   float(2.2)
 }

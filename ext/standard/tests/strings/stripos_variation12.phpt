@@ -7,7 +7,9 @@ Test stripos() function : usage variations - null terminated strings for 'haysta
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with null terminated strings for 'haystack' argument */
+/* Test stripos() function with null terminated strings for 'haystack' argument 
+ *  in order to check the binary safe 
+*/
 
 echo "*** Test stripos() function: binary safe ***\n";
 $haystacks = array(
@@ -15,7 +17,7 @@ $haystacks = array(
   chr(0)."Hello World",
   "Hello World".chr(0),
   chr(0).chr(0).chr(0),
-  b"Hello\0world",
+  "Hello\0world",
   "\0Hello",
   "Hello\0"
 );
@@ -26,7 +28,7 @@ for($index = 0; $index < count($haystacks); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Test stripos() function: binary safe ***
 int(5)
 int(5)

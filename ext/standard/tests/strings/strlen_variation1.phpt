@@ -81,7 +81,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===Done===
+===DONE===
 --EXPECTF--
 *** Testing strlen() : with unexpected input for 'string' argument ***
 -- Iteration 1 --
@@ -102,15 +102,15 @@ int(5)
 int(12)
 -- Iteration 9 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 int(1)
@@ -128,10 +128,10 @@ int(0)
 int(13)
 -- Iteration 19 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 20 --
 int(0)
 -- Iteration 21 --
 int(0)
-===Done===
+===DONE===

@@ -19,21 +19,21 @@ var_dump( $date2->format( "F j, Y, g:i a") );
 ===DONE=== 
 --EXPECTF--
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2005-07-14 22:30:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-unicode(118) "O:8:"DateTime":3:{U:4:"date";U:19:"2005-07-14 22:30:41";U:13:"timezone_type";i:3;U:8:"timezone";U:13:"Europe/London";}"
+string(118) "O:8:"DateTime":3:{s:4:"date";s:19:"2005-07-14 22:30:41";s:13:"timezone_type";i:3;s:8:"timezone";s:13:"Europe/London";}"
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2005-07-14 22:30:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-unicode(23) "July 14, 2005, 10:30 pm"
+string(23) "July 14, 2005, 10:30 pm"
 ===DONE===

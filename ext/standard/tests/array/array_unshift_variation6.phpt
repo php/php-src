@@ -73,7 +73,7 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unshift() : two dimensional arrays for $array argument ***
 int(4)
 array(4) {
@@ -81,12 +81,12 @@ array(4) {
   int(10)
   [1]=>
   array(3) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
-    [u"place"]=>
-    unicode(2) "LA"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+    ["place"]=>
+    string(2) "LA"
   }
   [2]=>
   array(5) {
@@ -103,20 +103,20 @@ array(4) {
   }
   [3]=>
   array(7) {
-    [u"a"]=>
-    unicode(5) "green"
+    ["a"]=>
+    string(5) "green"
     [0]=>
-    unicode(3) "red"
+    string(3) "red"
     [1]=>
-    unicode(5) "brown"
+    string(5) "brown"
     [2]=>
     int(33)
     [3]=>
     int(88)
     [4]=>
-    unicode(6) "orange"
-    [u"item"]=>
-    unicode(4) "ball"
+    string(6) "orange"
+    ["item"]=>
+    string(4) "ball"
   }
 }
 int(6)
@@ -124,17 +124,17 @@ array(6) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
+  string(5) "world"
   [3]=>
   array(3) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
-    [u"place"]=>
-    unicode(2) "LA"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+    ["place"]=>
+    string(2) "LA"
   }
   [4]=>
   array(5) {
@@ -151,46 +151,46 @@ array(6) {
   }
   [5]=>
   array(7) {
-    [u"a"]=>
-    unicode(5) "green"
+    ["a"]=>
+    string(5) "green"
     [0]=>
-    unicode(3) "red"
+    string(3) "red"
     [1]=>
-    unicode(5) "brown"
+    string(5) "brown"
     [2]=>
     int(33)
     [3]=>
     int(88)
     [4]=>
-    unicode(6) "orange"
-    [u"item"]=>
-    unicode(4) "ball"
+    string(6) "orange"
+    ["item"]=>
+    string(4) "ball"
   }
 }
 int(4)
 array(4) {
   [0]=>
   int(10)
-  [u"color"]=>
-  unicode(3) "red"
-  [u"item"]=>
-  unicode(3) "pen"
-  [u"place"]=>
-  unicode(2) "LA"
+  ["color"]=>
+  string(3) "red"
+  ["item"]=>
+  string(3) "pen"
+  ["place"]=>
+  string(2) "LA"
 }
 int(6)
 array(6) {
   [0]=>
   int(10)
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"color"]=>
-  unicode(3) "red"
-  [u"item"]=>
-  unicode(3) "pen"
-  [u"place"]=>
-  unicode(2) "LA"
+  string(5) "world"
+  ["color"]=>
+  string(3) "red"
+  ["item"]=>
+  string(3) "pen"
+  ["place"]=>
+  string(2) "LA"
 }
 Done

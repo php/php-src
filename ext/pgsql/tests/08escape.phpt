@@ -1,10 +1,7 @@
 --TEST--
 PostgreSQL escape functions
 --SKIPIF--
-<?php
-include("skipif.inc");
-skip_server_version('8.5dev', '>=');
-?>
+<?php include("skipif.inc"); ?>
 --FILE--
 <?php
 
@@ -33,7 +30,7 @@ if ($expect === $after) {
 	echo "pg_escape_bytea() is Ok\n";
 }
 else {
-	echo "pg_escape_bytea() is NOT Ok\n";
+	echo "pg_escape_byte() is NOT Ok\n";
 	var_dump($before);
 	var_dump($after);
 	var_dump($expect);
@@ -64,8 +61,8 @@ else {
 ?>
 --EXPECT--
 pg_escape_string() is NOT Ok
-unicode(9) "ABC\ABC\'"
-unicode(12) "ABC\\ABC\\''"
-unicode(10) "ABC\\ABC\'"
+string(9) "ABC\ABC\'"
+string(12) "ABC\\ABC\\''"
+string(10) "ABC\\ABC\'"
 pg_escape_bytea() is Ok
 pg_escape_bytea() actually works with database

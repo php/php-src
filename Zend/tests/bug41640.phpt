@@ -10,6 +10,6 @@ class foo {
 var_dump(get_class_vars("foo"));
 --EXPECT--
 array(1) {
-  [u"x"]=>
+  ["x"]=>
   int(1)
 }

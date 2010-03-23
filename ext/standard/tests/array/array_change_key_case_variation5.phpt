@@ -31,12 +31,12 @@ echo "Done";
 
 -- Call array_change_key_case() --
 array(3) {
-  [u"ONE"]=>
-  unicode(2) "un"
-  [u"TWO"]=>
-  unicode(4) "deux"
-  [u"THREE"]=>
-  unicode(5) "trois"
+  ["ONE"]=>
+  string(2) "un"
+  ["TWO"]=>
+  string(4) "deux"
+  ["THREE"]=>
+  string(5) "trois"
 }
 -- Position of Internal Pointer in Result: --
 ONE => un

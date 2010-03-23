@@ -1,5 +1,7 @@
 --TEST--
 Test array_values() function : usage variations - Referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
@@ -35,26 +37,25 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_values() : usage variations ***
 
 -- $input is an array made up of referenced variables: --
 array(3) {
   [0]=>
-  &unicode(3) "one"
+  &string(3) "one"
   [1]=>
-  &unicode(3) "two"
+  &string(3) "two"
   [2]=>
-  &unicode(5) "three"
+  &string(5) "three"
 }
 Change $val2 and check result of array_values():
 array(3) {
   [0]=>
-  &unicode(3) "one"
+  &string(3) "one"
   [1]=>
-  &unicode(4) "deux"
+  &string(4) "deux"
   [2]=>
-  &unicode(5) "three"
+  &string(5) "three"
 }
 
 -- Pass $input argument by reference --

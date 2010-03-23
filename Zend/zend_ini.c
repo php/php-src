@@ -158,8 +158,7 @@ static int ini_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 	} else if (s->nKeyLength == 0) { /* s is numeric, f is not */
 		return 1;
 	} else { /* both strings */
-		/* FIXME: unicode hash */
-		return zend_binary_strcasecmp(f->key.arKey.s, f->nKeyLength, s->key.arKey.s, s->nKeyLength);
+		return zend_binary_strcasecmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
 	}
 }
 /* }}} */
@@ -238,7 +237,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC) /* {{{
 
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 {
-	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(zend_uintptr_t) stage TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(zend_intptr_t) stage TSRMLS_CC);
 }
 /* }}} */
 #endif
@@ -669,47 +668,6 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 	p = (char **) (base+(size_t) mh_arg1);
 
 	*p = new_value;
-	return SUCCESS;
-}
-/* }}} */
-
-ZEND_API ZEND_INI_MH(OnUpdateUTF8String) /* {{{ */
-{
-	UChar **up;
-	UChar *ustr = NULL;
-	int32_t ustr_len, capacity;
-	UErrorCode status = U_ZERO_ERROR;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-	/* Convert only if unicode semantics is on. Otherwise, same as OnUpdateString */
-	/* estimate capacity */
-	capacity = (new_value_length > 2) ? ((new_value_length >> 1) + (new_value_length >> 3) + 2) : new_value_length;
-
-	while (1) {
-		ustr = peurealloc(ustr, capacity+1, 1);
-		u_strFromUTF8(ustr, capacity+1, &ustr_len, new_value, new_value_length, &status);
-		if (status == U_BUFFER_OVERFLOW_ERROR || status == U_STRING_NOT_TERMINATED_WARNING) {
-			capacity = ustr_len;
-			status = U_ZERO_ERROR;
-		} else {
-			break;
-		}
-	}
-
-	if (U_FAILURE(status)) {
-		zend_error(E_WARNING, "Could not convert UTF-8 INI value to Unicode");
-		efree(ustr);
-		return FAILURE;
-	}
-
-	up = (UChar **) (base+(size_t) mh_arg1);
-	*up = ustr;
-
 	return SUCCESS;
 }
 /* }}} */

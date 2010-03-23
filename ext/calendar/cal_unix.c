@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,53 +24,47 @@
 #include "sdncal.h"
 #include <time.h>
 
-/* {{{ proto int unixtojd([int timestamp]) U
+/* {{{ proto int unixtojd([int timestamp])
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-  time_t timestamp;
-  long jdate, t;
-  struct tm *ta, tmbuf;
-	
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &t) == FAILURE) {
-    return;
-  }
+	time_t ts = 0;
+	struct tm *ta, tmbuf;
 
-  if (ZEND_NUM_ARGS()) {
-    timestamp = (time_t) t;
-  } else {
-    timestamp = time(NULL);
-  }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
+		return;
+	}	
 
-  if (timestamp < 0) {
-	RETURN_FALSE;
-  }
+	if (!ts) {
+		ts = time(NULL);
+	} else if (ts < 0) {
+		RETURN_FALSE;
+	}
 
-  ta = php_localtime_r(&timestamp, &tmbuf);
-  if (!ta) {
-	  RETURN_FALSE;
-  }
+	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
+		RETURN_FALSE;
+	}
 
-  jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday);
-  RETURN_LONG(jdate);
+	RETURN_LONG(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
 }
 /* }}} */
 
-/* {{{ proto int jdtounix(int jday) U
+/* {{{ proto int jdtounix(int jday)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-  long uday, jday;
+	long uday;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &jday) != SUCCESS) {
-    return;
-  }
-  
-  uday = jday - 2440588; /* J.D. of 1.1.1970 */
-  if(uday<0)     RETURN_FALSE; /* before beginning of unix epoch */ 
-  if(uday>24755) RETURN_FALSE; /* behind end of unix epoch */
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
+		return;
+	}	
+	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-  RETURN_LONG(uday*24*3600);
+	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */ 
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(uday * 24 * 3600);
 }
 /* }}} */
 

@@ -30,24 +30,24 @@ var_dump(gmp_legendre());
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(1) "0"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(1) "0"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(1) "0"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(1) "0"
-unicode(2) "-1"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(1) "0"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(2) "-1"
+--EXPECTF--	
+string(1) "0"
+string(2) "-1"
+string(1) "0"
+string(1) "0"
+string(2) "-1"
+string(1) "0"
+string(1) "0"
+string(2) "-1"
+string(1) "0"
+string(1) "0"
+string(2) "-1"
+string(2) "-1"
+string(1) "0"
+string(1) "0"
+string(2) "-1"
+string(1) "0"
+string(2) "-1"
 
 Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

@@ -34,7 +34,7 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-int(8)
+int(4)
 bool(true)
-int(8)
+int(4)
 Done

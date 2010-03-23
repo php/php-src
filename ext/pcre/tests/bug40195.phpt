@@ -14,32 +14,32 @@ var_dump(preg_match('@^(/(?:[a-z]+))+$@', '/a/abcde', $m)); var_dump($m);
 int(1)
 array(3) {
   [0]=>
-  unicode(7) "//abcde"
+  string(7) "//abcde"
   [1]=>
-  unicode(6) "/abcde"
+  string(6) "/abcde"
   [2]=>
-  unicode(5) "abcde"
+  string(5) "abcde"
 }
 int(1)
 array(2) {
   [0]=>
-  unicode(7) "//abcde"
+  string(7) "//abcde"
   [1]=>
-  unicode(6) "/abcde"
+  string(6) "/abcde"
 }
 int(1)
 array(3) {
   [0]=>
-  unicode(8) "/a/abcde"
+  string(8) "/a/abcde"
   [1]=>
-  unicode(6) "/abcde"
+  string(6) "/abcde"
   [2]=>
-  unicode(5) "abcde"
+  string(5) "abcde"
 }
 int(1)
 array(2) {
   [0]=>
-  unicode(8) "/a/abcde"
+  string(8) "/a/abcde"
   [1]=>
-  unicode(6) "/abcde"
+  string(6) "/abcde"
 }

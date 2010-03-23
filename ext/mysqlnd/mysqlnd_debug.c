@@ -828,7 +828,9 @@ void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 		DBG_INF_FMT("before: %lu", zend_memory_usage(persistent TSRMLS_CC));
 	}
 
-	pefree(ptr, persistent);
+	if (ptr) {
+		pefree(ptr, persistent);
+	}
 
 	if (persistent == FALSE) {
 		DBG_INF_FMT("after : %lu", zend_memory_usage(persistent TSRMLS_CC));

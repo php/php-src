@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -243,7 +243,6 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->abstract = abstract;
 	ret->is_persistent = persistent_id ? 1 : 0;
 	ret->chunk_size = FG(def_chunk_size);
-	ret->readbuf_type = IS_STRING;
 
 #if ZEND_DEBUG
 	ret->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
@@ -383,9 +382,9 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			stream->wrapperdata = NULL;
 		}
 
-		if (stream->readbuf.v) {
-			pefree(stream->readbuf.v, stream->is_persistent);
-			stream->readbuf.v = NULL;
+		if (stream->readbuf) {
+			pefree(stream->readbuf, stream->is_persistent);
+			stream->readbuf = NULL;
 		}
 
 		if (stream->is_persistent && (close_options & PHP_STREAM_FREE_PERSISTENT)) {
@@ -398,7 +397,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			 * as leaked; it will log a warning, but lets help it out and display what kind
 			 * of stream it was. */
 			char *leakinfo;
-			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed (opened in %s on line %d)\n", __LINE__, stream->ops->label, stream, stream->orig_path, stream->open_filename, stream->open_lineno);
+			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->orig_path);
 
 			if (stream->orig_path) {
 				pefree(stream->orig_path, stream->is_persistent);
@@ -439,14 +438,8 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-/* size == full characters (char, UChar, or 2x UChar)
-   TODO: Needs better handling of surrogate pairs */
 static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
-	if (stream->readpos == stream->writepos) {
-		stream->readpos = stream->writepos = 0;
-	}
-
 	/* allocate/fill the buffer */
 
 	if (stream->readfilters.head) {
@@ -506,19 +499,14 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					 * stream read buffer */
 					while (brig_inp->head) {
 						bucket = brig_inp->head;
-						if (bucket->buf_type != stream->readbuf_type) {
-							/* Stream expects different datatype than bucket has, convert slopily */
-							php_stream_bucket_convert_notranscode(bucket, stream->readbuf_type);
-						}
-						/* Bucket type now matches stream type */
-
 						/* grow buffer to hold this bucket
 						 * TODO: this can fail for persistent streams */
-						if (stream->readbuflen - stream->writepos < (unsigned int)bucket->buflen) {
+						if (stream->readbuflen - stream->writepos < bucket->buflen) {
 							stream->readbuflen += bucket->buflen;
-							stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readbuflen), stream->is_persistent);
+							stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
+									stream->is_persistent);
 						}
-						memcpy(stream->readbuf.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos), bucket->buf.s, PS_ULEN(stream->readbuf_type == IS_UNICODE, bucket->buflen));
+						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
 						stream->writepos += bucket->buflen;
 
 						php_stream_bucket_unlink(bucket TSRMLS_CC);
@@ -550,14 +538,15 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		}
 
 		efree(chunk_buf);
-	} else {	/* Unfiltered Binary stream */
+
+	} else {
 		/* is there enough data in the buffer ? */
 		if (stream->writepos - stream->readpos < (off_t)size) {
 			size_t justread = 0;
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
-			if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
+			if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
+				memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->readbuflen - stream->readpos);
 				stream->writepos -= stream->readpos;
 				stream->readpos = 0;
 			}
@@ -566,18 +555,21 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 			 * TODO: this can fail for persistent streams */
 			if (stream->readbuflen - stream->writepos < stream->chunk_size) {
 				stream->readbuflen += stream->chunk_size;
-				stream->readbuf.s = (char*)perealloc(stream->readbuf.s, stream->readbuflen, stream->is_persistent);
+				stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
+						stream->is_persistent);
 			}
 
-			justread = stream->ops->read(stream, stream->readbuf.s + stream->writepos, stream->readbuflen - stream->writepos TSRMLS_CC);
-			if (justread != (size_t)-1 && justread != 0) {
+			justread = stream->ops->read(stream, stream->readbuf + stream->writepos,
+					stream->readbuflen - stream->writepos
+					TSRMLS_CC);
+
+			if (justread != (size_t)-1) {
 				stream->writepos += justread;
 			}
 		}
 	}
 }
 
-/* Reads binary data from stream, if the stream is unicode (text), the raw unicode data will be returned */
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
 	size_t toread = 0, didread = 0;
@@ -588,24 +580,15 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		 * It is possible that a buffered stream was switched to non-buffered, so we
 		 * drain the remainder of the buffer before using the "raw" read mode for
 		 * the excess */
-		if (stream->writepos - stream->readpos > 0) {
-			toread = PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos - stream->readpos);
+		if (stream->writepos > stream->readpos) {
 
+			toread = stream->writepos - stream->readpos;
 			if (toread > size) {
 				toread = size;
 			}
 
-			if (stream->readbuf_type == IS_UNICODE) {
-				/* Sloppy read, anyone using php_stream_read() on a unicode stream
-				 * had better know what they're doing */
-				
-				memcpy(buf, stream->readbuf.u + stream->readpos, toread);
-				stream->readpos += ceil(toread / UBYTES(1));
-			} else {
-				memcpy(buf, stream->readbuf.s + stream->readpos, toread);
-				stream->readpos += toread;
-			}
-
+			memcpy(buf, stream->readbuf + stream->readpos, toread);
+			stream->readpos += toread;
 			size -= toread;
 			buf += toread;
 			didread += toread;
@@ -627,15 +610,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			}
 
 			if (toread > 0) {
-				if (stream->readbuf_type == IS_UNICODE) {
-					/* Sloppy read, anyone using php_stream_read() on a unicode stream
-					 * had better know what they're doing */
-				
-					memcpy(buf, stream->readbuf.u + stream->readpos, toread);
-					stream->readpos += ceil(toread / UBYTES(1));
-				} else {
-					memcpy(buf, stream->readbuf.s + stream->readpos, toread);
-				}
+				memcpy(buf, stream->readbuf + stream->readpos, toread);
 				stream->readpos += toread;
 			}
 		}
@@ -647,6 +622,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			/* EOF, or temporary end of data (for non-blocking mode). */
 			break;
 		}
+
 		/* just break anyway, to avoid greedy read */
 		if (stream->wrapper != &php_plain_files_wrapper) {
 			break;
@@ -658,171 +634,6 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 	}
 
 	return didread;
-}
-
-/* Read unicode data from a stream.  Returns failure (-1) if not a unicode stream */
-PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int size, int maxchars TSRMLS_DC)
-{
-	size_t toread = 0, didread = 0, string_length = 0;
-
-	if (stream->readbuf_type != IS_UNICODE) {
-		return -1;
-	}
-
-	while (size > 0) {
-		/* take from the read buffer first.
-		 * It is possible that a buffered stream was switched to non-buffered, so we
-		 * drain the remainder of the buffer before using the "raw" read mode for
-		 * the excess */
-
-		while (size > 0 && (toread = (stream->writepos - stream->readpos)) &&
-              (toread > 1 ||
-			   !U16_IS_SURROGATE(stream->readbuf.u[stream->readpos]) ||
-			   !U16_IS_SURROGATE_LEAD(stream->readbuf.u[stream->readpos]) )) {
-			int length;
-
-			if (toread > size) {
-				toread = size;
-			}
-
-			if (U16_IS_SURROGATE(stream->readbuf.u[stream->readpos + toread - 1]) &&
-				U16_IS_SURROGATE_LEAD(stream->readbuf.u[stream->readpos + toread - 1])) {
-				/* Don't split surrogates */
-				toread--;
-				if (!toread) {
-					break;
-				}
-			}
-
-			if (maxchars > -1) {
-				length = u_countChar32(stream->readbuf.u + stream->readpos, toread);
-				if (string_length + length > maxchars) {
-					/* Don't read more U32 points than the caller asked for */
-					toread = 0;
-					length = size - string_length;
-					U16_FWD_N(stream->readbuf.u + stream->readpos, toread, stream->writepos - stream->readpos, length);
-				}
-				string_length += length;
-			}
-
-			memcpy(buf, stream->readbuf.u + stream->readpos, UBYTES(toread));
-			stream->readpos += toread;
-			size -= toread;
-			buf += toread;
-			didread += toread;
-		}
-
-		/* ignore eof here; the underlying state might have changed */
-		if (size == 0) {
-			break;
-		}
-
-		/* just break anyway, to avoid greedy read */
-		if (didread > 0 && (stream->wrapper != &php_plain_files_wrapper)) {
-			break;
-		}
-
-		php_stream_fill_read_buffer(stream, size * sizeof(UChar) TSRMLS_CC);
-		if (stream->writepos - stream->readpos <= 0) {
-			/* EOF, or temporary end of data (for non-blocking mode). */
-			break;
-		}
-	}
-
-	if (didread > 0) {
-		stream->position += didread;
-	}
-
-	return didread;
-}
-
-PHPAPI UChar *_php_stream_read_unicode_chars(php_stream *stream, int *pchars TSRMLS_DC)
-{
-	int size = *pchars;
-	UChar *bufstart, *buf;
-	int buflen = size;
-	size_t toread = 0, didread = 0, string_length = 0;
-
-	if (stream->readbuf_type != IS_UNICODE) {
-		return NULL;
-	}
-
-	/* Allocate for ideal size first, add more later if needed */
-	bufstart = buf = eumalloc(buflen + 1);
-
-	while (size > 0) {
-		/* take from the read buffer first.
-		 * It is possible that a buffered stream was switched to non-buffered, so we
-		 * drain the remainder of the buffer before using the "raw" read mode for
-		 * the excess */
-
-		while (size > 0 && (toread = (stream->writepos - stream->readpos)) &&
-              (toread > 1 || 
-			   !U16_IS_SURROGATE(stream->readbuf.u[stream->readpos]) ||
-			   !U16_IS_SURROGATE_LEAD(stream->readbuf.u[stream->readpos]) )) {
-			int length;
-
-			if (toread > size) {
-				toread = size;
-			}
-
-			if (U16_IS_SURROGATE(stream->readbuf.u[stream->readpos + toread - 1]) &&
-				U16_IS_SURROGATE_LEAD(stream->readbuf.u[stream->readpos + toread - 1])) {
-				/* Don't split surrogates */
-				toread--;
-				if (!toread) {
-					break;
-				}
-			}
-
-			length = u_countChar32(stream->readbuf.u + stream->readpos, toread);
-			if (string_length + length > size) {
-				/* Don't read more U32 points than the caller asked for */
-				toread = 0;
-				length = size - string_length;
-				U16_FWD_N(stream->readbuf.u + stream->readpos, toread, stream->writepos - stream->readpos, length);
-			}
-
-			if (toread > (buflen - didread)) {
-				/* We know we're in surrogated territory at this point, allocate aggressively */
-				int ofs = buf - bufstart;
-				buflen += size * 2;
-				bufstart = eurealloc(bufstart, buflen + 1);
-				buf = bufstart + ofs;
-			}
-
-			memcpy(buf, stream->readbuf.u + stream->readpos, UBYTES(toread));
-			stream->readpos += toread;
-			size -= toread;
-			buf += toread;
-			didread += toread;
-			string_length += length;
-		}
-
-		/* ignore eof here; the underlying state might have changed */
-		if (size == 0) {
-			break;
-		}
-
-		/* just break anyway, to avoid greedy read */
-		if (didread > 0 && (stream->wrapper != &php_plain_files_wrapper)) {
-			break;
-		}
-
-		php_stream_fill_read_buffer(stream, UBYTES(size) TSRMLS_CC);
-		if (stream->writepos - stream->readpos <= 0) {
-			/* EOF, or temporary end of data (for non-blocking mode). */
-			break;
-		}
-	}
-
-	if (didread > 0) {
-		stream->position += didread;
-	}
-
-	*pchars = string_length;
-	buf[0] = 0;
-	return bufstart;
 }
 
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
@@ -894,28 +705,24 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	return (stream->ops->stat)(stream, ssb TSRMLS_CC);
 }
 
-PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TSRMLS_DC)
+PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC)
 {
 	size_t avail;
 	char *cr, *lf, *eol = NULL;
-	char *readptr, *buf = zbuf.s;
+	char *readptr;
 
 	if (!buf) {
-		readptr = stream->readbuf.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readpos);
+		readptr = stream->readbuf + stream->readpos;
 		avail = stream->writepos - stream->readpos;
 	} else {
-		readptr = zbuf.s;
+		readptr = buf;
 		avail = buf_len;
-	}
+	}	
 
+	/* Look for EOL */
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
-		if (stream->readbuf_type == IS_UNICODE) {
-			cr = (char*)u_memchr((UChar*)readptr, '\r', avail);
-			lf = (char*)u_memchr((UChar*)readptr, '\n', avail);
-		} else {
-			cr = memchr(readptr, '\r', avail);
-			lf = memchr(readptr, '\n', avail);
-		}
+		cr = memchr(readptr, '\r', avail);
+		lf = memchr(readptr, '\n', avail);
 
 		if (cr && lf != cr + 1 && !(lf && lf < cr)) {
 			/* mac */
@@ -928,36 +735,28 @@ PHPAPI void *php_stream_locate_eol(php_stream *stream, zstr zbuf, int buf_len TS
 			eol = lf;
 		}
 	} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
-		eol = (stream->readbuf_type == IS_UNICODE) ? u_memchr((UChar*)readptr, '\r', avail) : memchr(readptr, '\r', avail);
+		eol = memchr(readptr, '\r', avail);
 	} else {
 		/* unix (and dos) line endings */
-		eol = (stream->readbuf_type == IS_UNICODE) ? u_memchr((UChar*)readptr, '\n', avail) : memchr(readptr, '\n', avail);
+		eol = memchr(readptr, '\n', avail);
 	}
 
-	return (void*)eol;
+	return eol;
 }
 
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
  * appropriate length to hold the line, regardless of the line length, memory
- * permitting -- returned string will be up to (maxlen-1) units of (maxchars) characters, last byte holding terminating NULL
- * Like php_stream_read(), this will (UTODO) treat unicode streams as ugly binary data (use with caution) */
-PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, size_t maxlen, size_t maxchars, size_t *returned_len TSRMLS_DC)
+ * permitting */
+PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
+		size_t *returned_len TSRMLS_DC)
 {
 	size_t avail = 0;
 	size_t current_buf_size = 0;
 	size_t total_copied = 0;
 	int grow_mode = 0;
-	int is_unicode = stream->readbuf_type == IS_UNICODE;
-	int split_surrogate = 0;
-	zstr bufstart = buf;
+	char *bufstart = buf;
 
-	if ((buf_type == IS_STRING && is_unicode) ||
-		(buf_type == IS_UNICODE && !is_unicode)) {
-		/* UTODO: Allow sloppy conversion */
-		return NULL;
-	}
-
-	if (buf.v == NULL) {
+	if (buf == NULL) {
 		grow_mode = 1;
 	} else if (maxlen == 0) {
 		return NULL;
@@ -979,39 +778,20 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 	for (;;) {
 		avail = stream->writepos - stream->readpos;
 
-		if (!split_surrogate && avail > 0) {
-			size_t cpysz = avail;
-			zstr readptr;
+		if (avail > 0) {
+			size_t cpysz = 0;
+			char *readptr;
+			char *eol;
 			int done = 0;
 
-			if (is_unicode) {
-				UChar *eol;
-				readptr.u = stream->readbuf.u + stream->readpos;
+			readptr = stream->readbuf + stream->readpos;
+			eol = php_stream_locate_eol(stream, NULL, 0 TSRMLS_CC);
 
-				eol = php_stream_locate_eol(stream, NULL_ZSTR, 0 TSRMLS_CC);
-				if (eol) {
-					cpysz = eol - readptr.u + 1;
-					done = 1;
-				}
-
-				if (U16_IS_SURROGATE(readptr.u[cpysz - 1]) &&
-					U16_IS_SURROGATE_LEAD(readptr.u[cpysz - 1])) {
-					/* Don't orphan */
-					cpysz--;
-					if (!cpysz) {
-						/* Force the loop to land on fill_read_buffer */
-						split_surrogate = 1; /* must specifically be 1 */
-						continue;
-					}
-				}
+			if (eol) {
+				cpysz = eol - readptr + 1;
+				done = 1;
 			} else {
-				char *eol;
-				readptr.s = stream->readbuf.s + stream->readpos;
-				eol = php_stream_locate_eol(stream, NULL_ZSTR, 0 TSRMLS_CC);
-				if (eol) {
-					cpysz = eol - readptr.s + 1;
-					done = 1;
-				}
+				cpysz = avail;
 			}
 
 			if (grow_mode) {
@@ -1022,9 +802,9 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 				 * than 8K, we waste 1 byte per additional 8K or so.
 				 * That seems acceptable to me, to avoid making this code
 				 * hard to follow */
-				bufstart.s = erealloc(bufstart.s, PS_ULEN(stream->readbuf_type == IS_UNICODE, current_buf_size + cpysz + 1));
-				buf.s = bufstart.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, total_copied);
+				bufstart = erealloc(bufstart, current_buf_size + cpysz + 1);
 				current_buf_size += cpysz + 1;
+				buf = bufstart + total_copied;
 			} else {
 				if (cpysz >= maxlen - 1) {
 					cpysz = maxlen - 1;
@@ -1032,31 +812,11 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 				}
 			}
 
-			if (is_unicode) {
-				if (maxchars) {
-					int ulen = u_countChar32(readptr.u, cpysz);
-	
-					if (ulen > maxchars) {
-						int32_t i = 0;
-	
-						ulen = maxchars;
-						U16_FWD_N(readptr.u, i, cpysz, ulen);
-						cpysz = i;
-					}
-					maxchars -= ulen;
-				}
-				memcpy(buf.u, readptr.u, UBYTES(cpysz));
-				buf.u += cpysz;
-			} else {
-				if (maxchars && cpysz > maxchars) {
-					cpysz = maxchars;
-				}
-				memcpy(buf.s, readptr.s, cpysz);
-				buf.s += cpysz;
-			}
+			memcpy(buf, readptr, cpysz);
 
 			stream->position += cpysz;
 			stream->readpos += cpysz;
+			buf += cpysz;
 			maxlen -= cpysz;
 			total_copied += cpysz;
 
@@ -1080,30 +840,25 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
 
-			if (stream->writepos - stream->readpos <= split_surrogate) {
+			if (stream->writepos - stream->readpos == 0) {
 				break;
 			}
-			split_surrogate = 0;
 		}
 	}
 
+	if (total_copied == 0) {
+		if (grow_mode) {
+			assert(bufstart == NULL);
+		}
+		return NULL;
+	}
+
+	buf[0] = '\0';
 	if (returned_len) {
 		*returned_len = total_copied;
 	}
 
-	if (total_copied == 0) {
-		assert(stream->eof || !grow_mode ||
-				(grow_mode && bufstart.v == NULL));
-		return NULL;
-	}
-
-	if (is_unicode) {
-		buf.u[0] = 0;
-	} else {
-		buf.s[0] = 0;
-	}
-
-	return bufstart.s;
+	return bufstart;
 }
 
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
@@ -1140,9 +895,9 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		}
 
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf.s + stream->readpos, *delim, seek_len);
+			e = memchr(stream->readbuf + stream->readpos, *delim, seek_len);
 		} else {
-			e = php_memnstr(stream->readbuf.s + stream->readpos, delim, delim_len, (stream->readbuf.s + stream->readpos + seek_len));
+			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readpos + seek_len));
 		}
 
 		if (!e) {
@@ -1151,7 +906,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 			}
 			toread = maxlen;
 		} else {
-			toread = e - stream->readbuf.s - stream->readpos;
+			toread = e - (char *) stream->readbuf - stream->readpos;
 			skip = 1;
 		}
 	}
@@ -1176,87 +931,10 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	}
 }
 
-PHPAPI UChar *php_stream_get_record_unicode(php_stream *stream, size_t maxlen, size_t maxchars, size_t *returned_len, UChar *delim, size_t delim_len TSRMLS_DC)
-{
-	UChar *e, *buf;
-	size_t toread;
-	int skip = 0;
-
-	if (stream->readbuf_type != IS_UNICODE) {
-		return NULL;
-	}
-
-	php_stream_fill_read_buffer(stream, maxlen TSRMLS_CC);
-
-	if (delim_len == 0 || !delim) {
-		toread = maxlen;
-	} else {
-		size_t seek_len;
-
-		seek_len = stream->writepos - stream->readpos;
-		if (seek_len > maxlen) {
-			seek_len = maxlen;
-		}
-
-		if (delim_len == 1) {
-			e = u_memchr(stream->readbuf.u + stream->readpos, *delim, seek_len);
-		} else {
-			e = u_strFindFirst(stream->readbuf.u + stream->readpos, stream->readbuf.u + stream->readpos + seek_len, delim, delim_len);
-		}
-
-		if (!e) {
-			toread = maxlen;
-		} else {
-			toread = e - (stream->readbuf.u + stream->readpos);
-			skip = 1;
-		}
-	}
-
-	if (toread > maxlen && maxlen > 0) {
-		toread = maxlen;
-	}
-
-	if (U16_IS_SURROGATE(stream->readbuf.u[stream->readpos + toread - 1]) &&
-		U16_IS_SURROGATE_LEAD(stream->readbuf.u[stream->readpos + toread - 1])) {
-		/* Don't orphan */
-		toread--;
-	}
-
-	if (maxchars > 0) {
-		size_t ulen = u_countChar32(stream->readbuf.u + stream->readpos, toread);
-
-		if (maxchars > ulen) {
-			int i = 0;
-			UChar *s = stream->readbuf.u + stream->readpos;
-
-			U16_FWD_N(s, i, toread, maxchars);
-			toread = i;
-		}
-	}
-
-	buf = eumalloc(toread + 1);
-	*returned_len = php_stream_read_unicode(stream, buf, toread);
-
-	if (*returned_len >= 0) {
-		if (skip) {
-			stream->readpos += delim_len;
-			stream->position += delim_len;
-		}
-		buf[*returned_len] = 0;
-		return buf;
-	} else {
-		efree(buf);
-		return NULL;
-	}
-}
-
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
-static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr buf, int buflen TSRMLS_DC)
+static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	size_t didwrite = 0, towrite, justwrote, shouldwrite;
-	char *freeme = NULL;
-	void *buf_orig = buf.v;
-	int buflen_orig = buflen, conv_err = 0;
+	size_t didwrite = 0, towrite, justwrote;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
@@ -1267,42 +945,18 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
 	}
 
-	if (buf_type == IS_UNICODE) {
-		int len, num_conv, ulen = u_countChar32(buf.u, buflen);
-		char *str;
-		UErrorCode status = U_ZERO_ERROR;
-
-		/* Use runtime_encoding to map to binary */
-		num_conv = zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &str, &len, buf.u, buflen, &status);
-		if (U_FAILURE(status)) {
-			zend_raise_conversion_error_ex("Unable to convert data to be written", ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
-									ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%d character unicode buffer downcoded for binary stream runtime_encoding", ulen);
-		}
-
-		if (num_conv < buflen) {
-			conv_err = 1;
-		}
-
-		freeme = buf.s = str;
-		buflen = len;
-	}
-
-	shouldwrite = buflen;
-
-	while (buflen > 0) {
-		towrite = buflen;
-		if (towrite > stream->chunk_size) {
+ 
+	while (count > 0) {
+		towrite = count;
+		if (towrite > stream->chunk_size)
 			towrite = stream->chunk_size;
-		}
 
-		justwrote = stream->ops->write(stream, buf.s, towrite TSRMLS_CC);
+		justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
 
 		/* convert justwrote to an integer, since normally it is unsigned */
 		if ((int)justwrote > 0) {
-			buf.s += justwrote;
-			buflen -= justwrote;
+			buf += justwrote;
+			count -= justwrote;
 			didwrite += justwrote;
 			
 			/* Only screw with the buffer if we can seek, otherwise we lose data
@@ -1314,32 +968,8 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
 			break;
 		}
 	}
-
-	if (buf_type == IS_UNICODE) {
-		/* Map bytes written back to UChars written */
-
-		if (shouldwrite == didwrite && !conv_err) {
-			/* wrote it all */
-			didwrite = buflen_orig;
-		} else {
-			/* Figure out how didwrite corresponds to the input buffer */
-			char *tmp = emalloc(didwrite + 1), *t = tmp;
-			const UChar *s = buf_orig;
-			UErrorCode status = U_ZERO_ERROR;
-
-			ucnv_resetFromUnicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)));
-			ucnv_fromUnicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &t, t + didwrite, &s, s + buflen_orig, NULL, TRUE, &status);
-
-			didwrite = s - ((UChar*)buf_orig);
-			efree(tmp);
-		}
-	}
-
-	if (freeme) {
-		efree(freeme);
-	}
-
 	return didwrite;
+
 }
 
 /* push some data through the write filter chain.
@@ -1347,7 +977,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, int buf_type, zstr bu
  * This may trigger a real write to the stream.
  * Returns the number of bytes consumed from buf by the first filter in the chain.
  * */
-static size_t _php_stream_write_filtered(php_stream *stream, int buf_type, zstr buf, int count, int flags TSRMLS_DC)
+static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags TSRMLS_DC)
 {
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
@@ -1356,19 +986,17 @@ static size_t _php_stream_write_filtered(php_stream *stream, int buf_type, zstr 
 	php_stream_filter_status_t status = PSFS_ERR_FATAL;
 	php_stream_filter *filter;
 
-	if (buf.v) {
-		if (buf_type == IS_UNICODE) {
-			bucket = php_stream_bucket_new_unicode(stream, buf.u, count, 0, 0 TSRMLS_CC);
-		} else {
-			bucket = php_stream_bucket_new(stream, buf.s, count, 0, 0 TSRMLS_CC);
-		}
-		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
+	if (buf) {
+		bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0 TSRMLS_CC);
+		php_stream_bucket_append(&brig_in, bucket TSRMLS_CC);
 	}
 
 	for (filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
-		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, (filter == stream->writefilters.head) ? &consumed : NULL, flags TSRMLS_CC);
+		status = filter->fops->filter(stream, filter, brig_inp, brig_outp,
+				filter == stream->writefilters.head ? &consumed : NULL, flags TSRMLS_CC);
+
 		if (status != PSFS_PASS_ON) {
 			break;
 		}
@@ -1387,7 +1015,7 @@ static size_t _php_stream_write_filtered(php_stream *stream, int buf_type, zstr 
 			 * underlying stream */
 			while (brig_inp->head) {
 				bucket = brig_inp->head;
-				_php_stream_write_buffer(stream, bucket->buf_type, bucket->buf, bucket->buflen TSRMLS_CC);
+				_php_stream_write_buffer(stream, bucket->buf, bucket->buflen TSRMLS_CC);
 				/* Potential error situation - eg: no space on device. Perhaps we should keep this brigade
 				 * hanging around and try to write it later.
 				 * At the moment, we just drop it on the floor
@@ -1415,7 +1043,7 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 	int ret = 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_write_filtered(stream, IS_STRING, NULL_ZSTR, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
+		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
 	}
 
 	if (stream->ops->flush) {
@@ -1432,27 +1060,10 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 	}
 
 	if (stream->writefilters.head) {
-		return _php_stream_write_filtered(stream, IS_STRING, ZSTR((void*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
+		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL TSRMLS_CC);
 	} else {
-		return _php_stream_write_buffer(stream, IS_STRING, ZSTR((void*)buf), count TSRMLS_CC);
+		return _php_stream_write_buffer(stream, buf, count TSRMLS_CC);
 	}
-}
-
-PHPAPI size_t _php_stream_write_unicode(php_stream *stream, const UChar *buf, int count TSRMLS_DC)
-{
-	int32_t ret;
-	
-	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
-		return 0;
-	}
-
-	if (stream->writefilters.head) {
-		ret = _php_stream_write_filtered(stream, IS_UNICODE, ZSTR((void*)buf), count, PSFS_FLAG_NORMAL TSRMLS_CC);
-	} else {
-		ret = _php_stream_write_buffer(stream, IS_UNICODE, ZSTR((void*)buf), count TSRMLS_CC);
-	}
-
-	return ret;
 }
 
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...)
@@ -1596,10 +1207,11 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRM
 
 PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
-	size_t count = 0;
+	size_t bcount = 0;
+	char buf[8192];
+	int b;
 
 	if (php_stream_mmap_possible(stream)) {
-		/* mmap_possible == non-filtered stream == binary stream */
 		char *p;
 		size_t mapped;
 
@@ -1614,62 +1226,23 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 		}
 	}
 
-	if (stream->readbuf_type == IS_UNICODE) {
-		UChar inbuf_start[8192];
-		UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
-		int outbuflen = UCNV_GET_MAX_BYTES_FOR_STRING(8192, ucnv_getMaxCharSize(conv));
-		char *outbuf_start = emalloc(outbuflen + 1);
-		int b;
-
-		ucnv_resetFromUnicode(conv);
-
-		while ((b = php_stream_read_unicode(stream, inbuf_start, 8192)) > 0) {
-			char *outbuf = outbuf_start;
-			const UChar *inbuf = inbuf_start;
-			UErrorCode status = U_ZERO_ERROR;
-			int len;
-
-			ucnv_fromUnicode(conv, &outbuf, outbuf + outbuflen, &inbuf, inbuf + b, NULL, TRUE, &status);
-			len = u_countChar32(inbuf_start, inbuf - inbuf_start);
-			if (U_FAILURE(status)) {
-				/* Memory overflow isn't a problem becuase MAX_BYTES_FOR_STRING was allocated,
-				   anything else is a more serious problem */
-				zend_raise_conversion_error_ex("Unable to convert Unicode character using output_encoding, at least one character was lost",
-											   conv, ZEND_FROM_UNICODE, len TSRMLS_CC);
-			}
-			if (outbuf > outbuf_start) {
-				PHPWRITE(outbuf_start, outbuf - outbuf_start);
-				count += len;
-			}
-		}
-		efree(outbuf_start);
-	} else {
-		char buf[8192];
-		int b;
-
-		while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			PHPWRITE(buf, b);
-			count += b;
-		}
+	while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+		PHPWRITE(buf, b);
+		bcount += b;
 	}
 
-	return count;
+	return bcount;
 }
 
 
-PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, void **buf, size_t maxlen, size_t maxchars, int persistent STREAMS_DC TSRMLS_DC)
+PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC)
 {
 	size_t ret = 0;
-	zstr ptr;
+	char *ptr;
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
-
-	if (rettype != src->readbuf_type) {
-		/* UTODO: Introduce sloppy buffer conversion */
-		return 0;
-	}
 
 	if (maxlen == 0) { 
 		return 0;
@@ -1680,29 +1253,14 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 	}
 
 	if (maxlen > 0) {
-		if (rettype == IS_UNICODE) {
-			ptr.u = *buf = pemalloc_rel_orig(UBYTES(maxlen + 1), persistent);
-			while ((len < maxlen) && !php_stream_eof(src)) {
-				int ulen;
-
-				ret = php_stream_read_unicode_ex(src, ptr.u, maxlen - len, maxchars);
-				ulen = u_countChar32(ptr.u, ret);
-				len += ret;
-				ptr.u += ret;
-				maxchars -= ret;
-			}
-			*(ptr.u) = 0;
-			return len;
-		} else {
-			ptr.s = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
-			while ((len < maxlen) && !php_stream_eof(src)) {
-				ret = php_stream_read(src, ptr.s, maxlen - len);
-				len += ret;
-				ptr.s += ret;
-			}
-			*(ptr.s) = 0;
-			return len;
+		ptr = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
+		while ((len < maxlen) && !php_stream_eof(src)) {
+			ret = php_stream_read(src, ptr, maxlen - len);
+			len += ret;
+			ptr += ret;
 		}
+		*ptr = '\0';
+		return len;
 	}
 
 	/* avoid many reallocs by allocating a good sized chunk to begin with, if
@@ -1717,49 +1275,21 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 		max_len = step;
 	}
 
-	if (rettype == IS_UNICODE) {
-		ptr.u = *buf = pemalloc_rel_orig(UBYTES(max_len + 1), persistent);
+	ptr = *buf = pemalloc_rel_orig(max_len, persistent);
 
-		while((ret = php_stream_read_unicode_ex(src, ptr.u, max_len - len, maxchars)))	{
-			int ulen = u_countChar32(ptr.u, ret);
-
-			len += ret;
-			if (len + min_room >= max_len) {
-				*buf = perealloc_rel_orig(*buf, UBYTES(max_len + step), persistent);
-				max_len += step;
-				ptr.u = ((UChar*)(*buf)) + len;
-			} else {
-				ptr.u += ret;
-			}
-			maxchars -= ulen;
-		}
-	} else {
-		ptr.s = *buf = pemalloc_rel_orig(max_len + 1, persistent);
-
-		while((ret = php_stream_read(src, ptr.s, max_len - len)))	{
-			len += ret;
-			if (len + min_room >= max_len) {
-				*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
-				max_len += step;
-				ptr.s = ((char*)(*buf)) + len;
-			} else {
-				ptr.s += ret;
-			}
+	while((ret = php_stream_read(src, ptr, max_len - len)))	{
+		len += ret;
+		if (len + min_room >= max_len) {
+			*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
+			max_len += step;
+			ptr = *buf + len;
+		} else {
+			ptr += ret;
 		}
 	}
-
 	if (len) {
-		if (rettype == IS_UNICODE) {
-			if ((max_len - len) > (2 * step)) {
-				*buf = perealloc_rel_orig(*buf, UBYTES(len + 1), persistent);
-			}
-			((UChar*)(*buf))[len] = 0;
-		} else {
-			if ((max_len - len) > (2 * step)) {
-				*buf = perealloc_rel_orig(*buf, len + 1, persistent);
-			}
-			((char*)(*buf))[len] = 0;
-		}
+		*buf = perealloc_rel_orig(*buf, len + 1, persistent);
+		(*buf)[len] = '\0';
 	} else {
 		pefree(*buf, persistent);
 		*buf = NULL;
@@ -1767,18 +1297,21 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 	return len;
 }
 
-zend_always_inline
-static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars, size_t *len, int utype STREAMS_DC TSRMLS_DC)
+/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
+PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
 {
+	char buf[CHUNK_SIZE];
+	size_t readchunk;
 	size_t haveread = 0;
-	php_stream_statbuf ssbuf;
+	size_t didread;
 	size_t dummy;
+	php_stream_statbuf ssbuf;
 
 	if (!len) {
 		len = &dummy;
 	}
 
-	if (maxlen == 0 || (utype == IS_UNICODE && maxchars == 0)) {
+	if (maxlen == 0) {
 		*len = 0;
 		return SUCCESS;
 	}
@@ -1798,7 +1331,7 @@ static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *des
 		}
 	}
 
-	if (utype == IS_STRING && php_stream_mmap_possible(src)) {
+	if (php_stream_mmap_possible(src)) {
 		char *p;
 		size_t mapped;
 
@@ -1822,52 +1355,38 @@ static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *des
 	}
 
 	while(1) {
-		zstr buf;
-		union { char s; UChar u; } _buf[CHUNK_SIZE];
-		size_t readchunk = sizeof(_buf) / sizeof(_buf[0]);
-		size_t didread;
-
-		buf.v = _buf;
+		readchunk = sizeof(buf);
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
 		}
 
-		didread = php_stream_u_read_ex(src, utype, buf, readchunk, maxchars);
+		didread = php_stream_read(src, buf, readchunk);
 
 		if (didread) {
 			/* extra paranoid */
 			size_t didwrite, towrite;
-			zstr writeptr;
-
-			if (utype == IS_UNICODE && maxchars > 0) {
-				/* Determine number of chars in this buf */
-				maxchars -= u_countChar32(buf.u, didread);
-			}
+			char *writeptr;
 
 			towrite = didread;
 			writeptr = buf;
 			haveread += didread;
 
 			while(towrite) {
-				didwrite = php_stream_u_write(dest, utype, writeptr, towrite);
+				didwrite = php_stream_write(dest, writeptr, towrite);
 				if (didwrite == 0) {
 					*len = haveread - (didread - towrite);
 					return FAILURE;
 				}
 
 				towrite -= didwrite;
-				if (utype == IS_UNICODE) {
-					writeptr.u += didwrite;
-				} else {
-					writeptr.s += didwrite;
-				}
+				writeptr += didwrite;
 			}
 		} else {
 			break;
 		}
 
-		if (maxlen - haveread == 0 || (utype == IS_UNICODE && maxchars == 0)) {
+		if (maxlen - haveread == 0) {
 			break;
 		}
 	}
@@ -1881,31 +1400,6 @@ static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *des
 		return SUCCESS;
 	}
 	return FAILURE;
-}
-
-/* Designed for copying UChars (taking into account both maxlen and maxchars) */
-PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars, size_t *len STREAMS_DC TSRMLS_DC)
-{
-	return _php_stream_copy_to_stream_common(src, dest, maxlen, maxchars, len, IS_UNICODE STREAMS_REL_CC TSRMLS_CC);
-}
-
-/* see _php_stream_copy_to_stream() */
-ZEND_ATTRIBUTE_DEPRECATED
-PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
-{
-	size_t len;
-	int ret = _php_stream_ucopy_to_stream_ex(src, dest, maxlen, maxchars, &len STREAMS_REL_CC TSRMLS_CC);
-	if (ret == SUCCESS && maxlen != 0 && maxchars != 0) {
-		return 1;
-	}
-	return len;
-}
-
-/* Optimized for copying octets from source stream */
-/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
-PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
-{
-	return _php_stream_copy_to_stream_common(src, dest, maxlen, 0, len, IS_STRING STREAMS_REL_CC TSRMLS_CC);
 }
 
 /* Returns the number of bytes moved.
@@ -2149,21 +1643,19 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 			return NULL;
 		}
 
+		if (FG(stream_wrappers)) {
 		/* The file:// wrapper may have been disabled/overridden */
- 		if (FG(stream_wrappers)) {
-			if (zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == FAILURE) {
-				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plainfiles wrapper disabled");
-				}
-				return NULL;
-			} else {
-				/* Handles overridden plain files wrapper */
-				plain_files_wrapper = *wrapperpp;
-			}
-		}
 
-		if (!php_stream_allow_url_fopen("file", sizeof("file") - 1) ||
-			((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include("file", sizeof("file") - 1)) ) {
+			if (wrapperpp) {
+				/* It was found so go ahead and provide it */
+				return *wrapperpp;
+			}
+
+			/* Check again, the original check might have not known the protocol name */
+			if (zend_hash_find(wrapper_hash, "file", sizeof("file"), (void**)&wrapperpp) == SUCCESS) {
+				return *wrapperpp;
+			}
+
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "file:// wrapper is disabled in the server configuration");
 			}
@@ -2173,13 +1665,15 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		return plain_files_wrapper;
 	}
 
-	if (((options & STREAM_DISABLE_URL_PROTECTION) == 0) &&
-	    (!php_stream_allow_url_fopen(protocol, n) ||
-		 ((options & STREAM_OPEN_FOR_INCLUDE) && !php_stream_allow_url_include(protocol, n)))) {
+	if (wrapperpp && (*wrapperpp)->is_url && 	    
+        (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
+	    (!PG(allow_url_fopen) || 
+	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
+	       PG(in_user_include)) && !PG(allow_url_include)))) {
 		if (options & REPORT_ERRORS) {
 			/* protocol[n] probably isn't '\0' */
 			char *protocol_dup = estrndup(protocol, n);
-			if (!php_stream_allow_url_fopen(protocol, n)) {
+			if (!PG(allow_url_fopen)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_fopen=0", protocol_dup);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_include=0", protocol_dup);
@@ -2199,7 +1693,7 @@ PHPAPI int _php_stream_mkdir(char *path, int mode, int options, php_stream_conte
 {
 	php_stream_wrapper *wrapper = NULL;
 
-	wrapper = php_stream_locate_url_wrapper(path, NULL, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_mkdir) {
 		return 0;
 	}
@@ -2214,7 +1708,7 @@ PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *contex
 {
 	php_stream_wrapper *wrapper = NULL;
 
-	wrapper = php_stream_locate_url_wrapper(path, NULL, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_rmdir) {
 		return 0;
 	}
@@ -2243,7 +1737,7 @@ PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb,
 		}
 	}
 
-	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && wrapper->wops->url_stat) {
 		ret = wrapper->wops->url_stat(wrapper, path_to_open, flags, ssb, context TSRMLS_CC);
 		if (ret == 0) {
@@ -2305,27 +1799,6 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 }
 /* }}} */
 
-PHPAPI php_stream *_php_stream_u_opendir(zend_uchar type, zstr path, int path_len, int options, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
-{
-	char *filename;
-	int filename_len;
-	php_stream *stream;
-
-	if (type == IS_STRING) {
-		return php_stream_opendir(path.s, options, context);
-	}
-
-	/* type == IS_UNICODE */
-	if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, path.u, path_len, options, context)) {
-		return NULL;
-	}
-
-	stream = php_stream_opendir(filename, options, context);
-	efree(filename);
-	return stream;
-}
-/* }}} */
-
 /* {{{ _php_stream_readdir */
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
 {
@@ -2335,32 +1808,6 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 	}
 
 	return NULL;
-}
-/* }}} */
-
-/* {{{ php_stream_fix_encoding
- * Sets read/write encoding on a stream based on the fopen mode, context options, and INI setting */
-PHPAPI void php_stream_fix_encoding(php_stream *stream, const char *mode, php_stream_context *context TSRMLS_DC)
-{
-	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
-	if (stream && strchr(mode, 't')) {
-		/* Only apply implicit unicode.to. filter if the wrapper didn't do it for us */
-		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_UNICODE) && 
-			(strchr(mode, 'w') || strchr(mode, 'a') || strchr(mode, '+'))) {
-			char *encoding = (context && context->output_encoding) ? context->output_encoding : UG(stream_encoding);
-
-			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-			php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
-		}
-
-		/* Only apply implicit unicode.from. filter if the wrapper didn't do it for us */
-		if ((stream->readbuf_type == IS_STRING) && (strchr(mode, 'r') || strchr(mode, '+'))) {
-			char *encoding = (context && context->input_encoding) ? context->input_encoding : UG(stream_encoding);
-
-			/* UTODO: (Maybe?) Allow overriding the default error handlers on a per-stream basis via context params */
-			php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
-		}
-	}
 }
 /* }}} */
 
@@ -2374,8 +1821,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	char *resolved_path = NULL;
 	char *copy_of_path = NULL;
-	char implicit_mode[16];
-	int modelen = strlen(mode);
+
 	
 	if (opened_path) {
 		*opened_path = NULL;
@@ -2407,23 +1853,13 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		return NULL;
 	}
 
-	strlcpy(implicit_mode, mode, sizeof(implicit_mode));
-	if (context && context->default_mode && modelen < 15 && !strchr(mode, 't') && !strchr(mode, 'b')) {
-		if (context->default_mode & PHP_FILE_BINARY) {
-			implicit_mode[modelen++] = 'b';
-		} else if (context->default_mode & PHP_FILE_TEXT) {
-			implicit_mode[modelen++] = 't';
-		}
-		implicit_mode[modelen] = '\0';
-	}
-
 	if (wrapper) {
 		if (!wrapper->wops->stream_opener) {
 			php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
 					"wrapper does not support stream open");
 		} else {
 			stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, implicit_mode, options ^ REPORT_ERRORS,
+				path_to_open, mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
 		}
 
@@ -2438,7 +1874,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		
 		if (stream) {
 			stream->wrapper = wrapper;
-			strlcpy(stream->mode, implicit_mode, sizeof(stream->mode));
 		}
 	}
 
@@ -2502,9 +1937,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 
-
-	php_stream_fix_encoding(stream, implicit_mode, context TSRMLS_CC);
-
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
 		if (opened_path && *opened_path) {
@@ -2518,7 +1950,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		pefree(copy_of_path, persistent);
 	}
 #endif
-
 	if (resolved_path) {
 		efree(resolved_path);
 	}
@@ -2526,65 +1957,11 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 }
 /* }}} */
 
-/* {{{ _php_stream_u_open_wrapper */
-PHPAPI php_stream *_php_stream_u_open_wrapper(zend_uchar type, zstr path, int path_len,
-			char *mode, int options, zstr *opened_path, int *opened_path_len,
-			php_stream_context *context STREAMS_DC TSRMLS_DC)
-{
-	php_stream *stream;
-	char *filename = NULL;
-	int filename_len;
-
-	if (opened_path) {
-		opened_path->v = NULL;
-	}
-	if (opened_path_len) {
-		*opened_path_len = 0;
-	}
-
-	if (type == IS_STRING) {
-		stream = php_stream_open_wrapper_ex(path.s, mode, options, (char**)opened_path, context);
-
-		if (opened_path_len && opened_path && opened_path->s) {
-			*opened_path_len = strlen(opened_path->s);
-		}
-
-		return stream;
-	}
-
-	/* type == IS_UNICODE */
-	if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, path.u, path_len, options, context)) {
-		return NULL;
-	}
-
-	stream = php_stream_open_wrapper_ex(filename, mode, options, (char**)opened_path, context);
-	efree(filename);
-
-	if (opened_path && opened_path->s) {
-		UChar *upath;
-		int upath_len;
-
-		if (SUCCESS == php_stream_path_decode(NULL, &upath, &upath_len, opened_path->s, strlen(opened_path->s), options, context)) {
-			efree(opened_path->s);
-			opened_path->u = upath;
-			if (opened_path_len) {
-				*opened_path_len = upath_len;
-			}
-		} else {
-			/* Shouldn't happen */
-			efree(opened_path->s);
-			opened_path->s = NULL;
-		}
-	}
-
-	return stream;
-}
-/* }}} */
-
 /* {{{ context API */
-PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context TSRMLS_DC)
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
 {
 	php_stream_context *oldcontext = stream->context;
+	TSRMLS_FETCH();
 
 	stream->context = context;
 
@@ -2614,12 +1991,6 @@ PHPAPI void php_stream_context_free(php_stream_context *context)
 	if (context->notifier) {
 		php_stream_notification_free(context->notifier);
 		context->notifier = NULL;
-	}
-	if (context->input_encoding) {
-		efree(context->input_encoding);
-	}
-	if (context->output_encoding) {
-		efree(context->output_encoding);
 	}
 	if (context->links) {
 		zval_ptr_dtor(&context->links);
@@ -2659,10 +2030,10 @@ PHPAPI int php_stream_context_get_option(php_stream_context *context,
 {
 	zval **wrapperhash;
 
-	if (FAILURE == zend_rt_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
+	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		return FAILURE;
 	}
-	return zend_rt_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
+	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
 }
 
 PHPAPI int php_stream_context_set_option(php_stream_context *context,
@@ -2676,16 +2047,16 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	zval_copy_ctor(copied_val);
 	INIT_PZVAL(copied_val);
 
-	if (FAILURE == zend_rt_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
+	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		MAKE_STD_ZVAL(category);
 		array_init(category);
-		if (FAILURE == zend_rt_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL)) {
+		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL)) {
 			return FAILURE;
 		}
 
 		wrapperhash = &category;
 	}
-	return zend_rt_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
+	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
 }
 
 PHPAPI int php_stream_context_get_link(php_stream_context *context,
@@ -2696,7 +2067,7 @@ PHPAPI int php_stream_context_get_link(php_stream_context *context,
 	if (!stream || !hostent || !context || !(context->links)) {
 		return FAILURE;
 	}
-	if (SUCCESS == zend_rt_hash_find(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&pstream)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&pstream)) {
 		*stream = *pstream;
 		return SUCCESS;
 	}
@@ -2715,18 +2086,16 @@ PHPAPI int php_stream_context_set_link(php_stream_context *context,
 	}
 	if (!stream) {
 		/* Delete any entry for <hostent> */
-		return zend_rt_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1);
+		return zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1);
 	}
-	return zend_rt_hash_update(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&stream, sizeof(php_stream *), NULL);
+	return zend_hash_update(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&stream, sizeof(php_stream *), NULL);
 }
 
 PHPAPI int php_stream_context_del_link(php_stream_context *context,
         php_stream *stream)
 {
 	php_stream **pstream;
-	zend_uchar type;
-	zstr hostent;
-	unsigned int hostent_len;
+	char *hostent;
 	int ret = SUCCESS;
 
 	if (!context || !context->links || !stream) {
@@ -2737,9 +2106,8 @@ PHPAPI int php_stream_context_del_link(php_stream_context *context,
 		SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(context->links), (void**)&pstream);
 		zend_hash_move_forward(Z_ARRVAL_P(context->links))) {
 		if (*pstream == stream) {
-			type = zend_hash_get_current_key_ex(Z_ARRVAL_P(context->links), &hostent, &hostent_len, NULL, 0, NULL);
-			if (type == HASH_KEY_IS_STRING || type == HASH_KEY_IS_UNICODE) {
-				if (FAILURE == zend_u_hash_del(Z_ARRVAL_P(context->links), type, hostent, hostent_len)) {
+			if (SUCCESS == zend_hash_get_current_key(Z_ARRVAL_P(context->links), &hostent, NULL, 0)) {
+				if (FAILURE == zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1)) {
 					ret = FAILURE;
 				}
 			} else {
@@ -2783,7 +2151,7 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 		return FAILURE;
 	}
 
-	stream = php_stream_opendir(dirname, REPORT_ERRORS, context);
+	stream = php_stream_opendir(dirname, ENFORCE_SAFE_MODE | REPORT_ERRORS, context);
 	if (!stream) {
 		return FAILURE;
 	}
@@ -2811,365 +2179,6 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 	}
 	return nfiles;
 }
-/* }}} */
-
-/* {{{ php_stream_path_encode
-Encode a filepath to the appropriate characterset.
-If the wrapper supports its own encoding rules it will be dispatched to wrapper->wops->path_encode()
-Otherwise the INI defined filesystem_encoding converter will be used
-If wrapper == NULL, the path will be explored to locate the correct wrapper
-*/
-PHPAPI int _php_stream_path_encode(php_stream_wrapper *wrapper,
-				char **pathenc, int *pathenc_len, const UChar *path, int path_len,
-				int options, php_stream_context *context TSRMLS_DC)
-{
-	UErrorCode status = U_ZERO_ERROR;
-	int num_conv;
-
-	if (!wrapper) {
-		UChar *p;
-		U_STRING_DECL(delim, "://", 3);
-		int delim_len = 3;
-
-		U_STRING_INIT(delim, "://", 3);
-
-		p = u_strFindFirst(path, path_len, delim, delim_len);
-		if (p) {
-			char *scheme = NULL;
-			int scheme_len = 0;
-
-			/* Convert just the scheme using utf8 in order to look it up in the registry */
-			num_conv = zend_unicode_to_string_ex(UG(utf8_conv), &scheme, &scheme_len, path, (p - path) + delim_len, &status);
-			if (U_FAILURE(status)) {
-				if (options & REPORT_ERRORS) {
-					zend_raise_conversion_error_ex("Unable to convert filepath", UG(utf8_conv), ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
-				}
-				*pathenc = NULL;
-				*pathenc_len = 0;
-
-				return FAILURE;
-			}
-			wrapper = php_stream_locate_url_wrapper(scheme, NULL, options | STREAM_DISABLE_URL_PROTECTION TSRMLS_CC);
-			efree(scheme);
-			if (!wrapper) {
-				*pathenc = NULL;
-				*pathenc_len = 0;
-
-				return FAILURE;
-			}			
-		} else {
-			wrapper = &php_plain_files_wrapper;
-		}
-	}
-
-	if (wrapper->wops->path_encode) {
-		if (wrapper->wops->path_encode(wrapper, pathenc, pathenc_len, path, path_len, options, context TSRMLS_CC) == FAILURE) {
-			*pathenc = NULL;
-			*pathenc_len = 0;
-
-			return FAILURE;
-		}
-
-		return SUCCESS;
-	}
-
-	/* Otherwise, fallback on filesystem_encoding */
-	status = U_ZERO_ERROR;
-
-	num_conv = zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-				pathenc, pathenc_len, path, path_len, &status);
-	if (U_FAILURE(status)) {
-		if (options & REPORT_ERRORS) {
-			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-							ZEND_FROM_UNICODE, num_conv TSRMLS_CC);
-		}
-
-		*pathenc = NULL;
-		*pathenc_len = 0;
-
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ php_stream_path_decode
-Decode a filepath from its character set to unicode
-If the wrapper supports its own decoding rules it will be dispatched to wrapper->wops->path_encode()
-Otherwise (or if wrapper == NULL) the INI defined filesystem_encoding converter will be used.
-*/
-PHPAPI int _php_stream_path_decode(php_stream_wrapper *wrapper,
-				UChar **pathdec, int *pathdec_len, const char *path, int path_len,
-				int options, php_stream_context *context TSRMLS_DC)
-{
-	int num_conv;
-	UErrorCode status = U_ZERO_ERROR;
-
-	if (wrapper && wrapper->wops->path_decode) {
-		if (wrapper->wops->path_decode(wrapper, pathdec, pathdec_len, path, path_len, options, context TSRMLS_CC) == FAILURE) {
-			*pathdec = NULL;
-			*pathdec_len = 0;
-
-			return FAILURE;
-		}
-		return SUCCESS;
-	}
-
-	/* Otherwise fallback on filesystem_encoding */
-	num_conv = zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-				pathdec, pathdec_len, path, path_len, &status);
-	if (U_FAILURE(status)) {
-		if (options & REPORT_ERRORS) {
-			zend_raise_conversion_error_ex("Unable to convert filepath", ZEND_U_CONVERTER(UG(filesystem_encoding_conv)),
-							ZEND_TO_UNICODE, num_conv TSRMLS_CC);
-		}
-
-		*pathdec = NULL;
-		*pathdec_len = 0;
-
-		return FAILURE;
-	}
-
-	return SUCCESS;
-
-}
-/* }}} */
-
-/* {{{ allow_url_fopen / allow_url_include Handlers */
-
-PHPAPI int php_stream_wrapper_is_allowed(const char *wrapper, int wrapper_len, const char *setting TSRMLS_DC)
-{
-	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
-	php_stream_wrapper **wrapperpp;
-	int setting_len = setting ? strlen(setting) : 0;
-	const char *s = setting, *e = s + setting_len;
-	char *wrapper_dup;
-
-	/* BC: allow_url_* == on */
-	if (setting_len == 1 && *setting == '*') {
-		/* "*" means everything is allowed */
-		return 1;
-	}
-
-	if (wrapper_len == (sizeof("zlib") - 1) && strncasecmp("zlib", wrapper, sizeof("zlib") - 1) == 0) {
-		wrapper = "compress.zlib";
-		wrapper_len = sizeof("compress.zlib") - 1;
-	}
-
-	wrapper_dup = estrndup(wrapper, wrapper_len);
-	php_strtolower(wrapper_dup, wrapper_len);
-	if (FAILURE == zend_hash_find(wrapper_hash, wrapper_dup, wrapper_len + 1, (void**)&wrapperpp)) {
-		/* Wrapper does not exist, assume disallow */
-		efree(wrapper_dup);
-		return 0;
-	}
-	efree(wrapper_dup);
-
-	/* BC: allow_url_* == off */
-	if (!setting || !setting_len) {
-		/* NULL or empty indicates that only is_url == 0 wrappers are allowed */
-
-		if (wrapper_len == (sizeof("file") - 1) && strncasecmp("file", wrapper, sizeof("file") - 1) == 0) {
-			/* file:// is non-url */
-			return 1;
-		}
-
-		if ((*wrapperpp)->is_url) {
-			/* is_url types are disabled, but this is an is_url wrapper, disallow */
-			return 0;
-		}
-
-		/* Wrapper is not is_url, allow it */
-		return 1;
-	}
-
-	/* Otherwise, scan list */
-	while (s < e) {
-		const char *p = php_memnstr((char*)s, ":", 1, (char*)e);
-
-		if (!p) {
-			p = e;
-		}
-
-		if (wrapper_len == (p - s) &&
-			strncasecmp(s, wrapper, p - s) == 0) {
-			/* wrapper found in list */
-			return 1;
-		}
-
-		if ((*wrapperpp)->wops == php_stream_user_wrapper_ops &&
-			(sizeof("user") - 1) == (p - s) &&
-			strncasecmp(s, "user", sizeof("user") - 1) == 0) {
-			/* Wrapper is userspace wrapper and meta-wrapper "user" is enabled */
-			return 1;
-		}
-
-		s = p + 1;
-	}
-
-	return 0;
-}
-
-/* allow_url_*_list accepts:
- *
- * 1/on to enable all URL prefixes
- * 0/off to disable all is_url=1 wrappers
- * A colon delimited list of wrappers to allow (wildcards allowed)
- * e.g.    file:gzip:compress.*:php
- */
-PHP_INI_MH(OnUpdateAllowUrl)
-{
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-        char **allow = (char **) (base+(size_t) mh_arg1);
-
-	/* BC Enable */
-	if ((new_value_length == 1 && *new_value == '1') ||
-		(new_value_length == (sizeof("on") - 1) && strncasecmp(new_value, "on", sizeof("on") - 1) == 0) ) {
-
-		if (*allow && strcmp(*allow, "*") == 0) {
-			/* Turning on, but that's no change from current, so leave it alone */
-			return SUCCESS;
-		}
-			
-		if (stage != PHP_INI_STAGE_STARTUP) {
-			/* Not already on, and not in SYSTEM context, fail */
-			return FAILURE;
-		}
-
-		/* Otherwise, turn on setting */
-		if (*allow) {
-			free(*allow);
-		}
-
-		*allow = zend_strndup("*", 1);
-
-		return SUCCESS;
-	}
-
-	/* BC disable */
-	if ((new_value_length == 1 && *new_value == '0') ||
-		(new_value_length == (sizeof("off") - 1) && strncasecmp(new_value, "off", sizeof("off") - 1) == 0) ) {
-
-		/* Always permit shutting off allowurl settings */
-		if (*allow) {
-			free(*allow);
-		}
-		*allow = NULL;
-
-		return SUCCESS;
-	}
-
-	/* Specify as list */
-	if (stage == PHP_INI_STAGE_STARTUP) {
-		/* Always allow new settings in startup stage */
-		if (*allow) {
-			free(*allow);
-		}
-		*allow = zend_strndup(new_value, new_value_length);
-
-		return SUCCESS;
-	}
-
-	/* In PERDIR/RUNTIME context, do more work to ensure we're only tightening the restriction */
-
-	if (*allow && strcmp(*allow, "*") == 0) {
-		/* Currently allowing everying, so whatever we set it to will be more restrictive */
-		free(*allow);
-		*allow = zend_strndup(new_value, new_value_length);
-
-		return SUCCESS;
-	}
-
-	if (!*allow) {
-		/* Currently allowing anything with is_url == 0
-		 * So long as this list doesn't contain any is_url == 1, allow it
-		 */
-		HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
-		char *s = new_value, *e = new_value + new_value_length;
-
-		while (s < e) {
-			php_stream_wrapper **wrapper;
-			char *p = php_memnstr(s, ":", 1, e);
-			char *scan;
-			int scan_len;
-
-			if (!p) {
-				p = e;
-			}
-
-			/* file:// is never a URL */
-			if ( (p - s) == (sizeof("file") - 1) && strncasecmp(s, "file", sizeof("file") - 1) == 0 ) {
-				/* file is not a URL */
-				s = p + 1;
-				continue;
-			}
-
-			if ( (p - s) == (sizeof("zlib") - 1) && strncasecmp(s, "zlib", sizeof("zlib") - 1) == 0 ) {
-				/* Wastful since we know that compress.zlib is already lower cased, but forgivable */
-				scan = estrndup("compress.zlib", sizeof("compress.zlib") - 1);
-				scan_len = sizeof("compress.zlib") - 1;
-			} else {
-				scan = estrndup(s, p - s);;
-				scan_len = p - s;
-				php_strtolower(scan, scan_len);
-			}
-
-			if (FAILURE == zend_hash_find(wrapper_hash, scan, scan_len + 1, (void**) &wrapper)) {
-				/* Unknown wrapper, not allowed in this context */
-				efree(scan);
-				return FAILURE;
-			}
-			efree(scan);
-
-			if ((*wrapper)->is_url) {
-				/* Disallowed is_url wrapper specified when trying to escape is_url == 0 context */
-				return FAILURE;
-			}
-
-			/* Seems alright so far... */
-			s = p+1;
-		}
-
-		/* All tests passed, allow it */
-		*allow = zend_strndup(new_value, new_value_length);
-
-		return SUCCESS;
-	}
-
-	/* The current allows are restricted to a specific list,
-	 * Make certain that our new list is a subset of that list
-	 */
-	{
-		char *s = new_value, *e = new_value + new_value_length;
-
-		while (s < e) {
-			char *p = php_memnstr(s, ":", 1, e);
-
-			if (!p) {
-				p = e;
-			}
-
-			if (!php_stream_wrapper_is_allowed(s, p - s, *allow TSRMLS_CC)) {
-				/* Current settings don't allow this wrapper, deny */
-				return FAILURE;
-			}
-
-			s = p + 1;
-		}
-
-		free(*allow);
-		*allow = zend_strndup(new_value, new_value_length);
-
-		return SUCCESS;
-	}
-}
-
 /* }}} */
 
 /*

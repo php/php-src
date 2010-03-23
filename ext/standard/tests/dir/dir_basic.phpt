@@ -56,27 +56,27 @@ rmdir($dir_path);
 *** Testing dir() : basic functionality ***
 Get Directory instance:
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_basic"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_basic"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 
 Read and rewind:
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 NULL
 
 Test using handle directly:
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 
 Close directory:
 NULL
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_basic"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_basic"
+  ["handle"]=>
   resource(%d) of type (Unknown)
 }
 

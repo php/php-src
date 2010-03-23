@@ -38,13 +38,13 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(7) "test''%"
+  string(7) "test''%"
 }
 Closing database
 bool(true)

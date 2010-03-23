@@ -49,7 +49,7 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -2345,
+      'int -12345' => -12345,
 
       // float data
       'float 10.5' => 10.5,
@@ -108,37 +108,37 @@ foreach($inputs as $key =>$value) {
 *** Testing date_sunrise() : usage variation ***
 
 --int 0--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --int 1--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --int 12345--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --int -12345--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --float 10.5--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --float -10.5--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --float .5--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
@@ -187,99 +187,99 @@ Warning: date_sunrise() expects parameter 1 to be long, array given in %s on lin
 bool(false)
 
 --uppercase NULL--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --lowercase null--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --lowercase true--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --lowercase false--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --uppercase TRUE--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --uppercase FALSE--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --empty string DQ--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -305,12 +305,12 @@ Warning: date_sunrise() expects parameter 1 to be long, object given in %s on li
 bool(false)
 
 --undefined var--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 
 --unset var--
-unicode(5) "08:56"
+string(5) "08:56"
 float(8.944%d)
 int(28599)
 ===DONE===

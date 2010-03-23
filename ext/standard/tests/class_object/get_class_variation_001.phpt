@@ -125,35 +125,25 @@ Arg value: 0.5 (type: double)
 Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Notice: Array to string conversion in %sget_class_variation_001.php on line 67
+Arg value: Array (type: array)
+
+Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
+bool(false)
 
 Arg value: Array (type: array)
 
 Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Notice: Array to string conversion in %sget_class_variation_001.php on line 67
-
 Arg value: Array (type: array)
 
 Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Notice: Array to string conversion in %sget_class_variation_001.php on line 67
-
 Arg value: Array (type: array)
 
 Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
 bool(false)
-
-Notice: Array to string conversion in %sget_class_variation_001.php on line 67
-
-Arg value: Array (type: array)
-
-Warning: get_class() expects parameter 1 to be object, array given in %sget_class_variation_001.php on line %d
-bool(false)
-
-Notice: Array to string conversion in %sget_class_variation_001.php on line 67
 
 Arg value: Array (type: array)
 
@@ -190,24 +180,24 @@ Arg value:  (type: boolean)
 Warning: get_class() expects parameter 1 to be object, boolean given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Arg value:  (type: unicode)
+Arg value:  (type: string)
 
-Warning: get_class() expects parameter 1 to be object, Unicode string given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Arg value:  (type: unicode)
+Arg value:  (type: string)
 
-Warning: get_class() expects parameter 1 to be object, Unicode string given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Arg value: string (type: unicode)
+Arg value: string (type: string)
 
-Warning: get_class() expects parameter 1 to be object, Unicode string given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
 bool(false)
 
-Arg value: string (type: unicode)
+Arg value: string (type: string)
 
-Warning: get_class() expects parameter 1 to be object, Unicode string given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, string given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value:  (type: NULL)

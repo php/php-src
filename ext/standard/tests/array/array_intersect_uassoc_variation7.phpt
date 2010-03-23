@@ -39,13 +39,13 @@ var_dump( array_intersect_uassoc($arr1_string_int, $arr2_string_float, "key_comp
 -- Result of strings containing integers intersection --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 
 -- Result of strings containing floating points intersection --
 array(1) {
   [0]=>
-  unicode(4) "1.00"
+  string(4) "1.00"
 }
 
 -- Result of strings containing integers and strings containing floating points intersection --

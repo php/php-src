@@ -27,7 +27,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_push() : usage variations ***
 
 -- Pass array as $var argument --
@@ -42,9 +42,9 @@ array(4) {
   [3]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
 }
 
@@ -60,11 +60,11 @@ array(4) {
   [3]=>
   array(3) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
     [2]=>
-    unicode(1) "a"
+    string(1) "a"
   }
 }
 Done

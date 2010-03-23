@@ -24,7 +24,7 @@ GetImageSize() with 246x247 pixels
 ?>
 --EXPECT--
 array(1) {
-  [u"246x247.png"]=>
+  ["246x247.png"]=>
   array(6) {
     [0]=>
     int(246)
@@ -33,10 +33,10 @@ array(1) {
     [2]=>
     int(3)
     [3]=>
-    unicode(24) "width="246" height="247""
-    [u"bits"]=>
+    string(24) "width="246" height="247""
+    ["bits"]=>
     int(4)
-    [u"mime"]=>
-    unicode(9) "image/png"
+    ["mime"]=>
+    string(9) "image/png"
   }
 }

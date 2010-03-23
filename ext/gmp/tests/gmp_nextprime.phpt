@@ -24,17 +24,17 @@ var_dump(gmp_strval($n));
 	
 echo "Done\n";
 ?>
---EXPECTF--
-%s(1) "2"
-%s(1) "2"
-%s(4) "-997"
-%s(4) "1009"
-%s(6) "100003"
+--EXPECTF--	
+string(1) "2"
+string(1) "2"
+string(4) "-997"
+string(4) "1009"
+string(6) "100003"
 
 Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s on line %d
-%s(1) "0"
-%s(1) "0"
+string(1) "0"
+string(1) "0"
 
 Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s on line %d
-%s(1) "0"
+string(1) "0"
 Done

@@ -7,3 +7,4 @@ stream_context_set_params($ctx, array("options" => 1));
 ?>
 --EXPECTF--
 Warning: stream_context_set_params(): Invalid stream/context parameter in %sbug44712.php on line %s
+

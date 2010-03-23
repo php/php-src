@@ -20,6 +20,7 @@ $filename = "$file_path/fflush_basic.tmp";
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
+
 if(substr(PHP_OS, 0, 3) == "WIN")  {
 	$data = str_replace("\r",'', $data);
 }
@@ -45,8 +46,6 @@ unlink($filename);
 
 --EXPECTF--
 *** Testing fflush(): writing to a file and reading the contents ***
-
-Notice: fwrite(): 63 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(63)
 bool(true)
 first line of string

@@ -41,29 +41,29 @@ echo "====DONE!====\n";
 Warning: SQLiteResult::seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 ====SEEK:0====
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 ====SEEK:1====
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 ====SEEK:2====
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====SEEK:3====
 
 Warning: SQLiteResult::seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====AGAIN====
 ====SEEK:-1====
@@ -71,28 +71,28 @@ array(1) {
 Warning: SQLiteResult::seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====SEEK:0====
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 ====SEEK:1====
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 ====SEEK:2====
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====SEEK:3====
 
 Warning: SQLiteResult::seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====DONE!====

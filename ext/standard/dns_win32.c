@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2008-2009 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -75,7 +75,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 			continue;
 		}
 
-		add_next_index_rt_string(mx_list, pRec->Data.MX.pNameExchange, ZSTR_DUPLICATE);
+		add_next_index_string(mx_list, pRec->Data.MX.pNameExchange, 1);
 		if (weight_list) {
 			add_next_index_long(weight_list, srv->wPriority);
 		}
@@ -133,7 +133,7 @@ PHP_FUNCTION(dns_check_record)
 /* }}} */
 
 /* {{{ php_parserr */
-static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **subarray TSRMLS_DC)
+static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **subarray)
 {
 	int type;
 	u_long ttl;
@@ -152,38 +152,38 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 	ALLOC_INIT_ZVAL(*subarray);
 	array_init(*subarray);
 
-	add_ascii_assoc_rt_string(*subarray, "host", pRec->pName, ZSTR_DUPLICATE);
+	add_assoc_string(*subarray, "host", pRec->pName, 1);
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_ascii_assoc_rt_string(*subarray, "type", "A", ZSTR_DUPLICATE);
-			add_ascii_assoc_rt_string(*subarray, "ip", inet_ntoa(ipaddr), ZSTR_DUPLICATE);
+			add_assoc_string(*subarray, "type", "A", 1);
+			add_assoc_string(*subarray, "ip", inet_ntoa(ipaddr), 1);
 			break;
 		}
 
 		case DNS_TYPE_MX:
-			add_ascii_assoc_rt_string(*subarray, "type", "MX", ZSTR_DUPLICATE);
-			add_ascii_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
+			add_assoc_string(*subarray, "type", "MX", 1);
+			add_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
 			/* no break; */
 
 		case DNS_TYPE_CNAME:
 			if (type == DNS_TYPE_CNAME) {
-				add_ascii_assoc_rt_string(*subarray, "type", "CNAME", ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "CNAME", 1);
 			}
 			/* no break; */
 
 		case DNS_TYPE_NS:
 			if (type == DNS_TYPE_NS) {
-				add_ascii_assoc_rt_string(*subarray, "type", "NS", ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "NS", 1);
 			}
 			/* no break; */
 
 		case DNS_TYPE_PTR:
 			if (type == DNS_TYPE_PTR) {
-				add_ascii_assoc_rt_string(*subarray, "type", "PTR", ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "PTR", 1);
 			}
-			add_ascii_assoc_rt_string(*subarray, "target", pRec->Data.MX.pNameExchange, ZSTR_DUPLICATE);
+			add_assoc_string(*subarray, "target", pRec->Data.MX.pNameExchange, 1);
 			break;
 
 		/* Not available on windows, the query is possible but there is no DNS_HINFO_DATA structure */
@@ -197,11 +197,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				long txt_len = 0;
 				zval *entries;
 
-				add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "TXT", 1);
 				
 				ALLOC_INIT_ZVAL(entries);
 				array_init(entries);
-
+				
 				for (i = 0; i < count; i++) {
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
@@ -211,12 +211,12 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				for (i = 0; i < count; i++) {
 					int len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
-					add_next_index_rt_stringl(entries, data_txt->pStringArray[i], len, ZSTR_DUPLICATE);
+					add_next_index_stringl(entries, data_txt->pStringArray[i], len, 1);
 					txt_dst += len;
 				}
 
-				add_ascii_assoc_rt_string(*subarray, "txt", txt, ZSTR_AUTOFREE);
-				add_ascii_assoc_zval(*subarray, "entries", entries);
+				add_assoc_string(*subarray, "txt", txt, 0);
+				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
 
@@ -224,15 +224,15 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 				DNS_SOA_DATA *data_soa = &pRec->Data.Soa;
 
-				add_ascii_assoc_rt_string(*subarray, "type", "SOA", ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "SOA", 1);
 
-				add_ascii_assoc_rt_string(*subarray, "mname", data_soa->pNamePrimaryServer, ZSTR_DUPLICATE);
-				add_ascii_assoc_rt_string(*subarray, "rname", data_soa->pNameAdministrator, ZSTR_DUPLICATE);
-				add_ascii_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
-				add_ascii_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
-				add_ascii_assoc_long(*subarray, "retry", data_soa->dwRetry);
-				add_ascii_assoc_long(*subarray, "expire", data_soa->dwExpire);
-				add_ascii_assoc_long(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
+				add_assoc_string(*subarray, "mname", data_soa->pNamePrimaryServer, 1);
+				add_assoc_string(*subarray, "rname", data_soa->pNameAdministrator, 1);
+				add_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
+				add_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
+				add_assoc_long(*subarray, "retry", data_soa->dwRetry);
+				add_assoc_long(*subarray, "expire", data_soa->dwExpire);
+				add_assoc_long(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
 			}
 			break;
 
@@ -289,11 +289,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 				DNS_SRV_DATA *data_srv = &pRec->Data.Srv;
 
-				add_ascii_assoc_rt_string(*subarray, "type", "SRV", ZSTR_DUPLICATE);
-				add_ascii_assoc_long(*subarray, "pri", data_srv->wPriority);
-				add_ascii_assoc_long(*subarray, "weight", data_srv->wWeight);
-				add_ascii_assoc_long(*subarray, "port", data_srv->wPort);
-				add_ascii_assoc_rt_string(*subarray, "target", data_srv->pNameTarget, ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "SRV", 1);
+				add_assoc_long(*subarray, "pri", data_srv->wPriority);
+				add_assoc_long(*subarray, "weight", data_srv->wWeight);
+				add_assoc_long(*subarray, "port", data_srv->wPort);
+				add_assoc_string(*subarray, "target", data_srv->pNameTarget, 1);
 			}
 			break;
 
@@ -302,13 +302,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 #if _MSC_VER >= 1500
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
 
-				add_ascii_assoc_rt_string(*subarray, "type", "NAPTR", ZSTR_DUPLICATE);
-				add_ascii_assoc_long(*subarray, "order", data_naptr->wOrder);
-				add_ascii_assoc_long(*subarray, "pref", data_naptr->wPreference);
-				add_ascii_assoc_rt_string(*subarray, "flags", data_naptr->pFlags, ZSTR_DUPLICATE);
-				add_ascii_assoc_rt_string(*subarray, "services", data_naptr->pService, ZSTR_DUPLICATE);
-				add_ascii_assoc_rt_string(*subarray, "regex", data_naptr->pRegularExpression, ZSTR_DUPLICATE);
-				add_ascii_assoc_rt_string(*subarray, "replacement", data_naptr->pReplacement, ZSTR_DUPLICATE);
+				add_assoc_string(*subarray, "type", "NAPTR", 1);
+				add_assoc_long(*subarray, "order", data_naptr->wOrder);
+				add_assoc_long(*subarray, "pref", data_naptr->wPreference);
+				add_assoc_string(*subarray, "flags", data_naptr->pFlags, 1);
+				add_assoc_string(*subarray, "services", data_naptr->pService, 1);
+				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression, 1);
+				add_assoc_string(*subarray, "replacement", data_naptr->pReplacement, 1);
 #endif
 			}
 			break;
@@ -317,8 +317,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			break;
 	}
 
-	add_ascii_assoc_rt_string(*subarray, "class", "IN", ZSTR_DUPLICATE);
-	add_ascii_assoc_long(*subarray, "ttl", ttl);
+	add_assoc_string(*subarray, "class", "IN", 1);
+	add_assoc_long(*subarray, "ttl", ttl);
 }
 /* }}} */
 
@@ -426,7 +426,7 @@ PHP_FUNCTION(dns_get_record)
 				zval *retval = NULL;
 
 				if (pRec->Flags.S.Section == DnsSectionAnswer) {
-					php_parserr(pRec, type_to_fetch, store_results, &retval TSRMLS_CC);
+					php_parserr(pRec, type_to_fetch, store_results, &retval);
 					if (retval != NULL && store_results) {
 						add_next_index_zval(return_value, retval);
 					}
@@ -434,7 +434,7 @@ PHP_FUNCTION(dns_get_record)
 
 				if (authns && pRec->Flags.S.Section == DnsSectionAuthority) {
 
-					php_parserr(pRec, type_to_fetch, store_results, &retval TSRMLS_CC);
+					php_parserr(pRec, type_to_fetch, store_results, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(authns, retval);
 					}
@@ -449,7 +449,7 @@ PHP_FUNCTION(dns_get_record)
 # endif
 #endif
 				if (addtl && pRec->Flags.S.Section == DnsSectionAdditional) {
-					php_parserr(pRec, type_to_fetch, store_results, &retval TSRMLS_CC);
+					php_parserr(pRec, type_to_fetch, store_results, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(addtl, retval);
 					}

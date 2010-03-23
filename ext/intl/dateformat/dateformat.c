@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,9 +75,13 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval*       object;
     long        date_type = 0;
     long        time_type = 0;
-    long        calendar = 1;
-    UChar*      pattern_str = NULL;
+    long        calendar = UCAL_GREGORIAN;
+    char*       timezone_str = NULL;
+    int         timezone_str_len = 0;
+    char*       pattern_str = NULL;
     int         pattern_str_len = 0;
+    UChar*      svalue = NULL;		/* UTF-16 pattern_str */
+    int         slength = 0;
     UChar*      timezone_utf16 = NULL;		/* UTF-16 timezone_str */
     int         timezone_utf16_len = 0;
 	UCalendar   ucal_obj = NULL;
@@ -86,32 +90,54 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset( NULL TSRMLS_CC );
 	object = return_value;
 	/* Parse parameters. */
-    if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sll|ulu",
-		&locale, &locale_len, &date_type, & time_type , &timezone_utf16, &timezone_utf16_len , &calendar ,&pattern_str , &pattern_str_len ) == FAILURE )
+    if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sll|sls",
+		&locale, &locale_len, &date_type, &time_type, &timezone_str, &timezone_str_len, &calendar,&pattern_str, &pattern_str_len ) == FAILURE )
     {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: unable to parse input parameters", 0 TSRMLS_CC );
 		zval_dtor(return_value);
 		RETURN_NULL();
     }
 
+	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
+	/* Convert pattern (if specified) to UTF-16. */
+	if( pattern_str && pattern_str_len>0 ){
+		intl_convert_utf8_to_utf16(&svalue, &slength, pattern_str, pattern_str_len, &INTL_DATA_ERROR_CODE(dfo));
+		INTL_CTOR_CHECK_STATUS(dfo, "datefmt_create: error converting pattern to UTF-16");
+	}
+
+	/* Convert pattern (if specified) to UTF-16. */
+	if( timezone_str && timezone_str_len >0 ){
+		intl_convert_utf8_to_utf16(&timezone_utf16, &timezone_utf16_len, timezone_str, timezone_str_len, &INTL_DATA_ERROR_CODE(dfo));
+		INTL_CTOR_CHECK_STATUS(dfo, "datefmt_create: error converting timezone_str to UTF-16" );
+	}
+
 	if(locale_len == 0) {
 		locale = INTL_G(default_locale);
 	}
 
 	if( pattern_str && pattern_str_len>0 ){
-		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE,UDAT_IGNORE, locale, timezone_utf16, timezone_utf16_len ,pattern_str ,pattern_str_len , &INTL_DATA_ERROR_CODE(dfo));
+		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE, UDAT_IGNORE, locale, timezone_utf16, timezone_utf16_len, svalue, slength, &INTL_DATA_ERROR_CODE(dfo));
 	} else {
-		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type,date_type, locale, timezone_utf16, timezone_utf16_len ,pattern_str ,pattern_str_len , &INTL_DATA_ERROR_CODE(dfo));
+		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type, date_type, locale, timezone_utf16, timezone_utf16_len, svalue, slength, &INTL_DATA_ERROR_CODE(dfo));
 	}
 
     /* Set the calendar if passed */
     if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo)) && calendar) {
-		ucal_obj = ucal_open( timezone_utf16 , timezone_utf16_len , locale , calendar , &INTL_DATA_ERROR_CODE(dfo) );
+		ucal_obj = ucal_open( timezone_utf16, timezone_utf16_len, locale, calendar, &INTL_DATA_ERROR_CODE(dfo) );
 		if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			udat_setCalendar( DATE_FORMAT_OBJECT(dfo), ucal_obj );
 		}
     }
+
+	if(svalue)
+	{
+		efree(svalue);
+	}
+	if(timezone_utf16)
+	{
+		efree(timezone_utf16);
+	}
 
 	INTL_CTOR_CHECK_STATUS(dfo, "datefmt_create: date formatter creation failed");
 

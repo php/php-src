@@ -1,9 +1,8 @@
 --TEST--
 date OO cloning
---INI--
-date.timezone=Europe/Berlin
 --FILE--
 <?php
+date_default_timezone_set('Europe/Berlin');
 class _d extends DateTime {}
 class _t extends DateTimeZone {}
 $d = new _d("1pm Aug 1 GMT 2007");
@@ -20,9 +19,9 @@ $c = clone $t;
 var_dump($c->getName());
 ?>
 --EXPECT--
-unicode(29) "Wed, 01 Aug 07 13:00:00 +0000"
-unicode(29) "Wed, 01 Aug 07 13:00:00 +0000"
-unicode(29) "Wed, 01 Aug 07 14:00:00 +0000"
-unicode(29) "Wed, 01 Aug 07 12:59:59 +0000"
-unicode(10) "Asia/Tokyo"
-unicode(10) "Asia/Tokyo"
+string(29) "Wed, 01 Aug 07 13:00:00 +0000"
+string(29) "Wed, 01 Aug 07 13:00:00 +0000"
+string(29) "Wed, 01 Aug 07 14:00:00 +0000"
+string(29) "Wed, 01 Aug 07 12:59:59 +0000"
+string(10) "Asia/Tokyo"
+string(10) "Asia/Tokyo"

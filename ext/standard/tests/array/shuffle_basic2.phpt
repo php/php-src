@@ -41,23 +41,23 @@ echo "Done";
 
 -- input array before shuffle() function is applied --
 array(9) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [2]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [4]=>
   int(4)
-  [u"#5"]=>
+  ["#5"]=>
   int(5)
-  [u"SIX"]=>
+  ["SIX"]=>
   int(6)
-  [u"seven"]=>
+  ["seven"]=>
   int(7)
-  [u"#8"]=>
+  ["#8"]=>
   int(10)
-  [u"nine"]=>
+  ["nine"]=>
   int(9)
 }
 
@@ -86,3 +86,4 @@ array(9) {
   int(%d)
 }
 Done
+

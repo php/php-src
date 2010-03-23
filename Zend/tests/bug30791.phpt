@@ -25,11 +25,11 @@ var_dump($c);
 
 ?>
 --EXPECT--
-unicode(50) "Object of class a could not be converted to string"
+string(50) "Object of class a could not be converted to string"
 
-unicode(50) "Object of class a could not be converted to string"
+string(50) "Object of class a could not be converted to string"
 
 object(a)#2 (1) {
-  [u"a"]=>
+  ["a"]=>
   int(4)
 }

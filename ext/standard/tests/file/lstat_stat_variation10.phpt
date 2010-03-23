@@ -48,7 +48,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation10");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stat() on directory after using is_dir() on it ***
 bool(true)
 bool(true)

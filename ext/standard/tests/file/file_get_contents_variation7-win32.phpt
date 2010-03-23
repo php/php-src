@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : variation - various absolute and relative paths
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -73,16 +71,16 @@ echo "\n*** Done ***\n";
 *** Testing file_get_contents() : variation ***
 
 -- Iteration 1 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 2 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 3 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 4 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 5 --
 
@@ -95,16 +93,16 @@ Warning: file_get_contents(%sfileGetContentsVar7.dir\fileGetContentsVar7Sub\BADD
 bool(false)
 
 -- Iteration 7 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 8 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 9 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 10 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 -- Iteration 11 --
 
@@ -112,6 +110,6 @@ Warning: file_get_contents(BADDIR\FileGetContentsVar7.tmp): failed to open strea
 bool(false)
 
 -- Iteration 12 --
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 *** Done ***

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -87,7 +87,7 @@ typedef struct {
 #	define PHP_SXE_API ZEND_API
 #endif
 
-PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D);
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry();
 
 #endif
 

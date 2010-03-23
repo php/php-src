@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,7 +59,7 @@ int dom_entity_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_XML_STRING(*retval, (char *) (nodep->ExternalID), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (nodep->ExternalID), 1);
 	}
 
 	return SUCCESS;
@@ -87,7 +87,7 @@ int dom_entity_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_XML_STRING(*retval, (char *) (nodep->SystemID), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (nodep->SystemID), 1);
 	}
 
 	return SUCCESS;
@@ -117,7 +117,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_NULL(*retval);
 	} else {
 		content = xmlNodeGetContent((xmlNodePtr) nodep);
-		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, content, 1);
 		xmlFree(content);
 	}
 

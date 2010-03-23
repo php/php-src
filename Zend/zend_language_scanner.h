@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -35,13 +35,22 @@ typedef struct _zend_lex_state {
 	zend_file_handle *in;
 	uint lineno;
 	char *filename;
-	char *script_encoding;
 
-	UConverter *input_conv;     /* converter for flex input */
-	UConverter *output_conv;    /* converter for data from flex output */
-	zend_bool encoding_checked;
-	char* rest_str;
-	int rest_len;
+#ifdef ZEND_MULTIBYTE
+	/* original (unfiltered) script */
+	unsigned char *script_org;
+	size_t script_org_size;
+
+	/* filtered script */
+	unsigned char *script_filtered;
+	size_t script_filtered_size;
+
+	/* input/ouput filters */
+	zend_encoding_filter input_filter;
+	zend_encoding_filter output_filter;
+	zend_encoding *script_encoding;
+	zend_encoding *internal_encoding;
+#endif /* ZEND_MULTIBYTE */
 } zend_lex_state;
 
 

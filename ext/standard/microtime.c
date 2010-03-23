@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -50,7 +50,7 @@
 #define SEC_IN_MIN 60
 
 #ifdef HAVE_GETTIMEOFDAY
-static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
+static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
@@ -73,23 +73,22 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info(TSRMLS_C));
 				
 		array_init(return_value);
-		add_ascii_assoc_long(return_value, "sec", tp.tv_sec);
-		add_ascii_assoc_long(return_value, "usec", tp.tv_usec);
+		add_assoc_long(return_value, "sec", tp.tv_sec);
+		add_assoc_long(return_value, "usec", tp.tv_usec);
 
-		add_ascii_assoc_long(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
-		add_ascii_assoc_long(return_value, "dsttime", offset->is_dst);
+		add_assoc_long(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
+		add_assoc_long(return_value, "dsttime", offset->is_dst);
 
 		timelib_time_offset_dtor(offset);
 	} else {
 		char ret[100];
 
 		snprintf(ret, 100, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
-		RETURN_ASCII_STRING(ret, ZSTR_DUPLICATE);
+		RETURN_STRING(ret, 1);
 	}
 }
-/* }}} */
 
-/* {{{ proto mixed microtime([bool get_as_float]) U
+/* {{{ proto mixed microtime([bool get_as_float])
    Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
@@ -97,7 +96,7 @@ PHP_FUNCTION(microtime)
 }
 /* }}} */
 
-/* {{{ proto array gettimeofday([bool get_as_float]) U
+/* {{{ proto array gettimeofday([bool get_as_float])
    Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
@@ -107,7 +106,7 @@ PHP_FUNCTION(gettimeofday)
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE
-/* {{{ proto array getrusage([int who]) U
+/* {{{ proto array getrusage([int who])
    Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
@@ -116,9 +115,9 @@ PHP_FUNCTION(getrusage)
 	int who = RUSAGE_SELF;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {
-	   return;
+		return;
 	}
-
+	
 	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
 	}
@@ -131,7 +130,7 @@ PHP_FUNCTION(getrusage)
 
 	array_init(return_value);
 #define PHP_RUSAGE_PARA(a) \
-		add_ascii_assoc_long(return_value, #a, usg.a)
+		add_assoc_long(return_value, #a, usg.a)
 #if !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);

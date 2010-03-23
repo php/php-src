@@ -4,7 +4,7 @@ openssl_digest() basic test
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$data = b"openssl_digest() basic test";
+$data = "openssl_digest() basic test";
 $method = "md5";
 $method2 = "sha1";
 

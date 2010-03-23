@@ -33,22 +33,20 @@ foreach($streams as $stream)
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-array(8) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(7) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(8) "data://,"
-  [u"base64"]=>
+  ["uri"]=>
+  string(8) "data://,"
+  ["base64"]=>
   bool(false)
 }
 NULL
@@ -56,22 +54,20 @@ NULL
 Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
-array(8) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(7) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(15) "data://;base64,"
-  [u"base64"]=>
+  ["uri"]=>
+  string(15) "data://;base64,"
+  ["base64"]=>
   bool(true)
 }
 NULL
@@ -87,24 +83,22 @@ NULL
 Warning: fopen(data://foo=bar,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
-array(9) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(8) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(18) "data://text/plain,"
-  [u"mediatype"]=>
-  unicode(10) "text/plain"
-  [u"base64"]=>
+  ["uri"]=>
+  string(18) "data://text/plain,"
+  ["mediatype"]=>
+  string(10) "text/plain"
+  ["base64"]=>
   bool(false)
 }
 NULL
@@ -112,83 +106,77 @@ NULL
 Warning: fopen(data://text/plain;foo,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
-array(10) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(9) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(26) "data://text/plain;foo=bar,"
-  [u"mediatype"]=>
-  unicode(10) "text/plain"
-  [u"foo"]=>
-  unicode(3) "bar"
-  [u"base64"]=>
+  ["uri"]=>
+  string(26) "data://text/plain;foo=bar,"
+  ["mediatype"]=>
+  string(10) "text/plain"
+  ["foo"]=>
+  string(3) "bar"
+  ["base64"]=>
   bool(false)
 }
-unicode(3) "bar"
+string(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bla,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
-array(10) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(9) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(33) "data://text/plain;foo=bar;base64,"
-  [u"mediatype"]=>
-  unicode(10) "text/plain"
-  [u"foo"]=>
-  unicode(3) "bar"
-  [u"base64"]=>
+  ["uri"]=>
+  string(33) "data://text/plain;foo=bar;base64,"
+  ["mediatype"]=>
+  string(10) "text/plain"
+  ["foo"]=>
+  string(3) "bar"
+  ["base64"]=>
   bool(true)
 }
-unicode(3) "bar"
+string(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
-array(11) {
-  [u"wrapper_type"]=>
-  unicode(7) "RFC2397"
-  [u"stream_type"]=>
-  unicode(7) "RFC2397"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(10) {
+  ["wrapper_type"]=>
+  string(7) "RFC2397"
+  ["stream_type"]=>
+  string(7) "RFC2397"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(34) "data://text/plain;foo=bar;bar=baz,"
-  [u"mediatype"]=>
-  unicode(10) "text/plain"
-  [u"foo"]=>
-  unicode(3) "bar"
-  [u"bar"]=>
-  unicode(3) "baz"
-  [u"base64"]=>
+  ["uri"]=>
+  string(34) "data://text/plain;foo=bar;bar=baz,"
+  ["mediatype"]=>
+  string(10) "text/plain"
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(3) "baz"
+  ["base64"]=>
   bool(false)
 }
-unicode(3) "bar"
+string(3) "bar"
 ===DONE===

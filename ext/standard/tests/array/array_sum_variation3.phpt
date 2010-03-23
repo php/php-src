@@ -22,7 +22,7 @@ var_dump( array_sum($float_input) );
 $float_input = array( 1.2e2, 23.4e3, -4.1e2, 0.2e2, 2.1e-2, .5e3);
 echo "-- float array with scientific notations e and E --\n";
 var_dump( array_sum($float_input) );
-$float_input = array( 1.2E2, 23.4E3, -4.1E2, 0.2E2, 2.1E-2, .5E2);
+$float_input = array( 1.2E2, 23.4E3, -4.1E2, 0.2E2, 2.1E-2, .5E3);
 var_dump( array_sum($float_input) );
 
 // Mixed float array
@@ -42,13 +42,13 @@ var_dump( array_sum($float_input) );
                      
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_sum() : array with different float values ***
 -- simple float array --
 float(1.3)
 -- float array with scientific notations e and E --
 float(23630.021)
-float(23180.021)
+float(23630.021)
 -- Mixed float array --
 float(6531.5458)
 Done

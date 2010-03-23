@@ -3,6 +3,7 @@ Bug #34704 (Infinite recursion due to corrupt JPEG)
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
+magic_quotes_runtime=0
 output_handler=
 zlib.output_compression=0 
 --FILE--
@@ -13,29 +14,29 @@ var_dump(exif_read_data($infile));
 ===DONE===
 --EXPECTF--
 array(7) {
-  [u"FileName"]=>
-  unicode(12) "bug34704.jpg"
-  [u"FileDateTime"]=>
+  ["FileName"]=>
+  string(12) "bug34704.jpg"
+  ["FileDateTime"]=>
   int(%d)
-  [u"FileSize"]=>
+  ["FileSize"]=>
   int(9976)
-  [u"FileType"]=>
+  ["FileType"]=>
   int(2)
-  [u"MimeType"]=>
-  unicode(10) "image/jpeg"
-  [u"SectionsFound"]=>
-  unicode(4) "IFD0"
-  [u"COMPUTED"]=>
+  ["MimeType"]=>
+  string(10) "image/jpeg"
+  ["SectionsFound"]=>
+  string(4) "IFD0"
+  ["COMPUTED"]=>
   array(5) {
-    [u"html"]=>
-    unicode(24) "width="386" height="488""
-    [u"Height"]=>
+    ["html"]=>
+    string(24) "width="386" height="488""
+    ["Height"]=>
     int(488)
-    [u"Width"]=>
+    ["Width"]=>
     int(386)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
-    [u"ByteOrderMotorola"]=>
+    ["ByteOrderMotorola"]=>
     int(0)
   }
 }

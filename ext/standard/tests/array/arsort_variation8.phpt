@@ -57,7 +57,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various arrays containing sub arrays --
@@ -76,14 +76,14 @@ array(0) {
 - With default sort_flag -
 bool(true)
 array(1) {
-  [u"sub_array[1][0]"]=>
+  ["sub_array[1][0]"]=>
   array(0) {
   }
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(1) {
-  [u"sub_array[1][0]"]=>
+  ["sub_array[1][0]"]=>
   array(0) {
   }
 }
@@ -92,31 +92,31 @@ array(1) {
 - With default sort_flag -
 bool(true)
 array(3) {
-  [u"sub_array[2][0] "]=>
+  ["sub_array[2][0] "]=>
   array(2) {
     [0]=>
     int(64)
     [1]=>
     int(61)
   }
-  [u"data[2,0]"]=>
+  ["data[2,0]"]=>
   int(44)
-  [u"data[2,1]"]=>
+  ["data[2,1]"]=>
   int(11)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
-  [u"sub_array[2][0] "]=>
+  ["sub_array[2][0] "]=>
   array(2) {
     [0]=>
     int(64)
     [1]=>
     int(61)
   }
-  [u"data[2,0]"]=>
+  ["data[2,0]"]=>
   int(44)
-  [u"data[2,1]"]=>
+  ["data[2,1]"]=>
   int(11)
 }
 
@@ -124,7 +124,7 @@ array(3) {
 - With default sort_flag -
 bool(true)
 array(4) {
-  [u"sub_array[3][0]"]=>
+  ["sub_array[3][0]"]=>
   array(3) {
     [0]=>
     int(33)
@@ -133,26 +133,26 @@ array(4) {
     [2]=>
     int(6)
   }
-  [u"sub_array[3][2]"]=>
+  ["sub_array[3][2]"]=>
   array(2) {
     [0]=>
     int(22)
     [1]=>
     int(-55)
   }
-  [u"sub_array[3][1]"]=>
+  ["sub_array[3][1]"]=>
   array(1) {
     [0]=>
     int(11)
   }
-  [u"sub_array[3][3]"]=>
+  ["sub_array[3][3]"]=>
   array(0) {
   }
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(4) {
-  [u"sub_array[3][0]"]=>
+  ["sub_array[3][0]"]=>
   array(3) {
     [0]=>
     int(33)
@@ -161,19 +161,19 @@ array(4) {
     [2]=>
     int(6)
   }
-  [u"sub_array[3][2]"]=>
+  ["sub_array[3][2]"]=>
   array(2) {
     [0]=>
     int(22)
     [1]=>
     int(-55)
   }
-  [u"sub_array[3][1]"]=>
+  ["sub_array[3][1]"]=>
   array(1) {
     [0]=>
     int(11)
   }
-  [u"sub_array[3][3]"]=>
+  ["sub_array[3][3]"]=>
   array(0) {
   }
 }

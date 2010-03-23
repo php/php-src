@@ -1,9 +1,8 @@
 --TEST--
 date OO interface
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 class _d extends DateTime {
 	function __construct() {
 	}
@@ -40,12 +39,12 @@ try {
 echo "DONE\n";
 ?>
 --EXPECTF--
-unicode(19) "%d-%d-%d %d:%d:%d"
+string(19) "%d-%d-%d %d:%d:%d"
 
 Warning: DateTime::format(): The DateTime object has not been correctly initialized by its constructor in %soo_001.php on line %d
 bool(false)
 DateTime::__construct(): Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
-unicode(3) "UTC"
+string(3) "UTC"
 
 Warning: DateTimeZone::getName(): The DateTimeZone object has not been correctly initialized by its constructor in %soo_001.php on line %d
 bool(false)

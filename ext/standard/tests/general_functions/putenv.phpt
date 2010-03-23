@@ -17,12 +17,12 @@ var_dump(getenv($var_name));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 bool(false)
 bool(true)
-unicode(5) "value"
+string(5) "value"
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
 bool(false)
 Done

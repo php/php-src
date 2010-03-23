@@ -42,11 +42,11 @@
 
 #define RESET_DOC_COMMENT()        \
     {                              \
-		if (CG(doc_comment.v)) {     \
-			efree(CG(doc_comment.v));  \
-			CG(doc_comment) = NULL_ZSTR;  \
-		}                          \
-		CG(doc_comment_len) = 0;   \
+        if (CG(doc_comment)) {     \
+          efree(CG(doc_comment));  \
+          CG(doc_comment) = NULL;  \
+        }                          \
+        CG(doc_comment_len) = 0;   \
     }
 
 typedef struct _zend_op_array zend_op_array;
@@ -153,26 +153,27 @@ typedef struct _zend_try_catch_element {
 
 #define ZEND_ACC_CLOSURE              0x100000
 
-char *zend_visibility_string(zend_uint fn_flags);
-
 /* function flag for internal user call handlers __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_HANDLER     0x200000
 
+char *zend_visibility_string(zend_uint fn_flags);
+
+
 typedef struct _zend_property_info {
 	zend_uint flags;
-	zstr name;
+	char *name;
 	int name_length;
 	ulong h;
-	zstr doc_comment;
+	char *doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
 } zend_property_info;
 
 
 typedef struct _zend_arg_info {
-	zstr name;
+	const char *name;
 	zend_uint name_len;
-	zstr class_name;
+	const char *class_name;
 	zend_uint class_name_len;
 	zend_bool array_type_hint;
 	zend_bool allow_null;
@@ -182,7 +183,7 @@ typedef struct _zend_arg_info {
 } zend_arg_info;
 
 typedef struct _zend_compiled_variable {
-	zstr name;
+	char *name;
 	int name_len;
 	ulong hash_value;
 } zend_compiled_variable;
@@ -190,7 +191,7 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	zstr function_name;
+	char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -229,10 +230,9 @@ struct _zend_op_array {
 	zend_uint this_var;
 
 	char *filename;
-	char *script_encoding;
 	zend_uint line_start;
 	zend_uint line_end;
-	zstr doc_comment;
+	char *doc_comment;
 	zend_uint doc_comment_len;
 	zend_uint early_binding; /* the linked list of delayed declarations */
 
@@ -246,7 +246,7 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	zstr function_name;
+	char * function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -261,14 +261,14 @@ typedef struct _zend_internal_function {
 	struct _zend_module_entry *module;
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : EMPTY_ZSTR)
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
 
 typedef union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
 
 	struct {
 		zend_uchar type;  /* never used */
-		zstr function_name;
+		char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
 		union _zend_function *prototype;
@@ -346,9 +346,6 @@ void init_compiler(TSRMLS_D);
 void shutdown_compiler(TSRMLS_D);
 void zend_init_compiler_data_structures(TSRMLS_D);
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
-void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
-
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
@@ -361,15 +358,10 @@ ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TS
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
-ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC);
-ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC);
-ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D);
 
-ZEND_API zstr zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
-
-ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int run_time TSRMLS_DC);
-ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *target_len, const char *source, int source_len, UErrorCode *status TSRMLS_DC);
-int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
+void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
+void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
+ZEND_API char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
@@ -394,7 +386,7 @@ void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS
 void fetch_string_offset(znode *result, const znode *parent, const znode *offset TSRMLS_DC);
 void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
 void zend_do_print(znode *result, const znode *arg TSRMLS_DC);
-void zend_do_echo(const znode *arg, zend_bool inline_html TSRMLS_DC);
+void zend_do_echo(const znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
@@ -442,7 +434,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
-void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference TSRMLS_DC);
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
@@ -480,12 +472,12 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
 void zend_do_declare_property(const znode *var_name, const znode *value, zend_uint access_type TSRMLS_DC);
-void zend_do_halt_compiler_register(TSRMLS_D);
 void zend_do_declare_implicit_property(TSRMLS_D);
 void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, const znode *property TSRMLS_DC);
 
+void zend_do_halt_compiler_register(TSRMLS_D);
 
 void zend_do_push_object(const znode *object TSRMLS_DC);
 void zend_do_pop_object(znode *object TSRMLS_DC);
@@ -551,14 +543,12 @@ void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
-ZEND_API void function_add_ref(zend_function *function TSRMLS_DC);
-
-void zend_do_normalization(znode *result, znode *str TSRMLS_DC);
-
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
 void zend_release_labels(TSRMLS_D);
+
+ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
@@ -575,23 +565,16 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
-ZEND_API int zend_copy_scanner_string(zval *zendlval, char *str, zend_uint str_len, zend_uchar type, UConverter *conv TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zend_function *function);
-ZEND_API void zend_u_function_dtor(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name);
-
-ZEND_API void zend_u_mangle_property_name(zstr *dest, int *dest_length, zend_uchar type, const zstr src1, int src1_length, const zstr src2, int src2_length, int internal);
-ZEND_API int zend_u_unmangle_property_name(zend_uchar type, zstr mangled_property, int len, zstr *class_name, zstr *prop_name);
-
+ZEND_API int zend_unmangle_property_name(char *mangled_property, int mangled_property_len, char **prop_name, char **class_name);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
-#define ZEND_U_FUNCTION_DTOR (void (*)(void *)) zend_u_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
 
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC);
@@ -607,7 +590,7 @@ void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additio
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
-int zend_get_class_fetch_type(zend_uchar type, zstr class_name, uint class_name_len);
+int zend_get_class_fetch_type(const char *class_name, uint class_name_len);
 
 typedef zend_bool (*zend_auto_global_callback)(char *name, uint name_len TSRMLS_DC);
 typedef struct _zend_auto_global {
@@ -615,21 +598,13 @@ typedef struct _zend_auto_global {
 	uint name_len;
 	zend_auto_global_callback auto_global_callback;
 	zend_bool armed;
-	zend_bool runtime;
-	zend_uchar index;
 } zend_auto_global;
 
 void zend_auto_global_dtor(zend_auto_global *auto_global);
 ZEND_API int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC);
-ZEND_API int zend_register_auto_global_ex(const char *name, uint name_len, zend_auto_global_callback auto_global_callback, zend_bool runtime TSRMLS_DC);
 ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC);
-ZEND_API zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC);
-ZEND_API zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC);
-ZEND_API int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC);
-ZEND_API int zend_auto_global_arm_by_name(const char *name, zend_uint name_len TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(const char *varname, zend_uint varname_length TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
-ZEND_API size_t zend_u_dirname(UChar *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
@@ -650,8 +625,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
 #define ZEND_FETCH_GLOBAL_LOCK		4
-#define ZEND_FETCH_AUTO_GLOBAL		5
-#define ZEND_FETCH_LEXICAL			6
+#define ZEND_FETCH_LEXICAL			5
+
 
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
@@ -662,9 +637,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
-#define ZEND_FETCH_CLASS_MASK         0x0f
-#define ZEND_FETCH_CLASS_NO_AUTOLOAD  0x80
-#define ZEND_FETCH_CLASS_SILENT       0x0100
+#define ZEND_FETCH_CLASS_MASK        0x0f
+#define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
+#define ZEND_FETCH_CLASS_SILENT      0x0100
 
 /* variable parsing type (compile-time) */
 #define ZEND_PARSED_MEMBER				(1<<0)
@@ -750,7 +725,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	(ARG_SEND_TYPE(zf, arg_num) == ZEND_SEND_PREFER_REF)
 
-
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
 
@@ -771,8 +745,6 @@ END_EXTERN_C()
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
-
-#define ZEND_HALT_CONSTANT_NAME	    "__COMPILER_HALT_OFFSET__"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

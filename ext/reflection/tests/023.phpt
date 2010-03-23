@@ -19,14 +19,14 @@ var_dump($class->getDefaultProperties());
 ?>
 --EXPECT--	
 array(5) {
-  [u"p4"]=>
+  ["p4"]=>
   int(4)
-  [u"p5"]=>
+  ["p5"]=>
   int(5)
-  [u"p6"]=>
+  ["p6"]=>
   int(6)
-  [u"p2"]=>
+  ["p2"]=>
   int(2)
-  [u"p3"]=>
+  ["p3"]=>
   int(3)
 }

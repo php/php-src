@@ -40,16 +40,16 @@ $input_values = array(
        array('Mango', array("Apple", 'Orange', "Lemon")),
 
        // bool values
-/*4*/  array(array(true, false), array(TRUE, FALSE)),
+/*4*/  array( array(true, false), array(TRUE, FALSE)),
 
        // null values
-       array(array(null), array(NULL)),
+       array( array(null), array(NULL)),
 
        // empty array
        array(),
 
        // binary array
-       array(b"binary"),
+       array(array(b'binary')),
 
        // mixed array
 /*8*/  array(16, 8.345, array("Fruits"), array(true, null), array(FALSE), array(-98, 0.005, 'banana'))
@@ -61,7 +61,7 @@ for($count = 0; $count < count($input_values); $count++) {
 }  
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk_recursive() : 'input' array with different values***
 
 -- Iteration 1 --

@@ -191,6 +191,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_substr_count() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: mb_substr_count() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 Done

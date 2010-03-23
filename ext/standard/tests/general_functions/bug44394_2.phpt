@@ -26,7 +26,6 @@ ob_end_clean();
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/sess_'.session_id());
 foreach (glob(__DIR__ . '/sess_*') as $filename) {
   unlink($filename);
 }

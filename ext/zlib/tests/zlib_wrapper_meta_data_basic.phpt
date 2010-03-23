@@ -24,46 +24,42 @@ gzclose($h);
 ===DONE===
 --EXPECTF--
 no wrapper
-array(8) {
-  [u"stream_type"]=>
-  unicode(4) "ZLIB"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(7) {
+  ["stream_type"]=>
+  string(4) "ZLIB"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"timed_out"]=>
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }
 
 with wrapper
-array(10) {
-  [u"wrapper_type"]=>
-  unicode(4) "ZLIB"
-  [u"stream_type"]=>
-  unicode(4) "ZLIB"
-  [u"mode"]=>
-  unicode(1) "r"
-  [u"unread_bytes"]=>
+array(9) {
+  ["wrapper_type"]=>
+  string(4) "ZLIB"
+  ["stream_type"]=>
+  string(4) "ZLIB"
+  ["mode"]=>
+  string(1) "r"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(true)
-  [u"uri"]=>
-  unicode(%d) "compress.zlib://%s/004.txt.gz"
-  [u"timed_out"]=>
+  ["uri"]=>
+  string(%d) "compress.zlib://%s/004.txt.gz"
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }
 ===DONE===

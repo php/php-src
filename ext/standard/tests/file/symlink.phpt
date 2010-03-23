@@ -44,9 +44,9 @@ var_dump(linkinfo("."));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 bool(true)
-unicode(%d) "%ssymlink.dat"
+string(%d) "%ssymlink.dat"
 int(%d)
 
 Warning: readlink(): No such file or directory in %s on line %d

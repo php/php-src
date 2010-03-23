@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<project name="generate" default="test" basedir=".">
+
+  <property name="build.dir" value="_build" />
+  
+  <target name="docs" description="Create API documentation.">
+    <exec command="doxygen doxygen.conf" />
+  </target>
+
+  <target name="test" description="Run all unit tests.">
+    <exec command="phpunit --coverage-html coverage tests" passthru="true" />
+  </target>
+
+</project>

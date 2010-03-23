@@ -52,19 +52,19 @@ NULL
 
 -- Testing substr_replace() function with start and length different types --
 
-Warning: substr_replace(): 'from' and 'len' should be of same type - numerical or array in %s on line %d
-unicode(12) "Good morning"
+Warning: substr_replace(): 'from' and 'len' should be of same type - numerical or array  in %s on line %d
+string(12) "Good morning"
 
-Warning: substr_replace(): 'from' and 'len' should be of same type - numerical or array in %s on line %d
-unicode(12) "Good morning"
+Warning: substr_replace(): 'from' and 'len' should be of same type - numerical or array  in %s on line %d
+string(12) "Good morning"
 
 -- Testing substr_replace() function with start and length with a different number of elments --
 
 Warning: substr_replace(): 'from' and 'len' should have the same number of elements in %s on line %d
-unicode(12) "Good morning"
+string(12) "Good morning"
 
 -- Testing substr_replace() function with start and length as arrays but string not--
 
 Warning: substr_replace(): Functionality of 'from' and 'len' as arrays is not implemented in %s on line %d
-unicode(12) "Good morning"
+string(12) "Good morning"
 ===DONE===

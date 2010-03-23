@@ -17,70 +17,70 @@ var_dump(preg_split('/\d*/', 'ab2c3u', -1, PREG_SPLIT_NO_EMPTY));
 
 ?>
 --EXPECTF--
-Warning: preg_split() expects at least 2 parameters, 0 given in %s on line %d
+Warning: preg_split() expects at least 2 parameters, 0 given in %ssplit.php on line 3
 bool(false)
 
-Warning: preg_split(): Compilation failed: nothing to repeat at offset 0 in %s on line %d
+Warning: preg_split(): Compilation failed: nothing to repeat at offset 0 in %ssplit.php on line 4
 bool(false)
 array(3) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "yy"
+  string(2) "yy"
   [2]=>
-  unicode(3) "zzz"
+  string(3) "zzz"
 }
 array(3) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "yy"
+  string(2) "yy"
   [2]=>
-  unicode(3) "zzz"
+  string(3) "zzz"
 }
 array(3) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "yy"
+  string(2) "yy"
   [2]=>
-  unicode(3) "zzz"
+  string(3) "zzz"
 }
 array(1) {
   [0]=>
-  unicode(8) "x yy,zzz"
+  string(8) "x yy,zzz"
 }
 array(2) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(6) "yy,zzz"
+  string(6) "yy,zzz"
 }
 array(8) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(1) "c"
+  string(1) "c"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(1) "u"
+  string(1) "u"
   [7]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(4) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(1) "u"
+  string(1) "u"
 }

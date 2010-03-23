@@ -119,114 +119,114 @@ echo "Done";
 bool(true)
 array(4) {
   [-2345]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [12345]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 
 -- Iteration 2 --
 bool(true)
 array(3) {
   [0]=>
-  unicode(4) "half"
+  string(4) "half"
   [-10]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [10]=>
-  unicode(8) "positive"
+  string(8) "positive"
 }
 
 -- Iteration 3 --
 bool(true)
 array(2) {
   [12345678]=>
-  unicode(5) "large"
+  string(5) "large"
   [0]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 
 -- Iteration 4 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(6) "null 1"
+  [""]=>
+  string(6) "null 1"
 }
 
 -- Iteration 5 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 -- Iteration 6 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
   [1]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
 }
 
 -- Iteration 7 --
 bool(true)
 array(2) {
   [0]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
   [1]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
 }
 
 -- Iteration 8 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(6) "emptyd"
+  [""]=>
+  string(6) "emptyd"
 }
 
 -- Iteration 9 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 
 -- Iteration 10 --
 bool(true)
 array(3) {
-  [u"stringd"]=>
-  unicode(7) "stringd"
-  [u"hello world"]=>
-  unicode(7) "stringh"
-  [u"strings"]=>
-  unicode(7) "strings"
+  ["stringd"]=>
+  string(7) "stringd"
+  ["hello world"]=>
+  string(7) "stringh"
+  ["strings"]=>
+  string(7) "strings"
 }
 
 -- Iteration 11 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 -- Iteration 12 --
 bool(true)
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 
 -- Iteration 13 --
 bool(true)
 array(3) {
-  [u"foo"]=>
-  unicode(3) "bar"
-  [u"baz"]=>
-  unicode(3) "bar"
-  [u"hello"]=>
-  unicode(5) "world"
+  ["foo"]=>
+  string(3) "bar"
+  ["baz"]=>
+  string(3) "bar"
+  ["hello"]=>
+  string(5) "world"
 }
 Done

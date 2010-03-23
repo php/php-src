@@ -5,7 +5,7 @@ SimpleXML: XPath
 --FILE--
 <?php 
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -31,7 +31,7 @@ var_dump($sxe->xpath("***"));
 array(1) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"test"]=>
+    ["test"]=>
     object(SimpleXMLElement)#%d (0) {
     }
   }

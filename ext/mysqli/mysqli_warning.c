@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,12 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@php.net>                               |
-  |          Andrey Hristov <andrey@php.net>                             |
-  |          Ulf Wendel <uw@php.net>                                     |
+  | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id$ 
 */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,6 +26,13 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+
+/* Define these in the PHP5 tree to make merging easy process */
+#define ZSTR_DUPLICATE (1<<0)
+#define ZSTR_AUTOFREE  (1<<1)
+
+#define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s), ((flags) & ZSTR_DUPLICATE))
+#define ZVAL_UTF8_STRINGL(z, s, l, flags)      ZVAL_STRINGL((z), (char*)(s), (l), ((flags) & ZSTR_DUPLICATE))
 
 
 /* {{{ void php_clear_warnings() */
@@ -105,12 +109,7 @@ MYSQLI_WARNING *php_new_warning(const zval *reason, int errorno TSRMLS_DC)
 
 	w->reason = *reason;
 	zval_copy_ctor(&(w->reason));
-	/*
-	  XXX: THIS JUST WON'T WORK IF 'character_set_system' is different
-	       than latin1 or utf8 !!!! We have to fix it by querying the server for its
-		   character_set_system and create appropriate convertor for anything but
-		   utf8/latin1 .
-	*/
+
 	ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
 	
 	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
@@ -331,10 +330,10 @@ const mysqli_property_entry mysqli_warning_property_entries[] = {
 
 /* {{{ mysqli_warning_property_info_entries */
 zend_property_info mysqli_warning_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, {"message"}, 	sizeof("message") - 1,	0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"sqlstate"},	sizeof("sqlstate") - 1,	0, {NULL}, 0, NULL},
-	{ZEND_ACC_PUBLIC, {"errno"},	sizeof("errno") - 1, 	0, {NULL}, 0, NULL},
-	{0,					{NULL}, 			0,				0, {NULL}, 0, NULL}	
+	{ZEND_ACC_PUBLIC, "message", 	sizeof("message") - 1,	0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,	0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1, 	0, NULL, 0, NULL},
+	{0,					NULL, 			0,					0, NULL, 0, NULL}	
 };
 /* }}} */
 

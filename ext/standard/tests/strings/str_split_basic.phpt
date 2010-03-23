@@ -1,5 +1,5 @@
 --TEST--
-Test str_split() function : basic functionality(Bug#42866)
+Test str_split() function : basic functionality 
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
@@ -26,66 +26,66 @@ var_dump( str_split($str) );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing str_split() : basic functionality ***
 -- With all possible arguments --
 array(5) {
   [0]=>
-  unicode(5) "This "
+  string(5) "This "
   [1]=>
-  unicode(5) "is ba"
+  string(5) "is ba"
   [2]=>
-  unicode(5) "sic t"
+  string(5) "sic t"
   [3]=>
-  unicode(5) "estca"
+  string(5) "estca"
   [4]=>
-  unicode(2) "se"
+  string(2) "se"
 }
 -- With split_length as default argument --
 array(22) {
   [0]=>
-  unicode(1) "T"
+  string(1) "T"
   [1]=>
-  unicode(1) "h"
+  string(1) "h"
   [2]=>
-  unicode(1) "i"
+  string(1) "i"
   [3]=>
-  unicode(1) "s"
+  string(1) "s"
   [4]=>
-  unicode(1) " "
+  string(1) " "
   [5]=>
-  unicode(1) "i"
+  string(1) "i"
   [6]=>
-  unicode(1) "s"
+  string(1) "s"
   [7]=>
-  unicode(1) " "
+  string(1) " "
   [8]=>
-  unicode(1) "b"
+  string(1) "b"
   [9]=>
-  unicode(1) "a"
+  string(1) "a"
   [10]=>
-  unicode(1) "s"
+  string(1) "s"
   [11]=>
-  unicode(1) "i"
+  string(1) "i"
   [12]=>
-  unicode(1) "c"
+  string(1) "c"
   [13]=>
-  unicode(1) " "
+  string(1) " "
   [14]=>
-  unicode(1) "t"
+  string(1) "t"
   [15]=>
-  unicode(1) "e"
+  string(1) "e"
   [16]=>
-  unicode(1) "s"
+  string(1) "s"
   [17]=>
-  unicode(1) "t"
+  string(1) "t"
   [18]=>
-  unicode(1) "c"
+  string(1) "c"
   [19]=>
-  unicode(1) "a"
+  string(1) "a"
   [20]=>
-  unicode(1) "s"
+  string(1) "s"
   [21]=>
-  unicode(1) "e"
+  string(1) "e"
 }
 Done

@@ -22,7 +22,7 @@ function Test($x) {
 
 $x = new SoapServer(dirname(__FILE__)."/bug39832.wsdl");
 $x->addFunction("Test");
-$x->handle();
+$x->handle($HTTP_RAW_POST_DATA);
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

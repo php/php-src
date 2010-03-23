@@ -35,22 +35,22 @@ array(8) {
   [-1000]=>
   array(2) {
     [0]=>
-    unicode(6) "banana"
+    string(6) "banana"
     [1]=>
-    unicode(6) "orange"
+    string(6) "orange"
   }
-  [u"test"]=>
+  ["test"]=>
   int(27)
   [0]=>
-  unicode(3) "PHP"
+  string(3) "PHP"
   [17]=>
-  unicode(27) "PHP: Hypertext Preprocessor"
+  string(27) "PHP: Hypertext Preprocessor"
   [5]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [1001]=>
-  unicode(6) "monkey"
+  string(6) "monkey"
   [1000]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 
  -- Testing uksort() -- 
@@ -58,23 +58,23 @@ array(8) {
   [-1000]=>
   array(2) {
     [0]=>
-    unicode(6) "banana"
+    string(6) "banana"
     [1]=>
-    unicode(6) "orange"
+    string(6) "orange"
   }
   [0]=>
-  unicode(3) "PHP"
+  string(3) "PHP"
   [1000]=>
-  unicode(4) "test"
+  string(4) "test"
   [1001]=>
-  unicode(6) "monkey"
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
   [17]=>
-  unicode(27) "PHP: Hypertext Preprocessor"
+  string(27) "PHP: Hypertext Preprocessor"
   [5]=>
-  unicode(4) "Test"
-  [u"test"]=>
+  string(4) "Test"
+  ["test"]=>
   int(27)
 }
 
@@ -85,20 +85,20 @@ array(8) {
   [1]=>
   array(2) {
     [0]=>
-    unicode(6) "banana"
+    string(6) "banana"
     [1]=>
-    unicode(6) "orange"
+    string(6) "orange"
   }
   [2]=>
   int(27)
   [3]=>
-  unicode(3) "PHP"
+  string(3) "PHP"
   [4]=>
-  unicode(27) "PHP: Hypertext Preprocessor"
+  string(27) "PHP: Hypertext Preprocessor"
   [5]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [6]=>
-  unicode(6) "monkey"
+  string(6) "monkey"
   [7]=>
-  unicode(4) "test"
+  string(4) "test"
 }

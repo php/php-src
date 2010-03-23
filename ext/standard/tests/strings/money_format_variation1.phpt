@@ -49,7 +49,7 @@ $formats =  array (
 		  -2147483648,
 		
 		  // float values
-/*7*/	  0.5,
+/*7*/	  10.5,
 		  -20.5,
 		  10.1234567e10,
 		
@@ -94,78 +94,79 @@ $value = 1234.56;
 
 foreach($formats as $format) {
   echo "-- Iteration $count --\n";
-  echo gettype( money_format($format, $value) )."\n";
+  echo gettype(money_format($format, $value))."\n";
   $count ++;
 }
 
 // close the file handle
 fclose($file_handle);  
+
 ?>
-===DONE===
+===Done===
 --EXPECTF--
 *** Testing money_format() function: with unexpected inputs for 'format' argument ***
 -- Iteration 1 --
-unicode
+string
 -- Iteration 2 --
-unicode
+string
 -- Iteration 3 --
-unicode
+string
 -- Iteration 4 --
-unicode
+string
 -- Iteration 5 --
-unicode
+string
 -- Iteration 6 --
-unicode
+string
 -- Iteration 7 --
-unicode
+string
 -- Iteration 8 --
-unicode
+string
 -- Iteration 9 --
-unicode
+string
 -- Iteration 10 --
 
-Warning: money_format() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: money_format() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: money_format() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
-unicode
+string
 -- Iteration 14 --
-unicode
+string
 -- Iteration 15 --
-unicode
+string
 -- Iteration 16 --
-unicode
+string
 -- Iteration 17 --
-unicode
+string
 -- Iteration 18 --
-unicode
+string
 -- Iteration 19 --
-unicode
+string
 -- Iteration 20 --
-unicode
+string
 -- Iteration 21 --
-unicode
+string
 -- Iteration 22 --
-unicode
+string
 -- Iteration 23 --
 
-Warning: money_format() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: money_format() expects parameter 1 to be string, object given in %s on line %d
 NULL
 -- Iteration 24 --
-unicode
+string
 -- Iteration 25 --
 
-Warning: money_format() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: money_format() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 26 --
-unicode
+string
 -- Iteration 27 --
-unicode
-===DONE===
+string
+===Done===

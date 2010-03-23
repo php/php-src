@@ -104,13 +104,13 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
@@ -160,25 +160,25 @@ NULL
 
 --uppercase NULL--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
 --lowercase null--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
@@ -187,13 +187,13 @@ float(%f)
 
 --lowercase false--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
@@ -202,37 +202,37 @@ float(%f)
 
 --uppercase FALSE--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
 --empty string DQ--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
 --empty string SQ--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
@@ -260,25 +260,25 @@ NULL
 
 --undefined var--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 
 --unset var--
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 ===DONE===

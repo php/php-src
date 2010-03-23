@@ -52,5 +52,5 @@ class SOAP_Interop_GroupH {
 
 $server = new SoapServer(dirname(__FILE__)."/round4_groupH_simple_rpcenc.wsdl");
 $server->setClass("SOAP_Interop_GroupH");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ?>

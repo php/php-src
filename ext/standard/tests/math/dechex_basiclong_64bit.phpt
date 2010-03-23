@@ -28,33 +28,33 @@ foreach ($longVals as $longVal) {
 ===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
-unicode(16) "7fffffffffffffff"
+string(16) "7fffffffffffffff"
 --- testing: -9223372036854775808 ---
-unicode(16) "8000000000000000"
+string(16) "8000000000000000"
 --- testing: 2147483647 ---
-unicode(8) "7fffffff"
+string(8) "7fffffff"
 --- testing: -2147483648 ---
-unicode(16) "ffffffff80000000"
+string(16) "ffffffff80000000"
 --- testing: 9223372034707292160 ---
-unicode(16) "7fffffff80000000"
+string(16) "7fffffff80000000"
 --- testing: -9223372034707292160 ---
-unicode(16) "8000000080000000"
+string(16) "8000000080000000"
 --- testing: 2147483648 ---
-unicode(8) "80000000"
+string(8) "80000000"
 --- testing: -2147483649 ---
-unicode(16) "ffffffff7fffffff"
+string(16) "ffffffff7fffffff"
 --- testing: 4294967294 ---
-unicode(8) "fffffffe"
+string(8) "fffffffe"
 --- testing: 4294967295 ---
-unicode(8) "ffffffff"
+string(8) "ffffffff"
 --- testing: 4294967293 ---
-unicode(8) "fffffffd"
+string(8) "fffffffd"
 --- testing: 9223372036854775806 ---
-unicode(16) "7ffffffffffffffe"
+string(16) "7ffffffffffffffe"
 --- testing: 9.2233720368548E+18 ---
-unicode(16) "8000000000000000"
+string(16) "8000000000000000"
 --- testing: -9223372036854775807 ---
-unicode(16) "8000000000000001"
+string(16) "8000000000000001"
 --- testing: -9.2233720368548E+18 ---
-unicode(16) "8000000000000000"
+string(16) "8000000000000000"
 ===DONE===

@@ -39,10 +39,10 @@ foreach($entries as $entry) {
 $path = dirname(__FILE__) . '/readdir_variation2';
 rmdir($path);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing readdir() : usage variations ***
 
 -- Pass an empty directory to readdir() --
-unicode(1) "."
-unicode(2) ".."
+string(1) "."
+string(2) ".."
 ===DONE===

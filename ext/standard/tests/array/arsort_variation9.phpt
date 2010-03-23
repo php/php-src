@@ -49,7 +49,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various arrays with key values --
@@ -88,22 +88,22 @@ array(5) {
 - With default sort_flag -
 bool(true)
 array(3) {
-  [u"a"]=>
-  unicode(6) "orange"
+  ["a"]=>
+  string(6) "orange"
   [0]=>
-  unicode(6) "banana"
-  [u"c"]=>
-  unicode(5) "apple"
+  string(6) "banana"
+  ["c"]=>
+  string(5) "apple"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
-  [u"a"]=>
-  unicode(6) "orange"
+  ["a"]=>
+  string(6) "orange"
   [0]=>
-  unicode(6) "banana"
-  [u"c"]=>
-  unicode(5) "apple"
+  string(6) "banana"
+  ["c"]=>
+  string(5) "apple"
 }
 
 -- Iteration 3 --
@@ -145,21 +145,21 @@ array(6) {
 bool(true)
 array(3) {
   [6]=>
-  unicode(5) "third"
+  string(5) "third"
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(3) {
   [6]=>
-  unicode(5) "third"
+  string(5) "third"
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
 }
 
 -- Iteration 5 --
@@ -200,59 +200,59 @@ array(6) {
 - With default sort_flag -
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1)
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1)
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 
 -- Iteration 7 --
 - With default sort_flag -
 bool(true)
 array(4) {
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(4) {
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 Done

@@ -11,7 +11,6 @@ print  "--- save as XML\n";
 print adjustDoctype($dom->saveXML());
 print  "--- save as HTML\n";
 
-$dom->formatOutput = true;
 print adjustDoctype($dom->saveHTML());
 
 function adjustDoctype($xml) {

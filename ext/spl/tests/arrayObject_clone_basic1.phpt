@@ -19,31 +19,30 @@ array(4) {
   int(1)
   [1]=>
   int(2)
-  [u"p1"]=>
-  unicode(35) "new element added to a before clone"
-  [u"p2"]=>
-  unicode(34) "new element added to a after clone"
+  ["p1"]=>
+  string(35) "new element added to a before clone"
+  ["p2"]=>
+  string(34) "new element added to a after clone"
 }
 object(ArrayObject)#1 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
     [1]=>
     int(2)
-    [u"new.aa1"]=>
-    unicode(24) "new element added to aa1"
+    ["new.aa1"]=>
+    string(24) "new element added to aa1"
   }
 }
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
     [1]=>
     int(2)
-    [u"new.aa2"]=>
-    unicode(24) "new element added to aa2"
+    ["new.aa2"]=>
+    string(24) "new element added to aa2"
   }
 }
-

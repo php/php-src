@@ -20,14 +20,14 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unique() : array with duplicate keys for $input argument ***
 array(3) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 Done

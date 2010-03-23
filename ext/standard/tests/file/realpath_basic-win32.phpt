@@ -67,19 +67,19 @@ rmdir("$name_prefix/");
 *** Testing realpath() on filenames ***
 
 -- Iteration 1 --
-unicode(%d) "%s\realpath_basic\home\realpath_basic.tmp"
+string(%d) "%s\realpath_basic\home\realpath_basic.tmp"
 
 -- Iteration 2 --
 bool(false)
 
 -- Iteration 3 --
-unicode(%d) "%s\realpath_basic\home\test\realpath_basic.tmp"
+string(%d) "%s\realpath_basic\home\test\realpath_basic.tmp"
 
 -- Iteration 4 --
 bool(false)
 
 -- Iteration 5 --
-unicode(%d) "%s\realpath_basic\home\realpath_basic.tmp"
+string(%d) "%s\realpath_basic\home\realpath_basic.tmp"
 
 -- Iteration 6 --
 bool(false)

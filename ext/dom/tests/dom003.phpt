@@ -22,29 +22,29 @@ $rootNode->appendChild($rootNode);
 --EXPECTF--
 --- Catch exception with try/catch
 object(DOMException)#%d (%d) {
-  [u"message":protected]=>
-  unicode(23) "Hierarchy Request Error"
-  [u"string":u"Exception":private]=>
-  unicode(0) ""
-  [u"file":protected]=>
-  unicode(%d) "%sdom003.php"
-  [u"line":protected]=>
+  ["message":protected]=>
+  string(23) "Hierarchy Request Error"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["file":protected]=>
+  string(%d) "%sdom003.php"
+  ["line":protected]=>
   int(8)
-  [u"trace":u"Exception":private]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
-      [u"file"]=>
-      unicode(%d) "%sdom003.php"
-      [u"line"]=>
+      ["file"]=>
+      string(%d) "%sdom003.php"
+      ["line"]=>
       int(8)
-      [u"function"]=>
-      unicode(11) "appendChild"
-      [u"class"]=>
-      unicode(7) "DOMNode"
-      [u"type"]=>
-      unicode(2) "->"
-      [u"args"]=>
+      ["function"]=>
+      string(11) "appendChild"
+      ["class"]=>
+      string(7) "DOMNode"
+      ["type"]=>
+      string(2) "->"
+      ["args"]=>
       array(1) {
         [0]=>
         object(DOMElement)#%d (0) {
@@ -52,9 +52,9 @@ object(DOMException)#%d (%d) {
       }
     }
   }
-  [u"previous":u"Exception":private]=>
+  ["previous":"Exception":private]=>
   NULL
-  [u"code"]=>
+  ["code"]=>
   int(3)
 }
 --- Don't catch exception with try/catch

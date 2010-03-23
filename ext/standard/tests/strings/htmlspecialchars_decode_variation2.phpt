@@ -96,96 +96,96 @@ echo "Done";
 *** Testing htmlspecialchars_decode() : usage variations ***
 
 -- Iteration 1 --
-unicode(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
+string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 2 --
-unicode(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
+string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 3 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 4 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 5 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 6 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, array given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 11 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 12 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 13 --
-unicode(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 14 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 15 --
-unicode(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 16 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 17 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, string given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, object given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, object given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 
 -- Iteration 22 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 23 --
-unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 24 --
 
-Warning: htmlspecialchars_decode() expects parameter 2 to be long, resource given in %s on line %d
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, resource given in %shtmlspecialchars_decode_variation2.php on line %d
 NULL
 Done

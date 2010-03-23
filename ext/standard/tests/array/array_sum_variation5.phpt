@@ -1,5 +1,5 @@
 --TEST--
-Test array_sum() function : usage variations - array with reference variables
+Test array_sum() function : usage variations - array with reference variables as elements
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array $input)
@@ -8,18 +8,17 @@ Test array_sum() function : usage variations - array with reference variables
 */
 
 /*
-* Testing array_sum() with 'input' containing different reference variables 
+* Testing array_sum() with 'input' having reference variables as elements
 */
 
 echo "*** Testing array_sum() : array with elements as reference ***\n";
 
-// different variables which are used as elements of 'array_arg'
 $value1 = -5;
 $value2 = 100;
 $value3 = 0;
 $value4 = &$value1;
 
-// input an array containing elements with reference variables
+// input array containing elements as reference variables
 $input = array(
   0 => 10,
   1 => &$value4,
@@ -32,7 +31,7 @@ var_dump( array_sum($input) );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_sum() : array with elements as reference ***
 int(305)
 Done

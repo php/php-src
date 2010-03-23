@@ -88,17 +88,17 @@ array\(2\) {
 -- Iteration 2 --
 
 With default argument
-unicode\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
+string\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
 
 With num_req = 1
-unicode\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
+string\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
 
 With num_req = 2
 array\(2\) {
   \[0\]=>
-  unicode\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
+  string\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
   \[1\]=>
-  unicode\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
+  string\([0-9]*\) "[ot1 ]*[hnw2]*[eort]*[ew]*[e]*[l]*[v]*[e]*"
 }
 
 -- Iteration 3 --
@@ -152,16 +152,17 @@ array\(2\) {
 -- Iteration 6 --
 
 With default argument
-unicode\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
+string\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
 
 With num_req = 1
-unicode\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
+string\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
 
 With num_req = 2
 array\(2\) {
   \[0\]=>
-  unicode\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
+  string\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
   \[1\]=>
-  unicode\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
+  string\([0-9]*\) "[#&!N  <\n\t'"\0]*[U#$>]*[rL]*[L]*"
 }
 Done
+

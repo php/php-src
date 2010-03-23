@@ -95,13 +95,13 @@ Error: 8 - Undefined variable: undefined_var, %s(%d)
 Error: 8 - Undefined variable: unset_var, %s(%d)
 
 -- Arg value 0 --
-unicode(0) ""
+string(0) ""
 
 -- Arg value 1 --
-unicode(0) ""
+string(0) ""
 
 -- Arg value 12345 --
-unicode(6) "d76df8"
+string(6) "d76df8"
 
 -- Arg value -2345 --
 bool(false)
@@ -113,7 +113,7 @@ bool(false)
 bool(false)
 
 -- Arg value 10.1234567e10 --
-unicode(18) "d74d76df8e7aef4d34"
+string(18) "d74d76df8e7aef4d34"
 
 -- Arg value 10.7654321E-10 --
 bool(false)
@@ -122,60 +122,60 @@ bool(false)
 bool(false)
 
 -- Arg value array() --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 -- Arg value array(0) --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 -- Arg value array(1) --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 -- Arg value array(1, 2) --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 -- Arg value NULL --
-unicode(0) ""
+string(0) ""
 
 -- Arg value null --
-unicode(0) ""
+string(0) ""
 
 -- Arg value true --
-unicode(0) ""
+string(0) ""
 
 -- Arg value false --
-unicode(0) ""
+string(0) ""
 
 -- Arg value TRUE --
-unicode(0) ""
+string(0) ""
 
 -- Arg value FALSE --
-unicode(0) ""
+string(0) ""
 
 -- Arg value "" --
-unicode(0) ""
+string(0) ""
 
 -- Arg value '' --
-unicode(0) ""
+string(0) ""
 
 -- Arg value stdClass object --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, object given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 -- Arg value undefined variable --
-unicode(0) ""
+string(0) ""
 
 -- Arg value unset variable --
-unicode(0) ""
+string(0) ""
 
 -- Arg value resource --
-Error: 2 - base64_decode() expects parameter 1 to be binary string, resource given, %s(%d)
+Error: 2 - base64_decode() expects parameter 1 to be string, resource given, %s(%d)
 NULL
 ===Done===

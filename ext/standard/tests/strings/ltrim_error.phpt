@@ -44,18 +44,18 @@ NULL
 -- Test ltrim function with various invalid charlists
 
 Warning: ltrim(): Invalid '..'-range, no character to the left of '..' in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: ltrim(): Invalid '..'-range, no character to the right of '..' in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: ltrim(): Invalid '..'-range, '..'-range needs to be incrementing in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: ltrim(): Invalid '..'-range in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 ===DONE===

@@ -48,18 +48,18 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [3]=>
-  unicode(5) "world"
+  string(5) "world"
 }
 array(0) {
 }
 array(0) {
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(0) {

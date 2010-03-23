@@ -22,19 +22,18 @@ var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+--EXPECTF--	
 array(1) {
   [0]=>
-  float(2.1)
+  float(2,1)
 }
 array(1) {
   [0]=>
-  float(0.15)
+  float(0,15)
 }
 array(1) {
   [0]=>
-  float(123.13452345)
+  float(123,13452345)
 }
 array(2) {
   [0]=>

@@ -33,6 +33,7 @@ NULL
 Warning: copy() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: copy() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: copy() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 *** Done ***
+

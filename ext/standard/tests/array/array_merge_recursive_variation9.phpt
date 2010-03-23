@@ -48,55 +48,55 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge_recursive() : arrays with common key and value ***
 -- Integer values --
 array(3) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
     int(2)
     [1]=>
     int(2)
   }
-  [u"c"]=>
+  ["c"]=>
   int(4)
 }
 -- Float values --
 array(3) {
-  [u"a"]=>
+  ["a"]=>
   float(1.1)
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
     float(2.2)
     [1]=>
     float(2.2)
   }
-  [u"c"]=>
+  ["c"]=>
   float(3.3)
 }
 -- String values --
 array(3) {
-  [u"a"]=>
-  unicode(5) "hello"
-  [u"b"]=>
+  ["a"]=>
+  string(5) "hello"
+  ["b"]=>
   array(2) {
     [0]=>
-    unicode(5) "world"
+    string(5) "world"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
   }
-  [u"c"]=>
-  unicode(6) "string"
+  ["c"]=>
+  string(6) "string"
 }
 -- Boolean values --
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   bool(true)
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
     bool(false)
@@ -106,7 +106,7 @@ array(2) {
 }
 -- Null values --
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   array(2) {
     [0]=>
     NULL

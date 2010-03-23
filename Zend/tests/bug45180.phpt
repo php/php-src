@@ -40,22 +40,22 @@ foo::$f();
 ?>
 --EXPECT--
 __call:
-unicode(3) "ABC"
+string(3) "ABC"
 __call:
-unicode(3) "ABC"
+string(3) "ABC"
 __callstatic:
-unicode(3) "XYZ"
+string(3) "XYZ"
 __callstatic:
-unicode(3) "WWW"
+string(3) "WWW"
 __callstatic:
-unicode(3) "ABC"
+string(3) "ABC"
 __callstatic:
-unicode(1) "A"
+string(1) "A"
 __callstatic:
-unicode(1) "B"
+string(1) "B"
 __callstatic:
-unicode(1) "C"
+string(1) "C"
 __callstatic:
-unicode(3) "FOO"
+string(3) "FOO"
 __callstatic:
-unicode(3) "FOO"
+string(3) "FOO"

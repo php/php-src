@@ -5,6 +5,7 @@ correct instantiation of references between variables in sessions
 --INI--
 session.use_cookies=0
 session.cache_limiter=
+register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -31,41 +32,50 @@ $b = new b($a);
 echo "original values:\n";
 var_dump($a,$b);
 
-$_SESSION['a'] = $a;
-$_SESSION['b'] = $b;
-
+session_register("a");
+session_register("b");
 session_write_close();
-unset($_SESSION['a']);
-unset($_SESSION['b']);
+
+session_unregister("a");
+session_unregister("b");
 
 session_start();
-$a = $_SESSION['a'];
-$b = $_SESSION['b'];
+
 echo "values after session:\n";
 var_dump($a,$b);
 ?>
 --EXPECTF--
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 original values:
 object(a)#%d (1) {
-  [u"test"]=>
-  unicode(5) "hallo"
+  ["test"]=>
+  string(5) "hallo"
 }
 object(b)#%d (1) {
-  [u"a"]=>
+  ["a"]=>
   &object(a)#%d (1) {
-    [u"test"]=>
-    unicode(5) "hallo"
+    ["test"]=>
+    string(5) "hallo"
   }
 }
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 values after session:
 object(a)#%d (1) {
-  [u"test"]=>
-  unicode(5) "hallo"
+  ["test"]=>
+  string(5) "hallo"
 }
 object(b)#%d (1) {
-  [u"a"]=>
+  ["a"]=>
   &object(a)#%d (1) {
-    [u"test"]=>
-    unicode(5) "hallo"
+    ["test"]=>
+    string(5) "hallo"
   }
 }
+

@@ -35,9 +35,8 @@ PHP Extension Build => API%s
 Debug Build => %s
 Thread Safety => %s
 Zend Memory Manager => %s
-Unicode Support => %s
+Zend Multibyte Support => %s
 IPv6 Support => %s
-
 Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
 Registered Stream Filters => %s
@@ -47,27 +46,17 @@ Registered Stream Filters => %s
 
 
 Configuration
-
-%a
-
+%A
 Core
-
-%a
-
+%A
 Additional Modules
-
-%a
-
+%A
 Environment
-
-%a
-
+%A
 PHP Variables
-
-%a
-
+%A
 PHP License
-%a
+%A
 bool(true)
 --
 

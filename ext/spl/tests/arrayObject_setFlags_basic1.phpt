@@ -33,13 +33,13 @@ access_p($ao);
 --EXPECTF--
 --> Access the real property:
 bool(true)
-unicode(15) "object property"
-unicode(23) "object property.changed"
+string(15) "object property"
+string(23) "object property.changed"
 
 --> Remove the real property and access the array element:
 bool(true)
-unicode(13) "array element"
-unicode(21) "array element.changed"
+string(13) "array element"
+string(21) "array element.changed"
 
 --> Remove the array element and try access again:
 bool(false)
@@ -48,4 +48,4 @@ Notice: Undefined index:  p in %s on line 10
 NULL
 
 Notice: Undefined index:  p in %s on line 12
-unicode(8) ".changed"
+string(8) ".changed"

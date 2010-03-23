@@ -9,11 +9,11 @@ strrev() function
 		$str .= chr($i++);
 	}
 	
-	var_dump(md5((binary)strrev($str)));
+	var_dump(md5(strrev($str)));
 	var_dump(strrev(NULL));
 	var_dump(strrev(""));
 ?>
 --EXPECT--
-unicode(32) "ec6df70f2569891eae50321a9179eb82"
-unicode(0) ""
-unicode(0) ""
+string(32) "ec6df70f2569891eae50321a9179eb82"
+string(0) ""
+string(0) ""

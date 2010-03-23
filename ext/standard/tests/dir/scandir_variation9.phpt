@@ -37,36 +37,36 @@ delete_files($dir, 2);
 $dir = dirname(__FILE__) . '/scandir_variation9';
 rmdir($dir);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing scandir() : usage variations ***
 array(4) {
   [0]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [1]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [2]=>
-  unicode(2) ".."
+  string(2) ".."
   [3]=>
-  unicode(1) "."
+  string(1) "."
 }
 array(4) {
   [0]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [1]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [2]=>
-  unicode(2) ".."
+  string(2) ".."
   [3]=>
-  unicode(1) "."
+  string(1) "."
 }
 array(4) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [3]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
 }
 ===DONE===

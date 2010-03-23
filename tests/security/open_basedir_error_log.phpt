@@ -39,7 +39,7 @@ bool(false)
 
 Warning: ini_set(): open_basedir restriction in effect. File(%s/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-unicode(0) ""
-unicode(%d) "%s/test/ok/ok.txt"
+string(0) ""
+string(%d) "%s/test/ok/ok.txt"
 *** Finished testing open_basedir configuration [error_log] ***
 

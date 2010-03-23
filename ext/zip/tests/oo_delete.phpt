@@ -65,6 +65,7 @@ $sb = $zip->statIndex(2);
 var_dump($sb);
 $zip->close();
 unset($zip);
+
 if (file_exists($file)) {
 	unlink($file);
 }

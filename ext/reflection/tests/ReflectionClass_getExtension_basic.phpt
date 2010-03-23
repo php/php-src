@@ -12,6 +12,6 @@ Rein Velt <rein@velt.org>
 ?>
 --EXPECTF--
 object(ReflectionExtension)#%d (1) {
-  [u"name"]=>
-  unicode(3) "dom"
+  ["name"]=>
+  string(3) "dom"
 }

@@ -51,27 +51,27 @@ Notice: Object of class classWithoutToString could not be converted to double in
 Notice: Object of class classWithoutToString could not be converted to double in %sarray_multisort_variation9.php on line %d
 bool(true)
 array(10) {
-  [u"float -10.5"]=>
+  ["float -10.5"]=>
   float(-10.5)
-  [u"string DQ"]=>
-  unicode(6) "string"
-  [u"undefined var"]=>
+  ["string DQ"]=>
+  string(6) "string"
+  ["undefined var"]=>
   NULL
-  [u"empty string DQ"]=>
-  unicode(0) ""
-  [u"uppercase NULL"]=>
+  ["empty string DQ"]=>
+  string(0) ""
+  ["uppercase NULL"]=>
   NULL
-  [u"int 0"]=>
+  ["int 0"]=>
   int(0)
   [0]=>
   array(0) {
   }
-  [u"instance of classWithoutToString"]=>
+  ["instance of classWithoutToString"]=>
   object(classWithoutToString)#2 (0) {
   }
-  [u"lowercase true"]=>
+  ["lowercase true"]=>
   bool(true)
-  [u"instance of classWithToString"]=>
+  ["instance of classWithToString"]=>
   object(classWithToString)#1 (0) {
   }
 }

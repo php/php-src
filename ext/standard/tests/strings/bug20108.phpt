@@ -7,5 +7,5 @@ Bug #20108 (Segfault on printf statement)
 	var_dump($z);
 ?>
 --EXPECT--
-unicode(581) "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 boo
+string(581) "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 boo
 "

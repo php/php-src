@@ -9,7 +9,7 @@ Test array_sum() function : usage variations - 'input' array with unexpected val
 
 /*
 * Testing array_sum() with array having other than numeric entries
-*    strings, bool, null, subarrays, objects
+*    strings, bool, null, subarrays & objects
 */
 
 echo "*** Testing array_sum() : array with unexpected entries ***\n";
@@ -67,7 +67,7 @@ echo "-- array with mixed values --\n";
 var_dump( array_sum($input) );
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_sum() : array with unexpected entries ***
 -- empty array --
 int(0)

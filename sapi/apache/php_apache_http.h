@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -19,6 +19,8 @@
 */
 
 /* $Id$ */
+
+#define NO_REGEX_EXTRA_H
 
 #ifdef WIN32
 #include <stddef.h>
@@ -65,4 +67,4 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 
-#include "mod_php.h"
+#include "mod_php5.h"

@@ -18,7 +18,7 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
@@ -43,18 +43,18 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Century number--
-unicode(%d) "%d"
-unicode(2) "20"
+string(%d) "%d"
+string(2) "20"
 
 --Month Date Year--
-unicode(%d) "%d/%d/%d"
-unicode(8) "08/08/08"
+string(%d) "%d/%d/%d"
+string(8) "08/08/08"
 
 --Year with century--
-unicode(%d) "%d"
-unicode(4) "2008"
+string(%d) "%d"
+string(4) "2008"
 
 --Year without century--
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 ===DONE===

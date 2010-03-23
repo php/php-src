@@ -7,8 +7,8 @@ Test usleep() function : error conditions
  * Source code: ext/standard/basic_functions.c
  */
  
-set_time_limit(20);
- 
+set_time_limit(20); 
+
 echo "*** Testing usleep() : error conditions ***\n";
 
 echo "\n-- Testing usleep() function with zero arguments --\n";

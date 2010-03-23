@@ -16,4 +16,3 @@ if (PHP_SOAP != "no") {
 			PHP_SOAP = "no"
 	}
 }
-

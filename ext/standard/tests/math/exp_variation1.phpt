@@ -141,12 +141,12 @@ float(1)
 
 -- Iteration 17 --
 
-Warning: exp() expects parameter 1 to be double, Unicode string given in %s on line %d
+Warning: exp() expects parameter 1 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: exp() expects parameter 1 to be double, Unicode string given in %s on line %d
+Warning: exp() expects parameter 1 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -156,17 +156,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: exp() expects parameter 1 to be double, Unicode string given in %s on line %d
+Warning: exp() expects parameter 1 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: exp() expects parameter 1 to be double, Unicode string given in %s on line %d
+Warning: exp() expects parameter 1 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: exp() expects parameter 1 to be double, Unicode string given in %s on line %d
+Warning: exp() expects parameter 1 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 23 --

@@ -15,7 +15,7 @@ test if bind_textdomain_codeset() returns correct value
 ?>
 --EXPECTF--	
 bool(false)
-%unicode|string%(5) "UTF-8"
+string(5) "UTF-8"
 Done
 --CREDITS--
 Florian Holzhauer fh-pt@fholzhauer.de

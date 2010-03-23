@@ -36,22 +36,23 @@ bool(false)
 bool(false)
 array(1) {
   [0]=>
-  unicode(5) "../ok"
+  string(5) "../ok"
 }
 array(1) {
   [0]=>
-  unicode(6) "ok.txt"
+  string(6) "ok.txt"
 }
 array(1) {
   [0]=>
-  unicode(12) "../ok/ok.txt"
+  string(12) "../ok/ok.txt"
 }
 array(1) {
   [0]=>
-  unicode(%d) "%s/test/ok/ok.txt"
+  string(%d) "%s/test/ok/ok.txt"
 }
 array(1) {
   [0]=>
-  unicode(%d) "%s/test/ok/../ok/ok.txt"
+  string(%d) "%s/test/ok/../ok/ok.txt"
 }
 *** Finished testing open_basedir configuration [glob] ***
+

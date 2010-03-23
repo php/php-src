@@ -99,7 +99,7 @@ Warning: base_convert(): Invalid `to base' (2147483647) in %s on line %d
 bool(false)
 
 -- Iteration 6 --
-unicode(2) "25"
+string(2) "25"
 
 -- Iteration 7 --
 
@@ -153,12 +153,12 @@ bool(false)
 
 -- Iteration 17 --
 
-Warning: base_convert() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: base_convert() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: base_convert() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: base_convert() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -168,17 +168,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: base_convert() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: base_convert() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: base_convert() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: base_convert() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: base_convert() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: base_convert() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 23 --

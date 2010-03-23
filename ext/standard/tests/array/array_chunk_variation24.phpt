@@ -14,8 +14,8 @@ for ($i = 0; $i < (sizeof($array) + 1); $i++) {
 ?>
 --EXPECT--
 array(1) {
-  [u"a"]=>
-  unicode(1) "A"
+  ["a"]=>
+  string(1) "A"
 }
 [0]
 NULL
@@ -27,20 +27,20 @@ array(1) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [u"a"]=>
-    unicode(1) "A"
+    ["a"]=>
+    string(1) "A"
   }
 }
 array(1) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
 }

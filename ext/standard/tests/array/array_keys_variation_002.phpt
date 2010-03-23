@@ -25,7 +25,7 @@ var_dump(array_keys(array()));  // null array
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_keys() on range of values ***
 array(4) {
   [0]=>
@@ -41,11 +41,11 @@ array(4) {
 *** Testing array_keys() on an array created on the fly ***
 array(3) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(0) {
 }

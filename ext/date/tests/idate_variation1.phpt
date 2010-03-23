@@ -101,18 +101,18 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
 --int 1--
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
 --int 12345--
@@ -173,34 +173,34 @@ bool(false)
 
 --empty array--
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: idate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: idate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -221,10 +221,10 @@ bool(false)
 
 --lowercase true--
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
 --lowercase false--
@@ -237,10 +237,10 @@ bool(false)
 
 --uppercase TRUE--
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
-Warning: idate(): Unrecognized date format token in %s on line %d
+Warning: idate(): Unrecognized date format token. in %s on line %d
 bool(false)
 
 --uppercase FALSE--
@@ -277,10 +277,10 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: idate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: idate() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
-Warning: idate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: idate() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 --undefined var--

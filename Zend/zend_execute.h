@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -52,10 +52,6 @@ typedef union _temp_variable {
 
 
 BEGIN_EXTERN_C()
-ZEND_API extern UChar u_main[sizeof("main")];
-ZEND_API extern UChar u_return[sizeof("return ")];
-ZEND_API extern UChar u_doublecolon[sizeof("::")];
-
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
@@ -74,18 +70,12 @@ static inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LI
 		FREE_ZVAL_REL(p);
 	}
 }
-ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
-ZEND_API int zend_lookup_class_ex(char *name, int name_length, char *autoload_name, zend_class_entry ***ce TSRMLS_DC);
-ZEND_API int zend_u_lookup_class(zend_uchar type, zstr name, int name_length, zend_class_entry ***ce TSRMLS_DC);
-ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length, zstr autoload_name, int do_normalize, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
-ZEND_API int zend_u_eval_string(zend_uchar type, zstr str, zval *retval_ptr, char *string_name TSRMLS_DC);
-ZEND_API int zend_u_eval_stringl(zend_uchar type, zstr str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
-ZEND_API int zend_u_eval_string_ex(zend_uchar type, zstr str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
-ZEND_API int zend_u_eval_stringl_ex(zend_uchar type, zstr str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 static inline int i_zend_is_true(zval *op)
 {
@@ -111,14 +101,6 @@ static inline int i_zend_is_true(zval *op)
 				result = 1;
 			}
 			break;
-		case IS_UNICODE:
-			if (Z_USTRLEN_P(op) == 0
-				|| (Z_USTRLEN_P(op)==1 && Z_USTRVAL_P(op)[0]=='0')) {
-				result = 0;
-			} else {
-				result = 1;
-			}
-			break;
 		case IS_ARRAY:
 			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
 			break;
@@ -128,7 +110,7 @@ static inline int i_zend_is_true(zval *op)
 
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
-					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL, NULL TSRMLS_CC) == SUCCESS) {
+					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL TSRMLS_CC) == SUCCESS) {
 						result = Z_LVAL(tmp);
 						break;
 					}
@@ -372,8 +354,8 @@ void execute_new_code(TSRMLS_D);
 
 
 /* services */
-ZEND_API zstr get_active_class_name(char **space TSRMLS_DC);
-ZEND_API zstr get_active_function_name(TSRMLS_D);
+ZEND_API char *get_active_class_name(char **space TSRMLS_DC);
+ZEND_API char *get_active_function_name(TSRMLS_D);
 ZEND_API char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(TSRMLS_D);
@@ -381,8 +363,7 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 ZEND_API void zend_set_timeout(long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
-ZEND_API zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
-ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, zstr class_name, uint class_name_len, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32
@@ -400,11 +381,9 @@ void zend_shutdown_timeout_thread(void);
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */
-#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && Z_TYPE_P(zval) == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : EMPTY_ZSTR)
+#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && Z_TYPE_P(zval) == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : "")
 
 ZEND_API zval** zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, zend_uint var);
-
-void init_unicode_strings(void);
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
 #define ZEND_USER_OPCODE_RETURN     1 /* exit from executor (return from function) */

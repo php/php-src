@@ -33,27 +33,27 @@ var_dump(get_included_files(true));
 -- List included files at start --
 array(1) {
   [0]=>
-  unicode(%d) "%sget_included_files.php"
+  string(%d) "%sget_included_files.php"
 }
 
 -- List included files atfter including inc1 -
 array(2) {
   [0]=>
-  unicode(%d) "%sget_included_files.php"
+  string(%d) "%sget_included_files.php"
   [1]=>
-  unicode(%d) "%sget_included_files_inc1.inc"
+  string(%d) "%sget_included_files_inc1.inc"
 }
 
 -- List included files atfter including inc2 which will include inc3 which includes inc1 --
 array(4) {
   [0]=>
-  unicode(%d) "%sget_included_files.php"
+  string(%d) "%sget_included_files.php"
   [1]=>
-  unicode(%d) "%sget_included_files_inc1.inc"
+  string(%d) "%sget_included_files_inc1.inc"
   [2]=>
-  unicode(%d) "%sget_included_files_inc2.inc"
+  string(%d) "%sget_included_files_inc2.inc"
   [3]=>
-  unicode(%d) "%sget_included_files_inc3.inc"
+  string(%d) "%sget_included_files_inc3.inc"
 }
 
 -- Error cases --

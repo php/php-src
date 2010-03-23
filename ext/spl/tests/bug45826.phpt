@@ -69,7 +69,7 @@ var_dump($o2[2][2] === $o2[2]);
 --EXPECT--
 bool(true)
 bool(true)
-unicode(84) "C:11:"ArrayObject":60:{x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;};m:a:0:{}}"
+string(84) "C:11:"ArrayObject":60:{x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;};m:a:0:{}}"
 string(125) "x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:3;i:2;C:11:"ArrayObject":45:{x:i:0;a:3:{i:0;r:3;i:1;r:3;i:2;r:5;};m:a:0:{}}};m:a:0:{}"
 bool(true)
 bool(true)
@@ -79,7 +79,7 @@ bool(true)
 #### Extending ArrayObject
 bool(true)
 bool(true)
-unicode(85) "C:12:"ArrayObject2":60:{x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;};m:a:0:{}}"
+string(85) "C:12:"ArrayObject2":60:{x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;};m:a:0:{}}"
 string(126) "x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:3;i:2;C:12:"ArrayObject2":45:{x:i:0;a:3:{i:0;r:3;i:1;r:3;i:2;r:5;};m:a:0:{}}};m:a:0:{}"
 bool(true)
 bool(true)

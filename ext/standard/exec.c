@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,6 +22,7 @@
 #include "php.h"
 #include <ctype.h>
 #include "php_string.h"
+#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "basic_functions.h"
@@ -56,21 +57,48 @@
  * If type==2, all lines will be saved to given array (exec with &$array)
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
- * Unicode command strings are encoding using filesystem_encoding, returned data is not decoded back to unicode
  */
 PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
-	char *buf;
-	int l, pclose_return;
-	char *cmd_p, *b, *d=NULL;
+	char *buf, *tmp=NULL;
+	int l = 0, pclose_return;
+	char *cmd_p, *b, *c, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
 
-	cmd_p = cmd;
+	if (PG(safe_mode)) {
+		if ((c = strchr(cmd, ' '))) {
+			*c = '\0';
+			c++;
+		}
+		if (strstr(cmd, "..")) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
+			goto err;
+		}
+		
+		b = strrchr(cmd, PHP_DIR_SEPARATOR);
+
+#ifdef PHP_WIN32
+		if (b && *b == '\\' && b == cmd) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid absolute path.");
+			goto err;
+		}
+#endif
+
+		spprintf(&d, 0, "%s%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
+		if (c) {
+			*(c - 1) = ' ';
+		}
+		cmd_p = php_escape_shell_cmd(d);
+		efree(d);
+		d = cmd_p;
+	} else {
+		cmd_p = cmd;
+	}
 
 #if PHP_SIGCHILD
 	sig_handler = signal (SIGCHLD, SIG_DFL);
@@ -93,8 +121,8 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 
 	if (type != 3) {
 		b = buf;
-
-		while (php_stream_get_line(stream, ZSTR(b), EXEC_INPUT_BUF, &bufl)) {
+		
+		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
 				if (buflen < (bufl + (b - buf) + EXEC_INPUT_BUF)) {
@@ -111,16 +139,15 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			if (type == 1) {
-				int ob_level;
 				PHPWRITE(buf, bufl);
-				if ((php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL, &ob_level TSRMLS_CC) == SUCCESS) && ob_level < 1) {
+				if (OG(ob_nesting_level) < 1) {
 					sapi_flush(TSRMLS_C);
 				}
 			} else if (type == 2) {
 				/* strip trailing whitespaces */
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
+				if (l != (int)(bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -133,7 +160,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
+				if (l != (int)(bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -143,7 +170,14 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			/* Return last line from the shell command */
-			RETVAL_STRINGL(buf, bufl, 1);
+			if (PG(magic_quotes_runtime)) {
+				int len;
+
+				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
+				RETVAL_STRINGL(tmp, len, 0);
+			} else {
+				RETVAL_STRINGL(buf, bufl, 1);
+			}
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}
@@ -176,28 +210,21 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
 	int cmd_len;
-	zend_uchar cmd_type;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
 	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|z/", &cmd, &cmd_len, &cmd_type, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|z/z/", &cmd, &cmd_len, &cmd_type, &ret_array, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 	if (!cmd_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
-	}
-
-	if (cmd_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &cmd, &cmd_len, (UChar*)cmd, cmd_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
 	}
 
 	if (!ret_array) {
@@ -213,14 +240,10 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		zval_dtor(ret_code);
 		ZVAL_LONG(ret_code, ret);
 	}
-
-	if (cmd_type == IS_UNICODE) {
-		efree(cmd);
-	}
 }
 /* }}} */
 
-/* {{{ proto string exec(string command [, array &output [, int &return_value]]) U
+/* {{{ proto string exec(string command [, array &output [, int &return_value]])
    Execute an external program */
 PHP_FUNCTION(exec)
 {
@@ -228,7 +251,7 @@ PHP_FUNCTION(exec)
 }
 /* }}} */
 
-/* {{{ proto int system(string command [, int &return_value]) U
+/* {{{ proto int system(string command [, int &return_value])
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
@@ -236,7 +259,7 @@ PHP_FUNCTION(system)
 }
 /* }}} */
 
-/* {{{ proto void passthru(string command [, int &return_value]) U
+/* {{{ proto void passthru(string command [, int &return_value])
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
@@ -295,8 +318,8 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 				output PATH whil ^%PATH^% not. escapeshellcmd will escape all %.
 			*/
 			case '%':
-				cmd[y++] = ' ';
-				break;
+			case '"':
+			case '\'':
 #endif
 			case '#': /* This is character-set independent */
 			case '&':
@@ -406,23 +429,16 @@ PHPAPI char *php_escape_shell_arg(char *str)
 }
 /* }}} */
 
-/* {{{ proto string escapeshellcmd(string command) U
+/* {{{ proto string escapeshellcmd(string command)
    Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
 	int command_len;
-	zend_uchar command_type;
 	char *cmd = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &command, &command_len, &command_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
 		return;
-	}
-
-	if (command_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
 	}
 
 	if (command_len) {
@@ -431,44 +447,29 @@ PHP_FUNCTION(escapeshellcmd)
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
-
-	if (command_type == IS_UNICODE) {
-		efree(command);
-	}
 }
 /* }}} */
 
-/* {{{ proto string escapeshellarg(string arg) U
+/* {{{ proto string escapeshellarg(string arg)
    Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
 	int argument_len;
-	zend_uchar argument_type;
 	char *cmd = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &argument, &argument_len, &argument_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
 		return;
-	}
-
-	if (argument_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &argument, &argument_len, (UChar*)argument, argument_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
 	}
 
 	if (argument) {
 		cmd = php_escape_shell_arg(argument);
 		RETVAL_STRING(cmd, 0);
 	}
-
-	if (argument_type == IS_UNICODE) {
-		efree(argument);
-	}
 }
 /* }}} */
 
-/* {{{ proto string shell_exec(string cmd) U
+/* {{{ proto string shell_exec(string cmd)
    Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
@@ -476,18 +477,16 @@ PHP_FUNCTION(shell_exec)
 	size_t total_readbytes;
 	char *command;
 	int command_len;
-	zend_uchar command_type;
 	char *ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &command, &command_len, &command_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
 		return;
 	}
 
-	if (command_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &command, &command_len, (UChar*)command, command_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	if (PG(safe_mode)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
+		RETURN_FALSE;
 	}
 
 #ifdef PHP_WIN32
@@ -500,21 +499,17 @@ PHP_FUNCTION(shell_exec)
 	}
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
-	total_readbytes = php_stream_copy_to_mem(stream, (void *)&ret, PHP_STREAM_COPY_ALL, 0);
+	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
 	if (total_readbytes > 0) {
 		RETVAL_STRINGL(ret, total_readbytes, 0);
 	}
-
-	if (command_type == IS_UNICODE) {
-		efree(command);
-	}
 }
 /* }}} */
 
 #ifdef HAVE_NICE
-/* {{{ proto bool proc_nice(int priority) U
+/* {{{ proto bool proc_nice(int priority)
    Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {

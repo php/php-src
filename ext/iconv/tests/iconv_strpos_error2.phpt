@@ -5,8 +5,6 @@ Test iconv_strpos() function : error conditions - Pass unknown encoding
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
 ?>
---XFAIL--
-Will fail until bug #48538 fixed 
 --FILE--
 <?php
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])

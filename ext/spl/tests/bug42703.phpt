@@ -35,7 +35,7 @@ catch (Exception $e) {
 var_dump($itit->current());
 var_dump($itit->key());
 ?>
---EXPECT--
-unicode(3) "boo"
+--EXPECTF--
+string(3) "boo"
 NULL
 NULL

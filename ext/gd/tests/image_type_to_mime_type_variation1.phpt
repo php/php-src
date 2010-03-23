@@ -9,6 +9,8 @@ Test image_type_to_mime_type() function : usage variations  - Pass different dat
 
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
+error_reporting(E_ALL ^ E_NOTICE);
+
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -75,19 +77,19 @@ foreach($values as $value) {
 *** Testing image_type_to_mime_type() : usage variations ***
 
 -- Iteration 1 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 2 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 3 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 4 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 5 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 6 --
 
@@ -100,41 +102,41 @@ Warning: image_type_to_mime_type() expects parameter 1 to be long, array given i
 NULL
 
 -- Iteration 8 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 9 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 10 --
-unicode(9) "image/gif"
+string(9) "image/gif"
 
 -- Iteration 11 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 12 --
-unicode(9) "image/gif"
+string(9) "image/gif"
 
 -- Iteration 13 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 14 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -143,8 +145,8 @@ Warning: image_type_to_mime_type() expects parameter 1 to be long, object given 
 NULL
 
 -- Iteration 19 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 20 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 ===DONE===

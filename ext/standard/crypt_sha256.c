@@ -341,8 +341,15 @@ static const char b64t[64] =
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 {
 #ifdef PHP_WIN32
+# if _MSC <= 1300
+#  pragma pack(push, 16)
+	unsigned char alt_result[32];
+	unsigned char temp_result[32];
+#  pragma pack(pop)
+# else
 	__declspec(align(32)) unsigned char alt_result[32];
 	__declspec(align(32)) unsigned char temp_result[32];
+# endif
 #else
 	unsigned char alt_result[32] ALIGNED(__alignof__ (uint32_t));
 	unsigned char temp_result[32] ALIGNED(__alignof__ (uint32_t));

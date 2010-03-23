@@ -11,4 +11,4 @@ default_charset=ISO-8859-1
 ?>
 --EXPECT--
 ISO-8859-1
-unicode(18) "&auml;&ouml;&uuml;"
+string(18) "&auml;&ouml;&uuml;"

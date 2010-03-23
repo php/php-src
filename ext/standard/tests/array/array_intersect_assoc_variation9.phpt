@@ -61,14 +61,6 @@ echo "Done";
 *** Testing array_intersect_assoc() : passing two dimensional array to both $arr1 and $arr2 arguments ***
 -- Passing the entire 2-D array to $arr1 and $arr2 --
 - With default arguments -
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(2) {
   [0]=>
   array(4) {
@@ -77,9 +69,9 @@ array(2) {
     [1]=>
     int(2)
     [2]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [3]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(4) {
@@ -94,22 +86,6 @@ array(2) {
   }
 }
 - With more arguments -
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(2) {
   [0]=>
   array(4) {
@@ -118,9 +94,9 @@ array(2) {
     [1]=>
     int(2)
     [2]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [3]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(4) {

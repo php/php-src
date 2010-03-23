@@ -13,6 +13,6 @@ var_dump(get_class(new casesensitivitytest));
 
 echo "Done";
 ?>
---EXPECT--
-unicode(19) "caseSensitivityTest"
+--EXPECTF--
+string(19) "caseSensitivityTest"
 Done

@@ -35,5 +35,5 @@ DOMDocument created
 Read initial documentURI:
 %s
 Set documentURI to a URL, reading again:
-unicode(34) "http://dom.example.org/example.xml"
+string(34) "http://dom.example.org/example.xml"
 Done

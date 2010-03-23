@@ -39,12 +39,12 @@ echo "Done";
 -- Pass each() a two-dimensional array --
 array(4) {
   [1]=>
-  unicode(4) "zero"
-  [u"value"]=>
-  unicode(4) "zero"
+  string(4) "zero"
+  ["value"]=>
+  string(4) "zero"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 array(4) {
@@ -57,7 +57,7 @@ array(4) {
     [2]=>
     int(3)
   }
-  [u"value"]=>
+  ["value"]=>
   array(3) {
     [0]=>
     int(1)
@@ -68,29 +68,29 @@ array(4) {
   }
   [0]=>
   int(1)
-  [u"key"]=>
+  ["key"]=>
   int(1)
 }
 array(4) {
   [1]=>
-  unicode(2) "un"
-  [u"value"]=>
-  unicode(2) "un"
+  string(2) "un"
+  ["value"]=>
+  string(2) "un"
   [0]=>
-  unicode(3) "one"
-  [u"key"]=>
-  unicode(3) "one"
+  string(3) "one"
+  ["key"]=>
+  string(3) "one"
 }
 
 -- Pass each() a sub-array --
 array(4) {
   [1]=>
-  unicode(1) "a"
-  [u"value"]=>
-  unicode(1) "a"
+  string(1) "a"
+  ["value"]=>
+  string(1) "a"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 Done

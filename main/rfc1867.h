@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -37,16 +37,16 @@ typedef struct _multipart_event_start {
 
 typedef struct _multipart_event_formdata {
 	size_t	post_bytes_processed;
-	zstr	name;
-	zstr    *value;
+	char	*name;
+	char	**value;
 	size_t	length;
 	size_t	*newlength;
 } multipart_event_formdata;
 
 typedef struct _multipart_event_file_start {
 	size_t	post_bytes_processed;
-	zstr	name;
-	zstr    *filename;
+	char	*name;
+	char	**filename;
 } multipart_event_file_start;
 
 typedef struct _multipart_event_file_data {
@@ -59,7 +59,7 @@ typedef struct _multipart_event_file_data {
 
 typedef struct _multipart_event_file_end {
 	size_t	post_bytes_processed;
-	zstr	temp_filename;
+	char	*temp_filename;
 	int	cancel_upload;
 } multipart_event_file_end;
 

@@ -110,27 +110,17 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Notice: Array to string conversion in %s on line 68
+Arg value Array 
+bool(false)
 
 Arg value Array 
 bool(false)
 
-Notice: Array to string conversion in %s on line 68
-
 Arg value Array 
 bool(false)
 
-Notice: Array to string conversion in %s on line 68
-
 Arg value Array 
 bool(false)
-
-Notice: Array to string conversion in %s on line 68
-
-Arg value Array 
-bool(false)
-
-Notice: Array to string conversion in %s on line 68
 
 Arg value Array 
 bool(false)

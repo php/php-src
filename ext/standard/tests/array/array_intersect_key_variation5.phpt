@@ -24,18 +24,18 @@ var_dump( array_intersect_key($float_indx_array,$input_array ) );
 -- Testing array_intersect_key() function with float indexed array --
 array(3) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
   [-10]=>
-  unicode(3) "-10"
+  string(3) "-10"
 }
 array(3) {
   [0]=>
-  unicode(3) "0.5"
+  string(3) "0.5"
   [10]=>
-  unicode(4) "10.5"
+  string(4) "10.5"
   [-10]=>
-  unicode(5) "-10.5"
+  string(5) "-10.5"
 }
 ===DONE===

@@ -18,7 +18,7 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
@@ -41,10 +41,10 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --The ISO 8601:1988 week number--
-unicode(%d) "%d"
-unicode(2) "32"
+string(%d) "%d"
+string(2) "32"
 
 --Weekday as decimal--
-unicode(%d) "%d"
-unicode(1) "5"
+string(%d) "%d"
+string(1) "5"
 ===DONE===

@@ -1,7 +1,5 @@
 --TEST--
 Test fwrite() function : error conditions
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -90,7 +88,7 @@ int(0)
 -- Testing fwrite() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fwrite() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 

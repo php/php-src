@@ -80,49 +80,49 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing bin2hex() function: with unexpected inputs for 'str' argument ***
 -- Iteration 1 --
-unicode(2) "30"
+string(2) "30"
 -- Iteration 2 --
-unicode(2) "31"
+string(2) "31"
 -- Iteration 3 --
-unicode(12) "313233343536"
+string(12) "313233343536"
 -- Iteration 4 --
-unicode(8) "31302e35"
+string(8) "31302e35"
 -- Iteration 5 --
-unicode(10) "2d32302e35"
+string(10) "2d32302e35"
 -- Iteration 6 --
-unicode(24) "313031323334353637303030"
+string(24) "313031323334353637303030"
 -- Iteration 7 --
 
-Warning: bin2hex() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: bin2hex() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: bin2hex() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: bin2hex() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: bin2hex() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: bin2hex() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
-unicode(2) "31"
+string(2) "31"
 -- Iteration 11 --
-unicode(0) ""
+string(0) ""
 -- Iteration 12 --
-unicode(2) "31"
+string(2) "31"
 -- Iteration 13 --
-unicode(0) ""
+string(0) ""
 -- Iteration 14 --
-unicode(0) ""
+string(0) ""
 -- Iteration 15 --
-unicode(0) ""
+string(0) ""
 -- Iteration 16 --
-unicode(26) "73616d706c65206f626a656374"
+string(26) "73616d706c65206f626a656374"
 -- Iteration 17 --
 
-Warning: bin2hex() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: bin2hex() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 -- Iteration 19 --
-unicode(0) ""
+string(0) ""
 ===DONE===

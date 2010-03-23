@@ -142,33 +142,33 @@ array(1) {
 -- Iterator 7 --
 array(1) {
   [4]=>
-  unicode(6) "col	or"
+  string(6) "col	or"
 }
 array(1) {
   [4]=>
-  unicode(6) "col	or"
+  string(6) "col	or"
 }
 -- Iterator 8 --
 array(1) {
   [5]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
 }
 array(1) {
   [5]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
 }
 -- Iterator 9 --
 array(2) {
   [7]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [8]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
 }
 array(2) {
   [7]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [8]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
 }
 -- Iterator 10 --
 array(2) {
@@ -190,30 +190,30 @@ array(6) {
   [6]=>
   resource(%d) of type (stream)
   [7]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [8]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [9]=>
   object(classA)#%d (0) {
   }
   [10]=>
   float(444.432)
   [11]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 array(6) {
   [6]=>
   resource(%d) of type (stream)
   [7]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [8]=>
-  unicode(11) "Hello world"
+  string(11) "Hello world"
   [9]=>
   object(classA)#%d (0) {
   }
   [10]=>
   float(444.432)
   [11]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 Done

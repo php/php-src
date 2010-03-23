@@ -45,7 +45,7 @@ if ($b == $string_all_mb) { // Japanese characters only - should not be any conv
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing mb_strtoupper() : usage variations ***
 
 -- Mixed string (mulitbyte and ASCII characters) --

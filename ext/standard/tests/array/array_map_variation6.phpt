@@ -30,7 +30,7 @@ $arr1 = array(
 var_dump( array_map('callback', $arr1));
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_map() : array having subarrays ***
 array(5) {
   [0]=>
@@ -46,9 +46,9 @@ array(5) {
   [2]=>
   array(2) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
   }
   [3]=>
   array(4) {
@@ -57,15 +57,15 @@ array(5) {
     [1]=>
     int(2)
     [2]=>
-    unicode(1) "a"
+    string(1) "a"
     [3]=>
-    unicode(1) "b"
+    string(1) "b"
   }
   [4]=>
   array(2) {
     [1]=>
-    unicode(1) "a"
-    [u"b"]=>
+    string(1) "a"
+    ["b"]=>
     int(2)
   }
 }

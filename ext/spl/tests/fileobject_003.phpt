@@ -44,80 +44,80 @@ test(dirname(__FILE__),       substr(dirname(__FILE__),-1), 'l');
 --EXPECTF--
 ===0===
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "fileobject_001a.txt"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "fileobject_001a.txt"
 }
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "fileobject_001a.txt"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "fileobject_001a.txt"
 }
 bool(false)
 bool(true)
 bool(true)
 %s(%d) "%sfileobject_001a.txt"
-unicode(%d) "%sfileobject_001a.txt"
+string(%d) "%sfileobject_001a.txt"
 bool(true)
-unicode(19) "fileobject_001a.txt"
+string(19) "fileobject_001a.txt"
 bool(true)
 string(%d) "%stests"
 bool(true)
-unicode(%d) "%sfileobject_001a.txt"
-unicode(19) "fileobject_001a.txt"
-unicode(%d) "%stests"
+string(%d) "%sfileobject_001a.txt"
+string(19) "fileobject_001a.txt"
+string(%d) "%stests"
 ===1===
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s%etests"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "tests"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "tests"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 bool(false)
 bool(true)
 bool(true)
 %s(%d) "%stests/"
-unicode(%d) "%stests"
+string(%d) "%stests"
 bool(true)
-unicode(5) "tests"
+string(5) "tests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
-unicode(%d) "%stests"
-unicode(%d) "tests"
-unicode(%d) "%s%espl"
+string(%d) "%stests"
+string(%d) "tests"
+string(%d) "%sspl"
 ===2===
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 object(SplFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s%etests"
-  [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%s"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "%s"
 }
 bool(false)
 bool(true)
 bool(true)
 %s(%d) "%stests"
-unicode(%d) "%stests"
+string(%d) "%stests"
 bool(true)
-unicode(%d) "tests"
+string(%d) "tests"
 bool(true)
 string(%d) "%sspl"
 bool(true)
-unicode(%d) "%stests"
-unicode(5) "tests"
-unicode(%d) "%sspl"
+string(%d) "%stests"
+string(5) "tests"
+string(%d) "%sspl"
 ===DONE===

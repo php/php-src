@@ -41,20 +41,20 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_name() : variation ***
-unicode(9) "PHPSESSID"
+string(9) "PHPSESSID"
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 bool(true)
-unicode(1) "	"
+string(1) "	"
 bool(true)
-unicode(1) "	"
-unicode(1) "	"
+string(1) "	"
+string(1) "	"
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
-unicode(0) ""
+string(0) ""
 Done
 

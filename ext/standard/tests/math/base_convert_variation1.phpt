@@ -81,79 +81,79 @@ fclose($fp);
 *** Testing base_convert() : usage variations ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 3 --
-unicode(2) "14"
+string(2) "14"
 
 -- Iteration 4 --
-unicode(2) "14"
+string(2) "14"
 
 -- Iteration 5 --
-unicode(11) "17777777777"
+string(11) "17777777777"
 
 -- Iteration 6 --
-unicode(3) "151"
+string(3) "151"
 
 -- Iteration 7 --
-unicode(3) "151"
+string(3) "151"
 
 -- Iteration 8 --
-unicode(7) "4553207"
+string(7) "4553207"
 
 -- Iteration 9 --
-unicode(7) "4553207"
+string(7) "4553207"
 
 -- Iteration 10 --
-unicode(1) "5"
+string(1) "5"
 
 -- Iteration 11 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 12 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 13 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 14 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 15 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 16 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 17 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 18 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 19 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 20 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 21 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 22 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 23 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 24 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 25 --
-unicode(%d) "%d"
+string(%d) "%d"
 ===Done===

@@ -30,8 +30,8 @@ ob_end_flush();
 *** Testing session_unset() : basic functionality ***
 bool(true)
 array(1) {
-  [u"foo"]=>
-  unicode(12) "Hello World!"
+  ["foo"]=>
+  string(12) "Hello World!"
 }
 NULL
 array(0) {

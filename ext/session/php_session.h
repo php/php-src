@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -95,25 +95,6 @@ typedef enum {
 	php_session_active
 } php_session_status;
 
-typedef struct _php_session_rfc1867_progress {
-	zval      prefix;
-	zval      name;
-	zval      sname;
-	zval      sid;
-	zval      key;
-	long      update_step;
-	long      next_update;
-	double    last_update_time;
-	zval      *data;
-	size_t    content_length;
-	zval      *post_bytes_processed;
-	zval      *files;
-	zval      *current_file;
-	zval      *current_file_bytes_processed;
-	zend_bool apply_trans_sid;
-	zend_bool cancel_upload;
-} php_session_rfc1867_progress;
-
 typedef struct _php_ps_globals {
 	char *save_path;
 	char *session_name;
@@ -146,6 +127,8 @@ typedef struct _php_ps_globals {
 			zval *ps_gc;
 		} name;
 	} mod_user_names;
+	zend_bool bug_compat; /* Whether to behave like PHP 4.2 and earlier */
+	zend_bool bug_compat_warn; /* Whether to warn about it */
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
@@ -162,13 +145,6 @@ typedef struct _php_ps_globals {
 	int send_cookie;
 	int define_sid;
 	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
-
-	zend_bool rfc1867_enabled;
-	zstr rfc1867_prefix;
-	zstr rfc1867_name;
-	long rfc1867_freq;
-	double rfc1867_min_freq;
-	php_session_rfc1867_progress *rfc1867_progress;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -238,12 +214,11 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
 
 #define PS_ENCODE_VARS 											\
-	zstr key;													\
+	char *key;													\
 	uint key_length;											\
 	ulong num_key;												\
 	zval **struc;
 
-/* (Possibly) needed for BC (e.g. by external modules using the session registry) */
 #define PS_ENCODE_LOOP(code) do {									\
 		HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars));			\
 		int key_type;												\
@@ -256,29 +231,11 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 				continue;											\
 			}														\
 			key_length--;											\
-			if (php_get_session_var(key.s, key_length, &struc TSRMLS_CC) == SUCCESS) {	\
+			if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) {	\
 				code;		 										\
 			} 														\
 		}															\
 	} while(0)
-
-#define PS_UENCODE_LOOP(code) do {									\
-		HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars));			\
-		HashPosition _pos;											\
-		int key_type;												\
-																	\
-		for (zend_hash_internal_pointer_reset_ex(_ht, &_pos);		\
-				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, &_pos)) != HASH_KEY_NON_EXISTANT; \
-					zend_hash_move_forward_ex(_ht, &_pos)) {		\
-			if (key_type != HASH_KEY_IS_STRING && key_type != HASH_KEY_IS_UNICODE) { break; }	\
-			key_length--;											\
-			struc = NULL;											\
-			zend_hash_get_current_data_ex(_ht, (void**)&struc, &_pos);	\
-																	\
-			code;		 											\
-		}															\
-	} while(0)
-
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 

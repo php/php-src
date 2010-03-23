@@ -23,7 +23,7 @@ var_dump($ao2);
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
 object(ArrayObject)#1 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [1]=>
     int(2)
@@ -35,13 +35,13 @@ object(ArrayObject)#1 (1) {
 }
 bool(true)
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"a"]=>
+    ["a"]=>
     int(4)
   }
 }

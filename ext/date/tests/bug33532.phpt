@@ -5,7 +5,7 @@ error_reporting=2047
 date.timezone=UTC
 --FILE--
 <?php
-date_default_timezone_set('UTC');
+
 setlocale(LC_ALL, 'C');
 
 print "TZ has NOT been set\n";

@@ -54,11 +54,11 @@ $values = array(
 /*15*/	  NULL,
 		  null,
 		
-		  // string data
-/*17*/   "ABC",
-		  'abc',
-		  "0abc",
-		  "123abc",
+  		  // string data
+/*17*/	  "ABC",
+  		  'abc',
+  		  "0abc",
+  		  "123abc",
 		
 		  // empty data
 /*21*/	  "",
@@ -92,83 +92,69 @@ fclose($fp);
 --EXPECTF--
 *** Testing sha1() : unexpected values for 'raw' ***
 -- Iteration 1 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 2 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 3 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 4 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 5 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 6 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 7 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 8 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 9 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 10 --
 
 Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 11 --
 
 Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 12 --
 
 Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 13 --
 
 Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 14 --
 
 Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 15 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 16 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 17 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 18 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 19 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 20 --
-unicode(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 21 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 22 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 23 --
 
 Warning: sha1() expects parameter 2 to be boolean, object given in %s on line %d
-unicode(0) ""
+string(0) ""
 -- Iteration 24 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 25 --
-
-Warning: bin2hex() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 26 --
 
 Warning: sha1() expects parameter 2 to be boolean, resource given in %s on line %d
-unicode(0) ""
+string(0) ""
 ===DONE===

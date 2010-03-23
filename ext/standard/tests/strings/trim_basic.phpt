@@ -32,14 +32,14 @@ var_dump(trim($binary, "\x00..\x1F"));
 *** Testing trim() : basic functionality ***
 
 -- Trim string with all white space characters --
-unicode(27) "---These are a few words---"
+string(27) "---These are a few words---"
 
 -- Trim non-whitespace from a string --
-unicode(11) "Hello World"
+string(11) "Hello World"
 
 -- Trim some non-white space characters from a string --
-unicode(19) "!===Hello World===!"
+string(19) "!===Hello World===!"
 
 -- Trim the ASCII control characters at the beginning of a string --
-unicode(14) "Example string"
+string(14) "Example string"
 ===DONE===

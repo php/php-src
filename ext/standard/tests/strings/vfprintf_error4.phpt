@@ -1,5 +1,7 @@
 --TEST--
 Test vfprintf() function : error conditions (various conditions)
+--CREDITS--
+Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
 precision=14
 --FILE--
@@ -14,9 +16,6 @@ precision=14
 $file = 'vfprintf_test.txt';
 $fp = fopen( $file, "a+" );
 
-// Set unicode encoding
-stream_encoding( $fp, 'unicode' );
-
 echo "\n-- Testing vfprintf() function with other strangeties  --\n";
 var_dump( vfprintf( 'foo', 'bar', array( 'baz' ) ) );
 var_dump( vfprintf( $fp, 'Foo %$c-0202Sd', array( 2 ) ) );
@@ -29,16 +28,16 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_text.txt';
+$file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>
 --EXPECTF--
 -- Testing vfprintf() function with other strangeties  --
 
-Warning: vfprintf() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: vfprintf() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Warning: vfprintf(): Zero is not a valid argument number in %s on line %d
+Warning: vfprintf(): Argument number must be greater than zero in %s on line %d
 bool(false)
 ===DONE===

@@ -1,7 +1,5 @@
 --TEST--
 Test fpassthru() function : usage variations  - different parameter types
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -190,22 +188,22 @@ bool(false)
 
 Arg value  
 
-Warning: fpassthru() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 Arg value  
 
-Warning: fpassthru() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: fpassthru() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: fpassthru() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 Arg value testClass 

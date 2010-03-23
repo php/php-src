@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -265,9 +265,9 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, str, 1);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 	
 	if (qname != NULL) {
@@ -318,7 +318,7 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, str, 1);
 		xmlFree(str);
 	} else {
 		ZVAL_NULL(*retval);
@@ -358,7 +358,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 					zval_copy_ctor(&value_copy);
 					newval = &value_copy;
 				}
-				convert_to_string_with_converter(newval, UG(utf8_conv));
+				convert_to_string(newval);
 			}
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			if (newval == &value_copy) {
@@ -716,7 +716,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, str, 1);
 	} else {
 		ZVAL_NULL(*retval);
 	}
@@ -761,9 +761,9 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (str == NULL) {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	} else {
-		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, str, 1);
 	}
 	return SUCCESS;
 
@@ -800,7 +800,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					zval_copy_ctor(&value_copy);
 					newval = &value_copy;
 				}
-				convert_to_string_with_converter(newval, UG(utf8_conv));
+				convert_to_string(newval);
 			}
 			prefix = Z_STRVAL_P(newval);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
@@ -867,7 +867,7 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
-		ZVAL_XML_STRING(*retval, (char *) (nodep->name), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (nodep->name), 1);
 	} else {
 		ZVAL_NULL(*retval);
 	}
@@ -898,7 +898,7 @@ int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	baseuri = xmlNodeGetBase(nodep->doc, nodep);
 	if (baseuri) {
-		ZVAL_XML_STRING(*retval, (char *) (baseuri), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (baseuri), 1);
 		xmlFree(baseuri);
 	} else {
 		ZVAL_NULL(*retval);
@@ -931,10 +931,10 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if(str != NULL) {
-		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, str, 1);
 		xmlFree(str);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 
 	return SUCCESS;
@@ -992,7 +992,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 }
 /* }}} */
 
-/* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild) U
+/* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
@@ -1153,7 +1153,7 @@ PHP_FUNCTION(dom_node_insert_before)
 }
 /* }}} end dom_node_insert_before */
 
-/* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild) U
+/* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since: 
 */
@@ -1244,7 +1244,7 @@ PHP_FUNCTION(dom_node_replace_child)
 }
 /* }}} end dom_node_replace_child */
 
-/* {{{ proto DomNode dom_node_remove_child(DomNode oldChild) U
+/* {{{ proto DomNode dom_node_remove_child(DomNode oldChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since: 
 */
@@ -1296,7 +1296,7 @@ PHP_FUNCTION(dom_node_remove_child)
 }
 /* }}} end dom_node_remove_child */
 
-/* {{{ proto DomNode dom_node_append_child(DomNode newChild) U
+/* {{{ proto DomNode dom_node_append_child(DomNode newChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since: 
 */
@@ -1397,7 +1397,7 @@ PHP_FUNCTION(dom_node_append_child)
 }
 /* }}} end dom_node_append_child */
 
-/* {{{ proto boolean dom_node_has_child_nodes() U
+/* {{{ proto boolean dom_node_has_child_nodes();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since: 
 */
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 }
 /* }}} end dom_node_has_child_nodes */
 
-/* {{{ proto DomNode dom_node_clone_node(boolean deep) U
+/* {{{ proto DomNode dom_node_clone_node(boolean deep);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since: 
 */
@@ -1487,7 +1487,7 @@ PHP_FUNCTION(dom_node_clone_node)
 }
 /* }}} end dom_node_clone_node */
 
-/* {{{ proto void dom_node_normalize() U
+/* {{{ proto void dom_node_normalize();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since: 
 */
@@ -1530,7 +1530,7 @@ PHP_FUNCTION(dom_node_is_supported)
 }
 /* }}} end dom_node_is_supported */
 
-/* {{{ proto boolean dom_node_has_attributes() U
+/* {{{ proto boolean dom_node_has_attributes();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
@@ -1557,7 +1557,7 @@ PHP_FUNCTION(dom_node_has_attributes)
 }
 /* }}} end dom_node_has_attributes */
 
-/* {{{ proto short dom_node_compare_document_position(DomNode other) U
+/* {{{ proto short dom_node_compare_document_position(DomNode other);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-compareDocumentPosition
 Since: DOM Level 3
 */
@@ -1567,7 +1567,7 @@ PHP_FUNCTION(dom_node_compare_document_position)
 }
 /* }}} end dom_node_compare_document_position */
 
-/* {{{ proto boolean dom_node_is_same_node(DomNode other) U
+/* {{{ proto boolean dom_node_is_same_node(DomNode other);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
@@ -1593,7 +1593,7 @@ PHP_FUNCTION(dom_node_is_same_node)
 }
 /* }}} end dom_node_is_same_node */
 
-/* {{{ proto string dom_node_lookup_prefix(string namespaceURI) U
+/* {{{ proto string dom_node_lookup_prefix(string namespaceURI);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1634,8 +1634,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 
 		if (lookupp != NULL && (nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, uri))) {
 			if (nsptr->prefix != NULL) {
-				RETVAL_XML_STRING((char *) nsptr->prefix, ZSTR_DUPLICATE);
-				return;
+				RETURN_STRING((char *) nsptr->prefix, 1);
 			}
 		}
 	}
@@ -1644,7 +1643,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 }
 /* }}} end dom_node_lookup_prefix */
 
-/* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI) U
+/* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI);
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
@@ -1657,7 +1656,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_node_class_entry, &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1677,7 +1676,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 }
 /* }}} end dom_node_is_default_namespace */
 
-/* {{{ proto string dom_node_lookup_namespace_uri(string prefix) U
+/* {{{ proto string dom_node_lookup_namespace_uri(string prefix);
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
@@ -1690,7 +1689,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	int prefix_len = 0;
 	char *prefix=NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&", &id, dom_node_class_entry, &prefix, &prefix_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
@@ -1704,15 +1703,14 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 
 	nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
 	if (nsptr && nsptr->href != NULL) {
-		RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
-		return;
+		RETURN_STRING((char *) nsptr->href, 1);
 	}
 
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
-/* {{{ proto boolean dom_node_is_equal_node(DomNode arg) U
+/* {{{ proto boolean dom_node_is_equal_node(DomNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
 Since: DOM Level 3
 */
@@ -1722,7 +1720,7 @@ PHP_FUNCTION(dom_node_is_equal_node)
 }
 /* }}} end dom_node_is_equal_node */
 
-/* {{{ proto DomNode dom_node_get_feature(string feature, string version) U
+/* {{{ proto DomNode dom_node_get_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
 Since: DOM Level 3
 */
@@ -1732,7 +1730,7 @@ PHP_FUNCTION(dom_node_get_feature)
 }
 /* }}} end dom_node_get_feature */
 
-/* {{{ proto mixed dom_node_set_user_data(string key, mixed data, userdatahandler handler) U
+/* {{{ proto mixed dom_node_set_user_data(string key, mixed data, userdatahandler handler);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
 Since: DOM Level 3
 */
@@ -1742,7 +1740,7 @@ PHP_FUNCTION(dom_node_set_user_data)
 }
 /* }}} end dom_node_set_user_data */
 
-/* {{{ proto mixed dom_node_get_user_data(string key) U
+/* {{{ proto mixed dom_node_get_user_data(string key);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
 Since: DOM Level 3
 */
@@ -1767,7 +1765,6 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
-	zend_uchar file_type = IS_STRING;
 
 	if (mode == 0) {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
@@ -1777,7 +1774,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 	} else {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
-			"Ot|bba!a!", &id, dom_node_class_entry, &file, &file_len, &file_type, &exclusive, 
+			"Os|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive, 
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			return;
 		}
@@ -1790,12 +1787,6 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	if (! docp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node must be associated with a document");
 		RETURN_FALSE;
-	}
-
-	if (file_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &file, &file_len, (UChar*)file, file_len, REPORT_ERRORS, NULL) == FAILURE) {
-			RETURN_FALSE;
-		}
 	}
 
 	if (xpath_array == NULL) {
@@ -1811,34 +1802,20 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
-				if (file_type == IS_UNICODE) {
-					efree(file);
-				}
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset.");
 				RETURN_FALSE;
 			}
 		}
 	} else {
 		/*xpath query from xpath_array */
 		HashTable *ht = Z_ARRVAL_P(xpath_array);
-		zval **tmp, **zxquery;
+		zval **tmp;
 		char *xquery;
-		int xquery_len;
 
-		if (zend_ascii_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
-		    (Z_TYPE_PP(tmp) == IS_STRING || Z_TYPE_PP(tmp) == IS_UNICODE)) {
-				zxquery = tmp;
-/*
-			if (Z_TYPE_PP(tmp) == IS_STRING) {
-				xquery = Z_STRVAL_PP(tmp);
-			} else {
-				
-			}
-*/
+		if (zend_hash_find(ht, "query", sizeof("query"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			xquery = Z_STRVAL_PP(tmp);
 		} else {
-			if (file_type == IS_UNICODE) {
-				efree(file);
-			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'query' missing from xpath array or is not a string");
 			RETURN_FALSE;
 		}
@@ -1846,74 +1823,34 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;
 
-		if (zend_ascii_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
+		if (zend_hash_find(ht, "namespaces", sizeof("namespaces"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_ARRAY) {
 			zval **tmpns;
-			char *nschar;
-			int nschar_len;
-
 			while (zend_hash_get_current_data(Z_ARRVAL_PP(tmp), (void **)&tmpns) == SUCCESS) {
-				if (Z_TYPE_PP(tmpns) == IS_STRING || Z_TYPE_PP(tmpns) == IS_UNICODE) {
-					zstr prefix = NULL_ZSTR;
+				if (Z_TYPE_PP(tmpns) == IS_STRING) {
+					char *prefix;
 					ulong idx;
-					uint prefix_key_len;
-					zend_uchar htype;
-					UErrorCode errCode = 0;
+					int prefix_key_len;
 
-					if (Z_TYPE_PP(tmpns) == IS_UNICODE) {
-						zend_unicode_to_string_ex(UG(utf8_conv), &nschar, &nschar_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
-					} else {
-						nschar = Z_STRVAL_PP(tmpns);
-					}
-
-					htype = zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
-						&prefix, &prefix_key_len, &idx, 0, NULL);
-					if (htype == HASH_KEY_IS_STRING) {
-						xmlXPathRegisterNs(ctxp, (xmlChar *)prefix.s, (xmlChar *)nschar);
-					} else
-						if (htype == HASH_KEY_IS_UNICODE) {
-							char *tmp_prefix;
-							int tmp_prefix_len;
-							errCode = 0;
-
-							zend_unicode_to_string_ex(UG(utf8_conv), &tmp_prefix, &tmp_prefix_len, prefix.u, prefix_key_len, &errCode);
-							xmlXPathRegisterNs(ctxp, (xmlChar *)tmp_prefix, (xmlChar *)nschar);
-							efree(tmp_prefix);
-						}
-
-					if (Z_TYPE_PP(tmpns) == IS_UNICODE) {
-						efree(nschar);
+					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
+						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
+						xmlXPathRegisterNs(ctxp, prefix, Z_STRVAL_PP(tmpns));
 					}
 				}
 				zend_hash_move_forward(Z_ARRVAL_PP(tmp));
 			}
 		}
 
-		if (Z_TYPE_PP(zxquery) == IS_UNICODE) {
-			UErrorCode errCode = 0;
-			zend_unicode_to_string_ex(UG(utf8_conv), &xquery, &xquery_len, Z_USTRVAL_PP(zxquery), Z_USTRLEN_PP(zxquery), &errCode);
-		} else {
-			xquery = Z_STRVAL_PP(zxquery);
-		}
-
 		xpathobjp = xmlXPathEvalExpression(xquery, ctxp);
-
-		if (Z_TYPE_PP(zxquery) == IS_UNICODE) {
-			efree(xquery);
-		}
-
 		ctxp->node = NULL;
 		if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
 			nodeset = xpathobjp->nodesetval;
 		} else {
-			if (file_type == IS_UNICODE) {
-				efree(file);
-			}
 			if (xpathobjp) {
 				xmlXPathFreeObject(xpathobjp);
 			}
 			xmlXPathFreeContext(ctxp);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "XPath query did not return a nodeset.");
 			RETURN_FALSE;
 		}
 	}
@@ -1927,14 +1864,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				sizeof(xmlChar *), 0);
 			while (zend_hash_get_current_data(Z_ARRVAL_P(ns_prefixes), (void **)&tmpns) == SUCCESS) {
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
-					inclusive_ns_prefixes[nscount++] = estrndup(Z_STRVAL_PP(tmpns), strlen(Z_STRVAL_PP(tmpns)));
-				} else {
-					UErrorCode errCode = 0;
-					char *prefix;
-					int prfeix_len;
-
-					zend_unicode_to_string_ex(UG(utf8_conv), &prefix, &prfeix_len, Z_USTRVAL_PP(tmpns), Z_USTRLEN_PP(tmpns), &errCode);
-					inclusive_ns_prefixes[nscount++] = prefix;
+					inclusive_ns_prefixes[nscount++] = Z_STRVAL_PP(tmpns);
 				}
 				zend_hash_move_forward(Z_ARRVAL_P(ns_prefixes));
 			}
@@ -1956,15 +1886,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			with_comments, buf);
 	}
 
-	if (file_type == IS_UNICODE) {
-		efree(file);
-	}
-
 	if (inclusive_ns_prefixes != NULL) {
-		int nscount = 0;
-		while(inclusive_ns_prefixes[nscount] != NULL) {
-			efree(inclusive_ns_prefixes[nscount++]);
-		}
 		efree(inclusive_ns_prefixes);
 	}
 	if (xpathobjp != NULL) {
@@ -1998,7 +1920,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
+/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
    Canonicalize nodes to a string */
 PHP_METHOD(domnode, C14N)
 {
@@ -2006,7 +1928,7 @@ PHP_METHOD(domnode, C14N)
 }
 /* }}} */
 
-/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
+/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
    Canonicalize nodes to a file */
 PHP_METHOD(domnode, C14NFile)
 {
@@ -2014,9 +1936,8 @@ PHP_METHOD(domnode, C14NFile)
 }
 /* }}} */
 
-/* {{{ proto int DOMNode::getNodePath() U
+/* {{{ proto int DOMNode::getNodePath()
    Gets an xpath for a node */
-
 PHP_METHOD(domnode, getNodePath)
 {
 	zval *id;
@@ -2026,11 +1947,11 @@ PHP_METHOD(domnode, getNodePath)
 	
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = (char *)xmlGetNodePath(nodep);
+	value = xmlGetNodePath(nodep);
 	if (value == NULL) {
 		RETURN_NULL();
 	} else {
-		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
+		RETVAL_STRING(value, 1);
 		xmlFree(value);
 	}
 }

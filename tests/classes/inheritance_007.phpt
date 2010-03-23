@@ -1,5 +1,5 @@
 --TEST--
-Ensure inherited old-style constructor doesn't block other methods.
+Ensure inherited old-style constructor doesn't block other methods
 --FILE--
 <?php
 class A {
@@ -21,17 +21,17 @@ $b->b();
 array(2) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(1) "B"
-    [u"class"]=>
-    unicode(1) "A"
+    ["name"]=>
+    string(1) "B"
+    ["class"]=>
+    string(1) "A"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(1) "A"
-    [u"class"]=>
-    unicode(1) "A"
+    ["name"]=>
+    string(1) "A"
+    ["class"]=>
+    string(1) "A"
   }
 }
 In A::A

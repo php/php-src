@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -69,14 +69,15 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 	rb->child = NULL;
 
 	retval.handlers = &ResourceBundle_object_handlers;
-	retval.handle = zend_objects_store_put(	rb, ResourceBundle_object_destroy,	NULL, NULL TSRMLS_CC );
+	retval.handle = zend_objects_store_put(	rb, ResourceBundle_object_destroy, NULL, NULL TSRMLS_CC );
 
 	return retval;
 }
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) {
+static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
+{
 	char *    bundlename;
 	int       bundlename_len = 0;
 	char *    locale;
@@ -165,10 +166,6 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 		mekey = Z_STRVAL_P(offset);
 		mekeylen = Z_STRLEN_P(offset);
 		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
-	} else if(Z_TYPE_P(offset) == IS_UNICODE) {
-		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &mekey, &mekeylen, Z_USTRVAL_P(offset), Z_USTRLEN_P(offset), &INTL_DATA_ERROR_CODE(rb));
-		INTL_METHOD_CHECK_STATUS(rb, "Unable to convert the key");
-		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
 		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,	
 			"resourcebundle_get: index should be integer or string", 0 TSRMLS_CC);
@@ -201,9 +198,6 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 	}
 
 	resourcebundle_extract_value( return_value, rb TSRMLS_CC );
-	if(Z_TYPE_P(offset) == IS_UNICODE) {
-		efree(mekey);
-	}
 }
 /* }}} */
 

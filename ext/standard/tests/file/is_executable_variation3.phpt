@@ -62,7 +62,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: is_executable() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_executable() expects parameter 1 to be string, array given in %s on line %d
 NULL
 bool(false)
 Done

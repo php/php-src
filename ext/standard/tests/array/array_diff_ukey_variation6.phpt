@@ -36,30 +36,30 @@ foreach($input_arrays as $key =>$value) {
 --decimal indexed--
 array(1) {
   [-17]=>
-  unicode(3) "-17"
+  string(3) "-17"
 }
 array(1) {
   [-7]=>
-  unicode(3) "-07"
+  string(3) "-07"
 }
 
 --octal indexed--
 array(1) {
   [-9]=>
-  unicode(4) "-011"
+  string(4) "-011"
 }
 array(1) {
   [-7]=>
-  unicode(3) "-07"
+  string(3) "-07"
 }
 
 --hexa  indexed--
 array(1) {
   [18]=>
-  unicode(4) "0x12"
+  string(4) "0x12"
 }
 array(1) {
   [10]=>
-  unicode(3) "0xA"
+  string(3) "0xA"
 }
 ===DONE===

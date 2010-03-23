@@ -10,7 +10,7 @@ if (!extension_loaded("zlib")) {
 <?php
 $outputFileName = __FILE__.'tmp';
 $outFile = "compress.zlib://$outputFileName";
-$data = b<<<EOT
+$data = <<<EOT
 Here is some plain
 text to be read
 and displayed.

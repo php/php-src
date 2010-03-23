@@ -69,8 +69,8 @@ $input = array( "a" => "Apple", 'z' => array('b' => 'Bananna', "c" => "carrot"),
 echo "-- Associative array with string keys --\n";
 var_dump( array_walk_recursive($input, "for_string"));
 
-// binary keys
-$input = array(array(b"a" => "Apple", b"b" => "Banana"));
+// binary key
+$input = array( b"a" => "Apple", b"b" => "Banana");
 echo "-- Associative array with binary keys --\n";
 var_dump( array_walk_recursive($input, "for_string"));
 
@@ -81,7 +81,7 @@ var_dump( array_walk_recursive($input, "for_mixed"));
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk_recursive() : 'input' as an associative array ***
 -- Associative array with numeric keys --
 int(1)
@@ -106,25 +106,25 @@ int(10)
 
 bool(true)
 -- Associative array with string keys --
-unicode(1) "a"
-unicode(5) "Apple"
+string(1) "a"
+string(5) "Apple"
 
-unicode(1) "b"
-unicode(7) "Bananna"
+string(1) "b"
+string(7) "Bananna"
 
-unicode(1) "c"
-unicode(6) "carrot"
+string(1) "c"
+string(6) "carrot"
 
-unicode(1) "o"
-unicode(6) "Orange"
+string(1) "o"
+string(6) "Orange"
 
 bool(true)
 -- Associative array with binary keys --
 string(1) "a"
-unicode(5) "Apple"
+string(5) "Apple"
 
 string(1) "b"
-unicode(6) "Banana"
+string(6) "Banana"
 
 bool(true)
 -- Associative array with numeric/string keys --
@@ -134,11 +134,11 @@ int(1)
 int(1)
 int(2)
 
-unicode(1) "a"
-unicode(5) "Apple"
+string(1) "a"
+string(5) "Apple"
 
-unicode(1) "b"
-unicode(6) "Banana"
+string(1) "b"
+string(6) "Banana"
 
 int(2)
 int(3)

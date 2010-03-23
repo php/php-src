@@ -1,11 +1,11 @@
 --TEST--
 mcrypt_decrypt
 --SKIPIF--
-<?php if (!extension_loaded("mcrypt") || unicode_semantics()) print "skip"; ?>
+<?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
-$key      = b"FooBar";
-$secret   = b"PHP Testfest 2008";
+$key      = "FooBar";
+$secret   = "PHP Testfest 2008";
 $mode     = MCRYPT_MODE_CBC;
 $cipher   = MCRYPT_RIJNDAEL_128;
 
@@ -18,11 +18,11 @@ echo trim(mcrypt_decrypt($cipher, $key, $enc_data, $mode, $iv)) . "\n";
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
 mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC);
 
-var_dump(strpos(mcrypt_decrypt(MCRYPT_BLOWFISH, b"FooBar", $enc_data, MCRYPT_MODE_CBC, $iv), b"Testfest") !== false);
+var_dump(strpos(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv), "Testfest") !== false);
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommended in %s on line %d
+Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
 
 Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
 bool(false)

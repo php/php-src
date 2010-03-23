@@ -117,17 +117,17 @@ fclose( $file_handle );
 *** Testing mktime() : usage variation -  unexpected values to seventh argument $is_dst***
 
 -- int 0 --
-int(-205165755)
+int(%i)
 
 -- int 12345 --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205165755)
+int(%i)
 
 -- int -12345 --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205165755)
+int(%i)
 
 -- float 10.5 --
 
@@ -137,7 +137,7 @@ int(-205165755)
 -- float -10.5 --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205165755)
+int(%i)
 
 -- float .5 --
 
@@ -167,61 +167,61 @@ bool(false)
 -- uppercase NULL --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- lowercase null --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- lowercase true --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205165755)
+int(%i)
 
 -- lowercase false --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- uppercase TRUE --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205165755)
+int(%i)
 
 -- uppercase FALSE --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- empty string DQ --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: mktime() expects parameter 7 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 7 to be long, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
@@ -237,12 +237,12 @@ bool(false)
 -- undefined var --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- unset var --
 
 Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
-int(-205162155)
+int(%i)
 
 -- resource --
 

@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -53,59 +53,59 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
 array(3) {
   [0]=>
   object(stdClass)#%d (3) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val"]=>
-    unicode(1) "A"
-    [u"val2"]=>
-    unicode(2) "AA"
+    ["id"]=>
+    string(1) "1"
+    ["val"]=>
+    string(1) "A"
+    ["val2"]=>
+    string(2) "AA"
   }
   [1]=>
   object(stdClass)#%d (3) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val"]=>
-    unicode(1) "B"
-    [u"val2"]=>
-    unicode(2) "BB"
+    ["id"]=>
+    string(1) "2"
+    ["val"]=>
+    string(1) "B"
+    ["val2"]=>
+    string(2) "BB"
   }
   [2]=>
   object(stdClass)#%d (3) {
-    [u"id"]=>
-    unicode(1) "3"
-    [u"val"]=>
-    unicode(1) "C"
-    [u"val2"]=>
-    unicode(2) "CC"
+    ["id"]=>
+    string(1) "3"
+    ["val"]=>
+    string(1) "C"
+    ["val2"]=>
+    string(2) "CC"
   }
 }
 array(3) {
   [0]=>
   object(TestBase)#%d (3) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val":protected]=>
-    unicode(1) "A"
-    [u"val2":u"TestBase":private]=>
-    unicode(2) "AA"
+    ["id"]=>
+    string(1) "1"
+    ["val":protected]=>
+    string(1) "A"
+    ["val2":"TestBase":private]=>
+    string(2) "AA"
   }
   [1]=>
   object(TestBase)#%d (3) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val":protected]=>
-    unicode(1) "B"
-    [u"val2":u"TestBase":private]=>
-    unicode(2) "BB"
+    ["id"]=>
+    string(1) "2"
+    ["val":protected]=>
+    string(1) "B"
+    ["val2":"TestBase":private]=>
+    string(2) "BB"
   }
   [2]=>
   object(TestBase)#%d (3) {
-    [u"id"]=>
-    unicode(1) "3"
-    [u"val":protected]=>
-    unicode(1) "C"
-    [u"val2":u"TestBase":private]=>
-    unicode(2) "CC"
+    ["id"]=>
+    string(1) "3"
+    ["val":protected]=>
+    string(1) "C"
+    ["val2":"TestBase":private]=>
+    string(2) "CC"
   }
 }
 TestDerived::__construct(0,1)
@@ -114,41 +114,41 @@ TestDerived::__construct(2,3)
 array(3) {
   [0]=>
   object(TestDerived)#%d (5) {
-    [u"row":protected]=>
+    ["row":protected]=>
     int(0)
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val":protected]=>
-    unicode(1) "A"
-    [u"val2":u"TestBase":private]=>
+    ["id"]=>
+    string(1) "1"
+    ["val":protected]=>
+    string(1) "A"
+    ["val2":"TestBase":private]=>
     NULL
-    [u"val2"]=>
-    unicode(2) "AA"
+    ["val2"]=>
+    string(2) "AA"
   }
   [1]=>
   object(TestDerived)#%d (5) {
-    [u"row":protected]=>
+    ["row":protected]=>
     int(1)
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val":protected]=>
-    unicode(1) "B"
-    [u"val2":u"TestBase":private]=>
+    ["id"]=>
+    string(1) "2"
+    ["val":protected]=>
+    string(1) "B"
+    ["val2":"TestBase":private]=>
     NULL
-    [u"val2"]=>
-    unicode(2) "BB"
+    ["val2"]=>
+    string(2) "BB"
   }
   [2]=>
   object(TestDerived)#%d (5) {
-    [u"row":protected]=>
+    ["row":protected]=>
     int(2)
-    [u"id"]=>
-    unicode(1) "3"
-    [u"val":protected]=>
-    unicode(1) "C"
-    [u"val2":u"TestBase":private]=>
+    ["id"]=>
+    string(1) "3"
+    ["val":protected]=>
+    string(1) "C"
+    ["val2":"TestBase":private]=>
     NULL
-    [u"val2"]=>
-    unicode(2) "CC"
+    ["val2"]=>
+    string(2) "CC"
   }
 }

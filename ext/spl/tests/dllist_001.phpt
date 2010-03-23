@@ -1,5 +1,7 @@
 --TEST--
 SPL: DoublyLinkedList: std operations
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 $dll = new SplDoublyLinkedList();
@@ -57,9 +59,6 @@ echo count($dll)."\n";
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
 3

@@ -51,221 +51,220 @@ echo "Done\n";
 --EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
-unicode(5) "c:\.."
-unicode(4) "dir1"
+string(5) "c:\.."
+string(4) "dir1"
 string(0) ""
-unicode(4) "dir1"
+string(4) "dir1"
 array(3) {
-  [u"dirname"]=>
-  unicode(5) "c:\.."
-  [u"basename"]=>
-  unicode(4) "dir1"
-  [u"filename"]=>
-  unicode(4) "dir1"
+  ["dirname"]=>
+  string(5) "c:\.."
+  ["basename"]=>
+  string(4) "dir1"
+  ["filename"]=>
+  string(4) "dir1"
 }
 -- Iteration 2 --
-unicode(23) "c:\test\..\test2\.\adir"
-unicode(9) "afile.txt"
-unicode(3) "txt"
-unicode(5) "afile"
+string(23) "c:\test\..\test2\.\adir"
+string(9) "afile.txt"
+string(3) "txt"
+string(5) "afile"
 array(4) {
-  [u"dirname"]=>
-  unicode(23) "c:\test\..\test2\.\adir"
-  [u"basename"]=>
-  unicode(9) "afile.txt"
-  [u"extension"]=>
-  unicode(3) "txt"
-  [u"filename"]=>
-  unicode(5) "afile"
+  ["dirname"]=>
+  string(23) "c:\test\..\test2\.\adir"
+  ["basename"]=>
+  string(9) "afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(5) "afile"
 }
 -- Iteration 3 --
-unicode(22) "/usr/include/../arpa/."
-unicode(6) "inet.h"
-unicode(1) "h"
-unicode(4) "inet"
+string(22) "/usr/include/../arpa/."
+string(6) "inet.h"
+string(1) "h"
+string(4) "inet"
 array(4) {
-  [u"dirname"]=>
-  unicode(22) "/usr/include/../arpa/."
-  [u"basename"]=>
-  unicode(6) "inet.h"
-  [u"extension"]=>
-  unicode(1) "h"
-  [u"filename"]=>
-  unicode(4) "inet"
+  ["dirname"]=>
+  string(22) "/usr/include/../arpa/."
+  ["basename"]=>
+  string(6) "inet.h"
+  ["extension"]=>
+  string(1) "h"
+  ["filename"]=>
+  string(4) "inet"
 }
 -- Iteration 4 --
-unicode(12) "c:\test\adir"
-unicode(10) "afile..txt"
-unicode(3) "txt"
-unicode(6) "afile."
+string(12) "c:\test\adir"
+string(10) "afile..txt"
+string(3) "txt"
+string(6) "afile."
 array(4) {
-  [u"dirname"]=>
-  unicode(12) "c:\test\adir"
-  [u"basename"]=>
-  unicode(10) "afile..txt"
-  [u"extension"]=>
-  unicode(3) "txt"
-  [u"filename"]=>
-  unicode(6) "afile."
+  ["dirname"]=>
+  string(12) "c:\test\adir"
+  ["basename"]=>
+  string(10) "afile..txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(6) "afile."
 }
 -- Iteration 5 --
-unicode(17) "/usr/include/arpa"
-unicode(7) "inet..h"
-unicode(1) "h"
-unicode(5) "inet."
+string(17) "/usr/include/arpa"
+string(7) "inet..h"
+string(1) "h"
+string(5) "inet."
 array(4) {
-  [u"dirname"]=>
-  unicode(17) "/usr/include/arpa"
-  [u"basename"]=>
-  unicode(7) "inet..h"
-  [u"extension"]=>
-  unicode(1) "h"
-  [u"filename"]=>
-  unicode(5) "inet."
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(7) "inet..h"
+  ["extension"]=>
+  string(1) "h"
+  ["filename"]=>
+  string(5) "inet."
 }
 -- Iteration 6 --
-unicode(12) "c:\test\adir"
-unicode(6) "afile."
-unicode(0) ""
-unicode(5) "afile"
+string(12) "c:\test\adir"
+string(6) "afile."
+string(0) ""
+string(5) "afile"
 array(4) {
-  [u"dirname"]=>
-  unicode(12) "c:\test\adir"
-  [u"basename"]=>
-  unicode(6) "afile."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(5) "afile"
+  ["dirname"]=>
+  string(12) "c:\test\adir"
+  ["basename"]=>
+  string(6) "afile."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(5) "afile"
 }
 -- Iteration 7 --
-unicode(17) "/usr/include/arpa"
-unicode(5) "inet."
-unicode(0) ""
-unicode(4) "inet"
+string(17) "/usr/include/arpa"
+string(5) "inet."
+string(0) ""
+string(4) "inet"
 array(4) {
-  [u"dirname"]=>
-  unicode(17) "/usr/include/arpa"
-  [u"basename"]=>
-  unicode(5) "inet."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(4) "inet"
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(5) "inet."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(4) "inet"
 }
 -- Iteration 8 --
-unicode(17) "/usr/include/arpa"
-unicode(6) "inet,h"
+string(17) "/usr/include/arpa"
+string(6) "inet,h"
 string(0) ""
-unicode(6) "inet,h"
+string(6) "inet,h"
 array(3) {
-  [u"dirname"]=>
-  unicode(17) "/usr/include/arpa"
-  [u"basename"]=>
-  unicode(6) "inet,h"
-  [u"filename"]=>
-  unicode(6) "inet,h"
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(6) "inet,h"
+  ["filename"]=>
+  string(6) "inet,h"
 }
 -- Iteration 9 --
-unicode(3) "c:."
-unicode(11) "c:afile.txt"
-unicode(3) "txt"
-unicode(7) "c:afile"
+string(3) "c:."
+string(11) "c:afile.txt"
+string(3) "txt"
+string(7) "c:afile"
 array(4) {
-  [u"dirname"]=>
-  unicode(3) "c:."
-  [u"basename"]=>
-  unicode(11) "c:afile.txt"
-  [u"extension"]=>
-  unicode(3) "txt"
-  [u"filename"]=>
-  unicode(7) "c:afile"
+  ["dirname"]=>
+  string(3) "c:."
+  ["basename"]=>
+  string(11) "c:afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(7) "c:afile"
 }
 -- Iteration 10 --
-unicode(12) "..\.\..\test"
-unicode(9) "afile.txt"
-unicode(3) "txt"
-unicode(5) "afile"
+string(12) "..\.\..\test"
+string(9) "afile.txt"
+string(3) "txt"
+string(5) "afile"
 array(4) {
-  [u"dirname"]=>
-  unicode(12) "..\.\..\test"
-  [u"basename"]=>
-  unicode(9) "afile.txt"
-  [u"extension"]=>
-  unicode(3) "txt"
-  [u"filename"]=>
-  unicode(5) "afile"
+  ["dirname"]=>
+  string(12) "..\.\..\test"
+  ["basename"]=>
+  string(9) "afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(5) "afile"
 }
 -- Iteration 11 --
-unicode(12) ".././../test"
-unicode(5) "afile"
+string(12) ".././../test"
+string(5) "afile"
 string(0) ""
-unicode(5) "afile"
+string(5) "afile"
 array(3) {
-  [u"dirname"]=>
-  unicode(12) ".././../test"
-  [u"basename"]=>
-  unicode(5) "afile"
-  [u"filename"]=>
-  unicode(5) "afile"
+  ["dirname"]=>
+  string(12) ".././../test"
+  ["basename"]=>
+  string(5) "afile"
+  ["filename"]=>
+  string(5) "afile"
 }
 -- Iteration 12 --
-unicode(1) "."
-unicode(1) "."
-unicode(0) ""
-unicode(0) ""
+string(1) "."
+string(1) "."
+string(0) ""
+string(0) ""
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "."
-  [u"basename"]=>
-  unicode(1) "."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(0) ""
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
 -- Iteration 13 --
-unicode(1) "."
-unicode(2) ".."
-unicode(0) ""
-unicode(1) "."
+string(1) "."
+string(2) ".."
+string(0) ""
+string(1) "."
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "."
-  [u"basename"]=>
-  unicode(2) ".."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(1) "."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(2) ".."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(1) "."
 }
 -- Iteration 14 --
-unicode(1) "."
-unicode(3) "..."
-unicode(0) ""
-unicode(2) ".."
+string(1) "."
+string(3) "..."
+string(0) ""
+string(2) ".."
 array(4) {
-  [u"dirname"]=>
-  unicode(1) "."
-  [u"basename"]=>
-  unicode(3) "..."
-  [u"extension"]=>
-  unicode(0) ""
-  [u"filename"]=>
-  unicode(2) ".."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(3) "..."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(2) ".."
 }
 -- Iteration 15 --
-unicode(12) "/usr/lib/..."
-unicode(5) "afile"
+string(12) "/usr/lib/..."
+string(5) "afile"
 string(0) ""
-unicode(5) "afile"
+string(5) "afile"
 array(3) {
-  [u"dirname"]=>
-  unicode(12) "/usr/lib/..."
-  [u"basename"]=>
-  unicode(5) "afile"
-  [u"filename"]=>
-  unicode(5) "afile"
+  ["dirname"]=>
+  string(12) "/usr/lib/..."
+  ["basename"]=>
+  string(5) "afile"
+  ["filename"]=>
+  string(5) "afile"
 }
 Done
-

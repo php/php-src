@@ -40,17 +40,24 @@ bool(false)
 Notice: Undefined variable: _SESSION in %s on line %d
 NULL
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1234567890)
-  [u"bar"]=>
-  unicode(5) "Blah!"
-  [u"guff"]=>
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
   float(123.456)
 }
 
 Warning: session_decode(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
 bool(true)
-unicode(17) "foo|i:1234567890;"
+array(3) {
+  ["foo"]=>
+  int(1234567890)
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
+  float(123.456)
+}
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)

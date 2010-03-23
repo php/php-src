@@ -11,7 +11,7 @@ Test sort() function : basic functionality
 /*
  * Testing sort() by providing arrays with default keys and assoc arrays 
  * to check the basic functionality with following flag values.
- *  flag value as default
+ *  flag value as defualt
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
@@ -25,12 +25,12 @@ $unsorted_strings =   array( "l" => "lemon", "o" => "orange", "b" => "banana" );
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 
-echo "\n-- Testing sort() by supplying string array, 'flag' value is default --\n";
+echo "\n-- Testing sort() by supplying string array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_strings;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing sort() by supplying numeric array, 'flag' value is default --\n";
+echo "\n-- Testing sort() by supplying numeric array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -57,21 +57,21 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sort() : basic functionality ***
 
--- Testing sort() by supplying string array, 'flag' value is default --
+-- Testing sort() by supplying string array, 'flag' value is defualt --
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 
--- Testing sort() by supplying numeric array, 'flag' value is default --
+-- Testing sort() by supplying numeric array, 'flag' value is defualt --
 bool(true)
 array(4) {
   [0]=>
@@ -88,11 +88,11 @@ array(4) {
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 
 -- Testing sort() by supplying numeric array, 'flag' = SORT_REGULAR --
@@ -112,11 +112,11 @@ array(4) {
 bool(true)
 array(3) {
   [0]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [1]=>
-  unicode(5) "lemon"
+  string(5) "lemon"
   [2]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 
 -- Testing sort() by supplying numeric array, 'flag' = SORT_NUMERIC --

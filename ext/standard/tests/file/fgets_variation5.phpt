@@ -54,7 +54,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --
@@ -115,26 +115,26 @@ bool(true)
 -- File content type : numeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "22222222222222222222222222222222222222222222222222"
+string(50) "22222222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- File content type : text --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "text text text text text text text text text text "
+string(50) "text text text text text text text text text text "
 int(50)
 bool(true)
 -- File content type : text_with_new_line --
 -- fgets() with length > filesize --
 int(0)
-unicode(5) "line
+string(5) "line
 "
 int(5)
 bool(false)
 -- File content type : alphanumeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 
@@ -196,26 +196,26 @@ bool(true)
 -- File content type : numeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "22222222222222222222222222222222222222222222222222"
+string(50) "22222222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- File content type : text --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "text text text text text text text text text text "
+string(50) "text text text text text text text text text text "
 int(50)
 bool(true)
 -- File content type : text_with_new_line --
 -- fgets() with length > filesize --
 int(0)
-unicode(5) "line
+string(5) "line
 "
 int(5)
 bool(false)
 -- File content type : alphanumeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 
@@ -277,26 +277,26 @@ bool(true)
 -- File content type : numeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "22222222222222222222222222222222222222222222222222"
+string(50) "22222222222222222222222222222222222222222222222222"
 int(50)
 bool(true)
 -- File content type : text --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "text text text text text text text text text text "
+string(50) "text text text text text text text text text text "
 int(50)
 bool(true)
 -- File content type : text_with_new_line --
 -- fgets() with length > filesize --
 int(0)
-unicode(5) "line
+string(5) "line
 "
 int(5)
 bool(false)
 -- File content type : alphanumeric --
 -- fgets() with length > filesize --
 int(0)
-unicode(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
+string(50) "ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 "
 int(50)
 bool(true)
 Done

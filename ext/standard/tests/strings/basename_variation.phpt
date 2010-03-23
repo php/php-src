@@ -86,150 +86,150 @@ check_basename( $file_path_variations );
 
 echo "Done\n";
 
---EXPECT--
+--EXPECTF--
 *** Testing possible variations in path and suffix ***
 
 --Iteration 1--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 2--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 3--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 4--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 5--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 6--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 7--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 8--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 9--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 10--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 11--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 12--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 13--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 14--
-unicode(1) "t"
+string(1) "t"
 
 --Iteration 15--
-unicode(7) "tbar.gz"
+string(7) "tbar.gz"
 
 --Iteration 16--
-unicode(7) "tbar.gz"
+string(7) "tbar.gz"
 
 --Iteration 17--
-unicode(7) "tbar.gz"
+string(7) "tbar.gz"
 
 --Iteration 18--
-unicode(7) "tbar.gz"
+string(7) "tbar.gz"
 
 --Iteration 19--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 20--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 21--
-unicode(3) "My "
+string(3) "My "
 
 --Iteration 22--
-unicode(7) "My Pics"
+string(7) "My Pics"
 
 --Iteration 23--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 24--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 25--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 26--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 27--
-unicode(10) "My Pics.gz"
+string(10) "My Pics.gz"
 
 --Iteration 28--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 29--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 30--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 31--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 32--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 33--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 34--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 35--
-unicode(5) "10.gz"
+string(5) "10.gz"
 
 --Iteration 36--
-unicode(1) "0"
+string(1) "0"
 
 --Iteration 37--
-unicode(1) "0"
+string(1) "0"
 
 --Iteration 38--
-unicode(6) "bar.gz"
+string(6) "bar.gz"
 
 --Iteration 39--
-unicode(6) "bar.gz"
+string(6) "bar.gz"
 
 --Iteration 40--
-unicode(6) "bar.gz"
+string(6) "bar.gz"
 
 --Iteration 41--
-unicode(1) " "
+string(1) " "
 
 --Iteration 42--
-unicode(1) " "
+string(1) " "
 
 --Iteration 43--
-unicode(0) ""
+string(0) ""
 
 --Iteration 44--
-unicode(1) " "
+string(1) " "
 
 --Iteration 45--
-unicode(1) " "
+string(1) " "
 
 --Iteration 46--
-unicode(0) ""
+string(0) ""
 
 --Iteration 47--
-unicode(0) ""
+string(0) ""
 
 --Iteration 48--
-unicode(0) ""
+string(0) ""
 Done

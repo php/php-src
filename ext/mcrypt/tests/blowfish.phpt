@@ -6,11 +6,11 @@ Test for blowfish compatibility
 <?php
 function hex2bin($data) {
     $len = strlen($data);
-    return (binary) pack("H" . $len, $data);
+    return pack("H" . $len, $data);
 }   
 
 print "key               plain             crypt             guess             stat\n";
-$null = b"\0\0\0\0\0\0\0\0";
+$null = "\0\0\0\0\0\0\0\0";
 $vectors = file(dirname(__FILE__) . "/vectors.txt");
 
 $td = mcrypt_module_open ("blowfish", "", MCRYPT_MODE_ECB, "");
@@ -50,7 +50,7 @@ $guess = bin2hex( mcrypt_generic( $td, $plain ) );
 
 echo "\n", $guess, "\n";
 ?>
---EXPECT--
+--EXPECTF--
 key               plain             crypt             guess             stat
 0000000000000000  0000000000000000  4ef997456198dd78  4ef997456198dd78  OK
 FFFFFFFFFFFFFFFF  FFFFFFFFFFFFFFFF  51866fd5b85ecb8a  51866fd5b85ecb8a  OK

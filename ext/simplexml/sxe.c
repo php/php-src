@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -36,7 +36,7 @@ zend_class_entry *ce_SimpleXMLElement;
 
 #include "php_simplexml_exports.h"
 
-/* {{{ proto void SimpleXMLIterator::rewind() U
+/* {{{ proto void SimpleXMLIterator::rewind()
  Rewind to first element */
 PHP_METHOD(ce_SimpleXMLIterator, rewind)
 {
@@ -47,7 +47,7 @@ PHP_METHOD(ce_SimpleXMLIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::valid() U
+/* {{{ proto bool SimpleXMLIterator::valid()
  Check whether iteration is valid */
 PHP_METHOD(ce_SimpleXMLIterator, valid)
 {
@@ -57,7 +57,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current() U
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current()
  Get current element */
 PHP_METHOD(ce_SimpleXMLIterator, current)
 {
@@ -71,7 +71,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLIterator::key() U
+/* {{{ proto string SimpleXMLIterator::key()
  Get name of current child element */
 PHP_METHOD(ce_SimpleXMLIterator, key)
 {
@@ -86,14 +86,14 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 	intern = (php_sxe_object *)zend_object_store_get_object(sxe->iter.data TSRMLS_CC);
 	if (intern != NULL && intern->node != NULL) {
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
-		RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (char*)curnode->name, xmlStrlen(curnode->name), 1);
+		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name), 1);
 	}
     
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLIterator::next() U
+/* {{{ proto void SimpleXMLIterator::next()
  Move to next element */
 PHP_METHOD(ce_SimpleXMLIterator, next)
 {
@@ -104,7 +104,7 @@ PHP_METHOD(ce_SimpleXMLIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::hasChildren() U
+/* {{{ proto bool SimpleXMLIterator::hasChildren()
  Check whether element has children (elements) */ 
 PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 {
@@ -128,7 +128,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren() U
+/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
  Get child element iterator */ 
 PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 {

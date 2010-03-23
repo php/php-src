@@ -10,5 +10,5 @@ $it2 = new RecursiveDirectoryIterator(dirname(__FILE__));
 $it2->rewind();
 echo gettype($it2->current())."\n";
 --EXPECT--
-unicode
+string
 object

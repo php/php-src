@@ -5,7 +5,7 @@ dnl vim:et:sw=2:ts=2:
 define([PDO_ODBC_HELP_TEXT],[[
                             include and lib dirs are looked for under 'dir'.
                             
-                            'flavour' can be one of:  ibm-db2, unixODBC, generic
+                            'flavour' can be one of:  ibm-db2, iODBC, unixODBC, generic
                             If ',dir' part is omitted, default for the flavour 
                             you have selected will used. e.g.:
                             
@@ -47,15 +47,15 @@ if test "$PHP_PDO_ODBC" != "no"; then
   ],[
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+      pdo_inc_path=$prefix/include/php/ext
     else
       AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
+    AC_MSG_RESULT($pdo_inc_path)
   ])
 
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
@@ -72,6 +72,12 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
         pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
         pdo_odbc_def_lib=db2
+        ;;
+
+    iODBC|iodbc)
+        pdo_odbc_def_libdir=/usr/local/$PHP_LIBDIR
+        pdo_odbc_def_incdir=/usr/local/include
+        pdo_odbc_def_lib=iodbc
         ;;
 
     unixODBC|unixodbc)
@@ -151,7 +157,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     [], [
       AC_MSG_ERROR([
 Your ODBC library does not appear to be ODBC 3 compatible.
-You should consider using unixODBC instead, and loading your
+You should consider using iODBC or unixODBC instead, and loading your
 libraries as a driver in that environment; it will emulate the
 functions required for PDO support.
 ])], $PDO_ODBC_LDFLAGS)
@@ -159,9 +165,9 @@ functions required for PDO support.
     AC_MSG_ERROR([Your ODBC library does not exist or there was an error. Check config.log for more information])
   ], $PDO_ODBC_LDFLAGS)
 
-  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_ODBC_INCLUDE)
+  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_ODBC_INCLUDE)
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
-  ifdef([PHP_ADD_EXTENDION_DEP],
+  ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
   ])

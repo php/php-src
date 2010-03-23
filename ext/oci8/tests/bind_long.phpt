@@ -23,7 +23,7 @@ $stmt = oci_parse($c, "SELECT filetxt FROM phptestlng");
 oci_execute($stmt);
 
 $row = oci_fetch_row($stmt);
-var_dump(md5((binary)$row[0]));
+var_dump(md5($row[0]));
 var_dump(strlen($row[0]));
 
 $stmt = oci_parse($c, "drop table phptestlng");
@@ -33,6 +33,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-unicode(32) "5c7c34abf7ea51936785062dbfcaeddc"
+string(32) "5c7c34abf7ea51936785062dbfcaeddc"
 int(394)
 Done

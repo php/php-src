@@ -46,11 +46,11 @@ bool(true)
 SELECTING results
 array(1) {
   [0]=>
-  unicode(32) "0cc175b9c0f1b6a831c399e269772661"
+  string(32) "0cc175b9c0f1b6a831c399e269772661"
 }
 array(1) {
   [0]=>
-  unicode(32) "92eb5ffee6ae2fec3ad71c777531578f"
+  string(32) "92eb5ffee6ae2fec3ad71c777531578f"
 }
 Closing database
 bool(true)

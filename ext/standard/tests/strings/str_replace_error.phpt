@@ -19,6 +19,7 @@ var_dump( str_replace("") );
 var_dump( str_replace(NULL) );
 var_dump( str_replace(1, 2) );
 var_dump( str_replace(1,2,3,$var,5) );
+
 ?>
 ===DONE===
 --EXPECTF--	

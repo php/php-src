@@ -25,10 +25,10 @@ var_dump( is_resource($res, $extra_arg) );
 -- Testing is_resource() function with Zero arguments --
 
 Warning: is_resource() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 -- Testing is_resource() function with more than expected no. of arguments --
 
 Warning: is_resource() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 ===DONE===

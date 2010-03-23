@@ -35,35 +35,35 @@ var_dump(gmp_div_q(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: gmp_div_q() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
 Warning: gmp_div_q() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 resource(%d) of type (GMP integer)
-unicode(1) "0"
+string(1) "0"
 
 Warning: gmp_div_q(): Zero operand not allowed in %s on line %d
 bool(false)
 resource(%d) of type (GMP integer)
-unicode(1) "0"
+string(1) "0"
 NULL
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 resource(%d) of type (GMP integer)
-unicode(4) "9131"
+string(4) "9131"
 resource(%d) of type (GMP integer)
-unicode(4) "9132"
+string(4) "9132"
 resource(%d) of type (GMP integer)
-unicode(4) "9131"
+string(4) "9131"
 resource(%d) of type (GMP integer)
-unicode(4) "9131"
+string(4) "9131"
 resource(%d) of type (GMP integer)
-unicode(4) "9132"
+string(4) "9132"
 resource(%d) of type (GMP integer)
-unicode(4) "9131"
+string(4) "9131"
 
 Warning: gmp_div_q(): supplied resource is not a valid GMP integer resource in %s on line %d
 bool(false)

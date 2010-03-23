@@ -12,7 +12,7 @@ typedef struct JSON_parser_struct {
     int state;
     int depth;
     int top;
-    int error_code;
+	int error_code;
     int* stack;
     zval **the_zstack;
     zval *the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
@@ -24,7 +24,7 @@ enum error_codes {
     PHP_JSON_ERROR_STATE_MISMATCH,  
     PHP_JSON_ERROR_CTRL_CHAR,   
     PHP_JSON_ERROR_SYNTAX,
-    PHP_JSON_ERROR_UTF8,
+    PHP_JSON_ERROR_UTF8
 };
 
 extern JSON_parser new_JSON_parser(int depth);

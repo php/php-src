@@ -32,14 +32,14 @@ var_dump( gmdate('S', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with partial textual representation of day --
-unicode(%d) "%s"
-unicode(3) "Fri"
+string(%d) "%s"
+string(3) "Fri"
 
 -- Testing gmdate() function with full textual representation of day --
-unicode(%d) "%s"
-unicode(6) "Friday"
+string(%d) "%s"
+string(6) "Friday"
 
 -- Testing gmdate() function with English ordinal suffix --
-unicode(%d) "%s"
-unicode(2) "th"
+string(%d) "%s"
+string(2) "th"
 ===DONE===

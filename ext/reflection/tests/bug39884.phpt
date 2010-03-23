@@ -17,7 +17,6 @@ var_dump($refParam->getClass());
 ?>
 --EXPECT--	
 object(ReflectionClass)#4 (1) {
-  [u"name"]=>
-  unicode(13) "stubParamTest"
+  ["name"]=>
+  string(13) "stubParamTest"
 }
-

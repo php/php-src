@@ -109,30 +109,25 @@ string(20) "MS4wNzY1NDMyMUUtOQ=="
 
 Arg value 0.5 
 string(4) "MC41"
-Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
-Error: 2 - base64_encode() expects parameter 1 to be binary string, array given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
-Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
-Error: 2 - base64_encode() expects parameter 1 to be binary string, array given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
-Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
-Error: 2 - base64_encode() expects parameter 1 to be binary string, array given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
-Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
-Error: 2 - base64_encode() expects parameter 1 to be binary string, array given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
-Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
-Error: 2 - base64_encode() expects parameter 1 to be binary string, array given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 
 Arg value  
@@ -154,16 +149,14 @@ Arg value
 string(0) ""
 
 Arg value  
-Error: 2 - base64_encode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(73)
-NULL
+string(0) ""
 
 Arg value  
-Error: 2 - base64_encode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(73)
-NULL
+string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
 Arg value  
-Error: 2 - base64_encode() expects parameter 1 to be binary string, object given, %s(73)
+Error: 2 - base64_encode() expects parameter 1 to be string, object given, %s(73)
 NULL
 
 Arg value  

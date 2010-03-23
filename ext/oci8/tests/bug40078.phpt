@@ -42,14 +42,14 @@ echo "Done\n";
 --EXPECTF--	
 array(5) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(4) "four"
+  string(4) "four"
   [4]=>
-  unicode(4) "five"
+  string(4) "five"
 }
 Done

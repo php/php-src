@@ -14,11 +14,12 @@ Test readdir() function : basic functionality
 echo "*** Testing readdir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-include(dirname(__FILE__) . "/../file/file.inc");
+chdir(dirname(__FILE__));
+include(dirname(__FILE__)."/../file/file.inc");
 
 $path = dirname(__FILE__) . '/readdir_basic';
 mkdir($path);
-@create_files($path, 3, 'numeric', 0755, 1, 'w', 'readdir_basic');
+create_files($path, 3);
 
 echo "\n-- Call readdir() with \$path argument --\n";
 var_dump($dh = opendir($path));
@@ -42,7 +43,7 @@ foreach($a as $file) {
 	var_dump($file);
 }
 
-delete_files($path, 3, 'readdir_basic');
+delete_files($path, 3);
 closedir($dh);
 ?>
 ===DONE===
@@ -56,17 +57,17 @@ rmdir($path);
 
 -- Call readdir() with $path argument --
 resource(%d) of type (stream)
-unicode(1) "."
-unicode(2) ".."
-unicode(18) "readdir_basic1.tmp"
-unicode(18) "readdir_basic2.tmp"
-unicode(18) "readdir_basic3.tmp"
+string(1) "."
+string(2) ".."
+string(9) "file1.tmp"
+string(9) "file2.tmp"
+string(9) "file3.tmp"
 
 -- Call readdir() without $path argument --
 resource(%d) of type (stream)
-unicode(1) "."
-unicode(2) ".."
-unicode(18) "readdir_basic1.tmp"
-unicode(18) "readdir_basic2.tmp"
-unicode(18) "readdir_basic3.tmp"
+string(1) "."
+string(2) ".."
+string(9) "file1.tmp"
+string(9) "file2.tmp"
+string(9) "file3.tmp"
 ===DONE===

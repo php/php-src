@@ -34,7 +34,7 @@ var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
 -- Testing array_intersect_uassoc() function with referenced variable $ref_var has value 'a' --
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 
 -- Testing array_intersect_uassoc() function with referenced variable $ref_var value changed to 10 --
@@ -44,8 +44,8 @@ array(0) {
 -- Testing array_intersect_uassoc() function when $array2 is referencd to $array1 --
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 ===DONE===

@@ -9,7 +9,7 @@ mbstring.func_overload=0
 // TODO: Add more encodings
 
 //$debug=true;
-ini_set('include_path','.');
+ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 
 // restore detect_order to 'auto'
@@ -57,11 +57,11 @@ print  strlen($utf8) . "\n";
 // Wrong Parameters
 echo "== WRONG PARAMETERS ==\n";
 // Array
-// Note: PHP Notice, but returns some value
+// Note: PHP Warning, strlen() expects parameter 1 to be string, array given
 $r = strlen($t_ary);
 echo $r."\n";
 // Object
-// Note: PHP Notice, but returns some value
+// Note: PHP Warning, strlen() expects parameter 1 to be string, object given
 $r = strlen($t_obj);
 echo $r."\n";
 // Wrong encoding
@@ -91,11 +91,10 @@ echo $r."\n";
 43
 101
 == WRONG PARAMETERS ==
-ERR: Notice
-5
-ERR: Catchable fatal error
-ERR: Notice
-6
+ERR: Warning
+
+ERR: Warning
+
 ERR: Warning
 
 

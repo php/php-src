@@ -17,17 +17,17 @@ var_dump($a);
 --EXPECT--
 array(3) {
   [0]=>
-  unicode(1) "b"
+  string(1) "b"
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
   [2]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(3) {
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }

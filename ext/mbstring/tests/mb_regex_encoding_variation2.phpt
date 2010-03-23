@@ -91,7 +91,7 @@ echo "Done";
 *** Testing mb_regex_encoding() : usage variations ***
 
 -- Iteration 1 --
-string(10) "ISO-8859-1"
+string(%d) "%s"
 bool(true)
 string(5) "UCS-4"
 
@@ -418,4 +418,3 @@ string(6) "EUC-KR"
 bool(true)
 string(5) "KOI8R"
 Done
-

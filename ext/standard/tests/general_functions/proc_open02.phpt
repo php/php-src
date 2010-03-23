@@ -33,40 +33,40 @@ echo "Done!\n";
 --EXPECTF--
 bool(true)
 array(8) {
-  [u"command"]=>
-  unicode(28) "/usr/bin/nohup /bin/sleep 50"
-  [u"pid"]=>
+  ["command"]=>
+  string(28) "/usr/bin/nohup /bin/sleep 50"
+  ["pid"]=>
   int(%d)
-  [u"running"]=>
+  ["running"]=>
   bool(true)
-  [u"signaled"]=>
+  ["signaled"]=>
   bool(false)
-  [u"stopped"]=>
+  ["stopped"]=>
   bool(false)
-  [u"exitcode"]=>
+  ["exitcode"]=>
   int(-1)
-  [u"termsig"]=>
+  ["termsig"]=>
   int(0)
-  [u"stopsig"]=>
+  ["stopsig"]=>
   int(0)
 }
 bool(true)
 array(8) {
-  [u"command"]=>
-  unicode(28) "/usr/bin/nohup /bin/sleep 50"
-  [u"pid"]=>
+  ["command"]=>
+  string(28) "/usr/bin/nohup /bin/sleep 50"
+  ["pid"]=>
   int(%d)
-  [u"running"]=>
+  ["running"]=>
   bool(false)
-  [u"signaled"]=>
+  ["signaled"]=>
   bool(true)
-  [u"stopped"]=>
+  ["stopped"]=>
   bool(false)
-  [u"exitcode"]=>
+  ["exitcode"]=>
   int(-1)
-  [u"termsig"]=>
+  ["termsig"]=>
   int(15)
-  [u"stopsig"]=>
+  ["stopsig"]=>
   int(0)
 }
 Done!

@@ -73,10 +73,8 @@ Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s
-
-Warning: file_get_contents(Array): failed to open stream: No such file or directory in %s
-bool(false)
+Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 8 --
 
 Warning: file_get_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d

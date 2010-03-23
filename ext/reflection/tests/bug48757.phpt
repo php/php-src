@@ -18,4 +18,4 @@ $func->invoke('testing');
 ?>
 --EXPECT--
 Hello World
-unicode(7) "testing"
+string(7) "testing"

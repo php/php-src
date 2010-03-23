@@ -167,12 +167,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -182,17 +182,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: closedir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

@@ -31,7 +31,7 @@ var_dump(array_diff($array2, $array1));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff() : usage variations ***
 array(1) {
   [0]=>
@@ -39,6 +39,6 @@ array(1) {
 }
 array(1) {
   [4]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 Done

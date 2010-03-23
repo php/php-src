@@ -32,6 +32,6 @@ foreach ( $variation_array as $var ) {
 ?>
 --EXPECTF--
 *** Test substituting argument with array of valid parameters ***
-unicode(1) "0"
-unicode(3) "php"
-unicode(5) "files"
+string(1) "0"
+string(3) "php"
+string(5) "files"

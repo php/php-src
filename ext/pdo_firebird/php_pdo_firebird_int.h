@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -82,6 +82,11 @@ typedef struct {
 	char *time_format;
 	char *timestamp_format;
 	
+	/* prepend table names on column names in fetch */
+	unsigned fetch_table_names:1;
+	
+	unsigned _reserved:31;
+	
 } pdo_firebird_db_handle;
 
 
@@ -102,7 +107,10 @@ typedef struct {
 	/* whether EOF was reached for this statement */
 	unsigned exhausted:1;
 
-	unsigned _reserved:23;
+	/* successful isc_dsql_execute opens a cursor */
+	unsigned cursor_open:1;
+
+	unsigned _reserved:22;
 
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;

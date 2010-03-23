@@ -8,10 +8,10 @@ Test chop() function : usage variations  - unexpected values for str argument
 */
 
 /*
- * Testing chop() : with different unexpected values for str argument passed to the function 
+ * Testing chop() : with different unexpected values for $str argument passed to the function
 */
 
-echo "*** Testing chop() : with unexpected values for str argument passed to the function ***\n";
+echo "*** Testing chop() : with unexpected values for str argument ***\n";
 // initialize all required variables
 
 $charlist = " @#$%1234567890";
@@ -102,7 +102,7 @@ fclose( $file_handle);
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing chop() : with unexpected values for str argument passed to the function ***
+*** Testing chop() : with unexpected values for str argument ***
 
 Notice: Undefined variable: undefined_var in %s on line %d
 
@@ -110,105 +110,105 @@ Notice: Undefined variable: unset_var in %s on line %d
 
 --- Testing chop() by supplying different values for 'str' argument ---
 -- Iteration 1 --
-unicode(1) "0"
-unicode(0) ""
+string(1) "0"
+string(0) ""
 -- Iteration 2 --
-unicode(1) "1"
-unicode(0) ""
+string(1) "1"
+string(0) ""
 -- Iteration 3 --
-unicode(5) "12345"
-unicode(0) ""
+string(5) "12345"
+string(0) ""
 -- Iteration 4 --
-unicode(5) "-2345"
-unicode(1) "-"
+string(5) "-2345"
+string(1) "-"
 -- Iteration 5 --
-unicode(4) "10.5"
-unicode(3) "10."
+string(4) "10.5"
+string(3) "10."
 -- Iteration 6 --
-unicode(5) "-10.5"
-unicode(4) "-10."
+string(5) "-10.5"
+string(4) "-10."
 -- Iteration 7 --
-unicode(12) "101234567000"
-unicode(0) ""
+string(12) "101234567000"
+string(0) ""
 -- Iteration 8 --
-unicode(13) "1.07654321E-9"
-unicode(12) "1.07654321E-"
+string(13) "1.07654321E-9"
+string(12) "1.07654321E-"
 -- Iteration 9 --
-unicode(3) "0.5"
-unicode(2) "0."
+string(3) "0.5"
+string(2) "0."
 -- Iteration 10 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: chop() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(1) "1"
-unicode(0) ""
+string(1) "1"
+string(0) ""
 -- Iteration 16 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 17 --
-unicode(1) "1"
-unicode(0) ""
+string(1) "1"
+string(0) ""
 -- Iteration 18 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 19 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 20 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 21 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 22 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 23 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 24 --
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 25 --
-unicode(16) " @#$%Object @#$%"
-unicode(11) " @#$%Object"
+string(16) " @#$%Object @#$%"
+string(11) " @#$%Object"
 -- Iteration 26 --
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: chop() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: chop() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: chop() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

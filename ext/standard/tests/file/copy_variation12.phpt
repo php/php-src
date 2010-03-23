@@ -35,7 +35,6 @@ echo "*** Done ***\n";
 
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_copy_variation12");
 rmdir(dirname(__FILE__)."/copy_variation12");
 ?>
 

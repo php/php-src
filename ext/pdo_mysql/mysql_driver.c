@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -551,7 +551,6 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_check_liveness
 };
 /* }}} */
-
 #ifdef PDO_USE_MYSQLND
 # ifdef PHP_WIN32
 #  define MYSQL_UNIX_ADDR	"MySQL"

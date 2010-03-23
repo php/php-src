@@ -23,9 +23,9 @@ $level_two_dir_path = "$level_one_dir_path/level_two";
 
 // create directories and files
 mkdir($level_one_dir_path);
-@create_files($level_one_dir_path, 2, 'numeric', 0755, 1, 'w', 'level_one', 1);
+create_files($level_one_dir_path, 2, 'numeric', 0755, 1, 'w', 'level_one', 1);
 mkdir($level_two_dir_path);
-@create_files($level_two_dir_path, 2, 'numeric', 0755, 1, 'w', 'level_two', 1);
+create_files($level_two_dir_path, 2, 'numeric', 0755, 1, 'w', 'level_two', 1);
 
 echo "\n-- \$path = './level_one': --\n";
 var_dump(chdir($base_dir_path));
@@ -65,105 +65,105 @@ $dir_path = dirname(__FILE__);
 rmdir("$dir_path/level_one/level_two");
 rmdir("$dir_path/level_one");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing scandir() : usage variations ***
 
 -- $path = './level_one': --
 bool(true)
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_one1.tmp"
+  string(14) "level_one1.tmp"
   [3]=>
-  unicode(14) "level_one2.tmp"
+  string(14) "level_one2.tmp"
   [4]=>
-  unicode(9) "level_two"
+  string(9) "level_two"
 }
 
 -- $path = 'level_one/level_two': --
 bool(true)
 array(4) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_two1.tmp"
+  string(14) "level_two1.tmp"
   [3]=>
-  unicode(14) "level_two2.tmp"
+  string(14) "level_two2.tmp"
 }
 
 -- $path = '..': --
 bool(true)
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_one1.tmp"
+  string(14) "level_one1.tmp"
   [3]=>
-  unicode(14) "level_one2.tmp"
+  string(14) "level_one2.tmp"
   [4]=>
-  unicode(9) "level_two"
+  string(9) "level_two"
 }
 
 -- $path = 'level_two', '.': --
 bool(true)
 array(4) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_two1.tmp"
+  string(14) "level_two1.tmp"
   [3]=>
-  unicode(14) "level_two2.tmp"
+  string(14) "level_two2.tmp"
 }
 
 -- $path = '../': --
 bool(true)
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_one1.tmp"
+  string(14) "level_one1.tmp"
   [3]=>
-  unicode(14) "level_one2.tmp"
+  string(14) "level_one2.tmp"
   [4]=>
-  unicode(9) "level_two"
+  string(9) "level_two"
 }
 
 -- $path = './': --
 bool(true)
 array(4) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_two1.tmp"
+  string(14) "level_two1.tmp"
   [3]=>
-  unicode(14) "level_two2.tmp"
+  string(14) "level_two2.tmp"
 }
 
 -- $path = '../../'level_one': --
 bool(true)
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(14) "level_one1.tmp"
+  string(14) "level_one1.tmp"
   [3]=>
-  unicode(14) "level_one2.tmp"
+  string(14) "level_one2.tmp"
   [4]=>
-  unicode(9) "level_two"
+  string(9) "level_two"
 }
 ===DONE===

@@ -118,14 +118,14 @@ Warning: sha1_file() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 -- Hexadecimal Output for Empty file as Argument --
-unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 
 -- Raw Binary Output for Empty file as Argument --
-unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 
 -- Hexadecimal Output for a valid file with some contents --
-unicode(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
+string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
 
 -- Raw Binary Output for a valid file with some contents --
-unicode(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
+string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
 ===DONE===

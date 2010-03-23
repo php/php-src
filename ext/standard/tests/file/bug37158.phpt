@@ -18,7 +18,7 @@ $file = dirname(__FILE__) . '/footest.txt';
 $x = str_repeat(1, 8192);
 $fp = fopen($file, 'w');
 for ($i = 0; $i < 5; $i++) {
-	fwrite($fp, (binary)$x);
+	fwrite($fp, $x);
 }
 fclose($fp);
 
@@ -33,7 +33,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECT--
-unicode(26) "size of contents 1 = 20000"
-unicode(26) "size of contents 2 = 40960"
+--EXPECT--	
+string(26) "size of contents 1 = 20000"
+string(26) "size of contents 2 = 40960"
 Done

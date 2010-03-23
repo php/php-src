@@ -1,5 +1,7 @@
 --TEST--
 passing arguments by ref to a method handled by __call()
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 
@@ -21,8 +23,7 @@ var_dump($v);
 
 echo "Done\n";
 ?>
---EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
+--EXPECTF--	
 str
 5
 int(5)

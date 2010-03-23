@@ -14,270 +14,270 @@ var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 ?>
---EXPECT--
+--EXPECTF--	
 array(26) {
-  [u"basic"]=>
+  ["basic"]=>
   array(15) {
-    [u"basicval"]=>
-    unicode(3) "bar"
-    [u"longval"]=>
-    unicode(5) "12345"
-    [u"with.dot"]=>
-    unicode(7) "fooobar"
-    [u"boolon"]=>
-    unicode(1) "1"
-    [u"booltrue"]=>
-    unicode(1) "1"
-    [u"boolyes"]=>
-    unicode(1) "1"
-    [u"booloff"]=>
-    unicode(0) ""
-    [u"boolfalse"]=>
-    unicode(0) ""
-    [u"boolnone"]=>
-    unicode(0) ""
-    [u"boolno"]=>
-    unicode(0) ""
-    [u"string"]=>
-    unicode(31) "asdadfsdjkslkj ¡@£$$ { }[ ]/%#¤"
-    [u"sqstring"]=>
-    unicode(14) "adsasdadasdasd"
-    [u"dqstring"]=>
-    unicode(46) "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
-    [u"php_constant"]=>
-    unicode(5) "32767"
-    [u"user_constant"]=>
-    unicode(21) "this_is_test_constant"
+    ["basicval"]=>
+    string(3) "bar"
+    ["longval"]=>
+    string(5) "12345"
+    ["with.dot"]=>
+    string(7) "fooobar"
+    ["boolon"]=>
+    string(1) "1"
+    ["booltrue"]=>
+    string(1) "1"
+    ["boolyes"]=>
+    string(1) "1"
+    ["booloff"]=>
+    string(0) ""
+    ["boolfalse"]=>
+    string(0) ""
+    ["boolnone"]=>
+    string(0) ""
+    ["boolno"]=>
+    string(0) ""
+    ["string"]=>
+    string(34) "asdadfsdjkslkj ¡@£$$ { }[ ]/%#¤"
+    ["sqstring"]=>
+    string(14) "adsasdadasdasd"
+    ["dqstring"]=>
+    string(51) "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
+    ["php_constant"]=>
+    string(5) "30719"
+    ["user_constant"]=>
+    string(21) "this_is_test_constant"
   }
-  [u"basic with whitespace"]=>
+  ["basic with whitespace"]=>
   array(13) {
-    [u"basicval"]=>
-    unicode(3) "bar"
-    [u"longval"]=>
-    unicode(5) "12345"
-    [u"with.dot"]=>
-    unicode(7) "fooobar"
-    [u"boolon"]=>
-    unicode(1) "1"
-    [u"booltrue"]=>
-    unicode(1) "1"
-    [u"boolyes"]=>
-    unicode(1) "1"
-    [u"booloff"]=>
-    unicode(0) ""
-    [u"boolfalse"]=>
-    unicode(0) ""
-    [u"boolnone"]=>
-    unicode(0) ""
-    [u"boolno"]=>
-    unicode(0) ""
-    [u"sqstring"]=>
-    unicode(14) "adsasdadasdasd"
-    [u"dqstring"]=>
-    unicode(34) "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"
-    [u"php_constant"]=>
-    unicode(5) "32767"
+    ["basicval"]=>
+    string(3) "bar"
+    ["longval"]=>
+    string(5) "12345"
+    ["with.dot"]=>
+    string(7) "fooobar"
+    ["boolon"]=>
+    string(1) "1"
+    ["booltrue"]=>
+    string(1) "1"
+    ["boolyes"]=>
+    string(1) "1"
+    ["booloff"]=>
+    string(0) ""
+    ["boolfalse"]=>
+    string(0) ""
+    ["boolnone"]=>
+    string(0) ""
+    ["boolno"]=>
+    string(0) ""
+    ["sqstring"]=>
+    string(14) "adsasdadasdasd"
+    ["dqstring"]=>
+    string(41) "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"
+    ["php_constant"]=>
+    string(5) "30719"
   }
-  [u"comments"]=>
+  ["comments"]=>
   array(1) {
-    [u"somecomment"]=>
-    unicode(15) "comment follows"
+    ["somecomment"]=>
+    string(15) "comment follows"
   }
-  [u"variables"]=>
+  ["variables"]=>
   array(8) {
-    [u"var1"]=>
-    unicode(14) "FUBAR_VARIABLE"
-    [u"var2"]=>
-    unicode(18) "FUBAR_VARIABLE/foo"
-    [u"var3"]=>
-    unicode(18) "foo/FUBAR_VARIABLE"
-    [u"var4"]=>
-    unicode(22) "foo/FUBAR_VARIABLE/foo"
-    [u"quoted_var1"]=>
-    unicode(21) "FUBAR_QUOTES_VARIABLE"
-    [u"quoted_var2"]=>
-    unicode(25) "FUBAR_QUOTES_VARIABLE/foo"
-    [u"quoted_var3"]=>
-    unicode(25) "foo/FUBAR_QUOTES_VARIABLE"
-    [u"quoted_var4"]=>
-    unicode(29) "foo/FUBAR_QUOTES_VARIABLE/foo"
+    ["var1"]=>
+    string(14) "FUBAR_VARIABLE"
+    ["var2"]=>
+    string(18) "FUBAR_VARIABLE/foo"
+    ["var3"]=>
+    string(18) "foo/FUBAR_VARIABLE"
+    ["var4"]=>
+    string(22) "foo/FUBAR_VARIABLE/foo"
+    ["quoted_var1"]=>
+    string(21) "FUBAR_QUOTES_VARIABLE"
+    ["quoted_var2"]=>
+    string(25) "FUBAR_QUOTES_VARIABLE/foo"
+    ["quoted_var3"]=>
+    string(25) "foo/FUBAR_QUOTES_VARIABLE"
+    ["quoted_var4"]=>
+    string(29) "foo/FUBAR_QUOTES_VARIABLE/foo"
   }
-  [u"offset values"]=>
+  ["offset values"]=>
   array(6) {
-    [u"foo1"]=>
+    ["foo1"]=>
     array(2) {
       [0]=>
-      unicode(14) "basic offset 1"
+      string(14) "basic offset 1"
       [1]=>
-      unicode(14) "basic offset 2"
+      string(14) "basic offset 2"
     }
-    [u"foo2"]=>
+    ["foo2"]=>
     array(1) {
       [123]=>
-      unicode(11) "long offset"
+      string(11) "long offset"
     }
-    [u"foo3"]=>
+    ["foo3"]=>
     array(1) {
       ["abc"]=>
-      unicode(13) "string offset"
+      string(13) "string offset"
     }
-    [u"foo4"]=>
+    ["foo4"]=>
     array(4) {
       [0]=>
-      unicode(15) "quoted offset 1"
+      string(15) "quoted offset 1"
       [" "]=>
-      unicode(15) "quoted offset 2"
+      string(15) "quoted offset 2"
       ["sqfoobar"]=>
-      unicode(20) "quoted string offset"
+      string(20) "quoted string offset"
       ["dqfoobar"]=>
-      unicode(20) "single quoted offset"
+      string(20) "single quoted offset"
     }
-    [u"foo6"]=>
+    ["foo6"]=>
     array(4) {
       ["FUBAR_VARIABLE"]=>
-      unicode(8) "variable"
+      string(8) "variable"
       ["FUBAR_VARIABLE/foo"]=>
-      unicode(22) "variable with string 1"
+      string(22) "variable with string 1"
       ["foo/FUBAR_VARIABLE"]=>
-      unicode(22) "variable with string 2"
+      string(22) "variable with string 2"
       ["foo/FUBAR_VARIABLE/foo"]=>
-      unicode(22) "variable with string 3"
+      string(22) "variable with string 3"
     }
-    [u"foo7"]=>
+    ["foo7"]=>
     array(4) {
       ["FUBAR_QUOTES_VARIABLE"]=>
-      unicode(17) "quoted variable 1"
+      string(17) "quoted variable 1"
       ["FUBAR_QUOTES_VARIABLE/foo"]=>
-      unicode(17) "quoted variable 2"
+      string(17) "quoted variable 2"
       ["foo/FUBAR_QUOTES_VARIABLE"]=>
-      unicode(17) "quoted variable 3"
+      string(17) "quoted variable 3"
       ["foo/FUBAR_QUOTES_VARIABLE/foo"]=>
-      unicode(17) "quoted variable 4"
+      string(17) "quoted variable 4"
     }
   }
-  [u"non value"]=>
+  ["non value"]=>
   array(4) {
-    [u"novalue_option1"]=>
-    unicode(0) ""
-    [u"novalue_option2"]=>
-    unicode(0) ""
-    [u"novalue_option3"]=>
-    unicode(0) ""
-    [u"novalue_option4"]=>
+    ["novalue_option1"]=>
+    string(0) ""
+    ["novalue_option2"]=>
+    string(0) ""
+    ["novalue_option3"]=>
+    string(0) ""
+    ["novalue_option4"]=>
     array(3) {
       [0]=>
-      unicode(0) ""
+      string(0) ""
       [1]=>
-      unicode(0) ""
+      string(0) ""
       [2]=>
-      unicode(0) ""
+      string(0) ""
     }
   }
-  [u"Quoted strings and variables in sections"]=>
+  ["Quoted strings and variables in sections"]=>
   array(0) {
   }
-  [u"FUBAR_VARIABLE"]=>
+  ["FUBAR_VARIABLE"]=>
   array(0) {
   }
-  [u"FUBAR_VARIABLE/foo"]=>
+  ["FUBAR_VARIABLE/foo"]=>
   array(0) {
   }
-  [u"foo/FUBAR_VARIABLE"]=>
+  ["foo/FUBAR_VARIABLE"]=>
   array(0) {
   }
-  [u"foo/FUBAR_VARIABLE/foo"]=>
+  ["foo/FUBAR_VARIABLE/foo"]=>
   array(0) {
   }
-  [u"FUBAR_QUOTES_VARIABLE"]=>
+  ["FUBAR_QUOTES_VARIABLE"]=>
   array(0) {
   }
-  [u"FUBAR_QUOTES_VARIABLE/foo"]=>
+  ["FUBAR_QUOTES_VARIABLE/foo"]=>
   array(0) {
   }
-  [u"foo/FUBAR_QUOTES_VARIABLE"]=>
+  ["foo/FUBAR_QUOTES_VARIABLE"]=>
   array(0) {
   }
-  [u"foo/FUBAR_QUOTES_VARIABLE/foo"]=>
+  ["foo/FUBAR_QUOTES_VARIABLE/foo"]=>
   array(0) {
   }
-  [u"PATH=FUBAR_VARIABLE/no/quotes"]=>
+  ["PATH=FUBAR_VARIABLE/no/quotes"]=>
   array(0) {
   }
-  [u"PATH=FUBAR_VARIABLE/all/quoted"]=>
+  ["PATH=FUBAR_VARIABLE/all/quoted"]=>
   array(0) {
   }
-  [u"01"]=>
+  ["01"]=>
   array(2) {
-    [u"e"]=>
-    unicode(1) "e"
-    [u"f"]=>
-    unicode(1) "f"
+    ["e"]=>
+    string(1) "e"
+    ["f"]=>
+    string(1) "f"
   }
-  [u"02"]=>
+  ["02"]=>
   array(2) {
-    [u"g"]=>
-    unicode(1) "g"
-    [u"h"]=>
-    unicode(1) "h"
+    ["g"]=>
+    string(1) "g"
+    ["h"]=>
+    string(1) "h"
   }
   [1]=>
   array(2) {
-    [u"a"]=>
-    unicode(1) "a"
-    [u"b"]=>
-    unicode(1) "b"
+    ["a"]=>
+    string(1) "a"
+    ["b"]=>
+    string(1) "b"
   }
   [2]=>
   array(2) {
-    [u"c"]=>
-    unicode(1) "c"
-    [u"d"]=>
-    unicode(1) "d"
+    ["c"]=>
+    string(1) "c"
+    ["d"]=>
+    string(1) "d"
   }
-  [u"0815"]=>
+  ["0815"]=>
   array(1) {
-    [u"bla"]=>
-    unicode(3) "bla"
+    ["bla"]=>
+    string(3) "bla"
   }
-  [u"bug #43923"]=>
+  ["bug #43923"]=>
   array(3) {
-    [u"curly1"]=>
-    unicode(1) "{"
-    [u"curly2"]=>
-    unicode(1) "{"
-    [u"curly3"]=>
-    unicode(1) "{"
+    ["curly1"]=>
+    string(1) "{"
+    ["curly2"]=>
+    string(1) "{"
+    ["curly3"]=>
+    string(1) "{"
   }
-  [u"bug #44019"]=>
+  ["bug #44019"]=>
   array(6) {
-    [u"concatenation_before"]=>
-    unicode(37) "this_is_test_constant+some_text_after"
-    [u"concatenation_middle"]=>
-    unicode(54) "some_text_before+this_is_test_constant+some_text_after"
-    [u"concatenation_after"]=>
-    unicode(38) "some_text_before+this_is_test_constant"
-    [u"concatenation_nows_before"]=>
-    unicode(37) "this_is_test_constant+some_text_after"
-    [u"concatenation_nows_middle"]=>
-    unicode(54) "some_text_before+this_is_test_constant+some_text_after"
-    [u"concatenation_nows_after"]=>
-    unicode(38) "some_text_before+this_is_test_constant"
+    ["concatenation_before"]=>
+    string(37) "this_is_test_constant+some_text_after"
+    ["concatenation_middle"]=>
+    string(54) "some_text_before+this_is_test_constant+some_text_after"
+    ["concatenation_after"]=>
+    string(38) "some_text_before+this_is_test_constant"
+    ["concatenation_nows_before"]=>
+    string(37) "this_is_test_constant+some_text_after"
+    ["concatenation_nows_middle"]=>
+    string(54) "some_text_before+this_is_test_constant+some_text_after"
+    ["concatenation_nows_after"]=>
+    string(38) "some_text_before+this_is_test_constant"
   }
-  [u"bug #43915"]=>
+  ["bug #43915"]=>
   array(3) {
-    [u"ini_with-hyphen"]=>
-    unicode(26) "with hyphen and underscore"
-    [u"ini.with-hyphen"]=>
-    unicode(14) "dot and hyphen"
-    [u"ini-with.hyphen"]=>
-    unicode(14) "hyphen and dot"
+    ["ini_with-hyphen"]=>
+    string(26) "with hyphen and underscore"
+    ["ini.with-hyphen"]=>
+    string(14) "dot and hyphen"
+    ["ini-with.hyphen"]=>
+    string(14) "hyphen and dot"
   }
-  [u"windows paths"]=>
+  ["windows paths"]=>
   array(2) {
-    [u"winpath1"]=>
-    unicode(69) "c:\some windows\path\test\new\r\quote " here\single ' quote\some more"
-    [u"winpath2"]=>
-    unicode(13) "special case\"
+    ["winpath1"]=>
+    string(69) "c:\some windows\path\test\new\r\quote " here\single ' quote\some more"
+    ["winpath2"]=>
+    string(13) "special case\"
   }
 }
 Done.

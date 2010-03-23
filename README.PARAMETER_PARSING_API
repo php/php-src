@@ -39,7 +39,7 @@ Type specifiers
  instance of that class.
 
  a  - array (zval*)
- A  - array or object (zval *) 
+ A  - array or object (zval *)
  b  - boolean (zend_bool)
  C  - class (zend_class_entry*)
  d  - double (double)
@@ -53,15 +53,6 @@ Type specifiers
  O  - object of specific type given by class entry (zval*, zend_class_entry)
  r  - resource (zval*)
  s  - string (with possible null bytes) and its length (char*, int)
- S  - binary string, does not allow conversion from Unicode strings
- t  - text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
-      accepts either Unicode or binary string
- T  - text (zstr (string union), int (length), zend_uchar (IS_STRING/..))
-      coalesces all T parameters to common type (Unicode or binary)
- u  - unicode (UChar*, int)
- U  - Unicode string, does not allow conversion from binary strings
- x  - Unicode or binary string depending on UG(unicode). In unicode this 
-      behaves like 'u' and in nonunicode mode it behaves like 's'.
  z  - the actual zval (zval*)
  Z  - the actual zval (zval**)
  *  - variable arguments list (0 or more)
@@ -76,10 +67,6 @@ Type specifiers
     ! - the parameter it follows can be of specified type or NULL (applies
 		to all specifiers except for 'b', 'l', and 'd'). If NULL is passed, the
 		results pointer is set to NULL as well.
-    & - alternate format (currently used for 's' only to specify a converter to
-        use when converting from Unicode strings)
-	^ - returns original string type before conversion (only for 's' and 'u'
-	    specifiers)
 
 
 Note on 64bit compatibility
@@ -146,56 +133,6 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
                           &arr) == FAILURE) {
     return;
 }
-
-
-/* Gets a binary string in UTF-8 */
-char *str;
-int str_len;
-
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str, &str_len, UG(utf8_conv)) == FAILURE) {
-    return;
-}
-
-
-/* Gets a Unicode string */
-UChar *str;
-int len;
-
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &len) == FAILURE) {
-    return;
-}
-
-
-/* Gets a Unicode or binary string */
-zstr str;
-int len;
-zend_uchar type;
-
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &len, &type) == FAILURE) {
-    return;
-}
-if (type == IS_UNICODE) {
-   /* process str.u as Unicode string */
-} else {
-   /* process str.s binary string */
-}
-
-
-/* Gets two string parameters, both of which will be guaranteed to be of the same type */
-zstr str1, str2;
-int len1, len2;
-zend_uchar type1, type2;
-
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &str1, &len1,
-                          &type1, &str2, &len2, &type2) == FAILURE) {
-    return;
-}
-if (type1 == IS_UNICODE) {
-    /* process as Unicode, str2 is guaranteed to be Unicode as well */
-} else {
-    /* process as binary string, str2 is guaranteed to be the same */
-}
-
 
 /* Get either a set of 3 longs or a string. */
 long l1, l2, l3;

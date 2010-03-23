@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -55,7 +55,6 @@ extern void php_free_shutdown_functions(TSRMLS_D);
 /* environment module */
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
-
 END_EXTERN_C()
 
 #endif
