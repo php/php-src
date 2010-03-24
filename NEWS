@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #51338 (URL-Rewriter is still enabled if use_only_cookies is
   on). (Ilia, j dot jeising at gmail dot com)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
+- Fixed bug #51263 (imagettftext and rotated text uses wrong baseline)
+  (cschneid at cschneid dot com, Takeshi Abe)
 - Fixed bug #51237 (milter SAPI crash on startup). (igmar at palsenberg dot com)
 - Fixed bug #51213 (pdo_mssql is trimming value of the money column). (Ilia,
   alexr at oplot dot com)

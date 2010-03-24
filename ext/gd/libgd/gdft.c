@@ -1101,7 +1101,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 			/* now, draw to our target surface */
 			bm = (FT_BitmapGlyph) image;
-			gdft_draw_bitmap(tc_cache, im, fg, bm->bitmap, x + x1 + ((pen.x + 31) >> 6), y + y1 + ((pen.y + 31) >> 6) - bm->top);
+			gdft_draw_bitmap(tc_cache, im, fg, bm->bitmap, x + x1 + ((pen.x + 31) >> 6) + bm->left, y + y1 + ((pen.y + 31) >> 6) - bm->top);
 		}
 
 		/* record current glyph index for kerning */
