@@ -18,7 +18,7 @@ var_dump(hash_algos());
 ===Done===
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
-array(42) {
+array(45) {
   [0]=>
   string(3) "md2"
   [1]=>
@@ -74,34 +74,40 @@ array(42) {
   [26]=>
   string(7) "salsa20"
   [27]=>
-  string(10) "haval128,3"
+  string(6) "fnv132"
   [28]=>
-  string(10) "haval160,3"
+  string(6) "fnv164"
   [29]=>
-  string(10) "haval192,3"
+  string(5) "joaat"
   [30]=>
-  string(10) "haval224,3"
+  string(10) "haval128,3"
   [31]=>
-  string(10) "haval256,3"
+  string(10) "haval160,3"
   [32]=>
-  string(10) "haval128,4"
+  string(10) "haval192,3"
   [33]=>
-  string(10) "haval160,4"
+  string(10) "haval224,3"
   [34]=>
-  string(10) "haval192,4"
+  string(10) "haval256,3"
   [35]=>
-  string(10) "haval224,4"
+  string(10) "haval128,4"
   [36]=>
-  string(10) "haval256,4"
+  string(10) "haval160,4"
   [37]=>
-  string(10) "haval128,5"
+  string(10) "haval192,4"
   [38]=>
-  string(10) "haval160,5"
+  string(10) "haval224,4"
   [39]=>
-  string(10) "haval192,5"
+  string(10) "haval256,4"
   [40]=>
-  string(10) "haval224,5"
+  string(10) "haval128,5"
   [41]=>
+  string(10) "haval160,5"
+  [42]=>
+  string(10) "haval192,5"
+  [43]=>
+  string(10) "haval224,5"
+  [44]=>
   string(10) "haval256,5"
 }
 ===Done===
