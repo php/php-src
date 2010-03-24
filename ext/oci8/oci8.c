@@ -1549,6 +1549,7 @@ void php_oci_connection_descriptors_free(php_oci_connection *connection TSRMLS_D
 /* {{{ php_oci_error()
  *
  * Fetch & print out error message if we get an error
+ * Returns an Oracle error number
  */
 sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 {
@@ -1639,19 +1640,20 @@ int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, u
 {
 	*sqltext = NULL;
 	*error_offset = 0;
+	sword errstatus;
 
-	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) sqltext, (ub4 *)0, OCI_ATTR_STATEMENT, statement->err));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) sqltext, (ub4 *)0, OCI_ATTR_STATEMENT, statement->err));
 
-	if (statement->errcode != OCI_SUCCESS) {
-		statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		statement->errcode = php_oci_error(statement->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
 		return 1;
 	}
 
-	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)error_offset, (ub4 *)0, OCI_ATTR_PARSE_ERROR_OFFSET, statement->err));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)error_offset, (ub4 *)0, OCI_ATTR_PARSE_ERROR_OFFSET, statement->err));
 
-	if (statement->errcode != OCI_SUCCESS) {
-		statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		statement->errcode = php_oci_error(statement->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
 		return 1;
 	}
