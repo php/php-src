@@ -11,10 +11,6 @@ require(dirname(__FILE__).'/connect.inc');
 
 echo "Test 1\n";
 
-echo "Once Oracle has popped the message from its stack, the message is\n";
-echo "no longer available.\n";
-
-
 $s = oci_parse($c, 'delete from table_does_not_exist');
 $r = @oci_execute($s);
 
@@ -36,11 +32,9 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Test 1
-Once Oracle has popped the message from its stack, the message is
-no longer available.
 0 -> ORA-00942: %s
-1 -> 
-2 -> 
-3 -> 
-4 -> 
+1 -> ORA-00942: %s
+2 -> ORA-00942: %s
+3 -> ORA-00942: %s
+4 -> ORA-00942: %s
 Done
