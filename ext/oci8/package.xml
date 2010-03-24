@@ -6,7 +6,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
  <summary>Extension for Oracle Database</summary>
- <description>This extension allows you to access Oracle databases using the Oracle Call Interface (OCI8). It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
+ <description>This extension allows you to access Oracle databases. It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -37,17 +37,16 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <time>15:00:00</time>
 
  <version>
-  <release>1.4.1</release>
-  <api>1.4.1</api>
+  <release>1.4.2</release>
+  <api>1.4.2</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>development</release>
+  <api>development</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-Fixed bug #49560 (Using LOBs causes slow PHP shutdown)
-Fixed bug #47281 ($php_errormsg is limited in size of characters)
+    Fixed bug #51291 (oci_error doesn't report last error when called two times)
  </notes>
  <contents>
   <dir name="/">
@@ -366,6 +365,22 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.1</release>
+  <api>1.4.1</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #49560 (Using LOBs causes slow PHP shutdown)
+    Fixed bug #47281 ($php_errormsg is limited in size of characters)
+ </notes>
+</release>
 
 <release>
  <version>
