@@ -69,6 +69,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	zend_bool			new_connection = FALSE;
 	zend_rsrc_list_entry	*le;
 	mysqli_plist_entry *plist = NULL;
+	zend_bool			self_alloced = 0;
 
 
 #if !defined(MYSQL_USE_MYSQLND)
@@ -99,6 +100,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		}
 		if (!mysql) {
 			mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+			self_alloced = 1;
 		}
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 	} else {
@@ -243,6 +245,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		if (!is_real_connect) {
 			/* free mysql structure */
 			mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
+			mysql->mysql = NULL;
 		}
 		goto err;
 	}
@@ -292,7 +295,7 @@ err:
 		mysql->hash_key = NULL;
 		mysql->persistent = FALSE;
 	}
-	if (!is_real_connect) {
+	if (!is_real_connect && self_alloced) {
 		efree(mysql);
 	}
 	RETVAL_FALSE;
