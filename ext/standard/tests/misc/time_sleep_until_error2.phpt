@@ -1,9 +1,7 @@
 --TEST--
 time_sleep_until() function - error test for time_sleep_until()
 --SKIPIF--
-<?php
-	function_exists('time_sleep_until') or die('skip time_sleep_until() is not supported in this build.');
-?>
+<?php	if (!function_exists("time_sleep_until")) die('skip time_sleep_until() not available');?>
 --CREDITS--
 Filippo De Santis fd@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
