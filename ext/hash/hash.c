@@ -79,6 +79,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"FNV1A32", "fnv1a32", 30},
 	{"FNV164", "fnv164", 31},
 	{"FNV1A64", "fnv1a64", 32},
+	{"JOAAT", "joaat", 33},
 };
 #endif
 
@@ -847,6 +848,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("salsa20",		&php_hash_salsa20_ops);
 	php_hash_register_algo("fnv132",		&php_hash_fnv132_ops);
 	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
+	php_hash_register_algo("joaat",			&php_hash_joaat_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
