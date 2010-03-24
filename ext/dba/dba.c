@@ -50,6 +50,7 @@
 #include "php_flatfile.h"
 #include "php_inifile.h"
 #include "php_qdbm.h"
+#include "php_tcadb.h"
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
@@ -337,6 +338,9 @@ static dba_handler handler[] = {
 #if DBA_QDBM
 	DBA_HND(qdbm, DBA_LOCK_EXT)
 #endif
+#if DBA_TCADB
+	DBA_HND(tcadb, DBA_LOCK_ALL)
+#endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -358,6 +362,8 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "dbm"
 #elif DBA_QDBM
 #define DBA_DEFAULT "qdbm"
+#elif DBA_TCADB
+#define DBA_DEFAULT "tcadb"
 #else
 #define DBA_DEFAULT ""
 #endif
