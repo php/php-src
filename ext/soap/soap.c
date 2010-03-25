@@ -3470,7 +3470,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	}
 }
 
-static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, int *num_params, zval ***parameters)
+static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, int *num_params, zval ***parameters TSRMLS_DC)
 {
 	int cur_param = 0,num_of_params = 0;
 	zval **tmp_parameters = NULL;
@@ -3501,7 +3501,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 					MAKE_STD_ZVAL(tmp_parameters[cur_param]);
 					ZVAL_NULL(tmp_parameters[cur_param]);
 				} else {
-					tmp_parameters[cur_param] = master_to_zval((*param)->encode, val);
+					tmp_parameters[cur_param] = master_to_zval((*param)->encode, val TSRMLS_CC);
 				}
 				cur_param++;
 
@@ -3531,7 +3531,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 		    ((sdlSoapBindingFunctionPtr)function->bindingAttributes)->style == SOAP_DOCUMENT &&
 		    (function->requestParameters == NULL ||
 		     zend_hash_num_elements(function->requestParameters) == 0) &&
-		    strcmp(params->name, function->functionName) == 0) {
+		    strcmp((char *)params->name, function->functionName) == 0) {
 			num_of_params = 0;
 		} else if (num_of_params > 0) {
 			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
@@ -3551,7 +3551,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 					} else {
 						enc = (*param)->encode;
 					}
-					tmp_parameters[cur_param] = master_to_zval(enc, trav);
+					tmp_parameters[cur_param] = master_to_zval(enc, trav TSRMLS_CC);
 					cur_param++;
 				}
 				trav = trav->next;
@@ -3559,7 +3559,6 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 		}
 	}
 	if (num_of_params > cur_param) {
-		TSRMLS_FETCH();
 		soap_server_fault("Client","Missing parameter", NULL, NULL, NULL TSRMLS_CC);
 	}
 	(*parameters) = tmp_parameters;
@@ -3820,7 +3819,7 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 				if (h->hdr) {
 					h->num_params = 1;
 					h->parameters = emalloc(sizeof(zval*));
-					h->parameters[0] = master_to_zval(h->hdr->encode, hdr_func);
+					h->parameters[0] = master_to_zval(h->hdr->encode, hdr_func TSRMLS_CC);
 				} else {
 					if (h->function && h->function->binding && h->function->binding->bindingType == BINDING_SOAP) {
 						sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)h->function->bindingAttributes;
@@ -3828,7 +3827,7 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 							hdr_func = hdr_func->children;
 						}
 					}
-					deserialize_parameters(hdr_func, h->function, &h->num_params, &h->parameters);
+					deserialize_parameters(hdr_func, h->function, &h->num_params, &h->parameters TSRMLS_CC);
 				}
 				INIT_ZVAL(h->retval);
 				if (last == NULL) {
@@ -3851,7 +3850,7 @@ ignore_header:
 	} else {
 		func = func->children;
 	}
-	deserialize_parameters(func, function, num_params, parameters);
+	deserialize_parameters(func, function, num_params, parameters TSRMLS_CC);
 	
 	encode_finish();
 
@@ -4045,7 +4044,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					use = SOAP_ENCODED;
 				}
 			} else {
-				xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head);
+				xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head TSRMLS_CC);
 				if (hdr_name) {
 					xmlNodeSetName(xmlHdr, BAD_CAST(hdr_name));
 				}
@@ -4126,11 +4125,11 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				efree(str);
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
-				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param);
+				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param TSRMLS_CC);
 				xmlNodeSetName(node, BAD_CAST("faultstring"));
 			}
 			if (zend_hash_find(prop, "faultactor", sizeof("faultactor"), (void**)&tmp) == SUCCESS) {
-				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param);
+				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param TSRMLS_CC);
 				xmlNodeSetName(node, BAD_CAST("faultactor"));
 			}
 			detail_name = "detail";
@@ -4152,7 +4151,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), NULL);
-				node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, node);
+				node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, node TSRMLS_CC);
 				xmlNodeSetName(node, BAD_CAST("Text"));
 				xmlSetNs(node, ns);
 			}
@@ -4270,7 +4269,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 							use = SOAP_ENCODED;
 						}
 					} else {
-						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head);
+						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head TSRMLS_CC);
 						if (hdr_name) {
 							xmlNodeSetName(xmlHdr, BAD_CAST(hdr_name));
 						}
@@ -4475,7 +4474,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 				}
 
 				if (zend_hash_find(ht, "data", sizeof("data"), (void**)&tmp) == SUCCESS) {
-					h = master_to_xml(enc, *tmp, hdr_use, head);
+					h = master_to_xml(enc, *tmp, hdr_use, head TSRMLS_CC);
 					xmlNodeSetName(h, BAD_CAST(Z_STRVAL_PP(name)));
 				} else {
 					h = xmlNewNode(NULL, BAD_CAST(Z_STRVAL_PP(name)));
@@ -4595,7 +4594,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 	} else {
 		enc = NULL;
 	}
-	xmlParam = master_to_xml(enc, val, style, parent);
+	xmlParam = master_to_xml(enc, val, style, parent TSRMLS_CC);
 	if (!strcmp((char*)xmlParam->name, "BOGUS")) {
 		xmlNodeSetName(xmlParam, BAD_CAST(paramName));
 	}

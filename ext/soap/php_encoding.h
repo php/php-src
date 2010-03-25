@@ -188,8 +188,8 @@ struct _encode {
 };
 
 /* Master functions all encode/decode should be called thur these functions */
-xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent);
-zval *master_to_zval(encodePtr encode, xmlNodePtr data);
+xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent TSRMLS_DC);
+zval *master_to_zval(encodePtr encode, xmlNodePtr data TSRMLS_DC);
 
 /* user defined mapping */
 xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent TSRMLS_DC);

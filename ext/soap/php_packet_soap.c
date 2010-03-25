@@ -191,21 +191,21 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			tmp = get_node(fault->children, "faultstring");
 			if (tmp != NULL && tmp->children != NULL) {
-				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp TSRMLS_CC);
 				faultstring = Z_STRVAL_P(zv);
 				FREE_ZVAL(zv);
 			}
 
 			tmp = get_node(fault->children, "faultactor");
 			if (tmp != NULL && tmp->children != NULL) {
-				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+				zval *zv = master_to_zval(get_conversion(IS_STRING), tmp TSRMLS_CC);
 				faultactor = Z_STRVAL_P(zv);
 				FREE_ZVAL(zv);
 			}
 
 			tmp = get_node(fault->children, "detail");
 			if (tmp != NULL) {
-				details = master_to_zval(NULL, tmp);
+				details = master_to_zval(NULL, tmp TSRMLS_CC);
 			}
 		} else {
 			tmp = get_node(fault->children, "Code");
@@ -221,7 +221,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				/* TODO: lang attribute */
 				tmp = get_node(tmp->children,"Text");
 				if (tmp != NULL && tmp->children != NULL) {
-					zval *zv = master_to_zval(get_conversion(IS_STRING), tmp);
+					zval *zv = master_to_zval(get_conversion(IS_STRING), tmp TSRMLS_CC);
 					faultstring = Z_STRVAL_P(zv);
 					FREE_ZVAL(zv);
 				}
@@ -229,7 +229,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			tmp = get_node(fault->children,"Detail");
 			if (tmp != NULL) {
-				details = master_to_zval(NULL, tmp);
+				details = master_to_zval(NULL, tmp TSRMLS_CC);
 			}
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
@@ -327,9 +327,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					} else {
 						/* Decoding value of parameter */
 						if (param != NULL) {
-							tmp = master_to_zval(param->encode, val);
+							tmp = master_to_zval(param->encode, val TSRMLS_CC);
 						} else {
-							tmp = master_to_zval(NULL, val);
+							tmp = master_to_zval(NULL, val TSRMLS_CC);
 						}
 					}
 					add_assoc_zval(return_value, param->paramName, tmp);
@@ -352,7 +352,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 						zval *tmp;
 						zval **arr;
 
-						tmp = master_to_zval(NULL, val);
+						tmp = master_to_zval(NULL, val TSRMLS_CC);
 						if (val->name) {
 							if (zend_hash_find(Z_ARRVAL_P(return_value), (char*)val->name, strlen((char*)val->name)+1, (void**)&arr) == SUCCESS) {
 								add_next_index_zval(*arr, tmp);
@@ -416,7 +416,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					}
 					smart_str_free(&key);
 				}
-				val = master_to_zval(enc, trav);
+				val = master_to_zval(enc, trav TSRMLS_CC);
 				add_assoc_zval(soap_headers, (char*)trav->name, val);
 			}
 			trav = trav->next;
