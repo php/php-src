@@ -43,7 +43,7 @@ struct mhash_bc_entry {
 	int value;
 };
 
-#define MHASH_NUM_ALGOS 29
+#define MHASH_NUM_ALGOS 34
 
 static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"CRC32", "crc32", 0},
