@@ -126,7 +126,7 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle___construct, 0, 0, 2 )
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ proto void ResourceBundle::__construct( string $bundlename [, string $locale [, bool $fallback = true ]] )
+/* {{{ proto void ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
  * ResourceBundle object constructor
  */
 PHP_METHOD( ResourceBundle, __construct )
@@ -136,8 +136,9 @@ PHP_METHOD( ResourceBundle, __construct )
 }
 /* }}} */
 
-/* {{{ proto ResourceBundle ResourceBundle::create( string $bundlename [, string $locale [, bool $fallback = true ]] )
-proto ResourceBundle resourcebundle_create( string $bundlename [, string $locale [, bool $fallback = true ]] ) */
+/* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )
+proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )
+*/
 PHP_FUNCTION( resourcebundle_create ) 
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
