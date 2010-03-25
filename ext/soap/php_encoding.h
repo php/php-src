@@ -183,8 +183,8 @@ struct _encodeType {
 
 struct _encode {
 	encodeType details;
-	zval *(*to_zval)(encodeTypePtr type, xmlNodePtr data);
-	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
+	zval *(*to_zval)(encodeTypePtr type, xmlNodePtr data TSRMLS_DC);
+	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style, xmlNodePtr parent TSRMLS_DC);
 };
 
 /* Master functions all encode/decode should be called thur these functions */
@@ -192,14 +192,14 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 zval *master_to_zval(encodePtr encode, xmlNodePtr data);
 
 /* user defined mapping */
-xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
-zval *to_zval_user(encodeTypePtr type, xmlNodePtr node);
+xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent TSRMLS_DC);
+zval *to_zval_user(encodeTypePtr type, xmlNodePtr node TSRMLS_DC);
 
 void whiteSpace_replace(xmlChar* str);
 void whiteSpace_collapse(xmlChar* str);
 
-xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
-zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
+xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent TSRMLS_DC);
+zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data TSRMLS_DC);
 
 void encode_finish();
 void encode_reset_ns();
