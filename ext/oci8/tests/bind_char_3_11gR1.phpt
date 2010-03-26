@@ -1,29 +1,24 @@
 --TEST--
-PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to VARCHAR2 parameter
+PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to CHAR parameter
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
+$sv = preg_match('/Release 11\.1\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+	die ("skip expected output only valid when using Oracle 11gR1 database");
 }
 ?>
 --FILE--
 <?php
-
-// Note: expected output is valid for 32bit clients to 32bit 10gR2 XE or 11.2.0.1 64bit DBs.
-// It will diff on the undefined cases with a 32bit 11.2.0.1 DB
-
-// Same test as bind_char_3 but the PL/SQL function uses VARCHAR2 instead of CHAR
 
 require(dirname(__FILE__).'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"create or replace function bind_char_3_fn(p1 varchar2) return varchar2 as begin return p1; end;",
+	"create or replace function bind_char_3_fn(p1 char) return char as begin return p1; end;",
 );
 						 
 foreach ($stmtarray as $stmt) {
@@ -259,8 +254,9 @@ echo "Done\n";
 --EXPECTF--
 Test 1.1 In Length: default.  In Type: default.  Out Length: default.          Out Type: default
   Executing:
+    Oci_execute error ORA-6502
 string(3) "abc"
-string(3) "abc"
+NULL
 Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
 string(3) "abc"
@@ -272,19 +268,20 @@ string(3) "abc"
 Test 1.4 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
 string(3) "abc"
-string(30) "abc                           "
+string(10) "abc       "
 Test 1.5 In Length: strlen.   In Type: AFC.      Out Length: strlen(input).    Out Type: AFC
   Executing:
 string(3) "abc"
-string(9) "abc      "
+string(3) "abc"
 Test 1.6 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)-1.  Out Type: AFC
   Executing:
+    Oci_execute error ORA-6502
 string(3) "abc"
-string(6) "abc   "
+string(3) "abc"
 Test 1.7 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)+1.  Out Type: AFC
   Executing:
 string(3) "abc"
-string(12) "abc         "
+string(4) "abc "
 
 
 Tests with ''
