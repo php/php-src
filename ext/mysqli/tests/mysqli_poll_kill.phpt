@@ -183,7 +183,7 @@ array(1) {
   %unicode|string%(1) "1"
 }
 
-Warning: mysqli_reap_async_query(): GREET %s
+Warning: mysqli_reap_async_query(): RSET_HEADER %
 
 Warning: mysqli_reap_async_query(): MySQL server has gone away in %s on line %d
 [014] 2014/%s

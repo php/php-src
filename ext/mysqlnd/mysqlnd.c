@@ -516,20 +516,24 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	if (!host || !host[0]) {
 		host = "localhost";
 	}
-	if (!user || !user[0]) {
-		user = php_get_current_user();
+	if (!user) {
+		DBG_INF_FMT("no user given, using empty string");
+		user = "";
 	}
 	if (!passwd) {
+		DBG_INF_FMT("no password given, using empty string");
 		passwd = "";
 		passwd_len = 0;
 	}
 	if (!db) {
+		DBG_INF_FMT("no db given, using empty string");
 		db = "";
 		db_len = 0;
 	}
 	host_len = strlen(host);
 #ifndef PHP_WIN32
 	if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
+		DBG_INF_FMT("socket=%s", socket? socket:"n/a");
 		if (!socket) {
 			socket = "/tmp/mysql.sock";
 		}
