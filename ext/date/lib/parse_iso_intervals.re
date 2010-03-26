@@ -181,7 +181,7 @@ static long timelib_parse_tz_cor(char **ptr)
 	char *begin = *ptr, *end;
 	long  tmp;
 
-	while (**ptr != '\0') {
+	while (isdigit(**ptr) || **ptr == ':') {
 		++*ptr;
 	}
 	end = *ptr;
