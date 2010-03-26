@@ -1,7 +1,10 @@
 --TEST--
 Bug #49560 (LOB resource destructor and refcount test)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+require(dirname(__FILE__).'/details.inc');
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
+?>
 --FILE--
 <?php
 

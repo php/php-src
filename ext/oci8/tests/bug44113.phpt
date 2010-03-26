@@ -1,7 +1,11 @@
 --TEST--
 Bug #44113 (New collection creation can fail with OCI-22303)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php 
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
+require(dirname(__FILE__).'/details.inc');
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
+?>
 --FILE--
 <?php
 

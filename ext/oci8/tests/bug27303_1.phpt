@@ -7,7 +7,7 @@ require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
 $sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+	die ("skip expected output only valid when using Oracle 19gR2 or 11gR2 databases");
 }
 ?>
 --FILE--
@@ -26,7 +26,7 @@ $create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
 
 foreach ($create_st as $statement) {
 	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
+	@oci_execute($stmt);
 }
 
 define('MYLIMIT', 200);
@@ -36,7 +36,7 @@ $stmt = "insert into mytab (mydata, seqcol) values ('Some data', myseq.nextval) 
 $stid = OCIParse($c, $stmt);
 if (!$stid) { echo "Parse error"; die; }
 
-$r = OCIBindByName($stid, ':MYBV', $mybv, 0 );
+$r = OCIBindByName($stid, ':MYBV', $mybv);
 if (!$r) { echo "Bind error"; die; }
 
 for ($i = 1; $i < MYLIMIT; $i++) {
