@@ -26,8 +26,8 @@ $stmt = "insert into mytab (mydata, seqcol) values ('Some data', myseq.nextval) 
 $stid = OCIParse($c, $stmt);
 if (!$stid) { echo "Parse error"; die; }
 
-$mybv = INITMYBV;   // Uncomment this for the 2nd test only
-$r = OCIBindByName($stid, ':MYBV', $mybv, 5, SQLT_INT);  // Uncomment this for the 3rd test only
+$mybv = INITMYBV;
+$r = OCIBindByName($stid, ':MYBV', $mybv, 5, SQLT_INT);
 if (!$r) { echo "Bind error"; die; }
 
 for ($i = 1; $i < MYLIMIT; $i++) {

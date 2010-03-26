@@ -5,9 +5,9 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/Release 1[12]\./', $sv, $matches);
+$sv = preg_match('/Release 11\.1\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 11g+ database");
+	die ("skip expected output only valid when using Oracle 11gR1 database");
 }
 ?>
 --FILE--
@@ -23,19 +23,17 @@ $create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
 
 foreach ($create_st as $statement) {
 	$stmt = oci_parse($c, $statement);
-	@oci_execute($stmt);
+	oci_execute($stmt);
 }
 
 define('MYLIMIT', 200);
-define('INITMYBV', 11);
 
 $stmt = "insert into mytab (mydata, seqcol) values ('Some data', myseq.nextval) returning seqcol into :mybv";
 
 $stid = OCIParse($c, $stmt);
 if (!$stid) { echo "Parse error"; die; }
 
-//$mybv = INITMYBV;   // Uncomment this for the 2nd test only
-$r = OCIBindByName($stid, ':MYBV', $mybv /*, 5 */);  // Uncomment this for the 3rd test only
+$r = OCIBindByName($stid, ':MYBV', $mybv, 0 );
 if (!$r) { echo "Bind error"; die; }
 
 for ($i = 1; $i < MYLIMIT; $i++) {

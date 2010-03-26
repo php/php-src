@@ -5,6 +5,7 @@ Set and get of connection attributes with errors.
 require(dirname(__FILE__)."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
 
 $sv = oci_server_version($c);
 $sv = preg_match('/Release 1[012]\./', $sv, $matches);
