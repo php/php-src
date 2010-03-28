@@ -29,7 +29,7 @@ PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context);
 PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen);
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[16], PHP_JOAAT_CTX * context);
 
-static php_hash_uint32 joaat_buf(void *buf, size_t len);
+static php_hash_uint32 joaat_buf(void *buf, size_t len, php_hash_uint32 hval);
 
 #endif
 
