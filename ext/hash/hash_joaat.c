@@ -42,7 +42,7 @@ PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
 
 PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen)
 {
-	context->state = joaat_buf((void *)input, inputLen);
+	context->state = joaat_buf((void *)input, inputLen, context->state);
 }
 
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[4], PHP_JOAAT_CTX * context)
@@ -71,9 +71,8 @@ PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[4], PHP_JOAAT_CTX * contex
  *  32 bit hash as a static hash type
  */
 static php_hash_uint32
-joaat_buf(void *buf, size_t len)
+joaat_buf(void *buf, size_t len, php_hash_uint32 hval)
 {
-    php_hash_uint32 hval = 0;
     size_t i;
     unsigned char *input = (unsigned char *)buf;
  
