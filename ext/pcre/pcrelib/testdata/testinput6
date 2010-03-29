@@ -370,13 +370,6 @@
     \x{3b1}
     \x{ff5a}   
     
-/^\X/8
-    A
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
-    *** Failers
-    \x{300}  
-
 /^[\X]/8
     X123
     *** Failers
@@ -755,5 +748,8 @@
 
 /[\p{Lu}\x20]+/
     \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+
+/\p{Avestan}\p{Bamum}\p{Egyptian_Hieroglyphs}\p{Imperial_Aramaic}\p{Inscriptional_Pahlavi}\p{Inscriptional_Parthian}\p{Javanese}\p{Kaithi}\p{Lisu}\p{Meetei_Mayek}\p{Old_South_Arabian}\p{Old_Turkic}\p{Samaritan}\p{Tai_Tham}\p{Tai_Viet}/8
+    \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{0800}\x{1aad}\x{aac0}
 
 /-- End of testinput6 --/

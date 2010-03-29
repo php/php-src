@@ -247,7 +247,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
-actuall used in this definition. */
+actually used in this definition. */
 
 #ifndef NO_RECURSE
 #define REGISTER register
@@ -256,7 +256,7 @@ actuall used in this definition. */
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
   { \
   printf("match() called in line %d\n", __LINE__); \
-  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1); \
+  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rg,rdepth+1); \
   printf("to line %d\n", __LINE__); \
   }
 #define RRETURN(ra) \
@@ -266,7 +266,7 @@ actuall used in this definition. */
   }
 #else
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
-  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1)
+  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rg,rdepth+1)
 #define RRETURN(ra) return ra
 #endif
 
@@ -286,6 +286,7 @@ argument of match(), which never changes. */
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
   newframe->Xmstart = mstart;\
+  newframe->Xmarkptr = markptr;\
   newframe->Xoffset_top = rc;\
   newframe->Xims = re;\
   newframe->Xeptrb = rf;\
@@ -323,6 +324,7 @@ typedef struct heapframe {
   USPTR Xeptr;
   const uschar *Xecode;
   USPTR Xmstart;
+  USPTR Xmarkptr;
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -430,6 +432,7 @@ Arguments:
    ecode       pointer to current position in compiled code
    mstart      pointer to the current match start position (can be modified
                  by encountering \K)
+   markptr     pointer to the most recent MARK name, or NULL
    offset_top  current top pointer
    md          pointer to "static" info for the match
    ims         current /i, /m, and /s options
@@ -448,9 +451,9 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart,
-  int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
-  int flags, unsigned int rdepth)
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart, USPTR
+  markptr, int offset_top, match_data *md, unsigned long int ims,
+  eptrblock *eptrb, int flags, unsigned int rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
 so they can be ordinary variables in all cases. Mark some of them with
@@ -478,6 +481,7 @@ frame->Xprevframe = NULL;            /* Marks the top level */
 frame->Xeptr = eptr;
 frame->Xecode = ecode;
 frame->Xmstart = mstart;
+frame->Xmarkptr = markptr;
 frame->Xoffset_top = offset_top;
 frame->Xims = ims;
 frame->Xeptrb = eptrb;
@@ -493,6 +497,7 @@ HEAP_RECURSE:
 #define eptr               frame->Xeptr
 #define ecode              frame->Xecode
 #define mstart             frame->Xmstart
+#define markptr            frame->Xmarkptr
 #define offset_top         frame->Xoffset_top
 #define ims                frame->Xims
 #define eptrb              frame->Xeptrb
@@ -1068,7 +1073,6 @@ for (;;)
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
       offset_top = rec->save_offset_top;
-      mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
       break;
@@ -1112,7 +1116,11 @@ for (;;)
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM4);
-      if (rrc == MATCH_MATCH) break;
+      if (rrc == MATCH_MATCH)
+        {
+        mstart = md->start_match_ptr;   /* In case \K reset it */
+        break;
+        }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
@@ -1265,9 +1273,7 @@ for (;;)
 
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
-      new_recursive.save_start = mstart;
       new_recursive.save_offset_top = offset_top;
-      mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
       restore the offset and recursion data. */
@@ -1314,7 +1320,8 @@ for (;;)
     a move back into the brackets. Friedl calls these "atomic" subpatterns.
     Check the alternative branches in turn - the matching won't pass the KET
     for this kind of subpattern. If any one branch matches, we carry on as at
-    the end of a normal bracket, leaving the subject pointer. */
+    the end of a normal bracket, leaving the subject pointer, but resetting
+    the start-of-match value in case it was changed by \K. */
 
     case OP_ONCE:
     prev = ecode;
@@ -1323,7 +1330,11 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
-      if (rrc == MATCH_MATCH) break;
+      if (rrc == MATCH_MATCH)
+        {
+        mstart = md->start_match_ptr;
+        break;
+        }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
@@ -1442,9 +1453,10 @@ for (;;)
       }
     else saved_eptr = NULL;
 
-    /* If we are at the end of an assertion group, stop matching and return
-    MATCH_MATCH, but record the current high water mark for use by positive
-    assertions. Do this also for the "once" (atomic) groups. */
+    /* If we are at the end of an assertion group or an atomic group, stop
+    matching and return MATCH_MATCH, but record the current high water mark for
+    use by positive assertions. We also need to record the match start in case
+    it was changed by \K. */
 
     if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
         *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT ||
@@ -1452,6 +1464,7 @@ for (;;)
       {
       md->end_match_ptr = eptr;      /* For ONCE */
       md->end_offset_top = offset_top;
+      md->start_match_ptr = mstart;
       RRETURN(MATCH_MATCH);
       }
 
@@ -1488,7 +1501,6 @@ for (;;)
         recursion_info *rec = md->recursive;
         DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
         md->recursive = rec->prevrec;
-        mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
         offset_top = rec->save_offset_top;
@@ -5649,7 +5661,8 @@ for(;;)
   md->start_match_ptr = start_match;
   md->start_used_ptr = start_match;
   md->match_call_count = 0;
-  rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);
+  rc = match(start_match, md->start_code, start_match, NULL, 2, md, ims, NULL,
+    0, 0);
   if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
 
   switch(rc)

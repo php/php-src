@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
+- Upgraded bundled PCRE to version 8.02. (Ilia)
+
 - Added Tokyo Cabinet abstract DB support to ext/dba. (Michael Maclean)
 - Added Jenkins's one-at-a-time hash support to ext/hash. (Martin Jansen)
 - Added FNV-1 hash support to ext/hash. (Michael Maclean)

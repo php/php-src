@@ -3203,5 +3203,33 @@ a random value. /Ix
 
 /^(ab(c\1)d|x){2}$/BZ
     xabcxd
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
+
+/ -- The first four of these are not in the Perl 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+
+/(?!a\Kb)ac/
+    ac 
+    
+/^abc(?<=b\Kc)d/
+    abcd
+
+/^abc(?<!b\Kq)d/
+    abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+
+/----------------------/
+
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
 
 /-- End of testinput2 --/
