@@ -41,8 +41,6 @@ already through other measures.
 		$valid_options[] = constant('MYSQLI_OPT_NET_READ_BUFFER_SIZE');
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE'))
 		$valid_options[] = constant('MYSQLI_OPT_INT_AND_FLOAT_NATIVE');
-	if (defined('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'))
-		$valid_options[] = constant('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE');
 
 	$tmp    = NULL;
 	$link   = NULL;
@@ -79,10 +77,6 @@ already through other measures.
 
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT') &&
 		!($tmp = mysqli_options($link, constant('MYSQLI_OPT_INT_AND_YEARS_AS_INT'), true)))
-		printf("[006] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
-
-	if (defined('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE') &&
-		!($tmp = mysqli_options($link, constant('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'), true)))
 		printf("[006] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 
 	if ($IS_MYSQLND) {
