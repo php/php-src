@@ -137,7 +137,23 @@ enum {
   ucp_Rejang,
   ucp_Saurashtra,
   ucp_Sundanese,
-  ucp_Vai
+  ucp_Vai,
+  /* New for Unicode 5.2: */
+  ucp_Avestan,
+  ucp_Bamum,
+  ucp_Egyptian_Hieroglyphs,
+  ucp_Imperial_Aramaic,
+  ucp_Inscriptional_Pahlavi,
+  ucp_Inscriptional_Parthian,
+  ucp_Javanese,
+  ucp_Kaithi,
+  ucp_Lisu,
+  ucp_Meetei_Mayek,
+  ucp_Old_South_Arabian,
+  ucp_Old_Turkic,
+  ucp_Samaritan,
+  ucp_Tai_Tham,
+  ucp_Tai_Viet
 };
 
 #endif

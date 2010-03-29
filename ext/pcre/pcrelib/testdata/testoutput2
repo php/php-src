@@ -10596,5 +10596,76 @@ No match
  0: xabcxd
  1: abcxd
  2: cx
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ -- The first four of these are not in the Perl 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+ 0: ab
+ 1: ab
+
+/----------------------/
+
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+Failed: recursive call could loop indefinitely at offset 31
 
 /-- End of testinput2 --/
