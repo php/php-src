@@ -173,7 +173,7 @@ typedef struct _php_cgi_globals_struct {
 #endif
 	HashTable user_config_cache;
 	char *error_header;
-	char *fpm_conf;
+	char *fpm_config;
 	struct event_base *event_base;
 } php_cgi_globals_struct;
 
@@ -1408,7 +1408,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("fastcgi.impersonate",     "0",  PHP_INI_SYSTEM, OnUpdateBool,   impersonate, php_cgi_globals_struct, php_cgi_globals)
 #endif
 	STD_PHP_INI_ENTRY("fastcgi.error_header",    NULL, PHP_INI_SYSTEM, OnUpdateString, error_header, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("fpm.conf",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_conf, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor
@@ -1428,7 +1428,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 #endif
 	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
-	php_cgi_globals->fpm_conf = NULL;
+	php_cgi_globals->fpm_config = NULL;
 }
 /* }}} */
 
@@ -1750,7 +1750,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_conf), &CGIG(event_base))) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), &CGIG(event_base))) {
 		return FAILURE;
 	}
 
