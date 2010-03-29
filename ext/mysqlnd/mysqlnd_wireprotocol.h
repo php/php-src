@@ -41,7 +41,9 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
-		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
+		if ((packet)) { \
+			((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
+		} \
 	} while (0);
 
 PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
