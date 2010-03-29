@@ -154,10 +154,7 @@ require_once('skipifconnectfailure.inc');
 	if (defined('MYSQLI_DATA_TRUNCATED'))
 		$expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
-	if ($IS_MYSQLND && $php_version >= 600) {
-		/* mysqlnd only */
-		$expected_constants["MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE"] = true;
-	} else if (!$IS_MYSQLND) {
+	if (!$IS_MYSQLND) {
 		/* libmysql only */
 
 		/* are they available in all versions of ext/mysqli ?

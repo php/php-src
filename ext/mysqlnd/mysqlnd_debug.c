@@ -59,6 +59,8 @@ static const char mysqlnd_malloc_name[]		= "_mysqlnd_malloc";
 static const char mysqlnd_calloc_name[]		= "_mysqlnd_calloc";
 static const char mysqlnd_realloc_name[]	= "_mysqlnd_realloc";
 static const char mysqlnd_free_name[]		= "_mysqlnd_free";
+static const char mysqlnd_pestrndup_name[]	= "_mysqlnd_pestrndup";
+static const char mysqlnd_pestrdup_name[]	= "_mysqlnd_pestrdup";
 
 const char * mysqlnd_debug_std_no_trace_funcs[] =
 {
@@ -74,6 +76,7 @@ const char * mysqlnd_debug_std_no_trace_funcs[] =
 	mysqlnd_calloc_name,
 	mysqlnd_realloc_name,
 	mysqlnd_free_name,
+	mysqlnd_pestrndup_name,
 	mysqlnd_read_header_name,
 	mysqlnd_read_body_name,
 	NULL /* must be always last */
@@ -915,6 +918,43 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 }
 /* }}} */
 
+
+/* {{{ _mysqlnd_pestrndup */
+char * _mysqlnd_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D)
+{
+	char * ret;
+	DBG_ENTER(mysqlnd_pestrndup_name);
+	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
+	DBG_INF_FMT("ptr=%p", ptr); 
+
+	ret = pestrndup(ptr, length, persistent);
+
+	if (MYSQLND_G(collect_memory_statistics)) {
+		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_STRNDUP_COUNT : STAT_MEM_ESTRNDUP_COUNT);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_pestrdup */
+char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D)
+{
+	char * ret;
+	DBG_ENTER(mysqlnd_pestrdup_name);
+	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
+	DBG_INF_FMT("ptr=%p", ptr); 
+
+	ret = pestrdup(ptr, persistent);
+
+	if (MYSQLND_G(collect_memory_statistics)) {
+		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_STRDUP_COUNT : STAT_MEM_ESTRDUP_COUNT);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
 
 
 

@@ -367,11 +367,11 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	MYSQLND_PACKET_GREET *p= (MYSQLND_PACKET_GREET *) _packet;
 	if (p->server_version) {
-		mnd_efree(p->server_version);
+		efree(p->server_version);
 		p->server_version = NULL;
 	}
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -494,7 +494,8 @@ static
 void php_mysqlnd_auth_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_pefree((MYSQLND_PACKET_AUTH *) _packet, ((MYSQLND_PACKET_AUTH *)_packet)->header.persistent);
+		MYSQLND_PACKET_AUTH * p = (MYSQLND_PACKET_AUTH *) _packet;
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -716,7 +717,8 @@ static
 void php_mysqlnd_cmd_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_pefree(_packet, ((MYSQLND_PACKET_COMMAND *)_packet)->header.persistent);
+		MYSQLND_PACKET_COMMAND * p = (MYSQLND_PACKET_COMMAND *) _packet;
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1799,7 +1801,7 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 static struct st_mysqlnd_packet_greet *
 MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_greet * packet = pecalloc(1, packet_methods[PROT_GREET_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_greet * packet = mnd_pecalloc(1, packet_methods[PROT_GREET_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_greet_packet");
 	packet->header.m = &packet_methods[PROT_GREET_PACKET];
 	packet->header.persistent = persistent;
@@ -1812,7 +1814,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const prot
 static struct st_mysqlnd_packet_auth *
 MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_auth * packet = pecalloc(1, packet_methods[PROT_AUTH_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_auth * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_auth_packet");
 	packet->header.m = &packet_methods[PROT_AUTH_PACKET];
 	packet->header.persistent = persistent;
@@ -1825,7 +1827,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const proto
 static struct st_mysqlnd_packet_ok *
 MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_ok * packet = pecalloc(1, packet_methods[PROT_OK_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_ok * packet = mnd_pecalloc(1, packet_methods[PROT_OK_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_ok_packet");
 	packet->header.m = &packet_methods[PROT_OK_PACKET];
 	packet->header.persistent = persistent;
@@ -1838,7 +1840,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protoco
 static struct st_mysqlnd_packet_eof *
 MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_eof * packet = pecalloc(1, packet_methods[PROT_EOF_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_eof * packet = mnd_pecalloc(1, packet_methods[PROT_EOF_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_eof_packet");
 	packet->header.m = &packet_methods[PROT_EOF_PACKET];
 	packet->header.persistent = persistent;
@@ -1851,7 +1853,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protoc
 static struct st_mysqlnd_packet_command *
 MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_command * packet = pecalloc(1, packet_methods[PROT_CMD_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_command * packet = mnd_pecalloc(1, packet_methods[PROT_CMD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_command_packet");
 	packet->header.m = &packet_methods[PROT_CMD_PACKET];
 	packet->header.persistent = persistent;
@@ -1864,7 +1866,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const pr
 static struct st_mysqlnd_packet_rset_header *
 MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_rset_header * packet = pecalloc(1, packet_methods[PROT_RSET_HEADER_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_rset_header * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_HEADER_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_rset_header_packet");
 	packet->header.m = &packet_methods[PROT_RSET_HEADER_PACKET];
 	packet->header.persistent = persistent;
@@ -1877,7 +1879,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * cons
 static struct st_mysqlnd_packet_res_field *
 MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_res_field * packet = pecalloc(1, packet_methods[PROT_RSET_FLD_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_res_field * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_FLD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_result_field_packet");
 	packet->header.m = &packet_methods[PROT_RSET_FLD_PACKET];
 	packet->header.persistent = persistent;
@@ -1890,7 +1892,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * con
 static struct st_mysqlnd_packet_row *
 MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_row * packet = pecalloc(1, packet_methods[PROT_ROW_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_row * packet = mnd_pecalloc(1, packet_methods[PROT_ROW_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_row_packet");
 	packet->header.m = &packet_methods[PROT_ROW_PACKET];
 	packet->header.persistent = persistent;
@@ -1903,7 +1905,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protoc
 static struct st_mysqlnd_packet_stats *
 MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_stats * packet = pecalloc(1, packet_methods[PROT_STATS_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_stats * packet = mnd_pecalloc(1, packet_methods[PROT_STATS_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_stats_packet");
 	packet->header.m = &packet_methods[PROT_STATS_PACKET];
 	packet->header.persistent = persistent;
@@ -1916,7 +1918,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const prot
 static struct st_mysqlnd_packet_prepare_response *
 MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_prepare_response * packet = pecalloc(1, packet_methods[PROT_PREPARE_RESP_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_prepare_response * packet = mnd_pecalloc(1, packet_methods[PROT_PREPARE_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_prepare_response_packet");
 	packet->header.m = &packet_methods[PROT_PREPARE_RESP_PACKET];
 	packet->header.persistent = persistent;
@@ -1929,7 +1931,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL *
 static struct st_mysqlnd_packet_chg_user_resp*
 MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
 {
-	struct st_mysqlnd_packet_chg_user_resp * packet = pecalloc(1, packet_methods[PROT_CHG_USER_RESP_PACKET].struct_size, persistent);
+	struct st_mysqlnd_packet_chg_user_resp * packet = mnd_pecalloc(1, packet_methods[PROT_CHG_USER_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_change_user_response_packet");
 	packet->header.m = &packet_methods[PROT_CHG_USER_RESP_PACKET];
 	packet->header.persistent = persistent;
