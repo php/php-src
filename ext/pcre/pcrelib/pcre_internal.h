@@ -188,15 +188,14 @@ preprocessor time in standard C environments. */
 large integers. If a 64-bit integer type is available, we can use that.
 Otherwise we have to cast to double, which of course requires floating point
 arithmetic. Handle this by defining a macro for the appropriate type. If
-stdint.h is available, include it; it may define INT64_MAX. The macro int64_t
-may be set by "configure". */
+stdint.h is available, include it; it may define INT64_MAX. Systems that do not
+have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
+by "configure". */
 
 #if HAVE_STDINT_H
-# ifdef PHP_WIN32
-#  include "win32/php_stdint.h"
-# else
-#  include <stdint.h>
-# endif
+#include <stdint.h>
+#elif HAVE_INTTYPES_H
+#include <inttypes.h>
 #endif
 
 #if defined INT64_MAX || defined int64_t
@@ -1392,7 +1391,13 @@ enum {
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO        /* 114 */
+  OP_SKIPZERO,       /* 114 */
+
+  /* This is not an opcode, but is used to check that tables indexed by opcode
+  are the correct length, in order to catch updating errors - there have been
+  some in the past. */
+
+  OP_TABLE_LENGTH
 };
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
@@ -1440,8 +1445,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1, 1, 1,                 /* \A, \G, \K, \B, \b                     */ \
   1, 1, 1, 1, 1, 1,              /* \D, \d, \S, \s, \W, \w                 */ \
   1, 1, 1,                       /* Any, AllAny, Anybyte                   */ \
-  3, 3, 1,                       /* NOTPROP, PROP, EXTUNI                  */ \
+  3, 3,                          /* \P, \p                                 */ \
   1, 1, 1, 1, 1,                 /* \R, \H, \h, \V, \v                     */ \
+  1,                             /* \X                                     */ \
   1, 1, 2, 1, 1,                 /* \Z, \z, Opt, ^, $                      */ \
   2,                             /* Char  - the minimum length             */ \
   2,                             /* Charnc  - the minimum length           */ \
@@ -1496,8 +1502,9 @@ condition. */
 
 #define RREF_ANY  0xffff
 
-/* Error code numbers. They are given names so that they can more easily be
-tracked. */
+/* Compile time error code numbers. They are given names so that they can more
+easily be tracked. When a new number is added, the table called eint in
+pcreposix.c must be updated. */
 
 enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR10, ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19,
@@ -1505,7 +1512,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65 };
+       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
@@ -1610,7 +1617,6 @@ typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
   int group_num;                /* Number of group that was called */
   const uschar *after_call;     /* "Return value": points after the call in the expr */
-  USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
   int save_offset_top;          /* Current value of offset_top */

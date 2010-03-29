@@ -1,6 +1,71 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.02 19-Mar-2010
+------------------------
+
+1.  The Unicode data tables have been updated to Unicode 5.2.0.
+
+2.  Added the option --libs-cpp to pcre-config, but only when C++ support is
+    configured.
+
+3.  Updated the licensing terms in the pcregexp.pas file, as agreed with the
+    original author of that file, following a query about its status.
+
+4.  On systems that do not have stdint.h (e.g. Solaris), check for and include
+    inttypes.h instead. This fixes a bug that was introduced by change 8.01/8.
+
+5.  A pattern such as (?&t)*+(?(DEFINE)(?<t>.)) which has a possessive
+    quantifier applied to a forward-referencing subroutine call, could compile
+    incorrect code or give the error "internal error: previously-checked
+    referenced subpattern not found".
+
+6.  Both MS Visual Studio and Symbian OS have problems with initializing
+    variables to point to external functions. For these systems, therefore,
+    pcre_malloc etc. are now initialized to local functions that call the
+    relevant global functions.
+
+7.  There were two entries missing in the vectors called coptable and poptable
+    in pcre_dfa_exec.c. This could lead to memory accesses outsize the vectors.
+    I've fixed the data, and added a kludgy way of testing at compile time that
+    the lengths are correct (equal to the number of opcodes).
+
+8.  Following on from 7, I added a similar kludge to check the length of the
+    eint vector in pcreposix.c.
+
+9.  Error texts for pcre_compile() are held as one long string to avoid too
+    much relocation at load time. To find a text, the string is searched,
+    counting zeros. There was no check for running off the end of the string,
+    which could happen if a new error number was added without updating the
+    string.
+
+10. \K gave a compile-time error if it appeared in a lookbehind assersion.
+
+11. \K was not working if it appeared in an atomic group or in a group that
+    was called as a "subroutine", or in an assertion. Perl 5.11 documents that
+    \K is "not well defined" if used in an assertion. PCRE now accepts it if
+    the assertion is positive, but not if it is negative.
+
+12. Change 11 fortuitously reduced the size of the stack frame used in the
+    "match()" function of pcre_exec.c by one pointer. Forthcoming
+    implementation of support for (*MARK) will need an extra pointer on the
+    stack; I have reserved it now, so that the stack frame size does not
+    decrease.
+
+13. A pattern such as (?P<L1>(?P<L2>0)|(?P>L2)(?P>L1)) in which the only other
+    item in branch that calls a recursion is a subroutine call - as in the
+    second branch in the above example - was incorrectly given the compile-
+    time error "recursive call could loop indefinitely" because pcre_compile()
+    was not correctly checking the subroutine for matching a non-empty string.
+
+14. The checks for overrunning compiling workspace could trigger after an
+    overrun had occurred. This is a "should never occur" error, but it can be
+    triggered by pathological patterns such as hundreds of nested parentheses.
+    The checks now trigger 100 bytes before the end of the workspace.
+
+15. Fix typo in configure.ac: "srtoq" should be "strtoq".
+
+
 Version 8.01 19-Jan-2010
 ------------------------
 

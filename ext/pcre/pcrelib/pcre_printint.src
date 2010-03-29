@@ -190,6 +190,25 @@ for(;;)
 
   switch(*code)
     {
+/* ========================================================================== */
+      /* These cases are never obeyed. This is a fudge that causes a compile-
+      time error if the vectors OP_names or _pcre_OP_lengths, which are indexed
+      by opcode, are not the correct length. It seems to be the only way to do
+      such a check at compile time, as the sizeof() operator does not work in
+      the C preprocessor. We do this while compiling pcretest, because that
+      #includes pcre_tables.c, which holds _pcre_OP_lengths. We can't do this
+      when building pcre_compile.c with PCRE_DEBUG set, because it doesn't then
+      know the size of _pcre_OP_lengths. */
+
+#ifdef COMPILING_PCRETEST
+      case OP_TABLE_LENGTH:
+      case OP_TABLE_LENGTH +
+        ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
+        (sizeof(_pcre_OP_lengths) == OP_TABLE_LENGTH)):
+      break;
+#endif
+/* ========================================================================== */
+
     case OP_END:
     fprintf(f, "    %s\n", OP_names[*code]);
     fprintf(f, "------------------------------------------------------------------\n");

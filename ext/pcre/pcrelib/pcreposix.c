@@ -342,6 +342,8 @@ rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string + so, (eo - so),
 
 if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
 
+/* Successful match */
+
 if (rc >= 0)
   {
   size_t i;
@@ -358,22 +360,33 @@ if (rc >= 0)
   return 0;
   }
 
-else
+/* Unsuccessful match */
+
+if (allocated_ovector) free(ovector);
+switch(rc)
   {
-  if (allocated_ovector) free(ovector);
-  switch(rc)
-    {
-    case PCRE_ERROR_NOMATCH: return REG_NOMATCH;
-    case PCRE_ERROR_NULL: return REG_INVARG;
-    case PCRE_ERROR_BADOPTION: return REG_INVARG;
-    case PCRE_ERROR_BADMAGIC: return REG_INVARG;
-    case PCRE_ERROR_UNKNOWN_NODE: return REG_ASSERT;
-    case PCRE_ERROR_NOMEMORY: return REG_ESPACE;
-    case PCRE_ERROR_MATCHLIMIT: return REG_ESPACE;
-    case PCRE_ERROR_BADUTF8: return REG_INVARG;
-    case PCRE_ERROR_BADUTF8_OFFSET: return REG_INVARG;
-    default: return REG_ASSERT;
-    }
+/* ========================================================================== */
+  /* These cases are never obeyed. This is a fudge that causes a compile-time
+  error if the vector eint, which is indexed by compile-time error number, is
+  not the correct length. It seems to be the only way to do such a check at
+  compile time, as the sizeof() operator does not work in the C preprocessor.
+  As all the PCRE_ERROR_xxx values are negative, we can use 0 and 1. */
+
+  case 0:
+  case (sizeof(eint)/sizeof(int) == ERRCOUNT):
+  return REG_ASSERT;
+/* ========================================================================== */
+
+  case PCRE_ERROR_NOMATCH: return REG_NOMATCH;
+  case PCRE_ERROR_NULL: return REG_INVARG;
+  case PCRE_ERROR_BADOPTION: return REG_INVARG;
+  case PCRE_ERROR_BADMAGIC: return REG_INVARG;
+  case PCRE_ERROR_UNKNOWN_NODE: return REG_ASSERT;
+  case PCRE_ERROR_NOMEMORY: return REG_ESPACE;
+  case PCRE_ERROR_MATCHLIMIT: return REG_ESPACE;
+  case PCRE_ERROR_BADUTF8: return REG_INVARG;
+  case PCRE_ERROR_BADUTF8_OFFSET: return REG_INVARG;
+  default: return REG_ASSERT;
   }
 }
 
