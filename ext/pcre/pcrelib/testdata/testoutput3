@@ -1,3 +1,7 @@
+/-- This set of tests checks local-specific features, using the fr_FR locale. 
+    It is not Perl-compatible. There is different version called wintestinput3
+  f  or use on Windows, where the locale is called "french". --/
+
 /^[\w]+/
     *** Failers
 No match
@@ -83,6 +87,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 
@@ -91,6 +96,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
   ª µ º À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý Þ ß à á â 
@@ -160,4 +166,4 @@ No options
 No first char
 No need char
 
-/ End of testinput3 /
+/-- End of testinput3 --/

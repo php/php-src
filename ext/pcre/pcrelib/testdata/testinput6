@@ -1,3 +1,7 @@
+/-- This set of tests is for Unicode property support. It is compatible with
+    Perl 5.10, but not 5.8 because it tests some extra properties that are
+    not in the earlier release. --/ 
+
 /^\pC\pL\pM\pN\pP\pS\pZ</8
     \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
     \np\x{300}9!\$ < 
@@ -57,11 +61,6 @@
   
 /^\p{Co}/8
     \x{f8ff}
-    ** Failers
-    \x{09f} 
-  
-/^\p{Cs}/8
-    \?\x{dfff}
     ** Failers
     \x{09f} 
   
@@ -199,13 +198,6 @@
     }
     \x{f3b}
   
-/^\p{Sc}+/8
-    $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
-    \x{9f2}
-    ** Failers
-    X
-    \x{2c2}
-  
 /^\p{Sk}/8
     \x{2c2}
     ** Failers
@@ -236,17 +228,6 @@
     ** Failers
     X
     \x{2028}
-  
-/^\p{Zs}/8
-    \ \
-    \x{a0}
-    \x{1680}
-    \x{180e}
-    \x{2000}
-    \x{2001}     
-    ** Failers
-    \x{2028}
-    \x{200d} 
   
 /\p{Nd}+(..)/8
       \x{660}\x{661}\x{662}ABC
@@ -291,23 +272,6 @@
       ** Failers
       \x{660}\x{661}\x{662}ABC
   
-/\p{Lu}/8i
-    A
-    a\x{10a0}B 
-    ** Failers 
-    a
-    \x{1d00}  
-
-/\p{^Lu}/8i
-    1234
-    ** Failers
-    ABC 
-
-/\P{Lu}/8i
-    1234
-    ** Failers
-    ABC 
-
 /(?<=A\p{Nd})XYZ/8
     A2XYZ
     123A5XYZPQR
@@ -322,26 +286,6 @@
     XYZ 
     ** Failers
     WXYZ 
-
-/[\p{L}]/DZ
-
-/[\p{^L}]/DZ
-
-/[\P{L}]/DZ
-
-/[\P{^L}]/DZ
-
-/[abc\p{L}\x{0660}]/8DZ
-
-/[\p{Nd}]/8DZ
-    1234
-
-/[\p{Nd}+-]+/8DZ
-    1234
-    12-34
-    12+\x{661}-34  
-    ** Failers
-    abcd  
 
 /[\P{Nd}]+/8
     abcd
@@ -394,20 +338,6 @@
     ** Failers
     ABC   
 
-/\p{Ll}/8i 
-    a
-    Az
-    ** Failers
-    ABC   
-
-/^\x{c0}$/8i
-    \x{c0}
-    \x{e0} 
-
-/^\x{e0}$/8i
-    \x{c0}
-    \x{e0} 
-
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8
     A\x{391}\x{10427}\x{ff3a}\x{1fb0}
     ** Failers
@@ -425,14 +355,6 @@
     A\x{391}\x{10427}\x{ff5a}\x{1fb0}
     A\x{391}\x{10427}\x{ff3a}\x{1fb8}
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iDZ
-
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8DZ
-
-/AB\x{1fb0}/8DZ
-
-/AB\x{1fb0}/8DZi
-
 /\x{391}+/8i
     \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
 
@@ -448,42 +370,6 @@
     \x{3b1}
     \x{ff5a}   
     
-/[\x{c0}\x{391}]/8i
-    \x{c0}
-    \x{e0} 
-
-/[\x{105}-\x{109}]/8iDZ
-    \x{104}
-    \x{105}
-    \x{109}  
-    ** Failers
-    \x{100}
-    \x{10a} 
-    
-/[z-\x{100}]/8iDZ 
-    Z
-    z
-    \x{39c}
-    \x{178}
-    |
-    \x{80}
-    \x{ff}
-    \x{100}
-    \x{101} 
-    ** Failers
-    \x{102}
-    Y
-    y           
-
-/[z-\x{100}]/8DZi
-
-/^\X/8
-    A
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
-    *** Failers
-    \x{300}  
-
 /^[\X]/8
     X123
     *** Failers
@@ -747,30 +633,8 @@
 /([\pL]=(abc))*X/
     L=abcX
 
-/The next two should be Perl-compatible, but it fails to match \x{e0}. PCRE
-will match it only with UCP support, because without that it has no notion
-of case for anything other than the ASCII letters. / 
-
-/((?i)[\x{c0}])/8
-    \x{c0}
-    \x{e0} 
-
-/(?i:[\x{c0}])/8
-    \x{c0}
-    \x{e0} 
-    
 /^\p{Balinese}\p{Cuneiform}\p{Nko}\p{Phags_Pa}\p{Phoenician}/8
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
-
-/The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap frame storage; the 2nd
-was broken in all cases./
-
-/^\x{023a}+?(\x{0130}+)/8i
-  \x{023a}\x{2c65}\x{0130}
-  
-/^\x{023a}+([^X])/8i
-  \x{023a}\x{2c65}X
 
 /Check property support in non-UTF-8 mode/
  
@@ -789,48 +653,6 @@ was broken in all cases./
 
 /[\PPP\x8a]{1,}\x80/
     A\x80
-
-/(?:[\PPa*]*){8,}/
-
-/[\P{Any}]/BZ
-
-/[\P{Any}\E]/BZ
-
-/(\P{Yi}+\277)/
-
-/(\P{Yi}+\277)?/
-
-/(?<=\P{Yi}{3}A)X/
-
-/\p{Yi}+(\P{Yi}+)(?1)/
-
-/(\P{Yi}{2}\277)?/
-
-/[\P{Yi}A]/
-
-/[\P{Yi}\P{Yi}\P{Yi}A]/
-
-/[^\P{Yi}A]/
-
-/[^\P{Yi}\P{Yi}\P{Yi}A]/
-
-/(\P{Yi}*\277)*/
-
-/(\P{Yi}*?\277)*/
-
-/(\p{Yi}*+\277)*/
-
-/(\P{Yi}?\277)*/
-
-/(\P{Yi}??\277)*/
-
-/(\p{Yi}?+\277)*/
-
-/(\P{Yi}{0,3}\277)*/
-
-/(\P{Yi}{0,3}?\277)*/
-
-/(\p{Yi}{0,3}+\277)*/
 
 /^[\p{Arabic}]/8
     \x{60e} 
@@ -895,24 +717,6 @@ was broken in all cases./
     \x{1049f}
     \x{104aa}           
 
-/\p{Zl}{2,3}+/8BZ
-    \xe2\x80\xa8\xe2\x80\xa8
-    \x{2028}\x{2028}\x{2028}
-    
-/\p{Zl}/8BZ
-
-/\p{Lu}{3}+/8BZ
-
-/\pL{2}+/8BZ
-
-/\p{Cc}{2}+/8BZ
-
-/\x{c0}+\x{116}+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
-
-/[\x{c0}\x{116}]+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
-
 /\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
     \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
 
@@ -931,12 +735,6 @@ was broken in all cases./
     aa
     aA
 
-/(\x{de})\1/8i
-    \x{de}\x{de}
-    \x{de}\x{fe}
-    \x{fe}\x{fe}
-    \x{fe}\x{de}
-
 /(\x{10a})\1/8i
     \x{10a}\x{10a}
     \x{10a}\x{10b}
@@ -951,4 +749,7 @@ was broken in all cases./
 /[\p{Lu}\x20]+/
     \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
 
-/ End of testinput6 /
+/\p{Avestan}\p{Bamum}\p{Egyptian_Hieroglyphs}\p{Imperial_Aramaic}\p{Inscriptional_Pahlavi}\p{Inscriptional_Parthian}\p{Javanese}\p{Kaithi}\p{Lisu}\p{Meetei_Mayek}\p{Old_South_Arabian}\p{Old_Turkic}\p{Samaritan}\p{Tai_Tham}\p{Tai_Viet}/8
+    \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{0800}\x{1aad}\x{aac0}
+
+/-- End of testinput6 --/

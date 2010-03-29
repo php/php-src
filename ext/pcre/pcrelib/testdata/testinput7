@@ -1,3 +1,6 @@
+/-- This set of tests check the DFA matching functionality of pcre_dfa_exec().
+    The -dfa flag must be used with pcretest when running it. --/
+     
 /abc/
     abc
     
@@ -4421,4 +4424,140 @@
     "ab"
     \C-"ab"
 
-/ End of testinput7 /
+/\d+X|9+Y/
+    ++++123999\P
+    ++++123999Y\P
+
+/Z(*F)/
+    Z\P
+    ZA\P 
+    
+/Z(?!)/
+    Z\P 
+    ZA\P 
+
+/dog(sbody)?/
+    dogs\P
+    dogs\P\P 
+    
+/dog(sbody)??/
+    dogs\P
+    dogs\P\P 
+
+/dog|dogsbody/
+    dogs\P
+    dogs\P\P 
+ 
+/dogsbody|dog/
+    dogs\P
+    dogs\P\P 
+
+/Z(*F)Q|ZXY/
+    Z\P
+    ZA\P 
+    X\P 
+
+/\bthe cat\b/
+    the cat\P
+    the cat\P\P
+
+/dog(sbody)?/
+    dogs\D\P
+    body\D\R
+
+/dog(sbody)?/
+    dogs\D\P\P
+    body\D\R
+
+/abc/
+   abc\P
+   abc\P\P
+
+/abc\K123/
+    xyzabc123pqr
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+    xyzabc12\P
+    xyzabc12\P\P
+
+/\babc\b/
+    +++abc+++
+    +++ab\P
+    +++ab\P\P  
+
+/(?=C)/g+
+    ABCDECBA
+
+/(abc|def|xyz)/I
+    terhjk;abcdaadsfe
+    the quick xyz brown fox 
+    \Yterhjk;abcdaadsfe
+    \Ythe quick xyz brown fox 
+    ** Failers
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+
+/(abc|def|xyz)/SI
+    terhjk;abcdaadsfe
+    the quick xyz brown fox 
+    \Yterhjk;abcdaadsfe
+    \Ythe quick xyz brown fox 
+    ** Failers
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+
+/abcd*/+
+    xxxxabcd\P
+    xxxxabcd\P\P
+    dddxxx\R 
+    xxxxabcd\P\P
+    xxx\R 
+
+/abcd*/i
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/abc[de]*/
+    xxxxabcde\P
+    xxxxabcde\P\P
+
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+    CCD
+    ** Failers
+    CAD   
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+    BCD 
+    ** Failers
+    ABCD
+    CAD
+    BAD    
+
+/^(?!a(*SKIP)b)/
+    ac
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+    ac
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+    ** Failers 
+    ac
+
+/^(?(?!a(*SKIP)b))/
+    ac
+
+/-- End of testinput7 --/

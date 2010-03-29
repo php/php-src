@@ -4,7 +4,7 @@ PCRE LICENCE
 PCRE is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
-Release 7 of PCRE is distributed under the terms of the "BSD" licence, as
+Release 8 of PCRE is distributed under the terms of the "BSD" licence, as
 specified below. The documentation for PCRE, supplied in the "doc"
 directory, is distributed under the same terms as the software itself.
 
@@ -22,7 +22,7 @@ Email domain:     cam.ac.uk
 University of Cambridge Computing Service,
 Cambridge, England.
 
-Copyright (c) 1997-2009 University of Cambridge
+Copyright (c) 1997-2010 University of Cambridge
 All rights reserved.
 
 
@@ -31,7 +31,7 @@ THE C++ WRAPPER FUNCTIONS
 
 Contributed by:   Google Inc.
 
-Copyright (c) 2007-2008, Google Inc.
+Copyright (c) 2007-2010, Google Inc.
 All rights reserved.
 
 

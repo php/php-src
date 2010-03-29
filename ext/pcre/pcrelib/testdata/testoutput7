@@ -1,3 +1,6 @@
+/-- This set of tests check the DFA matching functionality of pcre_dfa_exec().
+    The -dfa flag must be used with pcretest when running it. --/
+     
 /abc/
     abc
  0: abc
@@ -981,7 +984,7 @@ Partial match: abc
    xyzfo\P 
 No match
    foob\P\>2 
-Partial match: b
+Partial match: foob
    foobar...\R\P\>4 
  0: ar
    xyzfo\P
@@ -7168,7 +7171,6 @@ No match
     
 /a\R{2,4}b/I<bsr_anycrlf>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_anycrlf
 First char = 'a'
 Need char = 'b'
@@ -7187,7 +7189,6 @@ No match
 
 /a\R{2,4}b/I<bsr_unicode>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_unicode
 First char = 'a'
 Need char = 'b'
@@ -7370,4 +7371,243 @@ No match
     \C-"ab"
  0: "ab"
 
-/ End of testinput7 /
+/\d+X|9+Y/
+    ++++123999\P
+Partial match: 123999
+    ++++123999Y\P
+ 0: 999Y
+
+/Z(*F)/
+    Z\P
+No match
+    ZA\P 
+No match
+    
+/Z(?!)/
+    Z\P 
+No match
+    ZA\P 
+No match
+
+/dog(sbody)?/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+    
+/dog(sbody)??/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+
+/dog|dogsbody/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+ 
+/dogsbody|dog/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+
+/Z(*F)Q|ZXY/
+    Z\P
+Partial match: Z
+    ZA\P 
+No match
+    X\P 
+No match
+
+/\bthe cat\b/
+    the cat\P
+ 0: the cat
+    the cat\P\P
+Partial match: the cat
+
+/dog(sbody)?/
+    dogs\D\P
+ 0: dog
+    body\D\R
+ 0: body
+
+/dog(sbody)?/
+    dogs\D\P\P
+Partial match: dogs
+    body\D\R
+ 0: body
+
+/abc/
+   abc\P
+ 0: abc
+   abc\P\P
+ 0: abc
+
+/abc\K123/
+    xyzabc123pqr
+Error -16
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+
+/\babc\b/
+    +++abc+++
+ 0: abc
+    +++ab\P
+Partial match: +ab
+    +++ab\P\P  
+Partial match: +ab
+
+/(?=C)/g+
+    ABCDECBA
+ 0: 
+ 0+ CDECBA
+ 0: 
+ 0+ CBA
+
+/(abc|def|xyz)/I
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+    terhjk;abcdaadsfe
+ 0: abc
+    the quick xyz brown fox 
+ 0: xyz
+    \Yterhjk;abcdaadsfe
+ 0: abc
+    \Ythe quick xyz brown fox 
+ 0: xyz
+    ** Failers
+No match
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+No match
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+No match
+
+/(abc|def|xyz)/SI
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: a d x 
+    terhjk;abcdaadsfe
+ 0: abc
+    the quick xyz brown fox 
+ 0: xyz
+    \Yterhjk;abcdaadsfe
+ 0: abc
+    \Ythe quick xyz brown fox 
+ 0: xyz
+    ** Failers
+No match
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+No match
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+No match
+
+/abcd*/+
+    xxxxabcd\P
+ 0: abcd
+ 0+ 
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+    dddxxx\R 
+ 0: ddd
+ 0+ xxx
+ 1: dd
+ 2: d
+ 3: 
+    xxxxabcd\P\P
+Partial match: abcd
+    xxx\R 
+ 0: 
+ 0+ xxx
+
+/abcd*/i
+    xxxxabcd\P
+ 0: abcd
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+    XXXXABCD\P
+ 0: ABCD
+ 1: ABC
+    XXXXABCD\P\P
+Partial match: ABCD
+
+/abc\d*/
+    xxxxabc1\P
+ 0: abc1
+ 1: abc
+    xxxxabc1\P\P
+Partial match: abc1
+
+/abc[de]*/
+    xxxxabcde\P
+ 0: abcde
+ 1: abcd
+ 2: abc
+    xxxxabcde\P\P
+Partial match: abcde
+
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+ 0: BC
+    CCD
+ 0: CC
+    ** Failers
+No match
+    CAD   
+No match
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+ 0: CC
+    BCD 
+ 0: BC
+    ** Failers
+No match
+    ABCD
+No match
+    CAD
+No match
+    BAD    
+No match
+
+/^(?!a(*SKIP)b)/
+    ac
+Error -16
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+No match
+    ac
+Error -16
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+Error -16
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+Error -16
+    ** Failers 
+No match
+    ac
+Error -16
+
+/^(?(?!a(*SKIP)b))/
+    ac
+Error -16
+
+/-- End of testinput7 --/

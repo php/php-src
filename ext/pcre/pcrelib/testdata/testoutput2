@@ -1,3 +1,14 @@
+/-- This set of tests is not Perl-compatible. It checks on special features
+    of PCRE's API, error diagnostics, and the compiled code of some patterns.
+    It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
+    Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
+    either because PCRE can't be compatible, or there is potential Perl 
+    bug. --/  
+  
+/-- Originally, the Perl 5.10 things were in here too, but now I have separated
+    many (most?) of them out into test 11. However, there may still be some
+    that were overlooked. --/   
+
 /(a)b|/I
 Capturing subpattern count = 1
 No options
@@ -40,28 +51,24 @@ No match
 
 /a+bc/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'c'
 
 /a*bc/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'c'
 
 /a{3}bc/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'c'
 
 /(abc|a+z)/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char = 'a'
 No need char
@@ -113,14 +120,12 @@ Failed: unrecognized character after (? or (?- at offset 2
 
 /.*b/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char at start or follows newline
 Need char = 'b'
 
 /.*?b/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char at start or follows newline
 Need char = 'b'
@@ -140,6 +145,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 3
 Starting byte set: c d e 
     this sentence eventually mentions a cat
  0: cat
@@ -151,6 +157,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 3
 Starting byte set: C D E c d e 
     this sentence eventually mentions a CAT cat
  0: CAT
@@ -162,6 +169,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a|[^\dZ])/IS
@@ -169,6 +177,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
@@ -189,6 +198,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0c \x0d \x20 a b 
 
 /(ab\2)/
@@ -324,7 +334,6 @@ No need char
 
 /.*((abc)$|(def))/I
 Capturing subpattern count = 3
-Partial matching not supported
 No options
 First char at start or follows newline
 No need char
@@ -338,19 +347,19 @@ No need char
  2: <unset>
  3: def
 
-/abc/IP
+/abc/P
     abc
  0: abc
     *** Failers
 No match: POSIX code 17: match failed
 
-/^abc|def/IP
+/^abc|def/P
     abcdef
  0: abc
     abcdef\B
  0: def
 
-/.*((abc)$|(def))/IP
+/.*((abc)$|(def))/P
     defabc
  0: defabc
  1: abc
@@ -360,7 +369,7 @@ No match: POSIX code 17: match failed
  1: def
  3: def
 
-/the quick brown fox/IP
+/the quick brown fox/P
     the quick brown fox
  0: the quick brown fox
     *** Failers
@@ -368,28 +377,28 @@ No match: POSIX code 17: match failed
     The Quick Brown Fox
 No match: POSIX code 17: match failed
 
-/the quick brown fox/IPi
+/the quick brown fox/Pi
     the quick brown fox
  0: the quick brown fox
     The Quick Brown Fox
  0: The Quick Brown Fox
 
-/abc.def/IP
+/abc.def/P
     *** Failers
 No match: POSIX code 17: match failed
     abc\ndef
 No match: POSIX code 17: match failed
 
-/abc$/IP
+/abc$/P
     abc
  0: abc
     abc\n
  0: abc
 
-/(abc)\2/IP
+/(abc)\2/P
 Failed: POSIX code 15: bad back reference at offset 7     
 
-/(abc\1)/IP
+/(abc\1)/P
     abc
 No match: POSIX code 17: match failed
 
@@ -401,7 +410,6 @@ Failed: missing terminating ] for character class at offset 4
 
 /[^aeiou ]{3,}/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -410,7 +418,6 @@ No need char
 
 /<.*>/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = '<'
 Need char = '>'
@@ -419,7 +426,6 @@ Need char = '>'
 
 /<.*?>/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = '<'
 Need char = '>'
@@ -428,7 +434,6 @@ Need char = '>'
 
 /<.*>/IU
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = '<'
 Need char = '>'
@@ -437,7 +442,6 @@ Need char = '>'
 
 /(?U)<.*>/I
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = '<'
 Need char = '>'
@@ -446,7 +450,6 @@ Need char = '>'
 
 /<.*?>/IU
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = '<'
 Need char = '>'
@@ -455,7 +458,6 @@ Need char = '>'
 
 /={3,}/IU
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = '='
 Need char = '='
@@ -464,7 +466,6 @@ Need char = '='
 
 /(?U)={3,}?/I
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = '='
 Need char = '='
@@ -522,7 +523,6 @@ No need char
 
 /(?s).*/I
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored dotall
 No first char
 No need char
@@ -532,6 +532,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(?i)[abcd]/IS
@@ -539,6 +540,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B C D a b c d 
 
 /(?m)[xy]|(b|c)/IS
@@ -546,6 +548,7 @@ Capturing subpattern count = 1
 Options: multiline
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: b c x y 
 
 /(^a|^b)/Im
@@ -584,7 +587,6 @@ Failed: syntax error in subpattern name (missing terminator) at offset 7
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 No options
 First char = 'b'
 Need char = 'h'
@@ -592,7 +594,6 @@ Need char = 'h'
 /((?i)blah)\s+\1/I
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 No options
 First char = 'b' (caseless)
 Need char = 'h' (caseless)
@@ -612,14 +613,15 @@ Capturing subpattern count = 1
 No options
 First char = 'b' (caseless)
 No need char
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /(a*b|(?i:c*(?-i)d))/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: C a b c d 
 
 /a$/I
@@ -668,7 +670,6 @@ Need char = 'c'
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/I
 Capturing subpattern count = 5
-Partial matching not supported
 Options: anchored
 No first char
 No need char
@@ -685,6 +686,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?<!foo)(alpha|omega)/IS
@@ -692,6 +694,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'a'
+Subject length lower bound = 5
 Starting byte set: a o 
 
 /(?!alphabet)[ab]/IS
@@ -699,6 +702,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?<=foo\n)^bar/Im
@@ -784,7 +788,6 @@ No need char
 
 /(?>.*)(?<=(abcd)|(xyz))/I
 Capturing subpattern count = 2
-Partial matching not supported
 No options
 First char at start or follows newline
 No need char
@@ -854,7 +857,7 @@ No match
     a
 No match
 
-/This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/I
+/This one is here because Perl behaves differently; see also the following/I
 Capturing subpattern count = 0
 No options
 First char = 'T'
@@ -866,9 +869,34 @@ Max back reference = 1
 Options: anchored
 No first char
 No need char
+    aaaa
+No match
     aaaaaa
- 0: aaaaaa
- 1: aa
+No match
+    
+/Perl does not fail these two for the final subjects. Neither did PCRE until/
+/release 8.01. The problem is in backtracking into a subpattern that contains/
+No match
+/a recursive reference to itself. PCRE has now made these into atomic patterns./
+No match
+
+/^(xa|=?\1a){2}$/
+    xa=xaa
+ 0: xa=xaa
+ 1: =xaa
+    ** Failers
+No match
+    xa=xaaa
+No match
+
+/^(xa|=?\1a)+$/
+    xa=xaa
+ 0: xa=xaa
+ 1: =xaa
+    ** Failers
+No match
+    xa=xaaa
+No match
 
 /These are syntax tests from Perl 5.005/I
 Capturing subpattern count = 0
@@ -1003,7 +1031,6 @@ copy substring 5 failed -7
 
 /(.{20})/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -1021,7 +1048,6 @@ No need char
 
 /(.{15})/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -1036,7 +1062,6 @@ No need char
 
 /(.{16})/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -1103,7 +1128,6 @@ No need char
 )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
 )?)?)?)?)?)?)?)?)?otherword/I
 Capturing subpattern count = 8
-Partial matching not supported
 Contains explicit CR or LF match
 No options
 First char = 'w'
@@ -1118,7 +1142,6 @@ Need char = 'd'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char at start or follows newline
 Need char = 'X'
@@ -1132,7 +1155,6 @@ Need char = 'X'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored dotall
 No first char
 Need char = 'X'
@@ -1151,7 +1173,6 @@ Need char = 'X'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char at start or follows newline
 No need char
@@ -1170,7 +1191,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored dotall
 No first char
 No need char
@@ -1189,7 +1209,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored dotall
 No first char
 No need char
@@ -1211,7 +1230,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 No need char
@@ -1296,7 +1314,6 @@ No need char
 
 /.*iss/Ig+
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char at start or follows newline
 Need char = 's'
@@ -1399,42 +1416,36 @@ Need char = 'c'
 
 /a*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
 
 /a+/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
 
 /(baa|a+)/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 Need char = 'a'
 
 /a{0,3}/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
 
 /baa{3,}/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'b'
 Need char = 'a'
 
 /"([^\\"]+|\\.)*"/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char = '"'
 Need char = '"'
@@ -1489,70 +1500,60 @@ Need char = 'b'
 
 /abc*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
 
 /ab.c*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
 
 /a.c*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
 
 /.c*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
 
 /ac*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
 
 /(a.c*|b.c*)/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
 
 /a.c*|aba/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
 
 /.+a/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'a'
 
 /(?=abcda)a.*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'a'
 
 /(?=a)a.*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
@@ -1565,14 +1566,12 @@ No need char
 
 /a\d*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
 
 /ab\d*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -1591,7 +1590,6 @@ Need char = 'd'
 
 /ab\d+/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -1666,7 +1664,7 @@ No need char
     \Nabc
 No match
 
-/a*(b+)(z)(z)/IP
+/a*(b+)(z)(z)/P
     aaaabbbbzzzz
  0: aaaabbbbzz
  1: bbbb
@@ -1698,7 +1696,8 @@ Capturing subpattern count = 0
 Options: anchored
 No first char
 Need char = 'd'
-Study returned NULL
+Subject length lower bound = 4
+No set of starting bytes
 
 /\(             # ( at start
   (?:           # Non-capturing bracket
@@ -1709,7 +1708,6 @@ Study returned NULL
   \)            # Closing )
   /Ix
 Capturing subpattern count = 0
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1738,7 +1736,6 @@ No match
 
 /\(  ( (?>[^()]+) | (?R) )* \) /Ixg
 Capturing subpattern count = 1
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1753,7 +1750,6 @@ Need char = ')'
 
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
 Capturing subpattern count = 0
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1772,7 +1768,6 @@ No match
 
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
 Capturing subpattern count = 0
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1783,7 +1778,6 @@ Need char = ')'
 
 /\(  ( (?>[^()]+) | (?R) )* \) /Ix
 Capturing subpattern count = 1
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1793,7 +1787,6 @@ Need char = ')'
 
 /\( ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 2
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1804,7 +1797,6 @@ Need char = ')'
 
 /\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1821,7 +1813,6 @@ Need char = ')'
 
 /\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1838,7 +1829,6 @@ Need char = ')'
 
 /\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /Ix
 Capturing subpattern count = 11
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1858,7 +1848,6 @@ Need char = ')'
 
 /\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1866,11 +1855,9 @@ Need char = ')'
  0: (abcd(xyz<p>qrs)123)
  1: abcd(xyz<p>qrs)123
  2: 123
- 3: <unset>
 
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
 Capturing subpattern count = 3
-Partial matching not supported
 Options: extended
 First char = '('
 Need char = ')'
@@ -1942,6 +1929,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 
@@ -2003,6 +1991,7 @@ Contains explicit CR or LF match
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 
 
 /^[[:cntrl:]]/DZ
@@ -2249,7 +2238,6 @@ Need char = 'd'
 /(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\d+(?:\s|$))(\w+)\s+(\270)/I
 Capturing subpattern count = 271
 Max back reference = 270
-Partial matching not supported
 No options
 No first char
 No need char
@@ -2930,7 +2918,6 @@ Need char = 'c'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -2959,7 +2946,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'x'
 No need char
@@ -2975,7 +2961,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'x'
 No need char
@@ -2999,7 +2984,6 @@ No need char
 
 /^(\w++|\s++)*$/I
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored
 No first char
 No need char
@@ -3013,7 +2997,6 @@ No match
 
 /(\d++)(\w)/I
 Capturing subpattern count = 2
-Partial matching not supported
 No options
 No first char
 No need char
@@ -3028,7 +3011,6 @@ No match
 
 /a++b/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -3037,7 +3019,6 @@ Need char = 'b'
 
 /(a++b)/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -3047,7 +3028,6 @@ Need char = 'b'
 
 /(a++)b/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -3057,7 +3037,6 @@ Need char = 'b'
 
 /([^()]++|\([^()]*\))+/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -3067,7 +3046,6 @@ No need char
 
 /\(([^()]++|\([^()]+\))+\)/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char = '('
 Need char = ')'
@@ -3130,7 +3108,6 @@ Failed: nothing to repeat at offset 7
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'x'
 Need char = 'b'
@@ -3147,7 +3124,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: ungreedy
 First char = 'x'
 Need char = 'b'
@@ -3176,7 +3152,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 5
-Partial matching not supported
 Options: anchored
 No first char
 No need char
@@ -3192,7 +3167,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'b'
@@ -3210,7 +3184,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'b'
@@ -3286,7 +3259,6 @@ No need char
 
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
 Capturing subpattern count = 0
-Partial matching not supported
 Options: extended
 First char = '<'
 Need char = '>'
@@ -3336,14 +3308,12 @@ Need char = 'X'
 /(.*)\d+\1/I
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 No options
 No first char
 No need char
 
 /(.*)\d+/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 First char at start or follows newline
 No need char
@@ -3351,14 +3321,12 @@ No need char
 /(.*)\d+\1/Is
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 Options: dotall
 No first char
 No need char
 
 /(.*)\d+/Is
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored dotall
 No first char
 No need char
@@ -3366,7 +3334,6 @@ No need char
 /(.*(xyz))\d+\2/I
 Capturing subpattern count = 2
 Max back reference = 2
-Partial matching not supported
 No options
 First char at start or follows newline
 Need char = 'z'
@@ -3374,7 +3341,6 @@ Need char = 'z'
 /((.*))\d+\1/I
 Capturing subpattern count = 2
 Max back reference = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -3391,7 +3357,6 @@ Need char = 'b'
 
 /(?=a).*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char = 'a'
 No need char
@@ -3497,6 +3462,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /[^a]/I
@@ -3516,6 +3482,7 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = '6'
+Subject length lower bound = 4
 Starting byte set: 0 1 2 3 4 5 6 7 8 9 
 
 /a^b/I
@@ -3549,6 +3516,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B a b 
 
 /[ab](?i)cd/IS
@@ -3556,6 +3524,7 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = 'd' (caseless)
+Subject length lower bound = 3
 Starting byte set: a b 
 
 /abc(?C)def/I
@@ -3713,7 +3682,6 @@ No need char
 
 /(\d{3}(?C))*/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -3842,7 +3810,6 @@ Callout 0: last capture = 1
 
 /a(b+)(c*)(?C1)/I
 Capturing subpattern count = 2
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -3868,7 +3835,6 @@ No match
 
 /a(b+?)(c*?)(?C1)/I
 Capturing subpattern count = 2
-Partial matching not supported
 No options
 First char = 'a'
 Need char = 'b'
@@ -3909,6 +3875,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?R)/I
@@ -4028,43 +3995,8 @@ No options
 First char = 'a'
 Need char = 'b'
 
-/^\W*(?:((.)\W*(?1)\W*\2|)|((.)\W*(?3)\W*\4|\W*.\W*))\W*$/Ii
-Capturing subpattern count = 4
-Max back reference = 4
-Partial matching not supported
-Options: anchored caseless
-No first char
-No need char
-    1221
- 0: 1221
- 1: 1221
- 2: 1
-    Satan, oscillate my metallic sonatas!
- 0: Satan, oscillate my metallic sonatas!
- 1: <unset>
- 2: <unset>
- 3: Satan, oscillate my metallic sonatas
- 4: S
-    A man, a plan, a canal: Panama!
- 0: A man, a plan, a canal: Panama!
- 1: <unset>
- 2: <unset>
- 3: A man, a plan, a canal: Panama
- 4: A
-    Able was I ere I saw Elba.
- 0: Able was I ere I saw Elba.
- 1: <unset>
- 2: <unset>
- 3: Able was I ere I saw Elba
- 4: A
-    *** Failers
-No match
-    The quick brown fox
-No match
-
 /^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/I
 Capturing subpattern count = 2
-Partial matching not supported
 Options: anchored
 No first char
 No need char
@@ -4105,7 +4037,6 @@ No match
 
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
 Capturing subpattern count = 2
-Partial matching not supported
 Options: extended
 First char = '<'
 Need char = '>'
@@ -4279,7 +4210,6 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
-Partial matching not supported
 Options: anchored caseless
 No first char
 No need char
@@ -4325,7 +4255,6 @@ No need char
 
 /(.*)a/Is
 Capturing subpattern count = 1
-Partial matching not supported
 Options: anchored dotall
 No first char
 Need char = 'a'
@@ -4333,7 +4262,6 @@ Need char = 'a'
 /(.*)a\1/Is
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 Options: dotall
 No first char
 Need char = 'a'
@@ -4341,14 +4269,12 @@ Need char = 'a'
 /(.*)a(b)\2/Is
 Capturing subpattern count = 2
 Max back reference = 2
-Partial matching not supported
 Options: anchored dotall
 No first char
 Need char = 'b'
 
 /((.*)a|(.*)b)z/Is
 Capturing subpattern count = 3
-Partial matching not supported
 Options: anchored dotall
 No first char
 Need char = 'z'
@@ -4356,7 +4282,6 @@ Need char = 'z'
 /((.*)a|(.*)b)z\1/Is
 Capturing subpattern count = 3
 Max back reference = 1
-Partial matching not supported
 Options: dotall
 No first char
 Need char = 'z'
@@ -4364,7 +4289,6 @@ Need char = 'z'
 /((.*)a|(.*)b)z\2/Is
 Capturing subpattern count = 3
 Max back reference = 2
-Partial matching not supported
 Options: dotall
 No first char
 Need char = 'z'
@@ -4372,7 +4296,6 @@ Need char = 'z'
 /((.*)a|(.*)b)z\3/Is
 Capturing subpattern count = 3
 Max back reference = 3
-Partial matching not supported
 Options: dotall
 No first char
 Need char = 'z'
@@ -4380,14 +4303,12 @@ Need char = 'z'
 /((.*)a|^(.*)b)z\3/Is
 Capturing subpattern count = 3
 Max back reference = 3
-Partial matching not supported
 Options: anchored dotall
 No first char
 Need char = 'z'
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a/Is
 Capturing subpattern count = 31
-Partial matching not supported
 Options: anchored dotall
 No first char
 No need char
@@ -4395,7 +4316,6 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\31/Is
 Capturing subpattern count = 31
 Max back reference = 31
-Partial matching not supported
 Options: dotall
 No first char
 No need char
@@ -4403,7 +4323,6 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/Is
 Capturing subpattern count = 32
 Max back reference = 32
-Partial matching not supported
 Options: dotall
 No first char
 No need char
@@ -4470,7 +4389,6 @@ Need char = 'c'
 
 /(a+)*zz/I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 Need char = 'z'
@@ -4607,7 +4525,6 @@ Failed: two named subpatterns have the same name at offset 30
 Capturing subpattern count = 3
 Named capturing subpatterns:
   elem   2
-Partial matching not supported
 No options
 First char = '['
 Need char = ']'
@@ -4625,7 +4542,6 @@ No match
 Capturing subpattern count = 3
 Named capturing subpatterns:
   elem   2
-Partial matching not supported
 No options
 First char = '['
 Need char = ']'
@@ -4732,7 +4648,6 @@ No need char
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/Ii
 Capturing subpattern count = 3
-Partial matching not supported
 Options: caseless
 No first char
 Need char = 'g' (caseless)
@@ -4742,11 +4657,11 @@ Need char = 'g' (caseless)
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/IiS
 Capturing subpattern count = 3
-Partial matching not supported
 Options: caseless
 No first char
 Need char = 'g' (caseless)
-Study returned NULL
+Subject length lower bound = 8
+No set of starting bytes
      Baby Bjorn Active Carrier - With free SHIPPING!!
  0: Baby Bjorn Active Carrier - With free SHIPPING!!
  1: Baby Bjorn Active Carrier - With free SHIPPING!!
@@ -4761,11 +4676,11 @@ Study returned NULL
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'b'
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /(a|b)*.?c/ISDZ
 ------------------------------------------------------------------
@@ -4785,7 +4700,8 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'c'
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /abc(?C255)de(?C)f/DZ
 ------------------------------------------------------------------
@@ -4854,7 +4770,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options:
 No first char
 Need char = 'b'
@@ -4899,7 +4814,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options:
 First char = 'a'
 Need char = 'b'
@@ -5337,7 +5251,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options:
 No first char
 Need char = '3'
@@ -5369,7 +5282,6 @@ Need char = '3'
 
 /\b.*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5378,7 +5290,6 @@ No need char
 
 /\b.*/Is
 Capturing subpattern count = 0
-Partial matching not supported
 Options: dotall
 No first char
 No need char
@@ -5387,7 +5298,6 @@ No need char
 
 /(?!.bcd).*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5400,15 +5310,15 @@ No options
 First char = 'a'
 Need char = 'e'
     ab\P
-Partial match
+Partial match: ab
     abc\P
-Partial match
+Partial match: abc
     abcd\P
-Partial match
+Partial match: abcd
     abcde\P
  0: abcde
     the quick brown abc\P
-Partial match
+Partial match: abc
     ** Failers\P
 No match
     the quick brown abxyz fox\P
@@ -5433,23 +5343,23 @@ Need char = '/'
  1: 02
  2: 05
     1\P
-Partial match
+Partial match: 1
     1/2\P
-Partial match
+Partial match: 1/2
     1/2/0\P
-Partial match
+Partial match: 1/2/0
     1/2/04\P
  0: 1/2/04
  1: 1
  2: 2
     0\P
-Partial match
+Partial match: 0
     02/\P
-Partial match
+Partial match: 02/
     02/0\P
-Partial match
+Partial match: 02/0
     02/1\P
-Partial match
+Partial match: 02/1
     ** Failers\P
 No match
     \P
@@ -5471,28 +5381,24 @@ No match
 
 /0{0,2}ABC/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'C'
 
 /\d{3,}ABC/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'C'
 
 /\d*ABC/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'C'
 
 /[abc]+DE/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = 'E'
@@ -5505,13 +5411,13 @@ Need char = '3'
     123\P
  0: 123
     a\P
-Partial match
+Partial match: a
     b\P
-Partial match
+Partial match: b
     c\P
-Partial match
+Partial match: c
     c12\P
-Partial match
+Partial match: c12
     c123\P
  0: c123
 
@@ -5521,17 +5427,17 @@ Options: anchored
 No first char
 Need char = 'X'
     1\P
-Partial match
+Partial match: 1
     123\P
-Partial match
+Partial match: 123
     123X
  0: 123X
     1234\P
-Partial match
+Partial match: 1234
     1234X
  0: 1234X
     12345\P
-Partial match
+Partial match: 12345
     12345X
  0: 12345X
     *** Failers
@@ -5578,6 +5484,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 Compiled regex written to testsavedregex
 Study data written to testsavedregex
@@ -5598,6 +5505,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 Compiled regex written to testsavedregex
 Study data written to testsavedregex
@@ -5616,7 +5524,6 @@ No match
 ~<(\w+)/?>(.)*</(\1)>~smgI
 Capturing subpattern count = 3
 Max back reference = 1
-Partial matching not supported
 Options: multiline dotall
 First char = '<'
 Need char = '>'
@@ -5669,7 +5576,7 @@ No match
     line one\nthis is a line\nbreak in the second line
 No match
 
-/ab.cd/IP
+/ab.cd/P
     ab-cd
  0: ab-cd
     ab=cd
@@ -5679,7 +5586,7 @@ No match: POSIX code 17: match failed
     ab\ncd
 No match: POSIX code 17: match failed
 
-/ab.cd/IPs
+/ab.cd/Ps
     ab-cd
  0: ab-cd
     ab=cd
@@ -5923,7 +5830,6 @@ Matched, but too many substrings
 
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5936,7 +5842,6 @@ No need char
 
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5947,7 +5852,6 @@ No need char
 
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5958,7 +5862,6 @@ No need char
 
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5971,7 +5874,6 @@ No need char
 
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
@@ -5984,11 +5886,11 @@ No need char
     ((this))
  0: ((this))
 
-/a(b)c/IPN
+/a(b)c/PN
     abc
 Matched with REG_NOSUB
 
-/a(?P<name>b)c/IPN
+/a(?P<name>b)c/PN
     abc
 Matched with REG_NOSUB
 
@@ -6313,10 +6215,10 @@ Failed: octal value is greater than \377 (not in UTF-8 mode) at offset 3
 
 /\s*,\s*/IS
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 Need char = ','
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0c \x0d \x20 , 
     \x0b,\x0b
  0: ,
@@ -6443,7 +6345,6 @@ Unknown newline type at: <bad>
 
 /.*/I<lf>
 Capturing subpattern count = 0
-Partial matching not supported
 Options:
 Forced newline sequence: LF
 First char at start or follows newline
@@ -6469,7 +6370,6 @@ No need char
 
 /\w+(.)(.)?def/Is
 Capturing subpattern count = 2
-Partial matching not supported
 Options: dotall
 No first char
 Need char = 'f'
@@ -6486,7 +6386,6 @@ Need char = 'f'
 
 +((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+I
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
@@ -6621,10 +6520,10 @@ No need char
 
 /(a*b|(?i:c*(?-i)d))/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: C a b c d 
 
 /()[ab]xyz/IS
@@ -6632,6 +6531,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b 
 
 /(|)[ab]xyz/IS
@@ -6639,6 +6539,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b 
 
 /(|c)[ab]xyz/IS
@@ -6646,6 +6547,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c 
 
 /(|c?)[ab]xyz/IS
@@ -6653,6 +6555,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c 
 
 /(d?|c?)[ab]xyz/IS
@@ -6660,6 +6563,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c d 
 
 /(d?|c)[ab]xyz/IS
@@ -6667,6 +6571,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c d 
 
 /^a*b\d/DZ
@@ -6680,7 +6585,6 @@ Starting byte set: a b c d
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'b'
@@ -6696,7 +6600,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'b'
@@ -6712,7 +6615,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'b'
@@ -6728,7 +6630,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored
 No first char
 Need char = 'A'
@@ -6750,7 +6651,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: anchored caseless
 No first char
 Need char = 'A' (caseless)
@@ -6761,34 +6661,34 @@ Need char = 'A' (caseless)
 
 /(a*|b*)[cd]/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a+|b*)[cd]/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a*|b+)[cd]/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a+|b+)[cd]/IS
 Capturing subpattern count = 1
-Partial matching not supported
 No options
 No first char
 No need char
+Subject length lower bound = 2
 Starting byte set: a b 
 
 /((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
@@ -7594,7 +7494,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond ref
+      2 Cond nref
         y
         Ket
         [()]
@@ -7660,7 +7560,6 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
-Partial matching not supported
 Options: anchored caseless
 No first char
 No need char
@@ -7694,7 +7593,6 @@ No match
 /(?=(\w+))\1:/I
 Capturing subpattern count = 1
 Max back reference = 1
-Partial matching not supported
 No options
 No first char
 Need char = ':'
@@ -7707,27 +7605,12 @@ Capturing subpattern count = 1
 Max back reference = 1
 Named capturing subpatterns:
   abc   1
-Partial matching not supported
 No options
 No first char
 Need char = ':'
     abcd:
  0: abcd:
  1: abcd
-
-/(?'abc'\w+):\k<abc>{2}/
-    a:aaxyz
- 0: a:aa
- 1: a
-    ab:ababxyz
- 0: ab:abab
- 1: ab
-    ** Failers
-No match
-    a:axyz
-No match
-    ab:abxyz
-No match
 
 /(?'abc'a|b)(?<abc>d|e)\k<abc>{2}/J
     adaa
@@ -7754,13 +7637,6 @@ No match
 No match
     bddd
 No match
-
-/^(?<ab>a)? (?(<ab>)b|c) (?('ab')d|e)/x
-    abd
- 0: abd
- 1: a
-    ce
- 0: ce
 
 /(?(<bc))/
 Failed: malformed number or name after (?( at offset 6
@@ -7791,24 +7667,6 @@ Failed: reference to non-existent subpattern at offset 29
  0: abcabc1Xabc2XabcX
  1: abcabc1Xabc2XabcX
  2: abcabc1Xabc2XabcX
-
-/^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
-    abcd
- 0: ab
- 1: <unset>
- 2: <unset>
-
-/(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
-  (?(DEFINE)
-  (?<NAME_PAT>[a-z]+)
-  (?<ADDRESS_PAT>\d+)
-  )/x
-    metcalfe 33
- 0: metcalfe 33
- 1: metcalfe
- 2: 33
- 3: <unset>
- 4: <unset>
 
 /^(?(DEFINE) abc | xyz ) /x
 Failed: DEFINE group contains more than one branch at offset 22
@@ -7987,46 +7845,6 @@ Need char = 'P'
  0: PXP
  1: P
 
-/(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))\b(?&byte)(\.(?&byte)){3}/
-    1.2.3.4
- 0: 1.2.3.4
- 1: <unset>
- 2: .4
-    131.111.10.206
- 0: 131.111.10.206
- 1: <unset>
- 2: .206
-    10.0.0.0
- 0: 10.0.0.0
- 1: <unset>
- 2: .0
-    ** Failers
-No match
-    10.6
-No match
-    455.3.4.5
-No match
-
-/\b(?&byte)(\.(?&byte)){3}(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))/
-    1.2.3.4
- 0: 1.2.3.4
- 1: .4
- 2: <unset>
-    131.111.10.206
- 0: 131.111.10.206
- 1: .206
- 2: <unset>
-    10.0.0.0
- 0: 10.0.0.0
- 1: .0
- 2: <unset>
-    ** Failers
-No match
-    10.6
-No match
-    455.3.4.5
-No match
-
 /(?:a(?&abc)b)*(?<abc>x)/
     123axbaxbaxbx456
  0: axbaxbaxbx
@@ -8063,12 +7881,6 @@ No match
  1: abc
    DEFabcABCXYZ
 No match
-
-/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
-    ababababbbabZXXXX
- 0: ababababbbabZ
- 1: ab
- 2: b
 
 /^(a)\g-2/
 Failed: reference to non-existent subpattern at offset 7
@@ -8325,26 +8137,6 @@ Failed: reference to non-existent subpattern at offset 7
  0: Y!
  1: !
 
-/(foo)\Kbar/
-    foobar
- 0: bar
- 1: foo
-   
-/(foo)(\Kbar|baz)/
-    foobar
- 0: bar
- 1: foo
- 2: bar
-    foobaz 
- 0: foobaz
- 1: foo
- 2: baz
-
-/(foo\Kbar)baz/
-    foobarbaz
- 0: barbaz
- 1: foobar
-
 /(?<A>tom|bon)-\k{A}/
     tom-tom
  0: tom-tom
@@ -8357,14 +8149,6 @@ No match
     tom-bon  
 No match
 
-/(?<A>tom|bon)-\g{A}/
-    tom-tom
- 0: tom-tom
- 1: tom
-    bon-bon 
- 0: bon-bon
- 1: bon
-    
 /\g{A/ 
 Failed: syntax error in subpattern name (missing terminator) at offset 4
 
@@ -8458,82 +8242,6 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
  2: xyz
  3: <unset>
  4: x
-
-/(?|(abc)|(xyz))\1/
-    abcabc
- 0: abcabc
- 1: abc
-    xyzxyz 
- 0: xyzxyz
- 1: xyz
-    ** Failers
-No match
-    abcxyz
-No match
-    xyzabc   
-No match
-    
-/(?|(abc)|(xyz))(?1)/
-    abcabc
- 0: abcabc
- 1: abc
-    xyzabc 
- 0: xyzabc
- 1: xyz
-    ** Failers 
-No match
-    xyzxyz 
-No match
- 
-/\H\h\V\v/
-    X X\x0a
- 0: X X\x0a
-    X\x09X\x0b
- 0: X\x09X\x0b
-    ** Failers
-No match
-    \xa0 X\x0a   
-No match
-    
-/\H*\h+\V?\v{3,4}/ 
-    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
- 0: \x09 \xa0X\x0a\x0b\x0c\x0d
-    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
- 0: \x09 \xa0\x0a\x0b\x0c\x0d
-    \x09\x20\xa0\x0a\x0b\x0c
- 0: \x09 \xa0\x0a\x0b\x0c
-    ** Failers 
-No match
-    \x09\x20\xa0\x0a\x0b
-No match
-     
-/\H{3,4}/
-    XY  ABCDE
- 0: ABCD
-    XY  PQR ST 
- 0: PQR
-    
-/.\h{3,4}./
-    XY  AB    PQRS
- 0: B    P
-
-/\h*X\h?\H+Y\H?Z/
-    >XNNNYZ
- 0: XNNNYZ
-    >  X NYQZ
- 0:   X NYQZ
-    ** Failers
-No match
-    >XYZ   
-No match
-    >  X NY Z
-No match
-
-/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
-    >XY\x0aZ\x0aA\x0bNN\x0c
- 0: XY\x0aZ\x0aA\x0bNN\x0c
-    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
- 0: \x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
 /[\h]/BZ
 ------------------------------------------------------------------
@@ -8831,87 +8539,6 @@ Failed: missing terminating ] for character class at offset 10
         End
 ------------------------------------------------------------------
 
-/^a+(*FAIL)/
-    aaaaaa
-No match
-    
-/a+b?c+(*FAIL)/
-    aaabccc
-No match
-
-/a+b?(*PRUNE)c+(*FAIL)/
-    aaabccc
-No match
-
-/a+b?(*COMMIT)c+(*FAIL)/
-    aaabccc
-No match
-    
-/a+b?(*SKIP)c+(*FAIL)/
-    aaabcccaaabccc
-No match
-
-/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
- 0: aaaxxxxxx
-    aaa++++++ 
- 0: aaa
-    bbbxxxxx
- 0: bbbxxxxx
-    bbb+++++ 
- 0: bbb
-    cccxxxx
- 0: cccxxxx
-    ccc++++ 
- 0: ccc
-    dddddddd   
- 0: ddd
-
-/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
- 0: aaaxxxxxx
- 1: aaaxxxxxx
-    aaa++++++ 
- 0: aaa
- 1: aaa
-    bbbxxxxx
- 0: bbbxxxxx
- 1: bbbxxxxx
-    bbb+++++ 
- 0: bbb
- 1: bbb
-    cccxxxx
- 0: cccxxxx
- 1: cccxxxx
-    ccc++++ 
- 0: ccc
- 1: ccc
-    dddddddd   
- 0: ddd
- 1: ddd
-
-/a+b?(*THEN)c+(*FAIL)/
-    aaabccc
-No match
-
-/(A (A|B(*ACCEPT)|C) D)(E)/x
-    ABX
- 0: AB
-    AADE
- 0: AADE
- 1: AAD
- 2: A
- 3: E
-    ACDE
- 0: ACDE
- 1: ACD
- 2: C
- 3: E
-    ** Failers
-No match
-    AD 
-No match
-        
 /^a+(*FAIL)/C
     aaaaaa
 --->aaaaaa
@@ -9216,7 +8843,6 @@ No match
     
 /a\R{2,4}b/I<bsr_anycrlf>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_anycrlf
 First char = 'a'
 Need char = 'b'
@@ -9235,7 +8861,6 @@ No match
 
 /a\R{2,4}b/I<bsr_unicode>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_unicode
 First char = 'a'
 Need char = 'b'
@@ -9385,143 +9010,14 @@ Failed: unknown POSIX class name at offset 6
 /[[:a\dz:]]/
 Failed: unknown POSIX class name at offset 3
 
-/^(?<name>a|b\g<name>c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(?<name>a|b\g'name'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g<1>c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g'1'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g'-1'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/(^(a|b\g<-1>c))/
-    aaaa
- 0: a
- 1: a
- 2: a
-    bacxxx
- 0: bac
- 1: bac
- 2: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
- 2: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
- 2: bbbaccc
-
 /(^(a|b\g<-1'c))/
 Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 15
-
-/(^(a|b\g{-1}))/
-    bacxxx
-No match
-
-/(?-i:\g<name>)(?i:(?<name>a))/
-    XaaX
- 0: aa
- 1: a
-    XAAX 
- 0: AA
- 1: A
-
-/(?i:\g<name>)(?-i:(?<name>a))/
-    XaaX
- 0: aa
- 1: a
-    ** Failers 
-No match
-    XAAX 
-No match
-
-/(?-i:\g<+1>)(?i:(a))/
-    XaaX
- 0: aa
- 1: a
-    XAAX 
- 0: AA
- 1: A
-
-/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
-
-/(?<n>a|b|c)\g<n>*/
-   abc
- 0: abc
- 1: a
-   accccbbb 
- 0: accccbbb
- 1: a
 
 /^(?+1)(?<a>x|y){0}z/
     xzxx
  0: xz
- 1: <unset>
     yzyy 
  0: yz
- 1: <unset>
     ** Failers
 No match
     xxz  
@@ -9636,11 +9132,11 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: x y z 
 
 /(?(?=.*b)b|^)/CI
 Capturing subpattern count = 0
-Partial matching not supported
 Options:
 No first char
 No need char
@@ -9680,14 +9176,12 @@ No need char
    
 /(?(?=b).*b|^d)/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 No first char
 No need char
 
 /(?(?=.*b).*b|^d)/I
 Capturing subpattern count = 0
-Partial matching not supported
 No options
 First char at start or follows newline
 No need char
@@ -9786,15 +9280,6 @@ No match
  0: "ab"
  1: 
 
-/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
- 1: a
- 2: b
- 3: c
- 4: d
- 5: Y
-
 /^X(?5)(a)(?|(b)|(q))(c)(d)Y/
 Failed: reference to non-existent subpattern at offset 5
 
@@ -9807,6 +9292,579 @@ Failed: reference to non-existent subpattern at offset 5
  4: d
  5: Y
  
+/Xa{2,4}b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/Xa{2,4}?b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/Xa{2,4}+b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\d{2,4}b/
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+    
+/X\d{2,4}?b/
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+    
+/X\d{2,4}+b/
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+    
+/X\D{2,4}b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\D{2,4}?b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\D{2,4}+b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[abc]{2,4}b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[abc]{2,4}?b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[abc]{2,4}+b/
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[^a]{2,4}b/
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+    
+/X[^a]{2,4}?b/
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+    
+/X[^a]{2,4}+b/
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+    
+/(Y)X\1{2,4}b/
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+    
+/(Y)X\1{2,4}?b/
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+    
+/(Y)X\1{2,4}+b/
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+    
+/\++\KZ|\d+X|9+Y/
+    ++++123999\P
+Partial match: 123999
+    ++++123999Y\P
+ 0: 999Y
+    ++++Z1234\P 
+ 0: Z
+
+/Z(*F)/
+    Z\P
+No match
+    ZA\P 
+No match
+    
+/Z(?!)/
+    Z\P 
+No match
+    ZA\P 
+No match
+
+/dog(sbody)?/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+    
+/dog(sbody)??/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+ 0: dog
+
+/dog|dogsbody/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+ 0: dog
+ 
+/dogsbody|dog/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+
+/\bthe cat\b/
+    the cat\P
+ 0: the cat
+    the cat\P\P
+Partial match: the cat
+
+/abc/
+   abc\P
+ 0: abc
+   abc\P\P
+ 0: abc
+   
+/\w+A/P
+   CDAAAAB 
+ 0: CDAAAA
+
+/\w+A/PU
+   CDAAAAB 
+ 0: CDA
+
+/abc\K123/
+    xyzabc123pqr
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+
+/\babc\b/
+    +++abc+++
+ 0: abc
+    +++ab\P
+Partial match: +ab
+    +++ab\P\P  
+Partial match: +ab
+
+/(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        Recurse
+        Ket
+        Once
+        Recurse
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        <
+        [^m]
+        [^>]
+        >
+        [^<]
+        Ket
+        CBra 2
+        \w*+
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        Recurse
+        Ket
+        Once
+        Recurse
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        <
+        [\x00-/:-\xff] (neg)
+        [^>]
+        >
+        [^<]
+        Ket
+        CBra 2
+        \w*+
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(ab)(x(y)z(cd(*ACCEPT)))pq/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        ab
+        Ket
+        CBra 2
+        x
+        CBra 3
+        y
+        Ket
+        z
+        CBra 4
+        cd
+        Close 4
+        Close 2
+        *ACCEPT
+        Ket
+        Ket
+        pq
+        Ket
+        End
+------------------------------------------------------------------
+
+/abc\K/+
+    abcdef
+ 0: 
+ 0+ def
+    abcdef\N\N
+ 0: 
+ 0+ def
+    xyzabcdef\N\N
+ 0: 
+ 0+ def
+    ** Failers
+No match
+    abcdef\N 
+No match
+    xyzabcdef\N
+No match
+    
+/^(?:(?=abc)|abc\K)/+
+    abcdef
+ 0: 
+ 0+ abcdef
+    abcdef\N\N 
+ 0: 
+ 0+ def
+    ** Failers 
+No match
+    abcdef\N 
+No match
+
+/a?b?/+
+    xyz
+ 0: 
+ 0+ xyz
+    xyzabc
+ 0: 
+ 0+ xyzabc
+    xyzabc\N
+ 0: ab
+ 0+ c
+    xyzabc\N\N
+ 0: 
+ 0+ yzabc
+    xyz\N\N    
+ 0: 
+ 0+ yz
+    ** Failers 
+ 0: 
+ 0+ ** Failers
+    xyz\N 
+No match
+
+/^a?b?/+
+    xyz
+ 0: 
+ 0+ xyz
+    xyzabc
+ 0: 
+ 0+ xyzabc
+    ** Failers 
+ 0: 
+ 0+ ** Failers
+    xyzabc\N
+No match
+    xyzabc\N\N
+No match
+    xyz\N\N    
+No match
+    xyz\N 
+No match
+    
+/^(?<name>a|b\g<name>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g<1>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'-1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/(^(a|b\g<-1>c))/
+    aaaa
+ 0: a
+ 1: a
+ 2: a
+    bacxxx
+ 0: bac
+ 1: bac
+ 2: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+ 2: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+ 2: bbbaccc
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    ** Failers 
+No match
+    XAAX 
+No match
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+ 0: abc
+ 1: a
+   accccbbb 
+ 0: accccbbb
+ 1: a
+
 /^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
     XYabcdY
  0: XYabcdY
@@ -9818,26 +9876,796 @@ Failed: reference to non-existent subpattern at offset 5
  6: d
  7: Y
 
-/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
+/(?<=b(?1)|zzz)(a)/
+    xbaax
+ 0: a
+ 1: a
+    xzzzax 
+ 0: a
+ 1: a
+
+/(a)(?<=b\1)/
+Failed: lookbehind assertion is not fixed length at offset 10
+
+/(a)(?<=b+(?1))/
+Failed: lookbehind assertion is not fixed length at offset 13
+
+/(a+)(?<=b(?1))/
+Failed: lookbehind assertion is not fixed length at offset 14
+
+/(a(?<=b(?1)))/
+Failed: lookbehind assertion is not fixed length at offset 13
+
+/(?<=b(?1))xyz/
+Failed: reference to non-existent subpattern at offset 8
+
+/(?<=b(?1))xyz(b+)pqrstuvew/
+Failed: lookbehind assertion is not fixed length at offset 26
+
+/(a|bc)\1/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bc)\1{2,3}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: a b 
+
+/(a|bc)(?1)/SI
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|b\1)(a|b\1)/SI
+Capturing subpattern count = 2
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|b\1){2}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bbbb\1)(a|bbbb\1)/SI
+Capturing subpattern count = 2
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bbbb\1){2}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/^From +([^ ]+) +[a-zA-Z][a-zA-Z][a-zA-Z] +[a-zA-Z][a-zA-Z][a-zA-Z] +[0-9]?[0-9] +[0-9][0-9]:[0-9][0-9]/SI
+Capturing subpattern count = 1
+Options: anchored
+No first char
+Need char = ':'
+Subject length lower bound = 22
+No set of starting bytes
+
+/  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                          # optional leading comment
+(?:    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)                    # initial word
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)  )* # further okay, if led by a period
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+# address
+|                     #  or
+(?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)             # one word, optionally followed by....
+(?:
+[^()<>@,;:".\\\[\]\x80-\xff\000-\010\012-\037]  |  # atom and space parts, or...
+\(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)       |  # comments, or...
+
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+# quoted strings
+)*
+<  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                     # leading <
+(?:  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  ,  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+)* # further okay, if led by comma
+:                                # closing colon
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  )? #       optional route
+(?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)                    # initial word
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)  )* # further okay, if led by a period
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+#       address spec
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  > #                  trailing >
+# name and address
+)  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                       # optional trailing comment
+/xSI
+Capturing subpattern count = 0
+Contains explicit CR or LF match
+Options: extended
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
+  9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
+  f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
+
+/<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
+Capturing subpattern count = 11
+Options: caseless dotall
+First char = '<'
+Need char = '>'
+Subject length lower bound = 47
+No set of starting bytes
+
+"(?>.*/)foo"SI
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'o'
+Subject length lower bound = 4
+No set of starting bytes
+
+/(?(?=[^a-z]+[a-z])  \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} ) /xSI
+Capturing subpattern count = 0
+Options: extended
+No first char
+Need char = '-'
+Subject length lower bound = 8
+No set of starting bytes
+
+/(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))/iSI
+Capturing subpattern count = 1
+Options: caseless
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: A B C a b c 
+
+/(?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))/SI
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+Subject length lower bound = 41
+Starting byte set: c d 
+
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isxSI
+Capturing subpattern count = 3
+Max back reference = 1
+Options: caseless extended dotall
+First char = '<'
+Need char = '='
+Subject length lower bound = 9
+No set of starting bytes
+
+/^(?!:)                       # colon disallowed at start
+  (?:                         # start of item
+    (?: [0-9a-f]{1,4} |       # 1-4 hex digits or
+    (?(1)0 | () ) )           # if null previously matched, fail; else null
+    :                         # followed by colon
+  ){1,7}                      # end item; 1-7 of them required               
+  [0-9a-f]{1,4} $             # final hex number at end of string
+  (?(1)|.)                    # check that there was an empty component
+  /xiIS
+Capturing subpattern count = 1
+Options: anchored caseless extended
+No first char
+Need char = ':'
+Subject length lower bound = 2
+No set of starting bytes
+
+/(?|(?<a>A)|(?<a>B))/I
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  a   1
+  a   1
+No options
+No first char
+No need char
+    AB\Ca
+ 0: A
+ 1: A
+  C A (1) a
+    BA\Ca
+ 0: B
+ 1: B
+  C B (1) a
+
+/(?|(?<a>A)|(?<b>B))/ 
+Failed: different names for subpatterns of the same number are not allowed at offset 15
+
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |
+    b(?<quote> (?<apostrophe>')|(?<realquote>")) ) 
+    (?('quote')[a-z]+|[0-9]+)/JIx
+Capturing subpattern count = 6
+Named capturing subpatterns:
+  apostrophe   2
+  apostrophe   5
+  quote        1
+  quote        4
+  realquote    3
+  realquote    6
+Options: extended dupnames
+No first char
+No need char
+    a"aaaaa
+ 0: a"aaaaa
+ 1: "
+ 2: <unset>
+ 3: "
+    b"aaaaa 
+ 0: b"aaaaa
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: "
+ 5: <unset>
+ 6: "
+    ** Failers 
+No match
+    b"11111
+No match
+    a"11111 
+No match
+    
+/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDZx
+------------------------------------------------------------------
+        Bra
+        ^
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        Alt
+        CBra 1
+        e
+        Ket
+        Ket
+        Cond
+      4 Cond nref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  D   4
+  D   1
+Options: anchored extended dupnames
+No first char
+No need char
+    abcdX
+ 0: abcdX
  1: a
  2: b
- 3: <unset>
- 4: <unset>
- 5: c
- 6: d
- 7: Y
-
-/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
+ 3: c
+ 4: d
+    eX
+ 0: eX
+ 1: e
+    ** Failers
+No match
+    abcdY
+No match
+    ey     
+No match
+    
+/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDZx
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Cond
+        Cond nrecurse 1
+        $
+        Alt
+        Once
+        Recurse
+        Ket
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  A   1
+  A   4
+Options: extended dupnames
+First char = 'a'
+Need char = 'd'
+    abcdd
+ 0: abcdd
  1: a
  2: b
- 3: <unset>
- 4: <unset>
- 5: c
- 6: d
- 7: Y
+ 3: c
+ 4: dd
+    ** Failers
+No match
+    abcdde  
+No match
 
-/ End of testinput2 /
+/abcd*/
+    xxxxabcd\P
+ 0: abcd
+    xxxxabcd\P\P
+Partial match: abcd
+
+/abcd*/i
+    xxxxabcd\P
+ 0: abcd
+    xxxxabcd\P\P
+Partial match: abcd
+    XXXXABCD\P
+ 0: ABCD
+    XXXXABCD\P\P
+Partial match: ABCD
+
+/abc\d*/
+    xxxxabc1\P
+ 0: abc1
+    xxxxabc1\P\P
+Partial match: abc1
+
+/(a)bc\1*/
+    xxxxabca\P
+ 0: abca
+ 1: a
+    xxxxabca\P\P
+Partial match: abca
+
+/abc[de]*/
+    xxxxabcde\P
+ 0: abcde
+    xxxxabcde\P\P
+Partial match: abcde
+
+/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
+    and not behaving as specified in that it *does* bumpalong after hitting
+    (*COMMIT). --/ 
+
+/(?1)(A(*COMMIT)|B)D/
+    ABD
+ 0: ABD
+ 1: B
+    XABD
+ 0: ABD
+ 1: B
+    BAD
+ 0: BAD
+ 1: A
+    ABXABD  
+ 0: ABD
+ 1: B
+    ** Failers 
+No match
+    ABX 
+No match
+    BAXBAD  
+No match
+
+/(\3)(\1)(a)/<JS>
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+
+/(\3)(\1)(a)/SI<JS>
+Capturing subpattern count = 3
+Max back reference = 3
+Options:
+No first char
+Need char = 'a'
+Subject length lower bound = 1
+No set of starting bytes
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+
+/(\3)(\1)(a)/SI
+Capturing subpattern count = 3
+Max back reference = 3
+No options
+No first char
+Need char = 'a'
+Subject length lower bound = 3
+No set of starting bytes
+    cat
+No match
+
+/i(?(DEFINE)(?<s>a))/SI
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  s   1
+No options
+First char = 'i'
+No need char
+Subject length lower bound = 1
+No set of starting bytes
+    i
+ 0: i
+    
+/()i(?(1)a)/SI 
+Capturing subpattern count = 1
+No options
+No first char
+Need char = 'i'
+Subject length lower bound = 1
+Starting byte set: i 
+    ia
+ 0: ia
+ 1: 
+
+/(?i)a(?-i)b|c/BZ
+------------------------------------------------------------------
+        Bra
+     NC a
+     00 Opt
+        b
+        Alt
+     00 Opt
+        c
+        Ket
+        End
+------------------------------------------------------------------
+    XabX
+ 0: ab
+    XAbX
+ 0: Ab
+    CcC 
+ 0: c
+    ** Failers
+No match
+    XABX   
+No match
+
+/(?i)a(?s)b|c/BZ
+------------------------------------------------------------------
+        Bra
+     NC a
+     05 Opt
+     NC b
+        Alt
+     05 Opt
+     NC c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?i)a(?s-i)b|c/BZ
+------------------------------------------------------------------
+        Bra
+     NC a
+     04 Opt
+        b
+        Alt
+     04 Opt
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(ab(c\1)d|x){2}$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once
+        CBra 1
+        ab
+        CBra 2
+        c
+        \1
+        Ket
+        d
+        Alt
+        x
+        Ket
+        Ket
+        Once
+        CBra 1
+        ab
+        CBra 2
+        c
+        \1
+        Ket
+        d
+        Alt
+        x
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+    xabcxd
+ 0: xabcxd
+ 1: abcxd
+ 2: cx
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ -- The first four of these are not in the Perl 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+ 0: ab
+ 1: ab
+
+/----------------------/
+
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+Failed: recursive call could loop indefinitely at offset 31
+
+/-- End of testinput2 --/

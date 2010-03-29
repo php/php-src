@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,8 @@ internal form of a compiled regular expression, along with some supporting
 local functions. This source file is used in two places:
 
 (1) It is #included by pcre_compile.c when it is compiled in debugging mode
-(DEBUG defined in pcre_internal.h). It is not included in production compiles.
+(PCRE_DEBUG defined in pcre_internal.h). It is not included in production
+compiles.
 
 (2) It is always #included by pcretest.c, which can be asked to print out a
 compiled regex for debugging purposes. */
@@ -189,6 +190,25 @@ for(;;)
 
   switch(*code)
     {
+/* ========================================================================== */
+      /* These cases are never obeyed. This is a fudge that causes a compile-
+      time error if the vectors OP_names or _pcre_OP_lengths, which are indexed
+      by opcode, are not the correct length. It seems to be the only way to do
+      such a check at compile time, as the sizeof() operator does not work in
+      the C preprocessor. We do this while compiling pcretest, because that
+      #includes pcre_tables.c, which holds _pcre_OP_lengths. We can't do this
+      when building pcre_compile.c with PCRE_DEBUG set, because it doesn't then
+      know the size of _pcre_OP_lengths. */
+
+#ifdef COMPILING_PCRETEST
+      case OP_TABLE_LENGTH:
+      case OP_TABLE_LENGTH +
+        ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
+        (sizeof(_pcre_OP_lengths) == OP_TABLE_LENGTH)):
+      break;
+#endif
+/* ========================================================================== */
+
     case OP_END:
     fprintf(f, "    %s\n", OP_names[*code]);
     fprintf(f, "------------------------------------------------------------------\n");
@@ -246,7 +266,12 @@ for(;;)
     fprintf(f, "%s", OP_names[*code]);
     break;
 
+    case OP_CLOSE:
+    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
+    break;
+
     case OP_CREF:
+    case OP_NCREF:
     fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
     break;
 
@@ -256,6 +281,14 @@ for(;;)
       fprintf(f, "    Cond recurse any");
     else
       fprintf(f, "    Cond recurse %d", c);
+    break;
+
+    case OP_NRREF:
+    c = GET2(code, 1);
+    if (c == RREF_ANY)
+      fprintf(f, "    Cond nrecurse any");
+    else
+      fprintf(f, "    Cond nrecurse %d", c);
     break;
 
     case OP_DEF:

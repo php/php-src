@@ -1,3 +1,7 @@
+/-- This set of tests is for Unicode property support. It is compatible with
+    Perl 5.10, but not 5.8 because it tests some extra properties that are
+    not in the earlier release. --/ 
+
 /^\pC\pL\pM\pN\pP\pS\pZ</8
     \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
  0: \x{7f}\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
@@ -93,14 +97,6 @@ No match
 /^\p{Co}/8
     \x{f8ff}
  0: \x{f8ff}
-    ** Failers
-No match
-    \x{09f} 
-No match
-  
-/^\p{Cs}/8
-    \?\x{dfff}
- 0: \x{dfff}
     ** Failers
 No match
     \x{09f} 
@@ -338,18 +334,6 @@ No match
     \x{f3b}
 No match
   
-/^\p{Sc}+/8
-    $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
- 0: $\x{a2}\x{a3}\x{a4}\x{a5}
-    \x{9f2}
- 0: \x{9f2}
-    ** Failers
-No match
-    X
-No match
-    \x{2c2}
-No match
-  
 /^\p{Sk}/8
     \x{2c2}
  0: \x{2c2}
@@ -400,26 +384,6 @@ No match
     X
 No match
     \x{2028}
-No match
-  
-/^\p{Zs}/8
-    \ \
- 0:  
-    \x{a0}
- 0: \x{a0}
-    \x{1680}
- 0: \x{1680}
-    \x{180e}
- 0: \x{180e}
-    \x{2000}
- 0: \x{2000}
-    \x{2001}     
- 0: \x{2001}
-    ** Failers
-No match
-    \x{2028}
-No match
-    \x{200d} 
 No match
   
 /\p{Nd}+(..)/8
@@ -494,34 +458,6 @@ No match
       \x{660}\x{661}\x{662}ABC
 No match
   
-/\p{Lu}/8i
-    A
- 0: A
-    a\x{10a0}B 
- 0: \x{10a0}
-    ** Failers 
- 0: F
-    a
-No match
-    \x{1d00}  
-No match
-
-/\p{^Lu}/8i
-    1234
- 0: 1
-    ** Failers
- 0: *
-    ABC 
-No match
-
-/\P{Lu}/8i
-    1234
- 0: 1
-    ** Failers
- 0: *
-    ABC 
-No match
-
 /(?<=A\p{Nd})XYZ/8
     A2XYZ
  0: XYZ
@@ -546,103 +482,6 @@ No match
     ** Failers
 No match
     WXYZ 
-No match
-
-/[\p{L}]/DZ
-------------------------------------------------------------------
-        Bra
-        [\p{L}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[\p{^L}]/DZ
-------------------------------------------------------------------
-        Bra
-        [\P{L}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[\P{L}]/DZ
-------------------------------------------------------------------
-        Bra
-        [\P{L}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[\P{^L}]/DZ
-------------------------------------------------------------------
-        Bra
-        [\p{L}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-
-/[abc\p{L}\x{0660}]/8DZ
-------------------------------------------------------------------
-        Bra
-        [a-c\p{L}\x{660}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-No first char
-No need char
-
-/[\p{Nd}]/8DZ
-------------------------------------------------------------------
-        Bra
-        [\p{Nd}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-No first char
-No need char
-    1234
- 0: 1
-
-/[\p{Nd}+-]+/8DZ
-------------------------------------------------------------------
-        Bra
-        [+\-\p{Nd}]+
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Partial matching not supported
-Options: utf8
-No first char
-No need char
-    1234
- 0: 1234
-    12-34
- 0: 12-34
-    12+\x{661}-34  
- 0: 12+\x{661}-34
-    ** Failers
-No match
-    abcd  
 No match
 
 /[\P{Nd}]+/8
@@ -725,28 +564,6 @@ No match
     ABC   
 No match
 
-/\p{Ll}/8i 
-    a
- 0: a
-    Az
- 0: z
-    ** Failers
- 0: a
-    ABC   
-No match
-
-/^\x{c0}$/8i
-    \x{c0}
- 0: \x{c0}
-    \x{e0} 
- 0: \x{e0}
-
-/^\x{e0}$/8i
-    \x{c0}
- 0: \x{c0}
-    \x{e0} 
- 0: \x{e0}
-
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8
     A\x{391}\x{10427}\x{ff3a}\x{1fb0}
  0: A\x{391}\x{10427}\x{ff3a}\x{1fb0}
@@ -777,54 +594,6 @@ No match
     A\x{391}\x{10427}\x{ff3a}\x{1fb8}
  0: A\x{391}\x{10427}\x{ff3a}\x{1fb8}
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iDZ
-------------------------------------------------------------------
-        Bra
-     NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: caseless utf8
-First char = 'A' (caseless)
-No need char
-
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8DZ
-------------------------------------------------------------------
-        Bra
-        A\x{391}\x{10427}\x{ff3a}\x{1fb0}
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 'A'
-Need char = 176
-
-/AB\x{1fb0}/8DZ
-------------------------------------------------------------------
-        Bra
-        AB\x{1fb0}
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 'A'
-Need char = 176
-
-/AB\x{1fb0}/8DZi
-------------------------------------------------------------------
-        Bra
-     NC AB\x{1fb0}
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: caseless utf8
-First char = 'A' (caseless)
-Need char = 'B' (caseless)
-
 /\x{391}+/8i
     \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
  0: \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
@@ -849,98 +618,6 @@ Need char = 'B' (caseless)
     \x{ff5a}   
  0: \x{ff5a}
     
-/[\x{c0}\x{391}]/8i
-    \x{c0}
- 0: \x{c0}
-    \x{e0} 
- 0: \x{e0}
-
-/[\x{105}-\x{109}]/8iDZ
-------------------------------------------------------------------
-        Bra
-        [\x{104}-\x{109}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: caseless utf8
-No first char
-No need char
-    \x{104}
- 0: \x{104}
-    \x{105}
- 0: \x{105}
-    \x{109}  
- 0: \x{109}
-    ** Failers
-No match
-    \x{100}
-No match
-    \x{10a} 
-No match
-    
-/[z-\x{100}]/8iDZ 
-------------------------------------------------------------------
-        Bra
-        [Z\x{39c}\x{178}z-\x{101}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: caseless utf8
-No first char
-No need char
-    Z
- 0: Z
-    z
- 0: z
-    \x{39c}
- 0: \x{39c}
-    \x{178}
- 0: \x{178}
-    |
- 0: |
-    \x{80}
- 0: \x{80}
-    \x{ff}
- 0: \x{ff}
-    \x{100}
- 0: \x{100}
-    \x{101} 
- 0: \x{101}
-    ** Failers
-No match
-    \x{102}
-No match
-    Y
-No match
-    y           
-No match
-
-/[z-\x{100}]/8DZi
-------------------------------------------------------------------
-        Bra
-        [Z\x{39c}\x{178}z-\x{101}]
-        Ket
-        End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: caseless utf8
-No first char
-No need char
-
-/^\X/8
-    A
- 0: A
-    A\x{300}BC 
- 0: A\x{300}
-    A\x{300}\x{301}\x{302}BC 
- 0: A\x{300}\x{301}\x{302}
-    *** Failers
- 0: *
-    \x{300}  
-No match
-
 /^[\X]/8
     X123
  0: X
@@ -1408,41 +1085,9 @@ No match
  1: L=abc
  2: abc
 
-/The next two should be Perl-compatible, but it fails to match \x{e0}. PCRE
-will match it only with UCP support, because without that it has no notion
-of case for anything other than the ASCII letters. / 
-
-/((?i)[\x{c0}])/8
-    \x{c0}
- 0: \x{c0}
- 1: \x{c0}
-    \x{e0} 
- 0: \x{e0}
- 1: \x{e0}
-
-/(?i:[\x{c0}])/8
-    \x{c0}
- 0: \x{c0}
-    \x{e0} 
- 0: \x{e0}
-    
 /^\p{Balinese}\p{Cuneiform}\p{Nko}\p{Phags_Pa}\p{Phoenician}/8
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
  0: \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
-
-/The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap frame storage; the 2nd
-was broken in all cases./
-
-/^\x{023a}+?(\x{0130}+)/8i
-  \x{023a}\x{2c65}\x{0130}
- 0: \x{23a}\x{2c65}\x{130}
- 1: \x{130}
-  
-/^\x{023a}+([^X])/8i
-  \x{023a}\x{2c65}X
- 0: \x{23a}\x{2c65}
- 1: \x{2c65}
 
 /Check property support in non-UTF-8 mode/
  
@@ -1467,60 +1112,6 @@ No match
 /[\PPP\x8a]{1,}\x80/
     A\x80
  0: A\x80
-
-/(?:[\PPa*]*){8,}/
-
-/[\P{Any}]/BZ
-------------------------------------------------------------------
-        Bra
-        [\P{Any}]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\P{Any}\E]/BZ
-------------------------------------------------------------------
-        Bra
-        [\P{Any}]
-        Ket
-        End
-------------------------------------------------------------------
-
-/(\P{Yi}+\277)/
-
-/(\P{Yi}+\277)?/
-
-/(?<=\P{Yi}{3}A)X/
-
-/\p{Yi}+(\P{Yi}+)(?1)/
-
-/(\P{Yi}{2}\277)?/
-
-/[\P{Yi}A]/
-
-/[\P{Yi}\P{Yi}\P{Yi}A]/
-
-/[^\P{Yi}A]/
-
-/[^\P{Yi}\P{Yi}\P{Yi}A]/
-
-/(\P{Yi}*\277)*/
-
-/(\P{Yi}*?\277)*/
-
-/(\p{Yi}*+\277)*/
-
-/(\P{Yi}?\277)*/
-
-/(\P{Yi}??\277)*/
-
-/(\p{Yi}?+\277)*/
-
-/(\P{Yi}{0,3}\277)*/
-
-/(\P{Yi}{0,3}?\277)*/
-
-/(\p{Yi}{0,3}+\277)*/
 
 /^[\p{Arabic}]/8
     \x{60e} 
@@ -1634,59 +1225,6 @@ No match
     \x{104aa}           
 No match
 
-/\p{Zl}{2,3}+/8BZ
-------------------------------------------------------------------
-        Bra
-        prop Zl {2}
-        prop Zl ?+
-        Ket
-        End
-------------------------------------------------------------------
-    \xe2\x80\xa8\xe2\x80\xa8
- 0: \x{2028}\x{2028}
-    \x{2028}\x{2028}\x{2028}
- 0: \x{2028}\x{2028}\x{2028}
-    
-/\p{Zl}/8BZ
-------------------------------------------------------------------
-        Bra
-        prop Zl
-        Ket
-        End
-------------------------------------------------------------------
-
-/\p{Lu}{3}+/8BZ
-------------------------------------------------------------------
-        Bra
-        prop Lu {3}
-        Ket
-        End
-------------------------------------------------------------------
-
-/\pL{2}+/8BZ
-------------------------------------------------------------------
-        Bra
-        prop L {2}
-        Ket
-        End
-------------------------------------------------------------------
-
-/\p{Cc}{2}+/8BZ
-------------------------------------------------------------------
-        Bra
-        prop Cc {2}
-        Ket
-        End
-------------------------------------------------------------------
-
-/\x{c0}+\x{116}+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
- 0: \x{c0}\x{e0}\x{116}\x{117}
-
-/[\x{c0}\x{116}]+/8i
-    \x{c0}\x{e0}\x{116}\x{117}
- 0: \x{c0}\x{e0}\x{116}\x{117}
-
 /\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
     \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
  0: \x{102a4}\x{aa52}\x{a91d}\x{1c46}\x{10283}\x{1092e}\x{1c6b}\x{a93b}\x{a8bf}\x{1ba0}\x{a50a}
@@ -1719,20 +1257,6 @@ No match
  0: aA
  1: a
 
-/(\x{de})\1/8i
-    \x{de}\x{de}
- 0: \x{de}\x{de}
- 1: \x{de}
-    \x{de}\x{fe}
- 0: \x{de}\x{fe}
- 1: \x{de}
-    \x{fe}\x{fe}
- 0: \x{fe}\x{fe}
- 1: \x{fe}
-    \x{fe}\x{de}
- 0: \x{fe}\x{de}
- 1: \x{fe}
-
 /(\x{10a})\1/8i
     \x{10a}\x{10a}
  0: \x{10a}\x{10a}
@@ -1757,4 +1281,8 @@ No match
     \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
  0: A P\xc2T\xc9 TODAY
 
-/ End of testinput6 /
+/\p{Avestan}\p{Bamum}\p{Egyptian_Hieroglyphs}\p{Imperial_Aramaic}\p{Inscriptional_Pahlavi}\p{Inscriptional_Parthian}\p{Javanese}\p{Kaithi}\p{Lisu}\p{Meetei_Mayek}\p{Old_South_Arabian}\p{Old_Turkic}\p{Samaritan}\p{Tai_Tham}\p{Tai_Viet}/8
+    \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{0800}\x{1aad}\x{aac0}
+ 0: \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{800}\x{1aad}\x{aac0}
+
+/-- End of testinput6 --/

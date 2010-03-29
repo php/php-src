@@ -1,6 +1,34 @@
 News about PCRE releases
 ------------------------
 
+Release 8.02 19-Mar-2010
+------------------------
+
+Another bug-fix release.
+
+
+Release 8.01 19-Jan-2010
+------------------------
+
+This is a bug-fix release. Several bugs in the code itself and some bugs and
+infelicities in the build system have been fixed.
+
+
+Release 8.00 19-Oct-09
+----------------------
+
+Bugs have been fixed in the library and in pcregrep. There are also some
+enhancements. Restrictions on patterns used for partial matching have been
+removed, extra information is given for partial matches, the partial matching
+process has been improved, and an option to make a partial match override a
+full match is available. The "study" process has been enhanced by finding a
+lower bound matching length. Groups with duplicate numbers may now have
+duplicated names without the use of PCRE_DUPNAMES. However, they may not have
+different names. The documentation has been revised to reflect these changes.
+The version number has been expanded to 3 digits as it is clear that the rate
+of change is not slowing down.
+
+
 Release 7.9 11-Apr-09
 ---------------------
 

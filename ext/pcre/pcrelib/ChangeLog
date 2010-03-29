@@ -1,6 +1,363 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.02 19-Mar-2010
+------------------------
+
+1.  The Unicode data tables have been updated to Unicode 5.2.0.
+
+2.  Added the option --libs-cpp to pcre-config, but only when C++ support is
+    configured.
+
+3.  Updated the licensing terms in the pcregexp.pas file, as agreed with the
+    original author of that file, following a query about its status.
+
+4.  On systems that do not have stdint.h (e.g. Solaris), check for and include
+    inttypes.h instead. This fixes a bug that was introduced by change 8.01/8.
+
+5.  A pattern such as (?&t)*+(?(DEFINE)(?<t>.)) which has a possessive
+    quantifier applied to a forward-referencing subroutine call, could compile
+    incorrect code or give the error "internal error: previously-checked
+    referenced subpattern not found".
+
+6.  Both MS Visual Studio and Symbian OS have problems with initializing
+    variables to point to external functions. For these systems, therefore,
+    pcre_malloc etc. are now initialized to local functions that call the
+    relevant global functions.
+
+7.  There were two entries missing in the vectors called coptable and poptable
+    in pcre_dfa_exec.c. This could lead to memory accesses outsize the vectors.
+    I've fixed the data, and added a kludgy way of testing at compile time that
+    the lengths are correct (equal to the number of opcodes).
+
+8.  Following on from 7, I added a similar kludge to check the length of the
+    eint vector in pcreposix.c.
+
+9.  Error texts for pcre_compile() are held as one long string to avoid too
+    much relocation at load time. To find a text, the string is searched,
+    counting zeros. There was no check for running off the end of the string,
+    which could happen if a new error number was added without updating the
+    string.
+
+10. \K gave a compile-time error if it appeared in a lookbehind assersion.
+
+11. \K was not working if it appeared in an atomic group or in a group that
+    was called as a "subroutine", or in an assertion. Perl 5.11 documents that
+    \K is "not well defined" if used in an assertion. PCRE now accepts it if
+    the assertion is positive, but not if it is negative.
+
+12. Change 11 fortuitously reduced the size of the stack frame used in the
+    "match()" function of pcre_exec.c by one pointer. Forthcoming
+    implementation of support for (*MARK) will need an extra pointer on the
+    stack; I have reserved it now, so that the stack frame size does not
+    decrease.
+
+13. A pattern such as (?P<L1>(?P<L2>0)|(?P>L2)(?P>L1)) in which the only other
+    item in branch that calls a recursion is a subroutine call - as in the
+    second branch in the above example - was incorrectly given the compile-
+    time error "recursive call could loop indefinitely" because pcre_compile()
+    was not correctly checking the subroutine for matching a non-empty string.
+
+14. The checks for overrunning compiling workspace could trigger after an
+    overrun had occurred. This is a "should never occur" error, but it can be
+    triggered by pathological patterns such as hundreds of nested parentheses.
+    The checks now trigger 100 bytes before the end of the workspace.
+
+15. Fix typo in configure.ac: "srtoq" should be "strtoq".
+
+
+Version 8.01 19-Jan-2010
+------------------------
+
+1.  If a pattern contained a conditional subpattern with only one branch (in
+    particular, this includes all (*DEFINE) patterns), a call to pcre_study()
+    computed the wrong minimum data length (which is of course zero for such
+    subpatterns). This could cause incorrect "no match" results.
+
+2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of
+    the pattern is reset in the first branch, pcre_compile() failed with
+    "internal error: code overflow at offset...". This happened only when
+    the reset was to the original external option setting. (An optimization
+    abstracts leading options settings into an external setting, which was the
+    cause of this.)
+
+3.  A pattern such as ^(?!a(*SKIP)b) where a negative assertion contained one
+    of the verbs SKIP, PRUNE, or COMMIT, did not work correctly. When the
+    assertion pattern did not match (meaning that the assertion was true), it
+    was incorrectly treated as false if the SKIP had been reached during the
+    matching. This also applied to assertions used as conditions.
+
+4.  If an item that is not supported by pcre_dfa_exec() was encountered in an
+    assertion subpattern, including such a pattern used as a condition,
+    unpredictable results occurred, instead of the error return
+    PCRE_ERROR_DFA_UITEM.
+
+5.  The C++ GlobalReplace function was not working like Perl for the special
+    situation when an empty string is matched. It now does the fancy magic
+    stuff that is necessary.
+
+6.  In pcre_internal.h, obsolete includes to setjmp.h and stdarg.h have been
+    removed. (These were left over from very, very early versions of PCRE.)
+
+7.  Some cosmetic changes to the code to make life easier when compiling it
+    as part of something else:
+
+    (a) Change DEBUG to PCRE_DEBUG.
+
+    (b) In pcre_compile(), rename the member of the "branch_chain" structure
+        called "current" as "current_branch", to prevent a collision with the
+        Linux macro when compiled as a kernel module.
+
+    (c) In pcre_study(), rename the function set_bit() as set_table_bit(), to
+        prevent a collision with the Linux macro when compiled as a kernel
+        module.
+
+8.  In pcre_compile() there are some checks for integer overflows that used to
+    cast potentially large values to (double). This has been changed to that
+    when building, a check for int64_t is made, and if it is found, it is used
+    instead, thus avoiding the use of floating point arithmetic. (There is no
+    other use of FP in PCRE.) If int64_t is not found, the fallback is to
+    double.
+
+9.  Added two casts to avoid signed/unsigned warnings from VS Studio Express
+    2005 (difference between two addresses compared to an unsigned value).
+
+10. Change the standard AC_CHECK_LIB test for libbz2 in configure.ac to a
+    custom one, because of the following reported problem in Windows:
+
+      - libbz2 uses the Pascal calling convention (WINAPI) for the functions
+          under Win32.
+      - The standard autoconf AC_CHECK_LIB fails to include "bzlib.h",
+          therefore missing the function definition.
+      - The compiler thus generates a "C" signature for the test function.
+      - The linker fails to find the "C" function.
+      - PCRE fails to configure if asked to do so against libbz2.
+
+11. When running libtoolize from libtool-2.2.6b as part of autogen.sh, these
+    messages were output:
+
+      Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
+      rerunning libtoolize, to keep the correct libtool macros in-tree.
+      Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
+
+    I have done both of these things.
+
+12. Although pcre_dfa_exec() does not use nearly as much stack as pcre_exec()
+    most of the time, it *can* run out if it is given a pattern that contains a
+    runaway infinite recursion. I updated the discussion in the pcrestack man
+    page.
+
+13. Now that we have gone to the x.xx style of version numbers, the minor
+    version may start with zero. Using 08 or 09 is a bad idea because users
+    might check the value of PCRE_MINOR in their code, and 08 or 09 may be
+    interpreted as invalid octal numbers. I've updated the previous comment in
+    configure.ac, and also added a check that gives an error if 08 or 09 are
+    used.
+
+14. Change 8.00/11 was not quite complete: code had been accidentally omitted,
+    causing partial matching to fail when the end of the subject matched \W
+    in a UTF-8 pattern where \W was quantified with a minimum of 3.
+
+15. There were some discrepancies between the declarations in pcre_internal.h
+    of _pcre_is_newline(), _pcre_was_newline(), and _pcre_valid_utf8() and
+    their definitions. The declarations used "const uschar *" and the
+    definitions used USPTR. Even though USPTR is normally defined as "const
+    unsigned char *" (and uschar is typedeffed as "unsigned char"), it was
+    reported that: "This difference in casting confuses some C++ compilers, for
+    example, SunCC recognizes above declarations as different functions and
+    generates broken code for hbpcre." I have changed the declarations to use
+    USPTR.
+
+16. GNU libtool is named differently on some systems. The autogen.sh script now
+    tries several variants such as glibtoolize (MacOSX) and libtoolize1x
+    (FreeBSD).
+
+17. Applied Craig's patch that fixes an HP aCC compile error in pcre 8.00
+    (strtoXX undefined when compiling pcrecpp.cc). The patch contains this
+    comment: "Figure out how to create a longlong from a string: strtoll and
+    equivalent. It's not enough to call AC_CHECK_FUNCS: hpux has a strtoll, for
+    instance, but it only takes 2 args instead of 3!"
+
+18. A subtle bug concerned with back references has been fixed by a change of
+    specification, with a corresponding code fix. A pattern such as
+    ^(xa|=?\1a)+$ which contains a back reference inside the group to which it
+    refers, was giving matches when it shouldn't. For example, xa=xaaa would
+    match that pattern. Interestingly, Perl (at least up to 5.11.3) has the
+    same bug. Such groups have to be quantified to be useful, or contained
+    inside another quantified group. (If there's no repetition, the reference
+    can never match.) The problem arises because, having left the group and
+    moved on to the rest of the pattern, a later failure that backtracks into
+    the group uses the captured value from the final iteration of the group
+    rather than the correct earlier one. I have fixed this in PCRE by forcing
+    any group that contains a reference to itself to be an atomic group; that
+    is, there cannot be any backtracking into it once it has completed. This is
+    similar to recursive and subroutine calls.
+
+
+Version 8.00 19-Oct-09
+----------------------
+
+1.  The table for translating pcre_compile() error codes into POSIX error codes
+    was out-of-date, and there was no check on the pcre_compile() error code
+    being within the table. This could lead to an OK return being given in
+    error.
+
+2.  Changed the call to open a subject file in pcregrep from fopen(pathname,
+    "r") to fopen(pathname, "rb"), which fixed a problem with some of the tests
+    in a Windows environment.
+
+3.  The pcregrep --count option prints the count for each file even when it is
+    zero, as does GNU grep. However, pcregrep was also printing all files when
+    --files-with-matches was added. Now, when both options are given, it prints
+    counts only for those files that have at least one match. (GNU grep just
+    prints the file name in this circumstance, but including the count seems
+    more useful - otherwise, why use --count?) Also ensured that the
+    combination -clh just lists non-zero counts, with no names.
+
+4.  The long form of the pcregrep -F option was incorrectly implemented as
+    --fixed_strings instead of --fixed-strings. This is an incompatible change,
+    but it seems right to fix it, and I didn't think it was worth preserving
+    the old behaviour.
+
+5.  The command line items --regex=pattern and --regexp=pattern were not
+    recognized by pcregrep, which required --regex pattern or --regexp pattern
+    (with a space rather than an '='). The man page documented the '=' forms,
+    which are compatible with GNU grep; these now work.
+
+6.  No libpcreposix.pc file was created for pkg-config; there was just
+    libpcre.pc and libpcrecpp.pc. The omission has been rectified.
+
+7.  Added #ifndef SUPPORT_UCP into the pcre_ucd.c module, to reduce its size
+    when UCP support is not needed, by modifying the Python script that
+    generates it from Unicode data files. This should not matter if the module
+    is correctly used as a library, but I received one complaint about 50K of
+    unwanted data. My guess is that the person linked everything into his
+    program rather than using a library. Anyway, it does no harm.
+
+8.  A pattern such as /\x{123}{2,2}+/8 was incorrectly compiled; the trigger
+    was a minimum greater than 1 for a wide character in a possessive
+    repetition. The same bug could also affect patterns like /(\x{ff}{0,2})*/8
+    which had an unlimited repeat of a nested, fixed maximum repeat of a wide
+    character. Chaos in the form of incorrect output or a compiling loop could
+    result.
+
+9.  The restrictions on what a pattern can contain when partial matching is
+    requested for pcre_exec() have been removed. All patterns can now be
+    partially matched by this function. In addition, if there are at least two
+    slots in the offset vector, the offset of the earliest inspected character
+    for the match and the offset of the end of the subject are set in them when
+    PCRE_ERROR_PARTIAL is returned.
+
+10. Partial matching has been split into two forms: PCRE_PARTIAL_SOFT, which is
+    synonymous with PCRE_PARTIAL, for backwards compatibility, and
+    PCRE_PARTIAL_HARD, which causes a partial match to supersede a full match,
+    and may be more useful for multi-segment matching.
+
+11. Partial matching with pcre_exec() is now more intuitive. A partial match
+    used to be given if ever the end of the subject was reached; now it is
+    given only if matching could not proceed because another character was
+    needed. This makes a difference in some odd cases such as Z(*FAIL) with the
+    string "Z", which now yields "no match" instead of "partial match". In the
+    case of pcre_dfa_exec(), "no match" is given if every matching path for the
+    final character ended with (*FAIL).
+
+12. Restarting a match using pcre_dfa_exec() after a partial match did not work
+    if the pattern had a "must contain" character that was already found in the
+    earlier partial match, unless partial matching was again requested. For
+    example, with the pattern /dog.(body)?/, the "must contain" character is
+    "g". If the first part-match was for the string "dog", restarting with
+    "sbody" failed. This bug has been fixed.
+
+13. The string returned by pcre_dfa_exec() after a partial match has been
+    changed so that it starts at the first inspected character rather than the
+    first character of the match. This makes a difference only if the pattern
+    starts with a lookbehind assertion or \b or \B (\K is not supported by
+    pcre_dfa_exec()). It's an incompatible change, but it makes the two
+    matching functions compatible, and I think it's the right thing to do.
+
+14. Added a pcredemo man page, created automatically from the pcredemo.c file,
+    so that the demonstration program is easily available in environments where
+    PCRE has not been installed from source.
+
+15. Arranged to add -DPCRE_STATIC to cflags in libpcre.pc, libpcreposix.cp,
+    libpcrecpp.pc and pcre-config when PCRE is not compiled as a shared
+    library.
+
+16. Added REG_UNGREEDY to the pcreposix interface, at the request of a user.
+    It maps to PCRE_UNGREEDY. It is not, of course, POSIX-compatible, but it
+    is not the first non-POSIX option to be added. Clearly some people find
+    these options useful.
+
+17. If a caller to the POSIX matching function regexec() passes a non-zero
+    value for nmatch with a NULL value for pmatch, the value of
+    nmatch is forced to zero.
+
+18. RunGrepTest did not have a test for the availability of the -u option of
+    the diff command, as RunTest does. It now checks in the same way as
+    RunTest, and also checks for the -b option.
+
+19. If an odd number of negated classes containing just a single character
+    interposed, within parentheses, between a forward reference to a named
+    subpattern and the definition of the subpattern, compilation crashed with
+    an internal error, complaining that it could not find the referenced
+    subpattern. An example of a crashing pattern is /(?&A)(([^m])(?<A>))/.
+    [The bug was that it was starting one character too far in when skipping
+    over the character class, thus treating the ] as data rather than
+    terminating the class. This meant it could skip too much.]
+
+20. Added PCRE_NOTEMPTY_ATSTART in order to be able to correctly implement the
+    /g option in pcretest when the pattern contains \K, which makes it possible
+    to have an empty string match not at the start, even when the pattern is
+    anchored. Updated pcretest and pcredemo to use this option.
+
+21. If the maximum number of capturing subpatterns in a recursion was greater
+    than the maximum at the outer level, the higher number was returned, but
+    with unset values at the outer level. The correct (outer level) value is
+    now given.
+
+22. If (*ACCEPT) appeared inside capturing parentheses, previous releases of
+    PCRE did not set those parentheses (unlike Perl). I have now found a way to
+    make it do so. The string so far is captured, making this feature
+    compatible with Perl.
+
+23. The tests have been re-organized, adding tests 11 and 12, to make it
+    possible to check the Perl 5.10 features against Perl 5.10.
+
+24. Perl 5.10 allows subroutine calls in lookbehinds, as long as the subroutine
+    pattern matches a fixed length string. PCRE did not allow this; now it
+    does. Neither allows recursion.
+
+25. I finally figured out how to implement a request to provide the minimum
+    length of subject string that was needed in order to match a given pattern.
+    (It was back references and recursion that I had previously got hung up
+    on.) This code has now been added to pcre_study(); it finds a lower bound
+    to the length of subject needed. It is not necessarily the greatest lower
+    bound, but using it to avoid searching strings that are too short does give
+    some useful speed-ups. The value is available to calling programs via
+    pcre_fullinfo().
+
+26. While implementing 25, I discovered to my embarrassment that pcretest had
+    not been passing the result of pcre_study() to pcre_dfa_exec(), so the
+    study optimizations had never been tested with that matching function.
+    Oops. What is worse, even when it was passed study data, there was a bug in
+    pcre_dfa_exec() that meant it never actually used it. Double oops. There
+    were also very few tests of studied patterns with pcre_dfa_exec().
+
+27. If (?| is used to create subpatterns with duplicate numbers, they are now
+    allowed to have the same name, even if PCRE_DUPNAMES is not set. However,
+    on the other side of the coin, they are no longer allowed to have different
+    names, because these cannot be distinguished in PCRE, and this has caused
+    confusion. (This is a difference from Perl.)
+
+28. When duplicate subpattern names are present (necessarily with different
+    numbers, as required by 27 above), and a test is made by name in a
+    conditional pattern, either for a subpattern having been matched, or for
+    recursion in such a pattern, all the associated numbered subpatterns are
+    tested, and the overall condition is true if the condition is true for any
+    one of them. This is the way Perl works, and is also more like the way
+    testing by number works.
+
+
 Version 7.9 11-Apr-09
 ---------------------
 
