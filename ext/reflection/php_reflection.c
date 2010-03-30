@@ -5037,7 +5037,7 @@ ZEND_METHOD(reflection_extension, info)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionExtension::isPersistent()
+/* {{{ proto public bool ReflectionExtension::isPersistent()
        Returns whether this extension is persistent */
 ZEND_METHOD(reflection_extension, isPersistent)
 {
@@ -5053,7 +5053,7 @@ ZEND_METHOD(reflection_extension, isPersistent)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionExtension::isTemporary()
+/* {{{ proto public bool ReflectionExtension::isTemporary()
        Returns whether this extension is temporary */
 ZEND_METHOD(reflection_extension, isTemporary)
 {
