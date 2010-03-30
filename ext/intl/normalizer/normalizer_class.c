@@ -41,7 +41,7 @@ ZEND_END_ARG_INFO()
  * Every 'Normalizer' class method has an entry in this table
  */
 
-function_entry Normalizer_class_functions[] = {
+zend_function_entry Normalizer_class_functions[] = {
 	ZEND_FENTRY( normalize, ZEND_FN( normalizer_normalize ), normalizer_3_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_FENTRY( isNormalized, ZEND_FN( normalizer_is_normalized ), normalizer_3_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	{ NULL, NULL, NULL }

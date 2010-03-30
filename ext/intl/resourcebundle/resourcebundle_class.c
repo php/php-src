@@ -387,7 +387,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 /* {{{ ResourceBundle_class_functions
  * Every 'ResourceBundle' class method has an entry in this table
  */
-static function_entry ResourceBundle_class_functions[] = {
+static zend_function_entry ResourceBundle_class_functions[] = {
 	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )

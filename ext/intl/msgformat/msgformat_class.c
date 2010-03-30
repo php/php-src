@@ -107,7 +107,7 @@ ZEND_END_ARG_INFO()
 /* {{{ MessageFormatter_class_functions
  * Every 'MessageFormatter' class method has an entry in this table
  */
-static function_entry MessageFormatter_class_functions[] = {
+static zend_function_entry MessageFormatter_class_functions[] = {
 	PHP_ME( MessageFormatter, __construct, arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY(  create, ZEND_FN( msgfmt_create ), arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( msgfmt_format ), arginfo_messageformatter_format )
