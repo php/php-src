@@ -5044,7 +5044,7 @@ ZEND_METHOD(reflection_extension, isTemporary)
 
 	RETURN_BOOL(module->type == MODULE_TEMPORARY);
 }
-
+/* }}} */
 
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
