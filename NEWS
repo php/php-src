@@ -7,6 +7,9 @@ PHP                                                                        NEWS
 - Added Tokyo Cabinet abstract DB support to ext/dba. (Michael Maclean)
 - Added Jenkins's one-at-a-time hash support to ext/hash. (Martin Jansen)
 - Added FNV-1 hash support to ext/hash. (Michael Maclean)
+- Added ReflectionExtension::isTemporary() and
+  ReflectionExtension::isPersistent(). (Johannes)
+
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 	
 ?? ??? 20??, PHP 5.3.3

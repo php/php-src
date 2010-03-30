@@ -5014,6 +5014,38 @@ ZEND_METHOD(reflection_extension, info)
 }
 /* }}} */
 
+/* {{{ proto public void ReflectionExtension::isPersistent()
+       Returns whether this extension is persistent */
+ZEND_METHOD(reflection_extension, isPersistent)
+{
+	reflection_object *intern;
+    zend_module_entry *module;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(module);
+
+	RETURN_BOOL(module->type == MODULE_PERSISTENT);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionExtension::isTemporary()
+       Returns whether this extension is temporary */
+ZEND_METHOD(reflection_extension, isTemporary)
+{
+	reflection_object *intern;
+	zend_module_entry *module;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(module);
+
+	RETURN_BOOL(module->type == MODULE_TEMPORARY);
+}
+
+
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
@@ -5376,6 +5408,8 @@ static const zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, getClassNames, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_extension, getDependencies, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_extension, info, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_extension, isPersistent, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_extension, isTemporary, arginfo_reflection__void, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
