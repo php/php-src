@@ -167,7 +167,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-function_entry finfo_class_functions[] = {
+zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -201,7 +201,7 @@ void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-function_entry fileinfo_functions[] = {
+zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)

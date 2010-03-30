@@ -137,7 +137,7 @@ ZEND_END_ARG_INFO()
 /* {{{ NumberFormatter_class_functions
  * Every 'NumberFormatter' class method has an entry in this table
  */
-static function_entry NumberFormatter_class_functions[] = {
+static zend_function_entry NumberFormatter_class_functions[] = {
 	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )

@@ -65,7 +65,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ json_functions[] */
-static const function_entry json_functions[] = {
+static const zend_function_entry json_functions[] = {
 	PHP_FE(json_encode, arginfo_json_encode)
 	PHP_FE(json_decode, arginfo_json_decode)
 	PHP_FE(json_last_error, arginfo_json_last_error)
