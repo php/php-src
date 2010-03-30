@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
+- Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
 - Added Tokyo Cabinet abstract DB support to ext/dba. (Michael Maclean)
