@@ -39,6 +39,7 @@
 #include "zend_ini.h"
 #include "zend_interfaces.h"
 #include "zend_closures.h"
+#include "zend_extensions.h"
 
 /* Undefine "getParameters" macro defined in "main/php3_compat.h" */
 #ifdef getParameters
@@ -57,6 +58,7 @@ PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
 PHPAPI zend_class_entry *reflection_property_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
+PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
 #if MBO_0
 ZEND_BEGIN_MODULE_GLOBALS(reflection)
@@ -330,6 +332,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
+static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC);
 
 /* {{{ _class_string */
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC)
@@ -1111,6 +1114,26 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
+
+static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC)
+{
+	string_printf(str, "%sZend Extension [ %s ", indent, extension->name);
+
+	if (extension->version) {
+		string_printf(str, "%s ", extension->version);
+	}
+	if (extension->copyright) {
+		string_printf(str, "%s ", extension->copyright);
+	}
+	if (extension->author) {
+		string_printf(str, "by %s ", extension->author);
+	}
+	if (extension->URL) {
+		string_printf(str, "<%s> ", extension->URL);
+	}
+
+	string_printf(str, "]\n");
+}
 
 /* {{{ _function_check_flag */
 static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
@@ -5046,6 +5069,148 @@ ZEND_METHOD(reflection_extension, isTemporary)
 }
 /* }}} */
 
+/* {{{ proto public static mixed ReflectionZendExtension::export(string name [, bool return]) throws ReflectionException
+ *    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
+ZEND_METHOD(reflection_zend_extension, export)
+{
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_zend_extension_ptr, 1);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionZendExtension::__construct(string name)
+       Constructor. Throws an Exception in case the given Zend extension does not exist */
+ZEND_METHOD(reflection_zend_extension, __construct)
+{
+	zval *name;
+	zval *object;
+	reflection_object *intern;
+	zend_extension *extension;
+	char *name_str;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+		return;
+	}
+
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL) {
+		return;
+	}
+
+	extension = zend_get_extension(name_str);
+	if (!extension) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Zend Extension %s does not exist", name_str);
+		return;
+	}
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, extension->name, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+	intern->ptr = extension;
+	intern->ref_type = REF_TYPE_OTHER;
+	intern->ce = NULL;
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionZendExtension::__toString()
+       Returns a string representation */
+ZEND_METHOD(reflection_zend_extension, __toString)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+	string str;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+	string_init(&str);
+	_zend_extension_string(&str, extension, "" TSRMLS_CC);
+	RETURN_STRINGL(str.string, str.len - 1, 0);
+}       
+/* }}} */
+
+/* {{{ proto public string ReflectionZendExtension::getName()
+       Returns the name of this Zend extension */
+ZEND_METHOD(reflection_zend_extension, getName)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+
+	RETURN_STRING(extension->name, 1);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionZendExtension::getVersion()
+       Returns the version information of this Zend extension */
+ZEND_METHOD(reflection_zend_extension, getVersion)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+
+	RETURN_STRING(extension->version ? extension->version : "", 1);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionZendExtension::getAuthor()
+ * Returns the name of this Zend extension's author */
+ZEND_METHOD(reflection_zend_extension, getAuthor)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+
+	RETURN_STRING(extension->author ? extension->author : "", 1);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionZendExtension::getURL()
+       Returns this Zend extension's URL*/
+ZEND_METHOD(reflection_zend_extension, getURL)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+
+	RETURN_STRING(extension->URL ? extension->URL : "", 1);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionZendExtension::getCopyright()
+       Returns this Zend extension's copyright information */
+ZEND_METHOD(reflection_zend_extension, getCopyright)
+{
+	reflection_object *intern;
+	zend_extension *extension;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(extension);
+
+	RETURN_STRING(extension->copyright ? extension->copyright : "", 1);
+}
+/* }}} */
+
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
@@ -5412,6 +5577,23 @@ static const zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, isTemporary, arginfo_reflection__void, 0)
 	{NULL, NULL, NULL}
 };
+
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_zend_extension___construct, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry reflection_zend_extension_functions[] = {
+	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_extension___construct, 0)
+	ZEND_ME(reflection_zend_extension, __toString, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_zend_extension, getName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_zend_extension, getVersion, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_zend_extension, getAuthor, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_zend_extension, getURL, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_zend_extension, getCopyright, arginfo_reflection__void, 0)
+	{NULL, NULL, NULL}
+};
 /* }}} */
 
 const zend_function_entry reflection_ext_functions[] = { /* {{{ */
@@ -5519,6 +5701,12 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_extension_ptr, reflector_ptr TSRMLS_CC);
 	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionZendExtension", reflection_zend_extension_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	reflection_register_implement(reflection_zend_extension_ptr, reflector_ptr TSRMLS_CC);
+	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

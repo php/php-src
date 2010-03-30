@@ -117,7 +117,8 @@ PHPAPI extern char *php_ini_scanned_files;
 #define PHP_MODE_REFLECTION_CLASS       9
 #define PHP_MODE_REFLECTION_EXTENSION   10
 #define PHP_MODE_REFLECTION_EXT_INFO    11
-#define PHP_MODE_SHOW_INI_CONFIG        12
+#define PHP_MODE_REFLECTION_ZEND_EXTENSION 12
+#define PHP_MODE_SHOW_INI_CONFIG        13
 
 const char HARDCODED_INI[] =
 	"html_errors=0\n"
@@ -165,10 +166,12 @@ static const opt_struct OPTIONS[] = {
 	{11,  1, "rclass"},
 	{12,  1, "re"},
 	{12,  1, "rextension"},
+	{13,  1, "rz"},
+	{13,  1, "rzendextension"},
 #endif
-	{13,  1, "ri"},
-	{13,  1, "rextinfo"},
-	{14,  0, "ini"},
+	{14,  1, "ri"},
+	{14,  1, "rextinfo"},
+	{15,  0, "ini"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -522,6 +525,7 @@ static void php_cli_usage(char *argv0)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
+				"  --rz <name>      Show information about Zend extension <name>.\n"
 #endif
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
@@ -1018,12 +1022,16 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
-#endif
 			case 13:
+				behavior=PHP_MODE_REFLECTION_ZEND_EXTENSION;
+				reflection_what = php_optarg;
+				break;
+#endif
+			case 14:
 				behavior=PHP_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
-			case 14:
+			case 15:
 				behavior = PHP_MODE_SHOW_INI_CONFIG;
 				break;
 			default:
@@ -1288,6 +1296,7 @@ int main(int argc, char *argv[])
 			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
+			case PHP_MODE_REFLECTION_ZEND_EXTENSION:
 				{
 					zend_class_entry *pce = NULL;
 					zval *arg, *ref;
@@ -1308,6 +1317,9 @@ int main(int argc, char *argv[])
 							break;
 						case PHP_MODE_REFLECTION_EXTENSION:
 							pce = reflection_extension_ptr;
+							break;
+						case PHP_MODE_REFLECTION_ZEND_EXTENSION:
+							pce = reflection_zend_extension_ptr;
 							break;
 					}
 					

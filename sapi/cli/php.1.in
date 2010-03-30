@@ -295,6 +295,16 @@ Shows information about extension
 .B name
 .TP
 .PD 0
+.B \-\-rzendextension
+.IR name
+.TP
+.PD 1
+.B \-\-rz
+.IR name
+Shows information about Zend extension
+.B name
+.TP
+.PD 0
 .B \-\-rextinfo
 .IR name
 .TP
