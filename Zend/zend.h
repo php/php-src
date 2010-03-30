@@ -200,9 +200,9 @@ char *alloca ();
 #endif
 
 #if ZEND_DEBUG
-#define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
+#define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
 #define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-#define ZEND_FILE_LINE_ORIG_D			char *__zend_orig_filename, uint __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 #define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 #define ZEND_FILE_LINE_RELAY_CC			, ZEND_FILE_LINE_RELAY_C
