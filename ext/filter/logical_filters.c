@@ -465,6 +465,11 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		e = url->host + strlen(url->host);
 		s = url->host;
 
+		/* First char of hostname must be alphanumeric */
+		if(!isalnum((int)*(unsigned char *)s)) { 
+			goto bad_url;
+		}
+
 		while (s < e) {
 			if (!isalnum((int)*(unsigned char *)s) && *s != '-' && *s != '.') {
 				goto bad_url;
