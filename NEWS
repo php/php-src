@@ -13,7 +13,9 @@ PHP                                                                        NEWS
 - Added command line option --rz to CLI. (Johannes)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
-	
+- default session.entropy_file is now /dev/urandom or /dev/arandom if either
+  is present at compile time. (Rasmus)
+  	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
