@@ -11,7 +11,6 @@ PHP                                                                        NEWS
   ReflectionExtension::isPersistent(). (Johannes)
 - Added ReflectionZendExtension class. (Johannes)
 - Added command line option --rz to CLI. (Johannes)
-- Added full_special_chars filter to ext/filter (Rasmus)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 - default session.entropy_file is now /dev/urandom or /dev/arandom if either
@@ -22,6 +21,7 @@ PHP                                                                        NEWS
 
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
+- Added full_special_chars filter to ext/filter (Rasmus)
 
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
