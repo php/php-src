@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
+- Added full_special_chars filter to ext/filter (Rasmus)
 
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
