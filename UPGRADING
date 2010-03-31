@@ -40,7 +40,19 @@ UPGRADE NOTES - PHP X.Y
 
     default_charset = iso-8859-1
 
-  to your php.ini to preserve pre-PHPX.Y behavior
+  to your php.ini to preserve pre-PHPX.Y behavior.
+
+- We now check at compile time if /dev/urandom or /dev/arandom
+  are present to provide non-blocking entropy to session id
+  generation.  If either is present, session.entropy_file
+  now defaults to that file and session.entropy_length defaults
+  to 32.  If you do not want extra entropy for your session ids
+  for some reason, add:
+
+    session.entropy_file=
+    session.entropy_length=0
+
+  to your php.ini to preserve pre-PHPX.Y behavior.
 
 =============================
 2. Reserved words and classes
