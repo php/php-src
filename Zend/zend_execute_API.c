@@ -411,6 +411,10 @@ ZEND_API char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
 
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 {
+	if(EG(exception) && EG(opline_ptr) && active_opline->opcode == ZEND_HANDLE_EXCEPTION && 
+		active_opline->lineno == 0 && EG(opline_before_exception)) {
+		return EG(opline_before_exception)->lineno;
+	}
 	if (EG(opline_ptr)) {
 		return active_opline->lineno;
 	} else {
