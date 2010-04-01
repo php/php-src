@@ -159,6 +159,14 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 #endif
 		efree(hashed_details);
 	}
+	/*
+	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
+	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
+	  unregistered till the script ends. So, we need to take care of that.
+	*/
+	net->stream->in_free = 1;
+	zend_hash_index_del(&EG(regular_list), net->stream->rsrc_id);
+	net->stream->in_free = 0;
 
 	if (!net->options.timeout_read) {
 		/* should always happen because read_timeout cannot be set via API */
@@ -703,15 +711,6 @@ mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 			mnd_pefree(net->cmd_buffer.buffer, pers);
 			net->cmd_buffer.buffer = NULL;
 		}
-		/*
-		  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-		  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-		  unregistered till the script ends. So, we need to take care of that.
-		  */
-		net->stream->in_free = 1;
-		zend_hash_index_del(&EG(regular_list), net->stream->rsrc_id);
-		net->stream->in_free = 0;
-
 		if (net->stream) {
 			DBG_INF_FMT("Freeing stream. abstract=%p", net->stream->abstract);
 			if (pers) {
