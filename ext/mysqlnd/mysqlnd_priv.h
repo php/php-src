@@ -93,10 +93,10 @@
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
 	{\
 		if ((buf)) { \
-			pefree((buf), (persistent)); \
+			mnd_pefree((buf), (persistent)); \
 		} \
 		if ((message)) { \
-			(buf) = pestrndup((message), (len), (persistent)); \
+			(buf) = mnd_pestrndup((message), (len), (persistent)); \
 		} else { \
 			buf = NULL; \
 		} \
@@ -106,7 +106,7 @@
 #define SET_EMPTY_MESSAGE(buf, buf_len, persistent) \
 	{\
 		if ((buf)) { \
-			pefree((buf), (persistent)); \
+			mnd_pefree((buf), (persistent)); \
 			(buf) = NULL; \
 		} \
 		(buf_len) = 0; \
