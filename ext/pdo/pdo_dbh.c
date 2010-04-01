@@ -597,6 +597,7 @@ static PHP_METHOD(PDO, beginTransaction)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
+	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
 	if (dbh->in_txn) {
