@@ -282,7 +282,11 @@ tail_call:
 			GC_SET_BLACK(obj->buffered);
 			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-				p = Z_OBJPROP_P(pz)->pListHead;
+				HashTable *props = Z_OBJPROP_P(pz);
+				if(!props) {
+					return;
+				}
+				p = props->pListHead;
 			}
 		}
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
@@ -313,7 +317,11 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 	GC_SET_BLACK(obj->buffered);
 	if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 	             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-		p = Z_OBJPROP_P(pz)->pListHead;
+		HashTable *props = Z_OBJPROP_P(pz);
+		if(!props) {
+			return;
+		}
+		p = props->pListHead;
 		while (p != NULL) {
 			pz = *(zval**)p->pData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
@@ -346,7 +354,11 @@ tail_call:
 				GC_SET_COLOR(obj->buffered, GC_GREY);
 				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-					p = Z_OBJPROP_P(pz)->pListHead;
+					HashTable *props = Z_OBJPROP_P(pz);
+					if(!props) {
+						return;
+					}
+					p = props->pListHead;
 				}
 			}
 		} else if (Z_TYPE_P(pz) == IS_ARRAY) {
@@ -380,7 +392,11 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 		GC_SET_COLOR(obj->buffered, GC_GREY);
 		if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 		             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-			p = Z_OBJPROP_P(pz)->pListHead;
+			HashTable *props = Z_OBJPROP_P(pz);
+			if(!props) {
+				return;
+			}
+			p = props->pListHead;
 			while (p != NULL) {
 				pz = *(zval**)p->pData;
 				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
@@ -445,7 +461,11 @@ tail_call:
 						GC_SET_COLOR(obj->buffered, GC_WHITE);
 						if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 						             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-							p = Z_OBJPROP_P(pz)->pListHead;
+							HashTable *props = Z_OBJPROP_P(pz);
+							if(!props) {
+								return 0;
+							}
+							p = props->pListHead;
 						}
 					}
 				}
@@ -484,7 +504,11 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 				GC_SET_COLOR(obj->buffered, GC_WHITE);
 				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-					p = Z_OBJPROP_P(pz)->pListHead;
+					HashTable *props = Z_OBJPROP_P(pz);
+					if(!props) {
+						return;
+					}
+					p = props->pListHead;
 					while (p != NULL) {
 						zval_scan(*(zval**)p->pData TSRMLS_CC);
 						p = p->pListNext;
@@ -531,7 +555,11 @@ tail_call:
 
 				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-					p = Z_OBJPROP_P(pz)->pListHead;
+					HashTable *props = Z_OBJPROP_P(pz);
+					if(!props) {
+						return;
+					}
+					p = props->pListHead;
 				}
 			}
 		} else {
@@ -572,7 +600,11 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 
 			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-				p = Z_OBJPROP_P(pz)->pListHead;
+				HashTable *props = Z_OBJPROP_P(pz);
+				if(!props) {
+					return;
+				}
+				p = props->pListHead;
 				while (p != NULL) {
 					pz = *(zval**)p->pData;
 					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
