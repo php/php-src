@@ -851,6 +851,7 @@ static PHP_METHOD(PDO, setAttribute)
 		RETURN_FALSE;
 	}
 
+	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
 	if (pdo_dbh_attribute_set(dbh, attr, value TSRMLS_CC) != FAILURE) {
