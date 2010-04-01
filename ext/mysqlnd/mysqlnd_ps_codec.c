@@ -270,7 +270,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		mnd_efree(to);
+		efree(to);  /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
@@ -321,7 +321,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		mnd_efree(to);
+		efree(to); /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
@@ -380,7 +380,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
-		mnd_efree(to);
+		efree(to); /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	

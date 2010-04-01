@@ -599,7 +599,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 					 not_bound, not_bound>1 ?"s":"");
 			SET_STMT_ERROR(stmt, CR_PARAMS_NOT_BOUND, UNKNOWN_SQLSTATE, msg);
 			if (msg) {
-				efree(msg);
+				efree(msg); /* allocated by spprintf */
 			}
 			DBG_INF("FAIL");
 			DBG_RETURN(FAIL);
@@ -2055,7 +2055,7 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_param_bind)(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	DBG_ENTER("mysqlnd_stmt::alloc_param_bind");
-	DBG_RETURN(pecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND), stmt->persistent));
+	DBG_RETURN(mnd_pecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND), stmt->persistent));
 }
 /* }}} */
 
@@ -2066,7 +2066,7 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_result_bind)(MYSQLND_STMT * const s TSRMLS_DC
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	DBG_ENTER("mysqlnd_stmt::alloc_result_bind");
-	DBG_RETURN(pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent));
+	DBG_RETURN(mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent));
 }
 /* }}} */
 
