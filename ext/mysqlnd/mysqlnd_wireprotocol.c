@@ -542,7 +542,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	/* There is a message */
 	if (packet->header.size > p - buf && (i = php_mysqlnd_net_field_length(&p))) {
-		packet->message = mnd_pestrndup((char *)p, MIN(i, buf_len - (p - begin)), FALSE);
+		packet->message = estrndup((char *)p, MIN(i, buf_len - (p - begin)));
 		packet->message_len = i;
 	} else {
 		packet->message = NULL;

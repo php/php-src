@@ -121,14 +121,14 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 		tv.tv_usec = 0;
 	}
 
-	DBG_INF_FMT("calling php_stream_xport_create");
 	net->stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
 										  hashed_details, (net->options.timeout_connect) ? &tv : NULL,
 										  NULL /*ctx*/, errstr, errcode);
 
+
 	if (*errstr || !net->stream) {
 		if (hashed_details) {
-			efree(hashed_details); /* allocated by spprintf */
+			efree(hashed_details);
 		}
 		*errcode = CR_CONNECTION_ERROR;
 		DBG_RETURN(FAIL);
@@ -231,7 +231,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 	if (net->compressed == TRUE) {
 		size_t comp_buf_size = MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE + MIN(left, MYSQLND_MAX_PACKET_SIZE);
 		DBG_INF_FMT("compress_buf_size=%d", comp_buf_size);
-		compress_buf = mnd_emalloc(comp_buf_size);
+		compress_buf = emalloc(comp_buf_size);
 	}
 
 	do {
@@ -264,7 +264,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
   #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
-				zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
+				zend_uchar * decompressed_data = malloc(decompressed_size);
 				int error = net->m.decode(decompressed_data, decompressed_size, compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 				if (error == Z_OK) {
 					int i;
@@ -279,7 +279,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 				} else {
 					DBG_INF("error decompressing");
 				}
-				mnd_free(decompressed_data);
+				free(decompressed_data);
 			}
   #endif /* WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY */
 		} else
@@ -322,7 +322,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 
 	net->stream->chunk_size = old_chunk_size;
 	if (compress_buf) {
-		mnd_efree(compress_buf);
+		efree(compress_buf);
 	}
 	DBG_RETURN(ret);
 }
@@ -415,7 +415,7 @@ mysqlnd_read_compressed_packet_from_stream_and_fill_read_buffer(MYSQLND * conn, 
 	/* we need to decompress the data */
 
 	if (decompressed_size) {
-		compressed_data = mnd_emalloc(net_payload_size);
+		compressed_data = emalloc(net_payload_size);
 		if (FAIL == conn->net->m.network_read(conn, compressed_data, net_payload_size TSRMLS_CC)) {
 			ret = FAIL;
 			goto end;
@@ -435,7 +435,7 @@ mysqlnd_read_compressed_packet_from_stream_and_fill_read_buffer(MYSQLND * conn, 
 	}
 end:
 	if (compressed_data) {
-		mnd_efree(compressed_data);
+		efree(compressed_data);
 	}
 	DBG_RETURN(ret);
 }
@@ -688,7 +688,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	net->m.free_contents = MYSQLND_METHOD(mysqlnd_net, free_contents);
 
 	{
-		unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
+		unsigned int buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
 		net->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size TSRMLS_CC);
 	}
 	DBG_RETURN(net);
@@ -716,7 +716,7 @@ mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 			if (pers) {
 				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
 			} else {
-				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE);
+				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE);	
 			}
 			net->stream = NULL;
 		}
