@@ -50,6 +50,7 @@ PHP                                                                        NEWS
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
 - Fixed bug #49778 (DateInterval::format("%a") is always zero when an interval
   is created from an ISO string). (Derick)
+- Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
 - Fixed bug #49429 (odbc_autocommit doesn't work). (Felipe)
 - Fixed bug #49192 (PHP crashes when GC invoked on COM object). (Stas)
 - Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
