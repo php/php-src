@@ -104,28 +104,7 @@ array(10) {
     [8]=>
     &string(1) "z"
     [9]=>
-    &array(10) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-      [3]=>
-      &string(1) "a"
-      [4]=>
-      &string(1) "b"
-      [5]=>
-      &string(1) "c"
-      [6]=>
-      &string(1) "x"
-      [7]=>
-      &string(1) "y"
-      [8]=>
-      &string(1) "z"
-      [9]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 Done

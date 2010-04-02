@@ -31,18 +31,7 @@ object(foo)#%d (%d) {
     ["static"]=>
     array(1) {
       ["a"]=>
-      &object(foo)#%d (2) {
-        ["test":"foo":private]=>
-        int(3)
-        ["a"]=>
-        object(Closure)#%d (1) {
-          ["static"]=>
-          array(1) {
-            ["a"]=>
-            *RECURSION*
-          }
-        }
-      }
+      *RECURSION*
     }
   }
 }

@@ -17,13 +17,10 @@ unset($a);
 var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
---EXPECT--
-object(Foo)#1 (1) {
+--EXPECTF--
+object(Foo)#%d (1) {
   ["a"]=>
-  object(Foo)#1 (1) {
-    ["a"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 __destruct
 int(1)
