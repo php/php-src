@@ -46,18 +46,7 @@ array(5) {
     [3]=>
     string(1) "2"
     [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [1]=>
-      float(3)
-      [2]=>
-      string(4) "zero"
-      [3]=>
-      string(1) "2"
-      [4]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 bool(true)
@@ -77,18 +66,7 @@ array(5) {
     [1]=>
     float(3)
     [4]=>
-    &array(5) {
-      [0]=>
-      int(1)
-      [3]=>
-      string(1) "2"
-      [1]=>
-      float(3)
-      [4]=>
-      *RECURSION*
-      [2]=>
-      string(4) "zero"
-    }
+    *RECURSION*
     [2]=>
     string(4) "zero"
   }

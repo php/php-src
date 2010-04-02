@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 
+- Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51393 (DateTime::createFromFormat() fails if format string contains
   timezone). (Adam)
 - Fixed bug #51338 (URL-Rewriter is still enabled if use_only_cookies is

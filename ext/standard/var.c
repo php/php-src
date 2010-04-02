@@ -124,8 +124,9 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
-		if (myht->nApplyCount > 1) {
+		if (++myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
+			--myht->nApplyCount;
 			return;
 		}
 		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
@@ -133,8 +134,9 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
-		if (myht && myht->nApplyCount > 1) {
+		if (myht && ++myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
+			--myht->nApplyCount;
 			return;
 		}
 
@@ -145,6 +147,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 1, level);
+			--myht->nApplyCount;
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
