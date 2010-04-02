@@ -55,6 +55,7 @@ PHP                                                                        NEWS
 - Fixed bug #49192 (PHP crashes when GC invoked on COM object). (Stas)
 - Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
   (yoarvi@gmail.com, Derick)
+- Fixed bug #48983 (DomDocument : saveHTMLFile wrong charset). (Rob)
 - Fixed bug #48902 (Timezone database fallback map is outdated). (Derick)
 - Fixed bug #46111 (Some timezone identifiers can not be parsed). (Derick)
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
