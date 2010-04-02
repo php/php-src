@@ -9,17 +9,11 @@ var_dump($a);
 ?>
 ===DONE===
 --EXPECTF--
-object(Closure)#1 (1) {
+object(Closure)#%d (1) {
   ["static"]=>
   array(1) {
     ["a"]=>
-    &object(Closure)#1 (1) {
-      ["static"]=>
-      array(1) {
-        ["a"]=>
-        *RECURSION*
-      }
-    }
+    *RECURSION*
   }
 }
 ===DONE===

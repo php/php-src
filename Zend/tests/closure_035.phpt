@@ -18,14 +18,8 @@ var_dump($x());
 object(Closure)#%d (1) {
   ["static"]=>
   array(1) {
-    [%u|b%"x"]=>
-    &object(Closure)#%d (1) {
-      ["static"]=>
-      array(1) {
-        [%u|b%"x"]=>
-        *RECURSION*
-      }
-    }
+    ["x"]=>
+    *RECURSION*
   }
 }
 int(1)

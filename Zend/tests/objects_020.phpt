@@ -13,18 +13,10 @@ $$test->a->b[] = 2;
 var_dump($$test);
 
 ?>
---EXPECT--
-object(stdClass)#1 (2) {
+--EXPECTF--
+object(stdClass)#%d (2) {
   ["a"]=>
-  &object(stdClass)#1 (2) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    array(1) {
-      [0]=>
-      int(2)
-    }
-  }
+  *RECURSION*
   ["b"]=>
   array(1) {
     [0]=>
