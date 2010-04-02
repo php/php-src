@@ -15,9 +15,6 @@ array(1) {
   ["a"]=>
   &array(1) {
     ["a"]=>
-    &array(1) {
-      ["a"]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
