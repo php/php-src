@@ -59,21 +59,12 @@ $a[2] = null;
 echo "Done";
 ?>
 --EXPECTF--
-
-
 --- 1 refs container:
 array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      int(1)
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
     int(1)
     [2]=>
@@ -89,14 +80,7 @@ array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      int(1)
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
     int(1)
     [2]=>
@@ -109,7 +93,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  %string(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   int(1)
   [2]=>
@@ -117,7 +101,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  %string(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   string(10) "b1.changed"
   [2]=>
@@ -125,7 +109,7 @@ array(3) {
 }
 array(3) {
   [0]=>
-  %string(10) "b0.changed"
+  string(10) "b0.changed"
   [1]=>
   string(10) "b1.changed"
   [2]=>
@@ -138,46 +122,18 @@ array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [2]=>
     int(1)
   }
   [1]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [2]=>
     int(1)
   }
@@ -189,46 +145,18 @@ array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [2]=>
     int(1)
   }
   [1]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      int(1)
-    }
+    *RECURSION*
     [2]=>
     int(1)
   }
@@ -266,92 +194,29 @@ array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
   [1]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
   [2]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 string(56) "a:3:{i:0;a:3:{i:0;R:2;i:1;R:2;i:2;R:2;}i:1;R:2;i:2;R:2;}"
@@ -359,92 +224,29 @@ array(3) {
   [0]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
   [1]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
   [2]=>
   &array(3) {
     [0]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [1]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 array(3) {
