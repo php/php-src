@@ -8,22 +8,14 @@ $a[] = $a;
 var_dump($a);
 ?>
 ===DONE===
---EXPECT--
-object(SplDoublyLinkedList)#1 (2) {
+--EXPECTF--
+object(SplDoublyLinkedList)#%d (2) {
   ["flags":"SplDoublyLinkedList":private]=>
   int(0)
   ["dllist":"SplDoublyLinkedList":private]=>
   array(1) {
     [0]=>
-    object(SplDoublyLinkedList)#1 (2) {
-      ["flags":"SplDoublyLinkedList":private]=>
-      int(0)
-      ["dllist":"SplDoublyLinkedList":private]=>
-      array(1) {
-        [0]=>
-        *RECURSION*
-      }
-    }
+    *RECURSION*
   }
 }
 ===DONE===

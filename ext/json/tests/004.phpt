@@ -16,10 +16,7 @@ echo "Done\n";
 --EXPECTF--	
 object(stdClass)#%d (1) {
   ["prop"]=>
-  object(stdClass)#%d (1) {
-    ["prop"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 
 Warning: json_encode(): recursion detected in %s on line %d
