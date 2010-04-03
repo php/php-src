@@ -24,16 +24,7 @@ object(a)#%d (1) {
     ["c"]=>
     object(c)#%d (1) {
       ["d"]=>
-      object(a)#%d (1) {
-        ["b"]=>
-        object(b)#%d (1) {
-          ["c"]=>
-          object(c)#%d (1) {
-            ["d"]=>
-            *RECURSION*
-          }
-        }
-      }
+      *RECURSION*
     }
   }
 }
