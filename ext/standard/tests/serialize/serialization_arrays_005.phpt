@@ -79,8 +79,6 @@ check($c);
 
 ?>
 --EXPECTF--
-
-
 --- Nested array references 1 element in containing array:
 array(3) {
   [0]=>
@@ -443,19 +441,7 @@ array(3) {
       [1]=>
       int(1)
       [2]=>
-      &array(2) {
-        [0]=>
-        int(1)
-        [1]=>
-        &array(3) {
-          [0]=>
-          int(1)
-          [1]=>
-          int(1)
-          [2]=>
-          *RECURSION*
-        }
-      }
+      *RECURSION*
     }
   }
 }
@@ -476,19 +462,7 @@ array(3) {
       [1]=>
       int(1)
       [2]=>
-      &array(2) {
-        [0]=>
-        int(1)
-        [1]=>
-        array(3) {
-          [0]=>
-          int(1)
-          [1]=>
-          int(1)
-          [2]=>
-          *RECURSION*
-        }
-      }
+      *RECURSION*
     }
   }
 }
@@ -508,19 +482,7 @@ array(3) {
       [1]=>
       int(1)
       [2]=>
-      &array(2) {
-        [0]=>
-        int(1)
-        [1]=>
-        array(3) {
-          [0]=>
-          int(1)
-          [1]=>
-          int(1)
-          [2]=>
-          *RECURSION*
-        }
-      }
+      *RECURSION*
     }
   }
 }
@@ -540,19 +502,7 @@ array(3) {
       [1]=>
       int(1)
       [2]=>
-      &array(2) {
-        [0]=>
-        string(12) "b2.0.changed"
-        [1]=>
-        array(3) {
-          [0]=>
-          int(1)
-          [1]=>
-          int(1)
-          [2]=>
-          *RECURSION*
-        }
-      }
+      *RECURSION*
     }
   }
 }

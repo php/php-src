@@ -74,14 +74,7 @@ echo "Done";
 --- a refs container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    int(1)
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
   int(1)
   ["c"]=>
@@ -90,14 +83,7 @@ object(stdClass)#%d (3) {
 string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";i:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    int(1)
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
   int(1)
   ["c"]=>
@@ -132,14 +118,7 @@ object(stdClass)#%d (3) {
 --- a eqs container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    int(1)
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
   int(1)
   ["c"]=>
@@ -148,14 +127,7 @@ object(stdClass)#%d (3) {
 string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";i:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    int(1)
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
   int(1)
   ["c"]=>
@@ -190,46 +162,18 @@ object(stdClass)#%d (3) {
 --- a,b ref container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["c"]=>
   int(1)
 }
 string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["c"]=>
   int(1)
 }
@@ -262,46 +206,18 @@ object(stdClass)#%d (3) {
 --- a,b eq container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["c"]=>
   int(1)
 }
 string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["c"]=>
   int(1)
 }
@@ -309,14 +225,7 @@ object(stdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    string(14) "obj->a.changed"
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    int(1)
-  }
+  *RECURSION*
   ["c"]=>
   int(1)
 }
@@ -341,62 +250,20 @@ object(stdClass)#%d (3) {
 --- a,b,c ref container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["b"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["c"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";R:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["b"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["c"]=>
-  &object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 object(stdClass)#%d (3) {
   ["a"]=>
@@ -427,84 +294,28 @@ object(stdClass)#%d (3) {
 --- a,b,c eq container:
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["c"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";r:1;}"
 object(stdClass)#%d (3) {
   ["a"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["c"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 object(stdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    string(14) "obj->a.changed"
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
   ["c"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    string(14) "obj->a.changed"
-    ["b"]=>
-    *RECURSION*
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 object(stdClass)#%d (3) {
   ["a"]=>
@@ -512,14 +323,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   string(14) "obj->b.changed"
   ["c"]=>
-  object(stdClass)#%d (3) {
-    ["a"]=>
-    string(14) "obj->a.changed"
-    ["b"]=>
-    string(14) "obj->b.changed"
-    ["c"]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 object(stdClass)#%d (3) {
   ["a"]=>
