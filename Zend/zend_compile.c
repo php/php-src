@@ -1270,22 +1270,13 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				}
 			}
 		} else {
-			char *short_class_name;
-			int short_class_name_length;
-			char *short_class_lcname;
-
-			if ((short_class_name = zend_memrchr(CG(active_class_entry)->name, '\\', CG(active_class_entry)->name_length))) {
-				short_class_name_length = CG(active_class_entry)->name_length - (short_class_name - CG(active_class_entry)->name) - 1;
-				++short_class_name;
-			} else {
-				short_class_name = CG(active_class_entry)->name;
-				short_class_name_length = CG(active_class_entry)->name_length;
-			}
-			short_class_lcname = do_alloca(short_class_name_length + 1, use_heap);
-			zend_str_tolower_copy(short_class_lcname, short_class_name, short_class_name_length);
+			char *class_lcname;
+			
+			class_lcname = do_alloca(CG(active_class_entry)->name_length + 1, use_heap);
+			zend_str_tolower_copy(class_lcname, CG(active_class_entry)->name, CG(active_class_entry)->name_length);
 			/* Improve after RC: cache the lowercase class name */
 
-			if ((short_class_name_length == name_len) && (!memcmp(short_class_lcname, lcname, name_len))) {
+			if ((CG(active_class_entry)->name_length == name_len) && (!memcmp(class_lcname, lcname, name_len))) {
 				if (CG(active_class_entry)->constructor) {
 					zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
 				} else {
@@ -1338,7 +1329,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
-			free_alloca(short_class_lcname, use_heap);
+			free_alloca(class_lcname, use_heap);
 		}
 
 		efree(lcname);
