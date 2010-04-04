@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   mcrypt_filter). (Stas)
 - Added full_special_chars filter to ext/filter (Rasmus)
 
+- Changed namespaced classes so that the ctor can only be named
+  __construct now. (Stas)
+
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 
