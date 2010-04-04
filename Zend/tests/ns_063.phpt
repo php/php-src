@@ -1,5 +1,5 @@
 --TEST--
-063: Support for old-style constructors in namesapces
+063: Old-style constructors in namesapces (not supported!)
 --FILE--
 <?php
 namespace Foo;
@@ -9,5 +9,6 @@ class Bar {
 	}
 }
 new Bar();
+echo "ok\n";
 --EXPECT--
 ok
