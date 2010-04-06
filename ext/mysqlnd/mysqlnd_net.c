@@ -448,6 +448,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, decode)(zend_uchar * uncompressed_data, size_t uncompressed_data_len,
 									const zend_uchar * const compressed_data, size_t compressed_data_len TSRMLS_DC)
 {
+#ifdef MYSQLND_COMPRESSION_ENABLED
 	int error;
 	uLongf tmp_complen = uncompressed_data_len;
 	DBG_ENTER("mysqlnd_net::decode");
@@ -458,6 +459,10 @@ MYSQLND_METHOD(mysqlnd_net, decode)(zend_uchar * uncompressed_data, size_t uncom
 		DBG_INF_FMT("decompression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
 	}
 	DBG_RETURN(error == Z_OK? PASS:FAIL);
+#else
+	DBG_ENTER("mysqlnd_net::decode");
+	DBG_RETURN(FAIL);
+#endif
 }
 /* }}} */
 
@@ -467,6 +472,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compress_buffer_len,
 									const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC)
 {
+#ifdef MYSQLND_COMPRESSION_ENABLED
 	int error;
 	uLongf tmp_complen = compress_buffer_len;
 	DBG_ENTER("mysqlnd_net::encode");
@@ -478,6 +484,10 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compres
 		DBG_INF_FMT("compression successful. compressed size=%d", tmp_complen);
 	}
 	DBG_RETURN(error == Z_OK? PASS:FAIL);
+#else
+	DBG_ENTER("mysqlnd_net::encode");
+	DBG_RETURN(FAIL);
+#endif
 }
 /* }}} */
 
