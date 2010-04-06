@@ -3,7 +3,7 @@ dnl config.m4 for extension pdo_mysql
 dnl vim: se ts=2 sw=2 et:
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
-[  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directoy
+[  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory
                                  If mysqlnd is passed as DIR, the MySQL native
                                  native driver will be used [/usr/local]])
 
