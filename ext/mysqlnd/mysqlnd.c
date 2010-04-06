@@ -529,6 +529,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		db = "";
 		db_len = 0;
 	}
+
 	host_len = strlen(host);
 	{
 		char * transport = NULL;
@@ -553,7 +554,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		DBG_INF_FMT("transport=%s", transport);
 		conn->scheme = mnd_pestrndup(transport, transport_len, conn->persistent);
 		conn->scheme_len = transport_len;
-		efree(transport);
+		efree(transport); /* allocated by spprintf */
 		transport = NULL;
 	}
 
@@ -643,6 +644,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		}
 	} else {
 		CONN_SET_STATE(conn, CONN_READY);
+
 		if (!self_alloced && saved_compression) {
 			conn->net->compressed = TRUE;
 		}
@@ -662,16 +664,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		conn->connect_or_select_db_len = db_len;
 
 		if (!unix_socket) {
-			char *p;
 
 			conn->host = mnd_pestrdup(host, conn->persistent);
 			conn->host_len = strlen(conn->host);
-			spprintf(&p, 0, "%s via TCP/IP", conn->host);
-			if (conn->persistent) {
-				conn->host_info = mnd_pestrdup(p, 1);
-				mnd_efree(p);
-			} else {
-				conn->host_info = p;
+			{
+				char *p;
+				spprintf(&p, 0, "%s via TCP/IP", conn->host);
+				conn->host_info =  mnd_pestrdup(p, conn->persistent);
+				efree(p); /* allocated by spprintf */
 			}
 		} else {
 			conn->unix_socket	= mnd_pestrdup(socket, conn->persistent);
@@ -693,10 +693,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		SET_EMPTY_ERROR(conn->error_info);
 
 		mysqlnd_local_infile_default(conn);
-		{
-			unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
-			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
-		}
 
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
 		if (reconnect) {
@@ -707,6 +703,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		}
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
+
 #if PHP_MAJOR_VERSION >= 6
 		{
 			unsigned int as_unicode = 1;
@@ -715,7 +712,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			DBG_INF("unicode set");
 		}
 #endif
-
 		if (conn->options.init_commands) {
 			int current_command = 0;
 			for (; current_command < conn->options.num_commands; ++current_command) {
@@ -773,7 +769,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 	zend_bool self_alloced = FALSE;
 
 	DBG_ENTER("mysqlnd_connect");
@@ -1139,7 +1135,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND *conn, const char *query, cons
 		result = conn->m->store_result(conn TSRMLS_CC);
 	}
 	if (show_query != query) {
-		mnd_efree(show_query);
+		efree(show_query); /* allocated by spprintf */
 	}
 	DBG_RETURN(result);
 }
@@ -1225,7 +1221,7 @@ MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn, const char * const
 	SET_ERROR_AFF_ROWS(conn);
 	if (ret == PASS) {
 		if (conn->connect_or_select_db) {
-			pefree(conn->connect_or_select_db, conn->persistent);
+			mnd_pefree(conn->connect_or_select_db, conn->persistent);
 		}
 		conn->connect_or_select_db = mnd_pestrndup(db, db_len, conn->persistent);
 		conn->connect_or_select_db_len = db_len;
@@ -1275,10 +1271,9 @@ MYSQLND_METHOD(mysqlnd_conn, stat)(MYSQLND *conn, char **message, unsigned int *
 	if (FAIL == (ret = PACKET_READ(stats_header, conn))) {
 		DBG_RETURN(FAIL);
 	}
-	*message = stats_header->message;
+	/* will be freed by Zend, thus don't use the mnd_ allocator */
+	*message = estrndup(stats_header->message, stats_header->message_len); 
 	*message_len = stats_header->message_len;
-	/* Ownership transfer */
-	stats_header->message = NULL;
 	PACKET_FREE(stats_header);
 
 	DBG_INF(*message);
@@ -1343,7 +1338,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_charset)(MYSQLND * const conn, const char * con
 	} else {
 		conn->charset = charset;
 	}
-	mnd_efree(query);
+	efree(query); /* allocated by spprintf */
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
