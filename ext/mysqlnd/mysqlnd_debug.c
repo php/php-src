@@ -658,8 +658,8 @@ PHPAPI void _mysqlnd_debug(const char * mode TSRMLS_DC)
 #endif
 	
 #define REAL_SIZE(s) (collect_memory_statistics? (s) + sizeof(size_t) : (s))
-#define REAL_PTR(p) (collect_memory_statistics && (p)? ((p) - sizeof(size_t)) : (p))
-#define FAKE_PTR(p) (collect_memory_statistics && (p)? ((p) + sizeof(size_t)) : (p))
+#define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - sizeof(size_t)) : (p))
+#define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + sizeof(size_t)) : (p))
 
 /* {{{ _mysqlnd_emalloc */
 void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
