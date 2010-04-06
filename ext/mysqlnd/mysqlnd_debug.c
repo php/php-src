@@ -757,14 +757,14 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (ptr - sizeof(size_t)) : 0;
+	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 	DBG_ENTER(mysqlnd_erealloc_name);
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("ptr=%p old_size=%lu, new_size=%lu", ptr, old_size, new_size); 
 
 	ret = erealloc(REAL_PTR(ptr), REAL_SIZE(new_size));
 
-	DBG_INF_FMT("new_ptr=%p", ret); 
+	DBG_INF_FMT("new_ptr=%p", (char*)ret); 
 	if (collect_memory_statistics) {
 		*(size_t *) ret = new_size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMOUNT, new_size);
@@ -779,14 +779,14 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (ptr - sizeof(size_t)) : 0;
+	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 	DBG_ENTER(mysqlnd_perealloc_name);
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("ptr=%p old_size=%lu new_size=%lu persist=%d", ptr, old_size, new_size, persistent); 
 
 	ret = perealloc(REAL_PTR(ptr), REAL_SIZE(new_size), persistent);
 
-	DBG_INF_FMT("new_ptr=%p", ret); 
+	DBG_INF_FMT("new_ptr=%p", (char*)ret); 
 
 	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_REALLOC_COUNT:STAT_MEM_EREALLOC_COUNT;
@@ -810,8 +810,8 @@ void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 
 	if (ptr) {
 		if (collect_memory_statistics) {
-			free_amount = *(size_t *)(ptr - sizeof(size_t));
-			DBG_INF_FMT("ptr=%p size=%u", ptr - sizeof(size_t), (unsigned int) free_amount);
+			free_amount = *(size_t *)(((char*)ptr) - sizeof(size_t));
+			DBG_INF_FMT("ptr=%p size=%u", ((char*)ptr) - sizeof(size_t), (unsigned int) free_amount);
 		}
 		efree(REAL_PTR(ptr));
 	}
@@ -835,8 +835,8 @@ void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 
 	if (ptr) {
 		if (collect_memory_statistics) {
-			free_amount = *(size_t *)(ptr - sizeof(size_t));
-			DBG_INF_FMT("ptr=%p size=%u", ptr - sizeof(size_t), (unsigned int) free_amount);
+			free_amount = *(size_t *)(((char*)ptr) - sizeof(size_t));
+			DBG_INF_FMT("ptr=%p size=%u", ((char*)ptr) - sizeof(size_t), (unsigned int) free_amount);
 		}
 		pefree(REAL_PTR(ptr), persistent);
 	}
@@ -901,7 +901,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 
 	ret = realloc(REAL_PTR(ptr), REAL_SIZE(new_size));
 
-	DBG_INF_FMT("new_ptr=%p", ret);
+	DBG_INF_FMT("new_ptr=%p", (char*)ret);
 
 	if (collect_memory_statistics) {
 		*(size_t *) ret = new_size;
@@ -923,8 +923,8 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 
 	if (ptr) {
 		if (collect_memory_statistics) {
-			free_amount = *(size_t *)(ptr - sizeof(size_t));
-			DBG_INF_FMT("ptr=%p size=%u", ptr - sizeof(size_t), (unsigned int) free_amount);
+			free_amount = *(size_t *)(((char*)ptr) - sizeof(size_t));
+			DBG_INF_FMT("ptr=%p size=%u", ((char*)ptr) - sizeof(size_t), (unsigned int) free_amount);
 		}
 		free(REAL_PTR(ptr));
 	}
@@ -976,7 +976,7 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 {
 	char * ret;
 	smart_str tmp_str = {0, 0, 0};
-	char * p = ptr;
+	const char * p = ptr;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	DBG_ENTER(mysqlnd_pestrdup_name);
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
