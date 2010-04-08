@@ -1273,14 +1273,11 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 			}
 
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-			if (as_int_or_float && perm_bind.php_type == IS_LONG &&
-				perm_bind.pack_len <= SIZEOF_LONG)
-			{
+			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				if (perm_bind.pack_len < SIZEOF_LONG)
-				{
+				if (perm_bind.pack_len < SIZEOF_LONG) {
 					/* direct conversion */
 					int64_t v =
 #ifndef PHP_WIN32
@@ -1304,6 +1301,8 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 					if ((uns == TRUE && v > L64(2147483647)) ||
 						(uns == FALSE && (( L64(2147483647) < (int64_t) v) ||
 						(L64(-2147483648) > (int64_t) v))))
+#else
+#error Need fix for this architecture
 #endif /* SIZEOF */
 					{
 						ZVAL_STRINGL(*current_field, (char *)p, len, 0);
