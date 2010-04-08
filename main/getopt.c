@@ -107,9 +107,15 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 				break;
 			}
 		}
-		optchr = 0;
-		dash = 0;
-		arg_start += strlen(opts[php_optidx].opt_name);
+
+		if (arg_end == strlen(opts[php_optidx].opt_name)) {
+			optchr = 0;
+			dash = 0;
+			arg_start += strlen(opts[php_optidx].opt_name);
+		} else {
+			(*optind)++;
+			return (php_opt_error(argc, argv, *optind-1, optchr, OPTERRNF, show_err));
+		}
 	} else {
 		if (!dash) {
 			dash = 1;
