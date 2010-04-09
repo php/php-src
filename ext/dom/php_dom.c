@@ -777,15 +777,12 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_documenttype_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_documenttype_prop_handlers, sizeof(dom_documenttype_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "DOMNotation", NULL, php_dom_notation_class_functions, dom_notation_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMNotation", dom_node_class_entry, php_dom_notation_class_functions, dom_notation_class_entry);
 	
 	zend_hash_init(&dom_notation_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL TSRMLS_CC);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL TSRMLS_CC);
-	/* Notation nodes are special */
-	dom_register_prop_handler(&dom_notation_prop_handlers, "nodeName", dom_node_node_name_read, NULL TSRMLS_CC);
-	dom_register_prop_handler(&dom_notation_prop_handlers, "nodeValue", dom_node_node_value_read, dom_node_node_value_write TSRMLS_CC);
-	dom_register_prop_handler(&dom_notation_prop_handlers, "attributes", dom_node_attributes_read, NULL TSRMLS_CC);
+	zend_hash_merge(&dom_notation_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_notation_prop_handlers, sizeof(dom_notation_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMEntity", dom_node_class_entry, php_dom_entity_class_functions, dom_entity_class_entry);
