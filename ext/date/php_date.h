@@ -177,4 +177,9 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
+/* Functions for creating DateTime objects, and initializing them from a string */
+PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+
+
 #endif /* PHP_DATE_H */
