@@ -11,6 +11,7 @@ if (!@mb_internal_encoding('ISO-2022-KR')) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';
