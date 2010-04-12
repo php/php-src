@@ -1071,13 +1071,6 @@ pdo_mysql.default_socket=
 
 ;phar.cache_list =
 
-[Syslog]
-; Whether or not to define the various syslog variables (e.g. $LOG_PID,
-; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
-; runtime, you can define these variables by calling define_syslog_variables().
-; http://php.net/define-syslog-variables
-define_syslog_variables  = Off
-
 [mail function]
 ; For Win32 only.
 ; http://php.net/smtp
