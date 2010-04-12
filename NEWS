@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 - default session.entropy_file is now /dev/urandom or /dev/arandom if either
   is present at compile time. (Rasmus)
+
+- Removed legacy features:
+  . define_syslog_variables ini option and its associated function. (Kalle)
   	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
