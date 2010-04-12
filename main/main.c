@@ -425,7 +425,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("define_syslog_variables",	"0",				PHP_INI_ALL,	NULL,			php_ini_boolean_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.bg",			HL_BG_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
@@ -2061,29 +2060,50 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Check for deprecated directives */
 	/* NOTE: If you add anything here, remember to add it also in Makefile.global! */
 	{
-		static const char *directives[] = {
-			"define_syslog_variables", 
-			"register_globals", 
-			"register_long_arrays", 
-			"safe_mode", 
-			"magic_quotes_gpc", 
-			"magic_quotes_runtime", 
-			"magic_quotes_sybase", 
-			NULL
-		};
-		const char **p = directives;
-		long val;
-
-		while (*p) {
-			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_WARNING, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
+		struct {
+			const long error_level;
+			const char *phrase;
+			const char *directives[7]; /* Remember to change this if the number of directives change */
+		} directives[] = {
+			{
+				E_CORE_WARNING, 
+				"Directive '%s' is deprecated in PHP 5.3 and greater", 
+				{
+					"register_globals", 
+					"register_long_arrays", 
+					"safe_mode", 
+					"magic_quotes_gpc", 
+					"magic_quotes_runtime", 
+					"magic_quotes_sybase", 
+					NULL
+				}
+			}, 
+			{
+				E_CORE_ERROR, 
+				"Directive '%s' is no longer available in PHP", 
+				{
+					"define_syslog_variables", 
+					"zend.ze1_compatibility_mode", 
+					NULL
+				}
 			}
-			++p;
-		}
+		};
 
-		/* This is not too nice, but since its the only one theres no need for extra stuff here */
-		if (cfg_get_long("zend.ze1_compatibility_mode", &val) == SUCCESS && val) {
-			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
+		unsigned int i;
+
+		/* 2 = Count of deprecation structs */
+		for (i = 0; i < 2; i++) {
+			const char **p = directives[i].directives;
+
+			while(*p) {
+				long value;
+
+				if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
+					zend_error(directives[i].error_level, directives[i].phrase, *p);
+				}
+
+				++p;
+			}
 		}
 	}
 	
