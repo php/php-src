@@ -1372,16 +1372,8 @@ PHP_FUNCTION(stream_set_write_buffer)
 	size_t buff;
 	php_stream *stream;
 
-	switch (ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
-			RETURN_FALSE;
-		}
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		/* NOTREACHED */
-		break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &arg1);
@@ -1393,6 +1385,35 @@ PHP_FUNCTION(stream_set_write_buffer)
 		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_WRITE_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 	} else {
 		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_WRITE_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
+	}
+
+	RETURN_LONG(ret == 0 ? 0 : EOF);
+}
+/* }}} */
+
+/* {{{ proto int stream_set_read_buffer(resource fp, int buffer)
+   Set file read buffer */
+PHP_FUNCTION(stream_set_read_buffer)
+{
+	zval *arg1;
+	int ret;
+	long arg2;
+	size_t buff;
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &arg1);
+
+	buff = arg2;
+
+	/* if buff is 0 then set to non-buffered */
+	if (buff == 0) {
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
+	} else {
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
 	}
 
 	RETURN_LONG(ret == 0 ? 0 : EOF);

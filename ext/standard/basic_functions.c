@@ -2100,6 +2100,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_timeout, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO(arginfo_stream_set_read_buffer, 0)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, buffer)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_stream_set_write_buffer, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, buffer)
@@ -3104,6 +3109,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fputcsv,															arginfo_fputcsv)
 	PHP_FE(flock,															arginfo_flock)
 	PHP_FE(get_meta_tags,													arginfo_get_meta_tags)
+	PHP_FE(stream_set_read_buffer,											arginfo_stream_set_read_buffer)
 	PHP_FE(stream_set_write_buffer,											arginfo_stream_set_write_buffer)
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
 
