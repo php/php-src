@@ -233,10 +233,6 @@ asp_tags = Off
 ; http://php.net/precision
 precision = 14
 
-; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
-; http://php.net/y2k-compliance
-y2k_compliance = On
-
 ; Output buffering is a mechanism for controlling how much output data
 ; (excluding headers and cookies) PHP should keep internally before pushing that
 ; data to the client. If your application's output exceeds this setting, PHP

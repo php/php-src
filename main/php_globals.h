@@ -127,8 +127,6 @@ struct _php_core_globals {
 	zend_bool register_argc_argv;
 	zend_bool auto_globals_jit;
 
-	zend_bool y2k_compliance;
-
 	char *docref_root;
 	char *docref_ext;
 
