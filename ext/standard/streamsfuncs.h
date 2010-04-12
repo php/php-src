@@ -36,6 +36,7 @@ PHP_FUNCTION(stream_get_contents);
 PHP_FUNCTION(stream_set_blocking);
 PHP_FUNCTION(stream_select);
 PHP_FUNCTION(stream_set_timeout);
+PHP_FUNCTION(stream_set_read_buffer);
 PHP_FUNCTION(stream_set_write_buffer);
 PHP_FUNCTION(stream_get_transports);
 PHP_FUNCTION(stream_get_wrappers);
