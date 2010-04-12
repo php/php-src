@@ -1392,7 +1392,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 /* }}} */
 
 /* {{{ proto int stream_set_read_buffer(resource fp, int buffer)
-   Set file write buffer */
+   Set file read buffer */
 PHP_FUNCTION(stream_set_read_buffer)
 {
 	zval *arg1;
