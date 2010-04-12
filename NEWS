@@ -13,11 +13,13 @@
 - Added command line option --rz to CLI. (Johannes)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
-- default session.entropy_file is now /dev/urandom or /dev/arandom if either
+
+- Changed session.entropy_file to default to /dev/urandom or /dev/arandom if either
   is present at compile time. (Rasmus)
 
-- Removed legacy features:
-  . define_syslog_variables ini option and its associated function. (Kalle)
+- Removed legacy features: (Kalle)
+  . define_syslog_variables ini option and its associated function.
+  . y2k_compliance ini option.
   	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
