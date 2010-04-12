@@ -11,6 +11,7 @@ if (!@mb_internal_encoding('GB2312')) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';

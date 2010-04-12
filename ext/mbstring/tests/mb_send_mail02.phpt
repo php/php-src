@@ -8,6 +8,7 @@ if (!function_exists("mb_send_mail") || !mb_language("japanese")) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';
