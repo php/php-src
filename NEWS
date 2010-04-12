@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
+- Reset error state in PDO::beginTransaction() reset error state. (Ilia)
 
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
