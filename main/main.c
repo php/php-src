@@ -1745,7 +1745,7 @@ int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
 }
 /* }}} */
 
-#if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(PHP_WIN32) && _MSC_VER >= 1400
 static _invalid_parameter_handler old_invalid_parameter_handler;
 
 void dummy_invalid_parameter_handler(
@@ -1795,14 +1795,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	WSADATA wsaData;
 #endif
 #ifdef PHP_WIN32
-	DWORD dwVersion = GetVersion();
-	/* Get build numbers for Windows NT or Win95 */
-	if (dwVersion < 0x80000000){
-		php_os="WINNT";
-	} else {
-		php_os="WIN32";
-	}
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	php_os = "WINNT";
+#if _MSC_VER >= 1400
 	old_invalid_parameter_handler =
 		_set_invalid_parameter_handler(dummy_invalid_parameter_handler);
 	if (old_invalid_parameter_handler != NULL) {
