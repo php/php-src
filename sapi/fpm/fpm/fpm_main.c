@@ -1477,7 +1477,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-function_entry cgi_fcgi_sapi_functions[] = {
+static const zend_function_entry cgi_fcgi_sapi_functions[] = {
 	PHP_FE(fastcgi_finish_request,              NULL)
 	{NULL, NULL, NULL}
 };
