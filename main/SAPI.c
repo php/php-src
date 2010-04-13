@@ -689,7 +689,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 						ptr++;
 					}
 
-					myuid = php_getuid();
+					myuid = php_getuid(TSRMLS_C);
 
 					ptr_len = strlen(ptr);
 					MAKE_STD_ZVAL(repl_temp);
