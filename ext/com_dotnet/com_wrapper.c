@@ -52,12 +52,12 @@ typedef struct {
 
 static int le_dispatch;
 
-static void disp_destructor(php_dispatchex *disp);
+static void disp_destructor(php_dispatchex *disp TSRMLS_DC);
 
 static void dispatch_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_dispatchex *disp = (php_dispatchex *)rsrc->ptr;
-	disp_destructor(disp);
+	disp_destructor(disp TSRMLS_CC);
 }
 
 int php_com_wrapper_minit(INIT_FUNC_ARGS)
@@ -86,14 +86,8 @@ static inline void trace(char *fmt, ...)
 }
 /* }}} */
 
-#ifdef ZTS
-# define TSRMLS_FIXED()	TSRMLS_FETCH();
-#else
-# define TSRMLS_FIXED()
-#endif
-
 #define FETCH_DISP(methname)																			\
-	TSRMLS_FIXED() 																						\
+	TSRMLS_FETCH();																						\
 	php_dispatchex *disp = (php_dispatchex*)This; 														\
 	if (COMG(rshutdown_started)) {																		\
 		trace(" PHP Object:%p (name:unknown) %s\n", disp->object,  methname); 							\
@@ -559,10 +553,8 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 	return disp;
 }
 
-static void disp_destructor(php_dispatchex *disp)
-{
-	TSRMLS_FETCH();
-	
+static void disp_destructor(php_dispatchex *disp TSRMLS_DC)
+{	
 	/* Object store not available during request shutdown */
 	if (COMG(rshutdown_started)) {
 		trace("destroying COM wrapper for PHP object %p (name:unknown)\n", disp->object);

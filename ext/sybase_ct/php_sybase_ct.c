@@ -1188,11 +1188,10 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 		ZVAL_STRINGL(&result, buf, length- 1, 1);       \
 	}
 
-static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
+static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS_DC)
 {
 	int i, j;
 	CS_INT retcode;
-	TSRMLS_FETCH();
 	
 	/* We've already fetched everything */
 	if (result->last_retcode == CS_END_DATA || result->last_retcode == CS_END_RESULTS) {
@@ -1282,7 +1281,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	return retcode;
 }
 
-static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int buffered, int store)
+static sybase_result * php_sybase_fetch_result_set(sybase_link *sybase_ptr, int buffered, int store TSRMLS_DC)
 {
 	int num_fields;
 	sybase_result *result;
@@ -1401,7 +1400,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 	if (buffered) {
 		retcode = CS_SUCCEED;
 	} else {
-		if ((retcode = php_sybase_fetch_result_row(result, -1)) == CS_FAIL) {
+		if ((retcode = php_sybase_fetch_result_row(result, -1 TSRMLS_CC)) == CS_FAIL) {
 			return NULL;
 		}
 	}
@@ -1538,7 +1537,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 			case CS_PARAM_RESULT:
 			case CS_ROW_RESULT:
 			case CS_STATUS_RESULT:
-				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
+				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store TSRMLS_CC);
 				if (result == NULL) {
 					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 					RETURN_FALSE;
@@ -1564,7 +1563,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 					case CS_PARAM_RESULT:
 					case CS_ROW_RESULT:
 						if (status != Q_RESULT) {
-							result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
+							result = php_sybase_fetch_result_set(sybase_ptr, buffered, store TSRMLS_CC);
 							if (result == NULL) {
 								ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 								sybase_ptr->dead = 1;
@@ -1756,7 +1755,7 @@ PHP_FUNCTION(sybase_fetch_row)
 
 	/* Unbuffered? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		php_sybase_fetch_result_row(result, 1);
+		php_sybase_fetch_result_row(result, 1 TSRMLS_CC);
 	}
 	
 	/* At the end? */
@@ -1792,7 +1791,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 
 	/* Unbuffered ? Fetch next row */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		php_sybase_fetch_result_row(result, 1);
+		php_sybase_fetch_result_row(result, 1 TSRMLS_CC);
 	}
 
 	/* At the end? */
@@ -1910,7 +1909,7 @@ PHP_FUNCTION(sybase_data_seek)
 
 	/* Unbuffered ? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && offset >= result->num_rows) {
-		php_sybase_fetch_result_row(result, offset+ 1);
+		php_sybase_fetch_result_row(result, offset+ 1 TSRMLS_CC);
 	}
 	
 	if (offset < 0 || offset >= result->num_rows) {
@@ -2044,7 +2043,7 @@ PHP_FUNCTION(sybase_result)
 	
 	/* Unbuffered ? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && row >= result->num_rows) {
-		php_sybase_fetch_result_row(result, row);
+		php_sybase_fetch_result_row(result, row TSRMLS_CC);
 	}
 
 	if (row < 0 || row >= result->num_rows) {

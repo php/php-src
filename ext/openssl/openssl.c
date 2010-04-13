@@ -852,11 +852,9 @@ static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC) 
 }
 /* }}} */
 
-static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded) /* {{{ */
+static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded TSRMLS_DC) /* {{{ */
 {
 	char buffer[MAXPATHLEN];
-
-	TSRMLS_FETCH();
 
 	*egdsocket = 0;
 	*seeded = 0;
@@ -2742,7 +2740,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	}
 
 	randfile = CONF_get_string(req->req_config, req->section_name, "RANDFILE");
-	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
+	php_openssl_load_rand_file(randfile, &egdsocket, &seeded TSRMLS_CC);
 	
 	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
 		switch(req->priv_key_type) {

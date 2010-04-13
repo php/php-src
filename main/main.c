@@ -113,9 +113,9 @@ PHPAPI int core_globals_id;
 #ifdef PHP_WIN32
 #include "win32_internal_function_disabled.h"
 
-static php_win32_disable_functions() {
+static php_win32_disable_functions(TSRMLS_D)
+{
 	int i;
-	TSRMLS_FETCH();
 
 	if (EG(windows_version_info).dwMajorVersion < 5) {
 		for (i = 0; i < function_name_cnt_5; i++) {
@@ -2044,7 +2044,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef PHP_WIN32
 	/* Disable incompatible functions for the running platform */
-	if (php_win32_disable_functions() == FAILURE) {
+	if (php_win32_disable_functions(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to disable unsupported functions\n");
 		return FAILURE;
 	}

@@ -124,12 +124,11 @@ static int ereg_clean_cache(void *data, void *arg TSRMLS_DC)
 
 /* {{{ _php_regcomp
  */
-static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
+static int _php_regcomp(regex_t *preg, const char *pattern, int cflags TSRMLS_DC)
 {
 	int r = 0;
 	int patlen = strlen(pattern);
 	reg_cache *rc = NULL;
-	TSRMLS_FETCH();
 
 	if (zend_hash_num_elements(&EREG(ht_rc)) >= EREG_CACHE_SIZE) {
 		/* easier than dealing with overflow as it happens */
@@ -201,7 +200,7 @@ static void _free_ereg_cache(reg_cache *rc)
 #undef regfree
 #define regfree(a);
 #undef regcomp
-#define regcomp(a, b, c) _php_regcomp(a, b, c)
+#define regcomp(a, b, c) _php_regcomp(a, b, c TSRMLS_CC)
 	
 static void php_ereg_init_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
 {
@@ -400,7 +399,7 @@ PHP_FUNCTION(eregi)
 
 /* {{{ php_ereg_replace
  * this is the meat and potatoes of regex replacement! */
-PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
+PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC)
 {
 	regex_t re;
 	regmatch_t *subs;
@@ -593,7 +592,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* do the actual work */
-	ret = php_ereg_replace(pattern, replace, string, icase, 1);
+	ret = php_ereg_replace(pattern, replace, string, icase, 1 TSRMLS_CC);
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
