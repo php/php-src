@@ -29,7 +29,7 @@ PHP_FUNCTION(getlastmod);
 
 PHPAPI void php_statpage(TSRMLS_D);
 PHPAPI long php_getlastmod(TSRMLS_D);
-extern long php_getuid(void);
-extern long php_getgid(void);
+extern long php_getuid(TSRMLS_D);
+extern long php_getgid(TSRMLS_D);
 
 #endif

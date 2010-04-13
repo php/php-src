@@ -69,7 +69,7 @@
 		*p = ' ';								\
 	}											\
 
-extern long php_getuid(void);
+extern long php_getuid(TSRMLS_D);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -241,9 +241,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f);
 		}
 		efree(f);
 	}
