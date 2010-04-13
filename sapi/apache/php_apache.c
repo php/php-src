@@ -533,14 +533,14 @@ PHP_FUNCTION(apache_lookup_uri)
 
 
 #if 0
+/*
 This function is most likely a bad idea.  Just playing with it for now.
-
+*/
 PHP_FUNCTION(apache_exec_uri)
 {
 	char *filename;
 	int filename_len;
 	request_rec *rr=NULL;
-	TSRMLS_FETCH();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;

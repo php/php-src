@@ -163,14 +163,12 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* {{{ */
+static int php_curl_option_url(php_curl *ch, const char *url, const int len TSRMLS_DC) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 #if LIBCURL_VERSION_NUM < 0x071100
 	char *copystr = NULL;
 #endif
-	TSRMLS_FETCH();
-
 	/* Disable file:// if open_basedir or safe_mode are used */
 	if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
 #if LIBCURL_VERSION_NUM >= 0x071304
@@ -1474,7 +1472,7 @@ PHP_FUNCTION(curl_init)
 #endif
 
 	if (url) {
-		if (!php_curl_option_url(ch, url, url_len)) {
+		if (!php_curl_option_url(ch, url, url_len TSRMLS_CC)) {
 			_php_curl_close_ex(ch TSRMLS_CC);
 			RETURN_FALSE;
 		}
@@ -1737,7 +1735,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			}
 #endif
 			if (option == CURLOPT_URL) {
-				if (!php_curl_option_url(ch, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue))) {
+				if (!php_curl_option_url(ch, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue) TSRMLS_CC)) {
 					RETVAL_FALSE;
 					return 1;
 				}

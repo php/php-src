@@ -45,22 +45,16 @@ typedef struct {
 } php_istream;
 
 static int le_istream;
-static void istream_destructor(php_istream *stm);
+static void istream_destructor(php_istream *stm TSRMLS_DC);
 
 static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
+	istream_destructor(stm TSRMLS_CC);
 }
 
-#ifdef ZTS
-# define TSRMLS_FIXED()	TSRMLS_FETCH();
-#else
-# define TSRMLS_FIXED()
-#endif
-
 #define FETCH_STM()	\
-	TSRMLS_FIXED() \
+	TSRMLS_FETCH(); \
 	php_istream *stm = (php_istream*)This; \
 	if (GetCurrentThreadId() != stm->engine_thread) \
 		return RPC_E_WRONG_THREAD;
@@ -250,10 +244,8 @@ static struct IStreamVtbl php_istream_vtbl = {
 	stm_clone
 };
 
-static void istream_destructor(php_istream *stm)
+static void istream_destructor(php_istream *stm TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (stm->id) {
 		int id = stm->id;
 		stm->id = 0;

@@ -1906,13 +1906,14 @@ PHP_FUNCTION(apache_lookup_uri)
 
 
 #if 0
+/*
 This function is most likely a bad idea.  Just playing with it for now.
+*/
 
 PHP_FUNCTION(apache_exec_uri)
 {
 	zval **filename;
 	request_rec *rr=NULL;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;

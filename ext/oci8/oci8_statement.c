@@ -336,9 +336,9 @@ php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, l
 sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcpp)
 {
 	php_oci_out_column *outcol = (php_oci_out_column *)ctx;
+	TSRMLS_FETCH();
 
 	if (!outcol) {
-		TSRMLS_FETCH();
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid context pointer value");
 		return OCI_ERROR;
@@ -347,7 +347,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 	switch(outcol->data_type) {
 		case SQLT_RSET: {
 				php_oci_statement *nested_stmt;
-				TSRMLS_FETCH();
 
 				nested_stmt = php_oci_statement_create(outcol->statement->connection, NULL, 0 TSRMLS_CC);
 				if (!nested_stmt) {
@@ -372,7 +371,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 		case SQLT_BFILE: {
 				php_oci_descriptor *descr;
 				int dtype;
-				TSRMLS_FETCH();
 
 				if (outcol->data_type == SQLT_BFILE) {
 					dtype = OCI_DTYPE_FILE;
