@@ -3420,6 +3420,7 @@ PHP_FUNCTION(imap_fetch_overview)
 				add_property_long(myoverview, "deleted", elt->deleted);
 				add_property_long(myoverview, "seen", elt->seen);
 				add_property_long(myoverview, "draft", elt->draft);
+				add_property_long(myoverview, "udate", mail_longdate(elt));
 				add_next_index_object(return_value, myoverview TSRMLS_CC);
 			}
 		}

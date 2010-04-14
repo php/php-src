@@ -22,19 +22,6 @@ require_once(dirname(__FILE__).'/imap_include.inc');
 
 $stream_id = setup_test_mailbox('', 3, $mailbox, 'notSimple'); // set up temp mailbox with 3 msgs
 
-//Set mandatory response fields
-$mandatoryFields = array(
-                    'size',
-                    'uid',
-                    'msgno',
-                    'recent',
-                    'flagged',
-                    'answered',
-                    'deleted',
-                    'seen',
-                    'draft',
-                   );
-
 $sequences = array (0,     4,     '4', // out of range
                     '2',   '1,3', '1, 2',
                     '1:3'); // pass uid without setting FT_UID option
@@ -47,11 +34,7 @@ foreach($sequences as $msg_no) {
         } else {
 		foreach($overview as $ov) {
 			echo "\n";
-               		 foreach ($mandatoryFields as $mf)
-               		 {
-               		   	$z = $ov->$mf;
-               		   	echo "$mf is $z\n";
-			}
+			displayOverviewFields($ov);
        		 }
         }
 }
@@ -89,6 +72,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- $msg_no is 1,3 --
 
@@ -101,6 +85,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 size is %d
 uid is %d
@@ -111,6 +96,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- $msg_no is 1, 2 --
 Syntax error in sequence
@@ -126,6 +112,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 size is %d
 uid is %d
@@ -136,6 +123,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 size is %d
 uid is %d
@@ -146,4 +134,5 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 ===DONE===
