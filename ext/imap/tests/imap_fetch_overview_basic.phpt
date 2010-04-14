@@ -23,28 +23,11 @@ $stream_id = setup_test_mailbox('', 2, $mailbox, 'notSimple');
 $msg_no = imap_uid($stream_id, 1);
 $options = FT_UID;
 
-//Set mandatory response fields
-$mandatoryFields = array(
-                    'size',
-                    'uid',
-                    'msgno',
-                    'recent',
-                    'flagged',
-                    'answered',
-                    'deleted',
-                    'seen',
-                    'draft',
-                   );
-
 // Calling imap_fetch_overview() with all possible arguments
 echo "\n-- All possible arguments --\n";
 $a =  imap_fetch_overview($stream_id, "$msg_no", $options) ;
 echo "\n--> Object #1\n";
-foreach ($mandatoryFields as $mf) 
-{
-  $z = $a[0]->$mf;
-  echo "$mf is $z\n";
-}
+displayOverviewFields($a[0]);
 
 // Calling imap_fetch_overview() with mandatory arguments
 echo "\n-- Mandatory arguments --\n";
@@ -52,19 +35,11 @@ $a = imap_fetch_overview($stream_id, '1:2') ;
 
 //first object in array
 echo "\n--> Object #1\n";
-foreach ($mandatoryFields as $mf) 
-{
-  $z = $a[0]->$mf;
-  echo "$mf is $z\n";
-}
+displayOverviewFields($a[0]);
 
 //Second object in array
 echo "\n--> Object #2\n";
-foreach ($mandatoryFields as $mf) 
-{
-  $z = $a[1]->$mf;
-  echo "$mf is $z\n";
-}
+displayOverviewFields($a[1]);
 
 imap_close($stream_id);
 
@@ -91,6 +66,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- Mandatory arguments --
 
@@ -104,6 +80,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 --> Object #2
 size is %d
@@ -115,4 +92,5 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 ===DONE===

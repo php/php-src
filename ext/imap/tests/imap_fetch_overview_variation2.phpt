@@ -22,20 +22,6 @@ require_once(dirname(__FILE__).'/imap_include.inc');
 // Initialise function arguments not being substituted
 $stream_id = setup_test_mailbox('', 1, $mailbox, 'notSimple'); // set up temp mailbox with 1 msg
 
-//Set mandatory response fields
-$mandatoryFields = array(
-                    'size',
-                    'uid',
-                    'msgno',
-                    'recent',
-                    'flagged',
-                    'answered',
-                    'deleted',
-                    'seen',
-                    'draft',
-                   );
-
-
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -114,11 +100,7 @@ foreach($inputs as $input) {
 	if (!$overview) {
 		echo imap_last_error() . "\n";
 	} else {
-                foreach ($mandatoryFields as $mf)
-                {
-                  $z = $overview[0]->$mf;
-                  echo "$mf is $z\n";
-                }
+		displayOverviewFields($overview[0]);
         }
 	$iterator++;
 };
@@ -151,6 +133,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- Testing with second argument value: int(12345)
 Sequence out of range
@@ -189,6 +172,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- Testing with second argument value: bool(false)
 Sequence out of range
@@ -203,6 +187,7 @@ answered is 0
 deleted is 0
 seen is 0
 draft is 0
+udate is OK
 
 -- Testing with second argument value: bool(false)
 Sequence out of range
