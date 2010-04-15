@@ -5,7 +5,6 @@ bug compatibility: global is used albeit register_globals=0
  if (version_compare(PHP_VERSION,"4.2.3-dev", "<")) die("skip this is for PHP >= 4.2.3");
 ?>
 --INI--
-register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
 register_globals=0
@@ -27,7 +26,7 @@ session_id("abtest");
 session_start();
 session_destroy();
 
-### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
+### Phase 2 $_SESSION["c"] does not contain any value
 session_id("abtest");
 session_register("c");
 var_dump($c);
@@ -36,29 +35,28 @@ $c = 3.14;
 @session_write_close(); // this generates an E_WARNING which will be printed 
 // by $php_errormsg so we can use "@" here. ANY further message IS an error.
 echo $php_errormsg."\n";
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
-### Phase 3 $HTTP_SESSION_VARS["c"] is set
+### Phase 3 $_SESSION["c"] is set
 session_start();
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 unset($c);
 $c = 2.78;
 
 session_write_close();
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
 ### Phase 4 final
 
 session_start();
 var_dump($c);
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 
 session_destroy();
 ?>
 --EXPECTF--
-Warning: Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
 NULL
 session_write_close(): Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively
 array(1) {

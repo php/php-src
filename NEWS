@@ -19,6 +19,7 @@
 
 - Removed legacy features: (Kalle)
   . define_syslog_variables ini option and its associated function.
+  . register_long_arrays ini option.
   . y2k_compliance ini option.
   	
 ?? ??? 20??, PHP 5.3.3

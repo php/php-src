@@ -235,8 +235,7 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 {
 	zval *session_vars = NULL;
 
-	/* Unconditionally destroy existing arrays -- possible dirty data */
-	zend_delete_global_variable("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1 TSRMLS_CC);
+	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
 	if (PS(http_session_vars)) {
@@ -247,13 +246,7 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 	array_init(session_vars);
 	PS(http_session_vars) = session_vars;
 
-	if (PG(register_long_arrays)) {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 3, 1);
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 3, 1);
-	}
-	else {
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
-	}
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
 }
 /* }}} */
 
@@ -1814,9 +1807,7 @@ static void php_register_var(zval** entry TSRMLS_DC)
 	} else {
 		convert_to_string_ex(entry);
 
-		if ((strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0) &&
-			(strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0)
-		) {
+		if (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0) {
 			PS_ADD_VARL(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry));
 		}
 	}
