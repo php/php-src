@@ -2121,7 +2121,6 @@ PHP_FUNCTION(mysqli_sqlstate)
 
 /* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher]) U
 */
-#if !defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_ssl_set)
 {
 	MY_MYSQL	*mysql;
@@ -2144,7 +2143,6 @@ PHP_FUNCTION(mysqli_ssl_set)
 
 	RETURN_TRUE;
 }
-#endif
 /* }}} */
   
 /* {{{ proto mixed mysqli_stat(object link) 

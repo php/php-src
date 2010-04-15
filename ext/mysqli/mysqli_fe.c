@@ -156,9 +156,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_reset,							NULL)
 	PHP_FE(mysqli_stmt_param_count,						NULL)
 	PHP_FE(mysqli_sqlstate,   							NULL)
-#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_ssl_set,								NULL)
-#endif
 	PHP_FE(mysqli_stat,									NULL)
 	PHP_FE(mysqli_stmt_affected_rows,					NULL)
 	PHP_FE(mysqli_stmt_close,							NULL)
@@ -246,9 +244,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(set_charset,mysqli_set_charset,NULL)
 #endif
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
-#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
-#endif
 	PHP_FALIAS(stat,mysqli_stat,NULL)
 	PHP_FALIAS(stmt_init,mysqli_stmt_init, NULL)
 	PHP_FALIAS(store_result,mysqli_store_result,NULL)
