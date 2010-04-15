@@ -111,7 +111,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 				chunk->ptr = new_ptr;
 				chunk->size = size;
 				chunk->pool = NULL; /* now we have no pool memory */
-				pool->refcount--;				
+				pool->refcount--;
 			}
 		}
 	} else {

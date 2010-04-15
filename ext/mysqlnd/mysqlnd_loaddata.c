@@ -37,7 +37,7 @@ if (c) {\
 
 #define FREE_CALLBACK_ARGS(a, b, c)\
 if (a) {\
-	for (i=b; i < c; i++) {\
+	for (i = b; i < c; i++) {\
 		zval_ptr_dtor(a[i]);\
 		mnd_efree(a[i]);\
 	}\
@@ -48,8 +48,8 @@ if (a) {\
 static
 int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS_DC)
 {
-	MYSQLND_INFILE_INFO		*info;
-	php_stream_context 		*context = NULL;
+	MYSQLND_INFILE_INFO	*info;
+	php_stream_context	*context = NULL;
 
 	DBG_ENTER("mysqlnd_local_infile_init");
 
@@ -85,7 +85,7 @@ int mysqlnd_local_infile_read(void *ptr, char *buf, unsigned int buf_len TSRMLS_
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int count;
 
-    DBG_ENTER("mysqlnd_local_infile_read");
+	DBG_ENTER("mysqlnd_local_infile_read");
 
 	count = (int)php_stream_read(info->fd, buf, buf_len);
 
@@ -171,7 +171,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	char				*buf;
 	char				empty_packet[MYSQLND_HEADER_SIZE];
 	enum_func_status	result = FAIL;
-	unsigned int				buflen = 4096;
+	unsigned int		buflen = 4096;
 	void				*info = NULL;
 	int					bufsize;
 	size_t				ret;
@@ -199,16 +199,14 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 		/* error occured */
 		strcpy(conn->error_info.sqlstate, UNKNOWN_SQLSTATE);
 		conn->error_info.error_no =
-				infile.local_infile_error(info, conn->error_info.error,
-										  sizeof(conn->error_info.error) TSRMLS_CC);
+				infile.local_infile_error(info, conn->error_info.error, sizeof(conn->error_info.error) TSRMLS_CC);
 		/* write empty packet to server */
 		ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC);
 		goto infile_error;
 	}
 
 	/* read data */
-	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE,
-												buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
+	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE, buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
 		if ((ret = conn->net->m.send(conn, buf, bufsize TSRMLS_CC)) < 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
@@ -227,8 +225,8 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 		*is_warning = TRUE;
 		DBG_ERR_FMT("Bufsize < 0, warning,  %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		strcpy(conn->error_info.sqlstate, UNKNOWN_SQLSTATE);
-		conn->error_info.error_no = infile.local_infile_error(info, conn->error_info.error,
-															 sizeof(conn->error_info.error) TSRMLS_CC);
+		conn->error_info.error_no =
+				infile.local_infile_error(info, conn->error_info.error, sizeof(conn->error_info.error) TSRMLS_CC);
 		goto infile_error;
 	}
 

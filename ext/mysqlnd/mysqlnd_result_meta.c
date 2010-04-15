@@ -29,8 +29,8 @@
 
 
 /* {{{ php_mysqlnd_free_field_metadata */
-static
-void php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS_DC)
+static void
+php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS_DC)
 {
 	if (meta) {
 		if (meta->root) {
@@ -51,10 +51,10 @@ void php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent T
   The following code is stolen from ZE - HANDLE_NUMERIC() macro from zend_hash.c
   and modified for the needs of mysqlnd.
 */
-static
-zend_bool mysqlnd_is_key_numeric(char *key, size_t length, long *idx)
+static zend_bool
+mysqlnd_is_key_numeric(char *key, size_t length, long *idx)
 {
-	register char *tmp=key;
+	register char * tmp = key;
 
 	if (*tmp=='-') {
 		tmp++;
@@ -94,10 +94,10 @@ zend_bool mysqlnd_is_key_numeric(char *key, size_t length, long *idx)
 
 #if PHP_MAJOR_VERSION >= 6
 /* {{{ mysqlnd_unicode_is_key_numeric */
-static
-zend_bool mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
+static zend_bool
+mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
 {
-	register UChar *tmp=key;
+	register UChar * tmp=key;
 
 	if (*tmp==0x2D /*'-'*/) {
 		tmp++;

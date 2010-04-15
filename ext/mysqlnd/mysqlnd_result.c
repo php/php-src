@@ -87,42 +87,39 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bo
 {
 	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
 	*copy_ctor_called = FALSE;
-	{
+
+	/*
+	  This zval is not from the cache block.
+	  Thus the refcount is -1 than of a zval from the cache,
+	  because the zvals from the cache are owned by it.
+	*/
+	if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
+		; /* do nothing, zval_ptr_dtor will do the job*/
+	} else if (Z_REFCOUNT_PP(zv) > 1) {
 		/*
-		  This zval is not from the cache block.
-		  Thus the refcount is -1 than of a zval from the cache,
-		  because the zvals from the cache are owned by it.
+		  Not a prepared statement, then we have to
+		  call copy_ctor and then zval_ptr_dtor()
+
+		  In Unicode mode the destruction  of the zvals should not call
+		  zval_copy_ctor() because then we will leak.
+		  I suppose we can use UG(unicode) in mysqlnd.c when freeing a result set
+		  to check if we need to call copy_ctor().
+
+		  If the type is IS_UNICODE, which can happen with PHP6, then we don't
+		  need to copy_ctor, as the data doesn't point to our internal buffers.
+		  If it's string (in PHP5 always) and in PHP6 if data is binary, then
+		  it still points to internal buffers and has to be copied.
 		*/
-		if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
-			; /* do nothing, zval_ptr_dtor will do the job*/
-		} else if (Z_REFCOUNT_PP(zv) > 1) {
-			/*
-			  Not a prepared statement, then we have to
-			  call copy_ctor and then zval_ptr_dtor()
-
-			  In Unicode mode the destruction  of the zvals should not call
-			  zval_copy_ctor() because then we will leak.
-			  I suppose we can use UG(unicode) in mysqlnd.c when freeing a result set
-			  to check if we need to call copy_ctor().
-
-			  If the type is IS_UNICODE, which can happen with PHP6, then we don't
-			  need to copy_ctor, as the data doesn't point to our internal buffers.
-			  If it's string (in PHP5 always) and in PHP6 if data is binary, then
-			  it still points to internal buffers and has to be copied.
-			*/
-			if (Z_TYPE_PP(zv) == IS_STRING) {
-				zval_copy_ctor(*zv);
-			}
-			*copy_ctor_called = TRUE;
-		} else {
-			if (Z_TYPE_PP(zv) == IS_STRING) {
-				ZVAL_NULL(*zv);
-			}
+		if (Z_TYPE_PP(zv) == IS_STRING) {
+			zval_copy_ctor(*zv);
 		}
-		zval_ptr_dtor(zv);
-		DBG_VOID_RETURN;
+		*copy_ctor_called = TRUE;
+	} else {
+		if (Z_TYPE_PP(zv) == IS_STRING) {
+			ZVAL_NULL(*zv);
+		}
 	}
-
+	zval_ptr_dtor(zv);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -263,7 +260,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 	if (result->result_set_memory_pool) {
 		DBG_INF("Freeing memory pool");
 		mysqlnd_mempool_destroy(result->result_set_memory_pool TSRMLS_CC);
-		result->result_set_memory_pool = NULL;	
+		result->result_set_memory_pool = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -339,9 +336,9 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES *result, MYSQLND *
 
 	/*
 	  2. Follows an EOF packet, which the client of mysqlnd_read_result_metadata()
-		 should consume.
+	     should consume.
 	  3. If there is a result set, it follows. The last packet will have 'eof' set
-	  	 If PS, then no result set follows.
+	     If PS, then no result set follows.
 	*/
 
 	DBG_RETURN(PASS);
@@ -423,7 +420,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				ret = PASS;
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
-			default:{			/* Result set	*/
+			default:{			/* Result set */
 				MYSQLND_PACKET_EOF * fields_eof;
 				MYSQLND_RES *result;
 				enum_mysqlnd_collected_stats stat = STAT_LAST;
@@ -463,7 +460,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 						  Note, that now (4.1.3) we always send metadata in reply to
 						  COM_STMT_EXECUTE (even if it is not necessary), so either this or
 						  previous branch always works.
-						*/	
+						*/
 					}
 					result = stmt->result;
 				}
@@ -542,8 +539,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static 
-unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
+static unsigned long *
+mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	unsigned int i;
 	zval **previous_row;
@@ -573,12 +570,13 @@ unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS
 
 
 /* {{{ mysqlnd_fetch_lengths_unbuffered */
-static
-unsigned long * mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
+static unsigned long *
+mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->lengths;
 }
 /* }}} */
+
 
 #if !defined(MYSQLND_USE_OPTIMISATIONS) || MYSQLND_USE_OPTIMISATIONS == 0
 /* {{{ mysqlnd_res::fetch_lengths */
@@ -589,16 +587,17 @@ PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_
 /* }}} */
 #endif
 
+
 /* {{{ mysqlnd_fetch_row_unbuffered_c */
 static MYSQLND_ROW_C
 mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 {
-	enum_func_status		ret;
-	MYSQLND_ROW_C 			retrow = NULL;
-	unsigned int			i,
-							field_count = result->field_count;
+	enum_func_status	ret;
+	MYSQLND_ROW_C		retrow = NULL;
+	unsigned int		i,
+						field_count = result->field_count;
 	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
-	unsigned long			*lengths = result->lengths;
+	unsigned long		*lengths = result->lengths;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered_c");
 
@@ -670,7 +669,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			result->conn->error_info = row_packet->error_info;
-			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error); 
+			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
@@ -701,8 +700,8 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 static enum_func_status
 mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
-	enum_func_status		ret;
-	zval 					*row = (zval *) param;
+	enum_func_status	ret;
+	zval				*row = (zval *) param;
 	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered");
@@ -714,8 +713,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 		DBG_RETURN(PASS);
 	}
 	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
-						 UNKNOWN_SQLSTATE, mysqlnd_out_of_sync); 
+		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(FAIL);
 	}
 	/* Let the row packet fill our buffer and skip additional mnd_malloc + memcpy */
@@ -804,7 +802,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			result->conn->error_info = row_packet->error_info;
-			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error); 
+			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		*fetched_anything = FALSE;
 		CONN_SET_STATE(result->conn, CONN_READY);
@@ -1139,7 +1137,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		set->error_info = row_packet->error_info;
 	} else {
 		/* Position at the first row */
-		set->data_cursor = set->data;	
+		set->data_cursor = set->data;
 
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status.affected_rows = set->row_count;
