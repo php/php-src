@@ -646,7 +646,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
-				int len;
+				unsigned int len;
 
 				if (Z_TYPE_P(data) != IS_NULL) {
 					convert_to_string(data);
@@ -755,7 +755,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 
 			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
-				int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+				unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
 
 				if (lengths) {
 					lengths[i] = len;
