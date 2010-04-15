@@ -81,7 +81,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
 		char *pos;
-		int arg_end = strlen(argv[*optind])-2;
+		int arg_end = strlen(argv[*optind])-1;
 
 		/* '--' indicates end of args if not followed by a known long option name */
 		if (argv[*optind][2] == '\0') {
@@ -95,27 +95,23 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		if ((pos = php_memnstr(&argv[*optind][arg_start], "=", 1, argv[*optind]+arg_end)) != NULL) {
 			arg_end = pos-&argv[*optind][arg_start];
 			arg_start++;
+		} else {
+			arg_end--;
 		}
- 
 
 		while (1) {
 			php_optidx++;
 			if (opts[php_optidx].opt_char == '-') {
 				(*optind)++;
 				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
-			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end)) {
+			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end) && arg_end == strlen(opts[php_optidx].opt_name)) {
 				break;
 			}
 		}
 
-		if (arg_end == strlen(opts[php_optidx].opt_name)) {
-			optchr = 0;
-			dash = 0;
-			arg_start += strlen(opts[php_optidx].opt_name);
-		} else {
-			(*optind)++;
-			return (php_opt_error(argc, argv, *optind-1, optchr, OPTERRNF, show_err));
-		}
+		optchr = 0;
+		dash = 0;
+		arg_start += strlen(opts[php_optidx].opt_name);
 	} else {
 		if (!dash) {
 			dash = 1;
