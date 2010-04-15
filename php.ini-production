@@ -1389,7 +1389,7 @@ pgsql.max_links = -1
 ; http://php.net/pgsql.ignore-notice
 pgsql.ignore_notice = 0
 
-; Log PostgreSQL backends Noitce message or not.
+; Log PostgreSQL backends Notice message or not.
 ; Unless pgsql.ignore_notice=0, module cannot log notice message.
 ; http://php.net/pgsql.log-notice
 pgsql.log_notice = 0
