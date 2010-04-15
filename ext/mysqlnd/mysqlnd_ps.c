@@ -156,7 +156,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	SET_EMPTY_ERROR(stmt->conn->error_info);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
-	result = mysqlnd_result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);	
+	result = mysqlnd_result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);
 
 	result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
 
@@ -1283,8 +1283,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 		unsigned int i = 0;
 
 		if (!param_bind) {
-			SET_STMT_ERROR(stmt, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-							 "Re-binding (still) not supported");
+			SET_STMT_ERROR(stmt, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, "Re-binding (still) not supported");
 			DBG_ERR("Re-binding (still) not supported");
 			DBG_RETURN(FAIL);
 		} else if (stmt->param_bind) {
@@ -1495,7 +1494,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		  Don't update is_ref !!! it's not our job
 		  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt
 		  will fail.
-		*/	
+		*/
 		stmt->result_bind[param_no].bound = TRUE;
 	}
 	DBG_INF("PASS");
@@ -1799,7 +1798,8 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s TSRMLS_DC)
 
 
 /* {{{ mysqlnd_stmt_separate_result_bind */
-void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
+static void
+mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	unsigned int i;
@@ -1852,7 +1852,8 @@ void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 
 
 /* {{{ mysqlnd_stmt_separate_one_result_bind */
-void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param_no TSRMLS_DC)
+static void
+mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param_no TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
@@ -1899,8 +1900,8 @@ void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int 
 
 
 /* {{{ mysqlnd_internal_free_stmt_content */
-static
-void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const s TSRMLS_DC)
+static void
+mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	DBG_ENTER("mysqlnd_internal_free_stmt_content");
@@ -2182,7 +2183,6 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, u
 /* }}} */
 
 
-
 /* {{{ _mysqlnd_init_ps_subsystem */
 void _mysqlnd_init_ps_subsystem()
 {
@@ -2191,12 +2191,14 @@ void _mysqlnd_init_ps_subsystem()
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_conn_get_methods */
 PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods()
 {
 	return mysqlnd_stmt_methods;
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_set_methods */
 PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)

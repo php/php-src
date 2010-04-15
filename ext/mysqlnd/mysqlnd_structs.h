@@ -48,7 +48,7 @@ struct st_mysqlnd_memory_pool
 struct st_mysqlnd_memory_pool_chunk
 {
 	uint64_t			app;
-	MYSQLND_MEMORY_POOL *pool;
+	MYSQLND_MEMORY_POOL	*pool;
 	zend_uchar			*ptr;
 	unsigned int		size;
 	void				(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
@@ -91,7 +91,6 @@ typedef struct st_mysqlnd_field
 } MYSQLND_FIELD;
 
 
-
 typedef struct st_mysqlnd_upsert_result
 {
 	unsigned int	warning_count;
@@ -111,24 +110,24 @@ typedef struct st_mysqlnd_error_info
 
 typedef struct st_mysqlnd_infile_info
 {
-	php_stream			*fd;
-	int					error_no;
-	char				error_msg[MYSQLND_ERRMSG_SIZE + 1];
-	const char			*filename;
+	php_stream	*fd;
+	int			error_no;
+	char		error_msg[MYSQLND_ERRMSG_SIZE + 1];
+	const char	*filename;
 } MYSQLND_INFILE_INFO;
 
 
 /* character set information */
 typedef struct st_mysqlnd_charset
 {
-	unsigned int		nr;
-	const char	*name;
-	const char	*collation;
-	unsigned int		char_minlen;
-	unsigned int		char_maxlen;
-	const char	*comment;
-	unsigned int 		(*mb_charlen)(unsigned int c);
-	unsigned int 		(*mb_valid)(const char *start, const char *end);
+	unsigned int	nr;
+	const char		*name;
+	const char		*collation;
+	unsigned int	char_minlen;
+	unsigned int	char_maxlen;
+	const char		*comment;
+	unsigned int 	(*mb_charlen)(unsigned int c);
+	unsigned int 	(*mb_valid)(const char *start, const char *end);
 } MYSQLND_CHARSET;
 
 
@@ -148,8 +147,8 @@ typedef struct st_mysqlnd_options
 	ulong		flags;
 
 	/* init commands - we need to send them to server directly after connect */
-	unsigned int		num_commands;
-	char		**init_commands;
+	unsigned int	num_commands;
+	char			**init_commands;
 
 	/* configuration file information */
 	char 		*cfg_file;
@@ -231,7 +230,7 @@ typedef void (*mysqlnd_stat_trigger)(MYSQLND_STATS * stats, enum_mysqlnd_collect
 struct st_mysqlnd_stats
 {
 	uint64_t				*values;
-	mysqlnd_stat_trigger 	*triggers;
+	mysqlnd_stat_trigger	*triggers;
 	size_t					count;
 	zend_bool				in_trigger;
 #ifdef ZTS
@@ -258,7 +257,7 @@ typedef size_t				(*func_mysqlnd_net__send)(MYSQLND * const conn, char * const b
 typedef size_t				(*func_mysqlnd_net__receive)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__set_client_option)(MYSQLND_NET * const net, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__network_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
-typedef size_t 				(*func_mysqlnd_net__network_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
+typedef size_t				(*func_mysqlnd_net__network_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__decode)(zend_uchar * uncompressed_data, size_t uncompressed_data_len, const zend_uchar * const compressed_data, size_t compressed_data_len TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__encode)(zend_uchar * compress_buffer, size_t compress_buffer_len, const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC);
 typedef size_t				(*func_mysqlnd_net__consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd TSRMLS_DC);
@@ -671,7 +670,7 @@ struct st_mysqlnd_net
 	/* cmd buffer */
 	MYSQLND_CMD_BUFFER	cmd_buffer;
 
-	MYSQLND_NET_OPTIONS options;
+	MYSQLND_NET_OPTIONS	options;
 
 	zend_bool			persistent;
 };
@@ -707,7 +706,7 @@ struct st_mysqlnd_connection
 	unsigned char	*scramble;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
-	char 			*connect_or_select_db;
+	char			*connect_or_select_db;
 	unsigned int	connect_or_select_db_len;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
@@ -833,7 +832,7 @@ struct st_mysqlnd_res
 
 	struct st_mysqlnd_packet_row * row_packet;
 
-	MYSQLND_MEMORY_POOL * result_set_memory_pool;
+	MYSQLND_MEMORY_POOL		* result_set_memory_pool;
 	zend_bool				persistent;
 };
 

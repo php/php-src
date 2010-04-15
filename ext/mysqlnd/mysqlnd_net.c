@@ -142,8 +142,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 		*/
 		zend_rsrc_list_entry *le;
 
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_len + 1,
-						   (void*) &le) == SUCCESS) {
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_len + 1, (void*) &le) == SUCCESS) {
 			/*
 			  in_free will let streams code skip destructing - big HACK,
 			  but STREAMS suck big time regarding persistent streams.
@@ -202,7 +201,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 /* {{{ mysqlnd_net::send */
 /*
   IMPORTANT : It's expected that buf has place in the beginning for MYSQLND_HEADER_SIZE !!!!
-  			  This is done for performance reasons in the caller of this function.
+			  This is done for performance reasons in the caller of this function.
 			  Otherwise we will have to do send two TCP packets, or do new alloc and memcpy.
 			  Neither are quick, thus the clients of this function are obligated to do
 			  what they are asked for.
@@ -246,7 +245,9 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 			STORE_HEADER_SIZE(safe_storage, uncompressed_payload);
 			int3store(uncompressed_payload, to_be_sent);
 			int1store(uncompressed_payload + 3, net->packet_no);
-			if (PASS == net->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), tmp_complen, uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE TSRMLS_CC)) {
+			if (PASS == net->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), tmp_complen,
+									   uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE TSRMLS_CC))
+			{
 				int3store(compress_buf + MYSQLND_HEADER_SIZE, to_be_sent + MYSQLND_HEADER_SIZE);
 				payload_size = tmp_complen;
 			} else {
@@ -265,7 +266,8 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
 				zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
-				int error = net->m.decode(decompressed_data, decompressed_size, compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
+				int error = net->m.decode(decompressed_data, decompressed_size,
+										  compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 				if (error == Z_OK) {
 					int i;
 					DBG_INF("success decompressing");
@@ -725,14 +727,14 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	php_stream_context *context = php_stream_context_alloc();
 	DBG_ENTER("mysqlnd_net::enable_ssl");
 	if (!context) {
-		DBG_RETURN(FAIL);	
+		DBG_RETURN(FAIL);
 	}
 
 	if (net->options.ssl_key) {
 		zval key_zval;
 		ZVAL_STRING(&key_zval, net->options.ssl_key, 0);
 		DBG_INF("key");
-		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);	
+		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
 	if (net->options.ssl_verify_peer) {
 		zval verify_peer_zval;
@@ -746,7 +748,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		DBG_INF_FMT("local_cert=%s", net->options.ssl_cert);
 		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
 		if (!net->options.ssl_key) {
-			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);	
+			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
 		}
 	}
 	if (net->options.ssl_ca) {

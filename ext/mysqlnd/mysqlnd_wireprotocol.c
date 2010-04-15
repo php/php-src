@@ -120,7 +120,8 @@ static enum_mysqlnd_collected_stats packet_type_to_statistic_packet_count[PROT_L
 
 /* {{{ php_mysqlnd_net_field_length
    Get next field's length */
-unsigned long php_mysqlnd_net_field_length(zend_uchar **packet)
+unsigned long
+php_mysqlnd_net_field_length(zend_uchar **packet)
 {
 	register zend_uchar *p= (zend_uchar *)*packet;
 
@@ -149,7 +150,8 @@ unsigned long php_mysqlnd_net_field_length(zend_uchar **packet)
 
 /* {{{ php_mysqlnd_net_field_length_ll
    Get next field's length */
-uint64_t php_mysqlnd_net_field_length_ll(zend_uchar **packet)
+uint64_t
+php_mysqlnd_net_field_length_ll(zend_uchar **packet)
 {
 	register zend_uchar *p= (zend_uchar *)*packet;
 
@@ -177,7 +179,8 @@ uint64_t php_mysqlnd_net_field_length_ll(zend_uchar **packet)
 
 
 /* {{{ php_mysqlnd_net_store_length */
-zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
+zend_uchar *
+php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 {
 	if (length < (uint64_t) L64(251)) {
 		*packet = (zend_uchar) length;
@@ -383,8 +386,8 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 
 
 /* {{{ php_mysqlnd_crypt */
-static
-void php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
+static void
+php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
 {
 	const zend_uchar *s1_end = s1 + len;
 	while (s1 < s1_end) {
@@ -395,8 +398,7 @@ void php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_ucha
 
 
 /* {{{ php_mysqlnd_scramble */
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble,
-						  const zend_uchar * const password)
+void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password)
 {
 	PHP_SHA1_CTX context;
 	zend_uchar sha1[SHA1_MAX_LENGTH];
@@ -427,7 +429,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 
 /* {{{ php_mysqlnd_auth_write */
 static
-size_t php_mysqlnd_auth_write(void *_packet, MYSQLND *conn TSRMLS_DC)
+size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 {
 	char buffer[1024];
 	register char *p= buffer + MYSQLND_HEADER_SIZE; /* start after the header */
@@ -567,8 +569,8 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 
 /* {{{ php_mysqlnd_ok_free_mem */
-static
-void php_mysqlnd_ok_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+static void
+php_mysqlnd_ok_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	MYSQLND_PACKET_OK *p= (MYSQLND_PACKET_OK *) _packet;
 	if (p->message) {
@@ -1028,7 +1030,7 @@ void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 
 /* {{{ php_mysqlnd_read_row_ex */
 static enum_func_status
-php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
+php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
 						MYSQLND_MEMORY_POOL_CHUNK **buffer,
 						uint64_t *data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes TSRMLS_DC)
@@ -1103,11 +1105,12 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL * result_set_memory_p
 
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
-void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
-										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_STATS * stats TSRMLS_DC)
+void
+php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									  unsigned int field_count, MYSQLND_FIELD *fields_metadata,
+									  zend_bool persistent,
+									  zend_bool as_unicode, zend_bool as_int_or_float,
+									  MYSQLND_STATS * stats TSRMLS_DC)
 {
 	int i;
 	zend_uchar *p = row_buffer->ptr;
@@ -1122,8 +1125,8 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	/* skip the first byte, not EODATA_MARKER -> 0x0, status */
 	p++;
 	null_ptr= p;
-	p += (field_count + 9)/8;		/* skip null bits */
-	bit	= 4;						/* first 2 bits are reserved */
+	p += (field_count + 9)/8;	/* skip null bits */
+	bit	= 4;					/* first 2 bits are reserved */
 
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		DBG_INF("Directly creating zval");
@@ -1139,8 +1142,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 			MYSQLND_INC_CONN_STATISTIC(stats, STAT_BINARY_TYPE_FETCHED_NULL);
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
-			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i],
-												  0, &p, as_unicode TSRMLS_CC);
+			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i], 0, &p, as_unicode TSRMLS_CC);
 
 			if (MYSQLND_G(collect_statistics)) {
 				enum_mysqlnd_collected_stats statistic;
@@ -1189,11 +1191,12 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
-void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
-										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_STATS * stats TSRMLS_DC)
+void
+php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
+									zend_bool persistent,
+									zend_bool as_unicode, zend_bool as_int_or_float,
+									MYSQLND_STATS * stats TSRMLS_DC)
 {
 	int i;
 	zend_bool last_field_was_string = FALSE;
@@ -1332,8 +1335,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 				  Definitely not nice, _hackish_ :(, but works.
 				*/
 				zend_uchar *start = bit_area;
-				ps_fetch_from_1_to_8_bytes(*current_field, &(fields_metadata[i]),
-							   			   0, &p, as_unicode, len TSRMLS_CC);
+				ps_fetch_from_1_to_8_bytes(*current_field, &(fields_metadata[i]), 0, &p, as_unicode, len TSRMLS_CC);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
@@ -1382,8 +1384,8 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 			  because then we will leak.
 
 			  XXX: Keep in mind that up there there is an open `else` in
-				   #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-				   which will make with this `if` an `else if`.
+			  #ifdef MYSQLND_STRING_TO_INT_CONVERSION
+			  which will make with this `if` an `else if`.
 			*/
 			if ((perm_bind.is_possibly_blob == TRUE &&
 				 fields_metadata[i].charsetnr == MYSQLND_BINARY_CHARSET_NR) ||
@@ -1429,8 +1431,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	if (!packet->binary_protocol && packet->bit_fields_count) {
 		/* For every field we need terminating \0 */
-		post_alloc_for_bit_fields =
-			packet->bit_fields_total_len + packet->bit_fields_count;
+		post_alloc_for_bit_fields = packet->bit_fields_total_len + packet->bit_fields_count;
 	}
 
 	ret = php_mysqlnd_read_row_ex(conn, packet->result_set_memory_pool, &packet->row_buffer, &data_size,
@@ -1511,8 +1512,8 @@ end:
 
 
 /* {{{ php_mysqlnd_rowp_free_mem */
-static
-void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+static void
+php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	MYSQLND_PACKET_ROW *p;
 
@@ -1526,9 +1527,9 @@ void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 	/*
 	  Don't free packet->fields :
 	  - normal queries -> store_result() | fetch_row_unbuffered() will transfer
-		the ownership and NULL it.
+	    the ownership and NULL it.
 	  - PS will pass in it the bound variables, we have to use them! and of course
-		not free the array. As it is passed to us, we should not clean it ourselves.
+	    not free the array. As it is passed to us, we should not clean it ourselves.
 	*/
 	if (!alloca) {
 		mnd_pefree(p, p->header.persistent);
@@ -1651,8 +1652,8 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 
 /* {{{ php_mysqlnd_prepare_free_mem */
-static
-void php_mysqlnd_prepare_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+static void
+php_mysqlnd_prepare_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	MYSQLND_PACKET_PREPARE_RESPONSE *p= (MYSQLND_PACKET_PREPARE_RESPONSE *) _packet;
 	if (!alloca) {
@@ -1712,8 +1713,8 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 
 /* {{{ php_mysqlnd_chg_user_free_mem */
-static
-void php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+static void
+php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
 		mnd_pefree(_packet, ((MYSQLND_PACKET_CHG_USER_RESPONSE *)_packet)->header.persistent);
@@ -1722,8 +1723,7 @@ void php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ packet_methods
- */
+/* {{{ packet_methods */
 static
 mysqlnd_packet_methods packet_methods[PROT_LAST] =
 {
@@ -1795,7 +1795,6 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 	} /* PROT_CHG_USER_RESP_PACKET */
 };
 /* }}} */
-
 
 
 /* {{{ mysqlnd_protocol::get_greet_packet */
@@ -1986,7 +1985,8 @@ mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
 
 
 /* {{{ _mysqlnd_plugin_get_plugin_protocol_data */
-PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC)
+PHPAPI void **
+_mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_plugin_get_plugin_protocol_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
