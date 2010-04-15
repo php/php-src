@@ -177,7 +177,7 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 
 /* {{{ mysqlnd_res::free_buffered_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES *result TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 {
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 	unsigned int field_count = result->field_count;
@@ -232,7 +232,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::free_result_buffers */
 static void
-MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::free_result_buffers");
 	DBG_INF_FMT("%s", result->unbuf? "unbuffered":(result->stored_data? "buffered":"unknown"));
@@ -270,7 +270,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_internal_free_result_contents */
 static
-void mysqlnd_internal_free_result_contents(MYSQLND_RES *result TSRMLS_DC)
+void mysqlnd_internal_free_result_contents(MYSQLND_RES * result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_internal_free_result_contents");
 
@@ -288,7 +288,7 @@ void mysqlnd_internal_free_result_contents(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_internal_free_result */
 static
-void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
+void mysqlnd_internal_free_result(MYSQLND_RES * result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_internal_free_result");
 	result->m.free_result_contents(result TSRMLS_CC);
@@ -307,7 +307,7 @@ void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::read_result_metadata */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES *result, MYSQLND *conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::read_result_metadata");
 
@@ -422,7 +422,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				break;
 			default:{			/* Result set */
 				MYSQLND_PACKET_EOF * fields_eof;
-				MYSQLND_RES *result;
+				MYSQLND_RES * result;
 				enum_mysqlnd_collected_stats stat = STAT_LAST;
 
 				DBG_INF("Result set pending");
@@ -590,7 +590,7 @@ PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_
 
 /* {{{ mysqlnd_fetch_row_unbuffered_c */
 static MYSQLND_ROW_C
-mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
+mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 {
 	enum_func_status	ret;
 	MYSQLND_ROW_C		retrow = NULL;
@@ -698,7 +698,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_unbuffered */
 static enum_func_status
-mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status	ret;
 	zval				*row = (zval *) param;
@@ -879,7 +879,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 
 /* {{{ mysqlnd_fetch_row_buffered_c */
 static MYSQLND_ROW_C
-mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
+mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 {
 	MYSQLND_ROW_C ret = NULL;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
@@ -946,7 +946,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_buffered */
 static enum_func_status
-mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	unsigned int i;
 	zval *row = (zval *) param;
@@ -1044,7 +1044,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 
 /* {{{ mysqlnd_res::store_result_fetch_data */
 enum_func_status
-MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES *result,
+MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA *meta,
 													zend_bool binary_protocol,
 													zend_bool to_cache TSRMLS_DC)
@@ -1223,7 +1223,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::free_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES *result, zend_bool implicit TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, zend_bool implicit TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::free_result");
 	DBG_INF_FMT("implicit=%d", implicit);
@@ -1241,7 +1241,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES *result, zend_bool implicit
 
 /* {{{ mysqlnd_res::data_seek */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64_t row TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES * result, uint64_t row TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::data_seek");
 	DBG_INF_FMT("row=%lu", row);
@@ -1381,7 +1381,7 @@ MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result TSRMLS_
 
 /* {{{ mysqlnd_res::fetch_into */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES *result, unsigned int flags,
+MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, unsigned int flags,
 										zval *return_value,
 										enum_mysqlnd_extension extension TSRMLS_DC ZEND_FILE_LINE_DC)
 {
@@ -1425,7 +1425,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES *result, unsigned int flags,
 
 /* {{{ mysqlnd_res::fetch_row_c */
 static MYSQLND_ROW_C
-MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES *result TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result TSRMLS_DC)
 {
 	MYSQLND_ROW_C ret = NULL;
 	DBG_ENTER("mysqlnd_res::fetch_row_c");
@@ -1446,7 +1446,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::fetch_all */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  *row;
 	ulong i = 0;
@@ -1481,7 +1481,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags, 
 
 /* {{{ mysqlnd_res::fetch_field_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int offset, zval *return_value TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int offset, zval *return_value TSRMLS_DC)
 {
 	zval row;
 	zval **entry;
