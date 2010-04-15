@@ -545,7 +545,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	p+= 2;
 
 	/* There is a message */
-	if (packet->header.size > p - buf && (i = php_mysqlnd_net_field_length(&p))) {
+	if (packet->header.size > (size_t) (p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
 		packet->message = mnd_pestrndup((char *)p, MIN(i, buf_len - (p - begin)), FALSE);
 		packet->message_len = i;
 	} else {
@@ -780,7 +780,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			packet->warning_count = uint2korr(p);
 			p+=2;
 			/* Check for additional textual data */
-			if (packet->header.size  > (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
+			if (packet->header.size  > (size_t) (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
 				packet->info_or_local_file = mnd_emalloc(len + 1);
 				memcpy(packet->info_or_local_file, p, len);
 				packet->info_or_local_file[len] = '\0';
@@ -935,7 +935,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	  NULL_LENGTH (0xFB) comes from COM_FIELD_LIST when the default value is NULL.
 	  Otherwise the string is length encoded.
 	*/
-	if (packet->header.size > (p - buf) &&
+	if (packet->header.size > (size_t) (p - buf) &&
 		(len = php_mysqlnd_net_field_length(&p)) &&
 		len != MYSQLND_NULL_LENGTH)
 	{
