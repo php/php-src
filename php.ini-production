@@ -141,11 +141,6 @@
 ;   Development Value: Off
 ;   Production Value: Off
 
-; register_long_arrays
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; request_order
 ;   Default Value: None
 ;   Development Value: "GP"
@@ -686,16 +681,6 @@ request_order = "GP"
 ; http://php.net/register-globals
 register_globals = Off
 
-; Determines whether the deprecated long $HTTP_*_VARS type predefined variables
-; are registered by PHP or not. As they are deprecated, we obviously don't
-; recommend you use them. They are on by default for compatibility reasons but
-; they are not recommended on production servers.
-; Default Value: On
-; Development Value: Off
-; Production Value: Off
-; http://php.net/register-long-arrays
-register_long_arrays = Off
-
 ; This directive determines whether PHP registers $argv & $argc each time it
 ; runs. $argv contains an array of all the arguments passed to PHP when a script
 ; is invoked. $argc contains an integer representing the number of arguments
@@ -714,8 +699,8 @@ register_argc_argv = Off
 ; When enabled, the SERVER and ENV variables are created when they're first
 ; used (Just In Time) instead of when the script starts. If these variables
 ; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directives register_globals, register_long_arrays,
-; and register_argc_argv must be disabled for this directive to have any affect.
+; performance gain. The PHP directives register_globals and register_argc_argv 
+; must be disabled for this directive to have any affect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
