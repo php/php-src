@@ -108,6 +108,12 @@ PHP_MINFO_FUNCTION(mysqlnd)
 #else
 								"not supported");
 #endif
+	php_info_print_table_row(2, "SSL",
+#ifdef MYSQLND_SSL_SUPPORTED
+								"supported");
+#else
+								"not supported");
+#endif
 	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_cmd_buffer_size));
 	php_info_print_table_row(2, "Command buffer size", buf);
 	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_read_buffer_size));

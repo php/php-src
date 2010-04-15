@@ -458,31 +458,33 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	memset(p, 0, 23); /* filler */
 	p+= 23;
 
-	len= strlen(packet->user);
-	memcpy(p, packet->user, len);
-	p+= len;
-	*p++ = '\0';
+	if (!packet->send_half_packet) {
+		len = strlen(packet->user);
+		memcpy(p, packet->user, len);
+		p+= len;
+		*p++ = '\0';
 
-	/* copy scrambled pass*/
-	if (packet->password && packet->password[0]) {
-		/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
-		int1store(p, 20);
-		p++;
-		php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
-		p+= 20;
-	} else {
-		/* Zero length */
-		int1store(p, 0);
-		p++;
-	}
+		/* copy scrambled pass*/
+		if (packet->password && packet->password[0]) {
+			/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
+			int1store(p, 20);
+			p++;
+			php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
+			p+= 20;
+		} else {
+			/* Zero length */
+			int1store(p, 0);
+			p++;
+		}
 
-	if (packet->db) {
-		memcpy(p, packet->db, packet->db_len);
-		p+= packet->db_len;
-		*p++= '\0';
+		if (packet->db) {
+			memcpy(p, packet->db, packet->db_len);
+			p+= packet->db_len;
+			*p++= '\0';
+		}
+		/* Handle CLIENT_CONNECT_WITH_DB */
+		/* no \0 for no DB */
 	}
-	/* Handle CLIENT_CONNECT_WITH_DB */
-	/* no \0 for no DB */
 
 	DBG_RETURN(conn->net->m.send(conn, buffer, p - buffer - MYSQLND_HEADER_SIZE TSRMLS_CC));
 }

@@ -155,13 +155,17 @@ typedef struct st_mysqlnd_options
 	char 		*cfg_file;
 	char		*cfg_section;
 
-	/* SSL information */
-	char		*ssl_key;
-	char		*ssl_cert;
-	char		*ssl_ca;
-	char		*ssl_capath;
-	char		*ssl_cipher;
-	zend_bool	use_ssl;
+	/*
+	  We need to keep these because otherwise st_mysqlnd_conn will be changed.
+	  The ABI will be broken and the methods structure will be somewhere else
+	  in the memory which can crash external code. Feel free to reuse these.
+	*/
+	char		* unused1;
+	char		* unused2;
+	char		* unused3;
+	char		* unused4;
+	char		* unused5;
+	zend_bool	unused6;
 
 	char 		*charset_name;
 	/* maximum allowed packet size for communication */
@@ -181,6 +185,15 @@ typedef struct st_mysqlnd_net_options
 	unsigned int timeout_write;
 
 	unsigned int net_read_buffer_size;
+
+	/* SSL information */
+	char		*ssl_key;
+	char		*ssl_cert;
+	char		*ssl_ca;
+	char		*ssl_capath;
+	char		*ssl_cipher;
+	char		*ssl_passphrase;
+	zend_bool	ssl_verify_peer;
 } MYSQLND_NET_OPTIONS;
 
 
@@ -250,6 +263,8 @@ typedef enum_func_status	(*func_mysqlnd_net__decode)(zend_uchar * uncompressed_d
 typedef enum_func_status	(*func_mysqlnd_net__encode)(zend_uchar * compress_buffer, size_t compress_buffer_len, const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC);
 typedef size_t				(*func_mysqlnd_net__consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__free_contents)(MYSQLND_NET * net TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_net__enable_ssl)(MYSQLND_NET * const net TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_net__disable_ssl)(MYSQLND_NET * const net TSRMLS_DC);
 
 
 struct st_mysqlnd_net_methods
@@ -264,6 +279,8 @@ struct st_mysqlnd_net_methods
 	func_mysqlnd_net__encode encode;
 	func_mysqlnd_net__consume_uneaten_data consume_uneaten_data;
 	func_mysqlnd_net__free_contents free_contents;
+	func_mysqlnd_net__enable_ssl enable_ssl;
+	func_mysqlnd_net__disable_ssl disable_ssl;
 };
 
 
@@ -375,6 +392,8 @@ typedef enum_func_status	(*func_mysqlnd_conn__restart_psession)(MYSQLND *conn TS
 typedef enum_func_status	(*func_mysqlnd_conn__end_psession)(MYSQLND *conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__send_close)(MYSQLND * conn TSRMLS_DC);
 
+typedef void				(*func_mysqlnd_conn__ssl_set)(MYSQLND * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher TSRMLS_DC);
+
 
 struct st_mysqlnd_conn_methods
 {
@@ -443,6 +462,8 @@ struct st_mysqlnd_conn_methods
 	func_mysqlnd_conn__restart_psession restart_psession;
 	func_mysqlnd_conn__end_psession end_psession;
 	func_mysqlnd_conn__send_close send_close;
+
+	func_mysqlnd_conn__ssl_set ssl_set;
 };
 
 

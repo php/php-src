@@ -50,6 +50,7 @@ require_once('skipifconnectfailure.inc');
 		'select_db'			=> true,
 		'set_charset'			=> true,
 		'set_opt'			=> true,
+		'ssl_set'			=> true,
 		'stat'				=> true,
 		'stmt_init'			=> true,
 		'store_result'			=> true,

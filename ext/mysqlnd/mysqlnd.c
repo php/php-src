@@ -109,27 +109,8 @@ MYSQLND_METHOD(mysqlnd_conn, free_options)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->options.cfg_section, pers);
 		conn->options.cfg_section = NULL;
 	}
-	if (conn->options.ssl_key) {
-		mnd_pefree(conn->options.ssl_key, pers);
-		conn->options.ssl_key = NULL;
-	}
-	if (conn->options.ssl_cert) {
-		mnd_pefree(conn->options.ssl_cert, pers);
-		conn->options.ssl_cert = NULL;
-	}
-	if (conn->options.ssl_ca) {
-		mnd_pefree(conn->options.ssl_ca, pers);
-		conn->options.ssl_ca = NULL;
-	}
-	if (conn->options.ssl_capath) {
-		mnd_pefree(conn->options.ssl_capath, pers);
-		conn->options.ssl_capath = NULL;
-	}
-	if (conn->options.ssl_cipher) {
-		mnd_pefree(conn->options.ssl_cipher, pers);
-		conn->options.ssl_cipher = NULL;
-	}
 }
+/* }}} */
 
 
 /* {{{ mysqlnd_conn::free_contents */
@@ -356,9 +337,8 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND *conn, enum php_mysqlnd_ser
 			DBG_ERR("Server is gone");
 			DBG_RETURN(FAIL);
 		default:
-			SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-							 mysqlnd_out_of_sync);
-			DBG_ERR("Command out of sync");
+			SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
+			DBG_ERR_FMT("Command out of sync. State=%d", CONN_GET_STATE(conn));
 			DBG_RETURN(FAIL);
 	}
 
@@ -597,7 +577,20 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
 #endif
-
+#ifndef MYSQLND_SSL_SUPPORTED
+	if (mysql_flags & CLIENT_SSL) {
+		mysql_flags &= ~CLIENT_SSL;
+	}
+#else
+	if (conn->net->options.ssl_key || conn->net->options.ssl_cert ||
+		conn->net->options.ssl_ca || conn->net->options.ssl_capath || conn->net->options.ssl_cipher)
+	{
+		mysql_flags |= CLIENT_SSL;
+	}
+	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
+		auth_packet->send_half_packet = TRUE;
+	}
+#endif
 	auth_packet->user		= user;
 	auth_packet->password	= passwd;
 
@@ -619,11 +612,32 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 
 	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
 	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
+	
 	if (!PACKET_WRITE(auth_packet, conn)) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		goto err;
 	}
+
+#ifdef MYSQLND_SSL_SUPPORTED
+	if (auth_packet->send_half_packet) {
+		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
+		DBG_INF("Switching to SSL");
+
+		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
+
+		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
+			goto err;
+		}
+		
+		auth_packet->send_half_packet = FALSE;
+		if (!PACKET_WRITE(auth_packet, conn)) {
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			goto err;
+		}
+	}
+#endif
 
 	if (FAIL == PACKET_READ(ok_packet, conn) || ok_packet->field_count >= 0xFE) {
 		if (ok_packet->field_count == 0xFE) {
@@ -1175,6 +1189,18 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 	DBG_ENTER("mysqlnd_old_escape_string");
 	DBG_RETURN(mysqlnd_cset_escape_slashes(mysqlnd_find_charset_name("latin1"),
 										   newstr, escapestr, escapestr_len TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn::ssl_set */
+void
+MYSQLND_METHOD(mysqlnd_conn, ssl_set)(MYSQLND * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher TSRMLS_DC)
+{
+	conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_KEY, key TSRMLS_CC);
+	conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CERT, cert TSRMLS_CC);
+	conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CA, ca TSRMLS_CC);
+	conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CAPATH, capath TSRMLS_CC);
+	conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CIPHER, cipher TSRMLS_CC);
 }
 /* }}} */
 
@@ -1875,6 +1901,12 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
 #endif
+		case MYSQLND_OPT_SSL_KEY:
+		case MYSQLND_OPT_SSL_CERT:
+		case MYSQLND_OPT_SSL_CA:
+		case MYSQLND_OPT_SSL_CAPATH:
+		case MYSQLND_OPT_SSL_CIPHER:
+		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
@@ -1913,7 +1945,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SET_CLIENT_IP:
 		case MYSQL_REPORT_DATA_TRUNCATION:
-		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 #endif
 			/* currently not supported. Todo!! */
 			break;
@@ -2100,7 +2131,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn, end_psession),
-	MYSQLND_METHOD(mysqlnd_conn, send_close)
+	MYSQLND_METHOD(mysqlnd_conn, send_close),
+
+	MYSQLND_METHOD(mysqlnd_conn, ssl_set)
 MYSQLND_CLASS_METHODS_END;
 
 

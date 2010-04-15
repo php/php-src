@@ -4435,7 +4435,9 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 	if (!cipherlist) {
 		cipherlist = "DEFAULT";
 	}
-	SSL_CTX_set_cipher_list(ctx, cipherlist);
+	if (SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
+		return NULL;
+	}
 
 	GET_VER_OPT_STRING("local_cert", certfile);
 	if (certfile) {
@@ -4443,6 +4445,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		EVP_PKEY *key = NULL;
 		SSL *tmpssl;
 		char resolved_path_buff[MAXPATHLEN];
+		const char * private_key;
 
 		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
 			/* a certificate to use for authentication */
@@ -4451,8 +4454,10 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 				return NULL;
 			}
 
-			if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
+			GET_VER_OPT_STRING("local_pk", private_key);
+
+			if (private_key && SSL_CTX_use_PrivateKey_file(ctx, private_key, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", private_key);
 				return NULL;
 			}
 

@@ -36,6 +36,7 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
       MYSQLND_LIBS="$MYSQLND_LIBS -lz"
     fi
   fi
+  AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable SSL support])
 fi
 
 if test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
