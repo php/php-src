@@ -338,7 +338,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	/* pad2 */
 	p+= 13;
 
-	if (p - buf < packet->header.size) {
+	if ((size_t) (p - buf) < packet->header.size) {
 		/* scramble_buf is split into two parts */
 		memcpy(packet->scramble_buf + SCRAMBLE_LENGTH_323,
 				p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
@@ -352,7 +352,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("server_capabilities=%d charset_no=%d server_status=%d",
 				packet->server_capabilities, packet->charset_no, packet->server_status);
 
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
@@ -556,7 +556,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				packet->affected_rows, packet->last_insert_id, packet->server_status,
 				packet->warning_count);
 
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
@@ -631,7 +631,7 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		packet->server_status = 0;
 	}
 
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("EOF packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
@@ -795,7 +795,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			/* Result set */
 			break;
 	}
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("RSET_HEADER packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
@@ -947,7 +947,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		p += len;
 	}
 
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("RSET field packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
 				 		"shorter than expected", p - begin - packet->header.size);
@@ -1639,7 +1639,7 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("Prepare packet read: stmt_id=%d fields=%d params=%d",
 				packet->stmt_id, packet->field_count, packet->param_count);
 
-	if (p - begin > packet->header.size) {
+	if ((size_t)(p - begin) > packet->header.size) {
 		DBG_ERR_FMT("PREPARE packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
@@ -1700,7 +1700,7 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 										 packet->error_info.sqlstate
 										 TSRMLS_CC);
 	}
-	if (p - begin > packet->header.size) {
+	if ((size_t) (p - begin) > packet->header.size) {
 		DBG_ERR_FMT("CHANGE_USER packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
