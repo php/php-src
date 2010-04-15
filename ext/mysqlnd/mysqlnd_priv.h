@@ -42,8 +42,8 @@
 #endif
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
-#define MYSQLND_CLASS_METHODS_START(class) struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
-#define MYSQLND_CLASS_METHODS_END  				}							 
+#define MYSQLND_CLASS_METHODS_START(class)	struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
+#define MYSQLND_CLASS_METHODS_END			}
 
 #if PHP_MAJOR_VERSION < 6
 #define mysqlnd_array_init(arg, field_count) \
@@ -134,8 +134,8 @@
 #define CONN_GET_STATE(c)		(c)->m->get_state((c) TSRMLS_CC)
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
 #else
-#define CONN_GET_STATE(c)		(c)->state
-#define CONN_SET_STATE(c, s)	(c)->state = s
+#define CONN_GET_STATE(c)		((c)->state)
+#define CONN_SET_STATE(c, s)	((c)->state = s)
 #endif
 
 

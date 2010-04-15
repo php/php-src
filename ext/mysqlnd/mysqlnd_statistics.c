@@ -225,7 +225,8 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 
 /* {{{ _mysqlnd_get_client_stats */
-PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+PHPAPI void
+_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	MYSQLND_STATS stats, *stats_ptr = mysqlnd_global_stats;
 	DBG_ENTER("_mysqlnd_get_client_stats");

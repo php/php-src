@@ -23,10 +23,7 @@
 #ifndef MYSQLND_RESULT_META_H
 #define MYSQLND_RESULT_META_H
 
-
 PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
-
-
 
 #endif /* MYSQLND_RESULT_META_H */
 

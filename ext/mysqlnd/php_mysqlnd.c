@@ -49,8 +49,8 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 		zstr	string_key;
 		uint	string_key_len;
 		ulong	num_key;
-		int     s_len;
-		char 	*s = NULL;
+		int		s_len;
+		char	*s = NULL;
 
 		TSRMLS_FETCH();
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &string_key, &string_key_len, &num_key, 0, &pos_values);

@@ -106,10 +106,10 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 		}
 
 #if SIZEOF_LONG==4
-	    if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
+		if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
-		} else 
+		} else
 #endif /* SIZEOF */
 		{
 			ZVAL_LONG(zv, lval);
@@ -126,7 +126,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 		{
 			DBG_INF("stringify");
 			ZVAL_STRINGL(zv, tmp, tmp_len, 1);
-		}			
+		}
 	}
 	(*row)+= byte_count;
 	DBG_VOID_RETURN;
@@ -199,7 +199,7 @@ void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
 	DBG_ENTER("ps_fetch_float");
 	float4get(value, *row);
 	ZVAL_DOUBLE(zv, value);
-  	(*row)+= 4;
+	(*row)+= 4;
 	DBG_INF_FMT("value=%f", value);
 	DBG_VOID_RETURN;
 }
@@ -256,14 +256,13 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	} else {
 		memset(&t, 0, sizeof(t));
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
- 	}
+	}
 
 	/*
 	  QQ : How to make this unicode without copying two times the buffer -
 	  Unicode equivalent of spprintf?
 	*/
-	length = spprintf(&to, 0, "%s%02u:%02u:%02u",
-					 (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+	length = spprintf(&to, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", to);
 #if PHP_MAJOR_VERSION >= 6
@@ -273,7 +272,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 		efree(to);  /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
+		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
 #endif
 	DBG_VOID_RETURN;
@@ -324,7 +323,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 		efree(to); /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
+		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
 #endif
 	DBG_VOID_RETURN;
@@ -358,7 +357,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 			t.minute = (unsigned int) to[5];
 			t.second = (unsigned int) to[6];
 		} else {
-      		t.hour = t.minute = t.second= 0;
+			t.hour = t.minute = t.second= 0;
 		}
 		t.second_part = (length > 7) ? (unsigned long) sint4korr(to+7) : 0;
 
@@ -383,7 +382,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 		efree(to); /* allocated by spprintf */
 #if PHP_MAJOR_VERSION >= 6
 	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);	
+		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
 #endif
 	DBG_VOID_RETURN;
@@ -406,7 +405,7 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 	DBG_INF_FMT("len = %lu", length);
 #if PHP_MAJOR_VERSION < 6
 	DBG_INF("copying from the row buffer");
-	ZVAL_STRINGL(zv, (char *)*row, length, 1);	
+	ZVAL_STRINGL(zv, (char *)*row, length, 1);
 #else
 	if (field->charsetnr == MYSQLND_BINARY_CHARSET_NR) {
 		DBG_INF("Binary charset");
@@ -440,92 +439,92 @@ void _mysqlnd_init_ps_fetch_subsystem()
 {
 	memset(mysqlnd_ps_fetch_functions, 0, sizeof(mysqlnd_ps_fetch_functions));
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].func		= ps_fetch_null;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].pack_len 	= 0;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].php_type 	= IS_NULL;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].pack_len	= 0;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].php_type	= IS_NULL;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].func		= ps_fetch_int8;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].pack_len	= 1;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].php_type	= IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].func		= ps_fetch_int16;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].pack_len	= 2;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].php_type	= IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].func		= ps_fetch_int16;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].pack_len	= 2;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].php_type	= IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].func		= ps_fetch_int32;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].pack_len	= 4;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].php_type	= IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].func		= ps_fetch_int32;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].pack_len	= 4;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].php_type 	= IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].func	= ps_fetch_int64;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].pack_len= 8;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].php_type = IS_LONG;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].php_type= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].func		= ps_fetch_float;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].pack_len	= 4;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].php_type	= IS_DOUBLE;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].func		= ps_fetch_double;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].pack_len	= 8;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].php_type = IS_DOUBLE;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].php_type	= IS_DOUBLE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].can_ret_as_str_in_uni	= TRUE;
 	
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].func		= ps_fetch_time;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].func		= ps_fetch_date;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].func		= ps_fetch_date;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].can_ret_as_str_in_uni	= TRUE;
 	
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].func	= ps_fetch_datetime;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].pack_len= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].php_type= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].func	= ps_fetch_datetime;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].pack_len= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].php_type= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].can_ret_as_str_in_uni = TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].can_ret_as_str_in_uni	= TRUE;
 	
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].php_type = IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].is_possibly_blob = TRUE;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].is_possibly_blob = TRUE;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].can_ret_as_str_in_uni	= TRUE;
 	
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].func	= ps_fetch_string;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].php_type= IS_STRING;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].func		= ps_fetch_string;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].is_possibly_blob = TRUE;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
@@ -545,23 +544,23 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].php_type = IS_STRING;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].func			= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].pack_len		= MYSQLND_PS_SKIP_RESULT_STR;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].php_type 	= IS_STRING;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDECIMAL].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDECIMAL].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDECIMAL].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDECIMAL].can_ret_as_str_in_uni 	= TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDECIMAL].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_ENUM].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_ENUM].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
@@ -583,7 +582,7 @@ static void
 mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current TSRMLS_DC)
 {
 	if (!*copies) {
-		*copies = mnd_ecalloc(param_count, sizeof(zval *));					
+		*copies = mnd_ecalloc(param_count, sizeof(zval *));
 	}
 	MAKE_STD_ZVAL((*copies)[current]);
 	*(*copies)[current] = *original;
@@ -637,8 +636,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		unsigned int j;
 		zval *the_var = stmt->param_bind[i].zv;
 
-		if (!the_var || (stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB &&
-						 Z_TYPE_P(the_var) == IS_NULL)) {
+		if (!the_var || (stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB && Z_TYPE_P(the_var) == IS_NULL)) {
 			continue;
 		}
 		for (j = i + 1; j < stmt->param_count; j++) {
@@ -778,7 +776,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				zval_ptr_dtor(&copies[i]);
 			}
 		}
-		mnd_efree(copies);	
+		mnd_efree(copies);
 	}
 }
 /* }}} */

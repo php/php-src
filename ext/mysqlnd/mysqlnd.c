@@ -224,8 +224,8 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 /* {{{ mysqlnd_conn::simple_command_handle_response */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum mysqlnd_packet_type ok_packet,
-									   						 zend_bool silent, enum php_mysqlnd_server_command command,
-									   						 zend_bool ignore_upsert_status TSRMLS_DC)
+															 zend_bool silent, enum php_mysqlnd_server_command command,
+															 zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret;
 
@@ -282,19 +282,17 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum
 				if (!silent) {
 					DBG_ERR_FMT("Error while reading %s's EOF packet", mysqlnd_command_to_text[command]);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading %s's EOF packet. PID=%d",
-								 	mysqlnd_command_to_text[command], getpid());
+									 mysqlnd_command_to_text[command], getpid());
 				}
 			} else if (0xFF == ok_response->field_count) {
 				/* The server signalled error. Set the error */
 				SET_CLIENT_ERROR(conn->error_info, ok_response->error_no, ok_response->sqlstate, ok_response->error);
 				SET_ERROR_AFF_ROWS(conn);
 			} else if (0xFE != ok_response->field_count) {
-				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
-								 "Malformed packet");
+				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
 				if (!silent) {
 					DBG_ERR_FMT("EOF packet expected, field count wasn't 0xFE but 0x%2X", ok_response->field_count);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-									"EOF packet expected, field count wasn't 0xFE but 0x%2X",
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "EOF packet expected, field count wasn't 0xFE but 0x%2X",
 									ok_response->field_count);
 				}
 			} else {
@@ -305,10 +303,8 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum
 		}
 		default:
 			ret = FAIL;
-			SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
-							 "Malformed packet");
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong response packet %d passed to the function",
-							 ok_packet);
+			SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong response packet %d passed to the function", ok_packet);
 			break;
 	}
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
@@ -543,7 +539,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 
 	if (FAIL == conn->net->m.connect(conn->net, conn->scheme, conn->scheme_len, conn->persistent, &errstr, &errcode TSRMLS_CC)) {
-		goto err;	
+		goto err;
 	}
 
 	DBG_INF_FMT("stream=%p", conn->net->stream);
@@ -594,9 +590,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	auth_packet->user		= user;
 	auth_packet->password	= passwd;
 
-	if (conn->options.charset_name &&
-		(charset = mysqlnd_find_charset_name(conn->options.charset_name)))
-	{
+	if (conn->options.charset_name && (charset = mysqlnd_find_charset_name(conn->options.charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
 #if PHP_MAJOR_VERSION >= 6
@@ -721,8 +715,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 #if PHP_MAJOR_VERSION >= 6
 		{
 			unsigned int as_unicode = 1;
-			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE,
-									   (char *)&as_unicode TSRMLS_CC);
+			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, (char *)&as_unicode TSRMLS_CC);
 			DBG_INF("unicode set");
 		}
 #endif
