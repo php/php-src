@@ -172,6 +172,8 @@ PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS
 PHPAPI const char *	mysqlnd_get_client_info();
 PHPAPI unsigned int	mysqlnd_get_client_version();
 
+#define mysqlnd_ssl_set(conn, key, cert, ca, capath, cipher) (conn)->m->ssl_set((conn), (key), (cert), (ca), (capath), (cipher) TSRMLS_CC)
+
 /* PS */
 #define mysqlnd_stmt_insert_id(stmt)		(stmt)->m->get_last_insert_id((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_affected_rows(stmt)	(stmt)->m->get_affected_rows((stmt) TSRMLS_CC)

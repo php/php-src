@@ -172,8 +172,8 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 		/* should always happen because read_timeout cannot be set via API */
 		net->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
 	}
-	if (net->options.timeout_read)
-	{
+	if (net->options.timeout_read) {
+		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->options.timeout_read);
 		tv.tv_sec = net->options.timeout_read;
 		tv.tv_usec = 0;
 		php_stream_set_option(net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
@@ -587,6 +587,63 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
 			net->options.timeout_connect = *(unsigned int*) value;
 			break;
+		case MYSQLND_OPT_SSL_KEY:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_key) {
+					mnd_pefree(net->options.ssl_key, pers);
+				}
+				net->options.ssl_key = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQLND_OPT_SSL_CERT:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_cert) {
+					mnd_pefree(net->options.ssl_cert, pers);
+				}
+				net->options.ssl_cert = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQLND_OPT_SSL_CA:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_ca) {
+					mnd_pefree(net->options.ssl_ca, pers);
+				}
+				net->options.ssl_ca = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQLND_OPT_SSL_CAPATH:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_capath) {
+					mnd_pefree(net->options.ssl_capath, pers);
+				}
+				net->options.ssl_capath = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQLND_OPT_SSL_CIPHER:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_cipher) {
+					mnd_pefree(net->options.ssl_cipher, pers);
+				}
+				net->options.ssl_cipher = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQLND_OPT_SSL_PASSPHRASE:
+			{
+				zend_bool pers = net->persistent;
+				if (net->options.ssl_passphrase) {
+					mnd_pefree(net->options.ssl_passphrase, pers);
+				}
+				net->options.ssl_passphrase = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
+		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
+			net->options.ssl_verify_peer = value? ((*(zend_bool *)value)? TRUE:FALSE): FALSE;
+			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
 			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
@@ -657,12 +714,113 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 }
 /* }}} */
 
+/*
+  in libmyusql, if cert and !key then key=cert
+*/
+/* {{{ mysqlnd_net::enable_ssl */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
+{
+#ifdef MYSQLND_SSL_SUPPORTED
+	php_stream_context *context = php_stream_context_alloc();
+	DBG_ENTER("mysqlnd_net::enable_ssl");
+	if (!context) {
+		DBG_RETURN(FAIL);	
+	}
+
+	if (net->options.ssl_key) {
+		zval key_zval;
+		ZVAL_STRING(&key_zval, net->options.ssl_key, 0);
+		DBG_INF("key");
+		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);	
+	}
+	if (net->options.ssl_verify_peer) {
+		zval verify_peer_zval;
+		ZVAL_TRUE(&verify_peer_zval);
+		DBG_INF("verify peer");
+		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
+	}
+	if (net->options.ssl_cert) {
+		zval cert_zval;
+		ZVAL_STRING(&cert_zval, net->options.ssl_cert, 0);
+		DBG_INF_FMT("local_cert=%s", net->options.ssl_cert);
+		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
+		if (!net->options.ssl_key) {
+			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);	
+		}
+	}
+	if (net->options.ssl_ca) {
+		zval cafile_zval;
+		ZVAL_STRING(&cafile_zval, net->options.ssl_ca, 0);
+		DBG_INF_FMT("cafile=%s", net->options.ssl_ca);
+		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
+	}
+	if (net->options.ssl_capath) {
+		zval capath_zval;
+		ZVAL_STRING(&capath_zval, net->options.ssl_capath, 0);
+		DBG_INF_FMT("capath=%s", net->options.ssl_capath);
+		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
+	}
+	if (net->options.ssl_passphrase) {
+		zval passphrase_zval;
+		ZVAL_STRING(&passphrase_zval, net->options.ssl_passphrase, 0);
+		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
+	}
+	if (net->options.ssl_cipher) {
+		zval cipher_zval;
+		ZVAL_STRING(&cipher_zval, net->options.ssl_cipher, 0);
+		DBG_INF_FMT("ciphers=%s", net->options.ssl_cipher);
+		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
+	}
+	php_stream_context_set(net->stream, context);
+	if (php_stream_xport_crypto_setup(net->stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
+	    php_stream_xport_crypto_enable(net->stream, 1 TSRMLS_CC) < 0)
+	{
+		DBG_ERR("Cannot connect to MySQL by using SSL");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to MySQL by using SSL");
+		DBG_RETURN(FAIL);
+	}
+	/*
+	  get rid of the context. we are persistent and if this is a real pconn used by mysql/mysqli,
+	  then the context would not survive cleaning of EG(regular_list), where it is registered, as a
+	  resource. What happens is that after this destruction any use of the network will mean usage
+	  of the context, which means usage of already freed memory, bad. Actually we don't need this
+	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
+	*/
+	php_stream_context_set(net->stream, NULL);
+
+	if (net->options.timeout_read) {
+		struct timeval tv;
+		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->options.timeout_read);
+		tv.tv_sec = net->options.timeout_read;
+		tv.tv_usec = 0;
+		php_stream_set_option(net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+	}
+
+	DBG_RETURN(PASS);
+#else
+	DBG_ENTER("mysqlnd_net::enable_ssl");
+	DBG_RETURN(PASS);
+#endif
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_net::disable_ssl */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_net, disable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_net::disable_ssl");
+	DBG_RETURN(PASS);
+}
+/* }}} */
 
 
 /* {{{ mysqlnd_net::set_client_option */
 static void
 MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 {
+	zend_bool pers = net->persistent;
 	DBG_ENTER("mysqlnd_net::free_contents");
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
@@ -670,6 +828,27 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 		net->uncompressed_data->free_buffer(&net->uncompressed_data TSRMLS_CC);
 	}
 #endif
+	if (net->options.ssl_key) {
+		mnd_pefree(net->options.ssl_key, pers);
+		net->options.ssl_key = NULL;
+	}
+	if (net->options.ssl_cert) {
+		mnd_pefree(net->options.ssl_cert, pers);
+		net->options.ssl_cert = NULL;
+	}
+	if (net->options.ssl_ca) {
+		mnd_pefree(net->options.ssl_ca, pers);
+		net->options.ssl_ca = NULL;
+	}
+	if (net->options.ssl_capath) {
+		mnd_pefree(net->options.ssl_capath, pers);
+		net->options.ssl_capath = NULL;
+	}
+	if (net->options.ssl_cipher) {
+		mnd_pefree(net->options.ssl_cipher, pers);
+		net->options.ssl_cipher = NULL;
+	}
+
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -696,6 +875,8 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	net->m.encode = MYSQLND_METHOD(mysqlnd_net, encode);
 	net->m.consume_uneaten_data = MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data);
 	net->m.free_contents = MYSQLND_METHOD(mysqlnd_net, free_contents);
+	net->m.enable_ssl = MYSQLND_METHOD(mysqlnd_net, enable_ssl);
+	net->m.disable_ssl = MYSQLND_METHOD(mysqlnd_net, disable_ssl);
 
 	{
 		unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/

@@ -90,6 +90,8 @@
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
 #define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
 
+#define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
+
 typedef enum mysqlnd_extension
 {
 	MYSQLND_MYSQL = 0,
@@ -156,6 +158,12 @@ typedef enum mysqlnd_option
 #endif
 	MYSQLND_OPT_NET_CMD_BUFFER_SIZE = 202,
 	MYSQLND_OPT_NET_READ_BUFFER_SIZE = 203,
+	MYSQLND_OPT_SSL_KEY = 204,
+	MYSQLND_OPT_SSL_CERT = 205,
+	MYSQLND_OPT_SSL_CA = 206,
+	MYSQLND_OPT_SSL_CAPATH = 207,
+	MYSQLND_OPT_SSL_CIPHER = 208,
+	MYSQLND_OPT_SSL_PASSPHRASE = 209
 } enum_mysqlnd_option;
 
 
