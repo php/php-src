@@ -311,7 +311,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
-	if (zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
+	if ((uint) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return FALSE;
 	}
 
@@ -348,7 +348,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
 	}
-	if (zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
+	if ((uint) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return PASS;
 	}
 
