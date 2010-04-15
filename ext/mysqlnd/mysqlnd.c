@@ -720,7 +720,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		}
 #endif
 		if (conn->options.init_commands) {
-			int current_command = 0;
+			unsigned int current_command = 0;
 			for (; current_command < conn->options.num_commands; ++current_command) {
 				const char * const command = conn->options.init_commands[current_command];
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
