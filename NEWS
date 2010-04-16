@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Fixed bug #51347 (mysqli_close / connection memory leak). (Andrey, Johannes)
 - Fixed bug #51338 (URL-Rewriter is still enabled if use_only_cookies is
   on). (Ilia, j dot jeising at gmail dot com)
+- Fixed bug #51291 (oci_error doesn't report last error when called two times)
+  (Oracle Corp.)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51257 (CURL_VERSION_LARGEFILE incorrectly used after libcurl
   version 7.10.1). (aron dot ujvari at microsec dot hu)
