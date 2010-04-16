@@ -54,8 +54,8 @@ static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 
 #define FETCH_STM()	\
-	TSRMLS_FETCH(); \
 	php_istream *stm = (php_istream*)This; \
+	TSRMLS_FETCH(); \
 	if (GetCurrentThreadId() != stm->engine_thread) \
 		return RPC_E_WRONG_THREAD;
 
