@@ -809,8 +809,16 @@ void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 {
 	php_oci_bind *bind = (php_oci_bind *) data;
+
 	*(int *)result = 0;
 
+	if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
+		/* These checks are currently valid for oci_bind_by_name, not
+		 * oci_bind_array_by_name.  Also bind->type and
+		 * bind->indicator are not used for oci_bind_array_by_name.
+		 */
+		return 0;
+	}	
 	switch (bind->type) {
 		case SQLT_NTY:
 		case SQLT_BFILEE:
@@ -850,9 +858,8 @@ int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 			}
 			break;
 	}
-	
-	/* reset all bind stuff to a normal state..-. */
 
+	/* reset all bind stuff to a normal state..-. */
 	bind->indicator = 0;
 
 	return 0;
