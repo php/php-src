@@ -1,16 +1,16 @@
 .TH PHP-FPM 1 "2009" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
-@php_fpm_bin@ \- PHP FastCGI Process Manager 'PHP-FPM'
+php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
 .SH SYNOPSIS
-.B @php_fpm_bin@
+.B php-fpm
 [options]
 .LP
 .SH DESCRIPTION
 \fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
-Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_log_path@.
+Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_localstatedir@/log/php-fpm.log.
 .LP
-Most options are set in the configuration file. The configuration file is @php_fpm_conf_path@. By default, @php_fpm_bin@ will respond to CGI requests listening on localhost http port 9000. Therefore @php_fpm_bin@ expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
+Most options are set in the configuration file. The configuration file is @php_fpm_sysconfdir@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
 .SH OPTIONS
 .TP 15
 .B \-C
@@ -83,7 +83,7 @@ Version number
 .TP
 .PD 1
 .B \-\-y
-Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_conf_path@)
+Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_sysconfdir@/php-fpm.conf)
 .TP
 .PD 0
 .B \-\-zend\-extension \fIfile\fP
@@ -94,20 +94,20 @@ Load Zend extension
 .IR file
 .SH FILES
 .TP 15
-.B @php_fpm_bin@.conf
-The configuration file for the @php_fpm_bin@ daemon.
+.B php-fpm.conf
+The configuration file for the php-fpm daemon.
 .TP
 .B php.ini
 The standard php configuration file.
 .SH EXAMPLES
-You should use the init script provided to start and stop the @php_fpm_bin@ daemon. This situation applies for any unix systems which use init.d for their main process manager.
+You should use the init script provided to start and stop the php-fpm daemon. This situation applies for any unix systems which use init.d for their main process manager.
 .P
 .PD 1
 .RS
-sudo /etc/init.d/@php_fpm_bin@ start
+sudo /etc/init.d/php-fpm start
 .RE
 .TP
-If your installation has no appropriate init script, launch @php_fpm_bin_path@ with no arguments. It will launch as a daemon (background process) by default. The file @php_fpm_pid_path@ determines whether @php_fpm_bin@ is already up and running. Once started, @php_fpm_bin@ then responds to several POSIX signals:
+If your installation has no appropriate init script, launch php-fpm with no arguments. It will launch as a daemon (background process) by default. The file @php_fpm_localstatedir@/run/php-fpm.pid determines whether php-fpm is already up and running. Once started, php-fpm then responds to several POSIX signals:
 .P
 .PD 0
 .RS
