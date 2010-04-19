@@ -24,8 +24,8 @@ static int xml_conf_sections_used = 0;
 char *xml_conf_set_slot_boolean(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	char *value = vv;
-	long value_y = !strcasecmp(value, "yes") || !strcmp(value,  "1") || !strcasecmp(value, "on");
-	long value_n = !strcasecmp(value, "no")  || !strcmp(value,  "0") || !strcasecmp(value, "off");
+	long value_y = !strcasecmp(value, "yes") || !strcmp(value,  "1") || !strcasecmp(value, "on") || !strcasecmp(value, "true");
+	long value_n = !strcasecmp(value, "no")  || !strcmp(value,  "0") || !strcasecmp(value, "off") || !strcasecmp(value, "false");
 
 	if (!value_y && !value_n) {
 		return "xml_conf_set_slot(): invalid boolean value";
