@@ -323,7 +323,7 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 }
 
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
-static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char *indent TSRMLS_DC);
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
@@ -1608,6 +1608,44 @@ ZEND_METHOD(reflection_function, isClosure)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::getClosureThis()
+   Returns this pointer bound to closure */
+ZEND_METHOD(reflection_function, getClosureThis)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	zval* closure_this;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (intern->obj) {
+		closure_this = zend_get_closure_this_ptr(intern->obj TSRMLS_CC);
+		if (closure_this) {
+			RETURN_ZVAL(closure_this, 1, 0);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionFunction::getClosure()
+   Returns a dynamically created closure for the function */
+ZEND_METHOD(reflection_function, getClosure)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	zend_create_closure(return_value, fptr, NULL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+
 /* {{{ proto public bool ReflectionFunction::isInternal()
    Returns whether this is an internal function */
 ZEND_METHOD(reflection_function, isInternal)
@@ -2066,8 +2104,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 					&& (fptr = zend_get_closure_invoke_method(*classref TSRMLS_CC)) != NULL)
 				{
-					/* nothign to do. don't set is_closure since is the invoke handler,
-					   not the closure itself */
+					/* nothing to do. don't set is_closure since is the invoke handler,
+-					   not the closure itself */
 				} else if (zend_hash_find(&ce->function_table, lcname, lcname_len + 1, (void **) &fptr) == FAILURE) {
 					efree(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2556,6 +2594,41 @@ ZEND_METHOD(reflection_method, __toString)
 	string_init(&str);
 	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionMethod::getClosure([mixed object])
+   Invokes the function */
+ZEND_METHOD(reflection_method, getClosure)
+{
+	reflection_object *intern;
+	zval *obj;
+	zend_function *mptr;
+	
+	METHOD_NOTSTATIC(reflection_method_ptr);
+	GET_REFLECTION_OBJECT_PTR(mptr);
+
+	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
+		zend_create_closure(return_value, mptr, mptr->common.scope, NULL TSRMLS_CC);
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+			return;
+		}
+
+		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope TSRMLS_CC)) {
+			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			/* Returns from this function */
+		}
+
+		/* This is an original closure object and __invoke is to be called. */
+		if (Z_OBJCE_P(obj) == zend_ce_closure && mptr->type == ZEND_INTERNAL_FUNCTION &&
+			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
+		{
+			RETURN_ZVAL(obj, 1, 0);
+		} else {
+			zend_create_closure(return_value, mptr, mptr->common.scope, obj TSRMLS_CC);
+		}
+	}
 }
 /* }}} */
 
@@ -5261,6 +5334,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isDeprecated, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)
@@ -5285,6 +5359,7 @@ static const zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, isDisabled, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, invoke, arginfo_reflection_function_invoke, 0)
 	ZEND_ME(reflection_function, invokeArgs, arginfo_reflection_function_invokeArgs, 0)
+	ZEND_ME(reflection_function, getClosure, arginfo_reflection__void, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -5313,6 +5388,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_setAccessible, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_getClosure, 0)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, export, arginfo_reflection_method_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_method, __construct, arginfo_reflection_method___construct, 0)
@@ -5325,6 +5404,7 @@ static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, isStatic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isConstructor, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isDestructor, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_method, getClosure, arginfo_reflection_method_getClosure, 0)
 	ZEND_ME(reflection_method, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, invoke, arginfo_reflection_method_invoke, 0)
 	ZEND_ME(reflection_method, invokeArgs, arginfo_reflection_method_invokeArgs, 0)
