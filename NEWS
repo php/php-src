@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas) 
 
+- Fixed bug #51609 (pg_copy_to: Invalid results when using fourth parameter).
+  (Felipe)
 - Fixed bug #51608 (pg_copy_to: WARNING: nonstandard use of \\ in a string
   literal). (cbandy at jbandy dot com)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
