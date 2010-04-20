@@ -988,9 +988,14 @@ static void sxe_dimension_delete(zval *object, zval *offset TSRMLS_DC)
 static inline char * sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine) /* {{{ */
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
-	char    *res = estrdup((char*)tmp);
-
-	xmlFree(tmp);
+	char    *res;
+	
+	if (tmp) {
+		res = estrdup((char*)tmp);
+		xmlFree(tmp);
+	} else {
+		res = STR_EMPTY_ALLOC();
+	}
 
 	return res;
 }
