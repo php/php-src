@@ -69,6 +69,8 @@ PHP                                                                        NEWS
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
 - Fixed bug #49778 (DateInterval::format("%a") is always zero when an interval
   is created from an ISO string). (Derick)
+- Fixed bug #49700 (memory leaks in php_date.c if garbage collector is
+  enabled). (Dmitry)
 - Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
 - Fixed bug #49429 (odbc_autocommit doesn't work). (Felipe)
 - Fixed bug #49234 (mysqli_ssl_set not found). (Andrey)
