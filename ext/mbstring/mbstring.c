@@ -3168,7 +3168,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, indent);
 	if (ret != NULL) {
-		RETVAL_STRINGL((char *)ret->val, ret->len, 0)	/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);	/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3192,7 +3192,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding));
 	if (ret != NULL) {
-		RETVAL_STRINGL((char *)ret->val, ret->len, 0)	/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);	/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}

@@ -342,7 +342,6 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	zval *current_object;
-	struct _zend_op *call_opline;
 };
 
 #define EX(element) execute_data.element
@@ -440,7 +439,7 @@ void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRM
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_receive_arg(zend_uchar op, const znode *var, const znode *offset, const znode *initialization, znode *class_type, const znode *varname, zend_bool pass_by_reference TSRMLS_DC);
+void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_bool pass_by_reference TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, const znode *expr TSRMLS_DC);

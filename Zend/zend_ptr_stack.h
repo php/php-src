@@ -54,7 +54,7 @@ END_EXTERN_C()
 
 /*	Not doing this with a macro because of the loop unrolling in the element assignment.
 	Just using a macro for 3 in the body for readability sake. */
-static inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b, void *c)
+static zend_always_inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b, void *c)
 {
 #define ZEND_PTR_STACK_NUM_ARGS 3
 
@@ -68,7 +68,7 @@ static inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b
 #undef ZEND_PTR_STACK_NUM_ARGS
 }
 
-static inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b)
+static zend_always_inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b)
 {
 #define ZEND_PTR_STACK_NUM_ARGS 2
 
@@ -81,7 +81,7 @@ static inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b
 #undef ZEND_PTR_STACK_NUM_ARGS
 }
 
-static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **b, void **c)
+static zend_always_inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **b, void **c)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
@@ -89,14 +89,14 @@ static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **
 	stack->top -= 3;
 }
 
-static inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
+static zend_always_inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
 	stack->top -= 2;
 }
 
-static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
+static zend_always_inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 {
 	ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, 1)
 
@@ -104,7 +104,7 @@ static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 	*(stack->top_element++) = ptr;
 }
 
-static inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
+static zend_always_inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
 {
 	stack->top--;
 	return *(--stack->top_element);

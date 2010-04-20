@@ -1665,12 +1665,34 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* {{{ */
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+{
+	if (zend_hash_quick_del(ht, name, name_len, hash_value) == SUCCESS) {
+		name_len--;
+		while (ex && ex->symbol_table == ht) {
+			int i;
+
+			if (ex->op_array) {
+				for (i = 0; i < ex->op_array->last_var; i++) {
+					if (ex->op_array->vars[i].hash_value == hash_value &&
+						ex->op_array->vars[i].name_len == name_len &&
+						!memcmp(ex->op_array->vars[i].name, name, name_len)) {
+						ex->CVs[i] = NULL;
+						break;
+					}
+				}
+			}
+			ex = ex->prev_execute_data;
+		}
+	}
+}
+/* }}} */
+
+ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ex;
-	ulong hash_value = zend_inline_hash_func(name, name_len + 1);
 
-	if (zend_hash_quick_exists(&EG(symbol_table), name, name_len + 1, hash_value)) {
+	if (zend_hash_quick_del(&EG(symbol_table), name, name_len + 1, hash_value) == SUCCESS) {
 		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 			if (ex->op_array && ex->symbol_table == &EG(symbol_table)) {
 				int i;
@@ -1685,9 +1707,15 @@ ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* 
 				}
 			}
 		}
-		return zend_hash_quick_del(&EG(symbol_table), name, name_len + 1, hash_value);
+		return SUCCESS;
 	}
 	return FAILURE;
+}
+/* }}} */
+
+ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* {{{ */
+{
+	return zend_delete_global_variable_ex(name, name_len, zend_inline_hash_func(name, name_len + 1) TSRMLS_CC);
 }
 /* }}} */
 

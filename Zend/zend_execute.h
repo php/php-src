@@ -62,7 +62,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
 #define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-static inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+static zend_always_inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
@@ -77,7 +77,28 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
-static inline int i_zend_is_true(zval *op)
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
+{
+	if (!Z_DELREF_P(zval_ptr)) {
+		TSRMLS_FETCH();
+
+		if (zval_ptr != &EG(uninitialized_zval)) {
+			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+			zval_dtor(zval_ptr);
+			efree_rel(zval_ptr);
+		}
+	} else {
+		TSRMLS_FETCH();
+
+		if (Z_REFCOUNT_P(zval_ptr) == 1) {
+			Z_UNSET_ISREF_P(zval_ptr);
+		}
+
+		GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
+	}
+}
+
+static zend_always_inline int i_zend_is_true(zval *op)
 {
 	int result;
 
@@ -157,7 +178,7 @@ struct _zend_vm_stack {
 		}															\
 	} while (0)
 
-static inline zend_vm_stack zend_vm_stack_new_page(int count) {
+static zend_always_inline zend_vm_stack zend_vm_stack_new_page(int count) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(ZEND_MM_ALIGNED_SIZE(sizeof(*page)) + sizeof(void*) * count);
 
 	page->top = ZEND_VM_STACK_ELEMETS(page);
@@ -166,12 +187,12 @@ static inline zend_vm_stack zend_vm_stack_new_page(int count) {
 	return page;
 }
 
-static inline void zend_vm_stack_init(TSRMLS_D)
+static zend_always_inline void zend_vm_stack_init(TSRMLS_D)
 {
 	EG(argument_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE);
 }
 
-static inline void zend_vm_stack_destroy(TSRMLS_D)
+static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 {
 	zend_vm_stack stack = EG(argument_stack);
 
@@ -182,30 +203,30 @@ static inline void zend_vm_stack_destroy(TSRMLS_D)
 	}
 }
 
-static inline void zend_vm_stack_extend(int count TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
 {
 	zend_vm_stack p = zend_vm_stack_new_page(count >= ZEND_VM_STACK_PAGE_SIZE ? count : ZEND_VM_STACK_PAGE_SIZE);
 	p->prev = EG(argument_stack);
 	EG(argument_stack) = p;
 }
 
-static inline void **zend_vm_stack_top(TSRMLS_D)
+static zend_always_inline void **zend_vm_stack_top(TSRMLS_D)
 {
 	return EG(argument_stack)->top;
 }
 
-static inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
 {
 	ZEND_VM_STACK_GROW_IF_NEEDED(1);
 	*(EG(argument_stack)->top++) = ptr;
 }
 
-static inline void zend_vm_stack_push_nocheck(void *ptr TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_push_nocheck(void *ptr TSRMLS_DC)
 {
 	*(EG(argument_stack)->top++) = ptr;
 }
 
-static inline void *zend_vm_stack_pop(TSRMLS_D)
+static zend_always_inline void *zend_vm_stack_pop(TSRMLS_D)
 {
 	void *el = *(--EG(argument_stack)->top);
 
@@ -217,7 +238,7 @@ static inline void *zend_vm_stack_pop(TSRMLS_D)
 	return el;
 }
 
-static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
+static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 {
 	void *ret;
 
@@ -246,7 +267,7 @@ static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	return ret;
 }
 
-static inline void zend_vm_stack_free_int(void *ptr TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_free_int(void *ptr TSRMLS_DC)
 {	
 	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (void**)ptr)) {
 		zend_vm_stack p = EG(argument_stack);
@@ -258,7 +279,7 @@ static inline void zend_vm_stack_free_int(void *ptr TSRMLS_DC)
 	}
 }
 
-static inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 {	
 	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (void**)ptr)) {
 		zend_vm_stack p = EG(argument_stack);
@@ -276,7 +297,7 @@ static inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 	}
 }
 
-static inline void** zend_vm_stack_push_args(int count TSRMLS_DC)
+static zend_always_inline void** zend_vm_stack_push_args(int count TSRMLS_DC)
 {
 
 	if (UNEXPECTED(EG(argument_stack)->top - ZEND_VM_STACK_ELEMETS(EG(argument_stack)) < count)  || 
@@ -305,7 +326,7 @@ static inline void** zend_vm_stack_push_args(int count TSRMLS_DC)
 	return EG(argument_stack)->top++;
 }
 
-static inline void zend_vm_stack_clear_multiple(TSRMLS_D)
+static zend_always_inline void zend_vm_stack_clear_multiple(TSRMLS_D)
 {
 	void **p = EG(argument_stack)->top - 1;
 	int delete_count = (int)(zend_uintptr_t) *p;
@@ -313,12 +334,12 @@ static inline void zend_vm_stack_clear_multiple(TSRMLS_D)
 	while (--delete_count>=0) {
 		zval *q = *(zval **)(--p);
 		*p = NULL;
-		zval_ptr_dtor(&q);
+		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
 	}
 	zend_vm_stack_free_int(p TSRMLS_CC);
 }
 
-static inline zval** zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)
+static zend_always_inline zval** zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)
 {
 	void **p = EG(current_execute_data)->prev_execute_data->function_state.arguments;
 	int arg_count = (int)(zend_uintptr_t) *p;
@@ -329,7 +350,7 @@ static inline zval** zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)
 	return (zval**)p - arg_count + requested_arg - 1;
 }
 
-static inline void zend_arg_types_stack_2_pop(zend_ptr_stack *stack, zval **object, zend_function **fbc)
+static zend_always_inline void zend_arg_types_stack_2_pop(zend_ptr_stack *stack, zval **object, zend_function **fbc)
 {
 	void *a, *b;
 
@@ -339,7 +360,7 @@ static inline void zend_arg_types_stack_2_pop(zend_ptr_stack *stack, zval **obje
 	*fbc = (zend_function *) b;
 }
 
-static inline void zend_arg_types_stack_3_pop(zend_ptr_stack *stack, zend_class_entry **called_scope, zval **object, zend_function **fbc)
+static zend_always_inline void zend_arg_types_stack_3_pop(zend_ptr_stack *stack, zend_class_entry **called_scope, zval **object, zend_function **fbc)
 {
 	void *a, *b, *c;
 

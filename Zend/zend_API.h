@@ -488,7 +488,11 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, char *name, int name_len, ulong hash_value TSRMLS_DC);
+
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
+
+ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash_value TSRMLS_DC);
 
 ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 
@@ -510,54 +514,61 @@ END_EXTERN_C()
 #define CHECK_ZVAL_STRING_REL(z)
 #endif
 
-#define ZVAL_RESOURCE(z, l) {		\
-		Z_TYPE_P(z) = IS_RESOURCE;	\
-		Z_LVAL_P(z) = l;			\
-	}
+#define ZVAL_RESOURCE(z, l) do {	\
+		zval *__z = (z);			\
+		Z_LVAL_P(__z) = l;			\
+		Z_TYPE_P(__z) = IS_RESOURCE;\
+	} while (0)
 
-#define ZVAL_BOOL(z, b) {			\
-		Z_TYPE_P(z) = IS_BOOL;		\
-		Z_LVAL_P(z) = ((b) != 0);   \
-	}
+#define ZVAL_BOOL(z, b) do {		\
+		zval *__z = (z);			\
+		Z_LVAL_P(__z) = ((b) != 0);	\
+		Z_TYPE_P(__z) = IS_BOOL;	\
+	} while (0)
 
 #define ZVAL_NULL(z) {				\
 		Z_TYPE_P(z) = IS_NULL;		\
 	}
 
 #define ZVAL_LONG(z, l) {			\
-		Z_TYPE_P(z) = IS_LONG;		\
-		Z_LVAL_P(z) = l;			\
+		zval *__z = (z);			\
+		Z_LVAL_P(__z) = l;			\
+		Z_TYPE_P(__z) = IS_LONG;	\
 	}
 
 #define ZVAL_DOUBLE(z, d) {			\
-		Z_TYPE_P(z) = IS_DOUBLE;	\
-		Z_DVAL_P(z) = d;			\
+		zval *__z = (z);			\
+		Z_DVAL_P(__z) = d;			\
+		Z_TYPE_P(__z) = IS_DOUBLE;	\
 	}
 
-#define ZVAL_STRING(z, s, duplicate) {	\
-		const char *__s=(s);			\
-		Z_STRLEN_P(z) = strlen(__s);	\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, Z_STRLEN_P(z)):(char*)__s);\
-		Z_TYPE_P(z) = IS_STRING;		\
-	}
+#define ZVAL_STRING(z, s, duplicate) do {	\
+		const char *__s=(s);				\
+		zval *__z = (z);					\
+		Z_STRLEN_P(__z) = strlen(__s);		\
+		Z_STRVAL_P(__z) = (duplicate?estrndup(__s, Z_STRLEN_P(__z)):(char*)__s);\
+		Z_TYPE_P(__z) = IS_STRING;			\
+	} while (0)
 
-#define ZVAL_STRINGL(z, s, l, duplicate) {	\
-		const char *__s=(s); int __l=l;		\
-		Z_STRLEN_P(z) = __l;				\
-		Z_STRVAL_P(z) = (duplicate?estrndup(__s, __l):(char*)__s);\
-		Z_TYPE_P(z) = IS_STRING;			\
-	}
+#define ZVAL_STRINGL(z, s, l, duplicate) do {	\
+		const char *__s=(s); int __l=l;			\
+		zval *__z = (z);						\
+		Z_STRLEN_P(__z) = __l;					\
+		Z_STRVAL_P(__z) = (duplicate?estrndup(__s, __l):(char*)__s);\
+		Z_TYPE_P(__z) = IS_STRING;				\
+	} while (0)
 
-#define ZVAL_EMPTY_STRING(z) {		\
-		Z_STRLEN_P(z) = 0;			\
-		Z_STRVAL_P(z) = STR_EMPTY_ALLOC();\
-		Z_TYPE_P(z) = IS_STRING;	\
-	}
+#define ZVAL_EMPTY_STRING(z) do {	\
+		zval *__z = (z);			\
+		Z_STRLEN_P(__z) = 0;		\
+		Z_STRVAL_P(__z) = STR_EMPTY_ALLOC();\
+		Z_TYPE_P(__z) = IS_STRING;	\
+	} while (0)
 
 #define ZVAL_ZVAL(z, zv, copy, dtor) {			\
 		zend_uchar is_ref = Z_ISREF_P(z);		\
 		zend_uint refcount = Z_REFCOUNT_P(z);	\
-		*(z) = *(zv);							\
+		ZVAL_COPY_VALUE(z, zv);					\
 		if (copy) {								\
 			zval_copy_ctor(z);					\
 	    }										\

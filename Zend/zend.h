@@ -352,17 +352,21 @@ struct _zval_struct {
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
+#define zend_never_inline __attribute__((noinline))
 #else
 #define zend_always_inline inline
+#define zend_never_inline
 #endif
 
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
+#define zend_never_inline
 #else
 #define zend_always_inline inline
+#define zend_never_inline
 #endif
 
-#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
 # define UNEXPECTED(condition) __builtin_expect(condition, 0)
 #else
@@ -677,19 +681,30 @@ END_EXTERN_C()
 
 #define PZVAL_IS_REF(z)		Z_ISREF_P(z)
 
-#define SEPARATE_ZVAL(ppzv)									\
-	{														\
-		zval *orig_ptr = *(ppzv);							\
-															\
-		if (Z_REFCOUNT_P(orig_ptr) > 1) {					\
-			Z_DELREF_P(orig_ptr);							\
-			ALLOC_ZVAL(*(ppzv));							\
-			**(ppzv) = *orig_ptr;							\
-			zval_copy_ctor(*(ppzv));						\
-			Z_SET_REFCOUNT_PP(ppzv, 1);						\
-			Z_UNSET_ISREF_PP((ppzv));						\
-		}													\
-	}
+#define ZVAL_COPY_VALUE(z, v)					\
+	do {										\
+		(z)->value = (v)->value;				\
+		Z_TYPE_P(z) = Z_TYPE_P(v);				\
+	} while (0)
+
+#define INIT_PZVAL_COPY(z, v)					\
+	do {										\
+		ZVAL_COPY_VALUE(z, v);					\
+		Z_SET_REFCOUNT_P(z, 1);					\
+		Z_UNSET_ISREF_P(z);						\
+	} while (0)
+
+#define SEPARATE_ZVAL(ppzv)						\
+	do {										\
+		if (Z_REFCOUNT_PP((ppzv)) > 1) {		\
+			zval *new_zv;						\
+			Z_DELREF_PP(ppzv);					\
+			ALLOC_ZVAL(new_zv);					\
+			INIT_PZVAL_COPY(new_zv, *(ppzv));	\
+			*(ppzv) = new_zv;					\
+			zval_copy_ctor(new_zv);				\
+		}										\
+	} while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(ppzv)		\
 	if (!PZVAL_IS_REF(*ppzv)) {				\
@@ -712,10 +727,9 @@ END_EXTERN_C()
 	}										\
 	INIT_PZVAL(&(zv));
 	
-#define MAKE_COPY_ZVAL(ppzv, pzv) \
-	*(pzv) = **(ppzv);            \
-	zval_copy_ctor((pzv));        \
-	INIT_PZVAL((pzv));
+#define MAKE_COPY_ZVAL(ppzv, pzv) 	\
+	INIT_PZVAL_COPY(pzv, *(ppzv));	\
+	zval_copy_ctor((pzv));
 
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
 	int is_ref, refcount;						\
@@ -724,7 +738,7 @@ END_EXTERN_C()
 	is_ref = Z_ISREF_PP(ppzv_dest);				\
 	refcount = Z_REFCOUNT_PP(ppzv_dest);		\
 	zval_dtor(*ppzv_dest);						\
-	**ppzv_dest = *pzv_src;						\
+	ZVAL_COPY_VALUE(*ppzv_dest, pzv_src);		\
 	if (copy) {                                 \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
@@ -736,10 +750,7 @@ END_EXTERN_C()
 	if (PZVAL_IS_REF(varptr)) { \
 		zval *original_var = varptr; \
 		ALLOC_ZVAL(varptr); \
-		varptr->value = original_var->value; \
-		Z_TYPE_P(varptr) = Z_TYPE_P(original_var); \
-		Z_UNSET_ISREF_P(varptr); \
-		Z_SET_REFCOUNT_P(varptr, 1); \
+		INIT_PZVAL_COPY(varptr, original_var); \
 		zval_copy_ctor(varptr); \
 	} else { \
 		Z_ADDREF_P(varptr); \
