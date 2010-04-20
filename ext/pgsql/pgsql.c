@@ -3765,9 +3765,9 @@ PHP_FUNCTION(pg_copy_to)
 	}
 
 	if (memchr(table_name, '.', table_name_len)) {
-		spprintf(&query, 0, "COPY %s TO STDOUT DELIMITERS '%c' WITH NULL AS '%s'", table_name, *pg_delim, pg_null_as);
+		spprintf(&query, 0, "COPY %s TO STDOUT DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
 	} else {
-		spprintf(&query, 0, "COPY \"%s\" TO STDOUT DELIMITERS '%c' WITH NULL AS '%s'", table_name, *pg_delim, pg_null_as);
+		spprintf(&query, 0, "COPY \"%s\" TO STDOUT DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, *pg_delim, pg_null_as);
 	}
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
