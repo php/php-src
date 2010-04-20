@@ -839,7 +839,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		RETURN_FALSE;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, 0, &ce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_class_ex(class_name, class_name_len, NULL, 0, &ce TSRMLS_CC) == FAILURE) {
 		retval = 0;
 	} else {
 		if (only_subclass) {
@@ -1102,7 +1102,7 @@ ZEND_FUNCTION(method_exists)
 
 		if (Z_TYPE_P(klass) == IS_OBJECT 
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
-		&& (func = Z_OBJ_HT_P(klass)->get_method(&klass, method_name, method_len TSRMLS_CC)) != NULL
+		&& (func = Z_OBJ_HT_P(klass)->get_method(&klass, method_name, method_len, NULL TSRMLS_CC)) != NULL
 		) {
 			if (func->type == ZEND_INTERNAL_FUNCTION 
 			&& ((zend_internal_function*)func)->handler == zend_std_call_user_call
@@ -1160,7 +1160,7 @@ ZEND_FUNCTION(property_exists)
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
 		Z_OBJ_HANDLER_P(object, has_property) && 
-		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2 TSRMLS_CC)) {
+		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, 0 TSRMLS_CC)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -2021,7 +2021,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				function_name = "unknown";
 				build_filename_arg = 0;
 			} else
-			switch (Z_LVAL(ptr->opline->op2.u.constant)) {
+			switch (ptr->opline->extended_value) {
 				case ZEND_EVAL:
 					function_name = "eval";
 					build_filename_arg = 0;
@@ -2204,7 +2204,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				function_name = "unknown";
 				build_filename_arg = 0;
 			} else
-			switch (ptr->opline->op2.u.constant.value.lval) {
+			switch (ptr->opline->extended_value) {
 				case ZEND_EVAL:
 					function_name = "eval";
 					build_filename_arg = 0;

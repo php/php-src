@@ -1023,7 +1023,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	zval **args[1];
 	zval autoload_function;
@@ -1038,23 +1038,31 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	ulong hash;
 	ALLOCA_FLAG(use_heap)
 
-	if (name == NULL || !name_length) {
-		return FAILURE;
+	if (key) {
+		lc_name = Z_STRVAL(key->constant);
+		lc_length = Z_STRLEN(key->constant) + 1;
+		hash = key->hash_value;
+	} else {
+		if (name == NULL || !name_length) {
+			return FAILURE;
+		}
+
+		lc_free = lc_name = do_alloca(name_length + 1, use_heap);
+		zend_str_tolower_copy(lc_name, name, name_length);
+		lc_length = name_length + 1;
+
+		if (lc_name[0] == '\\') {
+			lc_name += 1;
+			lc_length -= 1;
+		}
+
+		hash = zend_inline_hash_func(lc_name, lc_length);
 	}
-
-	lc_free = lc_name = do_alloca(name_length + 1, use_heap);
-	zend_str_tolower_copy(lc_name, name, name_length);
-	lc_length = name_length + 1;
-
-	if (lc_name[0] == '\\') {
-		lc_name += 1;
-		lc_length -= 1;
-	}
-
-	hash = zend_inline_hash_func(lc_name, lc_length);
 
 	if (zend_hash_quick_find(EG(class_table), lc_name, lc_length, hash, (void **) ce) == SUCCESS) {
-		free_alloca(lc_free, use_heap);
+		if (!key) {
+			free_alloca(lc_free, use_heap);
+		}
 		return SUCCESS;
 	}
 
@@ -1062,7 +1070,9 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	 * (doesn't impact fuctionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
-		free_alloca(lc_free, use_heap);
+		if (!key) {
+			free_alloca(lc_free, use_heap);
+		}
 		return FAILURE;
 	}
 
@@ -1072,7 +1082,9 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	}
 
 	if (zend_hash_quick_add(EG(in_autoload), lc_name, lc_length, hash, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
-		free_alloca(lc_free, use_heap);
+		if (!key) {
+			free_alloca(lc_free, use_heap);
+		}
 		return FAILURE;
 	}
 
@@ -1118,20 +1130,19 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		zval_ptr_dtor(&retval_ptr);
 	}
 
-	if (retval == FAILURE) {
-		free_alloca(lc_free, use_heap);
-		return FAILURE;
+	if (retval == SUCCESS) {
+		retval = zend_hash_quick_find(EG(class_table), lc_name, lc_length, hash, (void **) ce);
 	}
-
-	retval = zend_hash_quick_find(EG(class_table), lc_name, lc_length, hash, (void **) ce);
-	free_alloca(lc_free, use_heap);
+	if (!key) {
+		free_alloca(lc_free, use_heap);
+	}
 	return retval;
 }
 /* }}} */
 
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
-	return zend_lookup_class_ex(name, name_length, 1, ce TSRMLS_CC);
+	return zend_lookup_class_ex(name, name_length, NULL, 1, ce TSRMLS_CC);
 }
 /* }}} */
 
@@ -1249,8 +1260,8 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 
 	ret_opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	ret_opline->opcode = ZEND_RETURN;
-	ret_opline->op1.op_type = IS_CONST;
-	INIT_ZVAL(ret_opline->op1.u.constant);
+	ret_opline->op1_type = IS_CONST;
+	ret_opline->op1.constant = zend_add_literal(CG(active_op_array), &EG(uninitialized_zval));
 	SET_UNUSED(ret_opline->op2);
 
 	if (!CG(active_op_array)->start_op) {
@@ -1261,29 +1272,27 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
 
 	while (opline<end) {
-		if (opline->op1.op_type == IS_CONST) {
-			Z_SET_ISREF(opline->op1.u.constant);
-			Z_SET_REFCOUNT(opline->op1.u.constant, 2); /* Make sure is_ref won't be reset */
+		if (opline->op1_type == IS_CONST) {
+			opline->op1.zv = &CG(active_op_array)->literals[opline->op1.constant].constant;
 		}
-		if (opline->op2.op_type == IS_CONST) {
-			Z_SET_ISREF(opline->op2.u.constant);
-			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
+		if (opline->op2_type == IS_CONST) {
+			opline->op2.zv = &CG(active_op_array)->literals[opline->op2.constant].constant;
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
-				if (Z_TYPE(opline->op2.u.constant) != IS_LONG) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
 					zend_resolve_goto_label(CG(active_op_array), opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-				opline->op1.u.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.u.opline_num];
+				opline->op1.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.opline_num];
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
-				opline->op2.u.jmp_addr = &CG(active_op_array)->opcodes[opline->op2.u.opline_num];
+				opline->op2.jmp_addr = &CG(active_op_array)->opcodes[opline->op2.opline_num];
 				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
@@ -1547,10 +1556,31 @@ check_fetch_type:
 			break;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, use_autoload, &pce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_class_ex(class_name, class_name_len, NULL, use_autoload, &pce TSRMLS_CC) == FAILURE) {
 		if (use_autoload) {
 			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
+					zend_error(E_ERROR, "Interface '%s' not found", class_name);
+				} else {
+					zend_error(E_ERROR, "Class '%s' not found", class_name);
+				}	
+			}
+		}
+		return NULL;
+	}
+	return *pce;
+}
+/* }}} */
+
+zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
+{
+	zend_class_entry **pce;
+	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
+
+	if (zend_lookup_class_ex(class_name, class_name_len, key, use_autoload, &pce TSRMLS_CC) == FAILURE) {
+		if (use_autoload) {
+			if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
+				if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%s' not found", class_name);
 				} else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
@@ -1684,7 +1714,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
 			} else {
 				ALLOC_HASHTABLE(EG(active_symbol_table));
-				zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_init(EG(active_symbol_table), ex->op_array->last_var, NULL, ZVAL_PTR_DTOR, 0);
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}
 			ex->symbol_table = EG(active_symbol_table);

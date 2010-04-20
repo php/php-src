@@ -564,8 +564,8 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC);
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC);
 static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 
-zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC);
-void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS_DC);
+zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
+void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -3427,7 +3427,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 }
 
 /* {{{ date_interval_read_property */
-zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	php_interval_obj *obj;
 	zval *retval;
@@ -3474,7 +3474,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC
 /* }}} */
 
 /* {{{ date_interval_write_property */
-void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_interval_obj *obj;
 	zval tmp_member, tmp_value;

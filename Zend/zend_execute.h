@@ -71,7 +71,7 @@ static inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LI
 	}
 }
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
-ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
@@ -364,6 +364,7 @@ ZEND_API void zend_set_timeout(long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32
@@ -402,8 +403,8 @@ typedef struct _zend_free_op {
 /*	int   is_var; */
 } zend_free_op;
 
-ZEND_API zval *zend_get_zval_ptr(znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
-ZEND_API zval **zend_get_zval_ptr_ptr(const znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 

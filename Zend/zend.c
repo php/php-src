@@ -464,19 +464,19 @@ static void zend_init_exception_op(TSRMLS_D) /* {{{ */
 {
 	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
 	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[0].op1.op_type = IS_UNUSED;
-	EG(exception_op)[0].op2.op_type = IS_UNUSED;
-	EG(exception_op)[0].result.op_type = IS_UNUSED;
+	EG(exception_op)[0].op1_type = IS_UNUSED;
+	EG(exception_op)[0].op2_type = IS_UNUSED;
+	EG(exception_op)[0].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
 	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[1].op1.op_type = IS_UNUSED;
-	EG(exception_op)[1].op2.op_type = IS_UNUSED;
-	EG(exception_op)[1].result.op_type = IS_UNUSED;
+	EG(exception_op)[1].op1_type = IS_UNUSED;
+	EG(exception_op)[1].op2_type = IS_UNUSED;
+	EG(exception_op)[1].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
 	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[2].op1.op_type = IS_UNUSED;
-	EG(exception_op)[2].op2.op_type = IS_UNUSED;
-	EG(exception_op)[2].result.op_type = IS_UNUSED;
+	EG(exception_op)[2].op1_type = IS_UNUSED;
+	EG(exception_op)[2].op2_type = IS_UNUSED;
+	EG(exception_op)[2].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
 }
 /* }}} */

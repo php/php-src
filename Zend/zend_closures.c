@@ -152,7 +152,7 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_closure_get_method(zval **object_ptr, char *method_name, int method_len TSRMLS_DC) /* {{{ */
+static zend_function *zend_closure_get_method(zval **object_ptr, char *method_name, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	char *lc_name;
 	ALLOCA_FLAG(use_heap)
@@ -166,11 +166,11 @@ static zend_function *zend_closure_get_method(zval **object_ptr, char *method_na
 		return zend_get_closure_invoke_method(*object_ptr TSRMLS_CC);
 	}
 	free_alloca(lc_name, use_heap);
-	return std_object_handlers.get_method(object_ptr, method_name, method_len TSRMLS_CC);
+	return std_object_handlers.get_method(object_ptr, method_name, method_len, key TSRMLS_CC);
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
+static zval *zend_closure_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	Z_ADDREF(EG(uninitialized_zval));
@@ -178,20 +178,20 @@ static zval *zend_closure_read_property(zval *object, zval *member, int type TSR
 }
 /* }}} */
 
-static void zend_closure_write_property(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
+static void zend_closure_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
-static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
+static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	if (has_set_exists != 2) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -200,7 +200,7 @@ static int zend_closure_has_property(zval *object, zval *member, int has_set_exi
 }
 /* }}} */
 
-static void zend_closure_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static void zend_closure_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
@@ -308,7 +308,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 			MAKE_STD_ZVAL(val);
 			array_init(val);
 			zend_hash_copy(Z_ARRVAL_P(val), static_variables, (copy_ctor_func_t)zval_add_ref, NULL, sizeof(zval*));
-			zend_symtable_update(closure->debug_info, "static", sizeof("static"), (void *) &val, sizeof(zval *), NULL);
+			zend_hash_update(closure->debug_info, "static", sizeof("static"), (void *) &val, sizeof(zval *), NULL);
 		}
 
 		if (closure->this_ptr) {
@@ -340,7 +340,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 				efree(name);
 				arg_info++;
 			}
-			zend_symtable_update(closure->debug_info, "parameter", sizeof("parameter"), (void *) &val, sizeof(zval *), NULL);
+			zend_hash_update(closure->debug_info, "parameter", sizeof("parameter"), (void *) &val, sizeof(zval *), NULL);
 		}
 	}
 
