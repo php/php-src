@@ -61,6 +61,13 @@
 	}
 
 
+#define BAIL_IF_NO_MORE_DATA \
+	if ((size_t)(p - begin) > packet->header.size) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At line %d", __LINE__); \
+		goto premature_end; \
+	} \
+
+
 static const char *unknown_sqlstate= "HY000";
 
 char * const mysqlnd_empty_string = "";
@@ -294,9 +301,11 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_greet_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "greeting", PROT_GREET_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->protocol_version = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	if (ERROR_MARKER == packet->protocol_version) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
@@ -316,27 +325,35 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	packet->server_version = estrdup((char *)p);
 	p+= strlen(packet->server_version) + 1; /* eat the '\0' */
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->thread_id = uint4korr(p);
 	p+=4;
+	BAIL_IF_NO_MORE_DATA;
 
 	memcpy(packet->scramble_buf, p, SCRAMBLE_LENGTH_323);
 	p+= 8;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* pad1 */
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->server_capabilities = uint2korr(p);
 	p+= 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->charset_no = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->server_status = uint2korr(p);
 	p+= 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* pad2 */
 	p+= 13;
+	BAIL_IF_NO_MORE_DATA;
 
 	if ((size_t) (p - buf) < packet->header.size) {
 		/* scramble_buf is split into two parts */
@@ -352,14 +369,12 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("server_capabilities=%d charset_no=%d server_status=%d",
 				packet->server_capabilities, packet->charset_no, packet->server_status);
 
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
-
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -522,10 +537,12 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_ok_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "OK", PROT_OK_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->field_count = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	if (ERROR_MARKER == packet->field_count) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
@@ -536,13 +553,18 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	}
 	/* Everything was fine! */
 	packet->affected_rows  = php_mysqlnd_net_field_length_ll(&p);
+	BAIL_IF_NO_MORE_DATA;
+
 	packet->last_insert_id = php_mysqlnd_net_field_length_ll(&p);
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->server_status = uint2korr(p);
 	p+= 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->warning_count = uint2korr(p);
 	p+= 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* There is a message */
 	if (packet->header.size > (size_t) (p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
@@ -556,14 +578,14 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				packet->affected_rows, packet->last_insert_id, packet->server_status,
 				packet->warning_count);
 
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -603,10 +625,12 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_eof_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "EOF", PROT_EOF_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	/* Should be always EODATA_MARKER */
 	packet->field_count = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	if (ERROR_MARKER == packet->field_count) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
@@ -624,24 +648,27 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (packet->header.size > 1) {
 		packet->warning_count = uint2korr(p);
 		p+= 2;
+		BAIL_IF_NO_MORE_DATA;
+
 		packet->server_status = uint2korr(p);
 		p+= 2;
+		BAIL_IF_NO_MORE_DATA;
 	} else {
 		packet->warning_count = 0;
 		packet->server_status = 0;
 	}
 
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("EOF packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_INF_FMT("EOF packet: fields=%d status=%d warnings=%d",
 				packet->field_count, packet->server_status, packet->warning_count);
 
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("EOF packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -742,6 +769,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_rset_header_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "resultset header", PROT_RSET_HEADER_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	/*
 	  Don't increment. First byte is ERROR_MARKER on error, but otherwise is starting byte
@@ -750,6 +778,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (ERROR_MARKER == *p) {
 		/* Error */
 		p++;
+		BAIL_IF_NO_MORE_DATA;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
@@ -757,7 +786,9 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		DBG_RETURN(PASS);
 	}
 
-	packet->field_count= php_mysqlnd_net_field_length(&p);
+	packet->field_count = php_mysqlnd_net_field_length(&p);
+	BAIL_IF_NO_MORE_DATA;
+
 	switch (packet->field_count) {
 		case MYSQLND_NULL_LENGTH:
 			DBG_INF("LOAD LOCAL");
@@ -774,11 +805,18 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		case 0x00:
 			DBG_INF("UPSERT");
 			packet->affected_rows = php_mysqlnd_net_field_length_ll(&p);
-			packet->last_insert_id= php_mysqlnd_net_field_length_ll(&p);
+			BAIL_IF_NO_MORE_DATA;
+
+			packet->last_insert_id = php_mysqlnd_net_field_length_ll(&p);
+			BAIL_IF_NO_MORE_DATA;
+
 			packet->server_status = uint2korr(p);
 			p+=2;
+			BAIL_IF_NO_MORE_DATA;
+
 			packet->warning_count = uint2korr(p);
 			p+=2;
+			BAIL_IF_NO_MORE_DATA;
 			/* Check for additional textual data */
 			if (packet->header.size  > (size_t) (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
 				packet->info_or_local_file = mnd_emalloc(len + 1);
@@ -795,14 +833,14 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			/* Result set */
 			break;
 	}
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("RSET_HEADER packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("RSET_HEADER packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -863,9 +901,12 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (packet->skip_parsing) {
 		DBG_RETURN(PASS);
 	}
+
+	BAIL_IF_NO_MORE_DATA;
 	if (ERROR_MARKER == *p) {
 		/* Error */
 		p++;
+		BAIL_IF_NO_MORE_DATA;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
@@ -883,6 +924,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	for (i = 0; i < field_count; i += 2) {
 		len = php_mysqlnd_net_field_length(&p);
+		BAIL_IF_NO_MORE_DATA;
 		switch ((len)) {
 			case 0:
 				*(char **)(((char*)meta) + rset_field_offsets[i]) = mysqlnd_empty_string;
@@ -897,28 +939,36 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				total_len += len + 1;
 				break;
 		}
+		BAIL_IF_NO_MORE_DATA;
 	}
 
 	/* 1 byte filler */
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	meta->charsetnr = uint2korr(p);
 	p += 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	meta->length = uint4korr(p);
 	p += 4;
+	BAIL_IF_NO_MORE_DATA;
 
 	meta->type = uint1korr(p);
 	p += 1;
+	BAIL_IF_NO_MORE_DATA;
 
 	meta->flags = uint2korr(p);
 	p += 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	meta->decimals = uint2korr(p);
 	p += 1;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* 2 byte filler */
 	p +=2;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* Should we set NUM_FLAG (libmysql does it) ? */
 	if (
@@ -947,12 +997,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		p += len;
 	}
 
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("RSET field packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
-				 		"shorter than expected", p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_INF_FMT("allocing root. persistent=%d", packet->persistent_alloc);
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
@@ -1009,6 +1054,11 @@ faulty_or_fake:
 	DBG_ERR_FMT("Protocol error. Server sent NULL_LENGTH. The server is faulty");
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent NULL_LENGTH."
 					 " The server is faulty");
+	DBG_RETURN(FAIL);
+premature_end:
+	DBG_ERR_FMT("RSET field packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
+			 		"shorter than expected", p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -1596,10 +1646,12 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_prepare_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "prepare", PROT_PREPARE_RESP_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	data_size = packet->header.size;
 	packet->error_code = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
 
 	if (ERROR_MARKER == packet->error_code) {
 		php_mysqlnd_read_error_from_line(p, data_size - 1,
@@ -1621,17 +1673,21 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	packet->stmt_id = uint4korr(p);
 	p += 4;
+	BAIL_IF_NO_MORE_DATA;
 
 	/* Number of columns in result set */
 	packet->field_count = uint2korr(p);
 	p += 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	packet->param_count = uint2korr(p);
 	p += 2;
+	BAIL_IF_NO_MORE_DATA;
 
 	if (data_size > 9) {
 		/* 0x0 filler sent by the server for 5.0+ clients */
 		p++;
+		BAIL_IF_NO_MORE_DATA;
 
 		packet->warning_count = uint2korr(p);
 	}
@@ -1639,14 +1695,14 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("Prepare packet read: stmt_id=%d fields=%d params=%d",
 				packet->stmt_id, packet->field_count, packet->param_count);
 
-	if ((size_t)(p - begin) > packet->header.size) {
-		DBG_ERR_FMT("PREPARE packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("PREPARE packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -1677,6 +1733,7 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_chg_user_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "change user response", PROT_CHG_USER_RESP_PACKET);
+	BAIL_IF_NO_MORE_DATA;
 
 	/*
 	  Don't increment. First byte is ERROR_MARKER on error, but otherwise is starting byte
@@ -1701,14 +1758,14 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 										 packet->error_info.sqlstate
 										 TSRMLS_CC);
 	}
-	if ((size_t) (p - begin) > packet->header.size) {
-		DBG_ERR_FMT("CHANGE_USER packet %d bytes shorter than expected", p - begin - packet->header.size);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
-						 p - begin - packet->header.size);
-		DBG_RETURN(FAIL);
-	}
+	BAIL_IF_NO_MORE_DATA;
 
 	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("CHANGE_USER packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+						 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
