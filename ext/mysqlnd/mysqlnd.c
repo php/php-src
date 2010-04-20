@@ -1863,6 +1863,10 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		}
 		conn->charset = conn->greet_charset;
 		memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
+	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
+		/* old authentication with new server  !*/
+		DBG_ERR(mysqlnd_old_passwd);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);	
 	}
 
 	SET_ERROR_AFF_ROWS(conn);
