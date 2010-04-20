@@ -1893,10 +1893,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		}
 		fname_len = strlen(ptr->fname);
- 		lowercase_name = zend_str_tolower_dup(ptr->fname, fname_len);
+		lowercase_name = CG(new_interned_string)(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
 		if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
-			efree(lowercase_name);
+			str_efree(lowercase_name);
 			break;
 		}
 		if (scope) {
@@ -1938,7 +1938,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		ptr++;
 		count++;
-		efree(lowercase_name);
+		str_efree(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		if (scope) {
@@ -2168,7 +2168,7 @@ int zend_next_free_module(void) /* {{{ */
 static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, zend_uint ce_flags TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
-	char *lowercase_name = malloc(orig_class_entry->name_length + 1);
+	char *lowercase_name = emalloc(orig_class_entry->name_length + 1);
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -2181,8 +2181,9 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	}
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
+	lowercase_name = CG(new_interned_string)(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
-	free(lowercase_name);
+	str_efree(lowercase_name);
 	return class_entry;
 }
 /* }}} */
@@ -3070,6 +3071,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 {
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
+	char *interned_name;
 
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
@@ -3097,7 +3099,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 				int priv_name_length;
 
 				zend_mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
-				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = priv_name;
 				property_info.name_length = priv_name_length;
 			}
@@ -3107,7 +3108,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 				int prot_name_length;
 
 				zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
-				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = prot_name;
 				property_info.name_length = prot_name_length;
 			}
@@ -3121,11 +3121,27 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 				zend_hash_del(target_symbol_table, prot_name, prot_name_length+1);
 				pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 			}
-			zend_hash_update(target_symbol_table, name, name_length+1, &property, sizeof(zval *), NULL);
-			property_info.name = ce->type & ZEND_INTERNAL_CLASS ? zend_strndup(name, name_length) : estrndup(name, name_length);
+			if (IS_INTERNED(name)) {
+				property_info.name = (char*)name;
+			} else {
+				property_info.name = ce->type & ZEND_INTERNAL_CLASS ? zend_strndup(name, name_length) : estrndup(name, name_length);
+			}
 			property_info.name_length = name_length;
 			break;
 	}
+
+	interned_name = CG(new_interned_string)(property_info.name, property_info.name_length+1, 0 TSRMLS_CC);
+	if (interned_name != property_info.name) {
+		if (ce->type == ZEND_USER_CLASS) {
+			efree(property_info.name);
+		} else {
+			free(property_info.name);
+		}
+		property_info.name = interned_name;
+	}
+
+	zend_hash_update(target_symbol_table, property_info.name, property_info.name_length+1, &property, sizeof(zval *), NULL);
+
 	property_info.flags = access_type;
 	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
 

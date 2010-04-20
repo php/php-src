@@ -681,7 +681,7 @@ repeat:
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = zend_strndup(name, name_len);
+	c.name = IS_INTERNED(name) ? name : zend_strndup(name, name_len);
 	c.name_len = name_len+1;
 	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {

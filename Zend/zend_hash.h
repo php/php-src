@@ -60,7 +60,7 @@ typedef struct bucket {
 	struct bucket *pListLast;
 	struct bucket *pNext;
 	struct bucket *pLast;
-	char arKey[1]; /* Must be last element */
+	char *arKey;
 } Bucket;
 
 typedef struct _hashtable {

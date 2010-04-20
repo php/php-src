@@ -1653,24 +1653,28 @@ PHP_FUNCTION(range)
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
 		if (*low > *high) {		/* Negative Steps */
+			unsigned char ch = *low;
+
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)low, 1, 1);
-				if (((signed int)*low - lstep) < 0) {
+			for (; ch >= *high; ch -= (unsigned int)lstep) {
+				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				if (((signed int)ch - lstep) < 0) {
 					break;
 				}
 			}
 		} else if (*high > *low) {	/* Positive Steps */
+			unsigned char ch = *low;
+
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; *low <= *high; (*low) += (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)low, 1, 1);
-				if (((signed int)*low + lstep) > 255) {
+			for (; ch <= *high; ch += (unsigned int)lstep) {
+				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				if (((signed int)ch + lstep) > 255) {
 					break;
 				}
 			}

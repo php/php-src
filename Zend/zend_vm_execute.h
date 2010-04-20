@@ -1367,6 +1367,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND
 */
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
+		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
+			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
 			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
 		}
@@ -2889,7 +2891,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -2951,7 +2957,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 		zval_copy_ctor(&c.value);
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
-	c.name = zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	c.name = IS_INTERNED(Z_STRVAL_P(name)) ? Z_STRVAL_P(name) : zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;
 	c.module_number = PHP_USER_CONSTANT;
 
@@ -3399,7 +3405,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3875,7 +3885,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -4075,7 +4089,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -4565,7 +4583,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -4685,6 +4707,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_O
 */
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
+		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
+			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
 			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
 		}
@@ -6175,7 +6199,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6651,7 +6679,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -7127,7 +7159,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -7230,7 +7266,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -7703,7 +7743,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -7981,6 +8025,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_O
 */
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
+		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
+			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
 			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
 		}
@@ -10759,7 +10805,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -10834,7 +10884,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -10974,7 +11028,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -12528,7 +12586,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -12603,7 +12665,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -12743,7 +12809,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -14348,7 +14418,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -14423,7 +14497,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -14563,7 +14641,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -15230,7 +15312,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -16764,7 +16850,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -16839,7 +16929,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -16979,7 +17073,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -18041,7 +18139,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -18179,7 +18281,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -19108,7 +19214,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -19246,7 +19356,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -20175,7 +20289,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -20313,7 +20431,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -21501,7 +21623,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -21639,7 +21765,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -21975,6 +22105,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OP
 */
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
+		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
+			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
 			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
 		}
@@ -24436,7 +24568,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -24511,7 +24647,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -24649,7 +24789,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -26096,7 +26240,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -26171,7 +26319,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -26309,7 +26461,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -27806,7 +27962,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -27881,7 +28041,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -28019,7 +28183,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -28585,7 +28753,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -30013,7 +30185,11 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index);
-					hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					if (IS_INTERNED(Z_STRVAL_P(offset))) {
+						hval = INTERNED_HASH(Z_STRVAL_P(offset));
+					} else {
+						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+					}
 				}
 				zend_hash_quick_update(Z_ARRVAL_P(array_ptr), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -30088,7 +30264,11 @@ num_index_dim:
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_dim);
-							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							if (IS_INTERNED(Z_STRVAL_P(offset))) {
+								hval = INTERNED_HASH(Z_STRVAL_P(offset));
+							} else {
+								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+							}
 						}
 						if (zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
@@ -30226,7 +30406,11 @@ num_index_prop:
 						if (!prop_dim) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, index, goto num_index_prop);
 						}
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						if (IS_INTERNED(Z_STRVAL_P(offset))) {
+							hval = INTERNED_HASH(Z_STRVAL_P(offset));
+						} else {
+							hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+						}
 					}
 					if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 						isset = 1;

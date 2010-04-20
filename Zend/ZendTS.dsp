@@ -273,6 +273,10 @@ SOURCE=.\zend_stream.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_string.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_strtod.c
 # End Source File
 # Begin Source File
@@ -442,6 +446,10 @@ SOURCE=.\zend_stack.h
 # Begin Source File
 
 SOURCE=.\zend_stream.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_string.h
 # End Source File
 # Begin Source File
 

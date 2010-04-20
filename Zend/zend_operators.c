@@ -1177,11 +1177,18 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 /* must support result==op1 */
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
-	Z_STRLEN_P(result) = Z_STRLEN_P(op1) + 1;
-	Z_STRVAL_P(result) = (char *) erealloc(Z_STRVAL_P(op1), Z_STRLEN_P(result)+1);
-	Z_STRVAL_P(result)[Z_STRLEN_P(result) - 1] = (char) Z_LVAL_P(op2);
-	Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
-	Z_TYPE_P(result) = IS_STRING;
+	int length = Z_STRLEN_P(op1) + 1;
+	char *buf;
+
+	if (IS_INTERNED(Z_STRVAL_P(op1))) {
+		buf = (char *) emalloc(length + 1);
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+	} else {
+		buf = (char *) erealloc(Z_STRVAL_P(op1), length + 1);
+	}
+	buf[length - 1] = (char) Z_LVAL_P(op2);
+	buf[length] = 0;
+	ZVAL_STRINGL(result, buf, length, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1190,12 +1197,17 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+	char *buf;
 
-	Z_STRVAL_P(result) = (char *) erealloc(Z_STRVAL_P(op1), length+1);
-	memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-	Z_STRVAL_P(result)[length] = 0;
-	Z_STRLEN_P(result) = length;
-	Z_TYPE_P(result) = IS_STRING;
+	if (IS_INTERNED(Z_STRVAL_P(op1))) {
+		buf = (char *) emalloc(length+1);
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+	} else {
+		buf = (char *) erealloc(Z_STRVAL_P(op1), length+1);
+	}
+	memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	buf[length] = 0;
+	ZVAL_STRINGL(result, buf, length, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1224,7 +1236,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	if (use_copy2) {
 		op2 = &op2_copy;
 	}
-	if (result==op1) {	/* special case, perform operations on result */
+	if (result==op1 && !IS_INTERNED(Z_STRVAL_P(op1))) {	/* special case, perform operations on result */
 		uint res_len = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
 		if (Z_STRLEN_P(result) < 0 || (int) (Z_STRLEN_P(op1) + Z_STRLEN_P(op2)) < 0) {
@@ -1239,12 +1251,13 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		Z_STRVAL_P(result)[res_len]=0;
 		Z_STRLEN_P(result) = res_len;
 	} else {
-		Z_STRLEN_P(result) = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-		Z_STRVAL_P(result) = (char *) emalloc(Z_STRLEN_P(result) + 1);
-		memcpy(Z_STRVAL_P(result), Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-		Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
-		Z_TYPE_P(result) = IS_STRING;
+		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+		char *buf = (char *) emalloc(length + 1);
+
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+		memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		buf[length] = 0;
+		ZVAL_STRINGL(result, buf, length, 0);
 	}
 	if (use_copy1) {
 		zval_dtor(op1);
@@ -1668,6 +1681,12 @@ static void increment_string(zval *str) /* {{{ */
 		return;
 	}
 
+	if (IS_INTERNED(s)) {
+		s = (char*) emalloc(Z_STRLEN_P(str) + 1);
+		memcpy(s, Z_STRVAL_P(str), Z_STRLEN_P(str) + 1);
+		Z_STRVAL_P(str) = s;
+	}
+
 	while (pos >= 0) {
 		ch = s[pos];
 		if (ch >= 'a' && ch <= 'z') {
@@ -1753,7 +1772,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
-						efree(Z_STRVAL_P(op1));
+						str_efree(Z_STRVAL_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
@@ -1763,7 +1782,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 						}
 						break;
 					case IS_DOUBLE:
-						efree(Z_STRVAL_P(op1));
+						str_efree(Z_STRVAL_P(op1));
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
@@ -1879,6 +1898,9 @@ ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint 
 {
 	int retval;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	retval = memcmp(s1, s2, MIN(len1, len2));
 	if (!retval) {
 		return (len1 - len2);
@@ -1892,6 +1914,9 @@ ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint
 {
 	int retval;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
 	if (!retval) {
 		return (MIN(length, len1) - MIN(length, len2));
@@ -1906,8 +1931,11 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, u
 	int len;
 	int c1, c2;
 
-	len = MIN(len1, len2);
+	if (s1 == s2) {
+		return 0;
+	}
 
+	len = MIN(len1, len2);
 	while (len--) {
 		c1 = zend_tolower((int)*(unsigned char *)s1++);
 		c2 = zend_tolower((int)*(unsigned char *)s2++);
@@ -1925,8 +1953,10 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, 
 	int len;
 	int c1, c2;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	len = MIN(length, MIN(len1, len2));
-
 	while (len--) {
 		c1 = zend_tolower((int)*(unsigned char *)s1++);
 		c2 = zend_tolower((int)*(unsigned char *)s2++);

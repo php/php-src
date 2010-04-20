@@ -456,7 +456,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
-void zend_do_begin_catch(znode *try_token, znode *catch_class, const znode *catch_var, znode *first_catch TSRMLS_DC);
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
 void zend_do_end_catch(const znode *try_token TSRMLS_DC);
 void zend_do_throw(const znode *expr TSRMLS_DC);
 

@@ -51,7 +51,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	}
 
 	smart_str_0(&str);
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = str.c;
 	Z_STRLEN_P(value) = str.len;
 }
@@ -102,7 +102,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		s++;	
 	}
 	*p = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)str;
 	Z_STRLEN_P(value) = p - str;
 }
@@ -131,7 +131,7 @@ static void php_filter_strip(zval *value, long flags)
 	}
 	/* update zval string data */
 	buf[c] = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
@@ -169,7 +169,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	}
 	/* update zval string data */
 	buf[c] = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
@@ -254,7 +254,7 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 		quotes = ENT_NOQUOTES;
 	}
 	buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = buf;
 	Z_STRLEN_P(value) = len;
 }
@@ -365,7 +365,7 @@ void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 	/* just call php_addslashes quotes */
 	buf = php_addslashes(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 0 TSRMLS_CC);
 
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = buf;
 	Z_STRLEN_P(value) = len;
 }
