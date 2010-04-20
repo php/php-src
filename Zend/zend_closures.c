@@ -258,7 +258,7 @@ static zend_object_value zend_closure_clone(zval *zobject TSRMLS_DC) /* {{{ */
 	zend_closure *closure = (zend_closure *)zend_object_store_get_object(zobject TSRMLS_CC);
 	zval result;
 
-	zend_create_closure(&result, &closure->func, closure->func.common.scope, closure->this_ptr);
+	zend_create_closure(&result, &closure->func, closure->func.common.scope, closure->this_ptr TSRMLS_CC);
 	return Z_OBJVAL(result);
 }
 /* }}} */
