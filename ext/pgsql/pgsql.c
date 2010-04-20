@@ -3312,7 +3312,7 @@ PHP_FUNCTION(pg_copy_to)
 {
 	zval *pgsql_link;
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL;
-	int table_name_len, pg_delim_len, pg_null_as_len;
+	int table_name_len, pg_delim_len, pg_null_as_len, free_pg_null = 0;
 	char *query;
 	int id = -1;
 	PGconn *pgsql;
@@ -3339,6 +3339,7 @@ PHP_FUNCTION(pg_copy_to)
 
 	if (!pg_null_as) {
 		pg_null_as = safe_estrdup("\\\\N");
+		free_pg_null = 1;
 	}
 
 	if (memchr(table_name, '.', table_name_len)) {
@@ -3351,7 +3352,9 @@ PHP_FUNCTION(pg_copy_to)
 		PQclear(pgsql_result);
 	}
 	pgsql_result = PQexec(pgsql, query);
-	efree(pg_null_as);
+	if (free_pg_null) {
+		efree(pg_null_as);
+	}
 	efree(query);
 
 	if (pgsql_result) {
