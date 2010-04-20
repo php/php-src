@@ -239,9 +239,24 @@ static char *xml_conf_set_slot_key_value_pair(void **conf, char *name, void *vv,
 		return "xml_conf_set_slot_key_value_pair(): strdup() failed";
 	}
 
+	kv->next = **parent;
 	**parent = kv;
-	*parent = &kv->next;
 	return NULL;
+}
+/* }}} */
+
+static char *xml_conf_set_slot_key_value_pair_bool(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
+{
+	int value;
+	void *subconf = &value;
+	char *error;
+
+	error = xml_conf_set_slot_boolean(&subconf, name, vv, 0);
+	if (error) {
+		return error;
+	}
+
+	return(xml_conf_set_slot_key_value_pair(conf, name, value ? "On" : "Off", offset));
 }
 /* }}} */
 
@@ -253,10 +268,25 @@ static struct xml_conf_section fpm_conf_set_key_value_pairs_subsection_conf = {
 	}
 };
 
+static struct xml_conf_section fpm_conf_set_key_value_pairs_subsection_conf_bool = {
+	.path = "key_value_pairs somewhere", /* fixme */
+	.parsers = (struct xml_value_parser []) {
+		{ XML_CONF_SCALAR, 0, &xml_conf_set_slot_key_value_pair_bool, 0 },
+		{ 0, 0, 0, 0 }
+	}
+};
+
 static char *fpm_conf_set_key_value_pairs_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
 	void *next_kv = (char *) *conf + offset;
 	return xml_conf_parse_section(&next_kv, &fpm_conf_set_key_value_pairs_subsection_conf, xml_node);
+}
+/* }}} */
+
+static char *fpm_conf_set_key_value_pairs_subsection_bool(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
+{
+	void *next_kv = (char *) *conf + offset;
+	return xml_conf_parse_section(&next_kv, &fpm_conf_set_key_value_pairs_subsection_conf_bool, xml_node);
 }
 /* }}} */
 
@@ -303,7 +333,13 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 		free(wpc->listen_options->mode);
 		free(wpc->listen_options);
 	}
-	for (kv = wpc->php_defines; kv; kv = kv_next) {
+	for (kv = wpc->php_values; kv; kv = kv_next) {
+		kv_next = kv->next;
+		free(kv->key);
+		free(kv->value);
+		free(kv);
+	}
+	for (kv = wpc->php_admin_values; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
 		free(kv->value);
@@ -334,7 +370,10 @@ static struct xml_conf_section xml_section_fpm_worker_pool_config = {
 		{ XML_CONF_SCALAR,		"name",							&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, name) },
 		{ XML_CONF_SCALAR,		"listen_address",				&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, listen_address) },
 		{ XML_CONF_SUBSECTION,	"listen_options",				&fpm_conf_set_listen_options_subsection,	offsetof(struct fpm_worker_pool_config_s, listen_options) },
-		{ XML_CONF_SUBSECTION,	"php_defines",					&fpm_conf_set_key_value_pairs_subsection,	offsetof(struct fpm_worker_pool_config_s, php_defines) },
+		{ XML_CONF_SUBSECTION,	"php_value",					&fpm_conf_set_key_value_pairs_subsection,	offsetof(struct fpm_worker_pool_config_s, php_values) },
+		{ XML_CONF_SUBSECTION,	"php_flag",					&fpm_conf_set_key_value_pairs_subsection_bool,	offsetof(struct fpm_worker_pool_config_s, php_values) },
+		{ XML_CONF_SUBSECTION,	"php_admin_value",					&fpm_conf_set_key_value_pairs_subsection,	offsetof(struct fpm_worker_pool_config_s, php_admin_values) },
+		{ XML_CONF_SUBSECTION,	"php_admin_flag",					&fpm_conf_set_key_value_pairs_subsection_bool,	offsetof(struct fpm_worker_pool_config_s, php_admin_values) },
 		{ XML_CONF_SCALAR,		"user",							&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, user) },
 		{ XML_CONF_SCALAR,		"group",						&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, group) },
 		{ XML_CONF_SCALAR,		"chroot",						&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, chroot) },

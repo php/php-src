@@ -55,11 +55,21 @@
 
 			Additional php.ini defines, specific to this pool of workers.
 			These settings overwrite the values previously defined in the php.ini.
-			<value name="php_defines">
-				<!-- <value name="sendmail_path">/usr/sbin/sendmail -t -i</value> -->
-				<!-- <value name="display_errors">0</value> -->
+			Like apache, you can use php_value, php_flag, php_admin_value or php_admin_flag.
+			Defining 'extension' will search for the corresponding shared extension in extension_dir.
+			Defining 'disable_functions' or 'disable_classes' won't overwrite previously defined
+			php.ini value, but the new value will be append.
+			<value name="php_value">
 				<!-- <value name="error_log">/var/log/php-error.log</value> -->
-        		<!-- <value name="log_errors">true</value> -->
+			</value>
+			<value name="php_flag">
+				<!-- <value name="log_errors">true</value> -->
+			</value>
+			<value name="php_admin_value">
+				<!-- <value name="sendmail_path">/usr/sbin/sendmail -t -i</value> -->
+			</value>
+			<value name="php_admin_flag">
+				<!-- <value name="display_errors">0</value> -->
 			</value>
 
 			Unix user of processes
