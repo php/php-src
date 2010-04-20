@@ -1508,6 +1508,7 @@ void php_request_shutdown_for_exec(void *dummy)
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1 TSRMLS_CC);
+	CG(interned_strings_restore)(TSRMLS_C);
 }
 /* }}} */
 
@@ -1549,6 +1550,8 @@ void php_request_shutdown_for_hook(void *dummy)
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
 	} zend_end_try();
+
+	CG(interned_strings_restore)(TSRMLS_C);
 
 	zend_try {
 		zend_unset_timeout(TSRMLS_C);
@@ -1648,6 +1651,7 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
+	CG(interned_strings_restore)(TSRMLS_C);
 
 	/* 12. Reset max_execution_time */
 	zend_try {
@@ -2103,6 +2107,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_startup = 0;
 
 	shutdown_memory_manager(1, 0 TSRMLS_CC);
+	CG(interned_strings_snapshot)(TSRMLS_C);
 
 	/* we're done */
 	return SUCCESS;
