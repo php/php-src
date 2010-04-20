@@ -1689,11 +1689,11 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	if (packet->header.size == 1 && buf[0] == EODATA_MARKER && packet->server_capabilities & CLIENT_SECURE_CONNECTION) {
 		/* We don't handle 3.23 authentication */
+		packet->server_asked_323_auth = TRUE;
 		DBG_RETURN(FAIL);
 	}
 
 	if (ERROR_MARKER == packet->field_count) {
-		packet->server_asked_323_auth = TRUE;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error,
 										 sizeof(packet->error_info.error),
