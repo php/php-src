@@ -237,6 +237,7 @@ char *alloca ();
 #include "zend_alloc.h"
 
 #include "zend_types.h"
+#include "zend_string.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
@@ -599,8 +600,8 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
 
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
 

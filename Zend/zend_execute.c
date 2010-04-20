@@ -610,12 +610,24 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 		}
 
 		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
-			Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
+				char *tmp = (char *) emalloc(T->str_offset.offset+1+1);
+
+				memcpy(tmp, Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+				Z_STRVAL_P(T->str_offset.str) = tmp;
+			} else {
+				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			}
 			memset(Z_STRVAL_P(T->str_offset.str) + Z_STRLEN_P(T->str_offset.str),
 			       ' ',
 			       T->str_offset.offset - Z_STRLEN_P(T->str_offset.str));
 			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
 			Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
+		} else if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
+			char *tmp = (char *) emalloc(Z_STRLEN_P(T->str_offset.str) + 1);
+
+			memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str) + 1);
+			Z_STRVAL_P(T->str_offset.str) = tmp;
 		}
 
 		if (Z_TYPE_P(value) != IS_STRING) {
@@ -803,7 +815,11 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 				hval = Z_HASH_P(dim);
 			} else {
 				ZEND_HANDLE_NUMERIC_EX(offset_key, offset_key_length+1, index, goto num_index);
-				hval = zend_hash_func(offset_key, offset_key_length+1);
+				if (IS_INTERNED(offset_key)) {
+					hval = INTERNED_HASH(offset_key);
+				} else {
+					hval = zend_hash_func(offset_key, offset_key_length+1);
+				}
 			}	
 fetch_string_dim:
 			if (zend_hash_quick_find(ht, offset_key, offset_key_length+1, hval, (void **) &retval) == FAILURE) {

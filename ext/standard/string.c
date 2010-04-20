@@ -3589,7 +3589,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity, replace_count);
 			}
 
-			efree(Z_STRVAL_P(result));
+           str_efree(Z_STRVAL_P(result));
 			Z_STRVAL_P(result) = Z_STRVAL(temp_result);
 			Z_STRLEN_P(result) = Z_STRLEN(temp_result);
 
@@ -4244,6 +4244,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
 	int state = 0, pos;
+	char *allow_free;
 
 	if (stateptr)
 		state = *stateptr;
@@ -4255,7 +4256,12 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 	rp = rbuf;
 	br = 0;
 	if (allow) {
-		php_strtolower(allow, allow_len);
+		if (IS_INTERNED(allow)) {
+			allow_free = allow = zend_str_tolower_dup(allow, allow_len);
+		} else {
+			allow_free = NULL;
+			php_strtolower(allow, allow_len);
+		}
 		tbuf = emalloc(PHP_TAG_BUF_SIZE + 1);
 		tp = tbuf;
 	} else {
@@ -4494,8 +4500,12 @@ reg_char:
 		*rp = '\0';
 	}
 	efree(buf);
-	if (allow)
+	if (allow) {
 		efree(tbuf);
+		if (allow_free) {
+			efree(allow_free);
+		}
+	}
 	if (stateptr)
 		*stateptr = state;
 

@@ -693,6 +693,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	EG(user_exception_handler) = NULL;
 #endif
 
+	zend_interned_strings_init(TSRMLS_C);
 	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
@@ -781,6 +782,8 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	GLOBAL_CONSTANTS_TABLE = NULL;
 #endif
 	zend_destroy_rsrc_list_dtors();
+
+	zend_interned_strings_dtor(TSRMLS_C);
 }
 /* }}} */
 

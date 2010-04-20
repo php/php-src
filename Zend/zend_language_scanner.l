@@ -408,7 +408,13 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
 	/* enforce two trailing NULLs for flex... */
-	str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
+	if (IS_INTERNED(str->value.str.val)) {
+		char *tmp = safe_emalloc(1, str->value.str.len, ZEND_MMAP_AHEAD);
+		memcpy(tmp, str->value.str.val, str->value.str.len + ZEND_MMAP_AHEAD);
+		str->value.str.val = tmp;
+	} else {
+		str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
+	}
 
 	memset(str->value.str.val + str->value.str.len, 0, ZEND_MMAP_AHEAD);
 

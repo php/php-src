@@ -525,7 +525,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
 					colon = estrndup(colon, Z_STRLEN_P(p));
-					efree(Z_STRVAL_P(p));
+					str_efree(Z_STRVAL_P(p));
 					Z_STRVAL_P(p) = colon;
 				} else {
 					Z_STRVAL_P(p) = colon + 1;
@@ -561,12 +561,12 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (fix_save) {
 						save--;
 					}
-					if (inline_change) {
+					if (inline_change && !IS_INTERNED(save)) {
 						efree(save);
 					}
 					save = NULL;
 				}
-				if (inline_change && save && save != actual) {
+				if (inline_change && save && save != actual && !IS_INTERNED(save)) {
 					efree(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
