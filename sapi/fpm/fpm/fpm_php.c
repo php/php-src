@@ -20,7 +20,7 @@
 #include "fpm_cleanup.h"
 #include "fpm_worker_pool.h"
 
-static int zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int stage TSRMLS_DC) /* {{{ */
+static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
@@ -32,10 +32,11 @@ static int zend_ini_alter_master(char *name, int name_length, char *new_value, i
 	duplicate = strdup(new_value);
 
 	if (!ini_entry->on_modify
-		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length,
-			ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC) == SUCCESS) {
+			|| ini_entry->on_modify(ini_entry, duplicate, new_value_length,
+				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC) == SUCCESS) {
 		ini_entry->value = duplicate;
 		ini_entry->value_length = new_value_length;
+		ini_entry->modifiable = mode;
 	} else {
 		free(duplicate);
 	}
@@ -73,55 +74,62 @@ static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS
 }
 /* }}} */
 
+int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
+{
+	TSRMLS_FETCH();
+
+	char *name = kv->key;
+	char *value = kv->value;
+	int name_len = strlen(name);
+	int value_len = strlen(value);
+
+	if (!strcmp(name, "extension") && *value) {
+		zval zv;
+		php_dl(value, MODULE_PERSISTENT, &zv, 1 TSRMLS_CC);
+		return Z_BVAL(zv) ? 1 : -1;
+	}
+
+	if (fpm_php_zend_ini_alter_master(name, name_len+1, value, value_len, mode, PHP_INI_STAGE_ACTIVATE TSRMLS_CC) == FAILURE) {
+		return -1;
+	}
+
+	if (!strcmp(name, "disable_functions") && *value) {
+		char *v = strdup(value);
+		PG(disable_functions) = v;
+		fpm_php_disable(v, zend_disable_function TSRMLS_CC);
+		return 1;
+	}
+
+	if (!strcmp(name, "disable_classes") && *value) {
+		char *v = strdup(value);
+		PG(disable_classes) = v;
+		fpm_php_disable(v, zend_disable_class TSRMLS_CC);
+		return 1;
+	}
+
+	return 1;
+}
+/* }}} */
+
 static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	TSRMLS_FETCH();
 	struct key_value_s *kv;
 
-	for (kv = wp->config->php_defines; kv; kv = kv->next) {
-		char *name = kv->key;
-		char *value = kv->value;
-		int name_len = strlen(name);
-		int value_len = strlen(value);
-
-		if (!strcmp(name, "extension") && *value) {
-			zval zv;
-
-#if defined(PHP_VERSION_ID) && (PHP_VERSION_ID >= 50300)
-			php_dl(value, MODULE_PERSISTENT, &zv, 1 TSRMLS_CC);
-#else
-			zval filename;
-			ZVAL_STRINGL(&filename, value, value_len, 0);
-#if (PHP_MAJOR_VERSION >= 5)
-			php_dl(&filename, MODULE_PERSISTENT, &zv, 1 TSRMLS_CC);
-#else
-			php_dl(&filename, MODULE_PERSISTENT, &zv TSRMLS_CC);
-#endif
-#endif
-			continue;
+	for (kv = wp->config->php_values; kv; kv = kv->next) {
+		if (fpm_php_apply_defines_ex(kv, ZEND_INI_USER) == -1) {
+			fprintf(stderr, "Unable to set php_value '%s'", kv->key);
 		}
+	}
 
-		zend_ini_alter_master(name, name_len + 1, value, value_len, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
-
-		if (!strcmp(name, "disable_functions") && *value) {
-			char *v = strdup(value);
-#if (PHP_MAJOR_VERSION >= 5)
-			PG(disable_functions) = v;
-#endif
-			fpm_php_disable(v, zend_disable_function TSRMLS_CC);
-		}
-		else if (!strcmp(name, "disable_classes") && *value) {
-			char *v = strdup(value);
-#if (PHP_MAJOR_VERSION >= 5)
-			PG(disable_classes) = v;
-#endif
-			fpm_php_disable(v, zend_disable_class TSRMLS_CC);
+	for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+		if (fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM) == -1) {
+			fprintf(stderr, "Unable to set php_admin_value '%s'", kv->key);
 		}
 	}
 
 	return 0;
 }
-/* }}} */
 
 static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {

@@ -50,7 +50,8 @@ struct fpm_worker_pool_config_s {
 	char *name;
 	char *listen_address;
 	struct fpm_listen_options_s *listen_options;
-	struct key_value_s *php_defines;
+	struct key_value_s *php_values;
+	struct key_value_s *php_admin_values;
 	char *user;
 	char *group;
 	char *chroot;
