@@ -4,6 +4,10 @@
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
+- Added a number of small performance tweaks and optimizations (Dmitry)
+  . ZEND_RECV now always has IS_CV as its result
+  . ZEND_CATCH now has to be used only with constant class names
+  . ZEND_FETCH_DIM_? may fetch array and dimension operans in a different order
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty

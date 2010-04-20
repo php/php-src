@@ -82,13 +82,13 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 				*iter = (zend_object_iterator *)zend_object_store_get_object(array_ptr TSRMLS_CC);
 				return ZEND_ITER_OBJECT;
 			}
-			if (HASH_OF(array_ptr)) {
+			if (Z_OBJPROP_P(array_ptr)) {
 				return ZEND_ITER_PLAIN_OBJECT;
 			}
 			return ZEND_ITER_INVALID;
 
 		case IS_ARRAY:
-			if (HASH_OF(array_ptr)) {
+			if (Z_ARRVAL_P(array_ptr)) {
 				return ZEND_ITER_PLAIN_ARRAY;
 			}
 			return ZEND_ITER_INVALID;

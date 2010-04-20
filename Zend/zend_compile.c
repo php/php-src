@@ -1571,10 +1571,11 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_receive_arg(zend_uchar op, const znode *var, const znode *offset, const znode *initialization, znode *class_type, const znode *varname, zend_uchar pass_by_reference TSRMLS_DC) /* {{{ */
+void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_uchar pass_by_reference TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
+	znode var;
 
 	if (class_type->op_type == IS_CONST &&
 	    Z_TYPE(class_type->u.constant) == IS_STRING &&
@@ -1585,23 +1586,27 @@ void zend_do_receive_arg(zend_uchar op, const znode *var, const znode *offset, c
 		return;
 	}
 
-	if (var->op_type == IS_CV &&
-	    var->u.op.var == CG(active_op_array)->this_var &&
-	    (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) {
- 		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
-	} else if (var->op_type == IS_VAR &&
-	    CG(active_op_array)->scope &&
-		((CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) &&
-		(Z_TYPE(varname->u.constant) == IS_STRING) &&
-		(Z_STRLEN(varname->u.constant) == sizeof("this")-1) &&
-		(memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")) == 0)) {
-		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+	if (zend_is_auto_global(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant) TSRMLS_CC)) {
+		zend_error(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
+	} else {
+		var.op_type = IS_CV;
+		var.u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC);
+		varname->u.constant.value.str.val = CG(active_op_array)->vars[var.u.op.var].name;
+		var.EA = 0;
+		if (Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
+		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
+			if (CG(active_op_array)->scope &&
+			    (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) {
+				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+			}
+			CG(active_op_array)->this_var = var.u.op.var;
+		}
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
-	SET_NODE(opline->result, var);
+	SET_NODE(opline->result, &var);
 	SET_NODE(opline->op1, offset);
 	if (op == ZEND_RECV_INIT) {
 		SET_NODE(opline->op2, initialization);
@@ -2498,16 +2503,17 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	zend_op *opline;
 	znode catch_class;
 
-	zend_do_fetch_class(&catch_class, class_name TSRMLS_CC);
+	if (class_name->op_type == IS_CONST &&
+	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
+		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
 
-	catch_op_number = get_next_op_number(CG(active_op_array));
-	if (catch_op_number > 0) {
-		opline = &CG(active_op_array)->opcodes[catch_op_number-1];
-		if (opline->opcode == ZEND_FETCH_CLASS) {
-			opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
-		}
+		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		catch_class = *class_name;
+	} else {
+		zend_error(E_COMPILE_ERROR, "Bad class name in the catch statement");
 	}
 
+	catch_op_number = get_next_op_number(CG(active_op_array));
 	if (first_catch) {
 		first_catch->u.op.opline_num = catch_op_number;
 	}
@@ -2515,6 +2521,7 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	SET_NODE(opline->op1, &catch_class);
+	add_lowercased_class_name(opline->op1.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
 	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len TSRMLS_CC);
 	catch_var->u.constant.value.str.val = CG(active_op_array)->vars[opline->op2.var].name;

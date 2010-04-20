@@ -27,7 +27,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-static inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type <= IS_BOOL) {
 		return;
@@ -37,7 +37,7 @@ static inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-static inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
+static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type <= IS_BOOL) {
 		return;
