@@ -1773,6 +1773,12 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
+			/* check request_method has been sent.
+			 * if not, the certainly not an HTTP over fcgi request */
+			if (!SG(request_info).request_method) {
+				goto fastcgi_request_done;
+			}
+
 			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, SG(request_info).query_string, &status_buffer, &status_content_type)) {
 				if (status_buffer) {
 					if (status_content_type) {
