@@ -650,7 +650,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 	++offset;
 	while (op < end) {
 		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-			&& op->op1.u.constant.value.lval == (long)offset)
+			&& op->op1.num == (long)offset)
 		{
 			return op;
 		}
@@ -690,12 +690,12 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	}
 	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
-		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2.op_type != IS_UNUSED) {
+		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 			zval *zv, zv_copy;
 			int use_copy;
 			string_write(str, " = ", sizeof(" = ")-1);
 			ALLOC_ZVAL(zv);
-			*zv = precv->op2.u.constant;
+			*zv = *precv->op2.zv;
 			zval_copy_ctor(zv);
 			INIT_PZVAL(zv);
 			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
@@ -2427,7 +2427,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 		RETURN_FALSE;
 	}
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2457,12 +2457,12 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		return;
 	}
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error"); 
 		return;
 	}
 
-	*return_value = precv->op2.u.constant;
+	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
 	if (Z_TYPE_P(return_value) != IS_CONSTANT) {
 		zval_copy_ctor(return_value);
@@ -3203,7 +3203,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	prop = zend_std_get_static_property(ce, name, name_len, 1 TSRMLS_CC);
+	prop = zend_std_get_static_property(ce, name, name_len, 1, NULL TSRMLS_CC);
 	if (!prop) {
 		if (def_value) {
 			RETURN_ZVAL(def_value, 1, 0);
@@ -3237,7 +3237,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	variable_ptr = zend_std_get_static_property(ce, name, name_len, 1 TSRMLS_CC);
+	variable_ptr = zend_std_get_static_property(ce, name, name_len, 1, NULL TSRMLS_CC);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Class %s does not have a property named %s", ce->name, name);
@@ -3618,7 +3618,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 		if (intern->obj && Z_OBJ_HANDLER_P(intern->obj, has_property)) {
 			MAKE_STD_ZVAL(property);
 			ZVAL_STRINGL(property, name, name_len, 1);
-			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 2 TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 2, 0 TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
@@ -5678,7 +5678,7 @@ const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 static zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
-static void _reflection_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+static void _reflection_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->default_properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1)
@@ -5690,7 +5690,7 @@ static void _reflection_write_property(zval *object, zval *member, zval *value T
 	}
 	else
 	{
-		zend_std_obj_handlers->write_property(object, member, value TSRMLS_CC);		
+		zend_std_obj_handlers->write_property(object, member, value, key TSRMLS_CC);
 	}
 }
 /* }}} */

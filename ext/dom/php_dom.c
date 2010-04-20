@@ -302,7 +302,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_r
 }
 /* }}} */
 
-static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval **dom_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -325,7 +325,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* 
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -336,7 +336,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ dom_read_property */
-zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *dom_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -371,7 +371,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -382,7 +382,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 /* }}} */
 
 /* {{{ dom_write_property */
-void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void dom_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -407,7 +407,7 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		hnd->write_func(obj, value TSRMLS_CC);
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -417,7 +417,7 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 /* }}} */
 
 /* {{{ dom_property_exists */
-static int dom_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int dom_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -455,7 +455,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty TSRML
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty TSRMLS_CC);
+		retval = std_hnd->has_property(object, member, check_empty, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {

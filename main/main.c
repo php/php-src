@@ -667,7 +667,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 				EG(current_execute_data)->opline &&
 				EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL
 	) {
-		switch (EG(current_execute_data)->opline->op2.u.constant.value.lval) {
+		switch (EG(current_execute_data)->opline->extended_value) {
 			case ZEND_EVAL:
 				function = "eval";
 				is_function = 1;

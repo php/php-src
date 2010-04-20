@@ -449,7 +449,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	MAKE_STD_ZVAL(query_string);
 	ZVAL_STRINGL(query_string, stmt->query_string, stmt->query_stringlen, 1);
 	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
-	std_object_handlers.write_property(object, &z_key, query_string TSRMLS_CC);
+	std_object_handlers.write_property(object, &z_key, query_string, 0 TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
 
 	if (dbstmt_ce->constructor) {
@@ -1327,7 +1327,7 @@ static union _zend_function *dbh_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, int method_len TSRMLS_DC)
+	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
@@ -1339,7 +1339,7 @@ static union _zend_function *dbh_method_get(
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
-	if ((fbc = std_object_handlers.get_method(object_pp, method_name, method_len TSRMLS_CC)) == NULL) {
+	if ((fbc = std_object_handlers.get_method(object_pp, method_name, method_len, key TSRMLS_CC)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {

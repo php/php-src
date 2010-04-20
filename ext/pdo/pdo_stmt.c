@@ -2234,7 +2234,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void dbstmt_prop_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -2243,11 +2243,11 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
-		std_object_handlers.write_property(object, member, value TSRMLS_CC);
+		std_object_handlers.write_property(object, member, value, key TSRMLS_CC);
 	}
 }
 
-static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
+static void dbstmt_prop_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -2256,7 +2256,7 @@ static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
-		std_object_handlers.unset_property(object, member TSRMLS_CC);
+		std_object_handlers.unset_property(object, member, key TSRMLS_CC);
 	}
 }
 
@@ -2266,7 +2266,7 @@ static union _zend_function *dbstmt_method_get(
 #else
 	zval *object,
 #endif
-   	char *method_name, int method_len TSRMLS_DC)
+   	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
@@ -2585,7 +2585,7 @@ const zend_function_entry pdo_row_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval *row_prop_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval *return_value;
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
@@ -2613,7 +2613,7 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 			}
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 				zval_ptr_dtor(&return_value);
-				return std_object_handlers.read_property(object, member, IS_STRING TSRMLS_CC);
+				return std_object_handlers.read_property(object, member, IS_STRING, key TSRMLS_CC);
 			}
 		}
 	}
@@ -2624,12 +2624,22 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 	return return_value;
 }
 
-static void row_prop_or_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static zval *row_dim_read(zval *object, zval *member, int type TSRMLS_DC)
+{
+	return row_prop_read(object, member, type, NULL TSRMLS_CC);
+}
+
+static void row_prop_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
 }
 
-static int row_prop_or_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static void row_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
+}
+
+static int row_prop_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	int colno = -1;
@@ -2653,7 +2663,17 @@ static int row_prop_or_dim_exists(zval *object, zval *member, int check_empty TS
 	return 0;
 }
 
-static void row_prop_or_dim_delete(zval *object, zval *offset TSRMLS_DC)
+static int row_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	return row_prop_exists(object, member, check_empty, NULL TSRMLS_CC);
+}
+
+static void row_prop_delete(zval *object, zval *offset, const zend_literal *key TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDORow");
+}
+
+static void row_dim_delete(zval *object, zval *offset TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDORow");
 }
@@ -2684,7 +2704,7 @@ static union _zend_function *row_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, int method_len TSRMLS_DC)
+	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
@@ -2741,17 +2761,17 @@ static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
 
 zend_object_handlers pdo_row_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
-	row_prop_or_dim_read,
-	row_prop_or_dim_write,
-	row_prop_or_dim_read,
-	row_prop_or_dim_write,
+	row_prop_read,
+	row_prop_write,
+	row_dim_read,
+	row_dim_write,
 	NULL,
 	NULL,
 	NULL,
-	row_prop_or_dim_exists,
-	row_prop_or_dim_delete,
-	row_prop_or_dim_exists,
-	row_prop_or_dim_delete,
+	row_prop_exists,
+	row_prop_delete,
+	row_dim_exists,
+	row_dim_delete,
 	row_get_properties,
 	row_method_get,
 	row_call_method,

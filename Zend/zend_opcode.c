@@ -67,7 +67,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->opcodes = NULL;
 	op_array_alloc_ops(op_array);
 
-	op_array->size_var = 0; /* FIXME:??? */
+	op_array->size_var = 0;
 	op_array->last_var = 0;
 	op_array->vars = NULL;
 
@@ -102,6 +102,10 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->fn_flags = CG(interactive)?ZEND_ACC_INTERACTIVE:0;
 
 	op_array->early_binding = -1;
+
+	op_array->size_literal = 0;
+	op_array->last_literal = 0;
+	op_array->literals = NULL;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -220,8 +224,8 @@ void zend_class_add_ref(zend_class_entry **ce)
 
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_op *opline = op_array->opcodes;
-	zend_op *end = op_array->opcodes+op_array->last;
+	zend_literal *literal = op_array->literals;
+	zend_literal *end;
 	zend_uint i;
 
 	if (op_array->static_variables) {
@@ -244,20 +248,13 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		efree(op_array->vars);
 	}
 
-	while (opline<end) {
-		if (opline->op1.op_type==IS_CONST) {
-#if DEBUG_ZEND>2
-			printf("Reducing refcount for %x 1=>0 (destroying)\n", &opline->op1.u.constant);
-#endif
-			zval_dtor(&opline->op1.u.constant);
+	if (literal) {
+	 	end = literal + op_array->last_literal;
+	 	while (literal < end) {
+			zval_dtor(&literal->constant);
+			literal++;
 		}
-		if (opline->op2.op_type==IS_CONST) {
-#if DEBUG_ZEND>2
-			printf("Reducing refcount for %x 1=>0 (destroying)\n", &opline->op2.u.constant);
-#endif
-			zval_dtor(&opline->op2.u.constant);
-		}
-		opline++;
+		efree(op_array->literals);
 	}
 	efree(op_array->opcodes);
 
@@ -377,39 +374,41 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
 		op_array->size = op_array->last;
 	}
+	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && op_array->size_literal != op_array->last_literal) {
+		op_array->literals = (zend_literal*)erealloc(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
+		op_array->size_literal = op_array->last_literal;
+	}
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
-		if (opline->op1.op_type == IS_CONST) {
-			Z_SET_ISREF(opline->op1.u.constant);
-			Z_SET_REFCOUNT(opline->op1.u.constant, 2); /* Make sure is_ref won't be reset */
+		if (opline->op1_type == IS_CONST) {
+			opline->op1.zv = &op_array->literals[opline->op1.constant].constant;
 		}
-		if (opline->op2.op_type == IS_CONST) {
-			Z_SET_ISREF(opline->op2.u.constant);
-			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
+		if (opline->op2_type == IS_CONST) {
+			opline->op2.zv = &op_array->literals[opline->op2.constant].constant;
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
-				if (Z_TYPE(opline->op2.u.constant) != IS_LONG) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-				opline->op1.u.jmp_addr = &op_array->opcodes[opline->op1.u.opline_num];
+				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
-				opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
+				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.opline_num];
 				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
-	
+
 	op_array->done_pass_two = 1;
 	return 0;
 }

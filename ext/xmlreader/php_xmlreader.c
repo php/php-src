@@ -112,7 +112,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
+zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -135,7 +135,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -146,7 +146,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 /* }}} */
 
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *xmlreader_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -178,7 +178,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -189,7 +189,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void xmlreader_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -214,7 +214,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write to read-only property");
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {

@@ -311,7 +311,7 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 
 
 /* {{{ mysqli_read_property */
-zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *mysqli_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval tmp_member;
 	zval *retval;
@@ -343,7 +343,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -354,7 +354,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqli_write_property */
-void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void mysqli_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	zval tmp_member;
 	mysqli_object *obj;
@@ -382,7 +382,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -403,7 +403,7 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 }
 /* }}} */
 
-static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
+static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 	mysqli_prop_handler	p;
@@ -415,7 +415,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				ret = 1;
 				break;
 			case 1: {
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+				zval *value = mysqli_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
 					ret = Z_BVAL_P(value)? 1:0;
@@ -426,7 +426,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				break;
 			}
 			case 0:{
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+				zval *value = mysqli_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1:0;
 					/* refcount is 0 */
@@ -440,7 +440,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		ret = std_hnd->has_property(object, member, has_set_exists TSRMLS_CC);
+		ret = std_hnd->has_property(object, member, has_set_exists, key TSRMLS_CC);
 	}
 	return ret;
 } /* }}} */
@@ -463,7 +463,7 @@ HashTable * mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		zval *value;
 		INIT_ZVAL(member);
 		ZVAL_STRINGL(&member, entry->name, entry->name_len, 0); 
-		value = mysqli_read_property(object, &member, BP_VAR_IS TSRMLS_CC);
+		value = mysqli_read_property(object, &member, BP_VAR_IS, 0 TSRMLS_CC);
 		if (value != EG(uninitialized_zval_ptr)) {
 			Z_ADDREF_P(value);
 			zend_hash_add(retval, entry->name, entry->name_len + 1, &value, sizeof(zval *), NULL);

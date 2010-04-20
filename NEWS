@@ -17,6 +17,8 @@
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
+- Changed the structure of op_array.opcodes. The constant values are moved from
+  opcode operands into a separate literal table. (Dmitry)
 - Changed session.entropy_file to default to /dev/urandom or /dev/arandom if either
   is present at compile time. (Rasmus)
 
