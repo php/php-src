@@ -1970,7 +1970,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 				SAVE_CURL_ERROR(ch, error);
 				if (error != CURLE_OK) {
-					RETVAL_FALSE
+					RETVAL_FALSE;
 					return 1;
 				}
 
