@@ -848,6 +848,7 @@ static inline zval* zend_assign_tmp_to_variable(zval **variable_ptr_ptr, zval *v
 			zendi_zval_dtor(garbage);
 			return variable_ptr;
 		} else { /* we need to split */
+    		GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			ALLOC_ZVAL(variable_ptr);
 			INIT_PZVAL_COPY(variable_ptr, value);
 			*variable_ptr_ptr = variable_ptr;
@@ -901,6 +902,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				return value;
 			}
 		} else { /* we need to split */
+    		GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
 				ALLOC_ZVAL(variable_ptr);
 				INIT_PZVAL_COPY(variable_ptr, value);
