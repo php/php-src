@@ -2080,7 +2080,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 	props = dateobj->std.properties;
 
-	if (!dateobj->time) {
+	if (!dateobj->time || GC_G(gc_active)) {
 		return props;
 	}
 
@@ -2223,7 +2223,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 
 	props = intervalobj->std.properties;
 
-	if (!intervalobj->initialized) {
+	if (!intervalobj->initialized || GC_G(gc_active)) {
 		return props;
 	}
 
