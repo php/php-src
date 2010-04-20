@@ -1773,8 +1773,8 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
-			/* check request_method has been sent.
-			 * if not, the certainly not an HTTP over fcgi request */
+			/* check if request_method has been sent.
+			 * if not, it's certainly not an HTTP over fcgi request */
 			if (!SG(request_info).request_method) {
 				goto fastcgi_request_done;
 			}
