@@ -51,7 +51,7 @@ function ssl_async_client($port) {
 	$socket = stream_socket_client($host, $errno, $errstr, 10, $flags);
 	stream_set_blocking($socket, 0);
 
-	while ($data) {
+	while ($socket && $data) {
 		$wrote = fwrite($socket, $data, strlen($data));
 		$data = substr($data, $wrote);
 	}
