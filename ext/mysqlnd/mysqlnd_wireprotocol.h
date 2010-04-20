@@ -245,6 +245,7 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
+	zend_bool			server_asked_323_auth;
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
