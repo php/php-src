@@ -855,11 +855,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
 ZEND_END_ARG_INFO()
 #endif
- 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
-	ZEND_ARG_INFO(0, types)
-	ZEND_ARG_INFO(0, prefix)
-ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GETLOADAVG
 ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
@@ -2946,7 +2941,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(get_magic_quotes_gpc,											arginfo_get_magic_quotes_gpc)
 	PHP_FE(get_magic_quotes_runtime,										arginfo_get_magic_quotes_runtime)
 
-	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
 	PHP_FE(call_user_func,													arginfo_call_user_func)
@@ -6025,104 +6019,6 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 }
 /* }}} */
 #endif
-
-static int copy_request_variable(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zval *prefix, new_key;
-	int prefix_len;
-	zval **var = (zval **) pDest;
-
-	if (num_args != 1) {
-		return 0;
-	}
-
-	prefix = va_arg(args, zval *);
-	prefix_len = Z_STRLEN_P(prefix);
-
-	if (!prefix_len && !hash_key->nKeyLength) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard");
-		return 0;
-	}
-
-	if (hash_key->nKeyLength) {
-		php_prefix_varname(&new_key, prefix, hash_key->arKey, hash_key->nKeyLength - 1, 0 TSRMLS_CC);
-	} else {
-		zval num;
-
-		ZVAL_LONG(&num, hash_key->h);
-		convert_to_string(&num);
-		php_prefix_varname(&new_key, prefix, Z_STRVAL(num), Z_STRLEN(num), 0 TSRMLS_CC);
-		zval_dtor(&num);
-	}
-
-	if (php_varname_check(Z_STRVAL(new_key), Z_STRLEN(new_key), 0 TSRMLS_CC) == FAILURE) {
-		zval_dtor(&new_key);
-		return 0;
-	}
-
-	zend_delete_global_variable(Z_STRVAL(new_key), Z_STRLEN(new_key) TSRMLS_CC);
-	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), Z_STRVAL(new_key), Z_STRLEN(new_key) + 1, *var, Z_REFCOUNT_PP(var) + 1, 0);
-
-	zval_dtor(&new_key);
-	return 0;
-}
-/* }}} */
-
-/* {{{ proto bool import_request_variables(string types [, string prefix])
-   Import GET/POST/Cookie variables into the global scope */
-PHP_FUNCTION(import_request_variables)
-{
-	char *types;
-	int types_len;
-	zval *prefix = NULL;
-	char *p;
-	zend_bool ok = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &types, &types_len, &prefix) == FAILURE) {
-		return;
-	}
-
-	if (ZEND_NUM_ARGS() > 1) {
-		convert_to_string(prefix);
-
-		if (Z_STRLEN_P(prefix) == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");
-		}
-	} else {
-		MAKE_STD_ZVAL(prefix);
-		ZVAL_EMPTY_STRING(prefix);
-	}
-
-	for (p = types; p && *p; p++) {
-		switch (*p) {
-
-			case 'g':
-			case 'G':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
-				ok = 1;
-				break;
-
-			case 'p':
-			case 'P':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
-				ok = 1;
-				break;
-
-			case 'c':
-			case 'C':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
-				ok = 1;
-				break;
-		}
-	}
-
-	if (ZEND_NUM_ARGS() < 2) {
-		zval_ptr_dtor(&prefix);
-	}
-	RETURN_BOOL(ok);
-}
-/* }}} */
 
 #ifdef HAVE_GETLOADAVG
 /* {{{ proto array sys_getloadavg()
