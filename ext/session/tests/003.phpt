@@ -5,7 +5,6 @@ session object deserialization
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -21,14 +20,13 @@ session_id("abtest");
 session_start();
 session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
 
-$baz->method();
-$arr[3]->method();
+$_SESSION["baz"]->method();
+$_SESSION["arr"][3]->method();
 
-var_dump($baz);
-var_dump($arr);
+var_dump($_SESSION["baz"]);
+var_dump($_SESSION["arr"]);
 session_destroy();
 --EXPECT--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 object(foo)#1 (2) {
   ["bar"]=>
   string(2) "ok"

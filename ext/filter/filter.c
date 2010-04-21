@@ -450,8 +450,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		orig_var = estrdup(var);
 
 		/* Store the RAW variable internally */
-		/* FIXME: Should not use php_register_variable_ex as that also registers
-		 * globals when register_globals is turned on */
 		Z_STRLEN(raw_var) = val_len;
 		Z_STRVAL(raw_var) = estrndup(*val, val_len);
 		Z_TYPE(raw_var) = IS_STRING;
@@ -461,8 +459,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (val_len) {
 		/* Register mangled variable */
-		/* FIXME: Should not use php_register_variable_ex as that also registers
-		 * globals when register_globals is turned on */
 		Z_STRLEN(new_var) = val_len;
 		Z_TYPE(new_var) = IS_STRING;
 
@@ -537,7 +533,6 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
-	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals));
 
 	switch (arg) {
 		case PARSE_GET:
@@ -550,13 +545,13 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 			array_ptr = IF_G(cookie_array);
 			break;
 		case PARSE_SERVER:
-			if (jit_initialization) {
+			if (PG(auto_globals_jit)) {
 				zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 			}
 			array_ptr = IF_G(server_array);
 			break;
 		case PARSE_ENV:
-			if (jit_initialization) {
+			if (PG(auto_globals_jit)) {
 				zend_is_auto_global("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 			}
 			array_ptr = IF_G(env_array);

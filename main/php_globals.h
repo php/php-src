@@ -122,7 +122,6 @@ struct _php_core_globals {
 
 	zend_bool expose_php;
 
-	zend_bool register_globals;
 	zend_bool register_argc_argv;
 	zend_bool auto_globals_jit;
 

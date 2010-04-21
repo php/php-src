@@ -244,21 +244,13 @@ static void safe_php_register_variable_ex(char *var, zval *val, zval *track_vars
 
 static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
-	int register_globals = PG(register_globals);
-
-	PG(register_globals) = 0;
 	safe_php_register_variable(strvar, val, strlen(val), http_post_files, override_protection TSRMLS_CC);
-	PG(register_globals) = register_globals;
 }
 /* }}} */
 
 static void register_http_post_files_variable_ex(char *var, zval *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
-	int register_globals = PG(register_globals);
-
-	PG(register_globals) = 0;
 	safe_php_register_variable_ex(var, val, http_post_files, override_protection TSRMLS_CC);
-	PG(register_globals) = register_globals;
 }
 /* }}} */
 
