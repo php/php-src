@@ -1311,6 +1311,7 @@ PHP_FUNCTION(mssql_query)
 	mssql_result *result;
 	int id = -1;
 
+	dbsettime(MS_SQL_G(timeout));
 	batchsize = MS_SQL_G(batchsize);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|rl", &query, &query_len, &mssql_link_index, &zbatchsize) == FAILURE) {
