@@ -1221,7 +1221,9 @@ PHP_FUNCTION(mssql_query)
 	int id, num_fields;
 	int batchsize;
 
+	dbsettime(MS_SQL_G(timeout));
 	batchsize = MS_SQL_G(batchsize);
+
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
