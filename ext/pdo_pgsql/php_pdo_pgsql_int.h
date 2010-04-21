@@ -27,6 +27,10 @@
 #include <libpq/libpq-fs.h>
 #include <php.h>
 
+#ifndef HAVE_PQFREEMEM
+#define PQfreemem free
+#endif
+
 #define PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE "08006"
 
 typedef struct {
