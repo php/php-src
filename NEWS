@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #51607 (pg_copy_from does not allow schema in the tablename
   argument). (cbandy at jbandy dot com)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
+- Fixed bug #51562 (query timeout in mssql can not be changed per query).
+  (ejsmont dot artur at gmail dot com)
 - Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
   (Oracle Corp.)
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
