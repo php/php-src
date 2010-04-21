@@ -1,11 +1,10 @@
 --TEST--
 bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include('skipif.inc'); if (PHP_VERSION_ID < 503099) { echo 'requires register_globals'; }  ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.bug_compat_42=1
 session.serialize_handler=php
 session.save_handler=files

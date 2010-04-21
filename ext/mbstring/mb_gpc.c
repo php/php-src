@@ -151,7 +151,6 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 
 	info.data_type              = arg;
 	info.separator              = separator; 
-	info.force_register_globals = 0;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
@@ -209,13 +208,6 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
 	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
 	mbfl_string_init_set(&resval, info->to_language, info->to_encoding);
-
-	/* register_globals stuff
-	 * XXX: this feature is going to be deprecated? */
-
-	if (info->force_register_globals && !(prev_rg_state = PG(register_globals))) {
-		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "1", sizeof("1")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
-	}
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -346,11 +338,6 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	}
 
 out:
-	/* register_global stuff */
-	if (info->force_register_globals && !prev_rg_state) {
-		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "0", sizeof("0")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
-	}
-
 	if (convd != NULL) {
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
@@ -376,7 +363,6 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 
 	info.data_type              = PARSE_POST;
 	info.separator              = "&";
-	info.force_register_globals = 0;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);

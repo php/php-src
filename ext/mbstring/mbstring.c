@@ -1896,7 +1896,6 @@ PHP_FUNCTION(mb_parse_str)
 
 	info.data_type              = PARSE_STRING;
 	info.separator              = PG(arg_separator).input; 
-	info.force_register_globals = (track_vars_array == NULL);
 	info.report_errors          = 1;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
 	info.to_language            = MBSTRG(language);

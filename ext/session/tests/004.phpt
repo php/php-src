@@ -5,7 +5,6 @@ session_set_save_handler test
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.name=PHPSESSID
 session.serialize_handler=php
 --FILE--
@@ -56,24 +55,23 @@ session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, 
 
 session_id("abtest");
 session_start();
-$baz->method();
-$arr[3]->method();
+$_SESSION["baz"]->method();
+$_SESSION["arr"][3]->method();
 
-var_dump($baz);
-var_dump($arr);
+var_dump($_SESSION["baz"]);
+var_dump($_SESSION["arr"]);
 
 session_write_close();
 
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 session_start();
 
-var_dump($baz);
-var_dump($arr);
+var_dump($_SESSION["baz"]);
+var_dump($_SESSION["arr"]);
 
 session_destroy();
 ?>
 --EXPECT--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#2 (2) {
@@ -94,7 +92,7 @@ array(1) {
 WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
 OPEN: PHPSESSID
 READ: abtest
-object(foo)#4 (2) {
+object(foo)#3 (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>

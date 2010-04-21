@@ -5,7 +5,6 @@ session_decode(); should not segfault
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=0
 session.bug_compat_42=1
 session.bug_compat_warn=0
 --FILE--

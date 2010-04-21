@@ -458,7 +458,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("register_globals",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_globals,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 #if PHP_SAFE_MODE
 	STD_PHP_INI_BOOLEAN("safe_mode",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
@@ -2054,18 +2053,17 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_initialized = 1;
 
 	/* Check for deprecated directives */
-	/* NOTE: If you add anything here, remember to add it also in Makefile.global! */
+	/* NOTE: If you add anything here, remember to add it to Makefile.global! */
 	{
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[6]; /* Remember to change this if the number of directives change */
+			const char *directives[5]; /* Remember to change this if the number of directives change */
 		} directives[] = {
 			{
 				E_CORE_WARNING, 
 				"Directive '%s' is deprecated in PHP 5.3 and greater", 
 				{
-					"register_globals", 
 					"safe_mode", 
 					"magic_quotes_gpc", 
 					"magic_quotes_runtime", 
@@ -2078,6 +2076,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				"Directive '%s' is no longer available in PHP", 
 				{
 					"define_syslog_variables", 
+					"register_globals", 
 					"register_long_arrays", 
 					"zend.ze1_compatibility_mode", 
 					NULL

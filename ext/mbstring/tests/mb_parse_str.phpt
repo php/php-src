@@ -4,7 +4,6 @@ mb_parse_str()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 arg_separator.input=&
-register_globals=0
 --FILE--
 <?php
 $queries = array(

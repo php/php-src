@@ -1,11 +1,10 @@
 --TEST--
-unset($_SESSION["name"]); should work with register_globals=off
+unset($_SESSION["name"]); test
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=0
 session.bug_compat_42=1
 session.bug_compat_warn=0
 session.serialize_handler=php

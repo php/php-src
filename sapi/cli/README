@@ -11,8 +11,8 @@ The main differences between the two:
 * It does not change the working directory to that of the script.
   (-C switch kept for compatibility)
 * Plain text error message
-* $argc and $argv registered irrespective of register_globals
-  and register_argc_argv php.ini settings.
+* $argc and $argv registered irrespective of the register_argc_argv 
+  php.ini setting.
 * implicit_flush always on
 * -r option which allows execution of PHP code directly from
   the command line (e.g. php -r 'echo md5("test");' )

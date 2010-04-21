@@ -5,7 +5,6 @@ Bug #46313 (Magic quotes broke $_FILES)
 --INI--
 magic_quotes_gpc=1
 file_uploads=1
-register_globals=1
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
@@ -60,6 +59,4 @@ string(12) "o1"
 bool(true)
 string(%d) "%s"
 bool(true)
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
-Warning: Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
 

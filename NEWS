@@ -12,6 +12,7 @@
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty
   HashTables (Stas, Dmitry)
+
 - Added Tokyo Cabinet abstract DB support to ext/dba. (Michael Maclean)
 - Added Jenkins's one-at-a-time hash support to ext/hash. (Martin Jansen)
 - Added FNV-1 hash support to ext/hash. (Michael Maclean)
@@ -30,6 +31,7 @@
 
 - Removed legacy features: (Kalle)
   . define_syslog_variables ini option and its associated function.
+  . register_globals.
   . register_long_arrays ini option.
   . y2k_compliance ini option.
   	
