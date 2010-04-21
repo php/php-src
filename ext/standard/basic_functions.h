@@ -74,8 +74,6 @@ PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
 
-PHP_FUNCTION(import_request_variables);
-
 PHP_FUNCTION(error_log);
 PHP_FUNCTION(error_get_last);
 
