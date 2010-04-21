@@ -1837,88 +1837,6 @@ static PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
-/* {{{ proto bool session_register(mixed var_names [, mixed ...])
-   Adds varname(s) to the list of variables which are freezed at the session end */
-static PHP_FUNCTION(session_register)
-{
-	zval ***args = NULL;
-	int num_args, i;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
-		return;
-	}
-
-	if (PS(session_status) == php_session_none || PS(session_status) == php_session_disabled) {
-		php_session_start(TSRMLS_C);
-	}
-
-	if (PS(session_status) == php_session_disabled) {
-		if (args) {
-			efree(args);
-		}
-		RETURN_FALSE;
-	}
-
-	for (i = 0; i < num_args; i++) {
-		if (Z_TYPE_PP(args[i]) == IS_ARRAY) {
-			SEPARATE_ZVAL(args[i]);
-		}
-		php_register_var(args[i] TSRMLS_CC);
-	}
-
-	if (args) {
-		efree(args);
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool session_unregister(string varname)
-   Removes varname from the list of variables which are freezed at the session end */
-static PHP_FUNCTION(session_unregister)
-{
-	char *p_name;
-	int p_name_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p_name, &p_name_len) == FAILURE) {
-		return;
-	}
-
-	IF_SESSION_VARS() {
-		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
-		PS_DEL_VARL(p_name, p_name_len);
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool session_is_registered(string varname)
-   Checks if a variable is registered in session */
-static PHP_FUNCTION(session_is_registered)
-{
-	zval *p_var;
-	char *p_name;
-	int p_name_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p_name, &p_name_len) == FAILURE) {
-		return;
-	}
-
-	if (PS(session_status) == php_session_none) {
-		RETURN_FALSE;
-	}
-
-	IF_SESSION_VARS() {
-		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), p_name, p_name_len+1, (void **)&p_var) == SUCCESS) {
-			RETURN_TRUE;
-		}
-	}
-	RETURN_FALSE;
-}
-/* }}} */
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_name, 0, 0, 0)
 	ZEND_ARG_INFO(0, name)
@@ -1942,19 +1860,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_register, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, ...)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_unregister, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_is_registered, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_session_void, 0)
@@ -1995,9 +1900,6 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_id,                arginfo_session_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
-	PHP_DEP_FE(session_register,      arginfo_session_register)
-	PHP_DEP_FE(session_unregister,    arginfo_session_unregister)
-	PHP_DEP_FE(session_is_registered, arginfo_session_is_registered)
 	PHP_FE(session_encode,            arginfo_session_void)
 	PHP_FE(session_start,             arginfo_session_void)
 	PHP_FE(session_destroy,           arginfo_session_void)

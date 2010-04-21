@@ -35,6 +35,8 @@
   . import_request_variables().
   . register_globals.
   . register_long_arrays ini option.
+  . session_is_registered(), session_register() and session_unregister() 
+    functions.
   . y2k_compliance ini option.
   	
 ?? ??? 20??, PHP 5.3.3
