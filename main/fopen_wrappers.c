@@ -435,8 +435,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		}
 	} else
 #endif
-	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root)) &&
-		IS_ABSOLUTE_PATH(PG(doc_root), length))) {
+	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
+		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		filename = emalloc(length + strlen(path_info) + 2);
 		if (filename) {
 			memcpy(filename, PG(doc_root), length);

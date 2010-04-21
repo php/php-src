@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas) 
 
+- Fixed bug #51627 (script path not correctly evaluated).
+  (russell dot tempero at rightnow dot com)
 - Fixed bug #51615 (PHP crash with wrong HTML in SimpleXML). (Felipe)
 - Fixed bug #51609 (pg_copy_to: Invalid results when using fourth parameter).
   (Felipe)
