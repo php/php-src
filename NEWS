@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   __construct now. (Stas)
 - Reset error state in PDO::beginTransaction() reset error state. (Ilia)
 
+- Implemented FR#35638 (Adding udate to imap_fetch_overview results).
+  (Charles_Duffy at dell dot com )
+
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas) 
@@ -89,8 +92,6 @@ PHP                                                                        NEWS
 - Fixed bug #48781 (Cyclical garbage collector memory leak). (Dmitry)
 - Fixed bug #46111 (Some timezone identifiers can not be parsed). (Derick)
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
-- Implement feature request #35638 (Adding udate to imap_fetch_overview results).
-  (Charles_Duffy at dell dot com )
 
 
 ?? ??? 20??, PHP 5.3.2
