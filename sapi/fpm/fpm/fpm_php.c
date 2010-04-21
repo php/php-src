@@ -113,7 +113,6 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	TSRMLS_FETCH();
 	struct key_value_s *kv;
 
 	for (kv = wp->config->php_values; kv; kv = kv->next) {

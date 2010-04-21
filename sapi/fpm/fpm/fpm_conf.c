@@ -43,7 +43,7 @@
 #include "fpm_status.h"
 #include "zlog.h"
 
-static int fpm_conf_load_ini_file(char *filename);
+static int fpm_conf_load_ini_file(char *filename TSRMLS_DC);
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset);
@@ -673,7 +673,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 			int len = strlen(g.gl_pathv[i]);
 			if (len < 1) continue;
 			if (g.gl_pathv[i][len - 1] == '/') continue; /* don't parse directories */
-			if (0 > fpm_conf_load_ini_file(g.gl_pathv[i])) {
+			if (0 > fpm_conf_load_ini_file(g.gl_pathv[i] TSRMLS_CC)) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "Unable to include %s from %s at line %d", g.gl_pathv[i], filename, ini_lineno);
 				*error = 1;
 				return;
@@ -682,7 +682,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 		globfree(&g);
 	}
 #else /* HAVE_GLOB */
-	if (0 > fpm_conf_load_ini_file(inc)) {
+	if (0 > fpm_conf_load_ini_file(inc TSRMLS_CC)) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "Unable to include %s from %s at line %d", inc, filename, ini_lineno);
 		*error = 1;
 		return;
@@ -848,13 +848,13 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 
 	switch(callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
-			fpm_conf_ini_parser_entry(arg1, arg2, error);
+			fpm_conf_ini_parser_entry(arg1, arg2, error TSRMLS_CC);
 			break;;
 		case ZEND_INI_PARSER_SECTION:
-			fpm_conf_ini_parser_section(arg1, error);
+			fpm_conf_ini_parser_section(arg1, error TSRMLS_CC);
 			break;;
 		case ZEND_INI_PARSER_POP_ENTRY:
-			fpm_conf_ini_parser_array(arg1, arg3, arg2, error);
+			fpm_conf_ini_parser_array(arg1, arg3, arg2, error TSRMLS_CC);
 			break;;
 		default:
 			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Unknown INI syntax", ini_filename, ini_lineno);
@@ -864,7 +864,7 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 }
 /* }}} */
 
-int fpm_conf_load_ini_file(char *filename) /* {{{ */
+int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 {
 	int error = 0;
 	char buf[1024+1];
@@ -936,13 +936,14 @@ int fpm_conf_init_main() /* {{{ */
 	char *filename = fpm_globals.config;
 	int free = 0;
 	int ret;
+	TSRMLS_FETCH();
 
 	if (filename == NULL) {
 		spprintf(&filename, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
 		free = 1;
 	}
 
-	ret = fpm_conf_load_ini_file(filename);
+	ret = fpm_conf_load_ini_file(filename TSRMLS_CC);
 
 	if (0 > ret) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "failed to load configuration file '%s'", filename);
