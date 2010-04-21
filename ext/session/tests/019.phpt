@@ -24,7 +24,6 @@ class TFoo {
 
 session_id("abtest");
 session_start();
-session_register('o1', 'o2' );
 
 $_SESSION["o1"] = new TFoo(42);
 $_SESSION["o2"] =& $_SESSION["o1"];
@@ -47,7 +46,6 @@ session_destroy();
 ?>
 --EXPECTF--
 
-Deprecated: Function session_register() is deprecated in %s on line %d
 array(2) {
   ["o1"]=>
   &object(TFoo)#%d (1) {
