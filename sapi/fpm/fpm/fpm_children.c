@@ -143,7 +143,7 @@ static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 
 static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	fpm_globals.max_requests = wp->config->max_requests;
+	fpm_globals.max_requests = wp->config->pm_max_requests;
 
 	if (0 > fpm_stdio_init_child(wp) ||
 		0 > fpm_status_init_child(wp) ||
@@ -355,14 +355,14 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	struct fpm_child_s *child;
 	int max;
 
-	if (wp->config->pm->style == PM_STYLE_DYNAMIC) {
+	if (wp->config->pm == PM_STYLE_DYNAMIC) {
 		if (!in_event_loop) { /* starting */
-			max = wp->config->pm->dynamic.start_servers;
+			max = wp->config->pm_start_servers;
 		} else {
 			max = wp->running_children + nb_to_spawn;
 		}
 	} else { /* PM_STYLE_STATIC */
-		max = wp->config->pm->max_children;
+		max = wp->config->pm_max_children;
 	}
 
 	while (!enough && fpm_pctl_can_spawn_children() && wp->running_children < max) {

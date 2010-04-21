@@ -8,11 +8,6 @@ minimum_libevent_version="1.4.11"
 PHP_ARG_ENABLE(fpm,,
 [  --enable-fpm              EXPERIMENTAL: Enable building of the fpm SAPI executable], no, no)
 
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     FPM: libxml2 install prefix], no, no)
-fi
-
 dnl libevent check function {{{
 dnl @synopsis AC_LIB_EVENT([MINIMUM-VERSION])
 dnl
@@ -515,11 +510,6 @@ if test "$PHP_FPM" != "no"; then
     AC_MSG_ERROR([build test failed. Please check the config.log for details.])
   ], $LIBEVENT_LIBS)
 
-  PHP_SETUP_LIBXML(FPM_SHARED_LIBADD, [
-  ], [
-    AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
-  ])
-
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
   AC_FPM_CLOCK
@@ -593,7 +583,6 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_stdio.c \
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \
-    fpm/xml_config.c \
     fpm/zlog.c \
   "
 

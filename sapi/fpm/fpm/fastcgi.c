@@ -373,7 +373,7 @@ void fcgi_set_allowed_clients(char *ip)
 			}
 			allowed_clients[n] = inet_addr(cur);
 			if (allowed_clients[n] == INADDR_NONE) {
-				fprintf(stderr, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS\n", cur);
+				fprintf(stderr, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS or listen.allowed_clients\n", cur);
 			}
 			n++;
 			cur = end;
@@ -383,6 +383,7 @@ void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
+//TODO
 static int is_port_number(const char *bindpath)
 {
 	while (*bindpath) {

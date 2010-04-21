@@ -352,21 +352,21 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 		fpm_status_update_activity(wp->shm_status, idle, active, idle + active, 0);
 
 		/* the rest is only used by PM_STYLE_DYNAMIC */
-		if (wp->config->pm->style != PM_STYLE_DYNAMIC) continue;
+		if (wp->config->pm != PM_STYLE_DYNAMIC) continue;
 
 		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children, %d running children. Spawning rate %d", wp->config->name, active, idle, wp->running_children, wp->idle_spawn_rate);
 
-		if (idle > wp->config->pm->dynamic.max_spare_servers && last_idle_child) {
+		if (idle > wp->config->pm_max_spare_servers && last_idle_child) {
 			last_idle_child->idle_kill = 1;
 			fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_TERM);
 			wp->idle_spawn_rate = 1;
 			continue;
 		}
 
-		if (idle < wp->config->pm->dynamic.min_spare_servers) {
-			if (wp->running_children >= wp->config->pm->max_children) {
+		if (idle < wp->config->pm_min_spare_servers) {
+			if (wp->running_children >= wp->config->pm_max_children) {
 				if (!wp->warn_max_children) {
-					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm->max_children);
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
 				wp->idle_spawn_rate = 1;
@@ -378,13 +378,13 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 			}
 
 			/* compute the number of idle process to spawn */
-			i = MIN(wp->idle_spawn_rate, wp->config->pm->dynamic.min_spare_servers - idle);
+			i = MIN(wp->idle_spawn_rate, wp->config->pm_min_spare_servers - idle);
 
 			/* get sure it won't exceed max_children */
-			i = MIN(i, wp->config->pm->max_children - wp->running_children);
+			i = MIN(i, wp->config->pm_max_children - wp->running_children);
 			if (i <= 0) {
 				if (!wp->warn_max_children) {
-					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm->max_children);
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
 				wp->idle_spawn_rate = 1;

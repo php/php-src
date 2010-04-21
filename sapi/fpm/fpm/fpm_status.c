@@ -23,8 +23,8 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "unable to init fpm_status because conf structure is NULL");
 		return -1;
 	}
-	if (wp->config->pm->status || wp->config->pm->ping) {
-		if (wp->config->pm->status) {
+	if (wp->config->pm_status_path || wp->config->ping_path) {
+		if (wp->config->pm_status_path) {
 			if (!wp->shm_status) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to init fpm_status because the dedicated SHM has not been set", wp->config->name);
 				return -1;
@@ -32,16 +32,16 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			fpm_status_shm = wp->shm_status;
 		}
 		fpm_status_pool = strdup(wp->config->name);
-		if (wp->config->pm->status) {
-			fpm_status_uri = strdup(wp->config->pm->status);
+		if (wp->config->pm_status_path) {
+			fpm_status_uri = strdup(wp->config->pm_status_path);
 		}
-		if (wp->config->pm->ping) {
-			if (!wp->config->pm->pong) {
-				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] ping is set (%s) but pong is not set.", wp->config->name, wp->config->pm->ping);
+		if (wp->config->ping_path) {
+			if (!wp->config->ping_response) {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] ping is set (%s) but pong is not set.", wp->config->name, wp->config->ping_path);
 				return -1;
 			}
-			fpm_status_ping = strdup(wp->config->pm->ping);
-			fpm_status_pong = strdup(wp->config->pm->pong);
+			fpm_status_ping = strdup(wp->config->ping_path);
+			fpm_status_pong = strdup(wp->config->ping_response);
 		}
 	}
 	return 0;

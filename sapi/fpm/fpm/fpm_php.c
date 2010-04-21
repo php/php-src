@@ -134,7 +134,7 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->listen_address_domain == FPM_AF_INET) {
-		fcgi_set_allowed_clients(wp->config->allowed_clients);
+		fcgi_set_allowed_clients(wp->config->listen_allowed_clients);
 	}
 	return 0;
 }
@@ -145,7 +145,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
 
-	len = sprintf(max_workers, "%u", (unsigned int) wp->config->pm->max_children);
+	len = sprintf(max_workers, "%u", (unsigned int) wp->config->pm_max_children);
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);
