@@ -425,7 +425,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("highlight.bg",			HL_BG_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.html",			HL_HTML_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
@@ -2058,7 +2057,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[5]; /* Remember to change this if the number of directives change */
+			const char *directives[6]; /* Remember to change this if the number of directives change */
 		} directives[] = {
 			{
 				E_CORE_WARNING, 
@@ -2076,6 +2075,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				"Directive '%s' is no longer available in PHP", 
 				{
 					"define_syslog_variables", 
+					"highlight.bg", 
 					"register_globals", 
 					"register_long_arrays", 
 					"zend.ze1_compatibility_mode", 

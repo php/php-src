@@ -31,6 +31,7 @@
 
 - Removed legacy features: (Kalle)
   . define_syslog_variables ini option and its associated function.
+  . highlight.bg ini option.
   . register_globals.
   . register_long_arrays ini option.
   . y2k_compliance ini option.

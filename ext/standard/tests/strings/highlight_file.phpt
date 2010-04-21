@@ -4,7 +4,6 @@ highlight_file() tests
 highlight.string=#DD0000
 highlight.comment=#FF9900
 highlight.keyword=#007700
-highlight.bg=#FFFFFF
 highlight.default=#0000BB
 highlight.html=#000000
 allow_url_include=1
