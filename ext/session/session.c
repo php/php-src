@@ -1713,35 +1713,6 @@ static PHP_FUNCTION(session_cache_expire)
 }
 /* }}} */
 
-/* {{{ static void php_register_var(zval** entry TSRMLS_DC) */
-static void php_register_var(zval** entry TSRMLS_DC)
-{
-	zval **value;
-
-	if (Z_TYPE_PP(entry) == IS_ARRAY) {
-		if (Z_ARRVAL_PP(entry)->nApplyCount > 1) {
-			return;
-		}
-
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(entry));
-		Z_ARRVAL_PP(entry)->nApplyCount++;
-
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(entry), (void**)&value) == SUCCESS) {
-			php_register_var(value TSRMLS_CC);
-			zend_hash_move_forward(Z_ARRVAL_PP(entry));
-		}
-
-		Z_ARRVAL_PP(entry)->nApplyCount--;
-	} else {
-		convert_to_string_ex(entry);
-
-		if (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0) {
-			PS_ADD_VARL(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry));
-		}
-	}
-}
-/* }}} */
-
 /* {{{ proto string session_encode(void)
    Serializes the current setup and returns the serialized representation */
 static PHP_FUNCTION(session_encode)
