@@ -1302,12 +1302,12 @@ PHP_FUNCTION(mysqli_options)
 {
 	MY_MYSQL 		*mysql;
 	zval  			*mysql_link = NULL;
-	zval  			*mysql_value;
+	zval  			**mysql_value;
 	long  			mysql_option;
 	unsigned int 	l_value;
 	long  			ret;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olz", &mysql_link, mysqli_link_class_entry, &mysql_option, &mysql_value) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlZ", &mysql_link, mysqli_link_class_entry, &mysql_option, &mysql_value) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
@@ -1318,13 +1318,13 @@ PHP_FUNCTION(mysqli_options)
 		}
 	}
 
-	switch (Z_TYPE_PP(&mysql_value)) {
+	switch (Z_TYPE_PP(mysql_value)) {
 		case IS_STRING:
-			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_PP(&mysql_value));
+			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_PP(mysql_value));
 			break;
 		default:
-			convert_to_long_ex(&mysql_value);
-			l_value = Z_LVAL_PP(&mysql_value);
+			convert_to_long_ex(mysql_value);
+			l_value = Z_LVAL_PP(mysql_value);
 			ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value);
 			break;
 	}
