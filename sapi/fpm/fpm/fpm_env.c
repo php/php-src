@@ -117,7 +117,7 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	clearenv();
 
-	for (kv = wp->config->environment; kv; kv = kv->next) {
+	for (kv = wp->config->env; kv; kv = kv->next) {
 		setenv(kv->key, kv->value, 1);
 	}
 
@@ -137,9 +137,7 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
-	kv = wp->config->environment;
-
-	for (kv = wp->config->environment; kv; kv = kv->next) {
+	for (kv = wp->config->env; kv; kv = kv->next) {
 		if (*kv->value == '$') {
 			char *value = getenv(kv->value + 1);
 

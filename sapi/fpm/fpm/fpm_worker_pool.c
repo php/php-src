@@ -51,9 +51,6 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
 	}
 
 	memset(ret, 0, sizeof(struct fpm_worker_pool_s));
-	if (!fpm_worker_all_pools) {
-		fpm_worker_all_pools = ret;
-	}
 
 	fpm_array_init(&ret->slots_used, sizeof(struct fpm_shm_slot_ptr_s), 50);
 	fpm_array_init(&ret->slots_free, sizeof(struct fpm_shm_slot_ptr_s), 50);

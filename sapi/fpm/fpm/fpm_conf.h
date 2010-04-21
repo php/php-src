@@ -5,6 +5,9 @@
 #ifndef FPM_CONF_H
 #define FPM_CONF_H 1
 
+#include <stdint.h>
+#include "php.h"
+
 #define FPM_CONF_MAX_PONG_LENGTH 64
 
 struct key_value_s;
@@ -26,46 +29,42 @@ struct fpm_global_config_s {
 
 extern struct fpm_global_config_s fpm_global_config;
 
-struct fpm_pm_s {
-	int style;
-	int max_children;
-	char *status;
-	char *ping;
-	char *pong;
-	struct {
-		int start_servers;
-		int min_spare_servers;
-		int max_spare_servers;
-	} dynamic;
-};
-
-struct fpm_listen_options_s {
-	int backlog;
-	char *owner;
-	char *group;
-	char *mode;
-};
-
 struct fpm_worker_pool_config_s {
 	char *name;
-	char *listen_address;
-	struct fpm_listen_options_s *listen_options;
-	struct key_value_s *php_values;
-	struct key_value_s *php_admin_values;
 	char *user;
 	char *group;
 	char *chroot;
 	char *chdir;
-	char *allowed_clients;
-	struct key_value_s *environment;
-	struct fpm_pm_s *pm;
 	int request_terminate_timeout;
 	int request_slowlog_timeout;
 	char *slowlog;
-	int max_requests;
 	int rlimit_files;
 	int rlimit_core;
-	unsigned catch_workers_output:1;
+	int catch_workers_output;
+	int pm;
+	int pm_max_children;
+	char *pm_status_path;
+	int pm_max_requests;
+	int pm_start_servers;
+	int pm_min_spare_servers;
+	int pm_max_spare_servers;
+	char *ping_path;
+	char *ping_response;
+	char *listen_address;
+	int listen_backlog;
+	char *listen_owner;
+	char *listen_group;
+	char *listen_mode;
+	char *listen_allowed_clients;
+	struct key_value_s *env;
+	struct key_value_s *php_admin_values;
+	struct key_value_s *php_values;
+};
+
+struct ini_value_parser_s {
+	char *name;
+	char *(*parser)(zval *, void **, intptr_t);
+	intptr_t offset;
 };
 
 enum { PM_STYLE_STATIC = 1, PM_STYLE_DYNAMIC = 2 };

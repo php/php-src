@@ -29,23 +29,23 @@ size_t fpm_pagesize;
 
 int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	struct fpm_listen_options_s *lo = wp->config->listen_options;
+	struct fpm_worker_pool_config_s *c = wp->config;
 
 	/* uninitialized */
 	wp->socket_uid = -1;
 	wp->socket_gid = -1;
 	wp->socket_mode = 0666;
 
-	if (!lo) {
+	if (!c) {
 		return 0;
 	}
 
-	if (lo->owner && *lo->owner) {
+	if (c->listen_owner && *c->listen_owner) {
 		struct passwd *pwd;
 
-		pwd = getpwnam(lo->owner);
+		pwd = getpwnam(c->listen_owner);
 		if (!pwd) {
-			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, lo->owner);
+			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, c->listen_owner);
 			return -1;
 		}
 
@@ -53,19 +53,19 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 		wp->socket_gid = pwd->pw_gid;
 	}
 
-	if (lo->group && *lo->group) {
+	if (c->listen_group && *c->listen_group) {
 		struct group *grp;
 
-		grp = getgrnam(lo->group);
+		grp = getgrnam(c->listen_group);
 		if (!grp) {
-			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, lo->group);
+			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, c->listen_group);
 			return -1;
 		}
 		wp->socket_gid = grp->gr_gid;
 	}
 
-	if (lo->mode && *lo->mode) {
-		wp->socket_mode = strtoul(lo->mode, 0, 8);
+	if (c->listen_mode && *c->listen_mode) {
+		wp->socket_mode = strtoul(c->listen_mode, 0, 8);
 	}
 	return 0;
 }
@@ -152,6 +152,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 		getrlimit(RLIMIT_NOFILE, &r);
 		r.rlim_cur = (rlim_t) wp->config->rlimit_files;
+//		r.rlim_max = (rlim_t) wp->config->rlimit_files;
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_NOFILE) failed", wp->config->name);
 		}

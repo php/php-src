@@ -164,15 +164,9 @@ static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int typ
 
 static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct sockaddr *sa, int socklen) /* {{{ */
 {
-	int backlog = -1;
 	int flags = 1;
 	int sock;
 	mode_t saved_umask;
-
-	/* we have custom backlog value */
-	if (wp->config->listen_options) {
-		backlog = wp->config->listen_options->backlog;
-	}
 
 	sock = socket(sa->sa_family, SOCK_STREAM, 0);
 
@@ -205,7 +199,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	}
 	umask(saved_umask);
 
-	if (0 > listen(sock, backlog)) {
+	if (0 > listen(sock, wp->config->listen_backlog)) {
 		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
 		return -1;
 	}
@@ -333,23 +327,21 @@ int fpm_sockets_init_main() /* {{{ */
 
 	/* create all required sockets */
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (!wp->is_template) {
-			switch (wp->listen_address_domain) {
-				case FPM_AF_INET :
-					wp->listening_socket = fpm_socket_af_inet_listening_socket(wp);
-					break;
+		switch (wp->listen_address_domain) {
+			case FPM_AF_INET :
+				wp->listening_socket = fpm_socket_af_inet_listening_socket(wp);
+				break;
 
-				case FPM_AF_UNIX :
-					if (0 > fpm_unix_resolve_socket_premissions(wp)) {
-						return -1;
-					}
-					wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);
-					break;
-			}
+			case FPM_AF_UNIX :
+				if (0 > fpm_unix_resolve_socket_premissions(wp)) {
+					return -1;
+				}
+				wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);
+				break;
+		}
 
-			if (wp->listening_socket == -1) {
-				return -1;
-			}
+		if (wp->listening_socket == -1) {
+			return -1;
 		}
 	}
 
