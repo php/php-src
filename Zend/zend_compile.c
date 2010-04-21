@@ -364,7 +364,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv) /* {{{ */
 }
 /* }}} */
 
-int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv) /* {{{ */
+int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
 {
 	int ret;
 	char *lc_name;
@@ -389,7 +389,7 @@ int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv) /* {{{ *
 /* }}} */
 
 
-int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv) /* {{{ */
+int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
 {
 	int ret;
 	char *lc_name;
@@ -1774,7 +1774,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
 		if (last_op->op2_type == IS_CONST) {
 			last_op->op2.constant =
-				zend_add_func_name_literal(CG(active_op_array), &CONSTANT(last_op->op2.constant));
+				zend_add_func_name_literal(CG(active_op_array), &CONSTANT(last_op->op2.constant) TSRMLS_CC);
 		}
 		last_op->opcode = ZEND_INIT_METHOD_CALL;
 		SET_UNUSED(last_op->result);
@@ -2019,7 +2019,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 				zend_resolve_class_name(class_name, &opline->extended_value, 0 TSRMLS_CC);
 				opline->op2_type = IS_CONST;
 				opline->op2.constant =
-					zend_add_class_name_literal(CG(active_op_array), &class_name->u.constant);
+					zend_add_class_name_literal(CG(active_op_array), &class_name->u.constant TSRMLS_CC);
 				break;
 		}
 	} else {
@@ -2204,14 +2204,14 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	if (class_node.op_type == IS_CONST) {
 		opline->op1_type = IS_CONST;
 		opline->op1.constant =
-			zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant);
+			zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
 	} else {
 		SET_NODE(opline->op1, &class_node);
 	}
 	if (method_name->op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
 		opline->op2.constant =
-			zend_add_func_name_literal(CG(active_op_array), &method_name->u.constant);
+			zend_add_func_name_literal(CG(active_op_array), &method_name->u.constant TSRMLS_CC);
 	} else {
 		SET_NODE(opline->op2, method_name);
 	}
@@ -2545,7 +2545,7 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	opline->op1_type = IS_CONST;
-	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant);
+	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
 	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len TSRMLS_CC);
 	catch_var->u.constant.value.str.val = CG(active_op_array)->vars[opline->op2.var].name;
@@ -3756,7 +3756,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	zend_resolve_class_name(interface_name, &opline->extended_value, 0 TSRMLS_CC);
 	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
 	opline->op2_type = IS_CONST;
-	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant);
+	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant TSRMLS_CC);
 	CG(active_class_entry)->num_interfaces++;
 }
 /* }}} */
@@ -4103,7 +4103,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				opline->result.var = get_temporary_variable(CG(active_op_array));
 				if (constant_container->op_type == IS_CONST) {
 					opline->op1_type = IS_CONST;
-					opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &constant_container->u.constant);
+					opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &constant_container->u.constant TSRMLS_CC);
 				} else {
 					SET_NODE(opline->op1, constant_container);
 				}
