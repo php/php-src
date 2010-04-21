@@ -6131,6 +6131,10 @@ PHP_FUNCTION(sys_getloadavg)
 {
 	double load[3];
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (getloadavg(load, 3) == -1) {
 		RETURN_FALSE;
 	} else {
