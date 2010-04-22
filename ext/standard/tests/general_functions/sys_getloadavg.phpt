@@ -21,12 +21,6 @@ array(3) {
   [2]=>
   float(%f)
 }
-array(3) {
-  [0]=>
-  float(%f)
-  [1]=>
-  float(%f)
-  [2]=>
-  float(%f)
-}
+
+Warning: sys_getloadavg() expects exactly 0 parameters, %d given in %s 
 Done
