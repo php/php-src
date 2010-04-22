@@ -12,7 +12,11 @@ var_dump(sys_getloadavg());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
+
+Warning: sys_getloadavg() expects exactly 0 parameters, %d given in %s
+NULL
+
 array(3) {
   [0]=>
   float(%f)
@@ -22,5 +26,4 @@ array(3) {
   float(%f)
 }
 
-Warning: sys_getloadavg() expects exactly 0 parameters, %d given in %s 
 Done
