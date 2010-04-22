@@ -18,7 +18,7 @@ trait World {
  
 class MyHelloWorld {
    use Hello, World {
-     Hello::saySomething instead World;
+     Hello::saySomething insteadof World;
    }
 }
  
