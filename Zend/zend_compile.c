@@ -3451,7 +3451,7 @@ static int _merge_functions_to_class(zend_function *fn, int num_args, va_list ar
 
 		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn);
 		/* it could be necessary to update child classes as well */
-		/* zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len); */
+		/* zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len); */
 	} else {
 		zend_function_dtor(fn);
 		/* efree(fn); */
@@ -3576,8 +3576,8 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 /**
 * Copies function table entries to target function table with applied aliasing
 */
-void copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table) {
-	zend_hash_apply_with_arguments(source, (apply_func_args_t)_copy_functions, 3, /* 3 is number of args for apply_func */
+void copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table TSRMLS_DC) {
+	zend_hash_apply_with_arguments(source TSRMLS_CC, (apply_func_args_t)_copy_functions, 3, /* 3 is number of args for apply_func */
 			target, aliases, exclude_table);
 }
 
@@ -3683,13 +3683,13 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 		compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
 		/* copies functions, applies defined aliasing, and excludes unused trait methods */
-		copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table);
+		copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
 		zend_hash_graceful_destroy(&exclude_table);
 	}
 
 	/* now merge trait methods */
 	for (i = 0; i < ce->num_traits; i++) {
-		zend_hash_apply_with_arguments(function_tables[i], (apply_func_args_t)_merge_functions, 5, /* 5 is number of args for apply_func */
+		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)_merge_functions, 5, /* 5 is number of args for apply_func */
 						i, ce->num_traits, resulting_table, function_tables, ce);
 	}
 
@@ -3699,7 +3699,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	   if there is already a method with the same name it is replaced iff ce != fn.scope
 	   --> all inherited methods are overridden, methods defined in the class are leaved
 	   untouched */
-	zend_hash_apply_with_arguments(resulting_table, (apply_func_args_t)_merge_functions_to_class, 1, ce TSRMLS_CC);
+	zend_hash_apply_with_arguments(resulting_table TSRMLS_CC, (apply_func_args_t)_merge_functions_to_class, 1, ce);
 
 	/* free temporary function tables */
 	for (i = 0; i < ce->num_traits; i++) {
