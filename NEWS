@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   literal). (cbandy at jbandy dot com)
 - Fixed bug #51607 (pg_copy_from does not allow schema in the tablename
   argument). (cbandy at jbandy dot com)
+- Fixed bug #51604 (newline in end of header is shown in start of message).
+  (Daniel Egeberg)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
 - Fixed bug #51562 (query timeout in mssql can not be changed per query).
   (ejsmont dot artur at gmail dot com)
