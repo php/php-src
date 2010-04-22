@@ -856,7 +856,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	}
 	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
 
-	result->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
+	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 
 	/*
 	  Will be freed in the mysqlnd_internal_free_result_contents() called
@@ -1171,7 +1171,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 
-	result->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
+	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
 
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol, to_cache TSRMLS_CC);

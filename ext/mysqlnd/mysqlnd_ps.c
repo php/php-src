@@ -102,7 +102,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	result->m.fetch_row		= mysqlnd_fetch_stmt_row_buffered;
 	result->m.fetch_lengths	= NULL;/* makes no sense */
 
-	result->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
+	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE, to_cache TSRMLS_CC);
 

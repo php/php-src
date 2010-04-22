@@ -176,6 +176,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_buffer_size",	"32768",PHP_INI_ALL,	OnUpdateLong,	net_read_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 PHP_INI_END()
 /* }}} */
 
