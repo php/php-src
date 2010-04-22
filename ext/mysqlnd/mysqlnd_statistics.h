@@ -42,21 +42,28 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_STATS_UNLOCK(stats)
 #endif
 
+#ifndef MYSQLND_CORE_STATISTICS_TRIGGERS_DISABLED
+#define MYSQLND_STAT_CALL_TRIGGER(s_array, statistic, val) \
+			if ((s_array)->triggers[(statistic)] && (s_array)->in_trigger == FALSE) { \
+				(s_array)->in_trigger = TRUE; \
+				MYSQLND_STATS_UNLOCK((s_array)); \
+																						\
+				(s_array)->triggers[(statistic)]((s_array), (statistic), (val) TSRMLS_CC); \
+																						\
+				MYSQLND_STATS_LOCK((s_array)); \
+				(s_array)->in_trigger = FALSE; \
+			} 
+#else
+#define MYSQLND_STAT_CALL_TRIGGER(s_array, statistic, val)
+#endif /* MYSQLND_CORE_STATISTICS_TRIGGERS_DISABLED */
+
 #define MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(stats, statistic, value) \
 	{ \
 			MYSQLND_STATS_LOCK(stats); \
 			(stats)->values[(statistic)] += (value); \
-			if ((stats)->triggers[(statistic)] && (stats)->in_trigger == FALSE) { \
-				(stats)->in_trigger = TRUE; \
-				MYSQLND_STATS_UNLOCK(stats); \
-																							\
-				(stats)->triggers[(statistic)]((stats), (statistic), (value) TSRMLS_CC); \
-																							\
-				MYSQLND_STATS_LOCK(stats); \
-				(stats)->in_trigger = FALSE; \
-			} \
+			MYSQLND_STAT_CALL_TRIGGER((stats), (statistic), (value)); \
 			MYSQLND_STATS_UNLOCK(_p_s); \
-	} \
+	}
 	
 #define MYSQLND_DEC_STATISTIC(enabler, stats, statistic) \
  { \
@@ -116,6 +123,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
  }
 
 
+
+#ifndef MYSQLND_CORE_STATISTICS_DISABLED
+
 #define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
 	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
 
@@ -141,6 +151,17 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2), (statistic3), (value3)); \
 	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2), (statistic3), (value3));
 
+#else
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) 
+#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3)
+
+#endif /* MYSQLND_CORE_STATISTICS_DISABLED */
 
 PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
 
