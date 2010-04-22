@@ -24,7 +24,7 @@ trait C {
 
 class Foo {
     use C, A, B {
-		B::foo instead A, C; 
+		B::foo insteadof A, C; 
 	}
 }
 

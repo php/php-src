@@ -24,8 +24,8 @@ trait B {
 
 class Talker {
     use A, B {
-		B::smallTalk instead A; 
-		A::bigTalk instead B;
+		B::smallTalk insteadof A; 
+		A::bigTalk insteadof B;
 		B::bigTalk as talk;
 	}
 }
