@@ -2851,7 +2851,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-static void do_inheritance_check_on_method(zend_function *child, zend_function *parent)
+static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC)
 {
 	zend_uint child_flags;
     zend_uint parent_flags = parent->common.fn_flags;
@@ -2932,7 +2932,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
 	
-	do_inheritance_check_on_method(child, parent);
+	do_inheritance_check_on_method(child, parent TSRMLS_CC);
 	
 	return 0;
 }
@@ -3227,13 +3227,13 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 	HashTable* resulting_table;
 	HashTable** function_tables;
 	zend_class_entry *ce;
-	//zstr lcname;
+	/* zstr lcname; */
 	size_t collision = 0;
 	size_t abstract_solved = 0;
-	//unsigned int name_len;
+	/* unsigned int name_len; */
 	zend_function* other_trait_fn;
 
-	current			= va_arg(args, size_t);  // index of current trait
+	current			= va_arg(args, size_t);  /* index of current trait */
 	count			= va_arg(args, size_t);
 	resulting_table = va_arg(args, HashTable*);
 	function_tables = va_arg(args, HashTable**);
@@ -3241,23 +3241,23 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 
 	for (i = 0; i < count; i++) {
 		if (i == current) {
-			continue; // just skip this, cause its the table this function is applied on
+			continue; /* just skip this, cause its the table this function is applied on */
 		}
 
 		if (zend_hash_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, &other_trait_fn) == SUCCESS) {
-			// if it is an abstract method, there is no collision
+			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-				// we can savely free and remove it from other table
+				/* we can savely free and remove it from other table */
 				zend_function_dtor(other_trait_fn);
 				zend_hash_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength);
 			} else {
-				// if it is not an abstract method, there is still no collision
-				// iff fn is an abstract method
+				/* if it is not an abstract method, there is still no collision */
+				/* if fn is an abstract method */
 				if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-					// just mark as solved, will be added if its own trait is processed
+					/* just mark as solved, will be added if its own trait is processed */
 					abstract_solved = 1;
 				} else {
-					// but else, we have a collision of non-abstract methods
+					/* but else, we have a collision of non-abstract methods */
 					collision++;
 					zend_function_dtor(other_trait_fn);
 					zend_hash_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength);
@@ -3268,7 +3268,7 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 
 	if (collision) {
 		zend_function* class_fn;
-		// make sure method is not already overridden in class
+		/* make sure method is not already overridden in class */
 
 		if (zend_hash_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, &class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
@@ -3280,7 +3280,7 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 	} else if (abstract_solved) {
 		zend_function_dtor(fn);
 	} else {
-		// Add it to result function table
+		/* Add it to result function table */
 		if (zend_hash_add(resulting_table, hash_key->arKey, hash_key->nKeyLength,
                       fn, sizeof(zend_function), NULL)==FAILURE) {
 			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table.",
@@ -3288,7 +3288,7 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 		}
 	}
 
-	//efree(lcname.v);
+	/* efree(lcname.v); */
 	return ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
@@ -3365,7 +3365,8 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 	fe->op_array.start_op = fe->op_array.opcodes;
 	fe->op_array.function_name = newname;
 
-	//fe->op_array.prototype = fe->op_array.prototype;  //was setting it to fe which does not work since fe is stack allocated and not a stable address
+	/* was setting it to fe which does not work since fe is stack allocated and not a stable address */
+	/* fe->op_array.prototype = fe->op_array.prototype;   */
 
 	if (fe->op_array.arg_info) {
 		zend_arg_info *tmpArginfo;
@@ -3388,7 +3389,7 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
   
-  // TODO: check whether there is something similar and whether that is ok
+  /* TODO: check whether there is something similar and whether that is ok */
   zend_literal* literals_copy = (zend_literal*)emalloc(fe->op_array.size_literal * sizeof(zend_literal));
   
   for (i = 0; i < fe->op_array.size_literal; i++) {
@@ -3403,21 +3404,23 @@ static int _merge_functions_to_class(zend_function *fn, int num_args, va_list ar
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
 	zend_function* existing_fn;
-	zend_function* prototype = NULL;		// is used to determine the prototype according to the inheritance chain
+	zend_function* prototype = NULL;		/* is used to determine the prototype according to the inheritance chain */
 
 	if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &existing_fn) == FAILURE) {
-		add = 1; // not found
+		add = 1; /* not found */
 	} else if (existing_fn->common.scope != ce) {
-		add = 1; // or inherited from other class or interface
-		// prototype = existing_fn;  // it is just a reference which was added to the subclass while doing the inheritance
-		// function_add_ref(prototype);  //memory is scrambled anyway????
+		add = 1; /* or inherited from other class or interface */
+		/* it is just a reference which was added to the subclass while doing the inheritance */
+		/* prototype = existing_fn; */
+		/* memory is scrambled anyway???? */
+		/* function_add_ref(prototype);  */
 		zend_hash_quick_del(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h);
 	}
 
 	if (add) {
 		zend_function* parent_function;
 		if (ce->parent && zend_hash_quick_find(&ce->parent->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &parent_function) != FAILURE) {
-			prototype = parent_function; //->common.fn_flags |= ZEND_ACC_ABSTRACT;
+			prototype = parent_function; /* ->common.fn_flags |= ZEND_ACC_ABSTRACT; */
 		}
 
 		fn->common.scope = ce;
@@ -3427,15 +3430,14 @@ static int _merge_functions_to_class(zend_function *fn, int num_args, va_list ar
 			&& (prototype->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
 				|| prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			fn->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
-		}
-		else // remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class
-		if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
+		} else if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
+			/* remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class */
 			fn->common.fn_flags = fn->common.fn_flags - ZEND_ACC_IMPLEMENTED_ABSTRACT;
 		}
 
-		// check whether the trait method fullfills the inheritance requirements
+		/* check whether the trait method fullfills the inheritance requirements */
 		if (prototype) {
-			do_inheritance_check_on_method(fn, prototype);
+			do_inheritance_check_on_method(fn, prototype TSRMLS_CC);
 		}
 
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
@@ -3448,14 +3450,14 @@ static int _merge_functions_to_class(zend_function *fn, int num_args, va_list ar
 		}
 
 		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn);
-		//it could be necessary to update child classes as well
-		//zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len);
+		/* it could be necessary to update child classes as well */
+		/* zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len); */
 	} else {
 		zend_function_dtor(fn);
-		//efree(fn);
+		/* efree(fn); */
 	}
 
-	//efree(lcname.v);
+	/* efree(lcname.v); */
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
@@ -3476,7 +3478,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 
 	fnname_len = strlen(fn->common.function_name);
 
-	// apply aliases which are qualified with a class name, there should not be any ambiguatty
+	/* apply aliases which are qualified with a class name, there should not be any ambiguatty */
 	if (aliases) {
 		while (aliases[i]) {
 			if (fn->common.scope == aliases[i]->trait_method->ce &&
@@ -3487,7 +3489,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 					fn_copy = *fn;
 					php_runkit_function_copy_ctor(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
-					if (aliases[i]->modifiers) { // if it is 0, no modifieres has been changed
+					if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
@@ -3501,7 +3503,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 						zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name\n",
                        fn_copy.common.function_name);
 					}
-					//aliases[i]->function = fn_copy;
+					/* aliases[i]->function = fn_copy; */
 					efree(lcname);
 				}
 			}
@@ -3513,12 +3515,12 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 	lcname = zend_str_tolower_dup(fn->common.function_name, fnname_len);
 	void* dummy;
 	if (zend_hash_find(exclude_table, lcname, lcname_len, &dummy) == FAILURE) {
-		// is not in hashtable, thus, function is not to be excluded
+		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 		php_runkit_function_copy_ctor(&fn_copy, estrndup(fn->common.function_name, fnname_len));
 
-		// apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility
-		// TODO: i am still not sure, that there will be no ambigousities...
+		/* apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility */
+		/* TODO: i am still not sure, that there will be no ambigousities... */
 
 		if (aliases) {
 			i = 0;
@@ -3531,7 +3533,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 						zend_function fn_copy2 = *fn;
 						php_runkit_function_copy_ctor(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
-						if (aliases[i]->modifiers) { // if it is 0, no modifieres has been changed
+						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 							fn_copy2.common.fn_flags = aliases[i]->modifiers;
 							if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 								fn_copy2.common.fn_flags |= ZEND_ACC_PUBLIC;
@@ -3547,7 +3549,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 						}
 						efree(lcname2);
 					} else {
-						if (aliases[i]->modifiers) { // if it is 0, no modifieres has been changed
+						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 							fn_copy.common.fn_flags = aliases[i]->modifiers;
 							if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 								fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
@@ -3575,7 +3577,7 @@ static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_h
 * Copies function table entries to target function table with applied aliasing
 */
 void copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table) {
-	zend_hash_apply_with_arguments(source, (apply_func_args_t)_copy_functions, 3, //3 is number of args for apply_func
+	zend_hash_apply_with_arguments(source, (apply_func_args_t)_copy_functions, 3, /* 3 is number of args for apply_func */
 			target, aliases, exclude_table);
 }
 
@@ -3586,7 +3588,7 @@ void init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	zend_trait_method_reference *cur_method_ref;
 	zend_class_entry *cur_ce;
 
-	// resolve class references
+	/* resolve class references */
 
 	if (ce->trait_precedences) {
 		i = 0;
@@ -3657,63 +3659,63 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 
 	if (ce->num_traits <= 0) { return; }
 
-//	zend_error(E_NOTICE, "Do bind Traits on %v with %d traits.\n Class has already %d methods.\n",
-//			   ce->name.s, ce->num_traits, ce->function_table.nNumOfElements);
+/*	zend_error(E_NOTICE, "Do bind Traits on %v with %d traits.\n Class has already %d methods.\n",
+			   ce->name.s, ce->num_traits, ce->function_table.nNumOfElements); */
 
-	// complete initialization of trait strutures in ce
-	init_trait_structures(ce);
+	/* complete initialization of trait strutures in ce */
+	init_trait_structures(ce TSRMLS_CC);
 
-	// prepare copies of trait function tables for combination
+	/* prepare copies of trait function tables for combination */
 	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
 	resulting_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(resulting_table, 10, // TODO: revisit this start size, may be its not optimal
-						  //NULL, ZEND_FUNCTION_DTOR, 0, 0);
+	zend_hash_init_ex(resulting_table, 10, /* TODO: revisit this start size, may be its not optimal */
+						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
 					  	  NULL, NULL, 0, 0);
 
 	for (i = 0; i < ce->num_traits; i++) {
 		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
     	zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements,
-						  //NULL, ZEND_FUNCTION_DTOR, 0, 0);
+						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
 						  NULL, NULL, 0, 0);
 
-		zend_hash_init_ex(&exclude_table, 2, // TODO: revisit this start size, may be its not optimal
+		zend_hash_init_ex(&exclude_table, 2, /* TODO: revisit this start size, may be its not optimal */
 							NULL, NULL, 0, 0);
 		compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
-		// copies functions, applies defined aliasing, and excludes unused trait methods
+		/* copies functions, applies defined aliasing, and excludes unused trait methods */
 		copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table);
 		zend_hash_graceful_destroy(&exclude_table);
 	}
 
-	// now merge trait methods
+	/* now merge trait methods */
 	for (i = 0; i < ce->num_traits; i++) {
-		zend_hash_apply_with_arguments(function_tables[i], (apply_func_args_t)_merge_functions, 5, //5 is number of args for apply_func
+		zend_hash_apply_with_arguments(function_tables[i], (apply_func_args_t)_merge_functions, 5, /* 5 is number of args for apply_func */
 						i, ce->num_traits, resulting_table, function_tables, ce);
 	}
 
-	// now the resulting_table contains all trait methods we would have to
-	// add to the class
-	// in the following step the methods are inserted into the method table
-	// if there is already a method with the same name it is replaced iff ce != fn.scope
-	// --> all inherited methods are overridden, methods defined in the class are leaved
-	// untouched
+	/* now the resulting_table contains all trait methods we would have to
+	   add to the class
+	   in the following step the methods are inserted into the method table
+	   if there is already a method with the same name it is replaced iff ce != fn.scope
+	   --> all inherited methods are overridden, methods defined in the class are leaved
+	   untouched */
 	zend_hash_apply_with_arguments(resulting_table, (apply_func_args_t)_merge_functions_to_class, 1, ce TSRMLS_CC);
 
-	// free temporary function tables
+	/* free temporary function tables */
 	for (i = 0; i < ce->num_traits; i++) {
-		//zend_hash_destroy(function_tables[i]); //
+		/* zend_hash_destroy(function_tables[i]); */
 		zend_hash_graceful_destroy(function_tables[i]);
 		free(function_tables[i]);
 	}
 	free(function_tables);
 
-	// free temporary resulting table
-	//zend_hash_destroy(resulting_table); //
+	/* free temporary resulting table */
+	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
 	free(resulting_table);
 
 	zend_verify_abstract_class(ce TSRMLS_CC);
-	// now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed
+	/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	}
@@ -3762,14 +3764,14 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_add_to_list(&ce->trait_precedences,precedence_znode->u.op.ptr);
+	zend_add_to_list(&ce->trait_precedences, precedence_znode->u.op.ptr TSRMLS_CC);
 }
 /* }}} */
 
 void zend_add_trait_alias(znode *alias_znode TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_add_to_list(&ce->trait_aliases, alias_znode->u.op.ptr);
+	zend_add_to_list(&ce->trait_aliases, alias_znode->u.op.ptr TSRMLS_CC);
 }
 /* }}} */
 
@@ -3778,8 +3780,8 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	zend_trait_method_reference *method_ref = emalloc(sizeof(zend_trait_method_reference));
 	method_ref->ce = NULL;
 
-	// REM: There should not be a need for copying, 
-  //      zend_do_begin_class_declaration is also just using that string
+	/* REM: There should not be a need for copying, 
+	   zend_do_begin_class_declaration is also just using that string */
 	if (class_name) {
 		method_ref->class_name = Z_STRVAL(class_name->u.constant);
 		method_ref->cname_len  = Z_STRLEN(class_name->u.constant);
@@ -3816,7 +3818,7 @@ void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *mod
 }
 /* }}} */
 
-//void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC) /* {{{ */
+/*void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC)*/ /* {{{ */
 /*{
 	zend_trait_alias* trait_alias = emalloc(sizeof(zend_trait_alias));
 	trait_alias->method_name = Z_UNIVAL(method_name->u.constant);
@@ -3833,6 +3835,7 @@ void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *mod
 
 	result->u.var = trait_alias;
 }
+*/
 /* }}} */
 
 void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC) /* {{{ */
@@ -4443,7 +4446,7 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 		ce->num_traits = 0;
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
 
-		// opcode generation:
+		/* opcode generation: */
 		zend_op *opline;
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_BIND_TRAITS;
@@ -4458,7 +4461,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
-	// Traits can not implement interfaces
+	/* Traits can not implement interfaces */
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' since it is a Trait",
                Z_STRVAL(interface_name->u.constant),
