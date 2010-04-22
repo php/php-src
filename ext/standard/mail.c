@@ -97,7 +97,7 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL, *headers=NULL;
+	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL, *extra_cmd=NULL;
 	int to_len, message_len, headers_len = 0;
 	int subject_len, extra_cmd_len = 0, i;
@@ -122,6 +122,7 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
 		MAIL_ASCIIZ_CHECK(headers, headers_len);
+		headers_trimmed = php_trim(headers, headers_len, NULL, 0, NULL, 2 TSRMLS_CC);
 	}
 	if (extra_cmd) {
 		MAIL_ASCIIZ_CHECK(extra_cmd, extra_cmd_len);
@@ -173,10 +174,14 @@ PHP_FUNCTION(mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	if (php_mail(to_r, subject_r, message, headers, extra_cmd TSRMLS_CC)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
+	}
+
+	if (headers_trimmed) {
+		efree(headers_trimmed);
 	}
 
 	if (extra_cmd) {
