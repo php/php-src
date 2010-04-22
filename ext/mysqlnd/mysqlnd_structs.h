@@ -39,9 +39,6 @@ struct st_mysqlnd_memory_pool
 	unsigned int arena_size;
 	unsigned int free_size;
 
-	MYSQLND_MEMORY_POOL_CHUNK* free_chunk_list[MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE];
-	unsigned int free_chunk_list_elements;
-
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size TSRMLS_DC);
 };
 
