@@ -3329,7 +3329,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_UNUSED) {
 		/* namespaced constant */
-		if (!zend_get_constant_ex(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), &EX_T(opline->result.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+		if (!zend_quick_get_constant(opline->op2.literal + 1, &EX_T(opline->result.var).tmp_var, opline->extended_value TSRMLS_CC)) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
 				if(!actual) {

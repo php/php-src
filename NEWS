@@ -10,6 +10,8 @@
   . ZEND_FETCH_DIM_? may fetch array and dimension operans in a different order
   . ZEND_RETURN is splitted into two new instructions ZEND_RETURN and 
     ZEND_RETURN_BY_REF
+  . optimized access to global constants using values with pre-calculated
+    hash_values from litersls table
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty

@@ -525,11 +525,12 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_CONSTANT_ARRAY	9
 
 /* Ugly hack to support constants as static array indices */
-#define IS_CONSTANT_TYPE_MASK	0x0f
-#define IS_CONSTANT_UNQUALIFIED	0x10
-#define IS_CONSTANT_INDEX		0x80
-#define IS_LEXICAL_VAR			0x20
-#define IS_LEXICAL_REF			0x40
+#define IS_CONSTANT_TYPE_MASK		0x00f
+#define IS_CONSTANT_UNQUALIFIED		0x010
+#define IS_CONSTANT_INDEX			0x080
+#define IS_LEXICAL_VAR				0x020
+#define IS_LEXICAL_REF				0x040
+#define IS_CONSTANT_IN_NAMESPACE	0x100
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)

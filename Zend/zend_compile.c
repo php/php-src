@@ -420,6 +420,76 @@ int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_D
 }
 /* }}} */
 
+int zend_add_const_name_literal(zend_op_array *op_array, const zval *zv, int unqualified TSRMLS_DC) /* {{{ */
+{
+	int ret, tmp_literal;
+	char *name, *tmp_name, *ns_separator;
+	int name_len, ns_len;
+	zval c;
+
+	if (op_array->last_literal > 0 && 
+	    &op_array->literals[op_array->last_literal - 1].constant == zv) {
+		/* we already have function name as last literal (do nothing) */
+		ret = op_array->last_literal - 1;
+	} else {
+		ret = zend_add_literal(op_array, zv);
+	}
+
+	/* skip leading '\\' */ 
+	if (Z_STRVAL_P(zv)[0] == '\\') {
+		name_len = Z_STRLEN_P(zv) - 1;
+		name = Z_STRVAL_P(zv) + 1;
+	} else {
+		name_len = Z_STRLEN_P(zv);
+		name = Z_STRVAL_P(zv);
+	}
+	ns_separator = zend_memrchr(name, '\\', name_len);
+	if (ns_separator) {
+		ns_len = ns_separator - name;
+	} else {
+		ns_len = 0;
+	}
+
+	if (ns_len) {
+		/* lowercased namespace name & original constant name */
+		tmp_name = estrndup(name, name_len);
+		zend_str_tolower(tmp_name, ns_len);
+		ZVAL_STRINGL(&c, tmp_name, name_len, 0);
+		tmp_literal = zend_add_literal(CG(active_op_array), &c);
+		CALCULATE_LITERAL_HASH(tmp_literal);
+
+		/* lowercased namespace name & lowercased constant name */
+		tmp_name = zend_str_tolower_dup(name, name_len);
+		ZVAL_STRINGL(&c, tmp_name, name_len, 0);
+		tmp_literal = zend_add_literal(CG(active_op_array), &c);
+		CALCULATE_LITERAL_HASH(tmp_literal);
+	}
+
+	if (ns_len) {
+		if (!unqualified) {
+			return ret;
+		}
+		ns_len++;
+		name += ns_len;
+		name_len -= ns_len;
+	}
+
+	/* original constant name */
+	tmp_name = estrndup(name, name_len);
+	ZVAL_STRINGL(&c, tmp_name, name_len, 0);
+	tmp_literal = zend_add_literal(CG(active_op_array), &c);
+	CALCULATE_LITERAL_HASH(tmp_literal);
+
+	/* lowercased constant name */
+	tmp_name = zend_str_tolower_dup(name, name_len);
+	ZVAL_STRINGL(&c, tmp_name, name_len, 0);
+	tmp_literal = zend_add_literal(CG(active_op_array), &c);
+	CALCULATE_LITERAL_HASH(tmp_literal);
+
+	return ret;
+}
+/* }}} */
+
 #define LITERAL_STRINGL(op, str, len, copy) do { \
 		zval _c; \
 		ZVAL_STRINGL(&_c, str, len, copy); \
@@ -4149,14 +4219,20 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			opline->result.var = get_temporary_variable(CG(active_op_array));
 			GET_NODE(result, opline->result);
 			SET_UNUSED(opline->op1);
-			if(compound) {
+			opline->op2_type = IS_CONST;
+			if (compound) {
 				/* the name is unambiguous */
 				opline->extended_value = 0;
-			} else {
+				opline->op2.constant = zend_add_const_name_literal(CG(active_op_array), &constant_name->u.constant, 0 TSRMLS_CC);
+			} else {				
 				opline->extended_value = IS_CONSTANT_UNQUALIFIED;
+				if (CG(current_namespace)) {
+					opline->extended_value |= IS_CONSTANT_IN_NAMESPACE;
+					opline->op2.constant = zend_add_const_name_literal(CG(active_op_array), &constant_name->u.constant, 1 TSRMLS_CC);
+				} else {
+					opline->op2.constant = zend_add_const_name_literal(CG(active_op_array), &constant_name->u.constant, 0 TSRMLS_CC);
+				}
 			}
-			SET_NODE(opline->op2, constant_name);
-			CALCULATE_LITERAL_HASH(opline->op2.constant);
 			break;
 	}
 }
