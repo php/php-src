@@ -4443,7 +4443,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		EVP_PKEY *key = NULL;
 		SSL *tmpssl;
 		char resolved_path_buff[MAXPATHLEN];
-		const char * private_key;
+		const char * private_key = NULL;
 
 		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
 			/* a certificate to use for authentication */
