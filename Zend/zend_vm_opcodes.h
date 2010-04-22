@@ -129,6 +129,7 @@
 #define ZEND_THROW                           108
 #define ZEND_FETCH_CLASS                     109
 #define ZEND_CLONE                           110
+#define ZEND_RETURN_BY_REF                   111
 #define ZEND_INIT_METHOD_CALL                112
 #define ZEND_INIT_STATIC_METHOD_CALL         113
 #define ZEND_ISSET_ISEMPTY_VAR               114
