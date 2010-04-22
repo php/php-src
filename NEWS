@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas) 
 
+- Fixed bug #51629 (CURLOPT_FOLLOWLOCATION error message is misleading).
+  (Pierre)
 - Fixed bug #51627 (script path not correctly evaluated).
   (russell dot tempero at rightnow dot com)
 - Fixed bug #51615 (PHP crash with wrong HTML in SimpleXML). (Felipe)
