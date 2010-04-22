@@ -35,6 +35,8 @@
   . import_request_variables().
   . register_globals.
   . register_long_arrays ini option.
+  . Session bug compatibility mode (session.bug_compat42 and 
+    session.bug_compat_warn ini options).
   . session_is_registered(), session_register() and session_unregister() 
     functions.
   . y2k_compliance ini option.

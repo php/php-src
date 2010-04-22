@@ -439,63 +439,11 @@ new_session:
 }
 /* }}} */
 
-static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC) /* {{{ */
-{
-	char *str;
-	uint str_len;
-	ulong num_key;
-	int n;
-	zval **val;
-	int ret = 0;
-
-	n = zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, pos);
-
-	switch (n) {
-		case HASH_KEY_IS_STRING:
-			if (zend_hash_find(&EG(symbol_table), str, str_len, (void **) &val) == SUCCESS &&
-				val && Z_TYPE_PP(val) != IS_NULL
-			) {
-				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, Z_REFCOUNT_PP(val) + 1, 1);
-				ret = 1;
-			}
-			break;
-		case HASH_KEY_IS_LONG:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The session bug compatibility code will not "
-					"try to locate the global variable $%lu due to its "
-					"numeric nature", num_key);
-			break;
-	}
-	return ret;
-}
-/* }}} */
-
 static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 {
 	int ret = FAILURE;
 
 	IF_SESSION_VARS() {
-		if (PS(bug_compat)) {
-			HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
-			HashPosition pos;
-			zval **val;
-			int do_warn = 0;
-
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
-
-			while (zend_hash_get_current_data_ex(ht, (void **) &val, &pos) != FAILURE) {
-				if (Z_TYPE_PP(val) == IS_NULL) {
-					if (migrate_global(ht, &pos TSRMLS_CC)) {
-						do_warn = 1;
-					}
-				}
-				zend_hash_move_forward_ex(ht, &pos);
-			}
-
-			if (do_warn && PS(bug_compat_warn)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively");
-			}
-		}
-
 		if (PS(mod_data)) {
 			char *val;
 			int vallen;
@@ -684,8 +632,6 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("session.bug_compat_42",    "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_BOOLEAN("session.bug_compat_warn",  "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat_warn,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)

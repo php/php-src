@@ -127,8 +127,6 @@ typedef struct _php_ps_globals {
 			zval *ps_gc;
 		} name;
 	} mod_user_names;
-	zend_bool bug_compat; /* Whether to behave like PHP 4.2 and earlier */
-	zend_bool bug_compat_warn; /* Whether to warn about it */
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;

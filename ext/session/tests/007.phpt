@@ -5,7 +5,6 @@ bug compatibility: unset($c) with enabled register_globals
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-session.bug_compat_42=1
 session.serialize_handler=php
 session.save_handler=files
 precision=14
