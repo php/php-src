@@ -151,6 +151,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->net_read_buffer_size = 32768;
 	mysqlnd_globals->net_read_timeout = 31536000;
 	mysqlnd_globals->log_mask = 0;
+	mysqlnd_globals->log_mask = 16000;
 }
 /* }}} */
 
