@@ -339,7 +339,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	zval *object;
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -4500,8 +4499,6 @@ ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 
 ZEND_VM_HANDLER(101, ZEND_EXT_STMT, ANY, ANY)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	if (!EG(no_extensions)) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_statement_handler, EX(op_array) TSRMLS_CC);
@@ -4512,8 +4509,6 @@ ZEND_VM_HANDLER(101, ZEND_EXT_STMT, ANY, ANY)
 
 ZEND_VM_HANDLER(102, ZEND_EXT_FCALL_BEGIN, ANY, ANY)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	if (!EG(no_extensions)) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_begin_handler, EX(op_array) TSRMLS_CC);

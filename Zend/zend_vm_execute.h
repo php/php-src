@@ -583,8 +583,6 @@ static int ZEND_FASTCALL  ZEND_RAISE_ABSTRACT_ERROR_SPEC_HANDLER(ZEND_OPCODE_HAN
 
 static int ZEND_FASTCALL  ZEND_EXT_STMT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	if (!EG(no_extensions)) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_statement_handler, EX(op_array) TSRMLS_CC);
@@ -595,8 +593,6 @@ static int ZEND_FASTCALL  ZEND_EXT_STMT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_FASTCALL  ZEND_EXT_FCALL_BEGIN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	if (!EG(no_extensions)) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_begin_handler, EX(op_array) TSRMLS_CC);
@@ -10245,7 +10241,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	zval *object;
 	zval *property = opline->op2.zv;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -12225,7 +12220,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	zval *object;
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -14150,7 +14144,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	zval *object;
 	zval *property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -15850,7 +15843,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	zval *object;
 	zval *property = NULL;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -16751,7 +16743,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	zval *object;
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -18531,7 +18522,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	zval *object;
 	zval *property = opline->op2.zv;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -19748,7 +19738,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	zval *object;
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -20907,7 +20896,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	zval *object;
 	zval *property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -22066,7 +22054,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	zval *object;
 	zval *property = NULL;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -22336,7 +22323,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	zval *object;
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -25226,7 +25212,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	zval *object;
 	zval *property = opline->op2.zv;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -27035,7 +27020,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	zval *object;
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -28848,7 +28832,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	zval *object;
 	zval *property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -30435,7 +30418,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	zval *object;
 	zval *property = NULL;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -31235,7 +31217,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	zval *object;
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-	znode_op *result = &opline->result;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
