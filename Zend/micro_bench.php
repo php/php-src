@@ -166,6 +166,14 @@ function create_object($n) {
 	}
 }
 
+define('TEST', null);
+
+function read_const($n) {
+	for ($i = 0; $i < $n; ++$i) {
+		$x = TEST;
+	}
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -272,4 +280,6 @@ $x->read_const(N);
 $t = end_test($t, '$x = Foo::TEST', $overhead);
 create_object(N);
 $t = end_test($t, 'new Foo()', $overhead);
+read_const(N);
+$t = end_test($t, '$x = TEST', $overhead);
 total($t0, "Total");

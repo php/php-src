@@ -2981,7 +2981,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 	SAVE_OPLINE();
 	if (IS_CONST == IS_UNUSED) {
 		/* namespaced constant */
-		if (!zend_get_constant_ex(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), &EX_T(opline->result.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+		if (!zend_quick_get_constant(opline->op2.literal + 1, &EX_T(opline->result.var).tmp_var, opline->extended_value TSRMLS_CC)) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
 				if(!actual) {
@@ -11495,7 +11495,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 	SAVE_OPLINE();
 	if (IS_VAR == IS_UNUSED) {
 		/* namespaced constant */
-		if (!zend_get_constant_ex(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), &EX_T(opline->result.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+		if (!zend_quick_get_constant(opline->op2.literal + 1, &EX_T(opline->result.var).tmp_var, opline->extended_value TSRMLS_CC)) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
 				if(!actual) {
@@ -19381,7 +19381,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 	SAVE_OPLINE();
 	if (IS_UNUSED == IS_UNUSED) {
 		/* namespaced constant */
-		if (!zend_get_constant_ex(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), &EX_T(opline->result.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+		if (!zend_quick_get_constant(opline->op2.literal + 1, &EX_T(opline->result.var).tmp_var, opline->extended_value TSRMLS_CC)) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
 				if(!actual) {
