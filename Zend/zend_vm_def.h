@@ -4638,6 +4638,34 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
+{
+	zend_op *opline = EX(opline);
+	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
+	zend_class_entry *trait = zend_fetch_class(Z_STRVAL_P(opline->op2.zv),
+                                             Z_STRLEN_P(opline->op2.zv),
+                                             opline->extended_value TSRMLS_CC);
+	
+	if (trait) {
+		if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
+			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name, trait->name);
+		}
+		zend_do_implement_trait(ce, trait TSRMLS_CC);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
+{
+	zend_op *opline = EX(opline);
+	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
+	
+	zend_do_bind_traits(ce TSRMLS_CC);
+	
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 {
 	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;

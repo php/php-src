@@ -69,6 +69,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
+  void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
@@ -136,6 +137,7 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
 #define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
+#define ZEND_ACC_TRAIT						0x120
 
 /* op_array flags */
 #define ZEND_ACC_INTERACTIVE				0x10
@@ -166,6 +168,7 @@ typedef struct _zend_try_catch_element {
 
 /* class implement interface(s) flag */
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
 
 #define ZEND_ACC_CLOSURE              0x100000
 
@@ -466,6 +469,24 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
+/* Trait related functions */
+void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC);
+void zend_add_trait_alias(znode *alias_znode TSRMLS_DC);
+
+
+void zend_do_implements_trait(znode *interface_znode /*, znode* aliases */ TSRMLS_DC);
+ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
+ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
+//void zend_do_binds_traits(TSRMLS_D);
+//ZEND_API void zend_do_add_trait_preparative_to_class(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
+void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
+void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
+void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
+
+void init_trait_alias_list(znode* result, const znode* trait_alias TSRMLS_DC);
+void add_trait_alias(znode* result, const znode* trait_alias TSRMLS_DC);
+void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC);
+
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
@@ -514,6 +535,11 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC);
 void zend_do_add_list_element(const znode *element TSRMLS_DC);
 void zend_do_new_list_begin(TSRMLS_D);
 void zend_do_new_list_end(TSRMLS_D);
+
+/* Functions for a null terminated pointer list, used for traits parsing and compilation */
+void zend_init_list(void *result, void *item TSRMLS_DC);
+void zend_add_to_list(void *result, void *item TSRMLS_DC);
+
 
 void zend_do_cast(znode *result, const znode *expr, int type TSRMLS_DC);
 void zend_do_include_or_eval(int type, znode *result, const znode *op1 TSRMLS_DC);
@@ -643,6 +669,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv);
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
+#define ZEND_FETCH_CLASS_TRAIT		14
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
