@@ -277,6 +277,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			net_read_buffer_size;
 	long			log_mask;
 	long			net_read_timeout;
+	long			mempool_default_size;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
