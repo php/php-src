@@ -92,11 +92,6 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 	}
 }
 
-static zend_never_inline void __zval_ptr_dtor(zval *zval_ptr  ZEND_FILE_LINE_DC)
-{
-	__zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC);
-}
-
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv)  ZEND_FILE_LINE_CC)
 
