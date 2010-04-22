@@ -418,7 +418,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			return -1;
 		}
 
-		if (wp->config->pm == NULL) {
+		if (wp->config->pm != PM_STYLE_STATIC && wp->config->pm != PM_STYLE_DYNAMIC) {
 			zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] the process manager is missing (static or dynamic)", wp->config->name);
 			return -1;
 		}
