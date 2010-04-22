@@ -4451,7 +4451,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 				return NULL;
 			}
 
-			if (SSL_CTX_use_PrivateKey_file(ctx, reso, SSL_FILETYPE_PEM) != 1) {
+			if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
 				return NULL;
 			}
