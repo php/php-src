@@ -113,6 +113,7 @@
 %token T_CATCH
 %token T_THROW
 %token T_USE
+%token T_INSTEADOF
 %token T_GLOBAL
 %right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
 %token T_VAR
@@ -121,6 +122,7 @@
 %token T_EMPTY
 %token T_HALT_COMPILER
 %token T_CLASS
+%token T_TRAIT
 %token T_INTERFACE
 %token T_EXTENDS
 %token T_IMPLEMENTS
@@ -329,6 +331,7 @@ unticked_class_declaration_statement:
 class_entry_type:
 		T_CLASS			{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = 0; }
 	|	T_ABSTRACT T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
+	|	T_TRAIT { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_TRAIT; }
 	|	T_FINAL T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_FINAL_CLASS; }
 ;
 
@@ -514,10 +517,67 @@ class_statement_list:
 class_statement:
 		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
 	|	class_constant_declaration ';'
+	|	trait_use_statement
 	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); } '('
 			parameter_list ')' method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
+trait_use_statement:
+		T_USE trait_list trait_adaptations
+;
+
+trait_list:
+		fully_qualified_class_name						{ zend_do_implements_trait(&$1 TSRMLS_CC); }
+	|	trait_list ',' fully_qualified_class_name		{ zend_do_implements_trait(&$3 TSRMLS_CC); }
+;
+
+trait_adaptations:
+		';'
+	|	'{' trait_adaptation_list '}'
+;
+
+trait_adaptation_list:
+		/* empty */
+	|	non_empty_trait_adaptation_list
+;
+
+non_empty_trait_adaptation_list:
+		trait_adaptation_statement
+	|	non_empty_trait_adaptation_list trait_adaptation_statement
+;
+
+trait_adaptation_statement:
+		trait_precedence ';'								{ zend_add_trait_precedence(&$1 TSRMLS_CC); }
+	|	trait_alias ';'										{ zend_add_trait_alias(&$1 TSRMLS_CC); }
+;
+
+trait_precedence:
+	trait_method_reference_fully_qualified T_INSTEADOF trait_reference_list	{ zend_prepare_trait_precedence(&$$, &$1, &$3 TSRMLS_CC); }
+;
+
+trait_reference_list:
+		fully_qualified_class_name									{ zend_init_list(&$$.u.op.ptr, Z_STRVAL($1.u.constant) TSRMLS_CC); }
+	|	trait_reference_list ',' fully_qualified_class_name			{ zend_add_to_list(&$1.u.op.ptr, Z_STRVAL($3.u.constant) TSRMLS_CC); $$ = $1; }
+;
+
+trait_method_reference:
+		T_STRING													{ zend_prepare_reference(&$$, NULL, &$1 TSRMLS_CC); }
+	|	trait_method_reference_fully_qualified						{ $$ = $1; }
+;
+
+trait_method_reference_fully_qualified:
+	fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING		{ zend_prepare_reference(&$$, &$1, &$3 TSRMLS_CC); }
+;
+
+trait_alias:
+		trait_method_reference T_AS trait_modifiers T_STRING		{ zend_prepare_trait_alias(&$$, &$1, &$3, &$4 TSRMLS_CC); }
+	|	trait_method_reference T_AS member_modifier					{ zend_prepare_trait_alias(&$$, &$1, &$3, NULL TSRMLS_CC); }
+;
+
+trait_modifiers:
+		/* empty */					{ Z_LVAL($$.u.constant) = 0x0; } /* No change of methods visibility */
+	|	member_modifier	{ $$ = $1; } /* REM: Keep in mind, there are not only visibility modifiers */
+;
 
 method_body:
 		';' /* abstract method */		{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }

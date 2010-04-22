@@ -154,3 +154,5 @@
 #define ZEND_USER_OPCODE                     150
 #define ZEND_JMP_SET                         152
 #define ZEND_DECLARE_LAMBDA_FUNCTION         153
+#define ZEND_ADD_TRAIT                       154
+#define ZEND_BIND_TRAITS                     155

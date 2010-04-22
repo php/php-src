@@ -1561,7 +1561,9 @@ check_fetch_type:
 			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%s' not found", class_name);
-				} else {
+				} else if (fetch_type == ZEND_FETCH_CLASS_TRAIT) {
+                	zend_error(E_ERROR, "Trait '%s' not found", class_name);
+                } else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
 				}	
 			}

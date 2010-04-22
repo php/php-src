@@ -420,6 +420,44 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+struct _zend_trait_method_reference {
+	char* method_name;
+	unsigned int mname_len;
+	
+	zend_class_entry *ce;
+	
+	char* class_name;
+	unsigned int cname_len;
+};
+typedef struct _zend_trait_method_reference	zend_trait_method_reference;
+
+struct _zend_trait_precedence {
+	zend_trait_method_reference *trait_method;
+	
+	zend_class_entry** exclude_from_classes;
+	
+	union _zend_function* function;
+};
+typedef struct _zend_trait_precedence zend_trait_precedence;
+
+struct _zend_trait_alias {
+	zend_trait_method_reference *trait_method;
+	
+	/**
+	* name for method to be added
+	*/
+	char* alias;
+	unsigned int alias_len;
+	
+	/**
+	* modifiers to be set on trait method
+	*/
+	zend_uint modifiers;
+	
+	union _zend_function* function;
+};
+typedef struct _zend_trait_alias zend_trait_alias;
+
 struct _zend_class_entry {
 	char type;
 	char *name;
@@ -464,6 +502,11 @@ struct _zend_class_entry {
 
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
+	
+	zend_class_entry **traits;
+	zend_uint num_traits;
+	zend_trait_alias **trait_aliases;
+	zend_trait_precedence **trait_precedences;
 
 	char *filename;
 	zend_uint line_start;

@@ -990,6 +990,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_INTERFACE;
 }
 
+<ST_IN_SCRIPTING>"trait" {
+	return T_TRAIT;
+}
+
 <ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
 }
@@ -1106,6 +1110,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"use" {
 	return T_USE;
+}
+
+<ST_IN_SCRIPTING>"insteadof" {
+        return T_INSTEADOF;
 }
 
 <ST_IN_SCRIPTING>"global" {

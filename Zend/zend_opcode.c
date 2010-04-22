@@ -194,9 +194,50 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
+            if (ce->num_traits > 0 && ce->traits) {
+            	efree(ce->traits);
+            }
 			if (ce->doc_comment) {
 				efree(ce->doc_comment);
 			}
+ 			if (ce->trait_aliases) {
+ 				size_t i = 0;
+ 				while (ce->trait_aliases[i]) {
+ 					if (ce->trait_aliases[i]->trait_method) {
+ 						if (ce->trait_aliases[i]->trait_method->method_name) {
+ 							efree(ce->trait_aliases[i]->trait_method->method_name);
+ 						}
+ 						if (ce->trait_aliases[i]->trait_method->class_name) {
+ 							efree(ce->trait_aliases[i]->trait_method->class_name);
+ 						}
+ 						efree(ce->trait_aliases[i]->trait_method);
+ 					}
+ 					if (ce->trait_aliases[i]->alias) {
+ 						efree(ce->trait_aliases[i]->alias);
+ 					}
+ 					efree(ce->trait_aliases[i]);
+ 					i++;
+ 				}
+ 				efree(ce->trait_aliases);
+ 			}
+ 			
+ 			if (ce->trait_precedences) {
+ 				size_t i = 0;
+ 				while (ce->trait_precedences[i]) {
+ 					efree(ce->trait_precedences[i]->trait_method->method_name);
+ 					efree(ce->trait_precedences[i]->trait_method->class_name);
+ 					efree(ce->trait_precedences[i]->trait_method);
+ 					
+ 					if (ce->trait_precedences[i]->exclude_from_classes) {
+ 						efree(ce->trait_precedences[i]->exclude_from_classes);
+ 					}
+ 					
+ 					efree(ce->trait_precedences[i]);
+ 					i++;
+ 				}
+ 				efree(ce->trait_precedences);
+ 			}
+			
 			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:
