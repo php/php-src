@@ -5,8 +5,6 @@ redefining SID should not cause warnings
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-session.bug_compat_42=1
-session.bug_compat_warn=0
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
