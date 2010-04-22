@@ -30,6 +30,6 @@ var_dump( $curl_content );
 --EXPECTF--
 *** Testing curl_setopt with CURLOPT_FOLLOWLOCATION in safemode
 
-Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set in %s on line %d
+Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when safe_mode is enabled or an open_basedir is set in %s on line %d
 bool(false)
 ===DONE===
