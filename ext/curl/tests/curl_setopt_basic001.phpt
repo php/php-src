@@ -30,6 +30,6 @@ var_dump( $curl_content );
 Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing curl_setopt with CURLOPT_FOLLOWLOCATION in safemode
 
-Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set in %s on line %d
+Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when safe_mode is enabled or an open_basedir is set in %s on line %d
 bool(false)
 
