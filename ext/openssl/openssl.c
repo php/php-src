@@ -4445,6 +4445,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		EVP_PKEY *key = NULL;
 		SSL *tmpssl;
 		char resolved_path_buff[MAXPATHLEN];
+		const char * private_key = NULL;
 
 		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
 			/* a certificate to use for authentication */
@@ -4452,10 +4453,21 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set local cert chain file `%s'; Check that your cafile/capath settings include details of your certificate and its issuer", certfile);
 				return NULL;
 			}
+			GET_VER_OPT_STRING("local_pk", private_key);
 
-			if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
-				return NULL;
+			if (private_key) {
+				char resolved_path_buff_pk[MAXPATHLEN];
+				if (VCWD_REALPATH(private_key, resolved_path_buff_pk)) {
+					if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff_pk, SSL_FILETYPE_PEM) != 1) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff_pk);
+						return NULL;
+					}
+				}
+			} else {
+				if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
+					return NULL;
+				}		
 			}
 
 			tmpssl = SSL_new(ctx);
