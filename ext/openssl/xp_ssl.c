@@ -588,6 +588,8 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 				case STREAM_CRYPTO_METHOD_TLS_CLIENT:
 					sock->method = STREAM_CRYPTO_METHOD_TLS_SERVER;
 					break;
+				default:
+					break;
 			}
 
 			clisockdata->method = sock->method;
