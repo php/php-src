@@ -3244,7 +3244,7 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 			continue; /* just skip this, cause its the table this function is applied on */
 		}
 
-		if (zend_hash_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, &other_trait_fn) == SUCCESS) {
+		if (zend_hash_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, (void **)&other_trait_fn) == SUCCESS) {
 			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* we can savely free and remove it from other table */
@@ -3270,7 +3270,7 @@ static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_
 		zend_function* class_fn;
 		/* make sure method is not already overridden in class */
 
-		if (zend_hash_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, &class_fn) == FAILURE
+		if (zend_hash_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
 				zend_error(E_WARNING, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
                    fn->common.function_name, ce->name);
@@ -3344,7 +3344,7 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 	for(i = 0; i < fe->op_array.last; i++) {
 		opcode_copy[i] = fe->op_array.opcodes[i];
 		if (opcode_copy[i].op1_type == IS_CONST) {
-			zval_copy_ctor(&opcode_copy[i].op1.constant);
+			zval_copy_ctor(&CONSTANT_EX(&fe->op_array, opcode_copy[i].op1.constant));
 		} else {
 			if (opcode_copy[i].op1.jmp_addr >= fe->op_array.opcodes &&
 				opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
@@ -3353,7 +3353,7 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
         }
 
 		if (opcode_copy[i].op2_type == IS_CONST) {
-			zval_copy_ctor(&opcode_copy[i].op2.constant);
+			zval_copy_ctor(&CONSTANT_EX(&fe->op_array, opcode_copy[i].op2.constant));
 		} else {
 			if (opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
 				opcode_copy[i].op2.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
@@ -3389,13 +3389,13 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
   
-  /* TODO: check whether there is something similar and whether that is ok */
-  zend_literal* literals_copy = (zend_literal*)emalloc(fe->op_array.size_literal * sizeof(zend_literal));
+	/* TODO: check whether there is something similar and whether that is ok */
+	zend_literal* literals_copy = (zend_literal*)emalloc(fe->op_array.size_literal * sizeof(zend_literal));
   
-  for (i = 0; i < fe->op_array.size_literal; i++) {
-    literals_copy[i] = fe->op_array.literals[i];
-  }
-  fe->op_array.literals = literals_copy;
+	for (i = 0; i < fe->op_array.size_literal; i++) {
+		literals_copy[i] = fe->op_array.literals[i];
+	}
+	fe->op_array.literals = literals_copy;
 }
 /* }}}} */
 
@@ -3461,7 +3461,7 @@ static int _merge_functions_to_class(zend_function *fn, int num_args, va_list ar
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static int _copy_functions(zend_function *fn, int num_args, va_list args, zend_hash_key *hash_key)
+static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	HashTable* target;
 	zend_trait_alias** aliases;
