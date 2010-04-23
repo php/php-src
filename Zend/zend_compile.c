@@ -3344,18 +3344,14 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 	opcode_copy = safe_emalloc(sizeof(zend_op), fe->op_array.last, 0);
 	for(i = 0; i < fe->op_array.last; i++) {
 		opcode_copy[i] = fe->op_array.opcodes[i];
-		if (opcode_copy[i].op1_type == IS_CONST) {
-			zval_copy_ctor(&CONSTANT_EX(&fe->op_array, opcode_copy[i].op1.constant));
-		} else {
+		if (opcode_copy[i].op1_type != IS_CONST) {
 			if (opcode_copy[i].op1.jmp_addr >= fe->op_array.opcodes &&
 				opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
 				opcode_copy[i].op1.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op1.jmp_addr - fe->op_array.opcodes);
 			}
         }
 
-		if (opcode_copy[i].op2_type == IS_CONST) {
-			zval_copy_ctor(&CONSTANT_EX(&fe->op_array, opcode_copy[i].op2.constant));
-		} else {
+		if (opcode_copy[i].op2_type != IS_CONST) {
 			if (opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
 				opcode_copy[i].op2.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
 				opcode_copy[i].op2.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op2.jmp_addr - fe->op_array.opcodes);
@@ -3394,6 +3390,7 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
   
 	for (i = 0; i < fe->op_array.size_literal; i++) {
 		literals_copy[i] = fe->op_array.literals[i];
+		zval_copy_ctor(&literals_copy[i].constant);
 	}
 	fe->op_array.literals = literals_copy;
 }
