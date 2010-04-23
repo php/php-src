@@ -27,6 +27,10 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "zend_modules.h"
+#include "php.h"
+#include "zend_ini_scanner.h"
+#include "zend_globals.h"
+#include "zend_stream.h"
 
 #include "SAPI.h"
 
@@ -103,6 +107,8 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include <fpm/fpm.h>
 #include <fpm/fpm_request.h>
 #include <fpm/fpm_status.h>
+#include <fpm/fpm_conf.h>
+#include <fpm/fpm_php.h>
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
@@ -123,6 +129,7 @@ static int parent = 1;
 static int request_body_fd;
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC);
+static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC);
 
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
@@ -1070,6 +1077,7 @@ static void init_request_info(TSRMLS_D)
 	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1 TSRMLS_CC);
 	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
+	char *ini;
 
 	/* some broken servers do not have script_filename or argv0
 	 * an example, IIS configured in some ways.  then they do more
@@ -1353,6 +1361,58 @@ static void init_request_info(TSRMLS_D)
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION", sizeof("HTTP_AUTHORIZATION")-1 TSRMLS_CC);
 		php_handle_auth_data(auth TSRMLS_CC);
+	}
+
+	/* INI stuff */
+	ini = sapi_cgibin_getenv("PHP_VALUE", sizeof("PHP_VALUE")-1 TSRMLS_CC);
+	if (ini) {
+		int mode = ZEND_INI_USER;
+		char *tmp;
+		spprintf(&tmp, 0, "%s\n", ini);
+		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
+		efree(tmp);
+	}
+
+	ini = sapi_cgibin_getenv("PHP_ADMIN_VALUE", sizeof("PHP_ADMIN_VALUE")-1 TSRMLS_CC);
+	if (ini) {
+		int mode = ZEND_INI_SYSTEM;
+		char *tmp;
+		spprintf(&tmp, 0, "%s\n", ini);
+		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
+		efree(tmp);
+	}
+}
+/* }}} */
+
+static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC) /* {{{ */
+{
+	int *mode = (int *)arg;
+	char *key = Z_STRVAL_P(arg1);
+	char *value = Z_STRVAL_P(arg2);
+	struct key_value_s kv;
+
+	if (!mode) return;
+
+	if (callback_type != ZEND_INI_PARSER_ENTRY) {
+		fprintf(stderr, "Passing INI directive through FastCGI: only classic entries are allowed\n");
+		return;
+	}
+
+	if (!key || strlen(key) < 1) {
+		fprintf(stderr, "Passing INI directive through FastCGI: empty key\n");
+		return;
+	}
+
+	if (!value || strlen(value) < 1) {
+		fprintf(stderr, "Passing INI directive through FastCGI: empty value for key '%s'\n", key);
+		return;
+	}
+
+	kv.key = key;
+	kv.value = value;
+	kv.next = NULL;
+	if (fpm_php_apply_defines_ex(&kv, *mode) == -1) {
+		fprintf(stderr, "Passing INI directive through FastCGI: unable to set '%s'\n", key);
 	}
 }
 /* }}} */
