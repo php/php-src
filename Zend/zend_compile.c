@@ -4506,10 +4506,11 @@ void zend_do_implements_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_TRAIT;
-  SET_NODE(opline->op1, &CG(implementing_class));
+	SET_NODE(opline->op1, &CG(implementing_class));
 	zend_resolve_class_name(trait_name, &opline->extended_value, 0 TSRMLS_CC);
 	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_TRAIT;
-	SET_NODE(opline->op2, trait_name);
+	opline->op2_type = IS_CONST;
+	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &trait_name->u.constant TSRMLS_CC);
 	CG(active_class_entry)->num_traits++;
 }
 /* }}} */
