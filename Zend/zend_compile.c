@@ -3219,7 +3219,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 }
 /* }}} */
 
-static int _merge_functions(zend_function *fn, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	size_t current;
 	size_t i;
@@ -3399,7 +3399,7 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 }
 /* }}}} */
 
-static int _merge_functions_to_class(zend_function *fn, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
+static int _merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
