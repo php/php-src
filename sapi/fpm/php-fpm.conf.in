@@ -71,6 +71,14 @@ listen = 127.0.0.1:9000
 ; default : -1
 ;
 ;listen.backlog = -1
+ 
+; List of ipv4 addresses of FastCGI clients that allowed to connect.
+; Equivalent to FCGI_WEB_SERVER_ADDRS environment in original php.fcgi (5.2.2+)
+; Makes sense only with a tcp listening socket.
+; Each addresses must be separated by a comma
+; default: any
+;
+;listen.allowed_client = 127.0.0.1
 
 ; Set permissions for unix socket, if one used.
 ; In Linux read/write permissions must be set in order to allow connections from web server.
@@ -134,7 +142,7 @@ pm.max_children = 50
 ; Equivalent to PHP_FCGI_MAX_REQUESTS
 ; default : 0
 ;
-;max_requests = 500
+;pm.max_requests = 500
 
 ; Sets the status URI to call to obtain php-fpm status page.
 ; If not set, no URI will be recognized as a status page.
@@ -191,7 +199,7 @@ pm.max_children = 50
 ;
 ; default: pong
 ;
-;pong.response = pong
+;ping.response = pong
  
 ; The timeout (in seconds) for serving a single request after which the worker process will be terminated
 ; Should be used when 'max_execution_time' ini option does not stop script execution for some reason
@@ -244,14 +252,6 @@ pm.max_children = 50
 ; default: no
 ;
 ;catch_workers_output = yes
- 
-; List of ipv4 addresses of FastCGI clients that allowed to connect.
-; Equivalent to FCGI_WEB_SERVER_ADDRS environment in original php.fcgi (5.2.2+)
-; Makes sense only with a tcp listening socket.
-; Each addresses must be separated by a comma
-; default: any
-;
-;listen.allowed_client = 127.0.0.1
  
 ; Pass environment variables like LD_LIBRARY_PATH
 ; All $VARIABLEs are taken from current environment
