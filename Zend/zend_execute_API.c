@@ -1585,7 +1585,7 @@ zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_na
 				if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%s' not found", class_name);
 				} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-                	zend_error(E_ERROR, "Trait '%s' not found", class_name);
+					zend_error(E_ERROR, "Trait '%s' not found", class_name);
 				} else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
 				}	
