@@ -84,10 +84,6 @@ static void fpm_stdio_child_said(int fd, short which, void *arg) /* {{{ */
 	int in_buf = 0;
 	int res;
 
-#if 0
-	zlog(ZLOG_STUFF, ZLOG_DEBUG, "child %d said %s", (int) child->pid, is_stdout ? "stdout" : "stderr");
-#endif
-
 	while (fifo_in || fifo_out) {
 		if (fifo_in) {
 			res = read(fd, buf + in_buf, max_buf_size - 1 - in_buf);
@@ -111,13 +107,6 @@ static void fpm_stdio_child_said(int fd, short which, void *arg) /* {{{ */
 						close(child->fd_stderr);
 						child->fd_stderr = -1;
 					}
-
-#if 0
-					if (in_buf == 0 && !fpm_globals.is_child) {
-						zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] child %d, %s pipe is closed", child->wp->config->name,
-						  (int) child->pid, is_stdout ? "stdout" : "stderr");
-					}
-#endif
 				}
 			} else {
 				in_buf += res;

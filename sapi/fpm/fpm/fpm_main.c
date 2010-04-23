@@ -118,17 +118,6 @@ static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
  * Set to non-zero if we are the parent process
  */
 static int parent = 1;
-
-/* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
-static int exit_signal = 0;
-
-/* Is Parent waiting for children to exit */
-static int parent_waiting = 0;
-
-/**
- * Process group
- */
-static pid_t pgroup;
 #endif
 
 static int request_body_fd;
@@ -1368,29 +1357,6 @@ static void init_request_info(TSRMLS_D)
 }
 /* }}} */
 
-#ifndef PHP_WIN32
-/**
- * Clean up child processes upon exit
- */
-void fastcgi_cleanup(int signal)
-{
-#ifdef DEBUG_FASTCGI
-	fprintf(stderr, "FastCGI shutdown, pid %d\n", getpid());
-#endif
-
-	sigaction(SIGTERM, &old_term, 0);
-
-	/* Kill all the processes in our process group */
-	kill(-pgroup, SIGTERM);
-
-	if (parent && parent_waiting) {
-		exit_signal = 1;
-	} else {
-		exit(0);
-	}
-}
-#endif
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
@@ -1521,16 +1487,6 @@ int main(int argc, char *argv[])
 	char *fpm_config = NULL;
 
 	fcgi_init();
-
-#if 0 && defined(PHP_DEBUG)
-	/* IIS is always making things more difficult.  This allows
-	 * us to stop PHP and attach a debugger before much gets started */
-	{
-		char szMessage [256];
-		wsprintf (szMessage, "Please attach a debugger to the process 0x%X [%d] (%s) and click OK", GetCurrentProcessId(), GetCurrentProcessId(), argv[0]);
-		MessageBox(NULL, szMessage, "CGI Debug Time!", MB_OK|MB_SERVICE_NOTIFICATION);
-	}
-#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)

@@ -183,11 +183,6 @@ static void fcgi_setup_signals(void)
 }
 #endif
 
-int fcgi_in_shutdown(void)
-{
-	return in_shutdown;
-}
-
 int fcgi_init(void)
 {
 	if (!is_initialized) {
@@ -278,76 +273,6 @@ void fcgi_shutdown(void)
 	}
 }
 
-#ifdef _WIN32
-/* Do some black magic with the NT security API.
- * We prepare a DACL (Discretionary Access Control List) so that
- * we, the creator, are allowed all access, while "Everyone Else"
- * is only allowed to read and write to the pipe.
- * This avoids security issues on shared hosts where a luser messes
- * with the lower-level pipe settings and screws up the FastCGI service.
- */
-static PACL prepare_named_pipe_acl(PSECURITY_DESCRIPTOR sd, LPSECURITY_ATTRIBUTES sa)
-{
-	DWORD req_acl_size;
-	char everyone_buf[32], owner_buf[32];
-	PSID sid_everyone, sid_owner;
-	SID_IDENTIFIER_AUTHORITY
-		siaWorld = SECURITY_WORLD_SID_AUTHORITY,
-		siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
-	PACL acl;
-
-	sid_everyone = (PSID)&everyone_buf;
-	sid_owner = (PSID)&owner_buf;
-
-	req_acl_size = sizeof(ACL) +
-		(2 * ((sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD)) + GetSidLengthRequired(1)));
-
-	acl = malloc(req_acl_size);
-
-	if (acl == NULL) {
-		return NULL;
-	}
-
-	if (!InitializeSid(sid_everyone, &siaWorld, 1)) {
-		goto out_fail;
-	}
-	*GetSidSubAuthority(sid_everyone, 0) = SECURITY_WORLD_RID;
-
-	if (!InitializeSid(sid_owner, &siaCreator, 1)) {
-		goto out_fail;
-	}
-	*GetSidSubAuthority(sid_owner, 0) = SECURITY_CREATOR_OWNER_RID;
-
-	if (!InitializeAcl(acl, req_acl_size, ACL_REVISION)) {
-		goto out_fail;
-	}
-
-	if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_GENERIC_READ | FILE_GENERIC_WRITE, sid_everyone)) {
-		goto out_fail;
-	}
-
-	if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_ALL_ACCESS, sid_owner)) {
-		goto out_fail;
-	}
-
-	if (!InitializeSecurityDescriptor(sd, SECURITY_DESCRIPTOR_REVISION)) {
-		goto out_fail;
-	}
-
-	if (!SetSecurityDescriptorDacl(sd, TRUE, acl, FALSE)) {
-		goto out_fail;
-	}
-
-	sa->lpSecurityDescriptor = sd;
-
-	return acl;
-
-out_fail:
-	free(acl);
-	return NULL;
-}
-#endif
-
 void fcgi_set_allowed_clients(char *ip)
 {
 	char *cur, *end;
@@ -381,154 +306,6 @@ void fcgi_set_allowed_clients(char *ip)
 		allowed_clients[n] = INADDR_NONE;
 		free(ip);
 	}
-}
-
-//TODO
-static int is_port_number(const char *bindpath)
-{
-	while (*bindpath) {
-		if (*bindpath < '0' || *bindpath > '9') {
-			return 0;
-		}
-		bindpath++;
-	}
-	return 1;
-}
-
-int fcgi_listen(const char *path, int backlog)
-{
-	char     *s;
-	int       tcp = 0;
-	char      host[MAXPATHLEN];
-	short     port = 0;
-	int       listen_socket;
-	sa_t      sa;
-	socklen_t sock_len;
-#ifdef SO_REUSEADDR
-# ifdef _WIN32
-	BOOL reuse = 1;
-# else
-	int reuse = 1;
-# endif
-#endif
-
-	if ((s = strchr(path, ':'))) {
-		port = atoi(s+1);
-		if (port != 0 && (s-path) < MAXPATHLEN) {
-			strncpy(host, path, s-path);
-			host[s-path] = '\0';
-			tcp = 1;
-		}
-	} else if (is_port_number(path)) {
-		port = atoi(path);
-		if (port != 0) {
-			host[0] = '\0';
-			tcp = 1;
-		}
-	}
-
-	/* Prepare socket address */
-	if (tcp) {
-		memset(&sa.sa_inet, 0, sizeof(sa.sa_inet));
-		sa.sa_inet.sin_family = AF_INET;
-		sa.sa_inet.sin_port = htons(port);
-		sock_len = sizeof(sa.sa_inet);
-
-		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
-			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
-		} else {
-			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
-			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
-				struct hostent *hep;
-
-				hep = gethostbyname(host);
-				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
-					fprintf(stderr, "Cannot resolve host name '%s'!\n", host);
-					return -1;
-				} else if (hep->h_addr_list[1]) {
-					fprintf(stderr, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
-					return -1;
-				}
-				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
-			}
-		}
-	} else {
-#ifdef _WIN32
-		SECURITY_DESCRIPTOR  sd;
-		SECURITY_ATTRIBUTES  saw;
-		PACL                 acl;
-		HANDLE namedPipe;
-
-		memset(&sa, 0, sizeof(saw));
-		saw.nLength = sizeof(saw);
-		saw.bInheritHandle = FALSE;
-		acl = prepare_named_pipe_acl(&sd, &saw);
-
-		namedPipe = CreateNamedPipe(path,
-			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE,
-			PIPE_UNLIMITED_INSTANCES,
-			8192, 8192, 0, &saw);
-		if (namedPipe == INVALID_HANDLE_VALUE) {
-			return -1;
-		}		
-		listen_socket = _open_osfhandle((long)namedPipe, 0);
-		if (!is_initialized) {
-			fcgi_init();
-		}
-		is_fastcgi = 1;
-		return listen_socket;
-
-#else
-		int path_len = strlen(path);
-
-		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
-			fprintf(stderr, "Listening socket's path name is too long.\n");
-			return -1;
-		}
-
-		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
-		sa.sa_unix.sun_family = AF_UNIX;
-		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
-#ifdef HAVE_SOCKADDR_UN_SUN_LEN
-		sa.sa_unix.sun_len = sock_len;
-#endif
-		unlink(path);
-#endif
-	}
-
-	/* Create, bind socket and start listen on it */
-	if ((listen_socket = socket(sa.sa.sa_family, SOCK_STREAM, 0)) < 0 ||
-#ifdef SO_REUSEADDR
-	    setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) < 0 ||
-#endif
-	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
-	    listen(listen_socket, backlog) < 0) {
-
-		fprintf(stderr, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
-		return -1;
-	}
-
-	if (!tcp) {
-		chmod(path, 0777);
-	} else {
-		fcgi_set_allowed_clients(getenv("FCGI_WEB_SERVER_ADDRS"));
-	}
-
-	if (!is_initialized) {
-		fcgi_init();
-	}
-	is_fastcgi = 1;
-
-#ifdef _WIN32
-	if (tcp) {
-		listen_socket = _open_osfhandle((long)listen_socket, 0);
-	}
-#else
-	fcgi_setup_signals();
-#endif
-	return listen_socket;
 }
 
 void fcgi_init_request(fcgi_request *req, int listen_socket)
@@ -1139,36 +916,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	if (req->out_hdr && req->out_hdr->type != type) {
 		close_packet(req);
 	}
-#if 0
-	/* Unoptimized, but clear version */
-	rest = len;
-	while (rest > 0) {
-		limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
 
-		if (!req->out_hdr) {
-			if (limit < sizeof(fcgi_header)) {
-				if (!fcgi_flush(req, 0)) {
-					return -1;
-				}
-			}
-			open_packet(req, type);
-		}
-		limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
-		if (rest < limit) {
-			memcpy(req->out_pos, str, rest);
-			req->out_pos += rest;
-			return len;
-		} else {
-			memcpy(req->out_pos, str, limit);
-			req->out_pos += limit;
-			rest -= limit;
-			str += limit;
-			if (!fcgi_flush(req, 0)) {
-				return -1;
-			}
-		}
-	}
-#else
 	/* Optimized version */
 	limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
 	if (!req->out_hdr) {
@@ -1236,7 +984,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 			req->out_pos += rest;
 		}
 	}
-#endif
+
 	return len;
 }
 
@@ -1282,18 +1030,6 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 	}
 	return NULL;
 }
-
-#ifdef _WIN32
-void fcgi_impersonate(void)
-{
-	char *os_name;
-
-	os_name = getenv("OS");
-	if (os_name && stricmp(os_name, "Windows_NT") == 0) {
-		is_impersonate = 1;
-	}
-}
-#endif
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {

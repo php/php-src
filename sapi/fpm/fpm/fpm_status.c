@@ -123,37 +123,6 @@ void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int
 }
 /* }}} */
 
-int fpm_status_get(int *idle, int *active, int *total, int *pm) /* {{{ */
-{
-	struct fpm_status_s status;
-	if (!fpm_status_shm || !fpm_status_shm->mem) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to access status shared memory", fpm_status_pool);
-		return 0;
-	}
-	if (!idle || !active || !total) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to get status information : pointers are NULL", fpm_status_pool);
-		return 0;
-	}
-
-	/* one shot operation */
-	status = *(struct fpm_status_s *)fpm_status_shm->mem;
-
-	if (idle) {
-		*idle = status.idle;
-	}
-	if (active) {
-		*active = status.active;
-	}
-	if (total) {
-		*total = status.total;
-	}
-	if (pm) {
-		*pm = status.pm;
-	}
-	return 1;
-}
-/* }}} */
-
 static void fpm_status_handle_status_txt(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
 {
 	if (!status || !output || !content_type) {
