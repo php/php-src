@@ -3313,6 +3313,7 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
 void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 {
+	zend_literal *literals_copy;
 	zend_compiled_variable *dupvars;
 	zend_op *opcode_copy;
 	int i;
@@ -3383,14 +3384,13 @@ void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
 		fe->op_array.arg_info = tmpArginfo;
 	}
 
-	fe->op_array.doc_comment = estrndup(fe->op_array.doc_comment,
-                                      fe->op_array.doc_comment_len);
+	fe->op_array.doc_comment = estrndup(fe->op_array.doc_comment, fe->op_array.doc_comment_len);
 	fe->op_array.try_catch_array = (zend_try_catch_element*)estrndup((char*)fe->op_array.try_catch_array, sizeof(zend_try_catch_element) * fe->op_array.last_try_catch);
 
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
   
 	/* TODO: check whether there is something similar and whether that is ok */
-	zend_literal* literals_copy = (zend_literal*)emalloc(fe->op_array.size_literal * sizeof(zend_literal));
+	literals_copy = (zend_literal*)emalloc(fe->op_array.size_literal * sizeof(zend_literal));
   
 	for (i = 0; i < fe->op_array.size_literal; i++) {
 		literals_copy[i] = fe->op_array.literals[i];
@@ -3470,6 +3470,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 	unsigned int lcname_len;
 	unsigned int fnname_len;
 	zend_function fn_copy;
+	void* dummy;
 
 	size_t i = 0;
 	target = va_arg(args, HashTable*);
@@ -3513,7 +3514,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 
 	lcname_len = strlen(fn->common.function_name);
 	lcname = zend_str_tolower_dup(fn->common.function_name, fnname_len);
-	void* dummy;
+
 	if (zend_hash_find(exclude_table, lcname, lcname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
@@ -3530,6 +3531,8 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
                                    aliases[i]->trait_method->mname_len,
                                    fn->common.function_name, fnname_len) == 0)) {
 					if (aliases[i]->alias) {
+						zend_uint lcname2_len;
+						char* lcname2;
 						zend_function fn_copy2 = *fn;
 						php_runkit_function_copy_ctor(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
@@ -3540,8 +3543,8 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 							}
 						}
 
-						zend_uint lcname2_len = aliases[i]->alias_len;
-						char* lcname2 = zend_str_tolower_dup(aliases[i]->alias, lcname2_len);
+						lcname2_len = aliases[i]->alias_len;
+						lcname2 = zend_str_tolower_dup(aliases[i]->alias, lcname2_len);
 
 						if (zend_hash_add(target, lcname2, lcname2_len+1, &fn_copy2, sizeof(zend_function), NULL)==FAILURE) {
 							zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name\n",
@@ -4442,15 +4445,16 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 	 * The only difference will be a combined handling of them in the end.
 	 * Thus, we need another opcode here. */
 	if (ce->num_traits > 0) {
+		zend_op *opline;
+
 		ce->traits = NULL;
 		ce->num_traits = 0;
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
 
 		/* opcode generation: */
-		zend_op *opline;
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_BIND_TRAITS;
-    SET_NODE(opline->op1, &CG(implementing_class));
+		SET_NODE(opline->op1, &CG(implementing_class));
 	}
 
 	CG(active_class_entry) = NULL;
