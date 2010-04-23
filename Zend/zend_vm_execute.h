@@ -685,8 +685,9 @@ static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
-	zend_class_entry *trait = zend_fetch_class(Z_STRVAL_P(opline->op2.zv),
+	zend_class_entry *trait = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv),
                                              Z_STRLEN_P(opline->op2.zv),
+                                             opline->op2.literal + 1,
                                              opline->extended_value TSRMLS_CC);
 
 	if (trait) {
