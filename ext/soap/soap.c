@@ -1531,6 +1531,7 @@ PHP_METHOD(SoapServer, handle)
 				doc_request = soap_xmlParseMemory(post_data, post_data_length);
 			}
 		} else {
+			zval_ptr_dtor(&retval);
 			return;
 		}
 	} else {
