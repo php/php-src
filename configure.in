@@ -901,6 +901,23 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
 fi
 
+dnl ## DTRACE CHECHKS
+dnl ## this needs to be done before SAPI configureation
+PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
+[  --enable-dtrace         Enable DTrace support], no, no)
+
+dnl ## DTRACE CHECHKS
+dnl ## this needs to be done before SAPI configureation
+if test "$PHP_DTRACE" = "yes"; then
+  AC_CHECK_HEADERS([sys/sdt.h],
+    [PHP_ADD_DTRACE([Zend/zend_dtrace.d], [main/main.c, Zend/zend_API.c \
+       Zend/zend_execute.c Zend/zend_exceptions.c \
+       Zend/zend_dtrace.c Zend/zend.c])
+     AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
+     PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h])],
+    [])
+fi
+
 AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE(fd-setsize,,
 [  --enable-fd-setsize     Set size of descriptor sets], no, no)
@@ -1227,6 +1244,7 @@ PHP_SUBST(PHP_EXECUTABLE)
 PHP_SUBST(PHP_CLI_TARGET)
 PHP_SUBST(PHP_SAPI_OBJS)
 PHP_SUBST(PHP_CLI_OBJS)
+PHP_SUBST(PHP_DTRACE_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
 PHP_SUBST(PHP_MODULES)
@@ -1417,7 +1435,7 @@ esac
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
+    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
@@ -1448,6 +1466,13 @@ PHP_ADD_BUILD_DIR(Zend)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
+
+if test "$PHP_DTRACE" = "yes"; then
+  case $host_alias in
+    *solaris*)
+      PHP_GENERATE_DTRACE([Zend/zend_dtrace.d],$php_build_target);;
+  esac
+fi
 
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE

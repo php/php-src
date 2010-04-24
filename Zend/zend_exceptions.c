@@ -27,6 +27,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
 zend_class_entry *default_exception_ce;
 zend_class_entry *error_exception_ce;
@@ -82,6 +83,14 @@ void zend_exception_restore(TSRMLS_D) /* {{{ */
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
+#ifdef HAVE_DTRACE
+	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
+		char *classname;
+		int name_len;
+		zend_get_object_classname(exception, &classname, &name_len);
+		DTRACE_EXCEPTION_THROWN(classname);
+	}
+
 	if (exception != NULL) {
 		zval *previous = EG(exception);
 		zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
@@ -93,6 +102,7 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 	if (!EG(current_execute_data)) {
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
 	}
+#endif /* HAVE_DTRACE */
 
 	if (zend_throw_exception_hook) {
 		zend_throw_exception_hook(exception TSRMLS_CC);

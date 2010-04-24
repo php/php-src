@@ -4830,6 +4830,13 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 	catch_ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC);
 	ce = Z_OBJCE_P(EG(exception));
+
+#ifdef HAVE_DTRACE
+	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
+		DTRACE_EXCEPTION_CAUGHT(ce->name);
+	}
+#endif /* HAVE_DTRACE */
+
 	if (ce != catch_ce) {
 		if (!instanceof_function(ce, catch_ce TSRMLS_CC)) {
 			if (opline->result.num) {

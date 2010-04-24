@@ -29,6 +29,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -636,10 +637,17 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	zend_getenv = utility_functions->getenv_function;
 	zend_resolve_path = utility_functions->resolve_path_function;
 
+#if HAVE_DTRACE
+/* build with dtrace support */
+	zend_compile_file = dtrace_compile_file;
+	zend_execute = dtrace_execute;
+	zend_execute_internal = dtrace_execute_internal;
+#else
 	zend_compile_file = compile_file;
-	zend_compile_string = compile_string;
 	zend_execute = execute;
 	zend_execute_internal = NULL;
+#endif /* HAVE_SYS_SDT_H */
+	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
 
 	zend_init_opcodes_handlers();
@@ -971,6 +979,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	uint error_lineno;
 	zval *orig_user_error_handler;
 	zend_bool in_compilation;
+	char dtrace_error_buffer[1024];
 	zend_class_entry *saved_class_entry;
 	TSRMLS_FETCH();
 
@@ -1015,6 +1024,15 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	}
 
 	va_start(args, format);
+
+#ifdef HAVE_DTRACE
+	if(DTRACE_ERROR_ENABLED()) {
+		char *dtrace_error_buffer;
+		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
+		DTRACE_ERROR(dtrace_error_buffer, error_filename, error_lineno);
+		efree(dtrace_error_buffer);
+	}
+#endif /* HAVE_DTRACE */
 
 	/* if we don't have a user defined error handler */
 	if (!EG(user_error_handler)

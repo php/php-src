@@ -2877,3 +2877,58 @@ main()
   fi
 ])
 
+dnl
+dnl Generate dtrace targets
+dnl
+AC_DEFUN([PHP_GENERATE_DTRACE],[
+  old_IFS=[$]IFS
+  IFS=.
+  set $ac_src
+  IFS=$old_IFS
+  build_target=$2
+  PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS $1.o"
+  for src in $PHP_DTRACE_OBJS; do
+    case [$]build_target in
+      program|static)
+        obj="$obj `dirname $src`/`basename $src | sed 's,\.lo$,.o,'` " ;;
+      *)
+        obj="$obj `dirname $src`/.libs/`basename $src | sed 's,\.lo$,.o,'` " ;;
+    esac
+  done
+
+  cat >>Makefile.objects<<EOF
+$1.o: \$(PHP_DTRACE_OBJS)
+	dtrace -G -o $1.o -s $1 $obj
+EOF
+
+])
+
+dnl
+dnl Link given source files with dtrace
+dnl PHP_ADD_DTRACE(providerdesc, sources, module)
+dnl
+AC_DEFUN([PHP_ADD_DTRACE],[
+   case "$3" in
+    ""[)] unset ac_bdir;;
+    /*[)] ac_bdir=$ac_srcdir;;
+    *[)] extdir=PHP_EXT_DIR($3); ac_bdir="$extdir/";;
+    esac
+  old_IFS=[$]IFS
+  for ac_src in $2; do
+    IFS=.
+    set $ac_src
+    ac_obj=[$]1
+    IFS=$old_IFS
+
+    PHP_DTRACE_OBJS="[$]PHP_DTRACE_OBJS [$]ac_bdir[$]ac_obj.lo"
+  done;
+])
+
+dnl
+dnl Generate platform specific dtrace header
+dnl
+AC_DEFUN([PHP_INIT_DTRACE], [
+  dtrace -h -C -s $1 -o $2
+  $SED -ibak 's,PHP_,DTRACE_,g' $2
+])
+
