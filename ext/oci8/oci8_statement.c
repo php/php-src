@@ -1457,6 +1457,9 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->bind = NULL;
 	bindp->zval = var;
 	bindp->array.type = type;
+	bindp->indicator = 0;  		/* not used for array binds */
+	bindp->type = 0; 			/* not used for array binds */
+
 	zval_add_ref(&var);
 
 	PHP_OCI_CALL_RETURN(statement->errcode,
