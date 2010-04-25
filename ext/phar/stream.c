@@ -108,7 +108,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 		}
 		if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
 			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by ini setting (phar.readonly)");
 			}
 			php_url_free(resource);
 			return NULL;
@@ -727,7 +727,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	}
 	if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by ini setting (phar.readonly)");
 		return 0;
 	}
 

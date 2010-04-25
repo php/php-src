@@ -1369,7 +1369,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	if (PHAR_G(readonly) && !is_data) {
 		if (options & REPORT_ERRORS) {
 			if (error) {
-				spprintf(error, 0, "creating archive \"%s\" disabled by INI setting", fname);
+				spprintf(error, 0, "creating archive \"%s\" disabled by ini setting (phar.readonly)", fname);
 			}
 		}
 		return FAILURE;
