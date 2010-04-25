@@ -979,7 +979,6 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	uint error_lineno;
 	zval *orig_user_error_handler;
 	zend_bool in_compilation;
-	char dtrace_error_buffer[1024];
 	zend_class_entry *saved_class_entry;
 	TSRMLS_FETCH();
 
