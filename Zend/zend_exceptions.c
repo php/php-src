@@ -90,6 +90,7 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		zend_get_object_classname(exception, &classname, &name_len);
 		DTRACE_EXCEPTION_THROWN(classname);
 	}
+#endif /* HAVE_DTRACE */
 
 	if (exception != NULL) {
 		zval *previous = EG(exception);
@@ -102,7 +103,6 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 	if (!EG(current_execute_data)) {
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
 	}
-#endif /* HAVE_DTRACE */
 
 	if (zend_throw_exception_hook) {
 		zend_throw_exception_hook(exception TSRMLS_CC);
