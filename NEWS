@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   (Pierre)
 - Fixed bug #51627 (script path not correctly evaluated).
   (russell dot tempero at rightnow dot com)
+- Fixed bug #51624 (Crash when calling mysqli_options()). (Felipe)
 - Fixed bug #51615 (PHP crash with wrong HTML in SimpleXML). (Felipe)
 - Fixed bug #51609 (pg_copy_to: Invalid results when using fourth parameter).
   (Felipe)
