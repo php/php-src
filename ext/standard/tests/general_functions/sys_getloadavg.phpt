@@ -16,7 +16,6 @@ echo "Done\n";
 
 Warning: sys_getloadavg() expects exactly 0 parameters, %d given in %s
 NULL
-
 array(3) {
   [0]=>
   float(%f)
@@ -25,5 +24,4 @@ array(3) {
   [2]=>
   float(%f)
 }
-
 Done
