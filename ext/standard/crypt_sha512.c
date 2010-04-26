@@ -53,6 +53,11 @@ extern char * __php_stpncpy(char *dst, const char *src, size_t len);
 # define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+/* See #51582 */
+#ifndef UINT64_C
+# define UINT64_C(value) __CONCAT(value, ULL)
+#endif
+
 /* Structure to save state of computation between the single steps.  */
 struct sha512_ctx
 {
