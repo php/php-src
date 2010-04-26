@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Reset error state in PDO::beginTransaction() reset error state. (Ilia)
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
+- Fixed handling of session variable serialization on certain prefix
+  characters. Reported by Stefan Esser (Ilia)
 
 - Fixed bug #51629 (CURLOPT_FOLLOWLOCATION error message is misleading).
   (Pierre)
