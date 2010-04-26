@@ -102,7 +102,11 @@ MYSQLND_METHOD(mysqlnd_net, network_write)(MYSQLND * const conn, const zend_ucha
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const scheme, size_t scheme_len, zend_bool persistent, char **errstr, int * errcode TSRMLS_DC)
 {
+#if PHP_API_VERSION < 20100412
 	unsigned int streams_options = ENFORCE_SAFE_MODE;
+#else
+	unsigned int streams_options = 0;
+#endif
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	char * hashed_details = NULL;
 	int hashed_details_len = 0;

@@ -664,7 +664,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		/* disable local infile option for open_basedir */
+#if PHP_API_VERSION < 20100412
 		if (((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode)) && (client_flags & CLIENT_LOCAL_FILES)) {
+#else
+		if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') && (client_flags & CLIENT_LOCAL_FILES)) {
+#endif
 			client_flags ^= CLIENT_LOCAL_FILES;
 		}
 

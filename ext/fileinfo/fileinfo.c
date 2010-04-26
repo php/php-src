@@ -167,7 +167,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-function_entry finfo_class_functions[] = {
+zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -201,7 +201,7 @@ void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-function_entry fileinfo_functions[] = {
+zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
@@ -297,7 +297,11 @@ PHP_FUNCTION(finfo_open)
 		}
 		file = resolved_path;
 
+#if PHP_API_VERSION < 20100412
 		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
+#else
+		if (php_check_open_basedir(file TSRMLS_CC)) {
+#endif
 			RETURN_FALSE;
 		}
 	}
@@ -492,8 +496,11 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 			if (wrap) {
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
-
+#if PHP_API_VERSION < 20100412
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+#else
+				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
+#endif
 
 				if (!stream) {
 					RETVAL_FALSE;

@@ -587,7 +587,11 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
+#if PHP_API_VERSION < 20100412
 	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl TSRMLS_CC)) {
+#else
+	if (php_check_open_basedir(pwl TSRMLS_CC)) {
+#endif
 		RETURN_FALSE;
 	}
 
