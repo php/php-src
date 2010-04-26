@@ -39,7 +39,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "safe_mode.h"
 #include "php_link.h"
 #include "php_string.h"
 
@@ -91,7 +90,7 @@ PHP_FUNCTION(readlink)
 		return;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(link)) {
+	if (php_check_open_basedir(link TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	if (!expand_filepath(link, path_resolved TSRMLS_CC)) {
@@ -209,11 +208,11 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(dest_p)) {
+	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(source_p)) {
+	if (php_check_open_basedir(source_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -264,11 +263,11 @@ PHP_FUNCTION(link)
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(source_p)) {
+	if (php_check_open_basedir(source_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(dest_p)) {
+	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 

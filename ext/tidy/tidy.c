@@ -29,7 +29,6 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "safe_mode.h"
 
 #include "tidy.h"
 #include "buffio.h"
@@ -74,7 +73,7 @@
             _php_tidy_apply_config_array(_doc, HASH_OF(*_val) TSRMLS_CC); \
         } else { \
             convert_to_string_ex(_val); \
-            TIDY_SAFE_MODE_CHECK(Z_STRVAL_PP(_val)); \
+            TIDY_OPEN_BASE_DIR_CHECK(Z_STRVAL_PP(_val)); \
             switch (tidyLoadConfig(_doc, Z_STRVAL_PP(_val))) { \
               case -1: \
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_PP(_val)); \
@@ -156,8 +155,8 @@
        zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
    }
 
-#define TIDY_SAFE_MODE_CHECK(filename) \
-if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) { \
+#define TIDY_OPEN_BASE_DIR_CHECK(filename) \
+if (php_check_open_basedir(filename TSRMLS_CC)) { \
 	RETURN_FALSE; \
 } \
 
@@ -641,7 +640,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, in
 	php_stream *stream;
 	char *data = NULL;
 
-	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE, NULL))) {
+	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0), NULL))) {
 		return NULL;
 	}
 	if ((*len = (int) php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) == 0) {

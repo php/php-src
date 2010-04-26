@@ -1131,7 +1131,7 @@ cdf_dump_property_info(const cdf_property_info_t *info, size_t count)
 			break;
 		case CDF_FILETIME:
 			tp = info[i].pi_tp;
-#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
+#if defined(PHP_WIN32) && _MSC_VER <= 1500
 		if (tp < 1000000000000000i64) {
 #else
 			if (tp < 1000000000000000LL) {

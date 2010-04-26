@@ -1215,10 +1215,8 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(IMAPG(imap_password));
 	}
 
-	/* local filename, need to perform open_basedir and safe_mode checks */
-	if (mailbox[0] != '{' &&
-			(php_check_open_basedir(mailbox TSRMLS_CC) ||
-			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
+	/* local filename, need to perform open_basedir check */
+	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1292,10 +1290,8 @@ PHP_FUNCTION(imap_reopen)
 		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
 	}
 #endif
-	/* local filename, need to perform open_basedir and safe_mode checks */
-	if (mailbox[0] != '{' &&
-			(php_check_open_basedir(mailbox TSRMLS_CC) ||
-			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
+	/* local filename, need to perform open_basedir check */
+	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -2394,7 +2390,7 @@ PHP_FUNCTION(imap_savebody)
 
 		default:
 			convert_to_string_ex(out);
-			writer = php_stream_open_wrapper(Z_STRVAL_PP(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+			writer = php_stream_open_wrapper(Z_STRVAL_PP(out), "wb", REPORT_ERRORS, NULL);
 		break;
 	}
 

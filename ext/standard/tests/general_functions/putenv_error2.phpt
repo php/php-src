@@ -5,6 +5,8 @@ Brian DeShong <brian@deshong.net>
 --INI--
 safe_mode=1
 safe_mode_protected_env_vars=FOO,BAZ
+--SKIPIF--
+<?php if (PHP_VERSION_ID < 503099) { die('SKIP Safe mode is no longer available'); } ?>
 --FILE--
 <?php
 putenv('FOO=bar');

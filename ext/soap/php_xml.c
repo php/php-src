@@ -179,7 +179,7 @@ int php_stream_xmlIO_match_wrapper(const char *filename)
 void *php_stream_xmlIO_open_wrapper(const char *filename)
 {
 	TSRMLS_FETCH();
-	return php_stream_open_wrapper((char*)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	return php_stream_open_wrapper((char*)filename, "rb", REPORT_ERRORS, NULL);
 }
 
 int php_stream_xmlIO_read(void *context, char *buffer, int len)

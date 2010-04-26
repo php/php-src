@@ -272,7 +272,7 @@ PHP_MINFO_FUNCTION(apache)
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
 		for (i = 0; i < env_arr->nelts; ++i) {
-			if (env[i].key && (!PG(safe_mode) || (PG(safe_mode) && strncasecmp(env[i].key, "authorization", 13)))) {
+			if (env[i].key) {
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
@@ -401,9 +401,7 @@ PHP_FUNCTION(apache_request_headers)
 	env_arr = table_elts(((request_rec *) SG(server_context))->headers_in);
 	tenv = (table_entry *)env_arr->elts;
 	for (i = 0; i < env_arr->nelts; ++i) {
-		if (!tenv[i].key ||
-			(PG(safe_mode) &&
-			 !strncasecmp(tenv[i].key, "authorization", 13))) {
+		if (!tenv[i].key) {
 			continue;
 		}
 		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
@@ -594,11 +592,6 @@ PHP_FUNCTION(apache_get_modules)
    Reset the Apache write timer */
 PHP_FUNCTION(apache_reset_timeout)
 {
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot reset the Apache timeout in safe mode");
-		RETURN_FALSE;
-	}
-
 	ap_reset_timeout((request_rec *)SG(server_context));
 	RETURN_TRUE;
 }

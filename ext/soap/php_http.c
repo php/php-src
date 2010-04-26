@@ -118,7 +118,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
 
 	stream = php_stream_xport_create(name, namelen,
-		ENFORCE_SAFE_MODE | REPORT_ERRORS,
+		REPORT_ERRORS,
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
 		timeout,

@@ -35,12 +35,13 @@
   is present at compile time. (Rasmus)
 
 - Removed legacy features:
+  . allow_call_time_pass_reference. (Pierrick)
   . define_syslog_variables ini option and its associated function. (Kalle)
   . highlight.bg ini option. (Kalle)
   . import_request_variables(). (Kalle)
   . register_globals. (Kalle)
-  . allow_call_time_pass_reference. (Pierrick)
   . register_long_arrays ini option. (Kalle)
+  . Safe mode. (Kalle)
   . Session bug compatibility mode (session.bug_compat42 and 
     session.bug_compat_warn ini options). (Kalle)
   . session_is_registered(), session_register() and session_unregister() 

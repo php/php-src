@@ -1296,13 +1296,6 @@ PHP_FUNCTION(odbc_execute)
 				filename = estrndup(&Z_STRVAL_PP(tmp)[1], Z_STRLEN_PP(tmp) - 2);
 				filename[strlen(filename)] = '\0';
 
-				/* Check for safe mode. */
-				if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-					efree(filename);
-					efree(params);
-					RETURN_FALSE;
-				}
-
 				/* Check the basedir */
 				if (php_check_open_basedir(filename TSRMLS_CC)) {
 					efree(filename);

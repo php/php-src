@@ -26,7 +26,6 @@ if ($socket == "" && $host != NULL && $host != 'localhost' && $host != '.') {
 }
 ?>
 --INI--
-safe_mode=0
 open_basedir="."
 --FILE--
 <?php

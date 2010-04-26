@@ -386,8 +386,7 @@ CPH_METHOD(SaveToFile)
 				RETURN_FALSE;
 			}
 	
-			if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || 
-					php_check_open_basedir(fullpath TSRMLS_CC)) {
+			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 				efree(fullpath);
 				RETURN_FALSE;
 			}
@@ -449,8 +448,7 @@ CPH_METHOD(LoadFromFile)
 			RETURN_FALSE;
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			RETURN_FALSE;
 		}

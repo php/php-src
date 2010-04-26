@@ -1754,7 +1754,7 @@ phar_spl_fileinfo:
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned a path \"%s\" that safe mode prevents opening", ce->name, fname);
 
@@ -3943,7 +3943,7 @@ PHP_METHOD(Phar, addFile)
 		return;
 	}
 
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: unable to open file \"%s\" to add to phar archive, safe_mode restrictions prevent this", fname);
 		return;
@@ -4187,11 +4187,11 @@ PHP_METHOD(Phar, delMetadata)
 	}
 }
 /* }}} */
-#if (PHP_MAJOR_VERSION < 6)
-#define OPENBASEDIR_CHECKPATH(filename) \
+#if PHP_API_VERSION < 20100412
+#define PHAR_OPENBASEDIR_CHECKPATH(filename) \
 	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
 #else
-#define OPENBASEDIR_CHECKPATH(filename) \
+#define PHAR_OPENBASEDIR_CHECKPATH(filename) \
 	php_check_open_basedir(filename TSRMLS_CC)
 #endif
 
@@ -4235,7 +4235,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return FAILURE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(fullpath)) {
+	if (PHAR_OPENBASEDIR_CHECKPATH(fullpath)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", entry->filename, fullpath);
 		efree(fullpath);
 		return FAILURE;
@@ -4285,7 +4285,11 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return SUCCESS;
 	}
 
+#if PHP_API_VERSION < 20100412
 	fp = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+	fp = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
+#endif
 
 	if (!fp) {
 		spprintf(error, 4096, "Cannot extract \"%s\", could not open for writing \"%s\"", entry->filename, fullpath);

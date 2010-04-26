@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "php_string.h"
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
@@ -153,33 +152,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				if (string_length == 0) {
 					continue;
 				}
-				if (PG(safe_mode)) {
-					/* Check the protected list */
-					if (zend_hash_exists(&BG(sm_protected_env_vars), string_key, string_length - 1)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot override protected environment variable '%s'", string_key);
-						return env;
-					}
-					/* Check the allowed list */
-					if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
-						char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
-						char *strtok_buf = NULL;
-						char *allowed_prefix = php_strtok_r(allowed_env_vars, ", ", &strtok_buf);
-						zend_bool allowed = 0;
-
-						while (allowed_prefix) {
-							if (!strncmp(allowed_prefix, string_key, strlen(allowed_prefix))) {
-								allowed = 1;
-								break;
-							}
-							allowed_prefix = php_strtok_r(NULL, ", ", &strtok_buf);
-						}
-						efree(allowed_env_vars);
-						if (!allowed) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", string_key);
-							return env;
-						}
-					}
-				}
 
 				l = string_length + el_len + 1;
 				memcpy(p, string_key, string_length);
@@ -275,53 +247,6 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 	
-}
-/* }}} */
-
-/* {{{ php_make_safe_mode_command */
-static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persistent TSRMLS_DC)
-{
-	int lcmd, larg0;
-	char *space, *sep, *arg0;
-
-	if (!PG(safe_mode)) {
-		*safecmd = pestrdup(cmd, is_persistent);
-		return SUCCESS;
-	}
-
-	lcmd = strlen(cmd);
-
-	arg0 = estrndup(cmd, lcmd);
-
-	space = memchr(arg0, ' ', lcmd);
-	if (space) {
-		*space = '\0';
-		larg0 = space - arg0;
-	} else {
-		larg0 = lcmd;
-	}
-
-	if (php_memnstr(arg0, "..", sizeof("..")-1, arg0 + larg0)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-		efree(arg0);
-		return FAILURE;
-	}
-
-	sep = zend_memrchr(arg0, PHP_DIR_SEPARATOR, larg0);
-
-	spprintf(safecmd, 0, "%s%s%s%s", PG(safe_mode_exec_dir), (sep ? sep : "/"), (sep ? "" : arg0), (space ? cmd + larg0 : ""));
-
-	efree(arg0);
-	arg0 = php_escape_shell_cmd(*safecmd);
-	efree(*safecmd);
-	if (is_persistent) {
-		*safecmd = pestrdup(arg0, 1);
-		efree(arg0);
-	} else {
-		*safecmd = arg0;
-	}
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -541,9 +466,7 @@ PHP_FUNCTION(proc_open)
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == php_make_safe_mode_command(command, &command, is_persistent TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
+	command = pestrdup(command, is_persistent);
 
 #ifdef PHP_WIN32
 	if (other_options) {
@@ -695,7 +618,7 @@ PHP_FUNCTION(proc_open)
 
 				/* try a wrapper */
 				stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), Z_STRVAL_PP(zmode),
-						ENFORCE_SAFE_MODE|REPORT_ERRORS|STREAM_WILL_CAST, NULL);
+						REPORT_ERRORS|STREAM_WILL_CAST, NULL);
 
 				/* force into an fd */
 				if (stream == NULL || FAILURE == php_stream_cast(stream,

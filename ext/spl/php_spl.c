@@ -231,7 +231,7 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 
 	class_file_len = spprintf(&class_file, 0, "%s%s", lc_name, file_extension);
 
-	ret = php_stream_open_for_zend_ex(class_file, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+	ret = php_stream_open_for_zend_ex(class_file, &file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 
 	if (ret == SUCCESS) {
 		if (!file_handle.opened_path) {

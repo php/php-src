@@ -479,7 +479,6 @@ END_EXTERN_C()
 #define IGNORE_PATH                     0x00000000
 #define USE_PATH                        0x00000001
 #define IGNORE_URL                      0x00000002
-#define ENFORCE_SAFE_MODE               0x00000004
 #define REPORT_ERRORS                   0x00000008
 
 /* If you don't need to write to the stream, but really need to

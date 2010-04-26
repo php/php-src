@@ -31,7 +31,6 @@
 #endif
 
 #include "php_globals.h"
-#include "safe_mode.h"
 
 
 /* Implementation of the language Header() function */

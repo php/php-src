@@ -10,7 +10,7 @@
    | http://www.php.net/license/3_01.txt                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | license@php.net so we can mail you 6 copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Sterling Hughes <sterling@php.net>                           |
    +----------------------------------------------------------------------+
@@ -169,8 +169,8 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len TSRM
 #if LIBCURL_VERSION_NUM < 0x071100
 	char *copystr = NULL;
 #endif
-	/* Disable file:// if open_basedir or safe_mode are used */
-	if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+	/* Disable file:// if open_basedir are used */
+	if (PG(open_basedir) && *PG(open_basedir)) {
 #if LIBCURL_VERSION_NUM >= 0x071304
 		error = curl_easy_setopt(ch->cp, CURLOPT_PROTOCOLS, CURLPROTO_ALL & ~CURLPROTO_FILE);
 #else
@@ -1664,8 +1664,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			convert_to_long_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
-				((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when in safe_mode or an open_basedir is set");
+				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 			}
@@ -1674,9 +1674,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			break;
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
-			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when safe_mode is enabled or an open_basedir is set");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 				}
@@ -1728,7 +1728,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				option == CURLOPT_SSH_PUBLIC_KEYFILE || option == CURLOPT_SSH_PRIVATE_KEYFILE
 
 			) {
-				if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+				if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
 					RETVAL_FALSE;
 					return 1;
 				}
@@ -1938,8 +1938,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 						if ((filename = php_memnstr(postval, ";filename=", sizeof(";filename=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*filename = '\0';
 						}
-						/* safe_mode / open_basedir check */
-						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+						/* open_basedir check */
+						if (php_check_open_basedir(postval TSRMLS_CC)) {
 							RETVAL_FALSE;
 							return 1;
 						}
@@ -2028,8 +2028,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			break;
 		}
-		/* the following options deal with files, therefor safe_mode & open_basedir checks
-		 * are required.
+		/* the following options deal with files, therefore the open_basedir check
+		 * is required.
 		 */
 		case CURLOPT_COOKIEJAR:
 		case CURLOPT_SSLCERT:
@@ -2041,7 +2041,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 			convert_to_string_ex(zvalue);
 
-			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
 				RETVAL_FALSE;
 				return 1;
 			}

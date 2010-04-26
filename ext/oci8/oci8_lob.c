@@ -724,7 +724,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 	char buf[8192];
 	ub4 offset = 1;
 	
-	if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		return 1;
 	}
 	

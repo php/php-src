@@ -215,7 +215,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 	
-	dirp = php_stream_opendir(dirname, ENFORCE_SAFE_MODE|REPORT_ERRORS, context);
+	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
 
 	if (dirp == NULL) {
 		RETURN_FALSE;
@@ -319,7 +319,7 @@ PHP_FUNCTION(chdir)
 		RETURN_FALSE;
 	}
 
-	if ((PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir(str TSRMLS_CC)) {
+	if (php_check_open_basedir(str TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ret = VCWD_CHDIR(str);
@@ -481,7 +481,7 @@ PHP_FUNCTION(glob)
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 no_results:
-		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
 			struct stat s;
 
 			if (0 != VCWD_STAT(pattern, &s) || S_IFDIR != (s.st_mode & S_IFMT)) {
@@ -494,11 +494,8 @@ no_results:
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
-			if (PG(safe_mode) && (!php_checkuid_ex(globbuf.gl_pathv[n], NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS))) {
-				basedir_limit = 1;
-				continue;
-			} else if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
+			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
 				basedir_limit = 1;
 				continue;
 			}

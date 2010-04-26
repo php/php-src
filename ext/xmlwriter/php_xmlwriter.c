@@ -679,7 +679,7 @@ static void *php_xmlwriter_streams_IO_open_write_wrapper(const char *filename TS
 	php_stream_wrapper *wrapper = NULL;
 	void *ret_val = NULL;
 
-	ret_val = php_stream_open_wrapper_ex((char *)filename, "wb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, NULL);
+	ret_val = php_stream_open_wrapper_ex((char *)filename, "wb", REPORT_ERRORS, NULL, NULL);
 	return ret_val;
 }
 /* }}} */

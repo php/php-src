@@ -141,7 +141,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 		RETURN_FALSE;
 	}
 	if (isfilename) {
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, DEFAULT_CONTEXT);
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -219,7 +219,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		RETURN_FALSE;
 	}
 	if (isfilename) {
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, DEFAULT_CONTEXT);
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -453,7 +453,7 @@ PHP_FUNCTION(hash_update_file)
 	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		/* Stream will report errors opening file */
 		RETURN_FALSE;

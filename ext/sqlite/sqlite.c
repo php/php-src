@@ -1066,9 +1066,6 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 		case SQLITE_COPY:
 			if (strncmp(arg4, ":memory:", sizeof(":memory:") - 1)) {
 				TSRMLS_FETCH();
-				if (PG(safe_mode) && (!php_checkuid(arg4, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-					return SQLITE_DENY;
-				}
 
 				if (php_check_open_basedir(arg4 TSRMLS_CC)) {
 					return SQLITE_DENY;
@@ -1079,9 +1076,6 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 		case SQLITE_ATTACH:
 			if (strncmp(arg3, ":memory:", sizeof(":memory:") - 1)) {
 				TSRMLS_FETCH();
-				if (PG(safe_mode) && (!php_checkuid(arg3, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-					return SQLITE_DENY;
-				}
 
 				if (php_check_open_basedir(arg3 TSRMLS_CC)) {
 					return SQLITE_DENY;
@@ -1510,7 +1504,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	/* authorizer hook so we can enforce safe mode
 	 * Note: the declaration of php_sqlite_authorizer is correct for 2.8.2 of libsqlite,
 	 * and IS backwards binary compatible with earlier versions */
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+	if (PG(open_basedir) && *PG(open_basedir)) {
 		sqlite_set_authorizer(sdb, php_sqlite_authorizer, NULL);
 	}
 
@@ -1566,8 +1560,7 @@ PHP_FUNCTION(sqlite_popen)
 			RETURN_FALSE;
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || 
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			RETURN_FALSE;
 		}
@@ -1648,8 +1641,7 @@ PHP_FUNCTION(sqlite_open)
 			}
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			if (object) {
@@ -1697,8 +1689,7 @@ PHP_FUNCTION(sqlite_factory)
 			RETURN_NULL();
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			RETURN_NULL();

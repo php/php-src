@@ -820,28 +820,6 @@ AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
-[  --enable-safe-mode      Enable safe mode by default], no, no)
-
-if test "$PHP_SAFE_MODE" = "yes"; then
-  AC_DEFINE(PHP_SAFE_MODE,1,[ ])
-else
-  AC_DEFINE(PHP_SAFE_MODE,0,[ ])
-fi
-
-AC_MSG_CHECKING([for safe mode exec dir])
-PHP_ARG_WITH(exec-dir,,
-[  --with-exec-dir[=DIR]   Only allow executables in DIR under safe-mode
-                          [/usr/local/php/bin]], no, no)
-
-if test "$PHP_EXEC_DIR" != "no" && test "$PHP_EXEC_DIR" != "yes" ; then
-  AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR, "$PHP_EXEC_DIR", [ ])
-  AC_MSG_RESULT([$PHP_EXEC_DIR])
-else
-  AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR, "/usr/local/php/bin", [ ])
-  AC_MSG_RESULT([/usr/local/php/bin])
-fi
-
 PHP_ARG_ENABLE(sigchild, whether to enable PHP's own SIGCHLD handler,
 [  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
 
@@ -1410,7 +1388,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
-       safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c php_logos.c \

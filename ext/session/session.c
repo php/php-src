@@ -567,10 +567,6 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 			p = new_value;
 		}
 
-		if (PG(safe_mode) && *p && (!php_checkuid(p, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
-		}
-
 		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
 			return FAILURE;
 		}

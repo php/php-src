@@ -184,7 +184,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 		php_basename(path_cleaned, path_cleaned_len, NULL, 0, &file_basename, (size_t *)&file_basename_len TSRMLS_CC);
 
-		if (OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
+		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
 			efree(file_basename);
 			free(new_state.cwd);
@@ -238,7 +238,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	 * is required, does a file can have a different
 	 * safemode status as its parent folder?
 	 */
-	if (OPENBASEDIR_CHECKPATH(fullpath)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
@@ -255,7 +255,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
-#if (PHP_MAJOR_VERSION < 6)
+#if PHP_API_VERSION < 20100412
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
@@ -288,7 +288,7 @@ static int php_zip_add_file(struct zip *za, const char *filename, int filename_l
 	char resolved_path[MAXPATHLEN];
 
 
-	if (OPENBASEDIR_CHECKPATH(filename)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 		return -1;
 	}
 
@@ -530,7 +530,7 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
 	strncpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
-	if (OPENBASEDIR_CHECKPATH(cwd)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(cwd)) {
 		return -1;
 	}
 
@@ -592,7 +592,7 @@ int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *r
 	} 
 #endif
 
-	if (OPENBASEDIR_CHECKPATH(path)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(path)) {
 		return -1;
 	}
 
@@ -1163,7 +1163,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(filename)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 		RETURN_FALSE;
 	}
 
@@ -1452,7 +1452,7 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_FALSE;
 	}
 
-	if (OPENBASEDIR_CHECKPATH(filename)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 		RETURN_FALSE;
 	}
 
