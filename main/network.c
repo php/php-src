@@ -1046,7 +1046,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
 
-	stream = php_stream_xport_create(res, reslen, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+	stream = php_stream_xport_create(res, reslen, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, persistent_id, timeout, NULL, NULL, NULL);
 
 	efree(res);

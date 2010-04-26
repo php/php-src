@@ -1,7 +1,7 @@
 --TEST--
 Test functionality disabled in safe mode
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php if (!extension_loaded('oci8')){ die("skip no oci8 extension"); } if (PHP_VERSION_ID < 503099){ die("skip: safe_mode no longer available"); }  ?>
 --INI--
 safe_mode=On
 oci8.privileged_connect=On

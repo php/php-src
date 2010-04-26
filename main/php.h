@@ -196,8 +196,6 @@ typedef unsigned int socklen_t;
 # endif
 #endif
 
-#include "safe_mode.h"
-
 #ifndef HAVE_STRERROR
 char *strerror(int);
 #endif
@@ -331,6 +329,7 @@ PHPAPI int php_register_internal_extensions(TSRMLS_D);
 PHPAPI int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(TSRMLS_D);
+PHPAPI char *php_get_current_user(void);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */

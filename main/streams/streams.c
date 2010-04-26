@@ -1693,7 +1693,7 @@ PHPAPI int _php_stream_mkdir(char *path, int mode, int options, php_stream_conte
 {
 	php_stream_wrapper *wrapper = NULL;
 
-	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, NULL, 0 TSRMLS_CC);
 	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_mkdir) {
 		return 0;
 	}
@@ -1708,7 +1708,7 @@ PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *contex
 {
 	php_stream_wrapper *wrapper = NULL;
 
-	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, NULL, 0 TSRMLS_CC);
 	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_rmdir) {
 		return 0;
 	}
@@ -1737,7 +1737,7 @@ PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb,
 		}
 	}
 
-	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, 0 TSRMLS_CC);
 	if (wrapper && wrapper->wops->url_stat) {
 		ret = wrapper->wops->url_stat(wrapper, path_to_open, flags, ssb, context TSRMLS_CC);
 		if (ret == 0) {
@@ -2151,7 +2151,7 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 		return FAILURE;
 	}
 
-	stream = php_stream_opendir(dirname, ENFORCE_SAFE_MODE | REPORT_ERRORS, context);
+	stream = php_stream_opendir(dirname, REPORT_ERRORS, context);
 	if (!stream) {
 		return FAILURE;
 	}

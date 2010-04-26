@@ -120,11 +120,13 @@ PHP_METHOD(sqlite3, open)
 			return;
 		}
 
+#if PHP_API_VERSION < 20100412
 		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "safe_mode prohibits opening %s", fullpath);
 			efree(fullpath);
 			return;
 		}
+#endif
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "open_basedir prohibits opening %s", fullpath);
@@ -158,7 +160,11 @@ PHP_METHOD(sqlite3, open)
 	}
 #endif
 
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+#else
+	if (PG(open_basedir) && *PG(open_basedir)) {
+#endif
 		sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, NULL);
 	}
 
@@ -1779,14 +1785,18 @@ static zend_function_entry php_sqlite3_result_class_methods[] = {
 */
 static int php_sqlite3_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4, const char *arg5, const char *arg6)
 {
-	TSRMLS_FETCH();
 	switch (access_type) {
 		case SQLITE_ATTACH:
 		{
 			if (strncmp(arg3, ":memory:", sizeof(":memory:")-1)) {
+				TSRMLS_FETCH();
+
+#if PHP_API_VERSION < 20100412
 				if (PG(safe_mode) && (!php_checkuid(arg3, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 					return SQLITE_DENY;
 				}
+#endif
+
 				if (php_check_open_basedir(arg3 TSRMLS_CC)) {
 					return SQLITE_DENY;
 				}

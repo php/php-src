@@ -297,7 +297,11 @@ PHP_FUNCTION(finfo_open)
 		}
 		file = resolved_path;
 
+#if PHP_API_VERSION < 20100412
 		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
+#else
+		if (php_check_open_basedir(file TSRMLS_CC)) {
+#endif
 			RETURN_FALSE;
 		}
 	}
@@ -492,8 +496,11 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 			if (wrap) {
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
-
+#if PHP_API_VERSION < 20100412
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+#else
+				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
+#endif
 
 				if (!stream) {
 					RETVAL_FALSE;

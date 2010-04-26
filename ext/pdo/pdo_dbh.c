@@ -187,7 +187,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ 
 	php_stream *stream;
 	char *dsn = NULL;
 
-	stream = php_stream_open_wrapper(uri, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(uri, "rb", REPORT_ERRORS, NULL);
 	if (stream) {
 		dsn = php_stream_get_line(stream, buf, buflen, NULL);
 		php_stream_close(stream);

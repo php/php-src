@@ -395,7 +395,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 				}
 			}
 			if (mr > 1) {
-				if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+				if (PG(open_basedir) && *PG(open_basedir)) {
 					curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 0);
 				} else {
 					curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -403,7 +403,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 				curl_easy_setopt(curlstream->curl, CURLOPT_MAXREDIRS, mr);
 			}
 		} else {
-			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+			if (PG(open_basedir) && *PG(open_basedir)) {
 				curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 0);
 			} else {
 				curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);

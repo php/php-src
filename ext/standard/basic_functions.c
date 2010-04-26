@@ -34,7 +34,6 @@
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
-#include "safe_mode.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -3351,41 +3350,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 };
 /* }}} */
 
-static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars) /* {{{ */
-{
-	char *protected_vars, *protected_var;
-	char *token_buf;
-	int dummy = 1;
-
-	protected_vars = estrndup(new_value, new_value_length);
-	zend_hash_clean(&BG(sm_protected_env_vars));
-
-	protected_var = php_strtok_r(protected_vars, ", ", &token_buf);
-	while (protected_var) {
-		zend_hash_update(&BG(sm_protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
-		protected_var = php_strtok_r(NULL, ", ", &token_buf);
-	}
-	efree(protected_vars);
-	return SUCCESS;
-}
-/* }}} */
-
-static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars) /* {{{ */
-{
-	if (BG(sm_allowed_env_vars)) {
-		free(BG(sm_allowed_env_vars));
-	}
-	BG(sm_allowed_env_vars) = zend_strndup(new_value, new_value_length);
-	return SUCCESS;
-}
-/* }}} */
-
-PHP_INI_BEGIN() /* {{{ */
-	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars", SAFE_MODE_PROTECTED_ENV_VARS, PHP_INI_SYSTEM, OnUpdateSafeModeProtectedEnvVars, NULL)
-	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",   SAFE_MODE_ALLOWED_ENV_VARS,   PHP_INI_SYSTEM, OnUpdateSafeModeAllowedEnvVars,   NULL)
-PHP_INI_END()
-/* }}} */
-
 static const zend_module_dep standard_deps[] = { /* {{{ */
 	ZEND_MOD_OPTIONAL("session")
 	{NULL, NULL, NULL}
@@ -3462,8 +3426,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
-	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
-	BG(sm_allowed_env_vars) = NULL;
 
 	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
 
@@ -3479,10 +3441,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC) /* {{{ */
 {
-	zend_hash_destroy(&BG(sm_protected_env_vars));
-	if (BG(sm_allowed_env_vars)) {
-		free(BG(sm_allowed_env_vars));
-	}
 	if (BG(url_adapt_state_ex).tags) {
 		zend_hash_destroy(BG(url_adapt_state_ex).tags);
 		free(BG(url_adapt_state_ex).tags);
@@ -3594,8 +3552,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	test_class_startup();
 #endif
 
-	REGISTER_INI_ENTRIES();
-
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
@@ -3675,8 +3631,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	php_unregister_url_stream_wrapper("http" TSRMLS_CC);
 	php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
 #endif
-
-	UNREGISTER_INI_ENTRIES();
 
 	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -4060,39 +4014,6 @@ PHP_FUNCTION(putenv)
 			}
 		}
 #endif
-
-		if (PG(safe_mode)) {
-			/* Check the protected list */
-			if (zend_hash_exists(&BG(sm_protected_env_vars), pe.key, pe.key_len)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot override protected environment variable '%s'", pe.key);
-				efree(pe.putenv_string);
-				efree(pe.key);
-				RETURN_FALSE;
-			}
-
-			/* Check the allowed list */
-			if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
-				char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
-				char *strtok_buf = NULL;
-				char *allowed_prefix = php_strtok_r(allowed_env_vars, ", ", &strtok_buf);
-				zend_bool allowed = 0;
-
-				while (allowed_prefix) {
-					if (!strncmp(allowed_prefix, pe.key, strlen(allowed_prefix))) {
-						allowed = 1;
-						break;
-					}
-					allowed_prefix = php_strtok_r(NULL, ", ", &strtok_buf);
-				}
-				efree(allowed_env_vars);
-				if (!allowed) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", pe.key);
-					efree(pe.putenv_string);
-					efree(pe.key);
-					RETURN_FALSE;
-				}
-			}
-		}
 
 		zend_hash_del(&BG(putenv_ht), pe.key, pe.key_len+1);
 
@@ -4694,7 +4615,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *
 			break;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL_WIN | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
@@ -5141,10 +5062,6 @@ PHP_FUNCTION(highlight_file)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -5391,33 +5308,18 @@ PHP_FUNCTION(ini_set)
 	}
 
 #define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
-	/* safe_mode & basedir check */
-	if (PG(safe_mode) || PG(open_basedir)) {
+	/* open basedir check */
+	if (PG(open_basedir)) {
 		if (_CHECK_PATH(varname, varname_len, "error_log") ||
 			_CHECK_PATH(varname, varname_len, "java.class.path") ||
 			_CHECK_PATH(varname, varname_len, "java.home") ||
 			_CHECK_PATH(varname, varname_len, "mail.log") ||
 			_CHECK_PATH(varname, varname_len, "java.library.path") ||
 			_CHECK_PATH(varname, varname_len, "vpopmail.directory")) {
-			if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-				zval_dtor(return_value);
-				RETURN_FALSE;
-			}
 			if (php_check_open_basedir(new_value TSRMLS_CC)) {
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
-		}
-	}
-
-	/* checks that ensure the user does not overwrite certain ini settings when safe_mode is enabled */
-	if (PG(safe_mode)) {
-		if (!strncmp("max_execution_time", varname, sizeof("max_execution_time")) ||
-			!strncmp("memory_limit", varname, sizeof("memory_limit")) ||
-			!strncmp("child_terminate", varname, sizeof("child_terminate"))
-		) {
-			zval_dtor(return_value);
-			RETURN_FALSE;
 		}
 	}
 
@@ -5794,10 +5696,6 @@ PHP_FUNCTION(move_uploaded_file)
 	}
 
 	if (!zend_hash_exists(SG(rfc1867_uploaded_files), path, path_len + 1)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(new_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 

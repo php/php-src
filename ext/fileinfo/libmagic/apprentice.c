@@ -597,7 +597,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
 	TSRMLS_FETCH();
 
-#if (PHP_MAJOR_VERSION < 6)
+#if PHP_API_VERSION < 20100412
 	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
@@ -2041,7 +2041,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (dbname == NULL)
 		goto error2;
 
-#if (PHP_MAJOR_VERSION < 6)
+#if PHP_API_VERSION < 20100412
 		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
@@ -2165,7 +2165,7 @@ apprentice_compile(struct magic_set *ms, struct magic **magicp,
 	}
 
 /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
-#if (PHP_MAJOR_VERSION < 6)
+#if PHP_API_VERSION < 20100412
 	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS, NULL);

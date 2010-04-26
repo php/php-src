@@ -1313,7 +1313,7 @@ PHP_FUNCTION(getimagesize)
 		array_init(*info);
 	}
 
-	stream = php_stream_open_wrapper(arg1, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+	stream = php_stream_open_wrapper(arg1, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;

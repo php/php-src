@@ -58,14 +58,10 @@ struct _php_core_globals {
 	zend_bool magic_quotes_runtime;
 	zend_bool magic_quotes_sybase;
 
-	zend_bool safe_mode;
-
 	zend_bool implicit_flush;
 
 	long output_buffering;
 
-	char *safe_mode_include_dir;
-	zend_bool safe_mode_gid;
 	zend_bool sql_safe_mode;
 	zend_bool enable_dl;
 
@@ -73,8 +69,6 @@ struct _php_core_globals {
 
 	char *unserialize_callback_func;
 	long serialize_precision;
-
-	char *safe_mode_exec_dir;
 
 	long memory_limit;
 	long max_input_time;

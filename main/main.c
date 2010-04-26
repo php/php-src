@@ -352,14 +352,9 @@ static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && strcmp(new_value, "syslog")) {
-		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
-		}
-
 		if (PG(open_basedir) && php_check_open_basedir(new_value TSRMLS_CC)) {
 			return FAILURE;
 		}
-
 	}
 	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
@@ -372,14 +367,9 @@ static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
-		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
-		}
-
 		if (PG(open_basedir) && php_check_open_basedir(new_value TSRMLS_CC)) {
 			return FAILURE;
 		}
-
 	}
 	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
@@ -399,20 +389,13 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 /* }}} */
 
 
-/* Need to convert to strings and make use of:
- * PHP_SAFE_MODE
- *
- * Need to be read from the environment (?):
+/* Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
  * PHP_AUTO_APPEND_FILE
  * PHP_DOCUMENT_ROOT
  * PHP_USER_DIR
  * PHP_INCLUDE_PATH
  */
-
-#ifndef PHP_SAFE_MODE_EXEC_DIR
-#	define PHP_SAFE_MODE_EXEC_DIR ""
-#endif
 
  /* Windows and Netware use the internal mail */
 #if defined(PHP_WIN32) || defined(NETWARE)
@@ -458,13 +441,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
-#if PHP_SAFE_MODE
-	STD_PHP_INI_BOOLEAN("safe_mode",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
-#else
-	STD_PHP_INI_BOOLEAN("safe_mode",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
-#endif
-	STD_PHP_INI_ENTRY("safe_mode_include_dir",	NULL,		PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_include_dir,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("safe_mode_gid",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode_gid,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
@@ -484,7 +460,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
 	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("safe_mode_exec_dir",		PHP_SAFE_MODE_EXEC_DIR,	PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_exec_dir,		php_core_globals,	core_globals)
 
 	STD_PHP_INI_BOOLEAN("file_uploads",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			upload_max_filesize,	php_core_globals,	core_globals)
@@ -1117,6 +1092,70 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 }
 /* }}} */
 
+/* {{{ php_get_current_user
+ */
+PHPAPI char *php_get_current_user(void)
+{
+	struct stat *pstat;
+	TSRMLS_FETCH();
+
+	if (SG(request_info).current_user) {
+		return SG(request_info).current_user;
+	}
+
+	/* FIXME: I need to have this somehow handled if
+	USE_SAPI is defined, because cgi will also be
+	interfaced in USE_SAPI */
+
+	pstat = sapi_get_stat(TSRMLS_C);
+
+	if (!pstat) {
+		return "";
+	} else {
+#ifdef PHP_WIN32
+		char name[256];
+		DWORD len = sizeof(name)-1;
+
+		if (!GetUserName(name, &len)) {
+			return "";
+		}
+		name[len] = '\0';
+		SG(request_info).current_user_length = len;
+		SG(request_info).current_user = estrndup(name, len);
+		return SG(request_info).current_user;		
+#else
+		struct passwd *pwd;
+#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
+		struct passwd _pw;
+		struct passwd *retpwptr = NULL;
+		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf;
+
+		if (pwbuflen < 1) {
+			return "";
+		}
+		pwbuf = emalloc(pwbuflen);
+		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+			efree(pwbuf);
+			return "";
+		}
+		pwd = &_pw;
+#else
+		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
+			return "";
+		}
+#endif
+		SG(request_info).current_user_length = strlen(pwd->pw_name);
+		SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
+#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
+		efree(pwbuf);
+#endif
+		return SG(request_info).current_user;		
+#endif
+	}	
+}
+/* }}} */
+
 /* {{{ proto bool set_time_limit(int seconds)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
@@ -1124,11 +1163,6 @@ PHP_FUNCTION(set_time_limit)
 	long new_timeout;
 	char *new_timeout_str;
 	int new_timeout_strlen;
-
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot set time limit in safe mode");
-		RETURN_FALSE;
-	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
 		return;
@@ -1149,7 +1183,7 @@ PHP_FUNCTION(set_time_limit)
  */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path TSRMLS_DC)
 {
-	return php_stream_open_wrapper_as_file((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
+	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
 
@@ -1178,7 +1212,7 @@ static size_t php_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 
 static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
-	return php_stream_open_for_zend_ex(filename, handle, ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 }
 /* }}} */
 
@@ -1412,8 +1446,8 @@ int php_request_startup(TSRMLS_D)
 			zend_set_timeout(PG(max_input_time), 1);
 		}
 
-		/* Disable realpath cache if safe_mode or open_basedir are set */
-		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+		/* Disable realpath cache if an open_basedir is set */
+		if (PG(open_basedir) && *PG(open_basedir)) {
 			CWDG(realpath_cache_size_limit) = 0;
 		}
 
@@ -1976,8 +2010,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Register Zend ini entries */
 	zend_register_standard_ini_entries(TSRMLS_C);
 
-	/* Disable realpath cache if safe_mode or open_basedir are set */
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+	/* Disable realpath cache if an open_basedir is set */
+	if (PG(open_basedir) && *PG(open_basedir)) {
 		CWDG(realpath_cache_size_limit) = 0;
 	}
 
@@ -2065,13 +2099,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[7]; /* Remember to change this if the number of directives change */
-		} directives[] = {
+			const char *directives[13]; /* Remember to change this if the number of directives change */
+		} directives[2] = {
 			{
 				E_CORE_WARNING, 
 				"Directive '%s' is deprecated in PHP 5.3 and greater", 
 				{
-					"safe_mode", 
 					"magic_quotes_gpc", 
 					"magic_quotes_runtime", 
 					"magic_quotes_sybase", 
@@ -2082,12 +2115,18 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				E_CORE_ERROR, 
 				"Directive '%s' is no longer available in PHP", 
 				{
+					"allow_call_time_pass_reference",
 					"define_syslog_variables", 
 					"highlight.bg", 
 					"register_globals", 
 					"register_long_arrays", 
+					"safe_mode", 
+					"safe_mode_gid", 
+					"safe_mode_include_dir", 
+					"safe_mode_exec_dir", 
+					"safe_mode_allowed_env_vars", 
+					"safe_mode_protected_env_vars", 
 					"zend.ze1_compatibility_mode", 
-					"allow_call_time_pass_reference",
 					NULL
 				}
 			}

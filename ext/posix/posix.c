@@ -840,8 +840,7 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -875,8 +874,7 @@ PHP_FUNCTION(posix_mknod)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -961,8 +959,7 @@ PHP_FUNCTION(posix_access)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;

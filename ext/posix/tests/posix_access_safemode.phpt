@@ -11,6 +11,9 @@ if (!extension_loaded('posix')) {
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }
+if (PHP_VERSION_ID < 503099) {
+    die('SKIP Safe mode is no longer available.');
+}
 --INI--
 safe_mode = 1
 --FILE--

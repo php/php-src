@@ -6,7 +6,7 @@ Paul Sohier
 --INI--
 safe_mode=On
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
+<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER') || PHP_VERSION_ID < 503099) print "skip"; ?>
 --FILE--
 <?php
 

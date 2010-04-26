@@ -131,7 +131,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			Z_TYPE_PP(tmpzval) != IS_STRING ||
 			Z_STRLEN_PP(tmpzval) <= 0) {
 			php_url_free(resource);
-			return php_stream_open_wrapper_ex(path, mode, ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
 		request_fulluri = 1;

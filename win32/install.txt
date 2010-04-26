@@ -1488,7 +1488,7 @@ Running PHP as an Apache module
    Example 5-2. Apache configuration example
 <IfModule mod_php5.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
+  php_admin_flag engine on
 </IfModule>
 
    Caution

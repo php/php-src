@@ -489,12 +489,9 @@ static void php_csr_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ openssl safe_mode & open_basedir checks */
-inline static int php_openssl_safe_mode_chk(char *filename TSRMLS_DC)
+/* {{{ openssl open_basedir check */
+inline static int php_openssl_open_base_dir_chk(char *filename TSRMLS_DC)
 {
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return -1;
-	}
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		return -1;
 	}
@@ -774,7 +771,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* read in the oids */
 	str = CONF_get_string(req->req_config, NULL, "oid_file");
-	if (str && !php_openssl_safe_mode_chk(str TSRMLS_CC)) {
+	if (str && !php_openssl_open_base_dir_chk(str TSRMLS_CC)) {
 		BIO *oid_bio = BIO_new_file(str, "r");
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
@@ -1163,7 +1160,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 		/* read cert from the named file */
 		BIO *in;
 
-		if (php_openssl_safe_mode_chk(Z_STRVAL_PP(val) + (sizeof("file://") - 1) TSRMLS_CC)) {
+		if (php_openssl_open_base_dir_chk(Z_STRVAL_PP(val) + (sizeof("file://") - 1) TSRMLS_CC)) {
 			return NULL;
 		}
 
@@ -1219,7 +1216,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		return;
 	}
 
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 		return;
 	}
 
@@ -1449,7 +1446,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 		goto end;
 	}
 
-	if (php_openssl_safe_mode_chk(certfile TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(certfile TSRMLS_CC)) {
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -1776,7 +1773,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "private key does not correspond to cert");
 		goto cleanup;
 	}
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 		goto cleanup;
 	}
 
@@ -2178,7 +2175,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 		filename = Z_STRVAL_PP(val) + (sizeof("file://") - 1);
 	}
 	if (filename) {
-		if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+		if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 			return NULL;
 		}
 		in = BIO_new_file(filename, "r");
@@ -2214,7 +2211,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		return;
 	}
 
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 		return;
 	}
 
@@ -2692,7 +2689,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			BIO *in;
 
 			if (filename) {
-				if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+				if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 					TMP_CLEAN;
 				}
 				in = BIO_new_file(filename, "r");
@@ -2999,7 +2996,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		RETURN_FALSE;
 	}
 	
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	
@@ -3287,7 +3284,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (!store) {
 		goto clean_exit;
 	}
-	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(filename TSRMLS_CC)) {
 		goto clean_exit;
 	}
 
@@ -3305,7 +3302,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 	if (datafilename) {
 
-		if (php_openssl_safe_mode_chk(datafilename TSRMLS_CC)) {
+		if (php_openssl_open_base_dir_chk(datafilename TSRMLS_CC)) {
 			goto clean_exit;
 		}
 
@@ -3325,7 +3322,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		if (signersfilename) {
 			BIO *certout;
 		
-			if (php_openssl_safe_mode_chk(signersfilename TSRMLS_CC)) {
+			if (php_openssl_open_base_dir_chk(signersfilename TSRMLS_CC)) {
 				goto clean_exit;
 			}
 		
@@ -3385,7 +3382,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		return;
 
 	
-	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(infilename TSRMLS_CC) || php_openssl_open_base_dir_chk(outfilename TSRMLS_CC)) {
 		return;
 	}
 
@@ -3544,7 +3541,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(infilename TSRMLS_CC) || php_openssl_open_base_dir_chk(outfilename TSRMLS_CC)) {
 		goto clean_exit;
 	}
 
@@ -3639,7 +3636,7 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 		goto clean_exit;
 	}
 	
-	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
+	if (php_openssl_open_base_dir_chk(infilename TSRMLS_CC) || php_openssl_open_base_dir_chk(outfilename TSRMLS_CC)) {
 		goto clean_exit;
 	}
 

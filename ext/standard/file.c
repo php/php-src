@@ -70,7 +70,6 @@
 #endif
 
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "php_string.h"
 #include "file.h"
 
@@ -386,7 +385,7 @@ PHP_FUNCTION(get_meta_tags)
 	}
 
 	md.stream = php_stream_open_wrapper(filename, "rb",
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 			NULL);
 	if (!md.stream)	{
 		RETURN_FALSE;
@@ -546,7 +545,7 @@ PHP_FUNCTION(file_get_contents)
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb",
-				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+				(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 				NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
@@ -615,7 +614,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	mode[2] = '\0';
 
-	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -750,7 +749,7 @@ PHP_FUNCTION(file)
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -836,10 +835,6 @@ PHP_FUNCTION(tempnam)
 		return;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -896,7 +891,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 
 	if (stream == NULL) {
 		RETURN_FALSE;
@@ -942,7 +937,7 @@ PHP_FUNCTION(popen)
 	int command_len, mode_len;
 	FILE *fp;
 	php_stream *stream;
-	char *posix_mode, *b, *buf = 0, *tmp;
+	char *posix_mode, *buf = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &command, &command_len, &mode, &mode_len) == FAILURE) {
 		return;
@@ -957,49 +952,14 @@ PHP_FUNCTION(popen)
 		}
 	}
 #endif
-	if (PG(safe_mode)){
-		b = strchr(command, ' ');
-		if (!b) {
-			b = strrchr(command, '/');
-		} else {
-			char *c;
 
-			c = command;
-			while((*b != '/') && (b != c)) {
-				b--;
-			}
-			if (b == c) {
-				b = NULL;
-			}
-		}
-
-		if (b) {
-			spprintf(&buf, 0, "%s%s", PG(safe_mode_exec_dir), b);
-		} else {
-			spprintf(&buf, 0, "%s/%s", PG(safe_mode_exec_dir), command);
-		}
-
-		tmp = php_escape_shell_cmd(buf);
-		fp = VCWD_POPEN(tmp, posix_mode);
-		efree(tmp);
-
-		if (!fp) {
-			php_error_docref2(NULL TSRMLS_CC, buf, posix_mode, E_WARNING, "%s", strerror(errno));
-			efree(posix_mode);
-			efree(buf);
-			RETURN_FALSE;
-		}
-
-		efree(buf);
-
-	} else {
-		fp = VCWD_POPEN(command, posix_mode);
-		if (!fp) {
-			php_error_docref2(NULL TSRMLS_CC, command, posix_mode, E_WARNING, "%s", strerror(errno));
-			efree(posix_mode);
-			RETURN_FALSE;
-		}
+	fp = VCWD_POPEN(command, posix_mode);
+	if (!fp) {
+		php_error_docref2(NULL TSRMLS_CC, command, posix_mode, E_WARNING, "%s", strerror(errno));
+		efree(posix_mode);
+		RETURN_FALSE;
 	}
+
 	stream = php_stream_fopen_from_pipe(fp, mode);
 
 	if (stream == NULL)	{
@@ -1361,10 +1321,6 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
-	if (PG(safe_mode) && (!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return -1;
-	}
-
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		return -1;
 	}
@@ -1440,7 +1396,7 @@ PHP_FUNCTION(readfile)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
@@ -1561,7 +1517,7 @@ PHP_FUNCTION(unlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
-	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, ENFORCE_SAFE_MODE | REPORT_ERRORS, context TSRMLS_CC));
+	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context TSRMLS_CC));
 }
 /* }}} */
 
@@ -1684,10 +1640,6 @@ PHP_FUNCTION(copy)
 		return;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(source, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(source TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -1704,13 +1656,13 @@ PHP_FUNCTION(copy)
 
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
 {
-	return php_copy_file_ex(src, dest, ENFORCE_SAFE_MODE TSRMLS_CC);
+	return php_copy_file_ex(src, dest, 0 TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC)
+PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -1781,13 +1733,13 @@ no_stat:
 	}
 safe_to_copy:
 
-	srcstream = php_stream_open_wrapper(src, "rb", src_chk | REPORT_ERRORS, NULL);
+	srcstream = php_stream_open_wrapper(src, "rb", src_flg | REPORT_ERRORS, NULL);
 
 	if (!srcstream) {
 		return ret;
 	}
 
-	deststream = php_stream_open_wrapper(dest, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	deststream = php_stream_open_wrapper(dest, "wb", REPORT_ERRORS, NULL);
 
 	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
@@ -2376,10 +2328,6 @@ PHP_FUNCTION(realpath)
 	}
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
-		if (PG(safe_mode) && (!php_checkuid(resolved_path_buff, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			RETURN_FALSE;
-		}
-
 		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
 			RETURN_FALSE;
 		}

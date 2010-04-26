@@ -47,9 +47,9 @@ PHP_FUNCTION(ftok)
 	if (proj_len != 1){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
 		RETURN_LONG(-1);
-    }
+	}
 
-	if ((PG(safe_mode) && (!php_checkuid(pathname, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pathname TSRMLS_CC)) {
+	if (php_check_open_basedir(pathname TSRMLS_CC)) {
 		RETURN_LONG(-1);
 	}
 

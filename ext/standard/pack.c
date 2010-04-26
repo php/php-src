@@ -39,7 +39,6 @@
 #include <sys/param.h>
 #endif
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "php_string.h"
 #include "pack.h"
 #if HAVE_PWD_H

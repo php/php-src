@@ -44,7 +44,6 @@
 #endif
 
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 #include "php_zlib.h"
@@ -373,7 +372,7 @@ static PHP_FUNCTION(gzfile)
 	use_include_path = flags ? USE_PATH : 0;
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (stream == NULL) {
 		/* Error reporting is already done by stream code */
 		RETURN_FALSE;
@@ -415,7 +414,7 @@ static PHP_FUNCTION(gzopen)
 
 	use_include_path = flags ? USE_PATH : 0;
 
-	stream = php_stream_gzopen(NULL, filename, mode, use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, mode, use_include_path | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -444,7 +443,7 @@ static PHP_FUNCTION(readgzfile)
 
 	use_include_path = flags ? USE_PATH : 0;
 
-	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | ENFORCE_SAFE_MODE, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (!stream) {
 		RETURN_FALSE;
 	}

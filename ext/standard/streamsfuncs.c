@@ -128,7 +128,7 @@ PHP_FUNCTION(stream_socket_client)
 		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
@@ -204,7 +204,7 @@ PHP_FUNCTION(stream_socket_server)
 		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
 			STREAM_XPORT_SERVER | flags,
 			NULL, NULL, context, &errstr, &err);
 

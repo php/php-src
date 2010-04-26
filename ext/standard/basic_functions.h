@@ -175,9 +175,6 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval *active_ini_file_section;
-
-	HashTable sm_protected_env_vars;
-	char *sm_allowed_env_vars;
 	
 	/* pageinfo.c */
 	long page_uid;
@@ -239,11 +236,6 @@ typedef struct {
 	int key_len;
 } putenv_entry;
 #endif
-
-/* Values are comma-delimited
- */
-#define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
-#define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);

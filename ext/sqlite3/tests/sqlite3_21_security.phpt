@@ -1,5 +1,5 @@
 --TEST--
-SQLite3 open_basedir / safe_mode checks
+SQLite3 open_basedir checks
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --INI--

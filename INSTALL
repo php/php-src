@@ -1584,15 +1584,11 @@ Running PHP as an Apache module
    Example 6-2. Apache configuration example
 <IfModule mod_php5.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
+  php_admin_flag engine on
 </IfModule>
 <IfModule mod_php4.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
-</IfModule>
-<IfModule mod_php3.c>
-  php3_include_path ".:/usr/local/lib/php"
-  php3_safe_mode on
+  php_admin_flag engine on
 </IfModule>
 
    Caution
