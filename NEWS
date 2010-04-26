@@ -34,17 +34,18 @@
 - Changed session.entropy_file to default to /dev/urandom or /dev/arandom if either
   is present at compile time. (Rasmus)
 
-- Removed legacy features: (Kalle)
-  . define_syslog_variables ini option and its associated function.
-  . highlight.bg ini option.
-  . import_request_variables().
-  . register_globals.
-  . register_long_arrays ini option.
+- Removed legacy features:
+  . define_syslog_variables ini option and its associated function. (Kalle)
+  . highlight.bg ini option. (Kalle)
+  . import_request_variables(). (Kalle)
+  . register_globals. (Kalle)
+  . allow_call_time_pass_reference. (Pierrick)
+  . register_long_arrays ini option. (Kalle)
   . Session bug compatibility mode (session.bug_compat42 and 
-    session.bug_compat_warn ini options).
+    session.bug_compat_warn ini options). (Kalle)
   . session_is_registered(), session_register() and session_unregister() 
-    functions.
-  . y2k_compliance ini option.
+    functions. (Kalle)
+  . y2k_compliance ini option. (Kalle)
   	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)

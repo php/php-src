@@ -1,7 +1,5 @@
 --TEST--
 Test debug_zval_dump() function : usage variations
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 /* Prototype: void debug_zval_dump ( mixed $variable );
@@ -115,7 +113,6 @@ $counter = 1;
 foreach( $misc_values as $value ) {
   echo "-- Iteration $counter --\n";
   debug_zval_dump( $value );
-  debug_zval_dump( &$value );
   $counter++;
 }
 
@@ -190,26 +187,18 @@ long(10) refcount(2)
 *** Testing debug_zval_dump() on miscelleneous input arguments ***
 -- Iteration 1 --
 NULL refcount(3)
-&NULL refcount(2)
 -- Iteration 2 --
 NULL refcount(3)
-&NULL refcount(2)
 -- Iteration 3 --
 NULL refcount(1)
-&NULL refcount(2)
 -- Iteration 4 --
 NULL refcount(1)
-&NULL refcount(2)
 -- Iteration 5 --
 string(7) "TRUE123" refcount(3)
-&string(7) "TRUE123" refcount(2)
 -- Iteration 6 --
 string(9) "123string" refcount(3)
-&string(9) "123string" refcount(2)
 -- Iteration 7 --
 string(9) "string123" refcount(3)
-&string(9) "string123" refcount(2)
 -- Iteration 8 --
 string(10) "NULLstring" refcount(3)
-&string(10) "NULLstring" refcount(2)
 Done

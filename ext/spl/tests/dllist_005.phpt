@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: Queues
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 $queue = new SplQueue();
@@ -20,10 +18,6 @@ try {
 // data consistency
 $a = 2;
 $queue->enqueue($a);
-$a = 3;
-$queue->enqueue(&$a);
-$a = 4;
-echo $queue->dequeue()."\n";
 echo $queue->dequeue()."\n";
 
 // peakable
@@ -56,7 +50,6 @@ echo count($queue)."\n";
 Exception: Can't shift from an empty datastructure
 Exception: Can't shift from an empty datastructure
 2
-3
 2
 [1]
 [2]

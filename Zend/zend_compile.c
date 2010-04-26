@@ -2335,21 +2335,21 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
 	function_ptr = *function_ptr_ptr;
 
-	if (original_op == ZEND_SEND_REF && !CG(allow_call_time_pass_reference)) {
+	if (original_op == ZEND_SEND_REF) {
 		if (function_ptr &&
 		    function_ptr->common.function_name &&
 		    function_ptr->common.type == ZEND_USER_FUNCTION &&
 		    !ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
-			zend_error(E_DEPRECATED,
-						"Call-time pass-by-reference has been deprecated; "
-						"If you would like to pass it by reference, modify the declaration of %s().  "
-						"If you would like to enable call-time pass-by-reference, you can set "
-						"allow_call_time_pass_reference to true in your INI file", function_ptr->common.function_name);
+			zend_error(E_COMPILE_ERROR,
+						"Call-time pass-by-reference has been removed; "
+						"If you would like to pass argument by reference, modify the declaration of %s().",
+						function_ptr->common.function_name);
 		} else {
-			zend_error(E_DEPRECATED, "Call-time pass-by-reference has been deprecated");
+			zend_error(E_COMPILE_ERROR, "Call-time pass-by-reference has been removed");
 		}
-	}
-
+		return;
+	} 
+	
 	if (function_ptr) {
 		if (ARG_MAY_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
 			if (param->op_type & (IS_VAR|IS_CV)) {
