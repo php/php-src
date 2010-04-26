@@ -91,11 +91,6 @@
 ; Please see the actual settings later in the document for more details as to why
 ; we recommend these changes in PHP's behavior.
 
-; allow_call_time_pass_reference
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; display_errors
 ;   Default Value: On
 ;   Development Value: On
@@ -309,20 +304,6 @@ unserialize_callback_func =
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
 serialize_precision = 100
-
-; This directive allows you to enable and disable warnings which PHP will issue
-; if you pass a value by reference at function call time. Passing values by
-; reference at function call time is a deprecated feature which will be removed
-; from PHP at some point in the near future. The acceptable method for passing a
-; value by reference to a function is by declaring the reference in the functions
-; definition, not at call time. This directive does not disable this feature, it
-; only determines whether PHP will warn you about it or not. These warnings
-; should enabled in development environments only.
-; Default Value: On (Suppress warnings)
-; Development Value: Off (Issue warnings)
-; Production Value: Off (Issue warnings)
-; http://php.net/allow-call-time-pass-reference
-allow_call_time_pass_reference = Off
 
 ; Safe Mode
 ; http://php.net/safe-mode

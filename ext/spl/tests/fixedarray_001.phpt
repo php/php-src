@@ -1,7 +1,5 @@
 --TEST--
 SPL: FixedArray: std operations
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 $a = new SplFixedArray(0);
