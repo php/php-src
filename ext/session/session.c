@@ -770,7 +770,7 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 
 	PS_ENCODE_LOOP(
 			smart_str_appendl(&buf, key, key_length);
-			if (memchr(key, PS_DELIMITER, key_length)) {
+			if (memchr(key, PS_DELIMITER, key_length) || memchr(key, PS_UNDEF_MARKER, key_length)) {
 				PHP_VAR_SERIALIZE_DESTROY(var_hash);
 				smart_str_free(&buf);
 				return FAILURE;
