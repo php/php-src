@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Implemented FR#35638 (Adding udate to imap_fetch_overview results).
   (Charles_Duffy at dell dot com )
 
+- Fixed handling of session variable serialization on certain prefix
+  characters. Reported by Stefan Esser (Ilia)
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas) 
