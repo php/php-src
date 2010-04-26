@@ -1696,7 +1696,7 @@ ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash
 {
 	zend_execute_data *ex;
 
-	if (zend_hash_quick_del(&EG(symbol_table), name, name_len + 1, hash_value) == SUCCESS) {
+	if (zend_hash_quick_exists(&EG(symbol_table), name, name_len + 1, hash_value)) {
 		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 			if (ex->op_array && ex->symbol_table == &EG(symbol_table)) {
 				int i;
@@ -1711,7 +1711,7 @@ ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash
 				}
 			}
 		}
-		return SUCCESS;
+		return zend_hash_quick_del(&EG(symbol_table), name, name_len + 1, hash_value);
 	}
 	return FAILURE;
 }
