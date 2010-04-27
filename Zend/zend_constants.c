@@ -413,7 +413,7 @@ finish:
 	return zend_get_constant(name, name_len, result TSRMLS_CC);
 }
 
-int zend_quick_get_constant(const zend_literal *key, zval *result, ulong flags TSRMLS_DC)
+zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC)
 {
 	zend_constant *c;
 
@@ -430,22 +430,19 @@ int zend_quick_get_constant(const zend_literal *key, zval *result, ulong flags T
 
 						key--;
 						if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
-							return 0;
+							return NULL;
 						}
 					}
 				}
 			} else {
 				key--;
 				if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
-					return 0;
+					return NULL;
 				}
 			}
 		}
 	}
-
-	INIT_PZVAL_COPY(result, &c->value);
-	zval_copy_ctor(result);
-	return 1;
+	return c;
 }
 
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)

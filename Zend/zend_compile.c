@@ -388,6 +388,37 @@ int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 }
 /* }}} */
 
+int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
+{
+	int ret;
+	char *lc_name, *ns_separator;
+	int lc_len;
+	zval c;
+	int lc_literal;
+
+	if (op_array->last_literal > 0 && 
+	    &op_array->literals[op_array->last_literal - 1].constant == zv) {
+		/* we already have function name as last literal (do nothing) */
+		ret = op_array->last_literal - 1;
+	} else {
+		ret = zend_add_literal(op_array, zv);
+	}
+
+	lc_name = zend_str_tolower_dup(Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+	ZVAL_STRINGL(&c, lc_name, Z_STRLEN_P(zv), 0);
+	lc_literal = zend_add_literal(CG(active_op_array), &c);
+	CALCULATE_LITERAL_HASH(lc_literal);
+
+	ns_separator = zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv)) + 1;
+	lc_len = Z_STRLEN_P(zv) - (ns_separator - Z_STRVAL_P(zv));
+	lc_name = zend_str_tolower_dup(ns_separator, lc_len);
+	ZVAL_STRINGL(&c, lc_name, lc_len, 0);
+	lc_literal = zend_add_literal(CG(active_op_array), &c);
+	CALCULATE_LITERAL_HASH(lc_literal);
+
+	return ret;
+}
+/* }}} */
 
 int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
 {
@@ -1853,13 +1884,13 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		SET_NODE(opline->op2, left_bracket);
-		if (opline->op2_type == IS_CONST) {
-			opline->op1_type = IS_CONST;
-			LITERAL_STRINGL(opline->op1, zend_str_tolower_dup(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))), Z_STRLEN(CONSTANT(opline->op2.constant)), 0);
-			CALCULATE_LITERAL_HASH(opline->op1.constant);
-		} else {
-			SET_UNUSED(opline->op1);
-		}
+		SET_UNUSED(opline->op1);
+		if (left_bracket->op_type == IS_CONST) {
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &left_bracket->u.constant TSRMLS_CC);
+ 		} else {
+			SET_NODE(opline->op2, left_bracket);
+ 		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1883,7 +1914,7 @@ void zend_do_clone(znode *result, const znode *expr TSRMLS_DC) /* {{{ */
 void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRMLS_DC) /* {{{ */
 {
 	unsigned char *ptr = NULL;
-	zend_op *opline, *opline2;
+	zend_op *opline;
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	if (ns_call) {
@@ -1892,34 +1923,18 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
 		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
-		SET_NODE(opline->op2, function_name);
-		opline->op1_type = IS_CONST;
-		LITERAL_STRINGL(opline->op1, zend_str_tolower_dup(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))), Z_STRLEN(CONSTANT(opline->op2.constant)), 0);
-		CALCULATE_LITERAL_HASH(opline->op1.constant);
-		slash = zend_memrchr(Z_STRVAL(CONSTANT(opline->op1.constant)), '\\', Z_STRLEN(CONSTANT(opline->op1.constant)));
-		prefix_len = slash-Z_STRVAL(CONSTANT(opline->op1.constant))+1;
-		name_len = Z_STRLEN(CONSTANT(opline->op1.constant))-prefix_len;
-		opline2 = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline2->opcode = ZEND_OP_DATA;
-		SET_UNUSED(opline2->op1);
-		if(!slash) {
-			zend_error(E_CORE_ERROR, "Namespaced name %s should contain slash", Z_STRVAL(CONSTANT(opline->op1.constant)));
-		}
-		/* this is the length of namespace prefix */
-		opline2->op1.num = prefix_len;
-		/* this is the hash of the non-prefixed part, lowercased */
-		opline2->extended_value = zend_hash_func(slash+1, name_len+1);
-		SET_UNUSED(opline2->op2);
+		SET_UNUSED(opline->op1);
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_ns_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		SET_NODE(opline->op2, function_name);
-		if (opline->op2_type == IS_CONST) {
-			opline->op1_type = IS_CONST;
-			LITERAL_STRINGL(opline->op1, zend_str_tolower_dup(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))), Z_STRLEN(CONSTANT(opline->op2.constant)), 0);
-			CALCULATE_LITERAL_HASH(opline->op1.constant);
-		} else {
-			SET_UNUSED(opline->op1);
-		}
+		SET_UNUSED(opline->op1);
+		if (function_name->op_type == IS_CONST) {
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
+ 		} else {
+			SET_NODE(opline->op2, function_name);
+ 		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
