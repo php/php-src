@@ -3824,7 +3824,7 @@ PHP_METHOD(Phar, offsetSet)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by ini setting (phar.readonly)");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
@@ -3863,7 +3863,7 @@ PHP_METHOD(Phar, offsetUnset)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by ini setting (phar.readonly)");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
@@ -4125,7 +4125,7 @@ PHP_METHOD(Phar, setMetadata)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by ini setting (phar.readonly)");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
@@ -4164,7 +4164,7 @@ PHP_METHOD(Phar, delMetadata)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by ini setting (phar.readonly)");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
@@ -4772,7 +4772,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	PHAR_ENTRY_OBJECT();
 
 	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
@@ -4825,7 +4825,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	PHAR_ENTRY_OBJECT();
 
 	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by the php.ini setting phar.readonly");
 		return;
 	}
 
