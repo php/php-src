@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   (Raphael Geissert)
 - Fixed bug #50383 (Exceptions thrown in __call() / __callStatic() do not
   include file and line in trace). (Felipe)
+- Fixed bug #49723 (LimitIterator with empty SeekableIterator). (Etienne)
 - Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
 - Fixed bug #49267 (Linking fails for iconv). (Moriyosh)
 - Fixed bug #43314 (iconv_mime_encode(), broken Q scheme). (Rasmus)
