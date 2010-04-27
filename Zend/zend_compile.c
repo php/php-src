@@ -1883,14 +1883,13 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		SET_NODE(opline->op2, left_bracket);
 		SET_UNUSED(opline->op1);
 		if (left_bracket->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &left_bracket->u.constant TSRMLS_CC);
- 		} else {
+		} else {
 			SET_NODE(opline->op2, left_bracket);
- 		}
+		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1918,8 +1917,6 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	if (ns_call) {
-		char *slash;
-		int prefix_len, name_len;
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
 		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
@@ -1932,9 +1929,9 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		if (function_name->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
- 		} else {
+		} else {
 			SET_NODE(opline->op2, function_name);
- 		}
+		}
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
