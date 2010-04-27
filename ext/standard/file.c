@@ -937,7 +937,7 @@ PHP_FUNCTION(popen)
 	int command_len, mode_len;
 	FILE *fp;
 	php_stream *stream;
-	char *posix_mode, *buf = 0;
+	char *posix_mode;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &command, &command_len, &mode, &mode_len) == FAILURE) {
 		return;

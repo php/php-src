@@ -62,7 +62,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 	FILE *fp;
 	char *buf, *tmp=NULL;
 	int l = 0, pclose_return;
-	char *b, *c, *d=NULL;
+	char *b, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
