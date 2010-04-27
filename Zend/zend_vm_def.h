@@ -2374,9 +2374,9 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 {
 	USE_OPLINE
 	zend_literal *func_name;
- 
- 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
- 
+
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
+
 	func_name = opline->op2.literal + 1;
 	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(func_name->constant), Z_STRLEN(func_name->constant)+1, func_name->hash_value, (void **) &EX(fbc))==FAILURE) {
 		func_name++;
