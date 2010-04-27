@@ -73,8 +73,18 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+		printf("[020] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+	}
+
+	if (false !== ($tmp = mysqli_change_user($link, str_repeat('user', 16384), str_repeat('pass', 16384), str_repeat('dbase', 16384))))
+		printf("[021] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+
+	mysqli_close($link);
+
 	if (NULL !== ($tmp = @mysqli_change_user($link, $user, $passwd, $db)))
-		printf("[020] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[022] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
