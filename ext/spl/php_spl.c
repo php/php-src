@@ -556,7 +556,14 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 		}
 
-		zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL);
+		if (zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL) == FAILURE) {
+			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				Z_DELREF_P(alfi.obj);
+			}				
+			if (alfi.closure) {
+				Z_DELREF_P(alfi.closure);
+			}
+		}
 		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
 			/* Move the newly created element to the head of the hashtable */
 			HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
