@@ -599,6 +599,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	unsigned int i = 0;
+	zend_uchar * provided_buffer = *buf;
 	size_t left = (*buf_len - (*p - *buf));
 	size_t data_size = 0;
 	zval **copies = NULL;/* if there are different types */
@@ -714,9 +715,17 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
 		tmp_buf = mnd_emalloc(*buf_len);
 		memcpy(tmp_buf, *buf, offset);
+		/*
+		  When too many columns the buffer provided to the function might not be sufficient.
+		  In this case new buffer has been allocated above. When we allocate a buffer and then
+		  allocate a bigger one here, we should free the first one.
+		*/
+		if (*buf != provided_buffer) {
+			mnd_efree(*buf);
+		}
 		*buf = tmp_buf;
 		/* Update our pos pointer */
-		*p = *buf + offset;	
+		*p = *buf + offset;
 	}
 
 	/* 2.3 Store the actual data */

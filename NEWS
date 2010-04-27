@@ -16,7 +16,9 @@ PHP                                                                        NEWS
 
 - Implemented FR#35638 (Adding udate to imap_fetch_overview results).
   (Charles_Duffy at dell dot com )
-- Fixed possible buffer overflows in mysqlnd_list_fields,  mysqlnd_change_user
+- Fixed possible buffer overflows in mysqlnd_list_fields,  mysqlnd_change_user.
+  (Andrey)
+- Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
 - Fixed handling of session variable serialization on certain prefix
