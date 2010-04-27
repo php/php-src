@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51393 (DateTime::createFromFormat() fails if format string contains
   timezone). (Adam)
+- Fixed bug #51374 (Wrongly initialized object properties). (Etienne)
 - Fixed bug #51338 (URL-Rewriter is still enabled if use_only_cookies is
   on). (Ilia, j dot jeising at gmail dot com)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)

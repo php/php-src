@@ -341,6 +341,9 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	ce = ce ? ce : source->info_class;
+
+	zend_update_class_constants(ce TSRMLS_CC);
+
 	return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_OBJECT;
 
@@ -381,6 +384,9 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	switch (type) {
 	case SPL_FS_INFO:
 		ce = ce ? ce : source->info_class;
+
+		zend_update_class_constants(ce TSRMLS_CC);
+
 		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_OBJECT;
 
@@ -399,6 +405,9 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 		break;
 	case SPL_FS_FILE:
 		ce = ce ? ce : source->file_class;
+
+		zend_update_class_constants(ce TSRMLS_CC);
+
 		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_OBJECT;
 	
