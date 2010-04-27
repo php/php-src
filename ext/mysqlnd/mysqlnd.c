@@ -1782,7 +1782,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	/*
 	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
 	  Stack space is not that expensive, so use a bit more to be protected against
-	  stack overrungs.
+	  buffer overflows.
 	*/
 	size_t user_len;
 	enum_func_status ret;
@@ -1805,7 +1805,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	}
 
 	/* 1. user ASCIIZ */
-	user_len = MIN(strlen(user), MYSQLND_MAX_ALLOWED_DB_LEN);
+	user_len = MIN(strlen(user), MYSQLND_MAX_ALLOWED_USER_LEN);
 	memcpy(p, user, user_len);
 	p += user_len;
 	*p++ = '\0';
@@ -1821,8 +1821,8 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 
 	/* 3. db ASCIIZ */
 	if (db[0]) {
-		size_t db_len = strlen(db);
-		memcpy(p, db, MIN(db_len, MYSQLND_MAX_ALLOWED_DB_LEN));
+		size_t db_len = MIN(strlen(db), MYSQLND_MAX_ALLOWED_DB_LEN);
+		memcpy(p, db, db_len);
 		p += db_len;
 	}
 	*p++ = '\0';
