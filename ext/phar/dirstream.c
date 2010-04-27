@@ -360,7 +360,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 			efree(error);
 		} else {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar file \"%s\" is unknown", resource->host);

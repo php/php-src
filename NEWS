@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed string format validation inside phar extension. Reported by Stefan
+  Esser (Ilia)
 - Fixed handling of session variable serialization on certain prefix
   characters. Reported by Stefan Esser (Ilia)
 - Fixed a NULL pointer dereference when processing invalid XML-RPC

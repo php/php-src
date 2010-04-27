@@ -117,7 +117,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 				}
 				efree(error);
 			}
@@ -128,7 +128,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 			if (error) {
 				spprintf(&error, 0, "Cannot open cached phar '%s' as writeable, copy on write failed", resource->host);
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 				}
 				efree(error);
 			}
@@ -140,7 +140,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 				}
 				efree(error);
 			}
@@ -192,7 +192,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		if (NULL == (idata = phar_get_or_create_entry_data(resource->host, host_len, internal_file, strlen(internal_file), mode, 0, &error, 1 TSRMLS_CC))) {
 			if (error) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 				efree(error);
 			} else {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, resource->host);
@@ -297,7 +297,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		if ((FAILURE == phar_get_entry_data(&idata, resource->host, host_len, internal_file, strlen(internal_file), "r", 0, &error, 0 TSRMLS_CC)) || !idata) {
 idata_error:
 			if (error) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 				efree(error);
 			} else {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
@@ -320,7 +320,7 @@ idata_error:
 
 	/* check length, crc32 */
 	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(idata, idata->internal_file->crc32, &error, 2 TSRMLS_CC) != SUCCESS) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 		efree(error);
 		phar_entry_delref(idata TSRMLS_CC);
 		efree(internal_file);
@@ -761,7 +761,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	efree(internal_file);
 	phar_entry_remove(idata, &error TSRMLS_CC);
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 	return 1;
