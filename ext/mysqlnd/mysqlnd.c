@@ -30,9 +30,6 @@
 /* for php_get_current_user() */
 #include "ext/standard/basic_functions.h"
 
-/* the server doesn't support 4byte utf8, but let's make it forward compatible */
-#define MYSQLND_MAX_ALLOWED_USER_LEN	256  /* 64 char * 4byte */
-#define MYSQLND_MAX_ALLOWED_DB_LEN		256  /* 64 char * 4byte */
 /*
   TODO :
   - Don't bind so tightly the metadata with the result set. This means
@@ -1066,7 +1063,7 @@ MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, const char *achtung_wild TSRMLS_DC)
 {
 	/* db + \0 + wild + \0 (for wild) */
-	char buff[MYSQLND_MAX_ALLOWED_DB_LEN * 4 * 2 + 1 + 1], *p;
+	char buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p;
 	size_t table_len, wild_len;
 	MYSQLND_RES *result = NULL;
 	DBG_ENTER("mysqlnd_conn::list_fields");
@@ -1074,14 +1071,14 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 
 	p = buff;
 	if (table && (table_len = strlen(table))) {
-		size_t to_copy = MIN(table_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4);
+		size_t to_copy = MIN(table_len, MYSQLND_MAX_ALLOWED_DB_LEN);
 		memcpy(p, table, to_copy);
 		p += to_copy;
 		*p++ = '\0';
 	}
 
 	if (achtung_wild && (wild_len = strlen(achtung_wild))) {
-		size_t to_copy = MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4);
+		size_t to_copy = MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN);
 		memcpy(p, achtung_wild, to_copy);
 		p += to_copy;
 		*p++ = '\0';
