@@ -2089,6 +2089,8 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		/* Set the executed flag to 0 to reallocate columns on next execute */
+		stmt->executed = 0;
 		return 0;
 	}
 
