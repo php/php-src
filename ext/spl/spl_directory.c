@@ -1187,7 +1187,10 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 		int path_len;
 		char *path = spl_filesystem_object_get_pathname(intern, &path_len TSRMLS_CC);
 		if (path) {
-			spl_filesystem_object_create_info(intern, path, path_len, 1, ce, return_value TSRMLS_CC);
+			char *dpath = estrndup(path, path_len);
+			path_len = php_dirname(dpath, path_len);
+			spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value TSRMLS_CC);
+			efree(dpath);
 		}
 	}
 
