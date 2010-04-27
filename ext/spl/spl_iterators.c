@@ -2080,7 +2080,7 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Cannot seek to %ld which is behind offset %ld plus count %ld", pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
-	if (instanceof_function(intern->inner.ce, spl_ce_SeekableIterator TSRMLS_CC)) {
+	if (pos != intern->current.pos && instanceof_function(intern->inner.ce, spl_ce_SeekableIterator TSRMLS_CC)) {
 		MAKE_STD_ZVAL(zpos);
 		ZVAL_LONG(zpos, pos);
 		spl_dual_it_free(intern TSRMLS_CC);
