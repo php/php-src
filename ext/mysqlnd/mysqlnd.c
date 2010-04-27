@@ -1074,14 +1074,16 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 
 	p = buff;
 	if (table && (table_len = strlen(table))) {
-		memcpy(p, table, MIN(table_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4));
-		p += table_len;
+		size_t to_copy = MIN(table_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4);
+		memcpy(p, table, to_copy);
+		p += to_copy;
 		*p++ = '\0';
 	}
 
 	if (achtung_wild && (wild_len = strlen(achtung_wild))) {
-		memcpy(p, achtung_wild, MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4));
-		p += wild_len;
+		size_t to_copy = MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4);
+		memcpy(p, achtung_wild, to_copy);
+		p += to_copy;
 		*p++ = '\0';
 	}
 
