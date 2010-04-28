@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed handling of session variable serialization on certain prefix
   characters. Reported by Stefan Esser (Ilia)
 
+- Fixed bug #51671 (imagefill does not work correctly for small images).
+  (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
   after calling nextRowset). (Pierrick)
 - Fixed bug #51629 (CURLOPT_FOLLOWLOCATION error message is misleading).

@@ -2000,7 +2000,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 				goto done;
 			}
 			gdImageSetPixel(im, ix, iy, nc);
-		} while(ix++ < (im->sx -1));
+		} while(iy++ < (im->sy -1));
 		goto done;
 	}
 
