@@ -1514,7 +1514,7 @@ ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, do
 }
 /* }}} */
 
-ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate TSRMLS_DC) /* {{{ */
+ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, const char *str, int duplicate TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 	zval *z_key;
@@ -1532,7 +1532,7 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, ch
 }
 /* }}} */
 
-ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC) /* {{{ */
+ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, int duplicate TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 	zval *z_key;
@@ -3221,7 +3221,7 @@ ZEND_API int zend_declare_property_double(zend_class_entry *ce, char *name, int 
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, const char *value, int access_type TSRMLS_DC) /* {{{ */
 {
 	zval *property;
 	int len = strlen(value);
@@ -3238,7 +3238,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int name_length, char *value, int value_len, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int name_length, const char *value, int value_len, int access_type TSRMLS_DC) /* {{{ */
 {
 	zval *property;
 
