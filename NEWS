@@ -54,6 +54,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when 
   an invalid option is provided). (Ilia)
+- Fixed bug #51128 (imagefill() doesn't work with large images). (Pierre)
 - Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)
 - Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
