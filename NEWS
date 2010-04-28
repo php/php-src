@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
+
+- Fixed bug #51671 (imagefill does not work correctly for small images).
+  (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
   after calling nextRowset). (Pierrick)
 - Fixed bug #51647 Certificate file without private key (pk in another file)
