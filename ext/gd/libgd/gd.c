@@ -1889,8 +1889,8 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	}
 
 	/* Do not use the 4 neighbors implementation with
-   * small images
-   */
+	 * small images
+	 */
 	if (im->sx < 4) {
 		int ix = x, iy = y, c;
 		do {
