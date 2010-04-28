@@ -175,7 +175,7 @@ array(2) {
 }
 
 Warning: oci_execute(): ORA-01002: %s
-ORA-06512: at "SYSTEM.REFCURPKG", line %d
+ORA-06512: at "%s.REFCURPKG", line %d
 ORA-06512: at line %d in %s on line %d
 Fetch Row  from PL/SQL
 NULL
@@ -218,7 +218,7 @@ array(2) {
 }
 
 Warning: oci_execute(): ORA-01002: %s
-ORA-06512: at "SYSTEM.REFCURPKG", line %d
+ORA-06512: at "%s.REFCURPKG", line %d
 ORA-06512: at line %d in %s on line %d
 Fetch Row  from PL/SQL
 NULL
