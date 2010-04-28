@@ -2508,7 +2508,7 @@ PHP_FUNCTION(sqlite_array_query)
 		return;
 	}
 
-	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
+	rres = (struct php_sqlite_result *)ecalloc(1, sizeof(*rres));
 	sqlite_query(NULL, db, sql, sql_len, (int)mode, 0, NULL, &rres, NULL TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
 		if (rres) {
@@ -2624,7 +2624,7 @@ PHP_FUNCTION(sqlite_single_query)
 		return;
 	}
 
-	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
+	rres = (struct php_sqlite_result *)ecalloc(1, sizeof(*rres));
 	sqlite_query(NULL, db, sql, sql_len, PHPSQLITE_NUM, 0, NULL, &rres, NULL TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
 		if (rres) {
