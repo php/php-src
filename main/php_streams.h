@@ -480,6 +480,7 @@ END_EXTERN_C()
 #define USE_PATH                        0x00000001
 #define IGNORE_URL                      0x00000002
 #define REPORT_ERRORS                   0x00000008
+#define ENFORCE_SAFE_MODE               0 /* for BC only */
 
 /* If you don't need to write to the stream, but really need to
  * be able to seek, use this flag in your options. */
