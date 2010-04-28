@@ -86,6 +86,7 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    
   an invalid option is provided). (Ilia)
+- Fixed bug #51128 (imagefill() doesn't work with large images). (Pierre)
 - Fixed bug #51096 ('last day' and 'first day' are handled incorrectly when
   parsing date strings). (Derick)
 - Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)

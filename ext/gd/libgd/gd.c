@@ -1845,9 +1845,9 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 struct seg {int y, xl, xr, dy;};
 
 /* max depth of stack */
-#define FILL_MAX 1200000
+#define FILL_MAX ((int)(im->sy*im->sx)/4)
 #define FILL_PUSH(Y, XL, XR, DY) \
-    if (sp<stack+FILL_MAX*10 && Y+(DY)>=0 && Y+(DY)<wy2) \
+    if (sp<stack+FILL_MAX && Y+(DY)>=0 && Y+(DY)<wy2) \
     {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
 
 #define FILL_POP(Y, XL, XR, DY) \
