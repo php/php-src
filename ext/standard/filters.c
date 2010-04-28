@@ -1914,7 +1914,7 @@ typedef enum _php_chunked_filter_state {
 
 typedef struct _php_chunked_filter_data {
 	php_chunked_filter_state state;
-	int chunk_size;
+	size_t chunk_size;
 	int persistent;
 } php_chunked_filter_data;
 
@@ -1991,7 +1991,7 @@ static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
 					continue;
 				}
 			case CHUNK_BODY:
-				if (end - p >= data->chunk_size) {
+				if ((size_t) (end - p) >= data->chunk_size) {
 					if (p != out) {
 						memmove(out, p, data->chunk_size);
 					}
