@@ -223,21 +223,31 @@ php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
 
 	DBG_ENTER("php_mysqlnd_read_error_from_line");
 
+	*error_no = CR_UNKNOWN_ERROR;
+	memcpy(sqlstate, unknown_sqlstate, MYSQLND_SQLSTATE_LENGTH);
+
 	if (buf_len > 2) {
 		*error_no = uint2korr(p);
 		p+= 2;
-		/* sqlstate is following */
+		/*
+		  sqlstate is following. No need to check for buf_left_len as we checked > 2 above,
+		  if it was >=2 then we would need a check
+		*/
 		if (*p == '#') {
-			memcpy(sqlstate, ++p, MYSQLND_SQLSTATE_LENGTH);
-			p+= MYSQLND_SQLSTATE_LENGTH;
+			++p;
+			if ((buf_len - (p - buf)) >= MYSQLND_SQLSTATE_LENGTH) {
+				memcpy(sqlstate, p, MYSQLND_SQLSTATE_LENGTH);
+				p+= MYSQLND_SQLSTATE_LENGTH;
+			} else {
+				goto end;
+			}
 		}
-		error_msg_len = buf_len - (p - buf);
-		error_msg_len = MIN(error_msg_len, error_buf_len - 1);
-		memcpy(error, p, error_msg_len);
-	} else {
-		*error_no = CR_UNKNOWN_ERROR;
-		memcpy(sqlstate, unknown_sqlstate, MYSQLND_SQLSTATE_LENGTH);
+		if ((buf_len - (p - buf)) > 0) {
+			error_msg_len = MIN((buf_len - (p - buf)), error_buf_len - 1);
+			memcpy(error, p, error_msg_len);
+		}
 	}
+end:
 	sqlstate[MYSQLND_SQLSTATE_LENGTH] = '\0';
 	error[error_msg_len]= '\0';
 
@@ -442,11 +452,13 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 /* }}} */
 
 
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SHA1_MAX_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 128)
+
 /* {{{ php_mysqlnd_auth_write */
 static
 size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 {
-	char buffer[1024];
+	char buffer[AUTH_WRITE_BUFFER_LEN];
 	register char *p= buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 	int len;
 	register MYSQLND_PACKET_AUTH *packet= (MYSQLND_PACKET_AUTH *) _packet;
@@ -476,7 +488,7 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 	p+= 23;
 
 	if (!packet->send_half_packet) {
-		len = strlen(packet->user);
+		len = MIN(strlen(packet->user), MYSQLND_MAX_ALLOWED_USER_LEN);
 		memcpy(p, packet->user, len);
 		p+= len;
 		*p++ = '\0';
@@ -484,10 +496,10 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		/* copy scrambled pass*/
 		if (packet->password && packet->password[0]) {
 			/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
-			int1store(p, 20);
+			int1store(p, SHA1_MAX_LENGTH);
 			p++;
 			php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
-			p+= 20;
+			p+= SHA1_MAX_LENGTH;
 		} else {
 			/* Zero length */
 			int1store(p, 0);
@@ -495,8 +507,9 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		}
 
 		if (packet->db) {
-			memcpy(p, packet->db, packet->db_len);
-			p+= packet->db_len;
+			size_t real_db_len = MIN(MYSQLND_MAX_ALLOWED_DB_LEN, packet->db_len);
+			memcpy(p, packet->db, real_db_len);
+			p+= real_db_len;
 			*p++= '\0';
 		}
 		/* Handle CLIENT_CONNECT_WITH_DB */
@@ -568,10 +581,11 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	/* There is a message */
 	if (packet->header.size > (size_t) (p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
-		packet->message = mnd_pestrndup((char *)p, MIN(i, buf_len - (p - begin)), FALSE);
-		packet->message_len = i;
+		packet->message_len = MIN(i, buf_len - (p - begin));
+		packet->message = mnd_pestrndup((char *)p, packet->message_len, FALSE);
 	} else {
 		packet->message = NULL;
+		packet->message_len = 0;
 	}
 
 	DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%ld server_status=%d warnings=%d",
@@ -795,6 +809,9 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			/*
 			  First byte in the packet is the field count.
 			  Thus, the name is size - 1. And we add 1 for a trailing \0.
+			  Because we have BAIL_IF_NO_MORE_DATA before the switch, we are guaranteed
+			  that packet->header.size is > 0. Which means that len can't underflow, that
+			  would lead to 0 byte allocation but 2^32 or 2^64 bytes copied.
 			*/
 			len = packet->header.size - 1;
 			packet->info_or_local_file = mnd_emalloc(len + 1);

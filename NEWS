@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   (Charles_Duffy at dell dot com )
 - Fixed possible buffer overflows in mysqlnd_list_fields,  mysqlnd_change_user.
   (Andrey)
+- Fixed possible buffer overflows when handling error packets in mysqlnd.
+  Reported by Stefan Esser. (Andrey)
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
