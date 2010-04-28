@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed a possible dechunking filter buffer overflow. Reported by Stefan Esser.
+  (Pierre)
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported 
   by Mateusz Kocielski. (Ilia)
 - Fixed string format validation inside phar extension. Reported by Stefan
