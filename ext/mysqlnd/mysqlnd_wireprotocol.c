@@ -70,7 +70,7 @@
 
 static const char *unknown_sqlstate= "HY000";
 
-char * const mysqlnd_empty_string = "";
+const char * const mysqlnd_empty_string = "";
 
 /* Used in mysqlnd_debug.c */
 const char mysqlnd_read_header_name[]	= "mysqlnd_read_header";
@@ -927,13 +927,13 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		BAIL_IF_NO_MORE_DATA;
 		switch ((len)) {
 			case 0:
-				*(char **)(((char*)meta) + rset_field_offsets[i]) = mysqlnd_empty_string;
+				*(const char **)(((char*)meta) + rset_field_offsets[i]) = mysqlnd_empty_string;
 				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = 0;
 				break;
 			case MYSQLND_NULL_LENGTH:
 				goto faulty_or_fake;
 			default:
-				*(char **)(((char *)meta) + rset_field_offsets[i]) = (char *)p;
+				*(const char **)(((char *)meta) + rset_field_offsets[i]) = (const char *)p;
 				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = len;
 				p += len;
 				total_len += len + 1;
@@ -989,6 +989,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		(len = php_mysqlnd_net_field_length(&p)) &&
 		len != MYSQLND_NULL_LENGTH)
 	{
+		BAIL_IF_NO_MORE_DATA;
 		DBG_INF_FMT("Def found, length %lu, persistent=%d", len, packet->persistent_alloc);
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		memcpy(meta->def, p, len);
@@ -996,8 +997,6 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		meta->def_length = len;
 		p += len;
 	}
-
-	BAIL_IF_NO_MORE_DATA;
 
 	DBG_INF_FMT("allocing root. persistent=%d", packet->persistent_alloc);
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
