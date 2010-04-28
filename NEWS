@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed handling of session variable serialization on certain prefix
   characters. Reported by Stefan Esser (Ilia)
+- Fixed a possible arbitrary memory access inside sqlite extension. Reported
+  by Mateusz Kocielski. (Ilia)  
 
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
