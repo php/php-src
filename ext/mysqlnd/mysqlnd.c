@@ -780,8 +780,10 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d", host?host:"", user?user:"", db?db:"", port, mysql_flags);
 
 	if (!conn) {
-		conn = mysqlnd_init(FALSE);
 		self_alloced = TRUE;
+		if (!(conn = mysqlnd_init(FALSE))) {
+			DBG_RETURN(NULL);
+		}
 	}
 
 	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket, mysql_flags TSRMLS_CC);
@@ -1094,7 +1096,9 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 	   MyISAM goes to 2500 BIT columns, double it for safety.
 	 */
 	result = mysqlnd_result_init(5000, conn->persistent TSRMLS_CC);
-
+	if (!result) {
+		DBG_RETURN(NULL);
+	}
 
 	if (FAIL == result->m.read_result_metadata(result, conn TSRMLS_CC)) {
 		DBG_ERR("Error ocurred while reading metadata");
@@ -1105,6 +1109,11 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 	result->type = MYSQLND_RES_NORMAL;
 	result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
 	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+	if (!result->unbuf) {
+		DBG_ERR("OOM");
+		result->m.free_result(result, TRUE TSRMLS_CC);
+		DBG_RETURN(NULL);	
+	}
 	result->unbuf->eof_reached = TRUE;
 
 	DBG_RETURN(result);
@@ -1933,7 +1942,13 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			/* when num_commands is 0, then realloc will be effectively a malloc call, internally */
 			conn->options.init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1),
 														conn->persistent);
+			if (!conn->options.init_commands) {
+				DBG_RETURN(FAIL);			
+			}
 			conn->options.init_commands[conn->options.num_commands] = mnd_pestrdup(value, conn->persistent);
+			if (!conn->options.init_commands[conn->options.num_commands]) {
+				DBG_RETURN(FAIL);
+			}
 			++conn->options.num_commands;
 			break;
 		case MYSQL_READ_DEFAULT_FILE:
@@ -1946,6 +1961,10 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			break;
 		case MYSQL_SET_CHARSET_NAME:
 			DBG_INF("MYSQL_SET_CHARSET_NAME");
+			if (conn->options.charset_name) {
+				mnd_pefree(conn->options.charset_name, conn->persistent);
+				conn->options.charset_name = NULL;
+			}
 			conn->options.charset_name = mnd_pestrdup(value, conn->persistent);
 			DBG_INF_FMT("charset=%s", conn->options.charset_name);
 			break;
