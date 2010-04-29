@@ -127,6 +127,9 @@
 		strlcpy(error_info.error, (c), sizeof(error_info.error)); \
 	}
 
+#define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR(error_info, CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
+
+
 #define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(stmt->error_info, a, b, c)
 
 
@@ -157,6 +160,7 @@ extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 
 PHPAPI extern const char * const mysqlnd_old_passwd;
 PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
+PHPAPI extern const char * const mysqlnd_out_of_memory;
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
 
