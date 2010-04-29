@@ -1842,7 +1842,6 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
 	ret = PACKET_READ(chg_user_resp, conn);
 	conn->error_info = chg_user_resp->error_info;
-	PACKET_FREE(chg_user_resp);
 
 	if (conn->error_info.error_no) {
 		ret = FAIL;
@@ -1876,6 +1875,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		DBG_ERR(mysqlnd_old_passwd);
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);	
 	}
+	PACKET_FREE(chg_user_resp);
 
 	SET_ERROR_AFF_ROWS(conn);
 
