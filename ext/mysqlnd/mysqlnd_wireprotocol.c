@@ -705,7 +705,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	MYSQLND_PACKET_COMMAND *packet= (MYSQLND_PACKET_COMMAND *) _packet;
 	MYSQLND_NET *net = conn->net;
 	unsigned int error_reporting = EG(error_reporting);
-	size_t written;
+	size_t written = 0;
 
 	DBG_ENTER("php_mysqlnd_cmd_write");
 	/*
@@ -734,6 +734,9 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 		size_t tmp_len = packet->arg_len + 1 + MYSQLND_HEADER_SIZE, ret;
 		zend_uchar *tmp, *p;
 		tmp = (tmp_len > net->cmd_buffer.length)? mnd_emalloc(tmp_len):net->cmd_buffer.buffer;
+		if (!tmp) {
+			goto end;
+		}
 		p = tmp + MYSQLND_HEADER_SIZE; /* skip the header */
 
 		int1store(p, packet->command);
@@ -748,6 +751,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 		}
 		written = ret;
 	}
+end:
 	if (error_reporting) {
 		/* restore error reporting */
 		EG(error_reporting) = error_reporting;
