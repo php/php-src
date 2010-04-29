@@ -1,7 +1,7 @@
 --TEST--
 unset() CV 7 (indirect unset() of global variable in import_request_variables())
 --SKIPIF--
-<?php if(PHP_VERSION_ID < 503099){ die('Not needed anymore without register_globals'); } ?>
+<?php if(PHP_VERSION_ID < 503099){ die('skip not needed anymore without register_globals'); } ?>
 --GET--
 x=2
 --FILE--
