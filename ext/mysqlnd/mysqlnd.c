@@ -61,6 +61,7 @@ PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL
 
 PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
 PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
+PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
@@ -524,16 +525,25 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 			transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
 		}
+		if (!transport) {
+			goto err; /* OOM */
+		}
 		DBG_INF_FMT("transport=%s", transport);
 		conn->scheme = mnd_pestrndup(transport, transport_len, conn->persistent);
 		conn->scheme_len = transport_len;
 		efree(transport); /* allocated by spprintf */
 		transport = NULL;
+		if (!conn->scheme) {
+			goto err; /* OOM */
+		}
 	}
 
 	greet_packet = conn->protocol->m.get_greet_packet(conn->protocol, FALSE TSRMLS_CC);
 	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
 	ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!greet_packet || !auth_packet || !ok_packet) {
+		goto err; /* OOM */
+	}
 
 	if (FAIL == conn->net->m.connect(conn->net, conn->scheme, conn->scheme_len, conn->persistent, &errstr, &errcode TSRMLS_CC)) {
 		goto err;
@@ -602,6 +612,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	auth_packet->client_flags= mysql_flags;
 
 	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
+	if (!conn->scramble) {
+		goto err; /* OOM */
+	}
 	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
 	
 	if (!PACKET_WRITE(auth_packet, conn)) {
@@ -668,20 +681,35 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		conn->connect_or_select_db = mnd_pestrndup(db, db_len, conn->persistent);
 		conn->connect_or_select_db_len = db_len;
 
-		if (!unix_socket) {
+		if (!conn->user || !conn->passwd || !conn->connect_or_select_db) {
+			goto err; /* OOM */
+		}
 
+		if (!unix_socket) {
 			conn->host = mnd_pestrdup(host, conn->persistent);
+			if (!conn->host) {
+				goto err; /* OOM */
+			}
 			conn->host_len = strlen(conn->host);
 			{
 				char *p;
 				spprintf(&p, 0, "%s via TCP/IP", conn->host);
+				if (!p) {
+					goto err; /* OOM */		
+				}
 				conn->host_info =  mnd_pestrdup(p, conn->persistent);
 				efree(p); /* allocated by spprintf */
+				if (!conn->host_info) {
+					goto err; /* OOM */		
+				}
 			}
 		} else {
 			conn->unix_socket	= mnd_pestrdup(socket, conn->persistent);
-			conn->unix_socket_len = strlen(conn->unix_socket);
 			conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
+			if (!conn->unix_socket || !conn->host_info) {
+				goto err; /* OOM */			
+			}
+			conn->unix_socket_len = strlen(conn->unix_socket);
 		}
 		conn->client_flag		= auth_packet->client_flags;
 		conn->max_packet_size	= auth_packet->max_packet_size;
@@ -720,14 +748,16 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			unsigned int current_command = 0;
 			for (; current_command < conn->options.num_commands; ++current_command) {
 				const char * const command = conn->options.init_commands[current_command];
-				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
-				if (PASS != conn->m->query(conn, command, strlen(command) TSRMLS_CC)) {
-					MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
-					goto err;
-				}
-				if (conn->last_query_type == QUERY_SELECT) {
-					MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
-					result->m.free_result(result, TRUE TSRMLS_CC);
+				if (command) {
+					MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
+					if (PASS != conn->m->query(conn, command, strlen(command) TSRMLS_CC)) {
+						MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
+						goto err;
+					}
+					if (conn->last_query_type == QUERY_SELECT) {
+						MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
+						result->m.free_result(result, TRUE TSRMLS_CC);
+					}
 				}
 			}
 		}
@@ -782,6 +812,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 	if (!conn) {
 		self_alloced = TRUE;
 		if (!(conn = mysqlnd_init(FALSE))) {
+			/* OOM */
 			DBG_RETURN(NULL);
 		}
 	}
@@ -1110,7 +1141,8 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 	result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
 	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
 	if (!result->unbuf) {
-		DBG_ERR("OOM");
+		/* OOM */
+		SET_OOM_ERROR(conn->error_info);
 		result->m.free_result(result, TRUE TSRMLS_CC);
 		DBG_RETURN(NULL);	
 	}
@@ -1252,6 +1284,11 @@ MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn, const char * const
 		}
 		conn->connect_or_select_db = mnd_pestrndup(db, db_len, conn->persistent);
 		conn->connect_or_select_db_len = db_len;
+		if (!conn->connect_or_select_db) {
+			/* OOM */
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+		}
 	}
 	DBG_RETURN(ret);
 }
@@ -1860,10 +1897,16 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		}
 	}
 	if (ret == PASS) {
-		mnd_pefree(conn->user, conn->persistent);
+		if (conn->user) {
+			mnd_pefree(conn->user, conn->persistent);
+		}
 		conn->user = mnd_pestrndup(user, user_len, conn->persistent);
-		mnd_pefree(conn->passwd, conn->persistent);
+
+		if (conn->passwd) {
+			mnd_pefree(conn->passwd, conn->persistent);
+		}
 		conn->passwd = mnd_pestrdup(passwd, conn->persistent);
+
 		if (conn->last_message) {
 			mnd_pefree(conn->last_message, conn->persistent);
 			conn->last_message = NULL;
@@ -1896,6 +1939,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 												const char * const value
 												TSRMLS_DC)
 {
+	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn::set_client_option");
 	DBG_INF_FMT("conn=%llu option=%d", conn->thread_id, option);
 	switch (option) {
@@ -1915,7 +1959,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-			conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
+			ret = conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
 #if PHP_MAJOR_VERSION >= 6
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
@@ -1943,11 +1987,11 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			conn->options.init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1),
 														conn->persistent);
 			if (!conn->options.init_commands) {
-				DBG_RETURN(FAIL);			
+				goto oom;
 			}
 			conn->options.init_commands[conn->options.num_commands] = mnd_pestrdup(value, conn->persistent);
 			if (!conn->options.init_commands[conn->options.num_commands]) {
-				DBG_RETURN(FAIL);
+				goto oom;
 			}
 			++conn->options.num_commands;
 			break;
@@ -1966,6 +2010,9 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 				conn->options.charset_name = NULL;
 			}
 			conn->options.charset_name = mnd_pestrdup(value, conn->persistent);
+			if (!conn->options.charset_name) {
+				goto oom;
+			}
 			DBG_INF_FMT("charset=%s", conn->options.charset_name);
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
@@ -1990,9 +2037,12 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			/* not sure, todo ? */
 #endif
 		default:
-			DBG_RETURN(FAIL);
+			ret = FAIL;
 	}
-	DBG_RETURN(PASS);
+	DBG_RETURN(ret);
+oom:
+	SET_OOM_ERROR(conn->error_info);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -2176,6 +2226,9 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 
 	DBG_ENTER("mysqlnd_init");
 	DBG_INF_FMT("persistent=%d", persistent);
+	if (!ret) {
+		DBG_RETURN(NULL);
+	}
 
 	ret->persistent = persistent;
 	ret->m = mysqlnd_conn_methods;
