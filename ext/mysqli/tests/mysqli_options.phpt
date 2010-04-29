@@ -53,6 +53,10 @@ already through other measures.
 
 	$link = mysqli_init();
 
+	/* set it twice, checking if memory for the previous one is correctly freed */
+	mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "utf8");
+	mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "latin1");
+
 	if (!is_null($tmp = @mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
