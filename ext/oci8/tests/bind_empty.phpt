@@ -7,11 +7,11 @@ binding empty values
 
 require dirname(__FILE__).'/connect.inc';
 
-$drop = "DROP table bind_test";
+$drop = "DROP table bind_empty_tab";
 $statement = oci_parse($c, $drop);
 @oci_execute($statement);
 
-$create = "CREATE table bind_test(name VARCHAR(10))";
+$create = "CREATE table bind_empty_tab(name VARCHAR(10))";
 $statement = oci_parse($c, $create);
 oci_execute($statement);
 
@@ -19,7 +19,7 @@ oci_execute($statement);
 echo "Test 1\n";
 
 $name = null;
-$stmt = oci_parse($c, "UPDATE bind_test SET name=:name");
+$stmt = oci_parse($c, "UPDATE bind_empty_tab SET name=:name");
 oci_bind_by_name($stmt, ":name", $name);
 
 var_dump(oci_execute($stmt));
@@ -27,26 +27,26 @@ var_dump(oci_execute($stmt));
 echo "Test 2\n";
 
 $name = "";
-$stmt = oci_parse($c, "UPDATE bind_test SET name=:name");
+$stmt = oci_parse($c, "UPDATE bind_empty_tab SET name=:name");
 oci_bind_by_name($stmt, ":name", $name);
 
 var_dump(oci_execute($stmt));
 
 echo "Test 3\n";
 
-$stmt = oci_parse($c, "INSERT INTO bind_test (NAME) VALUES ('abc')");
+$stmt = oci_parse($c, "INSERT INTO bind_empty_tab (NAME) VALUES ('abc')");
 $res = oci_execute($stmt);
 
-$stmt = oci_parse($c, "INSERT INTO bind_test (NAME) VALUES ('def')");
+$stmt = oci_parse($c, "INSERT INTO bind_empty_tab (NAME) VALUES ('def')");
 $res = oci_execute($stmt);
 
 $name = null;
-$stmt = oci_parse($c, "UPDATE bind_test SET name=:name WHERE NAME = 'abc'");
+$stmt = oci_parse($c, "UPDATE bind_empty_tab SET name=:name WHERE NAME = 'abc'");
 oci_bind_by_name($stmt, ":name", $name);
 
 var_dump(oci_execute($stmt));
 
-$stid = oci_parse($c, "select * from bind_test order by 1");
+$stid = oci_parse($c, "select * from bind_empty_tab order by 1");
 oci_execute($stid);
 oci_fetch_all($stid, $res);
 var_dump($res);
@@ -54,26 +54,43 @@ var_dump($res);
 echo "Test 4\n";
 
 $name = "";
-$stmt = oci_parse($c, "UPDATE bind_test SET name=:name WHERE NAME = 'def'");
+$stmt = oci_parse($c, "UPDATE bind_empty_tab SET name=:name WHERE NAME = 'def'");
 oci_bind_by_name($stmt, ":name", $name);
 
 var_dump(oci_execute($stmt));
 
-$stid = oci_parse($c, "select * from bind_test order by 1");
+$stid = oci_parse($c, "select * from bind_empty_tab order by 1");
 oci_execute($stid);
 oci_fetch_all($stid, $res);
 var_dump($res);
 
+echo "Test 5\n";
+
+$av = $bv = 'old';
+$s = oci_parse($c, "begin :bv := null; end; ");
+oci_bind_by_name($s, ":bv", $bv);
+oci_execute($s);
+var_dump($av);
+var_dump($bv);
+
+echo "Test 6\n";
+
+$av = $bv = null;
+$s = oci_parse($c, "begin :bv := null; end; ");
+oci_bind_by_name($s, ":bv", $bv);
+oci_execute($s);
+var_dump($av);
+var_dump($bv);
 
 // Clean up
 
-$drop = "DROP table bind_test";
+$drop = "DROP table bind_empty_tab";
 $statement = oci_parse($c, $drop);
 @oci_execute($statement);
 
-echo "Done\n";
-
 ?>
+===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 Test 1
 bool(true)
@@ -101,4 +118,10 @@ array(1) {
     NULL
   }
 }
-Done
+Test 5
+string(3) "old"
+NULL
+Test 6
+NULL
+NULL
+===DONE===
