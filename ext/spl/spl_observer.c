@@ -139,6 +139,11 @@ static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *thi
 		int hash_len = sizeof(zend_object_value);
 
 #if HAVE_PACKED_OBJECT_VALUE
+
+		if (hash_len_ptr) {
+			*hash_len_ptr = hash_len;
+		}
+
 		return (char*)&Z_OBJVAL_P(obj);
 #else
 		char *hash = emalloc((hash_len+1)*sizeof(char *));
@@ -150,13 +155,13 @@ static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *thi
 
 		strncpy(hash, (char *)&zvalue, hash_len);
 		hash[hash_len] = 0;
-#endif
 
 		if (hash_len_ptr) {
 			*hash_len_ptr = hash_len;
 		}
-		
+
 		return hash;
+#endif
 	}
 }
 
