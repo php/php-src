@@ -1,7 +1,7 @@
 --TEST--
 import_request_variables() tests
 --SKIPIF--
-<?php if(PHP_VERSION_ID < 503099){ die('skip not needed anymore without register_globals'); } ?>
+<?php if(PHP_VERSION_ID >= 50399){ die('skip not needed anymore without register_globals'); } ?>
 --GET--
 a=1&b=heh&c=3&d[]=5&GLOBALS=test&1=hm
 --POST--
