@@ -880,7 +880,15 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 		}
 		zval_dtor(val);
 		ZVAL_NULL(val);
-	} else if (Z_TYPE_P(bind->zval) == IS_STRING && Z_STRLEN_P(bind->zval) > 0) {
+	} else if (Z_TYPE_P(bind->zval) == IS_STRING
+			   && Z_STRLEN_P(bind->zval) > 0
+			   && Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] != '\0') {
+		/* The post- PHP 5.3 feature for "interned" strings disallows
+		 * their reallocation but (i) any IN binds either interned or
+		 * not should already be null terminated and (ii) for OUT
+		 * binds, php_oci_bind_out_callback() should have allocated a
+		 * new string that can be realloced.
+		 */
 		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRLEN_P(bind->zval)+1);
 		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
 	} else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
