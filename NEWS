@@ -26,6 +26,7 @@
 - Added ReflectionZendExtension class. (Johannes)
 - Added command line option --rz to CLI. (Johannes)
 - Added closure $this support back. (Stas)
+- Added SplObjectStorage::getHash() hook. (Etienne)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
