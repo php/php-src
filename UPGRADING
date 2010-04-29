@@ -54,6 +54,32 @@ UPGRADE NOTES - PHP X.Y
 
   to your php.ini to preserve pre-PHPX.Y behavior.
 
+- Deprecated ini directives will now throw an E_CORE_WARNING's 
+  instead of the previous E_WARNING's.
+
+  The following directives are marked as deprecated:
+  - magic_quotes_gpc
+  - magic_quotes_runtime
+  - magic_quotes_sybase
+
+- The following directives, which indicates a removed feature 
+  in PHP will now throw an E_CORE_ERROR upon startup like the 
+  deprecation warnings.
+
+  The following directives are no longer available:
+  - allow_call_time_pass_reference
+  - define_syslog_variables
+  - highlight.bg
+  - register_globals
+  - register_long_arrays
+  - safe_mode
+  - safe_mode_gid
+  - safe_mode_include_dir
+  - safe_mode_exec_dir
+  - safe_mode_allowed_env_vars
+  - safe_mode_protected_env_vars
+  - zend.ze1_compatibility_mode
+
 =============================
 2. Reserved words and classes
 =============================
@@ -84,9 +110,44 @@ UPGRADE NOTES - PHP X.Y
 
 - 
 
-==============
-7. Extensions:
-==============
+==========
+7. Removed
+==========
+
+    a. removed features
+
+       - register_globals
+       - register_long_arrays
+       - Safe mode
+       - Session extension bug compatibility mode
+       - y2k_compliance mode
+
+    b. removed ini directives
+
+       - define_syslog_variables
+       - register_globals
+       - register_long_arrays
+       - safe_mode
+       - safe_mode_gid
+       - safe_mode_include_dir
+       - safe_mode_exec_dir
+       - safe_mode_allowed_env_vars
+       - safe_mode_protected_env_vars
+       - session.bug_compat42
+       - session.bug_compat_warn
+       - y2k_compliance
+
+    c. removed functions
+
+       - define_syslog_variables()
+       - import_request_variables()
+       - session_is_registered()
+       - session_register()
+       - session_unregister()
+
+=============
+8. Extensions
+=============
 
      a. moved out to PECL and actively maintained there
 
@@ -105,31 +166,31 @@ UPGRADE NOTES - PHP X.Y
         - 
 
 ==========================
-8. Changes in SAPI support
+9. Changes in SAPI support
 ==========================
 
 - 
 
-============================
-9. Changes in INI directives
-============================
+=============================
+10. Changes in INI directives
+=============================
 
 - 
 
 ====================
-10. Syntax additions
+11. Syntax additions
 ====================
 
 - 
 
 ===================
-11. Windows support
+12. Windows support
 ===================
 
 - 
 
 ===================
-12. New in PHP X.Y:
+13. New in PHP X.Y:
 ===================
 
      a. New libraries
