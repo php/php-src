@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #51688 (ini per dir crashes when invalid document root  are given).
+  (Pierre)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
