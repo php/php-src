@@ -2898,7 +2898,7 @@ AC_DEFUN([PHP_GENERATE_DTRACE],[
 
   cat >>Makefile.objects<<EOF
 $1.o: \$(PHP_DTRACE_OBJS)
-	dtrace -G -o $1.o -s $1 $obj
+	dtrace -G -o $abs_builddir/$1.o -s $abs_srcdir/$1 $obj
 EOF
 
 ])
@@ -2928,7 +2928,7 @@ dnl
 dnl Generate platform specific dtrace header
 dnl
 AC_DEFUN([PHP_INIT_DTRACE], [
-  dtrace -h -C -s $1 -o $2
-  $SED -ibak 's,PHP_,DTRACE_,g' $2
+  dtrace -h -C -s $abs_srcdir/$1 -o $abs_builddir/$2
+  $SED -ibak 's,PHP_,DTRACE_,g' $abs_builddir/$2
 ])
 
