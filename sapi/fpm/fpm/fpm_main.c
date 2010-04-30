@@ -753,6 +753,9 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 
 		if (!IS_ABSOLUTE_PATH(path, path_len)) {
 			real_path = tsrm_realpath(path, NULL TSRMLS_CC);
+			if (real_path == NULL) {
+				return;
+			}
 			real_path_len = strlen(real_path);
 			path = real_path;
 			path_len = real_path_len;
