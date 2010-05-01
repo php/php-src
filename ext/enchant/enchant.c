@@ -728,6 +728,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 	if (enchant_dict_check(pdict->pdict, word, wordlen) > 0) {
 		int n_sugg;
+		size_t n_sugg_st;
 		char **suggs;
 
 		if (!sugg && ZEND_NUM_ARGS() == 2) {
@@ -736,7 +737,8 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 		array_init(sugg);
 
-		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, (size_t *) &n_sugg);
+		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, n_sugg_st);
+		memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));
 		if (suggs && n_sugg) {
 			int i;
 			for (i = 0; i < n_sugg; i++) {
@@ -781,6 +783,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 	char **suggs;
 	enchant_dict *pdict;
 	int n_sugg;
+	size_t n_sugg_st;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
 		RETURN_FALSE;
@@ -788,7 +791,8 @@ PHP_FUNCTION(enchant_dict_suggest)
 
 	PHP_ENCHANT_GET_DICT;
 
-	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, (size_t *)&n_sugg);
+	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
+	memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));
 	if (suggs && n_sugg) {
 		int i;
 
