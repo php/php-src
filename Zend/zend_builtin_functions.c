@@ -1148,7 +1148,7 @@ ZEND_FUNCTION(get_included_files)
 /* }}} */
 
 
-/* {{{ proto void trigger_error(string messsage [, int error_type])
+/* {{{ proto void trigger_error(string message [, int error_type])
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
