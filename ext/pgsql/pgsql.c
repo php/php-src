@@ -3855,7 +3855,7 @@ PHP_FUNCTION(pg_result_error_field)
 /* }}} */
 #endif
 
-/* {{{ proto int pg_connection_status(resource connnection)
+/* {{{ proto int pg_connection_status(resource connection)
    Get connection status */
 PHP_FUNCTION(pg_connection_status)
 {
@@ -3876,7 +3876,7 @@ PHP_FUNCTION(pg_connection_status)
 /* }}} */
 
 #if HAVE_PGTRANSACTIONSTATUS
-/* {{{ proto int pg_transaction_status(resource connnection)
+/* {{{ proto int pg_transaction_status(resource connection)
    Get transaction status */
 PHP_FUNCTION(pg_transaction_status)
 {
