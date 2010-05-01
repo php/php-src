@@ -434,12 +434,12 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_status, 0, 0, 1)
-	ZEND_ARG_INFO(0, connnection)
+	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PGTRANSACTIONSTATUS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_transaction_status, 0, 0, 1)
-	ZEND_ARG_INFO(0, connnection)
+	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -4278,7 +4278,7 @@ PHP_FUNCTION(pg_result_error_field)
 /* }}} */
 #endif
 
-/* {{{ proto int pg_connection_status(resource connnection)
+/* {{{ proto int pg_connection_status(resource connection)
    Get connection status */
 PHP_FUNCTION(pg_connection_status)
 {
@@ -4299,7 +4299,7 @@ PHP_FUNCTION(pg_connection_status)
 /* }}} */
 
 #if HAVE_PGTRANSACTIONSTATUS
-/* {{{ proto int pg_transaction_status(resource connnection)
+/* {{{ proto int pg_transaction_status(resource connection)
    Get transaction status */
 PHP_FUNCTION(pg_transaction_status)
 {
