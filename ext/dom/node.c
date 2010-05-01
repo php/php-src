@@ -1921,7 +1921,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			inclusive_ns_prefixes[nscount] = NULL;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, 
-				"Inclusive namespace prefixes only allowed in exlcusive mode.");
+				"Inclusive namespace prefixes only allowed in exclusive mode.");
 		}
 	}
 
