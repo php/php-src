@@ -179,7 +179,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_alias, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
-	ZEND_ARG_INFO(0, messsage)
+	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, error_type)
 ZEND_END_ARG_INFO()
 
@@ -1384,7 +1384,7 @@ ZEND_FUNCTION(get_included_files)
 /* }}} */
 
 
-/* {{{ proto void trigger_error(string messsage [, int error_type])
+/* {{{ proto void trigger_error(string message [, int error_type])
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
