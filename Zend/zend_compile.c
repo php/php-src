@@ -3462,7 +3462,6 @@ static int _merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, 
 		/* efree(fn); */
 	}
 
-	/* efree(lcname.v); */
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
@@ -3538,6 +3537,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 						zend_uint lcname2_len;
 						char* lcname2;
 						zend_function fn_copy2 = *fn;
+
 						_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
 						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
@@ -3607,7 +3607,8 @@ void init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j]) {
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
-          zend_uint name_length = strlen(class_name);
+					zend_uint name_length = strlen(class_name);
+
 					cur_ce = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
 					efree(class_name);
 					cur_precedence->exclude_from_classes[j] = cur_ce;
@@ -3803,7 +3804,7 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	method_ref->mname_len   = Z_STRLEN(method_name->u.constant);
 
 	result->u.op.ptr = method_ref;
-  result->op_type = IS_TMP_VAR;
+	result->op_type = IS_TMP_VAR;
 }
 /* }}} */
 
