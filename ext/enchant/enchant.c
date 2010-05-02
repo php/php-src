@@ -737,7 +737,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 		array_init(sugg);
 
-		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, n_sugg_st);
+		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
 		memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));
 		if (suggs && n_sugg) {
 			int i;
