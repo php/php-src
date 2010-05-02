@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Updated timezone database to version 2010.5. (Derick)
 
+- Fixed a possible stack exaustion inside fnmatch(). Reporeted by Stefan
+  Esser (Ilia)
 - Reset error state in PDO::beginTransaction() reset error state. (Ilia)
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
