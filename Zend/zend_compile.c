@@ -3239,7 +3239,6 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 	HashTable* resulting_table;
 	HashTable** function_tables;
 	zend_class_entry *ce;
-	/* zstr lcname; */
 	size_t collision = 0;
 	size_t abstract_solved = 0;
 	/* unsigned int name_len; */
@@ -3256,12 +3255,12 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 			continue; /* just skip this, cause its the table this function is applied on */
 		}
 
-		if (zend_hash_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, (void **)&other_trait_fn) == SUCCESS) {
+		if (zend_hash_quick_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&other_trait_fn) == SUCCESS) {
 			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* we can savely free and remove it from other table */
 				zend_function_dtor(other_trait_fn);
-				zend_hash_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength);
+				zend_hash_quick_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h);
 			} else {
 				/* if it is not an abstract method, there is still no collision */
 				/* if fn is an abstract method */
@@ -3272,7 +3271,7 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 					/* but else, we have a collision of non-abstract methods */
 					collision++;
 					zend_function_dtor(other_trait_fn);
-					zend_hash_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength);
+					zend_hash_quick_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h);
 				}
 			}
 		}
@@ -3282,7 +3281,7 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 		zend_function* class_fn;
 		/* make sure method is not already overridden in class */
 
-		if (zend_hash_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, (void **)&class_fn) == FAILURE
+		if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
 				zend_error(E_WARNING, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
                    fn->common.function_name, ce->name);
@@ -3293,14 +3292,12 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 		zend_function_dtor(fn);
 	} else {
 		/* Add it to result function table */
-		if (zend_hash_add(resulting_table, hash_key->arKey, hash_key->nKeyLength,
-                      fn, sizeof(zend_function), NULL)==FAILURE) {
+		if (zend_hash_quick_add(resulting_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
 			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table.",
                  fn->common.function_name);
 		}
 	}
 
-	/* efree(lcname.v); */
 	return ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
@@ -3453,8 +3450,7 @@ static int _merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, 
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 
-		if (zend_hash_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength,
-                      fn, sizeof(zend_function), NULL)==FAILURE) {
+		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
 			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table.", hash_key->arKey);
 		}
 
@@ -3521,10 +3517,9 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 		}
 	}
 
-	lcname_len = strlen(fn->common.function_name);
 	lcname = zend_str_tolower_dup(fn->common.function_name, fnname_len);
 
-	if (zend_hash_find(exclude_table, lcname, lcname_len, &dummy) == FAILURE) {
+	if (zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 		_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len));
@@ -3574,7 +3569,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 		}
 
 
-		if (zend_hash_add(target, lcname, lcname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
+		if (zend_hash_add(target, lcname, fnname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
 			zend_error(E_ERROR, "Failed to added trait method (%s) to trait table. Propably there is already a trait method with same name\n",
                  fn_copy.common.function_name);
 		}
@@ -3669,7 +3664,9 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	HashTable exclude_table;
 	size_t i;
 
-	if (ce->num_traits <= 0) { return; }
+	if (ce->num_traits <= 0) {
+		return;
+	}
 
 /*	zend_error(E_NOTICE, "Do bind Traits on %v with %d traits.\n Class has already %d methods.\n",
 			   ce->name.s, ce->num_traits, ce->function_table.nNumOfElements); */
