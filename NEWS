@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed a possible stack exaustion inside fnmatch(). Reporeted by Stefan    
+  Esser (Ilia)
 - Fixed a possible dechunking filter buffer overflow. Reported by Stefan Esser.
   (Pierre)
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported 

@@ -136,26 +136,12 @@ php_file_globals file_globals;
 
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
-/* sharing globals is *evil* */
-static int le_stream_context = FAILURE;
 
-PHPAPI int php_le_stream_context(void)
-{
-	return le_stream_context;
-}
 /* }}} */
 
 /* {{{ Module-Stuff
 */
-static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
-{
-	php_stream_context *context = (php_stream_context*)rsrc->ptr;
-	if (context->options) {
-		zval_ptr_dtor(&context->options);
-		context->options = NULL;
-	}
-	php_stream_context_free(context);
-}
+
 
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
@@ -176,7 +162,6 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
@@ -2519,6 +2504,10 @@ PHP_FUNCTION(fnmatch)
 
 	if (filename_len >= MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		RETURN_FALSE;
+	}
+	if (pattern_len >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
