@@ -3321,9 +3321,9 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 	else if (IS_EQUAL(mname, mname_len, "unserialize_func"))(ce)->unserialize_func	= (fe); \
 }
 
-/* {{{ php_runkit_function_copy_ctor
+/* {{{ Originates from php_runkit_function_copy_ctor
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
-void php_runkit_function_copy_ctor(zend_function *fe, char *newname)
+void _duplicate_function(zend_function *fe, char *newname)
 {
 	zend_literal *literals_copy;
 	zend_compiled_variable *dupvars;
@@ -3497,7 +3497,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
                                  fn->common.function_name, fnname_len) == 0)) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
-					php_runkit_function_copy_ctor(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+					_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
 					if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
@@ -3527,7 +3527,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 	if (zend_hash_find(exclude_table, lcname, lcname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
-		php_runkit_function_copy_ctor(&fn_copy, estrndup(fn->common.function_name, fnname_len));
+		_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len));
 
 		/* apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility */
 		/* TODO: i am still not sure, that there will be no ambigousities... */
@@ -3543,7 +3543,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 						zend_uint lcname2_len;
 						char* lcname2;
 						zend_function fn_copy2 = *fn;
-						php_runkit_function_copy_ctor(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+						_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
 						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 							fn_copy2.common.fn_flags = aliases[i]->modifiers;
