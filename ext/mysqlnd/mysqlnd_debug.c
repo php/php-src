@@ -28,60 +28,6 @@
 #include "mysqlnd_statistics.h"
 #include "zend_builtin_functions.h"
 
-static void * mysqlnd_zend_mm_emalloc(size_t size MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
-static void mysqlnd_zend_mm_efree(void * ptr MYSQLND_MEM_D);
-static void mysqlnd_zend_mm_pefree(void * ptr, zend_bool persistent MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_malloc(size_t size MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-static void * mysqlnd_zend_mm_realloc(void * ptr, size_t new_size MYSQLND_MEM_D);
-static void mysqlnd_zend_mm_free(void * ptr MYSQLND_MEM_D);
-static char * mysqlnd_zend_mm_pestrndup(const char * const ptr, size_t length, zend_bool persistent MYSQLND_MEM_D);
-static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
-
-#define MYSQLND_DEBUG_MEMORY 1
-
-struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
-{
-#if MYSQLND_DEBUG_MEMORY
-	_mysqlnd_emalloc,
-	_mysqlnd_pemalloc,
-	_mysqlnd_ecalloc,
-	_mysqlnd_pecalloc,
-	_mysqlnd_erealloc,
-	_mysqlnd_perealloc,
-	_mysqlnd_efree,
-	_mysqlnd_pefree,
-	_mysqlnd_malloc,
-	_mysqlnd_calloc,
-	_mysqlnd_realloc,
-	_mysqlnd_free,
-	_mysqlnd_pestrndup,
-	_mysqlnd_pestrdup
-#else
-	mysqlnd_zend_mm_emalloc,
-	mysqlnd_zend_mm_pemalloc,
-	mysqlnd_zend_mm_ecalloc,
-	mysqlnd_zend_mm_pecalloc,
-	mysqlnd_zend_mm_erealloc,
-	mysqlnd_zend_mm_perealloc,
-	mysqlnd_zend_mm_efree,
-	mysqlnd_zend_mm_pefree,
-	mysqlnd_zend_mm_malloc,
-	mysqlnd_zend_mm_calloc,
-	mysqlnd_zend_mm_realloc,
-	mysqlnd_zend_mm_free,
-	mysqlnd_zend_mm_pestrndup,
-	mysqlnd_zend_mm_pestrdup
-#endif
-};
-
-
-
 static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace";
 
 #ifdef ZTS 
@@ -1046,6 +992,7 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 }
 /* }}} */
 
+#if MYSQLND_DEBUG_MEMORY
 
 /* {{{ mysqlnd_zend_mm_emalloc */
 static void * mysqlnd_zend_mm_emalloc(size_t size MYSQLND_MEM_D)
@@ -1157,6 +1104,46 @@ static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persist
 	return pestrdup(ptr, persistent);
 }
 /* }}} */
+
+#endif
+
+
+#define MYSQLND_DEBUG_MEMORY 1
+
+struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
+{
+#if MYSQLND_DEBUG_MEMORY
+	_mysqlnd_emalloc,
+	_mysqlnd_pemalloc,
+	_mysqlnd_ecalloc,
+	_mysqlnd_pecalloc,
+	_mysqlnd_erealloc,
+	_mysqlnd_perealloc,
+	_mysqlnd_efree,
+	_mysqlnd_pefree,
+	_mysqlnd_malloc,
+	_mysqlnd_calloc,
+	_mysqlnd_realloc,
+	_mysqlnd_free,
+	_mysqlnd_pestrndup,
+	_mysqlnd_pestrdup
+#else
+	mysqlnd_zend_mm_emalloc,
+	mysqlnd_zend_mm_pemalloc,
+	mysqlnd_zend_mm_ecalloc,
+	mysqlnd_zend_mm_pecalloc,
+	mysqlnd_zend_mm_erealloc,
+	mysqlnd_zend_mm_perealloc,
+	mysqlnd_zend_mm_efree,
+	mysqlnd_zend_mm_pefree,
+	mysqlnd_zend_mm_malloc,
+	mysqlnd_zend_mm_calloc,
+	mysqlnd_zend_mm_realloc,
+	mysqlnd_zend_mm_free,
+	mysqlnd_zend_mm_pestrndup,
+	mysqlnd_zend_mm_pestrdup
+#endif
+};
 
 
 
