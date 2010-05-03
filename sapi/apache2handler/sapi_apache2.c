@@ -110,7 +110,15 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 		}
 		ctx->content_type = estrdup(val);
 	} else if (!strcasecmp(sapi_header->header, "content-length")) {
-		ap_set_content_length(ctx->r, strtol(val, (char **)NULL, 10));
+#ifdef PHP_WINDOWS
+# ifdef APR_HAS_LARGE_FILES
+		ap_set_content_length(ctx->r, (apr_off_t) _strtoui64(val, (char **)NULL, 10));
+# else
+		ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
+# endif
+#else
+		ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
+#endif
 	} else if (sapi_header->replace) {
 		apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 	} else {
