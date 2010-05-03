@@ -119,29 +119,30 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 	DBG_ENTER("mysqlnd_mempool_get_chunk");
 
 	chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
-
-	chunk->free_chunk = mysqlnd_mempool_free_chunk;
-	chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
-	chunk->size = size;
-	/*
-	  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
-	  expect non-arena memory in mysqlnd_wireprotocol.c . We
-	  realloc the non-arena memory.
-	*/
-	chunk->pool = pool;
-	if (size > pool->free_size) {
-		chunk->from_pool = FALSE;
-		chunk->ptr = mnd_malloc(size);
-		if (!chunk->ptr) {
-			chunk->free_chunk(chunk TSRMLS_CC);
-			chunk = NULL;
+	if (chunk) {
+		chunk->free_chunk = mysqlnd_mempool_free_chunk;
+		chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
+		chunk->size = size;
+		/*
+		  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
+		  expect non-arena memory in mysqlnd_wireprotocol.c . We
+		  realloc the non-arena memory.
+		*/
+		chunk->pool = pool;
+		if (size > pool->free_size) {
+			chunk->from_pool = FALSE;
+			chunk->ptr = mnd_malloc(size);
+			if (!chunk->ptr) {
+				chunk->free_chunk(chunk TSRMLS_CC);
+				chunk = NULL;
+			}
+		} else {
+			chunk->from_pool = TRUE;
+			++pool->refcount;
+			chunk->ptr = pool->arena + (pool->arena_size - pool->free_size);
+			/* Last step, update free_size */
+			pool->free_size -= size;
 		}
-	} else {
-		chunk->from_pool = TRUE;
-		++pool->refcount;
-		chunk->ptr = pool->arena + (pool->arena_size - pool->free_size);
-		/* Last step, update free_size */
-		pool->free_size -= size;
 	}
 	DBG_RETURN(chunk);
 }
