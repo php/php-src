@@ -384,12 +384,13 @@ static zend_object_value spl_SplObjectStorage_new(zend_class_entry *class_type T
 
 int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *obj TSRMLS_DC) /* {{{ */
 {
-	int hash_len;
+	int hash_len, found;
 	char *hash = spl_object_storage_get_hash(intern, this, obj, &hash_len TSRMLS_CC);
 	if (!hash) {
 		return 0;
 	}
-	int found = zend_hash_exists(&intern->storage, hash, hash_len);
+
+	found = zend_hash_exists(&intern->storage, hash, hash_len);
 	spl_object_storage_free_hash(intern, hash);
 	return found;
 } /* }}} */
