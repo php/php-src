@@ -1149,7 +1149,11 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 			  We need a trailing \0 for the last string, in case of text-mode,
 			  to be able to implement read-only variables.
 			*/
-			(*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC);
+			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC)) {
+				SET_OOM_ERROR(conn->error_info);
+				ret = FAIL;
+				break;
+			}
 			/* The position could have changed, recalculate */
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
