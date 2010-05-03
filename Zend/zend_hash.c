@@ -1477,7 +1477,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					return 1;
 				}
 			} else { /* string index */
-				if (zend_hash_find(ht2, p1->arKey, p1->nKeyLength, &pData2)==FAILURE) {
+				if (zend_hash_quick_find(ht2, p1->arKey, p1->nKeyLength, p1->h, &pData2)==FAILURE) {
 					HASH_UNPROTECT_RECURSION(ht1); 
 					HASH_UNPROTECT_RECURSION(ht2); 
 					return 1;
