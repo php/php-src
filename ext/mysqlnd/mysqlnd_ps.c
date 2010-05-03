@@ -819,7 +819,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
 			*/
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer, TRUE TSRMLS_CC);
+			row_packet->row_buffer->free_chunk(row_packet->row_buffer TSRMLS_CC);
 			row_packet->row_buffer = NULL;
 		}
 	} else if (ret == FAIL) {
@@ -998,13 +998,13 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
 			*/
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer, TRUE TSRMLS_CC);
+			row_packet->row_buffer->free_chunk(row_packet->row_buffer TSRMLS_CC);
 			row_packet->row_buffer = NULL;
 		}
 		/* We asked for one row, the next one should be EOF, eat it */
 		ret = PACKET_READ(row_packet, result->conn);
 		if (row_packet->row_buffer) {
-			row_packet->row_buffer->free_chunk(row_packet->row_buffer, TRUE TSRMLS_CC);
+			row_packet->row_buffer->free_chunk(row_packet->row_buffer TSRMLS_CC);
 			row_packet->row_buffer = NULL;
 		}
 		MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);

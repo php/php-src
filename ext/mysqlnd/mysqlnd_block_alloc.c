@@ -29,7 +29,7 @@
 
 /* {{{ mysqlnd_mempool_free_chunk */
 static void
-mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC)
+mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk TSRMLS_DC)
 {
 	MYSQLND_MEMORY_POOL * pool = chunk->pool;
 	DBG_ENTER("mysqlnd_mempool_free_chunk");
@@ -130,8 +130,12 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 	*/
 	chunk->pool = pool;
 	if (size > pool->free_size) {
-		chunk->ptr = mnd_malloc(size);
 		chunk->from_pool = FALSE;
+		chunk->ptr = mnd_malloc(size);
+		if (!chunk->ptr) {
+			chunk->free_chunk(chunk TSRMLS_CC);
+			chunk = NULL;
+		}
 	} else {
 		chunk->from_pool = TRUE;
 		++pool->refcount;
