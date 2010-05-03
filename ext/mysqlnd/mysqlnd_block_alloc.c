@@ -99,7 +99,12 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			}
 		}
 	} else {
-		chunk->ptr = mnd_realloc(chunk->ptr, size);
+		zend_uchar *new_ptr = mnd_realloc(chunk->ptr, size);
+		if (!new_ptr) {
+			DBG_RETURN(FAIL);
+		}
+		chunk->ptr = new_ptr;
+		
 	}
 	DBG_RETURN(PASS);
 }
