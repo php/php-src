@@ -156,13 +156,17 @@ mysqlnd_mempool_create(size_t arena_size TSRMLS_DC)
 	/* We calloc, because we free(). We don't mnd_calloc()  for a reason. */
 	MYSQLND_MEMORY_POOL * ret = mnd_calloc(1, sizeof(MYSQLND_MEMORY_POOL));
 	DBG_ENTER("mysqlnd_mempool_create");
-
-	ret->free_size = ret->arena_size = arena_size ? arena_size : 0;
-	ret->refcount = 0;
-	/* OOM ? */
-	ret->arena = mnd_malloc(ret->arena_size);
-	ret->get_chunk = mysqlnd_mempool_get_chunk;
-
+	if (ret) {
+		ret->get_chunk = mysqlnd_mempool_get_chunk;
+		ret->free_size = ret->arena_size = arena_size ? arena_size : 0;
+		ret->refcount = 0;
+		/* OOM ? */
+		ret->arena = mnd_malloc(ret->arena_size);
+		if (!ret->arena) {
+			mysqlnd_mempool_destroy(ret TSRMLS_CC);
+			ret = NULL;
+		}
+	}
 	DBG_RETURN(ret);
 }
 /* }}} */
