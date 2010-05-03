@@ -1136,6 +1136,10 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 			  to be able to implement read-only variables. Thus, we add + 1.
 			*/
 			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size + 1 TSRMLS_CC);
+			if (!*buffer) {
+				ret = FAIL;
+				break;
+			}
 			p = (*buffer)->ptr;
 		} else if (!first_iteration) {
 			/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
