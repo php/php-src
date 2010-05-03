@@ -2060,7 +2060,7 @@ oom:
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 {
-	MYSQLND_RES *result;
+	MYSQLND_RES * result;
 
 	DBG_ENTER("mysqlnd_conn::use_result");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
@@ -2079,11 +2079,14 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_UNBUFFERED_SETS);
 
-	result = conn->current_result;
-	conn->current_result = NULL;
-	result->conn = conn->m->get_reference(conn TSRMLS_CC);
+	conn->current_result->conn = conn->m->get_reference(conn TSRMLS_CC);
+	result = conn->current_result->m.use_result(conn->current_result, FALSE TSRMLS_CC);
 
-	result = result->m.use_result(result, FALSE TSRMLS_CC);
+	if (!result) {
+		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
+	}
+	conn->current_result = NULL;
+	
 	DBG_RETURN(result);
 }
 /* }}} */
@@ -2112,10 +2115,11 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
-	result = conn->current_result;
+	result = conn->current_result->m.store_result(conn->current_result, conn, FALSE TSRMLS_CC);
+	if (!result) {
+		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);	
+	}
 	conn->current_result = NULL;
-
-	result = result->m.store_result(result, conn, FALSE TSRMLS_CC);
 	DBG_RETURN(result);
 }
 /* }}} */

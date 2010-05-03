@@ -841,22 +841,28 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 
 	SET_EMPTY_ERROR(result->conn->error_info);
 
+	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
+	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+	if (!result->result_set_memory_pool || !result->unbuf) {
+		goto oom;
+	}
+
 	if (ps == FALSE) {
 		result->type			= MYSQLND_RES_NORMAL;
 		result->m.fetch_row		= result->m.fetch_row_normal_unbuffered;
 		result->m.fetch_lengths	= mysqlnd_fetch_lengths_unbuffered;
-		result->lengths			= mnd_ecalloc(result->field_count, sizeof(unsigned long));
 		result->m.row_decoder	= php_mysqlnd_rowp_read_text_protocol;
+		result->lengths			= mnd_ecalloc(result->field_count, sizeof(unsigned long));
+		if (!result->lengths) {
+			goto oom;
+		}
 	} else {
 		result->type			= MYSQLND_RES_PS_UNBUF;
 		/* result->m.fetch_row() will be set in mysqlnd_ps.c */
 		result->m.fetch_lengths	= NULL; /* makes no sense */
-		result->lengths 		= NULL;
 		result->m.row_decoder	= php_mysqlnd_rowp_read_binary_protocol;
+		result->lengths 		= NULL;
 	}
-	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
-
-	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 
 	/*
 	  Will be freed in the mysqlnd_internal_free_result_contents() called
@@ -865,6 +871,9 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	*/
 	/* FALSE = non-persistent */
 	result->row_packet = result->conn->protocol->m.get_row_packet(result->conn->protocol, FALSE TSRMLS_CC);
+	if (!result->row_packet) {
+		goto oom;
+	}
 	result->row_packet->result_set_memory_pool = result->result_set_memory_pool;
 	result->row_packet->field_count = result->field_count;
 	result->row_packet->binary_protocol = ps;
@@ -873,6 +882,9 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	result->row_packet->bit_fields_total_len = result->meta->bit_fields_total_len;
 
 	DBG_RETURN(result);
+oom:
+	SET_OOM_ERROR(result->conn->error_info);
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
@@ -1163,6 +1175,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	DBG_ENTER("mysqlnd_res::store_result");
 	DBG_INF_FMT("conn=%d ps_protocol=%d", conn->thread_id, ps_protocol);
 
+	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
+	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
+	if (!result->result_set_memory_pool || !result->lengths) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(NULL);
+	}
+
 	/* We need the conn because we are doing lazy zval initialization in buffered_fetch_row */
 	result->conn 			= conn->m->get_reference(conn TSRMLS_CC);
 	result->type			= MYSQLND_RES_NORMAL;
@@ -1171,18 +1190,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 
-	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
-	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
-
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol, to_cache TSRMLS_CC);
-	if (PASS == ret) {
-		/* libmysql's documentation says it should be so for SELECT statements */
-		conn->upsert_status.affected_rows = result->stored_data->row_count;
-	} else {
+	if (FAIL == ret) {
 		conn->error_info = result->stored_data->error_info;
-		result->m.free_result_internal(result TSRMLS_CC);
-		result = NULL;
+		DBG_RETURN(NULL);
 	}
+	/* libmysql's documentation says it should be so for SELECT statements */
+	conn->upsert_status.affected_rows = result->stored_data->row_count;
 
 	DBG_RETURN(result);
 }
