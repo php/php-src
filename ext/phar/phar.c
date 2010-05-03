@@ -2563,8 +2563,8 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
  */
 int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, char **error TSRMLS_DC) /* {{{ */
 {
-/*	static const char newstub[] = "<?php __HALT_COMPILER(); ?>\r\n"; */
-	char *newstub;
+	char halt_stub[] = "__HALT_COMPILER();";
+	char *newstub, *tmp;
 	phar_entry_info *entry, *newentry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *pos, has_dirs = 0;
@@ -2665,8 +2665,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		} else {
 			free_user_stub = 0;
 		}
-		if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL)
-		{
+		tmp = estrndup(user_stub, len);
+		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+			efree(tmp);
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2679,6 +2680,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 			return EOF;
 		}
+		pos = user_stub + (pos - tmp);
+		efree(tmp);
 		len = pos - user_stub + 18;
 		if ((size_t)len != php_stream_write(newfile, user_stub, len)
 		||			  5 != php_stream_write(newfile, " ?>\r\n", 5)) {
