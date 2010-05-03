@@ -53,7 +53,7 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it
 
 
 /* {{{ mysqlnd_mempool_resize_chunk */
-static void
+static enum_func_status
 mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
@@ -68,6 +68,9 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			if ((chunk->size + pool->free_size) < size) {
 				zend_uchar *new_ptr;
 				new_ptr = mnd_malloc(size);
+				if (!new_ptr) {
+					DBG_RETURN(FAIL);
+				}
 				memcpy(new_ptr, chunk->ptr, chunk->size);
 				chunk->ptr = new_ptr;
 				pool->free_size += chunk->size;
@@ -85,6 +88,9 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			} else {
 				zend_uchar *new_ptr;
 				new_ptr = mnd_malloc(size);
+				if (!new_ptr) {
+					DBG_RETURN(FAIL);
+				}
 				memcpy(new_ptr, chunk->ptr, chunk->size);
 				chunk->ptr = new_ptr;
 				chunk->size = size;
@@ -95,7 +101,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 	} else {
 		chunk->ptr = mnd_realloc(chunk->ptr, size);
 	}
-	DBG_VOID_RETURN;
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
