@@ -53,6 +53,10 @@
 
 #include "php_apache.h"
 
+#if _MSC_VER <= 1300
+# include "win32/php_strtoi64.h"
+#endif
+
 /* UnixWare and Netware define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
  * file does not use the system call shutdown, it is safe to #undef it.K
@@ -120,7 +124,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_e
 				}
 				ctx->content_type = estrdup(val);
 			} else if (!strcasecmp(sapi_header->header, "content-length")) {
-#ifdef PHP_WINDOWS
+#ifdef PHP_WIN32
 # ifdef APR_HAS_LARGE_FILES
 				ap_set_content_length(ctx->r, (apr_off_t) _strtoui64(val, (char **)NULL, 10));
 # else
