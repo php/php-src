@@ -1638,10 +1638,10 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
  */
 int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, ub2 *error_offset TSRMLS_DC)
 {
-	*sqltext = NULL;
-	*error_offset = 0;
 	sword errstatus;
 
+	*sqltext = NULL;
+	*error_offset = 0;
 	PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) sqltext, (ub4 *)0, OCI_ATTR_STATEMENT, statement->err));
 
 	if (errstatus != OCI_SUCCESS) {
