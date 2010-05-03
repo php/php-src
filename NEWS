@@ -18,8 +18,6 @@ PHP                                                                        NEWS
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported
   by Mateusz Kocielski. (Ilia)  
 
-- Fixed bug #51723 (Content-length header is limited to 32bit integer with
-  Apache2 on Windows). (Pierre)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
