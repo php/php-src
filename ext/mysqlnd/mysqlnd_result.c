@@ -353,6 +353,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 	MYSQLND_STMT_DATA * stmt = s ? s->data:NULL;
 	enum_func_status ret;
 	MYSQLND_PACKET_RSET_HEADER * rset_header;
+	MYSQLND_PACKET_EOF * fields_eof;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
 	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
@@ -420,8 +421,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				ret = PASS;
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
-			default:{			/* Result set */
-				MYSQLND_PACKET_EOF * fields_eof;
+			default: do {			/* Result set */
 				MYSQLND_RES * result;
 				enum_mysqlnd_collected_stats stat = STAT_LAST;
 
@@ -464,7 +464,12 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 					}
 					result = stmt->result;
 				}
-
+				if (!result) {
+					SET_OOM_ERROR(conn->error_info);
+					ret = FAIL;
+					break;
+				}
+				
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn TSRMLS_CC))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt && conn->current_result) {
@@ -517,11 +522,9 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 					}
 					MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
 				}
-
-				PACKET_FREE(fields_eof);
-
-				break;
-			}
+			} while (0);
+			PACKET_FREE(fields_eof);
+			break; /* switch break */
 		}
 	} while (0);
 	PACKET_FREE(rset_header);
@@ -1546,6 +1549,10 @@ mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 
 	DBG_ENTER("mysqlnd_result_init");
 	DBG_INF_FMT("field_count=%u", field_count);
+	
+	if (!ret) {
+		DBG_RETURN(NULL);
+	}
 
 	ret->persistent		= persistent;
 	ret->field_count	= field_count;

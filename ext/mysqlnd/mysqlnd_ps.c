@@ -156,20 +156,35 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	SET_EMPTY_ERROR(stmt->conn->error_info);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
-	result = mysqlnd_result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);
+	do {
+		result = mysqlnd_result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);
+		if (!result) {
+			SET_OOM_ERROR(stmt->conn->error_info);
+			break;
+		}
 
-	result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
+		result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
+		if (!result->meta) {
+			SET_OOM_ERROR(stmt->conn->error_info);
+			break;
+		}
 
-	if ((result = result->m.store_result(result, conn, TRUE TSRMLS_CC))) {
-		stmt->upsert_status.affected_rows = result->stored_data->row_count;	
-		stmt->state = MYSQLND_STMT_PREPARED;
-		result->type = MYSQLND_RES_PS_BUF;
-	} else {
-		stmt->error_info = conn->error_info;
-		stmt->state = MYSQLND_STMT_PREPARED;
+		if ((result = result->m.store_result(result, conn, TRUE TSRMLS_CC))) {
+			stmt->upsert_status.affected_rows = result->stored_data->row_count;	
+			stmt->state = MYSQLND_STMT_PREPARED;
+			result->type = MYSQLND_RES_PS_BUF;
+		} else {
+			stmt->error_info = conn->error_info;
+			stmt->state = MYSQLND_STMT_PREPARED;
+			break;
+		}
+		DBG_RETURN(result);
+	} while (0);
+
+	if (result) {
+		result->m.free_result(result, TRUE TSRMLS_CC);
 	}
-
-	DBG_RETURN(result);
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
@@ -366,6 +381,10 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	*/
 	if (stmt_to_prepare->field_count) {
 		MYSQLND_RES * result = mysqlnd_result_init(stmt_to_prepare->field_count, stmt_to_prepare->persistent TSRMLS_CC);
+		if (!result) {
+			SET_OOM_ERROR(stmt->conn->error_info);
+			goto fail;
+		}
 		/* Allocate the result now as it is needed for the reading of metadata */
 		stmt_to_prepare->result = result; 
 
@@ -374,7 +393,8 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		result->type = MYSQLND_RES_PS_BUF;
 
 		if (FAIL == result->m.read_result_metadata(result, stmt_to_prepare->conn TSRMLS_CC) ||
-			FAIL == mysqlnd_stmt_prepare_read_eof(s_to_prepare TSRMLS_CC)) {
+			FAIL == mysqlnd_stmt_prepare_read_eof(s_to_prepare TSRMLS_CC))
+		{
 			goto fail;
 		}
 	}
@@ -1655,15 +1675,32 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 	  In the meantime we don't need a zval cache reference for this fake
 	  result set, so we don't get one.
 	*/
-	result = mysqlnd_result_init(stmt->field_count, stmt->persistent TSRMLS_CC);
-	result->type = MYSQLND_RES_NORMAL;
-	result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
-	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
-	result->unbuf->eof_reached = TRUE;
-	result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
+	do {
+		result = mysqlnd_result_init(stmt->field_count, stmt->persistent TSRMLS_CC);
+		if (!result) {
+			break;
+		}
+		result->type = MYSQLND_RES_NORMAL;
+		result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
+		result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+		if (!result->unbuf) {
+			break;
+		}
+		result->unbuf->eof_reached = TRUE;
+		result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
+		if (!result->meta) {
+			break;
+		}
 
-	DBG_INF_FMT("result=%p", result);
-	DBG_RETURN(result);
+		DBG_INF_FMT("result=%p", result);
+		DBG_RETURN(result);
+	} while (0);
+
+	SET_OOM_ERROR(stmt->conn->error_info);
+	if (result) {
+		result->m.free_result(result, TRUE TSRMLS_CC);
+	}
+	DBG_RETURN(NULL);	
 }
 /* }}} */
 
