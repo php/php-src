@@ -939,20 +939,23 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 			}
 		}
 
-		ret = mnd_malloc(result->field_count * sizeof(char *));
-
-		for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
-			zval *data = current_row[i];
-
-			if (Z_TYPE_P(data) != IS_NULL) {
-				convert_to_string(data);
-				ret[i] = Z_STRVAL_P(data);
-			} else {
-				ret[i] = NULL;
-			}
-		}
 		set->data_cursor += result->meta->field_count;
 		MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
+
+		ret = mnd_malloc(result->field_count * sizeof(char *));
+		if (ret) {
+			for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
+				zval *data = current_row[i];
+
+				if (Z_TYPE_P(data) != IS_NULL) {
+					convert_to_string(data);
+					ret[i] = Z_STRVAL_P(data);
+				} else {
+					ret[i] = NULL;
+				}
+			}
+		}
+		/* there is no conn handle in this function thus we can't set OOM in error_info */
 	} else {
 		set->data_cursor = NULL;
 		DBG_INF("EOF reached");
