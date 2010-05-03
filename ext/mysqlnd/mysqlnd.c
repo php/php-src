@@ -1122,6 +1122,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 									   FALSE, TRUE TSRMLS_CC)) {
 		DBG_RETURN(NULL);
 	}
+	
 	/*
 	   Prepare for the worst case.
 	   MyISAM goes to 2500 BIT columns, double it for safety.
@@ -1981,20 +1982,26 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			}
 			break;
 		case MYSQL_INIT_COMMAND:
+		{
+			char ** new_init_commands;
+			char * new_command;
 			DBG_INF("MYSQL_INIT_COMMAND");
 			DBG_INF_FMT("command=%s", value);
 			/* when num_commands is 0, then realloc will be effectively a malloc call, internally */
-			conn->options.init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1),
-														conn->persistent);
-			if (!conn->options.init_commands) {
+			/* Don't assign to conn->options.init_commands because in case of OOM we will lose the pointer and leak */
+			new_init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1), conn->persistent);
+			if (!new_init_commands) {
 				goto oom;
 			}
-			conn->options.init_commands[conn->options.num_commands] = mnd_pestrdup(value, conn->persistent);
-			if (!conn->options.init_commands[conn->options.num_commands]) {
+			conn->options.init_commands = new_init_commands;
+			new_command = mnd_pestrdup(value, conn->persistent);
+			if (!new_command) {
 				goto oom;
 			}
+			conn->options.init_commands[conn->options.num_commands] = new_command;
 			++conn->options.num_commands;
 			break;
+		}
 		case MYSQL_READ_DEFAULT_FILE:
 		case MYSQL_READ_DEFAULT_GROUP:
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
@@ -2004,17 +2011,19 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			/* currently not supported. Todo!! */
 			break;
 		case MYSQL_SET_CHARSET_NAME:
+		{
+			char * new_charset_name = mnd_pestrdup(value, conn->persistent);
 			DBG_INF("MYSQL_SET_CHARSET_NAME");
-			if (conn->options.charset_name) {
-				mnd_pefree(conn->options.charset_name, conn->persistent);
-				conn->options.charset_name = NULL;
-			}
-			conn->options.charset_name = mnd_pestrdup(value, conn->persistent);
-			if (!conn->options.charset_name) {
+			if (!new_charset_name) {
 				goto oom;
 			}
+			if (conn->options.charset_name) {
+				mnd_pefree(conn->options.charset_name, conn->persistent);
+			}
+			conn->options.charset_name = new_charset_name;
 			DBG_INF_FMT("charset=%s", conn->options.charset_name);
 			break;
+		}
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SET_CHARSET_DIR:
 		case MYSQL_OPT_RECONNECT:
