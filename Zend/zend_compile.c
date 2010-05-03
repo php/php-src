@@ -3231,7 +3231,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 }
 /* }}} */
 
-static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	size_t current;
 	size_t i;
@@ -3320,7 +3320,7 @@ static int _merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list a
 
 /* {{{ Originates from php_runkit_function_copy_ctor
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
-void _duplicate_function(zend_function *fe, char *newname)
+static void zend_traits_duplicate_function(zend_function *fe, char *newname)
 {
 	zend_literal *literals_copy;
 	zend_compiled_variable *dupvars;
@@ -3405,7 +3405,7 @@ void _duplicate_function(zend_function *fe, char *newname)
 }
 /* }}}} */
 
-static int _merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
@@ -3465,7 +3465,7 @@ static int _merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, 
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	HashTable* target;
 	zend_trait_alias** aliases;
@@ -3492,7 +3492,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
                                  fn->common.function_name, fnname_len) == 0)) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
-					_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
 					if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
@@ -3521,7 +3521,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 	if (zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
-		_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len));
+		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len));
 
 		/* apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility */
 		/* TODO: i am still not sure, that there will be no ambigousities... */
@@ -3538,7 +3538,7 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 						char* lcname2;
 						zend_function fn_copy2 = *fn;
 
-						_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+						zend_traits_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
 
 						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 							fn_copy2.common.fn_flags = aliases[i]->modifiers;
@@ -3583,12 +3583,12 @@ static int _copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list ar
 /**
 * Copies function table entries to target function table with applied aliasing
 */
-void copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table TSRMLS_DC) {
-	zend_hash_apply_with_arguments(source TSRMLS_CC, (apply_func_args_t)_copy_functions, 3, /* 3 is number of args for apply_func */
+static void zend_traits_copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table TSRMLS_DC) {
+	zend_hash_apply_with_arguments(source TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, /* 3 is number of args for apply_func */
 			target, aliases, exclude_table);
 }
 
-void init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	size_t i, j = 0;
 	zend_trait_precedence *cur_precedence;
@@ -3632,7 +3632,7 @@ void init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) {
+static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) {
 	size_t i, j;
 	if (precedences) {
 		i = 0;
@@ -3673,7 +3673,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 			   ce->name.s, ce->num_traits, ce->function_table.nNumOfElements); */
 
 	/* complete initialization of trait strutures in ce */
-	init_trait_structures(ce TSRMLS_CC);
+	zend_traits_init_trait_structures(ce TSRMLS_CC);
 
 	/* prepare copies of trait function tables for combination */
 	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
@@ -3690,16 +3690,16 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 
 		zend_hash_init_ex(&exclude_table, 2, /* TODO: revisit this start size, may be its not optimal */
 							NULL, NULL, 0, 0);
-		compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+		zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
 		/* copies functions, applies defined aliasing, and excludes unused trait methods */
-		copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
+		zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
 		zend_hash_graceful_destroy(&exclude_table);
 	}
 
 	/* now merge trait methods */
 	for (i = 0; i < ce->num_traits; i++) {
-		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)_merge_functions, 5, /* 5 is number of args for apply_func */
+		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions, 5, /* 5 is number of args for apply_func */
 						i, ce->num_traits, resulting_table, function_tables, ce);
 	}
 
@@ -3709,7 +3709,7 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	   if there is already a method with the same name it is replaced iff ce != fn.scope
 	   --> all inherited methods are overridden, methods defined in the class are leaved
 	   untouched */
-	zend_hash_apply_with_arguments(resulting_table TSRMLS_CC, (apply_func_args_t)_merge_functions_to_class, 1, ce);
+	zend_hash_apply_with_arguments(resulting_table TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions_to_class, 1, ce);
 
 	/* free temporary function tables */
 	for (i = 0; i < ce->num_traits; i++) {
