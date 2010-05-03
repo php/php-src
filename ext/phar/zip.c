@@ -1167,6 +1167,9 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	char *pos;
 	smart_str main_metadata_str = {0};
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
+	char halt_stub[] = "__HALT_COMPILER();";
+	char *tmp;
+	
 	php_stream *stubfile, *oldfile;
 	php_serialize_data_t metadata_hash;
 	int free_user_stub, closeoldfile = 0;
@@ -1261,8 +1264,9 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 			free_user_stub = 0;
 		}
 
-		if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL)
-		{
+		tmp = estrndup(user_stub, len);
+		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+			efree(tmp);
 			if (error) {
 				spprintf(error, 0, "illegal stub for zip-based phar \"%s\"", phar->fname);
 			}
@@ -1271,6 +1275,8 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 			}
 			return EOF;
 		}
+		pos = user_stub + (pos - tmp);
+		efree(tmp);
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();
