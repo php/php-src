@@ -1169,7 +1169,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 		}
 	}
 	if (ret == FAIL && *buffer) {
-		(*buffer)->free_chunk((*buffer), TRUE TSRMLS_CC);
+		(*buffer)->free_chunk((*buffer) TSRMLS_CC);
 		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
@@ -1594,7 +1594,7 @@ php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	p = (MYSQLND_PACKET_ROW *) _packet;
 	if (p->row_buffer) {
-		p->row_buffer->free_chunk(p->row_buffer, TRUE TSRMLS_CC);
+		p->row_buffer->free_chunk(p->row_buffer TSRMLS_CC);
 		p->row_buffer = NULL;
 	}
 	DBG_INF_FMT("alloca=%d persistent=%d", (int)alloca, (int)p->header.persistent);
