@@ -1080,8 +1080,18 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 				conn->thread_id, binary_protocol, to_cache);
 
 	result->stored_data	= set = mnd_pecalloc(1, sizeof(MYSQLND_RES_BUFFERED), to_cache);
+	if (!set) {
+		SET_OOM_ERROR(conn->error_info);
+		ret = FAIL;
+		goto end;	
+	}
 	if (free_rows) {
 		set->row_buffers = mnd_pemalloc(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
+		if (!set->row_buffers) {
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+			goto end;	
+		}
 	}
 	set->persistent	= to_cache;
 	set->references	= 1;
@@ -1091,6 +1101,11 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 
 	/* non-persistent */
 	row_packet = conn->protocol->m.get_row_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!row_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		ret = FAIL;
+		goto end;	
+	}
 	row_packet->result_set_memory_pool = result->result_set_memory_pool;
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;
@@ -1103,10 +1118,17 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
 		if (!free_rows) {
 			uint64_t total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
+			MYSQLND_MEMORY_POOL_CHUNK ** new_row_buffers;
 			total_allocated_rows += set->row_count;
-			set->row_buffers = mnd_perealloc(set->row_buffers,
-											 total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
-											 set->persistent);
+			new_row_buffers = mnd_perealloc(set->row_buffers,
+											total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
+											set->persistent);
+			if (!new_row_buffers) {
+				SET_OOM_ERROR(conn->error_info);
+				ret = FAIL;
+				goto end;
+			}
+			set->row_buffers = new_row_buffers;
 		}
 		free_rows--;
 		set->row_buffers[set->row_count] = row_packet->row_buffer;
@@ -1128,6 +1150,11 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	if (set->row_count) {
 		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
 		set->data = mnd_pemalloc(set->row_count * meta->field_count * sizeof(zval *), to_cache);
+		if (!set->data) {
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+			goto end;
+		}
 		memset(set->data, 0, set->row_count * meta->field_count * sizeof(zval *));
 	}
 
@@ -1163,6 +1190,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status.affected_rows = set->row_count;
 	}
+end:
 	PACKET_FREE(row_packet);
 
 	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u", ret == PASS? "PASS":"FAIL",
