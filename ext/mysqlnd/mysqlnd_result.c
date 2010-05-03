@@ -646,27 +646,30 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 								  result->conn->stats TSRMLS_CC);
 
 			retrow = mnd_malloc(result->field_count * sizeof(char *));
+			if (retrow) {
+				for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
+					zval *data = result->unbuf->last_row_data[i];
+					unsigned int len;
 
-			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
-				zval *data = result->unbuf->last_row_data[i];
-				unsigned int len;
+					if (Z_TYPE_P(data) != IS_NULL) {
+						convert_to_string(data);
+						retrow[i] = Z_STRVAL_P(data);
+						len = Z_STRLEN_P(data);
+					} else {
+						retrow[i] = NULL;
+						len = 0;
+					}
 
-				if (Z_TYPE_P(data) != IS_NULL) {
-					convert_to_string(data);
-					retrow[i] = Z_STRVAL_P(data);
-					len = Z_STRLEN_P(data);
-				} else {
-					retrow[i] = NULL;
-					len = 0;
+					if (lengths) {
+						lengths[i] = len;
+					}
+
+					if (field->max_length < len) {
+						field->max_length = len;
+					}
 				}
-
-				if (lengths) {
-					lengths[i] = len;
-				}
-
-				if (field->max_length < len) {
-					field->max_length = len;
-				}
+			} else {
+				SET_OOM_ERROR(result->conn->error_info);
 			}
 		}
 	} else if (ret == FAIL) {
