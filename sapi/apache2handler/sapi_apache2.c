@@ -53,8 +53,10 @@
 
 #include "php_apache.h"
 
-#if _MSC_VER <= 1300
-# include "win32/php_strtoi64.h"
+#ifdef PHP_WIN32
+# if _MSC_VER <= 1300
+#  include "win32/php_strtoi64.h"
+# endif
 #endif
 
 /* UnixWare and Netware define shutdown to _shutdown, which causes problems later
