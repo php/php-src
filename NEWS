@@ -25,7 +25,7 @@ PHP                                                                        NEWS
 
 - Fixed a possible memory corruption in addcslashes(). Reported by Stefan    
   Esser (Dmitry)
-- Fixed a possible stack exaustion inside fnmatch(). Reported by Stefan    
+- Fixed a possible stack exhaustion inside fnmatch(). Reported by Stefan    
   Esser (Ilia)
 - Fixed a possible dechunking filter buffer overflow. Reported by Stefan Esser.
   (Pierre)
