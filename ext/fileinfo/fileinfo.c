@@ -291,7 +291,9 @@ PHP_FUNCTION(finfo_open)
 		RETURN_FALSE;
 	}
 
-	if (file && *file) { /* user specified file, perform open_basedir checks */
+	if (file_len == 0) {
+		file = NULL;
+	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 		if (!VCWD_REALPATH(file, resolved_path)) {
 			RETURN_FALSE;
 		}

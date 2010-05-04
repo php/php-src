@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #51732 (Fileinfo __construct or open does not work with NULL).
+  (Pierre)
 - Fixed bug #51723 (Content-length header is limited to 32bit integer with
   Apache2 on Windows). (Pierre)
 - Fixed bug #51690 (Phar::setStub looks for case-sensitive
