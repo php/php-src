@@ -278,6 +278,12 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			log_mask;
 	long			net_read_timeout;
 	long			mempool_default_size;
+	long			debug_emalloc_fail_threshold;
+	long			debug_ecalloc_fail_threshold;
+	long			debug_erealloc_fail_threshold;
+	long			debug_malloc_fail_threshold;
+	long			debug_calloc_fail_threshold;
+	long			debug_realloc_fail_threshold;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
