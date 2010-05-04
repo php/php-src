@@ -3932,6 +3932,8 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 
 	if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name, parent_ce->name);
+	} else if ((parent_ce->ce_flags & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) & ZEND_ACC_TRAIT) {
+		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name, parent_ce->name);
 	}
 
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
