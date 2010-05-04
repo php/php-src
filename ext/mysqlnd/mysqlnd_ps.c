@@ -1227,19 +1227,25 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 
 	if (CONN_GET_STATE(conn) == CONN_READY) {
 		size_t packet_len;
-		stmt->param_bind[param_no].flags |= MYSQLND_PARAM_BIND_BLOB_USED;
 		cmd_buf = mnd_emalloc(packet_len = STMT_ID_LENGTH + 2 + length);
+		if (cmd_buf) {
+			stmt->param_bind[param_no].flags |= MYSQLND_PARAM_BIND_BLOB_USED;
 
-		int4store(cmd_buf, stmt->stmt_id);
-		int2store(cmd_buf + STMT_ID_LENGTH, param_no);
-		memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
+			int4store(cmd_buf, stmt->stmt_id);
+			int2store(cmd_buf + STMT_ID_LENGTH, param_no);
+			memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
 
-		/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
-		ret = conn->m->simple_command(conn, cmd, (char *)cmd_buf, packet_len,
-									 PROT_LAST , FALSE, TRUE TSRMLS_CC);
-		mnd_efree(cmd_buf);
-		if (FAIL == ret) {
-			stmt->error_info = conn->error_info;
+			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
+			ret = conn->m->simple_command(conn, cmd, (char *)cmd_buf, packet_len,
+										 PROT_LAST , FALSE, TRUE TSRMLS_CC);
+			mnd_efree(cmd_buf);
+			if (FAIL == ret) {
+				stmt->error_info = conn->error_info;
+			}
+		} else {
+			ret = FAIL;
+			SET_OOM_ERROR(stmt->error_info);			
+			SET_OOM_ERROR(conn->error_info);			
 		}
 		/*
 		  Cover protocol error: COM_STMT_SEND_LONG_DATA was designed to be quick and not
