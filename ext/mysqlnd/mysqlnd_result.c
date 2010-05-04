@@ -359,9 +359,16 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
 
 	ret = FAIL;
-	rset_header = conn->protocol->m.get_rset_header_packet(conn->protocol, FALSE TSRMLS_CC);
 	do {
+		rset_header = conn->protocol->m.get_rset_header_packet(conn->protocol, FALSE TSRMLS_CC);
+		if (!rset_header) {
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+			break;		
+		}
+
 		SET_ERROR_AFF_ROWS(conn);
+
 		if (FAIL == (ret = PACKET_READ(rset_header, conn))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading result set's header");
 			break;
