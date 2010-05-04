@@ -520,7 +520,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (EX_T(opline->op1.var).class_entry->ce_flags & ZEND_ACC_INTERFACE) {
 			class_type = "interface";
-		} else if (EX_T(opline->op1.var).class_entry->ce_flags & ZEND_ACC_TRAIT) {
+		} else if ((EX_T(opline->op1.var).class_entry->ce_flags & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) & ZEND_ACC_TRAIT) {
 			class_type = "trait";
 		} else {
 			class_type = "abstract class";
