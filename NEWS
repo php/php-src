@@ -126,6 +126,7 @@ PHP                                                                        NEWS
 - Fixed bug #49700 (memory leaks in php_date.c if garbage collector is
   enabled). (Dmitry)
 - Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
+- Fixed bug #49490 (XPath namespace prefix conflict). (Rob)
 - Fixed bug #49429 (odbc_autocommit doesn't work). (Felipe)
 - Fixed bug #49234 (mysqli_ssl_set not found). (Andrey)
 - Fixed bug #49192 (PHP crashes when GC invoked on COM object). (Stas)
