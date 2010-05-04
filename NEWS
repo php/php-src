@@ -131,11 +131,11 @@ PHP                                                                        NEWS
   (yoarvi@gmail.com, Derick)
 - Fixed bug #48983 (DomDocument : saveHTMLFile wrong charset). (Rob)
 - Fixed bug #48902 (Timezone database fallback map is outdated). (Derick)
-- Fixed bug #48289 (iconv_mime_encode() quoted-printable scheme is broken).
-  (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #48781 (Cyclical garbage collector memory leak). (Dmitry)
 - Fixed bug #48361 (SplFileInfo::getPathInfo should return the
   parent dir). (Etienne)
+- Fixed bug #48289 (iconv_mime_encode() quoted-printable scheme is broken).
+  (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #46111 (Some timezone identifiers can not be parsed). (Derick)
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
 
