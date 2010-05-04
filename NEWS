@@ -129,6 +129,8 @@ PHP                                                                        NEWS
 - Fixed bug #49429 (odbc_autocommit doesn't work). (Felipe)
 - Fixed bug #49234 (mysqli_ssl_set not found). (Andrey)
 - Fixed bug #49192 (PHP crashes when GC invoked on COM object). (Stas)
+- Fixed bug #49081 (DateTime::diff() mistake if start in January and interval >
+  28 days). (Derick)
 - Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
   (yoarvi@gmail.com, Derick)
 - Fixed bug #48983 (DomDocument : saveHTMLFile wrong charset). (Rob)
