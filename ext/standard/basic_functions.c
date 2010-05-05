@@ -2690,6 +2690,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(iptcparse,														arginfo_iptcparse)
 	PHP_FE(iptcembed,														arginfo_iptcembed)
 	PHP_FE(getimagesize,													arginfo_getimagesize)
+	PHP_FE(getimagesizefromstring,											arginfo_getimagesize)
 	PHP_FE(image_type_to_mime_type,											arginfo_image_type_to_mime_type)
 	PHP_FE(image_type_to_extension,											arginfo_image_type_to_extension)
 
