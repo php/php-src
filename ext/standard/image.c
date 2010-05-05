@@ -1296,8 +1296,8 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 
 static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	char *arg1, *temp;
-	int arg1_len, itype = 0, argc = ZEND_NUM_ARGS();
+	char *temp;
+	int itype = 0;
 	struct gfxinfo *result = NULL;
 
 	if (!stream) {
