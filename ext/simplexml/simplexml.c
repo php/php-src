@@ -1258,31 +1258,29 @@ SXE_METHOD(xpath)
 	}
 
 	result = retval->nodesetval;
-	if (!result) {
-		xmlXPathFreeObject(retval);
-		RETURN_FALSE;
-	}
 
 	array_init(return_value);
 
-	for (i = 0; i < result->nodeNr; ++i) {
-		nodeptr = result->nodeTab[i];
-		if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
-			MAKE_STD_ZVAL(value);
-			/**
-			 * Detect the case where the last selector is text(), simplexml
-			 * always accesses the text() child by default, therefore we assign
-			 * to the parent node.
-			 */
-			if (nodeptr->type == XML_TEXT_NODE) {
-				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
-			} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
-				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? (xmlChar *)nodeptr->ns->href : NULL, 0 TSRMLS_CC);
-			} else {
-				_node_as_zval(sxe, nodeptr, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
-			}
+	if (result != NULL) {
+		for (i = 0; i < result->nodeNr; ++i) {
+			nodeptr = result->nodeTab[i];
+			if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
+				MAKE_STD_ZVAL(value);
+				/**
+				 * Detect the case where the last selector is text(), simplexml
+				 * always accesses the text() child by default, therefore we assign
+				 * to the parent node.
+				 */
+				if (nodeptr->type == XML_TEXT_NODE) {
+					_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
+				} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
+					_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? (xmlChar *)nodeptr->ns->href : NULL, 0 TSRMLS_CC);
+				} else {
+					_node_as_zval(sxe, nodeptr, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
+				}
 
-			add_next_index_zval(return_value, value);
+				add_next_index_zval(return_value, value);
+			}
 		}
 	}
 
