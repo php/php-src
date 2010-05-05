@@ -37,6 +37,8 @@ static PHP_FUNCTION(json_last_error);
 
 static const char digits[] = "0123456789abcdef";
 
+zend_class_entry *php_json_serializable_ce;
+
 #define PHP_JSON_HEX_TAG	(1<<0)
 #define PHP_JSON_HEX_AMP	(1<<1)
 #define PHP_JSON_HEX_APOS	(1<<2)
@@ -73,9 +75,25 @@ static const zend_function_entry json_functions[] = {
 };
 /* }}} */
 
+/* {{{ JSON_Serializable methods */
+ZEND_BEGIN_ARG_INFO(json_serialize_arginfo, 0)
+	/* No arguments */
+ZEND_END_ARG_INFO();
+
+static const zend_function_entry json_serializable_interface[] = {
+	PHP_ABSTRACT_ME(JSON_Serializable, jsonSerialize, json_serialize_arginfo)
+	{ NULL, NULL, NULL }
+};
+
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "JSON_Serializable", json_serializable_interface);
+	php_json_serializable_ce = zend_register_internal_interface(&ce TSRMLS_CC);
+	/* Note: Consider adding: interface JSON\Serializable extends JSON_Serializable {} for futureproofing... */
+
 	REGISTER_LONG_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
@@ -413,6 +431,39 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 }
 /* }}} */
 
+
+static void json_encode_serializable_object(smart_str *buf, zval *val, int options TSRMLS_DC)
+{
+	zend_class_entry *ce = Z_OBJCE_P(val);
+	zval *retval = NULL, fname;
+
+	ZVAL_STRING(&fname, "jsonSerialize", 0);
+
+	if (FAILURE == call_user_function_ex(EG(function_table), &val, &fname, &retval, 0, NULL, 1, NULL TSRMLS_CC) || !retval) {
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed calling %s::serialize()", ce->name);
+		smart_str_appendl(buf, "null", sizeof("null") - 1);
+		return;
+    }   
+
+	if (EG(exception)) {
+		/* Error already raised */
+		zval_ptr_dtor(&retval);
+		smart_str_appendl(buf, "null", sizeof("null") - 1);
+		return;
+	}
+
+	if ((Z_TYPE_P(retval) == IS_OBJECT) &&
+		(Z_OBJ_HANDLE_P(retval) == Z_OBJ_HANDLE_P(val))) {
+		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
+		json_encode_array(buf, &retval, options TSRMLS_CC);
+	} else {
+		/* All other types, encode as normal */
+		php_json_encode(buf, retval, options TSRMLS_CC);
+	}
+
+	zval_ptr_dtor(&retval);
+}
+
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
@@ -455,8 +506,13 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 			json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options TSRMLS_CC);
 			break;
 
-		case IS_ARRAY:
 		case IS_OBJECT:
+			if (instanceof_function(Z_OBJCE_P(val), php_json_serializable_ce TSRMLS_CC)) {
+				json_encode_serializable_object(buf, val, options TSRMLS_CC);
+				break;
+			}
+			/* fallthrough -- Non-serializable object */
+		case IS_ARRAY:
 			json_encode_array(buf, &val, options TSRMLS_CC);
 			break;
 
