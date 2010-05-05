@@ -832,7 +832,12 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 							if (strncmp((char*)tmp->children->content, WSDL_HTTP_TRANSPORT, sizeof(WSDL_HTTP_TRANSPORT)) == 0) {
 								soapBinding->transport = SOAP_TRANSPORT_HTTP;
 							} else {
-								soap_error1(E_ERROR, "Parsing WSDL: PHP-SOAP doesn't support transport '%s'", tmp->children->content);
+								/* try the next binding */
+								efree(soapBinding);
+								efree(tmpbinding->location);
+								efree(tmpbinding);
+								trav = trav->next;
+								continue;
 							}
 						}
 					}
@@ -1126,6 +1131,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 		}
 	} else {
 		soap_error0(E_ERROR, "Parsing WSDL: Couldn't bind to service");
+	}
+
+	if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
+		soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 	}
 
 	zend_hash_destroy(&ctx.messages);
