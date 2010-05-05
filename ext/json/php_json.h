@@ -49,6 +49,7 @@ ZEND_END_MODULE_GLOBALS(json)
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
 PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC);
+extern zend_class_entry *php_json_serializable_ce;
 
 #endif  /* PHP_JSON_H */
 
