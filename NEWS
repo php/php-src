@@ -68,6 +68,7 @@ PHP                                                                        NEWS
 - Fixed bug #49723 (LimitIterator with empty SeekableIterator). (Etienne)
 - Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
 - Fixed bug #49267 (Linking fails for iconv). (Moriyosh)
+- Fixed bug #48601 (xpath() returns FALSE for legitimate query). (Rob)
 - Fixed bug #48289 (iconv_mime_encode() quoted-printable scheme is broken).
   (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #43314 (iconv_mime_encode(), broken Q scheme). (Rasmus)
