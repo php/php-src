@@ -216,6 +216,7 @@ UPGRADE NOTES - PHP X.Y
      f. New global constants
 
        - Core:
+         - get_declared_traits()
 
      g. New classes
 
