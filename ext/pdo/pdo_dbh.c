@@ -328,20 +328,20 @@ static PHP_METHOD(PDO, dbh_constructor)
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen+1;
 				pdbh->refcount = 1;
-				pdbh->properties = NULL;
+				pdbh->std.properties = NULL;
 			}
 		}
 
 		if (pdbh) {
 			/* let's copy the emalloc bits over from the other handle */
-			if (pdbh->properties) {
-				zend_hash_destroy(dbh->properties);	
-				efree(dbh->properties);
+			if (pdbh->std.properties) {
+				zend_hash_destroy(dbh->std.properties);	
+				efree(dbh->std.properties);
 			} else {
-				pdbh->ce = dbh->ce;
+				pdbh->std.ce = dbh->std.ce;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
 				pdbh->def_stmt_ctor_args = dbh->def_stmt_ctor_args;
-				pdbh->properties = dbh->properties;
+				pdbh->std.properties = dbh->std.properties;
 			}
 			/* kill the non-persistent thingamy */
 			efree(dbh);
@@ -1286,7 +1286,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
 		ifunc->function_name = (char*)funcs->fname;
-		ifunc->scope = dbh->ce;
+		ifunc->scope = dbh->std.ce;
 		ifunc->prototype = NULL;
 		if (funcs->arg_info) {
 			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
@@ -1539,16 +1539,12 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 		dbh->methods->rollback(dbh TSRMLS_CC);
 		dbh->in_txn = 0;
 	}
-
-	if (dbh->properties) {
-		zend_hash_destroy(dbh->properties);
-		efree(dbh->properties);
-		dbh->properties = NULL;
-	}
 	
 	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
+	zend_object_std_dtor(&dbh->std TSRMLS_CC);
+	dbh->std.properties = NULL;
 	dbh_free(dbh TSRMLS_CC);
 }
 
@@ -1560,11 +1556,9 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 
 	dbh = emalloc(sizeof(*dbh));
 	memset(dbh, 0, sizeof(*dbh));
-	dbh->ce = ce;
+	zend_object_std_init(&dbh->std, ce TSRMLS_CC);
+	zend_hash_copy(dbh->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	dbh->refcount = 1;
-	ALLOC_HASHTABLE(dbh->properties);
-	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(dbh->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	dbh->def_stmt_ce = pdo_dbstmt_ce;
 	
 	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbh_free_storage, NULL TSRMLS_CC);

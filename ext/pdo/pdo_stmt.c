@@ -2319,11 +2319,9 @@ static zend_object_value dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
 	stmt = ecalloc(1, sizeof(*stmt));
-	stmt->ce = Z_OBJCE_P(zobject);
+	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject) TSRMLS_CC);
+	zend_hash_copy(stmt->std.properties, &stmt->std.ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	stmt->refcount = 1;
-	ALLOC_HASHTABLE(stmt->properties);
-	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(stmt->properties, &stmt->ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	old_stmt = (pdo_stmt_t *)zend_object_store_get_object(zobject TSRMLS_CC);
 	
@@ -2366,12 +2364,6 @@ void pdo_stmt_init(TSRMLS_D)
 
 static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	if (stmt->properties) {
-		zend_hash_destroy(stmt->properties);
-		efree(stmt->properties);
-		stmt->properties = NULL;
-	}
-
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
 		FREE_HASHTABLE(stmt->bound_params);
@@ -2420,6 +2412,7 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	if (stmt->dbh) {
 		php_pdo_dbh_delref(stmt->dbh TSRMLS_CC);
 	}
+	zend_object_std_dtor(&stmt->std TSRMLS_CC);
 	efree(stmt);
 }
 
@@ -2448,11 +2441,9 @@ zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 	pdo_stmt_t *stmt;
 	stmt = emalloc(sizeof(*stmt));
 	memset(stmt, 0, sizeof(*stmt));
-	stmt->ce = ce;
+	zend_object_std_init(&stmt->std, ce TSRMLS_CC);
+	zend_hash_copy(stmt->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	stmt->refcount = 1;
-	ALLOC_HASHTABLE(stmt->properties);
-	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(stmt->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbstmt_free_storage, (zend_objects_store_clone_t)dbstmt_clone_obj TSRMLS_CC);
 	retval.handlers = &pdo_dbstmt_object_handlers;
@@ -2694,10 +2685,10 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 		MAKE_STD_ZVAL(val);
 		fetch_value(stmt, val, i, NULL TSRMLS_CC);
 
-		zend_hash_update(stmt->properties, stmt->columns[i].name, stmt->columns[i].namelen + 1, (void *)&val, sizeof(zval *), NULL);
+		zend_hash_update(stmt->std.properties, stmt->columns[i].name, stmt->columns[i].namelen + 1, (void *)&val, sizeof(zval *), NULL);
 	}
 
-	return stmt->properties;
+	return stmt->std.properties;
 }
 
 static union _zend_function *row_method_get(

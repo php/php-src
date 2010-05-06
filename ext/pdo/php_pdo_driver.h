@@ -430,10 +430,7 @@ struct _pdo_dbh_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
@@ -548,10 +545,7 @@ struct _pdo_stmt_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specifics */
 	struct pdo_stmt_methods *methods;
