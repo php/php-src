@@ -516,16 +516,13 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	if (UNEXPECTED((EX_T(opline->op1.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
-		char *class_type;
-
 		if (EX_T(opline->op1.var).class_entry->ce_flags & ZEND_ACC_INTERFACE) {
-			class_type = "interface";
+			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", EX_T(opline->op1.var).class_entry->name);
 		} else if ((EX_T(opline->op1.var).class_entry->ce_flags & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) & ZEND_ACC_TRAIT) {
-			class_type = "trait";
+			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", EX_T(opline->op1.var).class_entry->name);
 		} else {
-			class_type = "abstract class";
+			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", EX_T(opline->op1.var).class_entry->name);
 		}
-		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(opline->op1.var).class_entry->name);
 	}
 	ALLOC_ZVAL(object_zval);
 	object_init_ex(object_zval, EX_T(opline->op1.var).class_entry);
@@ -699,6 +696,7 @@ static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_do_implement_trait(ce, trait TSRMLS_CC);
 	}
 
+ 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -2838,18 +2836,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -3587,18 +3579,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -4249,18 +4235,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -4764,18 +4744,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -5392,18 +5366,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -12544,18 +12512,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -14666,18 +14628,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -16796,18 +16752,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -18021,18 +17971,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
@@ -19807,18 +19751,12 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
-			int severity;
-			char *verb;
 			if (EX(fbc)->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
+				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
+				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name);
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from incompatible context", EX(fbc)->common.scope->name, EX(fbc)->common.function_name, verb);
-
 		}
 		if ((EX(object) = EG(This))) {
 			Z_ADDREF_P(EX(object));
