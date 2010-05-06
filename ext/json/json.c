@@ -29,6 +29,7 @@
 #include "utf8_to_utf16.h"
 #include "JSON_parser.h"
 #include "php_json.h"
+#include <zend_exceptions.h>
 
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
