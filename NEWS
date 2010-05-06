@@ -49,7 +49,9 @@
   . session_is_registered(), session_register() and session_unregister() 
     functions. (Kalle)
   . y2k_compliance ini option. (Kalle)
-  	
+
+- Fixed PDO objects binary incompatibility. (Dmitry)
+	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
