@@ -3308,8 +3308,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 
 		if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
-				zend_error(E_WARNING, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
-                   fn->common.function_name, ce->name);
+				zend_error(E_WARNING, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
 		}
 
 		zend_function_dtor(fn);
@@ -3318,8 +3317,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	} else {
 		/* Add it to result function table */
 		if (zend_hash_quick_add(resulting_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table.",
-                 fn->common.function_name);
+			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table", fn->common.function_name);
 		}
 	}
 
@@ -3476,7 +3474,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		}
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table.", hash_key->arKey);
+			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
 
 		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn);
@@ -3835,6 +3833,11 @@ void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *mod
 
 	trait_alias->trait_method = (zend_trait_method_reference*)method_reference->u.op.ptr;
 	trait_alias->modifiers = Z_LVAL(modifiers->u.constant);
+	
+	if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_STATIC) {
+		zend_error(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
+		return;
+	}
 
 	if (alias) {
 		trait_alias->alias = Z_STRVAL(alias->u.constant);
