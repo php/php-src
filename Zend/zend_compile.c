@@ -3530,8 +3530,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					lcname = zend_str_tolower_dup(aliases[i]->alias, lcname_len);
 
 					if (zend_hash_add(target, lcname, lcname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-						zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name\n",
-                       fn_copy.common.function_name);
+						zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name", fn_copy.common.function_name);
 					}
 					/* aliases[i]->function = fn_copy; */
 					efree(lcname);
@@ -3576,8 +3575,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						lcname2 = zend_str_tolower_dup(aliases[i]->alias, lcname2_len);
 
 						if (zend_hash_add(target, lcname2, lcname2_len+1, &fn_copy2, sizeof(zend_function), NULL)==FAILURE) {
-							zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name\n",
-                         fn_copy2.common.function_name);
+							zend_error(E_ERROR, "Failed to added aliased trait method (%s) to trait table. Propably there is already a trait method with same name", fn_copy2.common.function_name);
 						}
 						efree(lcname2);
 					} else {
@@ -3595,8 +3593,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 
 
 		if (zend_hash_add(target, lcname, fnname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Failed to added trait method (%s) to trait table. Propably there is already a trait method with same name\n",
-                 fn_copy.common.function_name);
+			zend_error(E_ERROR, "Failed to added trait method (%s) to trait table. Propably there is already a trait method with same name", fn_copy.common.function_name);
 		}
 	}
 
@@ -3670,8 +3667,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 						char* lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name,
                                                 lcname_len);
 						if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL)==FAILURE) {
-							zend_error(E_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times.\n",
-                         precedences[i]->trait_method->method_name, trait->name);
+							zend_error(E_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
 						}
 						efree(lcname);
 					}
