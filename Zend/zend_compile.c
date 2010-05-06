@@ -360,6 +360,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv) /* {{{ */
 	CONSTANT_EX(op_array, i) = *zv;
 	Z_SET_REFCOUNT(CONSTANT_EX(op_array, i), 2);
 	Z_SET_ISREF(CONSTANT_EX(op_array, i));
+	op_array->literals[i].hash_value = 0;
 	return i;
 }
 /* }}} */
@@ -690,7 +691,15 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 	zend_op *opline_ptr;
 	zend_op opline;
 
-	zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
+	if (class_name->op_type == IS_CONST &&
+	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
+		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
+
+		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		class_node = *class_name;
+	} else {
+		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
+	}
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 	if (result->op_type == IS_CV) {
 		init_op(&opline TSRMLS_CC);
@@ -701,8 +710,13 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		opline.op1_type = IS_CONST;
 		LITERAL_STRINGL(opline.op1, estrdup(CG(active_op_array)->vars[result->u.op.var].name), CG(active_op_array)->vars[result->u.op.var].name_len, 0);
 		CALCULATE_LITERAL_HASH(opline.op1.constant);
-		SET_UNUSED(opline.op2);
-		SET_NODE(opline.op2, &class_node);
+		if (class_node.op_type == IS_CONST) {
+			opline.op2_type = IS_CONST;
+			opline.op2.constant =
+				zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
+		} else {
+			SET_NODE(opline.op2, &class_node);
+		}
 		GET_NODE(result,opline.result);
 		opline.extended_value |= ZEND_FETCH_STATIC_MEMBER;
 		opline_ptr = &opline;
@@ -720,14 +734,25 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 			opline.op1_type = IS_CONST;
 			LITERAL_STRINGL(opline.op1, estrdup(CG(active_op_array)->vars[opline_ptr->op1.var].name), CG(active_op_array)->vars[opline_ptr->op1.var].name_len, 0);
 			CALCULATE_LITERAL_HASH(opline.op1.constant);
-			SET_UNUSED(opline.op2);
-			SET_NODE(opline.op2, &class_node);
+			if (class_node.op_type == IS_CONST) {
+				opline.op2_type = IS_CONST;
+				opline.op2.constant =
+					zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
+			} else {
+				SET_NODE(opline.op2, &class_node);
+			}
 			opline.extended_value |= ZEND_FETCH_STATIC_MEMBER;
 			COPY_NODE(opline_ptr->op1, opline.result);
 
 			zend_llist_prepend_element(fetch_list_ptr, &opline);
 		} else {
-			SET_NODE(opline_ptr->op2, &class_node);
+			if (class_node.op_type == IS_CONST) {
+				opline_ptr->op2_type = IS_CONST;
+				opline_ptr->op2.constant =
+					zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
+			} else {
+				SET_NODE(opline.op2, &class_node);
+			}
 			opline_ptr->extended_value |= ZEND_FETCH_STATIC_MEMBER;
 		}
 	}
