@@ -69,6 +69,7 @@ static ZEND_FUNCTION(restore_error_handler);
 static ZEND_FUNCTION(set_exception_handler);
 static ZEND_FUNCTION(restore_exception_handler);
 static ZEND_FUNCTION(get_declared_classes);
+static ZEND_FUNCTION(get_declared_traits);
 static ZEND_FUNCTION(get_declared_interfaces);
 static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
@@ -261,6 +262,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(set_exception_handler,		arginfo_set_exception_handler)
 	ZEND_FE(restore_exception_handler,	arginfo_zend__void)
 	ZEND_FE(get_declared_classes, 		arginfo_zend__void)
+	ZEND_FE(get_declared_traits, 		arginfo_zend__void)
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
 	ZEND_FE(get_defined_functions, 		arginfo_zend__void)
 	ZEND_FE(get_defined_vars,			arginfo_zend__void)
@@ -1564,12 +1566,28 @@ static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int nu
 	return ZEND_HASH_APPLY_KEEP;
 }
 
+/* {{{ proto array get_declared_traits()
+   Returns an array of all declared traits. */
+ZEND_FUNCTION(get_declared_traits)
+{
+	zend_uint mask = ZEND_ACC_TRAIT;
+	zend_uint comply = 1;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+}
+/* }}} */
+
 
 /* {{{ proto array get_declared_classes()
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	zend_uint mask = ZEND_ACC_INTERFACE;
+	zend_uint mask = ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	zend_uint comply = 0;
 
 	if (zend_parse_parameters_none() == FAILURE) {
