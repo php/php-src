@@ -893,7 +893,7 @@ if test "$PHP_DTRACE" = "yes"; then
        Zend/zend_dtrace.c Zend/zend.c])
      AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
      PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h])],
-    [])
+    AC_MSG_ERROR([DTrace header not found. DTrace is probably not available on your system!]))
 fi
 
 AC_MSG_CHECKING([how big to make fd sets])
