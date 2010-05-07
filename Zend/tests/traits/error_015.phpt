@@ -22,4 +22,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Failed to add aliased trait method (zzz) to the trait table. There is probably already a trait method with same name in %s on line %d
+Fatal error: Failed to add aliased trait method (zzz) to the trait table. There is probably already a trait method with the same name in %s on line %d
