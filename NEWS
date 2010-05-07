@@ -30,14 +30,14 @@
 - Added command line option --rz to CLI. (Johannes)
 - Added closure $this support back. (Stas)
 - Added SplObjectStorage::getHash() hook. (Etienne)
-- Added JSON_Serializable interface (json_encode() calls $obj->jsonSerialize()). (Sara)
+- Added JSON_Serializable interface (Sara)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
 - Changed the structure of op_array.opcodes. The constant values are moved from
   opcode operands into a separate literal table. (Dmitry)
-- Changed session.entropy_file to default to /dev/urandom or /dev/arandom if either
-  is present at compile time. (Rasmus)
+- Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
+  either is present at compile time. (Rasmus)
 
 - Removed legacy features:
   . allow_call_time_pass_reference. (Pierrick)
