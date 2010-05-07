@@ -3229,7 +3229,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 	if (UNEXPECTED((EX_T(opline->op1.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
 		if (EX_T(opline->op1.var).class_entry->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", EX_T(opline->op1.var).class_entry->name);
-		} else if ((EX_T(opline->op1.var).class_entry->ce_flags & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) & ZEND_ACC_TRAIT) {
+		} else if ((EX_T(opline->op1.var).class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", EX_T(opline->op1.var).class_entry->name);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", EX_T(opline->op1.var).class_entry->name);
@@ -4677,7 +4677,7 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
                                              opline->extended_value TSRMLS_CC);
 	
 	if (trait) {
-		if (!((trait->ce_flags & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) & ZEND_ACC_TRAIT)) {
+		if (!((trait->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)) {
 			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name, trait->name);
 		}
 		zend_do_implement_trait(ce, trait TSRMLS_CC);
