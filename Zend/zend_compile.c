@@ -3534,7 +3534,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					lcname = zend_str_tolower_dup(aliases[i]->alias, lcname_len);
 
 					if (zend_hash_add(target, lcname, lcname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-						zend_error(E_ERROR, "Failed to add aliased trait method (%s) to trait table. Probably there is already a trait method with same name", fn_copy.common.function_name);
+						zend_error(E_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with same name", fn_copy.common.function_name);
 					}
 					/* aliases[i]->function = fn_copy; */
 					efree(lcname);
@@ -3579,7 +3579,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						lcname2 = zend_str_tolower_dup(aliases[i]->alias, lcname2_len);
 
 						if (zend_hash_add(target, lcname2, lcname2_len+1, &fn_copy2, sizeof(zend_function), NULL)==FAILURE) {
-							zend_error(E_ERROR, "Failed to add aliased trait method (%s) to trait table. Probably there is already a trait method with same name", fn_copy2.common.function_name);
+							zend_error(E_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with same name", fn_copy2.common.function_name);
 						}
 						efree(lcname2);
 					} else {
@@ -3596,7 +3596,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		}
 
 		if (zend_hash_add(target, lcname, fnname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Failed to add trait method (%s) to trait table. Probably there is already a trait method with same name", fn_copy.common.function_name);
+			zend_error(E_ERROR, "Failed to add trait method (%s) to the trait table. There is probably already a trait method with same name", fn_copy.common.function_name);
 		}
 	}
 
