@@ -3329,16 +3329,18 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
       strncmp(mname, str, mname_len)
 
 #define _ADD_MAGIC_METHOD(ce, mname, mname_len, fe) { \
-	if (IS_EQUAL(mname, mname_len, "__clone")) 	{	(ce)->clone			= (fe); (fe)->common.fn_flags = ZEND_ACC_CLONE; } \
-	else if (IS_EQUAL(mname, mname_len, "__get"))		(ce)->__get			= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__set"))		(ce)->__set			= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__call"))		(ce)->__call		= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__unset"))		(ce)->__unset		= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__isset"))		(ce)->__isset		= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__callstatic"))(ce)->__callstatic	= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "__tostring"))	(ce)->__tostring	= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "serialize_func"))	(ce)->serialize_func	= (fe); \
-	else if (IS_EQUAL(mname, mname_len, "unserialize_func"))(ce)->unserialize_func	= (fe); \
+	if (!IS_EQUAL(mname, mname_len, "__clone")) 	{	(ce)->clone			= (fe); (fe)->common.fn_flags |= ZEND_ACC_CLONE; } \
+	else if (!IS_EQUAL(mname, mname_len, "__construct"))  {		(ce)->constructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_CTOR; } \
+	else if (!IS_EQUAL(mname, mname_len, "__destruct"))  {		(ce)->destructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_DTOR; } \
+	else if (!IS_EQUAL(mname, mname_len, "__get"))		(ce)->__get			= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__set"))		(ce)->__set			= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__call"))		(ce)->__call		= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__unset"))		(ce)->__unset		= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__isset"))		(ce)->__isset		= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__callstatic"))(ce)->__callstatic	= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "__tostring"))	(ce)->__tostring	= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "serialize_func"))	(ce)->serialize_func	= (fe); \
+	else if (!IS_EQUAL(mname, mname_len, "unserialize_func"))(ce)->unserialize_func	= (fe); \
 }
 
 /* {{{ Originates from php_runkit_function_copy_ctor
@@ -3433,6 +3435,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
 	zend_function* existing_fn;
+	zend_function fn_copy, *fn_copy_p;
 	zend_function* prototype = NULL;		/* is used to determine the prototype according to the inheritance chain */
 
 	if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &existing_fn) == FAILURE) {
@@ -3472,17 +3475,20 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
+		fn_copy = *fn;
+		zend_traits_duplicate_function(&fn_copy, estrdup(fn->common.function_name));
 
-		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
+		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
 
-		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn);
+		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p);
 		/* it could be necessary to update child classes as well */
 		/* zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len); */
+
+		zend_function_dtor(fn);
 	} else {
 		zend_function_dtor(fn);
-		/* efree(fn); */
 	}
 
 	return ZEND_HASH_APPLY_REMOVE;
