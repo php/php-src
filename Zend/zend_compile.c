@@ -4461,6 +4461,22 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 	}
 
 	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
+	
+	/* Check for traits and proceed like with interfaces.
+	 * The only difference will be a combined handling of them in the end.
+	 * Thus, we need another opcode here. */
+	if (ce->num_traits > 0) {
+		zend_op *opline;
+
+		ce->traits = NULL;
+		ce->num_traits = 0;
+		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
+
+		/* opcode generation: */
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_BIND_TRAITS;
+		SET_NODE(opline->op1, &CG(implementing_class));
+	}
 
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
@@ -4477,22 +4493,6 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 		ce->interfaces = NULL;
 		ce->num_interfaces = 0;
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
-	}
-
-	/* Check for traits and proceed like with interfaces.
-	 * The only difference will be a combined handling of them in the end.
-	 * Thus, we need another opcode here. */
-	if (ce->num_traits > 0) {
-		zend_op *opline;
-
-		ce->traits = NULL;
-		ce->num_traits = 0;
-		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
-
-		/* opcode generation: */
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_BIND_TRAITS;
-		SET_NODE(opline->op1, &CG(implementing_class));
 	}
 
 	CG(active_class_entry) = NULL;
