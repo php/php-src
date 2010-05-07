@@ -2928,7 +2928,6 @@ dnl
 dnl Generate platform specific dtrace header
 dnl
 AC_DEFUN([PHP_INIT_DTRACE], [
-  dtrace -h -C -s $abs_srcdir/$1 -o $abs_builddir/$2
-  $SED -ibak 's,PHP_,DTRACE_,g' $abs_builddir/$2
+  dtrace -h -C -s $abs_srcdir/$1 -o $abs_builddir/$2 && $SED -ibak 's,PHP_,DTRACE_,g' $abs_builddir/$2 || AC_MSG_ERROR([cannot create DTrace header file])
 ])
 
