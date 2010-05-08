@@ -441,25 +441,26 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				return -1;
 			}
 
-			if (config->pm_max_spare_servers > config->pm_max_children ||
+			if (config->pm_min_spare_servers > config->pm_max_children ||
 					config->pm_max_spare_servers > config->pm_max_children) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) and max_spare_servers(%d) cannot be greater than max_children(%d)",
-						wp->config->name, config->pm_max_spare_servers, config->pm_max_spare_servers, config->pm_max_children);
+						wp->config->name, config->pm_min_spare_servers, config->pm_max_spare_servers, config->pm_max_children);
 				return -1;
 			}
 
-			if (config->pm_max_spare_servers < config->pm_max_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must not be less than min_spare_servers(%d)", wp->config->name, config->pm_max_spare_servers, config->pm_max_spare_servers);
+			if (config->pm_max_spare_servers < config->pm_min_spare_servers) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must not be less than min_spare_servers(%d)", wp->config->name, config->pm_max_spare_servers, config->pm_min_spare_servers);
 				return -1;
 			}
 
 			if (config->pm_start_servers <= 0) {
 				config->pm_start_servers = config->pm_min_spare_servers + ((config->pm_max_spare_servers - config->pm_min_spare_servers) / 2);
 				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] start_servers is not set. It's been set to %d.", wp->config->name, config->pm_start_servers);
-			} else if (config->pm_start_servers < config->pm_max_spare_servers || config->pm_start_servers > config->pm_max_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] start_servers(%d) must not be less than min_spare_servers(%d) and not greater than max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_max_spare_servers, config->pm_max_spare_servers);
+			} else if (config->pm_start_servers < config->pm_min_spare_servers || config->pm_start_servers > config->pm_max_spare_servers) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] start_servers(%d) must not be less than min_spare_servers(%d) and not greater than max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
 				return -1;
 			}
+
 		}
 
 
