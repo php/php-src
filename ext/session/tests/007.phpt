@@ -1,7 +1,7 @@
 --TEST--
 bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
-<?php include('skipif.inc'); if (PHP_VERSION_ID < 503099) { echo 'requires register_globals'; }  ?>
+<?php include('skipif.inc'); if (PHP_VERSION_ID < 503099) { echo 'skip requires register_globals'; }  ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
