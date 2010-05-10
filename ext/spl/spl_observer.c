@@ -274,7 +274,7 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 
 	if (class_type != spl_ce_SplObjectStorage) {
 		zend_hash_find(&class_type->function_table, "gethash",    sizeof("gethash"),    (void **) &intern->fptr_get_hash);
-		if (intern->fptr_get_hash->common.scope == spl_ce_SplObjectStorage) {
+		if (intern->fptr_get_hash && intern->fptr_get_hash->common.scope == spl_ce_SplObjectStorage) {
 			intern->fptr_get_hash = NULL;
 		}
 	}
