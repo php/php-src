@@ -95,6 +95,26 @@ typedef enum {
 	php_session_active
 } php_session_status;
 
+typedef struct _php_session_rfc1867_progress {
+
+	size_t    sname_len;
+	zval      sid;
+	smart_str key;
+
+	long      update_step;
+	long      next_update;
+	double    next_update_time;
+	zend_bool cancel_upload;
+	zend_bool apply_trans_sid;
+	size_t    content_length;
+
+	zval      *data;                 /* the array exported to session data */
+	zval      *post_bytes_processed; /* data["bytes_processed"] */
+	zval      *files;                /* data["files"] array */
+	zval      *current_file;         /* array of currently uploading file */
+	zval      *current_file_bytes_processed;
+} php_session_rfc1867_progress;
+
 typedef struct _php_ps_globals {
 	char *save_path;
 	char *session_name;
@@ -143,6 +163,13 @@ typedef struct _php_ps_globals {
 	int send_cookie;
 	int define_sid;
 	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
+
+	php_session_rfc1867_progress *rfc1867_progress;
+	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
+	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
+	smart_str rfc1867_name;    /* session.upload_progress.name */
+	long rfc1867_freq;         /* session.upload_progress.freq */
+	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
