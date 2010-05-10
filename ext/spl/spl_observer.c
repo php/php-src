@@ -282,6 +282,8 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 			}
 			break;
 		}
+
+		parent = parent->parent;
 	}
 
 	return retval;
