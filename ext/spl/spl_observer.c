@@ -250,9 +250,10 @@ void spl_object_storage_addall(spl_SplObjectStorage *intern, zval *this, spl_Spl
 
 static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type, spl_SplObjectStorage **obj, zval *orig TSRMLS_DC) /* {{{ */
 {
-	zend_object_value retval;
+	zend_object_value     retval;
 	spl_SplObjectStorage *intern;
-	zval *tmp;
+	zend_class_entry     *parent = class_type;
+	zval                 *tmp;
 
 	intern = emalloc(sizeof(spl_SplObjectStorage));
 	memset(intern, 0, sizeof(spl_SplObjectStorage));
@@ -271,11 +272,15 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 		spl_object_storage_addall(intern, orig, other TSRMLS_CC);
 	}
 
-
-	if (class_type != spl_ce_SplObjectStorage) {
-		zend_hash_find(&class_type->function_table, "gethash",    sizeof("gethash"),    (void **) &intern->fptr_get_hash);
-		if (intern->fptr_get_hash && intern->fptr_get_hash->common.scope == spl_ce_SplObjectStorage) {
-			intern->fptr_get_hash = NULL;
+	while (parent) {
+		if (parent == spl_ce_SplObjectStorage) {
+			if (class_type != spl_ce_SplObjectStorage) {
+				zend_hash_find(&class_type->function_table, "gethash",    sizeof("gethash"),    (void **) &intern->fptr_get_hash);
+				if (intern->fptr_get_hash->common.scope == spl_ce_SplObjectStorage) {
+					intern->fptr_get_hash = NULL;
+				}
+			}
+			break;
 		}
 	}
 
