@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   Apache2 on Windows). (Pierre)
 - Fixed bug #51721 (mark DOMNodeList and DOMNamedNodeMap as Traversable).
   (David Zuelke)
+- Fixed bug #51712 (Test mysql_mysqlnd_read_timeout_long must fail on MySQL4).
+  (Andrey)
 - Fixed bug #51690 (Phar::setStub looks for case-sensitive
   __HALT_COMPILER()). (Ilia)
 - Fixed bug #51688 (ini per dir crashes when invalid document root  are given).
