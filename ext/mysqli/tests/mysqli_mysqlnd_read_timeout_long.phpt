@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
+if (!$IS_MYSQLND) {
 	die("skip: test applies only to mysqlnd");
 }
 
