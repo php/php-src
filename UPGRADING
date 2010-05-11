@@ -159,7 +159,9 @@ UPGRADE NOTES - PHP X.Y
 
      c. with changed behaviour
 
-        - 
+        - The session extension now can hook into the file upload feature
+          in order to provide upload progress information through session 
+          variables.
 
      d. no longer possible to disable
 
@@ -175,7 +177,9 @@ UPGRADE NOTES - PHP X.Y
 10. Changes in INI directives
 =============================
 
-- 
+- Added session.upload_progress.enabled, session.upload_progress.cleanup, 
+  session.upload_progress.prefix, session.upload_progress.name, 
+  session.upload_progress.freq, session.upload_progress.min_freq.
 
 ====================
 11. Syntax additions
