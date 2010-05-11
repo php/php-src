@@ -129,6 +129,8 @@ PHP                                                                        NEWS
 - Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
   file and line in trace). (Felipe)
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
+- Fixed bug #49893 (Crash while creating an instance of Zend_Mail_Storage_Pop3).
+  (Dmitry)
 - Fixed bug #49778 (DateInterval::format("%a") is always zero when an interval
   is created from an ISO string). (Derick)
 - Fixed bug #49700 (memory leaks in php_date.c if garbage collector is
