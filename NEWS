@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed a possible memory corruption because of unexpected call-time pass by
+  refernce and following memory clobbering through callbacks.
+  Reported by Stefan Esser (Dmitry)
 - Fixed a possible memory corruption in addcslashes(). Reported by Stefan    
   Esser (Dmitry)
 - Fixed a possible stack exhaustion inside fnmatch(). Reported by Stefan    
