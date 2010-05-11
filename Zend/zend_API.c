@@ -418,6 +418,12 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_DOUBLE:
 					case IS_BOOL:
 						convert_to_string_ex(arg);
+						if (UNEXPECTED(Z_ISREF_PP(arg) != 0)) {
+							/* it's dangerous to return pointers to string
+							   buffer of referenced variable, because it can
+							   be clobbered throug magic callbacks */
+							SEPARATE_ZVAL(arg);
+						}
 						*p = Z_STRVAL_PP(arg);
 						*pl = Z_STRLEN_PP(arg);
 						break;
