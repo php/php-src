@@ -11,6 +11,7 @@ session.use_cookies=1
 session.use_only_cookies=0
 session.auto_start=0
 session.upload_progress.enabled=1
+session.upload_progress.cleanup=0
 session.upload_progress.prefix=upload_progress_
 session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=0

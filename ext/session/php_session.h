@@ -166,6 +166,7 @@ typedef struct _php_ps_globals {
 
 	php_session_rfc1867_progress *rfc1867_progress;
 	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
+	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
 	smart_str rfc1867_name;    /* session.upload_progress.name */
 	long rfc1867_freq;         /* session.upload_progress.freq */
