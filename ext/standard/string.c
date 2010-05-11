@@ -2219,12 +2219,21 @@ PHP_FUNCTION(substr_replace)
 	}
 	
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
+		if (Z_ISREF_PP(str)) {
+			SEPARATE_ZVAL(str);
+		}
 		convert_to_string_ex(str);
 	}
 	if (Z_TYPE_PP(repl) != IS_ARRAY) {
+		if (Z_ISREF_PP(repl)) {
+			SEPARATE_ZVAL(repl);
+		}
 		convert_to_string_ex(repl);
 	}
 	if (Z_TYPE_PP(from) != IS_ARRAY) {
+		if (Z_ISREF_PP(from)) {
+			SEPARATE_ZVAL(from);
+		}
 		convert_to_long_ex(from);
 	}
 
