@@ -3,8 +3,11 @@ mysqlnd.net_read_timeout = 0
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+
+if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
+        die("skip: test applies only to mysqlnd");
 ?>
 --INI--
 default_socket_timeout=10
