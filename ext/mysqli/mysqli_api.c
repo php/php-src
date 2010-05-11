@@ -562,7 +562,6 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC)
 				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
 				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
-				MyG(num_links)--;
 				MyG(num_active_persistent)--;
 				MyG(num_inactive_persistent)++;
 			}
@@ -570,6 +569,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC)
 		mysql->persistent = FALSE;
 	}
 	mysql->mysql = NULL;
+	MyG(num_links)--;
 
 	php_clear_mysql(mysql);
 }
