@@ -6,8 +6,16 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
-        die("skip: test applies only to mysqlnd");
+if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
+	die("skip: test applies only to mysqlnd");
+}
+
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
+}
+if (mysqli_get_server_version($link) <= 50011) {
+	die(sprintf('skip Needs MySQL 5.0.12+, found version %d.', mysqli_get_server_version($link)));
+}
 ?>
 --INI--
 default_socket_timeout=10
