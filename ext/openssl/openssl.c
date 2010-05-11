@@ -4785,27 +4785,23 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		ZVAL_BOOL(zstrong_result_returned, 0);
 	}
 
-	buffer = emalloc(buffer_length);
-
-	if (!buffer) {
-		RETURN_FALSE;
-	}
+	buffer = emalloc(buffer_length + 1);
 
 #ifdef WINDOWS
         RAND_screen();
 #endif
 
 	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
-		RETVAL_FALSE;
-	} else {
-		RETVAL_STRINGL((char *)buffer, buffer_length, 1);
-
-		if (zstrong_result_returned) {
-			ZVAL_BOOL(zstrong_result_returned, strong_result);
-		}
-
+		efree(buffer);
+		RETURN_FALSE;
 	}
-	efree(buffer);
+
+	buffer[buffer_length] = 0;
+	RETVAL_STRINGL((char *)buffer, buffer_length, 0);
+
+	if (zstrong_result_returned) {
+		ZVAL_BOOL(zstrong_result_returned, strong_result);
+	}
 }
 /* }}} */
 
