@@ -67,6 +67,7 @@ PHP                                                                        NEWS
   literal). (cbandy at jbandy dot com)
 - Fixed bug #51607 (pg_copy_from does not allow schema in the tablename
   argument). (cbandy at jbandy dot com)
+- Fixed bug #51605 (Mysqli - zombie links). (Andrey)
 - Fixed bug #51604 (newline in end of header is shown in start of message).
   (Daniel Egeberg)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
