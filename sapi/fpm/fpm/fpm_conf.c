@@ -660,8 +660,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 		if ((i = glob(inc, GLOB_ERR | GLOB_MARK | GLOB_NOSORT, NULL, &g)) != 0) {
 #ifdef GLOB_NOMATCH
 			if (i == GLOB_NOMATCH) {
-				zlog(ZLOG_STUFF, ZLOG_ERROR, "Nothing match the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
-				*error = 1;
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "Nothing match the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
 				return;
 			} 
 #endif /* GLOB_NOMATCH */
