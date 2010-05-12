@@ -46,6 +46,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #51732 (Fileinfo __construct or open does not work with NULL).
   (Pierre)
+- Fixed bug #51725 (xmlrpc_get_type() returns true on invalid dates). (Mike)
 - Fixed bug #51723 (Content-length header is limited to 32bit integer with
   Apache2 on Windows). (Pierre)
 - Fixed bug #51721 (mark DOMNodeList and DOMNamedNodeMap as Traversable).
