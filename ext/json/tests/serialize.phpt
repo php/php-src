@@ -15,7 +15,7 @@ class NonSerializingTest
 	}
 }
 
-class SerializingTest extends NonSerializingTest implements JSON_Serializable
+class SerializingTest extends NonSerializingTest implements JsonSerializable
 {
 	public function jsonSerialize()
 	{

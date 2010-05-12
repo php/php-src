@@ -76,13 +76,13 @@ static const zend_function_entry json_functions[] = {
 };
 /* }}} */
 
-/* {{{ JSON_Serializable methods */
+/* {{{ JsonSerializable methods */
 ZEND_BEGIN_ARG_INFO(json_serialize_arginfo, 0)
 	/* No arguments */
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry json_serializable_interface[] = {
-	PHP_ABSTRACT_ME(JSON_Serializable, jsonSerialize, json_serialize_arginfo)
+	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, json_serialize_arginfo)
 	{ NULL, NULL, NULL }
 };
 
@@ -91,9 +91,8 @@ static PHP_MINIT_FUNCTION(json)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "JSON_Serializable", json_serializable_interface);
+	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
 	php_json_serializable_ce = zend_register_internal_interface(&ce TSRMLS_CC);
-	/* Note: Consider adding: interface JSON\Serializable extends JSON_Serializable {} for futureproofing... */
 
 	REGISTER_LONG_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
