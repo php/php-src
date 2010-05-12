@@ -120,6 +120,9 @@ PHP_FUNCTION(pack)
 		return;
 	}
 
+	if (Z_ISREF_PP(argv[0])) {
+		SEPARATE_ZVAL(argv[0]);
+	}
 	convert_to_string_ex(argv[0]);
 
 	format = Z_STRVAL_PP(argv[0]);
@@ -178,6 +181,9 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
+					if (Z_ISREF_PP(argv[currentarg])) {
+						SEPARATE_ZVAL(argv[currentarg]);
+					}
 					convert_to_string_ex(argv[currentarg]);
 					arg = Z_STRLEN_PP(argv[currentarg]);
 				}
@@ -311,6 +317,9 @@ PHP_FUNCTION(pack)
 			case 'A': 
 				memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
+				if (Z_ISREF_PP(val)) {
+					SEPARATE_ZVAL(val);
+				}
 				convert_to_string_ex(val);
 				memcpy(&output[outputpos], Z_STRVAL_PP(val),
 					   (Z_STRLEN_PP(val) < arg) ? Z_STRLEN_PP(val) : arg);
@@ -324,6 +333,9 @@ PHP_FUNCTION(pack)
 				char *v;
 
 				val = argv[currentarg++];
+				if (Z_ISREF_PP(val)) {
+					SEPARATE_ZVAL(val);
+				}
 				convert_to_string_ex(val);
 				v = Z_STRVAL_PP(val);
 				outputpos--;
