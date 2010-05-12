@@ -4146,11 +4146,13 @@ PHP_FUNCTION(parse_str)
 		Z_ARRVAL(tmp) = EG(active_symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
 	} else 	{
+		zval ret;
+		
+		array_init(&ret);
+		sapi_module.treat_data(PARSE_STRING, res, &ret TSRMLS_CC);
 		/* Clear out the array that was passed in. */
 		zval_dtor(arrayArg);
-		array_init(arrayArg);
-		
-		sapi_module.treat_data(PARSE_STRING, res, arrayArg TSRMLS_CC);
+		ZVAL_COPY_VALUE(arrayArg, &ret);
 	}
 }
 /* }}} */
