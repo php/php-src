@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed a possible resource destruction issues in shm_put_var()
+  Reported by Stefan Esser (Dmitry)
 - Fixed a possible information leak because of interruption of XOR operator.
   Reported by Stefan Esser (Dmitry)
 - Fixed a possible memory corruption because of unexpected call-time pass by
