@@ -215,7 +215,7 @@ extern zend_class_entry *mysqli_exception_class_entry;
 extern int php_le_pmysqli(void);
 extern void php_mysqli_dtor_p_elements(void *data);
 
-extern void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC);
+extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRMLS_DC);
 
 
 #ifdef HAVE_SPL
