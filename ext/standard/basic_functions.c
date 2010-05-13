@@ -3826,7 +3826,7 @@ PHP_FUNCTION(constant)
 		return;
 	}
 
-	if (!zend_get_constant_ex(const_name, const_name_len, return_value, NULL, 0 TSRMLS_CC)) {
+	if (!zend_get_constant_ex(const_name, const_name_len, return_value, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", const_name);
 		RETURN_NULL();
 	}
