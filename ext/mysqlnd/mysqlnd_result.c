@@ -352,8 +352,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s ? s->data:NULL;
 	enum_func_status ret;
-	MYSQLND_PACKET_RSET_HEADER * rset_header;
-	MYSQLND_PACKET_EOF * fields_eof;
+	MYSQLND_PACKET_RSET_HEADER * rset_header = NULL;
+	MYSQLND_PACKET_EOF * fields_eof = NULL;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
 	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
@@ -1078,7 +1078,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 													zend_bool to_cache TSRMLS_DC)
 {
 	enum_func_status ret;
-	MYSQLND_PACKET_ROW *row_packet;
+	MYSQLND_PACKET_ROW *row_packet = NULL;
 	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
 	MYSQLND_RES_BUFFERED *set;
 
@@ -1581,6 +1581,42 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 /* }}} */
 
 
+static 
+MYSQLND_CLASS_METHODS_START(mysqlnd_res)
+	NULL, /* fetch_row */
+	mysqlnd_fetch_row_buffered,
+	mysqlnd_fetch_row_unbuffered,
+	MYSQLND_METHOD(mysqlnd_res, use_result),
+	MYSQLND_METHOD(mysqlnd_res, store_result),
+	MYSQLND_METHOD(mysqlnd_res, fetch_into),
+	MYSQLND_METHOD(mysqlnd_res, fetch_row_c),
+	MYSQLND_METHOD(mysqlnd_res, fetch_all),
+	MYSQLND_METHOD(mysqlnd_res, fetch_field_data),
+	MYSQLND_METHOD(mysqlnd_res, num_rows),
+	MYSQLND_METHOD(mysqlnd_res, num_fields),
+	MYSQLND_METHOD(mysqlnd_res, skip_result),
+	MYSQLND_METHOD(mysqlnd_res, data_seek),
+	MYSQLND_METHOD(mysqlnd_res, field_seek),
+	MYSQLND_METHOD(mysqlnd_res, field_tell),
+	MYSQLND_METHOD(mysqlnd_res, fetch_field),
+	MYSQLND_METHOD(mysqlnd_res, fetch_field_direct),
+	MYSQLND_METHOD(mysqlnd_res, fetch_fields),
+	MYSQLND_METHOD(mysqlnd_res, read_result_metadata),
+	NULL, /* fetch_lengths */
+	MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data),
+	MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest),
+	MYSQLND_METHOD(mysqlnd_res, free_result_buffers),
+	MYSQLND_METHOD(mysqlnd_res, free_result),
+
+	mysqlnd_internal_free_result, /* free_result_internal */
+	mysqlnd_internal_free_result_contents, /* free_result_contents */
+	MYSQLND_METHOD(mysqlnd_res, free_buffered_data),
+	MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data),
+
+	NULL /* row_decoder */
+MYSQLND_CLASS_METHODS_END;
+
+
 /* {{{ mysqlnd_result_init_ex */
 PHPAPI MYSQLND_RES *
 mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
@@ -1597,37 +1633,7 @@ mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 
 	ret->persistent		= persistent;
 	ret->field_count	= field_count;
-
-	ret->m.use_result	= MYSQLND_METHOD(mysqlnd_res, use_result);
-	ret->m.store_result	= MYSQLND_METHOD(mysqlnd_res, store_result);
-	ret->m.free_result	= MYSQLND_METHOD(mysqlnd_res, free_result);
-	ret->m.seek_data	= MYSQLND_METHOD(mysqlnd_res, data_seek);
-	ret->m.num_rows		= MYSQLND_METHOD(mysqlnd_res, num_rows);
-	ret->m.num_fields	= MYSQLND_METHOD(mysqlnd_res, num_fields);
-	ret->m.fetch_into	= MYSQLND_METHOD(mysqlnd_res, fetch_into);
-	ret->m.fetch_row_c	= MYSQLND_METHOD(mysqlnd_res, fetch_row_c);
-	ret->m.fetch_all	= MYSQLND_METHOD(mysqlnd_res, fetch_all);
-	ret->m.fetch_field_data	= MYSQLND_METHOD(mysqlnd_res, fetch_field_data);
-	ret->m.seek_field	= MYSQLND_METHOD(mysqlnd_res, field_seek);
-	ret->m.field_tell	= MYSQLND_METHOD(mysqlnd_res, field_tell);
-	ret->m.fetch_field	= MYSQLND_METHOD(mysqlnd_res, fetch_field);
-	ret->m.fetch_field_direct = MYSQLND_METHOD(mysqlnd_res, fetch_field_direct);
-	ret->m.fetch_fields	= MYSQLND_METHOD(mysqlnd_res, fetch_fields);
-
-	ret->m.skip_result	= MYSQLND_METHOD(mysqlnd_res, skip_result);
-	ret->m.free_result_buffers	= MYSQLND_METHOD(mysqlnd_res, free_result_buffers);
-	ret->m.free_result_internal = mysqlnd_internal_free_result;
-	ret->m.free_result_contents = mysqlnd_internal_free_result_contents;
-	ret->m.free_buffered_data = MYSQLND_METHOD(mysqlnd_res, free_buffered_data);
-	ret->m.unbuffered_free_last_data = MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data);
-
-	ret->m.read_result_metadata = MYSQLND_METHOD(mysqlnd_res, read_result_metadata);
-	ret->m.store_result_fetch_data = MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data);
-	ret->m.initialize_result_set_rest = MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest);
-
-	ret->m.fetch_row_normal_buffered	= mysqlnd_fetch_row_buffered;
-	ret->m.fetch_row_normal_unbuffered	= mysqlnd_fetch_row_unbuffered;
-	ret->m.row_decoder = NULL;
+	ret->m = mysqlnd_mysqlnd_res_methods;
 
 	DBG_RETURN(ret);
 }
@@ -1643,6 +1649,15 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result
 		return NULL;
 	}
 	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_result_get_methods */
+PHPAPI struct st_mysqlnd_res_methods *
+mysqlnd_result_get_methods()
+{
+	return &mysqlnd_mysqlnd_res_methods;
 }
 /* }}} */
 
