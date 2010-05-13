@@ -24,6 +24,7 @@
 #define MYSQLND_RESULT_H
 
 PHPAPI MYSQLND_RES * mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
+PHPAPI struct st_mysqlnd_res_methods * mysqlnd_result_get_methods();
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND * conn, MYSQLND_STMT * stmt TSRMLS_DC);
 
