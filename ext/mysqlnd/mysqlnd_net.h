@@ -26,6 +26,8 @@
 PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
 PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC);
 
+PHPAPI struct st_mysqlnd_net_methods * mysqlnd_net_get_methods();
+
 #endif /* MYSQLND_NET_H */
 
 /*
