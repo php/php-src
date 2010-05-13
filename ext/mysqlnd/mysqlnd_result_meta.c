@@ -150,6 +150,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
 	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!field_packet) {
+		DBG_RETURN(FAIL);
+	}
 	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
 		long idx;
@@ -423,6 +426,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 /* }}} */
 
 
+static 
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
@@ -453,6 +457,15 @@ mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_D
 	DBG_INF_FMT("meta=%p", ret);
 	DBG_RETURN(ret);
 }
+
+
+/* {{{ mysqlnd_res_meta_get_methods */
+PHPAPI struct st_mysqlnd_res_meta_methods *
+mysqlnd_result_metadata_get_methods()
+{
+	return &mysqlnd_mysqlnd_res_meta_methods;
+}
+/* }}} */
 
 
 /*

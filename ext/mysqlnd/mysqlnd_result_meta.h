@@ -24,6 +24,7 @@
 #define MYSQLND_RESULT_META_H
 
 PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
+PHPAPI struct st_mysqlnd_res_meta_methods * mysqlnd_result_metadata_get_methods();
 
 #endif /* MYSQLND_RESULT_META_H */
 
