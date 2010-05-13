@@ -1,5 +1,5 @@
 --TEST--
-Bug #51647 (Certificate file without private key (pk in another file) doesn't work)
+Bug #51605 Mysqli - zombie links
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -28,9 +28,17 @@ mysqli.reconnect = Off
 	mysqli_close($link);
 	echo "closed twice\n";
 
+	$link = mysqli_init();
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+		printf("[003] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+	}
+	mysqli_close($link);
+	echo "closed for third time\n";
+
 	print "done!";
 ?>
 --EXPECTF--
 closed once
 closed twice
+closed for third time
 done!

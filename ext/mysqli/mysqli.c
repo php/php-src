@@ -222,10 +222,11 @@ static void mysqli_link_free_storage(void *object TSRMLS_DC)
 	if (my_res && my_res->ptr) {
 		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
 		if (mysql->mysql) {
-			php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT TSRMLS_CC);
+			php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, my_res->status TSRMLS_CC);
 		}
 		php_clear_mysql(mysql);
 		efree(mysql);
+		my_res->status = MYSQLI_STATUS_UNKNOWN;
 	}
 	mysqli_objects_free_storage(object TSRMLS_CC);
 }
