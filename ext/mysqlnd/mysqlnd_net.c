@@ -859,6 +859,22 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 }
 /* }}} */
 
+static 
+MYSQLND_CLASS_METHODS_START(mysqlnd_net)
+	MYSQLND_METHOD(mysqlnd_net, connect),
+	MYSQLND_METHOD(mysqlnd_net, send),
+	MYSQLND_METHOD(mysqlnd_net, receive),
+	MYSQLND_METHOD(mysqlnd_net, set_client_option),
+	MYSQLND_METHOD(mysqlnd_net, network_read),
+	MYSQLND_METHOD(mysqlnd_net, network_write),
+	MYSQLND_METHOD(mysqlnd_net, decode),
+	MYSQLND_METHOD(mysqlnd_net, encode),
+	MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data),
+	MYSQLND_METHOD(mysqlnd_net, free_contents),
+	MYSQLND_METHOD(mysqlnd_net, enable_ssl),
+	MYSQLND_METHOD(mysqlnd_net, disable_ssl)
+MYSQLND_CLASS_METHODS_END;
+
 
 /* {{{ mysqlnd_net_init */
 PHPAPI MYSQLND_NET *
@@ -871,18 +887,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	DBG_INF_FMT("persistent=%d", persistent);
 	net->persistent = persistent;
 
-	net->m.connect = MYSQLND_METHOD(mysqlnd_net, connect);
-	net->m.send = MYSQLND_METHOD(mysqlnd_net, send);
-	net->m.receive = MYSQLND_METHOD(mysqlnd_net, receive);
-	net->m.set_client_option = MYSQLND_METHOD(mysqlnd_net, set_client_option);
-	net->m.network_read = MYSQLND_METHOD(mysqlnd_net, network_read);
-	net->m.network_write = MYSQLND_METHOD(mysqlnd_net, network_write);
-	net->m.decode = MYSQLND_METHOD(mysqlnd_net, decode);
-	net->m.encode = MYSQLND_METHOD(mysqlnd_net, encode);
-	net->m.consume_uneaten_data = MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data);
-	net->m.free_contents = MYSQLND_METHOD(mysqlnd_net, free_contents);
-	net->m.enable_ssl = MYSQLND_METHOD(mysqlnd_net, enable_ssl);
-	net->m.disable_ssl = MYSQLND_METHOD(mysqlnd_net, disable_ssl);
+	net->m = mysqlnd_mysqlnd_net_methods;
 
 	{
 		unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
@@ -936,6 +941,14 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsi
 }
 /* }}} */
 
+
+/* {{{ mysqlnd_res_meta_get_methods */
+PHPAPI struct st_mysqlnd_net_methods *
+mysqlnd_net_get_methods()
+{
+	return &mysqlnd_mysqlnd_net_methods;
+}
+/* }}} */
 
 
 /*
