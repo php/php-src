@@ -124,7 +124,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	}
 	if (mysql->mysql && mysqli_resource && mysqli_resource->status > MYSQLI_STATUS_INITIALIZED) {
 		/* already connected, we should close the connection */
-		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT TSRMLS_CC);
+		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status TSRMLS_CC);
 	}
 
 	if (!socket_len || !socket) {
@@ -199,11 +199,11 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 			}
 		}
 	}
-
 	if (MyG(max_links) != -1 && MyG(num_links) >= MyG(max_links)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MyG(num_links));
 		goto err;
 	}
+
 	if (persistent && MyG(max_persistent) != -1 &&
 		(MyG(num_active_persistent) + MyG(num_inactive_persistent))>= MyG(max_persistent))
 	{
