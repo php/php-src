@@ -551,8 +551,12 @@ PHP_FUNCTION(mysqli_character_set_name)
 
 
 /* {{{ php_mysqli_close */
-void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC)
+void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRMLS_DC)
 {
+	if (resource_status > MYSQLI_STATUS_INITIALIZED) {
+		MyG(num_links)--;
+	}
+
 	if (!mysql->persistent) {
 		mysqli_close(mysql->mysql, close_type);
 	} else {
@@ -569,7 +573,6 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC)
 		mysql->persistent = FALSE;
 	}
 	mysql->mysql = NULL;
-	MyG(num_links)--;
 
 	php_clear_mysql(mysql);
 }
@@ -589,7 +592,8 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
-	php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT TSRMLS_CC);
+	php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, ((MYSQLI_RESOURCE *)((mysqli_object *)zend_object_store_get_object(mysql_link TSRMLS_CC))->ptr)->status TSRMLS_CC);
+	((MYSQLI_RESOURCE *)((mysqli_object *)zend_object_store_get_object(mysql_link TSRMLS_CC))->ptr)->status = MYSQLI_STATUS_UNKNOWN;
 
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);
 	efree(mysql);
