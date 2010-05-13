@@ -320,6 +320,11 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		return &EG(uninitialized_zval_ptr);
 	}
 	
+	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->nApplyCount > 0)) {
+		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		return &EG(uninitialized_zval_ptr);;
+	}
+
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
@@ -421,6 +426,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
+	HashTable *ht;
 
 	if (check_inherited && intern->fptr_offset_set) {
 		if (!offset) {
@@ -434,30 +440,50 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	}
 	
 	if (!offset) {
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
 		Z_ADDREF_P(value);
-		zend_hash_next_index_insert(spl_array_get_hash_table(intern, 0 TSRMLS_CC), (void**)&value, sizeof(void*), NULL);
+		zend_hash_next_index_insert(ht, (void**)&value, sizeof(void*), NULL);
 		return;
 	}
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
 		Z_ADDREF_P(value);
-		zend_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
+		zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL: 
 	case IS_LONG: 
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
 		if (offset->type == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
 		}
 		Z_ADDREF_P(value);
-		zend_hash_index_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index, (void**)&value, sizeof(void*), NULL);
+		zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_NULL:
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
 		Z_ADDREF_P(value);
-		zend_hash_next_index_insert(spl_array_get_hash_table(intern, 0 TSRMLS_CC), (void**)&value, sizeof(void*), NULL);
+		zend_hash_next_index_insert(ht, (void**)&value, sizeof(void*), NULL);
 		return;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
@@ -474,6 +500,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
+	HashTable *ht;
 
 	if (check_inherited && intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
@@ -484,12 +511,17 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		if (spl_array_get_hash_table(intern, 0 TSRMLS_CC) == &EG(symbol_table)) {
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
+		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
 			}
 		} else {
-			if (zend_symtable_del(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
+			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
 			}
 		}
@@ -503,7 +535,12 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		} else {
 			index = Z_LVAL_P(offset);
 		}
-		if (zend_hash_index_del(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index) == FAILURE) {
+		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+		if (ht->nApplyCount > 0) {
+			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+			return;
+		}
+		if (zend_hash_index_del(ht, index) == FAILURE) {
 			zend_error(E_NOTICE,"Undefined offset:  %ld", Z_LVAL_P(offset));
 		}
 		break;
@@ -746,7 +783,7 @@ static zval **spl_array_get_property_ptr_ptr(zval *object, zval *member TSRMLS_D
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 	&& !std_object_handlers.has_property(object, member, 2 TSRMLS_CC)) {
-		return spl_array_get_dimension_ptr_ptr(1, object, member, 0 TSRMLS_CC);		
+		return spl_array_get_dimension_ptr_ptr(1, object, member, BP_VAR_RW TSRMLS_CC);
 	}
 	return std_object_handlers.get_property_ptr_ptr(object, member TSRMLS_CC);
 } /* }}} */
@@ -1303,9 +1340,13 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
+		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 2, tmp, arg TSRMLS_CC);
+		aht->nApplyCount--;
 	} else {
+		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 1, tmp, NULL TSRMLS_CC);
+		aht->nApplyCount--;
 	}
 	Z_TYPE_P(tmp) = IS_NULL; /* we want to destroy the zval, not the hashtable */
 	zval_ptr_dtor(&tmp);
