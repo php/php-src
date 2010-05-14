@@ -157,7 +157,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
 	do {
-		result = mysqlnd_result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);
+		result = conn->m->result_init(stmt->result->field_count, stmt->persistent TSRMLS_CC);
 		if (!result) {
 			SET_OOM_ERROR(stmt->conn->error_info);
 			break;
@@ -359,7 +359,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		  Create a new test statement, which we will prepare, but if anything
 		  fails, we will scrap it.
 		*/
-		s_to_prepare = mysqlnd_stmt_init(stmt->conn);
+		s_to_prepare = stmt->conn->m->stmt_init(stmt->conn TSRMLS_CC);
 		stmt_to_prepare = s_to_prepare->data;
 	}
 
@@ -383,7 +383,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	  no metadata at prepare.
 	*/
 	if (stmt_to_prepare->field_count) {
-		MYSQLND_RES * result = mysqlnd_result_init(stmt_to_prepare->field_count, stmt_to_prepare->persistent TSRMLS_CC);
+		MYSQLND_RES * result = stmt->conn->m->result_init(stmt_to_prepare->field_count, stmt_to_prepare->persistent TSRMLS_CC);
 		if (!result) {
 			SET_OOM_ERROR(stmt->conn->error_info);
 			goto fail;
@@ -1685,7 +1685,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 	  result set, so we don't get one.
 	*/
 	do {
-		result = mysqlnd_result_init(stmt->field_count, stmt->persistent TSRMLS_CC);
+		result = stmt->conn->m->result_init(stmt->field_count, stmt->persistent TSRMLS_CC);
 		if (!result) {
 			break;
 		}

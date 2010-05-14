@@ -390,6 +390,7 @@ typedef enum_func_status	(*func_mysqlnd_conn__send_close)(MYSQLND * conn TSRMLS_
 
 typedef void				(*func_mysqlnd_conn__ssl_set)(MYSQLND * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher TSRMLS_DC);
 
+typedef MYSQLND_RES * 		(*func_mysqlnd_conn__result_init)(unsigned int field_count, zend_bool persistent TSRMLS_DC);
 
 struct st_mysqlnd_conn_methods
 {
@@ -460,6 +461,8 @@ struct st_mysqlnd_conn_methods
 	func_mysqlnd_conn__send_close send_close;
 
 	func_mysqlnd_conn__ssl_set ssl_set;
+
+	func_mysqlnd_conn__result_init result_init;
 };
 
 
