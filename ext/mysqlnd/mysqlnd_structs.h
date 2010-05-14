@@ -277,6 +277,12 @@ struct st_mysqlnd_net_methods
 	func_mysqlnd_net__free_contents free_contents;
 	func_mysqlnd_net__enable_ssl enable_ssl;
 	func_mysqlnd_net__disable_ssl disable_ssl;
+
+	void * unused1;
+	void * unused2;
+	void * unused3;
+	void * unused4;
+	void * unused5;
 };
 
 
@@ -318,6 +324,12 @@ struct st_mysqlnd_protocol_methods
 	func_mysqlnd_protocol__get_stats_packet get_stats_packet;
 	func_mysqlnd_protocol__get_prepare_response_packet get_prepare_response_packet;
 	func_mysqlnd_protocol__get_change_user_response_packet get_change_user_response_packet;
+
+	void * unused1;
+	void * unused2;
+	void * unused3;
+	void * unused4;
+	void * unused5;
 };
 
 
@@ -507,6 +519,8 @@ typedef void				(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row
 									zend_bool as_unicode, zend_bool as_int_or_float,
 									MYSQLND_STATS * stats TSRMLS_DC);
 
+typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent TSRMLS_DC);
+
 struct st_mysqlnd_res_methods
 {
 	mysqlnd_fetch_row_func	fetch_row;
@@ -541,6 +555,14 @@ struct st_mysqlnd_res_methods
 
 	/* for decoding - binary or text protocol */
 	func_mysqlnd_res__row_decoder row_decoder;
+
+	func_mysqlnd_res__result_meta_init result_meta_init;
+
+	void * unused1;
+	void * unused2;
+	void * unused3;
+	void * unused4;
+	void * unused5;
 };
 
 
