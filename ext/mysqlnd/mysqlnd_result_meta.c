@@ -442,14 +442,14 @@ MYSQLND_CLASS_METHODS_END;
 PHPAPI MYSQLND_RES_METADATA *
 mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 {
-	MYSQLND_RES_METADATA *ret;
+	size_t alloc_size = sizeof(MYSQLND_RES_METADATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_RES_METADATA *ret = mnd_pecalloc(1, alloc_size, persistent);
 	DBG_ENTER("mysqlnd_result_meta_init");
 	DBG_INF_FMT("persistent=%d", persistent);
 
-	/* +1 is to have empty marker at the end */
-	ret = mnd_pecalloc(1, sizeof(MYSQLND_RES_METADATA), persistent);
 	ret->persistent = persistent;
 	ret->field_count = field_count;
+	/* +1 is to have empty marker at the end */
 	ret->fields = mnd_pecalloc(field_count + 1, sizeof(MYSQLND_FIELD), ret->persistent);
 	ret->zend_hash_keys = mnd_pecalloc(field_count, sizeof(struct mysqlnd_field_hash_key), ret->persistent);
 
@@ -467,6 +467,19 @@ mysqlnd_result_metadata_get_methods()
 }
 /* }}} */
 
+
+/* {{{ _mysqlnd_plugin_get_plugin_result_metadata_data */
+PHPAPI void **
+_mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_result_metadata_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!meta || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)meta + sizeof(MYSQLND_RES_METADATA) + plugin_id * sizeof(void *)));
+}
+/* }}} */
 
 /*
  * Local variables:
