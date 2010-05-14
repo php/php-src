@@ -322,7 +322,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND 
 		result->meta = NULL;
 	}
 
-	result->meta = mysqlnd_result_meta_init(result->field_count, result->persistent TSRMLS_CC);
+	result->meta = result->m.result_meta_init(result->field_count, result->persistent TSRMLS_CC);
 
 	/* 1. Read all fields metadata */
 
@@ -1613,7 +1613,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, free_buffered_data),
 	MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data),
 
-	NULL /* row_decoder */
+	NULL /* row_decoder */,
+	mysqlnd_result_meta_init
 MYSQLND_CLASS_METHODS_END;
 
 
