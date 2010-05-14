@@ -1024,6 +1024,10 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		BAIL_IF_NO_MORE_DATA;
 		DBG_INF_FMT("Def found, length %lu, persistent=%d", len, packet->persistent_alloc);
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
+		if (!meta->def) {
+			SET_OOM_ERROR(conn->error_info);
+			DBG_RETURN(FAIL);		
+		}
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
 		meta->def_length = len;
@@ -1032,6 +1036,11 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_INF_FMT("allocing root. persistent=%d", packet->persistent_alloc);
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
+	if (!root_ptr) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(FAIL);	
+	}
+	
 	meta->root_len = total_len;
 	/* Now do allocs */
 	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {
@@ -1100,7 +1109,6 @@ static
 void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	MYSQLND_PACKET_RES_FIELD *p= (MYSQLND_PACKET_RES_FIELD *) _packet;
-
 	/* p->metadata was passed to us as temporal buffer */
 	if (!alloca) {
 		mnd_pefree(p, p->header.persistent);
