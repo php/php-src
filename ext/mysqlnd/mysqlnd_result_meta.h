@@ -25,6 +25,7 @@
 
 PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
 PHPAPI struct st_mysqlnd_res_meta_methods * mysqlnd_result_metadata_get_methods();
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id TSRMLS_DC);
 
 #endif /* MYSQLND_RESULT_META_H */
 
