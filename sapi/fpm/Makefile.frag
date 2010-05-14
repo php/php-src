@@ -1,6 +1,9 @@
 fpm: $(SAPI_FPM_PATH)
 
-$(SAPI_FPM_PATH): $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(SAPI_EXTRA_DEPS)
+fpm-subdir: 
+	@mkdir -p $(builddir)/fpm
+
+$(SAPI_FPM_PATH): fpm-subdir $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(SAPI_EXTRA_DEPS)
 	$(BUILD_FPM)
 
 $(builddir)/fpm/fpm_conf.lo: $(builddir)/../../main/build-defs.h
