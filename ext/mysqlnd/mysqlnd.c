@@ -1127,7 +1127,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 	   Prepare for the worst case.
 	   MyISAM goes to 2500 BIT columns, double it for safety.
 	 */
-	result = mysqlnd_result_init(5000, conn->persistent TSRMLS_CC);
+	result = conn->m->result_init(5000, conn->persistent TSRMLS_CC);
 	if (!result) {
 		DBG_RETURN(NULL);
 	}
@@ -2211,7 +2211,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, end_psession),
 	MYSQLND_METHOD(mysqlnd_conn, send_close),
 
-	MYSQLND_METHOD(mysqlnd_conn, ssl_set)
+	MYSQLND_METHOD(mysqlnd_conn, ssl_set),
+	mysqlnd_result_init
 MYSQLND_CLASS_METHODS_END;
 
 

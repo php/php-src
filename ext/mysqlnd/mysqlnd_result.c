@@ -445,7 +445,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				/* PS has already allocated it */
 				conn->field_count = rset_header->field_count;
 				if (!stmt) {
-					result = conn->current_result = mysqlnd_result_init(rset_header->field_count, conn->persistent TSRMLS_CC);
+					result = conn->current_result = conn->m->result_init(rset_header->field_count, conn->persistent TSRMLS_CC);
 				} else {
 					if (!stmt->result) {
 						DBG_INF("This is 'SHOW'/'EXPLAIN'-like query.");
@@ -454,7 +454,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
-						result = stmt->result = mysqlnd_result_init(rset_header->field_count, stmt->persistent TSRMLS_CC);
+						result = stmt->result = conn->m->result_init(rset_header->field_count, stmt->persistent TSRMLS_CC);
 					} else {
 						/*
 						  Update result set metadata if it for some reason changed between
@@ -1617,7 +1617,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_result_init_ex */
+/* {{{ mysqlnd_result_init */
 PHPAPI MYSQLND_RES *
 mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 {
