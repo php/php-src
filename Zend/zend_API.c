@@ -724,7 +724,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
 								class_name[0] ? "::" : "",
-								get_active_function_name(TSRMLS_C));
+								active_function->common.function_name);
 					}
 					return FAILURE;
 				}
@@ -744,7 +744,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
 							class_name[0] ? "::" : "",
-							get_active_function_name(TSRMLS_C));
+							active_function->common.function_name);
 				}
 				return FAILURE;
 		}
@@ -767,7 +767,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
-					get_active_function_name(TSRMLS_C),
+					active_function->common.function_name,
 					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 					num_args < min_num_args ? min_num_args : max_num_args,
 					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
