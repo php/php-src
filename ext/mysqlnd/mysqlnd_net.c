@@ -942,7 +942,7 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsi
 /* }}} */
 
 
-/* {{{ mysqlnd_res_meta_get_methods */
+/* {{{ mysqlnd_net_get_methods */
 PHPAPI struct st_mysqlnd_net_methods *
 mysqlnd_net_get_methods()
 {

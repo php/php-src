@@ -237,21 +237,24 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s TSRMLS_DC)
 	MYSQLND_STMT_DATA * stmt = s->data;
 	/* Follows parameter metadata, we have just to skip it, as libmysql does */
 	unsigned int i = 0;
-	enum_func_status ret = PASS;
+	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	field_packet = stmt->conn->protocol->m.get_result_field_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
-	field_packet->skip_parsing = TRUE;
-	for (;i < stmt->param_count; i++) {
-		if (FAIL == PACKET_READ(field_packet, stmt->conn)) {
-			ret = FAIL;
-			break;
+	if (field_packet) {
+		ret = PASS;
+		field_packet->skip_parsing = TRUE;
+		for (;i < stmt->param_count; i++) {
+			if (FAIL == PACKET_READ(field_packet, stmt->conn)) {
+				ret = FAIL;
+				break;
+			}
 		}
+		PACKET_FREE(field_packet);
 	}
-	PACKET_FREE(field_packet);
 
 	DBG_RETURN(ret);
 }
