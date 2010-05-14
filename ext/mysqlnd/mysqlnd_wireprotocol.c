@@ -2045,6 +2045,22 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 /* }}} */
 
 
+static
+MYSQLND_CLASS_METHODS_START(mysqlnd_protocol)
+	MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_command_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_row_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)
+MYSQLND_CLASS_METHODS_END;
+
+
 /* {{{ mysqlnd_protocol_init */
 PHPAPI MYSQLND_PROTOCOL *
 mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
@@ -2056,17 +2072,7 @@ mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
 	DBG_INF_FMT("persistent=%d", persistent);
 	ret->persistent = persistent;
 
-	ret->m.get_greet_packet = MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet);
-	ret->m.get_auth_packet = MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet);
-	ret->m.get_ok_packet = MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet);
-	ret->m.get_command_packet = MYSQLND_METHOD(mysqlnd_protocol, get_command_packet);
-	ret->m.get_eof_packet = MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet);
-	ret->m.get_rset_header_packet = MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet);
-	ret->m.get_result_field_packet = MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet);
-	ret->m.get_row_packet = MYSQLND_METHOD(mysqlnd_protocol, get_row_packet);
-	ret->m.get_stats_packet = MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet);
-	ret->m.get_prepare_response_packet = MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet);
-	ret->m.get_change_user_response_packet = MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet);
+	ret->m = mysqlnd_mysqlnd_protocol_methods;
 
 	DBG_RETURN(ret);
 }
@@ -2099,6 +2105,15 @@ _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsi
 		return NULL;
 	}
 	DBG_RETURN((void *)((char *)protocol + sizeof(MYSQLND_PROTOCOL) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol_get_methods */
+PHPAPI struct st_mysqlnd_protocol_methods *
+mysqlnd_protocol_get_methods()
+{
+	return &mysqlnd_mysqlnd_protocol_methods;
 }
 /* }}} */
 
