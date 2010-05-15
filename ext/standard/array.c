@@ -640,7 +640,7 @@ PHP_FUNCTION(usort)
 	}
 
 	/* Clear the is_ref flag, so the attemts to modify the array in user
-	 * comaprison function will create a copy of array and won't affect the
+	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
 	 * function returns FALSE.
