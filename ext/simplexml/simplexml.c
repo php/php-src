@@ -1083,6 +1083,9 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
+		if (GC_G(gc_active)) {
+			return NULL;
+		}
 		ALLOC_HASHTABLE(rv);
 		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 		sxe->properties = rv;
