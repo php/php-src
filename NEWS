@@ -170,6 +170,7 @@ PHP                                                                        NEWS
 - Fixed bug #48289 (iconv_mime_encode() quoted-printable scheme is broken).
   (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #46111 (Some timezone identifiers can not be parsed). (Derick)
+- Fixed bug #43233 (sasl support for ldap on Windows). (Pierre)
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
 
 
