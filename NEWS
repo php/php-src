@@ -55,6 +55,7 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #51844 (checkdnsrr does not support types other than MX). (Pierre)
 - Fixed bug #51827 (Bad warning when register_shutdown_function called with
   wrong num of parameters). (Felipe)
 - Fixed bug #51791 (constant() aborts execution when fail to check undefined
