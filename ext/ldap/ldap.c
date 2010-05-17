@@ -46,6 +46,7 @@
 
 #ifdef PHP_WIN32
 #include <string.h>
+#include "config.w32.h"
 #if HAVE_NSLDAP
 #include <winsock2.h>
 #endif
