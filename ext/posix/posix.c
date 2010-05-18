@@ -703,7 +703,9 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 1 to be a valid stream resource");
 		return 0;
 	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)fd, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not use stream of type '%s'", 
