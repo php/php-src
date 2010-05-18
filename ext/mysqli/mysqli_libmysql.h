@@ -1,9 +1,9 @@
 /*
-  ----------------------------------------------------------------------
-  | PHP Version 6                                                        |
-  ----------------------------------------------------------------------
-  | Copyright (c) 2007 The PHP Group                                     |
-  ----------------------------------------------------------------------
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2010 The PHP Group                                |
+  +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
@@ -11,12 +11,11 @@
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
-  ----------------------------------------------------------------------
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
-  |          Ulf Wendel <uwendel@mysql.com>                              |
-  ----------------------------------------------------------------------
-
+  +----------------------------------------------------------------------+
+  | Authors: Georg Richter <georg@php.net>                               |
+  |          Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
+  +----------------------------------------------------------------------+
 */
 
 #ifndef MYSQLI_LIBMYSQL_H
@@ -29,7 +28,8 @@
 #define MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE	200
 #define MYSQLND_OPT_INT_AND_YEAR_AS_INT				201
 
-#define mysqli_result_is_unbuffered(r)		((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT)
+/* r->data should be always NULL, at least in recent libmysql versions, the status changes once data is read*/
+#define mysqli_result_is_unbuffered(r)		(((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT) || ((r)->data == NULL))
 #define mysqli_server_status(c)				(c)->server_status
 #define mysqli_stmt_get_id(s)				((s)->stmt_id)
 #define mysqli_stmt_warning_count(s)		mysql_warning_count((s)->mysql)

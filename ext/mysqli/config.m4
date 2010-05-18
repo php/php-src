@@ -77,7 +77,7 @@ dnl Build extension
 if test "$PHP_MYSQLI" != "no"; then
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
                   mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
-                  mysqli_exception.c $mysqli_extra_sources"
+                  mysqli_exception.c mysqli_result_iterator.c $mysqli_extra_sources"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
 
