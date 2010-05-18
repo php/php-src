@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 - Added full_special_chars filter to ext/filter (Rasmus)
+- Added backlock socket context option for stream_socket_server(). (Mike)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
