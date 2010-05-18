@@ -35,7 +35,7 @@ isInstantiable: yes
 isInterface: no
 isAbstract: no
 isFinal: no
-isIteratable: no
+isIteratable: yes
 Modifiers: '0'
 Parent Class: ''
 Extension: 'mysqli'
