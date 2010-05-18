@@ -1186,7 +1186,7 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 				/* try to match the buffer mode as best we can */
 				if (value == PHP_STREAM_BUFFER_NONE) {
 					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
-				} else {
+				} else if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER) {
 					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
 				}
 				ret = PHP_STREAM_OPTION_RETURN_OK;
