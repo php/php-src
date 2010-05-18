@@ -1148,18 +1148,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysqli_fetch_row) 
 {
-#if !defined(MYSQLI_USE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_NUM, 0);
-#else
-	MYSQL_RES	*result;
-	zval		*mysql_result;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
-		return;
-	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
-	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, return_value, MYSQLND_MYSQLI); 
-#endif
 }
 /* }}} */
 
