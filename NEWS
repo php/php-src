@@ -34,6 +34,8 @@
 - Added support for storing upload progress feedback in session data. (Arnaud)
 - Added support for CURLOPT_MAX_RECV_SPEED_LARGE and CURLOPT_MAX_SEND_SPEED_LARGE.
   FR #51815. (Pierrick)
+- Added iterator support in MySQLi. mysqli_result implements Traversable.
+  (Andrey, Johannes)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
