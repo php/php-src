@@ -498,12 +498,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexact, 0)
 	ZEND_ARG_INFO(0, blue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagecolorset, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolorset, 0, 0, 5)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, color)
 	ZEND_ARG_INFO(0, red)
 	ZEND_ARG_INFO(0, green)
 	ZEND_ARG_INFO(0, blue)
+	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorsforindex, 0)
@@ -3058,11 +3059,11 @@ PHP_FUNCTION(imagecolorexact)
 PHP_FUNCTION(imagecolorset)
 {
 	zval *IM;
-	long color, red, green, blue;
+	long color, red, green, blue, alpha = 0;
 	int col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &color, &red, &green, &blue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll|l", &IM, &color, &red, &green, &blue, &alpha) == FAILURE) {
 		return;
 	}
 
@@ -3074,6 +3075,7 @@ PHP_FUNCTION(imagecolorset)
 		im->red[col]   = red;
 		im->green[col] = green;
 		im->blue[col]  = blue;
+		im->alpha[col]  = alpha;
 	} else {
 		RETURN_FALSE;
 	}
