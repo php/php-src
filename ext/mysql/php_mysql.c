@@ -1993,7 +1993,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		}
 	}
 #else
-	mysqlnd_fetch_into(mysql_result, MYSQLND_FETCH_ASSOC, return_value, MYSQLND_MYSQL);
+	mysqlnd_fetch_into(mysql_result, ((result_type & MYSQL_NUM)? MYSQLND_FETCH_NUM:0) | ((result_type & MYSQL_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQL);
 #endif
 
 #ifdef ZEND_ENGINE_2
@@ -2071,19 +2071,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
    Gets a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
-#ifdef MYSQL_USE_MYSQLND
-	MYSQL_RES		*result;
-	zval			*mysql_result;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_result) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, -1, "MySQL result", le_result);
-
-	mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, return_value, MYSQLND_MYSQL); 
-#else
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM, 1, 0);
-#endif
 }
 /* }}} */
 
@@ -2105,25 +2093,7 @@ PHP_FUNCTION(mysql_fetch_object)
    Fetch a result row as an array (associative, numeric or both) */
 PHP_FUNCTION(mysql_fetch_array)
 {
-#ifndef MYSQL_USE_MYSQLND
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2, 0);
-#else
-	MYSQL_RES		*result;
-	zval			*mysql_result;
-	long			mode = MYSQLND_FETCH_BOTH;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mysql_result, &mode) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, -1, "MySQL result", le_result);
-
-	if (mode & ~MYSQL_BOTH) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
-                mode = MYSQL_BOTH;
-        }
-
-	mysqlnd_fetch_into(result, mode, return_value, MYSQLND_MYSQL);
-#endif
 }
 /* }}} */
 
@@ -2132,19 +2102,7 @@ PHP_FUNCTION(mysql_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_assoc)
 {
-#ifndef MYSQL_USE_MYSQLND
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 1, 0);
-#else
-	MYSQL_RES		*result;
-	zval			*mysql_result;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_result) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, -1, "MySQL result", le_result);
-
-	mysqlnd_fetch_into(result, MYSQLND_FETCH_ASSOC, return_value, MYSQLND_MYSQL);
-#endif
 }
 /* }}} */
 
