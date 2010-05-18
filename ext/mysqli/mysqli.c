@@ -32,6 +32,7 @@
 #include "ext/standard/php_string.h"
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static PHP_GINIT_FUNCTION(mysqli);
@@ -685,6 +686,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_hash_init(&mysqli_result_properties, 0, NULL, NULL, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_result_properties, mysqli_result_property_entries);
 	MYSQLI_ADD_PROPERTIES_INFO(ce, mysqli_result_property_info_entries);
+	mysqli_result_class_entry->get_iterator = php_mysqli_result_get_iterator;
+	mysqli_result_class_entry->iterator_funcs.funcs = &php_mysqli_result_iterator_funcs;
+	zend_class_implements(mysqli_result_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 	zend_hash_add(&classes, ce->name, ce->name_length+1, &mysqli_result_properties, sizeof(mysqli_result_properties), NULL);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, mysqli_stmt_methods);
@@ -1072,58 +1076,15 @@ PHP_FUNCTION(mysqli_result_construct)
 }
 /* }}} */
 
-/* {{{ php_mysqli_fetch_into_hash
+
+/* {{{ php_mysqli_fetch_into_hash_aux
  */
-void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags, int into_object)
+void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC)
 {
-	MYSQL_RES		*result;
-	zval			*mysql_result;
-	long			fetchtype;
-	zval			*ctor_params = NULL;
-	zend_class_entry *ce = NULL;
-#if !defined(MYSQLI_USE_MYSQLND)
+	MYSQL_ROW row;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
-	MYSQL_ROW		row;
 	unsigned long	*field_len;
-#endif
-
-	if (into_object) {
-		char *class_name;
-		int class_name_len;
-
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
-			return;
-		}
-		if (ZEND_NUM_ARGS() < (getThis() ? 1 : 2)) {
-			ce = zend_standard_class_def;
-		} else {
-			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-		}
-		if (!ce) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
-			return;
-		}
-		fetchtype = MYSQLI_ASSOC;
-	} else {
-		if (override_flags) {
-			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
-				return;
-			}
-			fetchtype = override_flags;
-		} else {
-			fetchtype = MYSQLI_BOTH;
-			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
-				return;
-			}
-		}
-	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID); 
-
-	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH");
-		RETURN_FALSE;
-	}
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (!(row = mysql_fetch_row(result))) {
@@ -1195,8 +1156,60 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 	}
 #else
-	mysqlnd_fetch_into(result, MYSQLND_FETCH_ASSOC, return_value, MYSQLND_MYSQLI);
+	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQLI);
 #endif
+}
+/* }}} */
+
+
+/* {{{ php_mysqli_fetch_into_hash
+ */
+void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags, int into_object)
+{
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	long			fetchtype;
+	zval			*ctor_params = NULL;
+	zend_class_entry *ce = NULL;
+
+	if (into_object) {
+		char *class_name;
+		int class_name_len;
+
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+			return;
+		}
+		if (ZEND_NUM_ARGS() < (getThis() ? 1 : 2)) {
+			ce = zend_standard_class_def;
+		} else {
+			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		}
+		if (!ce) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
+			return;
+		}
+		fetchtype = MYSQLI_ASSOC;
+	} else {
+		if (override_flags) {
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
+				return;
+			}
+			fetchtype = override_flags;
+		} else {
+			fetchtype = MYSQLI_BOTH;
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
+				return;
+			}
+		}
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID); 
+
+	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH");
+		RETURN_FALSE;
+	}
+
+	php_mysqli_fetch_into_hash_aux(return_value, result, fetchtype TSRMLS_CC);
 
 	if (into_object && Z_TYPE_P(return_value) != IS_NULL) {
 		zval dataset = *return_value;

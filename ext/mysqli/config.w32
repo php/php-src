@@ -18,6 +18,7 @@ if (PHP_MYSQLI != "no") {
 		"mysqli_fe.c " +
 		"mysqli_nonapi.c " +
 		"mysqli_prop.c " +
+		"mysqli_result_iterator.c " +
 		"mysqli_report.c " +
 		"mysqli_warning.c";
 
