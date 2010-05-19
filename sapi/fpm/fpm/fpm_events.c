@@ -90,7 +90,7 @@ int fpm_event_init_main(struct event_base **base) /* {{{ */
 {
 	*base = event_base_new();
 
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: using %s", event_base_get_method(*base));
+	zlog(ZLOG_STUFF, ZLOG_DEBUG, "libevent: using %s", event_base_get_method(*base));
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, *base)) {
 		return -1;
