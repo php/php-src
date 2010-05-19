@@ -1210,7 +1210,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_prepare, 0, 0, 1)
-	ZEND_ARG_INFO(0, statment)
+	ZEND_ARG_INFO(0, statement)
 	ZEND_ARG_INFO(0, options) /* array */
 ZEND_END_ARG_INFO()
 
