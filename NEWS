@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   mcrypt_filter). (Stas)
 - Added full_special_chars filter to ext/filter (Rasmus)
 - Added backlog socket context option for stream_socket_server(). (Mike)
+- Added fifth parameter to openssl_encrypt()/openssl_decrypt()
+  (string $iv) to use non-NULL IV.
+  Made implicit use of NULL IV a warning. (Sara)
+- Added openssl_cipher_iv_length(). (Sara)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
