@@ -51,6 +51,8 @@ int zlog_set_level(int new_value) /* {{{ */
 {
 	int old_value = zlog_level;
 
+	if (new_value < ZLOG_DEBUG || new_value > ZLOG_ALERT) return old_value;
+
 	zlog_level = new_value;
 	return old_value;
 }
