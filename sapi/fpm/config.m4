@@ -203,10 +203,12 @@ if test "$PHP_LIBEVENT_DIR" != "no"; then
   if test -n "$ac_libevent_path"; then
     LIBEVENT_CFLAGS="-I$ac_libevent_path/include"
     LIBEVENT_LIBS="-L$ac_libevent_path/$PHP_LIBDIR $LIBEVENT_LIBS"
+    LIBEVENT_PATH="$ac_libevent_path/$PHP_LIBDIR"
   fi
 
   AC_SUBST(LIBEVENT_CFLAGS)
   AC_SUBST(LIBEVENT_LIBS)
+  AC_SUBST(LIBEVENT_PATH)
 
 else
   AC_MSG_ERROR([FPM requires libevent >= $WANT_LIBEVENT_VERSION. Please specify libevent install prefix with --with-libevent-dir=yes])
@@ -504,6 +506,8 @@ if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
   AC_LIB_EVENT([$minimum_libevent_version])
+
+  PHP_ADD_LIBRARY_WITH_PATH(event, $LIBEVENT_PATH)
 
   PHP_TEST_BUILD(event_init, [ ], [
     AC_MSG_RESULT(no)
