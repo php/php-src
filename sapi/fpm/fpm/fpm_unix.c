@@ -150,21 +150,20 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->config->rlimit_files) {
 		struct rlimit r;
 
-		getrlimit(RLIMIT_NOFILE, &r);
-		r.rlim_cur = (rlim_t) wp->config->rlimit_files;
-//		r.rlim_max = (rlim_t) wp->config->rlimit_files;
+		r.rlim_max = r.rlim_cur = (rlim_t) wp->config->rlimit_files;
+
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_NOFILE) failed", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_NOFILE, %d) failed (%d)", wp->config->name, wp->config->rlimit_files, errno);
 		}
 	}
 
 	if (wp->config->rlimit_core) {
 		struct rlimit r;
 
-		getrlimit(RLIMIT_CORE, &r);
-		r.rlim_cur = wp->config->rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_core;
+		r.rlim_max = r.rlim_cur = wp->config->rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_core;
+
 		if (0 > setrlimit(RLIMIT_CORE, &r)) {
-			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_CORE) failed", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_CORE, %d) failed (%d)", wp->config->name, wp->config->rlimit_core, errno);
 		}
 	}
 
@@ -248,14 +247,6 @@ int fpm_unix_init_main() /* {{{ */
 	}
 
 	fpm_stdio_init_final();
-
-	{
-		struct rlimit r;
-		getrlimit(RLIMIT_NOFILE, &r);
-
-		zlog(ZLOG_STUFF, ZLOG_NOTICE, "getrlimit(nofile): max:%lld, cur:%lld",
-			(long long) r.rlim_max, (long long) r.rlim_cur);
-	}
 	return 0;
 }
 /* }}} */
