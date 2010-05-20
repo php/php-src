@@ -21,14 +21,14 @@ var_dump( token_get_all($source) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing token_get_all() : basic functionality ***
 -- source string with PHP open and close tags --
 array(7) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(376)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -46,7 +46,7 @@ array(7) {
   [2]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -66,7 +66,7 @@ array(7) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -75,7 +75,7 @@ array(7) {
   [6]=>
   array(3) {
     [0]=>
-    int(372)
+    int(378)
     [1]=>
     string(2) "?>"
     [2]=>

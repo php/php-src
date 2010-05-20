@@ -26,13 +26,13 @@ var_dump( token_get_all($source));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing token_get_all() : 'source' string with different increment/decrement operators ***
 array(30) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(376)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -41,7 +41,7 @@ array(30) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -60,7 +60,7 @@ array(30) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -71,7 +71,7 @@ array(30) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -91,7 +91,7 @@ array(30) {
   [8]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -109,7 +109,7 @@ array(30) {
   [10]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -120,7 +120,7 @@ array(30) {
   [12]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -140,7 +140,7 @@ array(30) {
   [15]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -170,7 +170,7 @@ array(30) {
   [19]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -200,7 +200,7 @@ array(30) {
   [23]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -219,7 +219,7 @@ array(30) {
   [25]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -239,7 +239,7 @@ array(30) {
   [28]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -249,7 +249,7 @@ array(30) {
   [29]=>
   array(3) {
     [0]=>
-    int(372)
+    int(378)
     [1]=>
     string(2) "?>"
     [2]=>

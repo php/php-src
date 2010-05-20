@@ -37,14 +37,14 @@ var_dump( token_get_all($source));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing token_get_all() : with invalid/unknown tokens ***
 -- with valid PHP tags & invlid tokens --
 array(29) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(376)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -53,7 +53,7 @@ array(29) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -72,7 +72,7 @@ array(29) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -90,7 +90,7 @@ array(29) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -101,7 +101,7 @@ array(29) {
   [7]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(3) "
   "
@@ -120,7 +120,7 @@ array(29) {
   [9]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -140,7 +140,7 @@ array(29) {
   [12]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(3) "
   "
@@ -163,7 +163,7 @@ array(29) {
   [16]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -174,7 +174,7 @@ array(29) {
   [18]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -192,7 +192,7 @@ array(29) {
   [20]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -212,7 +212,7 @@ array(29) {
   [23]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -223,7 +223,7 @@ array(29) {
   [25]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -235,7 +235,7 @@ array(29) {
   [27]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -245,7 +245,7 @@ array(29) {
   [28]=>
   array(3) {
     [0]=>
-    int(372)
+    int(378)
     [1]=>
     string(2) "?>"
     [2]=>
