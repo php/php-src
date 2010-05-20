@@ -47,6 +47,12 @@
 - Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
   either is present at compile time. (Rasmus)
 
+- Improved CLI Interactive readline shell (Johannes)
+  . Added cli.pager ini setting to set a pager for output.
+  . Added cli.prompt ini settingto configure the shell prompt.
+  . Added shortcut #inisetting=value to change ini settings at run-time.
+  . Don't terminate shell on fatal errors.
+
 - Removed legacy features:
   . allow_call_time_pass_reference. (Pierrick)
   . define_syslog_variables ini option and its associated function. (Kalle)

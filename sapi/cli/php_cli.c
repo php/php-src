@@ -132,6 +132,7 @@ static char *php_optarg = NULL;
 static int php_optind = 1;
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 static char php_last_char = '\0';
+static FILE *pager_pipe = NULL;
 #endif
 
 static const opt_struct OPTIONS[] = {
@@ -258,7 +259,23 @@ static inline size_t sapi_cli_single_write(const char *str, uint str_length TSRM
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
+#endif
 
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+	if (CLIR_G(prompt_str)) {
+		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
+		return str_length;
+	}
+
+	if (CLIR_G(pager) && *CLIR_G(pager) && !pager_pipe) {
+		pager_pipe = VCWD_POPEN(CLIR_G(pager), "w");
+	}
+	if (pager_pipe) {
+		return fwrite(str, 1, MIN(str_length, 16384), pager_pipe);
+	}
+#endif
+
+#ifdef PHP_WRITE_STDOUT
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
 	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO TSRMLS_CC));
@@ -401,7 +418,11 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
+#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+	if (php_module_startup(sapi_module, &cli_readline_module_entry, 1)==FAILURE) {
+#else
 	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+#endif
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1124,7 +1145,7 @@ int main(int argc, char *argv[])
 				char *line;
 				size_t size = 4096, pos = 0, len;
 				char *code = emalloc(size);
-				char *prompt = "php > ";
+				char *prompt = cli_get_prompt("php", '>' TSRMLS_CC);
 				char *history_file;
 
 				if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
@@ -1158,6 +1179,27 @@ int main(int argc, char *argv[])
 					}
 
 					len = strlen(line);
+
+					if (line[0] == '#') {
+						char *param = strstr(&line[1], "=");
+						if (param) {
+							char *cmd;
+							uint cmd_len;
+							param++;
+							cmd_len = param - &line[1] - 1;
+							cmd = estrndup(&line[1], cmd_len);
+
+							zend_alter_ini_entry_ex(cmd, cmd_len + 1, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+							efree(cmd);
+							add_history(line);
+
+							efree(prompt);
+							/* TODO: This might be wrong! */
+							prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+							continue;
+						}
+					}
+
 					if (pos + len + 2 > size) {
 						size = pos + len + 2;
 						code = erealloc(code, size);
@@ -1172,15 +1214,19 @@ int main(int argc, char *argv[])
 					}
 
 					free(line);
+					efree(prompt);
 
 					if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
 						continue;
 					}
 
-					zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
+					zend_try {
+						zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
+					} zend_end_try();
+
 					pos = 0;
 					
-					if (php_last_char != '\0' && php_last_char != '\n') {
+					if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
 						sapi_cli_single_write("\n", 1 TSRMLS_CC);
 					}
 
@@ -1188,11 +1234,17 @@ int main(int argc, char *argv[])
 						zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
 					}
 
+					if (pager_pipe) {
+						fclose(pager_pipe);
+						pager_pipe = NULL;
+					}
+
 					php_last_char = '\0';
 				}
 				write_history(history_file);
 				free(history_file);
 				efree(code);
+				efree(prompt);
 				exit_status = EG(exit_status);
 				break;
 			}
