@@ -130,6 +130,12 @@
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
+%token T_BOOL_HINT
+%token T_STRING_HINT
+%token T_INT_HINT
+%token T_DOUBLE_HINT
+%token T_RESOURCE_HINT
+%token T_OBJECT_HINT
 %token T_CLASS_C
 %token T_METHOD_C
 %token T_FUNC_C
@@ -466,8 +472,14 @@ non_empty_parameter_list:
 
 optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	fully_qualified_class_name	{ $$ = $1; }
-	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NULL;}
+	|	T_ARRAY						{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
+	|	T_BOOL_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_BOOL; }
+	|	T_STRING_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_STRING; }
+	|	T_INT_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_LONG; }
+	|	T_DOUBLE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_DOUBLE; }
+	|	T_RESOURCE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_RESOURCE; }
+	|	T_OBJECT_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_OBJECT; }
+	|	fully_qualified_class_name			{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CLASS; }
 ;
 
 
