@@ -13,13 +13,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
+   |         Johannes Schlueter <johannes@php.net>                        |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
 #include "php.h"
+#include "ext/standard/php_smart_str.h"
 
+ZEND_BEGIN_MODULE_GLOBALS(cli_readline)
+	char *pager;
+	char *prompt;
+	smart_str *prompt_str;
+ZEND_END_MODULE_GLOBALS(cli_readline)
+
+#ifdef ZTS
+# define CLIR_G(v) TSRMG(cli_readline_globals_id, zend_cli_readline_globals *, v)
+#else
+# define CLIR_G(v) (cli_readline_globals.v)
+#endif
+
+ZEND_EXTERN_MODULE_GLOBALS(cli_readline)
+
+extern zend_module_entry cli_readline_module_entry;
+
+char *cli_get_prompt(char *block, char prompt TSRMLS_DC);
 int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC);
 
 char **cli_code_completion(const char *text, int start, int end);

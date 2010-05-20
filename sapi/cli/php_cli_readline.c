@@ -44,6 +44,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/php_smart_str.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
@@ -61,6 +62,55 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
+#include "php_cli_readline.h"
+
+#define DEFAULT_PROMPT "\\b \\> "
+
+ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
+
+static void cli_readline_init_globals(zend_cli_readline_globals *rg TSRMLS_DC)
+{
+	rg->pager = NULL;
+	rg->prompt = NULL;
+	rg->prompt_str = NULL;
+}
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("cli.pager", "", PHP_INI_ALL, OnUpdateString, pager, zend_cli_readline_globals, cli_readline_globals)
+	STD_PHP_INI_ENTRY("cli.prompt", DEFAULT_PROMPT, PHP_INI_ALL, OnUpdateString, prompt, zend_cli_readline_globals, cli_readline_globals)
+PHP_INI_END()
+
+static PHP_MINIT_FUNCTION(cli_readline)
+{
+	ZEND_INIT_MODULE_GLOBALS(cli_readline, cli_readline_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+static PHP_MSHUTDOWN_FUNCTION(cli_readline)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+static PHP_MINFO_FUNCTION(cli_readline)
+{
+	DISPLAY_INI_ENTRIES();
+}
+
+zend_module_entry cli_readline_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"cli-readline",
+	NULL,
+	PHP_MINIT(cli_readline),
+	PHP_MSHUTDOWN(cli_readline),
+	NULL,
+	NULL,
+	PHP_MINFO(cli_readline),
+	PHP_VERSION,
+	STANDARD_MODULE_PROPERTIES
+};
+
 typedef enum {
 	body,
 	sstring,
@@ -73,6 +123,75 @@ typedef enum {
 	heredoc,
 	outside,
 } php_code_type;
+
+char *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
+{
+	smart_str retval = {0};
+	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
+
+	do {
+		if (*prompt_spec == '\\') {
+			switch (prompt_spec[1]) {
+			case '\\':
+				smart_str_appendc(&retval, '\\');
+				prompt_spec++;
+				break;
+			case 'n':
+				smart_str_appendc(&retval, '\n');
+				prompt_spec++;
+				break;
+			case 't':
+				smart_str_appendc(&retval, '\t');
+				prompt_spec++;
+				break;
+			case 'e':
+				smart_str_appendc(&retval, '\033');
+				prompt_spec++;
+				break;
+
+
+			case 'v':
+				smart_str_appends(&retval, PHP_VERSION);
+				prompt_spec++;
+				break;
+			case 'b':
+				smart_str_appends(&retval, block);
+				prompt_spec++;
+				break;
+			case '>':
+				smart_str_appendc(&retval, prompt);
+				prompt_spec++;
+				break;
+			case '`':
+				smart_str_appendc(&retval, '`');
+				prompt_spec++;
+				break;
+			default:
+				smart_str_appendc(&retval, '\\');
+				break;
+			}
+		} else if (*prompt_spec == '`') {
+			char *prompt_end = strstr(prompt_spec + 1, "`");
+			char *code;
+
+			if (prompt_end) {
+				code = estrndup(prompt_spec + 1, prompt_end - prompt_spec - 1);
+
+				CLIR_G(prompt_str) = &retval;
+				zend_try {
+					zend_eval_stringl(code, prompt_end - prompt_spec - 1, NULL, "php prompt code" TSRMLS_CC);
+				} zend_end_try();
+				CLIR_G(prompt_str) = NULL;
+				efree(code);
+				prompt_spec = prompt_end;
+			}
+		} else {
+			smart_str_appendc(&retval, *prompt_spec);
+		}
+	} while (++prompt_spec && *prompt_spec);
+	smart_str_0(&retval);	
+	return retval.c;
+}
 
 int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 {
@@ -206,6 +325,7 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 				switch(code[i]) {
 					case ' ':
 					case '\t':
+					case '\'':
 						break;
 					case '\r':
 					case '\n':
@@ -241,29 +361,29 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 	switch (code_type) {
 		default:
 			if (brace_count) {
-				*prompt = "php ( ";
+				*prompt = cli_get_prompt("php", '(' TSRMLS_CC);
 			} else if (brackets_count) {
-				*prompt = "php { ";
+				*prompt = cli_get_prompt("php", '{' TSRMLS_CC);
 			} else {
-				*prompt = "php > ";
+				*prompt = cli_get_prompt("php", '>' TSRMLS_CC);
 			}
 			break;
 		case sstring:
 		case sstring_esc:
-			*prompt = "php ' ";
+			*prompt = cli_get_prompt("php", '\'' TSRMLS_CC);
 			break;
 		case dstring:
 		case dstring_esc:
-			*prompt = "php \" ";
+			*prompt = cli_get_prompt("php", '"' TSRMLS_CC);
 			break;
 		case comment_block:
-			*prompt = "/*  > ";
+			*prompt = cli_get_prompt("/* ", '>' TSRMLS_CC);
 			break;
 		case heredoc:
-			*prompt = "<<< > ";
+			*prompt = cli_get_prompt("<<<", '>' TSRMLS_CC);
 			break;
 		case outside:
-			*prompt = "    > ";
+			*prompt = cli_get_prompt("   ", '>' TSRMLS_CC);
 			break;
 	}
 
@@ -311,6 +431,20 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 		retval[0] = '$';
 		strcpy(&retval[1], tmp);
 		rl_completion_append_character = '\0';
+	}
+	return retval;
+} /* }}} */
+
+static char *cli_completion_generator_ini(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
+{
+	char *retval, *tmp;
+
+	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL TSRMLS_CC);
+	if (retval) {
+		retval = malloc(strlen(tmp) + 2);
+		retval[0] = '#';
+		strcpy(&retval[1], tmp);
+		rl_completion_append_character = '=';
 	}
 	return retval;
 } /* }}} */
@@ -373,6 +507,8 @@ TODO:
 	}
 	if (text[0] == '$') {
 		retval = cli_completion_generator_var(text, textlen, &cli_completion_state TSRMLS_CC);
+	} else if (text[0] == '#') {
+		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state TSRMLS_CC);
 	} else {
 		char *lc_text, *class_name, *class_name_end;
 		int class_name_len;
