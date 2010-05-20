@@ -28,7 +28,7 @@ var_dump( token_get_all($source));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing token_get_all() : 'source' string with HTML tags ***
 array(9) {
   [0]=>
@@ -50,7 +50,7 @@ array(9) {
   [1]=>
   array(3) {
     [0]=>
-    int(370)
+    int(376)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -59,7 +59,7 @@ array(9) {
   [2]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(3) "
   "
@@ -78,7 +78,7 @@ array(9) {
   [4]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) " "
     [2]=>
@@ -98,7 +98,7 @@ array(9) {
   [7]=>
   array(3) {
     [0]=>
-    int(373)
+    int(379)
     [1]=>
     string(1) "
 "
@@ -108,7 +108,7 @@ array(9) {
   [8]=>
   array(3) {
     [0]=>
-    int(372)
+    int(378)
     [1]=>
     string(2) "?>"
     [2]=>
