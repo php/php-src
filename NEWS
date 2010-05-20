@@ -37,6 +37,8 @@
 - Added iterator support in MySQLi. mysqli_result implements Traversable.
   (Andrey, Johannes)
 - Added scalar typehinting. (Ilia, Derick)
+- Added support for JSON_NUMERIC_CHECK option in json_encode() that converts 
+  numeric strings to integers. (Ilia)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
