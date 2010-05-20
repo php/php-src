@@ -4593,7 +4593,7 @@ PHP_FUNCTION(openssl_digest)
 }
 /* }}} */
 
-static zend_bool php_openssl_validate_iv(char **piv, int *piv_len, int iv_required_len)
+static zend_bool php_openssl_validate_iv(char **piv, int *piv_len, int iv_required_len TSRMLS_DC)
 {
 	char *iv_new;
 
@@ -4661,7 +4661,7 @@ PHP_FUNCTION(openssl_encrypt)
 	if (iv_len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
-	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type));
+	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type) TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
@@ -4740,7 +4740,7 @@ PHP_FUNCTION(openssl_decrypt)
 		key = (unsigned char*)password;
 	}
 
-	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type));
+	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type) TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
@@ -4772,7 +4772,7 @@ PHP_FUNCTION(openssl_decrypt)
 PHP_FUNCTION(openssl_cipher_iv_length)
 {
 	char *method;
-	int method_len, iv_len;
+	int method_len;
 	const EVP_CIPHER *cipher_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &method, &method_len) == FAILURE) {
