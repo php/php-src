@@ -50,6 +50,16 @@ ZEND_END_MODULE_GLOBALS(json)
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
 PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC);
 
+#define PHP_JSON_HEX_TAG	(1<<0)
+#define PHP_JSON_HEX_AMP	(1<<1)
+#define PHP_JSON_HEX_APOS	(1<<2)
+#define PHP_JSON_HEX_QUOT	(1<<3)
+#define PHP_JSON_FORCE_OBJECT	(1<<4)
+#define PHP_JSON_NUMERIC_CHECK	(1<<5)
+
+#define PHP_JSON_OUTPUT_ARRAY 0
+#define PHP_JSON_OUTPUT_OBJECT 1
+
 #endif  /* PHP_JSON_H */
 
 /*

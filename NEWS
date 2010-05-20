@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
+- Added support for JSON_NUMERIC_CHECK option in json_encode() that converts 
+  numeric strings to integers. (Ilia)
 - Added stream_set_read_buffer, allows to set the buffer for read operation.
   (Pierre).
 - Added stream filter support to mcrypt extension (ported from 

@@ -37,15 +37,6 @@ static PHP_FUNCTION(json_last_error);
 
 static const char digits[] = "0123456789abcdef";
 
-#define PHP_JSON_HEX_TAG	(1<<0)
-#define PHP_JSON_HEX_AMP	(1<<1)
-#define PHP_JSON_HEX_APOS	(1<<2)
-#define PHP_JSON_HEX_QUOT	(1<<3)
-#define PHP_JSON_FORCE_OBJECT	(1<<4)
-
-#define PHP_JSON_OUTPUT_ARRAY 0
-#define PHP_JSON_OUTPUT_OBJECT 1
-
 ZEND_DECLARE_MODULE_GLOBALS(json)
 
 /* {{{ arginfo */
@@ -81,6 +72,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -294,6 +286,30 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		return;
 	}
 
+	if (options & PHP_JSON_NUMERIC_CHECK) {
+		double d;
+		int type;
+		long p;
+
+		if ((type = is_numeric_string(s, len, &p, &d, 0)) != 0) {
+			if (type == IS_LONG) {
+				smart_str_append_long(buf, p);
+			} else if (type == IS_DOUBLE) {
+				if (!zend_isinf(d) && !zend_isnan(d)) {
+					char *tmp;
+					int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
+					smart_str_appendl(buf, tmp, l);
+					efree(tmp);
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", d);
+					smart_str_appendc(buf, '0');
+				}
+			}
+			return;
+		}
+		
+	}
+
 	utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
 
 	len = utf8_to_utf16(utf16, s, len);
@@ -445,7 +461,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 					smart_str_appendl(buf, d, len);
 					efree(d);
 				} else {
-					zend_error(E_WARNING, "[json] (php_json_encode) double %.9g does not conform to the JSON spec, encoded as 0", dbl);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", dbl);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -461,7 +477,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 			break;
 
 		default:
-			zend_error(E_WARNING, "[json] (php_json_encode) type is unsupported, encoded as null");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "type is unsupported, encoded as null");
 			smart_str_appendl(buf, "null", 4);
 			break;
 	}
