@@ -674,8 +674,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		if (arg_info->allow_null) {
 			string_printf(str, "or NULL ");
 		}
-	} else if (arg_info->array_type_hint) {
-		string_printf(str, "array ");
+	} else if (arg_info->type_hint) {
+		string_printf(str, "%s ", zend_get_type_by_const(arg_info->type_hint));
 		if (arg_info->allow_null) {
 			string_printf(str, "or NULL ");
 		}
@@ -2338,7 +2338,102 @@ ZEND_METHOD(reflection_parameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->array_type_hint);
+	RETVAL_BOOL(param->arg_info->type_hint == IS_ARRAY);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isInt()
+   Returns whether parameter MUST be a long */
+ZEND_METHOD(reflection_parameter, isInt)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_LONG);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isDouble()
+   Returns whether parameter MUST be a double */
+ZEND_METHOD(reflection_parameter, isDouble)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_DOUBLE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isBool()
+   Returns whether parameter MUST be a boolean */
+ZEND_METHOD(reflection_parameter, isBool)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_BOOL);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isObject()
+   Returns whether parameter MUST be a boolean */
+ZEND_METHOD(reflection_parameter, isObject)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_OBJECT);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isString()
+   Returns whether parameter MUST be a string */
+ZEND_METHOD(reflection_parameter, isString)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_STRING);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isResource()
+   Returns whether parameter MUST be a resource */
+ZEND_METHOD(reflection_parameter, isResource)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_RESOURCE);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionParameter::getTypeHint()
+   Returns what type hint is defined for this parameter */
+ZEND_METHOD(reflection_parameter, getTypeHint)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (!param->arg_info->type_hint) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(zend_get_type_by_const(param->arg_info->type_hint), 1);
 }
 /* }}} */
 
@@ -5089,7 +5184,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionExtension::info() U
+/* {{{ proto public void ReflectionExtension::info()
        Prints phpinfo block for the extension */
 ZEND_METHOD(reflection_extension, info)
 {
@@ -5617,6 +5712,13 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isInt, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isDouble, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isBool, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getTypeHint, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isString, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isObject, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isResource, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getPosition, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)

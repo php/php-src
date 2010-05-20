@@ -206,6 +206,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_STRING:
 			return "string";
 		case IS_OBJECT:
+		case IS_CLASS:
 			return "object";
 		case IS_RESOURCE:
 			return "resource";

@@ -36,6 +36,7 @@
   FR #51815. (Pierrick)
 - Added iterator support in MySQLi. mysqli_result implements Traversable.
   (Andrey, Johannes)
+- Added scalar typehinting. (Ilia, Derick)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 

@@ -671,13 +671,21 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			return zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "" TSRMLS_CC);
 		}
-	} else if (cur_arg_info->array_type_hint) {
+	} else if (cur_arg_info->type_hint) {
 		if (!arg) {
-			return zend_verify_arg_error(zf, arg_num, "be an array", "", "none", "" TSRMLS_CC);
+			return zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "" TSRMLS_CC);
 		}
-		if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
-			return zend_verify_arg_error(zf, arg_num, "be an array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
+
+		/* existing type already matches the hint or forced type */
+		if (Z_TYPE_P(arg) == cur_arg_info->type_hint) {
+			return 1;
 		}
+
+		/* NULL type given, check if parameter is optional */
+		if (Z_TYPE_P(arg) == IS_NULL && cur_arg_info->allow_null) {
+			return 1;
+		}
+		return zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "", zend_zval_type_name(arg) TSRMLS_CC);
 	}
 	return 1;
 }

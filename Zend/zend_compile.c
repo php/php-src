@@ -1807,7 +1807,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 	cur_arg_info = &CG(active_op_array)->arg_info[CG(active_op_array)->num_args-1];
 	cur_arg_info->name = CG(new_interned_string)(estrndup(varname->u.constant.value.str.val, varname->u.constant.value.str.len), varname->u.constant.value.str.len + 1, 1 TSRMLS_CC);
 	cur_arg_info->name_len = varname->u.constant.value.str.len;
-	cur_arg_info->array_type_hint = 0;
+	cur_arg_info->type_hint = 0;
 	cur_arg_info->allow_null = 1;
 	cur_arg_info->pass_by_reference = pass_by_reference;
 	cur_arg_info->class_name = NULL;
@@ -1815,7 +1815,10 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
-		if (class_type->u.constant.type == IS_STRING) {
+		cur_arg_info->type_hint = class_type->u.constant.type;
+
+		switch (class_type->u.constant.type) {
+		case IS_CLASS:
 			if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
 				zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
 			}
@@ -1829,10 +1832,9 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 					zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
 				}
 			}
-		} else {
-			cur_arg_info->array_type_hint = 1;
-			cur_arg_info->class_name = NULL;
-			cur_arg_info->class_name_len = 0;
+			break;
+
+		case IS_ARRAY:
 			if (op == ZEND_RECV_INIT) {
 				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
 					cur_arg_info->allow_null = 1;
@@ -1840,6 +1842,26 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 					zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 				}
 			}
+			break;
+
+		/* scalar type hinting */
+		case IS_BOOL:
+		case IS_STRING:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_RESOURCE:
+		case IS_OBJECT:
+			if (op == ZEND_RECV_INIT) {
+				if (Z_TYPE(initialization->u.constant) != class_type->u.constant.type && Z_TYPE(initialization->u.constant) != IS_NULL && (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT) {
+					zend_error(E_COMPILE_ERROR, "Default value for parameters with %s type hint can only be %s or NULL", zend_get_type_by_const(class_type->u.constant.type), zend_get_type_by_const(class_type->u.constant.type));
+				} else if (Z_TYPE(initialization->u.constant) == IS_NULL) {
+					cur_arg_info->allow_null = 1;
+				}
+			}
+			break;
+
+		default:
+			zend_error(E_COMPILE_ERROR, "Unknown type hint");
 		}
 	}
 }
@@ -2868,8 +2890,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 				return 0;
 			}
 		}
-		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {
-			/* Only one has an array type hint and the other one doesn't */
+		if (fe->common.arg_info[i].type_hint != proto->common.arg_info[i].type_hint) {
+			/* Incompatible type hint */
 			return 0;
 		}
 		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
