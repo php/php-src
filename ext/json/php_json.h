@@ -48,9 +48,11 @@ ZEND_END_MODULE_GLOBALS(json)
 #endif
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
-PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC);
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, long depth TSRMLS_DC);
 extern zend_class_entry *php_json_serializable_ce;
 
+
+/* json_encode() options */
 #define PHP_JSON_HEX_TAG	(1<<0)
 #define PHP_JSON_HEX_AMP	(1<<1)
 #define PHP_JSON_HEX_APOS	(1<<2)
@@ -58,8 +60,19 @@ extern zend_class_entry *php_json_serializable_ce;
 #define PHP_JSON_FORCE_OBJECT	(1<<4)
 #define PHP_JSON_NUMERIC_CHECK	(1<<5)
 
-#define PHP_JSON_OUTPUT_ARRAY 0
-#define PHP_JSON_OUTPUT_OBJECT 1
+/* Internal flags */
+#define PHP_JSON_OUTPUT_ARRAY	0
+#define PHP_JSON_OUTPUT_OBJECT	1
+
+/* json_decode() options */
+#define PHP_JSON_OBJECT_AS_ARRAY	(1<<0)
+#define PHP_JSON_BIGINT_AS_STRING	(1<<1)
+
+static inline php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC)
+{
+	php_json_decode_ex(return_value, str, str_len, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0, depth TSRMLS_CC);
+}
+
 
 #endif  /* PHP_JSON_H */
 
