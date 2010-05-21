@@ -20,7 +20,7 @@ var_dump( json_decode() );
 
 echo "\n-- Testing json_decode() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( json_decode('"abc"', TRUE, 512, $extra_arg) );
+var_dump( json_decode('"abc"', TRUE, 512, 0, $extra_arg) );
 
 ?>
 ===Done===
@@ -34,6 +34,6 @@ NULL
 
 -- Testing json_decode() function with more than expected no. of arguments --
 
-Warning: json_decode() expects at most 3 parameters, 4 given in %s on line %d
+Warning: json_decode() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 ===Done===

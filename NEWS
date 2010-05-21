@@ -31,6 +31,7 @@
 - Added closure $this support back. (Stas)
 - Added SplObjectStorage::getHash() hook. (Etienne)
 - Added JsonSerializable interface (Sara)
+- Added JSON_BIGINT_AS_STRING, extended json_decode() sig with $options. (Sara)
 - Added support for storing upload progress feedback in session data. (Arnaud)
 - Added support for CURLOPT_MAX_RECV_SPEED_LARGE and CURLOPT_MAX_SEND_SPEED_LARGE.
   FR #51815. (Pierrick)
