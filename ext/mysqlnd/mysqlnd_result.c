@@ -186,34 +186,37 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 	DBG_ENTER("mysqlnd_res::free_buffered_data");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
 
-	DBG_INF_FMT("before: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
-	for (row = set->row_count - 1; row >= 0; row--) {
-		zval **current_row = set->data + row * field_count;
-		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-		int col;
-
-		for (col = field_count - 1; col >= 0; --col) {
-			zend_bool copy_ctor_called;
-			if (current_row[0] == NULL) {
-				break;/* row that was never initialized */
-			}
-			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
-#if MYSQLND_DEBUG_MEMORY
-			DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
-#endif
-			MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
-														   STAT_COPY_ON_WRITE_SAVED);
-		}
-#if MYSQLND_DEBUG_MEMORY
-		DBG_INF("Freeing current_row & current_buffer");
-#endif
-		current_buffer->free_chunk(current_buffer TSRMLS_CC);
-	}
 	DBG_INF("Freeing data & row_buffer");
 	if (set->data) {
+
+		DBG_INF_FMT("before: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
+		for (row = set->row_count - 1; row >= 0; row--) {
+			zval **current_row = set->data + row * field_count;
+			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
+			int col;
+
+			for (col = field_count - 1; col >= 0; --col) {
+				zend_bool copy_ctor_called;
+				if (current_row == NULL || current_row[0] == NULL) {
+					break;/* row that was never initialized */
+				}
+			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
+#if MYSQLND_DEBUG_MEMORY
+				DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
+#endif
+				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
+														   STAT_COPY_ON_WRITE_SAVED);
+			}
+#if MYSQLND_DEBUG_MEMORY
+			DBG_INF("Freeing current_row & current_buffer");
+#endif
+			current_buffer->free_chunk(current_buffer TSRMLS_CC);
+		}
+
 		mnd_pefree(set->data, set->persistent);
 		set->data = NULL;
 	}
+
 	if (set->row_buffers) {
 		mnd_pefree(set->row_buffers, set->persistent);
 		set->row_buffers	= NULL;
