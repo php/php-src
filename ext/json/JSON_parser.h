@@ -34,7 +34,7 @@ extern int free_JSON_parser(JSON_parser jp);
 
 static inline int parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc TSRMLS_DC)
 {
-	parse_JSON_ex(jp, z, utf16_json, length, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0 TSRMLS_CC);
+	return parse_JSON_ex(jp, z, utf16_json, length, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0 TSRMLS_CC);
 }
 
 #endif
