@@ -1,4 +1,4 @@
-;/*
+/*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
@@ -679,7 +679,7 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EMALLOC_COUNT, 1, STAT_MEM_EMALLOC_AMOUNT, size);
 	}
@@ -711,7 +711,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 
 	DBG_INF_FMT("size=%lu ptr=%p persistent=%d", size, ret, persistent);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_MALLOC_COUNT:STAT_MEM_EMALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_MALLOC_AMOUNT:STAT_MEM_EMALLOC_AMOUNT;
 		*(size_t *) ret = size;
@@ -747,7 +747,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 	DBG_INF_FMT("after : %lu", zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret);
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_ECALLOC_COUNT, 1, STAT_MEM_ECALLOC_AMOUNT, size);
 	}
@@ -779,7 +779,7 @@ void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent M
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_CALLOC_COUNT:STAT_MEM_ECALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_CALLOC_AMOUNT:STAT_MEM_ECALLOC_AMOUNT;
 		*(size_t *) ret = size;
@@ -815,7 +815,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 #endif
 
 	DBG_INF_FMT("new_ptr=%p", (char*)ret);
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = new_size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMOUNT, new_size);
 	}
@@ -849,7 +849,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 
 	DBG_INF_FMT("new_ptr=%p", (char*)ret);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_REALLOC_COUNT:STAT_MEM_EREALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_REALLOC_AMOUNT:STAT_MEM_EREALLOC_AMOUNT;
 		*(size_t *) ret = new_size;
