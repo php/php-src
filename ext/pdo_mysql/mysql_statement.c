@@ -111,7 +111,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 #endif /* HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND */
 #if PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
-		free(S->current_data);
+		mnd_free(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
@@ -652,7 +652,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 	}
 #if PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
-		free(S->current_data);
+		mnd_free(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
