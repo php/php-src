@@ -1172,7 +1172,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ARRAY;
 }
 
-<ST_IN_SCRIPTING>("bool"|"boolean"){TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>("bool"|"boolean"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
 	if (yytext[4] == 'e') {
 		yyless((sizeof("boolean") - 1));
 	} else {
@@ -1181,12 +1181,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_BOOL_HINT;
 }
 
-<ST_IN_SCRIPTING>("string"|"binary"){TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>("string"|"binary"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
 	yyless(6);
 	return T_STRING_HINT;
 }
 
-<ST_IN_SCRIPTING>("int"|"integer"|"long"){TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>("int"|"integer"|"long"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
 	if (yytext[3] == 'e') {
 		yyless((sizeof("integer") - 1));
 	} else 	if (yytext[3] == 'g') {
@@ -1197,7 +1197,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_INT_HINT;
 }
 
-<ST_IN_SCRIPTING>("real"|"double"|"float"){TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>("real"|"double"|"float"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
 	if (yytext[4] == 'l') {
 		yyless((sizeof("double") - 1));
 	} else 	if (yytext[4] == 't') {
@@ -1208,12 +1208,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DOUBLE_HINT;
 }
 
-<ST_IN_SCRIPTING>"resource"{TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>"resource"{TABS_AND_SPACES}[ \t\r\n&]*"$" {
 	yyless((sizeof("resource") - 1));
 	return T_RESOURCE_HINT;
 }
 
-<ST_IN_SCRIPTING>"object"{TABS_AND_SPACES}[ \t&]+"$" {
+<ST_IN_SCRIPTING>"object"{TABS_AND_SPACES}[ \t\r\n&]*"$" {
 	yyless((sizeof("object") - 1));
 	return T_OBJECT_HINT;
 }
