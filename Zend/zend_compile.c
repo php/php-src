@@ -1876,6 +1876,19 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 			break;
 
 		/* scalar type hinting */
+		case IS_SCALAR:
+			if (op == ZEND_RECV_INIT && Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
+				break;
+			}
+			/* fall through */
+
+		/* scalar type hinting */
+		case IS_NUMERIC:
+			if (op == ZEND_RECV_INIT && (Z_TYPE(initialization->u.constant) == IS_LONG || Z_TYPE(initialization->u.constant) == IS_DOUBLE)) {
+				break;
+			}
+			/* fall through */
+
 		case IS_BOOL:
 		case IS_STRING:
 		case IS_LONG:
