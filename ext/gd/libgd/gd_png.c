@@ -515,8 +515,8 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	/*  png_set_filter(png_ptr, 0, PNG_FILTER_NONE);  */
 
 	/* 2.0.12: this is finally a parameter */
-	if (level < 0 || level > 9) {
-		php_gd_error("gd-png error: compression level must be between 0 and 9");
+	if (level != -1 && (level < 0 || level > 9)) {
+		php_gd_error("gd-png error: compression level must be 0 through 9");
 		return;
 	}
 	png_set_compression_level(png_ptr, level);
