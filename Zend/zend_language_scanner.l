@@ -1060,12 +1060,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DOUBLE_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"string"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
 	return T_STRING_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"binary"{TABS_AND_SPACES}")" {
-	return T_STRING_CAST;
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"scalar"{TABS_AND_SPACES}")" {
+	return T_SCALAR_CAST;
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
@@ -1184,6 +1184,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>("string"|"binary"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
 	yyless(6);
 	return T_STRING_HINT;
+}
+
+<ST_IN_SCRIPTING>"scalar"{TABS_AND_SPACES}[ \r\n\t&]*"$" {
+	yyless(6);
+	return T_SCALAR_HINT;
+}
+
+<ST_IN_SCRIPTING>"numeric"{TABS_AND_SPACES}[ \r\n\t&]*"$" {
+	yyless(7);
+	return T_NUMERIC_HINT;
 }
 
 <ST_IN_SCRIPTING>("int"|"integer"|"long"){TABS_AND_SPACES}[ \r\n\t&]*"$" {

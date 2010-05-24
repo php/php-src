@@ -685,6 +685,18 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 		if (Z_TYPE_P(arg) == IS_NULL && cur_arg_info->allow_null) {
 			return 1;
 		}
+
+		if (cur_arg_info->type_hint == IS_SCALAR && Z_TYPE_P(arg) != IS_NULL && Z_TYPE_P(arg) != IS_ARRAY && Z_TYPE_P(arg) != IS_OBJECT && Z_TYPE_P(arg) != IS_RESOURCE) {
+			return 1;
+		}
+
+		if (cur_arg_info->type_hint == IS_NUMERIC && (
+				(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE)
+				|| (Z_TYPE_P(arg) == IS_STRING && is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0))
+		)) {
+			return 1;
+		}
+
 		return zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "", zend_zval_type_name(arg) TSRMLS_CC);
 	}
 	return 1;

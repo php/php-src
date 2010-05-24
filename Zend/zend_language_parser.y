@@ -69,7 +69,7 @@
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_NUMERIC_CAST T_SCALAR_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
 %nonassoc T_NEW T_CLONE
 %token T_EXIT
@@ -136,6 +136,8 @@
 %token T_DOUBLE_HINT
 %token T_RESOURCE_HINT
 %token T_OBJECT_HINT
+%token T_SCALAR_HINT
+%token T_NUMERIC_HINT
 %token T_CLASS_C
 %token T_METHOD_C
 %token T_FUNC_C
@@ -479,6 +481,8 @@ optional_class_type:
 	|	T_DOUBLE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_DOUBLE; }
 	|	T_RESOURCE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_RESOURCE; }
 	|	T_OBJECT_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_OBJECT; }
+	|	T_SCALAR_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_SCALAR; }
+	|	T_NUMERIC_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NUMERIC; }
 	|	fully_qualified_class_name			{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CLASS; }
 ;
 
@@ -712,6 +716,8 @@ expr_without_variable:
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
+	|	T_SCALAR_CAST expr 	{ zend_do_cast(&$$, &$2, IS_SCALAR TSRMLS_CC); }
+	|	T_NUMERIC_CAST expr 	{ zend_do_cast(&$$, &$2, IS_NUMERIC TSRMLS_CC); }
 	|	T_UNSET_CAST expr	{ zend_do_cast(&$$, &$2, IS_NULL TSRMLS_CC); }
 	|	T_EXIT exit_expr	{ zend_do_exit(&$$, &$2 TSRMLS_CC); }
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
