@@ -2011,7 +2011,6 @@ static inline zend_object_value date_object_new_date_ex(zend_class_entry *class_
 {
 	php_date_obj *intern;
 	zend_object_value retval;
-	zval *tmp;
 
 	intern = emalloc(sizeof(php_date_obj));
 	memset(intern, 0, sizeof(php_date_obj));
@@ -2020,7 +2019,7 @@ static inline zend_object_value date_object_new_date_ex(zend_class_entry *class_
 	}
 	
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_date, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_date;
@@ -2084,7 +2083,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	props = dateobj->std.properties;
+	props = zend_std_get_properties(object TSRMLS_CC);
 
 	if (!dateobj->time || GC_G(gc_active)) {
 		return props;
@@ -2132,7 +2131,6 @@ static inline zend_object_value date_object_new_timezone_ex(zend_class_entry *cl
 {
 	php_timezone_obj *intern;
 	zend_object_value retval;
-	zval *tmp;
 
 	intern = emalloc(sizeof(php_timezone_obj));
 	memset(intern, 0, sizeof(php_timezone_obj));
@@ -2141,7 +2139,7 @@ static inline zend_object_value date_object_new_timezone_ex(zend_class_entry *cl
 	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_timezone, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_timezone;
@@ -2184,7 +2182,6 @@ static inline zend_object_value date_object_new_interval_ex(zend_class_entry *cl
 {
 	php_interval_obj *intern;
 	zend_object_value retval;
-	zval *tmp;
 
 	intern = emalloc(sizeof(php_interval_obj));
 	memset(intern, 0, sizeof(php_interval_obj));
@@ -2193,7 +2190,7 @@ static inline zend_object_value date_object_new_interval_ex(zend_class_entry *cl
 	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_interval, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_interval;
@@ -2227,7 +2224,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 
 	intervalobj = (php_interval_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	props = intervalobj->std.properties;
+	props = zend_std_get_properties(object TSRMLS_CC);
 
 	if (!intervalobj->initialized || GC_G(gc_active)) {
 		return props;
@@ -2260,7 +2257,6 @@ static inline zend_object_value date_object_new_period_ex(zend_class_entry *clas
 {
 	php_period_obj *intern;
 	zend_object_value retval;
-	zval *tmp;
 
 	intern = emalloc(sizeof(php_period_obj));
 	memset(intern, 0, sizeof(php_period_obj));
@@ -2269,7 +2265,7 @@ static inline zend_object_value date_object_new_period_ex(zend_class_entry *clas
 	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) date_object_free_storage_period, NULL TSRMLS_CC);
 	retval.handlers = &date_object_handlers_period;

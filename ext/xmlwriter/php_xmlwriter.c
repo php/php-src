@@ -143,7 +143,6 @@ static void xmlwriter_object_free_storage(void *object TSRMLS_DC)
 static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	ze_xmlwriter_object *intern;
-	zval *tmp;
 	zend_object_value retval;
 
 	intern = emalloc(sizeof(ze_xmlwriter_object));
@@ -151,8 +150,7 @@ static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRML
 	intern->xmlwriter_ptr = NULL;
 	
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
-					(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	retval.handle = zend_objects_store_put(intern,
 						NULL,

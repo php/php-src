@@ -1005,45 +1005,41 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	if (!class_type->constants_updated || !CE_STATIC_MEMBERS(class_type)) {
+	if (!class_type->constants_updated || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
+		int i;
 
 		*scope = class_type;
 		zend_hash_apply_with_argument(&class_type->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
-		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 
-		if (!CE_STATIC_MEMBERS(class_type)) {
-			HashPosition pos;
+		for (i = 0; i < class_type->default_properties_count; i++) {
+			if (class_type->default_properties_table[i]) {
+				zval_update_constant(&class_type->default_properties_table[i], (void**)1 TSRMLS_CC);
+			}
+		}
+
+		if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
 			zval **p;
 
 			if (class_type->parent) {
 				zend_update_class_constants(class_type->parent TSRMLS_CC);
 			}
 #if ZTS
-			ALLOC_HASHTABLE(CG(static_members)[(zend_intptr_t)(class_type->static_members)]);
+			CG(static_members)[(zend_intptr_t)(class_type->static_members)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
 #else
-			ALLOC_HASHTABLE(class_type->static_members);
+			class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
 #endif
-			zend_hash_init(CE_STATIC_MEMBERS(class_type), zend_hash_num_elements(&class_type->default_static_members), NULL, ZVAL_PTR_DTOR, 0);
-
-			zend_hash_internal_pointer_reset_ex(&class_type->default_static_members, &pos);
-			while (zend_hash_get_current_data_ex(&class_type->default_static_members, (void**)&p, &pos) == SUCCESS) {
-				char *str_index;
-				uint str_length;
-				ulong num_index;
-				zval **q;
-
-				zend_hash_get_current_key_ex(&class_type->default_static_members, &str_index, &str_length, &num_index, 0, &pos);
+			for (i = 0; i < class_type->default_static_members_count; i++) {
+				p = &class_type->default_static_members_table[i];
 				if (Z_ISREF_PP(p) &&
 					class_type->parent &&
-					zend_hash_find(&class_type->parent->default_static_members, str_index, str_length, (void**)&q) == SUCCESS &&
-					*p == *q &&
-					zend_hash_find(CE_STATIC_MEMBERS(class_type->parent), str_index, str_length, (void**)&q) == SUCCESS
+					class_type->parent->default_static_members_count < i &&
+					*p == class_type->parent->default_static_members_table[i]
 				) {
-					Z_ADDREF_PP(q);
-					Z_SET_ISREF_PP(q);
-					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)q, sizeof(zval*), NULL);
+					Z_ADDREF_PP(p);
+					Z_SET_ISREF_PP(p);
+					class_type->static_members_table[i] = *p;
 				} else {
 					zval *r;
 
@@ -1051,15 +1047,34 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 					*r = **p;
 					INIT_PZVAL(r);
 					zval_copy_ctor(r);
-					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)&r, sizeof(zval*), NULL);
+					class_type->static_members_table[i] = r;
 				}
-				zend_hash_move_forward_ex(&class_type->default_static_members, &pos);
 			}
 		}
-		zend_hash_apply_with_argument(CE_STATIC_MEMBERS(class_type), (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+
+		for (i = 0; i < class_type->default_static_members_count; i++) {
+			zval_update_constant(&CE_STATIC_MEMBERS(class_type)[i], (void**)1 TSRMLS_CC);
+		}
 
 		*scope = old_scope;
 		class_type->constants_updated = 1;
+	}
+}
+/* }}} */
+
+ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
+{
+	int i;
+
+	if (class_type->default_properties_count) {
+		object->properties_table = emalloc(sizeof(zval*) * class_type->default_properties_count);
+		for (i = 0; i < class_type->default_properties_count; i++) {
+			object->properties_table[i] = class_type->default_properties_table[i];
+			if (class_type->default_properties_table[i]) {
+				Z_ADDREF_P(object->properties_table[i]);
+			}
+		}
+		object->properties = NULL;
 	}
 }
 /* }}} */
@@ -1070,7 +1085,6 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
  * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
 	zend_object *object;
 
 	if (class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
@@ -1085,10 +1099,9 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 		Z_OBJVAL_P(arg) = zend_objects_new(&object, class_type TSRMLS_CC);
 		if (properties) {
 			object->properties = properties;
+			object->properties_table = NULL;
 		} else {
-			ALLOC_HASHTABLE_REL(object->properties);
-			zend_hash_init(object->properties, zend_hash_num_elements(&class_type->default_properties), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+			object_properties_init(object, class_type);
 		}
 	} else {
 		Z_OBJVAL_P(arg) = class_type->create_object(class_type TSRMLS_CC);
@@ -2315,8 +2328,6 @@ static zend_object_value display_disabled_class(zend_class_entry *class_type TSR
 	zend_object_value retval;
 	zend_object *intern;
 	retval = zend_objects_new(&intern, class_type TSRMLS_CC);
-	ALLOC_HASHTABLE(intern->properties);
-	zend_hash_init(intern->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", class_type->name);
 	return retval;
 }
@@ -3076,17 +3087,38 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC) /* {{{ */
 {
-	zend_property_info property_info;
-	HashTable *target_symbol_table;
+	zend_property_info property_info, *property_info_ptr;
 	char *interned_name;
+	ulong h = zend_get_hash_value(name, name_length+1);
 
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
 	if (access_type & ZEND_ACC_STATIC) {
-		target_symbol_table = &ce->default_static_members;
+		if (zend_hash_quick_find(&ce->properties_info, name, name_length + 1, h, (void**)&property_info_ptr) == SUCCESS &&
+		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
+			property_info.offset = property_info_ptr->offset;
+			zval_ptr_dtor(&ce->default_static_members_table[property_info.offset]);
+			zend_hash_quick_del(&ce->properties_info, name, name_length + 1, h);
+		} else {
+			property_info.offset = ce->default_static_members_count++;
+			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval*) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
+		}
+		ce->default_static_members_table[property_info.offset] = property;
+		if (ce->type == ZEND_USER_CLASS) {
+			ce->static_members_table = ce->default_static_members_table;
+		}
 	} else {
-		target_symbol_table = &ce->default_properties;
+		if (zend_hash_quick_find(&ce->properties_info, name, name_length + 1, h, (void**)&property_info_ptr) == SUCCESS &&
+		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
+			property_info.offset = property_info_ptr->offset;
+			zval_ptr_dtor(&ce->default_properties_table[property_info.offset]);
+			zend_hash_quick_del(&ce->properties_info, name, name_length + 1, h);
+		} else {
+			property_info.offset = ce->default_properties_count++;
+			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval*) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+		}
+		ce->default_properties_table[property_info.offset] = property;
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
@@ -3120,14 +3152,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 			}
 			break;
 		case ZEND_ACC_PUBLIC:
-			if (ce->parent) {
-				char *prot_name;
-				int prot_name_length;
-
-				zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
-				zend_hash_del(target_symbol_table, prot_name, prot_name_length+1);
-				pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
-			}
 			if (IS_INTERNED(name)) {
 				property_info.name = (char*)name;
 			} else {
@@ -3147,17 +3171,15 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 		property_info.name = interned_name;
 	}
 
-	zend_hash_update(target_symbol_table, property_info.name, property_info.name_length+1, &property, sizeof(zval *), NULL);
-
 	property_info.flags = access_type;
-	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
+	property_info.h = (access_type & ZEND_ACC_PUBLIC) ? h : zend_get_hash_value(property_info.name, property_info.name_length+1);
 
 	property_info.doc_comment = doc_comment;
 	property_info.doc_comment_len = doc_comment_len;
 
 	property_info.ce = ce;
 
-	zend_hash_update(&ce->properties_info, name, name_length + 1, &property_info, sizeof(zend_property_info), NULL);
+	zend_hash_quick_update(&ce->properties_info, name, name_length + 1, h, &property_info, sizeof(zend_property_info), NULL);
 
 	return SUCCESS;
 }

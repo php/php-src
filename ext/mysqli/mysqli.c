@@ -484,7 +484,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 {
 	zend_object_value retval;
 	mysqli_object *intern;
-	zval *tmp;
 	zend_class_entry *mysqli_base_class;
 	zend_objects_free_object_storage_t free_storage;
 
@@ -502,8 +501,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 					(void **) &intern->prop_handler);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
-					(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	/* link object */
 	if (instanceof_function(class_type, mysqli_link_class_entry TSRMLS_CC)) {

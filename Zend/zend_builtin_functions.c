@@ -888,49 +888,53 @@ ZEND_FUNCTION(is_a)
 
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *return_value TSRMLS_DC)
+static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
 {
-	if (zend_hash_num_elements(properties) > 0) {
-		HashPosition pos;
-		zval **prop;
+	HashPosition pos;
+	zend_property_info *prop_info;
+	zval *prop, *prop_copy;
+	char *key;
+	uint key_len;
+	ulong num_index;
 
-		zend_hash_internal_pointer_reset_ex(properties, &pos);
-		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
-			char *key, *class_name, *prop_name;
-			uint key_len;
-			ulong num_index;
-			int prop_name_len = 0;			
-			zval *prop_copy;
-			zend_property_info *property_info;
-			zval zprop_name;
-
-			zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
-			zend_hash_move_forward_ex(properties, &pos);
-
-			zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
-			prop_name_len = strlen(prop_name);
-
-			ZVAL_STRINGL(&zprop_name, prop_name, prop_name_len, 0);
-			property_info = zend_get_property_info(ce, &zprop_name, 1 TSRMLS_CC);
-
-			if (!property_info || property_info == &EG(std_property_info)) {
-				continue;
-			}
-
-			/* copy: enforce read only access */
-			ALLOC_ZVAL(prop_copy);
-			*prop_copy = **prop;
-			zval_copy_ctor(prop_copy);
-			INIT_PZVAL(prop_copy);
-
-			/* this is necessary to make it able to work with default array 
-			* properties, returned to user */
-			if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-				zval_update_constant(&prop_copy, 0 TSRMLS_CC);
-			}
-
-			add_assoc_zval(return_value, prop_name, prop_copy);
+	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+	while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS) {
+		zend_hash_get_current_key_ex(&ce->properties_info, &key, &key_len, &num_index, 0, &pos);
+		zend_hash_move_forward_ex(&ce->properties_info, &pos);
+		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
+		     prop_info->ce != EG(scope)) ||
+		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
+		     !zend_check_protected(prop_info->ce, EG(scope))) ||
+		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
+		      ce != EG(scope) &&
+			  prop_info->ce != EG(scope))) {
+			continue;
 		}
+		prop = NULL;
+		if (prop_info->offset >= 0) {
+			if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
+				prop = ce->default_static_members_table[prop_info->offset];
+			} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
+				prop = ce->default_properties_table[prop_info->offset];
+ 			}
+		}
+		if (!prop) {
+			continue;
+		}
+
+		/* copy: enforce read only access */
+		ALLOC_ZVAL(prop_copy);
+		*prop_copy = *prop;
+		zval_copy_ctor(prop_copy);
+		INIT_PZVAL(prop_copy);
+
+		/* this is necessary to make it able to work with default array
+		 * properties, returned to user */
+		if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+			zval_update_constant(&prop_copy, 0 TSRMLS_CC);
+		}
+
+		add_assoc_zval(return_value, key, prop_copy);
 	}
 }
 /* }}} */
@@ -953,8 +957,8 @@ ZEND_FUNCTION(get_class_vars)
 	} else {
 		array_init(return_value);
 		zend_update_class_constants(*pce TSRMLS_CC);
-		add_class_vars(*pce, &(*pce)->default_properties, return_value TSRMLS_CC);
-		add_class_vars(*pce, CE_STATIC_MEMBERS(*pce), return_value TSRMLS_CC);
+		add_class_vars(*pce, 0, return_value TSRMLS_CC);
+		add_class_vars(*pce, 1, return_value TSRMLS_CC);
 	}
 }
 /* }}} */

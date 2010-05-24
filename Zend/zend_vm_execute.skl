@@ -39,6 +39,10 @@ zend_vm_enter:
 
 	LOAD_REGS();
 
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+	}
+
 	if (op_array->this_var != -1 && EG(This)) {
  		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (!EG(active_symbol_table)) {

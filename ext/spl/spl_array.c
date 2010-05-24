@@ -81,11 +81,17 @@ typedef struct _spl_array_object {
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props TSRMLS_DC) { /* {{{ */
 	if ((intern->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
+		if (!intern->std.properties) {
+			rebuild_object_properties(&intern->std);
+		}
 		return intern->std.properties;
 	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0) && Z_TYPE_P(intern->array) == IS_OBJECT) {
 		spl_array_object *other  = (spl_array_object*)zend_object_store_get_object(intern->array TSRMLS_CC);
 		return spl_array_get_hash_table(other, check_std_props TSRMLS_CC);
 	} else if ((intern->ar_flags & ((check_std_props ? SPL_ARRAY_STD_PROP_LIST : 0) | SPL_ARRAY_IS_SELF)) != 0) {
+		if (!intern->std.properties) {
+			rebuild_object_properties(&intern->std);
+		}
 		return intern->std.properties;
 	} else {
 		return HASH_OF(intern->array);
@@ -173,7 +179,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	intern->ar_flags = 0;
 	intern->serialize_data   = NULL;
@@ -727,6 +733,10 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 	zend_class_entry *base;
 
 	*is_temp = 0;
+
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 
 	if (HASH_OF(intern->array) == intern->std.properties) {
 		return intern->std.properties;
@@ -1584,6 +1594,9 @@ smart_str spl_array_serialize_helper(spl_array_object *intern, php_serialize_dat
 	/* members */
 	smart_str_appendl(&buf, "m:", 2);
 	INIT_PZVAL(&members);
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 	Z_ARRVAL(members) = intern->std.properties;
 	Z_TYPE(members) = IS_ARRAY;
 	pmembers = &members;
@@ -1719,6 +1732,9 @@ void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char 
 	}
 
 	/* copy members */
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref, (void *) NULL, sizeof(zval *));
 	zval_ptr_dtor(&pmembers);
 

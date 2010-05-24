@@ -208,9 +208,9 @@ typedef struct _zend_fcall_info_cache {
 	INIT_OVERLOADED_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions, handle_fcall, handle_propget, handle_propset)
 
 #ifdef ZTS
-#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members)[(zend_intptr_t)(ce)->static_members])
+#	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members_table)[(zend_intptr_t)(ce)->static_members_table])
 #else
-#	define CE_STATIC_MEMBERS(ce) ((ce)->static_members)
+#	define CE_STATIC_MEMBERS(ce) ((ce)->static_members_table)
 #endif
 
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
@@ -347,6 +347,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC);
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC);
+ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
 

@@ -1154,14 +1154,13 @@ static void sqlite_object_free_storage(void *object TSRMLS_DC)
 static void sqlite_object_new(zend_class_entry *class_type, zend_object_handlers *handlers, zend_object_value *retval TSRMLS_DC)
 {
 	sqlite_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(sqlite_object));
 	memset(intern, 0, sizeof(sqlite_object));
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-
+	object_properties_init(&intern->std, class_type);
+	
 	retval->handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) sqlite_object_free_storage, NULL TSRMLS_CC);
 	retval->handlers = handlers;
 }

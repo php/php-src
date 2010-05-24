@@ -1552,12 +1552,12 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 	pdo_dbh_t *dbh;
-	zval *tmp;
 
 	dbh = emalloc(sizeof(*dbh));
 	memset(dbh, 0, sizeof(*dbh));
 	zend_object_std_init(&dbh->std, ce TSRMLS_CC);
-	zend_hash_copy(dbh->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&dbh->std, ce);
+	rebuild_object_properties(&dbh->std);
 	dbh->refcount = 1;
 	dbh->def_stmt_ce = pdo_dbstmt_ce;
 	

@@ -298,6 +298,7 @@ typedef struct _zend_guard {
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
+	zval **properties_table;
 	HashTable *guards; /* protects from __get/__set ... recursion */
 } zend_object;
 
@@ -468,11 +469,13 @@ struct _zend_class_entry {
 	zend_uint ce_flags;
 
 	HashTable function_table;
-	HashTable default_properties;
 	HashTable properties_info;
-	HashTable default_static_members;
-	HashTable *static_members;
+	zval **default_properties_table;
+	zval **default_static_members_table;
+	zval **static_members_table;
 	HashTable constants_table;
+	int default_properties_count;
+	int default_static_members_count;
 	const struct _zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;

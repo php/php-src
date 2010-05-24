@@ -115,7 +115,6 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
 	xsl_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(xsl_object));
 	intern->ptr = NULL;
@@ -129,7 +128,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->profiling = NULL;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);

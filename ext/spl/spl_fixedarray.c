@@ -150,21 +150,22 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from TSRMLS_
 static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {{{{ */
 {
 	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
 	int  i = 0;
 
 	if (intern->array) {
 		for (i = 0; i < intern->array->size; i++) {
 			if (intern->array->elements[i]) {
-				zend_hash_index_update(intern->std.properties, i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
+				zend_hash_index_update(ht, i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
 				Z_ADDREF_P(intern->array->elements[i]);
 			} else {
-				zend_hash_index_update(intern->std.properties, i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
+				zend_hash_index_update(ht, i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
 				Z_ADDREF_P(EG(uninitialized_zval_ptr));
 			}
 		}
 	}
 
-	return intern->std.properties;
+	return ht;
 }
 /* }}}} */
 
@@ -199,7 +200,6 @@ static zend_object_value spl_fixedarray_object_new_ex(zend_class_entry *class_ty
 {
 	zend_object_value     retval;
 	spl_fixedarray_object *intern;
-	zval                 *tmp;
 	zend_class_entry     *parent = class_type;
 	int                   inherited = 0;
 
@@ -208,7 +208,7 @@ static zend_object_value spl_fixedarray_object_new_ex(zend_class_entry *class_ty
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	intern->current = 0;
 	intern->flags = 0;

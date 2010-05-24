@@ -4,7 +4,7 @@ ReflectionClass::getStaticPropertyValue()
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
 --SKIPIF--
-<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
+<?php if (version_compare(zend_version(), '2.4.0', '<')) die('skip ZendEngine 2.4 needed'); ?>
 --FILE--
 <?php
 class A {
@@ -53,17 +53,9 @@ try {
 --EXPECTF--
 Retrieving static values from A:
 string(13) "default value"
-string(16) "original private"
-string(13) "default value"
-string(18) "original protected"
-string(15) "original public"
 
-Retrieving static values from B:
-string(16) "original private"
-string(15) "changed private"
-string(17) "changed protected"
-string(14) "changed public"
-
-Retrieving non-existent values from A with no default value:
-Class A does not have a property named protectedOverridden
-Class A does not have a property named privateOverridden
+Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not have a property named ' in %sReflectionClass_getStaticPropertyValue_001_2_4.php:%d
+Stack trace:
+#0 %sReflectionClass_getStaticPropertyValue_001_2_4.php(%d): ReflectionClass->getStaticPropertyValue('?A?privateOverr...')
+#1 {main}
+  thrown in %sReflectionClass_getStaticPropertyValue_001_2_4.php on line %d

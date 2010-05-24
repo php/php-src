@@ -4,7 +4,7 @@ ReflectionClass::setStaticPropertyValue()
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
 --SKIPIF--
-<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
+<?php if (version_compare(zend_version(), '2.4.0', '<')) die('skip ZendEngine 2.4 needed'); ?>
 --FILE--
 <?php
 class A {
@@ -53,27 +53,9 @@ try {
 ?>
 --EXPECTF--
 Set static values in A:
-Array
-(
-    [privateOverridden] => new value 1
-    [protectedOverridden] => new value 2
-    [publicOverridden] => new value 3
-)
 
-Set static values in B:
-Array
-(
-    [privateOverridden] => new value 4
-    [protectedOverridden] => new value 2
-    [publicOverridden] => new value 3
-)
-Array
-(
-    [privateOverridden] => new value 5
-    [protectedOverridden] => new value 6
-    [publicOverridden] => new value 7
-)
-
-Set non-existent values from A with no default value:
-Class A does not have a property named protectedOverridden
-Class A does not have a property named privateOverridden
+Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not have a property named ' in %sReflectionClass_setStaticPropertyValue_001_2_4.php:%d
+Stack trace:
+#0 %sReflectionClass_setStaticPropertyValue_001_2_4.php(%d): ReflectionClass->setStaticPropertyValue('?A?privateOverr...', 'new value 1')
+#1 {main}
+  thrown in %sReflectionClass_setStaticPropertyValue_001_2_4.php on line %d
