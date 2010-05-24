@@ -505,9 +505,9 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members = (HashTable**)calloc(compiler_globals->last_static_member, sizeof(HashTable*));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval**));
 	} else {
-		compiler_globals->static_members = NULL;
+		compiler_globals->static_members_table = NULL;
 	}
 }
 /* }}} */
@@ -526,8 +526,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
-	if (compiler_globals->static_members) {
-		free(compiler_globals->static_members);
+	if (compiler_globals->static_members_table) {
+		free(compiler_globals->static_members_table);
 	}
 	compiler_globals->last_static_member = 0;
 }

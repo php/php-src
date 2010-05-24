@@ -1026,7 +1026,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				zend_update_class_constants(class_type->parent TSRMLS_CC);
 			}
 #if ZTS
-			CG(static_members)[(zend_intptr_t)(class_type->static_members)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+			CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
 #else
 			class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
 #endif
