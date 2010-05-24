@@ -175,7 +175,7 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 		}
 		efree(CE_STATIC_MEMBERS(*pce));
 #ifdef ZTS
-		CG(static_members)[(zend_intptr_t)((*pce)->static_members)] = NULL;
+		CG(static_members_table)[(zend_intptr_t)((*pce)->static_members_table)] = NULL;
 #else
 		(*pce)->static_members_table = NULL;
 #endif

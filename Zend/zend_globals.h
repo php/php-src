@@ -166,7 +166,7 @@ struct _zend_compiler_globals {
 #endif /* ZEND_MULTIBYTE */
 
 #ifdef ZTS
-	HashTable **static_members;
+	zval ***static_members_table;
 	int last_static_member;
 #endif
 };

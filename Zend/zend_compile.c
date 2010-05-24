@@ -6140,18 +6140,18 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 #ifdef ZTS
 		int n = zend_hash_num_elements(CG(class_table));
 
-		if (CG(static_members) && n >= CG(last_static_member)) {
+		if (CG(static_members_table) && n >= CG(last_static_member)) {
 			/* Support for run-time declaration: dl() */
 			CG(last_static_member) = n+1;
-			CG(static_members) = realloc(CG(static_members), (n+1)*sizeof(HashTable*));
-			CG(static_members)[n] = NULL;
+			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval**));
+			CG(static_members_table)[n] = NULL;
 		}
 		ce->static_members_table = (zval**)(zend_intptr_t)n;
 #else
 		ce->static_members_table = NULL;
 #endif
 	} else {
-		ce->static_members_table = &ce->default_static_members_table;
+		ce->static_members_table = ce->default_static_members_table;
 	}
 
 	ce->default_properties_count = 0;

@@ -1564,7 +1564,7 @@ ZEND_METHOD(reflection_function, __construct)
 
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRING(name, fptr->common.function_name, 1);
-	reflection_update_property(object, "name", name TSRMLS_CC);
+	reflection_update_property(object, "name", name);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->obj = closure;
