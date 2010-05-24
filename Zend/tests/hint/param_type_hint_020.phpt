@@ -12,4 +12,4 @@ function bar6(scalar $param = array(1,2,3)) {}
 
 ?>
 --EXPECTF--
-Fatal error: Default value for parameters with scalar type hint can only be scalar or NULL in %s on line %d
+Fatal error: Default value for parameters with scalar type hint can only be scalar or NULL in %s on line 8
