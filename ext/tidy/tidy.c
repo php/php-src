@@ -676,13 +676,11 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 							zend_object_value *retval, tidy_obj_type objtype TSRMLS_DC)
 {
 	PHPTidyObj *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(PHPTidyObj));
 	memset(intern, 0, sizeof(PHPTidyObj));
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	switch(objtype) {
 		case is_node:

@@ -385,7 +385,6 @@ static zend_object_value spl_heap_object_new_ex(zend_class_entry *class_type, sp
 {
 	zend_object_value  retval;
 	spl_heap_object   *intern;
-	zval              *tmp;
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
@@ -394,7 +393,7 @@ static zend_object_value spl_heap_object_new_ex(zend_class_entry *class_type, sp
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	intern->flags      = 0;
 	intern->fptr_cmp   = NULL;
@@ -528,6 +527,10 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 	int  i;
 
 	*is_temp = 0;
+
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 
 	if (intern->debug_info == NULL) {
 		ALLOC_HASHTABLE(intern->debug_info);

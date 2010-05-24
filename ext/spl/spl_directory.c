@@ -136,7 +136,6 @@ static zend_object_value spl_filesystem_object_new_ex(zend_class_entry *class_ty
 {
 	zend_object_value retval;
 	spl_filesystem_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(spl_filesystem_object));
 	memset(intern, 0, sizeof(spl_filesystem_object));
@@ -146,7 +145,7 @@ static zend_object_value spl_filesystem_object_new_ex(zend_class_entry *class_ty
 	if (obj) *obj = intern;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_filesystem_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_filesystem_object_handlers;
@@ -548,6 +547,10 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 	char stmp[2];
 
 	*is_temp = 1;
+
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 
 	ALLOC_HASHTABLE(rv);
 	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 3, 0);

@@ -429,6 +429,23 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const t
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
+#define CACHED_PTR(num) \
+	EG(active_op_array)->run_time_cache[(num)]
+
+#define CACHE_PTR(num, ptr) do { \
+		EG(active_op_array)->run_time_cache[(num)] = (ptr); \
+	} while (0)
+
+#define CACHED_POLYMORPHIC_PTR(num, ce) \
+	((EG(active_op_array)->run_time_cache[(num)] == (ce)) ? \
+		EG(active_op_array)->run_time_cache[(num) + 1] : \
+		NULL)
+
+#define CACHE_POLYMORPHIC_PTR(num, ce, ptr) do { \
+		EG(active_op_array)->run_time_cache[(num)] = (ce); \
+		EG(active_op_array)->run_time_cache[(num) + 1] = (ptr); \
+	} while (0)
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */

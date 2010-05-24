@@ -971,7 +971,7 @@ static HashTable *php_zip_get_properties(zval *object TSRMLS_DC)/* {{{ */
 	ulong num_key;
 
 	obj = (ze_zip_object *)zend_objects_get_address(object TSRMLS_CC);
-	props = obj->zo.properties;
+	props = zend_std_get_properties(object TSRMLS_CC);
 
 	if (obj->prop_handler == NULL) {
 		return NULL;
@@ -988,7 +988,7 @@ static HashTable *php_zip_get_properties(zval *object TSRMLS_DC)/* {{{ */
 		zend_hash_update(props, key, key_len, (void *)&val, sizeof(zval *), NULL);
 		zend_hash_move_forward_ex(obj->prop_handler, &pos);
 	}
-	return obj->zo.properties;
+	return props;
 }
 /* }}} */
 
@@ -1040,7 +1040,6 @@ static void php_zip_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 static zend_object_value php_zip_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	ze_zip_object *intern;
-	zval *tmp;
 	zend_object_value retval;
 
 	intern = emalloc(sizeof(ze_zip_object));
@@ -1060,8 +1059,7 @@ static zend_object_value php_zip_object_new(zend_class_entry *class_type TSRMLS_
 	intern->zo.ce = class_type;
 #endif
 
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
-					(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	retval.handle = zend_objects_store_put(intern,
 						NULL,

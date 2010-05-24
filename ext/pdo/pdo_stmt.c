@@ -2313,14 +2313,13 @@ static int dbstmt_compare(zval *object1, zval *object2 TSRMLS_DC)
 static zend_object_value dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value retval;
-	zval *tmp;
 	pdo_stmt_t *stmt;
 	pdo_stmt_t *old_stmt;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
 	stmt = ecalloc(1, sizeof(*stmt));
 	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject) TSRMLS_CC);
-	zend_hash_copy(stmt->std.properties, &stmt->std.ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
 	stmt->refcount = 1;
 
 	old_stmt = (pdo_stmt_t *)zend_object_store_get_object(zobject TSRMLS_CC);
@@ -2436,13 +2435,12 @@ void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
-	zval *tmp;
 
 	pdo_stmt_t *stmt;
 	stmt = emalloc(sizeof(*stmt));
 	memset(stmt, 0, sizeof(*stmt));
 	zend_object_std_init(&stmt->std, ce TSRMLS_CC);
-	zend_hash_copy(stmt->std.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&stmt->std, ce);
 	stmt->refcount = 1;
 
 	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbstmt_free_storage, (zend_objects_store_clone_t)dbstmt_clone_obj TSRMLS_CC);
@@ -2680,6 +2678,9 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 		return NULL;
 	}
 	
+	if (!stmt->std.properties) {
+		rebuild_object_properties(&stmt->std);
+	}
 	for (i = 0; i < stmt->column_count; i++) {
 		zval *val;
 		MAKE_STD_ZVAL(val);

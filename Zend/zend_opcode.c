@@ -107,6 +107,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
 
+	op_array->run_time_cache = NULL;
+	op_array->last_cache_slot = 0;
+
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
@@ -163,14 +166,18 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
 		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
-		(*pce)->static_members = NULL;
+		(*pce)->static_members_table = NULL;
 	} else if (CE_STATIC_MEMBERS(*pce)) {
-		zend_hash_destroy(CE_STATIC_MEMBERS(*pce));
-		FREE_HASHTABLE(CE_STATIC_MEMBERS(*pce));
+		int i;
+		
+		for (i = 0; i < (*pce)->default_static_members_count; i++) {
+			zval_ptr_dtor(&CE_STATIC_MEMBERS(*pce)[i]);
+		}
+		efree(CE_STATIC_MEMBERS(*pce));
 #ifdef ZTS
 		CG(static_members)[(zend_intptr_t)((*pce)->static_members)] = NULL;
 #else
-		(*pce)->static_members = NULL;
+		(*pce)->static_members_table = NULL;
 #endif
 	}
 	return 0;
@@ -234,9 +241,25 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			zend_hash_destroy(&ce->default_properties);
+			if (ce->default_properties_table) {
+				int i;
+
+				for (i = 0; i < ce->default_properties_count; i++) {
+					if (ce->default_properties_table[i]) {
+						zval_ptr_dtor(&ce->default_properties_table[i]);
+				    }
+				}
+				efree(ce->default_properties_table);
+			}
+			if (ce->default_static_members_table) {
+				int i;
+
+				for (i = 0; i < ce->default_static_members_count; i++) {
+					zval_ptr_dtor(&ce->default_static_members_table[i]);
+				}
+				efree(ce->default_static_members_table);
+			}
 			zend_hash_destroy(&ce->properties_info);
-			zend_hash_destroy(&ce->default_static_members);
 			efree(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
@@ -252,9 +275,25 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:
-			zend_hash_destroy(&ce->default_properties);
+			if (ce->default_properties_table) {
+				int i;
+
+				for (i = 0; i < ce->default_properties_count; i++) {
+					if (ce->default_properties_table[i]) {
+						zval_internal_ptr_dtor(&ce->default_properties_table[i]);
+					}
+				}
+				free(ce->default_properties_table);
+			}
+			if (ce->default_static_members_table) {
+				int i;
+
+				for (i = 0; i < ce->default_static_members_count; i++) {
+					zval_internal_ptr_dtor(&ce->default_static_members_table[i]);
+				}
+				free(ce->default_static_members_table);
+			}
 			zend_hash_destroy(&ce->properties_info);
-			zend_hash_destroy(&ce->default_static_members);
 			free(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
@@ -283,6 +322,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);
 		FREE_HASHTABLE(op_array->static_variables);
+	}
+
+	if (op_array->run_time_cache) {
+		efree(op_array->run_time_cache);
 	}
 
 	if (--(*op_array->refcount)>0) {

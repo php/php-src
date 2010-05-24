@@ -4,6 +4,8 @@
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
+- Added caches to eliminate repeatable run-time bindings of functions, classes,
+  constants, methods and properties (Dmitry)
 - Added a number of small performance tweaks and optimizations (Dmitry)
   . ZEND_RECV now always has IS_CV as its result
   . ZEND_CATCH now has to be used only with constant class names

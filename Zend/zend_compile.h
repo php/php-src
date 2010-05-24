@@ -53,8 +53,9 @@ typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
 typedef struct _zend_literal {
-	zval constant;
-	ulong hash_value;
+	zval       constant;
+	zend_ulong hash_value;
+	zend_uint  cache_slot;
 } zend_literal;
 
 #define Z_HASH_P(zv) \
@@ -183,6 +184,7 @@ typedef struct _zend_property_info {
 	char *name;
 	int name_length;
 	ulong h;
+	int offset;
 	char *doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
@@ -257,6 +259,9 @@ struct _zend_op_array {
 
 	zend_literal *literals;
 	int last_literal, size_literal;
+
+	void **run_time_cache;
+	int  last_cache_slot;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

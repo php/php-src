@@ -367,7 +367,6 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 {
 	zend_object_value  retval;
 	spl_dllist_object *intern;
-	zval              *tmp;
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
@@ -376,7 +375,7 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	intern->flags = 0;
 	intern->traverse_position = 0;
@@ -523,6 +522,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		INIT_PZVAL(&zrv);
 		Z_ARRVAL(zrv) = intern->debug_info;
 
+		if (!intern->std.properties) {
+			rebuild_object_properties(&intern->std);
+		}
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);

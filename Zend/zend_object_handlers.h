@@ -152,6 +152,8 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 
 #define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))

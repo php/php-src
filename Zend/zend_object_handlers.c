@@ -32,7 +32,8 @@
 
 #define DEBUG_OBJECT_HANDLERS 0
 
-#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
+#define Z_OBJ_P(zval_p) \
+	((zend_object*)(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].bucket.obj.object))
 
 /*
   __X accessors explanation:
@@ -51,10 +52,52 @@
   called, we cal __call handler.
 */
 
+ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
+{
+	if (!zobj->properties) {
+		HashPosition pos;
+		zend_property_info *prop_info;
+		zend_class_entry *ce = zobj->ce;
+
+		ALLOC_HASHTABLE(zobj->properties);
+		zend_hash_init(zobj->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+		if (ce->default_properties_count) {
+			for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+			     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
+			     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+				if (/*prop_info->ce == ce &&*/
+				    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
+				    prop_info->offset >= 0 &&
+				    zobj->properties_table[prop_info->offset]) {
+					zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+				}				
+			}
+			while (ce->parent && ce->parent->default_properties_count) {
+				ce = ce->parent;
+				for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+				     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
+				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+					if (prop_info->ce == ce &&
+					    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
+					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 && 
+					    prop_info->offset >= 0 &&
+					    zobj->properties_table[prop_info->offset]) {
+						zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+					}				
+				}
+			}
+		}
+	}
+}
+
+
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zobj = Z_OBJ_P(object);
+	if (!zobj->properties) {
+		rebuild_object_properties(zobj);
+	}
 	return zobj->properties;
 }
 /* }}} */
@@ -158,7 +201,7 @@ static zval *zend_std_call_issetter(zval *object, zval *member TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
@@ -177,7 +220,7 @@ static int zend_verify_property_access(zend_property_info *property_info, zend_c
 }
 /* }}} */
 
-static inline zend_bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
+static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
 {
 	child_class = child_class->parent;
 	while (child_class) {
@@ -191,12 +234,16 @@ static inline zend_bool is_derived_class(zend_class_entry *child_class, zend_cla
 }
 /* }}} */
 
-static struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zval *member, int silent, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zend_always_inline struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zval *member, int silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 	ulong h;
+
+	if (key && (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) != NULL) {
+		return property_info;
+	}
 
 	if (UNEXPECTED(Z_STRVAL_P(member)[0] == '\0')) {
 		if (!silent) {
@@ -223,8 +270,11 @@ static struct _zend_property_info *zend_get_property_info_quick(zend_class_entry
 					 * continue checking below...
 					 */
 				} else {
-					if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
+					if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0) && !silent) {
 						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name, Z_STRVAL_P(member));
+					}
+					if (key) {
+						CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, property_info);
 					}
 					return property_info;
 				}
@@ -235,10 +285,13 @@ static struct _zend_property_info *zend_get_property_info_quick(zend_class_entry
 		}
 	}
 	if (EG(scope) != ce
-		&& is_derived_class(ce, EG(scope))
 		&& EG(scope)
+		&& is_derived_class(ce, EG(scope))
 		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
+		if (key) {
+			CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, scope_property_info);
+		}
 		return scope_property_info;
 	} else if (property_info) {
 		if (UNEXPECTED(denied_access != 0)) {
@@ -249,6 +302,9 @@ static struct _zend_property_info *zend_get_property_info_quick(zend_class_entry
 			return NULL;
 		} else {
 			/* fall through, return property_info... */
+			if (key) {
+				CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, property_info);
+			}
 		}
 	} else {
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
@@ -256,6 +312,7 @@ static struct _zend_property_info *zend_get_property_info_quick(zend_class_entry
 		EG(std_property_info).name_length = Z_STRLEN_P(member);
 		EG(std_property_info).h = h;
 		EG(std_property_info).ce = ce;
+		EG(std_property_info).offset = -1;
 		property_info = &EG(std_property_info);
 	}
 	return property_info;
@@ -348,7 +405,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
-	    UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)) {
+	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+	     property_info->offset >= 0) ?
+	        (zobj->properties ?
+	            ((retval = (zval**)zobj->properties_table[property_info->offset]) == NULL) :
+	            (*(retval = &zobj->properties_table[property_info->offset]) == NULL)) :
+	        (UNEXPECTED(!zobj->properties) ||
+	          UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)))) {
 		zend_guard *guard;
 
 		if (zobj->ce->__get &&
@@ -397,7 +460,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 }
 /* }}} */
 
-static void zend_std_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval *tmp_member = NULL;
@@ -419,7 +482,13 @@ static void zend_std_write_property(zval *object, zval *member, zval *value, con
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__set != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL) &&
-	    EXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS)) {
+	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+	     property_info->offset >= 0) ?
+	        (zobj->properties ?
+	            ((variable_ptr = (zval**)zobj->properties_table[property_info->offset]) != NULL) :
+	            (*(variable_ptr = &zobj->properties_table[property_info->offset]) != NULL)) :
+	        (EXPECTED(zobj->properties != NULL) &&
+	          EXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS)))) {
 		/* if we already have this value there, we don't actually need to do anything */
 		if (EXPECTED(*variable_ptr != value)) {
 			/* if we are assigning reference, we shouldn't move it, but instead assign variable
@@ -462,15 +531,27 @@ static void zend_std_write_property(zval *object, zval *member, zval *value, con
 			guard->in_set = 0;
 			zval_ptr_dtor(&object);
 		}
-		if (!setter_done && property_info) {
-			zval **foo;
-
+		if (!setter_done && EXPECTED(property_info != NULL)) {
 			/* if we assign referenced variable, we should separate it */
 			Z_ADDREF_P(value);
 			if (PZVAL_IS_REF(value)) {
 				SEPARATE_ZVAL(&value);
 			}
-			zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
+			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+			    property_info->offset >= 0) {
+				if (!zobj->properties) {
+					zobj->properties_table[property_info->offset] = value;
+				} else if (zobj->properties_table[property_info->offset]) {
+					*(zval**)zobj->properties_table[property_info->offset] = value;
+				} else {
+					zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void**)&zobj->properties_table[property_info->offset]);
+				}
+			} else {
+				if (!zobj->properties) {
+					rebuild_object_properties(zobj);
+				}
+				zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), NULL);
+			}
 		}
 	}
 
@@ -587,7 +668,13 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
-	    UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)) {
+	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+	     property_info->offset >= 0) ?
+	        (zobj->properties ?
+	            ((retval = (zval**)zobj->properties_table[property_info->offset]) == NULL) :
+	            (*(retval = &zobj->properties_table[property_info->offset]) == NULL)) :
+	        (UNEXPECTED(!zobj->properties) ||
+	          UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)))) {
 		zval *new_zval;
 		zend_guard *guard;
 
@@ -599,7 +686,24 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 
 /* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
 			Z_ADDREF_P(new_zval);
-			zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
+			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+			    property_info->offset >= 0) {
+				if (!zobj->properties) {
+					zobj->properties_table[property_info->offset] = new_zval;
+					retval = &zobj->properties_table[property_info->offset];
+				} else if (zobj->properties_table[property_info->offset]) {
+					*(zval**)zobj->properties_table[property_info->offset] = new_zval;
+					retval = (zval**)zobj->properties_table[property_info->offset];
+				} else {
+					zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void**)&zobj->properties_table[property_info->offset]);
+					retval = (zval**)zobj->properties_table[property_info->offset];
+				}
+			} else {
+				if (!zobj->properties) {
+					rebuild_object_properties(zobj);
+				}
+				zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
+			}
 		} else {
 			/* we do have getter - fail and let it try again with usual get/set */
 			retval = NULL;
@@ -632,8 +736,16 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
 
-	if (UNEXPECTED(!property_info) ||
-	    UNEXPECTED(zend_hash_quick_del(zobj->properties, property_info->name, property_info->name_length+1, property_info->h) == FAILURE)) {
+	if (EXPECTED(property_info != NULL) &&
+	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	    !zobj->properties &&
+	    property_info->offset >= 0 &&
+	    EXPECTED(zobj->properties_table[property_info->offset] != NULL)) {
+		zval_ptr_dtor(&zobj->properties_table[property_info->offset]);
+		zobj->properties_table[property_info->offset] = NULL;
+	} else if (UNEXPECTED(!property_info) ||
+	           !zobj->properties ||
+	           UNEXPECTED(zend_hash_quick_del(zobj->properties, property_info->name, property_info->name_length+1, property_info->h) == FAILURE)) {
 		zend_guard *guard;
 
 		if (zobj->ce->__unset &&
@@ -646,6 +758,10 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 			guard->in_unset = 0;
 			zval_ptr_dtor(&object);
 		}
+	} else if (EXPECTED(property_info != NULL) && 
+	           EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	           property_info->offset >= 0) {
+		zobj->properties_table[property_info->offset] = NULL;
 	}
 
 	if (UNEXPECTED(tmp_member != NULL)) {
@@ -1049,50 +1165,50 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 
 ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	zval **retval = NULL;
-	zend_class_entry *tmp_ce = ce;
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	ulong hash_value;
 	
-	if (EXPECTED(key != NULL)) {
-		hash_value = key->hash_value;
-	} else {
-		hash_value = zend_hash_func(property_name, property_name_len+1);
-	}
+	if (UNEXPECTED(!key) ||
+	    (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) == NULL) {
+		if (EXPECTED(key != NULL)) {
+			hash_value = key->hash_value;
+		} else {
+			hash_value = zend_hash_func(property_name, property_name_len+1);
+		}
 
-	if (UNEXPECTED(zend_hash_quick_find(&ce->properties_info, property_name, property_name_len+1, hash_value, (void **) &property_info)==FAILURE)) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = property_name;
-		std_property_info.name_length = property_name_len;
-		std_property_info.h = hash_value;
-		std_property_info.ce = ce;
-		property_info = &std_property_info;
-	}
+		if (UNEXPECTED(zend_hash_quick_find(&ce->properties_info, property_name, property_name_len+1, hash_value, (void **) &property_info)==FAILURE)) {
+			if (!silent) {
+				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
+			}
+			return NULL;
+		}
 
 #if DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
+		zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
 #endif
 
-	if (UNEXPECTED(!zend_verify_property_access(property_info, ce TSRMLS_CC))) {
-		if (!silent) {
-			zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+		if (UNEXPECTED(!zend_verify_property_access(property_info, ce TSRMLS_CC))) {
+			if (!silent) {
+				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+			}
+			return NULL;
 		}
-		return NULL;
+
+		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
+			if (!silent) {
+				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
+			}
+			return NULL;
+		}
+
+		zend_update_class_constants(ce TSRMLS_CC);
+
+		if (EXPECTED(key != NULL)) {
+			CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, property_info);
+		}
 	}
 
-	zend_update_class_constants(tmp_ce TSRMLS_CC);
-
-	zend_hash_quick_find(CE_STATIC_MEMBERS(tmp_ce), property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
-
-	if (UNEXPECTED(!retval)) {
-		if (!silent) {
-			zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
-		}
-		return NULL;
-	}
-
-	return retval;
+	return &CE_STATIC_MEMBERS(ce)[property_info->offset];
 }
 /* }}} */
 
@@ -1152,7 +1268,40 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	if (zobj1->ce != zobj2->ce) {
 		return 1; /* different classes */
 	}
-	return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties TSRMLS_CC);
+	if (!zobj1->properties && !zobj2->properties) {
+		int i;
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			if (zobj1->properties_table[i]) {
+				if (zobj2->properties_table[i]) {
+					zval result;
+
+					if (compare_function(&result, zobj1->properties_table[i], zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
+						return 1;
+					}
+					if (Z_LVAL(result) != 0) {
+						return Z_LVAL(result);
+					}
+				} else {
+					return 1;
+				}
+			} else {
+				if (zobj2->properties_table[i]) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		}
+		return 0;
+	} else {
+		if (!zobj1->properties) {
+			rebuild_object_properties(zobj1);
+		}
+		if (!zobj2->properties) {
+			rebuild_object_properties(zobj2);
+		}
+		return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties TSRMLS_CC);
+	}
 }
 /* }}} */
 
@@ -1160,7 +1309,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 {
 	zend_object *zobj;
 	int result;
-	zval **value;
+	zval **value = NULL;
 	zval *tmp_member = NULL;
 	zend_property_info *property_info;
 
@@ -1183,7 +1332,13 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 	property_info = zend_get_property_info_quick(zobj->ce, member, 1, key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
-	    zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &value) == FAILURE) {
+	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+	     property_info->offset >= 0) ?
+	        (zobj->properties ?
+	            ((value = (zval**)zobj->properties_table[property_info->offset]) == NULL) :
+	            (*(value = &zobj->properties_table[property_info->offset]) == NULL)) :
+	        (UNEXPECTED(!zobj->properties) ||
+	          UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &value) == FAILURE)))) {
 		zend_guard *guard;
 
 		result = 0;

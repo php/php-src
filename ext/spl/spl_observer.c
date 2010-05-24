@@ -253,14 +253,13 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 	zend_object_value     retval;
 	spl_SplObjectStorage *intern;
 	zend_class_entry     *parent = class_type;
-	zval                 *tmp;
 
 	intern = emalloc(sizeof(spl_SplObjectStorage));
 	memset(intern, 0, sizeof(spl_SplObjectStorage));
 	*obj = intern;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	zend_hash_init(&intern->storage, 0, NULL, (void (*)(void *))spl_object_storage_dtor, 0);
 
@@ -669,7 +668,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	/* members */
 	smart_str_appendl(&buf, "m:", 2);
 	INIT_PZVAL(&members);
-	Z_ARRVAL(members) = intern->std.properties;
+	Z_ARRVAL(members) = zend_std_get_properties(getThis() TSRMLS_CC);
 	Z_TYPE(members) = IS_ARRAY;
 	pmembers = &members;
 	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
@@ -767,6 +766,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 
 	/* copy members */
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
+	}
 	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref, (void *) NULL, sizeof(zval *));
 	zval_ptr_dtor(&pmembers);
 

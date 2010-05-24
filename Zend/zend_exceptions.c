@@ -138,16 +138,14 @@ ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 
 static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces TSRMLS_DC) /* {{{ */
 {
-	zval tmp, obj;
+	zval obj;
 	zend_object *object;
 	zval *trace;
 
 	Z_OBJVAL(obj) = zend_objects_new(&object, class_type TSRMLS_CC);
 	Z_OBJ_HT(obj) = &default_exception_handlers;
 
-	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(object, class_type);
 
 	ALLOC_ZVAL(trace);
 	Z_UNSET_ISREF_P(trace);

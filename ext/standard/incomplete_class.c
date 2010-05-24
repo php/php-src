@@ -109,8 +109,6 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	value = zend_objects_new(&object, class_type TSRMLS_CC);
 	value.handlers = &php_incomplete_object_handlers;
 	
-	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	return value;
 }
 
