@@ -74,20 +74,32 @@ static int reg_magic = 0;
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(ereg)
+static PHP_GINIT_FUNCTION(ereg);
+static PHP_GSHUTDOWN_FUNCTION(ereg);
 
 /* {{{ Module entry */
 zend_module_entry ereg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"ereg",
 	ereg_functions,
-	PHP_MINIT(ereg),
-	PHP_MSHUTDOWN(ereg),
+	NULL,
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(ereg),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(ereg),
+	PHP_GINIT(ereg),
+	PHP_GSHUTDOWN(ereg),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
+/* }}} */
+
+/* {{{ COMPILE_DL_EREG */
+#ifdef COMPILE_DL_EREG
+ZEND_GET_MODULE(ereg)
+#endif
 /* }}} */
 
 /* {{{ ereg_lru_cmp */
@@ -201,32 +213,23 @@ static void _free_ereg_cache(reg_cache *rc)
 #define regfree(a);
 #undef regcomp
 #define regcomp(a, b, c) _php_regcomp(a, b, c TSRMLS_CC)
-	
-static void php_ereg_init_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
+
+/* {{{ PHP_GINIT_FUNCTION
+ */
+static PHP_GINIT_FUNCTION(ereg)
 {
 	zend_hash_init(&ereg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_ereg_cache, 1);
 	ereg_globals->lru_counter = 0;
 }
+/* }}} */
 
-static void php_ereg_destroy_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
+/* {{{ PHP_GSHUTDOWN_FUNCTION
+ */
+static PHP_GSHUTDOWN_FUNCTION(ereg)
 {
 	zend_hash_destroy(&ereg_globals->ht_rc);
 }
-
-PHP_MINIT_FUNCTION(ereg)
-{
-	ZEND_INIT_MODULE_GLOBALS(ereg, php_ereg_init_globals, php_ereg_destroy_globals);
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(ereg)
-{
-#ifndef ZTS
-	php_ereg_destroy_globals(&ereg_globals TSRMLS_CC);
-#endif
-
-	return SUCCESS;
-}
+/* }}} */
 
 PHP_MINFO_FUNCTION(ereg)
 {
@@ -399,7 +402,7 @@ PHP_FUNCTION(eregi)
 
 /* {{{ php_ereg_replace
  * this is the meat and potatoes of regex replacement! */
-PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC)
+PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC)
 {
 	regex_t re;
 	regmatch_t *subs;
@@ -726,7 +729,7 @@ PHP_FUNCTION(spliti)
 
 /* {{{ proto string sql_regcase(string string)
    Make regular expression for case insensitive match */
-PHPAPI PHP_FUNCTION(sql_regcase)
+PHP_EREG_API PHP_FUNCTION(sql_regcase)
 {
 	char *string, *tmp;
 	int string_len;
