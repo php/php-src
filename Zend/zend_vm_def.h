@@ -2895,6 +2895,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 {
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
+	zval *exception;
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
@@ -2928,6 +2929,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		}
 	}
 
+	exception = EG(exception);
 	if (!EG(active_symbol_table)) {
 		if (EX_CV(opline->op2.var)) {
 			zval_ptr_dtor(EX_CV(opline->op2.var));
@@ -2939,8 +2941,13 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value,
 		    &EG(exception), sizeof(zval *), (void**)&EX_CV(opline->op2.var));
 	}
-	EG(exception) = NULL;
-	ZEND_VM_NEXT_OPCODE();
+	if (UNEXPECTED(EG(exception) != exception)) {
+		EG(exception) = NULL;
+		HANDLE_EXCEPTION();
+	} else {
+		EG(exception) = NULL;
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP|VAR|CV, ANY)
