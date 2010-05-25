@@ -334,7 +334,7 @@ struct st_mysqlnd_protocol_methods
 
 
 
-typedef void				(*func_mysqlnd_conn__init)(MYSQLND * conn TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn__init)(MYSQLND * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__connect)(MYSQLND *conn, const char *host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket, unsigned int mysql_flags TSRMLS_DC);
 typedef ulong				(*func_mysqlnd_conn__escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
