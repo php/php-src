@@ -960,9 +960,17 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #else
 		mysql->conn = mysql_init(persistent);
 #endif
+		if (!mysql->conn) {
+			MySG(connect_error) = estrdup("OOM");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OOM");
+			efree(hashed_details);
+			efree(mysql);
+			MYSQL_DO_CONNECT_RETURN_FALSE();
+		}
 
-		if (connect_timeout != -1)
-				mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+		if (connect_timeout != -1) {
+			mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+		}
 
 #ifndef MYSQL_USE_MYSQLND
 		if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) 
