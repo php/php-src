@@ -885,13 +885,14 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 
 	DBG_ENTER("mysqlnd_net_init");
 	DBG_INF_FMT("persistent=%d", persistent);
-	net->persistent = persistent;
+	if (net) {
+		net->persistent = persistent;
+		net->m = mysqlnd_mysqlnd_net_methods;
 
-	net->m = mysqlnd_mysqlnd_net_methods;
-
-	{
-		unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
-		net->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size TSRMLS_CC);
+		{
+			unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
+			net->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size TSRMLS_CC);
+		}
 	}
 	DBG_RETURN(net);
 }
