@@ -828,6 +828,9 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	tidySaveBuffer (obj->ptdoc->doc, &output);
 	
 	if (output.size) {
+		if (!obj->std.properties) {
+			rebuild_object_properties(&obj->std);
+		}
 		MAKE_STD_ZVAL(temp);
 		ZVAL_STRINGL(temp, (char*)output.bp, output.size-1, TRUE);
 		zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
@@ -836,6 +839,9 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	tidyBufFree(&output);
 
 	if (obj->ptdoc->errbuf->size) {
+		if (!obj->std.properties) {
+			rebuild_object_properties(&obj->std);
+		}
 		MAKE_STD_ZVAL(temp);
 		ZVAL_STRINGL(temp, (char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1, TRUE);
 		zend_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
@@ -854,6 +860,9 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 	switch(type) {
 
 		case is_node:
+			if (!obj->std.properties) {
+				rebuild_object_properties(&obj->std);
+			}
 			tidyBufInit(&buf);
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			ADD_PROPERTY_STRINGL(obj->std.properties, value, buf.bp, buf.size-1);
@@ -923,6 +932,9 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 			break;
 
 		case is_doc:
+			if (!obj->std.properties) {
+				rebuild_object_properties(&obj->std);
+			}
 			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
 			ADD_PROPERTY_NULL(obj->std.properties, value);
 			break;
