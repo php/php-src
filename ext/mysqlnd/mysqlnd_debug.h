@@ -131,7 +131,7 @@ struct st_mysqlnd_allocator_methods
 	char *	(*m_pestrdup)(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
 };
 
-extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
+PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 
 
 PHPAPI void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
