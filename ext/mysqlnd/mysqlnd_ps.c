@@ -243,7 +243,10 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	field_packet = stmt->conn->protocol->m.get_result_field_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
-	if (field_packet) {
+	if (!field_packet) {
+		SET_OOM_ERROR(stmt->error_info);
+		SET_OOM_ERROR(stmt->conn->error_info);
+	} else {
 		ret = PASS;
 		field_packet->skip_parsing = TRUE;
 		for (;i < stmt->param_count; i++) {
@@ -266,23 +269,27 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	MYSQLND_PACKET_PREPARE_RESPONSE * prepare_resp;
-	enum_func_status ret = PASS;
+	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_read_prepare_response");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	prepare_resp = stmt->conn->protocol->m.get_prepare_response_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
+	if (!prepare_resp) {
+		SET_OOM_ERROR(stmt->error_info);
+		SET_OOM_ERROR(stmt->conn->error_info);
+		goto done;	
+	}
+
 	if (FAIL == PACKET_READ(prepare_resp, stmt->conn)) {
-		ret = FAIL;
 		goto done;
 	}
 
 	if (0xFF == prepare_resp->error_code) {
 		stmt->error_info = stmt->conn->error_info = prepare_resp->error_info;
-		ret = FAIL;
 		goto done;
 	}
-
+	ret = PASS;
 	stmt->stmt_id = prepare_resp->stmt_id;
 	stmt->warning_count = stmt->conn->upsert_status.warning_count = prepare_resp->warning_count;
 	stmt->field_count = stmt->conn->field_count = prepare_resp->field_count;
@@ -307,19 +314,24 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s TSRMLS_DC)
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	fields_eof = stmt->conn->protocol->m.get_eof_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
-	if (FAIL == (ret = PACKET_READ(fields_eof, stmt->conn))) {
-		if (stmt->result) {
-			stmt->result->m.free_result_contents(stmt->result TSRMLS_CC);
-			mnd_efree(stmt->result);
-			memset(stmt, 0, sizeof(MYSQLND_STMT_DATA));
-			stmt->state = MYSQLND_STMT_INITTED;
-		}
+	if (!fields_eof) {
+		SET_OOM_ERROR(stmt->error_info);
+		SET_OOM_ERROR(stmt->conn->error_info);
 	} else {
-		stmt->upsert_status.server_status = fields_eof->server_status;
-		stmt->upsert_status.warning_count = fields_eof->warning_count;
-		stmt->state = MYSQLND_STMT_PREPARED;
+		if (FAIL == (ret = PACKET_READ(fields_eof, stmt->conn))) {
+			if (stmt->result) {
+				stmt->result->m.free_result_contents(stmt->result TSRMLS_CC);
+				mnd_efree(stmt->result);
+				memset(stmt, 0, sizeof(MYSQLND_STMT_DATA));
+				stmt->state = MYSQLND_STMT_INITTED;
+			}
+		} else {
+			stmt->upsert_status.server_status = fields_eof->server_status;
+			stmt->upsert_status.warning_count = fields_eof->warning_count;
+			stmt->state = MYSQLND_STMT_PREPARED;
+		}
+		PACKET_FREE(fields_eof);
 	}
-	PACKET_FREE(fields_eof);
 
 	DBG_RETURN(ret);
 }
