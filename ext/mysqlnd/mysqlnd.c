@@ -225,7 +225,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 															 zend_bool silent, enum php_mysqlnd_server_command command,
 															 zend_bool ignore_upsert_status TSRMLS_DC)
 {
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn::simple_command_handle_response");
 	DBG_INF_FMT("silent=%d packet=%d command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
@@ -233,6 +233,10 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 	switch (ok_packet) {
 		case PROT_OK_PACKET:{
 			MYSQLND_PACKET_OK * ok_response = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+			if (!ok_response) {
+				SET_OOM_ERROR(conn->error_info);
+				break;
+			}
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				if (!silent) {
 					DBG_ERR_FMT("Error while reading %s's OK packet", mysqlnd_command_to_text[command]);
@@ -274,6 +278,10 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 		}
 		case PROT_EOF_PACKET:{
 			MYSQLND_PACKET_EOF * ok_response = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
+			if (!ok_response) {
+				SET_OOM_ERROR(conn->error_info);
+				break;			
+			}
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
 								 "Malformed packet");
@@ -300,7 +308,6 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 			break;
 		}
 		default:
-			ret = FAIL;
 			SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong response packet %d passed to the function", ok_packet);
 			break;
@@ -344,6 +351,11 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND * conn, enum php_mysqlnd_se
 	SET_EMPTY_ERROR(conn->error_info);
 
 	cmd_packet = conn->protocol->m.get_command_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!cmd_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(FAIL);
+	}
+
 	cmd_packet->command = command;
 	if (arg && arg_len) {
 		cmd_packet->argument = arg;
@@ -526,6 +538,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
 		}
 		if (!transport) {
+			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
 		DBG_INF_FMT("transport=%s", transport);
@@ -542,6 +555,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
 	ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 	if (!greet_packet || !auth_packet || !ok_packet) {
+		SET_OOM_ERROR(conn->error_info);
 		goto err; /* OOM */
 	}
 
@@ -613,6 +627,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
 	if (!conn->scramble) {
+		SET_OOM_ERROR(conn->error_info);
 		goto err; /* OOM */
 	}
 	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
@@ -682,12 +697,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		conn->connect_or_select_db_len = db_len;
 
 		if (!conn->user || !conn->passwd || !conn->connect_or_select_db) {
+			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
 
 		if (!unix_socket) {
 			conn->host = mnd_pestrdup(host, conn->persistent);
 			if (!conn->host) {
+				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
 			conn->host_len = strlen(conn->host);
@@ -695,11 +712,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 				char *p;
 				spprintf(&p, 0, "%s via TCP/IP", conn->host);
 				if (!p) {
+					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */		
 				}
 				conn->host_info =  mnd_pestrdup(p, conn->persistent);
 				efree(p); /* allocated by spprintf */
 				if (!conn->host_info) {
+					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */		
 				}
 			}
@@ -707,6 +726,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			conn->unix_socket	= mnd_pestrdup(socket, conn->persistent);
 			conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			if (!conn->unix_socket || !conn->host_info) {
+				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */			
 			}
 			conn->unix_socket_len = strlen(conn->unix_socket);
@@ -1333,6 +1353,11 @@ MYSQLND_METHOD(mysqlnd_conn, stat)(MYSQLND * conn, char **message, unsigned int 
 		DBG_RETURN(FAIL);
 	}
 	stats_header = conn->protocol->m.get_stats_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!stats_header) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(FAIL);
+	}
+
 	if (FAIL == (ret = PACKET_READ(stats_header, conn))) {
 		DBG_RETURN(FAIL);
 	}
@@ -1829,7 +1854,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	  buffer overflows.
 	*/
 	size_t user_len;
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
 	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1];
 	char *p = buffer;
@@ -1837,6 +1862,8 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	DBG_ENTER("mysqlnd_conn::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%d",
 				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
+
+	SET_ERROR_AFF_ROWS(conn);
 
 	if (!user) {
 		user = "";
@@ -1878,6 +1905,10 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	}
 
 	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!chg_user_resp) {
+		SET_OOM_ERROR(conn->error_info);
+		goto end;
+	}
 	ret = PACKET_READ(chg_user_resp, conn);
 	conn->error_info = chg_user_resp->error_info;
 
@@ -1888,13 +1919,15 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		  bug#25371 mysql_change_user() triggers "packets out of sync"
 		  When it gets fixed, there should be one more check here
 		*/
-		if (mysqlnd_get_server_version(conn) > 50113L &&
-			mysqlnd_get_server_version(conn) < 50118L)
-		{
+		if (mysqlnd_get_server_version(conn) > 50113L && mysqlnd_get_server_version(conn) < 50118L) {
 			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
-			PACKET_READ(redundant_error_packet, conn);
-			PACKET_FREE(redundant_error_packet);
-			DBG_INF_FMT("Server is %d, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
+			if (redundant_error_packet) {
+				PACKET_READ(redundant_error_packet, conn);
+				PACKET_FREE(redundant_error_packet);
+				DBG_INF_FMT("Server is %d, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
+			} else {
+				SET_OOM_ERROR(conn->error_info);			
+			}
 		}
 	}
 	if (ret == PASS) {
@@ -1919,9 +1952,8 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		DBG_ERR(mysqlnd_old_passwd);
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);	
 	}
+end:
 	PACKET_FREE(chg_user_resp);
-
-	SET_ERROR_AFF_ROWS(conn);
 
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a

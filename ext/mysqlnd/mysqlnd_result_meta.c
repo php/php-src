@@ -151,6 +151,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE TSRMLS_CC);
 	if (!field_packet) {
+		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
 	}
 	field_packet->persistent_alloc = meta->persistent;
