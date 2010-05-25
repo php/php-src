@@ -2194,25 +2194,45 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
-	MYSQLND_STMT_DATA * stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
+	MYSQLND_STMT_DATA * stmt = NULL;
 
 	DBG_ENTER("_mysqlnd_stmt_init");
-	DBG_INF_FMT("stmt=%p", stmt); 
+	do {
+		if (!ret) {
+			break;
+		}
+		ret->m = mysqlnd_stmt_methods;
 
-	ret->m = mysqlnd_stmt_methods;
-	stmt->persistent = conn->persistent;
-	stmt->state = MYSQLND_STMT_INITTED;
-	stmt->execute_cmd_buffer.length = 4096;
-	stmt->execute_cmd_buffer.buffer = mnd_pemalloc(stmt->execute_cmd_buffer.length, stmt->persistent);
+		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
+		DBG_INF_FMT("stmt=%p", stmt);
+		if (!stmt) {
+			break;
+		}
+		stmt->persistent = conn->persistent;
+		stmt->state = MYSQLND_STMT_INITTED;
+		stmt->execute_cmd_buffer.length = 4096;
+		stmt->execute_cmd_buffer.buffer = mnd_pemalloc(stmt->execute_cmd_buffer.length, stmt->persistent);
+		if (!stmt->execute_cmd_buffer.buffer) {
+			break;
+		}
 
-	stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
-	/*
-	  Mark that we reference the connection, thus it won't be
-	  be destructed till there is open statements. The last statement
-	  or normal query result will close it then.
-	*/
-	stmt->conn = conn->m->get_reference(conn TSRMLS_CC);
-	DBG_RETURN(ret);
+		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
+		/*
+		  Mark that we reference the connection, thus it won't be
+		  be destructed till there is open statements. The last statement
+		  or normal query result will close it then.
+		*/
+		stmt->conn = conn->m->get_reference(conn TSRMLS_CC);
+
+		DBG_RETURN(ret);
+	} while (0);
+	
+	SET_OOM_ERROR(conn->error_info);
+	if (ret) {
+		ret->m->dtor(ret, TRUE TSRMLS_CC);
+		ret = NULL;
+	}
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
