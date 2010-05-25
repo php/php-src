@@ -459,14 +459,14 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		/* keep in mind that c->name_len already contains the '\0' */
 		lowercase_name = estrndup(c->name, c->name_len-1);
 		zend_str_tolower(lowercase_name, c->name_len-1);
-		lowercase_name = CG(new_interned_string)(lowercase_name, c->name_len, 1 TSRMLS_CC);
+		lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
 	} else {
 		char *slash = strrchr(c->name, '\\');
 		if(slash) {
 			lowercase_name = estrndup(c->name, c->name_len-1);
 			zend_str_tolower(lowercase_name, slash-c->name);
-			lowercase_name = CG(new_interned_string)(lowercase_name, c->name_len, 1 TSRMLS_CC);
+			lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
 		} else {
 			name = c->name;

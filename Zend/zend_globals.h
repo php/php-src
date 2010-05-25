@@ -147,10 +147,6 @@ struct _zend_compiler_globals {
 
 	HashTable interned_strings;
 
-	char *(*new_interned_string)(char *str, int len, int free_src TSRMLS_DC);
-	void (*interned_strings_snapshot)(TSRMLS_D);
-	void (*interned_strings_restore)(TSRMLS_D);
-
 #ifdef ZEND_MULTIBYTE
 	zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;

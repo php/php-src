@@ -1917,7 +1917,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		}
 		fname_len = strlen(ptr->fname);
-		lowercase_name = CG(new_interned_string)(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
+		lowercase_name = zend_new_interned_string(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
 		if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			str_efree(lowercase_name);
@@ -2205,7 +2205,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	}
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
-	lowercase_name = CG(new_interned_string)(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
+	lowercase_name = zend_new_interned_string(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	str_efree(lowercase_name);
 	return class_entry;
@@ -3165,7 +3165,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 			break;
 	}
 
-	interned_name = CG(new_interned_string)(property_info.name, property_info.name_length+1, 0 TSRMLS_CC);
+	interned_name = zend_new_interned_string(property_info.name, property_info.name_length+1, 0 TSRMLS_CC);
 	if (interned_name != property_info.name) {
 		if (ce->type == ZEND_USER_CLASS) {
 			efree(property_info.name);

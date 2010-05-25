@@ -29,9 +29,13 @@
 # include <sys/mman.h>
 #endif
 
-static char *zend_new_interned_string(char *str, int len, int free_src TSRMLS_DC);
-static void zend_interned_strings_snapshot(TSRMLS_D);
-static void zend_interned_strings_restore(TSRMLS_D);
+ZEND_API char *(*zend_new_interned_string)(char *str, int len, int free_src TSRMLS_DC);
+ZEND_API void (*zend_interned_strings_snapshot)(TSRMLS_D);
+ZEND_API void (*zend_interned_strings_restore)(TSRMLS_D);
+
+static char *zend_new_interned_string_int(char *str, int len, int free_src TSRMLS_DC);
+static void zend_interned_strings_snapshot_int(TSRMLS_D);
+static void zend_interned_strings_restore_int(TSRMLS_D);
 
 void zend_interned_strings_init(TSRMLS_D)
 {
@@ -59,9 +63,9 @@ void zend_interned_strings_init(TSRMLS_D)
 
 #endif
 
-	CG(new_interned_string) = zend_new_interned_string;
-	CG(interned_strings_snapshot) = zend_interned_strings_snapshot;
-	CG(interned_strings_restore) = zend_interned_strings_restore;
+	zend_new_interned_string = zend_new_interned_string_int;
+	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
+	zend_interned_strings_restore = zend_interned_strings_restore_int;
 }
 
 void zend_interned_strings_dtor(TSRMLS_D)
@@ -75,7 +79,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 #endif
 }
 
-static char *zend_new_interned_string(char *arKey, int nKeyLength, int free_src TSRMLS_DC)
+static char *zend_new_interned_string_int(char *arKey, int nKeyLength, int free_src TSRMLS_DC)
 {
 #ifndef ZTS
 	ulong h;
@@ -173,12 +177,12 @@ static char *zend_new_interned_string(char *arKey, int nKeyLength, int free_src 
 #endif
 }
 
-static void zend_interned_strings_snapshot(TSRMLS_D)
+static void zend_interned_strings_snapshot_int(TSRMLS_D)
 {
 	CG(interned_strings_snapshot_top) = CG(interned_strings_top);
 }
 
-static void zend_interned_strings_restore(TSRMLS_D)
+static void zend_interned_strings_restore_int(TSRMLS_D)
 {
 #ifndef ZTS
 	Bucket *p;
