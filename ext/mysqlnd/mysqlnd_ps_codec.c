@@ -578,22 +578,26 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 
 /* {{{ mysqlnd_stmt_copy_it */
-static void
+static enum_func_status
 mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current TSRMLS_DC)
 {
 	if (!*copies) {
 		*copies = mnd_ecalloc(param_count, sizeof(zval *));
 	}
-	MAKE_STD_ZVAL((*copies)[current]);
-	*(*copies)[current] = *original;
-	Z_SET_REFCOUNT_P((*copies)[current], 1);
-	zval_copy_ctor((*copies)[current]);
+	if (*copies) {
+		MAKE_STD_ZVAL((*copies)[current]);
+		*(*copies)[current] = *original;
+		Z_SET_REFCOUNT_P((*copies)[current], 1);
+		zval_copy_ctor((*copies)[current]);
+		return PASS;
+	}
+	return FAIL;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_stmt_execute_store_params */
-static void
+static enum_func_status
 mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p,
 								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
 {
@@ -603,6 +607,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	size_t left = (*buf_len - (*p - *buf));
 	size_t data_size = 0;
 	zval **copies = NULL;/* if there are different types */
+	enum_func_status ret = FAIL;
+
+	DBG_ENTER("mysqlnd_stmt_execute_store_params");
 
 /* 1. Store type information */
 	if (stmt->send_types_to_server) {
@@ -613,6 +620,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			zend_uchar *tmp_buf;
 			*buf_len = offset + stmt->param_count * 2 + 20;
 			tmp_buf = mnd_emalloc(*buf_len);
+			if (!tmp_buf) {
+				SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+				goto end;
+			}
 			memcpy(tmp_buf, *buf, offset);
 			*buf = tmp_buf;
 			
@@ -643,7 +654,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		for (j = i + 1; j < stmt->param_count; j++) {
 			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
-				mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
+				if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+					SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+					goto end;
+				}
 				break; 
 			}
 		}
@@ -653,7 +667,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				data_size += 8;
 				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
+						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							goto end;
+						}
 					}
 				}
 				break;
@@ -668,7 +685,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 #endif
 				if (Z_TYPE_P(the_var) != IS_LONG) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
+						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							goto end;
+						}
 					}
 				}
 				break;
@@ -691,7 +711,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 #endif
 				{
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
+						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							goto end;
+						}
 					}
 					the_var = copies[i];
 #if PHP_MAJOR_VERSION >= 6
@@ -714,6 +737,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		zend_uchar *tmp_buf;
 		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
 		tmp_buf = mnd_emalloc(*buf_len);
+		if (!tmp_buf) {
+			SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+			goto end;
+		}
 		memcpy(tmp_buf, *buf, offset);
 		/*
 		  When too many columns the buffer provided to the function might not be sufficient.
@@ -779,6 +806,8 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			}
 		}
 	}
+	ret = PASS;
+end:
 	if (copies) {
 		for (i = 0; i < stmt->param_count; i++) {
 			if (copies[i]) {
@@ -787,13 +816,16 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		}
 		mnd_efree(copies);
 	}
+
+	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
+	DBG_RETURN(ret);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_stmt_execute_generate_request */
-zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, size_t *request_len,
-												  zend_bool * free_buffer TSRMLS_DC)
+enum_func_status
+mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	zend_uchar	*p = stmt->execute_cmd_buffer.buffer,
@@ -801,6 +833,9 @@ zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, size_t *requ
 	size_t cmd_buffer_length = stmt->execute_cmd_buffer.length;
 	unsigned int	null_byte_offset,
 					null_count= (stmt->param_count + 7) / 8;
+	enum_func_status ret;
+
+	DBG_ENTER("mysqlnd_stmt_execute_generate_request");
 
 	int4store(p, stmt->stmt_id);
 	p += 4;
@@ -824,11 +859,13 @@ zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, size_t *requ
 	int1store(p, stmt->send_types_to_server); 
 	p++;
 
-	mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
+	ret = mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
 
 	*free_buffer = (cmd_buffer != stmt->execute_cmd_buffer.buffer);
 	*request_len = (p - cmd_buffer);
-	return cmd_buffer;
+	*request = cmd_buffer;
+	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
+	DBG_RETURN(ret);
 }
 /* }}} */
 

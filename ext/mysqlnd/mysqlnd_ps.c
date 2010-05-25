@@ -39,8 +39,7 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 static struct st_mysqlnd_stmt_methods *mysqlnd_stmt_methods;
 
 /* Exported by mysqlnd_ps_codec.c */
-zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
-												  zend_bool *free_buffer TSRMLS_DC);
+enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 
 
 MYSQLND_RES * _mysqlnd_stmt_use_result(MYSQLND_STMT *stmt TSRMLS_DC);
@@ -523,8 +522,8 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	enum_func_status ret;
-	MYSQLND		*conn = stmt->conn;
-	zend_uchar	*request;
+	MYSQLND *	conn = stmt->conn;
+	zend_uchar *request = NULL;
 	size_t		request_len;
 	zend_bool	free_request;
 
@@ -628,13 +627,15 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 			DBG_RETURN(FAIL);
 		}
 	}
-	request = mysqlnd_stmt_execute_generate_request(s, &request_len, &free_request TSRMLS_CC);
-	
-	/* support for buffer types should be added here ! */
-
-	ret = stmt->conn->m->simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
-										PROT_LAST /* we will handle the response packet*/,
-										FALSE, FALSE TSRMLS_CC);
+	ret = mysqlnd_stmt_execute_generate_request(s, &request, &request_len, &free_request TSRMLS_CC);
+	if (ret == PASS) {
+		/* support for buffer types should be added here ! */
+		ret = stmt->conn->m->simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
+											PROT_LAST /* we will handle the response packet*/,
+											FALSE, FALSE TSRMLS_CC);
+	} else {
+		SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
+	}
 
 	if (free_request) {
 		mnd_efree(request);

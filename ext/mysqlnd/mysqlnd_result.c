@@ -394,6 +394,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 			*/
 			conn->error_info = rset_header->error_info;
 			ret = FAIL;
+			DBG_ERR_FMT("error=%s", rset_header->error_info.error);
 			/* Return back from CONN_QUERY_SENT */
 			CONN_SET_STATE(conn, CONN_READY);
 			break;
