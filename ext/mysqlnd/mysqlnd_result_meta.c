@@ -309,18 +309,31 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 {
 	unsigned int i;
 	/* +1 is to have empty marker at the end */
-	MYSQLND_RES_METADATA *new_meta = mnd_pemalloc(sizeof(MYSQLND_RES_METADATA), persistent);
-	MYSQLND_FIELD *new_fields = mnd_pecalloc(meta->field_count + 1, sizeof(MYSQLND_FIELD), persistent);
-	MYSQLND_FIELD *orig_fields = meta->fields;
+	MYSQLND_RES_METADATA * new_meta = NULL;
+	MYSQLND_FIELD * new_fields;
+	MYSQLND_FIELD * orig_fields = meta->fields;
 	size_t len = meta->field_count * sizeof(struct mysqlnd_field_hash_key);
 
 	DBG_ENTER("mysqlnd_res_meta::clone_metadata");
 	DBG_INF_FMT("persistent=%d", persistent);
 
+	new_meta = mnd_pecalloc(1, sizeof(MYSQLND_RES_METADATA), persistent);
+	if (!new_meta) {
+		goto oom;
+	}
 	new_meta->persistent = persistent;
-	new_meta->zend_hash_keys = mnd_pemalloc(len, persistent);
-	memcpy(new_meta->zend_hash_keys, meta->zend_hash_keys, len);
 	new_meta->m = meta->m;
+
+	new_fields = mnd_pecalloc(meta->field_count + 1, sizeof(MYSQLND_FIELD), persistent);
+	if (!new_fields) {
+		goto oom;
+	}
+
+	new_meta->zend_hash_keys = mnd_pemalloc(len, persistent);
+	if (!new_meta->zend_hash_keys) {
+		goto oom;
+	}
+	memcpy(new_meta->zend_hash_keys, meta->zend_hash_keys, len);
 
 	/*
 	  This will copy also the strings and the root, which we will have
@@ -330,6 +343,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	for (i = 0; i < meta->field_count; i++) {
 		/* First copy the root, then field by field adjust the pointers */
 		new_fields[i].root = mnd_pemalloc(orig_fields[i].root_len, persistent);
+		if (!new_fields[i].root) {
+			goto oom;
+		}
 		memcpy(new_fields[i].root, orig_fields[i].root, new_fields[i].root_len);
 
 		if (orig_fields[i].name && orig_fields[i].name != mysqlnd_empty_string) {
@@ -357,6 +373,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		/* def is not on the root, if allocated at all */
 		if (orig_fields[i].def) {
 			new_fields[i].def = mnd_pemalloc(orig_fields[i].def_length + 1, persistent);
+			if (!new_fields[i].def) {
+				goto oom;
+			}
 			/* copy the trailing \0 too */
 			memcpy(new_fields[i].def, orig_fields[i].def, orig_fields[i].def_length + 1);
 		}
@@ -364,6 +383,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		if (new_meta->zend_hash_keys[i].ustr.u) {
 			new_meta->zend_hash_keys[i].ustr.u =
 					eustrndup(new_meta->zend_hash_keys[i].ustr.u, new_meta->zend_hash_keys[i].ulen);
+			if (!new_meta->zend_hash_keys[i].ustr.u) {
+				goto oom;
+			}
 		}
 #endif
 	}
@@ -373,6 +395,12 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	new_meta->fields = new_fields;
 
 	DBG_RETURN(new_meta);
+oom:
+	if (new_meta) {
+		new_meta->m->free_metadata(new_meta TSRMLS_CC);
+		new_meta = NULL;
+	}
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
