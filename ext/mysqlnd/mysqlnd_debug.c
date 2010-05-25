@@ -1210,7 +1210,7 @@ static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persist
 
 #define MYSQLND_DEBUG_MEMORY 1
 
-struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
+PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
 {
 #if MYSQLND_DEBUG_MEMORY
 	_mysqlnd_emalloc,
