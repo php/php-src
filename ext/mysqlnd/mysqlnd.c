@@ -2140,7 +2140,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 
 
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
-static void MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC);
+static enum_func_status MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC);
 
 static
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
@@ -2217,17 +2217,17 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_conn::init */
-static void
+static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::init");
-	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
-	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
 	mysqlnd_stats_init(&conn->stats, STAT_LAST);
-
 	SET_ERROR_AFF_ROWS(conn);
 
-	DBG_VOID_RETURN;
+	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
+	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
+
+	DBG_RETURN(conn->net && conn->protocol? PASS:FAIL);
 }
 /* }}} */
 
@@ -2249,7 +2249,10 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	CONN_SET_STATE(ret, CONN_ALLOCED);
 	ret->m->get_reference(ret TSRMLS_CC);
 
-	ret->m->init(ret TSRMLS_CC);
+	if (PASS != ret->m->init(ret TSRMLS_CC)) {
+		ret->m->dtor(ret TSRMLS_CC);
+		ret = NULL;
+	}
 
 	DBG_RETURN(ret);
 }
