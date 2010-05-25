@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported
   by Mateusz Kocielski. (Ilia)  
 
+- Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
+  constant array). (Felipe)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
