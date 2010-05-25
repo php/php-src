@@ -493,6 +493,11 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 
 				/* Check for SERVER_STATUS_MORE_RESULTS if needed */
 				fields_eof = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
+				if (!fields_eof) {
+					SET_OOM_ERROR(conn->error_info);
+					ret = FAIL;
+					break;				
+				}
 				if (FAIL == (ret = PACKET_READ(fields_eof, conn))) {
 					DBG_ERR("Error ocurred while reading the EOF packet");
 					result->m.free_result_contents(result TSRMLS_CC);
