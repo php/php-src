@@ -621,7 +621,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			*buf_len = offset + stmt->param_count * 2 + 20;
 			tmp_buf = mnd_emalloc(*buf_len);
 			if (!tmp_buf) {
-				SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+				SET_OOM_ERROR(stmt->error_info);
 				goto end;
 			}
 			memcpy(tmp_buf, *buf, offset);
@@ -655,7 +655,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
 				if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-					SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+					SET_OOM_ERROR(stmt->error_info);
 					goto end;
 				}
 				break; 
@@ -668,7 +668,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
 					if (!copies || !copies[i]) {
 						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -686,7 +686,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				if (Z_TYPE_P(the_var) != IS_LONG) {
 					if (!copies || !copies[i]) {
 						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -712,7 +712,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				{
 					if (!copies || !copies[i]) {
 						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-							SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -738,7 +738,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
 		tmp_buf = mnd_emalloc(*buf_len);
 		if (!tmp_buf) {
-			SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "OOM");
+			SET_OOM_ERROR(stmt->error_info);
 			goto end;
 		}
 		memcpy(tmp_buf, *buf, offset);
