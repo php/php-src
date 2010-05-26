@@ -315,7 +315,7 @@ restart:
 	if (YYCURSOR >= YYLIMIT) {
 		if (YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW)) {
 			BEGIN(INITIAL);
-			return 0;
+			return END_OF_LINE;
 		}
 		return 0;
 	}
