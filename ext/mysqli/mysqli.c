@@ -984,7 +984,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 			if (zend_parse_parameters(1 TSRMLS_CC, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
 				return;
 			}
-			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
+			MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
@@ -994,7 +994,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 			if (zend_parse_parameters(2 TSRMLS_CC, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
 				return;
 			}
-			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
+			MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(mysqli_result_construct)
 			WRONG_PARAM_COUNT;
 	}
 
-	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 	switch (resmode) {
 		case MYSQLI_STORE_RESULT:
