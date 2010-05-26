@@ -4735,7 +4735,6 @@ ZEND_METHOD(reflection_property, setValue)
 	zval **variable_ptr;
 	zval *object, name;
 	zval *value;
-	int setter_done = 0;
 	zval *tmp;
 
 	METHOD_NOTSTATIC(reflection_property_ptr);
