@@ -684,10 +684,22 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			}
 			zval_dtor(&const_value);
 		}
-		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
 	}
 	return 0;
+}
+/* }}} */
+
+ZEND_API int zval_update_constant_inline_change(zval **pp, void *scope TSRMLS_DC) /* {{{ */
+{
+	return zval_update_constant_ex(pp, (void*)1, scope TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *scope TSRMLS_DC) /* {{{ */
+{
+	return zval_update_constant_ex(pp, (void*)0, scope TSRMLS_CC);
 }
 /* }}} */
 
