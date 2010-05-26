@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   by Mateusz Kocielski. (Ilia)  
 
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
+- Fixed bug #51905 (ReflectionParameter fails if default value is an array
+  with an access to self::). (Felipe)
   constant array). (Felipe)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)

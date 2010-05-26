@@ -140,6 +140,8 @@ static inline int i_zend_is_true(zval *op)
 }
 
 ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
+ZEND_API int zval_update_constant_inline_change(zval **pp, void *arg TSRMLS_DC);
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *arg TSRMLS_DC);
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
