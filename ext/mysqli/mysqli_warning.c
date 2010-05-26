@@ -280,11 +280,11 @@ PHP_METHOD(mysqli_warning, __construct)
 
 	if (obj->zo.ce == mysqli_link_class_entry) {
 		MY_MYSQL *mysql;
-		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &z, "mysqli_link", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE_CONN(mysql, &z, MYSQLI_STATUS_VALID);
 		hdl = mysql->mysql;
 	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
 		MY_STMT *stmt;
-		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &z, "mysqli_stmt", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE_STMT(stmt, &z, MYSQLI_STATUS_VALID);
 		hdl = mysqli_stmt_get_connection(stmt->stmt);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid class argument");
