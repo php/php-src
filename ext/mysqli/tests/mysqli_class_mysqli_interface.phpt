@@ -59,7 +59,6 @@ require_once('skipifconnectfailure.inc');
 	);
 	if ($IS_MYSQLND) {
 		// mysqlnd only
-		/* $expected_methods['get_cache_stats']		= true; */
 		/* $expected_methods['get_client_stats']	= true; */
 		$expected_methods['get_connection_stats']	= true;
 		$expected_methods['poll']	= true;
