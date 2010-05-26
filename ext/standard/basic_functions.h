@@ -201,6 +201,14 @@ typedef struct _php_basic_globals {
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
+	struct {
+		void *var_hash;
+		unsigned level;
+	} serialize;
+	struct {
+		void *var_hash;
+		unsigned level;
+	} unserialize;
 
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;

@@ -638,7 +638,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_SplObjectStorageElement *element;
-	zval members, *pmembers;
+	zval members, *pmembers, *flags;
 	HashPosition      pos;
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
@@ -646,9 +646,11 @@ SPL_METHOD(SplObjectStorage, serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	/* storage */
-	smart_str_appendl(&buf, "x:i:", 4);
-	smart_str_append_long(&buf, zend_hash_num_elements(&intern->storage));
-	smart_str_appendc(&buf, ';');
+	smart_str_appendl(&buf, "x:", 2);
+	MAKE_STD_ZVAL(flags);
+	ZVAL_LONG(flags, zend_hash_num_elements(&intern->storage));
+	php_var_serialize(&buf, &flags, &var_hash TSRMLS_CC);
+	zval_ptr_dtor(&flags);
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 
@@ -716,7 +718,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pcount);
-	if (!php_var_unserialize(&pcount, &p, s + buf_len, NULL TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
+	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
 		zval_ptr_dtor(&pcount);
 		goto outexcept;
 	}
