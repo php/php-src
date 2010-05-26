@@ -275,6 +275,27 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	}\
 }
 
+#define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
+{ \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
+	if (!(__ptr)->mysql) { \
+		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		RETURN_NULL();\
+	} \
+}
+
+#define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \
+{ \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
+	if (!(__ptr)->stmt) { \
+		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		RETURN_NULL();\
+	} \
+}
+
+
 #define MYSQLI_SET_STATUS(__id, __value) \
 { \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
