@@ -1043,11 +1043,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				) {
 					Z_ADDREF_PP(p);
 					Z_SET_ISREF_PP(p);
-#if ZTS
-					CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)][i] = *p;
-#else
-					class_type->static_members_table[i] = *p;
-#endif
+					CE_STATIC_MEMBERS(class_type)[i] = *p;
 				} else {
 					zval *r;
 
@@ -1055,11 +1051,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 					*r = **p;
 					INIT_PZVAL(r);
 					zval_copy_ctor(r);
-#if ZTS
-					CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)][i] = r;
-#else
-					class_type->static_members_table[i] = r;
-#endif
+					CE_STATIC_MEMBERS(class_type)[i] = r;
 				}
 			}
 		}
