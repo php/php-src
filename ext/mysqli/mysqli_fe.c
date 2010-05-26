@@ -91,7 +91,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_field_tell,							NULL)
 	PHP_FE(mysqli_free_result,							NULL)
 #if defined(MYSQLI_USE_MYSQLND)
-	PHP_FE(mysqli_get_cache_stats,						NULL)
 	PHP_FE(mysqli_get_connection_stats,					NULL)
 	PHP_FE(mysqli_get_client_stats,						NULL)
 #endif

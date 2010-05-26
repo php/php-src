@@ -391,7 +391,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long 			num_inactive_persistent;
 	long			max_persistent;
 	long			allow_persistent;
-	long			cache_size;
 	unsigned long	default_port;
 	char			*default_host;
 	char			*default_user;
@@ -456,7 +455,6 @@ PHP_FUNCTION(mysqli_field_count);
 PHP_FUNCTION(mysqli_field_seek);
 PHP_FUNCTION(mysqli_field_tell);
 PHP_FUNCTION(mysqli_free_result);
-PHP_FUNCTION(mysqli_get_cache_stats);
 PHP_FUNCTION(mysqli_get_client_stats);
 PHP_FUNCTION(mysqli_get_connection_stats);
 PHP_FUNCTION(mysqli_get_charset);
