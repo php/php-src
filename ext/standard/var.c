@@ -498,12 +498,18 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 			var_no = -1;
 			zend_hash_next_index_insert(var_hash, &var_no, sizeof(var_no), NULL);
 		}
+#if 0
+		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(ulong**)var_old);
+#endif
 		return FAILURE;
 	}
 
 	/* +1 because otherwise hash will think we are trying to store NULL pointer */
 	var_no = zend_hash_num_elements(var_hash) + 1;
 	zend_hash_add(var_hash, p, len, &var_no, sizeof(var_no), NULL);
+#if 0
+	fprintf(stderr, "+ add var (%d): %lu\n", Z_TYPE_P(var), var_no);
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -814,9 +820,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 }
 /* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC) /* {{{ */
 {
-	php_var_serialize_intern(buf, *struc, var_hash TSRMLS_CC);
+	php_var_serialize_intern(buf, *struc, *var_hash TSRMLS_CC);
 	smart_str_0(buf);
 }
 /* }}} */

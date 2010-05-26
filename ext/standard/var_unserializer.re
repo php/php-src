@@ -33,8 +33,11 @@ typedef struct {
 
 static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = var_hashx->first, *prev = NULL;
-
+	var_entries *var_hash = (*var_hashx)->first, *prev = NULL;
+#if 0
+	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+#endif
+	
 	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		prev = var_hash;
 		var_hash = var_hash->next;
@@ -45,8 +48,8 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!var_hashx->first)
-			var_hashx->first = var_hash;
+		if (!(*var_hashx)->first)
+			(*var_hashx)->first = var_hash;
 		else
 			prev->next = var_hash;
 	}
@@ -56,8 +59,11 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 
 static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = var_hashx->first_dtor, *prev = NULL;
-
+	var_entries *var_hash = (*var_hashx)->first_dtor, *prev = NULL;
+#if 0
+	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+#endif
+		
 	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		prev = var_hash;
 		var_hash = var_hash->next;
@@ -68,8 +74,8 @@ static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!var_hashx->first_dtor)
-			var_hashx->first_dtor = var_hash;
+		if (!(*var_hashx)->first_dtor)
+			(*var_hashx)->first_dtor = var_hash;
 		else
 			prev->next = var_hash;
 	}
@@ -81,7 +87,10 @@ static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	long i;
-	var_entries *var_hash = var_hashx->first;
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
+#endif
 	
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
@@ -96,8 +105,11 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 
 static int var_access(php_unserialize_data_t *var_hashx, long id, zval ***store)
 {
-	var_entries *var_hash = var_hashx->first;
-	
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_access(%ld): %ld\n", var_hash?var_hash->used_slots:-1L, id);
+#endif
+		
 	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = var_hash->next;
 		id -= VAR_ENTRIES_MAX;
@@ -116,7 +128,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
 	long i;
-	var_entries *var_hash = var_hashx->first;
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_destroy(%ld)\n", var_hash?var_hash->used_slots:-1L);
+#endif
 	
 	while (var_hash) {
 		next = var_hash->next;
@@ -124,7 +139,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		var_hash = next;
 	}
 
-	var_hash = var_hashx->first_dtor;
+	var_hash = (*var_hashx)->first_dtor;
 	
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
