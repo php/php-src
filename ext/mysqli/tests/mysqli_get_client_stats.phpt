@@ -887,7 +887,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(156) {
+array(158) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1020,31 +1020,35 @@ array(156) {
   %unicode|string%(1) "0"
   [%u|b%"mem_emalloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_emalloc_ammount"]=>
+  [%u|b%"mem_emalloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_ecalloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_ecalloc_ammount"]=>
+  [%u|b%"mem_ecalloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_erealloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_erealloc_ammount"]=>
+  [%u|b%"mem_erealloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_efree_count"]=>
   %unicode|string%(1) "0"
+  [%u|b%"mem_efree_amount"]=>
+  %unicode|string%(1) "0"
   [%u|b%"mem_malloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_malloc_ammount"]=>
+  [%u|b%"mem_malloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_calloc_count"]=>
   %unicode|string%(%d) "%d"
-  [%u|b%"mem_calloc_ammount"]=>
+  [%u|b%"mem_calloc_amount"]=>
   %unicode|string%(%d) "%d"
   [%u|b%"mem_realloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_realloc_ammount"]=>
+  [%u|b%"mem_realloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_free_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_free_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_estrndup_count"]=>
   %unicode|string%(1) "0"
