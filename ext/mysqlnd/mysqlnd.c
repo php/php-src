@@ -125,7 +125,9 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND * conn TSRMLS_DC)
 		conn->current_result = NULL;
 	}
 
-	conn->net->m.free_contents(conn->net TSRMLS_CC);
+	if (conn->net) {
+		conn->net->m.free_contents(conn->net TSRMLS_CC);
+	}
 
 	DBG_INF("Freeing memory of members");
 
