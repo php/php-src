@@ -16,7 +16,7 @@ PHP                                                                        NEWS
   (string $iv) to use non-NULL IV.
   Made implicit use of NULL IV a warning. (Sara)
 - Added openssl_cipher_iv_length(). (Sara)
-- Merged FPM SAPI from trunk. (Tony)
+- Added FastCGI Process Manager (FPM) SAPI. (Tony)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
