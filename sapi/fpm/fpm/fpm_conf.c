@@ -742,7 +742,6 @@ static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg TSRMLS_
 	}
 
 	if (!strcmp(Z_STRVAL_P(name), "include")) {
-		//		fpm_conf_ini_parser_include(value, error);
 		if (ini_include) {
 			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] two includes at the same time !", ini_filename, ini_lineno);
 			*error = 1;
@@ -913,6 +912,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		if (ini_include) {
 			char *tmp = ini_include;
 			ini_include = NULL;
+			fpm_evaluate_full_path(&tmp);
 			fpm_conf_ini_parser_include(tmp, &error TSRMLS_CC);
 			if (error) {
 				free(tmp);
