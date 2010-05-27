@@ -23,4 +23,5 @@ END
   # Do not process skeleton #
   files=`find "$what" -name CREDITS | grep -v "$what"/skeleton/CREDITS`
   awk "$awkprog" $files | sort -f | uniq >> $file
+  echo "Updated $file"
 done
