@@ -932,7 +932,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 #endif
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret);
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_MALLOC_COUNT, 1, STAT_MEM_MALLOC_AMOUNT, size);
 	}
@@ -963,7 +963,7 @@ void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 #endif
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret);
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_CALLOC_COUNT, 1, STAT_MEM_CALLOC_AMOUNT, size);
 	}
@@ -997,7 +997,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 
 	DBG_INF_FMT("new_ptr=%p", (char*)ret);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = new_size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_REALLOC_COUNT, 1, STAT_MEM_REALLOC_AMOUNT, new_size);
 	}
@@ -1082,7 +1082,7 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 	ret = pemalloc(tmp_str.len + sizeof(size_t), persistent);
 	memcpy(FAKE_PTR(ret), tmp_str.c, tmp_str.len);
 
-	if (collect_memory_statistics) {
+	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = tmp_str.len;
 		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_STRDUP_COUNT : STAT_MEM_ESTRDUP_COUNT);
 	}
