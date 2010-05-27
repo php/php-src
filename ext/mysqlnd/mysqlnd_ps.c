@@ -2091,16 +2091,19 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit TS
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	enum_func_status ret;
-	zend_bool persistent = stmt->persistent;
+	zend_bool persistent = s->persistent;
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
-	DBG_INF_FMT("stmt=%p", stmt);
+	if (stmt) {
 
-	MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_STMT_CLOSE_IMPLICIT:
-													STAT_STMT_CLOSE_EXPLICIT);
+		DBG_INF_FMT("stmt=%p", stmt);
 
-	ret = s->m->net_close(s, implicit TSRMLS_CC);
-	mnd_pefree(stmt, persistent);
+		MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_STMT_CLOSE_IMPLICIT:
+														STAT_STMT_CLOSE_EXPLICIT);
+
+		ret = s->m->net_close(s, implicit TSRMLS_CC);
+		mnd_pefree(stmt, persistent);
+	}
 	mnd_pefree(s, persistent);
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
@@ -2214,6 +2217,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 			break;
 		}
 		ret->m = mysqlnd_stmt_methods;
+		ret->persistent = conn->persistent;
 
 		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
 		DBG_INF_FMT("stmt=%p", stmt);
