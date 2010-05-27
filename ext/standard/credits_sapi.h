@@ -20,6 +20,7 @@ CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo, Dmitry
 CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger, Johannes Schlueter");
 CREDIT_LINE("Continuity", "Alex Leigh (based on nsapi code)");
 CREDIT_LINE("Embed", "Edin Kadribasic");
+CREDIT_LINE("FastCGI Process Manager", "Andrei Nigmatulin, dreamcat4, Antony Dovgal, Jerome Loyet");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
 CREDIT_LINE("litespeed", "George Wang");
 CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy, Uwe Schindler");
