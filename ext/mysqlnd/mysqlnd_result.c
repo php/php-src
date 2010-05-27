@@ -326,6 +326,10 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND 
 	}
 
 	result->meta = result->m.result_meta_init(result->field_count, result->persistent TSRMLS_CC);
+	if (!result->meta) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(FAIL);
+	}
 
 	/* 1. Read all fields metadata */
 
