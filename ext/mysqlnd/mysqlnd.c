@@ -778,7 +778,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 					}
 					if (conn->last_query_type == QUERY_SELECT) {
 						MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
-						result->m.free_result(result, TRUE TSRMLS_CC);
+						if (result) {
+							result->m.free_result(result, TRUE TSRMLS_CC);
+						}
 					}
 				}
 			}
