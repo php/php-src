@@ -3286,7 +3286,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array 
 		* properties, returned to user */
 		if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-			zval_update_constant(&prop_copy, 1 TSRMLS_CC);
+			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
 		}
 
 		add_assoc_zval(return_value, key, prop_copy);
