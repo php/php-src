@@ -27,7 +27,8 @@
 ;
 ;log_level = notice
 
-; When this amount of php processes exited with SIGSEGV or SIGBUS ...
+; When this amount of php processes exited with SIGSEGV or SIGBUS,
+; php-fpm will restart
 ; 0 means 'Off'
 ; default: 0
 ;
@@ -35,18 +36,18 @@
 
 ; ... in a less than this interval of time, a graceful restart will be initiated.
 ; Useful to work around accidental curruptions in accelerator's shared memory.
-; available units are s(econd), m(inute), h(hour), or d(day)
-; default : 0s
+; available units are s(econd)(default), m(inute), h(hour), or d(day)
+; default : 0
 ;
-;emergency_restart_interval = 0s
+;emergency_restart_interval = 0
 
 ; Time limit on waiting child's reaction on signals from master
-; available units are s(econd), m(inute), h(hour), or d(day)
-; default : 0s
+; available units are s(econd)(default), m(inute), h(hour), or d(day)
+; default : 0
 ;
-;process_control_timeout = 0s
+;process_control_timeout = 0
 
-; send fpm to backgound (default)
+; send fpm to backgound
 ; set to 'no' to keep FPM in foreground for debugging
 ; default : yes
 ;
@@ -54,12 +55,12 @@
 
 ; Start a new pool named 'www'
 ; The name is used in logs and stats
-; There is no limitation of the number of pool FPM can handle. Your system will tell you anyway :)
+; There is no limitation on the number of pool FPM can handle. Your system will tell you anyway :)
 [www]
 
 ; Address to accept fastcgi requests on.
 ; Valid syntaxes are:
-; - 'ip.ad.re.ss:port' to listen on a TCP scoket to the specific address on the specific port
+; - 'ip.add.re.ss:port' to listen on a TCP scoket to the specific address on the specific port
 ; - 'port' to listen on a TCP socket to all addreses on the specific port
 ; - '/path/to/unix/socket' to listen on a unix socket
 ; it's mandatory
@@ -72,10 +73,11 @@ listen = 127.0.0.1:9000
 ;
 ;listen.backlog = -1
  
-; List of ipv4 addresses of FastCGI clients that allowed to connect.
+; List of ipv4 addresses of FastCGI clients which are allowed to connect.
 ; Equivalent to FCGI_WEB_SERVER_ADDRS environment in original php.fcgi (5.2.2+)
 ; Makes sense only with a tcp listening socket.
 ; Each addresses must be separated by a comma
+; If it's left blank, it accept connection from any ip address
 ; default: any
 ;
 ;listen.allowed_clients = 127.0.0.1
@@ -101,10 +103,10 @@ group = @php_fpm_group@
 ; - dynamic : The number of child processes are set up dynamically depending on the following directives
 ;             - pm.max_children      : the maximum number of children that can be alive at the same time
 ;             - pm.start_servers     : the number of children created on startup
-;             - pm.min_spare_servers : the minimum number of children in 'idle' state (waiting to precess).
+;             - pm.min_spare_servers : the minimum number of children in 'idle' state (waiting to process).
 ;                                      If the number of 'idle' processes is less than this number,
 ;                                      some children will be created.
-;             - pm.max_spare_servers : the maximum number of children in 'idle' state (waiting to precess).
+;             - pm.max_spare_servers : the maximum number of children in 'idle' state (waiting to process).
 ;                                      If the number of 'idle' processes is greater than this number,
 ;                                      some children will be killed;
 ; It's mandatory
@@ -201,27 +203,27 @@ pm.max_children = 50
 ;
 ;ping.response = pong
  
-; The timeout (in seconds) for serving a single request after which the worker process will be terminated
+; The timeout for serving a single request after which the worker process will be killed
 ; Should be used when 'max_execution_time' ini option does not stop script execution for some reason
 ; '0' means 'off'
-; available units are s(econd), m(inute), h(hour), or d(day)
+; available units are s(econd)(default), m(inute), h(hour), or d(day)
 ; default: 0
 ;
-;request_terminate_timeout = 0s
+;request_terminate_timeout = 0
  
-; The timeout (in seconds) for serving of single request after which a php backtrace will be dumped to slow.log file
+; The timeout for serving of single request after which a php backtrace will be dumped to slow.log file
 ; '0s' means 'off'
-; available units are s(econd), m(inute), h(hour), or d(day)
+; available units are s(econd)(default), m(inute), h(hour), or d(day)
 ; default: 0
 ;
-;request_slowlog_timeout = 0s
+;request_slowlog_timeout = 0
  
 ; The log file for slow requests
 ; default: @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow
 ;
 ;slowlog = @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow
  
-; Set open file desc rlimit
+; Set open file descriptor rlimit
 ; default: system defined value
 ;
 ;rlimit_files = 1024
