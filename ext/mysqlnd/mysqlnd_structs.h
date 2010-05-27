@@ -908,6 +908,7 @@ struct st_mysqlnd_stmt
 {
 	MYSQLND_STMT_DATA * data;
 	struct st_mysqlnd_stmt_methods	*m;
+	zend_bool persistent;
 };
 
 #endif /* MYSQLND_STRUCTS_H */
