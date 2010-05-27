@@ -15,8 +15,14 @@ if (!function_exists('mysqli_get_cache_stats')) {
 --FILE--
 <?php
 	$before = mysqli_get_cache_stats();
-	if (!is_array($before) || empty($before)) {
-		printf("[001] Expecting non-empty array, got %s.\n", gettype($before));
+	/*
+	NOTE: the function belongs to the mysqnd zval cache. The
+	mysqlnd zval cache was part of PHP from PHP 5.3.0(-dev) to
+	PHP 5.3.0RC3 or something. And it was turned off by default.
+	The function never returned anything meaningful in any released version of PHP.
+	*/
+	if (!is_array($before)) {
+		printf("[001] Expecting array, got %s.\n", gettype($before));
 		var_dump($before);
 	}
 
@@ -33,25 +39,11 @@ if (!function_exists('mysqli_get_cache_stats')) {
 		;
 
 	$after = mysqli_get_cache_stats();
-	/* references has to be maintained - it is used for memory management */
-	$ignore = array('references' => true);
-	foreach ($before as $k => $v) {
-		if (isset($ignore[$k]))
-			continue;
-
-		if ($before[$k] != $after[$k])
-			printf("[004] Statistics have changed - %s: %s => %s\n", $
-				$k, $before[$k], $after[$k]);
+        if ($before !== $after) {
+		printf("[002] Statistics have changed\n");
+		var_dump($before);
+		var_dump($after);
 	}
-
-	$ignore = array("size" => true, "free_items" => true, "references" => true);
-	foreach ($after as $k => $v) {
-		if ($v != 0 && !isset($ignore[$k])) {
-			printf("[005] Field %s should not have any other value but 0, got %s.\n",
-				$k, $v);
-		}
-	}
-
 	mysqli_close($link);
 
 	print "done!";

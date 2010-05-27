@@ -23,6 +23,6 @@ array(2) {
   ["Variable_name"]=>
   string(10) "Ssl_cipher"
   ["Value"]=>
-  string(%d) "%s"
+  string(%d) "%S"
 }
 done!
