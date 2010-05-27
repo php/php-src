@@ -453,10 +453,13 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 {
 	unsigned int i;
 	MYSQLND_RESULT_BIND * params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
-	for (i = 0; i < (argc - start); i++) {
-		params[i].zv = *(args[i + start]);
+	if (params) {
+		for (i = 0; i < (argc - start); i++) {
+			params[i].zv = *(args[i + start]);
+		}
+		return mysqlnd_stmt_bind_result(stmt->stmt, params);
 	}
-	return mysqlnd_stmt_bind_result(stmt->stmt, params);
+	return FAIL;
 }
 #endif
 /* }}} */
