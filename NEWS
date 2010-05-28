@@ -65,6 +65,8 @@ PHP                                                                        NEWS
 - Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
   (Raphael Geissert)
+- Fixed bug #50762 (in WSDL mode Soap Header handler function only being called
+  if defined in WSDL). (mephius at gmail dot com)
 - Fixed bug #50698 (SoapClient should handle wsdls with some incompatiable
   endpoints). (Justin Dearing)
 - Fixed bug #50383 (Exceptions thrown in __call() / __callStatic() do not

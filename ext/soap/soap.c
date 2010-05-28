@@ -1706,6 +1706,7 @@ PHP_METHOD(SoapServer, handle)
 			soapHeader *h = header;
 
 			header = header->next;
+#if 0
 			if (service->sdl && !h->function && !h->hdr) {
 				if (h->mustUnderstand) {
 					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL, NULL TSRMLS_CC);
@@ -1713,7 +1714,7 @@ PHP_METHOD(SoapServer, handle)
 					continue;
 				}
 			}
-
+#endif
 			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
 			if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1) ||
 			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
