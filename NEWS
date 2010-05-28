@@ -152,6 +152,8 @@ PHP                                                                        NEWS
 - Fixed bug #50999 (unaligned memory access in dba_fetch()). (Felipe)
 - Fixed bug #50828 (DOMNotation is not subclass of DOMNode). (Rob)
 - Fixed bug #50810 (property_exists does not work for private). (Felipe)
+- Fixed bug #50762 (in WSDL mode Soap Header handler function only being called
+  if defined in WSDL). (mephius at gmail dot com)
 - Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
   spl_autoload_register). (Felipe)
 - Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications). (Derick)
