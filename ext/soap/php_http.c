@@ -212,6 +212,9 @@ int make_http_soap_request(zval  *this_ptr,
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
+	zend_bool has_authorization = 0;
+	zend_bool has_proxy_authorization = 0;
+	zend_bool has_cookies = 0;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -480,6 +483,7 @@ try_again:
 		    Z_TYPE_PP(login) == IS_STRING) {
 			zval **digest;
 
+			has_authorization = 1;
 			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"), (void **)&digest) == SUCCESS) {
 				if (Z_TYPE_PP(digest) == IS_ARRAY) {
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
@@ -651,6 +655,7 @@ try_again:
 
 		/* Proxy HTTP Authentication */
 		if (use_proxy && !use_ssl) {
+			has_proxy_authorization = 1;
 			proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		}
 
@@ -660,6 +665,7 @@ try_again:
 			char *key;
 			int i, n;
 
+			has_cookies = 1;
 			n = zend_hash_num_elements(Z_ARRVAL_PP(cookies));
 			if (n > 0) {
 				zend_hash_internal_pointer_reset(Z_ARRVAL_PP(cookies));
@@ -734,11 +740,14 @@ try_again:
 					     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
 					    (name_len != sizeof("content-type")-1 ||
 					     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-					    (name_len != sizeof("cookie")-1 ||
+					    (!has_cookies ||
+					     name_len != sizeof("cookie")-1 ||
 					     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-					    (name_len != sizeof("authorization")-1 ||
+					    (!has_authorization ||
+					     name_len != sizeof("authorization")-1 ||
 					     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-					    (name_len != sizeof("proxy-authorization")-1 ||
+					    (!has_proxy_authorization ||
+					     name_len != sizeof("proxy-authorization")-1 ||
 					     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
 					    /* add header */
 						smart_str_appendl(&soap_headers, s, p-s);
