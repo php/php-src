@@ -150,6 +150,8 @@ PHP                                                                        NEWS
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
   (Raphael Geissert)
 - Fixed bug #50999 (unaligned memory access in dba_fetch()). (Felipe)
+- Fixed bug #50976 (Soap headers Authorization not allowed).
+  (Brain France, Dmitry)
 - Fixed bug #50828 (DOMNotation is not subclass of DOMNode). (Rob)
 - Fixed bug #50810 (property_exists does not work for private). (Felipe)
 - Fixed bug #50762 (in WSDL mode Soap Header handler function only being called
