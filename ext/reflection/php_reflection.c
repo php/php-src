@@ -367,7 +367,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		char *kind = "Class";
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			kind = "Interface";
-		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		} else if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			kind = "Trait";
 		}
 		string_printf(str, "%s%s [ ", indent, kind);
