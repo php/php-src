@@ -1591,7 +1591,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			zend_str_tolower_copy(class_lcname, CG(active_class_entry)->name, CG(active_class_entry)->name_length);
 			/* Improve after RC: cache the lowercase class name */
 
-			if ((CG(active_class_entry)->name_length == name_len) && (!memcmp(class_lcname, lcname, name_len))) {
+			if ((CG(active_class_entry)->name_length == name_len) && ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) && (!memcmp(class_lcname, lcname, name_len))) {
 				if (CG(active_class_entry)->constructor) {
 					zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
 				} else {
