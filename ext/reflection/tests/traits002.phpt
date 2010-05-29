@@ -15,7 +15,7 @@ reflectionclass::export('bar');
 
 ?>
 --EXPECTF--
-Class [ <user> trait foo ] {
+Class [ <user> abstract class foo ] {
   @@ %s 3-4
 
   - Constants [0] {
