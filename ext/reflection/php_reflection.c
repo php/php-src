@@ -355,7 +355,13 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (obj) {
 		string_printf(str, "%sObject of class [ ", indent);
 	} else {
-		string_printf(str, "%s%s [ ", indent, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : "Class");
+		char *kind = "Class";
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			kind = "Interface";
+		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			kind = "Trait";
+		}
+		string_printf(str, "%s%s [ ", indent, kind);
 	}
 	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user" : "<internal");
 	if (ce->module) {
@@ -367,6 +373,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		string_printf(str, "interface ");
+	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		string_printf(str, "trait ");
 	} else {
 		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 			string_printf(str, "abstract ");
@@ -3974,6 +3982,14 @@ ZEND_METHOD(reflection_class, isInterface)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isTrait()
+   Returns whether this is a trait */
+ZEND_METHOD(reflection_class, isTrait)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionClass::isFinal()
    Returns whether this class is final */
 ZEND_METHOD(reflection_class, isFinal)
@@ -5605,6 +5621,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getInterfaces, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getInterfaceNames, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInterface, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
