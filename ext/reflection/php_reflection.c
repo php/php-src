@@ -382,7 +382,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		string_printf(str, "interface ");
-	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+	} else if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		string_printf(str, "trait ");
 	} else {
 		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
