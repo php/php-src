@@ -3999,7 +3999,7 @@ ZEND_METHOD(reflection_class, isInterface)
    Returns whether this is a trait */
 ZEND_METHOD(reflection_class, isTrait)
 {
-	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT);
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 }
 /* }}} */
 
