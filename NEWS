@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   Made implicit use of NULL IV a warning. (Sara)
 - Added openssl_cipher_iv_length(). (Sara)
 - Added FastCGI Process Manager (FPM) SAPI. (Tony)
+- Added recent Windows versions to php_uname and fix undefined windows 
+  version support. (Pierre)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
