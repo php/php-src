@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [44] {
+  - Methods [47] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -183,6 +183,24 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isInterface ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getTraits ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getTraitNames ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getTraitAliases ] {
 
       - Parameters [0] {
       }
