@@ -281,11 +281,22 @@ char* php_get_windows_name()
 	}
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
-		if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 )	{
-			if (osvi.wProductType == VER_NT_WORKSTATION) {
-				major = "Windows Vista";
+		if (osvi.dwMajorVersion == 6)	{
+			if( osvi.dwMinorVersion == 0 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION ) {
+					major = "Windows Vista";
+				} else {
+					major = "Windows Server 2008";
+				}
+			} else
+			if ( osvi.dwMinorVersion == 1 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					major = "Windows 7";
+				} else {
+					major = "Windows Server 2008 R2";
+				}
 			} else {
-				major = "Windows Server 2008";
+				major = "Unknow Windows version";
 			}
 
 			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
