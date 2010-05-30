@@ -4254,6 +4254,80 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 }
 /* }}} */
 
+/* {{{ proto public ReflectionClass[] ReflectionClass::getTraits()
+   Returns an array of traits used by this class */
+ZEND_METHOD(reflection_class, getTraits)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_uint i;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+
+	for (i=0; i < ce->num_traits; i++) {
+		zval *trait;
+		ALLOC_ZVAL(trait);
+		zend_reflection_class_factory(ce->traits[i], trait TSRMLS_CC);
+		add_assoc_zval_ex(return_value, ce->traits[i]->name, ce->traits[i]->name_length + 1, trait);
+	}
+}
+/* }}} */
+
+/* {{{ proto public String[] ReflectionClass::getTraitNames()
+   Returns an array of names of traits used by this class */
+ZEND_METHOD(reflection_class, getTraitNames)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_uint i;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+
+	for (i=0; i < ce->num_traits; i++) {
+		add_next_index_stringl(return_value, ce->traits[i]->name, ce->traits[i]->name_length, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto public arra ReflectionClass::getTraitaliases()
+   Returns an array of trait aliases */
+ZEND_METHOD(reflection_class, getTraitAliases)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+
+	if (ce->trait_aliases) {
+		zend_uint i = 0;
+		while (ce->trait_aliases[i]) {
+			char *method_name;
+			int method_name_len;
+			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
+
+			method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->class_name, cur_ref->method_name);
+			add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
+			i++;
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public ReflectionClass ReflectionClass::getParentClass()
    Returns the class' parent class, or, if none exists, FALSE */
 ZEND_METHOD(reflection_class, getParentClass)
@@ -5636,6 +5710,9 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getInterfaces, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getInterfaceNames, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInterface, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getTraits, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getTraitNames, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getTraitAliases, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
