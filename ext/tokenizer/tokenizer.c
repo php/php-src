@@ -164,15 +164,16 @@ PHP_FUNCTION(token_get_all)
 	zval source_z;
 	zend_lex_state original_lex_state;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) 
+	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
+	}
 
 	ZVAL_STRINGL(&source_z, source, source_len, 1);
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	if (zend_prepare_string_for_scanning(&source_z, "" TSRMLS_CC) == FAILURE) {
 		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-		RETURN_EMPTY_STRING();
+		RETURN_FALSE;
 	}
 
 	LANG_SCNG(yy_state) = yycINITIAL;
