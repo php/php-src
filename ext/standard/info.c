@@ -346,7 +346,7 @@ char* php_get_windows_name()
 			}
 		}
 
-		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 )	{
+		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 ) {
 			if (GetSystemMetrics(SM_SERVERR2))
 				major = "Windows Server 2003 R2";
 			else if (osvi.wSuiteMask == VER_SUITE_STORAGE_SERVER)
