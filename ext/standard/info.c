@@ -281,7 +281,7 @@ char* php_get_windows_name()
 	}
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
-		if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 )	{
+		if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 ) {
 			if (osvi.wProductType == VER_NT_WORKSTATION) {
 				major = "Windows Vista";
 			} else {
