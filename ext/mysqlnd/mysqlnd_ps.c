@@ -195,7 +195,7 @@ MYSQLND_METHOD(mysqlnd_stmt, more_results)(const MYSQLND_STMT * s TSRMLS_DC)
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt::more_results");
 	/* (conn->state == CONN_NEXT_RESULT_PENDING) too */
-	DBG_RETURN((stmt->conn && (stmt->conn->upsert_status.server_status &
+	DBG_RETURN((stmt && stmt->conn && (stmt->conn->upsert_status.server_status &
 							   SERVER_MORE_RESULTS_EXISTS))?
 									TRUE:
 									FALSE);
@@ -1569,7 +1569,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->upsert_status.last_insert_id;
+	return stmt? stmt->upsert_status.last_insert_id : 0;
 }
 /* }}} */
 
@@ -1579,7 +1579,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->upsert_status.affected_rows;
+	return stmt? stmt->upsert_status.affected_rows : 0;
 }
 /* }}} */
 
@@ -1589,7 +1589,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->result? mysqlnd_num_rows(stmt->result):0;
+	return stmt && stmt->result? mysqlnd_num_rows(stmt->result):0;
 }
 /* }}} */
 
@@ -1599,7 +1599,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->upsert_status.warning_count;
+	return stmt? stmt->upsert_status.warning_count : 0;
 }
 /* }}} */
 
@@ -1609,7 +1609,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, server_status)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->upsert_status.server_status;
+	return stmt? stmt->upsert_status.server_status : 0;
 }
 /* }}} */
 
@@ -1619,7 +1619,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->field_count;
+	return stmt? stmt->field_count : 0;
 }
 /* }}} */
 
@@ -1629,7 +1629,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->param_count;
+	return stmt? stmt->param_count : 0;
 }
 /* }}} */
 
@@ -1639,7 +1639,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, errno)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->error_info.error_no;
+	return stmt? stmt->error_info.error_no : 0;
 }
 /* }}} */
 
@@ -1649,7 +1649,7 @@ static const char *
 MYSQLND_METHOD(mysqlnd_stmt, error)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->error_info.error;
+	return stmt? stmt->error_info.error : 0;
 }
 /* }}} */
 
@@ -1659,7 +1659,7 @@ static const char *
 MYSQLND_METHOD(mysqlnd_stmt, sqlstate)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->error_info.sqlstate[0] ? stmt->error_info.sqlstate:MYSQLND_SQLSTATE_NULL;
+	return stmt && stmt->error_info.sqlstate[0] ? stmt->error_info.sqlstate:MYSQLND_SQLSTATE_NULL;
 }
 /* }}} */
 
@@ -1669,7 +1669,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const s, uint64_t row TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt->result? stmt->result->m.seek_data(stmt->result, row TSRMLS_CC) : FAIL;
+	return stmt && stmt->result? stmt->result->m.seek_data(stmt->result, row TSRMLS_CC) : FAIL;
 }
 /* }}} */
 
@@ -1679,7 +1679,7 @@ static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, param_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	if (!stmt->param_count) {
+	if (!stmt || !stmt->param_count) {
 		return NULL;
 	}
 	return NULL;
@@ -2136,6 +2136,9 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_param_bind)(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt::alloc_param_bind");
+	if (!stmt) {
+		DBG_RETURN(NULL);
+	}
 	DBG_RETURN(mnd_pecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND), stmt->persistent));
 }
 /* }}} */
@@ -2147,6 +2150,9 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_result_bind)(MYSQLND_STMT * const s TSRMLS_DC
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt::alloc_result_bind");
+	if (!stmt) {
+		DBG_RETURN(NULL);
+	}
 	DBG_RETURN(mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent));
 }
 /* }}} */
@@ -2157,7 +2163,9 @@ PHPAPI void
 MYSQLND_METHOD(mysqlnd_stmt, free_parameter_bind)(MYSQLND_STMT * const s, MYSQLND_PARAM_BIND * param_bind TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	mnd_pefree(param_bind, stmt->persistent);
+	if (stmt) {
+		mnd_pefree(param_bind, stmt->persistent);
+	}
 }
 /* }}} */
 
@@ -2167,7 +2175,9 @@ PHPAPI void
 MYSQLND_METHOD(mysqlnd_stmt, free_result_bind)(MYSQLND_STMT * const s, MYSQLND_RESULT_BIND * result_bind TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	mnd_pefree(result_bind, stmt->persistent);
+	if (stmt) {
+		mnd_pefree(result_bind, stmt->persistent);
+	}
 }
 /* }}} */
 
