@@ -63,7 +63,7 @@
 
 #define BAIL_IF_NO_MORE_DATA \
 	if ((size_t)(p - begin) > packet->header.size) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At line %d", __LINE__); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%d)", __LINE__); \
 		goto premature_end; \
 	} \
 
@@ -826,7 +826,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				packet->info_or_local_file_len = len;
 			} else {
 				SET_OOM_ERROR(conn->error_info);
-				ret = FAIL;	
+				ret = FAIL;
 			}
 			break;
 		case 0x00:
@@ -1026,7 +1026,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		if (!meta->def) {
 			SET_OOM_ERROR(conn->error_info);
-			DBG_RETURN(FAIL);		
+			DBG_RETURN(FAIL);
 		}
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
@@ -1038,9 +1038,9 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	if (!root_ptr) {
 		SET_OOM_ERROR(conn->error_info);
-		DBG_RETURN(FAIL);	
+		DBG_RETURN(FAIL);
 	}
-	
+
 	meta->root_len = total_len;
 	/* Now do allocs */
 	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {
