@@ -53,7 +53,12 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 	DBG_ENTER("mysqlnd_local_infile_init");
 
-	*ptr = info = ((MYSQLND_INFILE_INFO *)mnd_ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
+	info = ((MYSQLND_INFILE_INFO *)mnd_ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
+	if (!info) {
+		DBG_RETURN(1);
+	}
+	
+	*ptr = info;
 
 	/* check open_basedir */
 	if (PG(open_basedir)) {
