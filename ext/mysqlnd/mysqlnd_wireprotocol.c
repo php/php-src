@@ -63,7 +63,7 @@
 
 #define BAIL_IF_NO_MORE_DATA \
 	if ((size_t)(p - begin) > packet->header.size) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At line %d", __LINE__); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%d)", __LINE__); \
 		goto premature_end; \
 	} \
 
