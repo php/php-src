@@ -57,6 +57,8 @@
   . Added cli.prompt ini settingto configure the shell prompt.
   . Added shortcut #inisetting=value to change ini settings at run-time.
   . Don't terminate shell on fatal errors.
+- Improved ext/zlib: re-implemented non-file related functionality. (Mike)
+- Improved output layer. See README.NEW-OUTPUT-API for internals. (Mike)
 
 - Removed legacy features:
   . allow_call_time_pass_reference. (Pierrick)
