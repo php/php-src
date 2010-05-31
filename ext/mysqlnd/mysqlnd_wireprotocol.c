@@ -1202,7 +1202,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
-void
+enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									  unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 									  zend_bool persistent,
@@ -1217,7 +1217,9 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
 	end_field = (current_field = start_field = fields) + field_count;
-
+	if (!current_field) {
+		DBG_RETURN(FAIL);
+	}
 
 	/* skip the first byte, not EODATA_MARKER -> 0x0, status */
 	p++;
@@ -1228,6 +1230,9 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
+		if (!*current_field) {
+			DBG_RETURN(FAIL);
+		}
 
 		DBG_INF_FMT("Into zval=%p decoding column %d [%s.%s.%s] type=%d field->flags&unsigned=%d flags=%u is_bit=%d as_unicode=%d",
 			*current_field, i,
@@ -1282,13 +1287,13 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		}
 	}
 
-	DBG_VOID_RETURN;
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
-void
+enum_func_status
 php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 									zend_bool persistent,
@@ -1305,6 +1310,10 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
 
 	end_field = (current_field = start_field = fields) + field_count;
+	if (!current_field) {
+		DBG_RETURN(FAIL);
+	}
+
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
 		zend_uchar *this_field_len_pos = p;
@@ -1313,6 +1322,9 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
+		if (!*current_field) {
+			DBG_RETURN(FAIL);
+		}
 
 		if (current_field > start_field && last_field_was_string) {
 			/*
@@ -1503,7 +1515,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 		row_buffer->ptr[data_size] = '\0';
 	}
 
-	DBG_VOID_RETURN;
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
