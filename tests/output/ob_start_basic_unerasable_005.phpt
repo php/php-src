@@ -17,9 +17,9 @@ var_dump(ob_get_contents());
 ?>
 --EXPECTF--
 [callback:1]Attempt to flush unerasable buffer - should fail... 
-Notice: ob_flush(): failed to flush buffer callback. in %s on line 11
+Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line 11
 bool(false)
 string(%d) "Attempt to flush unerasable buffer - should fail... 
-Notice: ob_flush(): failed to flush buffer callback. in %s on line 11
+Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line 11
 bool(false)
 "

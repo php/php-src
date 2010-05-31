@@ -1650,7 +1650,7 @@ PHP_METHOD(SoapServer, handle)
 
 	ALLOC_INIT_ZVAL(retval);
 
-	if (php_start_ob_buffer(NULL, 0, 0 TSRMLS_CC) != SUCCESS) {
+	if (php_output_start_default(TSRMLS_C) != SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,"ob_start failed");
 	}
 
@@ -1738,7 +1738,7 @@ PHP_METHOD(SoapServer, handle)
 	
 #ifdef ZEND_ENGINE_2
 	if (EG(exception)) {
-		php_end_ob_buffer(0, 0 TSRMLS_CC);
+		php_output_discard(TSRMLS_C);
 		if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1792,7 +1792,7 @@ PHP_METHOD(SoapServer, handle)
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 				}
 				if (EG(exception)) {
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard(TSRMLS_C);
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 						soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1824,7 +1824,7 @@ PHP_METHOD(SoapServer, handle)
 					}
 #ifdef ZEND_ENGINE_2
 					if (EG(exception)) {
-						php_end_ob_buffer(0, 0 TSRMLS_CC);
+						php_output_discard(TSRMLS_C);
 						if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 						    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 							soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1904,14 +1904,14 @@ PHP_METHOD(SoapServer, handle)
 					    Z_TYPE_PP(tmp) != IS_NULL) {
 						headerfault = *tmp;
 					}
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard(TSRMLS_C);
 					soap_server_fault_ex(function, &h->retval, h TSRMLS_CC);
 					efree(fn_name);
 					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(&soap_obj);}
 					goto fail;
 #ifdef ZEND_ENGINE_2
 				} else if (EG(exception)) {
-					php_end_ob_buffer(0, 0 TSRMLS_CC);
+					php_output_discard(TSRMLS_C);
 					if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 						zval *headerfault = NULL, **tmp;
@@ -1961,7 +1961,7 @@ PHP_METHOD(SoapServer, handle)
 
 #ifdef ZEND_ENGINE_2
 	if (EG(exception)) {
-		php_end_ob_buffer(0, 0 TSRMLS_CC);
+		php_output_discard(TSRMLS_C);
 		if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -1983,7 +1983,7 @@ PHP_METHOD(SoapServer, handle)
 
 		if (Z_TYPE_P(retval) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE_P(retval), soap_fault_class_entry TSRMLS_CC)) {
-			php_end_ob_buffer(0, 0 TSRMLS_CC);
+			php_output_discard(TSRMLS_C);
 			soap_server_fault_ex(function, retval, NULL TSRMLS_CC);
 			goto fail;
 		}
@@ -2004,7 +2004,7 @@ PHP_METHOD(SoapServer, handle)
 
 #ifdef ZEND_ENGINE_2
 	if (EG(exception)) {
-		php_end_ob_buffer(0, 0 TSRMLS_CC);
+		php_output_discard(TSRMLS_C);
 		if (Z_TYPE_P(EG(exception)) == IS_OBJECT &&
 		    instanceof_function(Z_OBJCE_P(EG(exception)), soap_fault_class_entry TSRMLS_CC)) {
 			soap_server_fault_ex(function, EG(exception), NULL TSRMLS_CC);
@@ -2023,7 +2023,7 @@ PHP_METHOD(SoapServer, handle)
 #endif
 
 	/* Flush buffer */
-	php_end_ob_buffer(0, 0 TSRMLS_CC);
+	php_output_discard(TSRMLS_C);
 
 	if (doc_return) {
 		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
@@ -2041,39 +2041,14 @@ PHP_METHOD(SoapServer, handle)
 
 		xmlFreeDoc(doc_return);
 
-		if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0) &&				
-		    zend_hash_exists(EG(function_table), "ob_gzhandler", sizeof("ob_gzhandler"))) {
-			zval nm_ob_gzhandler;
-			zval str;
-			zval mode;
-			zval result;
-			zval *params[2];
-
-			INIT_ZVAL(result);
-			ZVAL_STRINGL(&nm_ob_gzhandler, "ob_gzhandler", sizeof("ob_gzhandler") - 1, 0);
-			INIT_PZVAL(&str);
-			ZVAL_STRINGL(&str, (char*)buf, size, 0);
-			params[0] = &str;
-			INIT_PZVAL(&mode);
-			ZVAL_LONG(&mode, PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END);
-			params[1] = &mode;
-			if (call_user_function(CG(function_table), NULL, &nm_ob_gzhandler, &result, 2, params TSRMLS_CC) != FAILURE &&
-			    Z_TYPE(result) == IS_STRING &&
-				zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
-				xmlFree(buf);
-				buf = NULL;
-				snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", Z_STRLEN(result));
-				sapi_add_header(cont_len, strlen(cont_len), 1);
-				php_write(Z_STRVAL(result), Z_STRLEN(result) TSRMLS_CC);
-			}
-			zval_dtor(&result);
-		}
-		if (buf) {
+		if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+			sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
+		} else {
 			snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
 			sapi_add_header(cont_len, strlen(cont_len), 1);
-			php_write(buf, size TSRMLS_CC);
-			xmlFree(buf);
 		}
+		php_write(buf, size TSRMLS_CC);
+		xmlFree(buf);
 	} else {
 		sapi_add_header("HTTP/1.1 202 Accepted", sizeof("HTTP/1.1 202 Accepted")-1, 1);
 		sapi_add_header("Content-Length: 0", sizeof("Content-Length: 0")-1, 1);
@@ -2212,47 +2187,22 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	if (use_http_error_status) {
 		sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
 	}
+	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+		sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
+	} else {
+		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
+		sapi_add_header(cont_len, strlen(cont_len), 1);
+	}
 	if (soap_version == SOAP_1_2) {
 		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
 	} else {
 		sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 	}
 
-	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0) &&				
-	    zend_hash_exists(EG(function_table), "ob_gzhandler", sizeof("ob_gzhandler"))) {
-		zval nm_ob_gzhandler;
-		zval str;
-		zval mode;
-		zval result;
-		zval *params[2];
-
-		INIT_ZVAL(result);
-		ZVAL_STRINGL(&nm_ob_gzhandler, "ob_gzhandler", sizeof("ob_gzhandler") - 1, 0);
-		INIT_PZVAL(&str);
-		ZVAL_STRINGL(&str, (char*)buf, size, 0);
-		params[0] = &str;
-		INIT_PZVAL(&mode);
-		ZVAL_LONG(&mode, PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END);
-		params[1] = &mode;
-		if (call_user_function(CG(function_table), NULL, &nm_ob_gzhandler, &result, 2, params TSRMLS_CC) != FAILURE &&
-		    Z_TYPE(result) == IS_STRING &&
-			zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
-			xmlFree(buf);
-			buf = NULL;
-			snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", Z_STRLEN(result));
-			sapi_add_header(cont_len, strlen(cont_len), 1);
-			php_write(Z_STRVAL(result), Z_STRLEN(result) TSRMLS_CC);
-		}
-		zval_dtor(&result);
-	}
-	if (buf) {
-		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
-		sapi_add_header(cont_len, strlen(cont_len), 1);
-		php_write(buf, size TSRMLS_CC);
-		xmlFree(buf);
-	}
+	php_write(buf, size TSRMLS_CC);
 
 	xmlFreeDoc(doc_return);
+	xmlFree(buf);
 	zend_clear_exception(TSRMLS_C);
 }
 
@@ -2415,11 +2365,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				}
 
 				/* Get output buffer and send as fault detials */
-				if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
+				if (php_output_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
 					ALLOC_INIT_ZVAL(outbuf);
-					php_ob_get_buffer(outbuf TSRMLS_CC);
+					php_output_get_contents(outbuf TSRMLS_CC);
 				}
-				php_end_ob_buffer(0, 0 TSRMLS_CC);
+				php_output_discard(TSRMLS_C);
 
 			}
 			INIT_ZVAL(fault_obj);

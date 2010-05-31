@@ -228,8 +228,8 @@ PHP_FUNCTION(headers_sent)
 		return;
 
 	if (SG(headers_sent)) {
-		line = php_get_output_start_lineno(TSRMLS_C);
-		file = php_get_output_start_filename(TSRMLS_C);
+		line = php_output_get_start_lineno(TSRMLS_C);
+		file = php_output_get_start_filename(TSRMLS_C);
 	}
 
 	switch(ZEND_NUM_ARGS()) {

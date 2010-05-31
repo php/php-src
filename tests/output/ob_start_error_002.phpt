@@ -20,8 +20,15 @@ var_dump(ob_start("no"));
 echo "done"
 ?>
 --EXPECTF--
+Notice: ob_start(): failed to create buffer in %s on line 13
 bool(false)
+
+Notice: ob_start(): failed to create buffer in %s on line 14
 bool(false)
+
+Notice: ob_start(): failed to create buffer in %s on line 15
 bool(false)
+
+Notice: ob_start(): failed to create buffer in %s on line 16
 bool(false)
 done

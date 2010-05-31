@@ -48,6 +48,8 @@ string(%d) "%a"
 
 Warning: gzinflate() expects at least 1 parameter, 0 given in %s on line %d
 NULL
+
+Warning: gzinflate(): data error in %s on line %d
 bool(false)
 
 Warning: gzinflate(): data error in %s on line %d

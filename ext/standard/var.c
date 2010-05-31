@@ -456,14 +456,14 @@ PHP_FUNCTION(var_export)
 	}
 
 	if (return_output) {
-		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+		php_output_start_default(TSRMLS_C);
 	}
 
 	php_var_export(&var, 1 TSRMLS_CC);
 
 	if (return_output) {
-		php_ob_get_buffer (return_value TSRMLS_CC);
-		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_get_contents(return_value TSRMLS_CC);
+		php_output_discard(TSRMLS_C);
 	}
 }
 /* }}} */

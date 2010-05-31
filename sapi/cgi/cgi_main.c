@@ -1812,11 +1812,9 @@ consult the installation file that came with this distribution, or visit \n\
 				case '?':
 					fcgi_shutdown();
 					no_headers = 1;
-					php_output_startup();
-					php_output_activate(TSRMLS_C);
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_end_ob_buffers(1 TSRMLS_CC);
+					php_output_end_all(TSRMLS_C);
 					exit_status = 0;
 					goto out;
 			}
@@ -1890,15 +1888,13 @@ consult the installation file that came with this distribution, or visit \n\
 							if (script_file) {
 								efree(script_file);
 							}
-							php_output_startup();
-							php_output_activate(TSRMLS_C);
 							SG(headers_sent) = 1;
 							php_printf("[PHP Modules]\n");
 							print_modules(TSRMLS_C);
 							php_printf("\n[Zend Modules]\n");
 							print_extensions(TSRMLS_C);
 							php_printf("\n");
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_end_all(TSRMLS_C);
 							exit_status = 0;
 							goto out;
 
@@ -2117,7 +2113,7 @@ consult the installation file that came with this distribution, or visit \n\
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						zend_strip(TSRMLS_C);
 						zend_file_handle_dtor(&file_handle TSRMLS_CC);
-						php_end_ob_buffers(1 TSRMLS_CC);
+						php_output_teardown();
 					}
 					return SUCCESS;
 					break;
@@ -2132,7 +2128,7 @@ consult the installation file that came with this distribution, or visit \n\
 								goto fastcgi_request_done;
 							}
 							zend_file_handle_dtor(&file_handle TSRMLS_CC);
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 						}
 						return SUCCESS;
 					}
@@ -2143,6 +2139,7 @@ consult the installation file that came with this distribution, or visit \n\
 					open_file_for_scanning(&file_handle TSRMLS_CC);
 					zend_indent();
 					zend_file_handle_dtor(&file_handle TSRMLS_CC);
+					php_output_teardown();
 					return SUCCESS;
 					break;
 #endif

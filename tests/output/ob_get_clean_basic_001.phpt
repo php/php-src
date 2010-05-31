@@ -14,5 +14,6 @@ echo "Hello World";
 var_dump(ob_get_clean());
 ?>
 --EXPECTF--
+Notice: ob_get_clean(): failed to delete buffer. No buffer to delete in %s on line 7
 bool(false)
 string(11) "Hello World"

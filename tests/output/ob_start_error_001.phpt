@@ -30,19 +30,22 @@ var_dump(ob_start("justPrint", 0, "this should be a bool"));
 
 ?>
 --EXPECTF--
-
 - Too many arguments
 
 Warning: ob_start() expects at most 3 parameters, 4 given in %s on line 17
-NULL
+bool(false)
 
 - Arg 1 wrong type
-bool(true)
+
+Notice: ob_start(): failed to create buffer in %s on line 20
+bool(false)
 
 - Arg 2 wrong type
 
 Warning: ob_start() expects parameter 2 to be long, string given in %s on line 23
-NULL
+bool(false)
 
 - Arg 3 wrong type
-bool(true)
+
+Warning: ob_start() expects parameter 3 to be long, string given in %s on line 26
+bool(false)

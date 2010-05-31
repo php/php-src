@@ -1,5 +1,5 @@
 --TEST--
-ob_start(): multiple buffer initialization with a single call, using arrays.
+ob_start(): ensure multiple buffer initialization with a single call using arrays is not supported on PHP6 (http://bugs.php.net/42641)
 --FILE--
 <?php
 /* 
@@ -72,46 +72,37 @@ var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
 checkAndClean();
 ?>
 --EXPECTF--
-
  ---> Test arrays: 
-f[call:1; len:34] - bool(true)
+
+Notice: ob_start(): failed to create buffer in %s on line 44
+bool(false)
 Array
 (
-    [0] => f
 )
 
-f[call:3; len:68] - f[call:2; len:47] - bool(true)
+Notice: ob_start(): failed to create buffer in %s on line 47
+bool(false)
 Array
 (
-    [0] => f
-    [1] => f
 )
 
-
-f[call:5; len:150] - C::g[call:2; len:125] - f[call:4; len:103] - C::g[call:1; len:79] - bool(true)
+Notice: ob_start(): failed to create buffer in %s on line 50
+bool(false)
 Array
 (
-    [0] => f
-    [1] => C::g
-    [2] => f
-    [3] => C::g
 )
 
-
-
-
-f[call:6; len:35] - bool(false)
+Notice: ob_start(): failed to create buffer in %s on line 53
+bool(false)
 Array
 (
-    [0] => f
 )
 
-f[call:7; len:35] - bool(false)
+Notice: ob_start(): failed to create buffer in %s on line 56
+bool(false)
 Array
 (
-    [0] => f
 )
-
 C::h[call:1; len:37; id:originalID] - bool(true)
 Array
 (
@@ -124,11 +115,9 @@ Array
     [0] => C::h
 )
 
-f[call:8; len:175] - C::g[call:4; len:150] - C::g[call:3; len:125] - C::h[call:3; len:82; id:changedIDagain] - bool(true)
+
+Notice: ob_start(): failed to create buffer in %s on line 68
+bool(false)
 Array
 (
-    [0] => f
-    [1] => C::g
-    [2] => C::g
-    [3] => C::h
 )

@@ -91,7 +91,7 @@ PHP_FUNCTION(virtual)
 	}
 
 	/* Flush everything. */
-	php_end_ob_buffers(1 TSRMLS_CC);
+	php_output_end_all(TSRMLS_C);
 	php_header(TSRMLS_C);
 
 	/* Ensure that the ap_r* layer for the main request is flushed, to
