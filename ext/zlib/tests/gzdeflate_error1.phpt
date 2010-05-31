@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzdeflate(string data [, int level])
+/* Prototype  : string gzdeflate(string data [, int level, [int encoding]])
  * Description: Gzip-compress a string 
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
@@ -28,12 +28,17 @@ var_dump( gzdeflate() );
 echo "\n-- Testing gzdeflate() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $level = 2;
+$encoding = ZLIB_ENCODING_RAW;
 $extra_arg = 10;
-var_dump( gzdeflate($data, $level, $extra_arg) );
+var_dump( gzdeflate($data, $level, $encoding, $extra_arg) );
 
 echo "\n-- Testing with incorrect compression level --\n";
 $bad_level = 99; 
 var_dump(gzdeflate($data, $bad_level));
+
+echo "\n-- Testing with incorrect encoding --\n";
+$bad_encoding = 99; 
+var_dump(gzdeflate($data, $level, $bad_encoding));
 
 class Tester {
     function Hello() {
@@ -58,12 +63,17 @@ NULL
 
 -- Testing gzdeflate() function with more than expected no. of arguments --
 
-Warning: gzdeflate() expects at most 2 parameters, 3 given in %s on line %d
+Warning: gzdeflate() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing with incorrect compression level --
 
 Warning: gzdeflate(): compression level (99) must be within -1..9 in %s on line %d
+bool(false)
+
+-- Testing with incorrect encoding --
+
+Warning: gzdeflate(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
 
 -- Testing with incorrect parameters --

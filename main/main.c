@@ -972,14 +972,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			efree(log_buffer);
 		}
 
-		if (PG(display_errors)
-			&& ((module_initialized && !PG(during_request_startup))
-				|| (PG(display_startup_errors) 
-					&& (OG(php_body_write)==php_default_output_func || OG(php_body_write)==php_ub_body_write_no_header || OG(php_body_write)==php_ub_body_write)
-					)
-				)
-			) {
-
+		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
 				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
 			} else {
@@ -1456,15 +1449,16 @@ int php_request_startup(TSRMLS_D)
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
-			php_start_ob_buffer_named(PG(output_handler), 0, 1 TSRMLS_CC);
+			zval *oh;
+
+			MAKE_STD_ZVAL(oh);
+			ZVAL_STRING(oh, PG(output_handler), 1);
+			php_output_start_user(oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+			zval_ptr_dtor(&oh);
 		} else if (PG(output_buffering)) {
-			if (PG(output_buffering)>1) {
-				php_start_ob_buffer(NULL, PG(output_buffering), 1 TSRMLS_CC);
-			} else {
-				php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
-			}
+			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		} else if (PG(implicit_flush)) {
-			php_start_implicit_flush(TSRMLS_C);
+			php_output_set_implicit_flush(1 TSRMLS_CC);
 		}
 
 		/* We turn this off in php_execute_script() */
@@ -1500,7 +1494,6 @@ int php_request_startup(TSRMLS_D)
 
 	zend_try {
 		PG(during_request_startup) = 1;
-		php_output_activate(TSRMLS_C);
 		if (PG(expose_php)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
@@ -1626,14 +1619,22 @@ void php_request_shutdown(void *dummy)
 	/* 3. Flush all output buffers */
 	zend_try {
 		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
+
 		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-				OG(ob_nesting_level) && !OG(active_ob_buffer).chunk_size && PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)) {
+			PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)
+		) {
 			send_buffer = 0;
 		}
-		php_end_ob_buffers(send_buffer TSRMLS_CC);
+
+		if (!send_buffer) {
+			php_output_discard_all(TSRMLS_C);
+		} else {
+			php_output_end_all(TSRMLS_C);
+		}
+		php_output_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */
+	/* 4. Send the set HTTP headers (note: This must be done AFTER php_output_discard_all() / php_output_end_all() !!) */
 	zend_try {
 		sapi_send_headers(TSRMLS_C);
 	} zend_end_try();
@@ -1720,12 +1721,12 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ php_body_write_wrapper
+/* {{{ php_output_wrapper
  */
-static int php_body_write_wrapper(const char *str, uint str_length)
+static int php_output_wrapper(const char *str, uint str_length)
 {
 	TSRMLS_FETCH();
-	return php_body_write(str, str_length TSRMLS_CC);
+	return php_output_write(str, str_length TSRMLS_CC);
 }
 /* }}} */
 
@@ -1872,7 +1873,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
-	zuf.write_function = php_body_write_wrapper;
+	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = sapi_module.block_interruptions;
@@ -2213,16 +2214,21 @@ void php_module_shutdown(TSRMLS_D)
 #ifndef ZTS
 	zend_ini_shutdown(TSRMLS_C);
 	shutdown_memory_manager(CG(unclean_shutdown), 1 TSRMLS_CC);
-	core_globals_dtor(&core_globals TSRMLS_CC);
-	gc_globals_dtor(TSRMLS_C);
 #else
 	zend_ini_global_shutdown(TSRMLS_C);
-	ts_free_id(core_globals_id);
 #endif
 
+	php_output_shutdown();
 	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
+
+#ifndef ZTS
+	core_globals_dtor(&core_globals TSRMLS_CC);
+	gc_globals_dtor(TSRMLS_C);
+#else
+	ts_free_id(core_globals_id);
+#endif
 
 #if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
 	if (old_invalid_parameter_handler == NULL) {
@@ -2384,7 +2390,7 @@ PHPAPI void php_handle_aborted_connection(void)
 	TSRMLS_FETCH();
 
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
-	php_output_set_status(0 TSRMLS_CC);
+	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 
 	if (!PG(ignore_user_abort)) {
 		zend_bailout();

@@ -822,7 +822,7 @@ int main(int argc, char *argv[])
 				}
 				request_started = 1;
 				php_cli_usage(argv[0]);
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
 				exit_status=0;
 				goto out;
 
@@ -832,7 +832,7 @@ int main(int argc, char *argv[])
 				}
 				request_started = 1;
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
 				exit_status=0;
 				goto out;
 
@@ -846,7 +846,7 @@ int main(int argc, char *argv[])
 				php_printf("\n[Zend Modules]\n");
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
 				exit_status=0;
 				goto out;
 
@@ -869,7 +869,7 @@ int main(int argc, char *argv[])
 #endif
 					get_zend_version()
 				);
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
 				exit_status=0;
 				goto out;
 

@@ -29,7 +29,7 @@ echo "Done";
 
 -- Testing ob_clean() function with Zero arguments --
 
-Notice: ob_clean(): failed to delete buffer. No buffer to delete. in %s on line 12
+Notice: ob_clean(): failed to delete buffer. No buffer to delete in %s on line 12
 bool(false)
 string(61) "bool(true)
 Ensure the buffer is still active after the clean."

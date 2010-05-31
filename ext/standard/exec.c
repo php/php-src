@@ -108,8 +108,10 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			if (type == 1) {
+				int ob_level;
+
 				PHPWRITE(buf, bufl);
-				if (OG(ob_nesting_level) < 1) {
+				if (php_output_get_level(TSRMLS_C) < 1) {
 					sapi_flush(TSRMLS_C);
 				}
 			} else if (type == 2) {
