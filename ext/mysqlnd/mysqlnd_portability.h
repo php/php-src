@@ -12,6 +12,8 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef MYSQLND_PORTABILITY_H
 #define MYSQLND_PORTABILITY_H
 
+
+
 /* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
 #define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
 
@@ -37,6 +39,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #else 
 #  include <ext/mysqlnd/php_mysqlnd_config.h>
 #endif /* _WIN32... */
+
+#if __STDC_VERSION__ < 199901L && !defined(atoll)
+  /* "inline" is a keyword */
+  #define atoll atol
+#endif
+
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
