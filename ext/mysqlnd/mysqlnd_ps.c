@@ -308,7 +308,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_PACKET_EOF * fields_eof;
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_prepare_read_eof");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -371,6 +371,9 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		  fails, we will scrap it.
 		*/
 		s_to_prepare = stmt->conn->m->stmt_init(stmt->conn TSRMLS_CC);
+		if (!s_to_prepare) {
+			goto fail;
+		}
 		stmt_to_prepare = s_to_prepare->data;
 	}
 
@@ -427,7 +430,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	DBG_RETURN(PASS);
 
 fail:
-	if (stmt_to_prepare != stmt) {
+	if (stmt_to_prepare != stmt && s_to_prepare) {
 		s_to_prepare->m->dtor(s_to_prepare, TRUE TSRMLS_CC);
 	}
 	stmt->state = MYSQLND_STMT_INITTED;
@@ -776,7 +779,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	MYSQLND_PACKET_ROW *row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW * row_packet;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_unbuffered");
 
@@ -793,6 +796,10 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);
 	}
+	if (!(row_packet = result->row_packet)) {
+		DBG_RETURN(FAIL);
+	}
+
 	/* Let the row packet fill our buffer and skip additional malloc + memcpy */
 	row_packet->skip_extraction = stmt && stmt->result_bind? FALSE:TRUE;
 
@@ -943,9 +950,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
-	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
+	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	zend_uchar buf[STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
-	MYSQLND_PACKET_ROW *row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW * row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
@@ -961,6 +968,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 		SET_CLIENT_ERROR(stmt->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
 						mysqlnd_out_of_sync);
 		DBG_ERR("command out of sync");
+		DBG_RETURN(FAIL);
+	}
+	if (!(row_packet = result->row_packet)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -1466,7 +1476,6 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 	DBG_ENTER("mysqlnd_stmt::bind_result");
 	DBG_INF_FMT("stmt=%lu field_count=%u", stmt->stmt_id, stmt->field_count);
 
-
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_STMT_ERROR(stmt, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
 		if (result_bind) {
@@ -1673,7 +1682,6 @@ MYSQLND_METHOD(mysqlnd_stmt, param_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 	if (!stmt->param_count) {
 		return NULL;
 	}
-
 	return NULL;
 }
 /* }}} */
