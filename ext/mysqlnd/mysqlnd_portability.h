@@ -38,6 +38,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #  include <ext/mysqlnd/php_mysqlnd_config.h>
 #endif /* _WIN32... */
 
+#if __STDC_VERSION__ < 199901L && !defined(atoll)
+  /* "inline" is a keyword */
+  #define atoll atol
+#endif
+
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
