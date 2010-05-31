@@ -503,7 +503,7 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * con
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES *result, MYSQLND * conn TSRMLS_DC);
 typedef unsigned long *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES *result, MYSQLND_RES_METADATA *meta, zend_bool binary_protocol, zend_bool to_cache TSRMLS_DC);
-typedef void 				(*func_mysqlnd_res__initialize_result_set_rest)(MYSQLND_RES * const result TSRMLS_DC);
+typedef enum_func_status 	(*func_mysqlnd_res__initialize_result_set_rest)(MYSQLND_RES * const result TSRMLS_DC);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result TSRMLS_DC);	/* private */
 typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, zend_bool implicit TSRMLS_DC);
@@ -513,7 +513,7 @@ typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result TSRM
 typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *result TSRMLS_DC);
 
 	/* for decoding - binary or text protocol */
-typedef void				(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 									zend_bool persistent,
 									zend_bool as_unicode, zend_bool as_int_or_float,
