@@ -2219,7 +2219,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 
 	mode = mode_in;
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (FALSE == mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+	if (mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
 #else
 	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
 #endif
