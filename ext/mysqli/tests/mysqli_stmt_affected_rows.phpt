@@ -99,7 +99,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (!($res = mysqli_query($link, "SELECT count(id) AS num FROM test")) ||
 		!($tmp = mysqli_fetch_assoc($res)))
-		printf("[017] [%d] %s\n", mysqli_errnor($link), mysqli_error($link));
+		printf("[017] [%d] %s\n", mysqli_error($link), mysqli_error($link));
 	$num = (int)$tmp['num'];
 	mysqli_free_result($res);
 
