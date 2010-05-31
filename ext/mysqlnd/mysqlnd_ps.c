@@ -680,6 +680,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 	unsigned int field_count = result->meta->field_count;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_buffered");
+	*fetched_anything = FALSE;
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	/* If we haven't read everything */
@@ -694,15 +695,18 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 
 			if (NULL == current_row[0]) {
 				uint64_t row_num = (set->data_cursor - set->data) / field_count;
+				enum_func_status rc = result->m.row_decoder(set->row_buffers[row_num],
+												current_row,
+												meta->field_count,
+												meta->fields,
+												result->stored_data->persistent,
+												result->conn->options.numeric_and_datetime_as_unicode,
+												result->conn->options.int_and_float_native,
+												result->conn->stats TSRMLS_CC);
+				if (PASS != rc) {
+					DBG_RETURN(FAIL);
+				}
 				set->initialized_rows++;
-				result->m.row_decoder(set->row_buffers[row_num],
-									  current_row,
-									  meta->field_count,
-									  meta->fields,
-									  result->stored_data->persistent,
-									  result->conn->options.numeric_and_datetime_as_unicode,
-									  result->conn->options.int_and_float_native,
-									  result->conn->stats TSRMLS_CC);
 				if (stmt->update_max_length) {
 					for (i = 0; i < result->field_count; i++) {
 						/*
@@ -757,7 +761,6 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 		DBG_INF("row fetched");
 	} else {
 		set->data_cursor = NULL;
-		*fetched_anything = FALSE;
 		DBG_INF("no more data");
 	}
 	DBG_INF("PASS");
@@ -777,9 +780,10 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_unbuffered");
 
+	*fetched_anything = FALSE;
+
 	if (result->unbuf->eof_reached) {
 		/* No more rows obviously */
-		*fetched_anything = FALSE;
 		DBG_INF("eof reached");
 		DBG_RETURN(PASS);
 	}
@@ -798,8 +802,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 	*/
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
-		result->unbuf->row_count++;
-		*fetched_anything = TRUE;
 
 		if (!row_packet->skip_extraction) {
 			result->m.unbuffered_free_last_data(result TSRMLS_CC);
@@ -810,14 +812,17 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 			row_packet->fields = NULL;
 			row_packet->row_buffer = NULL;
 
-			result->m.row_decoder(result->unbuf->last_row_buffer,
-								  result->unbuf->last_row_data,
-								  row_packet->field_count,
-								  row_packet->fields_metadata,
-								  FALSE,
-								  result->conn->options.numeric_and_datetime_as_unicode,
-								  result->conn->options.int_and_float_native,
-								  result->conn->stats TSRMLS_CC);
+			if (PASS != result->m.row_decoder(result->unbuf->last_row_buffer,
+									result->unbuf->last_row_data,
+									row_packet->field_count,
+									row_packet->fields_metadata,
+									FALSE,
+									result->conn->options.numeric_and_datetime_as_unicode,
+									result->conn->options.int_and_float_native,
+									result->conn->stats TSRMLS_CC))
+			{
+				DBG_RETURN(FAIL);
+			}
 
 			for (i = 0; i < field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
@@ -858,8 +863,10 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 			row_packet->row_buffer->free_chunk(row_packet->row_buffer TSRMLS_CC);
 			row_packet->row_buffer = NULL;
 		}
+
+		result->unbuf->row_count++;
+		*fetched_anything = TRUE;
 	} else if (ret == FAIL) {
-		*fetched_anything = FALSE;
 		if (row_packet->error_info.error_no) {
 			stmt->conn->error_info = row_packet->error_info; 
 			stmt->error_info = row_packet->error_info; 
@@ -867,7 +874,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		CONN_SET_STATE(result->conn, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */	
 	} else if (row_packet->eof) {
-		*fetched_anything = FALSE;
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
@@ -975,8 +981,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
-		result->unbuf->row_count++;
-		*fetched_anything = TRUE;
 
 		DBG_INF_FMT("skip_extraction=%d", row_packet->skip_extraction); 
 		if (!row_packet->skip_extraction) {
@@ -988,14 +992,17 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 			row_packet->fields = NULL;
 			row_packet->row_buffer = NULL;
 
-			result->m.row_decoder(result->unbuf->last_row_buffer,
-								  result->unbuf->last_row_data,
-								  row_packet->field_count,
-								  row_packet->fields_metadata,
-								  FALSE,
-								  result->conn->options.numeric_and_datetime_as_unicode,
-								  result->conn->options.int_and_float_native,
-								  result->conn->stats TSRMLS_CC);
+			if (PASS != result->m.row_decoder(result->unbuf->last_row_buffer,
+									  result->unbuf->last_row_data,
+									  row_packet->field_count,
+									  row_packet->fields_metadata,
+									  FALSE,
+									  result->conn->options.numeric_and_datetime_as_unicode,
+									  result->conn->options.int_and_float_native,
+									  result->conn->stats TSRMLS_CC))
+			{
+				DBG_RETURN(FAIL);						  
+			}
 
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
@@ -1044,6 +1051,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 			row_packet->row_buffer = NULL;
 		}
 		MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);
+
+		result->unbuf->row_count++;
+		*fetched_anything = TRUE;
 	} else {
 		*fetched_anything = FALSE;
 
