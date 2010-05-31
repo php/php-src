@@ -114,28 +114,7 @@ typedef struct {
 } pdo_dblib_db_handle;
 
 typedef struct {
-	int coltype;
-	char *name;
-	int maxlen;
-	char *source;
-} pdo_dblib_col;
-
-typedef struct {
-	unsigned long len;
-	char *data;
-} pdo_dblib_colval;
-
-typedef struct {
 	pdo_dblib_db_handle *H;
-
-	int ncols;
-	pdo_dblib_col *cols;
-
-	pdo_dblib_colval *rows;
-	int nrows;
-
-	int current;
-	
 	pdo_dblib_err err;
 } pdo_dblib_stmt;
 
