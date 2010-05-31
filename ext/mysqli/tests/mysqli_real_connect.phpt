@@ -136,6 +136,7 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	mysqli_close($link);
+	@var_dump($link);
 
 	if ($IS_MYSQLND) {
 		ini_set('mysqli.default_host', 'p:' . $host);
@@ -164,8 +165,6 @@ require_once('skipifconnectfailure.inc');
 		@mysqli_close($link);
 	}
 
-	@var_dump($link);
-
 	if (NULL !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
 		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -187,7 +186,7 @@ object(mysqli)#%d (%d) {
   [%u|b%"connect_errno"]=>
   int(%d)
   [%u|b%"connect_error"]=>
-  %unicode|string%(%d) "%s
+  NULL
   [%u|b%"errno"]=>
   %s
   [%u|b%"error"]=>
