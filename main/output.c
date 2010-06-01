@@ -412,7 +412,7 @@ PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_outp
 	Create a user level output handler */
 PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, size_t chunk_size, int flags TSRMLS_DC)
 {
-	char *handler_name = NULL;
+	char *handler_name = NULL, *error = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t *alias = NULL;
 	php_output_handler_user_func_t *user = NULL;
@@ -428,14 +428,17 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			}
 		default:
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
-			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, NULL TSRMLS_CC)) {
+			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error TSRMLS_CC)) {
 				handler = php_output_handler_init(handler_name, strlen(handler_name), chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER TSRMLS_CC);
 				Z_ADDREF_P(output_handler);
 				user->zoh = output_handler;
 				handler->func.user = user;
 			} else {
-				/* TODO(helly) log the rror? */
 				efree(user);
+				if (error) {
+					php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "%s", error);
+					efree(error);
+				}
 			}
 			if (handler_name) {
 				efree(handler_name);
@@ -1187,7 +1190,10 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 	PHP_OUTPUT_TSRMLS(output_context);
 	
 	if (func) {
-		func(output_context->in.data, output_context->in.used, &output_context->out.data, &output_context->out.used, output_context->op TSRMLS_CC);
+		uint safe_out_len;
+		
+		func(output_context->in.data, output_context->in.used, &output_context->out.data, &safe_out_len, output_context->op TSRMLS_CC);
+		output_context->out.used = safe_out_len;
 		output_context->out.free = 1;
 		return SUCCESS;
 	}
