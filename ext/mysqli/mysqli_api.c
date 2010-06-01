@@ -167,6 +167,9 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 		return PASS;
 	}
 	params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
+	if (!params) {
+		goto end;
+	}
 	for (i = 0; i < (argc - start); i++) {
 		zend_uchar type;
 		switch (types[i]) {
