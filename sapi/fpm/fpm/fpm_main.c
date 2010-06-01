@@ -1493,7 +1493,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 
 	if (fcgi_is_fastcgi() && request->fd >= 0) {
 
-		php_end_ob_buffers(1 TSRMLS_CC);
+		php_output_end_all(TSRMLS_C);
 		php_header(TSRMLS_C);
 
 		fcgi_flush(request, 1);
@@ -1629,7 +1629,6 @@ int main(int argc, char *argv[])
 
 			case 'm': /* list compiled in modules */
 				cgi_sapi_module.startup(&cgi_sapi_module);
-				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_printf("[PHP Modules]\n");
@@ -1637,7 +1636,8 @@ int main(int argc, char *argv[])
 				php_printf("\n[Zend Modules]\n");
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
+				php_output_deactivate(TSRMLS_C);
 				exit_status = 0;
 				goto out;
 
@@ -1660,11 +1660,11 @@ int main(int argc, char *argv[])
 			case 'h':
 			case '?':
 				cgi_sapi_module.startup(&cgi_sapi_module);
-				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_cgi_usage(argv[0]);
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
+				php_output_deactivate(TSRMLS_C);
 				exit_status = 0;
 				goto out;
 
@@ -1692,11 +1692,11 @@ int main(int argc, char *argv[])
 	/* No other args are permitted here as there is not interactive mode */
 	if (argc != php_optind) {
 		cgi_sapi_module.startup(&cgi_sapi_module);
-		php_output_startup();
 		php_output_activate(TSRMLS_C);
 		SG(headers_sent) = 1;
 		php_cgi_usage(argv[0]);
-		php_end_ob_buffers(1 TSRMLS_CC);
+		php_output_end_all(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
 		exit_status = 0;
 		goto out;
 	}
