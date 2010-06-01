@@ -120,7 +120,6 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 {
 	char *key;
 	uint len;
-	int type;
 	
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
