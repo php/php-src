@@ -2754,7 +2754,9 @@ static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
 }
 
 zend_object_handlers pdo_row_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
+	zend_objects_store_add_ref,
+	zend_objects_store_del_ref,
+	NULL,
 	row_prop_read,
 	row_prop_write,
 	row_dim_read,
