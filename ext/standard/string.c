@@ -39,6 +39,9 @@
 #endif
 #ifdef HAVE_LIBINTL
 # include <libintl.h> /* For LC_MESSAGES */
+ #ifdef setlocale
+ # undef setlocale /* Uh, libintl, don't F* our symbols please */
+ #endif
 #endif
 
 #include <math.h>
