@@ -39,9 +39,9 @@
 /* 
  * This define is here because some versions of libintl redefine setlocale
  * to point to libintl_setlocale.  That's a ridiculous thing to do as far
- * as * I am concerned, but with this define and the subsequent undef we
- * limit * the damage to just the actual setlocale() call in this file
- * without * turning zif_setlocale into zif_libintl_setlocale.  -Rasmus
+ * as I am concerned, but with this define and the subsequent undef we
+ * limit the damage to just the actual setlocale() call in this file
+ * without turning zif_setlocale into zif_libintl_setlocale.  -Rasmus
  */
 #define php_my_setlocale setlocale
 #ifdef HAVE_LIBINTL
