@@ -36,10 +36,18 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+/* 
+ * This define is here because some versions of libintl redefine setlocale
+ * to point to libintl_setlocale.  That's a ridiculous thing to do as far
+ * as * I am concerned, but with this define and the subsequent undef we
+ * limit * the damage to just the actual setlocale() call in this file
+ * without * turning zif_setlocale into zif_libintl_setlocale.  -Rasmus
+ */
+#define php_my_setlocale setlocale
 #ifdef HAVE_LIBINTL
 # include <libintl.h> /* For LC_MESSAGES */
  #ifdef setlocale
- # undef setlocale /* Uh, libintl, don't F* our symbols please */
+ # undef setlocale
  #endif
 #endif
 
@@ -4095,7 +4103,7 @@ PHP_FUNCTION(setlocale)
 			}
 		}
 
-		retval = setlocale(cat, loc);
+		retval = php_my_setlocale(cat, loc);
 		zend_update_current_locale();
 		if (retval) {
 			/* Remember if locale was changed */
