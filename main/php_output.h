@@ -140,9 +140,6 @@ typedef struct _php_output_handler {
 	} func;
 } php_output_handler;
 
-PHPAPI const char php_output_default_handler_name[sizeof("default output handler")];
-PHPAPI const char php_output_devnull_handler_name[sizeof("null output handler")];
-
 ZEND_BEGIN_MODULE_GLOBALS(output)
 	int flags;
 	zend_stack *handlers;
@@ -177,6 +174,10 @@ ZEND_END_MODULE_GLOBALS(output);
 
 
 BEGIN_EXTERN_C()
+
+extern const char php_output_default_handler_name[sizeof("default output handler")];
+extern const char php_output_devnull_handler_name[sizeof("null output handler")];
+
 #define php_output_tearup() \
 	php_output_startup(); \
 	php_output_activate(TSRMLS_C)

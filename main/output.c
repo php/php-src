@@ -37,8 +37,8 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(output);
 
-PHPAPI const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
-PHPAPI const char php_output_devnull_handler_name[sizeof("null output handler")] = "null output handler";
+const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
+const char php_output_devnull_handler_name[sizeof("null output handler")] = "null output handler";
 
 #if PHP_OUTPUT_NOINLINE || PHP_OUTPUT_DEBUG
 # undef inline
