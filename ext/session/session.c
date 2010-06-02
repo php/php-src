@@ -456,8 +456,8 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
 	
-	outid = emalloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5));
-	j = (int) (bin_to_readable((char *)digest, digest_len, outid, PS(hash_bits_per_character)) - outid);
+	outid = emalloc((size_t)((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5)));
+	j = (int) (bin_to_readable((char *)digest, digest_len, outid, (char)PS(hash_bits_per_character)) - outid);
 	efree(digest);
 
 	if (newlen) {
