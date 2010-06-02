@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - Fixed very rare memory leak in mysqlnd, when binding thousands of columns.
   (Andrey)
 
+- Fixed memory leak on error in mcrypt_create_iv on Windows. (Pierre)
 - Fixed a possible crash because of recursive GC invocation. (Dmitry)
 - Fixed a possible resource destruction issues in shm_put_var()
   Reported by Stefan Esser (Dmitry)
