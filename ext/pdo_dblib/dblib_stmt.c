@@ -50,14 +50,14 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 
-	dblib_dblib_stmt_cursor_closer(stmt);
+	dblib_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
 
 	efree(S);
 		
 	return 1;
 }
 
-static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
+static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -77,7 +77,6 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 
 static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
@@ -92,7 +91,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 	
-	ret = pdo_dblib_stmt_next_rowset(stmt);
+	ret = pdo_dblib_stmt_next_rowset(stmt TSRMLS_CC);
 	
 	if (ret == 0) {
 		return 0;
@@ -109,7 +108,6 @@ static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 {
 	
 	RETCODE ret;
-	int i;
 	
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
