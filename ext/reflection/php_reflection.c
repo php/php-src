@@ -4009,13 +4009,13 @@ ZEND_METHOD(reflection_class, isCloneable)
 			RETURN_BOOL(Z_OBJ_HANDLER_P(intern->obj, clone_obj) != NULL);
 		}
 	} else {
-		object_init_ex(&obj, ce);
 		if (ce->clone) {
-			RETVAL_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
 		} else {
+			object_init_ex(&obj, ce);
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
-		}
-		zval_dtor(&obj);
+			zval_dtor(&obj);
+		}		
 	}
 }
 /* }}} */
