@@ -3987,6 +3987,39 @@ ZEND_METHOD(reflection_class, isInstantiable)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isCloneable()
+   Returns whether this class is cloneable */
+ZEND_METHOD(reflection_class, isCloneable)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zval obj;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
+		RETURN_FALSE;
+	}
+	if (intern->obj) {
+		if (ce->clone) {
+			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+		} else {
+			RETURN_BOOL(Z_OBJ_HANDLER_P(intern->obj, clone_obj) != NULL);
+		}
+	} else {
+		object_init_ex(&obj, ce);
+		if (ce->clone) {
+			RETVAL_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+		} else {
+			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
+		}
+		zval_dtor(&obj);
+	}
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionClass::isInterface()
    Returns whether this is an interface or a class */
 ZEND_METHOD(reflection_class, isInterface)
@@ -5693,6 +5726,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstantiable, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isCloneable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getFileName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getStartLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getEndLine, arginfo_reflection__void, 0)
