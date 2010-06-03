@@ -2306,7 +2306,7 @@ static ZIPARCHIVE_METHOD(unchangeAll)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::unchangeAll()
+/* {{{ proto bool ZipArchive::unchangeArchive()
 Revert all global changes to the archive archive.  For now, this only reverts archive comment changes. */
 static ZIPARCHIVE_METHOD(unchangeArchive)
 {
@@ -2492,7 +2492,7 @@ static ZIPARCHIVE_METHOD(getFromName)
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getFromIndex(string entryname[, int len [, int flags]])
+/* {{{ proto string ZipArchive::getFromIndex(int index[, int len [, int flags]])
 get the contents of an entry using its index */
 static ZIPARCHIVE_METHOD(getFromIndex)
 {
@@ -2631,7 +2631,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_getfromname, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_getfromindex, 0, 0, 1)
-	ZEND_ARG_INFO(0, entryname)
+	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, len)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
