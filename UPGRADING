@@ -224,7 +224,8 @@ UPGRADE NOTES - PHP X.Y
 
      g. New classes
 
-       - 
+       - Reflection:
+         - ReflectionZendExtension
 
      h. New methods
 
