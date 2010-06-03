@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Added FastCGI Process Manager (FPM) SAPI. (Tony)
 - Added recent Windows versions to php_uname and fix undefined windows 
   version support. (Pierre)
+- Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
