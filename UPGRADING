@@ -230,6 +230,9 @@ UPGRADE NOTES - PHP X.Y
 
        - Reflection:
          - ReflectionClass::isCloneable()
+         - ReflectionClass::getTraits()
+         - ReflectionClass::getTraitNames()
+         - ReflectionClass::getTraitAliases()
 
      i. New class constants
 
