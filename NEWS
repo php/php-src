@@ -29,6 +29,7 @@
 - Added ReflectionExtension::isTemporary() and
   ReflectionExtension::isPersistent(). (Johannes)
 - Added ReflectionZendExtension class. (Johannes)
+- Added ReflectionClass::isCloneable(). (Felipe)
 - Added command line option --rz to CLI. (Johannes)
 - Added closure $this support back. (Stas)
 - Added SplObjectStorage::getHash() hook. (Etienne)
