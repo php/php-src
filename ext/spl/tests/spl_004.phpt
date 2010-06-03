@@ -74,7 +74,7 @@ int(5)
 int(6)
 int(4)
 ===ERRORS===
-Error: Argument 3 passed to iterator_apply() must be an array, integer given
+Error: Argument 3 passed to iterator_apply() must be of the type array, integer given
 Error: iterator_apply() expects parameter 3 to be array, integer given
 NULL
 Error: iterator_apply() expects parameter 2 to be a valid callback, function 'non_existing_functon' not found or invalid function name
