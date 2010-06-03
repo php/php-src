@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [47] {
+  - Methods [48] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -73,6 +73,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isInstantiable ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isCloneable ] {
 
       - Parameters [0] {
       }
