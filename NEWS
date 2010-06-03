@@ -44,6 +44,7 @@
   numeric strings to integers. (Ilia)
 - Added support for object references in recursive serialize() calls. FR #36424.
   (Mike)
+- Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 

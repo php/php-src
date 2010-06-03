@@ -83,16 +83,16 @@ PHP_ARG_WITH(ndbm,,
 [  --with-ndbm[=DIR]         DBA: NDBM support], no, no)
 
 PHP_ARG_WITH(db4,,
-[  --with-db4[=DIR]          DBA: Berkeley DB4 support], no, no)
+[  --with-db4[=DIR]          DBA: Oracle Berkeley DB 4.x or 5.x support], no, no)
 
 PHP_ARG_WITH(db3,,
-[  --with-db3[=DIR]          DBA: Berkeley DB3 support], no, no)
+[  --with-db3[=DIR]          DBA: Oracle Berkeley DB 3.x support], no, no)
 
 PHP_ARG_WITH(db2,,
-[  --with-db2[=DIR]          DBA: Berkeley DB2 support], no, no)
+[  --with-db2[=DIR]          DBA: Oracle Berkeley DB 2.x support], no, no)
 
 PHP_ARG_WITH(db1,,
-[  --with-db1[=DIR]          DBA: Berkeley DB1 support/emulation], no, no)
+[  --with-db1[=DIR]          DBA: Oracle Berkeley DB 1.x support/emulation], no, no)
 
 PHP_ARG_WITH(dbm,,
 [  --with-dbm[=DIR]          DBA: DBM support], no, no)
@@ -245,7 +245,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
         ],[
           AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-#if DB_VERSION_MAJOR == $1
+#if DB_VERSION_MAJOR == $1 || ($1 == 4 && DB_VERSION_MAJOR == 5)
             yes
 #endif
           ],[
@@ -268,7 +268,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     AC_MSG_CHECKING([for DB4 minor version and patch level])
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-#if DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25
+#if DB_VERSION_MINOR != 1 || (DB_VERSION_MINOR == 1 && DB_VERSION_PATCH >= 25)
       yes
 #endif
     ],[
@@ -309,11 +309,20 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
 # DB4
 if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
-  dbdp="/usr/local/BerkeleyDB.4."
-  for i in $PHP_DB4 ${dbdp}8 ${dbdp}7 ${dbdp}6 ${dbdp}5 ${dbdp}4 ${dbdp}3 ${dbdp}2 ${dbdp}1 ${dbdp}0 /usr/local /usr; do
-    if test -f "$i/db4/db.h"; then
+  dbdp4="/usr/local/BerkeleyDB.4."
+  dbdp5="/usr/local/BerkeleyDB.5."
+  for i in $PHP_DB4 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
+    if test -f "$i/db5/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/db5/db.h
+      break
+    elif test -f "$i/db4/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db4/db.h
+      break
+    elif test -f "$i/include/db5.0/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db5.0/db.h
       break
     elif test -f "$i/include/db4.8/db.h"; then
       THIS_PREFIX=$i
