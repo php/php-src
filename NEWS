@@ -67,6 +67,7 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #51991 (spl_autoload and *nix support with namespace). (Felipe)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
   constant array). (Felipe)
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
