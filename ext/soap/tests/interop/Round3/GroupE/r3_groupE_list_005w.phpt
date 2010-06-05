@@ -45,28 +45,7 @@ object(stdClass)#7 (3) {
       ["varString"]=>
       string(4) "arg3"
       ["child"]=>
-      object(stdClass)#7 (3) {
-        ["varInt"]=>
-        int(1)
-        ["varString"]=>
-        string(4) "arg1"
-        ["child"]=>
-        object(stdClass)#8 (3) {
-          ["varInt"]=>
-          int(2)
-          ["varString"]=>
-          string(4) "arg2"
-          ["child"]=>
-          object(stdClass)#9 (3) {
-            ["varInt"]=>
-            int(3)
-            ["varString"]=>
-            string(4) "arg3"
-            ["child"]=>
-            *RECURSION*
-          }
-        }
-      }
+      *RECURSION*
     }
   }
 }
