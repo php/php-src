@@ -269,7 +269,9 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
 
+#if HAVE_MMAP
 return_mapped:
+#endif
 	file_handle->type = ZEND_HANDLE_MAPPED;
 	file_handle->handle.stream.mmap.pos        = 0;
 	file_handle->handle.stream.mmap.old_handle = file_handle->handle.stream.handle;
