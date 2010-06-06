@@ -538,7 +538,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	smart_str_appendl(buf, "O:", 2);
-	smart_str_append_long(buf, name_len);
+	smart_str_append_long(buf, (long)name_len);
 	smart_str_appendl(buf, ":\"", 2);
 	smart_str_appendl(buf, class_name, name_len);
 	smart_str_appendl(buf, "\":", 2);
@@ -645,12 +645,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	if (var_hash && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
-			smart_str_append_long(buf, *var_already);
+			smart_str_append_long(buf, (long)*var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		} else if (Z_TYPE_P(struc) == IS_OBJECT) {
 			smart_str_appendl(buf, "r:", 2);
-			smart_str_append_long(buf, *var_already);
+			smart_str_append_long(buf, (long)*var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		}
@@ -704,12 +704,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
-						smart_str_append_long(buf, Z_OBJCE_P(struc)->name_length);
+						smart_str_append_long(buf, (long)Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
 						smart_str_appendl(buf, Z_OBJCE_P(struc)->name, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, "\":", 2);
 
-						smart_str_append_long(buf, serialized_length);
+						smart_str_append_long(buf, (long)serialized_length);
 						smart_str_appendl(buf, ":{", 2);
 						smart_str_appendl(buf, serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
