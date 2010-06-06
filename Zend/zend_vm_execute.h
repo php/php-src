@@ -1314,6 +1314,9 @@ static int ZEND_FASTCALL  ZEND_PRINT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	return ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+#ifdef ZEND_WIN32
+# pragma warning(once : 4101)
+#endif
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
