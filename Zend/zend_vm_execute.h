@@ -2653,7 +2653,9 @@ static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
-
+#ifdef ZEND_WIN32
+# pragma warning(once : 4101)
+#endif
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
