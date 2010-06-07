@@ -41,6 +41,9 @@ $header_text = <<< DATA
 */
 
 
+#ifdef ZEND_WIN32
+# pragma warning(once : 4101)
+#endif
 DATA;
 
 /*
