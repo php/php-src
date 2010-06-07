@@ -41,10 +41,6 @@ $header_text = <<< DATA
 */
 
 
-#ifdef ZEND_WIN32
-# pragma warning(once : 4101)
-#endif
-
 DATA;
 
 /*
@@ -1206,6 +1202,9 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	// Suppress free_op1 warnings on Windows
+	out($f, "#ifdef ZEND_WIN32\n# pragma warning(once : 4101)\n#endif\n");
+	
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {");
 	for ($i = 0; $i < 255; ++$i) {
