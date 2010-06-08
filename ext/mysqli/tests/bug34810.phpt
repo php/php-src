@@ -24,7 +24,24 @@ class DbConnection {
 		$mysql->query("CREATE TABLE test_warnings (a int not null)");
 		$mysql->query("SET sql_mode=''");
 		$mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
-		var_dump($mysql->get_warnings());
+
+		$warning = $mysql->get_warnings();
+		if (!$warning)
+			printf("[001] No warning!\n");
+
+		if ($warning->errno == 1048 || $warning->errno == 1253) {
+			/* 1048 - Column 'a' cannot be null, 1263 - Data truncated; NULL supplied to NOT NULL column 'a' at row */
+			if ("HY000" != $warning->sqlstate)
+				printf("[003] Wrong sql state code: %s\n", $warning->sqlstate);
+
+			if ("" == $warning->message)
+				printf("[004] Message string must not be empty\n");
+
+
+		} else {
+			printf("[002] Empty error message!\n");
+			var_dump($warning);
+		}
 	}
 }
 
@@ -116,13 +133,5 @@ object(mysqli)#%d (%d) {
   NULL
   [%u|b%"warning_count"]=>
   NULL
-}
-object(mysqli_warning)#%d (%d) {
-  [%u|b%"message"]=>
-  %unicode|string%(25) "Column 'a' cannot be null"
-  [%u|b%"sqlstate"]=>
-  %unicode|string%(5) "HY000"
-  [%u|b%"errno"]=>
-  int(1048)
 }
 Done
