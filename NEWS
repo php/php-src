@@ -132,6 +132,8 @@ PHP                                                                        NEWS
   on). (Ilia, j dot jeising at gmail dot com)
 - Fixed bug #51291 (oci_error doesn't report last error when called two times)
   (Oracle Corp.)
+- Fixed bug #51276 (php_load_extension() is missing when HAVE_LIBDL is undefined). 
+  (Tony)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51257 (CURL_VERSION_LARGEFILE incorrectly used after libcurl
   version 7.10.1). (aron dot ujvari at microsec dot hu)

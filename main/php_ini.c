@@ -346,7 +346,9 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
  */
 static void php_load_php_extension_cb(void *arg TSRMLS_DC)
 {
+#ifdef HAVE_LIBDL
 	php_load_extension(*((char **) arg), MODULE_PERSISTENT, 0 TSRMLS_CC);
+#endif
 }
 /* }}} */
 
