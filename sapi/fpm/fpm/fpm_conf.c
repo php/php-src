@@ -196,7 +196,7 @@ static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 		fpm_globals.log_level = ZLOG_DEBUG;
 	} else if (!strcasecmp(val, "notice")) {
 		fpm_globals.log_level = ZLOG_NOTICE;
-	} else if (!strcasecmp(val, "warn")) {
+	} else if (!strcasecmp(val, "warning") || !strcasecmp(val, "warn")) {
 		fpm_globals.log_level = ZLOG_WARNING;
 	} else if (!strcasecmp(val, "error")) {
 		fpm_globals.log_level = ZLOG_ERROR;
