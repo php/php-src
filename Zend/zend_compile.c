@@ -3464,7 +3464,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 
 /* {{{ Originates from php_runkit_function_copy_ctor
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
-static void zend_traits_duplicate_function(zend_function *fe, char *newname)
+static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRMLS_DC)
 {
 	zend_literal *literals_copy;
 	zend_compiled_variable *dupvars;
@@ -3473,7 +3473,6 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname)
 
 	if (fe->op_array.static_variables) {
 		HashTable *tmpHash;
-		zval tmpZval;
 
 		ALLOC_HASHTABLE(tmpHash);
 		zend_hash_init(tmpHash, zend_hash_num_elements(fe->op_array.static_variables), NULL, ZVAL_PTR_DTOR, 0);
@@ -3596,7 +3595,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 		fn_copy = *fn;
-		zend_traits_duplicate_function(&fn_copy, estrdup(fn->common.function_name));
+		zend_traits_duplicate_function(&fn_copy, estrdup(fn->common.function_name) TSRMLS_CC);
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
@@ -3641,7 +3640,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
                                  fn->common.function_name, fnname_len) == 0)) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
-					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
 
 					if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
@@ -3669,7 +3668,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	if (zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
-		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len));
+		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len) TSRMLS_CC);
 
 		/* apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility */
 		/* TODO: i am still not sure, that there will be no ambigousities... */
@@ -3686,7 +3685,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						char* lcname2;
 						zend_function fn_copy2 = *fn;
 
-						zend_traits_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len));
+						zend_traits_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
 
 						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 							fn_copy2.common.fn_flags = aliases[i]->modifiers;
