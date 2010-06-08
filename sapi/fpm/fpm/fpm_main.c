@@ -1638,6 +1638,7 @@ int main(int argc, char *argv[])
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1653,6 +1654,7 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_request_shutdown((void *) 0);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1665,6 +1667,7 @@ int main(int argc, char *argv[])
 				SG(headers_sent) = 1;
 				php_cgi_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1684,6 +1687,7 @@ int main(int argc, char *argv[])
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2009 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 		}
@@ -1698,6 +1702,7 @@ int main(int argc, char *argv[])
 		php_cgi_usage(argv[0]);
 		php_end_ob_buffers(1 TSRMLS_CC);
 		exit_status = 0;
+		fcgi_shutdown();
 		goto out;
 	}
 
