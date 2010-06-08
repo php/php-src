@@ -17,16 +17,20 @@ require_once('skipifconnectfailure.inc');
 			return false;
 		}
 
-		$sql = sprintf("CREATE TABLE test(id %s)", $sql_type);
-		if (!mysqli_query($link, $sql)) {
-			printf("[002] %s, [%d] %s\n", $sql_type,
+		$create = sprintf("CREATE TABLE test(id %s)", $sql_type);
+		if (!mysqli_query($link, $create)) {
+			printf("[002] '%s' - '%s', [%d] %s\n", $sql_type, $create,
 				mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
-		$sql = sprintf("INSERT INTO test(id) VALUES ('%s')", $php_value);
+		if (is_string($php_value))
+			$sql = sprintf("INSERT INTO test(id) VALUES ('%s')", $php_value);
+		else
+			$sql = sprintf("INSERT INTO test(id) VALUES (%s)", $php_value);
+
 		if (!mysqli_query($link, $sql)) {
-			printf("[003] %s, [%d] %s\n", $sql_type,
+			printf("[003] '%s' - '%s' - '%s', [%d] %s\n", $sql_type, $create, $sql,
 				mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
@@ -85,7 +89,7 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_TYPE_VAR_STRING => array("VARCHAR(32768)", 'varchar'),
 		MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING - TODO add testing',
 		MYSQLI_TYPE_STRING => array('CHAR(1)', 'a'),
-		MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'Will be converted to string although it is a SET...'),
+		MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'smash'),
 		MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL - TODO add testing',
 		MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
 		MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',
