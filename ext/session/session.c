@@ -26,9 +26,10 @@
 #include "php.h"
 
 #ifdef PHP_WIN32
-#include "win32/time.h"
+# include "win32/winutil.h"
+# include "win32/time.h"
 #else
-#include <sys/time.h>
+# include <sys/time.h>
 #endif
 
 #include <sys/stat.h>
@@ -328,6 +329,28 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	efree(buf);
 
 	if (PS(entropy_length) > 0) {
+		unsigned char rbuf[2048];
+
+#ifdef PHP_WIN32
+		size_t toread = PS(entropy_length);
+		__debugbreak();
+		if (php_win32_get_random_bytes(rbuf, (size_t) toread) == SUCCESS){
+
+			switch (PS(hash_func)) {
+				case PS_HASH_FUNC_MD5:
+					PHP_MD5Update(&md5_context, rbuf, toread);
+					break;
+				case PS_HASH_FUNC_SHA1:
+					PHP_SHA1Update(&sha1_context, rbuf, toread);
+					break;
+# if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
+				case PS_HASH_FUNC_OTHER:
+					PS(hash_ops)->hash_update(hash_context, rbuf, toread);
+					break;
+# endif /* HAVE_HASH_EXT */
+			}
+		}
+#else
 		int fd;
 
 		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
@@ -357,6 +380,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 			}
 			close(fd);
 		}
+#endif
 	}
 
 	digest = emalloc(digest_len + 1);
