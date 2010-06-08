@@ -23,8 +23,15 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt->bind_param("bb",$bvar, $bvar))
 		printf("[004] [%d] %s\n", $stmt->errno, $stmt->error);
 
-	if (!$stmt->execute())
-		printf("[005] [%d] %s\n", $stmt->errno, $stmt->error);
+	if (!$stmt->execute()) {
+		if ($stmt->errno != 1366) {
+			/*
+				$bvar is null, b is for BLOB - any error like this should be OK:
+				1366 -  Incorrect integer value: '' for column 'id' at row 1
+			*/
+			printf("[005] [%d] %s\n", $stmt->errno, $stmt->error);
+		}
+	}
 
 	$stmt->close();
 	$link->close();
