@@ -144,6 +144,8 @@ PHP                                                                        NEWS
   alexr at oplot dot com)
 - Fixed bug #51190 (ftp_put() returns false when transfer was successful).  
   (Ilia)
+- Fixed bug #51183 (ext/date/php_date.c fails to compile with Sun Studio).
+  (Sriram Natarajan)
 - Fixed bug #51176 (Static calling in non-static method behaves like $this->).
   (Felipe)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    

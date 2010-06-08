@@ -36,7 +36,7 @@ static __inline __int64 php_date_llabs( __int64 i ) { return i >= 0? i: -i; }
 #elif defined(__GNUC__) && __GNUC__ < 3
 static __inline __int64_t php_date_llabs( __int64_t i ) { return i >= 0 ? i : -i; }
 #else
-static __inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
+static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 #endif
 
 /* {{{ arginfo */
