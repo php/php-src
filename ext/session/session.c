@@ -333,7 +333,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 #ifdef PHP_WIN32
 		size_t toread = PS(entropy_length);
-		__debugbreak();
+
 		if (php_win32_get_random_bytes(rbuf, (size_t) toread) == SUCCESS){
 
 			switch (PS(hash_func)) {
