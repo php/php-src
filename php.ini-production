@@ -1494,6 +1494,9 @@ session.bug_compat_warn = Off
 ; http://php.net/session.referer-check
 session.referer_check =
 
+; How many bytes to read from the file.
+; http://php.net/session.entropy-length
+;session.entropy_length = 32
 ; Specified here to create the session id.
 ; http://php.net/session.entropy-file
 ; Defaults to /dev/urandom
@@ -1502,10 +1505,6 @@ session.referer_check =
 ; On windows, setting the entropy_length setting will activate the 
 ; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
-
-; http://php.net/session.entropy-length
-; defaults to 32
-;session.entropy_length = 32
 
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
