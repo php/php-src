@@ -1495,6 +1495,8 @@ session.referer_check =
 ; Defaults to /dev/urandom
 ; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
 ; If neither are found at compile time, the default is no entropy file.
+; On windows, setting the entropy_length setting will activate the 
+; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
 
 ; http://php.net/session.entropy-length
