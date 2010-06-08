@@ -51,6 +51,7 @@ require_once('skipifconnectfailure.inc');
 		'BIT'               => array(1, 'int'),
 		'TINYINT'           => array(1, 'int'),
 		'BOOL'              => array('true', 'int'),
+		'BOOL'              => array(1, 'int'),
 		'SMALLINT'          => array(32767, 'int'),
 		'MEDIUMINT'         => array(8388607, 'int'),
 		'INT'               => array(100, 'int'),
@@ -86,7 +87,17 @@ require_once('skipifconnectfailure.inc');
 			// server and/or engine might not support the data type
 			continue;
 		}
-		if (!mysql_query(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $type_desc[0]), $link)) {
+
+		if (is_string($type_desc[0]))
+			$insert = sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $type_desc[0]);
+		else
+			$insert = sprintf("INSERT INTO test(id, label) VALUES (1, %s)", $type_desc[0]);
+
+		if (!mysql_query($insert, $link)) {
+			if (1366 == mysql_errno($link)) {
+				/* Strict SQL mode - 1366, Incorrect integer value: 'true' for column 'label' at row 1 */
+				continue;
+			}
 			printf("[009/%s] [%d] %s\n", $type_name, mysql_errno($link), mysql_error($link));
 			continue;
 		}
