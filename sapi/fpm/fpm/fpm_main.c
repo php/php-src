@@ -1638,6 +1638,7 @@ int main(int argc, char *argv[])
 				php_printf("\n");
 				php_output_end_all(TSRMLS_C);
 				php_output_deactivate(TSRMLS_C);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1653,6 +1654,7 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_request_shutdown((void *) 0);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1665,6 +1667,7 @@ int main(int argc, char *argv[])
 				php_cgi_usage(argv[0]);
 				php_output_end_all(TSRMLS_C);
 				php_output_deactivate(TSRMLS_C);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 
@@ -1684,12 +1687,13 @@ int main(int argc, char *argv[])
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2009 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
+				fcgi_shutdown();
 				exit_status = 0;
 				goto out;
 		}
 	}
 
-	/* No other args are permitted here as there is not interactive mode */
+	/* No other args are permitted here as there is no interactive mode */
 	if (argc != php_optind) {
 		cgi_sapi_module.startup(&cgi_sapi_module);
 		php_output_activate(TSRMLS_C);
@@ -1697,6 +1701,7 @@ int main(int argc, char *argv[])
 		php_cgi_usage(argv[0]);
 		php_output_end_all(TSRMLS_C);
 		php_output_deactivate(TSRMLS_C);
+		fcgi_shutdown();
 		exit_status = 0;
 		goto out;
 	}
