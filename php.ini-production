@@ -1594,8 +1594,10 @@ session.entropy_length = 0
 
 ; Specified here to create the session id.
 ; http://php.net/session.entropy-file
+; On systems that don't have /dev/urandom /dev/arandom can be used
+; On windows, setting the entropy_length setting will activate the 
+; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
-session.entropy_file =
 
 ; http://php.net/session.entropy-length
 ;session.entropy_length = 16
