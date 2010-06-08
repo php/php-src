@@ -185,7 +185,10 @@ UPGRADE NOTES - PHP X.Y
 11. Syntax additions
 ====================
 
-- 
+- Array dereferencing.
+  e.g.
+    foo()[0]
+    $foo->bar()[0]
 
 ===================
 12. Windows support
