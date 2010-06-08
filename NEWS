@@ -114,12 +114,12 @@ PHP                                                                        NEWS
 - Fixed bug #51604 (newline in end of header is shown in start of message).
   (Daniel Egeberg)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
-- Fixed bug #51562 (query timeout in mssql can not be changed per query).
-  (ejsmont dot artur at gmail dot com)
-- Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
-  (Oracle Corp.)
 - Fixed bug #51582 (Don't assume UINT64_C it's ever available).
   (reidrac at usebox dot net, Pierre)
+- Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
+  (Oracle Corp.)
+- Fixed bug #51562 (query timeout in mssql can not be changed per query).
+  (ejsmont dot artur at gmail dot com)
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51435 (Missing ifdefs / logic bug in crypt code cause compile
   errors). (Felipe)
