@@ -12,13 +12,15 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author:                                                              |
+   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   *         Pierre Joye <pierre@php.net>                                 |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
 
 #include "php.h"
+#include <wincrypt.h>
 
 PHPAPI char *php_win_err(int error)
 {
@@ -46,3 +48,35 @@ int php_win32_check_trailing_space(const char * path, const int path_len) {
 		return 0;
 	}
 }
+
+PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
+	HCRYPTPROV   hCryptProv;
+	int has_context = 0;
+	BOOL ret;
+	size_t i = 0;
+
+	if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+		/* Could mean that the key container does not exist, let try 
+		   again by asking for a new one */
+		if (GetLastError() == NTE_BAD_KEYSET) {
+			if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
+				has_context = 1;
+			} else {
+				return FAILURE;
+			}
+		}
+	}
+
+	ret = CryptGenRandom(hCryptProv, size, buf);
+	CryptReleaseContext(hCryptProv, 0);
+	if (ret) {
+		while (i < size && buf[i] != 0) {
+			i++;
+		}
+		if (i == size) {
+			return SUCCESS;
+		}
+   }
+	return FAILURE;
+}
+/* }}} */
