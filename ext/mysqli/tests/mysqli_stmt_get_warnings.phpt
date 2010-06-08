@@ -5,6 +5,22 @@ mysqli_stmt_get_warnings() - TODO
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+
+require_once("connect.inc");
+
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	die(sprintf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+		$host, $user, $db, $port, $socket));
+}
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
+	!mysqli_query($link, "CREATE TABLE test(id SMALLINT)"))
+	die(sprintf("skip [%d] %s\n", $link->errno, $link->error));
+
+if (!@mysqli_query("INSERT INTO test(id) VALUES (100001)"))
+	die("skip Strict sql mode seems to be active. We won't get a warning to check for.");
+
+mysqli_query($link, "DROP TABLE IF EXISTS test");
 ?>
 --FILE--
 <?php

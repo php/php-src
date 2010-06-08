@@ -20,8 +20,25 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
-	require_once('table.inc');
+require_once("connect.inc");
+
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+{
+		printf("[001] Cannot connect to the server using host=%s, user=%s,
+passwd=***, dbname=%s, port=%s, socket=%s - [%d] %s\n", $host, $user, $db,
+$port, $socket, mysqli_connect_errno(), mysqli_connect_error());
+	}
+
+	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
+		printf("Failed to drop old test table: [%d] %s\n", mysqli_errno($link),
+mysqli_error($link));
+	}
+
+	if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY
+KEY(id)) ENGINE=' . $engine . " DEFAULT CHARSET=eucjpms")) {
+		printf("Failed to create test table: [%d] %s\n", mysqli_errno($link),
+mysqli_error($link));
+	}
 
 	var_dump(mysqli_set_charset($link, "eucjpms"));
 
@@ -47,6 +64,10 @@ mysqli_close($link);
 
 	mysqli_close($link);
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 bool(true)
