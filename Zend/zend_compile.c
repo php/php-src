@@ -3476,8 +3476,9 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname)
 		zval tmpZval;
 
 		ALLOC_HASHTABLE(tmpHash);
-		zend_hash_init(tmpHash, 2, NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_copy(tmpHash, fe->op_array.static_variables, ZVAL_COPY_CTOR, &tmpZval, sizeof(zval));
+		zend_hash_init(tmpHash, zend_hash_num_elements(fe->op_array.static_variables), NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_apply_with_arguments(tmpHash TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, fe->op_array.static_variables);
+    
 		fe->op_array.static_variables = tmpHash;
 	}
 

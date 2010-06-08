@@ -188,6 +188,43 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zval_ptr)
 }
 #endif
 
+ZEND_API int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	HashTable *target = va_arg(args, HashTable*);
+	zend_bool is_ref;
+  
+	if (Z_TYPE_PP(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
+		is_ref = Z_TYPE_PP(p) & IS_LEXICAL_REF;
+    
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		if (zend_hash_quick_find(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, (void **) &p) == FAILURE) {
+			if (is_ref) {
+				zval *tmp;
+        
+				ALLOC_INIT_ZVAL(tmp);
+				Z_SET_ISREF_P(tmp);
+				zend_hash_quick_add(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, &tmp, sizeof(zval*), (void**)&p);
+			} else {
+				p = &EG(uninitialized_zval_ptr);
+				zend_error(E_NOTICE,"Undefined variable: %s", key->arKey);
+			}
+		} else {
+			if (is_ref) {
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+			} else if (Z_ISREF_PP(p)) {
+				SEPARATE_ZVAL(p);
+			}
+		}
+	}
+	if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, p, sizeof(zval*), NULL) == SUCCESS) {
+		Z_ADDREF_PP(p);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
