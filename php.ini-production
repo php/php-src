@@ -1599,9 +1599,6 @@ session.entropy_length = 0
 ; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
 
-; http://php.net/session.entropy-length
-;session.entropy_length = 16
-
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
 ; http://php.net/session.cache-limiter
