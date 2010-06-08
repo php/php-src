@@ -50,7 +50,7 @@ mysql_free_result($res);
 if (!$res = mysql_query("SELECT 1 AS a, 2 AS b, 3 AS c, 4 AS C", $link)) {
 	printf("[012] Cannot run query, [%d] %s\n",
 		mysql_errno($link), $mysql_error($link));
-exit(1);
+	exit(1);
 }
 
 do {
@@ -76,7 +76,6 @@ function func_mysql_fetch_array($link, $engine, $sql_type, $sql_value, $php_valu
 	}
 
 	if (!mysql_query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine), $link)) {
-		print $sql;
 		// don't bail, engine might not support the datatype
 		return false;
 	}
@@ -225,11 +224,11 @@ func_mysql_fetch_array($link, $engine, "CHAR(255)", $string255,  $string255, 550
 func_mysql_fetch_array($link, $engine, "CHAR(1) NOT NULL", "a", "a", 560);
 func_mysql_fetch_array($link, $engine, "CHAR(1)", NULL, NULL, 570);
 
-$string65k = func_mysql_fetch_array_make_string(65535);
+$string65k = func_mysql_fetch_array_make_string(65400);
 
 func_mysql_fetch_array($link, $engine, "VARCHAR(1)", "a", "a", 580);
 func_mysql_fetch_array($link, $engine, "VARCHAR(255)", $string255, $string255, 590);
-func_mysql_fetch_array($link, $engine, "VARCHAR(65635)", $string65k, $string65k, 600);
+func_mysql_fetch_array($link, $engine, "VARCHAR(65400)", $string65k, $string65k, 600);
 func_mysql_fetch_array($link, $engine, "VARCHAR(1) NOT NULL", "a", "a", 610);
 func_mysql_fetch_array($link, $engine, "VARCHAR(1)", NULL, NULL, 620);
 
