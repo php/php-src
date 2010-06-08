@@ -1876,6 +1876,7 @@ consult the installation file that came with this distribution, or visit \n\
 							}
 							php_print_info(0xFFFFFFFF TSRMLS_CC);
 							php_request_shutdown((void *) 0);
+							fcgi_shutdown();
 							exit_status = 0;
 							goto out;
 
@@ -1895,6 +1896,7 @@ consult the installation file that came with this distribution, or visit \n\
 							print_extensions(TSRMLS_C);
 							php_printf("\n");
 							php_output_end_all(TSRMLS_C);
+							fcgi_shutdown();
 							exit_status = 0;
 							goto out;
 
@@ -1928,6 +1930,7 @@ consult the installation file that came with this distribution, or visit \n\
 							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2010 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
+							fcgi_shutdown();
 							exit_status = 0;
 							goto out;
 
