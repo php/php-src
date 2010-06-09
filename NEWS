@@ -134,6 +134,8 @@ PHP                                                                        NEWS
   (Oracle Corp.)
 - Fixed bug #51276 (php_load_extension() is missing when HAVE_LIBDL is undefined). 
   (Tony)
+- Fixed bug #51273 (Faultstring property does not exist when the faultstring is
+  empty) (Ilia, dennis at transip dot nl)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51257 (CURL_VERSION_LARGEFILE incorrectly used after libcurl
   version 7.10.1). (aron dot ujvari at microsec dot hu)

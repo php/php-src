@@ -3422,12 +3422,12 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		object_init_ex(obj, soap_fault_class_entry);
 	}
-	if (fault_string != NULL) {
-		add_property_string(obj, "faultstring", fault_string, 1);
+	
+	add_property_string(obj, "faultstring", fault_string ? fault_string : "", 1);
 #ifdef ZEND_ENGINE_2
-		zend_update_property_string(zend_exception_get_default(TSRMLS_C), obj, "message", sizeof("message")-1, fault_string TSRMLS_CC);
+	zend_update_property_string(zend_exception_get_default(TSRMLS_C), obj, "message", sizeof("message")-1, (fault_string ? fault_string : "") TSRMLS_CC);
 #endif
-	}
+	
 	if (fault_code != NULL) {
 		int soap_version = SOAP_GLOBAL(soap_version);
 
