@@ -1788,7 +1788,7 @@ static int php_sqlite3_authorizer(void *autharg, int access_type, const char *ar
 	switch (access_type) {
 		case SQLITE_ATTACH:
 		{
-			if (strncmp(arg3, ":memory:", sizeof(":memory:")-1)) {
+			if (strncmp(arg3, ":memory:", sizeof(":memory:")-1) && *arg3) {
 				TSRMLS_FETCH();
 
 #if PHP_API_VERSION < 20100412
