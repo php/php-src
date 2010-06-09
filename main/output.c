@@ -435,10 +435,10 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				handler->func.user = user;
 			} else {
 				efree(user);
-				if (error) {
-					php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "%s", error);
-					efree(error);
-				}
+			}
+			if (error) {
+				php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "%s", error);
+				efree(error);
 			}
 			if (handler_name) {
 				efree(handler_name);
