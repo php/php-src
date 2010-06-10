@@ -69,6 +69,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia)
+- Fixed bug #52001 (Memory allocation problems after using variable variables).
+  (Dmitry)
 - Fixed bug #51991 (spl_autoload and *nix support with namespace). (Felipe)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
   constant array). (Felipe)
