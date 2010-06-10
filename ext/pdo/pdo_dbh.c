@@ -683,6 +683,25 @@ static PHP_METHOD(PDO, rollBack)
 }
 /* }}} */
 
+/* {{{ proto bool PDO::inTransaction()
+   determine if inside a transaction */
+static PHP_METHOD(PDO, inTransaction)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	PDO_CONSTRUCT_CHECK;
+
+	if (!dbh->methods->in_transaction) {
+		RETURN_BOOL(dbh->in_txn);
+	}	
+
+	RETURN_LONG(dbh->methods->in_transaction(dbh TSRMLS_CC));
+}
+/* }}} */
+
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC) /* {{{ */
 {
 
@@ -1246,6 +1265,7 @@ const zend_function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, beginTransaction,       arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,                 arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, rollBack,               arginfo_pdo__void,         ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, inTransaction,          arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	arginfo_pdo_setattribute,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, exec,			arginfo_pdo_exec,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, query,			NULL,					ZEND_ACC_PUBLIC)
