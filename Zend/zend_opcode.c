@@ -166,7 +166,17 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
 		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
-		(*pce)->static_members_table = NULL;
+		if ((*pce)->static_members_table) {
+			int i;
+
+			for (i = 0; i < (*pce)->default_static_members_count; i++) {
+				if ((*pce)->static_members_table[i]) {
+					zval_ptr_dtor(&(*pce)->static_members_table[i]);
+					(*pce)->static_members_table[i] = NULL;
+				}
+			}
+			(*pce)->static_members_table = NULL;
+		}
 	} else if (CE_STATIC_MEMBERS(*pce)) {
 		int i;
 		
@@ -255,7 +265,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				int i;
 
 				for (i = 0; i < ce->default_static_members_count; i++) {
-					zval_ptr_dtor(&ce->default_static_members_table[i]);
+					if (ce->default_static_members_table[i]) {
+						zval_ptr_dtor(&ce->default_static_members_table[i]);
+					}
 				}
 				efree(ce->default_static_members_table);
 			}
