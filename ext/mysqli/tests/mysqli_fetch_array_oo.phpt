@@ -166,7 +166,7 @@ require_once('skipifconnectfailure.inc');
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", -2147483648, "-2147483648", 200);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", 2147483647, "2147483647", 210);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", NULL, NULL, 220);
-	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", 4294967295, "4294967295", 230);
+	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
 	if ($IS_MYSQLND ||

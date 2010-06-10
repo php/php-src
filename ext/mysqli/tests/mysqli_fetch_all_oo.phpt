@@ -193,7 +193,7 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", -2147483648, "-2147483648", 200);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", 2147483647, "2147483647", 210);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", NULL, NULL, 220);
-	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", 4294967295, "4294967295", 230);
+	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
 	func_mysqli_fetch_all_oo($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
