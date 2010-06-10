@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
 - Added support for copy to/from array/file for pdo_pgsql extension. 
   (Denis Gasparin, Ilia)
+- Added inTransaction() method to PDO, with specialized support for Postgres
+  (Ilia, Denis Gasparin)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)

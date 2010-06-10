@@ -497,6 +497,15 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
 }
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	return PQtransactionStatus(H->server);
+}
+
 /* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])
    Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyFromArray)
@@ -1020,7 +1029,9 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_fetch_error_func,
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
-	pdo_pgsql_get_driver_methods  /* get_driver_methods */
+	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
+	NULL,
+	pgsql_handle_in_transaction,
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
