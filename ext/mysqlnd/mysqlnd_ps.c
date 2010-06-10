@@ -2016,7 +2016,7 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
 	if (!stmt) {
-		DBG_RETURN(FAIL);
+		DBG_VOID_RETURN;
 	}
 	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%d",
 				stmt->stmt_id, stmt->result_bind, stmt->field_count, param_no);
