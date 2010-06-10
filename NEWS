@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Added recent Windows versions to php_uname and fix undefined windows 
   version support. (Pierre)
 - Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
+- Added support for copy to/from array/file for pdo_pgsql extension. 
+  (Denis Gasparin, Ilia)
 
 - Changed namespaced classes so that the ctor can only be named
   __construct now. (Stas)
