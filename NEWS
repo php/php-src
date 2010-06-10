@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
   with an access to self::). (Felipe)
   constant array). (Felipe)
+- Fixed bug #51822i (Segfault with strange __destruct() for static class
+  variables). (Dmitry)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
 - Fixed bug #51670 (getColumnMeta causes segfault when re-executing query
