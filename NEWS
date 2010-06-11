@@ -73,6 +73,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #52060 (Memory leak when passing a closure to method_exists()).
   (Felipe)
+- Fixed bug #52057 (ReflectionClass fails on Closure class). (Felipe)
 - Fixed bug #52019 (make lcov doesn't support TESTS variable anymore). (Patrick)
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia)
