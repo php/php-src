@@ -1057,6 +1057,9 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	/* Set up known arguments */
 	args[1] = &key;
 	args[2] = userdata;
+	if (userdata) {
+		Z_ADDREF_PP(userdata);
+	}
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
@@ -1076,6 +1079,9 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			thash = Z_ARRVAL_PP(args[0]);
 			if (thash->nApplyCount > 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+				if (userdata) {
+					zval_ptr_dtor(userdata);
+				}
 				return 0;
 			}
 
@@ -1126,6 +1132,9 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
 
+	if (userdata) {
+		zval_ptr_dtor(userdata);
+	}
 	return 0;
 }
 /* }}} */
