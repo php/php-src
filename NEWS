@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   (Daniel Egeberg)
 - Fixed bug #51562 (query timeout in mssql can not be changed per query).
   (ejsmont dot artur at gmail dot com)
+- Fixed bug #51552 (debug_backtrace() causes segmentation fault and/or memory
+  issues). (Dmitry)
 - Fixed bug #51532 (Wrong prototype for SplFileObject::fscanf()). (Etienne)
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51393 (DateTime::createFromFormat() fails if format string contains
