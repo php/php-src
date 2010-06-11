@@ -3588,7 +3588,9 @@ ZEND_METHOD(reflection_class, hasMethod)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	lc_name = zend_str_tolower_dup(name, name_len);
-	if (zend_hash_exists(&ce->function_table, lc_name, name_len + 1)) {
+	if ((ce == zend_ce_closure && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0)
+		|| zend_hash_exists(&ce->function_table, lc_name, name_len + 1)) {
 		efree(lc_name);
 		RETURN_TRUE;
 	} else {
@@ -3605,6 +3607,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	zend_function *mptr;
+	zval obj_tmp;
 	char *name, *lc_name; 
 	int name_len;
 
@@ -3622,6 +3625,14 @@ ZEND_METHOD(reflection_class, getMethod)
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
+		efree(lc_name);
+	} else if (ce == zend_ce_closure && !intern->obj && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(&obj_tmp TSRMLS_CC)) != NULL) {
+		/* don't assign closure_object since we only reflect the invoke handler
+		   method and not the closure definition itself */
+		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
+		zval_dtor(&obj_tmp);
 		efree(lc_name);
 	} else if (zend_hash_find(&ce->function_table, lc_name, name_len + 1, (void**) &mptr) == SUCCESS) {
 		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
