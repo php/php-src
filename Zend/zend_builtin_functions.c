@@ -26,6 +26,7 @@
 #include "zend_ini.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
+#include "zend_closures.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -1104,22 +1105,29 @@ ZEND_FUNCTION(method_exists)
 		RETURN_TRUE;
 	} else {
 		union _zend_function *func = NULL;
-		efree(lcname);
 
 		if (Z_TYPE_P(klass) == IS_OBJECT 
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
 		&& (func = Z_OBJ_HT_P(klass)->get_method(&klass, method_name, method_len, NULL TSRMLS_CC)) != NULL
 		) {
 			if (func->type == ZEND_INTERNAL_FUNCTION 
-			&& ((zend_internal_function*)func)->handler == zend_std_call_user_call
+			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
 			) {
+				/* Returns true to the fake Closure's __invoke */
+				RETVAL_BOOL((func->common.scope == zend_ce_closure
+					&& (method_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) ? 1 : 0);
+					
+				efree(lcname);
 				efree(((zend_internal_function*)func)->function_name);
 				efree(func);
-				RETURN_FALSE;
+				return;
 			}
+			efree(lcname);
 			RETURN_TRUE;
 		}
 	}
+	efree(lcname);
 	RETURN_FALSE;
 }
 /* }}} */
