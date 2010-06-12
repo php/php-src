@@ -20,9 +20,9 @@ PHP                                                                        NEWS
 
 - Fixed bug #52019 (make lcov doesn't support TESTS variable anymore). (Patrick)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
+  constant array). (Felipe)
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
   with an access to self::). (Felipe)
-  constant array). (Felipe)
 - Fixed bug #51822i (Segfault with strange __destruct() for static class
   variables). (Dmitry)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
