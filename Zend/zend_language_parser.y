@@ -943,7 +943,7 @@ method:
 
 method_or_not:			
 		method						{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); $$.EA = ZEND_PARSED_METHOD_CALL; }
-	|	array_method_dereference	{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); $$.EA = ZEND_PARSED_METHOD_CALL; }
+	|	array_method_dereference	{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); }
 	|	/* empty */ { $$.EA = ZEND_PARSED_MEMBER; }
 ;
 
