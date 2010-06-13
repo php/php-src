@@ -99,6 +99,18 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ 0, 0, 0 }
 };
 
+static int fpm_conf_is_dir(char *path) /* {{{ */
+{
+	struct stat sb;
+
+	if (stat(path, &sb) != 0) {
+		return 0;
+	}
+
+	return (sb.st_mode & S_IFMT) == S_IFDIR;
+}
+/* }}} */
+
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
@@ -564,6 +576,48 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 1);
 			fpm_status_set_pm(wp->shm_status, wp->config->pm);
 			/* memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update)); */
+		}
+
+		if (wp->config->chroot && *wp->config->chroot) {
+			if (*wp->config->chroot != '/') {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chroot path '%s' must start with a '/'", wp->config->name, wp->config->chroot);
+				return -1;
+			}
+			if (!fpm_conf_is_dir(wp->config->chroot)) {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chroot path '%s' does not exist or is not a directory", wp->config->name, wp->config->chroot);
+				return -1;
+			}
+		}
+
+		if (wp->config->chdir && *wp->config->chdir) {
+			if (*wp->config->chdir != '/') {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chdir path '%s' must start with a '/'", wp->config->name, wp->config->chdir);
+				return -1;
+			}
+
+			if (wp->config->chroot) {
+				char *buf;
+				size_t len;
+
+				len = strlen(wp->config->chroot) + strlen(wp->config->chdir) + 1;
+				buf = malloc(sizeof(char) * len);
+				if (!buf) {
+					zlog(ZLOG_STUFF, ZLOG_SYSERROR, "[pool %s] malloc() failed", wp->config->name);
+					return -1;
+				}
+				snprintf(buf, len, "%s%s", wp->config->chroot, wp->config->chdir);
+				if (!fpm_conf_is_dir(buf)) {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chdir path '%s' wihtin the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
+					free(buf);
+					return -1;
+				}
+				free(buf);
+			} else {
+				if (!fpm_conf_is_dir(wp->config->chdir)) {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chdir path '%s' does not exist or is not a directory", wp->config->name, wp->config->chdir);
+					return -1;
+				}
+			}
 		}
 	}
 	return 0;
