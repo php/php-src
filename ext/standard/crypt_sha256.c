@@ -38,7 +38,6 @@
 # include <sys/param.h>
 # include <sys/types.h>
 # if HAVE_STRING_H
-//#  define __USE_GNU 1
 #  include <string.h>
 # else
 #  include <strings.h>
