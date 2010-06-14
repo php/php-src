@@ -521,11 +521,18 @@ PHP_FUNCTION(mysqli_change_user)
 	char		*user, *password, *dbname;
 	int			user_len, password_len, dbname_len;
 	ulong		rc;
+#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+	const		CHARSET_INFO * old_charset;
+#endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osss", &mysql_link, mysqli_link_class_entry, &user, &user_len, &password, &password_len, &dbname, &dbname_len) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
+
+#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+	old_charset = mysql->mysql->charset;
+#endif
 
 	rc = mysql_change_user(mysql->mysql, user, password, dbname);
 	MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
@@ -533,6 +540,16 @@ PHP_FUNCTION(mysqli_change_user)
 	if (rc) {
 		RETURN_FALSE;
 	}
+#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+	if (mysql_get_server_version(mysql->mysql) < 501023L) {
+		/*
+		  Request the current charset, or it will be reset to the system one.
+		  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug : 
+		  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
+		*/
+		rc = mysql_set_character_set(mysql->mysql, old_charset->csname);
+	}
+#endif
 
 	RETURN_TRUE;
 }
