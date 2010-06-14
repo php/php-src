@@ -71,6 +71,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #52082 (character_set_client & character_set_connection reset after
+  mysqli_change_user()). (Andrey)
 - Fixed bug #52043 (GD doesn't recognize latest libJPEG versions).
   (php at group dot apple dot com, Pierre) 
 - Fixed bug #52060 (Memory leak when passing a closure to method_exists()).
