@@ -113,6 +113,15 @@ const char * gdJpegGetVersionString()
 		case 62:
 			return "6b";
 			break;
+
+		case 70:
+			return "7";
+			break;
+
+		case 80:
+			return "8";
+			break;
+
 		default:
 			return "unknown";
 	}
