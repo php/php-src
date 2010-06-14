@@ -1860,8 +1860,9 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	size_t user_len;
 	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
-	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1];
+	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 2 /* charset*/ ];
 	char *p = buffer;
+	const MYSQLND_CHARSET * old_cs = conn->charset;
 
 	DBG_ENTER("mysqlnd_conn::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%d",
@@ -1902,6 +1903,16 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	}
 	*p++ = '\0';
 
+	/*
+	  4. request the current charset, or it will be reset to the system one.
+	  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug : 
+	  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
+	*/
+	if (mysqlnd_get_server_version(conn) >= 50123) {
+		int2store(p, conn->charset->nr);
+		p+=2;
+	}
+	
 	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
 									   PROT_LAST /* we will handle the OK packet*/,
 									   silent, TRUE TSRMLS_CC)) {
@@ -1951,6 +1962,10 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		}
 		conn->charset = conn->greet_charset;
 		memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
+		/* set charset for old servers */
+		if (mysqlnd_get_server_version(conn) < 50123) {
+			ret = conn->m->set_charset(conn, old_cs->name TSRMLS_CC);
+		}
 	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
 		/* old authentication with new server  !*/
 		DBG_ERR(mysqlnd_old_passwd);
