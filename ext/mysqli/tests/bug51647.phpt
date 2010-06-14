@@ -12,7 +12,8 @@ require_once('skipifconnectfailure.inc');
 	if (!is_object($link = mysqli_init()))
 		printf("[001] Cannot create link\n");
 
-	if (!$link->ssl_set("client-key.pem", "client-cert.pem", "cacert.pem","",""))
+	$path_to_pems = !$IS_MYSQLND? "ext/mysqli/tests/" : "";
+	if (!$link->ssl_set("{$path_to_pems}client-key.pem", "{$path_to_pems}client-cert.pem", "{$path_to_pems}cacert.pem","",""))
 		printf("[002] [%d] %s\n", $link->errno, $link->error);
 
 	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
@@ -36,8 +37,6 @@ require_once('skipifconnectfailure.inc');
 		if (!$row = $res->fetch_assoc())
 			printf("[006] [%d] %s\n", $link->errno, $link->error);
 	}
-
-
 
 	var_dump($row);
 
