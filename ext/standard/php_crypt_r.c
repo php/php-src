@@ -81,11 +81,13 @@ void _crypt_extended_init_r(void)
 	tsrm_mutex_lock(php_crypt_extended_init_lock);
 #endif
 
-	if (initialized) {
-		return;
-	} else {
+	if (!initialized) {
+#ifdef PHP_WIN32
+		InterlockedIncrement(initialized);
+#elif (defined(__GNUC__) && (__GNUC__ >= 4 && __GNUC_MINOR >= 2))
+		__sync_fetch_and_add(&initialized, 1);
+#endif
 		_crypt_extended_init();
-		initialized = 1;
 	}
 #ifdef ZTS
 	tsrm_mutex_unlock(php_crypt_extended_init_lock);
