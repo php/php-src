@@ -280,8 +280,8 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 }
 /* }}} */
 
-static int php_zip_add_file(struct zip *za, const char *filename, int filename_len, 
-	char *entry_name, int entry_name_len, long offset_start, long offset_len TSRMLS_DC) /* {{{ */
+static int php_zip_add_file(struct zip *za, const char *filename, size_t filename_len, 
+	char *entry_name, size_t entry_name_len, long offset_start, long offset_len TSRMLS_DC) /* {{{ */
 {
 	struct zip_source *zs;
 	int cur_idx;
@@ -1642,7 +1642,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 		for (i = 0; i < found; i++) {
 			char *file, *file_stripped, *entry_name;
-			int entry_name_len,file_stripped_len;
+			size_t entry_name_len, file_stripped_len;
 			char entry_name_buf[MAXPATHLEN];
 			char *basename = NULL;
 
