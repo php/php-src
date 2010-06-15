@@ -141,6 +141,7 @@ PHP                                                                        NEWS
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51435 (Missing ifdefs / logic bug in crypt code cause compile
   errors). (Felipe)
+- Fixed bug #51424 (crypt() function hangs after 3rd call). (Pierre)
 - Fixed bug #51394 (Error line reported incorrectly if error handler throws an 
   exception). (Stas)
 - Fixed bug #51393 (DateTime::createFromFormat() fails if format string contains
