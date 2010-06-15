@@ -1809,6 +1809,12 @@ return_by_value:
 				INIT_PZVAL_COPY(ret, retval_ptr);
 				zval_copy_ctor(ret);
 				*EG(return_value_ptr_ptr) = ret;
+			} else if ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
+			           retval_ptr == &EG(uninitialized_zval)) {
+				zval *ret;
+
+				ALLOC_INIT_ZVAL(ret);
+				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;
 				retval_ptr->refcount++;
@@ -4384,6 +4390,12 @@ return_by_value:
 				ALLOC_ZVAL(ret);
 				INIT_PZVAL_COPY(ret, retval_ptr);
 				zval_copy_ctor(ret);
+				*EG(return_value_ptr_ptr) = ret;
+			} else if ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
+			           retval_ptr == &EG(uninitialized_zval)) {
+				zval *ret;
+
+				ALLOC_INIT_ZVAL(ret);
 				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;
@@ -7434,6 +7446,12 @@ return_by_value:
 				ALLOC_ZVAL(ret);
 				INIT_PZVAL_COPY(ret, retval_ptr);
 				zval_copy_ctor(ret);
+				*EG(return_value_ptr_ptr) = ret;
+			} else if ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
+			           retval_ptr == &EG(uninitialized_zval)) {
+				zval *ret;
+
+				ALLOC_INIT_ZVAL(ret);
 				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;
@@ -19864,6 +19882,12 @@ return_by_value:
 				ALLOC_ZVAL(ret);
 				INIT_PZVAL_COPY(ret, retval_ptr);
 				zval_copy_ctor(ret);
+				*EG(return_value_ptr_ptr) = ret;
+			} else if ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
+			           retval_ptr == &EG(uninitialized_zval)) {
+				zval *ret;
+
+				ALLOC_INIT_ZVAL(ret);
 				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;

@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported
   by Mateusz Kocielski. (Ilia)  
 
+- Fixed bug #52041 (Memory leak when writing on uninitialized variable returned
+  from function). (Dmitry)
 - Fixed bug #52019 (make lcov doesn't support TESTS variable anymore). (Patrick)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
   constant array). (Felipe)
