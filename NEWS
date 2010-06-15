@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   constant array). (Felipe)
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
   with an access to self::). (Felipe)
-- Fixed bug #51822i (Segfault with strange __destruct() for static class
+- Fixed bug #51822 (Segfault with strange __destruct() for static class
   variables). (Dmitry)
 - Fixed bug #51671 (imagefill does not work correctly for small images).
   (Pierre)
