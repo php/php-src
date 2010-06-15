@@ -75,7 +75,11 @@ void php_shutdown_crypt_r()
 
 void _crypt_extended_init_r(void)
 {
+#ifdef PHP_WIN32
+	LONG volatile initialized = 0;
+#else
 	static volatile sig_atomic_t initialized = 0;
+#endif
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_crypt_extended_init_lock);
@@ -83,7 +87,7 @@ void _crypt_extended_init_r(void)
 
 	if (!initialized) {
 #ifdef PHP_WIN32
-		InterlockedIncrement(initialized);
+		InterlockedIncrement(&initialized);
 #elif (defined(__GNUC__) && (__GNUC__ >= 4 && __GNUC_MINOR >= 2))
 		__sync_fetch_and_add(&initialized, 1);
 #endif
