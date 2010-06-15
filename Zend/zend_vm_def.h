@@ -2493,6 +2493,12 @@ ZEND_VM_C_LABEL(return_by_value):
 				INIT_PZVAL_COPY(ret, retval_ptr);
 				zval_copy_ctor(ret);
 				*EG(return_value_ptr_ptr) = ret;
+			} else if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
+			           retval_ptr == &EG(uninitialized_zval)) {
+				zval *ret;
+
+				ALLOC_INIT_ZVAL(ret);
+				*EG(return_value_ptr_ptr) = ret;
 			} else {
 				*EG(return_value_ptr_ptr) = retval_ptr;
 				Z_ADDREF_P(retval_ptr);

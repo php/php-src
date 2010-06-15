@@ -1562,8 +1562,13 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
 			if (redo_any) {
-				if (get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
+				zval *tmp = get_zval_property(ret, "any" TSRMLS_CC);
+
+				if (tmp == NULL) {
 					model_to_zval_any(ret, data->children TSRMLS_CC);
+				} else if (Z_REFCOUNT_P(tmp) == 0) {
+					zval_dtor(tmp);
+					efree(tmp);
 				}
 				zval_ptr_dtor(&redo_any);
 			}
