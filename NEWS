@@ -75,6 +75,8 @@ PHP                                                                        NEWS
   mysqli_change_user()). (Andrey)
 - Fixed bug #52043 (GD doesn't recognize latest libJPEG versions).
   (php at group dot apple dot com, Pierre) 
+- Fixed bug #52041 (Memory leak when writing on uninitialized variable returned
+  from function). (Dmitry)
 - Fixed bug #52060 (Memory leak when passing a closure to method_exists()).
   (Felipe)
 - Fixed bug #52057 (ReflectionClass fails on Closure class). (Felipe)
@@ -95,6 +97,8 @@ PHP                                                                        NEWS
 - Fixed bug #51844 (checkdnsrr does not support types other than MX). (Pierre)
 - Fixed bug #51827 (Bad warning when register_shutdown_function called with
   wrong num of parameters). (Felipe)
+- Fixed bug #51822 (Segfault with strange __destruct() for static class
+  variables). (Dmitry)
 - Fixed bug #51791 (constant() aborts execution when fail to check undefined
   constant). (Felipe)
 - Fixed bug #51732 (Fileinfo __construct or open does not work with NULL).
@@ -138,6 +142,8 @@ PHP                                                                        NEWS
   (Oracle Corp.)
 - Fixed bug #51562 (query timeout in mssql can not be changed per query).
   (ejsmont dot artur at gmail dot com)
+- Fixed bug #51552 (debug_backtrace() causes segmentation fault and/or memory
+  issues). (Dmitry)
 - Fixed bug #51445 (var_dump() invalid/slow *RECURSION* detection). (Felipe)
 - Fixed bug #51435 (Missing ifdefs / logic bug in crypt code cause compile
   errors). (Felipe)
