@@ -694,11 +694,7 @@ static PHP_METHOD(PDO, inTransaction)
 	}
 	PDO_CONSTRUCT_CHECK;
 
-	if (!dbh->methods->in_transaction) {
-		RETURN_BOOL(dbh->in_txn);
-	}	
-
-	RETURN_LONG(dbh->methods->in_transaction(dbh TSRMLS_CC));
+	RETURN_LONG(dbh->in_txn);
 }
 /* }}} */
 

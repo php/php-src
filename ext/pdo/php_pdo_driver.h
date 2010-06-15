@@ -310,7 +310,6 @@ struct pdo_dbh_methods {
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
-	pdo_dbh_txn_func		in_transaction;
 };
 
 /* }}} */
