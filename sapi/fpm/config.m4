@@ -362,7 +362,7 @@ AC_DEFUN([AC_FPM_TRACE],
           int ret = 0;
 
           if (0 > ptrace(PTRACE_ATTACH, child, 0, 0)) {
-            return 1;
+            return 2;
           }
 
           waitpid(child, &status, 0);
@@ -376,7 +376,7 @@ AC_DEFUN([AC_FPM_TRACE],
           };
 
           if (0 > ptrace(PT_IO, child, (void *) &ptio, 0)) {
-            ret = 1;
+            ret = 3;
           }
       #else
           errno = 0;
@@ -384,7 +384,7 @@ AC_DEFUN([AC_FPM_TRACE],
           v2 = ptrace(PTRACE_PEEKDATA, child, (void *) &v1, 0);
 
           if (errno) {
-            ret = 1;
+            ret = 4;
           }
       #endif
           ptrace(PTRACE_DETACH, child, (void *) 1, 0);
@@ -495,7 +495,7 @@ AC_DEFUN([AC_FPM_TRACE],
     fpm_trace_type=mach
     
   else
-    AC_MSG_ERROR([FPM Trace - ptrace, pread, or mach: could not be found])    
+    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])    
   fi
   
 ])
