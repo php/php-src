@@ -194,6 +194,10 @@ PHP                                                                        NEWS
   if defined in WSDL). (mephius at gmail dot com)
 - Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
   spl_autoload_register). (Felipe)
+- Fixed bug #50563 (removing E_WARNING from parse_url). (ralph at smashlabs dot 
+  com, Pierre)
+- Fixed bug #50578 (incorrect shebang in phar.phar). (Fedora at FamilleCollet
+  dot com)
 - Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications). (Derick)
 - Fixed bug #50392 (date_create_from_format enforces 6 digits for 'u' format
   character). (Derick)
@@ -202,6 +206,8 @@ PHP                                                                        NEWS
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
 - Fixed bug #50101 (name clash between global and local variable).
   (patch by yoarvi at gmail dot com)
+- Fixed bug #51002 (fix possible memory corruption with very long names).
+  (Pierre)
 - Fixed bug #49893 (Crash while creating an instance of Zend_Mail_Storage_Pop3).
   (Dmitry)
 - Fixed bug #49819 (STDOUT losing data with posix_isatty()). (Mike)
