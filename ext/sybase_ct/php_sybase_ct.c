@@ -1247,8 +1247,17 @@ static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS
 					}
 					
 					default: {
-						/* This indicates anything else, return it as string */
-						ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1, 1);
+						/* This indicates anything else, return it as string
+						 * FreeTDS doesn't correctly set result->indicators[j] correctly
+						 * for NULL fields in some version in conjunction with ASE 12.5
+						 * but instead sets result->lengths[j] to 0, which would lead to
+						 * a negative memory allocation (and thus a segfault).
+						 */
+						if (result->lengths[j] < 1) {
+							ZVAL_NULL(&result->data[i][j]);
+						} else {
+							ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1, 1);
+						}
 						break;
 					}
 				}
