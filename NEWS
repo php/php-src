@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   characters. Reported by Stefan Esser (Ilia)
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported
   by Mateusz Kocielski. (Ilia)  
+- Fixed a crash when calling an inexistent method of a class that inherits 
+  PDOStatement if instantiated directly instead of doing by the PDO methods.
+  (Felipe)
 
 - Fixed bug #52041 (Memory leak when writing on uninitialized variable returned
   from function). (Dmitry)
