@@ -1960,7 +1960,6 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 			mnd_pefree(conn->last_message, conn->persistent);
 			conn->last_message = NULL;
 		}
-		conn->charset = conn->greet_charset;
 		memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
 		/* set charset for old servers */
 		if (mysqlnd_get_server_version(conn) < 50123) {
