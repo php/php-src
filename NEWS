@@ -7,10 +7,10 @@ PHP                                                                        NEWS
 - Added support for JSON_NUMERIC_CHECK option in json_encode() that converts 
   numeric strings to integers. (Ilia)
 - Added stream_set_read_buffer, allows to set the buffer for read operation.
-  (Pierre).
+  (Pierre)
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
-- Added full_special_chars filter to ext/filter (Rasmus)
+- Added full_special_chars filter to ext/filter. (Rasmus)
 - Added backlog socket context option for stream_socket_server(). (Mike)
 - Added fifth parameter to openssl_encrypt()/openssl_decrypt()
   (string $iv) to use non-NULL IV.
@@ -19,10 +19,10 @@ PHP                                                                        NEWS
 - Added FastCGI Process Manager (FPM) SAPI. (Tony)
 - Added recent Windows versions to php_uname and fix undefined windows 
   version support. (Pierre)
-- Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
+- Added Berkeley DB 5 support to the DBA extension. (Johannes, Chris Jones)
 - Added support for copy to/from array/file for pdo_pgsql extension. 
   (Denis Gasparin, Ilia)
-- Added inTransaction() method to PDO, with specialized support for Postgres
+- Added inTransaction() method to PDO, with specialized support for Postgres.
   (Ilia, Denis Gasparin)
 
 - Changed namespaced classes so that the ctor can only be named
@@ -43,33 +43,33 @@ PHP                                                                        NEWS
 
 - Fixed memory leak on error in mcrypt_create_iv on Windows. (Pierre)
 - Fixed a possible crash because of recursive GC invocation. (Dmitry)
-- Fixed a possible resource destruction issues in shm_put_var()
-  Reported by Stefan Esser (Dmitry)
+- Fixed a possible resource destruction issues in shm_put_var().
+  Reported by Stefan Esser. (Dmitry)
 - Fixed a possible information leak because of interruption of XOR operator.
-  Reported by Stefan Esser (Dmitry)
+  Reported by Stefan Esser. (Dmitry)
 - Fixed a possible memory corruption because of unexpected call-time pass by
   refernce and following memory clobbering through callbacks.
-  Reported by Stefan Esser (Dmitry)
-- Fixed a possible memory corruption in ArrayObject::uasort() Reported by
-  Stefan Esser (Dmitry)
-- Fixed a possible memory corruption in parse_str(). Reported by Stefan Esser
+  Reported by Stefan Esser. (Dmitry)
+- Fixed a possible memory corruption in ArrayObject::uasort(). Reported by
+  Stefan Esser. (Dmitry)
+- Fixed a possible memory corruption in parse_str(). Reported by Stefan Esser.
   (Dmitry)
-- Fixed a possible memory corruption in pack(). Reported by Stefan Esser
+- Fixed a possible memory corruption in pack(). Reported by Stefan Esser.
   (Dmitry)
 - Fixed a possible memory corruption in substr_replace(). Reported by Stefan    
-  Esser (Dmitry)
+  Esser. (Dmitry)
 - Fixed a possible memory corruption in addcslashes(). Reported by Stefan    
-  Esser (Dmitry)
+  Esser. (Dmitry)
 - Fixed a possible stack exhaustion inside fnmatch(). Reported by Stefan    
-  Esser (Ilia)
+  Esser. (Ilia)
 - Fixed a possible dechunking filter buffer overflow. Reported by Stefan Esser.
   (Pierre)
 - Fixed a possible arbitrary memory access inside sqlite extension. Reported 
   by Mateusz Kocielski. (Ilia)
 - Fixed string format validation inside phar extension. Reported by Stefan
-  Esser (Ilia)
+  Esser. (Ilia)
 - Fixed handling of session variable serialization on certain prefix
-  characters. Reported by Stefan Esser (Ilia)
+  characters. Reported by Stefan Esser. (Ilia)
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
@@ -162,8 +162,8 @@ PHP                                                                        NEWS
   on). (Ilia, j dot jeising at gmail dot com)
 - Fixed bug #51291 (oci_error doesn't report last error when called two times)
   (Oracle Corp.)
-- Fixed bug #51276 (php_load_extension() is missing when HAVE_LIBDL is undefined). 
-  (Tony)
+- Fixed bug #51276 (php_load_extension() is missing when HAVE_LIBDL is
+  undefined). (Tony)
 - Fixed bug #51273 (Faultstring property does not exist when the faultstring is
   empty) (Ilia, dennis at transip dot nl)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
@@ -186,7 +186,8 @@ PHP                                                                        NEWS
 - Fixed bug #51096 ('last day' and 'first day' are handled incorrectly when
   parsing date strings). (Derick)
 - Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)
-- Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
+- Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris
+  Jones)
 - Fixed bug #51026 (mysqli_ssl_set not working). (Andrey)
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
   (Raphael Geissert)
@@ -203,7 +204,8 @@ PHP                                                                        NEWS
   com, Pierre)
 - Fixed bug #50578 (incorrect shebang in phar.phar). (Fedora at FamilleCollet
   dot com)
-- Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications). (Derick)
+- Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications).
+  (Derick)
 - Fixed bug #50392 (date_create_from_format enforces 6 digits for 'u' format
   character). (Derick)
 - Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
@@ -244,10 +246,19 @@ PHP                                                                        NEWS
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
 
 
-?? ??? 20??, PHP 5.3.2
+04 Mar 2010, PHP 5.3.2
+
 - Upgraded bundled sqlite to version 3.6.22. (Ilia)
 - Upgraded bundled libmagic to version 5.03. (Mikko)
 - Upgraded bundled PCRE to version 8.00. (Scott)
+- Updated timezone database to version 2010.3. (Derick)
+
+- Improved LCG entropy. (Rasmus, Samy Kamkar)
+- Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
+  Joey, Pierre)
+
+- Reverted fix for bug #49521 (PDO fetchObject sets values before calling
+  constructor). (Pierrick, Johannes)
 
 - Changed gmp_strval() to use full range from 2 to 62, and -2 to -36. FR #50283
   (David Soria Parra)
@@ -279,12 +290,8 @@ PHP                                                                        NEWS
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
 
-- Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
-  Joey, Pierre)
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
-- Fixed crypt's blowfish sanity check of the "setting" string, to reject iteration
-  counts encoded as 36 through 39. (Solar Designer, Joey, Pierre)
 - Fixed mysqlnd hang when queries exactly 16777214 bytes long are sent. (Andrey)
 - Fixed incorrect decoding of 5-byte BIT sequences in mysqlnd. (Andrey)
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
@@ -305,6 +312,8 @@ PHP                                                                        NEWS
 - Fixed memory leaks in the ACL function on Windows. (Pierre)
 - Fixed memory leak in the realpath cache on Windows. (Pierre)
 - Fixed memory leak in zip_close. (Pierre)
+- Fixed crypt's blowfish sanity check of the "setting" string, to reject
+  iteration counts encoded as 36 through 39. (Solar Designer, Joey, Pierre)
 
 - Fixed bug #51059 (crypt crashes when invalid salt are given). (Pierre)
 - Fixed bug #50952 (allow underscore _ in constants parsed in php.ini files).
@@ -343,25 +352,6 @@ PHP                                                                        NEWS
 - Fixed bug #50632 (filter_input() does not return default value if the
   variable does not exist). (Ilia)
 - Fixed bug #50576 (XML_OPTION_SKIP_TAGSTART option has no effect). (Pierrick)
-- Fixed bug #50416 (PROCEDURE db.myproc can't return a result set in the given
-  context). (Andrey)
-- Fixed bug #49600 (imageTTFText text shifted right). (Takeshi Abe)
-- Fixed bug #49585 (date_format buffer not long enough for >4 digit years).
-  (Derick, Adam)
-- Fixed bug #49560 (oci8: using LOBs causes slow PHP shutdown). (Oracle Corp.)
-- Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
-- Fixed bug #48811 (Directives in PATH section do not get applied to
-  subdirectories). (Patch by: ct at swin dot edu dot au)
-- Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
-- Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
-  in HTTP uploads). (Ilia)
-- Fixed bug #47409 (extract() problem with array containing word "this").
-  (Ilia, chrisstocktonaz at gmail dot com)
-- Fixed bug #47281 ($php_errormsg is limited in size of characters)
-  (Oracle Corp.)
-- Fixed bug #44827 (define() allows :: in constant names). (Ilia)
-- Fixed bug #44098 (imap_utf8() returns only capital letters).
-  (steffen at dislabs dot de, Pierre)
 - Fixed bug #50558 (Broken object model when extending tidy). (Pierrick)
 - Fixed bug #50540 (Crash while running ldap_next_reference test cases).
   (Sriram)
@@ -376,6 +366,8 @@ PHP                                                                        NEWS
 - Fixed bug #50458 (PDO::FETCH_FUNC fails with Closures). (Felipe, Pierrick)
 - Fixed bug #50445 (PDO-ODBC stored procedure call from Solaris 64-bit causes
   seg fault). (davbrown4 at yahoo dot com, Felipe)
+- Fixed bug #50416 (PROCEDURE db.myproc can't return a result set in the given
+  context). (Andrey)
 - Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
 - Fixed bug #50351 (performance regression handling objects, ten times slower
   in 5.3 than in 5.2). (Dmitry)
@@ -456,25 +448,40 @@ PHP                                                                        NEWS
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49600 (imageTTFText text shifted right). (Takeshi Abe)
+- Fixed bug #49585 (date_format buffer not long enough for >4 digit years).
+  (Derick, Adam)
+- Fixed bug #49560 (oci8: using LOBs causes slow PHP shutdown). (Oracle Corp.)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
 - Fixed bug #49472 (Constants defined in Interfaces can be overridden).
   (Felipe)
+- Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
 - Fixed bug #49174 (crash when extending PDOStatement and trying to set
   queryString property). (Felipe)
+- Fixed bug #48811 (Directives in PATH section do not get applied to
+  subdirectories). (Patch by: ct at swin dot edu dot au)
+- Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
+- Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
+  in HTTP uploads). (Ilia)
 - Fixed bug #47848 (importNode doesn't preserve attribute namespaces). (Rob)
+- Fixed bug #47409 (extract() problem with array containing word "this").
+  (Ilia, chrisstocktonaz at gmail dot com)
+- Fixed bug #47281 ($php_errormsg is limited in size of characters)
+  (Oracle Corp.)
 - Fixed bug #46478 (htmlentities() uses obsolete mapping table for character
   entity references). (Moriyoshi)
 - Fixed bug #45599 (strip_tags() truncates rest of string with invalid
   attribute). (Ilia, hradtke)
 - Fixed bug #45120 (PDOStatement->execute() returns true then false for same
   statement). (Pierrick)
+- Fixed bug #44827 (define() allows :: in constant names). (Ilia)
+- Fixed bug #44098 (imap_utf8() returns only capital letters).
+  (steffen at dislabs dot de, Pierre)
 - Fixed bug #34852 (Failure in odbc_exec() using oracle-supplied odbc
   driver). (tim dot tassonis at trivadis dot com)
-
 
 19 Nov 2009, PHP 5.3.1
 - Upgraded bundled sqlite to version 3.6.19. (Scott)
