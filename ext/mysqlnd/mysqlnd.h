@@ -286,7 +286,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_realloc_fail_threshold;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
-ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
 
 #ifdef ZTS
 #define MYSQLND_G(v) TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
