@@ -567,6 +567,11 @@ if test "$ac_cv_type_mbstate_t" = "yes"; then
 fi
 
 dnl
+dnl Check for atomic operation API availability in Solaris
+dnl
+AC_CHECK_HEADERS([atomic.h])
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
