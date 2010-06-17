@@ -274,6 +274,12 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 					}
 				}
 
+				if (have_v6_break && in_v6_break) {
+					tp[0] = ':';
+					tp++;
+				}
+				tp[0] = '\0';
+
 				add_assoc_string(*subarray, "type", "AAAA", 1);
 				add_assoc_string(*subarray, "ipv6", buf, 1);
 			}
