@@ -405,11 +405,6 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 /* }}} */
 
 
-#define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
-				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
-				CLIENT_MULTI_RESULTS)
-
-
 /* {{{ php_mysqlnd_crypt */
 static void
 php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
@@ -464,16 +459,6 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 	register MYSQLND_PACKET_AUTH *packet= (MYSQLND_PACKET_AUTH *) _packet;
 
 	DBG_ENTER("php_mysqlnd_auth_write");
-
-	packet->client_flags |= MYSQLND_CAPABILITIES;
-
-	if (packet->db) {
-		packet->client_flags |= CLIENT_CONNECT_WITH_DB;
-	}
-
-	if (PG(open_basedir) && strlen(PG(open_basedir))) {
-		packet->client_flags ^= CLIENT_LOCAL_FILES;
-	}
 
 	int4store(p, packet->client_flags);
 	p+= 4;
