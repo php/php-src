@@ -42,7 +42,11 @@
 # include <Wincrypt.h>
 #endif
 
-#include <signal.h>
+#ifdef HAVE_ATOMIC_H /* Solaris 10 defines atomic API within */
+# include <atomic.h>
+#else
+# include <signal.h>
+#endif
 #include "php_crypt_r.h"
 #include "crypt_freesec.h"
 
@@ -77,6 +81,8 @@ void _crypt_extended_init_r(void)
 {
 #ifdef PHP_WIN32
 	LONG volatile initialized = 0;
+#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
+	volatile unsigned int initialized = 0;
 #else
 	static volatile sig_atomic_t initialized = 0;
 #endif
@@ -90,6 +96,9 @@ void _crypt_extended_init_r(void)
 		InterlockedIncrement(&initialized);
 #elif (defined(__GNUC__) && (__GNUC__ >= 4 && __GNUC_MINOR >= 2))
 		__sync_fetch_and_add(&initialized, 1);
+#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
+		membar_producer();
+		atomic_add_int(&initialized, 1);
 #endif
 		_crypt_extended_init();
 	}
