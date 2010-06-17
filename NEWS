@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, PHP 5.2.14
+17 Jun 2010, PHP 5.2.14RC1
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
 - Reverted bug fix #49521 (PDO fetchObject sets values before calling
