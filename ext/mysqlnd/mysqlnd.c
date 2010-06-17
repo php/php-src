@@ -444,6 +444,123 @@ MYSQLND_METHOD(mysqlnd_conn, end_psession)(MYSQLND * conn TSRMLS_DC)
 /* }}} */
 
 
+#define MYSQLND_ASSEBLED_PACKET_MAX_SIZE 3UL*1024UL*1024UL*1024UL
+/* {{{ mysqlnd_connect_run_authentication */
+static enum_func_status
+mysqlnd_connect_run_authentication(
+			MYSQLND * conn,
+			const char * const user,
+			const char * const passwd,
+			const char * const db,
+			size_t db_len,
+			const MYSQLND_PACKET_GREET * const greet_packet,
+			const MYSQLND_OPTIONS * const options,
+			unsigned long mysql_flags
+			TSRMLS_DC)
+{
+	const MYSQLND_CHARSET * charset = NULL;
+	enum_func_status ret = FAIL;
+	MYSQLND_PACKET_AUTH * auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+	MYSQLND_PACKET_OK * ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+
+	DBG_ENTER("mysqlnd_connect_run_authentication");
+
+	if (!auth_packet || !ok_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		goto err;
+	}
+
+#ifdef MYSQLND_SSL_SUPPORTED
+	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
+		auth_packet->send_half_packet = TRUE;
+	}
+#endif
+	auth_packet->user		= user;
+	auth_packet->password	= passwd;
+
+	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
+		auth_packet->charset_no	= charset->nr;
+	} else {
+#if PHP_MAJOR_VERSION >= 6
+		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
+#else
+		auth_packet->charset_no	= greet_packet->charset_no;
+#endif
+	}
+	auth_packet->db			= db;
+	auth_packet->db_len		= db_len;
+	auth_packet->max_packet_size= MYSQLND_ASSEBLED_PACKET_MAX_SIZE;
+	auth_packet->client_flags= mysql_flags;
+
+	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
+	if (!conn->scramble) {
+		SET_OOM_ERROR(conn->error_info);
+		goto err;
+	}
+	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
+	
+	if (!PACKET_WRITE(auth_packet, conn)) {
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		goto err;
+	}
+
+#ifdef MYSQLND_SSL_SUPPORTED
+	if (auth_packet->send_half_packet) {
+		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
+		DBG_INF("Switching to SSL");
+
+		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
+
+		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
+			goto err;
+		}
+		
+		auth_packet->send_half_packet = FALSE;
+		if (!PACKET_WRITE(auth_packet, conn)) {
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			goto err;
+		}
+	}
+#endif
+
+
+	if (FAIL == PACKET_READ(ok_packet, conn) || ok_packet->field_count >= 0xFE) {
+		if (ok_packet->field_count == 0xFE) {
+			/* old authentication with new server  !*/
+			DBG_ERR(mysqlnd_old_passwd);
+			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
+		} else if (ok_packet->field_count == 0xFF) {
+			if (ok_packet->sqlstate[0]) {
+				strlcpy(conn->error_info.sqlstate, ok_packet->sqlstate, sizeof(conn->error_info.sqlstate));
+				DBG_ERR_FMT("ERROR:%d [SQLSTATE:%s] %s", ok_packet->error_no, ok_packet->sqlstate, ok_packet->error);
+			}
+			conn->error_info.error_no = ok_packet->error_no;
+			strlcpy(conn->error_info.error, ok_packet->error, sizeof(conn->error_info.error));
+		}
+		goto err;
+	}
+
+	SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
+					ok_packet->message, ok_packet->message_len,
+					conn->persistent);
+	conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+	ret = PASS;
+err:
+	PACKET_FREE(auth_packet);
+	PACKET_FREE(ok_packet);
+	DBG_RETURN(ret);	
+}
+/* }}} */
+
+
+#define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
+				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
+				CLIENT_MULTI_RESULTS)
+
+
+
 /* {{{ mysqlnd_conn::connect */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
@@ -457,15 +574,11 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 {
 	char *errstr = NULL;
 	int errcode = 0, host_len;
-	zend_bool self_alloced = FALSE;
 	zend_bool unix_socket = FALSE;
-	const MYSQLND_CHARSET * charset;
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 
 	MYSQLND_PACKET_GREET * greet_packet = NULL;
-	MYSQLND_PACKET_AUTH * auth_packet = NULL;
-	MYSQLND_PACKET_OK * ok_packet = NULL;
 
 	DBG_ENTER("mysqlnd_conn::connect");
 
@@ -536,7 +649,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			if (!port) {
 				port = 3306;
 			}
-
 			transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
 		}
 		if (!transport) {
@@ -554,9 +666,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	}
 
 	greet_packet = conn->protocol->m.get_greet_packet(conn->protocol, FALSE TSRMLS_CC);
-	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
-	ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
-	if (!greet_packet || !auth_packet || !ok_packet) {
+	if (!greet_packet) {
 		SET_OOM_ERROR(conn->error_info);
 		goto err; /* OOM */
 	}
@@ -590,7 +700,17 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
 	/* we allow load data local infile by default */
-	mysql_flags  |= CLIENT_LOCAL_FILES | CLIENT_PS_MULTI_RESULTS;
+	mysql_flags |= CLIENT_LOCAL_FILES | CLIENT_PS_MULTI_RESULTS;
+	mysql_flags |= MYSQLND_CAPABILITIES;
+
+	if (db) {
+		mysql_flags |= CLIENT_CONNECT_WITH_DB;
+	}
+
+	if (PG(open_basedir) && strlen(PG(open_basedir))) {
+		mysql_flags ^= CLIENT_LOCAL_FILES;
+	}
+
 #ifndef MYSQLND_COMPRESSION_ENABLED
 	if (mysql_flags & CLIENT_COMPRESS) {
 		mysql_flags &= ~CLIENT_COMPRESS;
@@ -606,81 +726,16 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	{
 		mysql_flags |= CLIENT_SSL;
 	}
-	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
-		auth_packet->send_half_packet = TRUE;
-	}
 #endif
-	auth_packet->user		= user;
-	auth_packet->password	= passwd;
 
-	if (conn->options.charset_name && (charset = mysqlnd_find_charset_name(conn->options.charset_name))) {
-		auth_packet->charset_no	= charset->nr;
-	} else {
-#if PHP_MAJOR_VERSION >= 6
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
-		auth_packet->charset_no	= greet_packet->charset_no;
-#endif
-	}
-	auth_packet->db			= db;
-	auth_packet->db_len		= db_len;
-	auth_packet->max_packet_size= 3UL*1024UL*1024UL*1024UL;
-	auth_packet->client_flags= mysql_flags;
-
-	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
-	if (!conn->scramble) {
-		SET_OOM_ERROR(conn->error_info);
-		goto err; /* OOM */
-	}
-	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
-	
-	if (!PACKET_WRITE(auth_packet, conn)) {
-		CONN_SET_STATE(conn, CONN_QUIT_SENT);
-		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, greet_packet, &conn->options, mysql_flags TSRMLS_CC)) {
 		goto err;
 	}
 
-#ifdef MYSQLND_SSL_SUPPORTED
-	if (auth_packet->send_half_packet) {
-		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
-		DBG_INF("Switching to SSL");
-
-		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
-
-		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
-			goto err;
-		}
-		
-		auth_packet->send_half_packet = FALSE;
-		if (!PACKET_WRITE(auth_packet, conn)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-			goto err;
-		}
-	}
-#endif
-
-	if (FAIL == PACKET_READ(ok_packet, conn) || ok_packet->field_count >= 0xFE) {
-		if (ok_packet->field_count == 0xFE) {
-			/* old authentication with new server  !*/
-			DBG_ERR(mysqlnd_old_passwd);
-			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
-		} else if (ok_packet->field_count == 0xFF) {
-			if (ok_packet->sqlstate[0]) {
-				if (!self_alloced) {
-					strlcpy(conn->error_info.sqlstate, ok_packet->sqlstate, sizeof(conn->error_info.sqlstate));
-				}
-				DBG_ERR_FMT("ERROR:%d [SQLSTATE:%s] %s", ok_packet->error_no, ok_packet->sqlstate, ok_packet->error);
-			}
-			if (!self_alloced) {
-				conn->error_info.error_no = ok_packet->error_no;
-				strlcpy(conn->error_info.error, ok_packet->error, sizeof(conn->error_info.error));
-			}
-		}
-	} else {
+	{
 		CONN_SET_STATE(conn, CONN_READY);
 
-		if (!self_alloced && saved_compression) {
+		if (saved_compression) {
 			conn->net->compressed = TRUE;
 		}
 		/*
@@ -733,31 +788,17 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			}
 			conn->unix_socket_len = strlen(conn->unix_socket);
 		}
-		conn->client_flag		= auth_packet->client_flags;
-		conn->max_packet_size	= auth_packet->max_packet_size;
+		conn->client_flag		= mysql_flags;
+		conn->max_packet_size	= MYSQLND_ASSEBLED_PACKET_MAX_SIZE;
 		/* todo: check if charset is available */
-		conn->charset			= mysqlnd_find_charset_nr(auth_packet->charset_no);
 		conn->server_capabilities = greet_packet->server_capabilities;
 		conn->upsert_status.warning_count = 0;
 		conn->upsert_status.server_status = greet_packet->server_status;
 		conn->upsert_status.affected_rows = 0;
-		SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-						ok_packet->message, ok_packet->message_len,
-						conn->persistent);
 
 		SET_EMPTY_ERROR(conn->error_info);
 
 		mysqlnd_local_infile_default(conn);
-
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
-		if (reconnect) {
-			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);
-		}
-		if (conn->persistent) {
-			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
-		}
-
-		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
 
 #if PHP_MAJOR_VERSION >= 6
 		{
@@ -786,16 +827,23 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			}
 		}
 
+
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
+		if (reconnect) {
+			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);
+		}
+		if (conn->persistent) {
+			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
+		}
+
+		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
+
 		PACKET_FREE(greet_packet);
-		PACKET_FREE(auth_packet);
-		PACKET_FREE(ok_packet);
 
 		DBG_RETURN(PASS);
 	}
 err:
 	PACKET_FREE(greet_packet);
-	PACKET_FREE(auth_packet);
-	PACKET_FREE(ok_packet);
 
 	if (errstr) {
 		DBG_ERR_FMT("[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
@@ -803,11 +851,6 @@ err:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
 		/* no mnd_ since we don't allocate it */
 		efree(errstr);
-	}
-	if (conn->scheme) {
-		/* no mnd_ since we don't allocate it */
-		mnd_pefree(conn->scheme, conn->persistent);
-		conn->scheme = NULL;
 	}
 
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_FAILURE);
