@@ -1568,15 +1568,16 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 	DBG_INF_FMT("flags=%u", flags);
 
 	/* mysqlnd_res::fetch_all works with buffered resultsets only */
-	if (!set ||
-		!set->row_count || !set->data_cursor ||
-		set->data_cursor >= set->data + set->row_count)
-	{
+	if (result->unbuf || (!result->unbuf && !set)) {
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
-	}	
+	}
 
 	mysqlnd_array_init(return_value, (unsigned int) set->row_count);
+
+	if (!set->row_count || !set->data_cursor || set->data_cursor >= set->data + set->row_count) {
+		DBG_VOID_RETURN;
+	}	
 
 	while (set->data_cursor &&
 		   (set->data_cursor - set->data) < (set->row_count * result->meta->field_count))
