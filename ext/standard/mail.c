@@ -212,7 +212,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}	\
 	return val;	\
 
-	if (mail_log) {
+	if (mail_log && *mail_log) {
 		char *tmp;
 		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
 		php_stream *stream = php_stream_open_wrapper(mail_log, "a", IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR, NULL);
