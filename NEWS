@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.3 RC2
 - Fixed the mail.log ini setting when no filename was given. (Johannes)
+- Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
+  (Andrey)
 
 17 Jun 2010, PHP 5.3.3 RC1
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
