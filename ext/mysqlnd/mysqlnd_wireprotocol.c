@@ -1166,7 +1166,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
-		if ((ret = conn->net->m.receive(conn, p, header.size TSRMLS_CC))) {
+		if (PASS != (ret = conn->net->m.receive(conn, p, header.size TSRMLS_CC))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
 			break;

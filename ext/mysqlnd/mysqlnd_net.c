@@ -499,7 +499,7 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compres
 
 
 /* {{{ mysqlnd_net::receive */
-static size_t
+static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, receive)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 {
 	size_t to_read = count;
