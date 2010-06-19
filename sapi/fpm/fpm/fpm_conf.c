@@ -950,9 +950,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		for (n=0; n<1024 && (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
 			buf[n] = c;
 		}
-		if (c == '\n') {
-			buf[n++] = c;
-		}
+		buf[n++] = '\n';
 		ini_lineno++;
 		ini_filename = filename;
 		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
@@ -972,7 +970,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 				free(tmp);
 				ini_recursion--;
 				close(fd);
-				ret = -1;
+				return -1;
 			}
 			free(tmp);
 		}
