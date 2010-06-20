@@ -298,6 +298,33 @@ PHP_METHOD(sqlite3, lastErrorMsg)
 }
 /* }}} */
 
+/* {{{ proto bool SQLite3::busyTimeout(int msecs)
+   Sets a busy handler that will sleep until database is not locked or timeout is reached. Passing a value less than or equal to zero turns off all busy handlers. */
+PHP_METHOD(sqlite3, busyTimeout)
+{
+	php_sqlite3_db_object *db_obj;
+	zval *object = getThis();
+	long ms;
+	int return_code;
+	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
+
+	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ms)) {
+		return;
+	}
+
+	return_code = sqlite3_busy_timeout(db_obj->db, ms);
+	if (return_code != SQLITE_OK) {
+		php_sqlite3_error(db_obj, "Unable to set busy timeout: %d, %s", return_code, sqlite3_errmsg(db_obj->db));
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
 /* {{{ proto bool SQLite3::loadExtension(String Shared Library)
    Attempts to load an SQLite extension library. */
@@ -1652,6 +1679,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_open, 0)
 	ZEND_ARG_INFO(0, encryption_key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_busytimeout, 0)
+	ZEND_ARG_INFO(0, ms)
+ZEND_END_ARG_INFO()
+
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_loadextension, 0)
 	ZEND_ARG_INFO(0, shared_library)
@@ -1736,6 +1767,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		lastInsertRowID,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorCode,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorMsg,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		busyTimeout,		arginfo_sqlite3_busytimeout, ZEND_ACC_PUBLIC)
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
 	PHP_ME(sqlite3,		loadExtension,		arginfo_sqlite3_loadextension, ZEND_ACC_PUBLIC)
 #endif
