@@ -79,6 +79,8 @@ PHP                                                                        NEWS
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
 
+- Fixed bug #45808 (stream_socket_enable_crypto() blocks and eats CPU).
+  (vincent at optilian dot com)
 - Fixed bug #52101 (dns_get_record() garbage in 'ipv6' field on Windows).
   (Pierre)
 - Fixed bug #52082 (character_set_client & character_set_connection reset after
