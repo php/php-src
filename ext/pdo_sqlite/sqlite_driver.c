@@ -642,7 +642,7 @@ static struct pdo_dbh_methods sqlite_methods = {
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
 {
-	if (strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
+	if (*filename && strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
 		char *fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 
 		if (!fullpath) {
