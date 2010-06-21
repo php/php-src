@@ -166,19 +166,53 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	RETCODE ret;
+	
+	if (FAIL == dbcmd(H->link, cmd)) {
+		return 0;
+	}
+	
+	if (FAIL == dbsqlexec(H->link)) {
+		return 0;
+	}
+	
+	return 1;
+}
+
+static int dblib_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("BEGIN TRANSACTION", dbh TSRMLS_CC);
+}
+
+static int dblib_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("COMMIT TRANSACTION", dbh TSRMLS_CC);
+}
+
+static int dblib_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh TSRMLS_CC);
+}
+
 static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
 	dblib_handle_doer,
 	dblib_handle_quoter,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* last insert */
+	dblib_handle_begin, /* begin */
+	dblib_handle_commit, /* commit */
+	dblib_handle_rollback, /* rollback */
+	NULL, /*set attr */
+	NULL, /* last insert id */
 	dblib_fetch_error, /* fetch error */
 	NULL, /* get attr */
 	NULL, /* check liveness */
+	NULL, /* get driver methods */
+	NULL, /* request shutdown */
+	NULL  /* in transaction */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
