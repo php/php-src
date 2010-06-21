@@ -207,7 +207,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 				}
 			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
-				DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
+				DBG_INF_FMT("Copy_ctor_called=%u", copy_ctor_called);
 #endif
 				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
 														   STAT_COPY_ON_WRITE_SAVED);
@@ -368,7 +368,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 	MYSQLND_PACKET_EOF * fields_eof = NULL;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
-	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
+	DBG_INF_FMT("stmt=%lu", stmt? stmt->stmt_id:0);
 
 	ret = FAIL;
 	do {
@@ -707,7 +707,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			result->conn->error_info = row_packet->error_info;
-			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
+			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
@@ -743,7 +743,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered");
-	DBG_INF_FMT("flags=%d", flags);
+	DBG_INF_FMT("flags=%u", flags);
 
 	*fetched_anything = FALSE;
 	if (result->unbuf->eof_reached) {
@@ -844,7 +844,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
 			result->conn->error_info = row_packet->error_info;
-			DBG_ERR_FMT("errorno=%d error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
+			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
@@ -866,7 +866,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 		result->m.unbuffered_free_last_data(result TSRMLS_CC);
 	}
 
-	DBG_INF_FMT("ret=%s fetched=%d", ret == PASS? "PASS":"FAIL", *fetched_anything);
+	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
 	DBG_RETURN(PASS);
 }
 /* }}} */
@@ -877,7 +877,7 @@ static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::use_result");
-	DBG_INF_FMT("ps=%d", ps);
+	DBG_INF_FMT("ps=%u", ps);
 
 	SET_EMPTY_ERROR(result->conn->error_info);
 
@@ -1100,7 +1100,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 		ret = PASS;
 		DBG_INF("EOF reached");
 	}
-	DBG_INF_FMT("ret=PASS fetched=%d", *fetched_anything);
+	DBG_INF_FMT("ret=PASS fetched=%u", *fetched_anything);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1121,7 +1121,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	MYSQLND_RES_BUFFERED *set;
 
 	DBG_ENTER("mysqlnd_res::store_result_fetch_data");
-	DBG_INF_FMT("conn=%llu binary_proto=%d to_cache=%d",
+	DBG_INF_FMT("conn=%llu binary_proto=%u to_cache=%u",
 				conn->thread_id, binary_protocol, to_cache);
 
 	result->stored_data	= set = mnd_pecalloc(1, sizeof(MYSQLND_RES_BUFFERED), to_cache);
@@ -1255,7 +1255,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	zend_bool to_cache = FALSE;
 
 	DBG_ENTER("mysqlnd_res::store_result");
-	DBG_INF_FMT("conn=%d ps_protocol=%d", conn->thread_id, ps_protocol);
+	DBG_INF_FMT("conn=%u ps_protocol=%u", conn->thread_id, ps_protocol);
 
 	/* We need the conn because we are doing lazy zval initialization in buffered_fetch_row */
 	result->conn 			= conn->m->get_reference(conn TSRMLS_CC);
@@ -1326,7 +1326,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, zend_bool implicit TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::free_result");
-	DBG_INF_FMT("implicit=%d", implicit);
+	DBG_INF_FMT("implicit=%u", implicit);
 
 	result->m.skip_result(result TSRMLS_CC);
 	MYSQLND_INC_CONN_STATISTIC(result->conn? result->conn->stats : NULL,
@@ -1500,7 +1500,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, unsigned int flags
 	zend_bool fetched_anything;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
-	DBG_INF_FMT("flags=%u mysqlnd_extension=%d", flags, extension);
+	DBG_INF_FMT("flags=%u mysqlnd_extension=%u", flags, extension);
 
 	if (!result->m.fetch_row) {
 		RETVAL_NULL();
