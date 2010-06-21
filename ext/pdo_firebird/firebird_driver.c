@@ -648,6 +648,14 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 			efree(vars[i].optval);
 		}
 	}
+	
+	if (!dbh->methods) {
+		char errmsg[512];
+		ISC_STATUS *s = H->isc_status;
+		isc_interprete(errmsg, &s);
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1] TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				"HY000", H->isc_status[1], errmsg);
+	}
 
 	if (!ret) {
 		firebird_handle_closer(dbh TSRMLS_CC);
