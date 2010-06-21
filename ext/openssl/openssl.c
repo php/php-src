@@ -89,6 +89,9 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_RC2_64,
 	PHP_OPENSSL_CIPHER_DES,
 	PHP_OPENSSL_CIPHER_3DES,
+	PHP_OPENSSL_CIPHER_AES_128_CBC,
+	PHP_OPENSSL_CIPHER_AES_192_CBC,
+	PHP_OPENSSL_CIPHER_AES_256_CBC,
 
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
@@ -533,6 +536,8 @@ struct php_x509_request { /* {{{ */
 	int priv_key_encrypt;
 
 	EVP_PKEY * priv_key;
+
+    const EVP_CIPHER * priv_key_encrypt_cipher;
 };
 /* }}} */
 
@@ -763,6 +768,9 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 	else \
 		varname = defval
 
+static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
+
+
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
 	char * str;
@@ -813,6 +821,21 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 			req->priv_key_encrypt = 1;
 		}
 	}
+
+	if (req->priv_key_encrypt && optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher"), (void**)&item) == SUCCESS) {
+		long cipher_algo = Z_LVAL_PP(item);
+		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
+		if (cipher == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm for private key.");
+			return FAILURE;
+		} else  {
+			req->priv_key_encrypt_cipher = cipher;
+		}
+	} else {
+		req->priv_key_encrypt_cipher = NULL;
+	}
+
+
 	
 	/* digest alg */
 	if (req->digest_name == NULL) {
@@ -960,6 +983,20 @@ static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo) { /* {
 			return EVP_des_ede3_cbc();
 			break;
 #endif
+
+#ifndef OPENSSL_NO_AES
+		case PHP_OPENSSL_CIPHER_AES_128_CBC:
+			return EVP_aes_128_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_AES_192_CBC:
+			return EVP_aes_192_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_AES_256_CBC:
+			return EVP_aes_256_cbc();
+			break;
+#endif
+
+
 		default:
 			return NULL;
 			break;
@@ -1039,7 +1076,12 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
 #endif
-
+#ifndef OPENSSL_NO_AES
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_128_CBC", PHP_OPENSSL_CIPHER_AES_128_CBC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_192_CBC", PHP_OPENSSL_CIPHER_AES_192_CBC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_256_CBC", PHP_OPENSSL_CIPHER_AES_256_CBC, CONST_CS|CONST_PERSISTENT);
+#endif
+ 
 	/* Values for key types */
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_RSA", OPENSSL_KEYTYPE_RSA, CONST_CS|CONST_PERSISTENT);
 #ifndef NO_DSA
@@ -3014,7 +3056,11 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		bio_out = BIO_new_file(filename, "w");
 
 		if (passphrase && req.priv_key_encrypt) {
-			cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
+			if (req.priv_key_encrypt_cipher) {
+				cipher = req.priv_key_encrypt_cipher;
+			} else {
+				cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
+			}
 		} else {
 			cipher = NULL;
 		}
@@ -3065,7 +3111,11 @@ PHP_FUNCTION(openssl_pkey_export)
 		bio_out = BIO_new(BIO_s_mem());
 
 		if (passphrase && req.priv_key_encrypt) {
-			cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
+			if (req.priv_key_encrypt_cipher) {
+				cipher = req.priv_key_encrypt_cipher;
+			} else {
+				cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
+			}
 		} else {
 			cipher = NULL;
 		}
