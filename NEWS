@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.3 RC2
+- Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
 - Fixed the mail.log ini setting when no filename was given. (Johannes)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
   (Andrey)
