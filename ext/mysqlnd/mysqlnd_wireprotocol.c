@@ -373,7 +373,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		packet->pre41 = TRUE;
 	}
 
-	DBG_INF_FMT("proto=%d server=%s thread_id=%ld",
+	DBG_INF_FMT("proto=%d server=%s thread_id=%d",
 				packet->protocol_version, packet->server_version, packet->thread_id);
 
 	DBG_INF_FMT("server_capabilities=%d charset_no=%d server_status=%d",
