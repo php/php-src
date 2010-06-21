@@ -32,6 +32,69 @@
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
 
+
+/* {{{ pdo_dblib_get_field_name
+ * 
+ * Taken from php_mssql_get_field_name
+ * 
+ */
+static char *pdo_dblib_get_field_name(int type)
+{
+	switch (type) {
+		case SQLBINARY:
+		case SQLVARBINARY:
+			return "blob";
+			break;
+		case SQLCHAR:
+		case SQLVARCHAR:
+			return "char";
+			break;
+		case SQLTEXT:
+			return "text";
+			break;
+		case SQLDATETIME:
+		case SQLDATETIM4:
+		case SQLDATETIMN:
+			return "datetime";
+			break;
+		case SQLDECIMAL:
+		case SQLFLT4:
+		case SQLFLT8:
+		case SQLFLTN:
+			return "real";
+			break;
+		case SQLINT1:
+		case SQLINT2:
+		case SQLINT4:
+		case SQLINTN:
+			return "int";
+			break;
+		case SQLNUMERIC:
+			return "numeric";
+			break;
+		case SQLMONEY:
+		case SQLMONEY4:
+		case SQLMONEYN:
+			return "money";
+			break;
+		case SQLBIT:
+			return "bit";
+			break;
+		case SQLIMAGE:
+			return "image";
+			break;
+#ifdef SQLUNIQUE
+		case SQLUNIQUE:
+			return "uniqueidentifier";
+			break;
+#endif
+		default:
+			return "unknown";
+			break;
+	}
+}
+/* }}} */
+
 static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -207,6 +270,25 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 	return 1;
 }
 
+static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+	
+	array_init(return_value);
+
+	DBTYPEINFO* dbtypeinfo;
+	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);
+		
+	add_assoc_long(return_value, "max_length", dbcollen(H->link, colno+1) );
+	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
+	add_assoc_long(return_value, "scale", (int) dbtypeinfo->scale );
+	add_assoc_string(return_value, "column_source", dbcolsource(H->link, colno+1), 1);
+	add_assoc_string(return_value, "native_type", pdo_dblib_get_field_name(dbcoltype(H->link, colno+1)), 1);
+
+	return 1;
+}
+
 
 struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
@@ -217,7 +299,7 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_param_hook,
 	NULL, /* set attr */
 	NULL, /* get attr */
-	NULL, /* meta */
+	pdo_dblib_stmt_get_column_meta, /* meta */
 	pdo_dblib_stmt_next_rowset, /* nextrow */
 	dblib_dblib_stmt_cursor_closer
 };
