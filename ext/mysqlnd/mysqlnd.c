@@ -230,7 +230,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn::simple_command_handle_response");
-	DBG_INF_FMT("silent=%d packet=%d command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
+	DBG_INF_FMT("silent=%u packet=%u command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
 
 	switch (ok_packet) {
 		case PROT_OK_PACKET:{
@@ -242,7 +242,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				if (!silent) {
 					DBG_ERR_FMT("Error while reading %s's OK packet", mysqlnd_command_to_text[command]);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading %s's OK packet. PID=%d",
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading %s's OK packet. PID=%u",
 									 mysqlnd_command_to_text[command], getpid());
 				}
 			} else {
@@ -311,7 +311,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 		}
 		default:
 			SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong response packet %d passed to the function", ok_packet);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong response packet %u passed to the function", ok_packet);
 			break;
 	}
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
@@ -330,7 +330,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND * conn, enum php_mysqlnd_se
 	MYSQLND_PACKET_COMMAND * cmd_packet;
 
 	DBG_ENTER("mysqlnd_conn::simple_command");
-	DBG_INF_FMT("command=%s ok_packet=%d silent=%d", mysqlnd_command_to_text[command], ok_packet, silent);
+	DBG_INF_FMT("command=%s ok_packet=%u silent=%u", mysqlnd_command_to_text[command], ok_packet, silent);
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
@@ -341,7 +341,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND * conn, enum php_mysqlnd_se
 			DBG_RETURN(FAIL);
 		default:
 			SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
-			DBG_ERR_FMT("Command out of sync. State=%d", CONN_GET_STATE(conn));
+			DBG_ERR_FMT("Command out of sync. State=%u", CONN_GET_STATE(conn));
 			DBG_RETURN(FAIL);
 	}
 
@@ -534,7 +534,7 @@ mysqlnd_connect_run_authentication(
 		} else if (ok_packet->field_count == 0xFF) {
 			if (ok_packet->sqlstate[0]) {
 				strlcpy(conn->error_info.sqlstate, ok_packet->sqlstate, sizeof(conn->error_info.sqlstate));
-				DBG_ERR_FMT("ERROR:%d [SQLSTATE:%s] %s", ok_packet->error_no, ok_packet->sqlstate, ok_packet->error);
+				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", ok_packet->error_no, ok_packet->sqlstate, ok_packet->error);
 			}
 			conn->error_info.error_no = ok_packet->error_no;
 			strlcpy(conn->error_info.error, ok_packet->error, sizeof(conn->error_info.error));
@@ -582,12 +582,11 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 	DBG_ENTER("mysqlnd_conn::connect");
 
-	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d persistent=%d state=%d",
+	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
 
 	if (conn && CONN_GET_STATE(conn) > CONN_ALLOCED && CONN_GET_STATE(conn) ) {
-		DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
 		DBG_INF("Connecting on a connected handle.");
 
 		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
@@ -649,7 +648,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			if (!port) {
 				port = 3306;
 			}
-			transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
+			transport_len = spprintf(&transport, 0, "tcp://%s:%u", host, port);
 		}
 		if (!transport) {
 			SET_OOM_ERROR(conn->error_info);
@@ -682,7 +681,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
 		goto err;
 	} else if (greet_packet->error_no) {
-		DBG_ERR_FMT("errorno=%d error=%s", greet_packet->error_no, greet_packet->error);
+		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
 		SET_CLIENT_ERROR(conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
 		goto err;
 	} else if (greet_packet->pre41) {
@@ -846,9 +845,9 @@ err:
 	PACKET_FREE(greet_packet);
 
 	if (errstr) {
-		DBG_ERR_FMT("[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
+		DBG_ERR_FMT("[%u] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
 		SET_CLIENT_ERROR(conn->error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%u] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
 		/* no mnd_ since we don't allocate it */
 		efree(errstr);
 	}
@@ -874,7 +873,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 	zend_bool self_alloced = FALSE;
 
 	DBG_ENTER("mysqlnd_connect");
-	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d", host?host:"", user?user:"", db?db:"", port, mysql_flags);
+	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host?host:"", user?user:"", db?db:"", port, mysql_flags);
 
 	if (!conn) {
 		self_alloced = TRUE;
@@ -963,7 +962,7 @@ MYSQLND_METHOD(mysqlnd_conn, reap_query)(MYSQLND * conn TSRMLS_DC)
 
 	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connection not opened, clear or has been closed");
-		DBG_ERR_FMT("Connection not opened, clear or has been closed. State=%d", state);
+		DBG_ERR_FMT("Connection not opened, clear or has been closed. State=%u", state);
 		DBG_RETURN(FAIL);
 	}
 	DBG_RETURN(conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC));
@@ -1230,7 +1229,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND * conn, const char * query, co
 	MYSQLND_RES *result = NULL;
 
 	DBG_ENTER("mysqlnd_conn::list_method");
-	DBG_INF_FMT("conn=%llu query=%s wild=%d", conn->thread_id, query, achtung_wild);
+	DBG_INF_FMT("conn=%llu query=%s wild=%u", conn->thread_id, query, achtung_wild);
 
 	if (par1) {
 		if (achtung_wild) {
@@ -1379,7 +1378,7 @@ MYSQLND_METHOD(mysqlnd_conn, ping)(MYSQLND * const conn TSRMLS_DC)
 	*/
 	SET_ERROR_AFF_ROWS(conn);
 
-	DBG_INF_FMT("ret=%d", ret);
+	DBG_INF_FMT("ret=%u", ret);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1652,7 +1651,7 @@ static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::set_state");
-	DBG_INF_FMT("New state=%d", new_state);
+	DBG_INF_FMT("New state=%u", new_state);
 	conn->state = new_state;
 	DBG_VOID_RETURN;
 }
@@ -1823,11 +1822,11 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 		  So there are no more results and we should just return FALSE, error_no has been set
 		*/
 		if (!conn->error_info.error_no) {
-			DBG_ERR_FMT("Serious error. %s::%d", __FILE__, __LINE__);
+			DBG_ERR_FMT("Serious error. %s::%u", __FILE__, __LINE__);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		} else {
-			DBG_INF_FMT("Error from the server : (%d) %s", conn->error_info.error_no, conn->error_info.error);
+			DBG_INF_FMT("Error from the server : (%u) %s", conn->error_info.error_no, conn->error_info.error);
 		}
 	}
 
@@ -1908,7 +1907,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	const MYSQLND_CHARSET * old_cs = conn->charset;
 
 	DBG_ENTER("mysqlnd_conn::change_user");
-	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%d",
+	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
 				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
 
 	SET_ERROR_AFF_ROWS(conn);
@@ -1982,7 +1981,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 			if (redundant_error_packet) {
 				PACKET_READ(redundant_error_packet, conn);
 				PACKET_FREE(redundant_error_packet);
-				DBG_INF_FMT("Server is %d, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
+				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
 			} else {
 				SET_OOM_ERROR(conn->error_info);			
 			}
@@ -2035,7 +2034,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 {
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn::set_client_option");
-	DBG_INF_FMT("conn=%llu option=%d", conn->thread_id, option);
+	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
 	switch (option) {
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_COMPRESS:
@@ -2332,7 +2331,7 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	MYSQLND *ret = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_init");
-	DBG_INF_FMT("persistent=%d", persistent);
+	DBG_INF_FMT("persistent=%u", persistent);
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
