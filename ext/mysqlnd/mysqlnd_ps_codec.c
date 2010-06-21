@@ -61,7 +61,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 	size_t tmp_len = 0;
 	zend_bool is_bit = field->type == MYSQL_TYPE_BIT;
 	DBG_ENTER("ps_fetch_from_1_to_8_bytes");
-	DBG_INF_FMT("zv=%p byte_count=%d", zv, byte_count);
+	DBG_INF_FMT("zv=%p byte_count=%u", zv, byte_count);
 	if (field->flags & UNSIGNED_FLAG) {
 		uint64_t uval = 0;
 

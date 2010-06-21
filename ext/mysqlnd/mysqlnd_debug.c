@@ -709,7 +709,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 	}
 #endif
 
-	DBG_INF_FMT("size=%lu ptr=%p persistent=%d", size, ret, persistent);
+	DBG_INF_FMT("size=%lu ptr=%p persistent=%u", size, ret, persistent);
 
 	if (ret && collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_MALLOC_COUNT:STAT_MEM_EMALLOC_COUNT;
@@ -833,7 +833,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 	long * threshold = persistent? &MYSQLND_G(debug_realloc_fail_threshold):&MYSQLND_G(debug_erealloc_fail_threshold);
 	DBG_ENTER(mysqlnd_perealloc_name);
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
-	DBG_INF_FMT("ptr=%p old_size=%lu new_size=%lu persist=%d", ptr, old_size, new_size, persistent); 
+	DBG_INF_FMT("ptr=%p old_size=%lu new_size=%lu persistent=%u", ptr, old_size, new_size, persistent); 
 
 #ifdef PHP_DEBUG
 	/* -1 is also "true" */
@@ -892,7 +892,7 @@ void _mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D)
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	DBG_ENTER(mysqlnd_pefree_name);
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
-	DBG_INF_FMT("ptr=%p persistent=%d", ptr, persistent); 
+	DBG_INF_FMT("ptr=%p persistent=%u", ptr, persistent); 
 
 	if (ptr) {
 		if (collect_memory_statistics) {

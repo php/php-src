@@ -227,13 +227,13 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 	size_t to_be_sent;
 
 	DBG_ENTER("mysqlnd_net::send");
-	DBG_INF_FMT("conn=%llu count=%lu compression=%d", conn->thread_id, count, net->compressed);
+	DBG_INF_FMT("conn=%llu count=%lu compression=%u", conn->thread_id, count, net->compressed);
 
 	net->stream->chunk_size = MYSQLND_MAX_PACKET_SIZE;
 
 	if (net->compressed == TRUE) {
 		size_t comp_buf_size = MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE + MIN(left, MYSQLND_MAX_PACKET_SIZE);
-		DBG_INF_FMT("compress_buf_size=%d", comp_buf_size);
+		DBG_INF_FMT("compress_buf_size="MYSQLND_SZ_T_SPEC, comp_buf_size);
 		compress_buf = mnd_emalloc(comp_buf_size);
 	}
 
@@ -263,7 +263,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 
 			int3store(compress_buf, payload_size);
 			int1store(compress_buf + 3, net->packet_no);
-			DBG_INF_FMT("writing %d bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
+			DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
 			ret = conn->net->m.network_write(conn, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE TSRMLS_CC);
 			net->compressed_envelope_packet_no++;
   #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
@@ -313,7 +313,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 		*/
 	} while (ret && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
-	DBG_INF_FMT("packet_size=%d packet_no=%d", left, net->packet_no);
+	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, net->packet_no);
 	/* Even for zero size payload we have to send a packet */
 	if (!ret) {
 		DBG_ERR_FMT("Can't %u send bytes", count);
@@ -460,7 +460,7 @@ MYSQLND_METHOD(mysqlnd_net, decode)(zend_uchar * uncompressed_data, size_t uncom
 	DBG_ENTER("mysqlnd_net::decode");
 	error = uncompress(uncompressed_data, &tmp_complen, compressed_data, compressed_data_len);
 
-	DBG_INF_FMT("compressed data: decomp_len=%d compressed_size=%d", tmp_complen, compressed_data_len);
+	DBG_INF_FMT("compressed data: decomp_len=%lu compressed_size="MYSQLND_SZ_T_SPEC, tmp_complen, compressed_data_len);
 	if (error != Z_OK) {
 		DBG_INF_FMT("decompression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
 	}
@@ -487,7 +487,7 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compres
 	if (error != Z_OK) {
 		DBG_INF_FMT("compression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
 	} else {
-		DBG_INF_FMT("compression successful. compressed size=%d", tmp_complen);
+		DBG_INF_FMT("compression successful. compressed size=%lu", tmp_complen);
 	}
 	DBG_RETURN(error == Z_OK? PASS:FAIL);
 #else
@@ -534,16 +534,16 @@ MYSQLND_METHOD(mysqlnd_net, receive)(MYSQLND * conn, zend_uchar * buffer, size_t
 			net_payload_size = uint3korr(net_header);
 			packet_no = uint1korr(net_header + 3);
 			if (net->compressed_envelope_packet_no != packet_no) {
-				DBG_ERR_FMT("Transport level: packets out of order. Expected %d received %d. Packet size=%d",
+				DBG_ERR_FMT("Transport level: packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
 							net->compressed_envelope_packet_no, packet_no, net_payload_size);
 
-				php_error(E_WARNING, "Packets out of order. Expected %d received %d. Packet size="MYSQLND_SZ_T_SPEC,
+				php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
 						  net->compressed_envelope_packet_no, packet_no, net_payload_size);
 				DBG_RETURN(FAIL);
 			}
 			net->compressed_envelope_packet_no++;
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
-			DBG_INF_FMT("HEADER: hwd_packet_no=%d size=%3d", packet_no, net_payload_size);
+			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (unsigned long) net_payload_size);
 #endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
 			mysqlnd_read_compressed_packet_from_stream_and_fill_read_buffer(conn, net_payload_size TSRMLS_CC);
@@ -569,7 +569,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mysqlnd_option option, const char * const value TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_net::set_client_option");
-	DBG_INF_FMT("option=%d", option);
+	DBG_INF_FMT("option=%u", option);
 	switch (option) {
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
@@ -884,7 +884,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_net_init");
-	DBG_INF_FMT("persistent=%d", persistent);
+	DBG_INF_FMT("persistent=%u", persistent);
 	if (net) {
 		net->persistent = persistent;
 		net->m = mysqlnd_mysqlnd_net_methods;

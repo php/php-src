@@ -182,10 +182,10 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 		if (mysqlnd_ps_fetch_functions[meta->fields[i].type].func == NULL) {
-			DBG_ERR_FMT("Unknown type %d sent by the server.  Please send a report to the developers",
+			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers",
 						meta->fields[i].type);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							 "Unknown type %d sent by the server. "
+							 "Unknown type %u sent by the server. "
 							 "Please send a report to the developers",
 							 meta->fields[i].type);
 			PACKET_FREE(field_packet);
@@ -270,7 +270,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 	int i;
 	MYSQLND_FIELD *fields;
 	DBG_ENTER("mysqlnd_res_meta::free");
-	DBG_INF_FMT("persistent=%d", meta->persistent);
+	DBG_INF_FMT("persistent=%u", meta->persistent);
 
 	if ((fields = meta->fields)) {
 		DBG_INF("Freeing fields metadata");
@@ -316,7 +316,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	size_t len = meta->field_count * sizeof(struct mysqlnd_field_hash_key);
 
 	DBG_ENTER("mysqlnd_res_meta::clone_metadata");
-	DBG_INF_FMT("persistent=%d", persistent);
+	DBG_INF_FMT("persistent=%u", persistent);
 
 	new_meta = mnd_pecalloc(1, sizeof(MYSQLND_RES_METADATA), persistent);
 	if (!new_meta) {
@@ -427,7 +427,7 @@ static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
-	DBG_INF_FMT("fieldnr=%d", fieldnr);
+	DBG_INF_FMT("fieldnr=%u", fieldnr);
 	DBG_INF_FMT("name=%s max_length=%u",
 		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
 		meta->fields[meta->current_field].max_length);
@@ -474,7 +474,7 @@ mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_D
 	size_t alloc_size = sizeof(MYSQLND_RES_METADATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_RES_METADATA *ret = mnd_pecalloc(1, alloc_size, persistent);
 	DBG_ENTER("mysqlnd_result_meta_init");
-	DBG_INF_FMT("persistent=%d", persistent);
+	DBG_INF_FMT("persistent=%u", persistent);
 	
 	do {
 		if (!ret) {
