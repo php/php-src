@@ -236,7 +236,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 		case SQLMONEY4:
 		case SQLMONEYN: {
 			DBFLT8 money_value;
-			dbconvert(NULL, coltype, *ptr, *len, SQLFLT8, (LPBYTE)&money_value, tmp_len);
+			dbconvert(NULL, coltype, *ptr, *len, SQLFLT8, (LPBYTE)&money_value, 8);
 			*len = spprintf(&tmp_ptr, 0, "%.4f", money_value);
 			*ptr = tmp_ptr;
 			break;
@@ -245,14 +245,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			if (dbwillconvert(coltype, SQLCHAR)) {
 				tmp_len = 32 + (2 * (*len));
 				tmp_ptr = emalloc(tmp_len);
-
-				*len = dbconvert(NULL, coltype, *ptr, *len, SQLCHAR, tmp_ptr, tmp_len);
-
-				if (*len >= 0) {
-					tmp_ptr[*len] = '\0';
-				}
+				*len = dbconvert(NULL, coltype, *ptr, *len, SQLCHAR, tmp_ptr, -1);
 				*ptr = tmp_ptr;
-				*len = tmp_len;
 		} else {
 			*len = 0;
 			*ptr = NULL;
