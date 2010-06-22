@@ -10416,34 +10416,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HANDLE_EXCEPTION();
 }
 
-static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-		&& ARG_MUST_BE_SENT_BY_REF(EX(fbc), opline->op2.opline_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
-	}
-	{
-		zval *valptr;
-		zval *value;
-		zend_free_op free_op1;
-
-		value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
-
-		ALLOC_ZVAL(valptr);
-		INIT_PZVAL_COPY(valptr, value);
-		if (!0) {
-			zval_copy_ctor(valptr);
-		}
-		zend_vm_stack_push(valptr TSRMLS_CC);
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
-	}
-	CHECK_EXCEPTION();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -26400,34 +26372,6 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HANDLE_EXCEPTION();
 }
 
-static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-		&& ARG_MUST_BE_SENT_BY_REF(EX(fbc), opline->op2.opline_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
-	}
-	{
-		zval *valptr;
-		zval *value;
-
-
-		value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
-
-		ALLOC_ZVAL(valptr);
-		INIT_PZVAL_COPY(valptr, value);
-		if (!0) {
-			zval_copy_ctor(valptr);
-		}
-		zend_vm_stack_push(valptr TSRMLS_CC);
-
-	}
-	CHECK_EXCEPTION();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -37512,21 +37456,21 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SEND_VAL_SPEC_TMP_HANDLER,
   	ZEND_SEND_VAL_SPEC_TMP_HANDLER,
   	ZEND_SEND_VAL_SPEC_TMP_HANDLER,
-  	ZEND_SEND_VAL_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAL_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAL_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAL_SPEC_VAR_HANDLER,
-  	ZEND_SEND_VAL_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_SEND_VAL_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAL_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAL_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAL_SPEC_CV_HANDLER,
-  	ZEND_SEND_VAL_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
