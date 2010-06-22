@@ -872,12 +872,8 @@ static inline zval* zend_assign_tmp_to_variable(zval **variable_ptr_ptr, zval *v
 		}
  	} else {
 		if (EXPECTED(variable_ptr != value)) {
-			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
-
 			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 			ZVAL_COPY_VALUE(variable_ptr, value);
-			Z_SET_REFCOUNT_P(variable_ptr, refcount);
-			Z_SET_ISREF_P(variable_ptr);
 			zendi_zval_dtor(garbage);
 		}
 		return variable_ptr;
@@ -934,12 +930,8 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		}
  	} else {
 		if (EXPECTED(variable_ptr != value)) {
-			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
-
 			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 			ZVAL_COPY_VALUE(variable_ptr, value);
-			Z_SET_REFCOUNT_P(variable_ptr, refcount);
-			Z_SET_ISREF_P(variable_ptr);
 			zendi_zval_copy_ctor(*variable_ptr);
 			zendi_zval_dtor(garbage);
 		}
