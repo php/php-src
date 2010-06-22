@@ -197,6 +197,50 @@ static int dblib_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh TSRMLS_CC);
 }
 
+char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC) 
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	RETCODE ret;
+	char *id = NULL;
+
+	/* 
+	 * Would use scope_identity() but it's not implemented on Sybase
+	 */
+	
+	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
+		return NULL;
+	}
+	
+	if (FAIL == dbsqlexec(H->link)) {
+		return NULL;
+	}
+	
+	ret = dbresults(H->link);
+	if (ret == FAIL || ret == NO_MORE_RESULTS) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	ret = dbnextrow(H->link);
+	
+	if (ret == FAIL || ret == NO_MORE_ROWS) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	if (dbdatlen(H->link, 1) == 0) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	id = emalloc(32);
+	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, id, (DBINT)-1);
+		
+	dbcancel(H->link);
+	return id;
+}
+
 static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
@@ -206,7 +250,7 @@ static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_commit, /* commit */
 	dblib_handle_rollback, /* rollback */
 	NULL, /*set attr */
-	NULL, /* last insert id */
+	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
 	NULL, /* get attr */
 	NULL, /* check liveness */
@@ -303,6 +347,7 @@ pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)
+#define PDO_DBLIB_IS_SYBASE
 	PDO_DRIVER_HEADER(sybase),
 #else
 	PDO_DRIVER_HEADER(dblib),
