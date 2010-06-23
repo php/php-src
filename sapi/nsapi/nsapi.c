@@ -634,7 +634,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 				if (value) {
 					for(p = value + pos; *p; p++) {
 						*p = toupper(*p);
-						if (*p < 'A' || *p > 'Z') {
+						if (!isalnum(*p)) {
 							*p = '_';
 						}
 					}
