@@ -310,9 +310,12 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
-	
+
 	/* limit text/image from network */
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
+
+	/* allow double quoted indentifiers */
+	DBSETOPT(H->link, DBQUOTEDIDENT, NULL);
 
 	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
 		goto cleanup;
