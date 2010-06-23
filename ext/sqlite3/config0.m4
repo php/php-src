@@ -80,6 +80,7 @@ if test $PHP_SQLITE3 != "no"; then
     fi
 
     PHP_SQLITE3_CFLAGS="-I@ext_srcdir@/libsqlite $other_flags $threadsafe_flags $debug_flags"
+    PHP_INSTALL_HEADERS([ext/sqlite3/libsqlite/sqlite3.h])
   fi
 
   AC_DEFINE(HAVE_SQLITE3,1,[ ])
