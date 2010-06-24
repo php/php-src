@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2010, PHP 5.2.14
+- Fixed bug #52163 (SplFileObject::fgetss() fails due to parameter that can't
+  be set). (Felipe)
 - Fixed bug #52162 (custom request header variables with numbers are removed). 
   (Sriram Natarajan)
 - Fixed bug #52061 (memory_limit above 2G). (Felipe)
