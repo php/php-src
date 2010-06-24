@@ -39,10 +39,7 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 static struct st_mysqlnd_stmt_methods *mysqlnd_stmt_methods;
 
 /* Exported by mysqlnd_ps_codec.c */
-enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
-
-
-MYSQLND_RES * _mysqlnd_stmt_use_result(MYSQLND_STMT *stmt TSRMLS_DC);
+enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 
 enum_func_status mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param,
 												unsigned int flags,
@@ -56,7 +53,6 @@ static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_D
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
 static void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const stmt TSRMLS_DC);
-static enum_func_status mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const stmt TSRMLS_DC);
 
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
@@ -234,7 +230,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	/* Free space for next result */
 	mysqlnd_internal_free_stmt_content(s TSRMLS_CC);
 
-	DBG_RETURN(mysqlnd_stmt_execute_parse_response(s TSRMLS_CC));
+	DBG_RETURN(s->m->parse_execute_response(s TSRMLS_CC));
 }
 /* }}} */
 
@@ -671,7 +667,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 			DBG_RETURN(FAIL);
 		}
 	}
-	ret = mysqlnd_stmt_execute_generate_request(s, &request, &request_len, &free_request TSRMLS_CC);
+	ret = s->m->generate_execute_request(s, &request, &request_len, &free_request TSRMLS_CC);
 	if (ret == PASS) {
 		/* support for buffer types should be added here ! */
 		ret = stmt->conn->m->simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
@@ -692,7 +688,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 	}
 	stmt->execute_count++;
 
-	ret = mysqlnd_stmt_execute_parse_response(s TSRMLS_CC);
+	ret = s->m->parse_execute_response(s TSRMLS_CC);
 
 	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status.affected_rows) {
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status.affected_rows);
@@ -2320,7 +2316,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, alloc_result_bind),
 	MYSQLND_METHOD(mysqlnd_stmt, free_parameter_bind),
 	MYSQLND_METHOD(mysqlnd_stmt, free_result_bind),
-	MYSQLND_METHOD(mysqlnd_stmt, server_status)
+	MYSQLND_METHOD(mysqlnd_stmt, server_status),
+	mysqlnd_stmt_execute_generate_request,
+	mysqlnd_stmt_execute_parse_response
 MYSQLND_CLASS_METHODS_END;
 
 
