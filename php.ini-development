@@ -1618,7 +1618,7 @@ session.use_trans_sid = 0
 ;   0  (MD5 128 bits)
 ;   1  (SHA-1 160 bits)
 ; This option may also be set to the name of any hash function supported by
-; the hash extension. A list of available hashes is returned by the hash_alogs()
+; the hash extension. A list of available hashes is returned by the hash_algos()
 ; function.
 ; http://php.net/session.hash-function
 session.hash_function = 0
