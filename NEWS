@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Fixed the mail.log ini setting when no filename was given. (Johannes)
 - Fixed bug #52162 (custom request header variables with numbers are removed). 
   (Sriram Natarajan)
+- Fixed bug #52138 (Constants are parsed into the ini file for section names).
+  (Felipe)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
   (Andrey)
 
