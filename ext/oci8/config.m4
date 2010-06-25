@@ -37,7 +37,7 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
     OCI8_LIB_DIR=$PHP_OCI8_OH_LIBDIR
   else
     dnl This isn't an ORACLE_HOME.  Try heuristic examination of the dir to help the user
-    if test -f "$OCI8_DIR/libociei.so"; then
+    if test -f "$OCI8_DIR/libociei.$SHLIB_SUFFIX_NAME"; then
       AC_MSG_ERROR([Expected an ORACLE_HOME top level directory but ${OCI8_DIR} appears to be an Instant Client directory. Try --with-oci8=instantclient,${OCI8_DIR}])
     else
       AC_MSG_ERROR([Oracle library directory not found in ${OCI8_DIR}])
