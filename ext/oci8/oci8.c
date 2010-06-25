@@ -1300,19 +1300,26 @@ PHP_MINFO_FUNCTION(oci)
 	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 
-#if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
-#ifdef PHP_OCI8_ORACLE_VERSION
-	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_ORACLE_VERSION);
+#if	defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
+	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
+#elif defined(PHP_OCI8_ORACLE_VERSION)
+	snprintf(buf, sizeof(buf), "%s", PHP_OCI8_ORACLE_VERSION);
+#else
+	snprintf(buf, sizeof(buf), "Unknown");
 #endif
-#ifdef PHP_OCI8_DEF_DIR
+#if defined(HAVE_OCI_INSTANT_CLIENT)
+	php_info_print_table_row(2, "Oracle Instant Client Version", buf);
+#else
+	php_info_print_table_row(2, "Oracle Version", buf);
+#endif
+
+#if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
+#if defined(PHP_OCI8_DEF_DIR)
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DEF_DIR);
 #endif
-#ifdef PHP_OCI8_DEF_SHARED_LIBADD
+#if defined(PHP_OCI8_DEF_SHARED_LIBADD)
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_DEF_SHARED_LIBADD);
 #endif
-#elif defined(HAVE_OCI_INSTANT_CLIENT) && defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
-	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
-	php_info_print_table_row(2, "Oracle Instant Client Version", buf);
 #endif
 
 	php_info_print_table_row(2, "Temporary Lob support", "enabled");
