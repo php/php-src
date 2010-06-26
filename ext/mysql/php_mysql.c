@@ -297,29 +297,29 @@ static const zend_function_entry mysql_functions[] = {
 	PHP_FE(mysql_set_charset,							arginfo_mysql_set_charset)
 #endif	 
 	/* for downwards compatability */
-	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
-	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	NULL)
-	PHP_FALIAS(mysql_fieldtable,	mysql_field_table,	NULL)
-	PHP_FALIAS(mysql_fieldlen,		mysql_field_len,	NULL)
-	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	NULL)
-	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	NULL)
-	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	NULL)
+	PHP_FALIAS(mysql,				mysql_db_query,		arginfo_mysql_db_query)
+	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	arginfo_mysql_field_name)
+	PHP_FALIAS(mysql_fieldtable,	mysql_field_table,	arginfo_mysql_field_seek)
+	PHP_FALIAS(mysql_fieldlen,		mysql_field_len,	arginfo_mysql_field_seek)
+	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	arginfo_mysql_field_seek)
+	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	arginfo_mysql_field_seek)
+	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	mysql_list_tables)
 #ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
-	PHP_DEP_FALIAS(mysql_createdb,	mysql_create_db,	NULL)
-	PHP_DEP_FALIAS(mysql_dropdb,	mysql_drop_db,		NULL)
+	PHP_DEP_FALIAS(mysql_createdb,	mysql_create_db,	arginfo_mysql_select_db)
+	PHP_DEP_FALIAS(mysql_dropdb,	mysql_drop_db,		arginfo_mysql_select_db)
 #endif
 #endif	/* NETWARE */
-	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	NULL)
-	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	NULL)
-	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		NULL)
-	PHP_FALIAS(mysql_listdbs,		mysql_list_dbs,		NULL)
-	PHP_DEP_FALIAS(mysql_listtables,mysql_list_tables,	NULL)
-	PHP_FALIAS(mysql_listfields,	mysql_list_fields,	NULL)
-	PHP_FALIAS(mysql_db_name,		mysql_result,		NULL)
-	PHP_FALIAS(mysql_dbname,		mysql_result,		NULL)
-	PHP_FALIAS(mysql_tablename,		mysql_result,		NULL)
-	PHP_FALIAS(mysql_table_name,	mysql_result,		NULL)
+	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	arginfo__result_mysql_arg)
+	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	arginfo__result_mysql_arg)
+	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		arginfo__result_mysql_arg)
+	PHP_FALIAS(mysql_listdbs,		mysql_list_dbs,		arginfo__optional_mysql_link)
+	PHP_DEP_FALIAS(mysql_listtables,mysql_list_tables,	arginfo_mysql_select_db)
+	PHP_FALIAS(mysql_listfields,	mysql_list_fields,	arginfo_mysql_list_fields)
+	PHP_FALIAS(mysql_db_name,		mysql_result,		arginfo_mysql_result)
+	PHP_FALIAS(mysql_dbname,		mysql_result,		arginfo_mysql_result)
+	PHP_FALIAS(mysql_tablename,		mysql_result,		arginfo_mysql_result)
+	PHP_FALIAS(mysql_table_name,	mysql_result,		arginfo_mysql_result)
 	{NULL, NULL, NULL}
 };
 /* }}} */

@@ -295,7 +295,7 @@ const zend_function_entry posix_functions[] = {
 #endif
 
 	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
-	PHP_FALIAS(posix_errno, posix_get_last_error,	NULL)
+	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_get_last_error)
 	PHP_FE(posix_strerror,							arginfo_posix_strerror)
 #ifdef HAVE_INITGROUPS
 	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
