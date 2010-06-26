@@ -35,43 +35,43 @@ array(0) {
 }
 array(1) {
   [0]=>
-  object(Closure)#1 (0) {
+  object(Closure)#%d (0) {
   }
 }
 int(2)
 array(1) {
   [0]=>
-  object(Closure)#2 (1) {
+  object(Closure)#%d (1) {
     ["static"]=>
     array(1) {
       ["h"]=>
       &array(1) {
         [0]=>
-        object(Closure)#1 (0) {
+        object(Closure)#%d (0) {
         }
       }
     }
   }
 }
-object(Closure)#2 (1) {
+object(Closure)#%d (1) {
   ["static"]=>
   array(1) {
     ["h"]=>
     &array(1) {
       [0]=>
-      object(Closure)#1 (0) {
+      object(Closure)#%d (0) {
       }
     }
   }
 }
 array(1) {
   [0]=>
-  object(Closure)#1 (0) {
+  object(Closure)#%d (0) {
   }
 }
 array(2) {
   [0]=>
-  object(Closure)#3 (0) {
+  object(Closure)#%d (0) {
   }
   [1]=>
   int(5)
