@@ -2532,13 +2532,20 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 {
 	zend_uint i;
 
-	/* If it's a user function then arg_info == NULL means we don't have any parameters but we still need to do the arg number checks.  We are only willing to ignore this for internal functions because extensions don't always define arg_info. */
+	/* If it's a user function then arg_info == NULL means we don't have any parameters but
+	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
+	 * functions because extensions don't always define arg_info.
+	 */
 	if (!proto || (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION)) {
 		return 1;
 	}
 
-	/* Checks for constructors only if they are declared in an interface */
-	if ((fe->common.fn_flags & ZEND_ACC_CTOR) && !(proto->common.scope->ce_flags & ZEND_ACC_INTERFACE)) {
+	/* Checks for constructors only if they are declared in an interface,
+	 * or explicitly marked as abstract
+	 */
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
+		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
+			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
 		return 1;
 	}
 
