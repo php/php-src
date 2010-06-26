@@ -386,9 +386,9 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkey_get_public,		arginfo_openssl_pkey_get_public)
 	PHP_FE(openssl_pkey_get_details,	arginfo_openssl_pkey_get_details)
 
-	PHP_FALIAS(openssl_free_key,		openssl_pkey_free, 			NULL)
-	PHP_FALIAS(openssl_get_privatekey,	openssl_pkey_get_private,	NULL)
-	PHP_FALIAS(openssl_get_publickey,	openssl_pkey_get_public,	NULL)
+	PHP_FALIAS(openssl_free_key,		openssl_pkey_free, 			arginfo_openssl_pkey_free)
+	PHP_FALIAS(openssl_get_privatekey,	openssl_pkey_get_private,	arginfo_openssl_pkey_get_private)
+	PHP_FALIAS(openssl_get_publickey,	openssl_pkey_get_public,	arginfo_openssl_pkey_get_public)
 
 /* x.509 cert funcs */
 	PHP_FE(openssl_x509_read,				arginfo_openssl_x509_read)

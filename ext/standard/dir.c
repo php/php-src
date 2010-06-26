@@ -94,11 +94,17 @@ static zend_class_entry *dir_class_entry_ptr;
 		if (!dirp) \
 			RETURN_FALSE; \
 	} 
+	
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
+	ZEND_ARG_INFO(0, dir_handle)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,	NULL)
-	PHP_FALIAS(rewind,	rewinddir,	NULL)
-	PHP_NAMED_FE(read,  php_if_readdir, NULL)
+	PHP_FALIAS(close,	closedir,		arginfo_dir)
+	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
+	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
 	{NULL, NULL, NULL}
 };
 
