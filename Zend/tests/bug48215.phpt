@@ -29,8 +29,6 @@ $b->A();
 ?>
 ===DONE===
 --EXPECTF--
-
-Strict Standards: Redefining already defined constructor for class A in %s on line %d
 B::__construct
 A::__construct
 B::A
