@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   be set). (Felipe)
 - Fixed bug #52162 (custom request header variables with numbers are removed). 
   (Sriram Natarajan)
+- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
 - Fixed bug #52061 (memory_limit above 2G). (Felipe)
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia, Felipe)

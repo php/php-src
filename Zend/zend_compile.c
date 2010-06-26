@@ -1175,9 +1175,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			/* Improve after RC: cache the lowercase class name */
 
 			if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len))) {
-				if (CG(active_class_entry)->constructor) {
-					zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
-				} else {
+				if (!CG(active_class_entry)->constructor) {
 					CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 				}
 			} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
