@@ -30,7 +30,9 @@ if (defined("pass3")) {
   set_error_handler('errorHandler');
   define("pass2", 1);
   include(__FILE__);
+  print "ok\n";
 }
+
 ?>
---EXPECTF--
-Error: Redefining already defined constructor for class TestClass (%sbug35634.php:12)
+--EXPECT--
+ok

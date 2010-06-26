@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   function aliases). (Felipe)
 - Fixed bug #52162 (custom request header variables with numbers are removed). 
   (Sriram Natarajan)
+- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
 - Fixed bug #52138 (Constants are parsed into the ini file for section names).
   (Felipe)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
