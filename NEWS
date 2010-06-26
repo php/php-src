@@ -2,7 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.3 RC2
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
+
 - Fixed the mail.log ini setting when no filename was given. (Johannes)
+
+- Fixed bug #52193 (converting closure to array yields empty array). (Felipe)
 - Fixed bug #52183 (Reflectionfunction reports invalid number of arguments for
   function aliases). (Felipe)
 - Fixed bug #52162 (custom request header variables with numbers are removed). 

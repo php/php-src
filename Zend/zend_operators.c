@@ -30,6 +30,7 @@
 #include "zend_multiply.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
@@ -646,7 +647,14 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 
 				ALLOC_HASHTABLE(ht);
 				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-				if (Z_OBJ_HT_P(op)->get_properties) {
+				if (Z_OBJCE_P(op) == zend_ce_closure) {
+					convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
+					if (Z_TYPE_P(op) == IS_ARRAY) {
+						zend_hash_destroy(ht);
+						FREE_HASHTABLE(ht);
+						return;
+					}
+				} else if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
 					if (obj_ht) {
 						zend_hash_copy(ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
