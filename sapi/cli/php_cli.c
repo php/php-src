@@ -630,7 +630,6 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 		CG(shebang_len) = ftell(file_handle->handle.fp);
 		*lineno = 2;
 	} else {
-		CG(shebang_len) = 0;
 		rewind(file_handle->handle.fp);
 	}
 
@@ -1060,6 +1059,7 @@ int main(int argc, char *argv[])
 			script_file=argv[php_optind];
 			php_optind++;
 		}
+		CG(shebang_len) = 0;
 		if (script_file) {
 			if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
 				goto err;
@@ -1268,6 +1268,7 @@ int main(int argc, char *argv[])
 							exit_status=254;
 						}
 					} else {
+						CG(shebang_len) = 0;
 						if (script_file) {
 							if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
 								exit_status = 1;
