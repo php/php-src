@@ -2098,8 +2098,10 @@ consult the installation file that came with this distribution, or visit \n\
 							fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 						}
 					}
+					CG(shebang_len) = ftell(file_handle.handle.fp);
 					CG(start_lineno) = 2;
 				} else {
+					CG(shebang_len) = 0;
 					rewind(file_handle.handle.fp);
 				}
 			}
