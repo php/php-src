@@ -2079,6 +2079,7 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 			}
 
+			CG(shebang_len) = 0;
 			if (CGIG(check_shebang_line) && file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 				/* #!php support */
 				c = fgetc(file_handle.handle.fp);
@@ -2096,7 +2097,6 @@ consult the installation file that came with this distribution, or visit \n\
 					CG(shebang_len) = ftell(file_handle.handle.fp);
 					CG(start_lineno) = 2;
 				} else {
-					CG(shebang_len) = 0;
 					rewind(file_handle.handle.fp);
 				}
 			}
