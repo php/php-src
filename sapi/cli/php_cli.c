@@ -652,8 +652,10 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
 			}
 		}
+		CG(shebang_len) = ftell(file_handle->handle.fp);
 		*lineno = 2;
 	} else {
+		CG(shebang_len) = 0;
 		rewind(file_handle->handle.fp);
 	}
 
