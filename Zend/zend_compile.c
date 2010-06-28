@@ -2540,12 +2540,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
-	/* Checks for constructors only if they are declared in an interface,
-	 * or explicitly marked as abstract
-	 */
-	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
-		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
+	/* Checks for constructors only if they are declared in an interface */
+	if ((fe->common.fn_flags & ZEND_ACC_CTOR) && (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 		return 1;
 	}
 
