@@ -230,7 +230,6 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			memcpy(tmp_ptr, *ptr, *len);
 			tmp_ptr[*len] = '\0';
 			*ptr = tmp_ptr;
-			++(*len);
 			break;
 		case SQLMONEY:
 		case SQLMONEY4:
