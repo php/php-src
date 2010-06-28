@@ -31,9 +31,45 @@ if test "$PHP_SYBASE_CT" != "no"; then
   fi
   
   PHP_ADD_LIBPATH($SYBASE_CT_LIBDIR, SYBASE_CT_SHARED_LIBADD)
-  if test -f $SYBASE_CT_INCDIR/tds.h; then
+  if test -f $SYBASE_CT_INCDIR/tds.h -o -f $SYBASE_CT_INCDIR/tds_sysdep_public.h; then
     PHP_ADD_LIBRARY(ct,, SYBASE_CT_SHARED_LIBADD)
     SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lct"
+  else if test -f $SYBASE_CT_INCDIR/libsybct64; then
+    PHP_ADD_LIBRARY(sybcs64,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybct64,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybcomn64,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybintl64,, SYBASE_CT_SHARED_LIBADD)
+  
+    SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lsybcs64 -lsybct64 -lsybcomn64 -lsybintl64"
+  
+    PHP_CHECK_LIBRARY(sybtcl64, netg_errstr, [
+      PHP_ADD_LIBRARY(sybtcl64,,SYBASE_CT_SHARED_LIBADD)
+    ],[ 
+      PHP_ADD_LIBRARY(sybtcl64,,SYBASE_CT_SHARED_LIBADD)
+    ],[ 
+      $SYBASE_CT_LIBS 
+    ])
+  
+    PHP_CHECK_LIBRARY(insck64, insck__getVdate, [PHP_ADD_LIBRARY(insck64,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
+    PHP_CHECK_LIBRARY(insck64, bsd_tcp,         [PHP_ADD_LIBRARY(insck64,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
+  else if test -f $SYBASE_CT_INCDIR/libsybct; then
+    PHP_ADD_LIBRARY(sybcs,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybct,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybcomn,, SYBASE_CT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY(sybintl,, SYBASE_CT_SHARED_LIBADD)
+  
+    SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lsybcs -lsybct -lsybcomn -lsybintl"
+  
+    PHP_CHECK_LIBRARY(sybtcl, netg_errstr, [
+      PHP_ADD_LIBRARY(sybtcl,,SYBASE_CT_SHARED_LIBADD)
+    ],[ 
+      PHP_ADD_LIBRARY(sybtcl,,SYBASE_CT_SHARED_LIBADD)
+    ],[ 
+      $SYBASE_CT_LIBS 
+    ])
+  
+    PHP_CHECK_LIBRARY(insck, insck__getVdate, [PHP_ADD_LIBRARY(insck,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
+    PHP_CHECK_LIBRARY(insck, bsd_tcp,         [PHP_ADD_LIBRARY(insck,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
   else
     PHP_ADD_LIBRARY(cs,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(ct,, SYBASE_CT_SHARED_LIBADD)
