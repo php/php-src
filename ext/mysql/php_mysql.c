@@ -303,7 +303,7 @@ static const zend_function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_fieldlen,		mysql_field_len,	arginfo_mysql_field_seek)
 	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	arginfo_mysql_field_seek)
 	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	arginfo_mysql_field_seek)
-	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	mysql_list_tables)
+	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	arginfo_mysql_select_db)
 #ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_DEP_FALIAS(mysql_createdb,	mysql_create_db,	arginfo_mysql_select_db)
