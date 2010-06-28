@@ -9,8 +9,6 @@ PHP                                                                        NEWS
 - Fixed bug #52061 (memory_limit above 2G). (Felipe)
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia, Felipe)
-- Fixed bug #51421 (Abstract __construct constructor argument list not
-  enforced). (Felipe)
 - Fixed bug #49730 (Firebird - new PDO() returns NULL). (Felipe)
 
 17 Jun 2010, PHP 5.2.14RC1
