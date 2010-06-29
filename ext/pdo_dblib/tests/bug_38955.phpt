@@ -1,0 +1,62 @@
+--TEST--
+ PDO_DBLIB driver does not support transactions
+--SKIPIF--
+<?php
+if (!extension_loaded('pdo') || !extension_loaded('pdo_dblib')) die('skip not loaded');
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+PDOTest::skip();
+?>
+--FILE--
+<?php
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+
+/*We see these rows */
+$db->query("CREATE table php_test(val int)");
+$db->beginTransaction();
+$db->query("INSERT INTO php_test(val) values(1)");
+$db->query("INSERT INTO php_test(val) values(2)");
+$db->query("INSERT INTO php_test(val) values(3)");
+$db->query("INSERT INTO php_test(val) values(4)");
+$db->commit();
+
+/*We don't see these rows */
+$db->beginTransaction();
+$db->query("INSERT INTO php_test(val) values(5)");
+$db->query("INSERT INTO php_test(val) values(6)");
+$db->query("INSERT INTO php_test(val) values(7)");
+$db->query("INSERT INTO php_test(val) values(8)");
+$db->rollback();
+
+$rs = $db->query("SELECT * FROM php_test");
+$rows = $rs->fetchAll(PDO::FETCH_ASSOC);
+var_dump($rows);
+
+$db->query("DROP table php_test");
+?>
+--EXPECT--
+array(4) {
+  [0]=>
+  array(1) {
+    ["val"]=>
+    string(1) "1"
+  }
+  [1]=>
+  array(1) {
+    ["val"]=>
+    string(1) "2"
+  }
+  [2]=>
+  array(1) {
+    ["val"]=>
+    string(1) "3"
+  }
+  [3]=>
+  array(1) {
+    ["val"]=>
+    string(1) "4"
+  }
+}
