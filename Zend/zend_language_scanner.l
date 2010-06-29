@@ -299,7 +299,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		CG(start_lineno) = 0;
 	} else {
 		CG(zend_lineno) = 1;
-		CG(shebang_len) = 0;
 	}
 
 	CG(increment_lineno) = 0;
@@ -443,7 +442,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
-	size_t offset = (SCNG(yy_cursor) - SCNG(yy_start)) + CG(shebang_len);
+	size_t offset = SCNG(yy_cursor) - SCNG(yy_start);
 #ifdef ZEND_MULTIBYTE
 	if (SCNG(input_filter)) {
 		size_t original_offset = offset, length = 0; do {

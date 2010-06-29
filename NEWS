@@ -17,7 +17,6 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
   (Andrey)
-- Fixed bug #48930 (__COMPILER_HALT_OFFSET__ incorrect in PHP >= 5.3). (Felipe)
 
 17 Jun 2010, PHP 5.3.3 RC1
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
