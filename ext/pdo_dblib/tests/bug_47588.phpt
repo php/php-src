@@ -2,15 +2,19 @@
 PDO_DBLIB: Quoted field names
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_dblib')) die('skip not loaded');
+if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+try {
+	$db = new PDO( getenv('PDOTEST_DSN'), getenv('PDOTEST_USER'), getenv('PDOTEST_PASS'));
+} catch (PDOException $e) {
+	die('skip ' . $e->getMessage());
+}
+
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require dirname(__FILE__) . '/config.inc';
+$db = new PDO( getenv('PDOTEST_DSN'), getenv('PDOTEST_USER'), getenv('PDOTEST_PASS'));
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
@@ -27,23 +31,23 @@ echo "Done.\n";
 array(3) {
   [0]=>
   array(2) {
-    ["my field"]=>
+    ["My Field"]=>
     string(1) "1"
-    ["another field"]=>
+    ["Another Field"]=>
     string(11) "test_string"
   }
   [1]=>
   array(2) {
-    ["my field"]=>
+    ["My Field"]=>
     string(1) "2"
-    ["another field"]=>
+    ["Another Field"]=>
     string(11) "test_string"
   }
   [2]=>
   array(2) {
-    ["my field"]=>
+    ["My Field"]=>
     string(1) "3"
-    ["another field"]=>
+    ["Another Field"]=>
     string(11) "test_string"
   }
 }
