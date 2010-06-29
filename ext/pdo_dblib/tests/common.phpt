@@ -2,8 +2,7 @@
 DBLIB
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo_dblib')) print 'skip'; 
-?>
+if (!extension_loaded('pdo_dblib')) print 'skip'; ?>
 --REDIRECTTEST--
 # magic auto-configuration
 # Also update config.inc if you make changes here... 
