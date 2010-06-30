@@ -1,20 +1,26 @@
 <?php
 
 if (false !== getenv('PDO_DBLIB_TEST_DSN')) 
-	$config['ENV']['PDOTEST_DSN'] = getenv('PDO_DBLIB_TEST_DSN');
+	$dsn = getenv('PDO_DBLIB_TEST_DSN');
 else
-	$config['ENV']['PDOTEST_DSN'] = 'dblib:host=localhost dbname=test';
+	$dsn = 'dblib:host=localhost;dbname=test';
 
 if (false !== getenv('PDO_DBLIB_TEST_USER')) 	
-	$config['ENV']['PDOTEST_USER'] = getenv('PDO_DBLIB_TEST_USER');
+	$user = getenv('PDO_DBLIB_TEST_USER');
+else
+	$user = 'php';
+	
 	
 if (false !== getenv('PDO_DBLIB_TEST_PASS')) 	
-	$config['ENV']['PDOTEST_PASS'] = getenv('PDO_DBLIB_TEST_PASS');
+	$pass = getenv('PDO_DBLIB_TEST_PASS');
+else
+	$pass = 'password';
 
-if (false !== getenv('PDO_DBLIB_TEST_ATTR'))
-	$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_DBLIB_TEST_ATTR');
-	
-foreach ($config['ENV'] as $k => $v) {
-	putenv("$k=$v");
+try {
+	$db = new PDO($dsn, $user, $pass);
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+} catch (PDOException $e) {
+	die('skip ' . $e->getMessage());
 }
 ?>
