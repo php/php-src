@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia, Felipe)
 - Fixed bug #49730 (Firebird - new PDO() returns NULL). (Felipe)
+- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
+  JPEGs). (Ilia)
 
 17 Jun 2010, PHP 5.2.14RC1
 - Upgraded bundled PCRE to version 8.02. (Ilia)
