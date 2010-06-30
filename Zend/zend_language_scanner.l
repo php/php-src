@@ -139,8 +139,10 @@ static void yy_pop_state(TSRMLS_D)
 static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 {
 	YYCURSOR       = (YYCTYPE*)str;
-	SCNG(yy_start) = YYCURSOR;
 	YYLIMIT        = YYCURSOR + len;
+	if (!SCNG(yy_start)) {
+		SCNG(yy_start) = YYCURSOR;
+	}
 }
 
 void startup_scanner(TSRMLS_D)
@@ -241,7 +243,14 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path = NULL, *buf;
-	size_t size;
+	size_t size, offset = 0;
+	
+	/* The shebang line was read, get the current position to obtain the buffer start */
+	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
+		if ((offset = ftell(file_handle->handle.fp)) == -1) {
+			offset = 0;
+		}
+	}
 
 	if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
 		return FAILURE;
@@ -257,6 +266,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
+	SCNG(yy_start) = NULL;
 
 	if (size != -1) {
 #ifdef ZEND_MULTIBYTE
@@ -275,9 +285,10 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		} else {
 			SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
 		}
-
+		SCNG(yy_start) = SCNG(script_filtered) - offset;
 		yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);
 #else /* !ZEND_MULTIBYTE */
+		SCNG(yy_start) = buf - offset;
 		yy_scan_buffer(buf, size TSRMLS_CC);
 #endif /* ZEND_MULTIBYTE */
 	} else {
@@ -413,6 +424,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	memset(str->value.str.val + str->value.str.len, 0, ZEND_MMAP_AHEAD);
 
 	SCNG(yy_in)=NULL;
+	SCNG(yy_start) = NULL;
 
 #ifdef ZEND_MULTIBYTE
 	SCNG(script_org) = (unsigned char *)estrdup(str->value.str.val);
