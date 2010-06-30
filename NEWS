@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
   (Andrey)
+- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
+  JPEGs). (Ilia)
 
 17 Jun 2010, PHP 5.3.3 RC1
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
