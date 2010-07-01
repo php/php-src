@@ -1230,6 +1230,9 @@ PHP_FUNCTION(strtok)
 		case 2:
 			str = args[0];
 			tok = args[1];
+			if (PZVAL_IS_REF(*str)) {
+				SEPARATE_ZVAL(str);
+			}
 			convert_to_string_ex(str);
 
 			zval_add_ref(str);
@@ -2208,6 +2211,9 @@ PHP_FUNCTION(chunk_split)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (PZVAL_IS_REF(*p_str)) {
+		SEPARATE_ZVAL(p_str);
+	}
 	convert_to_string_ex(p_str);
 
 	if (argc > 1) {
@@ -2263,6 +2269,9 @@ PHP_FUNCTION(substr)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (PZVAL_IS_REF(*str)) {
+		SEPARATE_ZVAL(str);
+	}
 	convert_to_string_ex(str);
 	convert_to_long_ex(from);
 
@@ -3058,6 +3067,9 @@ PHP_FUNCTION(addcslashes)
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &str, &what) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+	if (PZVAL_IS_REF(*str)) {
+		SEPARATE_ZVAL(str);
 	}
 	convert_to_string_ex(str);
 	convert_to_string_ex(what);
@@ -4632,6 +4644,9 @@ PHP_FUNCTION(str_repeat)
 	}
 	
 	/* Make sure we're dealing with proper types */
+	if (PZVAL_IS_REF(*input_str)) {
+		SEPARATE_ZVAL(input_str);
+	}
 	convert_to_string_ex(input_str);
 	convert_to_long_ex(mult);
 	
