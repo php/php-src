@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
   (Andrey)
+- Fixed bug #48930 (__COMPILER_HALT_OFFSET__ incorrect in PHP >= 5.3). (Felipe)
 - Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
   JPEGs). (Ilia)
 
