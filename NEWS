@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jul 2010, PHP 5.2.14
+
 01 Jul 2010, PHP 5.2.14RC2
 - Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
 
