@@ -3,6 +3,11 @@ PHP                                                                        NEWS
 ?? Jul 2010, PHP 5.2.14
 
 01 Jul 2010, PHP 5.2.14RC2
+- Fixed a possible interruption array leak in strrchr(). Reported by
+  Péter Veres. (Felipe)
+- Fixed a possible interruption array leak in strchr(), strstr(), substr(), 
+  chunk_split(), strtok(), addcslashes(), str_repeat(). (Felipe)
+- Fixed a possible memory corruption in substr_replace() (Dmitry)
 - Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
 
 - Fixed bug #52163 (SplFileObject::fgetss() fails due to parameter that can't
