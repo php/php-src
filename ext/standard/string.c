@@ -2116,6 +2116,9 @@ PHP_FUNCTION(strrchr)
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	if (PZVAL_IS_REF(*haystack)) {
+		SEPARATE_ZVAL(haystack);
+	}
 	convert_to_string_ex(haystack);
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
