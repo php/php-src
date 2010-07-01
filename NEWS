@@ -85,6 +85,8 @@
 
 - Fixed PDO objects binary incompatibility. (Dmitry)
 
+- Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
+
 	
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)

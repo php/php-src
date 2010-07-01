@@ -2357,9 +2357,12 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	err = php_iconv_string(in_buffer, (size_t)in_buffer_len,
 		&out_buffer, &out_len, out_charset, in_charset);
 	_php_iconv_show_error(err, out_charset, in_charset TSRMLS_CC); 
-	if (out_buffer != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != NULL) {
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
+		if (out_buffer != NULL) {
+			efree(out_buffer);
+		}
 		RETURN_FALSE;
 	}
 }
