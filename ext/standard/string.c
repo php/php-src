@@ -1766,6 +1766,9 @@ PHP_FUNCTION(strstr)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (PZVAL_IS_REF(*haystack)) {
+		SEPARATE_ZVAL(haystack);
+	}
 	convert_to_string_ex(haystack);
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
@@ -2341,12 +2344,21 @@ PHP_FUNCTION(substr_replace)
 	}
 	
 	if (Z_TYPE_PP(str) != IS_ARRAY) {
+		if (PZVAL_IS_REF(*str)) {
+			SEPARATE_ZVAL(str);
+		}
 		convert_to_string_ex(str);
 	}
 	if (Z_TYPE_PP(repl) != IS_ARRAY) {
+		if (PZVAL_IS_REF(*repl)) {
+			SEPARATE_ZVAL(repl);
+		}
 		convert_to_string_ex(repl);
 	}
 	if (Z_TYPE_PP(from) != IS_ARRAY) {
+		if (PZVAL_IS_REF(*from)) {
+			SEPARATE_ZVAL(from);
+		}
 		convert_to_long_ex(from);
 	}
 
