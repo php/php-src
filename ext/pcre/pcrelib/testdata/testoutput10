@@ -1,7 +1,8 @@
 /-- These are a few representative patterns whose lengths and offsets are to be 
 shown when the link size is 2. This is just a doublecheck test to ensure the 
 sizes don't go horribly wrong when something is changed. The pattern contents 
-are all themselves checked in other tests. --/
+are all themselves checked in other tests. Unicode, including property support, 
+is required for these tests. --/
 
 /((?i)b)/BM
 Memory allocation (code space): 21
@@ -664,6 +665,46 @@ Memory allocation (code space): 40
   3     [\x00-\xa9\xab-\xff] (neg)
  36  36 Ket
  39     End
+------------------------------------------------------------------
+
+/[^\d]/8WB
+------------------------------------------------------------------
+  0  11 Bra
+  3     [^\p{Nd}]
+ 11  11 Ket
+ 14     End
+------------------------------------------------------------------
+
+/[[:^alpha:][:^cntrl:]]+/8WB
+------------------------------------------------------------------
+  0  44 Bra
+  3     [ -~\x80-\xff\P{L}]+
+ 44  44 Ket
+ 47     End
+------------------------------------------------------------------
+
+/[[:^cntrl:][:^alpha:]]+/8WB
+------------------------------------------------------------------
+  0  44 Bra
+  3     [ -~\x80-\xff\P{L}]+
+ 44  44 Ket
+ 47     End
+------------------------------------------------------------------
+
+/[[:alpha:]]+/8WB
+------------------------------------------------------------------
+  0  12 Bra
+  3     [\p{L}]+
+ 12  12 Ket
+ 15     End
+------------------------------------------------------------------
+
+/[[:^alpha:]\S]+/8WB
+------------------------------------------------------------------
+  0  15 Bra
+  3     [\P{L}\P{Xsp}]+
+ 15  15 Ket
+ 18     End
 ------------------------------------------------------------------
 
 /-- End of testinput10 --/

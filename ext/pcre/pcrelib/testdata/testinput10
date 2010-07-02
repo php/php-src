@@ -1,7 +1,8 @@
 /-- These are a few representative patterns whose lengths and offsets are to be 
 shown when the link size is 2. This is just a doublecheck test to ensure the 
 sizes don't go horribly wrong when something is changed. The pattern contents 
-are all themselves checked in other tests. --/
+are all themselves checked in other tests. Unicode, including property support, 
+is required for these tests. --/
 
 /((?i)b)/BM
 
@@ -120,5 +121,15 @@ are all themselves checked in other tests. --/
 /[^\xaa]/BM
 
 /[^\xaa]/8BM
+
+/[^\d]/8WB
+
+/[[:^alpha:][:^cntrl:]]+/8WB
+
+/[[:^cntrl:][:^alpha:]]+/8WB
+
+/[[:alpha:]]+/8WB
+
+/[[:^alpha:]\S]+/8WB
 
 /-- End of testinput10 --/

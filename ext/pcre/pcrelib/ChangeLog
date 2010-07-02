@@ -1,6 +1,101 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.10 25-Jun-2010
+------------------------
+
+1.  Added support for (*MARK:ARG) and for ARG additions to PRUNE, SKIP, and
+    THEN.
+
+2.  (*ACCEPT) was not working when inside an atomic group.
+
+3.  Inside a character class, \B is treated as a literal by default, but
+    faulted if PCRE_EXTRA is set. This mimics Perl's behaviour (the -w option
+    causes the error). The code is unchanged, but I tidied the documentation.
+
+4.  Inside a character class, PCRE always treated \R and \X as literals,
+    whereas Perl faults them if its -w option is set. I have changed PCRE so
+    that it faults them when PCRE_EXTRA is set.
+
+5.  Added support for \N, which always matches any character other than
+    newline. (It is the same as "." when PCRE_DOTALL is not set.)
+
+6.  When compiling pcregrep with newer versions of gcc which may have
+    FORTIFY_SOURCE set, several warnings "ignoring return value of 'fwrite',
+    declared with attribute warn_unused_result" were given. Just casting the
+    result to (void) does not stop the warnings; a more elaborate fudge is
+    needed. I've used a macro to implement this.
+
+7.  Minor change to pcretest.c to avoid a compiler warning.
+
+8.  Added four artifical Unicode properties to help with an option to make
+    \s etc use properties (see next item). The new properties are: Xan
+    (alphanumeric), Xsp (Perl space), Xps (POSIX space), and Xwd (word).
+
+9.  Added PCRE_UCP to make \b, \d, \s, \w, and certain POSIX character classes
+    use Unicode properties. (*UCP) at the start of a pattern can be used to set
+    this option. Modified pcretest to add /W to test this facility. Added
+    REG_UCP to make it available via the POSIX interface.
+
+10. Added --line-buffered to pcregrep.
+
+11. In UTF-8 mode, if a pattern that was compiled with PCRE_CASELESS was
+    studied, and the match started with a letter with a code point greater than
+    127 whose first byte was different to the first byte of the other case of
+    the letter, the other case of this starting letter was not recognized
+    (#976).
+
+12. If a pattern that was studied started with a repeated Unicode property
+    test, for example, \p{Nd}+, there was the theoretical possibility of
+    setting up an incorrect bitmap of starting bytes, but fortunately it could
+    not have actually happened in practice until change 8 above was made (it
+    added property types that matched character-matching opcodes).
+
+13. pcre_study() now recognizes \h, \v, and \R when constructing a bit map of
+    possible starting bytes for non-anchored patterns.
+
+14. Extended the "auto-possessify" feature of pcre_compile(). It now recognizes
+    \R, and also a number of cases that involve Unicode properties, both
+    explicit and implicit when PCRE_UCP is set.
+
+15. If a repeated Unicode property match (e.g. \p{Lu}*) was used with non-UTF-8
+    input, it could crash or give wrong results if characters with values
+    greater than 0xc0 were present in the subject string. (Detail: it assumed
+    UTF-8 input when processing these items.)
+
+16. Added a lot of (int) casts to avoid compiler warnings in systems where
+    size_t is 64-bit (#991).
+
+17. Added a check for running out of memory when PCRE is compiled with
+    --disable-stack-for-recursion (#990).
+
+18. If the last data line in a file for pcretest does not have a newline on
+    the end, a newline was missing in the output.
+
+19. The default pcre_chartables.c file recognizes only ASCII characters (values
+    less than 128) in its various bitmaps. However, there is a facility for
+    generating tables according to the current locale when PCRE is compiled. It
+    turns out that in some environments, 0x85 and 0xa0, which are Unicode space
+    characters, are recognized by isspace() and therefore were getting set in
+    these tables, and indeed these tables seem to approximate to ISO 8859. This
+    caused a problem in UTF-8 mode when pcre_study() was used to create a list
+    of bytes that can start a match. For \s, it was including 0x85 and 0xa0,
+    which of course cannot start UTF-8 characters. I have changed the code so
+    that only real ASCII characters (less than 128) and the correct starting
+    bytes for UTF-8 encodings are set for characters greater than 127 when in
+    UTF-8 mode. (When PCRE_UCP is set - see 9 above - the code is different
+    altogether.)
+
+20. Added the /T option to pcretest so as to be able to run tests with non-
+    standard character tables, thus making it possible to include the tests
+    used for 19 above in the standard set of tests.
+
+21. A pattern such as (?&t)(?#()(?(DEFINE)(?<t>a)) which has a forward
+    reference to a subpattern the other side of a comment that contains an
+    opening parenthesis caused either an internal compiling error, or a
+    reference to the wrong subpattern.
+
+
 Version 8.02 19-Mar-2010
 ------------------------
 

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -110,12 +110,13 @@ while ((t = *data++) != XCL_END)
       break;
 
       case PT_LAMP:
-      if ((prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt) ==
-          (t == XCL_PROP)) return !negated;
+      if ((prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
+           prop->chartype == ucp_Lt) == (t == XCL_PROP)) return !negated;
       break;
 
       case PT_GC:
-      if ((data[1] == _pcre_ucp_gentype[prop->chartype]) == (t == XCL_PROP)) return !negated;
+      if ((data[1] == _pcre_ucp_gentype[prop->chartype]) == (t == XCL_PROP))
+        return !negated;
       break;
 
       case PT_PC:
@@ -124,6 +125,33 @@ while ((t = *data++) != XCL_END)
 
       case PT_SC:
       if ((data[1] == prop->script) == (t == XCL_PROP)) return !negated;
+      break;
+
+      case PT_ALNUM:
+      if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
+           _pcre_ucp_gentype[prop->chartype] == ucp_N) == (t == XCL_PROP))
+        return !negated;
+      break;
+
+      case PT_SPACE:    /* Perl space */
+      if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
+           c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
+             == (t == XCL_PROP))
+        return !negated;
+      break;
+
+      case PT_PXSPACE:  /* POSIX space */
+      if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
+           c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
+           c == CHAR_FF || c == CHAR_CR) == (t == XCL_PROP))
+        return !negated;
+      break;
+
+      case PT_WORD:
+      if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
+           _pcre_ucp_gentype[prop->chartype] == ucp_N || c == CHAR_UNDERSCORE)
+             == (t == XCL_PROP))
+        return !negated;
       break;
 
       /* This should never occur, but compilers may mutter if there is no

@@ -1,6 +1,17 @@
 News about PCRE releases
 ------------------------
 
+Release 8.10 25-Jun-2010
+------------------------
+
+There are two major additions: support for (*MARK) and friends, and the option
+PCRE_UCP, which changes the behaviour of \b, \d, \s, and \w (and their
+opposites) so that they make use of Unicode properties. There are also a number
+of lesser new features, and several bugs have been fixed. A new option,
+--line-buffered, has been added to pcregrep, for use when it is connected to
+pipes.
+
+
 Release 8.02 19-Mar-2010
 ------------------------
 

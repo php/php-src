@@ -192,9 +192,7 @@ stdint.h is available, include it; it may define INT64_MAX. Systems that do not
 have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
 by "configure". */
 
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#elif HAVE_STDINT_H
+#if HAVE_STDINT_H
 #include <stdint.h>
 #elif HAVE_INTTYPES_H
 #include <inttypes.h>
@@ -477,7 +475,8 @@ know we are in UTF-8 mode. */
       } \
     }
 
-/* Get the next character, testing for UTF-8 mode, and advancing the pointer */
+/* Get the next character, testing for UTF-8 mode, and advancing the pointer.
+This is called when we don't know if we are in UTF-8 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
   c = *eptr++; \
@@ -514,7 +513,7 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, not advancing the
 pointer, incrementing length if there are extra bytes. This is called when we
-know we are in UTF-8 mode. */
+do not know if we are in UTF-8 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   c = *eptr; \
@@ -582,7 +581,7 @@ time, run time, or study time, respectively. */
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
    PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
    PCRE_DUPNAMES|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
-   PCRE_JAVASCRIPT_COMPAT)
+   PCRE_JAVASCRIPT_COMPAT|PCRE_UCP)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
@@ -877,6 +876,7 @@ so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
 #define STRING_COMMIT0              "COMMIT\0"
 #define STRING_F0                   "F\0"
 #define STRING_FAIL0                "FAIL\0"
+#define STRING_MARK0                "MARK\0"
 #define STRING_PRUNE0               "PRUNE\0"
 #define STRING_SKIP0                "SKIP\0"
 #define STRING_THEN                 "THEN"
@@ -906,6 +906,7 @@ so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
 #define STRING_BSR_ANYCRLF_RIGHTPAR "BSR_ANYCRLF)"
 #define STRING_BSR_UNICODE_RIGHTPAR "BSR_UNICODE)"
 #define STRING_UTF8_RIGHTPAR        "UTF8)"
+#define STRING_UCP_RIGHTPAR         "UCP)"
 
 #else  /* SUPPORT_UTF8 */
 
@@ -1129,6 +1130,7 @@ only. */
 #define STRING_COMMIT0              STR_C STR_O STR_M STR_M STR_I STR_T "\0"
 #define STRING_F0                   STR_F "\0"
 #define STRING_FAIL0                STR_F STR_A STR_I STR_L "\0"
+#define STRING_MARK0                STR_M STR_A STR_R STR_K "\0"
 #define STRING_PRUNE0               STR_P STR_R STR_U STR_N STR_E "\0"
 #define STRING_SKIP0                STR_S STR_K STR_I STR_P "\0"
 #define STRING_THEN                 STR_T STR_H STR_E STR_N
@@ -1158,6 +1160,7 @@ only. */
 #define STRING_BSR_ANYCRLF_RIGHTPAR STR_B STR_S STR_R STR_UNDERSCORE STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
 #define STRING_BSR_UNICODE_RIGHTPAR STR_B STR_S STR_R STR_UNDERSCORE STR_U STR_N STR_I STR_C STR_O STR_D STR_E STR_RIGHT_PARENTHESIS
 #define STRING_UTF8_RIGHTPAR        STR_U STR_T STR_F STR_8 STR_RIGHT_PARENTHESIS
+#define STRING_UCP_RIGHTPAR         STR_U STR_C STR_P STR_RIGHT_PARENTHESIS
 
 #endif  /* SUPPORT_UTF8 */
 
@@ -1190,9 +1193,13 @@ only. */
 
 #define PT_ANY        0    /* Any property - matches all chars */
 #define PT_LAMP       1    /* L& - the union of Lu, Ll, Lt */
-#define PT_GC         2    /* General characteristic (e.g. L) */
-#define PT_PC         3    /* Particular characteristic (e.g. Lu) */
+#define PT_GC         2    /* Specified general characteristic (e.g. L) */
+#define PT_PC         3    /* Specified particular characteristic (e.g. Lu) */
 #define PT_SC         4    /* Script (e.g. Han) */
+#define PT_ALNUM      5    /* Alphanumeric - the union of L and N */
+#define PT_SPACE      6    /* Perl space - Z plus 9,10,12,13 */
+#define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
+#define PT_WORD       8    /* Word - L plus N plus underscore */
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain UTF-8 characters with values greater than 255. */
@@ -1209,9 +1216,15 @@ contain UTF-8 characters with values greater than 255. */
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
-definitions below, up to ESC_z. There's a dummy for OP_ANY because it
-corresponds to "." rather than an escape sequence, and another for OP_ALLANY
-(which is used for [^] in JavaScript compatibility mode).
+definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
+corresponds to "." in DOTALL mode rather than an escape sequence. It is also
+used for [^] in JavaScript compatibility mode. In non-DOTALL mode, "." behaves
+like \N.
+
+The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
+when PCRE_UCP is set, when replacement of \d etc by \p sequences is required.
+They must be contiguous, and remain in order so that the replacements can be
+looked up from a table.
 
 The final escape must be ESC_REF as subsequent values are used for
 backreferences (\1, \2, \3, etc). There are two tests in the code for an escape
@@ -1221,10 +1234,11 @@ put in between that don't consume a character, that code will have to change.
 */
 
 enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
-       ESC_W, ESC_w, ESC_dum1, ESC_dum2, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
-       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, ESC_E, ESC_Q, ESC_g, ESC_k,
+       ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
+       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
+       ESC_E, ESC_Q, ESC_g, ESC_k,
+       ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu,
        ESC_REF };
-
 
 /* Opcode table: Starting from 1 (i.e. after OP_END), the values up to
 OP_EOD must correspond in order to the list of escapes immediately above.
@@ -1249,8 +1263,8 @@ enum {
   OP_WHITESPACE,         /*  9 \s */
   OP_NOT_WORDCHAR,       /* 10 \W */
   OP_WORDCHAR,           /* 11 \w */
-  OP_ANY,            /* 12 Match any character (subject to DOTALL) */
-  OP_ALLANY,         /* 13 Match any character (not subject to DOTALL) */
+  OP_ANY,            /* 12 Match any character except newline */
+  OP_ALLANY,         /* 13 Match any character */
   OP_ANYBYTE,        /* 14 Match any byte (\C); different to OP_ANY for UTF-8 */
   OP_NOTPROP,        /* 15 \P (not Unicode property) */
   OP_PROP,           /* 16 \p (Unicode property) */
@@ -1380,20 +1394,24 @@ enum {
 
   /* These are backtracking control verbs */
 
-  OP_PRUNE,          /* 107 */
-  OP_SKIP,           /* 108 */
-  OP_THEN,           /* 109 */
-  OP_COMMIT,         /* 110 */
+  OP_MARK,           /* 107 always has an argument */
+  OP_PRUNE,          /* 108 */
+  OP_PRUNE_ARG,      /* 109 same, but with argument */
+  OP_SKIP,           /* 110 */
+  OP_SKIP_ARG,       /* 111 same, but with argument */
+  OP_THEN,           /* 112 */
+  OP_THEN_ARG,       /* 113 same, but with argument */
+  OP_COMMIT,         /* 114 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 111 */
-  OP_ACCEPT,         /* 112 */
-  OP_CLOSE,          /* 113 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 115 */
+  OP_ACCEPT,         /* 116 */
+  OP_CLOSE,          /* 117 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 114 */
+  OP_SKIPZERO,       /* 118 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1404,7 +1422,7 @@ enum {
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
 definitions that follow must also be updated to match. There are also tables
-called "coptable" cna "poptable" in pcre_dfa_exec.c that must be updated. */
+called "coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only
@@ -1429,7 +1447,8 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond nref", "Cond rec", "Cond nrec", "Cond def",   \
   "Brazero", "Braminzero",                                        \
-  "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
+  "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
+  "*THEN", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",                \
   "Close", "Skip zero"
 
 
@@ -1495,8 +1514,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 3,                          /* RREF, NRREF                            */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
-  1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
-  1, 1, 3, 1                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG,                */ \
+  1, 3, 1, 3,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */ \
+  1, 1, 1, 3, 1                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 
 
 /* A magic value for OP_RREF and OP_NRREF to indicate the "any recursion"
@@ -1514,7 +1534,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERRCOUNT };
+       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
@@ -1657,6 +1677,7 @@ typedef struct match_data {
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   utf8;                  /* UTF8 flag */
   BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
+  BOOL   use_ucp;               /* PCRE_UCP flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
   BOOL   notempty_atstart;      /* Empty string match at start not wanted */
@@ -1676,6 +1697,7 @@ typedef struct match_data {
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
+  const uschar *mark;           /* Mark pointer to pass back */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

@@ -241,6 +241,10 @@ strings to make sure that UTF-8 support works on EBCDIC platforms. */
 #define STRING_Tifinagh0 STR_T STR_i STR_f STR_i STR_n STR_a STR_g STR_h "\0"
 #define STRING_Ugaritic0 STR_U STR_g STR_a STR_r STR_i STR_t STR_i STR_c "\0"
 #define STRING_Vai0 STR_V STR_a STR_i "\0"
+#define STRING_Xan0 STR_X STR_a STR_n "\0"
+#define STRING_Xps0 STR_X STR_p STR_s "\0"
+#define STRING_Xsp0 STR_X STR_s STR_p "\0"
+#define STRING_Xwd0 STR_X STR_w STR_d "\0"
 #define STRING_Yi0 STR_Y STR_i "\0"
 #define STRING_Z0 STR_Z "\0"
 #define STRING_Zl0 STR_Z STR_l "\0"
@@ -374,6 +378,10 @@ const char _pcre_utt_names[] =
   STRING_Tifinagh0
   STRING_Ugaritic0
   STRING_Vai0
+  STRING_Xan0
+  STRING_Xps0
+  STRING_Xsp0
+  STRING_Xwd0
   STRING_Yi0
   STRING_Z0
   STRING_Zl0
@@ -507,11 +515,15 @@ const ucp_type_table _pcre_utt[] = {
   { 891, PT_SC, ucp_Tifinagh },
   { 900, PT_SC, ucp_Ugaritic },
   { 909, PT_SC, ucp_Vai },
-  { 913, PT_SC, ucp_Yi },
-  { 916, PT_GC, ucp_Z },
-  { 918, PT_PC, ucp_Zl },
-  { 921, PT_PC, ucp_Zp },
-  { 924, PT_PC, ucp_Zs }
+  { 913, PT_ALNUM, 0 },
+  { 917, PT_PXSPACE, 0 },
+  { 921, PT_SPACE, 0 },
+  { 925, PT_WORD, 0 },
+  { 929, PT_SC, ucp_Yi },
+  { 932, PT_GC, ucp_Z },
+  { 934, PT_PC, ucp_Zl },
+  { 937, PT_PC, ucp_Zp },
+  { 940, PT_PC, ucp_Zs }
 };
 
 const int _pcre_utt_size = sizeof(_pcre_utt)/sizeof(ucp_type_table);
