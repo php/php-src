@@ -3035,7 +3035,9 @@ PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, v
 	}
 
 done:
-	iter->funcs->dtor(iter TSRMLS_CC);
+	if (iter) {
+		iter->funcs->dtor(iter TSRMLS_CC);
+	}
 	return EG(exception) ? FAILURE : SUCCESS;
 }
 /* }}} */
