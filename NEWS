@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 01 Jul 2010, PHP 5.2.14RC2
 - Fixed a possible interruption array leak in strrchr(). Reported by
-  Péter Veres. (Felipe)
+  Péter Veres. (CVE-2010-2484) (Felipe)
 - Fixed a possible interruption array leak in strchr(), strstr(), substr(), 
   chunk_split(), strtok(), addcslashes(), str_repeat(), trim(). (Felipe)
 - Fixed a possible memory corruption in substr_replace() (Dmitry)
