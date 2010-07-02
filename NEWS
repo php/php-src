@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.2.14
 
+- Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
+  (Johannes)
+
 01 Jul 2010, PHP 5.2.14RC2
 - Fixed a possible interruption array leak in strrchr(). Reported by
   Péter Veres. (CVE-2010-2484) (Felipe)
