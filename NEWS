@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Fixed a possible interruption array leak in strrchr(). Reported by
   Péter Veres. (Felipe)
 - Fixed a possible interruption array leak in strchr(), strstr(), substr(), 
-  chunk_split(), strtok(), addcslashes(), str_repeat(). (Felipe)
+  chunk_split(), strtok(), addcslashes(), str_repeat(), trim(). (Felipe)
 - Fixed a possible memory corruption in substr_replace() (Dmitry)
 - Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
 

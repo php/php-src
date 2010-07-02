@@ -774,6 +774,9 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (PZVAL_IS_REF(*str)) {
+		SEPARATE_ZVAL(str);
+	}
 	convert_to_string_ex(str);
 
 	if (argc > 1) {
