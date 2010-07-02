@@ -534,6 +534,14 @@ for(;;)
       }
     break;
 
+    case OP_MARK:
+    case OP_PRUNE_ARG:
+    case OP_SKIP_ARG:
+    case OP_THEN_ARG:
+    fprintf(f, "    %s %s", OP_names[*code], code + 2);
+    extra += code[1];
+    break;
+
     /* Anything else is just an item with no data*/
 
     default:

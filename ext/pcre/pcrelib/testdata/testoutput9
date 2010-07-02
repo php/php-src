@@ -1674,4 +1674,364 @@ No match
     \x{1d79}\x{a77d} 
 No match
 
+/^\p{Xan}/8
+    ABCD
+ 0: A
+    1234
+ 0: 1
+    \x{6ca}
+ 0: \x{6ca}
+    \x{a6c}
+ 0: \x{a6c}
+    \x{10a7}   
+ 0: \x{10a7}
+    ** Failers
+No match
+    _ABC   
+No match
+
+/^\p{Xan}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 1: ABCD1234\x{6ca}\x{a6c}
+ 2: ABCD1234\x{6ca}
+ 3: ABCD1234
+ 4: ABCD123
+ 5: ABCD12
+ 6: ABCD1
+ 7: ABCD
+ 8: ABC
+ 9: AB
+10: A
+    ** Failers
+No match
+    _ABC   
+No match
+
+/^\p{Xan}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 1: ABCD1234\x{6ca}\x{a6c}
+ 2: ABCD1234\x{6ca}
+ 3: ABCD1234
+ 4: ABCD123
+ 5: ABCD12
+ 6: ABCD1
+ 7: ABCD
+ 8: ABC
+ 9: AB
+10: A
+11: 
+    
+/^\p{Xan}{2,9}/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}
+ 1: ABCD1234
+ 2: ABCD123
+ 3: ABCD12
+ 4: ABCD1
+ 5: ABCD
+ 6: ABC
+ 7: AB
+    
+/^[\p{Xan}]/8
+    ABCD1234_
+ 0: A
+    1234abcd_
+ 0: 1
+    \x{6ca}
+ 0: \x{6ca}
+    \x{a6c}
+ 0: \x{a6c}
+    \x{10a7}   
+ 0: \x{10a7}
+    ** Failers
+No match
+    _ABC   
+No match
+ 
+/^[\p{Xan}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 1: ABCD1234\x{6ca}\x{a6c}
+ 2: ABCD1234\x{6ca}
+ 3: ABCD1234
+ 4: ABCD123
+ 5: ABCD12
+ 6: ABCD1
+ 7: ABCD
+ 8: ABC
+ 9: AB
+10: A
+    ** Failers
+No match
+    _ABC   
+No match
+
+/^>\p{Xsp}/8
+    >\x{1680}\x{2028}\x{0b}
+ 0: >\x{1680}
+    ** Failers
+No match
+    \x{0b} 
+No match
+
+/^>\p{Xsp}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}
+ 4: > \x{09}\x{0a}\x{0c}
+ 5: > \x{09}\x{0a}
+ 6: > \x{09}
+ 7: > 
+
+/^>\p{Xsp}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}
+ 4: > \x{09}\x{0a}\x{0c}
+ 5: > \x{09}\x{0a}
+ 6: > \x{09}
+ 7: > 
+ 8: >
+    
+/^>\p{Xsp}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}
+ 4: > \x{09}\x{0a}\x{0c}
+ 5: > \x{09}\x{0a}
+ 6: > \x{09}
+    
+/^>[\p{Xsp}]/8
+    >\x{2028}\x{0b}
+ 0: >\x{2028}
+ 
+/^>[\p{Xsp}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}
+ 4: > \x{09}\x{0a}\x{0c}
+ 5: > \x{09}\x{0a}
+ 6: > \x{09}
+ 7: > 
+
+/^>\p{Xps}/8
+    >\x{1680}\x{2028}\x{0b}
+ 0: >\x{1680}
+    >\x{a0} 
+ 0: >\x{a0}
+    ** Failers
+No match
+    \x{0b} 
+No match
+
+/^>\p{Xps}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 4: > \x{09}\x{0a}\x{0c}\x{0d}
+ 5: > \x{09}\x{0a}\x{0c}
+ 6: > \x{09}\x{0a}
+ 7: > \x{09}
+ 8: > 
+
+/^>\p{Xps}+?/8
+    >\x{1680}\x{2028}\x{0b}
+ 0: >\x{1680}\x{2028}\x{0b}
+ 1: >\x{1680}\x{2028}
+ 2: >\x{1680}
+
+/^>\p{Xps}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 4: > \x{09}\x{0a}\x{0c}\x{0d}
+ 5: > \x{09}\x{0a}\x{0c}
+ 6: > \x{09}\x{0a}
+ 7: > \x{09}
+ 8: > 
+ 9: >
+    
+/^>\p{Xps}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 4: > \x{09}\x{0a}\x{0c}\x{0d}
+ 5: > \x{09}\x{0a}\x{0c}
+ 6: > \x{09}\x{0a}
+ 7: > \x{09}
+    
+/^>\p{Xps}{2,9}?/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 4: > \x{09}\x{0a}\x{0c}\x{0d}
+ 5: > \x{09}\x{0a}\x{0c}
+ 6: > \x{09}\x{0a}
+ 7: > \x{09}
+    
+/^>[\p{Xps}]/8
+    >\x{2028}\x{0b}
+ 0: >\x{2028}
+ 
+/^>[\p{Xps}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+ 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
+ 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
+ 4: > \x{09}\x{0a}\x{0c}\x{0d}
+ 5: > \x{09}\x{0a}\x{0c}
+ 6: > \x{09}\x{0a}
+ 7: > \x{09}
+ 8: > 
+
+/^\p{Xwd}/8
+    ABCD
+ 0: A
+    1234
+ 0: 1
+    \x{6ca}
+ 0: \x{6ca}
+    \x{a6c}
+ 0: \x{a6c}
+    \x{10a7}
+ 0: \x{10a7}
+    _ABC    
+ 0: _
+    ** Failers
+No match
+    [] 
+No match
+
+/^\p{Xwd}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 1: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 2: ABCD1234\x{6ca}\x{a6c}
+ 3: ABCD1234\x{6ca}
+ 4: ABCD1234
+ 5: ABCD123
+ 6: ABCD12
+ 7: ABCD1
+ 8: ABCD
+ 9: ABC
+10: AB
+11: A
+
+/^\p{Xwd}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 1: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 2: ABCD1234\x{6ca}\x{a6c}
+ 3: ABCD1234\x{6ca}
+ 4: ABCD1234
+ 5: ABCD123
+ 6: ABCD12
+ 7: ABCD1
+ 8: ABCD
+ 9: ABC
+10: AB
+11: A
+12: 
+    
+/^\p{Xwd}{2,9}/8
+    A_12\x{6ca}\x{a6c}\x{10a7}
+ 0: A_12\x{6ca}\x{a6c}\x{10a7}
+ 1: A_12\x{6ca}\x{a6c}
+ 2: A_12\x{6ca}
+ 3: A_12
+ 4: A_1
+ 5: A_
+    
+/^[\p{Xwd}]/8
+    ABCD1234_
+ 0: A
+    1234abcd_
+ 0: 1
+    \x{6ca}
+ 0: \x{6ca}
+    \x{a6c}
+ 0: \x{a6c}
+    \x{10a7}   
+ 0: \x{10a7}
+    _ABC 
+ 0: _
+    ** Failers
+No match
+    []   
+No match
+ 
+/^[\p{Xwd}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 0: ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+ 1: ABCD1234\x{6ca}\x{a6c}\x{10a7}
+ 2: ABCD1234\x{6ca}\x{a6c}
+ 3: ABCD1234\x{6ca}
+ 4: ABCD1234
+ 5: ABCD123
+ 6: ABCD12
+ 7: ABCD1
+ 8: ABCD
+ 9: ABC
+10: AB
+11: A
+
+/-- Unicode properties for \b abd \B --/
+
+/\b...\B/8W
+    abc_
+ 0: abc
+    \x{37e}abc\x{376} 
+ 0: abc
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+ 0: \x{376}\x{371}\x{393}
+    !\x{c0}++\x{c1}\x{c2} 
+ 0: ++\x{c1}
+    !\x{c0}+++++ 
+ 0: \x{c0}++
+
+/-- Without PCRE_UCP, non-ASCII always fail, even if < 256  --/
+
+/\b...\B/8
+    abc_
+ 0: abc
+    ** Failers 
+ 0: Fai
+    \x{37e}abc\x{376} 
+No match
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+No match
+    !\x{c0}++\x{c1}\x{c2} 
+No match
+    !\x{c0}+++++ 
+No match
+
+/-- With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  --/
+
+/\b...\B/W
+    abc_
+ 0: abc
+    !\x{c0}++\x{c1}\x{c2} 
+ 0: ++\xc1
+    !\x{c0}+++++ 
+ 0: \xc0++
+
 /-- End of testinput9 --/ 

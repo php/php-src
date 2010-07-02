@@ -745,4 +745,53 @@ can't tell the difference.) --/
 /X\W{3}X/8
     \PX
 
+/\h/SI
+
+/\h/SI8
+    ABC\x{09}
+    ABC\x{20}
+    ABC\x{a0}
+    ABC\x{1680}
+    ABC\x{180e}
+    ABC\x{2000}
+    ABC\x{202f} 
+    ABC\x{205f} 
+    ABC\x{3000} 
+
+/\v/SI
+
+/\v/SI8
+    ABC\x{0a}
+    ABC\x{0b}
+    ABC\x{0c}
+    ABC\x{0d}
+    ABC\x{85}
+    ABC\x{2028}
+
+/\R/SI
+
+/\R/SI8
+
+/\h*A/SI8
+    CDBABC
+    
+/\v+A/SI8
+
+/\s?xxx\s/8SI
+
+/\sxxx\s/8T1
+    AB\x{85}xxx\x{a0}XYZ
+    AB\x{a0}xxx\x{85}XYZ
+
+/\sxxx\s/I8ST1
+    AB\x{85}xxx\x{a0}XYZ
+    AB\x{a0}xxx\x{85}XYZ
+
+/\S \S/8T1
+    \x{a2} \x{84} 
+
+/\S \S/I8ST1
+    \x{a2} \x{84} 
+    A Z 
+
 /-- End of testinput5 --/

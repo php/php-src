@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,11 @@ previously been set. */
 #  define PCREPOSIX_EXP_DECL extern __declspec(dllexport)
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
+
+/* We include pcre.h before pcre_internal.h so that the PCRE library functions
+are declared as "import" for Windows by defining PCRE_EXP_DECL as "import".
+This is needed even though pcre_internal.h itself includes pcre.h, because it
+does so after it has set PCRE_EXP_DECL to "export" if it is not already set. */
 
 #include "pcre.h"
 #include "pcre_internal.h"
@@ -133,7 +138,7 @@ static const int eint[] = {
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* a numbered reference must not be zero */
-  REG_BADPAT,  /* (*VERB) with an argument is not supported */
+  REG_BADPAT,  /* an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT) */
   /* 60 */
   REG_BADPAT,  /* (*VERB) not recognized */
   REG_BADPAT,  /* number is too big */
@@ -141,7 +146,9 @@ static const int eint[] = {
   REG_BADPAT,  /* digit expected after (?+ */
   REG_BADPAT,  /* ] is an invalid data character in JavaScript compatibility mode */
   /* 65 */
-  REG_BADPAT   /* different names for subpatterns of the same number are not allowed */
+  REG_BADPAT,  /* different names for subpatterns of the same number are not allowed */
+  REG_BADPAT,  /* (*MARK) must have an argument */
+  REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -245,6 +252,7 @@ if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
 if ((cflags & REG_DOTALL) != 0)   options |= PCRE_DOTALL;
 if ((cflags & REG_NOSUB) != 0)    options |= PCRE_NO_AUTO_CAPTURE;
 if ((cflags & REG_UTF8) != 0)     options |= PCRE_UTF8;
+if ((cflags & REG_UCP) != 0)      options |= PCRE_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE_UNGREEDY;
 
 preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,
@@ -334,13 +342,13 @@ if ((eflags & REG_STARTEND) != 0)
 else
   {
   so = 0;
-  eo = strlen(string);
+  eo = (int)strlen(string);
   }
 
 rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string + so, (eo - so),
-  0, options, ovector, nmatch * 3);
+  0, options, ovector, (int)(nmatch * 3));
 
-if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
+if (rc == 0) rc = (int)nmatch;    /* All captured slots were filled in */
 
 /* Successful match */
 

@@ -847,4 +847,143 @@
     ** Failers 
     \x{1d79}\x{a77d} 
 
+/^\p{Xan}/8
+    ABCD
+    1234
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    ** Failers
+    _ABC   
+
+/^\p{Xan}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    ** Failers
+    _ABC   
+
+/^\p{Xan}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^\p{Xan}{2,9}/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^[\p{Xan}]/8
+    ABCD1234_
+    1234abcd_
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    ** Failers
+    _ABC   
+ 
+/^[\p{Xan}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    ** Failers
+    _ABC   
+
+/^>\p{Xsp}/8
+    >\x{1680}\x{2028}\x{0b}
+    ** Failers
+    \x{0b} 
+
+/^>\p{Xsp}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xsp}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xsp}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>[\p{Xsp}]/8
+    >\x{2028}\x{0b}
+ 
+/^>[\p{Xsp}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}/8
+    >\x{1680}\x{2028}\x{0b}
+    >\x{a0} 
+    ** Failers
+    \x{0b} 
+
+/^>\p{Xps}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}+?/8
+    >\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xps}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xps}{2,9}?/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>[\p{Xps}]/8
+    >\x{2028}\x{0b}
+ 
+/^>[\p{Xps}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^\p{Xwd}/8
+    ABCD
+    1234
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}
+    _ABC    
+    ** Failers
+    [] 
+
+/^\p{Xwd}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+
+/^\p{Xwd}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^\p{Xwd}{2,9}/8
+    A_12\x{6ca}\x{a6c}\x{10a7}
+    
+/^[\p{Xwd}]/8
+    ABCD1234_
+    1234abcd_
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    _ABC 
+    ** Failers
+    []   
+ 
+/^[\p{Xwd}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+
+/-- Unicode properties for \b abd \B --/
+
+/\b...\B/8W
+    abc_
+    \x{37e}abc\x{376} 
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
+/-- Without PCRE_UCP, non-ASCII always fail, even if < 256  --/
+
+/\b...\B/8
+    abc_
+    ** Failers 
+    \x{37e}abc\x{376} 
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
+/-- With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  --/
+
+/\b...\B/W
+    abc_
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
 /-- End of testinput9 --/ 
