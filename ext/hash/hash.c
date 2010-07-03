@@ -556,8 +556,10 @@ PHP_FUNCTION(hash_copy)
 	copy_hash->ops = hash->ops;
 	copy_hash->context = context;
 	copy_hash->options = hash->options;
-	copy_hash->key = hash->key;
-
+	copy_hash->key = ecalloc(1, hash->ops->block_size);
+	if (hash->key) {
+		memcpy(copy_hash->key, hash->key, hash->ops->block_size);
+	}
 	ZEND_REGISTER_RESOURCE(return_value, copy_hash, php_hash_le_hash);
 }
 /* }}} */

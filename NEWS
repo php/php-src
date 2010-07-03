@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.3.3 RC3
-
+- Fixed bug #52240 (hash_copy() does not copy the HMAC key, causes wrong
+  results and PHP crashes). (Felipe)
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
 
