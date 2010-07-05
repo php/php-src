@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
+- Fixed bug #52237 (Crash when passing the reference of the property of a
+  non-object). (Dmitry)
 
 01 Jul 2010, PHP 5.2.14RC2
 - Fixed a possible interruption array leak in strrchr(). Reported by

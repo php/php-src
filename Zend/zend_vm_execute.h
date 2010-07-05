@@ -7605,9 +7605,16 @@ static int ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
-      	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
-               return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-        }
+	if (IS_VAR == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
+		(*varptr_ptr)->refcount--;
+		ALLOC_ZVAL(*varptr_ptr);
+		INIT_ZVAL(**varptr_ptr);
+		(*varptr_ptr)->refcount = 0;
+	}
+
+	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
+		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
@@ -20041,9 +20048,16 @@ static int ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
-      	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
-               return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-        }
+	if (IS_CV == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
+		(*varptr_ptr)->refcount--;
+		ALLOC_ZVAL(*varptr_ptr);
+		INIT_ZVAL(**varptr_ptr);
+		(*varptr_ptr)->refcount = 0;
+	}
+
+	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
+		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
