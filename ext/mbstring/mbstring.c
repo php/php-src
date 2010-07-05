@@ -1051,58 +1051,42 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC)
 {
 	enum mbfl_no_encoding no_encoding;
-  	const char *enc_name = NULL;
-  	uint enc_name_len = 0;
    
-  	no_encoding = new_value ? mbfl_name2no_encoding(new_value):
-  				mbfl_no_encoding_invalid;
-	if (no_encoding != mbfl_no_encoding_invalid) {
-  		enc_name = new_value;
-  		enc_name_len = new_value_length;
-  	} else {
+	if (!new_value
+	 || !*new_value
+	 || (no_encoding = mbfl_name2no_encoding(new_value)) == mbfl_no_encoding_invalid) {
   		switch (MBSTRG(language)) {
   			case mbfl_no_language_uni:
-  				enc_name = "UTF-8";
-  				enc_name_len = sizeof("UTF-8") - 1;
+  				no_encoding = mbfl_no_encoding_utf8;
   				break;
   			case mbfl_no_language_japanese:
-  				enc_name = "EUC-JP";
-  				enc_name_len = sizeof("EUC-JP") - 1;
+  				no_encoding = mbfl_no_encoding_euc_jp;
   				break;
   			case mbfl_no_language_korean:
-  				enc_name = "EUC-KR";
-  				enc_name_len = sizeof("EUC-KR") - 1;
+  				no_encoding = mbfl_no_encoding_euc_kr;
   				break;
   			case mbfl_no_language_simplified_chinese:
-  				enc_name = "EUC-CN";
-  				enc_name_len = sizeof("EUC-CN") - 1;
+  				no_encoding = mbfl_no_encoding_euc_cn;
   				break;
   			case mbfl_no_language_traditional_chinese:
-  				enc_name = "EUC-TW";
-  				enc_name_len = sizeof("EUC-TW") - 1;
+  				no_encoding = mbfl_no_encoding_euc_tw;
   				break;
   			case mbfl_no_language_russian:
-  				enc_name = "KOI8-R";
-  				enc_name_len = sizeof("KOI8-R") - 1;
+  				no_encoding = mbfl_no_encoding_koi8r;
   				break;
   			case mbfl_no_language_german:
-  				enc_name = "ISO-8859-15";
-  				enc_name_len = sizeof("ISO-8859-15") - 1;
+  				no_encoding = mbfl_no_encoding_8859_15;
   				break;
   			case mbfl_no_language_armenian:
-  				enc_name = "ArmSCII-8";
-  				enc_name_len = sizeof("ArmSCII-8") - 1;
+  				no_encoding = mbfl_no_encoding_armscii8;
   				break;
   			case mbfl_no_language_turkish:
-  				enc_name = "ISO-8859-9";
-  				enc_name_len = sizeof("ISO-8859-9") - 1;
+  				no_encoding = mbfl_no_encoding_8859_9;
   				break;
   			default:
-  				enc_name = "ISO-8859-1";
-  				enc_name_len = sizeof("ISO-8859-1") - 1;
+  				no_encoding = mbfl_no_encoding_8859_1;
   				break;
   		}
-  		no_encoding = mbfl_name2no_encoding(enc_name);
   	}
 	MBSTRG(internal_encoding) = no_encoding;
 	MBSTRG(current_internal_encoding) = no_encoding;

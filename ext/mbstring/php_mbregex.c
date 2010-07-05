@@ -372,7 +372,7 @@ static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 	const char *p;
 	php_mb_regex_enc_name_map_t *mapping;
 
-	if (pname == NULL) {
+	if (pname == NULL || !*pname) {
 		return ONIG_ENCODING_UNDEF;
 	}
 
