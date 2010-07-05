@@ -3078,6 +3078,13 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
+	if (OP1_TYPE == IS_VAR && UNEXPECTED(*varptr_ptr == &EG(error_zval))) {
+		Z_DELREF_PP(varptr_ptr);
+		ALLOC_ZVAL(*varptr_ptr);
+		INIT_ZVAL(**varptr_ptr);
+		Z_SET_REFCOUNT_PP(varptr_ptr, 0);
+	}
+
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.opline_num)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 	}
