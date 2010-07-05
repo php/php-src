@@ -3682,9 +3682,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	PHP_RINIT(dir)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
 
-	/* Reset magic_quotes_runtime */
-	PG(magic_quotes_runtime) = INI_BOOL("magic_quotes_runtime");
-
 	/* Setup default context */
 	FG(default_context) = NULL;
 
@@ -4534,7 +4531,9 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 		return;
 	}
 
-	PG(magic_quotes_runtime) = new_setting;
+	if (zend_alter_ini_entry_ex("magic_quotes_runtime", sizeof("magic_quotes_runtime"), new_setting ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 /* }}} */
