@@ -64,10 +64,7 @@ foreach ($classes as $class) {
 				 
 ?>
 --EXPECTF--
-
-Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line 26
-
-Strict Standards: %s for class NewAndOldCtor in %s on line 31
+Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line %d
 Constructor of NewCtor: __construct
 Constructor of ExtendsNewCtor: __construct
 Constructor of OldCtor: OldCtor
