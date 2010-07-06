@@ -35,13 +35,25 @@ Class [ <internal%s> class Directory ] {
   }
 
   - Methods [3] {
-    Method [ <internal%s> public method close ] {
+    Method [ <internal:standard> public method close ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> $dir_handle ]
+      }
     }
 
-    Method [ <internal%s> public method rewind ] {
+    Method [ <internal:standard> public method rewind ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> $dir_handle ]
+      }
     }
 
-    Method [ <internal%s> public method read ] {
+    Method [ <internal:standard> public method read ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> $dir_handle ]
+      }
     }
   }
 }
