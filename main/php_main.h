@@ -27,6 +27,7 @@
 #include "SAPI.h"
 
 BEGIN_EXTERN_C()
+PHPAPI int php_module_initialized(void);
 PHPAPI int php_request_startup(TSRMLS_D);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI void php_request_shutdown_for_exec(void *dummy);

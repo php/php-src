@@ -507,6 +507,11 @@ static int module_initialized = 0;
 static int module_startup = 1;
 static int module_shutdown = 0;
 
+PHPAPI int php_module_initialized(void)
+{
+	return module_initialized;
+}
+
 /* {{{ php_during_module_startup */
 static int php_during_module_startup(void)
 {
