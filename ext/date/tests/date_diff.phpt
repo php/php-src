@@ -1,5 +1,7 @@
 --TEST--
 Extensive test for date_diff().
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $ok = 0;
