@@ -36,6 +36,12 @@
 static int module_count=0;
 ZEND_API HashTable module_registry;
 
+static zend_module_entry **module_request_startup_handlers;
+static zend_module_entry **module_request_shutdown_handlers;
+static zend_module_entry **module_post_deactivate_handlers;
+
+static zend_class_entry  **class_cleanup_handlers;
+
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 {
@@ -1679,11 +1685,98 @@ try_again:
 }
 /* }}} */
 
+static void zend_collect_module_handlers(void) /* {{{ */
+{
+	HashPosition pos;
+	zend_module_entry *module;
+	int startup_count = 0;
+	int shutdown_count = 0;
+	int post_deactivate_count = 0;
+	zend_class_entry **pce;
+	int class_count = 0;
+
+	/* Collect extensions with request startup/shutdown handlers */
+	for (zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
+	     zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) == SUCCESS;
+	     zend_hash_move_forward_ex(&module_registry, &pos)) {
+		if (module->request_startup_func) {
+			startup_count++;
+		}
+		if (module->request_shutdown_func) {
+			shutdown_count++;
+		}
+		if (module->post_deactivate_func) {
+			post_deactivate_count++;
+		}
+	}
+	module_request_startup_handlers = (zend_module_entry**)malloc(
+	    sizeof(zend_module_entry*) *
+		(startup_count + 1 +
+		 shutdown_count + 1 +
+		 post_deactivate_count + 1));
+	module_request_startup_handlers[startup_count] = NULL;
+	module_request_shutdown_handlers = module_request_startup_handlers + startup_count + 1;
+	module_request_shutdown_handlers[shutdown_count] = NULL;
+	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
+	module_post_deactivate_handlers[post_deactivate_count] = NULL;
+	startup_count = 0;
+	
+	for (zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
+	     zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) == SUCCESS;
+	     zend_hash_move_forward_ex(&module_registry, &pos)) {
+		if (module->request_startup_func) {
+			module_request_startup_handlers[startup_count++] = module;
+		}
+		if (module->request_shutdown_func) {
+			module_request_shutdown_handlers[--shutdown_count] = module;
+		}
+		if (module->post_deactivate_func) {
+			module_post_deactivate_handlers[--post_deactivate_count] = module;
+		}
+	}
+
+	/* Collect internal classes with static members */
+	for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
+	     zend_hash_get_current_data_ex(CG(class_table), (void *) &pce, &pos) == SUCCESS;
+	     zend_hash_move_forward_ex(CG(class_table), &pos)) {
+		if ((*pce)->type == ZEND_INTERNAL_CLASS &&
+		    (*pce)->default_static_members_count > 0) {
+		    class_count++;
+		}
+	}
+
+	class_cleanup_handlers = (zend_class_entry**)malloc(
+		sizeof(zend_class_entry*) *
+		(class_count + 1));
+	class_cleanup_handlers[class_count] = NULL;
+
+	if (class_count) {
+		for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
+		     zend_hash_get_current_data_ex(CG(class_table), (void *) &pce, &pos) == SUCCESS;
+	    	 zend_hash_move_forward_ex(CG(class_table), &pos)) {
+			if ((*pce)->type == ZEND_INTERNAL_CLASS &&
+			    (*pce)->default_static_members_count > 0) {
+			    class_cleanup_handlers[--class_count] = *pce;
+			}
+		}
+	}
+}
+/* }}} */
+
 ZEND_API int zend_startup_modules(TSRMLS_D) /* {{{ */
 {
 	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
 	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_ex TSRMLS_CC);
+	zend_collect_module_handlers();
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API void zend_destroy_modules(void) /* {{{ */
+{
+	free(class_cleanup_handlers);
+	free(module_request_startup_handlers);
+	zend_hash_graceful_reverse_destroy(&module_registry);
 }
 /* }}} */
 
@@ -2147,19 +2240,19 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 }
 /* }}} */
 
-/* call request startup for all modules */
-int module_registry_request_startup(zend_module_entry *module TSRMLS_DC) /* {{{ */
+void zend_activate_modules(TSRMLS_D) /* {{{ */
 {
-	if (module->request_startup_func) {
-#if 0
-		zend_printf("%s: Request startup\n", module->name);
-#endif
+	zend_module_entry **p = module_request_startup_handlers;
+
+	while (*p) {
+		zend_module_entry *module = *p;
+
 		if (module->request_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
 			exit(1);
 		}
+		p++;
 	}
-	return 0;
 }
 /* }}} */
 
@@ -2176,9 +2269,68 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+void zend_deactivate_modules(TSRMLS_D) /* {{{ */
+{
+	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+
+	zend_try {
+		if (EG(full_tables_cleanup)) {
+			zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
+		} else {
+			zend_module_entry **p = module_request_shutdown_handlers;
+
+			while (*p) {
+				zend_module_entry *module = *p;
+
+				module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
+				p++;
+			}
+		}
+	} zend_end_try();
+}
+/* }}} */
+
+ZEND_API void zend_cleanup_internal_classes(TSRMLS_D) /* {{{ */
+{
+	zend_class_entry **p = class_cleanup_handlers;
+
+	while (*p) {
+		zend_cleanup_internal_class_data(*p TSRMLS_CC);
+		p++;
+	}
+}
+/* }}} */
+
 int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
 	return (module->type == MODULE_TEMPORARY) ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_STOP;
+}
+/* }}} */
+
+static int exec_done_cb(zend_module_entry *module TSRMLS_DC) /* {{{ */
+{
+	if (module->post_deactivate_func) {
+		module->post_deactivate_func();
+	}
+	return 0;
+}
+/* }}} */
+
+void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
+{
+	if (EG(full_tables_cleanup)) {
+		zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
+		zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_unload_temp TSRMLS_CC);
+	} else {
+		zend_module_entry **p = module_post_deactivate_handlers;
+
+		while (*p) {
+			zend_module_entry *module = *p;
+
+			module->post_deactivate_func();
+			p++;
+		}
+	}
 }
 /* }}} */
 

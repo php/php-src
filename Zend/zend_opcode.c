@@ -159,36 +159,65 @@ ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
 	return 0;
 }
 
+static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
+{
+	/* Clean all parts that can contain run-time data */
+	/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
+	   not contain objects and thus are not probelmatic */
+	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+		zend_hash_apply(&ce->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
+	}
+	if (ce->static_members_table) {
+		int i;
+
+		for (i = 0; i < ce->default_static_members_count; i++) {
+			if (ce->static_members_table[i]) {
+				zval_ptr_dtor(&ce->static_members_table[i]);
+				ce->static_members_table[i] = NULL;
+			}
+		}
+		ce->static_members_table = NULL;
+	}
+}
+
+static inline void cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
+{
+	if (CE_STATIC_MEMBERS(ce)) {
+		int i;
+		
+		for (i = 0; i < ce->default_static_members_count; i++) {
+			zval_ptr_dtor(&CE_STATIC_MEMBERS(ce)[i]);
+		}
+		efree(CE_STATIC_MEMBERS(ce));
+#ifdef ZTS
+		CG(static_members_table)[(zend_intptr_t)((ce->static_members_table)] = NULL;
+#else
+		ce->static_members_table = NULL;
+#endif
+	}
+}
+
+ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
+{
+	cleanup_internal_class_data(ce TSRMLS_CC);
+}
+
+ZEND_API int zend_cleanup_user_class_data(zend_class_entry **pce TSRMLS_DC)
+{
+	if ((*pce)->type == ZEND_USER_CLASS) {
+		cleanup_user_class_data(*pce TSRMLS_CC);
+		return ZEND_HASH_APPLY_KEEP;
+	} else {
+		return ZEND_HASH_APPLY_STOP;
+	}
+}
+
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 {
 	if ((*pce)->type == ZEND_USER_CLASS) {
-		/* Clean all parts that can contain run-time data */
-		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
-		   not contain objects and thus are not probelmatic */
-		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
-		if ((*pce)->static_members_table) {
-			int i;
-
-			for (i = 0; i < (*pce)->default_static_members_count; i++) {
-				if ((*pce)->static_members_table[i]) {
-					zval_ptr_dtor(&(*pce)->static_members_table[i]);
-					(*pce)->static_members_table[i] = NULL;
-				}
-			}
-			(*pce)->static_members_table = NULL;
-		}
-	} else if (CE_STATIC_MEMBERS(*pce)) {
-		int i;
-		
-		for (i = 0; i < (*pce)->default_static_members_count; i++) {
-			zval_ptr_dtor(&CE_STATIC_MEMBERS(*pce)[i]);
-		}
-		efree(CE_STATIC_MEMBERS(*pce));
-#ifdef ZTS
-		CG(static_members_table)[(zend_intptr_t)((*pce)->static_members_table)] = NULL;
-#else
-		(*pce)->static_members_table = NULL;
-#endif
+		cleanup_user_class_data(*pce TSRMLS_CC);
+	} else {
+		cleanup_internal_class_data(*pce TSRMLS_CC);
 	}
 	return 0;
 }

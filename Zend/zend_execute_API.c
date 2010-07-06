@@ -292,10 +292,12 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		 * not contain objects and thus are not probelmatic */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
+			zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 		} else {
 			zend_hash_reverse_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), (apply_func_t) zend_cleanup_user_class_data TSRMLS_CC);
+			zend_cleanup_internal_classes(TSRMLS_C);
 		}
-		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 
 		zend_vm_stack_destroy(TSRMLS_C);
 
