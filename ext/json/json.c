@@ -500,6 +500,7 @@ PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, ze
 		if (utf16) {
 			efree(utf16);
 		}
+		JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 		RETURN_NULL();
 	}
 
