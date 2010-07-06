@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     A constant class name may be used as a direct operand of ZEND_FETCH_*
     instruction without previous ZEND_FETCH_CLASS.
   . eliminated unnecessary iterations during request startup/shutdown
+  . zend_stack initialization is delayed before the actual usage
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty

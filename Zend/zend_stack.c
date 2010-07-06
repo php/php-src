@@ -25,13 +25,9 @@
 ZEND_API int zend_stack_init(zend_stack *stack)
 {
 	stack->top = 0;
-	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
-	if (!stack->elements) {
-		return FAILURE;
-	} else {
-		stack->max = STACK_BLOCK_SIZE;
-		return SUCCESS;
-	}
+	stack->max = 0;
+	stack->elements = NULL;
+	return SUCCESS;
 }
 
 ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size)
