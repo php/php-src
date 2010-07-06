@@ -761,7 +761,7 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	zend_shutdown_timeout_thread();
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
-	zend_hash_graceful_reverse_destroy(&module_registry);
+	zend_destroy_modules();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -859,22 +859,6 @@ void zend_activate(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_activate_modules(TSRMLS_D) /* {{{ */
-{
-	zend_hash_apply(&module_registry, (apply_func_t) module_registry_request_startup TSRMLS_CC);
-}
-/* }}} */
-
-void zend_deactivate_modules(TSRMLS_D) /* {{{ */
-{
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
-
-	zend_try {
-		zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
-	} zend_end_try();
-}
-/* }}} */
-
 void zend_call_destructors(TSRMLS_D) /* {{{ */
 {
 	zend_try {
@@ -925,22 +909,6 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 	zend_try {
 		zend_ini_deactivate(TSRMLS_C);
 	} zend_end_try();
-}
-/* }}} */
-
-static int exec_done_cb(zend_module_entry *module TSRMLS_DC) /* {{{ */
-{
-	if (module->post_deactivate_func) {
-		module->post_deactivate_func();
-	}
-	return 0;
-}
-/* }}} */
-
-void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
-{
-	zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
-	zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_unload_temp TSRMLS_CC);
 }
 /* }}} */
 

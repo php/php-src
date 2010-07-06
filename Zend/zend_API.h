@@ -252,6 +252,7 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_modules(TSRMLS_D);
+ZEND_API void zend_destroy_modules(void);
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, int error_type TSRMLS_DC);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);

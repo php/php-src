@@ -171,6 +171,10 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
 #define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
 
+/* user class has methods with static variables */
+#define ZEND_HAS_STATIC_IN_METHODS    0x800000
+
+
 #define ZEND_ACC_CLOSURE              0x100000
 
 /* function flag for internal user call handlers __call, __callstatic */
@@ -610,6 +614,9 @@ ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initia
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
+ZEND_API int zend_cleanup_user_class_data(zend_class_entry **pce TSRMLS_DC);
+ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC);
+ZEND_API void zend_cleanup_internal_classes(TSRMLS_C);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
 

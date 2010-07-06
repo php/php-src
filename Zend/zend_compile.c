@@ -3284,6 +3284,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		/* The verification will be done in runtime by ZEND_VERIFY_ABSTRACT_CLASS */
 		zend_verify_abstract_class(ce TSRMLS_CC);
 	}
+	ce->ce_flags |= parent_ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS;
 }
 /* }}} */
 
@@ -3598,6 +3599,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+		}
+		if (fn->op_array.static_variables) {
+			ce->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
 		fn_copy = *fn;
 		zend_traits_duplicate_function(&fn_copy, estrdup(fn->common.function_name) TSRMLS_CC);
@@ -5379,6 +5383,9 @@ void zend_do_fetch_static_variable(znode *varname, const znode *static_assignmen
 		INIT_ZVAL(*tmp);
 	}
 	if (!CG(active_op_array)->static_variables) {
+		if (CG(active_op_array)->scope) {
+			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
+		}
 		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
 		zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 	}

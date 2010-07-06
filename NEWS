@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . optimized access to static properties using executor specialization.
     A constant class name may be used as a direct operand of ZEND_FETCH_*
     instruction without previous ZEND_FETCH_CLASS.
+  . eliminated unnecessary iterations during request startup/shutdown
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty
