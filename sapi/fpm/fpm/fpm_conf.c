@@ -436,7 +436,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		}
 
 		if (wp->config->pm_max_children < 1) {
-			zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm_max_children must be a positiive value", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.max_children must be a positive value", wp->config->name);
 			return -1;
 		}
 
@@ -444,32 +444,32 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			struct fpm_worker_pool_config_s *config = wp->config;
 
 			if (config->pm_min_spare_servers <= 0) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) must be a positive value", wp->config->name, config->pm_min_spare_servers);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.min_spare_servers(%d) must be a positive value", wp->config->name, config->pm_min_spare_servers);
 				return -1;
 			}
 
 			if (config->pm_max_spare_servers <= 0) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must be a positive value", wp->config->name, config->pm_max_spare_servers);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.max_spare_servers(%d) must be a positive value", wp->config->name, config->pm_max_spare_servers);
 				return -1;
 			}
 
 			if (config->pm_min_spare_servers > config->pm_max_children ||
 					config->pm_max_spare_servers > config->pm_max_children) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) and max_spare_servers(%d) cannot be greater than max_children(%d)",
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.min_spare_servers(%d) and pm.max_spare_servers(%d) cannot be greater than pm.max_children(%d)",
 						wp->config->name, config->pm_min_spare_servers, config->pm_max_spare_servers, config->pm_max_children);
 				return -1;
 			}
 
 			if (config->pm_max_spare_servers < config->pm_min_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must not be less than min_spare_servers(%d)", wp->config->name, config->pm_max_spare_servers, config->pm_min_spare_servers);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.max_spare_servers(%d) must not be less than pm.min_spare_servers(%d)", wp->config->name, config->pm_max_spare_servers, config->pm_min_spare_servers);
 				return -1;
 			}
 
 			if (config->pm_start_servers <= 0) {
 				config->pm_start_servers = config->pm_min_spare_servers + ((config->pm_max_spare_servers - config->pm_min_spare_servers) / 2);
-				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] start_servers is not set. It's been set to %d.", wp->config->name, config->pm_start_servers);
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] pm.start_servers is not set. It's been set to %d.", wp->config->name, config->pm_start_servers);
 			} else if (config->pm_start_servers < config->pm_min_spare_servers || config->pm_start_servers > config->pm_max_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] start_servers(%d) must not be less than min_spare_servers(%d) and not greater than max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] pm.start_servers(%d) must not be less than pm.min_spare_servers(%d) and not greater than pm.max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
 				return -1;
 			}
 
@@ -563,7 +563,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			for (i=0; i<strlen(status); i++) {
 				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.') {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status path '%s' must containt only the following characters '[alphanum]/_-.'", wp->config->name, status);
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status path '%s' must contain only the following characters '[alphanum]/_-.'", wp->config->name, status);
 					return -1;
 				}
 			}
@@ -607,7 +607,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				}
 				snprintf(buf, len, "%s%s", wp->config->chroot, wp->config->chdir);
 				if (!fpm_conf_is_dir(buf)) {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chdir path '%s' wihtin the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the chdir path '%s' within the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
 					free(buf);
 					return -1;
 				}
@@ -714,7 +714,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 		if ((i = glob(inc, GLOB_ERR | GLOB_MARK | GLOB_NOSORT, NULL, &g)) != 0) {
 #ifdef GLOB_NOMATCH
 			if (i == GLOB_NOMATCH) {
-				zlog(ZLOG_STUFF, ZLOG_WARNING, "Nothing match the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "Nothing matches the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
 				return;
 			} 
 #endif /* GLOB_NOMATCH */
