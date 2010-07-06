@@ -190,7 +190,7 @@ static inline void cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
 		}
 		efree(CE_STATIC_MEMBERS(ce));
 #ifdef ZTS
-		CG(static_members_table)[(zend_intptr_t)((ce->static_members_table)] = NULL;
+		CG(static_members_table)[(zend_intptr_t)(ce->static_members_table)] = NULL;
 #else
 		ce->static_members_table = NULL;
 #endif
