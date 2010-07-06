@@ -1685,7 +1685,7 @@ try_again:
 }
 /* }}} */
 
-static void zend_collect_module_handlers(void) /* {{{ */
+static void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 {
 	HashPosition pos;
 	zend_module_entry *module;
@@ -1767,7 +1767,7 @@ ZEND_API int zend_startup_modules(TSRMLS_D) /* {{{ */
 {
 	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
 	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_ex TSRMLS_CC);
-	zend_collect_module_handlers();
+	zend_collect_module_handlers(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
