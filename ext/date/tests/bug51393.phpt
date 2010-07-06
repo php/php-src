@@ -1,5 +1,7 @@
 --TEST--
 Bug #51393 (DateTime::createFromFormat() fails if format string contains timezone)
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $dt = DateTime::createFromFormat('O', '+0800');
