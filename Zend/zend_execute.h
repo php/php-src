@@ -161,7 +161,7 @@ ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *arg TSRMLS_D
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
-#define ZEND_VM_STACK_PAGE_SIZE ((64 * 1024) - 64)
+#define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)
 
 struct _zend_vm_stack {
 	void **top;
