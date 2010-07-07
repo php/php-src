@@ -37,7 +37,6 @@ Interface of the class mysqli_stmt
 		'reset'             => true,
 		'result_metadata'   => true,
 		'send_long_data'    => true,
-		'stmt'              => true,
 		'store_result'      => true,
 	);
 

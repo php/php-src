@@ -94,7 +94,7 @@
 			foreach ($params as $k => $param)
 				$tmp[$param->getName()] = $param;
 
-			ksort($tmp, SORT_STRING);
+//			ksort($tmp, SORT_STRING);
 			foreach ($tmp as $param)
 				inspectParameter($method, $param);
 		}
