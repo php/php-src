@@ -2079,23 +2079,75 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 			}
 
-			if (CGIG(check_shebang_line) && file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
+			if (CGIG(check_shebang_line)) {
 				/* #!php support */
-				c = fgetc(file_handle.handle.fp);
-				if (c == '#') {
-					while (c != '\n' && c != '\r' && c != EOF) {
-						c = fgetc(file_handle.handle.fp);	/* skip to end of line */
-					}
-					/* handle situations where line is terminated by \r\n */
-					if (c == '\r') {
-						if (fgetc(file_handle.handle.fp) != '\n') {
-							long pos = ftell(file_handle.handle.fp);
-							fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+				switch (file_handle.type) {
+					case ZEND_HANDLE_FD:
+						if (file_handle.handle.fd < 0) {
+							break;
 						}
-					}
-					CG(start_lineno) = 2;
-				} else {
-					rewind(file_handle.handle.fp);
+						file_handle.type == ZEND_HANDLE_FP;
+						file_handle.handle.fp = fdopen(file_handle.handle.fd, "rb");
+						/* break missing intentionally */
+					case ZEND_HANDLE_FP:
+						if (!file_handle.handle.fp ||
+						    (file_handle.handle.fp == stdin)) {
+							break;
+						}
+						c = fgetc(file_handle.handle.fp);
+						if (c == '#') {
+							while (c != '\n' && c != '\r' && c != EOF) {
+								c = fgetc(file_handle.handle.fp);	/* skip to end of line */
+							}
+							/* handle situations where line is terminated by \r\n */
+							if (c == '\r') {
+								if (fgetc(file_handle.handle.fp) != '\n') {
+									long pos = ftell(file_handle.handle.fp);
+									fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+								}
+							}
+							CG(start_lineno) = 2;
+						} else {
+							rewind(file_handle.handle.fp);
+						}
+						break;
+					case ZEND_HANDLE_STREAM:
+						c = php_stream_getc((php_stream*)file_handle.handle.stream.handle);
+						if (c == '#') {
+							while (c != '\n' && c != '\r' && c != EOF) {
+								c = php_stream_getc((php_stream*)file_handle.handle.stream.handle);	/* skip to end of line */
+							}
+							/* handle situations where line is terminated by \r\n */
+							if (c == '\r') {
+								if (php_stream_getc((php_stream*)file_handle.handle.stream.handle) != '\n') {
+									long pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
+									php_stream_seek((php_stream*)file_handle.handle.stream.handle, pos - 1, SEEK_SET);
+								}
+							}
+							CG(start_lineno) = 2;
+						} else {
+							php_stream_rewind((php_stream*)file_handle.handle.stream.handle);
+						}
+						break;
+					case ZEND_HANDLE_MAPPED:
+						if (file_handle.handle.stream.mmap.buf[0] == '#') {
+						    int i = 1;
+
+						    c = file_handle.handle.stream.mmap.buf[i++];
+							while (c != '\n' && c != '\r' && c != EOF) {
+								c = file_handle.handle.stream.mmap.buf[i++];
+							}
+							if (c == '\r') {
+								if (file_handle.handle.stream.mmap.buf[i] == '\n') {
+									i++;
+								}
+							}
+							file_handle.handle.stream.mmap.buf += i;
+							file_handle.handle.stream.mmap.len -= i;
+						}
+						break;
+					default:
+						break;
 				}
 			}
 
