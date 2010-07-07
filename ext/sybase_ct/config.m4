@@ -39,7 +39,12 @@ if test "$PHP_SYBASE_CT" != "no"; then
     PHP_ADD_LIBRARY(sybct64,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybcomn64,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybintl64,, SYBASE_CT_SHARED_LIBADD)
-  
+
+    ac_solid_uname_s=`uname -s 2>/dev/null`
+    case $ac_solid_uname_s in
+      *OSF*)                            ;; # Tru64/DEC OSF does NOT use the SYB_LP64 define
+      *) CFLAGS="${CFLAGS} -DSYB_LP64"  ;; # 
+    esac
     SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lsybcs64 -lsybct64 -lsybcomn64 -lsybintl64"
   
     PHP_CHECK_LIBRARY(sybtcl64, netg_errstr, [
