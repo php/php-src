@@ -1197,7 +1197,6 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
-	CHECK_INIT(ht);
 
 	if (p) {
 		if (key_type == HASH_KEY_IS_LONG) {
