@@ -796,7 +796,7 @@ static void spl_RecursiveIteratorIterator_dtor(zend_object *_object, zend_object
 	zend_object_iterator      *sub_iter;
 
 	/* call standard dtor */
-	zend_objects_destroy_object(_object, handle);
+	zend_objects_destroy_object(_object, handle TSRMLS_CC);
 
 	if (object->iterators) {
 		while (object->level >= 0) {
@@ -1936,7 +1936,7 @@ static void spl_dual_it_dtor(zend_object *_object, zend_object_handle handle TSR
 	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
 
 	/* call standard dtor */
-	zend_objects_destroy_object(_object, handle);
+	zend_objects_destroy_object(_object, handle TSRMLS_CC);
 
 	spl_dual_it_free(object TSRMLS_CC);
 
