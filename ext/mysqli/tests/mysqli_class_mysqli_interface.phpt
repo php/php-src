@@ -61,7 +61,6 @@ require_once('skipifconnectfailure.inc');
 		// mysqlnd only
 		/* $expected_methods['get_client_stats']	= true; */
 		$expected_methods['get_connection_stats']	= true;
-		$expected_methods['poll']	= true;
 		$expected_methods['reap_async_query']	= true;
 	} else {
 		// libmysql only
