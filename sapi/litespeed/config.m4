@@ -12,6 +12,7 @@ if test "$PHP_LITESPEED" != "no"; then
   SAPI_LITESPEED_PATH=sapi/litespeed/php
   PHP_SUBST(SAPI_LITESPEED_PATH)
   PHP_SELECT_SAPI(litespeed, program, lsapi_main.c lsapilib.c, "", '$(SAPI_LITESPEED_PATH)') 
+  INSTALL_IT="@echo \"Installing PHP LiteSpeed into: \$(INSTALL_ROOT)\$(bindir)/\"; \$(INSTALL) -m 0755 \$(SAPI_LITESPEED_PATH) \$(INSTALL_ROOT)\$(bindir)/lsphp"
   case $host_alias in
   *darwin*)
     BUILD_LITESPEED="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_SAPI_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_LITESPEED_PATH)"
