@@ -131,7 +131,7 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)_iter->data;
 	zend_object_iterator      *sub_iter;
 
-	while (object->level) {
+	while (object->level > 0) {
 		sub_iter = object->iterators[object->level].iterator;
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
@@ -139,10 +139,10 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
 
-	zval_ptr_dtor(&iter->zobject);	
+	zval_ptr_dtor(&iter->zobject);
 	efree(iter);
 }
-	
+
 static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis TSRMLS_DC)
 {
 	zend_object_iterator      *sub_iter;
@@ -536,6 +536,18 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].state = RS_START;
 
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+
+	if (EG(exception)) {
+		zend_object_iterator *sub_iter;
+
+		while (intern->level >= 0) {
+			sub_iter = intern->iterators[intern->level].iterator;
+			sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
+			zval_ptr_dtor(&intern->iterators[intern->level--].zobject);
+		}
+		efree(intern->iterators);
+		intern->iterators = NULL;
+	}
 }
 
 /* {{{ proto void RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int mode = RIT_LEAVES_ONLY [, int flags = 0]]) throws InvalidArgumentException
@@ -778,10 +790,13 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 }
 
 /* {{{ spl_RecursiveIteratorIterator_dtor */
-static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
+static void spl_RecursiveIteratorIterator_dtor(zend_object *_object, zend_object_handle handle TSRMLS_DC)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object *)_object;
 	zend_object_iterator      *sub_iter;
+
+	/* call standard dtor */
+	zend_objects_destroy_object(_object, handle);
 
 	if (object->iterators) {
 		while (object->level >= 0) {
@@ -792,6 +807,13 @@ static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 		efree(object->iterators);
 		object->iterators = NULL;
 	}
+}
+/* }}} */
+
+/* {{{ spl_RecursiveIteratorIterator_dtor */
+static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object *)_object;
 
 	zend_object_std_dtor(&object->std TSRMLS_CC);
 	smart_str_free(&object->prefix[0]);
@@ -827,7 +849,7 @@ static zend_object_value spl_RecursiveIteratorIterator_new_ex(zend_class_entry *
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_RecursiveIteratorIterator_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)spl_RecursiveIteratorIterator_dtor, (zend_objects_free_object_storage_t) spl_RecursiveIteratorIterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handlers_rec_it_it;
 	return retval;
 }
@@ -1909,16 +1931,26 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 
 #endif
 
-/* {{{ spl_dual_it_free_storage */
-static void spl_dual_it_free_storage(void *_object TSRMLS_DC)
+/* {{{ spl_dual_it_dtor */
+static void spl_dual_it_dtor(zend_object *_object, zend_object_handle handle TSRMLS_DC)
 {
 	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
+
+	/* call standard dtor */
+	zend_objects_destroy_object(_object, handle);
 
 	spl_dual_it_free(object TSRMLS_CC);
 
 	if (object->inner.iterator) {
 		object->inner.iterator->funcs->dtor(object->inner.iterator TSRMLS_CC);
 	}
+}
+/* }}} */
+
+/* {{{ spl_dual_it_free_storage */
+static void spl_dual_it_free_storage(void *_object TSRMLS_DC)
+{
+	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
 
 	if (object->inner.zobject) {
 		zval_ptr_dtor(&object->inner.zobject);
@@ -1969,7 +2001,7 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_dual_it_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)spl_dual_it_dtor, (zend_objects_free_object_storage_t) spl_dual_it_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handlers_dual_it;
 	return retval;
 }

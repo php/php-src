@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   results and PHP crashes). (Felipe)
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
+- Fixed bug #51697 (Unsafe operations in free_storage of SPL iterators,
+  causes crash during shutdown). (Etienne)
 
 01 Jul 2010, PHP 5.3.3 RC2
 - Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
