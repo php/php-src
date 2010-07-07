@@ -18,9 +18,9 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_prepare($link, "SELECT @dummy"))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_bind_result($stmt, $dummy);
-	mysqli_execute($stmt);
-	mysqli_fetch($stmt);
+	mysqli_stmt_bind_result($stmt, $dummy);
+	mysqli_stmt_execute($stmt);
+	mysqli_stmt_fetch($stmt);
 
 	var_dump($dummy);
 

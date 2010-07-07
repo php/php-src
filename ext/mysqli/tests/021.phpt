@@ -18,16 +18,16 @@ require_once('skipifconnectfailure.inc');
 	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 char(10), c2 text)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?)");
-	mysqli_bind_param($stmt, "ss", $q1, $q2);
+	mysqli_stmt_bind_param($stmt, "ss", $q1, $q2);
 	$q1 = "1234567890";
 	$q2 = "this is a test";
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, $c1, $c2);
-	mysqli_execute($stmt);
-	mysqli_fetch($stmt);
+	mysqli_stmt_bind_result($stmt, $c1, $c2);
+	mysqli_stmt_execute($stmt);
+	mysqli_stmt_fetch($stmt);
 
 	$test = array($c1,$c2);
 

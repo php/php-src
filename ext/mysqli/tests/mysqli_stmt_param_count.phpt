@@ -55,7 +55,7 @@ require_once('skipifconnectfailure.inc');
 
 	/* Check that the function alias exists. It's a deprecated function,
 	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_param_count()))
+	if (!is_null($tmp = @mysqli_stmt_param_count()))
 		printf("[041] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";

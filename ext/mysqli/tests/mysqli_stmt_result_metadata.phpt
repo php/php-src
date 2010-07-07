@@ -87,7 +87,7 @@ require_once('skipifconnectfailure.inc');
 
 	/* Check that the function alias exists. It's a deprecated function,
 	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_get_metadata()))
+	if (!is_null($tmp = @mysqli_stmt_result_metadata()))
 		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);

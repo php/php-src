@@ -51,7 +51,7 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 
 	$charset2 = $mysqli->character_set_name();
 	if ($charset2 !== $charset) {
-		printf("[012] Alias mysqli_client_encoding returned %s/%s, expected  %s/%s\n",
+		printf("[012] Alias mysqli_character_set_name returned %s/%s, expected  %s/%s\n",
 			gettype($charset2), $charset2, gettype($charset), $charset);
 	}
 
@@ -61,7 +61,7 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
-	if (!is_null($tmp = @$mysqli->client_encoding()))
+	if (!is_null($tmp = @$mysqli->character_set_name()))
 		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
