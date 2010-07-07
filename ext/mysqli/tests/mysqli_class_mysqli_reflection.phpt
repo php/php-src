@@ -173,22 +173,6 @@ Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
-Inspecting method 'client_encoding'
-isFinal: no
-isAbstract: no
-isPublic: yes
-isPrivate: no
-isProtected: no
-isStatic: no
-isConstructor: no
-isDestructor: no
-isInternal: yes
-isUserDefined: no
-returnsReference: no
-Modifiers: 256
-Number of Parameters: 0
-Number of Required Parameters: 0
-
 Inspecting method 'close'
 isFinal: no
 isAbstract: no

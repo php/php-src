@@ -22,7 +22,6 @@ require_once('skipifconnectfailure.inc');
 		'autocommit'			=> true,
 		'change_user'			=> true,
 		'character_set_name'		=> true,
-		'client_encoding'		=> true,
 		'close'				=> true,
 		'commit'	=> true,
 		'connect'			=> true,
