@@ -1632,27 +1632,54 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 	internal = heap->internal;
 	storage = heap->storage;
 	segment = heap->segments_list;
-	while (segment) {
-		prev = segment;
-		segment = segment->next_segment;
-		ZEND_MM_STORAGE_FREE(prev);
-	}
 	if (full_shutdown) {
+		while (segment) {
+			prev = segment;
+			segment = segment->next_segment;
+			ZEND_MM_STORAGE_FREE(prev);
+		}
+		heap->segments_list = NULL;
 		storage->handlers->dtor(storage);
 		if (!internal) {
 			free(heap);
 		}
 	} else {
+		if (segment) {
+			if (heap->reserve_size) {
+				while (segment->next_segment) {
+					prev = segment;
+					segment = segment->next_segment;
+					ZEND_MM_STORAGE_FREE(prev);
+				}
+				heap->segments_list = segment;
+			} else {
+				do {
+					prev = segment;
+					segment = segment->next_segment;
+					ZEND_MM_STORAGE_FREE(prev);
+				} while (segment);
+				heap->segments_list = NULL;
+			}
+		}
 		if (heap->compact_size &&
 		    heap->real_peak > heap->compact_size) {
 			storage->handlers->compact(storage);
 		}
-		heap->segments_list = NULL;
 		zend_mm_init(heap);
 		heap->real_size = 0;
 		heap->real_peak = 0;
 		heap->size = 0;
 		heap->peak = 0;
+		if (heap->segments_list) {
+			/* mark segment as a free block */
+			zend_mm_free_block *b = (zend_mm_free_block*)((char*)heap->segments_list + ZEND_MM_ALIGNED_SEGMENT_SIZE);
+			size_t block_size = heap->segments_list->size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_HEADER_SIZE;
+
+			ZEND_MM_MARK_FIRST_BLOCK(b);
+			ZEND_MM_LAST_BLOCK(ZEND_MM_BLOCK_AT(b, block_size));
+			ZEND_MM_BLOCK(b, ZEND_MM_FREE_BLOCK, block_size);
+			zend_mm_add_to_free_list(heap, b);
+		}
 		if (heap->reserve_size) {
 			heap->reserve = _zend_mm_alloc_int(heap, heap->reserve_size  ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 		}
