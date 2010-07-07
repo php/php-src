@@ -42,19 +42,19 @@
 #endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 1)
-	ZEND_ARG_PASS_INFO(0)
+	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 1)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
+	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
+	ZEND_ARG_INFO(0, types)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 1)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 1)
-	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_INFO(0, types)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
@@ -455,14 +455,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_refresh,								arginfo_mysqli_refresh)
 
 	/* Aliases */
-	PHP_FALIAS(mysqli_bind_param,		mysqli_stmt_bind_param,		arginfo_mysqli_stmt_bind_param)
-	PHP_FALIAS(mysqli_bind_result,		mysqli_stmt_bind_result,	arginfo_mysqli_stmt_bind_result)
-	PHP_FALIAS(mysqli_client_encoding,	mysqli_character_set_name,	NULL)
 	PHP_FALIAS(mysqli_escape_string,	mysqli_real_escape_string,	arginfo_mysqli_query)
-	PHP_FALIAS(mysqli_fetch,			mysqli_stmt_fetch,			NULL)
-	PHP_FALIAS(mysqli_param_count,		mysqli_stmt_param_count,	NULL)
-	PHP_FALIAS(mysqli_get_metadata,		mysqli_stmt_result_metadata,NULL)
-	PHP_FALIAS(mysqli_send_long_data,	mysqli_stmt_send_long_data,	NULL)
 	PHP_FALIAS(mysqli_set_opt,			mysqli_options,				NULL)
 
 	{NULL, NULL, NULL}	/* Must be the last line in mysqli_functions[] */
@@ -477,7 +470,6 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(autocommit, mysqli_autocommit, arginfo_class_mysqli_autocommit)
 	PHP_FALIAS(change_user,mysqli_change_user, arginfo_class_mysqli_change_user)
 	PHP_FALIAS(character_set_name, mysqli_character_set_name, arginfo_mysqli_no_params)
-	PHP_FALIAS(client_encoding, mysqli_character_set_name, arginfo_mysqli_no_params) /* deprecated */
 	PHP_FALIAS(close, mysqli_close, arginfo_mysqli_no_params)
 	PHP_FALIAS(commit, mysqli_commit, arginfo_mysqli_no_params)
 	PHP_FALIAS(connect, mysqli_connect, arginfo_mysqli_connect)

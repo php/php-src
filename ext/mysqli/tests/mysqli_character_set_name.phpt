@@ -55,9 +55,9 @@ require_once('skipifconnectfailure.inc');
 		}
 	}
 
-	$charset2 = mysqli_client_encoding($link);
+	$charset2 = mysqli_character_set_name($link);
 	if ($charset2 !== $charset) {
-		printf("[012] Alias mysqli_client_encoding returned %s/%s, expected  %s/%s\n", gettype($charset2), $charset2, gettype($charset), $charset);
+		printf("[012] Alias mysqli_character_set_name returned %s/%s, expected  %s/%s\n", gettype($charset2), $charset2, gettype($charset), $charset);
 	}
 
 	mysqli_close($link);
@@ -66,7 +66,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
-	if (!is_null($tmp = @mysqli_client_encoding()))
+	if (!is_null($tmp = @mysqli_character_set_name()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";

@@ -37,7 +37,7 @@ require_once('skipifconnectfailure.inc');
 		c7 timestamp)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
-	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
+	mysqli_stmt_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
 
 	$d1 = "2002-01-02";
 	$d2 = "12:49:00";
@@ -47,15 +47,15 @@ require_once('skipifconnectfailure.inc');
 	$d6 = "2020";
 	$d7 = "1999-12-29";
 
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	$stmt = mysqli_prepare($link, "SELECT c1, c2, c3, c4, c5, c6, c7 FROM test_bind_result");
 
-	mysqli_bind_result($stmt,$c1, $c2, $c3, $c4, $c5, $c6, $c7);
+	mysqli_stmt_bind_result($stmt,$c1, $c2, $c3, $c4, $c5, $c6, $c7);
 
-	mysqli_execute($stmt);
-	mysqli_fetch($stmt);
+	mysqli_stmt_execute($stmt);
+	mysqli_stmt_fetch($stmt);
 
 	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7);
 
