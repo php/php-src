@@ -1052,6 +1052,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_COMMA;
 }
 
+<ST_IN_SCRIPTING>"." {
+	return T_DOT;
+}
+
 <ST_IN_SCRIPTING>"::" {
 	return T_PAAMAYIM_NEKUDOTAYIM;
 }
@@ -1350,6 +1354,58 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>">>" {
 	return T_SR;
+}
+
+<ST_IN_SCRIPTING>"|" {
+	return T_BW_OR;
+}
+
+<ST_IN_SCRIPTING>"&" {
+	return T_BW_AND;
+}
+
+<ST_IN_SCRIPTING>"^" {
+	return T_BW_XOR;
+}
+
+<ST_IN_SCRIPTING>"+" {
+	return T_PLUS;
+}
+
+<ST_IN_SCRIPTING>"-" {
+	return T_MINUS;
+}
+
+<ST_IN_SCRIPTING>"/" {
+	return T_DIV;
+}
+
+<ST_IN_SCRIPTING>"*" {
+	return T_MULT;
+}
+
+<ST_IN_SCRIPTING>"%" {
+	return T_MOD;
+}
+
+<ST_IN_SCRIPTING>"(" {
+	return T_LPAREN;
+}
+
+<ST_IN_SCRIPTING>")" {
+	return T_RPAREN;
+}
+
+<ST_IN_SCRIPTING>"[" {
+	return T_LBRACKET;
+}
+
+<ST_IN_SCRIPTING>"]" {
+	return T_RBRACKET;
+}
+
+<ST_IN_SCRIPTING>"@" {
+	return T_AT;
 }
 
 <ST_IN_SCRIPTING>{TOKENS} {
@@ -2276,6 +2332,9 @@ nowdoc_scan_done:
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
+<ST_IN_SCRIPTING>"$" {
+	return T_DOLLAR;
+}
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
