@@ -6138,7 +6138,6 @@ again:
                goto again;
            case T_END_HEREDOC:
                efree(Z_STRVAL(zendlval.u.constant));
-               break;
            case T_OPEN_TAG_WITH_ECHO:
                token = T_ECHO;
            case T_CLOSE_TAG:

@@ -53,6 +53,13 @@
 %type function_call_ns_iii {znode_array}
 %type function_call_cls_i {znode_array}
 %type additional_catch_i {znode_array}
+%type class_statement_ii {znode_array}
+%type new_ii {znode_array}
+%type closure_i {znode_array}
+%type closure_ii {znode_array}
+%type unticked_class_declaration_statement_i {znode_array}
+%type unticked_class_declaration_statement_ii {znode_array}
+
 
 /* TOKENS TRANSLATION:
    
@@ -92,7 +99,7 @@
 %left BOOLEAN_AND.
 %left BW_OR.
 %left BW_XOR.
-%left AMPERSAND.
+%left BW_AND.
 %nonassoc IS_EQUAL IS_NOT_EQUAL IS_IDENTICAL IS_NOT_IDENTICAL.
 %nonassoc IS_SMALLER IS_SMALLER_OR_EQUAL IS_GREATER IS_GREATER_OR_EQUAL.
 %left SL SR.
@@ -100,7 +107,7 @@
 %left MULT DIV MOD.
 %right BOOL_NOT.
 %nonassoc INSTANCEOF.
-%right TILDA INC DEC INT_CAST NUMERIC_CAST SCALAR_CAST DOUBLE_CAST STRING_CAST ARRAY_CAST OBJECT_CAST BOOL_CAST UNSET_CAST AT.
+%right BW_NOT INC DEC INT_CAST NUMERIC_CAST SCALAR_CAST DOUBLE_CAST STRING_CAST ARRAY_CAST OBJECT_CAST BOOL_CAST UNSET_CAST AT.
 %right RBRACKET.
 %nonassoc NEW CLONE.
 %nonassoc EXIT.
@@ -120,6 +127,7 @@ start ::= top_statement_list. { zend_do_end_compilation(TSRMLS_C); }
 //		top_statement_list  { zend_do_extended_info(TSRMLS_C); } top_statement { HANDLE_INTERACTIVE(); }
 //	|	/* empty */
 //;
+
 top_statement_list ::= top_statement_list_i top_statement. { HANDLE_INTERACTIVE(); }
 top_statement_list ::= .
 
@@ -133,7 +141,6 @@ top_statement_list_i ::= top_statement_list. { zend_do_extended_info(TSRMLS_C); 
 namespace_name(A) ::= STRING(B). { A = B; }
 namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING(C). { zend_do_build_namespace_name(&A, &B, &C TSRMLS_CC); }
 
-//
 //top_statement:
 //		statement						{ zend_verify_namespace(TSRMLS_C); }
 //	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
@@ -149,8 +156,8 @@ namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING(C). { zend_do_build_
 //;
 
 top_statement ::= statement.                                       { zend_verify_namespace(TSRMLS_C); }
-//top_statement ::= function_declaration_statement.                  { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-//top_statement ::= class_declaration_statement.                     { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+top_statement ::= function_declaration_statement.                  { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+top_statement ::= class_declaration_statement.                     { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 top_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON.   { zend_do_halt_compiler_register(TSRMLS_C); /* YYACCEPT; */ }
 top_statement ::= NAMESPACE namespace_name(B) SEMICOLON.       { zend_do_begin_namespace(&B, 0 TSRMLS_CC); }
 top_statement ::= NAMESPACE namespace_name(B) LBRACE.          { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
@@ -162,7 +169,6 @@ top_statement ::= constant_declaration SEMICOLON.                { zend_verify_n
 // Just to make the build works
 top_statement ::= todo.
 
-//
 //use_declarations:
 //		use_declarations COMMA use_declaration
 //	|	use_declaration
@@ -171,7 +177,6 @@ top_statement ::= todo.
 use_declarations ::= use_declarations COMMA use_declaration.
 use_declarations ::= use_declaration.
 
-//
 //use_declaration:
 //		namespace_name 			{ zend_do_use(&$1, NULL, 0 TSRMLS_CC); }
 //	|	namespace_name AS STRING	{ zend_do_use(&$1, &$3, 0 TSRMLS_CC); }
@@ -184,7 +189,6 @@ use_declaration ::= namespace_name(B) AS STRING(C).                { zend_do_use
 use_declaration ::= NS_SEPARATOR namespace_name(B).                  { zend_do_use(&B, NULL, 1 TSRMLS_CC); }
 use_declaration ::= NS_SEPARATOR namespace_name(B) AS STRING(C). { zend_do_use(&B, &C, 1 TSRMLS_CC); }
 
-//
 //constant_declaration:
 //		constant_declaration COMMA STRING EQUAL static_scalar	{ zend_do_declare_constant(&$3, &$5 TSRMLS_CC); }
 //	|	CONST STRING EQUAL static_scalar { zend_do_declare_constant(&$2, &$4 TSRMLS_CC); }
@@ -204,8 +208,6 @@ inner_statement_list ::= .
 
 inner_statement_list_i ::= inner_statement_list. { zend_do_extended_info(TSRMLS_C); }
 
-//
-//
 //inner_statement:
 //		statement
 //	|	function_declaration_statement
@@ -213,14 +215,11 @@ inner_statement_list_i ::= inner_statement_list. { zend_do_extended_info(TSRMLS_
 //	|	HALT_COMPILER LPAREN RPAREN SEMICOLON   { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 //;
 
-
 inner_statement ::= statement.
-//inner_statement ::= function_declaration_statement.
-//inner_statement ::= class_declaration_statement.
+inner_statement ::= function_declaration_statement.
+inner_statement ::= class_declaration_statement.
 inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 
-//
-//
 //statement:
 //		unticked_statement { zend_do_ticks(TSRMLS_C); }
 //	|	STRING COLON { zend_do_label(&$1 TSRMLS_CC); }
@@ -229,7 +228,6 @@ inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPIL
 statement ::= unticked_statement.  { zend_do_ticks(TSRMLS_C); }
 statement ::= STRING(A) COLON. { zend_do_label(&A TSRMLS_CC); }
 
-//
 //unticked_statement:
 //		LBRACE inner_statement_list RBRACE
 //	|	IF LPAREN expr RPAREN { zend_do_if_cond(&$3, &$4 TSRMLS_CC); } statement { zend_do_if_after_statement(&$4, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); }
@@ -280,15 +278,10 @@ statement ::= STRING(A) COLON. { zend_do_label(&A TSRMLS_CC); }
 //;
 
 if_cond(A)   ::= IF LPAREN expr(B) RPAREN(C). { zend_do_if_cond(&B, &C TSRMLS_CC); A = C; }
-if_cond_then ::= if_cond(B) statement.              { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
+if_cond_then ::= if_cond(B) statement.        { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
 
 if_alt_cond(A)   ::= IF LPAREN expr(B) RPAREN(C) COLON. { zend_do_if_cond(&B, &C TSRMLS_CC); A = C; }
-if_alt_cond_then ::= if_alt_cond(B) inner_statement_list.       { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
-
-unticked_statement ::= LBRACE inner_statement_list RBRACE.
-unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
-
-unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
+if_alt_cond_then ::= if_alt_cond(B) inner_statement_list. { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
 
 while_begin ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); }
 
@@ -306,20 +299,21 @@ unticked_statement ::= FOR
                         for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
 unticked_statement ::= SWITCH LPAREN expr RPAREN	{ zend_do_switch_cond(&$3 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$6 TSRMLS_CC); }
 */
+
+unticked_statement ::= LBRACE inner_statement_list RBRACE.
+unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
+unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
 unticked_statement ::= BREAK SEMICOLON.            { zend_do_brk_cont(ZEND_BRK, NULL TSRMLS_CC); }
 unticked_statement ::= BREAK expr(B) SEMICOLON.    { zend_do_brk_cont(ZEND_BRK, &B TSRMLS_CC); }
 unticked_statement ::= CONTINUE SEMICOLON.         { zend_do_brk_cont(ZEND_CONT, NULL TSRMLS_CC); }
 unticked_statement ::= CONTINUE expr(B) SEMICOLON. { zend_do_brk_cont(ZEND_CONT, &B TSRMLS_CC); }
-
 unticked_statement ::= RETURN SEMICOLON.                            { zend_do_return(NULL, 0 TSRMLS_CC); }
 unticked_statement ::= RETURN expr_without_variable(B) SEMICOLON.   { zend_do_return(&B, 0 TSRMLS_CC); }
-//unticked_statement ::= RETURN variable(B) SEMICOLON.                { zend_do_return(&(B), 1 TSRMLS_CC); }
-
-//unticked_statement ::= GLOBAL global_var_list SEMICOLON.
-//unticked_statement ::= STATIC static_var_list SEMICOLON.
+unticked_statement ::= RETURN variable(B) SEMICOLON.                { zend_do_return(&B, 1 TSRMLS_CC); }
+unticked_statement ::= GLOBAL global_var_list SEMICOLON.
+unticked_statement ::= STATIC static_var_list SEMICOLON.
 unticked_statement ::= ECHO echo_expr_list SEMICOLON.
 unticked_statement ::= INLINE_HTML(B). { zend_do_echo(&B TSRMLS_CC); }
-
 unticked_statement ::= expr(B) SEMICOLON. { zend_do_free(&B TSRMLS_CC); }
 unticked_statement ::= UNSET LPAREN unset_variables RPAREN SEMICOLON.
 
@@ -386,27 +380,34 @@ unset_variables ::= unset_variables COMMA unset_variable.
 
 unset_variable(A) ::= variable(B). { zend_do_end_variable_parse(&B, BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&B TSRMLS_CC); A = B; }
 
-//
 //function_declaration_statement:
 //		unticked_function_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
 //;
-//
+
+function_declaration_statement ::= unticked_function_declaration_statement. { zend_do_ticks(TSRMLS_C); }
+
 //class_declaration_statement:
 //		unticked_class_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
 //;
-//
-//
+
+class_declaration_statement ::= unticked_class_declaration_statement. { zend_do_ticks(TSRMLS_C); }
+
 //is_reference:
 //		/* empty */	{ $$.op_type = ZEND_RETURN_VAL; }
 //	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
 //;
-//
-//
+
+is_reference(A) ::= . { A.op_type = ZEND_RETURN_VAL; }
+is_reference(A) ::= BW_AND. { A.op_type = ZEND_RETURN_REF; }
+
 //unticked_function_declaration_statement:
 //		function is_reference STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
 //			LPAREN parameter_list RPAREN LBRACE inner_statement_list RBRACE { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 //;
-//
+
+unticked_function_declaration_statement_i(A) ::= function(B) is_reference(C) STRING(D). { zend_do_begin_function_declaration(&B, &D, 0, C.op_type, NULL TSRMLS_CC); A = B; }
+unticked_function_declaration_statement ::= unticked_function_declaration_statement_i(B) LPAREN parameter_list RPAREN LBRACE inner_statement_list RBRACE. { zend_do_end_function_declaration(&B TSRMLS_CC); }
+
 //unticked_class_declaration_statement:
 //		class_entry_type STRING extends_from
 //			{ zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); }
@@ -421,6 +422,20 @@ unset_variable(A) ::= variable(B). { zend_do_end_variable_parse(&B, BP_VAR_UNSET
 //				class_statement_list
 //			RBRACE { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
 //;
+
+unticked_class_declaration_statement_i(A) ::= class_entry_type(B) STRING(C) extends_from(D). { zend_do_begin_class_declaration(&B, &C, &D TSRMLS_CC); A[0] = B; A[1] = C; }
+unticked_class_declaration_statement_ii(A) ::= interface_entry(B) STRING(C). { zend_do_begin_class_declaration(&B, &C, NULL TSRMLS_CC); A[0] = B; A[1] = C; }
+
+unticked_class_declaration_statement ::= unticked_class_declaration_statement_i(B)
+			implements_list
+			LBRACE
+				class_statement_list
+			RBRACE. { zend_do_end_class_declaration(&B[0], &B[1] TSRMLS_CC); }
+unticked_class_declaration_statement ::= unticked_class_declaration_statement_ii(B)
+			interface_extends_list
+			LBRACE
+				class_statement_list
+			RBRACE. { zend_do_end_class_declaration(&B[0], &B[1] TSRMLS_CC); }
 
 //class_entry_type:
 //		CLASS			{ $$.u.op.opline_num = CG(zend_lineno); $$.EA = 0; }
@@ -710,7 +725,16 @@ class_statement_list ::= class_statement_list class_statement.
 //	|	method_modifiers function is_reference STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); } LPAREN
 //			parameter_list RPAREN method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 //;
-//
+
+class_statement_i ::= variable_modifiers(B). { CG(access_type) = Z_LVAL(B.u.constant); }
+
+class_statement_ii(A) ::= method_modifiers(B) function(C) is_reference(D) STRING(E). { zend_do_begin_function_declaration(&C, &E, 1, D.op_type, &B TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
+
+class_statement ::= class_statement_i class_variable_declaration SEMICOLON.
+class_statement ::= class_constant_declaration SEMICOLON.
+class_statement ::= trait_use_statement.
+class_statement ::= class_statement_ii(B) LPAREN parameter_list RPAREN method_body(C). { zend_do_abstract_method(&B[2], &B[0], &C TSRMLS_CC); zend_do_end_function_declaration(&B[1] TSRMLS_CC); }
+
 //trait_use_statement:
 //		USE trait_list trait_adaptations
 //;
@@ -975,11 +999,22 @@ non_empty_for_expr(A) ::= expr(B). { A = B; }
 //;
 //
 
+new_i(A) ::= NEW(B) class_name_reference(C). { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&B, &C TSRMLS_CC); A = B; } 
+new_ii(A) ::= variable(B) EQUAL BW_AND(C) NEW(D) class_name_reference(E). {
+	zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");
+	zend_check_writable_variable(&B);
+	zend_do_extended_fcall_begin(TSRMLS_C);
+	zend_do_begin_new_object(&D, &E TSRMLS_CC);
+	A[0] = B;
+	A[1] = C;
+	A[2] = D;
+}
+
 //expr_without_variable(A) ::= LIST LPAREN { zend_do_list_init(TSRMLS_C); } assignment_list RPAREN EQUAL expr. { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) EQUAL expr(C).		{ zend_check_writable_variable(&B); zend_do_assign(&A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) EQUAL BW_AND variable(C). { zend_check_writable_variable(&B); zend_do_end_variable_parse(&C, BP_VAR_W, 1 TSRMLS_CC); zend_do_end_variable_parse(&B, BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&A, &B, &C TSRMLS_CC); }
-//expr_without_variable(A) ::= variable EQUAL '&' NEW class_name_reference { zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");  zend_check_writable_variable(&$1); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(&$1, BP_VAR_W, 0 TSRMLS_CC); $3.EA = ZEND_PARSED_NEW; zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
-//expr_without_variable(A) ::= NEW class_name_reference. { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+expr_without_variable(A) ::= new_ii(B) ctor_arguments(C). { zend_do_end_new_object(&B[1], &B[2], &C TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(&B[0], BP_VAR_W, 0 TSRMLS_CC); B[1].EA = ZEND_PARSED_NEW; zend_do_assign_ref(&A, &B[0], &B[1] TSRMLS_CC); }
+expr_without_variable(A) ::= new_i(B) ctor_arguments(C). { zend_do_end_new_object(&A, &B, &C TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 expr_without_variable(A) ::= CLONE expr(B). { zend_do_clone(&A, &B TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) PLUS_EQUAL expr(C). 	{ zend_check_writable_variable(&B); zend_do_end_variable_parse(&B, BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) MINUS_EQUAL expr(C).	{ zend_check_writable_variable(&B); zend_do_end_variable_parse(&B, BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SUB, &A, &B, &C TSRMLS_CC); }
@@ -1013,6 +1048,7 @@ expr_without_variable(A) ::= expr(B) IS_GREATER expr(C). { zend_do_binary_op(ZEN
 expr_without_variable(A) ::= expr(B) IS_GREATER_OR_EQUAL expr(C). { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &A, &C, &B TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) INSTANCEOF class_name_reference(C). { zend_do_instanceof(&A, &B, &C, 0 TSRMLS_CC); }
 expr_without_variable(A) ::= LPAREN expr(B) RPAREN.	{ A = B; }
+expr_without_variable(A) ::= internal_functions_in_yacc(B). { A = B; }
 expr_without_variable(A) ::= INT_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_LONG TSRMLS_CC); }
 expr_without_variable(A) ::= DOUBLE_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_DOUBLE TSRMLS_CC); }
 expr_without_variable(A) ::= STRING_CAST expr(B).	{ zend_do_cast(&A, &B, IS_STRING TSRMLS_CC); }
@@ -1028,6 +1064,11 @@ expr_without_variable(A) ::= ARRAY LPAREN array_pair_list(B) RPAREN. { A = B; }
 expr_without_variable(A) ::= scalar(B). { A = B; }
 expr_without_variable(A) ::= BACKQUOTE backticks_expr(B) BACKQUOTE. { zend_do_shell_exec(&A, &B TSRMLS_CC); }
 expr_without_variable(A) ::= PRINT expr(B). { zend_do_print(&A, &B TSRMLS_CC); }
+expr_without_variable(A) ::= closure_i(B) parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE. { zend_do_end_function_declaration(&B[1] TSRMLS_CC); A = B[0]; }
+expr_without_variable(A) ::= closure_ii(B) parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE. { zend_do_end_function_declaration(&B[1] TSRMLS_CC); A = B[0]; }
+
+closure_i(A) ::= function(B) is_reference(C) LPAREN. { zend_do_begin_lambda_function_declaration(&A[0], &B, C.op_type, 0 TSRMLS_CC); A[1] = B; }
+closure_ii(A) ::= STATIC function(B) is_reference(C) LPAREN. { zend_do_begin_lambda_function_declaration(&A[0], &B, C.op_type, 1 TSRMLS_CC); A[1] = B; }
 
 silent(A) ::= AT(B). { zend_do_begin_silence(&B TSRMLS_CC); A = B; }
 
@@ -1302,7 +1343,6 @@ static_array_pair_list(A) ::= non_empty_static_array_pair_list(B) possible_comma
 possible_comma ::= .
 possible_comma ::= COMMA.
 
-//
 //non_empty_static_array_pair_list:
 //		non_empty_static_array_pair_list COMMA static_scalar DOUBLE_ARROW static_scalar	{ zend_do_add_static_array_element(&$$, &$3, &$5); }
 //	|	non_empty_static_array_pair_list COMMA static_scalar { zend_do_add_static_array_element(&$$, NULL, &$3); }
@@ -1529,20 +1569,26 @@ simple_indirect_reference(A) ::= simple_indirect_reference T_DOLLAR. { Z_LVAL(A.
 //		assignment_list COMMA assignment_list_element
 //	|	assignment_list_element
 //;
-//
-//
+
+assignment_list ::=	assignment_list COMMA assignment_list_element.
+assignment_list ::=	assignment_list_element.
+
 //assignment_list_element:
 //		variable								{ zend_do_add_list_element(&$1 TSRMLS_CC); }
 //	|	LIST LPAREN { zend_do_new_list_begin(TSRMLS_C); } assignment_list RPAREN	{ zend_do_new_list_end(TSRMLS_C); }
 //	|	/* empty */							{ zend_do_add_list_element(NULL TSRMLS_CC); }
 //;
-//
-//
+
+assignment_list_element_i ::= LIST LPAREN. { zend_do_new_list_begin(TSRMLS_C); }
+
+assignment_list_element ::=	variable(B). { zend_do_add_list_element(&B TSRMLS_CC); }
+assignment_list_element ::=	assignment_list_element_i assignment_list RPAREN. { zend_do_new_list_end(TSRMLS_C); }
+assignment_list_element ::=	. { zend_do_add_list_element(NULL TSRMLS_CC); }
+
 //array_pair_list:
 //		/* empty */ { zend_do_init_array(&$$, NULL, NULL, 0 TSRMLS_CC); }
 //	|	non_empty_array_pair_list possible_comma	{ $$ = $1; }
 //;
-//
 
 array_pair_list(A) ::= . { zend_do_init_array(&A, NULL, NULL, 0 TSRMLS_CC); }
 array_pair_list(A) ::= non_empty_array_pair_list(B) possible_comma.	{ A = B; }
@@ -1616,7 +1662,15 @@ encaps_var_offset(A) ::= VARIABLE(B). { fetch_simple_variable(&A, &B, 1 TSRMLS_C
 //	|	REQUIRE expr			{ zend_do_include_or_eval(ZEND_REQUIRE, &$$, &$2 TSRMLS_CC); }
 //	|	REQUIRE_ONCE expr		{ zend_do_include_or_eval(ZEND_REQUIRE_ONCE, &$$, &$2 TSRMLS_CC); }
 //;
-//
+
+internal_functions_in_yacc(A) ::= ISSET LPAREN isset_variables(B) RPAREN. { A = B; }
+internal_functions_in_yacc(A) ::= EMPTY LPAREN variable(B) RPAREN. { zend_do_isset_or_isempty(ZEND_ISEMPTY, &A, &B TSRMLS_CC); }
+internal_functions_in_yacc(A) ::= INCLUDE expr(B).  { zend_do_include_or_eval(ZEND_INCLUDE, &A, &B TSRMLS_CC); }
+internal_functions_in_yacc(A) ::= INCLUDE_ONCE expr(B). { zend_do_include_or_eval(ZEND_INCLUDE_ONCE, &A, &B TSRMLS_CC); }
+internal_functions_in_yacc(A) ::= EVAL LPAREN expr(B) RPAREN.	{ zend_do_include_or_eval(ZEND_EVAL, &A, &B TSRMLS_CC); }
+internal_functions_in_yacc(A) ::= REQUIRE expr(B). { zend_do_include_or_eval(ZEND_REQUIRE, &A, &B TSRMLS_CC); }
+internal_functions_in_yacc(A) ::= REQUIRE_ONCE expr(B). { zend_do_include_or_eval(ZEND_REQUIRE_ONCE, &A, &B TSRMLS_CC); }
+
 //isset_variables:
 //		variable 				{ zend_do_isset_or_isempty(ZEND_ISSET, &$$, &$1 TSRMLS_CC); }
 //	|	isset_variables COMMA { zend_do_boolean_and_begin(&$1, &$2 TSRMLS_CC); } variable { znode tmp; zend_do_isset_or_isempty(ZEND_ISSET, &tmp, &$4 TSRMLS_CC); zend_do_boolean_and_end(&$$, &$1, &tmp, &$2 TSRMLS_CC); }
@@ -1632,21 +1686,17 @@ class_constant(A) ::= variable_class_name(B) PAAMAYIM_NEKUDOTAYIM STRING(C). { z
 
 // Just to the build works
 todo ::= OPEN_TAG OPEN_TAG_WITH_ECHO ENCAPSED_AND_WHITESPACE CURLY_OPEN VARIABLE
-	DOLLAR_OPEN_CURLY_BRACES END_HEREDOC WHITESPACE COMMENT CLOSE_TAG DOC_COMMENT
-	START_HEREDOC OBJECT_HINT INT_HINT LIST DOUBLE_ARROW UNSET VAR DEFAULT
-	DECLARE EMPTY STRING_VARNAME NUM_STRING ENDFOREACH ENDDECLARE EXTENDS ENDWHILE
-	DO FOREACH FOR FUNCTION CATCH CASE CLASS ENDSWITCH ENDFOR IMPLEMENTS INTERFACE
+	DOLLAR_OPEN_CURLY_BRACES WHITESPACE COMMENT CLOSE_TAG DOC_COMMENT
+	OBJECT_HINT INT_HINT LIST DOUBLE_ARROW VAR DEFAULT
+	DECLARE EMPTY NUM_STRING ENDFOREACH ENDDECLARE ENDWHILE
+	DO FOREACH FOR CASE CLASS ENDSWITCH ENDFOR IMPLEMENTS INTERFACE
 	TRY TRAIT INSTEADOF OBJECT_OPERATOR GLOBAL STRING_HINT SWITCH SCALAR_HINT ARRAY
-	ISSET RESOURCE_HINT DOUBLE_HINT BOOL_HINT PAAMAYIM_NEKUDOTAYIM NUMERIC_HINT.
+	ISSET RESOURCE_HINT DOUBLE_HINT BOOL_HINT NUMERIC_HINT.
 
-
-//
-//%%
-//
-///*
-// * Local variables:
-// * tab-width: 4
-// * c-basic-offset: 4
-// * indent-tabs-mode: t
-// * End:
-// */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -1060,6 +1060,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_PAAMAYIM_NEKUDOTAYIM;
 }
 
+<ST_IN_SCRIPTING>":" {
+	return T_COLON;
+}
+
 <ST_IN_SCRIPTING>"\\" {
 	return T_NS_SEPARATOR;
 }
@@ -2359,6 +2363,10 @@ nowdoc_scan_done:
 
 <ST_IN_SCRIPTING>'"' {
 	return T_QUOTE;
+}
+
+<ST_IN_SCRIPTING>'?' {
+	return T_QUESTION_MARK;
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
