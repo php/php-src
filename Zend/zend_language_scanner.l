@@ -2336,6 +2336,10 @@ nowdoc_scan_done:
 	return T_DOLLAR;
 }
 
+<ST_IN_SCRIPTING>'"' {
+	return T_QUOTE;
+}
+
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
 		return 0;
