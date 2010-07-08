@@ -1108,6 +1108,9 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
+	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
 			|| stage == PHP_INI_STAGE_RUNTIME) {
 		return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
@@ -1245,7 +1248,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
 	PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
 	PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
-	PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
+	STD_PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding, internal_encoding_name, zend_mbstring_globals, mbstring_globals)
 #ifdef ZEND_MULTIBYTE
 	PHP_INI_ENTRY("mbstring.script_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_script_encoding)
 #endif /* ZEND_MULTIBYTE */

@@ -163,6 +163,7 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
+	char *internal_encoding_name;
 	enum mbfl_no_language language;
 	enum mbfl_no_encoding internal_encoding;
 	enum mbfl_no_encoding current_internal_encoding;
