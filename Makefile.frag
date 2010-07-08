@@ -11,7 +11,7 @@ $(srcdir)/zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 
 $(srcdir)/zend_language_parser.h: $(srcdir)/zend_language_parser.c
 $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
-	@$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o $@
+	@$(LEMON) -q -c $(srcdir)/zend_language_parser.y
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
 $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y

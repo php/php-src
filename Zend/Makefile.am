@@ -35,7 +35,8 @@ zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 
 zend_language_parser.h: zend_language_parser.c
 zend_language_parser.c: $(srcdir)/zend_language_parser.y
-	$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o zend_language_parser.c
+	$(LEMON) -q -c $(srcdir)/zend_language_parser.y
+
 
 # INI parser/scanner rules
 

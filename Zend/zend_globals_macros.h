@@ -32,11 +32,9 @@ BEGIN_EXTERN_C()
 /* Compiler */
 #ifdef ZTS
 # define CG(v) TSRMG(compiler_globals_id, zend_compiler_globals *, v)
-int zendparse(void *compiler_globals);
 #else
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
-int zendparse(void);
 #endif
 
 
