@@ -55,7 +55,7 @@
    = => T_EQUAL
    ( => T_LPAREN
    ) => T_LPAREN
-   ; => T_OLON
+   ; => T_SEMICOLON
    : => T_COLON
    { => T_LBRACE
    } => T_LBRACE
