@@ -185,7 +185,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 
-#ifdef PHP_DEBUG
+#if PHP_DEBUG
 	STD_PHP_INI_ENTRY("mysqlnd.debug_emalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_emalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.debug_ecalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_ecalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.debug_erealloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_erealloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
@@ -222,12 +222,11 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 /* }}} */
 
 
-#if defined(PHP_DEBUG)
+#if PHP_DEBUG
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
-#if defined(PHP_DEBUG)
 	if (MYSQLND_G(debug)) {
 		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
 		if (!dbg) {
@@ -236,14 +235,13 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 		dbg->m->set_mode(dbg, MYSQLND_G(debug));
 		MYSQLND_G(dbg) = dbg;
 	}
-#endif
 	return SUCCESS;
 }
 /* }}} */
 #endif
 
 
-#if defined(PHP_DEBUG)
+#if PHP_DEBUG
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
@@ -277,12 +275,12 @@ zend_module_entry mysqlnd_module_entry = {
 	mysqlnd_functions,
 	PHP_MINIT(mysqlnd),
 	PHP_MSHUTDOWN(mysqlnd),
-#if defined(PHP_DEBUG)
+#if PHP_DEBUG
 	PHP_RINIT(mysqlnd),
 #else
 	NULL,
 #endif
-#ifdef PHP_DEBUG
+#if PHP_DEBUG
 	PHP_RSHUTDOWN(mysqlnd),
 #else
 	NULL,
