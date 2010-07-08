@@ -72,7 +72,7 @@
    ; => T_SEMICOLON
    : => T_COLON
    { => T_LBRACE
-   } => T_LBRACE
+   } => T_RBRACE
    + => T_PLUS
    - => T_MINUS
    % => T_MOD
@@ -83,7 +83,9 @@
    ^ => T_BW_XOR
    @ => T_AT
    " => T_QUOTE
-   ! => 
+   ! => T_BOOL_NOT
+   > => T_GREATER
+   < => T_SMALLER
 
 */
 
