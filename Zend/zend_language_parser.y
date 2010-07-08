@@ -1545,7 +1545,7 @@ simple_indirect_reference(A) ::= simple_indirect_reference T_DOLLAR. { Z_LVAL(A.
 //
 
 array_pair_list(A) ::= . { zend_do_init_array(&A, NULL, NULL, 0 TSRMLS_CC); }
-array_pair_list(A) ::= non_empty_array_pair_list possible_comma(B).	{ A = B; }
+array_pair_list(A) ::= non_empty_array_pair_list(B) possible_comma.	{ A = B; }
 
 //non_empty_array_pair_list:
 //		non_empty_array_pair_list COMMA expr DOUBLE_ARROW expr	{ zend_do_add_array_element(&$$, &$5, &$3, 0 TSRMLS_CC); }
