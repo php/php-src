@@ -55,6 +55,10 @@
 %type additional_catch_i {znode_array}
 %type class_statement_ii {znode_array}
 %type new_ii {znode_array}
+%type foreach_i {znode_array}
+%type foreach_ii {znode_array}
+%type foreach2_i {znode_array}
+%type foreach2_ii {znode_array}
 %type closure_i {znode_array}
 %type closure_ii {znode_array}
 %type unticked_class_declaration_statement_i {znode_array}
@@ -318,18 +322,17 @@ unticked_statement ::= ECHO echo_expr_list SEMICOLON.
 unticked_statement ::= INLINE_HTML(B). { zend_do_echo(&B TSRMLS_CC); }
 unticked_statement ::= expr(B) SEMICOLON. { zend_do_free(&B TSRMLS_CC); }
 unticked_statement ::= UNSET LPAREN unset_variables RPAREN SEMICOLON.
+unticked_statement ::= foreach.
+unticked_statement ::= foreach2.
+// unticked_statement ::= DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } LPAREN declare_list RPAREN declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 
-/* FIXME
-unticked_statement ::= FOREACH LPAREN variable AS
-                       { zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
-                       foreach_variable foreach_optional_arg RPAREN { zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-                       foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); }
-unticked_statement ::= FOREACH LPAREN expr_without_variable AS
-                   ::= { zend_do_foreach_begin(&$1, &$2, &$3, &$4, 0 TSRMLS_CC); }
-                   ::= variable foreach_optional_arg RPAREN { zend_check_writable_variable(&$6); zend_do_foreach_cont(&$1, &$2, &$4, &$6, &$7 TSRMLS_CC); }
-                   ::= foreach_statement { zend_do_foreach_end(&$1, &$4 TSRMLS_CC); }
-unticked_statement ::= DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } LPAREN declare_list RPAREN declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
-*/
+foreach_ii(A) ::= FOREACH(B) LPAREN(C) variable(D) AS(E). { zend_do_foreach_begin(&B, &C, &D, &E, 1 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
+foreach_i(A)  ::= foreach_ii(B) foreach_variable(C) foreach_optional_arg(D) RPAREN. { zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
+foreach       ::= foreach_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
+
+foreach2_ii(A) ::= FOREACH(B) LPAREN(C) expr_without_variable(D) AS(E). { zend_do_foreach_begin(&A, &B, &C, &D, 0 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
+foreach2_i(A)  ::= foreach2_ii(B) variable(C) foreach_optional_arg(D) RPAREN. { zend_check_writable_variable(&C); zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
+foreach2       ::= foreach2_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
 
 unticked_statement ::= SEMICOLON. /* empty statement */
 /* FIXME
