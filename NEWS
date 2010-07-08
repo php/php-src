@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     instruction without previous ZEND_FETCH_CLASS.
   . eliminated unnecessary iterations during request startup/shutdown
   . zend_stack initialization is delayed before the actual usage
+  . $GLOBALS became a JIT autoglobal, so it's initialized only if used
+    (this may affect opcode caches)
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty
