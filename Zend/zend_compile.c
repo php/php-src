@@ -6065,7 +6065,7 @@ int zend_register_auto_global(const char *name, uint name_len, zend_bool jit, ze
 {
 	zend_auto_global auto_global;
 
-	auto_global.name = zend_new_interned_string(name, name_len + 1, 0);
+	auto_global.name = zend_new_interned_string(name, name_len + 1, 0 TSRMLS_CC);
 	auto_global.name_len = name_len;
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
