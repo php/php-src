@@ -1276,12 +1276,29 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_IS_NOT_EQUAL;
 }
 
+<ST_IN_SCRIPTING>"!" {
+	return T_BOOL_NOT;
+}
+
+<ST_IN_SCRIPTING>"~" {
+	return T_BW_NOT;
+}
+
+
 <ST_IN_SCRIPTING>"<=" {
 	return T_IS_SMALLER_OR_EQUAL;
 }
 
+<ST_IN_SCRIPTING>"<" {
+	return T_IS_SMALLER;
+}
+
 <ST_IN_SCRIPTING>">=" {
 	return T_IS_GREATER_OR_EQUAL;
+}
+
+<ST_IN_SCRIPTING>">" {
+	return T_IS_GREATER;
 }
 
 <ST_IN_SCRIPTING>"+=" {
@@ -1415,7 +1432,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
-	return '{';
+	return T_LBRACE;
 }
 
 
@@ -1430,7 +1447,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state(TSRMLS_C);
 	}
-	return '}';
+	return T_RBRACE;
 }
 
 
@@ -2077,7 +2094,7 @@ inline_html:
 
 <ST_IN_SCRIPTING>[`] {
 	BEGIN(ST_BACKQUOTE);
-	return '`';
+	return T_BACKQUOTE;
 }
 
 

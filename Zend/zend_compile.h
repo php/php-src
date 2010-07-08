@@ -83,6 +83,8 @@ typedef struct _znode { /* used only during compilation */
 	zend_uint EA;      /* extended attributes */
 } znode;
 
+typedef znode znode_array[5];
+
 typedef struct _zend_execute_data zend_execute_data;
 
 #define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
