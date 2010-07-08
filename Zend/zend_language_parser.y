@@ -28,7 +28,11 @@
 #include "zend_constants.h"
 }
 
-%name lemon_
+//%name lemon_
+
+%syntax_error {
+	zend_error(E_PARSE, "syntax error, unexpected '%.*s'", LANG_SCNG(yy_leng), LANG_SCNG(yy_text));
+}
 
 %stack_overflow {
      fprintf(stderr,"Woops, parser stack overflow\n");
@@ -40,7 +44,9 @@
 
 %token_prefix T_
 
-%token_type {znode *}
+%token_type {znode}
+
+%extra_argument {void ***tsrm_ls}
 
 
 /* TOKENS TRANSLATION:
@@ -49,7 +55,7 @@
    = => T_EQUAL
    ( => T_LPAREN
    ) => T_LPAREN
-   ; => T_SEMICOLON
+   ; => T_OLON
    : => T_COLON
    { => T_LBRACE
    } => T_LBRACE
@@ -108,7 +114,7 @@ top_statement_list_i ::= top_statement_list. { zend_do_extended_info(TSRMLS_C); 
 //;
 
 namespace_name(A) ::= STRING(B). { A = B; }
-namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING. { zend_do_build_namespace_name(&A, B, C TSRMLS_CC); }
+namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING(C). { zend_do_build_namespace_name(&A, &B, &C TSRMLS_CC); }
 
 //
 //top_statement:
@@ -126,9 +132,9 @@ namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING. { zend_do_build_nam
 //;
 
 top_statement ::= statement.                                       { zend_verify_namespace(TSRMLS_C); }
-top_statement ::= function_declaration_statement.                  { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-top_statement ::= class_declaration_statement.                     { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-top_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON.   { zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
+//top_statement ::= function_declaration_statement.                  { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+//top_statement ::= class_declaration_statement.                     { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+top_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON.   { zend_do_halt_compiler_register(TSRMLS_C); /* YYACCEPT; */ }
 top_statement ::= NAMESPACE namespace_name(B) SEMICOLON.       { zend_do_begin_namespace(&B, 0 TSRMLS_CC); }
 top_statement ::= NAMESPACE namespace_name(B) LBRACE.          { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
 top_statement ::= top_statement_list RBRACE.                     { zend_do_end_namespace(TSRMLS_C); }
@@ -136,6 +142,8 @@ top_statement ::= NAMESPACE LBRACE.                            { zend_do_begin_n
 top_statement ::= top_statement_list RBRACE.                     { zend_do_end_namespace(TSRMLS_C); }
 top_statement ::= USE use_declarations SEMICOLON.              { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= constant_declaration SEMICOLON.                { zend_verify_namespace(TSRMLS_C); }
+// Just to make the build works
+top_statement ::= todo.
 
 //
 //use_declarations:
@@ -190,8 +198,8 @@ inner_statement_list_i ::= inner_statement_list. { zend_do_extended_info(TSRMLS_
 
 
 inner_statement ::= statement.
-inner_statement ::= function_declaration_statement.
-inner_statement ::= class_declaration_statement.
+//inner_statement ::= function_declaration_statement.
+//inner_statement ::= class_declaration_statement.
 inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 
 //
@@ -202,7 +210,7 @@ inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPIL
 //;
 
 statement ::= unticked_statement.  { zend_do_ticks(TSRMLS_C); }
-statement ::= STRING(A) COLON. { zend_do_label(&A); }
+statement ::= STRING(A) COLON. { zend_do_label(&A TSRMLS_CC); }
 
 //
 //unticked_statement:
@@ -261,9 +269,9 @@ if_alt_cond(A)   ::= IF LPAREN expr(B) RPAREN(C) COLON. { zend_do_if_cond(&B, &C
 if_alt_cond_then ::= if_alt_cond(B) inner_statement_list.       { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
 
 unticked_statement ::= LBRACE inner_statement_list RBRACE.
-unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
+//unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
 
-unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
+//unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
 
 while_begin ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); }
 
@@ -288,15 +296,15 @@ unticked_statement ::= CONTINUE expr(B) SEMICOLON. { zend_do_brk_cont(ZEND_CONT,
 
 unticked_statement ::= RETURN SEMICOLON.                            { zend_do_return(NULL, 0 TSRMLS_CC); }
 unticked_statement ::= RETURN expr_without_variable(B) SEMICOLON.   { zend_do_return(&B, 0 TSRMLS_CC); }
-unticked_statement ::= RETURN variable(B) SEMICOLON.                { zend_do_return(&(B), 1 TSRMLS_CC); }
+//unticked_statement ::= RETURN variable(B) SEMICOLON.                { zend_do_return(&(B), 1 TSRMLS_CC); }
 
-unticked_statement ::= GLOBAL global_var_list SEMICOLON.
-unticked_statement ::= STATIC static_var_list SEMICOLON.
+//unticked_statement ::= GLOBAL global_var_list SEMICOLON.
+//unticked_statement ::= STATIC static_var_list SEMICOLON.
 unticked_statement ::= ECHO echo_expr_list SEMICOLON.
 unticked_statement ::= INLINE_HTML(B). { zend_do_echo(&B TSRMLS_CC); }
 
 unticked_statement ::= expr(B) SEMICOLON. { zend_do_free(&B TSRMLS_CC); }
-unticked_statement ::= UNSET LPAREN unset_variables RPAREN SEMICOLON.
+//unticked_statement ::= UNSET LPAREN unset_variables RPAREN SEMICOLON.
 /* FIXME
 unticked_statement ::= FOREACH LPAREN variable AS
                        { zend_do_foreach_begin(&$1, &$2, &$3, &$4, 1 TSRMLS_CC); }
@@ -690,6 +698,10 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //	|	expr					{ zend_do_echo(&$1 TSRMLS_CC); }
 //;
 //
+
+echo_expr_list ::= expr(A). { zend_do_echo(&A TSRMLS_CC); }
+echo_expr_list ::= echo_expr_list COMMA expr(A). { zend_do_echo(&A TSRMLS_CC); }
+
 //
 //for_expr:
 //		/* empty */			{ $$.op_type = IS_CONST;  Z_TYPE($$.u.constant) = IS_BOOL;  Z_LVAL($$.u.constant) = 1; }
@@ -780,6 +792,10 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //			parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE {  zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $5; }
 //;
 //
+
+expr_without_variable(A) ::= scalar(B). { A = B; }
+
+
 //function:
 //	FUNCTION { $$.u.op.opline_num = CG(zend_lineno); }
 //;
@@ -881,20 +897,20 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //;
 //
 //
-//common_scalar:
-//		LNUMBER 					{ $$ = $1; }
-//	|	DNUMBER 					{ $$ = $1; }
-//	|	CONSTANT_ENCAPSED_STRING	{ $$ = $1; }
-//	|	LINE 						{ $$ = $1; }
-//	|	FILE 						{ $$ = $1; }
-//	|	DIR   					{ $$ = $1; }
-//	|	CLASS_C					{ $$ = $1; }
-//	|	METHOD_C					{ $$ = $1; }
-//	|	FUNC_C					{ $$ = $1; }
-//	|	NS_C						{ $$ = $1; }
-//	|	START_HEREDOC ENCAPSED_AND_WHITESPACE END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
-//	|	START_HEREDOC END_HEREDOC { ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
-//;
+
+common_scalar(A) ::= LNUMBER(B). 					{ A = B; }
+common_scalar(A) ::= DNUMBER(B). 					{ A = B; }
+common_scalar(A) ::= CONSTANT_ENCAPSED_STRING(B).	{ A = B; }
+common_scalar(A) ::= LINE(B). 						{ A = B; }
+common_scalar(A) ::= FILE(B). 						{ A = B; }
+common_scalar(A) ::= DIR(B).   						{ A = B; }
+common_scalar(A) ::= CLASS_C(B).						{ A = B; }
+common_scalar(A) ::= METHOD_C(B).					{ A = B; }
+common_scalar(A) ::= FUNC_C(B).						{ A = B; }
+common_scalar(A) ::= NS_C(B).						{ A = B; }
+//common_scalar(A) ::= START_HEREDOC ENCAPSED_AND_WHITESPACE END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+//common_scalar(A) ::= START_HEREDOC END_HEREDOC { ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+//
 //
 //
 //static_scalar: /* compile-time evaluated scalars */
@@ -907,6 +923,9 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //	|	ARRAY LPAREN static_array_pair_list RPAREN { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 //	|	static_class_constant { $$ = $1; }
 //;
+
+static_scalar(A) ::= common_scalar(B). { A = B; }
+
 //
 //static_class_constant:
 //		class_name PAAMAYIM_NEKUDOTAYIM STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT, 0 TSRMLS_CC); }
@@ -923,6 +942,8 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //	|	START_HEREDOC encaps_list END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
 //;
 //
+
+scalar(A) ::= common_scalar(B). { A = B; }
 //
 //static_array_pair_list:
 //		/* empty */ { $$.op_type = IS_CONST; INIT_PZVAL(&$$.u.constant); array_init(&$$.u.constant); }
@@ -946,6 +967,9 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //	|	expr_without_variable		{ $$ = $1; }
 //;
 //
+
+expr(R) ::= expr_without_variable(A).	{ R = A; }
+
 //
 //r_variable:
 //	variable { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
@@ -1143,6 +1167,17 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 //		class_name PAAMAYIM_NEKUDOTAYIM STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 //	|	variable_class_name PAAMAYIM_NEKUDOTAYIM STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 //;
+
+// Just to the build works
+todo ::= OPEN_TAG OPEN_TAG_WITH_ECHO ENCAPSED_AND_WHITESPACE CURLY_OPEN VARIABLE
+	DOLLAR_OPEN_CURLY_BRACES END_HEREDOC WHITESPACE COMMENT CLOSE_TAG DOC_COMMENT
+	START_HEREDOC OBJECT_HINT INT_HINT LIST DOUBLE_ARROW UNSET VAR DEFAULT
+	DECLARE EMPTY STRING_VARNAME NUM_STRING ENDFOREACH ENDDECLARE EXTENDS ENDWHILE
+	DO FOREACH FOR FUNCTION CATCH CASE CLASS ENDSWITCH ENDFOR IMPLEMENTS INTERFACE
+	TRY TRAIT INSTEADOF OBJECT_OPERATOR GLOBAL STRING_HINT SWITCH SCALAR_HINT ARRAY
+	ISSET RESOURCE_HINT DOUBLE_HINT BOOL_HINT PAAMAYIM_NEKUDOTAYIM NUMERIC_HINT.
+
+
 //
 //%%
 //

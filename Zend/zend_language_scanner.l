@@ -1044,6 +1044,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	goto restart;
 }
 
+<ST_IN_SCRIPTING>";" {
+	return T_SEMICOLON;
+}
+
+<ST_IN_SCRIPTING>"," {
+	return T_COMMA;
+}
+
 <ST_IN_SCRIPTING>"::" {
 	return T_PAAMAYIM_NEKUDOTAYIM;
 }
