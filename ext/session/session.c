@@ -1993,7 +1993,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 
 static PHP_MINIT_FUNCTION(session) /* {{{ */
 {
-	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1, 0, NULL TSRMLS_CC);
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 

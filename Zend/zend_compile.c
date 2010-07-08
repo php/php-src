@@ -163,27 +163,6 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 /* }}} */
 
 
-int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
-{
-	auto_global->armed = (auto_global->auto_global_callback ? 1 : 0);
-	return 0;
-}
-/* }}} */
-
-
-ZEND_API int zend_auto_global_disable_jit(const char *varname, zend_uint varname_length TSRMLS_DC) /* {{{ */
-{
-	zend_auto_global *auto_global;
-
-	if (zend_hash_find(CG(auto_globals), varname, varname_length+1, (void **) &auto_global)==FAILURE) {
-		return FAILURE;
-	}
-	auto_global->armed = 0;
-	return SUCCESS;
-}
-/* }}} */
-
-
 static void init_compiler_declarables(TSRMLS_D) /* {{{ */
 {
 	Z_TYPE(CG(declarables).ticks) = IS_LONG;
@@ -211,7 +190,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
 	init_compiler_declarables(TSRMLS_C);
-	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 	zend_stack_init(&CG(labels_stack));
 	CG(labels) = NULL;
 
@@ -6069,12 +6047,6 @@ void zend_do_ticks(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_auto_global_dtor(zend_auto_global *auto_global) /* {{{ */
-{
-	free(auto_global->name);
-}
-/* }}} */
-
 zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
@@ -6089,15 +6061,35 @@ zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
+int zend_register_auto_global(const char *name, uint name_len, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global auto_global;
 
-	auto_global.name = zend_strndup(name, name_len);
+	auto_global.name = zend_new_interned_string(name, name_len + 1, 0);
 	auto_global.name_len = name_len;
 	auto_global.auto_global_callback = auto_global_callback;
+	auto_global.jit = jit;
 
 	return zend_hash_add(CG(auto_globals), name, name_len+1, &auto_global, sizeof(zend_auto_global), NULL);
+}
+/* }}} */
+
+static int zend_auto_global_init(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
+{
+    if (auto_global->jit) {
+		auto_global->armed = 1;
+    } else if (auto_global->auto_global_callback) {
+    	auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+	} else {
+		auto_global->armed = 0;
+	}
+	return 0;
+}
+/* }}} */
+
+ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
+{
+	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_init TSRMLS_CC);
 }
 /* }}} */
 

@@ -174,6 +174,20 @@ function read_const($n) {
 	}
 }
 
+function read_auto_global($n) {
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $_GET;
+	}
+}
+
+$g_var = 0;
+
+function read_global_var($n) {
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $GLOBALS['g_var'];
+	}
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -282,4 +296,8 @@ create_object(N);
 $t = end_test($t, 'new Foo()', $overhead);
 read_const(N);
 $t = end_test($t, '$x = TEST', $overhead);
+read_auto_global(N);
+$t = end_test($t, '$x = $_GET', $overhead);
+read_global_var(N);
+$t = end_test($t, '$x = $GLOBALS[\'v\']', $overhead);
 total($t0, "Total");

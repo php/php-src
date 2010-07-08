@@ -593,6 +593,20 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
+static zend_bool php_auto_globals_create_globals(char *name, uint name_len TSRMLS_DC) /* {{{ */
+{
+	zval *globals;
+
+	ALLOC_ZVAL(globals);
+	Z_SET_REFCOUNT_P(globals, 1);
+	Z_SET_ISREF_P(globals);
+	Z_TYPE_P(globals) = IS_ARRAY;
+	Z_ARRVAL_P(globals) = &EG(symbol_table);
+	zend_hash_update(&EG(symbol_table), name, name_len + 1, &globals, sizeof(zval *), NULL);
+	return 0;
+}
+/* }}} */
+
 int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC) /* {{{ */
 {
 #ifdef ZTS
@@ -660,7 +674,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
+	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
 	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
 
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
@@ -701,7 +715,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	zend_interned_strings_init(TSRMLS_C);
 	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
-	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
+	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, 1, php_auto_globals_create_globals TSRMLS_CC);
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
