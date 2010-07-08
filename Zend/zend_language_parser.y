@@ -61,6 +61,9 @@
 %type foreach2_ii {znode_array}
 %type closure_i {znode_array}
 %type closure_ii {znode_array}
+%type try_catch_iv {znode_array}
+%type try_catch_iii {znode_array}
+%type isset_variables_i {znode_array}
 %type unticked_class_declaration_statement_i {znode_array}
 %type unticked_class_declaration_statement_ii {znode_array}
 
@@ -203,7 +206,6 @@ use_declaration ::= NS_SEPARATOR namespace_name(B) AS STRING(C). { zend_do_use(&
 constant_declaration ::= constant_declaration COMMA STRING(B) EQUAL static_scalar(C). { zend_do_declare_constant(&B, &C TSRMLS_CC); }
 constant_declaration ::= CONST STRING(B) EQUAL static_scalar(C).                      { zend_do_declare_constant(&B, &C TSRMLS_CC); }
 
-//
 //inner_statement_list:
 //		inner_statement_list  { zend_do_extended_info(TSRMLS_C); } inner_statement { HANDLE_INTERACTIVE(); }
 //	|	/* empty */
@@ -335,15 +337,23 @@ foreach2_i(A)  ::= foreach2_ii(B) variable(C) foreach_optional_arg(D) RPAREN. { 
 foreach2       ::= foreach2_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
 
 unticked_statement ::= SEMICOLON. /* empty statement */
-/* FIXME
-try ::= TRY(B). { zend_do_try(&B TSRMLS_CC); }
-unticked_statement ::= try LBRACE inner_statement_list RBRACE.
-                       CATCH(B) LPAREN. { zend_initialize_try_catch_element(&B TSRMLS_CC); }
-                       fully_qualified_class_name. { zend_do_first_catch(&$7 TSRMLS_CC); }
-                       VARIABLE RPAREN { zend_do_begin_catch(&$1, &$9, &$11, &$7 TSRMLS_CC); }
-                       LBRACE inner_statement_list RBRACE { zend_do_end_catch(&$1 TSRMLS_CC); }
-                       additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
-*/
+
+// TRY { zend_do_try(&$1 TSRMLS_CC); } LBRACE inner_statement_list RBRACE
+//		CATCH LPAREN { zend_initialize_try_catch_element(&$1 TSRMLS_CC); }
+//		fully_qualified_class_name { zend_do_first_catch(&$7 TSRMLS_CC); }
+//		VARIABLE RPAREN { zend_do_begin_catch(&$1, &$9, &$11, &$7 TSRMLS_CC); }
+//		LBRACE inner_statement_list RBRACE { zend_do_end_catch(&$1 TSRMLS_CC); }
+//		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
+
+try_catch_v(A)   ::= TRY(B). { zend_do_try(&B TSRMLS_CC); A = B; }
+try_catch_iv(A)  ::= try_catch_v(B) LBRACE inner_statement_list RBRACE CATCH(C) LPAREN(D). { zend_initialize_try_catch_element(&B TSRMLS_CC); A[0] = B; A[1] = D; }
+try_catch_iii(A) ::= try_catch_iv(B) fully_qualified_class_name(C). { zend_do_first_catch(&B TSRMLS_CC); A[0] = B[0]; A[1] = B[1]; A[2] = C; }
+try_catch_ii(A)  ::= try_catch_iii(B) VARIABLE(C) RPAREN. { zend_do_begin_catch(&B[0], &B[2], &C, &B[1] TSRMLS_CC); A = B[0]; }
+try_catch_i(A)   ::= try_catch_ii(B) LBRACE inner_statement_list RBRACE. { zend_do_end_catch(&B TSRMLS_CC); A = B; }
+try_catch        ::= try_catch_i(B) additional_catches(C). { zend_do_mark_last_catch(&B, &C TSRMLS_CC); }
+
+unticked_statement ::= try_catch.
+
 unticked_statement ::= THROW expr(B) SEMICOLON. { zend_do_throw(&B TSRMLS_CC); }
 unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 
@@ -1680,7 +1690,15 @@ internal_functions_in_yacc(A) ::= REQUIRE_ONCE expr(B). { zend_do_include_or_eva
 //		variable 				{ zend_do_isset_or_isempty(ZEND_ISSET, &$$, &$1 TSRMLS_CC); }
 //	|	isset_variables COMMA { zend_do_boolean_and_begin(&$1, &$2 TSRMLS_CC); } variable { znode tmp; zend_do_isset_or_isempty(ZEND_ISSET, &tmp, &$4 TSRMLS_CC); zend_do_boolean_and_end(&$$, &$1, &tmp, &$2 TSRMLS_CC); }
 //;
-//
+
+isset_variables_i(A) ::= isset_variables(B) COMMA(C). { zend_do_boolean_and_begin(&B, &C TSRMLS_CC); A[0] = B; A[1] = C; }
+
+isset_variables(A) ::= variable(B).	{ zend_do_isset_or_isempty(ZEND_ISSET, &A, &B TSRMLS_CC); }
+isset_variables(A) ::= isset_variables_i(B) variable(C). { 
+	znode tmp; zend_do_isset_or_isempty(ZEND_ISSET, &tmp, &C TSRMLS_CC);
+	zend_do_boolean_and_end(&A, &B[0], &tmp, &B[1] TSRMLS_CC);
+}
+
 //class_constant:
 //		class_name PAAMAYIM_NEKUDOTAYIM STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 //	|	variable_class_name PAAMAYIM_NEKUDOTAYIM STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
