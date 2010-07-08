@@ -1,3 +1,4 @@
+%include{
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -18,6 +19,16 @@
 */
 
 /* $Id$ */
+
+#include "zend_compile.h"
+#include "zend.h"
+#include "zend_list.h"
+#include "zend_globals.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+}
+
+
 
 /* TOKENS TRANSLATION:
    

@@ -4,12 +4,6 @@
 /* First off, code is included that follows the "include" declaration
 ** in the input grammar file. */
 #include <stdio.h>
-#include "zend_compile.h"
-#include "zend.h"
-#include "zend_list.h"
-#include "zend_globals.h"
-#include "zend_API.h"
-#include "zend_constants.h"
 %%
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
