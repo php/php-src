@@ -137,6 +137,10 @@
 
 %right STATIC ABSTRACT FINAL PRIVATE PROTECTED PUBLIC.
 
+// dummy tokens
+%nonassoc OPEN_TAG OPEN_TAG_WITH_ECHO WHITESPACE COMMENT CLOSE_TAG DOC_COMMENT.
+
+
 //start:
 //	top_statement_list	{ zend_do_end_compilation(TSRMLS_C); }
 //;
@@ -316,6 +320,7 @@ for_cont_2(A) ::= for_cont(B) for_expr(C) RPAREN. { zend_do_free(&C TSRMLS_CC); 
 unticked_statement ::= for_cont_2(B) for_statement. { zend_do_for_end(&B TSRMLS_CC); }
 
 switch_i ::=  SWITCH LPAREN expr(B) RPAREN. { zend_do_switch_cond(&B TSRMLS_CC); }
+
 unticked_statement ::= switch_i switch_case_list(B). { zend_do_switch_end(&B TSRMLS_CC); }
 
 unticked_statement ::= LBRACE inner_statement_list RBRACE.
@@ -1758,6 +1763,7 @@ isset_variables(A) ::= isset_variables_i(B) variable(C). {
 
 class_constant(A) ::= class_name(B) PAAMAYIM_NEKUDOTAYIM STRING(C). { zend_do_fetch_constant(&A, &B, &C, ZEND_RT, 0 TSRMLS_CC); }
 class_constant(A) ::= variable_class_name(B) PAAMAYIM_NEKUDOTAYIM STRING(C). { zend_do_fetch_constant(&A, &B, &C, ZEND_RT, 0 TSRMLS_CC); }
+
 
 /*
  * Local variables:
