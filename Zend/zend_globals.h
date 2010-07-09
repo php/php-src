@@ -34,6 +34,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_modules.h"
+#include "zend_float.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
@@ -261,7 +262,10 @@ struct _zend_executor_globals {
 
 	zend_bool active; 
 
-	void *saved_fpu_cw;
+	void *saved_fpu_cw_ptr;
+#if XPFPA_HAVE_CW
+	XPFPA_CW_DATATYPE saved_fpu_cw;
+#endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
