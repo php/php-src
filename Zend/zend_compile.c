@@ -6103,63 +6103,63 @@ int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_
 
 int zendparse(TSRMLS_D) /* {{{ */
 {
-   int token;
-   void *pParser;
+	int token;
+	void *pParser;
 
-   if ((pParser = ParseAlloc(malloc)) == NULL) {
-       ParseFree(pParser, free);
-       return 1;
-   }
+	if ((pParser = ParseAlloc(malloc)) == NULL) {
+		ParseFree(pParser, free);
+		return 1;
+	}
 
-   while (1) {
-       znode zendlval;
+	while (1) {
+		znode zendlval;
 
-       zendlval.op_type = IS_CONST;
-       INIT_PZVAL(&zendlval.u.constant);
+		zendlval.op_type = IS_CONST;
+		INIT_PZVAL(&zendlval.u.constant);
 again:
-       Z_TYPE(zendlval.u.constant) = IS_LONG;
-       
-       if (CG(increment_lineno)) {
-           CG(zend_lineno)++;
-           CG(increment_lineno) = 0;
-       }
-       
-       /* Call the scanner */
-       token = lex_scan(&zendlval.u.constant TSRMLS_CC);
+		Z_TYPE(zendlval.u.constant) = IS_LONG;
 
-       switch (token) {
-           case T_COMMENT:
-           case T_DOC_COMMENT:
-           case T_OPEN_TAG:
-           case T_WHITESPACE:
-               goto again;
-           case T_END_HEREDOC:
-               efree(Z_STRVAL(zendlval.u.constant));
-           case T_OPEN_TAG_WITH_ECHO:
-               token = T_ECHO;
-           case T_CLOSE_TAG:
-               if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
-                   CG(increment_lineno) = 1;
-               }
-               if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
-                   break;
-               }
-           default:
-               Parse(pParser, token, zendlval TSRMLS_CC);
-               break;
-       }
-       if (token == 0) {
-           break;
-       }
-   }
-   ParseFree(pParser, free);
-   
-   /* We got a parse error occured */
-   if (EG(exit_status) == 255) {
-       return 1;
-   }
-   
-   return 0;
+		if (CG(increment_lineno)) {
+			CG(zend_lineno)++;
+			CG(increment_lineno) = 0;
+		}
+
+		/* Call the scanner */
+		token = lex_scan(&zendlval.u.constant TSRMLS_CC);
+
+		switch (token) {
+			case T_COMMENT:
+			case T_DOC_COMMENT:
+			case T_OPEN_TAG:
+			case T_WHITESPACE:
+				goto again;
+			case T_END_HEREDOC:
+				efree(Z_STRVAL(zendlval.u.constant));
+			case T_OPEN_TAG_WITH_ECHO:
+				token = T_ECHO;
+			case T_CLOSE_TAG:
+				if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
+					CG(increment_lineno) = 1;
+				}
+				if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
+					break;
+				}
+			default:
+				Parse(pParser, token, zendlval TSRMLS_CC);
+				break;
+		}
+		if (token == 0) {
+			break;
+		}
+	}
+	ParseFree(pParser, free);
+
+	/* We got a parse error occured */
+	if (EG(exit_status) == 255) {
+		return 1;
+	}
+
+	return 0;
 }
 /* }}} */
 
