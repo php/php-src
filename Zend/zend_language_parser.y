@@ -72,6 +72,7 @@
 %type isset_variables_i {znode_array}
 %type unticked_class_declaration_statement_i {znode_array}
 %type unticked_class_declaration_statement_ii {znode_array}
+%type while_cond {znode_array}
 
 
 /* TOKENS TRANSLATION:
@@ -170,6 +171,8 @@ namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING(C). { zend_do_build_
 //	|	constant_declaration SEMICOLON		{ zend_verify_namespace(TSRMLS_C); }
 //;
 
+namespace_start ::= NAMESPACE LBRACE. { zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
+
 top_statement ::= statement.                                       { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= function_declaration_statement.                  { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 top_statement ::= class_declaration_statement.                     { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
@@ -177,8 +180,7 @@ top_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON.   { zend_do_halt_compil
 top_statement ::= NAMESPACE namespace_name(B) SEMICOLON.       { zend_do_begin_namespace(&B, 0 TSRMLS_CC); }
 top_statement ::= NAMESPACE namespace_name(B) LBRACE.          { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
 top_statement ::= top_statement_list RBRACE.                     { zend_do_end_namespace(TSRMLS_C); }
-top_statement ::= NAMESPACE LBRACE.                            { zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
-top_statement ::= top_statement_list RBRACE.                     { zend_do_end_namespace(TSRMLS_C); }
+top_statement ::= namespace_start top_statement_list RBRACE.  { zend_do_end_namespace(TSRMLS_C); }
 top_statement ::= USE use_declarations SEMICOLON.              { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= constant_declaration SEMICOLON.                { zend_verify_namespace(TSRMLS_C); }
 // Just to make the build works
@@ -297,23 +299,24 @@ if_cond_then ::= if_cond(B) statement.        { zend_do_if_after_statement(&B, 1
 if_alt_cond(A)   ::= IF LPAREN expr(B) RPAREN(C) COLON. { zend_do_if_cond(&B, &C TSRMLS_CC); A = C; }
 if_alt_cond_then ::= if_alt_cond(B) inner_statement_list. { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
 
-while_begin ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); }
+while_begin(A) ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); A = B }
+while_cond(A)  ::= while_begin(B)  expr(C) RPAREN(D). { zend_do_while_cond(&C, &D TSRMLS_CC); A[0] = B; A[1] = D }
+unticked_statement ::= while_cond(B) while_statement. { zend_do_while_end(&B[0], &B[1] TSRMLS_CC); }
 
-/* FIXME
-unticked_statement ::= while_begin  expr RPAREN { zend_do_while_cond(&$4, &$5 TSRMLS_CC); } while_statement { zend_do_while_end(&$1, &$5 TSRMLS_CC); }
-unticked_statement ::= DO { $1.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); } statement WHILE LPAREN { $5.u.op.opline_num = get_next_op_number(CG(active_op_array)); } expr RPAREN SEMICOLON { zend_do_do_while_end(&$1, &$5, &$7 TSRMLS_CC); }
-unticked_statement ::= FOR
-                        LPAREN
-                            for_expr
-                        SEMICOLON { zend_do_free(&$3 TSRMLS_CC); $4.u.op.opline_num = get_next_op_number(CG(active_op_array)); }
-                            for_expr
-                        SEMICOLON { zend_do_extended_info(TSRMLS_C); zend_do_for_cond(&$6, &$7 TSRMLS_CC); }
-                            for_expr
-                        RPAREN { zend_do_free(&$9 TSRMLS_CC); zend_do_for_before_statement(&$4, &$7 TSRMLS_CC); }
-                        for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
-*/
 
-unticked_statement ::= switch.
+do_start(A) ::= DO. { A.u.op.opline_num = get_next_op_number(CG(active_op_array));  zend_do_do_while_begin(TSRMLS_C); }
+do_statement(A) ::= do_start(B) statement WHILE LPAREN(C). { C.u.op.opline_num = get_next_op_number(CG(active_op_array)); A[0] = B; A[1] = C; }
+unticked_statement ::= do_statement(B) expr(C) RPAREN SEMICOLON. { zend_do_do_while_end(&B[0], &B[1], &C TSRMLS_CC); }
+
+for_begin(A) ::= FOR LPAREN for_expr(B) SEMICOLON(C). { zend_do_free(&B TSRMLS_CC); C.u.op.opline_num = get_next_op_number(CG(active_op_array)); A = C; }
+for_cont(A) ::= for_begin(B) for_expr(C) SEMICOLON(D). { zend_do_extended_info(TSRMLS_C); zend_do_for_cond(&C, &D TSRMLS_CC); A[0] = B; A[1] = D; }
+for_cont_2(A) ::= for_cont(B) for_expr(C) RPAREN. { zend_do_free(&C TSRMLS_CC); zend_do_for_before_statement(&B[0], &B[1] TSRMLS_CC); A = B[1]; }
+
+unticked_statement ::= for_cont_2(B) for_statement. { zend_do_for_end(&B TSRMLS_CC); }
+
+switch_i ::=  SWITCH LPAREN expr(B) RPAREN. { zend_do_switch_cond(&B TSRMLS_CC); }
+unticked_statement ::= switch_i switch_case_list(B). { zend_do_switch_end(&B TSRMLS_CC); }
+
 unticked_statement ::= LBRACE inner_statement_list RBRACE.
 unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
 unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
@@ -340,9 +343,6 @@ unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 
 declare_i(A) ::= DECLARE(B). { A.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); A = B; }
 declare ::= declare_i(B) LPAREN declare_list RPAREN declare_statement. { zend_do_declare_end(&B TSRMLS_CC); }
-
-switch_i ::=  SWITCH LPAREN expr(B) RPAREN. { zend_do_switch_cond(&B TSRMLS_CC); }
-switch ::= switch_i switch_case_list(B). { zend_do_switch_end(&B TSRMLS_CC); }
 
 foreach_ii(A) ::= FOREACH(B) LPAREN(C) variable(D) AS(E). { zend_do_foreach_begin(&B, &C, &D, &E, 1 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
 foreach_i(A)  ::= foreach_ii(B) foreach_variable(C) foreach_optional_arg(D) RPAREN. { zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
