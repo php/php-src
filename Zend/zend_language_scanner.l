@@ -865,6 +865,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
+<ST_IN_SCRIPTING>"?" {
+	return T_QUESTION_MARK;
+}
 
 <ST_IN_SCRIPTING>"exit" {
 	return T_EXIT;
@@ -1825,7 +1828,7 @@ inline_html:
 
 <ST_VAR_OFFSET>"]" {
 	yy_pop_state(TSRMLS_C);
-	return ']';
+	return T_RBRACKET;
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[{}"`] {
@@ -2047,7 +2050,7 @@ inline_html:
 	YYCURSOR = SCNG(yy_text) + yyleng;
 
 	BEGIN(ST_DOUBLE_QUOTES);
-	return '"';
+	return T_QUOTE;
 }
 
 
@@ -2129,12 +2132,12 @@ inline_html:
 
 <ST_DOUBLE_QUOTES>["] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '"';
+	return T_QUOTE;
 }
 
 <ST_BACKQUOTE>[`] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '`';
+	return T_BACKQUOTE;
 }
 
 
@@ -2363,10 +2366,6 @@ nowdoc_scan_done:
 
 <ST_IN_SCRIPTING>'"' {
 	return T_QUOTE;
-}
-
-<ST_IN_SCRIPTING>'?' {
-	return T_QUESTION_MARK;
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {

@@ -101,9 +101,11 @@
    ^ => T_BW_XOR
    @ => T_AT
    " => T_QUOTE
+   ? => T_QUESTION_MARK
    ! => T_BOOL_NOT
    > => T_GREATER
    < => T_SMALLER
+   ` => T_BACKQUOTE
 
 */
 
