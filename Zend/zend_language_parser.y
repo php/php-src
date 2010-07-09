@@ -185,8 +185,6 @@ top_statement ::= top_statement_list RBRACE.                     { zend_do_end_n
 top_statement ::= namespace_start top_statement_list RBRACE.  { zend_do_end_namespace(TSRMLS_C); }
 top_statement ::= USE use_declarations SEMICOLON.              { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= constant_declaration SEMICOLON.                { zend_verify_namespace(TSRMLS_C); }
-// Just to make the build works
-top_statement ::= todo.
 
 //use_declarations:
 //		use_declarations COMMA use_declaration
@@ -244,7 +242,7 @@ inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPIL
 //;
 
 statement ::= unticked_statement.  { zend_do_ticks(TSRMLS_C); }
-statement ::= STRING(A) COLON. { zend_do_label(&A TSRMLS_CC); }
+statement ::= STRING(B) COLON. { zend_do_label(&A TSRMLS_CC); }
 
 //unticked_statement:
 //		LBRACE inner_statement_list RBRACE
@@ -1760,15 +1758,6 @@ isset_variables(A) ::= isset_variables_i(B) variable(C). {
 
 class_constant(A) ::= class_name(B) PAAMAYIM_NEKUDOTAYIM STRING(C). { zend_do_fetch_constant(&A, &B, &C, ZEND_RT, 0 TSRMLS_CC); }
 class_constant(A) ::= variable_class_name(B) PAAMAYIM_NEKUDOTAYIM STRING(C). { zend_do_fetch_constant(&A, &B, &C, ZEND_RT, 0 TSRMLS_CC); }
-
-// Just to the build works
-todo ::= OPEN_TAG OPEN_TAG_WITH_ECHO ENCAPSED_AND_WHITESPACE CURLY_OPEN VARIABLE
-	DOLLAR_OPEN_CURLY_BRACES WHITESPACE COMMENT CLOSE_TAG DOC_COMMENT
-	OBJECT_HINT INT_HINT LIST DOUBLE_ARROW VAR DEFAULT
-	DECLARE EMPTY NUM_STRING ENDFOREACH ENDDECLARE ENDWHILE
-	DO FOREACH FOR CASE CLASS ENDSWITCH ENDFOR IMPLEMENTS INTERFACE
-	TRY TRAIT INSTEADOF OBJECT_OPERATOR GLOBAL STRING_HINT SWITCH SCALAR_HINT ARRAY
-	ISSET RESOURCE_HINT DOUBLE_HINT BOOL_HINT NUMERIC_HINT.
 
 /*
  * Local variables:
