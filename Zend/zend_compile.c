@@ -6105,9 +6105,6 @@ int zendparse(TSRMLS_D) /* {{{ */
 {
    int token;
    void *pParser;
-#ifndef ZTS
-   void ***tsrm_ls;
-#endif
 
    if ((pParser = ParseAlloc(malloc)) == NULL) {
        ParseFree(pParser, free);
@@ -6148,7 +6145,7 @@ again:
                    break;
                }
            default:
-               Parse(pParser, token, zendlval, tsrm_ls);
+               Parse(pParser, token, zendlval TSRMLS_CC);
                break;
        }
        if (token == 0) {

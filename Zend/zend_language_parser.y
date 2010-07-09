@@ -48,7 +48,7 @@
 %token_type {znode}
 
 %ifdef ZTS
-    %extra_argument {void ***tsrm_ls}
+	%extra_argument {void ***tsrm_ls}
 %endif
 
 %type function_call_ns_i {znode_array}

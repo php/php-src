@@ -1,7 +1,6 @@
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
-LEMON=lemon
 
 DEFS = -DPHP_ATOM_INC -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
 COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORKPATH)

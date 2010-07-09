@@ -149,6 +149,7 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs
 PHP_PROG_AWK
 PHP_PROG_BISON
+PHP_PROG_LEMON
 PHP_PROG_RE2C
 
 dnl Check if bison generated files exist when bison does not..
@@ -1053,9 +1054,12 @@ LIBZEND_OTHER_CHECKS
 if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   PHP_THREAD_SAFETY=yes
+  LEMON_FLAGS="-c -q D=ZTS"
 else
   PHP_THREAD_SAFETY=no
+  LEMON_FLAGS="-c -q"
 fi
+PHP_SUBST(LEMON_FLAGS)
 
 INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
 INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
