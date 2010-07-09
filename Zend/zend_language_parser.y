@@ -1084,6 +1084,8 @@ expr_without_variable(A) ::= expr(B) MINUS expr(C). 	{ zend_do_binary_op(ZEND_SU
 expr_without_variable(A) ::= expr(B) MULT expr(C).	{ zend_do_binary_op(ZEND_MUL, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) DIV expr(C).	{ zend_do_binary_op(ZEND_DIV, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) MOD expr(C).	{ zend_do_binary_op(ZEND_MOD, &A, &B, &C TSRMLS_CC); }
+//expr_without_variable(A) ::= expr(B) SL expr(C). 	{ zend_do_binary_op(ZEND_SL, &A, &B, &C TSRMLS_CC); }
+//expr_without_variable(A) ::= expr(B) SR expr(C).	{ zend_do_binary_op(ZEND_SR, &A, &B, &C TSRMLS_CC); }
 //expr_without_variable(A) ::= PLUS(B) expr(C). [INC] { ZVAL_LONG(&B.u.constant, 0); if (C.op_type == IS_CONST) { add_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; } else { B.op_type = IS_CONST; INIT_PZVAL(&B.u.constant); zend_do_binary_op(ZEND_ADD, &A, &B, &C TSRMLS_CC); } }
 //expr_without_variable(A) ::= MINUS(B) expr(C). [INC] { ZVAL_LONG(&B.u.constant, 0); if (C.op_type == IS_CONST) { sub_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; } else { B.op_type = IS_CONST; INIT_PZVAL(&B.u.constant); zend_do_binary_op(ZEND_SUB, &A, &B, &C TSRMLS_CC); } }
 expr_without_variable(A) ::= BOOL_NOT expr(B). { zend_do_unary_op(ZEND_BOOL_NOT, &A, &B TSRMLS_CC); }
@@ -1111,7 +1113,7 @@ expr_without_variable(A) ::= SCALAR_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_SCA
 expr_without_variable(A) ::= NUMERIC_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_NUMERIC TSRMLS_CC); }
 expr_without_variable(A) ::= UNSET_CAST expr(B).	{ zend_do_cast(&A, &B, IS_NULL TSRMLS_CC); }
 expr_without_variable(A) ::= EXIT exit_expr(B).	{ zend_do_exit(&A, &B TSRMLS_CC); }
-expr_without_variable(A) ::= silent(B) expr(C). { zend_do_end_silence(&B TSRMLS_CC); A = C; }
+expr_without_variable(A) ::= silent(B) expr(C). [IF] { zend_do_end_silence(&B TSRMLS_CC); A = C; }
 expr_without_variable(A) ::= ARRAY LPAREN array_pair_list(B) RPAREN. { A = B; }
 expr_without_variable(A) ::= scalar(B). { A = B; }
 expr_without_variable(A) ::= BACKQUOTE backticks_expr(B) BACKQUOTE. { zend_do_shell_exec(&A, &B TSRMLS_CC); }
