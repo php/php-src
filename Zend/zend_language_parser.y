@@ -1677,12 +1677,12 @@ array_pair_list(A) ::= non_empty_array_pair_list(B) possible_comma.	{ A = B; }
 //	|	'&' w_variable 			{ zend_do_init_array(&$$, &$2, NULL, 1 TSRMLS_CC); }
 //;
 
-non_empty_array_pair_list(A) ::= non_empty_array_pair_list COMMA expr(B) DOUBLE_ARROW expr(C). { zend_do_add_array_element(&A, &C, &B, 0 TSRMLS_CC); }
-non_empty_array_pair_list(A) ::= non_empty_array_pair_list COMMA expr(B). { zend_do_add_array_element(&A, &B, NULL, 0 TSRMLS_CC); }
+non_empty_array_pair_list(A) ::= non_empty_array_pair_list(B) COMMA expr(C) DOUBLE_ARROW expr(D). { zend_do_add_array_element(&B, &D, &C, 0 TSRMLS_CC); A = B; }
+non_empty_array_pair_list(A) ::= non_empty_array_pair_list(B) COMMA expr(C). { zend_do_add_array_element(&B, &C, NULL, 0 TSRMLS_CC); A = B; }
 non_empty_array_pair_list(A) ::= expr(B) DOUBLE_ARROW expr(C). { zend_do_init_array(&A, &C, &B, 0 TSRMLS_CC); }
 non_empty_array_pair_list(A) ::= expr(B). { zend_do_init_array(&A, &B, NULL, 0 TSRMLS_CC); }
-non_empty_array_pair_list(A) ::= non_empty_array_pair_list COMMA expr(B) DOUBLE_ARROW BW_AND w_variable(C). { zend_do_add_array_element(&A, &C, &B, 1 TSRMLS_CC); }
-non_empty_array_pair_list(A) ::= non_empty_array_pair_list COMMA BW_AND w_variable(B). { zend_do_add_array_element(&A, &B, NULL, 1 TSRMLS_CC); }
+non_empty_array_pair_list(A) ::= non_empty_array_pair_list(B) COMMA expr(C) DOUBLE_ARROW BW_AND w_variable(D). { zend_do_add_array_element(&B, &D, &C, 1 TSRMLS_CC); A = B; }
+non_empty_array_pair_list(A) ::= non_empty_array_pair_list(B) COMMA BW_AND w_variable(C). { zend_do_add_array_element(&B, &C, NULL, 1 TSRMLS_CC); A = B; }
 non_empty_array_pair_list(A) ::= expr(B) DOUBLE_ARROW BW_AND w_variable(C).	{ zend_do_init_array(&A, &C, &B, 1 TSRMLS_CC); }
 non_empty_array_pair_list(A) ::= BW_AND w_variable(B). { zend_do_init_array(&A, &B, NULL, 1 TSRMLS_CC); }
 
