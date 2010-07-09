@@ -1411,8 +1411,8 @@ possible_comma ::= COMMA.
 //	|	static_scalar { $$.op_type = IS_CONST; INIT_PZVAL(&$$.u.constant); array_init(&$$.u.constant); zend_do_add_static_array_element(&$$, NULL, &$1); }
 //;
 
-non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list COMMA static_scalar(B) DOUBLE_ARROW static_scalar(C). { zend_do_add_static_array_element(&A, &B, &C); }
-non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list COMMA static_scalar(B). { zend_do_add_static_array_element(&A, NULL, &B); }
+non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list(B) COMMA static_scalar(C) DOUBLE_ARROW static_scalar(D). { zend_do_add_static_array_element(&B, &C, &D); A = B; }
+non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list(B) COMMA static_scalar(C). { zend_do_add_static_array_element(&B, NULL, &C); A = B; }
 non_empty_static_array_pair_list(A) ::= static_scalar(B) DOUBLE_ARROW static_scalar(C). { A.op_type = IS_CONST;
                                                                                           INIT_PZVAL(&A.u.constant);
                                                                                           array_init(&A.u.constant);
