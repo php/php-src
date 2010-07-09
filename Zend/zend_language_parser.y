@@ -73,6 +73,8 @@
 %type unticked_class_declaration_statement_i {znode_array}
 %type unticked_class_declaration_statement_ii {znode_array}
 %type while_cond {znode_array}
+%type do_statement {znode_array}
+%type for_cont {znode_array}
 
 
 /* TOKENS TRANSLATION:
@@ -299,8 +301,8 @@ if_cond_then ::= if_cond(B) statement.        { zend_do_if_after_statement(&B, 1
 if_alt_cond(A)   ::= IF LPAREN expr(B) RPAREN(C) COLON. { zend_do_if_cond(&B, &C TSRMLS_CC); A = C; }
 if_alt_cond_then ::= if_alt_cond(B) inner_statement_list. { zend_do_if_after_statement(&B, 1 TSRMLS_CC); }
 
-while_begin(A) ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); A = B }
-while_cond(A)  ::= while_begin(B)  expr(C) RPAREN(D). { zend_do_while_cond(&C, &D TSRMLS_CC); A[0] = B; A[1] = D }
+while_begin(A) ::= WHILE(B) LPAREN. { B.u.op.opline_num = get_next_op_number(CG(active_op_array)); A = B; }
+while_cond(A)  ::= while_begin(B)  expr(C) RPAREN(D). { zend_do_while_cond(&C, &D TSRMLS_CC); A[0] = B; A[1] = D; }
 unticked_statement ::= while_cond(B) while_statement. { zend_do_while_end(&B[0], &B[1] TSRMLS_CC); }
 
 
@@ -348,13 +350,13 @@ foreach_ii(A) ::= FOREACH(B) LPAREN(C) variable(D) AS(E). { zend_do_foreach_begi
 foreach_i(A)  ::= foreach_ii(B) foreach_variable(C) foreach_optional_arg(D) RPAREN. { zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
 foreach       ::= foreach_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
 
-foreach2_ii(A) ::= FOREACH(B) LPAREN(C) expr_without_variable(D) AS(E). { zend_do_foreach_begin(&A, &B, &C, &D, 0 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
+foreach2_ii(A) ::= FOREACH(B) LPAREN(C) expr_without_variable(D) AS(E). { zend_do_foreach_begin(&B, &C, &D, &E, 0 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
 foreach2_i(A)  ::= foreach2_ii(B) variable(C) foreach_optional_arg(D) RPAREN. { zend_check_writable_variable(&C); zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
 foreach2       ::= foreach2_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
 
 try_catch_v(A)   ::= TRY(B). { zend_do_try(&B TSRMLS_CC); A = B; }
 try_catch_iv(A)  ::= try_catch_v(B) LBRACE inner_statement_list RBRACE CATCH LPAREN(C). { zend_initialize_try_catch_element(&B TSRMLS_CC); A[0] = B; A[1] = C; }
-try_catch_iii(A) ::= try_catch_iv(B) fully_qualified_class_name(C). { zend_do_first_catch(&B TSRMLS_CC); A[0] = B[0]; A[1] = B[1]; A[2] = C; }
+try_catch_iii(A) ::= try_catch_iv(B) fully_qualified_class_name(C). { zend_do_first_catch(&B[1] TSRMLS_CC); A[0] = B[0]; A[1] = B[1]; A[2] = C; }
 try_catch_ii(A)  ::= try_catch_iii(B) VARIABLE(C) RPAREN. { zend_do_begin_catch(&B[0], &B[2], &C, &B[1] TSRMLS_CC); A = B[0]; }
 try_catch_i(A)   ::= try_catch_ii(B) LBRACE inner_statement_list RBRACE. { zend_do_end_catch(&B TSRMLS_CC); A = B; }
 try_catch        ::= try_catch_i(B) additional_catches(C). { zend_do_mark_last_catch(&B, &C TSRMLS_CC); }
@@ -1412,8 +1414,15 @@ possible_comma ::= COMMA.
 
 non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list COMMA static_scalar(B) DOUBLE_ARROW static_scalar(C). { zend_do_add_static_array_element(&A, &B, &C); }
 non_empty_static_array_pair_list(A) ::= non_empty_static_array_pair_list COMMA static_scalar(B). { zend_do_add_static_array_element(&A, NULL, &B); }
-non_empty_static_array_pair_list(A) ::= static_scalar(B) DOUBLE_ARROW static_scalar(C). { A.op_type = IS_CONST; INIT_PZVAL(&A.u.constant); array_init(&A.u.constant); zend_do_add_static_array_element(&A, &B, &C); }
-non_empty_static_array_pair_list(A) ::= static_scalar(B). { A.op_type = IS_CONST; INIT_PZVAL(&A.u.constant); array_init(&A.u.constant); zend_do_add_static_array_element(&A, NULL, &B); }
+non_empty_static_array_pair_list(A) ::= static_scalar(B) DOUBLE_ARROW static_scalar(C). { A.op_type = IS_CONST;
+                                                                                          INIT_PZVAL(&A.u.constant);
+                                                                                          array_init(&A.u.constant);
+                                                                                          zend_do_add_static_array_element(&A, &B, &C); }
+
+non_empty_static_array_pair_list(A) ::= static_scalar(B). { A.op_type = IS_CONST;
+                                                            INIT_PZVAL(&A.u.constant);
+                                                            array_init(&A.u.constant);
+                                                            zend_do_add_static_array_element(&A, NULL, &B); }
 
 //expr:
 //		r_variable					{ $$ = $1; }
