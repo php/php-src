@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.3.3 RC3
+- Rewrote var_export() to use smart_str rather than output buffering, prevents
+  data disclosure if a fatal error occurs. (Scott)
+
 - Fixed bug #52262 (json_decode() shows no errors on invalid UTF-8).
   (Scott)
 - Fixed bug #52240 (hash_copy() does not copy the HMAC key, causes wrong
