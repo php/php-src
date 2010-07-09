@@ -1084,6 +1084,8 @@ expr_without_variable(A) ::= expr(B) MINUS expr(C). 	{ zend_do_binary_op(ZEND_SU
 expr_without_variable(A) ::= expr(B) MULT expr(C).	{ zend_do_binary_op(ZEND_MUL, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) DIV expr(C).	{ zend_do_binary_op(ZEND_DIV, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) MOD expr(C).	{ zend_do_binary_op(ZEND_MOD, &A, &B, &C TSRMLS_CC); }
+//expr_without_variable(A) ::= PLUS(B) expr(C). [INC] { ZVAL_LONG(&B.u.constant, 0); if (C.op_type == IS_CONST) { add_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; } else { B.op_type = IS_CONST; INIT_PZVAL(&B.u.constant); zend_do_binary_op(ZEND_ADD, &A, &B, &C TSRMLS_CC); } }
+//expr_without_variable(A) ::= MINUS(B) expr(C). [INC] { ZVAL_LONG(&B.u.constant, 0); if (C.op_type == IS_CONST) { sub_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; } else { B.op_type = IS_CONST; INIT_PZVAL(&B.u.constant); zend_do_binary_op(ZEND_SUB, &A, &B, &C TSRMLS_CC); } }
 expr_without_variable(A) ::= BOOL_NOT expr(B). { zend_do_unary_op(ZEND_BOOL_NOT, &A, &B TSRMLS_CC); }
 expr_without_variable(A) ::= BW_NOT expr(B). { zend_do_unary_op(ZEND_BW_NOT, &A, &B TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) IS_IDENTICAL expr(C).	{ zend_do_binary_op(ZEND_IS_IDENTICAL, &A, &B, &C TSRMLS_CC); }

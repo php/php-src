@@ -6146,6 +6146,7 @@ again:
 				if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
 					break;
 				}
+				token = T_SEMICOLON;
 			default:
 				break;
 		}

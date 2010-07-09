@@ -1826,6 +1826,10 @@ inline_html:
 	return T_VARIABLE;
 }
 
+<ST_VAR_OFFSET>"[" {
+	return T_LBRACKET;
+}
+
 <ST_VAR_OFFSET>"]" {
 	yy_pop_state(TSRMLS_C);
 	return T_RBRACKET;
