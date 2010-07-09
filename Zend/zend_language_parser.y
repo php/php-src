@@ -59,6 +59,12 @@
 %type foreach_ii {znode_array}
 %type foreach2_i {znode_array}
 %type foreach2_ii {znode_array}
+%type bool_or_expr_i {znode_array}
+%type bool_and_expr_i {znode_array}
+%type logic_or_expr_i {znode_array}
+%type logic_and_expr_i {znode_array}
+%type ternary_i {znode_array}
+%type short_ternary_i {znode_array}
 %type closure_i {znode_array}
 %type closure_ii {znode_array}
 %type try_catch_iv {znode_array}
@@ -326,7 +332,14 @@ unticked_statement ::= expr(B) SEMICOLON. { zend_do_free(&B TSRMLS_CC); }
 unticked_statement ::= UNSET LPAREN unset_variables RPAREN SEMICOLON.
 unticked_statement ::= foreach.
 unticked_statement ::= foreach2.
-// unticked_statement ::= DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } LPAREN declare_list RPAREN declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
+unticked_statement ::= declare.
+unticked_statement ::= SEMICOLON. /* empty statement */
+unticked_statement ::= try_catch.
+unticked_statement ::= THROW expr(B) SEMICOLON. { zend_do_throw(&B TSRMLS_CC); }
+unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
+
+declare_i(A) ::= DECLARE(B). { A.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); A = B; }
+declare ::= declare_i(B) LPAREN declare_list RPAREN declare_statement. { zend_do_declare_end(&B TSRMLS_CC); }
 
 switch_i ::=  SWITCH LPAREN expr(B) RPAREN. { zend_do_switch_cond(&B TSRMLS_CC); }
 switch ::= switch_i switch_case_list(B). { zend_do_switch_end(&B TSRMLS_CC); }
@@ -339,26 +352,12 @@ foreach2_ii(A) ::= FOREACH(B) LPAREN(C) expr_without_variable(D) AS(E). { zend_d
 foreach2_i(A)  ::= foreach2_ii(B) variable(C) foreach_optional_arg(D) RPAREN. { zend_check_writable_variable(&C); zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
 foreach2       ::= foreach2_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
 
-unticked_statement ::= SEMICOLON. /* empty statement */
-
-// TRY { zend_do_try(&$1 TSRMLS_CC); } LBRACE inner_statement_list RBRACE
-//		CATCH LPAREN { zend_initialize_try_catch_element(&$1 TSRMLS_CC); }
-//		fully_qualified_class_name { zend_do_first_catch(&$7 TSRMLS_CC); }
-//		VARIABLE RPAREN { zend_do_begin_catch(&$1, &$9, &$11, &$7 TSRMLS_CC); }
-//		LBRACE inner_statement_list RBRACE { zend_do_end_catch(&$1 TSRMLS_CC); }
-//		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
-
 try_catch_v(A)   ::= TRY(B). { zend_do_try(&B TSRMLS_CC); A = B; }
 try_catch_iv(A)  ::= try_catch_v(B) LBRACE inner_statement_list RBRACE CATCH LPAREN(C). { zend_initialize_try_catch_element(&B TSRMLS_CC); A[0] = B; A[1] = C; }
 try_catch_iii(A) ::= try_catch_iv(B) fully_qualified_class_name(C). { zend_do_first_catch(&B TSRMLS_CC); A[0] = B[0]; A[1] = B[1]; A[2] = C; }
 try_catch_ii(A)  ::= try_catch_iii(B) VARIABLE(C) RPAREN. { zend_do_begin_catch(&B[0], &B[2], &C, &B[1] TSRMLS_CC); A = B[0]; }
 try_catch_i(A)   ::= try_catch_ii(B) LBRACE inner_statement_list RBRACE. { zend_do_end_catch(&B TSRMLS_CC); A = B; }
 try_catch        ::= try_catch_i(B) additional_catches(C). { zend_do_mark_last_catch(&B, &C TSRMLS_CC); }
-
-unticked_statement ::= try_catch.
-
-unticked_statement ::= THROW expr(B) SEMICOLON. { zend_do_throw(&B TSRMLS_CC); }
-unticked_statement ::= GOTO STRING(B) SEMICOLON. { zend_do_goto(&B TSRMLS_CC); }
 
 //additional_catches:
 //		non_empty_additional_catches { $$ = $1; }
@@ -1038,7 +1037,10 @@ new_ii(A) ::= variable(B) EQUAL BW_AND(C) NEW(D) class_name_reference(E). {
 	A[2] = D;
 }
 
-//expr_without_variable(A) ::= LIST LPAREN { zend_do_list_init(TSRMLS_C); } assignment_list RPAREN EQUAL expr. { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
+list_i ::= LIST LPAREN. { zend_do_list_init(TSRMLS_C); }
+list(A) ::= list_i assignment_list RPAREN EQUAL expr(B). { zend_do_list_end(&A, &B TSRMLS_CC); }
+
+expr_without_variable(A) ::= list(B). { A = B; }
 expr_without_variable(A) ::= variable(B) EQUAL expr(C).		{ zend_check_writable_variable(&B); zend_do_assign(&A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) EQUAL BW_AND variable(C). { zend_check_writable_variable(&B); zend_do_end_variable_parse(&C, BP_VAR_W, 1 TSRMLS_CC); zend_do_end_variable_parse(&B, BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= new_ii(B) ctor_arguments(C). { zend_do_end_new_object(&B[1], &B[2], &C TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(&B[0], BP_VAR_W, 0 TSRMLS_CC); B[1].EA = ZEND_PARSED_NEW; zend_do_assign_ref(&A, &B[0], &B[1] TSRMLS_CC); }
@@ -1055,6 +1057,15 @@ expr_without_variable(A) ::= variable(B) OR_EQUAL expr(C). 		{ zend_check_writab
 expr_without_variable(A) ::= variable(B) XOR_EQUAL expr(C). 	{ zend_check_writable_variable(&B); zend_do_end_variable_parse(&B, BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_BW_XOR, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) SL_EQUAL expr(C).	{ zend_check_writable_variable(&B); zend_do_end_variable_parse(&B, BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SL, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= variable(B) SR_EQUAL expr(C).	{ zend_check_writable_variable(&B); zend_do_end_variable_parse(&B, BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SR, &A, &B, &C TSRMLS_CC); }
+expr_without_variable(A) ::= rw_variable(B) INC. { zend_do_post_incdec(&A, &B, ZEND_POST_INC TSRMLS_CC); }
+expr_without_variable(A) ::= INC rw_variable(B). { zend_do_pre_incdec(&A, &B, ZEND_PRE_INC TSRMLS_CC); }
+expr_without_variable(A) ::= rw_variable(B) DEC. { zend_do_post_incdec(&A, &B, ZEND_POST_DEC TSRMLS_CC); }
+expr_without_variable(A) ::= DEC rw_variable(B). { zend_do_pre_incdec(&A, &B, ZEND_PRE_DEC TSRMLS_CC); }
+expr_without_variable(A) ::= bool_or_expr(B). { A = B; }
+expr_without_variable(A) ::= bool_and_expr(B). { A = B; }
+expr_without_variable(A) ::= logic_or_expr(B). { A = B; }
+expr_without_variable(A) ::= logic_and_expr(B). { A = B; }
+expr_without_variable(A) ::= expr(B) LOGICAL_XOR expr(C). { zend_do_binary_op(ZEND_BOOL_XOR, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) BW_OR expr(C).	{ zend_do_binary_op(ZEND_BW_OR, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) BW_AND expr(C).	{ zend_do_binary_op(ZEND_BW_AND, &A, &B, &C TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) BW_XOR expr(C).	{ zend_do_binary_op(ZEND_BW_XOR, &A, &B, &C TSRMLS_CC); }
@@ -1076,6 +1087,8 @@ expr_without_variable(A) ::= expr(B) IS_GREATER expr(C). { zend_do_binary_op(ZEN
 expr_without_variable(A) ::= expr(B) IS_GREATER_OR_EQUAL expr(C). { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &A, &C, &B TSRMLS_CC); }
 expr_without_variable(A) ::= expr(B) INSTANCEOF class_name_reference(C). { zend_do_instanceof(&A, &B, &C, 0 TSRMLS_CC); }
 expr_without_variable(A) ::= LPAREN expr(B) RPAREN.	{ A = B; }
+expr_without_variable(A) ::= ternary(B). { A = B; }
+expr_without_variable(A) ::= short_ternary(B). { A = B; }
 expr_without_variable(A) ::= internal_functions_in_yacc(B). { A = B; }
 expr_without_variable(A) ::= INT_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_LONG TSRMLS_CC); }
 expr_without_variable(A) ::= DOUBLE_CAST expr(B). 	{ zend_do_cast(&A, &B, IS_DOUBLE TSRMLS_CC); }
@@ -1094,6 +1107,25 @@ expr_without_variable(A) ::= BACKQUOTE backticks_expr(B) BACKQUOTE. { zend_do_sh
 expr_without_variable(A) ::= PRINT expr(B). { zend_do_print(&A, &B TSRMLS_CC); }
 expr_without_variable(A) ::= closure_i(B) parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE. { zend_do_end_function_declaration(&B[1] TSRMLS_CC); A = B[0]; }
 expr_without_variable(A) ::= closure_ii(B) parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE. { zend_do_end_function_declaration(&B[1] TSRMLS_CC); A = B[0]; }
+
+bool_or_expr_i(A) ::= expr(B) BOOLEAN_OR(C). { zend_do_boolean_or_begin(&B, &C TSRMLS_CC); A[0] = B; A[1] = C; }
+bool_or_expr(A) ::= bool_or_expr_i(B) expr(C). { zend_do_boolean_or_end(&A, &B[0], &C, &B[1] TSRMLS_CC); }
+
+bool_and_expr_i(A) ::= expr(B) BOOLEAN_AND(C). { zend_do_boolean_and_begin(&B, &C TSRMLS_CC); A[0] = B; A[1] = C; }
+bool_and_expr(A) ::=  bool_and_expr_i(B) expr(C). { zend_do_boolean_and_end(&A, &B[0], &C, &B[1] TSRMLS_CC); }
+
+logic_or_expr_i(A) ::= expr(B) LOGICAL_OR(C). { zend_do_boolean_or_begin(&B, &C TSRMLS_CC); A[0] = B; A[1] = C; }
+logic_or_expr(A) ::= logic_or_expr_i(B) expr(C). { zend_do_boolean_or_end(&A, &B[0], &C, &B[1] TSRMLS_CC); }
+
+logic_and_expr_i(A) ::= expr(B) LOGICAL_AND(C). { zend_do_boolean_and_begin(&B, &C TSRMLS_CC); A[0] = B; A[1] = C; }
+logic_and_expr(A) ::= logic_and_expr_i(B) expr(C). { zend_do_boolean_and_end(&A, &B[0], &C, &B[1] TSRMLS_CC); }
+
+ternary_ii(A) ::= expr(B) QUESTION_MARK(C). { zend_do_begin_qm_op(&B, &C TSRMLS_CC); A = C; }
+ternary_i(A)  ::= ternary_ii(B) expr(C) COLON(D). { zend_do_qm_true(&C, &B, &D TSRMLS_CC); A[0] = B; A[1] = D; }
+ternary(A)    ::= ternary_i(B) expr(C).	 { zend_do_qm_false(&A, &C, &B[0], &B[1] TSRMLS_CC); }
+
+short_ternary_i(A) ::= expr(B) QUESTION_MARK(C) COLON(D). { zend_do_jmp_set(&B, &C, &D TSRMLS_CC); A[0] = C; A[1] = D; }
+short_ternary(A)   ::= short_ternary_i(B) expr(C). { zend_do_jmp_set_else(&A, &C, &B[0], &B[1] TSRMLS_CC); }
 
 closure_i(A) ::= function(B) is_reference(C) LPAREN. { zend_do_begin_lambda_function_declaration(&A[0], &B, C.op_type, 0 TSRMLS_CC); A[1] = B; }
 closure_ii(A) ::= STATIC function(B) is_reference(C) LPAREN. { zend_do_begin_lambda_function_declaration(&A[0], &B, C.op_type, 1 TSRMLS_CC); A[1] = B; }
