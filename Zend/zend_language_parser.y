@@ -46,7 +46,9 @@
 
 %token_type {znode}
 
-%extra_argument {void ***tsrm_ls}
+%ifdef ZTS
+    %extra_argument {void ***tsrm_ls}
+%endif
 
 %type function_call_ns_i {znode_array}
 %type function_call_ns_ii {znode_array}
@@ -78,7 +80,6 @@
 
 
 /* TOKENS TRANSLATION:
-   
    , => T_COMMA
    = => T_EQUAL
    ( => T_LPAREN
