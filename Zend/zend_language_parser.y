@@ -1568,7 +1568,6 @@ base_variable(A) ::= static_member(B). { A = B; A.EA = ZEND_PARSED_STATIC_MEMBER
 //
 
 reference_variable(A) ::= reference_variable(B) LBRACKET dim_offset(C) RBRACKET.	{ fetch_array_dim(&A, &B, &C TSRMLS_CC); }
-reference_variable(A) ::= reference_variable(B) LBRACKET dim_offset(C) RBRACKET.	{ fetch_array_dim(&A, &B, &C TSRMLS_CC); }
 reference_variable(A) ::= reference_variable(B) LBRACE expr(C) RBRACE.		{ fetch_string_offset(&A, &B, &C TSRMLS_CC); }
 reference_variable(A) ::= compound_variable(B).	{ zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&A, &B, 1 TSRMLS_CC); }
 
