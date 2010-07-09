@@ -31,11 +31,12 @@
 //%name lemon_
 
 %syntax_error {
-	zend_error(E_PARSE, "syntax error, unexpected '%.*s'", LANG_SCNG(yy_leng), LANG_SCNG(yy_text));
+    zend_error(E_PARSE, "syntax error, unexpected '%.*s'", LANG_SCNG(yy_leng), LANG_SCNG(yy_text));
+    zend_bailout();
 }
 
 %stack_overflow {
-     fprintf(stderr,"Woops, parser stack overflow\n");
+    fprintf(stderr,"Woops, parser stack overflow\n");
 }
 
 %stack_size 500
