@@ -6135,8 +6135,10 @@ again:
 				goto again;
 			case T_END_HEREDOC:
 				efree(Z_STRVAL(zendlval.u.constant));
+				break;
 			case T_OPEN_TAG_WITH_ECHO:
 				token = T_ECHO;
+				break;
 			case T_CLOSE_TAG:
 				if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
 					CG(increment_lineno) = 1;
@@ -6145,9 +6147,9 @@ again:
 					break;
 				}
 			default:
-				Parse(pParser, token, zendlval TSRMLS_CC);
 				break;
 		}
+		Parse(pParser, token, zendlval TSRMLS_CC);
 		if (token == 0) {
 			break;
 		}
