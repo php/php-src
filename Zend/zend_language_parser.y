@@ -242,7 +242,7 @@ inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPIL
 //;
 
 statement ::= unticked_statement.  { zend_do_ticks(TSRMLS_C); }
-statement ::= STRING(B) COLON. { zend_do_label(&A TSRMLS_CC); }
+statement ::= STRING(B) COLON. { zend_do_label(&B TSRMLS_CC); }
 
 //unticked_statement:
 //		LBRACE inner_statement_list RBRACE
