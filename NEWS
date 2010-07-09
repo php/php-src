@@ -18,7 +18,7 @@ PHP                                                                        NEWS
     A constant class name may be used as a direct operand of ZEND_FETCH_*
     instruction without previous ZEND_FETCH_CLASS.
   . eliminated unnecessary iterations during request startup/shutdown
-  . zend_stack initialization is delayed before the actual usage
+  . zend_stack and zend_ptr_stack allocation is delayed before the actual usage
   . $GLOBALS became a JIT autoglobal, so it's initialized only if used
     (this may affect opcode caches)
 - Added concept of interned strings. All strings constants known at compile
