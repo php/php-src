@@ -305,9 +305,9 @@ unticked_statement ::= FOR
                             for_expr
                         RPAREN { zend_do_free(&$9 TSRMLS_CC); zend_do_for_before_statement(&$4, &$7 TSRMLS_CC); }
                         for_statement { zend_do_for_end(&$7 TSRMLS_CC); }
-unticked_statement ::= SWITCH LPAREN expr RPAREN	{ zend_do_switch_cond(&$3 TSRMLS_CC); } switch_case_list { zend_do_switch_end(&$6 TSRMLS_CC); }
 */
 
+unticked_statement ::= switch.
 unticked_statement ::= LBRACE inner_statement_list RBRACE.
 unticked_statement ::= if_cond_then elseif_list else_single. { zend_do_if_end(TSRMLS_C); }
 unticked_statement ::= if_alt_cond_then elseif_alt_list else_alt_single ENDIF SEMICOLON. { zend_do_if_end(TSRMLS_C); }
@@ -328,6 +328,9 @@ unticked_statement ::= foreach.
 unticked_statement ::= foreach2.
 // unticked_statement ::= DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } LPAREN declare_list RPAREN declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 
+switch_i ::=  SWITCH LPAREN expr(B) RPAREN. { zend_do_switch_cond(&B TSRMLS_CC); }
+switch ::= switch_i switch_case_list(B). { zend_do_switch_end(&B TSRMLS_CC); }
+
 foreach_ii(A) ::= FOREACH(B) LPAREN(C) variable(D) AS(E). { zend_do_foreach_begin(&B, &C, &D, &E, 1 TSRMLS_CC); A[0] = B; A[1] = C; A[2] = E; }
 foreach_i(A)  ::= foreach_ii(B) foreach_variable(C) foreach_optional_arg(D) RPAREN. { zend_do_foreach_cont(&B[0], &B[1], &B[2], &C, &D TSRMLS_CC); A[0] = B[0]; A[1] = B[2]; }
 foreach       ::= foreach_i(B) foreach_statement. { zend_do_foreach_end(&B[0], &B[1] TSRMLS_CC); }
@@ -346,7 +349,7 @@ unticked_statement ::= SEMICOLON. /* empty statement */
 //		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
 
 try_catch_v(A)   ::= TRY(B). { zend_do_try(&B TSRMLS_CC); A = B; }
-try_catch_iv(A)  ::= try_catch_v(B) LBRACE inner_statement_list RBRACE CATCH(C) LPAREN(D). { zend_initialize_try_catch_element(&B TSRMLS_CC); A[0] = B; A[1] = D; }
+try_catch_iv(A)  ::= try_catch_v(B) LBRACE inner_statement_list RBRACE CATCH LPAREN(C). { zend_initialize_try_catch_element(&B TSRMLS_CC); A[0] = B; A[1] = C; }
 try_catch_iii(A) ::= try_catch_iv(B) fully_qualified_class_name(C). { zend_do_first_catch(&B TSRMLS_CC); A[0] = B[0]; A[1] = B[1]; A[2] = C; }
 try_catch_ii(A)  ::= try_catch_iii(B) VARIABLE(C) RPAREN. { zend_do_begin_catch(&B[0], &B[2], &C, &B[1] TSRMLS_CC); A = B[0]; }
 try_catch_i(A)   ::= try_catch_ii(B) LBRACE inner_statement_list RBRACE. { zend_do_end_catch(&B TSRMLS_CC); A = B; }
@@ -556,15 +559,25 @@ declare_list ::= declare_list COMMA STRING(B) EQUAL static_scalar(C). { zend_do_
 //	|	COLON case_list ENDSWITCH SEMICOLON		{ $$ = $2; }
 //	|	COLON SEMICOLON case_list ENDSWITCH SEMICOLON	{ $$ = $3; }
 //;
-//
-//
+
+switch_case_list(A) ::= LBRACE case_list(B) RBRACE. { A = B; }
+switch_case_list(A) ::=	LBRACE SEMICOLON case_list(B) RBRACE. { A = B; }
+switch_case_list(A) ::=	COLON case_list(B) ENDSWITCH SEMICOLON. { A = B; }
+switch_case_list(A) ::=	COLON SEMICOLON case_list(B) ENDSWITCH SEMICOLON. { A = B; }
+
 //case_list:
 //		/* empty */	{ $$.op_type = IS_UNUSED; }
 //	|	case_list CASE expr case_separator { zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&$1, &$2, &$3 TSRMLS_CC); } inner_statement_list { zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
 //	|	case_list DEFAULT case_separator { zend_do_extended_info(TSRMLS_C);  zend_do_default_before_statement(&$1, &$2 TSRMLS_CC); } inner_statement_list { zend_do_case_after_statement(&$$, &$2 TSRMLS_CC); $$.op_type = IS_CONST; }
 //;
-//
-//
+
+case_list_i(A)  ::= case_list(B) CASE(C) expr(D) case_separator. { zend_do_extended_info(TSRMLS_C);  zend_do_case_before_statement(&B, &C, &D TSRMLS_CC); A = C;}
+case_list_ii(A) ::= case_list(B) DEFAULT(C) case_separator. { zend_do_extended_info(TSRMLS_C);  zend_do_default_before_statement(&B, &C TSRMLS_CC); A = C; }
+
+case_list(A) ::= . { A.op_type = IS_UNUSED; }
+case_list(A) ::= case_list_i(B) inner_statement_list. { zend_do_case_after_statement(&A, &B TSRMLS_CC); A.op_type = IS_CONST; }
+case_list(A) ::= case_list_ii(B) inner_statement_list. { zend_do_case_after_statement(&A, &B TSRMLS_CC); A.op_type = IS_CONST; }
+
 //case_separator:
 //		COLON
 //	|	SEMICOLON
