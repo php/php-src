@@ -6103,7 +6103,7 @@ int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_
 
 int zendparse(TSRMLS_D) /* {{{ */
 {
-	int token;
+	int token, halting = 0;
 	void *pParser;
 
 	if ((pParser = ParseAlloc(malloc)) == NULL) {
@@ -6133,6 +6133,9 @@ again:
 			case T_OPEN_TAG:
 			case T_WHITESPACE:
 				goto again;
+			case T_HALT_COMPILER:
+				halting = 1;
+				break;
 			case T_END_HEREDOC:
 				efree(Z_STRVAL(zendlval.u.constant));
 				break;
@@ -6152,6 +6155,9 @@ again:
 		}
 		Parse(pParser, token, zendlval TSRMLS_CC);
 		if (token == 0) {
+			break;
+		} else if (halting == 1 && token == T_SEMICOLON) {
+			Parse(pParser, 0, zendlval TSRMLS_CC);
 			break;
 		}
 	}
