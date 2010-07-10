@@ -1642,7 +1642,7 @@ variable_name(A) ::= LBRACE expr(B) RBRACE. { A = B; }
 //;
 
 simple_indirect_reference(A) ::= DOLLAR. { Z_LVAL(A.u.constant) = 1; }
-simple_indirect_reference(A) ::= simple_indirect_reference DOLLAR. { Z_LVAL(A.u.constant)++; }
+simple_indirect_reference(A) ::= simple_indirect_reference(B) DOLLAR. { Z_LVAL(B.u.constant)++; A = B; }
 
 //assignment_list:
 //		assignment_list COMMA assignment_list_element
