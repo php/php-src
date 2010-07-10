@@ -1436,6 +1436,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_AT;
 }
 
+<ST_IN_SCRIPTING>"$" {
+	return T_DOLLAR;
+}
+
 <ST_IN_SCRIPTING>{TOKENS} {
 	return yytext[0];
 }
@@ -2362,10 +2366,6 @@ nowdoc_scan_done:
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-<ST_IN_SCRIPTING>"$" {
-	return T_DOLLAR;
 }
 
 <ST_IN_SCRIPTING>'"' {
