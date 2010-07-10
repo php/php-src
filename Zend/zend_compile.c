@@ -6163,11 +6163,6 @@ again:
 	}
 	ParseFree(pParser, free);
 
-	/* We got a parse error occured */
-	if (EG(exit_status) == 255) {
-		return 1;
-	}
-
 	return 0;
 }
 /* }}} */

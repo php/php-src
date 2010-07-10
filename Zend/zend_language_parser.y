@@ -1370,7 +1370,7 @@ static_scalar(A) ::= namespace_name(B). { zend_do_fetch_constant(&A, NULL, &B, Z
 static_scalar(A) ::= NAMESPACE NS_SEPARATOR namespace_name(B). { A.op_type = IS_CONST; ZVAL_EMPTY_STRING(&A.u.constant);  zend_do_build_namespace_name(&A, &A, &B TSRMLS_CC); B = A; zend_do_fetch_constant(&A, NULL, &B, ZEND_CT, 0 TSRMLS_CC); }
 static_scalar(A) ::= NS_SEPARATOR namespace_name(B). { char *tmp = estrndup(Z_STRVAL(B.u.constant), Z_STRLEN(B.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL(B.u.constant), Z_STRLEN(B.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL(B.u.constant)); Z_STRVAL(B.u.constant) = tmp; ++Z_STRLEN(B.u.constant); zend_do_fetch_constant(&A, NULL, &B, ZEND_CT, 0 TSRMLS_CC); }
 static_scalar(A) ::= PLUS(B) static_scalar(C). { ZVAL_LONG(&B.u.constant, 0); add_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; }
-static_scalar(A) ::= MINUS(B) static_scalar(C). { ZVAL_LONG(&C.u.constant, 0); sub_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; }
+static_scalar(A) ::= MINUS(B) static_scalar(C). { ZVAL_LONG(&B.u.constant, 0); sub_function(&C.u.constant, &B.u.constant, &C.u.constant TSRMLS_CC); A = C; }
 static_scalar(A) ::= ARRAY LPAREN static_array_pair_list(B) RPAREN. { A = B; Z_TYPE(A.u.constant) = IS_CONSTANT_ARRAY; }
 static_scalar(A) ::= static_class_constant(B). { A = B; }
 
