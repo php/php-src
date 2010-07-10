@@ -11,7 +11,7 @@ $(srcdir)/zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 
 $(srcdir)/zend_language_parser.h: $(srcdir)/zend_language_parser.c
 $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
-	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_language_parser.y || test $$? -eq 25
+	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_language_parser.y || test $$? -eq 2
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
 $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
