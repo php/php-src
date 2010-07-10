@@ -1700,7 +1700,7 @@ non_empty_array_pair_list(A) ::= BW_AND w_variable(B). { zend_do_init_array(&A, 
 //;
 
 encaps_list(A) ::= encaps_list(B) encaps_var(C). { zend_do_end_variable_parse(&B, BP_VAR_R, 0 TSRMLS_CC);  zend_do_add_variable(&A, &B, &C TSRMLS_CC); }
-encaps_list(A) ::= encaps_list(B) ENCAPSED_AND_WHITESPACE(C). { zend_do_add_string(&A, &B, &C TSRMLS_CC); }
+encaps_list(A) ::= encaps_list(B) ENCAPSED_AND_WHITESPACE(C). { zend_do_add_string(&B, &B, &C TSRMLS_CC); A = B; }
 encaps_list(A) ::= encaps_var(B). { zend_do_end_variable_parse(&B, BP_VAR_R, 0 TSRMLS_CC); zend_do_add_variable(&A, NULL, &B TSRMLS_CC); }
 encaps_list(A) ::= ENCAPSED_AND_WHITESPACE(B) encaps_var(C). { zend_do_add_string(&A, NULL, &B TSRMLS_CC); zend_do_end_variable_parse(&C, BP_VAR_R, 0 TSRMLS_CC); zend_do_add_variable(&A, &A, &C TSRMLS_CC); }
 
