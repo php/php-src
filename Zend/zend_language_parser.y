@@ -934,8 +934,8 @@ class_constant_declaration ::= CONST STRING(B) EQUAL static_scalar(C). { zend_do
 //	|	expr					{ zend_do_echo(&$1 TSRMLS_CC); }
 //;
 
-echo_expr_list ::= expr(A). { zend_do_echo(&A TSRMLS_CC); }
-echo_expr_list ::= echo_expr_list COMMA expr(A). { zend_do_echo(&A TSRMLS_CC); }
+echo_expr_list ::= expr(B). { zend_do_echo(&B TSRMLS_CC); }
+echo_expr_list ::= echo_expr_list COMMA expr(B). { zend_do_echo(&B TSRMLS_CC); }
 
 //for_expr:
 //		/* empty */			{ $$.op_type = IS_CONST;  Z_TYPE($$.u.constant) = IS_BOOL;  Z_LVAL($$.u.constant) = 1; }
