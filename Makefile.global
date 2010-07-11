@@ -1,3 +1,4 @@
+LEMON = $(top_srcdir)/lemon
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644

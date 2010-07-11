@@ -2096,25 +2096,6 @@ AC_DEFUN([PHP_PROG_BISON], [
   PHP_SUBST(YACC)
 ])
 
-
-dnl
-dnl PHP_PROG_LEMON
-dnl
-dnl Search for lemon binary and check its version
-dnl
-AC_DEFUN([PHP_PROG_LEMON],[
-  AC_CHECK_PROG(LEMON, lemon, lemon)
-  if test "$LEMON"; then
-    AC_CACHE_CHECK([for lemon version], php_cv_lemon_version, [
-      lemon_version=`$LEMON -x 2>/dev/null | $SED -e 's/^.* //'`
-      php_cv_lemon_version="$lemon_check_version (ok)"
-    ])
-  else
-    lemon_version=none
-  fi
-  PHP_SUBST(LEMON)
-])
-
 dnl
 dnl PHP_PROG_LEX
 dnl
