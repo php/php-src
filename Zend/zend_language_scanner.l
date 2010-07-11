@@ -858,7 +858,6 @@ HNUM	"0x"[0-9a-fA-F]+
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
 
@@ -1440,11 +1439,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DOLLAR;
 }
 
-<ST_IN_SCRIPTING>{TOKENS} {
-	return yytext[0];
-}
-
-
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return T_LBRACE;
@@ -1839,11 +1833,6 @@ inline_html:
 	return T_RBRACKET;
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}"`] {
-	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
-	return yytext[0];
-}
-
 <ST_VAR_OFFSET>[ \n\r\t\\'#] {
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
@@ -1944,7 +1933,7 @@ inline_html:
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
-		return yytext[0];
+		return T_MOD;
 	}
 }
 

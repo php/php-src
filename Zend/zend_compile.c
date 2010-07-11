@@ -6116,19 +6116,19 @@ int zendparse(TSRMLS_D) /* {{{ */
 		ParseFree(pParser, free);
 		return 1;
 	}
-
+//ParseTrace(stderr, "LEMON >> ");
 	while (1) {
 		znode zendlval;
 
 		zendlval.op_type = IS_CONST;
 		INIT_PZVAL(&zendlval.u.constant);
-again:
-		Z_TYPE(zendlval.u.constant) = IS_LONG;
 
 		if (CG(increment_lineno)) {
 			CG(zend_lineno)++;
 			CG(increment_lineno) = 0;
 		}
+again:
+		Z_TYPE(zendlval.u.constant) = IS_LONG;
 
 		/* Call the scanner */
 		token = lex_scan(&zendlval.u.constant TSRMLS_CC);
@@ -6153,7 +6153,7 @@ again:
 					CG(increment_lineno) = 1;
 				}
 				if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
-					break;
+					goto again;
 				}
 				token = T_SEMICOLON;
 			default:

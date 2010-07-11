@@ -129,16 +129,18 @@ top_statement_list ::= .
 namespace_name(A) ::= STRING(B). { A = B; }
 namespace_name(A) ::= namespace_name(B) NS_SEPARATOR STRING(C). { zend_do_build_namespace_name(&A, &B, &C TSRMLS_CC); }
 
-namespace_start ::= NAMESPACE LBRACE. { zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
+namespace_start ::= NAMESPACE. { zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
 
+namespace_start2 ::= NAMESPACE namespace_name(B). { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
+
+top_statement ::= SEMICOLON.                                 { zend_do_ticks(TSRMLS_C); }
 top_statement ::= statement.                                 { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= function_declaration_statement.            { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 top_statement ::= class_declaration_statement.               { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 top_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON.     { zend_do_halt_compiler_register(TSRMLS_C); }
 top_statement ::= NAMESPACE namespace_name(B) SEMICOLON.     { zend_do_begin_namespace(&B, 0 TSRMLS_CC); }
-top_statement ::= NAMESPACE namespace_name(B) LBRACE.        { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
-top_statement ::= top_statement_list RBRACE.                 { zend_do_end_namespace(TSRMLS_C); }
-top_statement ::= namespace_start top_statement_list RBRACE. { zend_do_end_namespace(TSRMLS_C); }
+top_statement ::= namespace_start2 LBRACE top_statement_list_i RBRACE. { zend_do_end_namespace(TSRMLS_C); }
+top_statement ::= namespace_start  LBRACE top_statement_list RBRACE.   { zend_do_end_namespace(TSRMLS_C); }
 top_statement ::= USE use_declarations SEMICOLON.            { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= constant_declaration SEMICOLON.            { zend_verify_namespace(TSRMLS_C); }
 
