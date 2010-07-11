@@ -153,6 +153,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			case T_BACKQUOTE:
 			case T_QUESTION_MARK:
 			case T_IS_GREATER:
+			case T_DOLLAR:
 			case T_IS_SMALLER:
 				 add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
 				 break;
