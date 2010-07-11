@@ -126,25 +126,55 @@ static void tokenize(zval *return_value TSRMLS_DC)
 				break;
 		}
 
-		if (token_type >= 256) {
-			MAKE_STD_ZVAL(keyword);
-			array_init(keyword);
-			add_next_index_long(keyword, token_type);
-			if (token_type == T_END_HEREDOC) {
-				if (CG(increment_lineno)) {
-					token_line = ++CG(zend_lineno);
-					CG(increment_lineno) = 0;
+		switch (token_type) {
+			case T_DOT:
+			case T_AT:
+			case T_BOOL_NOT:
+			case T_BW_AND:
+			case T_BW_OR:
+			case T_BW_XOR:
+			case T_BW_NOT:
+			case T_PLUS:
+			case T_MINUS:
+			case T_MOD:
+			case T_DIV:
+			case T_MULT:
+			case T_SEMICOLON:
+			case T_COLON:
+			case T_COMMA:
+			case T_LBRACE:
+			case T_RBRACE:
+			case T_LBRACKET:
+			case T_RBRACKET:
+			case T_LPAREN:
+			case T_RPAREN:
+			case T_EQUAL:
+			case T_QUOTE:
+			case T_BACKQUOTE:
+			case T_QUESTION_MARK:
+			case T_IS_GREATER:
+			case T_IS_SMALLER:
+				 add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
+				 break;
+			default:
+				MAKE_STD_ZVAL(keyword);
+				array_init(keyword);
+				add_next_index_long(keyword, token_type);
+				if (token_type == T_END_HEREDOC) {
+					if (CG(increment_lineno)) {
+						token_line = ++CG(zend_lineno);
+						CG(increment_lineno) = 0;
+					}
+					add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
+					efree(Z_STRVAL(token));
+				} else {
+					add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
 				}
-				add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
-				efree(Z_STRVAL(token));
-			} else {
-				add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
-			}
-			add_next_index_long(keyword, token_line);
-			add_next_index_zval(return_value, keyword);
-		} else {
-			add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
+				add_next_index_long(keyword, token_line);
+				add_next_index_zval(return_value, keyword);
+				break;
 		}
+
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
 		}
