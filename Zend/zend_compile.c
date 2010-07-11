@@ -611,8 +611,14 @@ static void zend_do_op_data(zend_op *data_op, const znode *value TSRMLS_DC) /* {
 
 void zend_do_binary_assign_op(zend_uchar op, znode *result, const znode *op1, const znode *op2 TSRMLS_DC) /* {{{ */
 {
-	int last_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	int last_op_number = 0;
+	zend_op *opline    = NULL;
+
+	zend_check_writable_variable(op1);
+	zend_do_end_variable_parse(op1, BP_VAR_RW, 0 TSRMLS_CC);
+
+	last_op_number = get_next_op_number(CG(active_op_array));
+	opline         = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	if (last_op_number > 0) {
 		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
