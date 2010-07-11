@@ -6116,7 +6116,7 @@ int zendparse(TSRMLS_D) /* {{{ */
 		ParseFree(pParser, free);
 		return 1;
 	}
-//ParseTrace(stderr, "LEMON >> ");
+
 	while (1) {
 		znode zendlval;
 
