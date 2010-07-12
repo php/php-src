@@ -6112,8 +6112,8 @@ int zendparse(TSRMLS_D) /* {{{ */
 	int token, halting = 0;
 	void *pParser;
 
-	if ((pParser = ParseAlloc(malloc)) == NULL) {
-		ParseFree(pParser, free);
+	if ((pParser = zend_lang_parseAlloc(malloc)) == NULL) {
+		zend_lang_parseFree(pParser, free);
 		return 1;
 	}
 
@@ -6159,15 +6159,15 @@ again:
 			default:
 				break;
 		}
-		Parse(pParser, token, zendlval TSRMLS_CC);
+		zend_lang_parse(pParser, token, zendlval TSRMLS_CC);
 		if (token == 0) {
 			break;
 		} else if (halting == 1 && token == T_SEMICOLON) {
-			Parse(pParser, 0, zendlval TSRMLS_CC);
+			zend_lang_parse(pParser, 0, zendlval TSRMLS_CC);
 			break;
 		}
 	}
-	ParseFree(pParser, free);
+	zend_lang_parseFree(pParser, free);
 
 	return 0;
 }

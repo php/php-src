@@ -31,6 +31,8 @@
 #include "zend_constants.h"
 }
 
+%name zend_lang_parse
+
 %syntax_error {
     zend_error(E_PARSE, "syntax error, unexpected '%.*s'", LANG_SCNG(yy_leng), LANG_SCNG(yy_text));
     zend_bailout();

@@ -662,7 +662,11 @@ ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC
 ZEND_API int zend_auto_global_disable_jit(const char *varname, zend_uint varname_length TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
+/* Parser */
 int zendparse(TSRMLS_D);
+void *zend_lang_parseAlloc(void *(*mallocProc)(size_t));
+void zend_lang_parseFree(void *p, void (*freeProc)(void*));
+void zend_lang_parse(void *yyp, int yymajor, znode yyminor TSRMLS_DC);
 
 int zend_add_literal(zend_op_array *op_array, const zval *zv);
 
