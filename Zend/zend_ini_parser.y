@@ -37,6 +37,7 @@
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
 #define ZEND_INI_PARSER_SE 	(CG(ini_parser_param))->syntax_error
 
+int ini_parse(TSRMLS_D);
 void *zend_ini_parseAlloc(void *(*mallocProc)(size_t));
 void zend_ini_parseFree(void *p, void (*freeProc)(void*));
 void zend_ini_parse(void *yyp, int yymajor, zval yyminor TSRMLS_DC);
@@ -249,7 +250,6 @@ int ini_parse(TSRMLS_D) /* {{{ */
 	char *error_buf;
 	int error_buf_len;
 	char *currently_parsed_filename;
-	TSRMLS_FETCH();
 
 	ZEND_INI_PARSER_SE = 1;
 
