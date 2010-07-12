@@ -26,7 +26,9 @@ PHP_BUILD=$(PHP_BUILD)
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
 
-all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+all: $(BUILD_DIR)\lemon.exe generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+
+LEMON=$(BUILD_DIR)\lemon.exe
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
 
@@ -45,10 +47,10 @@ $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	$(BISON) --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
+	$(LEMON) $(LEMON_FLAGS) --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
-	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	$(LEMON) $(LEMON_FLAGS) Zend/zend_language_parser.y
 
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
@@ -97,11 +99,15 @@ clean-sapi:
 	@for %D in (_x $(SAPI_TARGETS)) do @if exist $(BUILD_DIR)\%D @del /F /Q $(BUILD_DIR)\%D > NUL
 	-@del /F /Q $(BUILD_DIR)\$(PHPDLL)
 
-clean: clean-sapi
+clean: clean-sapi clean-lemon
 	@echo Cleaning distribution build dirs
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+
+clean-lemon:
+	@echo Cleaning lemon build dirs
+	-@del $(BUILD_DIR)\lemon.*
 
 clean-pecl:
 	@echo Cleaning PECL targets only
@@ -147,6 +153,10 @@ snap: build-snap build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+
+
+$(BUILD_DIR)\lemon.exe:	lemon.c
+	$(CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\lemon.exe lemon.c
 
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"

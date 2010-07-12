@@ -204,6 +204,9 @@ if (PHP_DEBUG == "yes") {
 
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
+	DEFINE("LEMON_FLAGS", "-c -q D=ZTS");
+} else {
+	DEFINE("LEMON_FLAGS", "-c -q");
 }
 
 DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
