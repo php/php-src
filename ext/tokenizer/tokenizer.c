@@ -105,12 +105,12 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	zval *keyword;
 	int token_type;
 	zend_bool destroy;
-	int token_line = 1;
+	int token_line = 1, lineno = 0;
 
 	array_init(return_value);
 
 	ZVAL_NULL(&token);
-	while ((token_type = lex_scan(&token TSRMLS_CC))) {
+	while ((token_type = lex_scan(&token, &lineno TSRMLS_CC))) {
 		destroy = 1;
 		switch (token_type) {
 			case T_CLOSE_TAG:

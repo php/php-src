@@ -6109,13 +6109,15 @@ int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_
 
 int zendparse(TSRMLS_D) /* {{{ */
 {
-	int token, halting = 0;
+	int token, lineno = 0, halting = 0;
 	void *pParser;
 
 	if ((pParser = zend_lang_parseAlloc(malloc)) == NULL) {
 		zend_lang_parseFree(pParser, free);
 		return 1;
 	}
+	
+	lineno = CG(zend_lineno);
 
 	while (1) {
 		znode zendlval;
@@ -6126,12 +6128,13 @@ int zendparse(TSRMLS_D) /* {{{ */
 		if (CG(increment_lineno)) {
 			CG(zend_lineno)++;
 			CG(increment_lineno) = 0;
-		}
+			lineno = CG(zend_lineno);
+		}		
 again:
 		Z_TYPE(zendlval.u.constant) = IS_LONG;
 
 		/* Call the scanner */
-		token = lex_scan(&zendlval.u.constant TSRMLS_CC);
+		token = lex_scan(&zendlval.u.constant, &lineno TSRMLS_CC);
 
 		switch (token) {
 			case T_COMMENT:
@@ -6160,6 +6163,7 @@ again:
 				break;
 		}
 		zend_lang_parse(pParser, token, zendlval TSRMLS_CC);
+		CG(zend_lineno) = lineno;
 		if (token == 0) {
 			break;
 		} else if (halting == 1 && token == T_SEMICOLON) {

@@ -96,7 +96,7 @@ do {																			\
 																				\
 	while (p<boundary) {														\
 		if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {					\
-			CG(zend_lineno)++;													\
+			++(*lineno);														\
 		}																		\
 		p++;																	\
 	}																			\
@@ -105,7 +105,7 @@ do {																			\
 #define HANDLE_NEWLINE(c) \
 { \
 	if (c == '\n' || c == '\r') { \
-		CG(zend_lineno)++; \
+		++(*lineno); \
 	} \
 }
 
@@ -728,7 +728,7 @@ ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC)
 	zendlval->value.str.len = yyleng;
 #endif /* ZEND_MULTIBYTE */
 
-static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
+static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type, int *lineno TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
@@ -825,7 +825,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 		}
 
 		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
-			CG(zend_lineno)++;
+			++(*lineno);
 		}
 		s++;
 	}
@@ -842,7 +842,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 }
 
 
-int lex_scan(zval *zendlval TSRMLS_DC)
+int lex_scan(zval *zendlval, int *lineno TSRMLS_DC)
 {
 restart:
 	SCNG(yy_text) = YYCURSOR;
@@ -1598,7 +1598,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	zendlval->value.lval = CG(zend_lineno);
+	zendlval->value.lval = *lineno;
 	zendlval->type = IS_LONG;
 	return T_LINE;
 }
@@ -1856,7 +1856,7 @@ inline_html:
 				}
 				/* fall through */
 			case '\n':
-				CG(zend_lineno)++;
+				++(*lineno);
 				break;
 			case '%':
 				if (!CG(asp_tags)) {
@@ -1990,7 +1990,7 @@ inline_html:
 		}
 
 		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
-			CG(zend_lineno)++;
+			++(*lineno);
 		}
 		s++;
 	}
@@ -2016,7 +2016,7 @@ inline_html:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"' TSRMLS_CC);
+				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"', lineno TSRMLS_CC);
 				return T_CONSTANT_ENCAPSED_STRING;
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
@@ -2059,7 +2059,7 @@ inline_html:
 	Z_STRVAL_P(zendlval) = CG(heredoc);
 	Z_STRLEN_P(zendlval) = CG(heredoc_len);
 
-	CG(zend_lineno)++;
+	++(*lineno);
 	CG(heredoc_len) = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+bprefix+3;
 	while ((*s == ' ') || (*s == '\t')) {
@@ -2183,7 +2183,7 @@ inline_html:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"', lineno TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -2225,7 +2225,7 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`', lineno TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -2297,7 +2297,7 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0 TSRMLS_CC);
+	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0, lineno TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 

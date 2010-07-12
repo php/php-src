@@ -52,7 +52,7 @@ ZEND_API void zend_indent()
 	zval token;
 	int token_type;
 	int in_string=0;
-	int nest_level=0;
+	int nest_level=0, lineno = 0;
 	int emit_whitespace[256];
 	int i;
 	TSRMLS_FETCH();
@@ -61,7 +61,7 @@ ZEND_API void zend_indent()
 
 	/* highlight stuff coming back from zendlex() */
 	token.type = 0;
-	while ((token_type=lex_scan(&token TSRMLS_CC))) {
+	while ((token_type=lex_scan(&token, &lineno TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
