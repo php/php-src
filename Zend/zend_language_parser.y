@@ -29,6 +29,8 @@
 #include "zend_globals.h"
 #include "zend_API.h"
 #include "zend_constants.h"
+
+#define NDEBUG
 }
 
 %name zend_lang_parse
