@@ -6109,7 +6109,7 @@ int zend_register_auto_global(const char *name, uint name_len, zend_auto_global_
 
 int zendparse(TSRMLS_D) /* {{{ */
 {
-	int token, lineno = 0, halting = 0;
+	int token, lineno = 0, halting = 0, old_exit_status;
 	void *pParser;
 
 	if ((pParser = zend_lang_parseAlloc(malloc)) == NULL) {
@@ -6117,6 +6117,8 @@ int zendparse(TSRMLS_D) /* {{{ */
 		return 1;
 	}
 	
+	old_exit_status = EG(exit_status);
+	EG(exit_status) = 0;
 	lineno = CG(zend_lineno);
 
 	while (1) {
@@ -6164,15 +6166,25 @@ again:
 		}
 		zend_lang_parse(pParser, token, zendlval TSRMLS_CC);
 		CG(zend_lineno) = lineno;
+		
 		if (token == 0) {
 			break;
-		} else if (halting == 1 && token == T_SEMICOLON) {
+		} else if (EG(exit_status) == 255 || (halting == 1 && token == T_SEMICOLON)) {
+			/* Handles E_PARSE and __HALT_COMPILER(); */
 			zend_lang_parse(pParser, 0, zendlval TSRMLS_CC);
+			if (EG(exit_status) == 255) {
+				goto end_parse;
+			}
 			break;
 		}
 	}
+end_parse:
 	zend_lang_parseFree(pParser, free);
-
+	if (EG(exit_status) == 255) {
+		/* We got an E_PARSE */
+		return 1;
+	}
+	EG(exit_status) = old_exit_status;
 	return 0;
 }
 /* }}} */

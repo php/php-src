@@ -37,7 +37,6 @@
 
 %syntax_error {
     zend_error(E_PARSE, "syntax error, unexpected '%.*s'", LANG_SCNG(yy_leng), LANG_SCNG(yy_text));
-    zend_bailout();
 }
 
 %stack_overflow {
