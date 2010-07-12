@@ -115,7 +115,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		switch (token_type) {
 			case T_CLOSE_TAG:
 				if (zendtext[zendleng - 1] != '>') {
-					token_line++;
+					++token_line;
 				}
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
@@ -162,11 +162,6 @@ static void tokenize(zval *return_value TSRMLS_DC)
 				array_init(keyword);
 				add_next_index_long(keyword, token_type);
 				if (token_type == T_END_HEREDOC) {
-					/*CG(zend_lineno) = token_line;
-					if (CG(increment_lineno)) {
-						++token_line;
-						CG(increment_lineno) = 0;
-					}*/
 					add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
 					efree(Z_STRVAL(token));
 				} else {
@@ -179,7 +174,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		CG(zend_lineno) = token_line;
 		
 		if (CG(increment_lineno)) {
-			CG(zend_lineno)++;
+			++CG(zend_lineno);
 			CG(increment_lineno) = 0;
 			token_line = CG(zend_lineno);
 		}
