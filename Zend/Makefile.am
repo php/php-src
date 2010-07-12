@@ -41,7 +41,7 @@ zend_language_parser.c: $(srcdir)/zend_language_parser.y
 # INI parser/scanner rules
 
 zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
-	$(YACC) -p ini_ -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
+	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_ini_parser.y
 
 zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt $(srcdir)/zend_ini_scanner_defs.h -o$@ $(srcdir)/zend_ini_scanner.l

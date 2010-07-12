@@ -315,7 +315,7 @@ restart:
 	if (YYCURSOR >= YYLIMIT) {
 		if (YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW)) {
 			BEGIN(INITIAL);
-			return END_OF_LINE;
+			return TC_END_OF_LINE;
 		}
 		return 0;
 	}
@@ -374,7 +374,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <ST_SECTION_RAW,ST_SECTION_VALUE>"]"{TABS_AND_SPACES}*{NEWLINE}? { /* End of section */
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
-	return ']';
+	return TC_RBRACKET;
 }
 
 <INITIAL>{LABEL}"["{TABS_AND_SPACES}* { /* Start of option with offset */
@@ -392,7 +392,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <ST_OFFSET>{TABS_AND_SPACES}*"]" { /* End of section or an option offset */
 	BEGIN(INITIAL);
-	return ']';
+	return TC_RBRACKET;
 }
 
 <ST_DOUBLE_QUOTES,ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{DOLLAR_CURLY} { /* Variable start */
@@ -412,15 +412,15 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <ST_VARNAME>"}" { /* Variable end */
 	yy_pop_state(TSRMLS_C);
-	return '}';
+	return TC_RBRACE;
 }
 
 <INITIAL,ST_VALUE>("true"|"on"|"yes"){TABS_AND_SPACES}* { /* TRUE value (when used outside option value/offset this causes parse error!) */
-	RETURN_TOKEN(BOOL_TRUE, "1", 1);
+	RETURN_TOKEN(TC_BOOL_TRUE, "1", 1);
 }
 
 <INITIAL,ST_VALUE>("false"|"off"|"no"|"none"|"null"){TABS_AND_SPACES}* { /* FALSE value (when used outside option value/offset this causes parse error!)*/
-	RETURN_TOKEN(BOOL_FALSE, "", 0);
+	RETURN_TOKEN(TC_BOOL_FALSE, "", 0);
 }
 
 <INITIAL>{LABEL} { /* Get option name */
@@ -439,7 +439,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	} else {
 		yy_push_state(ST_VALUE TSRMLS_CC);
 	}
-	return '=';
+	return TC_EQUAL;
 }
 
 <ST_RAW>{RAW_VALUE_CHARS}+ { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
@@ -458,7 +458,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <ST_VALUE,ST_RAW>{TABS_AND_SPACES}*{NEWLINE} { /* End of option value */
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{CONSTANT} { /* Get constant option value */
@@ -473,14 +473,34 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return yytext[0];
 }
 
-<ST_VALUE>{OPERATORS}{TABS_AND_SPACES}* { /* Boolean operators */
-	return yytext[0];
+<ST_VALUE>"|"{TABS_AND_SPACES}* {
+	return TC_BW_OR;
+}
+
+<ST_VALUE>"&"{TABS_AND_SPACES}* {
+	return TC_BW_AND;
+}
+
+<ST_VALUE>"~"{TABS_AND_SPACES}* {
+	return TC_BW_NOT;
+}
+
+<ST_VALUE>"!"{TABS_AND_SPACES}* {
+	return TC_BOOL_NOT;
+}
+
+<ST_VALUE>"("{TABS_AND_SPACES}* {
+	return TC_LPAREN;
+}
+
+<ST_VALUE>")"{TABS_AND_SPACES}* {
+	return TC_RPAREN;
 }
 
 <ST_VALUE>[=] { /* Make = used in option value to trigger error */
 	yyless(0);
 	BEGIN(INITIAL);
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <ST_VALUE>{VALUE_CHARS}+ { /* Get everything else as option/offset value */
@@ -493,12 +513,12 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{TABS_AND_SPACES}*["] { /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES TSRMLS_CC);
-	return '"';
+	return TC_QUOTE;
 }
 
 <ST_DOUBLE_QUOTES>["]{TABS_AND_SPACES}* { /* Double quoted '"' string ends */
 	yy_pop_state(TSRMLS_C);
-	return '"';
+	return TC_QUOTE;
 }
 
 <ST_DOUBLE_QUOTES>[^] { /* Escape double quoted string contents */
@@ -548,25 +568,25 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <INITIAL>{TABS_AND_SPACES}*{NEWLINE} {
 	SCNG(lineno)++;
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <INITIAL,ST_VALUE,ST_RAW>{TABS_AND_SPACES}*[;][^\r\n]*{NEWLINE} { /* Comment */
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
 	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(TSRMLS_C), SCNG(lineno));
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
-	return END_OF_LINE;
+	return TC_END_OF_LINE;
 }
 
 <*>[^] {

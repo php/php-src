@@ -1,4 +1,4 @@
-%{
+%include{
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -13,7 +13,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Author:  Pierrick Charron <pierrick@php.net>                         |
+   | Yacc version authors:                                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
    |          Jani Taskinen <jani@php.net>                                |
    +----------------------------------------------------------------------+
 */
@@ -29,19 +31,15 @@
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
 
-#define YYERROR_VERBOSE
-#define YYSTYPE zval
-
-#ifdef ZTS
-#define YYPARSE_PARAM tsrm_ls
-#define YYLEX_PARAM tsrm_ls
-int ini_parse(void *arg);
-#else
-int ini_parse(void);
-#endif
+#define NDEBUG
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
+#define ZEND_INI_PARSER_SE 	(CG(ini_parser_param))->syntax_error
+
+void *zend_ini_parseAlloc(void *(*mallocProc)(size_t));
+void zend_ini_parseFree(void *p, void (*freeProc)(void*));
+void zend_ini_parse(void *yyp, int yymajor, zval yyminor TSRMLS_DC);
 
 /* {{{ zend_ini_do_op()
 */
@@ -144,46 +142,16 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name)+1, &curval) == SUCCESS) {
 		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(curval), Z_STRLEN(curval));
 		Z_STRLEN_P(result) = Z_STRLEN(curval);
+		Z_TYPE_P(result) = IS_STRING;
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		Z_STRVAL_P(result) = strdup(envvar);
 		Z_STRLEN_P(result) = strlen(envvar);
+		Z_TYPE_P(result) = IS_STRING;
 	} else {
 		zend_ini_init_string(result);
 	}
-}
-/* }}} */
-
-/* {{{ ini_error()
-*/
-static void ini_error(char *msg)
-{
-	char *error_buf;
-	int error_buf_len;
-	char *currently_parsed_filename;
-	TSRMLS_FETCH();
-
-	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
-	if (currently_parsed_filename) {
-		error_buf_len = 128 + strlen(msg) + strlen(currently_parsed_filename); /* should be more than enough */
-		error_buf = (char *) emalloc(error_buf_len);
-
-		sprintf(error_buf, "%s in %s on line %d\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));
-	} else {
-		error_buf = estrdup("Invalid configuration directive\n");
-	}
-
-	if (CG(ini_parser_unbuffered_errors)) {
-#ifdef PHP_WIN32
-		MessageBox(NULL, error_buf, "PHP Error", MB_OK|MB_TOPMOST|0x00200000L);
-#else
-		fprintf(stderr, "PHP:  %s", error_buf);
-#endif
-	} else {
-		zend_error(E_WARNING, "%s", error_buf);
-	}
-	efree(error_buf);
 }
 /* }}} */
 
@@ -196,6 +164,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
+	ini_parser_param.syntax_error = 0;
 	CG(ini_parser_param) = &ini_parser_param;
 
 	if (zend_ini_open_file_for_scanning(fh, scanner_mode TSRMLS_CC) == FAILURE) {
@@ -225,6 +194,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
+	ini_parser_param.syntax_error = 0;
 	CG(ini_parser_param) = &ini_parser_param;
 
 	if (zend_ini_prepare_string_for_scanning(str, scanner_mode TSRMLS_CC) == FAILURE) {
@@ -244,134 +214,161 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 }
 /* }}} */
 
-%}
+int ini_parse(TSRMLS_D) /* {{{ */
+{
+	int token;
+	void *pParser = zend_ini_parseAlloc(malloc);
 
-%expect 0
-%pure_parser
+	if (pParser == NULL) {
+		zend_ini_parseFree(pParser, free);
+		return 1;
+	}
 
-%token TC_SECTION
-%token TC_RAW
-%token TC_CONSTANT
-%token TC_NUMBER
-%token TC_STRING
-%token TC_WHITESPACE
-%token TC_LABEL
-%token TC_OFFSET
-%token TC_DOLLAR_CURLY
-%token TC_VARNAME
-%token TC_QUOTED_STRING
-%token BOOL_TRUE
-%token BOOL_FALSE
-%token END_OF_LINE
-%token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
-%left '|' '&'
-%right '~' '!'
+	while (1) {
+		zval zendval;
+		token = ini_lex(&zendval TSRMLS_CC);
+		zend_ini_parse(pParser, token, zendval TSRMLS_CC);
 
-%%
-
-statement_list:
-		statement_list statement
-	|	/* empty */
-;
-
-statement:
-		TC_SECTION section_string_or_value ']' {
-#if DEBUG_CFG_PARSER
-			printf("SECTION: [%s]\n", Z_STRVAL($2));
-#endif
-			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($2));
+		if (token == 0 || ZEND_INI_PARSER_SE) {
+			break;
 		}
-	|	TC_LABEL '=' string_or_value {
-#if DEBUG_CFG_PARSER
-			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
+	}
+
+	zend_ini_parseFree(pParser, free);
+	if (ZEND_INI_PARSER_SE) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+/* }}} */
+
+}
+
+%syntax_error {
+	char *error_buf;
+	int error_buf_len;
+	char *currently_parsed_filename;
+	TSRMLS_FETCH();
+
+	ZEND_INI_PARSER_SE = 1;
+
+	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
+	if (currently_parsed_filename) {
+		error_buf_len = 128 + INI_SCNG(yy_leng) + strlen(currently_parsed_filename); /* should be more than enough */
+		error_buf = (char *) emalloc(error_buf_len);
+		sprintf(error_buf, "syntax error, unexpected '%.*s' in %s on line %d\n", INI_SCNG(yy_leng), INI_SCNG(yy_text), currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));
+	} else {
+		error_buf = estrdup("Invalid configuration directive\n");
+	}
+
+	if (CG(ini_parser_unbuffered_errors)) {
+#ifdef PHP_WIN32
+		MessageBox(NULL, error_buf, "PHP Error", MB_OK|MB_TOPMOST|0x00200000L);
+#else
+		fprintf(stderr, "PHP:  %s", error_buf);
 #endif
-			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($1));
-			free(Z_STRVAL($3));
-		}
-	|	TC_OFFSET option_offset ']' '=' string_or_value {
+	} else {
+		zend_error(E_WARNING, "%s", error_buf);
+	}
+	efree(error_buf);
+}
+
+%token_type {zval}
+
+%name zend_ini_parse
+
+%ifdef ZTS
+	%extra_argument {void ***tsrm_ls}
+%endif
+
+%token_prefix TC_
+
+/* Precedences */
+%left BW_OR BW_AND.
+%right BW_NOT BOOL_NOT.
+
+start ::= statement_list.
+
+statement_list ::= statement_list statement.
+statement_list ::= .
+
+statement ::= SECTION section_string_or_value(C) RBRACKET. {
 #if DEBUG_CFG_PARSER
-			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL($1), Z_STRVAL($2), Z_STRVAL($5));
+			printf("SECTION: [%s]\n", Z_STRVAL(C));
 #endif
-			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($1));
-			free(Z_STRVAL($2));
-			free(Z_STRVAL($5));
-		}
-	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
-	|	END_OF_LINE
-;
+			ZEND_INI_PARSER_CB(&C, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
+			free(Z_STRVAL(C));
+}
+statement ::= LABEL(B) EQUAL string_or_value(D). {
+#if DEBUG_CFG_PARSER
+			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL(B), Z_STRVAL(D));
+#endif
+			ZEND_INI_PARSER_CB(&B, &D, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
+			free(Z_STRVAL(B));
+			free(Z_STRVAL(D));
+}
+statement ::= OFFSET(B) option_offset(C) RBRACKET EQUAL string_or_value(F). {
+#if DEBUG_CFG_PARSER
+			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL(B), Z_STRVAL(C), Z_STRVAL(F));
+#endif
+			ZEND_INI_PARSER_CB(&B, &F, &C, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
+			free(Z_STRVAL(B));
+			free(Z_STRVAL(C));
+			free(Z_STRVAL(F));
+}
+statement ::= LABEL(B). { ZEND_INI_PARSER_CB(&B, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL(B)); }
+statement ::= END_OF_LINE.
 
-section_string_or_value:
-		var_string_list_section			{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
-;
+section_string_or_value(A) ::= var_string_list_section(B). { A = B; }
+section_string_or_value(A) ::= . { zend_ini_init_string(&A); }
 
-string_or_value:
-		expr							{ $$ = $1; }
-	|	BOOL_TRUE						{ $$ = $1; }
-	|	BOOL_FALSE						{ $$ = $1; }
-	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
-;
+string_or_value(A) ::= expr(B). { A = B; }
+string_or_value(A) ::= BOOL_TRUE(B). { A = B; }
+string_or_value(A) ::= BOOL_FALSE(B). { A = B; }
+string_or_value(A) ::= END_OF_LINE. { zend_ini_init_string(&A); }
 
-option_offset:
-		var_string_list					{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
-;
+option_offset(A) ::= var_string_list(B). { A = B; }
+option_offset(A) ::= . { zend_ini_init_string(&A); }
 
-encapsed_list:
-		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
-;
+encapsed_list(A) ::= encapsed_list(B) cfg_var_ref(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+encapsed_list(A) ::= encapsed_list(B) QUOTED_STRING(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+encapsed_list(A) ::= . { zend_ini_init_string(&A); }
 
-var_string_list_section:
-		cfg_var_ref						{ $$ = $1; }
-	|	constant_literal				{ $$ = $1; }
-	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
-;
+var_string_list_section(A) ::= cfg_var_ref(B). { A = B; }
+var_string_list_section(A) ::= constant_literal(B). { A = B; }
+var_string_list_section(A) ::= QUOTE encapsed_list(C) QUOTE. { A = C; }
+var_string_list_section(A) ::= var_string_list_section(B) cfg_var_ref(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+var_string_list_section(A) ::= var_string_list_section(B) constant_literal(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+var_string_list_section(A) ::= var_string_list_section(B) QUOTE encapsed_list(D) QUOTE. { zend_ini_add_string(&A, &B, &D); free(Z_STRVAL(D)); }
 
-var_string_list:
-		cfg_var_ref						{ $$ = $1; }
-	|	constant_string					{ $$ = $1; }
-	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
-;
+var_string_list(A) ::= cfg_var_ref(B). { A = B; }
+var_string_list(A) ::= constant_string(B). { A = B; }
+var_string_list(A) ::= QUOTE encapsed_list(C) QUOTE. { A = C; }
+var_string_list(A) ::= var_string_list(B) cfg_var_ref(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+var_string_list(A) ::= var_string_list(B) constant_string(C). { zend_ini_add_string(&A, &B, &C); free(Z_STRVAL(C)); }
+var_string_list(A) ::= var_string_list(B) QUOTE encapsed_list(D) QUOTE. { zend_ini_add_string(&A, &B, &D); free(Z_STRVAL(D)); }
 
-expr:
-		var_string_list					{ $$ = $1; }
-	|	expr '|' expr					{ zend_ini_do_op('|', &$$, &$1, &$3); }
-	|	expr '&' expr					{ zend_ini_do_op('&', &$$, &$1, &$3); }
-	|	'~' expr						{ zend_ini_do_op('~', &$$, &$2, NULL); }
-	|	'!'	expr						{ zend_ini_do_op('!', &$$, &$2, NULL); }
-	|	'(' expr ')'					{ $$ = $2; }
-;
+expr(A) ::= var_string_list(B).		{ A = B; }
+expr(A) ::= expr(B) BW_OR expr(D).	{ zend_ini_do_op('|', &A, &B, &D); }
+expr(A) ::= expr(B) BW_AND expr(D).	{ zend_ini_do_op('&', &A, &B, &D); }
+expr(A) ::= BW_NOT expr(C).			{ zend_ini_do_op('~', &A, &C, NULL); }
+expr(A) ::= BOOL_NOT expr(C).		{ zend_ini_do_op('!', &A, &C, NULL); }
+expr(A) ::= LPAREN expr(C) RPAREN.	{ A = C; }
 
-cfg_var_ref:
-		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); free(Z_STRVAL($2)); }
-;
+cfg_var_ref(A) ::= DOLLAR_CURLY VARNAME(C) RBRACE. { zend_ini_get_var(&A, &C TSRMLS_CC); free(Z_STRVAL(C)); }
 
-constant_literal:
-		TC_CONSTANT						{ $$ = $1; }
-	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
-;
+constant_literal(A) ::= CONSTANT(B).	{ A = B; }
+constant_literal(A) ::= RAW(B).			{ A = B; }
+constant_literal(A) ::= NUMBER(B).		{ A = B; }
+constant_literal(A) ::= STRING(B).		{ A = B; }
+constant_literal(A) ::= WHITESPACE(B).	{ A = B; }
 
-constant_string:
-		TC_CONSTANT						{ zend_ini_get_constant(&$$, &$1 TSRMLS_CC); }
-	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
-;
+constant_string(A) ::= CONSTANT(B).		{ zend_ini_get_constant(&A, &B TSRMLS_CC); }
+constant_string(A) ::= RAW(B).			{ A = B; }
+constant_string(A) ::= NUMBER(B).		{ A = B; }
+constant_string(A) ::= STRING(B).		{ A = B; }
+constant_string(A) ::= WHITESPACE(B).	{ A = B; }
 
 /*
  * Local variables:

@@ -19,8 +19,8 @@ $(srcdir)/zend_language_parser.c: lemon $(srcdir)/zend_language_parser.y
 	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_language_parser.y || test $$? -eq 2
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
-$(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
-	@$(YACC) -p ini_ -v -d $(srcdir)/zend_ini_parser.y -o $@
+$(srcdir)/zend_ini_parser.c: lemon $(srcdir)/zend_ini_parser.y
+	@$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_ini_parser.y 
 
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)

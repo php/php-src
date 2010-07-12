@@ -208,6 +208,7 @@ END_EXTERN_C()
 typedef struct _zend_ini_parser_param {
 	zend_ini_parser_cb_t ini_parser_cb;
 	void *arg;
+	zend_bool syntax_error;
 } zend_ini_parser_param;
 
 #endif /* ZEND_INI_H */
