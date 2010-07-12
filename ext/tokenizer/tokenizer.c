@@ -105,17 +105,17 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	zval *keyword;
 	int token_type;
 	zend_bool destroy;
-	int token_line = 1, lineno = 0;
+	int token_line = 1;
 
 	array_init(return_value);
 
 	ZVAL_NULL(&token);
-	while ((token_type = lex_scan(&token, &lineno TSRMLS_CC))) {
+	while ((token_type = lex_scan(&token, &token_line TSRMLS_CC))) {
 		destroy = 1;
 		switch (token_type) {
 			case T_CLOSE_TAG:
 				if (zendtext[zendleng - 1] != '>') {
-					CG(zend_lineno)++;
+					token_line++;
 				}
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
@@ -162,26 +162,31 @@ static void tokenize(zval *return_value TSRMLS_DC)
 				array_init(keyword);
 				add_next_index_long(keyword, token_type);
 				if (token_type == T_END_HEREDOC) {
+					/*CG(zend_lineno) = token_line;
 					if (CG(increment_lineno)) {
-						token_line = ++CG(zend_lineno);
+						++token_line;
 						CG(increment_lineno) = 0;
-					}
+					}*/
 					add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
 					efree(Z_STRVAL(token));
 				} else {
 					add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
 				}
-				add_next_index_long(keyword, token_line);
+				add_next_index_long(keyword, CG(zend_lineno));
 				add_next_index_zval(return_value, keyword);
 				break;
 		}
-
+		CG(zend_lineno) = token_line;
+		
+		if (CG(increment_lineno)) {
+			CG(zend_lineno)++;
+			CG(increment_lineno) = 0;
+			token_line = CG(zend_lineno);
+		}
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
 		}
 		ZVAL_NULL(&token);
-
-		token_line = CG(zend_lineno);
 	}
 }
 
