@@ -1569,6 +1569,10 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 
 	/* mysqlnd_res::fetch_all works with buffered resultsets only */
 	if (result->unbuf || (!result->unbuf && !set)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fetch_all can be used only with buffered sets");
+		if (result->conn) {
+			SET_CLIENT_ERROR(result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
+		}
 		RETVAL_NULL();
 		DBG_VOID_RETURN;
 	}
