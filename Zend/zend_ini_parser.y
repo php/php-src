@@ -32,6 +32,7 @@
 #include "zend_extensions.h"
 
 #define NDEBUG
+#define YYNOERRORRECOVERY
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
@@ -89,7 +90,7 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 */
 static void zend_ini_init_string(zval *result)
 {
-	Z_STRVAL_P(result) = malloc(1);
+	Z_STRVAL_P(result) = (char *) malloc(1);
 	Z_STRVAL_P(result)[0] = 0;
 	Z_STRLEN_P(result) = 0;
 	Z_TYPE_P(result) = IS_STRING;
