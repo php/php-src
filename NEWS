@@ -10,8 +10,10 @@ PHP                                                                        NEWS
   results and PHP crashes). (Felipe)
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
-- Fixed bug #52037 (Concurrent builds fail in install-programs) (seanius at 
+- Fixed bug #52037 (Concurrent builds fail in install-programs). (seanius at 
   debian dot org, Kalle)
+- Fixed bug #51943 (AIX: Several files are out of ANSI spec). (Kalle, 
+  coreystup at gmail dot com)
 - Fixed bug #51697 (Unsafe operations in free_storage of SPL iterators,
   causes crash during shutdown). (Etienne)
 
