@@ -35,7 +35,7 @@ zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 
 zend_language_parser.h: zend_language_parser.c
 zend_language_parser.c: $(srcdir)/zend_language_parser.y
-	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_language_parser.y || test $$? -eq 2
+	$(LEMON) $(LEMON_FLAGS) $(srcdir)/zend_language_parser.y || test $$? -eq 14
 
 
 # INI parser/scanner rules
