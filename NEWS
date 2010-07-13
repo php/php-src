@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.2.14
+- Rewrote var_export() to use smart_str rather than output buffering, prevents
+  data disclosure if a fatal error occurs. (Scott)
 
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
