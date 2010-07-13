@@ -88,6 +88,8 @@
 
 #define TIMELIB_ERROR          999
 
+/* Some compilers like AIX, defines uchar in sys/types.h */
+#undef uchar
 typedef unsigned char uchar;
 
 #define   BSIZE	   8192
