@@ -188,7 +188,7 @@ enum pdo_case_conversion {
 enum pdo_null_handling {
 	PDO_NULL_NATURAL = 0,
 	PDO_NULL_EMPTY_STRING = 1,
-	PDO_NULL_TO_STRING = 2,
+	PDO_NULL_TO_STRING = 2
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -349,7 +349,7 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
 	PDO_PARAM_EVT_FETCH_POST,
-	PDO_PARAM_EVT_NORMALIZE,
+	PDO_PARAM_EVT_NORMALIZE
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
