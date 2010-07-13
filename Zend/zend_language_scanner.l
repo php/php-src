@@ -1840,6 +1840,22 @@ inline_html:
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
+<ST_VAR_OFFSET>'"' {
+	return T_QUOTE;
+}
+
+<ST_VAR_OFFSET>'{' {
+	return T_LBRACE;
+}
+
+<ST_VAR_OFFSET>'}' {
+	return T_RBRACE;
+}
+
+<ST_VAR_OFFSET>'`' {
+	return T_BACKQUOTE;
+}
+
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
 	zendlval->type = IS_STRING;
@@ -2355,10 +2371,6 @@ nowdoc_scan_done:
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	return T_ENCAPSED_AND_WHITESPACE;
-}
-
-<ST_IN_SCRIPTING>'"' {
-	return T_QUOTE;
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
