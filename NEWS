@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   (Johannes)
 - Fixed bug #52237 (Crash when passing the reference of the property of a
   non-object). (Dmitry)
+- Fixed bug #52037 (Concurrent builds fail in install-programs) (seanius at 
+  debian dot org, Kalle)
 
 01 Jul 2010, PHP 5.2.14RC2
 - Fixed a possible interruption array leak in strrchr(). Reported by
