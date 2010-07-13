@@ -14,12 +14,5 @@ var_export($obj, true);
 ?>
 ===DONE===
 --EXPECTF--
-stdClass::__set_state(array(
-   'p' => 
-  stdClass::__set_state(array(
-     'p' => 
-    stdClass::__set_state(array(
-       'p' => 
-      stdClass::__set_state(array(
 
 Fatal error: Nesting level too deep - recursive dependency? in %s on line 9

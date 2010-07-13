@@ -33,6 +33,8 @@ PHP_FUNCTION(memory_get_peak_usage);
 
 PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC);
 PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC);
+PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC);
+
 PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
 
 /* typdef HashTable php_serialize_data_t; */
