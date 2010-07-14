@@ -224,35 +224,61 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
+static inline char *get_default_content_type(uint prefix_len, uint *len TSRMLS_DC)
 {
 	char *mimetype, *charset, *content_type;
+	uint mimetype_len, charset_len;
 
-	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
-	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
-
-	if (strncasecmp(mimetype, "text/", 5) == 0 && *charset) {
-		int len = strlen(mimetype) + sizeof("; charset=") + strlen(charset); /* sizeof() includes \0 */
-		content_type = emalloc(len);
-		snprintf(content_type, len, "%s; charset=%s", mimetype, charset);
+	if (SG(default_mimetype)) {
+		mimetype = SG(default_mimetype);
+		mimetype_len = strlen(SG(default_mimetype));
 	} else {
-		content_type = estrdup(mimetype);
+		mimetype = SAPI_DEFAULT_MIMETYPE;
+		mimetype_len = sizeof(SAPI_DEFAULT_MIMETYPE) - 1;
+	}
+	if (SG(default_charset)) {
+		charset = SG(default_charset);
+		charset_len = strlen(SG(default_charset));
+	} else {
+		charset = SAPI_DEFAULT_CHARSET;
+		charset_len = sizeof(SAPI_DEFAULT_CHARSET) - 1;
+	}
+
+	if (*charset && strncasecmp(mimetype, "text/", 5) == 0) {
+		char *p;
+
+		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
+		content_type = (char*)emalloc(*len + 1);
+		p = content_type + prefix_len;
+		memcpy(p, mimetype, mimetype_len);
+		p += mimetype_len;
+		memcpy(p, "; charset=", sizeof("; charset=") - 1);
+		p += sizeof("; charset=") - 1;
+		memcpy(p, charset, charset_len + 1);
+	} else {
+		*len = prefix_len + mimetype_len;
+		content_type = (char*)emalloc(*len + 1);
+		memcpy(content_type + prefix_len, mimetype, mimetype_len + 1);
 	}
 	return content_type;
 }
 
 
+SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
+{
+	uint len;
+
+	return get_default_content_type(0, &len TSRMLS_CC);
+}
+
+
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC)
 {
-	char *default_content_type = sapi_get_default_content_type(TSRMLS_C);
-	int default_content_type_len = strlen(default_content_type);
+    uint len;
 
-	default_header->header_len = (sizeof("Content-type: ")-1) + default_content_type_len;
-	default_header->header = emalloc(default_header->header_len+1);
-	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: "));
-	memcpy(default_header->header+sizeof("Content-type: ")-1, default_content_type, default_content_type_len);
-	default_header->header[default_header->header_len] = 0;
-	efree(default_content_type);
+	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len TSRMLS_CC);
+	default_header->header_len = len;
+	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: ") - 1);
 }
 
 /*
@@ -521,6 +547,27 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	return r;
 }
 
+static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_header TSRMLS_DC)
+{
+	if (!sapi_module.header_handler ||
+		(SAPI_HEADER_ADD & sapi_module.header_handler(sapi_header, op, &SG(sapi_headers) TSRMLS_CC))) {
+		if (op == SAPI_HEADER_REPLACE) {
+			char *colon_offset = strchr(sapi_header->header, ':');
+
+			if (colon_offset) {
+				char sav = *colon_offset;
+
+				*colon_offset = 0;
+				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header->header, (int(*)(void*, void*))sapi_find_matching_header);
+				*colon_offset = sav;
+			}
+		}
+		zend_llist_add_element(&SG(sapi_headers).headers, (void *) sapi_header);
+	} else {
+		sapi_free_header(sapi_header);
+	}
+}
+
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 {
 	int retval;
@@ -577,8 +624,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	header_line = estrndup(header_line, header_line_len);
 
 	/* cut of trailing spaces, linefeeds and carriage-returns */
-	while(header_line_len && isspace(header_line[header_line_len-1])) 
-		  header_line[--header_line_len]='\0';
+	if (header_line_len && isspace(header_line[header_line_len-1])) {
+		do {
+			header_line_len--;
+		} while(header_line_len && isspace(header_line[header_line_len-1]));
+		header_line[--header_line_len]='\0';
+	}
 	
 	if (op == SAPI_HEADER_DELETE) {
 		if (strchr(header_line, ':')) {
@@ -586,6 +637,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
 			return FAILURE;
 		}
+		if (sapi_module.header_handler) {
+			sapi_header.header = header_line;
+			sapi_header.header_len = header_line_len;
+			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
+		}
+		zend_llist_del_element(&SG(sapi_headers).headers, header_line, (int(*)(void*, void*))sapi_find_matching_header);
+		efree(header_line);
+		return SUCCESS;
 	} else {
 		/* new line safety check */
 		char *s = header_line, *e = header_line + header_line_len, *p;
@@ -602,15 +661,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
-
-	if (op == SAPI_HEADER_DELETE) {
-		if (sapi_module.header_handler) {
-			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
-		}
-		zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
-		sapi_free_header(&sapi_header);
-		return SUCCESS;
-	}
 
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
@@ -689,28 +739,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	if (http_response_code) {
 		sapi_update_response_code(http_response_code TSRMLS_CC);
 	}
-	if (sapi_module.header_handler) {
-		retval = sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
-	} else {
-		retval = SAPI_HEADER_ADD;
-	}
-	if (retval & SAPI_HEADER_ADD) {
-		/* in replace mode first remove the header if it already exists in the headers llist */
-		if (op == SAPI_HEADER_REPLACE) {
-			colon_offset = strchr(sapi_header.header, ':');
-			if (colon_offset) {
-				char sav;
-				sav = *colon_offset;
-				*colon_offset = 0;
-				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
-				*colon_offset = sav;
-			}
-		}
-
-		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
-	} else {
-		sapi_free_header(&sapi_header);
-	}
+	sapi_header_add_op(op, &sapi_header TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -729,8 +758,15 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
 		sapi_header_struct default_header;
-		sapi_get_default_content_type_header(&default_header TSRMLS_CC);
-		sapi_add_header_ex(default_header.header, default_header.header_len, 0, 0 TSRMLS_CC);
+	    uint len;
+
+		SG(sapi_headers).mimetype = get_default_content_type(0, &len TSRMLS_CC);
+		default_header.header_len = sizeof("Content-type: ") - 1 + len;
+		default_header.header = emalloc(default_header.header_len + 1);
+		memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
+		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+		sapi_header_add_op(SAPI_HEADER_ADD, &default_header TSRMLS_CC);
+		SG(sapi_headers).send_default_content_type = 0;
 	}
 
 	SG(headers_sent) = 1;
