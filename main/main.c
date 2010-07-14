@@ -1047,7 +1047,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					sapi_header_line ctr = {0};
 
 					ctr.line = "HTTP/1.0 500 Internal Server Error";
-					ctr.line_len = strlen(ctr.line);
+					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
