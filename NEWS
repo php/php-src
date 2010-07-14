@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jul 2010, PHP 5.3.3 RC3
+15 Jul 2010, PHP 5.3.3 RC3
 - Rewrote var_export() to use smart_str rather than output buffering, prevents
   data disclosure if a fatal error occurs. (Scott)
 
