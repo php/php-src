@@ -30,6 +30,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 
+#define YYNOERRORRECOVERY
 #define NDEBUG
 }
 

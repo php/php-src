@@ -6167,24 +6167,22 @@ again:
 		zend_lang_parse(pParser, token, zendlval TSRMLS_CC);
 		CG(zend_lineno) = lineno;
 		
-		if (token == 0) {
+		if (token == 0 || EG(exit_status) == 255) {
 			break;
-		} else if (EG(exit_status) == 255 || (halting == 1 && token == T_SEMICOLON)) {
-			/* Handles E_PARSE and __HALT_COMPILER(); */
+		} else if (halting == 1 && token == T_SEMICOLON){
+			/* Handles __HALT_COMPILER(); */
 			zend_lang_parse(pParser, 0, zendlval TSRMLS_CC);
-			if (EG(exit_status) == 255) {
-				goto end_parse;
-			}
 			break;
 		}
 	}
-end_parse:
 	zend_lang_parseFree(pParser, free);
+
 	if (EG(exit_status) == 255) {
 		/* We got an E_PARSE */
 		return 1;
 	}
 	EG(exit_status) = old_exit_status;
+
 	return 0;
 }
 /* }}} */
