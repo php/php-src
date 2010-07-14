@@ -1090,7 +1090,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 				mm_heap->large_free_buckets[i]->parent = &mm_heap->large_free_buckets[i];
 			}
 		}
-		mm_heap->rest_buckets[0]->next_free_block = mm_heap->rest_buckets[1]->prev_free_block = ZEND_MM_REST_BUCKET(mm_heap);
+		mm_heap->rest_buckets[0] = mm_heap->rest_buckets[1] = ZEND_MM_REST_BUCKET(mm_heap);
 
 		free(heap);
 		heap = mm_heap;
