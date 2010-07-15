@@ -664,8 +664,8 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 
 /* Parser */
 int zendparse(TSRMLS_D);
-void *zend_lang_parseAlloc(void *(*mallocProc)(size_t));
-void zend_lang_parseFree(void *p, void (*freeProc)(void*));
+void *zend_lang_parseAlloc(void *(*mallocProc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
+void zend_lang_parseFree(void *p, void (*freeProc)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
 void zend_lang_parse(void *yyp, int yymajor, znode yyminor TSRMLS_DC);
 
 int zend_add_literal(zend_op_array *op_array, const zval *zv);

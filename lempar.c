@@ -266,9 +266,9 @@ static void yyGrowStack(yyParser *p){
 ** A pointer to a parser.  This pointer is used in subsequent calls
 ** to Parse and ParseFree.
 */
-void *ParseAlloc(void *(*mallocProc)(size_t)){
+void *ParseAlloc(void *(*mallocProc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)){
   yyParser *pParser;
-  pParser = (yyParser*)(*mallocProc)( (size_t)sizeof(yyParser) );
+  pParser = (yyParser*)(*mallocProc)( ((size_t)sizeof(yyParser)) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
   if( pParser ){
     pParser->yyidx = -1;
 #ifdef YYTRACKMAXSTACKDEPTH
@@ -351,7 +351,7 @@ static zend_always_inline int yy_pop_parser_stack(yyParser *pParser){
 */
 void ParseFree(
   void *p,                    /* The parser to be deleted */
-  void (*freeProc)(void*)     /* Function used to reclaim memory */
+  void (*freeProc)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)     /* Function used to reclaim memory */
 ){
   yyParser *pParser = (yyParser*)p;
   if( pParser==0 ) return;
@@ -359,7 +359,7 @@ void ParseFree(
 #if YYSTACKDEPTH<=0
   free(pParser->yystack);
 #endif
-  (*freeProc)((void*)pParser);
+  (*freeProc)((void*)pParser ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
 /*

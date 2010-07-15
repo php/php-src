@@ -39,8 +39,8 @@
 #define ZEND_INI_PARSER_SE 	(CG(ini_parser_param))->syntax_error
 
 int ini_parse(TSRMLS_D);
-void *zend_ini_parseAlloc(void *(*mallocProc)(size_t));
-void zend_ini_parseFree(void *p, void (*freeProc)(void*));
+void *zend_ini_parseAlloc(void *(*mallocProc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
+void zend_ini_parseFree(void *p, void (*freeProc)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
 void zend_ini_parse(void *yyp, int yymajor, zval yyminor TSRMLS_DC);
 
 /* {{{ zend_ini_do_op()
@@ -219,10 +219,10 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 int ini_parse(TSRMLS_D) /* {{{ */
 {
 	int token;
-	void *pParser = zend_ini_parseAlloc(malloc);
+	void *pParser = zend_ini_parseAlloc(_emalloc);
 
 	if (pParser == NULL) {
-		zend_ini_parseFree(pParser, free);
+		zend_ini_parseFree(pParser, _efree);
 		return 1;
 	}
 
@@ -236,7 +236,7 @@ int ini_parse(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	zend_ini_parseFree(pParser, free);
+	zend_ini_parseFree(pParser, _efree);
 	if (ZEND_INI_PARSER_SE) {
 		return 1;
 	} else {
