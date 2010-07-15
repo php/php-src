@@ -32,6 +32,11 @@
 
 #define YYNOERRORRECOVERY
 #define NDEBUG
+
+#define ZEND_DO_TICKS() \
+	if (Z_LVAL(CG(declarables).ticks)) { \
+		void zend_do_ticks(TSRMLS_D); \
+	}
 }
 
 %name zend_lang_parse
@@ -141,7 +146,7 @@ namespace_start ::= NAMESPACE. { zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
 
 namespace_start2 ::= NAMESPACE namespace_name(B). { zend_do_begin_namespace(&B, 1 TSRMLS_CC); }
 
-top_statement ::= SEMICOLON.                                 { zend_do_ticks(TSRMLS_C); }
+top_statement ::= SEMICOLON.                                 { ZEND_DO_TICKS(); }
 top_statement ::= statement.                                 { zend_verify_namespace(TSRMLS_C); }
 top_statement ::= function_declaration_statement.            { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 top_statement ::= class_declaration_statement.               { zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
@@ -176,7 +181,7 @@ inner_statement ::= function_declaration_statement.
 inner_statement ::= class_declaration_statement.
 inner_statement ::= HALT_COMPILER LPAREN RPAREN SEMICOLON. { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 
-statement ::= unticked_statement.  { zend_do_ticks(TSRMLS_C); }
+statement ::= unticked_statement.  { ZEND_DO_TICKS(); }
 statement ::= STRING(B) COLON.     { zend_do_label(&B TSRMLS_CC); }
 
 
@@ -331,9 +336,9 @@ unset_variables ::= unset_variables COMMA unset_variable.
 
 unset_variable(A) ::= variable(B). { zend_do_end_variable_parse(&B, BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&B TSRMLS_CC); A = B; }
 
-function_declaration_statement ::= unticked_function_declaration_statement. { zend_do_ticks(TSRMLS_C); }
+function_declaration_statement ::= unticked_function_declaration_statement. { ZEND_DO_TICKS(); }
 
-class_declaration_statement ::= unticked_class_declaration_statement. { zend_do_ticks(TSRMLS_C); }
+class_declaration_statement ::= unticked_class_declaration_statement. { ZEND_DO_TICKS(); }
 
 is_reference(A) ::= . { A.op_type = ZEND_RETURN_VAL; }
 is_reference(A) ::= BW_AND. { A.op_type = ZEND_RETURN_REF; }
@@ -891,7 +896,7 @@ base_variable(A) ::= static_member(B).                                   { A = B
 
 reference_variable(A) ::= reference_variable(B) LBRACKET dim_offset(C) RBRACKET. { fetch_array_dim(&A, &B, &C TSRMLS_CC); }
 reference_variable(A) ::= reference_variable(B) LBRACE expr(C) RBRACE.           { fetch_string_offset(&A, &B, &C TSRMLS_CC); }
-reference_variable(A) ::= compound_variable(B).                                  { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&A, &B, 1 TSRMLS_CC); }
+reference_variable(A) ::= compound_variable(B).                                  { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable_ex(&A, &B, 1, ZEND_FETCH_W TSRMLS_CC); }
 
 compound_variable(A) ::= VARIABLE(B).                   { A = B; }
 compound_variable(A) ::= DOLLAR LBRACE expr(B) RBRACE.  { A = B; }
@@ -947,16 +952,16 @@ encaps_list(A) ::= ENCAPSED_AND_WHITESPACE(B) encaps_var(C).  { zend_do_add_stri
 
 encaps_var_i(A) ::= VARIABLE(B) LBRACKET. { zend_do_begin_variable_parse(TSRMLS_C); A = B; }
 
-encaps_var(A) ::= VARIABLE(B).                                   { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&A, &B, 1 TSRMLS_CC); }
+encaps_var(A) ::= VARIABLE(B).                                   { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable_ex(&A, &B, 1, ZEND_FETCH_W TSRMLS_CC); }
 encaps_var(A) ::= encaps_var_i(B) encaps_var_offset(C) RBRACKET. { fetch_array_begin(&A, &B, &C TSRMLS_CC); }
-encaps_var(A) ::= VARIABLE(B) OBJECT_OPERATOR(C) STRING(D).      { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable(&C, &B, 1 TSRMLS_CC); zend_do_fetch_property(&A, &C, &D TSRMLS_CC); }
-encaps_var(A) ::= DOLLAR_OPEN_CURLY_BRACES expr(B) RBRACE.       { zend_do_begin_variable_parse(TSRMLS_C);  fetch_simple_variable(&A, &B, 1 TSRMLS_CC); }
+encaps_var(A) ::= VARIABLE(B) OBJECT_OPERATOR(C) STRING(D).      { zend_do_begin_variable_parse(TSRMLS_C); fetch_simple_variable_ex(&C, &B, 1, ZEND_FETCH_W TSRMLS_CC); zend_do_fetch_property(&A, &C, &D TSRMLS_CC); }
+encaps_var(A) ::= DOLLAR_OPEN_CURLY_BRACES expr(B) RBRACE.       { zend_do_begin_variable_parse(TSRMLS_C);  fetch_simple_variable_ex(&A, &B, 1, ZEND_FETCH_W TSRMLS_CC); }
 encaps_var(A) ::= DOLLAR_OPEN_CURLY_BRACES STRING_VARNAME(B) LBRACKET expr(C) RBRACKET RBRACE. { zend_do_begin_variable_parse(TSRMLS_C);  fetch_array_begin(&A, &B, &C TSRMLS_CC); }
 encaps_var(A) ::= CURLY_OPEN variable(B) RBRACE.                 { A = B; }
 
 encaps_var_offset(A) ::= STRING(B).     { A = B; }
 encaps_var_offset(A) ::= NUM_STRING(B). { A = B; }
-encaps_var_offset(A) ::= VARIABLE(B).   { fetch_simple_variable(&A, &B, 1 TSRMLS_CC); }
+encaps_var_offset(A) ::= VARIABLE(B).   { fetch_simple_variable_ex(&A, &B, 1, ZEND_FETCH_W TSRMLS_CC); }
 
 internal_functions_in_yacc(A) ::= ISSET LPAREN isset_variables(B) RPAREN. { A = B; }
 internal_functions_in_yacc(A) ::= EMPTY LPAREN variable(B) RPAREN.        { zend_do_isset_or_isempty(ZEND_ISEMPTY, &A, &B TSRMLS_CC); }

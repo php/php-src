@@ -661,12 +661,14 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_op opline;
 	zend_op *opline_ptr;
 	zend_llist *fetch_list_ptr;
+	zend_bool is_auto_global = 0;
 
 	if (varname->op_type == IS_CONST) {
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
 			convert_to_string(&varname->u.constant);
 		}
-		if (!zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
+		is_auto_global = zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC);
+		if (!is_auto_global &&
 		    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
 		      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
 		    (CG(active_op_array)->last == 0 ||
@@ -696,7 +698,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	if (varname->op_type == IS_CONST) {
 		CALCULATE_LITERAL_HASH(opline_ptr->op1.constant);
-		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC)) {
+		if (is_auto_global) {
 			opline_ptr->extended_value = ZEND_FETCH_GLOBAL;
 		}
 	}
@@ -798,7 +800,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC) /* {{{ */
 {
-	fetch_simple_variable(result, varname, 1 TSRMLS_CC);
+	fetch_simple_variable_ex(result, varname, 1, ZEND_FETCH_W TSRMLS_CC);
 
 	fetch_array_dim(result, result, first_dim TSRMLS_CC);
 }
@@ -5418,7 +5420,7 @@ void zend_do_fetch_static_variable(znode *varname, const znode *static_assignmen
 	if (varname->op_type == IS_CONST) {
 		zval_copy_ctor(&varname->u.constant);
 	}
-	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
+	fetch_simple_variable_ex(&lval, varname, 0, ZEND_FETCH_W TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
 
 	if (fetch_type == ZEND_FETCH_LEXICAL) {
 		znode dummy;
@@ -5480,7 +5482,7 @@ void zend_do_fetch_global_variable(znode *varname, const znode *static_assignmen
 	if (varname->op_type == IS_CONST) {
 		zval_copy_ctor(&varname->u.constant);
 	}
-	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
+	fetch_simple_variable_ex(&lval, varname, 0, ZEND_FETCH_W TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
 
 	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
 	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result_type |= EXT_TYPE_UNUSED;
@@ -5529,7 +5531,7 @@ void zend_do_indirect_references(znode *result, const znode *num_references, zno
 		*variable = *result;
 	}
 	zend_do_begin_variable_parse(TSRMLS_C);
-	fetch_simple_variable(result, variable, 1 TSRMLS_CC);
+	fetch_simple_variable_ex(result, variable, 1, ZEND_FETCH_W TSRMLS_CC);
 }
 /* }}} */
 
