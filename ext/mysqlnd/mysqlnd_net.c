@@ -199,7 +199,12 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 
 
 /* We assume that MYSQLND_HEADER_SIZE is 4 bytes !! */
-#define STORE_HEADER_SIZE(safe_storage, buffer)  int4store((safe_storage), (*(uint32_t *)(buffer)))
+#define COPY_HEADER(T,A)  do { \
+		*(((char *)(T)))   = *(((char *)(A)));\
+		*(((char *)(T))+1) = *(((char *)(A))+1);\
+		*(((char *)(T))+2) = *(((char *)(A))+2);\
+		*(((char *)(T))+3) = *(((char *)(A))+3); } while (0)
+#define STORE_HEADER_SIZE(safe_storage, buffer)  COPY_HEADER((safe_storage), (buffer))
 #define RESTORE_HEADER_SIZE(buffer, safe_storage) STORE_HEADER_SIZE((safe_storage), (buffer))
 
 /* {{{ mysqlnd_net::send */

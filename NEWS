@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.3.3
+- Fixed bug #51583 (Bus error due to wrong alignment in mysqlnd). (Rainer Jung)
 
 
 15 Jul 2010, PHP 5.3.3 RC3
