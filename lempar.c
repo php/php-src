@@ -288,7 +288,7 @@ void *ParseAlloc(void *(*mallocProc)(size_t)){
 ** "yymajor" is the symbol code, and "yypminor" is a pointer to
 ** the value.
 */
-static void yy_destructor(
+static zend_always_inline void yy_destructor(
   yyParser *yypParser,    /* The parser */
   YYCODETYPE yymajor,     /* Type code for object to destroy */
   YYMINORTYPE *yypminor   /* The object to be destroyed */
@@ -319,7 +319,7 @@ static void yy_destructor(
 **
 ** Return the major token number for the symbol popped.
 */
-static int yy_pop_parser_stack(yyParser *pParser){
+static zend_always_inline int yy_pop_parser_stack(yyParser *pParser){
   YYCODETYPE yymajor;
   yyStackEntry *yytos = &pParser->yystack[pParser->yyidx];
 
@@ -380,7 +380,7 @@ int ParseStackPeak(void *p){
 ** independent of the look-ahead.  If it is, return the action, otherwise
 ** return YY_NO_ACTION.
 */
-static int yy_find_shift_action(
+static zend_always_inline int yy_find_shift_action(
   yyParser *pParser,        /* The parser */
   YYCODETYPE iLookAhead     /* The look-ahead token */
 ){
@@ -436,7 +436,7 @@ static int yy_find_shift_action(
 ** independent of the look-ahead.  If it is, return the action, otherwise
 ** return YY_NO_ACTION.
 */
-static int yy_find_reduce_action(
+static zend_always_inline int yy_find_reduce_action(
   int stateno,              /* Current state number */
   YYCODETYPE iLookAhead     /* The look-ahead token */
 ){
@@ -484,7 +484,7 @@ static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor){
 /*
 ** Perform a shift action.
 */
-static void yy_shift(
+static zend_always_inline void yy_shift(
   yyParser *yypParser,          /* The parser to be shifted */
   int yyNewState,               /* The new state to shift in */
   int yyMajor,                  /* The major token to shift in */
@@ -537,13 +537,13 @@ static const struct {
 %%
 };
 
-static void yy_accept(yyParser*);  /* Forward Declaration */
+static zend_always_inline void yy_accept(yyParser*);  /* Forward Declaration */
 
 /*
 ** Perform a reduce action and the shift that must immediately
 ** follow the reduce.
 */
-static void yy_reduce(
+static zend_always_inline void yy_reduce(
   yyParser *yypParser,         /* The parser */
   int yyruleno                 /* Number of the rule by which to reduce */
 ){
@@ -642,7 +642,7 @@ static void yy_parse_failed(
 /*
 ** The following code executes when a syntax error first occurs.
 */
-static void yy_syntax_error(
+static zend_always_inline void yy_syntax_error(
   yyParser *yypParser,           /* The parser */
   int yymajor,                   /* The major type of the error token */
   YYMINORTYPE yyminor            /* The minor type of the error token */
@@ -656,7 +656,7 @@ static void yy_syntax_error(
 /*
 ** The following is executed when the parser accepts
 */
-static void yy_accept(
+static zend_always_inline void yy_accept(
   yyParser *yypParser           /* The parser */
 ){
   ParseARG_FETCH;
