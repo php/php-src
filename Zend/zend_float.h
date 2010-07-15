@@ -78,7 +78,9 @@ extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
 #  define HAVE__CONTROLFP
 # endif /* MSC_VER >= 1500 */
   /* Tell MSVC optimizer that we access FP environment */
-# pragma fenv_access (on)
+# if _MSC_VER >= 1500
+#  pragma fenv_access (on)
+# endif
 #endif /* _MSC_VER */
 
 #ifdef HAVE__CONTROLFP_S
