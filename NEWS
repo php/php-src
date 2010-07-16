@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . $GLOBALS became a JIT autoglobal, so it's initialized only if used
     (this may affect opcode caches)
   . simplified string ofset reading. $str[1][0] now is a legal construct.
+  . ZEND_FETCH_*_R operations simplified and can't be used with EXT_TYPE_UNUSED
+    flag any more. Thit is very rare and useless case. ZEND_FREE might be
+    required after them instead.
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty

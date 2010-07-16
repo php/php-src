@@ -1422,7 +1422,19 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 		}
 		if (opline->result_type == IS_VAR
 			&& opline->result.var == op1->u.op.var) {
-			opline->result_type |= EXT_TYPE_UNUSED;
+			if (opline->opcode == ZEND_FETCH_R ||
+			    opline->opcode == ZEND_FETCH_DIM_R ||
+			    opline->opcode == ZEND_FETCH_OBJ_R) {
+				/* It's very rare and useless case. It's better to use
+				   additional FREE opcode and simplify the FETCH handlers
+				   their selves */
+				opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+				opline->opcode = ZEND_FREE;
+				SET_NODE(opline->op1, op1);
+				SET_UNUSED(opline->op2);
+			} else {
+				opline->result_type |= EXT_TYPE_UNUSED;
+			}
 		} else {
 			while (opline>CG(active_op_array)->opcodes) {
 				if (opline->opcode == ZEND_FETCH_DIM_R
@@ -6065,7 +6077,7 @@ int zend_register_auto_global(const char *name, uint name_len, zend_bool jit, ze
 {
 	zend_auto_global auto_global;
 
-	auto_global.name = zend_new_interned_string(name, name_len + 1, 0 TSRMLS_CC);
+	auto_global.name = zend_new_interned_string((char*)name, name_len + 1, 0 TSRMLS_CC);
 	auto_global.name_len = name_len;
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
