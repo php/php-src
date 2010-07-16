@@ -177,42 +177,12 @@ static zend_always_inline zval *_get_zval_ptr_tmp(zend_uint var, const temp_vari
 	return should_free->var = &T(var).tmp_var;
 }
 
-static zval *_get_zval_ptr_var_string_offset(zend_uint var, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	temp_variable *T = &T(var);
-	zval *str = T->str_offset.str;
-	zval *ptr;
-
-	/* string offset */
-	ALLOC_ZVAL(ptr);
-	T->str_offset.ptr = ptr;
-	should_free->var = ptr;
-
-	if (T->str_offset.str->type != IS_STRING
-		|| ((int)T->str_offset.offset < 0)
-		|| (T->str_offset.str->value.str.len <= (int)T->str_offset.offset)) {
-		ptr->value.str.val = STR_EMPTY_ALLOC();
-		ptr->value.str.len = 0;
-	} else {
-		ptr->value.str.val = estrndup(str->value.str.val + T->str_offset.offset, 1);
-		ptr->value.str.len = 1;
-	}
-	PZVAL_UNLOCK_FREE(str);
-	Z_SET_REFCOUNT_P(ptr, 1);
-	Z_SET_ISREF_P(ptr);
-	ptr->type = IS_STRING;
-	return ptr;
-}
-
 static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
 	zval *ptr = T(var).var.ptr;
-	if (EXPECTED(ptr != NULL)) {
-		PZVAL_UNLOCK(ptr, should_free);
-		return ptr;
-	} else {
-		return _get_zval_ptr_var_string_offset(var, Ts, should_free TSRMLS_CC);
-	}
+
+	PZVAL_UNLOCK(ptr, should_free);
+	return ptr;
 }
 
 static zend_never_inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC)
@@ -1286,14 +1256,23 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					dim = &tmp;
 				}
 				if (result) {
+					zval *ptr;
+
+					ALLOC_ZVAL(ptr);
+					INIT_PZVAL(ptr);
+					Z_TYPE_P(ptr) = IS_STRING;
+
 					if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+						Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
+						Z_STRLEN_P(ptr) = 0;
+					} else {
+						Z_STRVAL_P(ptr) = (char*)emalloc(2);
+						Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+						Z_STRVAL_P(ptr)[1] = 0;
+						Z_STRLEN_P(ptr) = 1;						
 					}
-					result->str_offset.str = container;
-					PZVAL_LOCK(container);
-					result->str_offset.offset = Z_LVAL_P(dim);
-					result->var.ptr_ptr = NULL;
-					result->var.ptr = NULL;
+					AI_SET_PTR(result, ptr);
 				}
 				return;
 			}

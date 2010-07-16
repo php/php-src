@@ -188,6 +188,20 @@ function read_global_var($n) {
 	}
 }
 
+function read_hash($n) {
+	$hash = array('test' => 0);
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $hash['test'];
+	}
+}
+
+function read_str_offset($n) {
+	$str = "test";
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $str[1];
+	}
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -300,4 +314,8 @@ read_auto_global(N);
 $t = end_test($t, '$x = $_GET', $overhead);
 read_global_var(N);
 $t = end_test($t, '$x = $GLOBALS[\'v\']', $overhead);
+read_hash(N);
+$t = end_test($t, '$x = $hash[\'v\']', $overhead);
+read_str_offset(N);
+$t = end_test($t, '$x = $str[0]', $overhead);
 total($t0, "Total");
