@@ -1218,23 +1218,18 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 
 		case IS_ARRAY:
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
-			if (result) {
-				AI_SET_PTR(result, *retval);
-				PZVAL_LOCK(*retval);
-			}
+			AI_SET_PTR(result, *retval);
+			PZVAL_LOCK(*retval);
 			return;
-			break;
 
 		case IS_NULL:
-			if (result) {
-				AI_SET_PTR(result, &EG(uninitialized_zval));
-				PZVAL_LOCK(&EG(uninitialized_zval));
-			}
+			AI_SET_PTR(result, &EG(uninitialized_zval));
+			PZVAL_LOCK(&EG(uninitialized_zval));
 			return;
-			break;
 
 		case IS_STRING: {
 				zval tmp;
+				zval *ptr;
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
 					switch(Z_TYPE_P(dim)) {
@@ -1255,25 +1250,22 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					convert_to_long(&tmp);
 					dim = &tmp;
 				}
-				if (result) {
-					zval *ptr;
 
-					ALLOC_ZVAL(ptr);
-					INIT_PZVAL(ptr);
-					Z_TYPE_P(ptr) = IS_STRING;
+				ALLOC_ZVAL(ptr);
+				INIT_PZVAL(ptr);
+				Z_TYPE_P(ptr) = IS_STRING;
 
-					if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
-						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
-						Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
-						Z_STRLEN_P(ptr) = 0;
-					} else {
-						Z_STRVAL_P(ptr) = (char*)emalloc(2);
-						Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
-						Z_STRVAL_P(ptr)[1] = 0;
-						Z_STRLEN_P(ptr) = 1;						
-					}
-					AI_SET_PTR(result, ptr);
+				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+					zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
+					Z_STRLEN_P(ptr) = 0;
+				} else {
+					Z_STRVAL_P(ptr) = (char*)emalloc(2);
+					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+					Z_STRVAL_P(ptr)[1] = 0;
+					Z_STRLEN_P(ptr) = 1;						
 				}
+				AI_SET_PTR(result, ptr);
 				return;
 			}
 			break;
@@ -1292,14 +1284,8 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					if (result) {
-						AI_SET_PTR(result, overloaded_result);
-						PZVAL_LOCK(overloaded_result);
-					} else if (Z_REFCOUNT_P(overloaded_result) == 0) {
-						/* Destroy unused result from offsetGet() magic method */
-						Z_SET_REFCOUNT_P(overloaded_result, 1);
-						zval_ptr_dtor(&overloaded_result);
-					}
+					AI_SET_PTR(result, overloaded_result);
+					PZVAL_LOCK(overloaded_result);
 				} else if (result) {
 					AI_SET_PTR(result, &EG(uninitialized_zval));
 					PZVAL_LOCK(&EG(uninitialized_zval));
@@ -1309,15 +1295,11 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				}
 			}
 			return;
-			break;
 
 		default:
-			if (result) {
-				AI_SET_PTR(result, &EG(uninitialized_zval));
-				PZVAL_LOCK(&EG(uninitialized_zval));
-			}
+			AI_SET_PTR(result, &EG(uninitialized_zval));
+			PZVAL_LOCK(&EG(uninitialized_zval));
 			return;
-			break;
 	}
 }
 

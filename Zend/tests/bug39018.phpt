@@ -63,9 +63,17 @@ print "\nDone\n";
 ?>
 --EXPECTF--
 
+Notice: Uninitialized string offset: %i in %s on line 6
+
+Notice: Uninitialized string offset: 0 in %s on line 10
+
 Notice: Uninitialized string offset: 0 in %s on line 12
 
+Notice: Uninitialized string offset: %i in %s on line 14
+
 Notice: Uninitialized string offset: %i in %s on line 16
+
+Notice: Uninitialized string offset: 0 in %s on line 18
 
 Notice: Uninitialized string offset: 4 in %s on line 28
 
@@ -76,6 +84,8 @@ Notice: Uninitialized string offset: 4 in %s on line 38
 Notice: Uninitialized string offset: 4 in %s on line 42
 
 Notice: Uninitialized string offset: 4 in %s on line 46
+
+Notice: Uninitialized string offset: 12 in %s on line 50
 
 Notice: Uninitialized string offset: 12 in %s on line 52
 b
