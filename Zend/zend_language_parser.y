@@ -35,7 +35,7 @@
 
 #define ZEND_DO_TICKS() \
 	if (Z_LVAL(CG(declarables).ticks)) { \
-		void zend_do_ticks(TSRMLS_D); \
+		zend_do_ticks(TSRMLS_C); \
 	}
 }
 
