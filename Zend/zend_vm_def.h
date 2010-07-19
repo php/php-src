@@ -335,7 +335,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data1;
-	zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+	zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	zval *object;
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -599,7 +599,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+	object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	retval = &EX_T(opline->result.var).var.ptr;
 
@@ -703,7 +703,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+	object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	retval = &EX_T(opline->result.var).tmp_var;
 
@@ -1537,7 +1537,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zval *property;
 
 	SAVE_OPLINE();
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R);
+	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_CV) {

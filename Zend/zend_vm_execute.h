@@ -26872,7 +26872,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	zval *object;
 	zval *property = opline->op2.zv;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -27134,7 +27134,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = opline->op2.zv;
 	retval = &EX_T(opline->result.var).var.ptr;
 
@@ -27238,7 +27238,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = opline->op2.zv;
 	retval = &EX_T(opline->result.var).tmp_var;
 
@@ -27854,7 +27854,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 	zval *property;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = opline->op2.zv;
 
 	if (IS_CV == IS_CV) {
@@ -28938,7 +28938,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data1;
-	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	zval *object;
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -29201,7 +29201,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	retval = &EX_T(opline->result.var).var.ptr;
 
@@ -29305,7 +29305,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	retval = &EX_T(opline->result.var).tmp_var;
 
@@ -29767,7 +29767,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_H
 	zval *property;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 
 	if (IS_CV == IS_CV) {
@@ -30711,7 +30711,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data1;
-	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	zval *object;
 	zval *property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -30974,7 +30974,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	retval = &EX_T(opline->result.var).var.ptr;
 
@@ -31078,7 +31078,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 	retval = &EX_T(opline->result.var).tmp_var;
 
@@ -31694,7 +31694,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_H
 	zval *property;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
 
 	if (IS_CV == IS_CV) {
@@ -32555,7 +32555,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	zval *object;
 	zval *property = NULL;
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -33648,7 +33648,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	zval **object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	zval *object;
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
@@ -33910,7 +33910,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	retval = &EX_T(opline->result.var).var.ptr;
 
@@ -34014,7 +34014,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 	int have_get_ptr = 0;
 
 	SAVE_OPLINE();
-	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+	object_ptr = _get_zval_ptr_ptr_cv_BP_VAR_RW(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 	retval = &EX_T(opline->result.var).tmp_var;
 
@@ -34476,7 +34476,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 	zval *property;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(EX_CVs(), opline->op1.var TSRMLS_CC);
 	property = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
 
 	if (IS_CV == IS_CV) {
