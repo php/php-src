@@ -9870,9 +9870,7 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (IS_VAR == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -9915,9 +9913,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (IS_VAR == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -25552,9 +25548,7 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (IS_CV == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -25596,9 +25590,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (IS_CV == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
