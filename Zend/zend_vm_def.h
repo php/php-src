@@ -901,9 +901,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -946,9 +944,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
-		}
+		ZVAL_NULL(&EX_T(opline->result.var).tmp_var);
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
