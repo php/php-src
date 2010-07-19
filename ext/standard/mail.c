@@ -41,6 +41,7 @@
 
 #include "php_mail.h"
 #include "php_ini.h"
+#include "php_string.h"
 #include "exec.h"
 
 #ifdef PHP_WIN32
