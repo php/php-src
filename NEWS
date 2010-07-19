@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2010, PHP 5.3.3
+- Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
+  bit)). (Adam)
 - Fixed bug #51583 (Bus error due to wrong alignment in mysqlnd). (Rainer Jung)
 
 
