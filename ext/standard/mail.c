@@ -39,6 +39,7 @@
 
 #include "php_mail.h"
 #include "php_ini.h"
+#include "php_string.h"
 #include "safe_mode.h"
 #include "exec.h"
 
