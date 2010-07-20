@@ -7,7 +7,7 @@ PHP                                                                        NEWS
 
 15 Jul 2010, PHP 5.2.14RC3
 - Rewrote var_export() to use smart_str rather than output buffering, prevents
-  data disclosure if a fatal error occurs. (Scott)
+  data disclosure if a fatal error occurs (CVE-2010-2531). (Scott)
 
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
   (Johannes)
