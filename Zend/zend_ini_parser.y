@@ -219,10 +219,10 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 int ini_parse(TSRMLS_D) /* {{{ */
 {
 	int token;
-	void *pParser = zend_ini_parseAlloc(_emalloc);
+	void *pParser = zend_ini_parseAlloc(malloc);
 
 	if (pParser == NULL) {
-		zend_ini_parseFree(pParser, _efree);
+		zend_ini_parseFree(pParser, free);
 		return 1;
 	}
 
@@ -236,7 +236,7 @@ int ini_parse(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	zend_ini_parseFree(pParser, _efree);
+	zend_ini_parseFree(pParser, free);
 	if (ZEND_INI_PARSER_SE) {
 		return 1;
 	} else {

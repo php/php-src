@@ -136,7 +136,6 @@
 %left ELSEIF.
 %left ELSE.
 %left ENDIF.
-
 %right STATIC ABSTRACT FINAL PRIVATE PROTECTED PUBLIC.
 
 // dummy tokens
@@ -575,8 +574,15 @@ class_statement_ii(A) ::= method_modifiers(B) function(C) is_reference(D) STRING
 class_statement ::= class_statement_i class_variables SEMICOLON.
 class_statement ::= class_constants SEMICOLON.
 class_statement ::= trait_use_statement.
-class_statement ::= class_statement_ii(B) LPAREN parameters RPAREN method_body(C). { zend_do_abstract_method(&B[2], &B[0], &C TSRMLS_CC); zend_do_end_function_declaration(&B[1] TSRMLS_CC); }
 
+method_body_i(A) ::= LPAREN parameters RPAREN(C) LBRACE inner_statement_list. { A = C; }
+
+method_body ::= class_statement_ii(B) method_body_i(C). { Z_LVAL(C.u.constant) = 0; zend_do_abstract_method(&B[2], &B[0], &C TSRMLS_CC); zend_do_end_function_declaration(&B[1] TSRMLS_CC); }
+
+method_body_abstract ::= class_statement_ii(B) LPAREN parameters RPAREN(C). { Z_LVAL(C.u.constant) = ZEND_ACC_ABSTRACT; zend_do_abstract_method(&B[2], &B[0], &C TSRMLS_CC); zend_do_end_function_declaration(&B[1] TSRMLS_CC); }
+
+class_statement ::= method_body_abstract SEMICOLON.
+class_statement ::= method_body RBRACE.
 
 trait_use_statement ::= USE trait_list trait_adaptations.
 
@@ -608,9 +614,6 @@ trait_alias(A) ::= trait_method_reference(B) AS member_modifier(C).           { 
 
 trait_modifiers(A) ::= .                    { Z_LVAL(A.u.constant) = 0x0; } /* No change of methods visibility */
 trait_modifiers(A) ::= member_modifier(B).  { A = B; } /* REM: Keep in mind, there are not only visibility modifiers */
-
-method_body(A) ::= SEMICOLON.                           { Z_LVAL(A.u.constant) = ZEND_ACC_ABSTRACT; }
-method_body(A) ::= LBRACE inner_statement_list RBRACE.  { Z_LVAL(A.u.constant) = 0;	}
 
 variable_modifiers(A) ::= member_modifiers_list(B). { A = B; }
 variable_modifiers(A) ::= VAR.                      { Z_LVAL(A.u.constant) = ZEND_ACC_PUBLIC; }

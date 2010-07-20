@@ -6114,8 +6114,8 @@ int zendparse(TSRMLS_D) /* {{{ */
 	int token, halting = 0, old_exit_status;
 	void *pParser;
 
-	if ((pParser = zend_lang_parseAlloc(_emalloc)) == NULL) {
-		zend_lang_parseFree(pParser, _efree);
+	if ((pParser = zend_lang_parseAlloc(malloc)) == NULL) {
+		zend_lang_parseFree(pParser, free);
 		return 1;
 	}
 	
@@ -6174,7 +6174,7 @@ again:
 			break;
 		}
 	}
-	zend_lang_parseFree(pParser, _efree);
+	zend_lang_parseFree(pParser, free);
 
 	if (EG(exit_status) == 255) {
 		/* We got an E_PARSE */
