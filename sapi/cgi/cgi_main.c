@@ -2086,7 +2086,7 @@ consult the installation file that came with this distribution, or visit \n\
 						if (file_handle.handle.fd < 0) {
 							break;
 						}
-						file_handle.type == ZEND_HANDLE_FP;
+						file_handle.type = ZEND_HANDLE_FP;
 						file_handle.handle.fp = fdopen(file_handle.handle.fd, "rb");
 						/* break missing intentionally */
 					case ZEND_HANDLE_FP:
