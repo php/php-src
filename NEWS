@@ -1,51 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jul 2010, PHP 5.3.3
-- Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
-  bit)). (Adam)
-- Fixed bug #51583 (Bus error due to wrong alignment in mysqlnd). (Rainer Jung)
-
-
-15 Jul 2010, PHP 5.3.3 RC3
-- Rewrote var_export() to use smart_str rather than output buffering, prevents
-  data disclosure if a fatal error occurs (CVE-2010-2531). (Scott)
-
-- Fixed bug #52262 (json_decode() shows no errors on invalid UTF-8).
-  (Scott)
-- Fixed bug #52240 (hash_copy() does not copy the HMAC key, causes wrong
-  results and PHP crashes). (Felipe)
-- Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
-  (Johannes)
-- Fixed bug #52037 (Concurrent builds fail in install-programs). (seanius at 
-  debian dot org, Kalle)
-- Fixed bug #51943 (AIX: Several files are out of ANSI spec). (Kalle, 
-  coreystup at gmail dot com)
-- Fixed bug #51697 (Unsafe operations in free_storage of SPL iterators,
-  causes crash during shutdown). (Etienne)
-
-01 Jul 2010, PHP 5.3.3 RC2
-- Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
-
-- Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
-
-- Fixed the mail.log ini setting when no filename was given. (Johannes)
-
-- Fixed bug #52193 (converting closure to array yields empty array). (Felipe)
-- Fixed bug #52183 (Reflectionfunction reports invalid number of arguments for
-  function aliases). (Felipe)
-- Fixed bug #52162 (custom request header variables with numbers are removed). 
-  (Sriram Natarajan)
-- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
-- Fixed bug #52138 (Constants are parsed into the ini file for section names).
-  (Felipe)
-- Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
-  (Andrey)
-- Fixed bug #49216 (Reflection doesn't seem to work properly on MySqli). (Andrey)
-- Fixed bug #48930 (__COMPILER_HALT_OFFSET__ incorrect in PHP >= 5.3). (Felipe)
-- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
-  JPEGs). (Ilia)
-
-17 Jun 2010, PHP 5.3.3 RC1
+22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
 - Upgraded bundled PCRE to version 8.02. (Ilia)
 
@@ -74,8 +29,11 @@ PHP                                                                        NEWS
   __construct now. (Stas)
 - Reset error state in PDO::beginTransaction() reset error state. (Ilia)
 
+- Implemented FR#51295 (SQLite3::busyTimeout not existing). (Mark)
 - Implemented FR#35638 (Adding udate to imap_fetch_overview results).
   (Charles_Duffy at dell dot com )
+- Rewrote var_export() to use smart_str rather than output buffering, prevents
+  data disclosure if a fatal error occurs (CVE-2010-2531). (Scott)
 - Fixed possible buffer overflows in mysqlnd_list_fields,  mysqlnd_change_user.
   (Andrey)
 - Fixed possible buffer overflows when handling error packets in mysqlnd.
@@ -118,9 +76,27 @@ PHP                                                                        NEWS
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 - Fixed 64-bit integer overflow in mhash_keygen_s2k(). (Clément LECIGNE, Stas)
+- Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
+- Fixed the mail.log ini setting when no filename was given. (Johannes)
 
-- Fixed bug #45808 (stream_socket_enable_crypto() blocks and eats CPU).
-  (vincent at optilian dot com)
+- Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
+  bit)). (Adam)
+- Fixed bug #52262 (json_decode() shows no errors on invalid UTF-8).
+  (Scott)
+- Fixed bug #52240 (hash_copy() does not copy the HMAC key, causes wrong
+  results and PHP crashes). (Felipe)
+- Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
+  (Johannes)
+- Fixed bug #52193 (converting closure to array yields empty array). (Felipe)
+- Fixed bug #52183 (Reflectionfunction reports invalid number of arguments for
+  function aliases). (Felipe)
+- Fixed bug #52162 (custom request header variables with numbers are removed). 
+  (Sriram Natarajan)
+- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
+- Fixed bug #52138 (Constants are parsed into the ini file for section names).
+  (Felipe)
+- Fixed bug #52115 (mysqli_result::fetch_all returns null, not an empty array).
+  (Andrey)
 - Fixed bug #52101 (dns_get_record() garbage in 'ipv6' field on Windows).
   (Pierre)
 - Fixed bug #52082 (character_set_client & character_set_connection reset after
@@ -134,12 +110,16 @@ PHP                                                                        NEWS
 - Fixed bug #52057 (ReflectionClass fails on Closure class). (Felipe)
 - Fixed bug #52051 (handling of case sensitivity of old-style constructors 
   changed in 5.3+). (Felipe)
+- Fixed bug #52037 (Concurrent builds fail in install-programs). (seanius at 
+  debian dot org, Kalle)
 - Fixed bug #52019 (make lcov doesn't support TESTS variable anymore). (Patrick)
 - Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
   (Ilia)
 - Fixed bug #52001 (Memory allocation problems after using variable variables).
   (Dmitry)
 - Fixed bug #51991 (spl_autoload and *nix support with namespace). (Felipe)
+- Fixed bug #51943 (AIX: Several files are out of ANSI spec). (Kalle, 
+  coreystup at gmail dot com)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
   constant array). (Felipe)
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
@@ -162,6 +142,8 @@ PHP                                                                        NEWS
   (David Zuelke)
 - Fixed bug #51712 (Test mysql_mysqlnd_read_timeout_long must fail on MySQL4).
   (Andrey)
+- Fixed bug #51697 (Unsafe operations in free_storage of SPL iterators,
+  causes crash during shutdown). (Etienne)
 - Fixed bug #51690 (Phar::setStub looks for case-sensitive
   __HALT_COMPILER()). (Ilia)
 - Fixed bug #51688 (ini per dir crashes when invalid document root  are given).
@@ -188,6 +170,7 @@ PHP                                                                        NEWS
 - Fixed bug #51604 (newline in end of header is shown in start of message).
   (Daniel Egeberg)
 - Fixed bug #51590 (JSON_ERROR_UTF8 is undefined). (Felipe)
+- Fixed bug #51583 (Bus error due to wrong alignment in mysqlnd). (Rainer Jung)
 - Fixed bug #51582 (Don't assume UINT64_C it's ever available).
   (reidrac at usebox dot net, Pierre)
 - Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
@@ -274,12 +257,15 @@ PHP                                                                        NEWS
 - Fixed bug #49429 (odbc_autocommit doesn't work). (Felipe)
 - Fixed bug #49320 (PDO returns null when SQLite connection fails). (Felipe)
 - Fixed bug #49234 (mysqli_ssl_set not found). (Andrey)
+- Fixed bug #49216 (Reflection doesn't seem to work properly on MySqli).
+  (Andrey)
 - Fixed bug #49192 (PHP crashes when GC invoked on COM object). (Stas)
 - Fixed bug #49081 (DateTime::diff() mistake if start in January and interval >
   28 days). (Derick)
 - Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
   (yoarvi@gmail.com, Derick)
 - Fixed bug #48983 (DomDocument : saveHTMLFile wrong charset). (Rob)
+- Fixed bug #48930 (__COMPILER_HALT_OFFSET__ incorrect in PHP >= 5.3). (Felipe)
 - Fixed bug #48902 (Timezone database fallback map is outdated). (Derick)
 - Fixed bug #48781 (Cyclical garbage collector memory leak). (Dmitry)
 - Fixed bug #48601 (xpath() returns FALSE for legitimate query). (Rob)
@@ -289,9 +275,12 @@ PHP                                                                        NEWS
   (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #47842 (sscanf() does not support 64-bit values). (Mike)
 - Fixed bug #46111 (Some timezone identifiers can not be parsed). (Derick)
+- Fixed bug #45808 (stream_socket_enable_crypto() blocks and eats CPU).
+  (vincent at optilian dot com)
 - Fixed bug #43233 (sasl support for ldap on Windows). (Pierre)
 - Fixed bug #35673 (formatOutput does not work with saveHTML). (Rob)
-
+- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
+  JPEGs). (Ilia)
 
 04 Mar 2010, PHP 5.3.2
 
