@@ -1,51 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jul 2010, PHP 5.2.14
-- Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
-  bit)). (Adam)
-
-
-15 Jul 2010, PHP 5.2.14RC3
-- Rewrote var_export() to use smart_str rather than output buffering, prevents
-  data disclosure if a fatal error occurs (CVE-2010-2531). (Scott)
-
-- Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
-  (Johannes)
-- Fixed bug #52237 (Crash when passing the reference of the property of a
-  non-object). (Dmitry)
-- Fixed bug #52037 (Concurrent builds fail in install-programs). (seanius at 
-  debian dot org, Kalle)
-- Fixed bug #51943 (AIX: Several files are out of ANSI spec). (Kalle, 
-  coreystup at gmail dot com)
-
-01 Jul 2010, PHP 5.2.14RC2
-- Fixed a possible interruption array leak in strrchr(). Reported by
-  Péter Veres. (CVE-2010-2484) (Felipe)
-- Fixed a possible interruption array leak in strchr(), strstr(), substr(), 
-  chunk_split(), strtok(), addcslashes(), str_repeat(), trim(). (Felipe)
-- Fixed a possible memory corruption in substr_replace() (Dmitry)
-- Fixed SplObjectStorage unserialization problems (CVE-2010-2225). (Stas)
-
-- Fixed bug #52163 (SplFileObject::fgetss() fails due to parameter that can't
-  be set). (Felipe)
-- Fixed bug #52162 (custom request header variables with numbers are removed). 
-  (Sriram Natarajan)
-- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
-- Fixed bug #52061 (memory_limit above 2G). (Felipe)
-- Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
-  (Ilia, Felipe)
-- Fixed bug #49730 (Firebird - new PDO() returns NULL). (Felipe)
-- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
-  JPEGs). (Ilia)
-
-17 Jun 2010, PHP 5.2.14RC1
-- Upgraded bundled PCRE to version 8.02. (Ilia)
-
+22 Jul 2010, PHP 5.2.14
 - Reverted bug fix #49521 (PDO fetchObject sets values before calling
   constructor). (Felipe)
 
 - Updated timezone database to version 2010.5. (Derick)
+- Upgraded bundled PCRE to version 8.02. (Ilia)
 
+- Rewrote var_export() to use smart_str rather than output buffering, prevents
+  data disclosure if a fatal error occurs (CVE-2010-2531). (Scott)
 - Fixed a possible stack exaustion inside fnmatch(). Reporeted by Stefan
   Esser (Ilia)
 - Reset error state in PDO::beginTransaction() reset error state. (Ilia)
@@ -59,9 +22,27 @@ PHP                                                                        NEWS
   PDOStatement if instantiated directly instead of doing by the PDO methods.
   (Felipe)
 
+- Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
+  bit)). (Adam)
+- Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
+  (Johannes)
+- Fixed bug #52237 (Crash when passing the reference of the property of a
+  non-object). (Dmitry)
+- Fixed bug #52163 (SplFileObject::fgetss() fails due to parameter that can't
+  be set). (Felipe)
+- Fixed bug #52162 (custom request header variables with numbers are removed). 
+  (Sriram Natarajan)
+- Fixed bug #52160 (Invalid E_STRICT redefined constructor error). (Felipe)
+- Fixed bug #52061 (memory_limit above 2G). (Felipe)
 - Fixed bug #52041 (Memory leak when writing on uninitialized variable returned
   from function). (Dmitry)
+- Fixed bug #52037 (Concurrent builds fail in install-programs). (seanius at 
+  debian dot org, Kalle)
 - Fixed bug #52019 (make lcov doesn't support TESTS variable anymore). (Patrick)
+- Fixed bug #52010 (open_basedir restrictions mismatch on vacuum command).
+  (Ilia, Felipe)
+- Fixed bug #51943 (AIX: Several files are out of ANSI spec). (Kalle, 
+  coreystup at gmail dot com)
 - Fixed bug #51911 (ReflectionParameter::getDefaultValue() memory leaks with
   constant array). (Felipe)
 - Fixed bug #51905 (ReflectionParameter fails if default value is an array
@@ -114,7 +95,8 @@ PHP                                                                        NEWS
   an invalid option is provided). (Ilia)
 - Fixed bug #51128 (imagefill() doesn't work with large images). (Pierre)
 - Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)
-- Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
+- Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris 
+  Jones)
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
   (Raphael Geissert)
 - Fixed bug #50762 (in WSDL mode Soap Header handler function only being called
@@ -123,6 +105,7 @@ PHP                                                                        NEWS
   endpoints). (Justin Dearing)
 - Fixed bug #50383 (Exceptions thrown in __call() / __callStatic() do not
   include file and line in trace). (Felipe)
+- Fixed bug #49730 (Firebird - new PDO() returns NULL). (Felipe)
 - Fixed bug #49723 (LimitIterator with empty SeekableIterator). (Etienne)
 - Fixed bug #49576 (FILTER_VALIDATE_EMAIL filter needs updating) (Rasmus)
 - Fixed bug #49320 (PDO returns null when SQLite connection fails). (Felipe)
@@ -131,6 +114,8 @@ PHP                                                                        NEWS
 - Fixed bug #48289 (iconv_mime_encode() quoted-printable scheme is broken).
   (Adam, patch from hiroaki dot kawai at gmail dot com).
 - Fixed bug #43314 (iconv_mime_encode(), broken Q scheme). (Rasmus)
+- Fixed bug #33210 (getimagesize() fails to detect width/height on certain 
+  JPEGs). (Ilia)
 - Fixed bug #23229 (syslog() truncates messages). (Adam)
 
 25 Feb 2010, PHP 5.2.13
