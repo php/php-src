@@ -2571,7 +2571,7 @@ static void php_lcfirst(char *str)
 }
 /* }}} */
 
-/* {{{ proto string ucfirst(string str)
+/* {{{ proto string lcfirst(string str)
    Make a string's first character lowercase */
 PHP_FUNCTION(lcfirst)
 {
