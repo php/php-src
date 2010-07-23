@@ -237,8 +237,6 @@ PHP                                                                        NEWS
   com, Pierre)
 - Fixed bug #50578 (incorrect shebang in phar.phar). (Fedora at FamilleCollet
   dot com)
-- Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications).
-  (Derick)
 - Fixed bug #50392 (date_create_from_format enforces 6 digits for 'u' format
   character). (Derick)
 - Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
@@ -246,6 +244,8 @@ PHP                                                                        NEWS
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
 - Fixed bug #50101 (name clash between global and local variable).
   (patch by yoarvi at gmail dot com)
+- Fixed bug #50055 (DateTime::sub() allows 'relative' time modifications).
+  (Derick)
 - Fixed bug #51002 (fix possible memory corruption with very long names).
   (Pierre)
 - Fixed bug #49893 (Crash while creating an instance of Zend_Mail_Storage_Pop3).
