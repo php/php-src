@@ -2832,7 +2832,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 
 		zval *value = *zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), opline->op2.zv, IS_CONST, BP_VAR_R TSRMLS_CC);
 
-		SELECTIVE_PZVAL_LOCK(value, opline);
+		PZVAL_LOCK(value);
 		AI_SET_PTR(&EX_T(opline->result.var), value);
 
 	}
@@ -7134,7 +7134,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 
 		zval *value = *zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), opline->op2.zv, IS_CONST, BP_VAR_R TSRMLS_CC);
 
-		SELECTIVE_PZVAL_LOCK(value, opline);
+		PZVAL_LOCK(value);
 		AI_SET_PTR(&EX_T(opline->result.var), value);
 
 	}
