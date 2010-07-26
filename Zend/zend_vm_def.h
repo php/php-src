@@ -1588,7 +1588,7 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_DIM_TMP_VAR, CONST|TMP, CONST)
 		zend_free_op free_op2;
 		zval *value = *zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
 
-		SELECTIVE_PZVAL_LOCK(value, opline);
+		PZVAL_LOCK(value);
 		AI_SET_PTR(&EX_T(opline->result.var), value);
 		FREE_OP2();
 	}
