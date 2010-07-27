@@ -2170,7 +2170,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	SAVE_OPLINE();
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
+	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr_ptr = NULL;
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			MAKE_STD_ZVAL(array_ptr);
@@ -3167,7 +3168,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -3230,7 +3233,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -4522,7 +4527,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -4585,7 +4592,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -5030,7 +5039,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -5093,7 +5104,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CONST == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -6430,7 +6443,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	SAVE_OPLINE();
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
+	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr_ptr = NULL;
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			MAKE_STD_ZVAL(array_ptr);
@@ -7380,7 +7394,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -7443,7 +7459,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -8699,7 +8717,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -8762,7 +8782,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -9094,7 +9116,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -9157,7 +9181,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_TMP_VAR == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -10707,7 +10733,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	SAVE_OPLINE();
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
+	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			MAKE_STD_ZVAL(array_ptr);
@@ -12951,7 +12978,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -13150,7 +13179,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -17101,7 +17132,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -17300,7 +17333,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -18313,7 +18348,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -18376,7 +18413,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_VAR == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -26355,7 +26394,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	SAVE_OPLINE();
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
+	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			MAKE_STD_ZVAL(array_ptr);
@@ -28239,7 +28279,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -28436,7 +28478,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_CONST == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -32136,7 +32180,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -32333,7 +32379,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_VAR == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
@@ -33229,7 +33277,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -33292,7 +33342,9 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (IS_CV == IS_CV &&
+	    IS_UNUSED == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {

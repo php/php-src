@@ -3751,7 +3751,9 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	if (OP1_TYPE == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (OP1_TYPE == IS_CV &&
+	    OP2_TYPE == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.var);
 
@@ -3955,7 +3957,8 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 
 	SAVE_OPLINE();
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
+	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
+	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
 		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			MAKE_STD_ZVAL(array_ptr);
@@ -4257,7 +4260,9 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	zend_bool isset = 1;
 
 	SAVE_OPLINE();
-	if (OP1_TYPE == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
+	if (OP1_TYPE == IS_CV &&
+	    OP2_TYPE == IS_UNUSED &&
+	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX_CV(opline->op1.var)) {
 			value = EX_CV(opline->op1.var);
 		} else if (EG(active_symbol_table)) {
