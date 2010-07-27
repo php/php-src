@@ -1,5 +1,7 @@
 
 #include <php_compat.h>
+#include <php_config.h>
+
 #undef PACKAGE_NAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_TARNAME
@@ -18,6 +20,8 @@
 # define PCRE_EXP_DATA_DEFN	__attribute__ ((visibility("default")))
 #endif
 
+/* Exclude these below definitions when building within PHP */
+#ifndef ZEND_API
 
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
@@ -188,6 +192,9 @@ them both to 0; an emulation function will be used. */
 
 /* Define to 1 if you have `_strtoi64'. */
 /* #undef HAVE__STRTOI64 */
+
+/* Exclude these above definitions when building within PHP */
+#endif
 
 /* The value of LINK_SIZE determines the number of bytes used to store links
    as offsets within the compiled regex. The default is 2, which allows for
