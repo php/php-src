@@ -5536,12 +5536,15 @@ void zend_do_unset(const znode *variable TSRMLS_DC) /* {{{ */
 		switch (last_op->opcode) {
 			case ZEND_FETCH_UNSET:
 				last_op->opcode = ZEND_UNSET_VAR;
+				SET_UNUSED(last_op->result);
 				break;
 			case ZEND_FETCH_DIM_UNSET:
 				last_op->opcode = ZEND_UNSET_DIM;
+				SET_UNUSED(last_op->result);
 				break;
 			case ZEND_FETCH_OBJ_UNSET:
 				last_op->opcode = ZEND_UNSET_OBJ;
+				SET_UNUSED(last_op->result);
 				break;
 
 		}
