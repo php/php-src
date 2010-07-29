@@ -1,6 +1,9 @@
 
 #include <php_compat.h>
-#include <php_config.h>
+
+#ifndef PHP_WIN32
+# include <php_config.h>
+#endif
 
 #undef PACKAGE_NAME
 #undef PACKAGE_VERSION
