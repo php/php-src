@@ -1887,7 +1887,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_INTO:
 			if (stmt->fetch.into) {
-				Z_DELREF_P(stmt->fetch.into);
+				zval_ptr_dtor(&stmt->fetch.into);
 				stmt->fetch.into = NULL;
 			}
 			break;
