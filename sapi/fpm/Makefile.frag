@@ -22,7 +22,7 @@ install-fpm: install-sapi
 
 	@$(INSTALL_DATA) sapi/fpm/php-fpm.conf $(INSTALL_ROOT)$(sysconfdir)/php-fpm.conf.default || :
 
-	@echo "Installing PHP FPM man page:      $(INSTALL_ROOT)$(mandir)/man1/"
-	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
-	@$(INSTALL_DATA) sapi/fpm/php-fpm.1 $(INSTALL_ROOT)$(mandir)/man1/php-fpm$(program_suffix).1
+	@echo "Installing PHP FPM man page:      $(INSTALL_ROOT)$(mandir)/man8/"
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man8
+	@$(INSTALL_DATA) sapi/fpm/php-fpm.8 $(INSTALL_ROOT)$(mandir)/man8/php-fpm$(program_suffix).8
 
