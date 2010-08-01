@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed bug #52487 (PDO::FETCH_INTO leaks memory). (Felipe)
 - Fixed bug #52484 (__set() ignores setting properties with empty names).
   (Felipe)
+- Fixed bug #52468 (wddx_deserialize corrupts integer field value when left
+  empty). (Felipe)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
 
