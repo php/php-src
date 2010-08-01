@@ -344,7 +344,7 @@ DOLLAR_CURLY "${"
 
 SECTION_RAW_CHARS [^\]\n\r]
 SINGLE_QUOTED_CHARS [^']
-RAW_VALUE_CHARS [^\n\r;]
+RAW_VALUE_CHARS [^\n\r;\000]
 
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
