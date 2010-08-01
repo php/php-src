@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
 - Fixed bug #52487 (PDO::FETCH_INTO leaks memory). (Felipe)
+- Fixed bug #52484 (__set() ignores setting properties with empty names).
+  (Felipe)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
 

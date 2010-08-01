@@ -340,7 +340,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__get != NULL) TSRMLS_CC);
 
 	if (!property_info || zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
-		zend_guard *guard;
+		zend_guard *guard = NULL;
 
 		if (zobj->ce->__get &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
@@ -373,6 +373,15 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 			}
 			zval_ptr_dtor(&object);
 		} else {
+			if (zobj->ce->__get && guard && guard->in_get == 1) {
+				if (Z_STRVAL_P(member)[0] == '\0') {
+					if (Z_STRLEN_P(member) == 0) {
+						zend_error(E_ERROR, "Cannot access empty property");
+					} else {
+						zend_error(E_ERROR, "Cannot access property started with '\\0'");
+					}
+				}
+			}
 			if (!silent) {
 				zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
 			}
@@ -437,7 +446,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		}
 	} else {
 		int setter_done = 0;
-		zend_guard *guard;
+		zend_guard *guard = NULL;
 
 		if (zobj->ce->__set &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
@@ -460,6 +469,14 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				SEPARATE_ZVAL(&value);
 			}
 			zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
+		} else if (zobj->ce->__set && guard && guard->in_set == 1) {
+			if (Z_STRVAL_P(member)[0] == '\0') {
+				if (Z_STRLEN_P(member) == 0) {
+					zend_error(E_ERROR, "Cannot access empty property");
+				} else {
+					zend_error(E_ERROR, "Cannot access property started with '\\0'");
+				}
+			}
 		}
 	}
 
@@ -619,7 +636,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__unset != NULL) TSRMLS_CC);
 
 	if (!property_info || zend_hash_quick_del(zobj->properties, property_info->name, property_info->name_length+1, property_info->h) == FAILURE) {
-		zend_guard *guard;
+		zend_guard *guard = NULL;
 
 		if (zobj->ce->__unset &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
@@ -630,6 +647,14 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{
 			zend_std_call_unsetter(object, member TSRMLS_CC);
 			guard->in_unset = 0;
 			zval_ptr_dtor(&object);
+		} else if (zobj->ce->__unset && guard && guard->in_unset == 1) {
+			if (Z_STRVAL_P(member)[0] == '\0') {
+				if (Z_STRLEN_P(member) == 0) {
+					zend_error(E_ERROR, "Cannot access empty property");
+				} else {
+					zend_error(E_ERROR, "Cannot access property started with '\\0'");
+				}
+			}
 		}
 	}
 
