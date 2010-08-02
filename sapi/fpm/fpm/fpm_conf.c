@@ -204,7 +204,7 @@ static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 
-	if (!strcmp(val, "debug")) {
+	if (!strcasecmp(val, "debug")) {
 		fpm_globals.log_level = ZLOG_DEBUG;
 	} else if (!strcasecmp(val, "notice")) {
 		fpm_globals.log_level = ZLOG_NOTICE;
@@ -227,7 +227,7 @@ static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offse
 	char *val = Z_STRVAL_P(value);
 	struct fpm_worker_pool_config_s *c = *config;
 
-	if (!strcmp(val, "unlimited")) {
+	if (!strcasecmp(val, "unlimited")) {
 		c->rlimit_core = -1;
 	} else {
 		int int_value;
@@ -255,9 +255,9 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 {
 	char *val = Z_STRVAL_P(value);
 	struct fpm_worker_pool_config_s  *c = *config;
-	if (!strcmp(val, "static")) {
+	if (!strcasecmp(val, "static")) {
 		c->pm = PM_STYLE_STATIC;
-	} else if (!strcmp(val, "dynamic")) {
+	} else if (!strcasecmp(val, "dynamic")) {
 		c->pm = PM_STYLE_DYNAMIC;
 	} else {
 		return "invalid process manager (static or dynamic)";
