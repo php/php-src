@@ -212,7 +212,8 @@ pm.max_children = 50
 ;request_slowlog_timeout = 0
  
 ; The log file for slow requests
-; Default Value: @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow
+; Default Value: not set
+; Note: slowlog is mandatory if request_slowlog_timeout is set
 ;slowlog = @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow
  
 ; Set open file descriptor rlimit.
