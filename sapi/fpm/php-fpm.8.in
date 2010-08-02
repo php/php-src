@@ -82,7 +82,7 @@ Version number
 .B \-\-fpm\-config \fIfile\fP
 .TP
 .PD 1
-.B \-\-y
+.B \-y
 Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_sysconfdir@/php-fpm.conf)
 .TP
 .PD 0
