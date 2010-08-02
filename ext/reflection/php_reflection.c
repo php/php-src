@@ -2378,6 +2378,9 @@ ZEND_METHOD(reflection_parameter, isInt)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_LONG);
@@ -2391,6 +2394,9 @@ ZEND_METHOD(reflection_parameter, isDouble)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_DOUBLE);
@@ -2404,6 +2410,9 @@ ZEND_METHOD(reflection_parameter, isBool)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_BOOL);
@@ -2417,6 +2426,9 @@ ZEND_METHOD(reflection_parameter, isObject)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_OBJECT);
@@ -2430,6 +2442,9 @@ ZEND_METHOD(reflection_parameter, isString)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_STRING);
@@ -2443,6 +2458,9 @@ ZEND_METHOD(reflection_parameter, isResource)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->type_hint == IS_RESOURCE);
@@ -2456,6 +2474,9 @@ ZEND_METHOD(reflection_parameter, getTypeHint)
 	reflection_object *intern;
 	parameter_reference *param;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->arg_info->type_hint) {
