@@ -353,7 +353,7 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
-		smart_str_append_long(buf, hash_key->h);
+		smart_str_append_long(buf, (long) hash_key->h);
 		smart_str_appendl(buf, " => ", 4);
 	} else { /* string key */
 		char *key, *tmp_str;

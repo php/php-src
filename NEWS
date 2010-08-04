@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Fixed bug #52534 (var_export array with negative key). (Felipe)
 - Fixed bug #52508 (newline problem with parse_ini_file+INI_SCANNER_RAW).
   (Felipe)
 - Fixed bug #52487 (PDO::FETCH_INTO leaks memory). (Felipe)
