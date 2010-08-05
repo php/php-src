@@ -301,7 +301,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			efree(ce->name);
+			if (!IS_INTERNED(ce->name)) {
+				efree(ce->name);
+			}
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -335,7 +337,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			free(ce->name);
+			if (!IS_INTERNED(ce->name)) {
+				free(ce->name);
+			}
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {

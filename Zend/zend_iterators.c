@@ -51,8 +51,6 @@ static zend_object_handlers iterator_object_handlers = {
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
-	free(zend_iterator_class_entry.name);
-	zend_iterator_class_entry.name = "__iterator_wrapper";
 }
 
 static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)

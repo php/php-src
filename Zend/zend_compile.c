@@ -4486,8 +4486,8 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	new_class_entry = emalloc(sizeof(zend_class_entry));
 	new_class_entry->type = ZEND_USER_CLASS;
-	new_class_entry->name = class_name->u.constant.value.str.val;
-	new_class_entry->name_length = class_name->u.constant.value.str.len;
+	new_class_entry->name = zend_new_interned_string(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant) + 1, 1 TSRMLS_CC);
+	new_class_entry->name_length = Z_STRLEN(class_name->u.constant);
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->filename = zend_get_compiled_filename(TSRMLS_C);
