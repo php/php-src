@@ -86,6 +86,9 @@ PHP                                                                        NEWS
     functions. (Kalle)
   . y2k_compliance ini option. (Kalle)
 
+- Removed support for linking against MySQL client libraries older 4.1 from
+  PDO_mysql. (Johannes)
+
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
 - Implemented FR #48632 (OpenSSL AES support). (yonas dot y
    at gmail dot com, Pierre)

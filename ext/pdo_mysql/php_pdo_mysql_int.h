@@ -124,7 +124,6 @@ typedef struct {
 	long			*current_lengths;
 #endif
 	pdo_mysql_error_info einfo;
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 #if PDO_USE_MYSQLND
 	MYSQLND_STMT 		*stmt;
 #else
@@ -141,7 +140,6 @@ typedef struct {
 	unsigned long		*out_length;
 	unsigned int		params_given;
 	unsigned		max_length:1;
-#endif
 } pdo_mysql_stmt;
 
 extern pdo_driver_t pdo_mysql_driver;
