@@ -55,5 +55,10 @@ Disallow: /source.php
 Disallow: /search.php
 Disallow: /mod.php
 Disallow: /manual/add-note.php
+
+Disallow: /harming/humans
+Disallow: /ignoring/human/orders
+Disallow: /harm/to/self
+
 CURL2
 
