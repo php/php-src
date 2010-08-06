@@ -691,10 +691,10 @@ PHP_FUNCTION(log)
 		RETURN_FALSE;
 	}
 	if (base == 1) {
-                RETURN_DOUBLE(NAN);
+		RETURN_DOUBLE(NAN);
 	} else {
-        	RETURN_DOUBLE(log(num) / log(base));
-        }
+		RETURN_DOUBLE(log(num) / log(base));
+	}
 }
 /* }}} */
 
