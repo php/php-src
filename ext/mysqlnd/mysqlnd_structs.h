@@ -400,7 +400,7 @@ typedef enum_func_status	(*func_mysqlnd_conn__restart_psession)(MYSQLND *conn TS
 typedef enum_func_status	(*func_mysqlnd_conn__end_psession)(MYSQLND *conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__send_close)(MYSQLND * conn TSRMLS_DC);
 
-typedef void				(*func_mysqlnd_conn__ssl_set)(MYSQLND * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher TSRMLS_DC);
+typedef enum_func_status    (*func_mysqlnd_conn__ssl_set)(MYSQLND * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher TSRMLS_DC);
 
 typedef MYSQLND_RES * 		(*func_mysqlnd_conn__result_init)(unsigned int field_count, zend_bool persistent TSRMLS_DC);
 
