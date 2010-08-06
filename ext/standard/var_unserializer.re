@@ -231,7 +231,7 @@ static inline long parse_iv2(const unsigned char *p, const unsigned char **q)
 	while (1) {
 		cursor = (char)*p;
 		if (cursor >= '0' && cursor <= '9') {
-			result = result * 10 + cursor - '0';
+			result = result * 10 + (size_t)(cursor - (unsigned char)'0');
 		} else {
 			break;
 		}
