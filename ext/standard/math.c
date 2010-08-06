@@ -691,7 +691,7 @@ PHP_FUNCTION(log)
 		RETURN_FALSE;
 	}
 	if (base == 1) {
-		RETURN_DOUBLE(NAN);
+		RETURN_DOUBLE(php_get_nan());
 	} else {
 		RETURN_DOUBLE(log(num) / log(base));
 	}
