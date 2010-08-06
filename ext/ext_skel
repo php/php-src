@@ -187,8 +187,8 @@ if (PHP_$EXTNAME != "no") {
 
 eof
 
-$ECHO_N " .cvsignore$ECHO_C"
-cat >.cvsignore <<eof
+$ECHO_N " .svnignore$ECHO_C"
+cat >.svnignore <<eof
 .deps
 *.lo
 *.la
