@@ -4870,7 +4870,7 @@ PHP_FUNCTION(str_pad)
 	long pad_length;			/* Length to pad to */
 	
 	/* Helper variables */
-	int	   num_pad_chars;		/* Number of padding characters (total - input size) */
+	size_t	   num_pad_chars;		/* Number of padding characters (total - input size) */
 	char  *result = NULL;		/* Resulting string */
 	int	   result_len = 0;		/* Length of the resulting string */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
@@ -4883,11 +4883,9 @@ PHP_FUNCTION(str_pad)
 		return;
 	}
 
-	num_pad_chars = pad_length - input_len;
-
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length <= 0 || num_pad_chars <= 0) {
+	if (pad_length <= 0 || (pad_length - input_len) <= 0) {
 		RETURN_STRINGL(input, input_len, 1);
 	}
 
@@ -4901,6 +4899,11 @@ PHP_FUNCTION(str_pad)
 		return;
 	}
 
+	num_pad_chars = pad_length - input_len;
+	if (num_pad_chars >= INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding length is too long");
+		return;	
+	}
 	result = (char *)emalloc(input_len + num_pad_chars + 1);
 
 	/* We need to figure out the left/right padding lengths. */
