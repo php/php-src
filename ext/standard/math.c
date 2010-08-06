@@ -690,7 +690,11 @@ PHP_FUNCTION(log)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "base must be greater than 0");				
 		RETURN_FALSE;
 	}
-	RETURN_DOUBLE(log(num) / log(base));
+	if (base == 1) {
+                RETURN_DOUBLE(NAN);
+	} else {
+        	RETURN_DOUBLE(log(num) / log(base));
+        }
 }
 /* }}} */
 
