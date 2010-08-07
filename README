@@ -1,0 +1,12 @@
+The OCI8 Extension
+------------------
+
+The OCI8 extension allows PHP to access Oracle databases.  It can be
+built using Oracle 9.2, 10, or 11 client libraries. It allows Oracle's
+standard cross-version connectivity, for example PHP using Oracle 10.2
+libraries can connect to Oracle Database 9.2 onwards.
+
+This release of OCI8 can be used with PHP versions 4.3.9 to 5.x.
+
+OCI8 installation instructions and documentation is available at
+http://www.php.net/oci8
