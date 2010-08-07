@@ -37,8 +37,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <time>15:00:00</time>
 
  <version>
-  <release>1.4.2</release>
-  <api>1.4.2</api>
+  <release>1.4.3</release>
+  <api>1.4.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,12 +46,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-    Fixed bug #52186 (phpinfo() shows 10.1 or 11.1 when installed with ORACLE_HOME 10.2 or 11.2)
-    Fixed bug #51691 (Unnecessary realloc causes crashes in PHP trunk tests with interned strings)
-    Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
-    Fixed bug #51291 (oci_error doesn't report last error when called two times)
-
-    OCI8 1.4.2 is included in PHP 5.3.3
+    Fixed bug #51610 (Using oci_connect causes PHP to take a long time to exit). Requires Oracle bug fix 9891199 for this patch to have an effect.
  </notes>
  <contents>
   <dir name="/">
@@ -380,6 +375,26 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.2</release>
+  <api>1.4.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #52186 (phpinfo() shows 10.1 or 11.1 when installed with ORACLE_HOME 10.2 or 11.2)
+    Fixed bug #51691 (Unnecessary realloc causes crashes in PHP trunk tests with interned strings)
+    Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
+    Fixed bug #51291 (oci_error doesn't report last error when called two times)
+
+    OCI8 1.4.2 is included in PHP 5.3.3
+ </notes>
+</release>
 
 <release>
  <version>

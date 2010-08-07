@@ -2701,20 +2701,6 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
 		iserror = 1;
-		goto exit_create_spool;
-	}
-
-	/* Set the session pool's timeout to the oci8.persistent_timeout param */
-	if (OCI_G(persistent_timeout)) {
-		ub4 timeout = OCI_G(persistent_timeout);
-
-		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) session_pool->poolh, (ub4) OCI_HTYPE_SPOOL, (void *) &timeout, (ub4) sizeof(timeout), (ub4) OCI_ATTR_SPOOL_TIMEOUT, OCI_G(err)));
-
-		if (OCI_G(errcode) != OCI_SUCCESS) {
-			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
-			iserror = 1;
-			goto exit_create_spool;
-		}
 	}
 
 exit_create_spool:

@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   empty). (Felipe)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
+- Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
+  exit). Requires Oracle bug fix 9891199 for this patch to have an
+  effect. (Oracle Corp.)
 
 22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
