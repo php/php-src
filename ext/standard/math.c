@@ -29,6 +29,8 @@
 #include <float.h>
 #include <stdlib.h>
 
+#include "basic_functions.h"
+
 /* {{{ php_intlog10abs
    Returns floor(log10(fabs(val))), uses fast binary search */
 static inline int php_intlog10abs(double value) {
@@ -127,7 +129,11 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	double tmp_value;
 	int precision_places;
 
-	precision_places = 14 - php_intlog10abs(value);
+	if ((precision_places = php_intlog10abs(value)) > 0) {
+		precision_places = 14 - php_intlog10abs(value);
+	} else {
+		precision_places = 14;
+	}
 
 	f1 = php_intpow10(abs(places));
 
