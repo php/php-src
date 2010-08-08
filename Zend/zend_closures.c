@@ -416,6 +416,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			zend_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_apply_with_arguments(static_variables TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, closure->func.op_array.static_variables);
 		}
+		closure->func.op_array.run_time_cache = NULL;
 		(*closure->func.op_array.refcount)++;
 	} else {
 		/* verify that we aren't binding internal function to a wrong scope */
