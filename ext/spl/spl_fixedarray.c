@@ -159,6 +159,9 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 				zend_hash_index_update(ht, i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
 				Z_ADDREF_P(intern->array->elements[i]);
 			} else {
+				if (GC_G(gc_active)) {
+					return NULL;
+				}
 				zend_hash_index_update(ht, i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
 				Z_ADDREF_P(EG(uninitialized_zval_ptr));
 			}
