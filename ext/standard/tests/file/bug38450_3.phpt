@@ -102,4 +102,4 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Catchable fatal error: Argument 1 passed to VariableStream::__construct() must be an array, none given in %s on line %d
+Catchable fatal error: Argument 1 passed to VariableStream::__construct() must be of the type array, none given in %s on line %d
