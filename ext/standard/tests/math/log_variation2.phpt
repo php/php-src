@@ -94,7 +94,7 @@ Warning: log(): base must be greater than 0 in %s on line %d
 bool(false)
 
 -- Iteration 2 --
-float(INF)
+float(NAN)
 
 -- Iteration 3 --
 float(0.12145441273706)
@@ -135,7 +135,7 @@ Warning: log(): base must be greater than 0 in %s on line %d
 bool(false)
 
 -- Iteration 13 --
-float(INF)
+float(NAN)
 
 -- Iteration 14 --
 
@@ -143,7 +143,7 @@ Warning: log(): base must be greater than 0 in %s on line %d
 bool(false)
 
 -- Iteration 15 --
-float(INF)
+float(NAN)
 
 -- Iteration 16 --
 
