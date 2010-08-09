@@ -28,6 +28,7 @@ PHP_FUNCTION(setcookie);
 PHP_FUNCTION(setrawcookie);
 PHP_FUNCTION(headers_sent);
 PHP_FUNCTION(headers_list);
+PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(TSRMLS_D);
 PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);

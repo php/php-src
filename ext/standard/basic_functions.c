@@ -1470,6 +1470,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_headers_list, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_http_response_code, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ html.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
@@ -2983,6 +2986,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(header_remove,													arginfo_header_remove)
 	PHP_FE(headers_sent,													arginfo_headers_sent)
 	PHP_FE(headers_list,													arginfo_headers_list)
+	PHP_FE(http_response_code,												arginfo_http_response_code)
 
 	PHP_FE(connection_aborted,												arginfo_connection_aborted)
 	PHP_FE(connection_status,												arginfo_connection_status)
