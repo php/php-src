@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
@@ -89,6 +89,7 @@ PHP                                                                        NEWS
 - Removed support for linking against MySQL client libraries older 4.1 from
   PDO_mysql. (Johannes)
 
+- Implemented FR #52555 (Ability to get HTTP response code). (Paul Dragoonis)
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
 - Implemented FR #48632 (OpenSSL AES support). (yonas dot y
    at gmail dot com, Pierre)

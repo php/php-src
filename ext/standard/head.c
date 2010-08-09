@@ -281,6 +281,18 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
+/* {{{ proto long http_response_code()
+   Returns the current HTTP response code */
+PHP_FUNCTION(http_response_code)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(SG(sapi_headers).http_response_code);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
