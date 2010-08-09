@@ -70,13 +70,9 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 	ret = CryptGenRandom(hCryptProv, size, buf);
 	CryptReleaseContext(hCryptProv, 0);
 	if (ret) {
-		while (i < size && buf[i] != 0) {
-			i++;
-		}
-		if (i == size) {
-			return SUCCESS;
-		}
+		return SUCCESS;
+	} else {
+		return FAILURE;
 	}
-	return FAILURE;
 }
 /* }}} */
