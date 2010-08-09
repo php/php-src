@@ -2116,10 +2116,17 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			DBG_INF_FMT("charset=%s", conn->options.charset_name);
 			break;
 		}
+		case MYSQL_OPT_NAMED_PIPE:
+			conn->options.protocol = MYSQL_PROTOCOL_PIPE;
+			break;
+		case MYSQL_OPT_PROTOCOL:
+			if (*(unsigned int*) value < MYSQL_PROTOCOL_LAST) {
+				conn->options.protocol = *(unsigned int*) value;
+			}
+			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SET_CHARSET_DIR:
 		case MYSQL_OPT_RECONNECT:
-		case MYSQL_OPT_PROTOCOL:
 			/* we don't need external character sets, all character sets are
 			   compiled in. For compatibility we just ignore this setting.
 			   Same for protocol, we don't support old protocol */
@@ -2131,7 +2138,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 #endif
 
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_OPT_NAMED_PIPE:
 		case MYSQL_SHARED_MEMORY_BASE_NAME:
 		case MYSQL_OPT_USE_RESULT:
 		case MYSQL_SECURE_AUTH:
