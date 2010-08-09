@@ -1567,8 +1567,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 	DBG_ENTER("mysqlnd_res::fetch_all");
 	DBG_INF_FMT("flags=%u", flags);
 
-	/* mysqlnd_res::fetch_all works with buffered resultsets only */
-	if (result->unbuf || (!result->unbuf && !set)) {
+	if ((!result->unbuf && !set)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fetch_all can be used only with buffered sets");
 		if (result->conn) {
 			SET_CLIENT_ERROR(result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
@@ -1577,19 +1576,17 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 		DBG_VOID_RETURN;
 	}
 
-	mysqlnd_array_init(return_value, (unsigned int) set->row_count);
+	mysqlnd_array_init(return_value, (unsigned int) set? set->row_count : 4); /* 4 is a magic value */
 
-	if (!set->row_count || !set->data_cursor || set->data_cursor >= set->data + set->row_count) {
-		DBG_VOID_RETURN;
-	}	
-
-	while (set->data_cursor &&
-		   (set->data_cursor - set->data) < (set->row_count * result->meta->field_count))
-	{
+	do {
 		MAKE_STD_ZVAL(row);
 		mysqlnd_fetch_into(result, flags, row, MYSQLND_MYSQLI);
+		if (Z_TYPE_P(row) != IS_ARRAY) {
+			zval_ptr_dtor(&row);
+			break;
+		}
 		add_index_zval(return_value, i++, row);
-	}
+	} while (1);
 
 	DBG_VOID_RETURN;
 }
