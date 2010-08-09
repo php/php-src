@@ -161,7 +161,7 @@ typedef struct st_mysqlnd_options
 	char		* unused3;
 	char		* unused4;
 	char		* unused5;
-	zend_bool	unused6;
+	enum_mysqlnd_protocol_type protocol;
 
 	char 		*charset_name;
 	/* maximum allowed packet size for communication */
