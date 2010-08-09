@@ -76,7 +76,7 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 		if (i == size) {
 			return SUCCESS;
 		}
-   }
+	}
 	return FAILURE;
 }
 /* }}} */
