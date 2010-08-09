@@ -228,11 +228,12 @@ UPGRADE NOTES - PHP X.Y
      e. New functions
 
        - Core:
+         - get_declared_traits()
+         - http_response_code()
 
      f. New global constants
 
-       - Core:
-         - get_declared_traits()
+       - 
 
      g. New classes
 
