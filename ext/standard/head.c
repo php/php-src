@@ -289,6 +289,10 @@ PHP_FUNCTION(http_response_code)
 		return;
 	}
 
+	if (!SG(sapi_headers).http_response_code) {
+		RETURN_FALSE;
+	}
+
 	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
 /* }}} */
