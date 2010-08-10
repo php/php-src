@@ -1206,17 +1206,18 @@ function gen_vm($def, $skel) {
 	out($f, "#ifdef ZEND_WIN32\n# pragma warning(once : 4101)\n#endif\n");
 	
 	// Support for ZEND_USER_OPCODE
-	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {");
+	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");
 	for ($i = 0; $i < 255; ++$i) {
-		out($f, "(user_opcode_handler_t)NULL,");
+		out($f, "\t(user_opcode_handler_t)NULL,\n");
 	}
-	out($f, "(user_opcode_handler_t)NULL};\n\n");
+	out($f, "\t(user_opcode_handler_t)NULL\n};\n\n");
 
 	out($f, "static zend_uchar zend_user_opcodes[256] = {");
 	for ($i = 0; $i < 255; ++$i) {
+		if ($i % 16 == 1) out($f, "\n\t");
 		out($f, "$i,");
 	}
-	out($f, "255};\n\n");
+	out($f, "255\n};\n\n");
 
 	// Generate specialized executor
 	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_init_opcodes_handlers", 0);
