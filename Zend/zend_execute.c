@@ -819,7 +819,6 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 static inline zval* zend_assign_tmp_to_variable(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
-	zval garbage;
 
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
@@ -828,12 +827,12 @@ static inline zval* zend_assign_tmp_to_variable(zval **variable_ptr_ptr, zval *v
 	}
 
  	if (EXPECTED(!PZVAL_IS_REF(variable_ptr))) {
-		if (Z_DELREF_P(variable_ptr)==0) {
-			ZVAL_COPY_VALUE(&garbage, variable_ptr);
-			INIT_PZVAL_COPY(variable_ptr, value);
-			zendi_zval_dtor(garbage);
+		if (Z_REFCOUNT_P(variable_ptr)==1) {
+			zendi_zval_dtor(*variable_ptr);
+			ZVAL_COPY_VALUE(variable_ptr, value);
 			return variable_ptr;
 		} else { /* we need to split */
+			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			ALLOC_ZVAL(variable_ptr);
 			INIT_PZVAL_COPY(variable_ptr, value);
@@ -841,11 +840,8 @@ static inline zval* zend_assign_tmp_to_variable(zval **variable_ptr_ptr, zval *v
 			return variable_ptr;
 		}
  	} else {
-		if (EXPECTED(variable_ptr != value)) {
-			ZVAL_COPY_VALUE(&garbage, variable_ptr);
-			ZVAL_COPY_VALUE(variable_ptr, value);
-			zendi_zval_dtor(garbage);
-		}
+		zendi_zval_dtor(*variable_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, value);
 		return variable_ptr;
 	}
 }
@@ -863,17 +859,17 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 	}
 
  	if (EXPECTED(!PZVAL_IS_REF(variable_ptr))) {
-		if (Z_DELREF_P(variable_ptr)==0) {
+		if (Z_REFCOUNT_P(variable_ptr)==1) {
 			if (variable_ptr==value) {
-				Z_ADDREF_P(variable_ptr);
 				return variable_ptr;
 			} else if (PZVAL_IS_REF(value)) {
 				ZVAL_COPY_VALUE(&garbage, variable_ptr);
-				INIT_PZVAL_COPY(variable_ptr, value);
+				ZVAL_COPY_VALUE(variable_ptr, value);
 				zval_copy_ctor(variable_ptr);
 				zendi_zval_dtor(garbage);
 				return variable_ptr;
 			} else {
+				Z_DELREF_P(variable_ptr);
 				Z_ADDREF_P(value);
 				*variable_ptr_ptr = value;
 				if (variable_ptr != &EG(uninitialized_zval)) {
@@ -884,6 +880,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				return value;
 			}
 		} else { /* we need to split */
+			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
 				ALLOC_ZVAL(variable_ptr);
