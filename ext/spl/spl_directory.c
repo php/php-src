@@ -1862,7 +1862,11 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	
-	ZVAL_ZVAL(return_value, retval, 1, 1);
+	if (result == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		ZVAL_ZVAL(return_value, retval, 1, 1);
+	}
 
 	efree(params);
 	return result;

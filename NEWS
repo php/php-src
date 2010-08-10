@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Fixed bug #52573 (SplFileObject::fscanf Segmentation fault). (Felipe)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe)
 - Fixed bug #52534 (var_export array with negative key). (Felipe)
