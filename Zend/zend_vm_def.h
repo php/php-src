@@ -3389,7 +3389,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			CACHE_PTR(opline->op2.literal->cache_slot, c);
 		}
 		retval = &EX_T(opline->result.var).tmp_var;
-		INIT_PZVAL_COPY(retval, &c->value);
+		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();

@@ -3276,7 +3276,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			CACHE_PTR(opline->op2.literal->cache_slot, c);
 		}
 		retval = &EX_T(opline->result.var).tmp_var;
-		INIT_PZVAL_COPY(retval, &c->value);
+		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -13086,7 +13086,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			CACHE_PTR(opline->op2.literal->cache_slot, c);
 		}
 		retval = &EX_T(opline->result.var).tmp_var;
-		INIT_PZVAL_COPY(retval, &c->value);
+		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -21675,7 +21675,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			CACHE_PTR(opline->op2.literal->cache_slot, c);
 		}
 		retval = &EX_T(opline->result.var).tmp_var;
-		INIT_PZVAL_COPY(retval, &c->value);
+		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
