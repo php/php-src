@@ -2083,7 +2083,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 		/* This is not too nice, but since its the only one theres no need for extra stuff here */
 		if (cfg_get_long("zend.ze1_compatibility_mode", &val) == SUCCESS && val) {
-			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
+			zend_error(E_CORE_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
 		}
 	}
 	
