@@ -1044,12 +1044,15 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 				p = &class_type->default_static_members_table[i];
 				if (Z_ISREF_PP(p) &&
 					class_type->parent &&
-					class_type->parent->default_static_members_count < i &&
-					*p == class_type->parent->default_static_members_table[i]
+					i < class_type->parent->default_static_members_count &&
+					*p == class_type->parent->default_static_members_table[i] &&
+					CE_STATIC_MEMBERS(class_type->parent)[i]
 				) {
-					Z_ADDREF_PP(p);
-					Z_SET_ISREF_PP(p);
-					CE_STATIC_MEMBERS(class_type)[i] = *p;
+					zval *q = CE_STATIC_MEMBERS(class_type->parent)[i];
+
+					Z_ADDREF_P(q);
+					Z_SET_ISREF_P(q);
+					CE_STATIC_MEMBERS(class_type)[i] = q;
 				} else {
 					zval *r;
 
