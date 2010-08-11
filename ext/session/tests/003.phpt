@@ -28,7 +28,7 @@ var_dump($baz);
 var_dump($arr);
 session_destroy();
 --EXPECT--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Deprecated: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 object(foo)#1 (2) {
   ["bar"]=>
   string(2) "ok"

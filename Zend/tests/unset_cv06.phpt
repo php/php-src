@@ -19,7 +19,7 @@ echo $x;
 echo "ok\n";
 ?>
 --EXPECTF--
-Warning: Directive 'register_globals' is deprecated in PHP %d.%d and greater in Unknown on line 0
+Deprecated: Directive 'register_globals' is deprecated in PHP %d.%d and greater in Unknown on line 0
 1
 
 Deprecated: Function session_register() is deprecated in %s on line %d

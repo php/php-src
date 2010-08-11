@@ -2076,7 +2076,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 		while (*p) {
 			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_WARNING, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
+				zend_error(E_DEPRECATED, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
 			}
 			++p;
 		}
