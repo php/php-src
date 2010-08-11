@@ -2817,6 +2817,26 @@ static int inherit_static_prop(zval **p TSRMLS_DC, int num_args, va_list args, c
 }
 /* }}} */
 
+#ifdef ZTS
+static void zval_internal_ctor(zval **p) /* {{{ */
+{
+	zval *orig_ptr = *p;
+
+	ALLOC_ZVAL(*p);
+	**p = *orig_ptr;
+	zval_copy_ctor(*p);
+	Z_SET_REFCOUNT_PP(p, 1);
+	Z_UNSET_ISREF_PP(p);
+}
+/* }}} */
+
+# define zval_property_ctor(parent_ce, ce) \
+	((void (*)(void *)) (((parent_ce)->type != (ce)->type) ? zval_internal_ctor : zval_add_ref))
+#else
+# define zval_property_ctor(parent_ce, ce) \
+	((void (*)(void *)) zval_add_ref)
+#endif
+
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
@@ -2840,7 +2860,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_do_inherit_interfaces(ce, parent_ce TSRMLS_CC);
 
 	/* Inherit properties */
-	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
+	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, zval_property_ctor(parent_ce, ce), NULL, sizeof(zval *), 0);
 	if (parent_ce->type != ce->type) {
 		/* User class extends internal class */
 		zend_update_class_constants(parent_ce  TSRMLS_CC);
@@ -2850,7 +2870,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
-	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
+	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, zval_property_ctor(parent_ce, ce), NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
 
