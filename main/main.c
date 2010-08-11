@@ -2103,7 +2103,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 			const char *directives[13]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
-				E_CORE_WARNING, 
+				E_DEPRECATED, 
 				"Directive '%s' is deprecated in PHP 5.3 and greater", 
 				{
 					"magic_quotes_gpc", 
