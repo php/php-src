@@ -91,7 +91,7 @@ var_dump($res);
 ?>
 ===DONE===
 --EXPECTF--
-Warning: Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Deprecated: Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing parse_str() : basic functionality ***
 
 Test string with array values
