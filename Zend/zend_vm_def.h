@@ -1685,8 +1685,10 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -1739,8 +1741,10 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (IS_OP2_TMP_FREE()) {
+		if (OP2_TYPE == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (OP2_TYPE == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}

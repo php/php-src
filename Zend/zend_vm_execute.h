@@ -12782,8 +12782,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -12836,8 +12838,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_CONST == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_CONST == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -14917,8 +14921,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -14971,8 +14977,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (1) {
+		if (IS_TMP_VAR == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_TMP_VAR == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -16970,8 +16978,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -17024,8 +17034,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_VAR == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_VAR == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -18383,8 +18395,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -20001,8 +20015,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -20055,8 +20071,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_CV == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_CV == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -28290,8 +28308,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -28344,8 +28364,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_CONST == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_CONST == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -30208,8 +30230,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -30262,8 +30286,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (1) {
+		if (IS_TMP_VAR == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_TMP_VAR == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -32135,8 +32161,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -32189,8 +32217,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_VAR == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_VAR == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
@@ -33425,8 +33455,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -34924,8 +34956,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 				AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 			}
 		} else {
-			if (IS_TMP_FREE(free_op_data1)) {
+			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+			} else if ((opline+1)->op1_type == IS_CONST) {
+			 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			} else {
 			 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 			}
@@ -34978,8 +35012,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 		}
 	} else {
-		if (0) {
+		if (IS_CV == IS_TMP_VAR) {
 		 	value = zend_assign_tmp_to_variable(variable_ptr_ptr, value TSRMLS_CC);
+		} else if (IS_CV == IS_CONST) {
+		 	value = zend_assign_const_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value TSRMLS_CC);
 		}
