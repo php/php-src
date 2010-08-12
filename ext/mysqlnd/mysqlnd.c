@@ -550,7 +550,7 @@ mysqlnd_connect_run_authentication(
 err:
 	PACKET_FREE(auth_packet);
 	PACKET_FREE(ok_packet);
-	DBG_RETURN(ret);	
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -769,13 +769,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 				spprintf(&p, 0, "%s via TCP/IP", conn->host);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
-					goto err; /* OOM */		
+					goto err; /* OOM */
 				}
 				conn->host_info =  mnd_pestrdup(p, conn->persistent);
 				efree(p); /* allocated by spprintf */
 				if (!conn->host_info) {
 					SET_OOM_ERROR(conn->error_info);
-					goto err; /* OOM */		
+					goto err; /* OOM */
 				}
 			}
 		} else {
@@ -783,7 +783,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			if (!conn->unix_socket || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
-				goto err; /* OOM */			
+				goto err; /* OOM */
 			}
 			conn->unix_socket_len = strlen(conn->unix_socket);
 		}
@@ -1211,7 +1211,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 		/* OOM */
 		SET_OOM_ERROR(conn->error_info);
 		result->m.free_result(result, TRUE TSRMLS_CC);
-		DBG_RETURN(NULL);	
+		DBG_RETURN(NULL);
 	}
 	result->unbuf->eof_reached = TRUE;
 
@@ -1287,8 +1287,7 @@ MYSQLND_METHOD(mysqlnd_conn, sqlstate)(const MYSQLND * const conn TSRMLS_DC)
 PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_old_escape_string");
-	DBG_RETURN(mysqlnd_cset_escape_slashes(mysqlnd_find_charset_name("latin1"),
-										   newstr, escapestr, escapestr_len TSRMLS_CC));
+	DBG_RETURN(mysqlnd_cset_escape_slashes(mysqlnd_find_charset_name("latin1"), newstr, escapestr, escapestr_len TSRMLS_CC));
 }
 /* }}} */
 
@@ -1438,8 +1437,7 @@ MYSQLND_METHOD(mysqlnd_conn, kill)(MYSQLND * conn, unsigned int pid TSRMLS_DC)
 		  a protocol of giving back -1. Thus we have to follow it :(
 		*/
 		SET_ERROR_AFF_ROWS(conn);
-	} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff,
-													 4, PROT_LAST, FALSE, TRUE TSRMLS_CC))) {
+	} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE TSRMLS_CC))) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 	}
 	DBG_RETURN(ret);
@@ -1983,7 +1981,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 				PACKET_FREE(redundant_error_packet);
 				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
 			} else {
-				SET_OOM_ERROR(conn->error_info);			
+				SET_OOM_ERROR(conn->error_info);
 			}
 		}
 	}
