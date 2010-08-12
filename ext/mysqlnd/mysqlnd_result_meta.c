@@ -92,7 +92,7 @@ mysqlnd_is_key_numeric(char *key, size_t length, long *idx)
 /* }}} */
 
 
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 /* {{{ mysqlnd_unicode_is_key_numeric */
 static zend_bool
 mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
@@ -142,7 +142,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 {
 	unsigned int i = 0;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	UChar *ustr;
 	int ulen;
 #endif
@@ -227,7 +227,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			
 		}
 
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen,
 							   meta->fields[i].name,
 							   meta->fields[i].name_length TSRMLS_CC);
@@ -284,7 +284,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 
 	if (meta->zend_hash_keys) {
 		DBG_INF("Freeing zend_hash_keys");
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		if (UG(unicode)) {
 			for (i = 0; i < meta->field_count; i++) {
 				if (meta->zend_hash_keys[i].ustr.v) {
@@ -380,7 +380,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 			/* copy the trailing \0 too */
 			memcpy(new_fields[i].def, orig_fields[i].def, orig_fields[i].def_length + 1);
 		}
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		if (new_meta->zend_hash_keys[i].ustr.u) {
 			new_meta->zend_hash_keys[i].ustr.u =
 					eustrndup(new_meta->zend_hash_keys[i].ustr.u, new_meta->zend_hash_keys[i].ulen);

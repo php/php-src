@@ -869,7 +869,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
 						if (
 							(Z_TYPE_P(data) == IS_STRING
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)
@@ -1059,7 +1059,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 								Z_TYPE_P(data), Z_REFCOUNT_P(stmt->result_bind[i].zv));
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data))) {
 						if ((Z_TYPE_P(data) == IS_STRING
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)

@@ -1332,7 +1332,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 			ZVAL_NULL(*current_field);
 			last_field_was_string = FALSE;
 		} else {
-#if PHP_MAJOR_VERSION >= 6 || defined(MYSQLND_STRING_TO_INT_CONVERSION)
+#if MYSQLND_UNICODE || defined(MYSQLND_STRING_TO_INT_CONVERSION)
 			struct st_mysqlnd_perm_bind perm_bind =
 					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
 #endif
@@ -1437,7 +1437,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				p -= len;
 				if (Z_TYPE_PP(current_field) == IS_LONG) {
 					bit_area += 1 + sprintf((char *)start, "%ld", Z_LVAL_PP(current_field));
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 					if (as_unicode) {
 						ZVAL_UTF8_STRINGL(*current_field, start, bit_area - start - 1, 0);
 					} else
@@ -1450,7 +1450,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 					bit_area += Z_STRLEN_PP(current_field);
 					*bit_area++ = '\0';
 					zval_dtor(*current_field);
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 					if (as_unicode) {
 						ZVAL_UTF8_STRINGL(*current_field, start, bit_area - start - 1, 0);
 					} else
@@ -1464,7 +1464,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				  the buffers are not referenced - everything is copied.
 				*/
 			} else
-#if PHP_MAJOR_VERSION < 6
+#if MYSQLND_UNICODE == 0
 			{
 				ZVAL_STRINGL(*current_field, (char *)p, len, 0);
 			}

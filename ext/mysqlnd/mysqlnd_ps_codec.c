@@ -117,7 +117,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 	}
 
 	if (tmp_len) {
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		if (as_unicode) {
 			DBG_INF("stringify");
 			ZVAL_UTF8_STRINGL(zv, tmp, tmp_len, ZSTR_DUPLICATE);
@@ -265,12 +265,12 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	length = spprintf(&to, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", to);
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
 		efree(to);  /* allocated by spprintf */
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
@@ -316,12 +316,12 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 	length = spprintf(&to, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
 
 	DBG_INF_FMT("%s", to);
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
 		efree(to); /* allocated by spprintf */
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
@@ -375,12 +375,12 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 					  t.year, t.month, t.day, t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", to);
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, to, length, 1);
 		efree(to); /* allocated by spprintf */
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
 	}
@@ -403,10 +403,7 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 	unsigned long length = php_mysqlnd_net_field_length(row);
 	DBG_ENTER("ps_fetch_string");
 	DBG_INF_FMT("len = %lu", length);
-#if PHP_MAJOR_VERSION < 6
-	DBG_INF("copying from the row buffer");
-	ZVAL_STRINGL(zv, (char *)*row, length, 1);
-#else
+#if MYSQLND_UNICODE
 	if (field->charsetnr == MYSQLND_BINARY_CHARSET_NR) {
 		DBG_INF("Binary charset");
 		ZVAL_STRINGL(zv, (char *)*row, length, 1);
@@ -414,6 +411,9 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 		DBG_INF_FMT("copying from the row buffer");
 		ZVAL_UTF8_STRINGL(zv, (char*)*row, length, ZSTR_DUPLICATE);
 	}
+#else
+	DBG_INF("copying from the row buffer");
+	ZVAL_STRINGL(zv, (char *)*row, length, 1);
 #endif
 
 	(*row) += length;
@@ -704,10 +704,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				break;
 			case MYSQL_TYPE_VAR_STRING:
 				data_size += 8; /* max 8 bytes for size */
-#if PHP_MAJOR_VERSION < 6
-				if (Z_TYPE_P(the_var) != IS_STRING)
-#elif PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 				if (Z_TYPE_P(the_var) != IS_STRING || Z_TYPE_P(the_var) == IS_UNICODE)
+#else
+				if (Z_TYPE_P(the_var) != IS_STRING)
 #endif
 				{
 					if (!copies || !copies[i]) {
@@ -717,7 +717,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 						}
 					}
 					the_var = copies[i];
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 					if (Z_TYPE_P(the_var) == IS_UNICODE) {
 						zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
 					}

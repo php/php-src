@@ -481,7 +481,7 @@ mysqlnd_connect_run_authentication(
 	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
 #else
 		auth_packet->charset_no	= greet_packet->charset_no;
@@ -799,7 +799,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 		mysqlnd_local_infile_default(conn);
 
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		{
 			unsigned int as_unicode = 1;
 			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, (char *)&as_unicode TSRMLS_CC);
@@ -2052,7 +2052,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
 			conn->options.numeric_and_datetime_as_unicode = *(unsigned int*) value;
 			break;

@@ -37,7 +37,7 @@ static zend_function_entry mysqlnd_functions[] = {
 
 
 /* {{{ mysqlnd_minfo_print_hash */
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 {
 	zval **values_entry;
