@@ -33,6 +33,12 @@
 #define Z_DELREF_PP(ppz)			Z_DELREF_P(*(ppz))
 #endif
 
+#if PHP_MAJOR_VERSION >= 6
+#define MYSQLND_UNICODE 1
+#else
+#define MYSQLND_UNICODE 0
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -45,18 +51,18 @@
 #define MYSQLND_CLASS_METHODS_START(class)	struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
 
-#if PHP_MAJOR_VERSION < 6
+#if MYSQLND_UNICODE
 #define mysqlnd_array_init(arg, field_count) \
 { \
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
-	zend_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0); \
+	zend_u_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0, 0);\
 	Z_TYPE_P(arg) = IS_ARRAY;\
 }
 #else
 #define mysqlnd_array_init(arg, field_count) \
 { \
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
-	zend_u_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0, 0);\
+	zend_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0); \
 	Z_TYPE_P(arg) = IS_ARRAY;\
 }
 #endif

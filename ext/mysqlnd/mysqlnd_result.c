@@ -814,7 +814,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 					*/
 					Z_ADDREF_P(data);
 					if (zend_hash_key->is_numeric == FALSE) {
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
 												 zend_hash_key->ustr,
 												 zend_hash_key->ulen + 1,
@@ -1069,7 +1069,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 				*/
 				Z_ADDREF_P(data);
 				if (zend_hash_key->is_numeric == FALSE) {
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
 											 zend_hash_key->ustr,
 											 zend_hash_key->ulen + 1,
