@@ -76,6 +76,17 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zvalue);
 
 ZEND_API void zval_add_ref(zval **p);
 
+ZEND_API void zval_property_ctor(zval **);
+
+#ifdef ZTS
+# define zval_shared_property_ctor zval_property_ctor
+#else
+# define zval_shared_property_ctor zval_add_ref
+#endif
+
+#define zval_copy_property_ctor(ce) ((copy_ctor_func_t) (ce)->type == ZEND_INTERNAL_CLASS ? zval_shared_property_ctor : zval_add_ref)
+
+
 END_EXTERN_C()
 
 #define ZVAL_DESTRUCTOR (void (*)(void *)) zval_dtor_wrapper

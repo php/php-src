@@ -148,7 +148,7 @@ ZEND_API zend_object *zend_objects_get_address(const zval *zobject TSRMLS_DC)
 
 ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
 {
-	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+	zend_hash_copy(new_object->properties, old_object->properties, zval_copy_property_ctor(old_object->ce), (void *) NULL /* Not used anymore */, sizeof(zval *));
 
 	if (old_object->ce->clone) {
 		zval *new_obj;

@@ -2817,25 +2817,8 @@ static int inherit_static_prop(zval **p TSRMLS_DC, int num_args, va_list args, c
 }
 /* }}} */
 
-#ifdef ZTS
-static void zval_internal_ctor(zval **p) /* {{{ */
-{
-	zval *orig_ptr = *p;
-
-	ALLOC_ZVAL(*p);
-	**p = *orig_ptr;
-	zval_copy_ctor(*p);
-	Z_SET_REFCOUNT_PP(p, 1);
-	Z_UNSET_ISREF_PP(p);
-}
-/* }}} */
-
-# define zval_property_ctor(parent_ce, ce) \
-	((void (*)(void *)) (((parent_ce)->type != (ce)->type) ? zval_internal_ctor : zval_add_ref))
-#else
-# define zval_property_ctor(parent_ce, ce) \
-	((void (*)(void *)) zval_add_ref)
-#endif
+#define zval_property_ctor(parent_ce, ce) \
+	((copy_ctor_func_t) (((parent_ce)->type != (ce)->type) ? zval_shared_property_ctor : zval_add_ref))
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {

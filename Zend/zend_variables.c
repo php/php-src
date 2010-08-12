@@ -159,6 +159,17 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 	zval_dtor(zvalue);
 }
 
+ZEND_API void zval_property_ctor(zval **p) /* {{{ */
+{
+	zval *orig_ptr = *p;
+
+	ALLOC_ZVAL(*p);
+	**p = *orig_ptr;
+	zval_copy_ctor(*p);
+	Z_SET_REFCOUNT_PP(p, 1);
+	Z_UNSET_ISREF_PP(p);
+}
+/* }}} */
 
 #if ZEND_DEBUG
 ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
