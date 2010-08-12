@@ -2298,24 +2298,8 @@ static int inherit_static_prop(zval **p, int num_args, va_list args, zend_hash_k
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-#ifdef ZTS
-static void zval_internal_ctor(zval **p)
-{
-	zval *orig_ptr = *p;
-
-	ALLOC_ZVAL(*p);
-	**p = *orig_ptr;
-	zval_copy_ctor(*p);
-	(*p)->refcount = 1;
-	(*p)->is_ref = 0;
-}
-
-# define zval_property_ctor(parent_ce, ce) \
-	((void (*)(void *)) (((parent_ce)->type != (ce)->type) ? zval_internal_ctor : zval_add_ref))
-#else
-# define zval_property_ctor(parent_ce, ce) \
-	((void (*)(void *)) zval_add_ref)
-#endif
+#define zval_property_ctor(parent_ce, ce) \
+	((copy_ctor_func_t) (((parent_ce)->type != (ce)->type) ? zval_shared_property_ctor : zval_add_ref))
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC)
 {

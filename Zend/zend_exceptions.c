@@ -84,7 +84,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 
 	ALLOC_HASHTABLE(object->properties);
 	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(object->properties, &class_type->default_properties, zval_copy_property_ctor(class_type), (void *) &tmp, sizeof(zval *));
 
 	ALLOC_ZVAL(trace);
 	trace->is_ref = 0;

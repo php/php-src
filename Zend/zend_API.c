@@ -952,7 +952,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 		} else {
 			ALLOC_HASHTABLE_REL(object->properties);
 			zend_hash_init(object->properties, zend_hash_num_elements(&class_type->default_properties), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+			zend_hash_copy(object->properties, &class_type->default_properties, zval_copy_property_ctor(class_type), (void *) &tmp, sizeof(zval *));
 		}
 	} else {
 		Z_OBJVAL_P(arg) = class_type->create_object(class_type TSRMLS_CC);

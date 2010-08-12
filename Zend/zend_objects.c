@@ -156,7 +156,7 @@ static void zval_add_ref_or_clone(zval **p)
 			(*p)->value.obj = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
 		}
 	} else {
-		(*p)->refcount++;
+		zval_shared_property_ctor(p);
 	}
 }
 
@@ -165,7 +165,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 	if (EG(ze1_compatibility_mode)) {
 		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref_or_clone, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	} else {
-		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+		zend_hash_copy(new_object->properties, old_object->properties, zval_copy_property_ctor(old_object->ce), (void *) NULL /* Not used anymore */, sizeof(zval *));
 	}
 	if (old_object->ce->clone) {
 		zval *new_obj;

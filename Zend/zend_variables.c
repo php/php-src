@@ -150,6 +150,18 @@ ZEND_API int zend_print_variable(zval *var) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zval_property_ctor(zval **p) /* {{{ */
+{
+	zval *orig_ptr = *p;
+
+	ALLOC_ZVAL(*p);
+	**p = *orig_ptr;
+	zval_copy_ctor(*p);
+	(*p)->refcount = 1;
+	(*p)->is_ref   = 0;
+}
+/* }}} */
+
 #if ZEND_DEBUG
 ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue) /* {{{ */
 {
