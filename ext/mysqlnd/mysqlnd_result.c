@@ -205,12 +205,11 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 				if (current_row == NULL || current_row[0] == NULL) {
 					break;/* row that was never initialized */
 				}
-			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
+				mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
 				DBG_INF_FMT("Copy_ctor_called=%u", copy_ctor_called);
 #endif
-				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
-														   STAT_COPY_ON_WRITE_SAVED);
+				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED: STAT_COPY_ON_WRITE_SAVED);
 			}
 #if MYSQLND_DEBUG_MEMORY
 			DBG_INF("Freeing current_row & current_buffer");
@@ -376,7 +375,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 		if (!rset_header) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
-			break;		
+			break;
 		}
 
 		SET_ERROR_AFF_ROWS(conn);
@@ -505,7 +504,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				if (!fields_eof) {
 					SET_OOM_ERROR(conn->error_info);
 					ret = FAIL;
-					break;				
+					break;
 				}
 				if (FAIL == (ret = PACKET_READ(fields_eof, conn))) {
 					DBG_ERR("Error ocurred while reading the EOF packet");
@@ -1128,14 +1127,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	if (!set) {
 		SET_OOM_ERROR(conn->error_info);
 		ret = FAIL;
-		goto end;	
+		goto end;
 	}
 	if (free_rows) {
 		set->row_buffers = mnd_pemalloc(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
 		if (!set->row_buffers) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
-			goto end;	
+			goto end;
 		}
 	}
 	set->persistent	= to_cache;
@@ -1277,7 +1276,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 		if (result->stored_data) {
 			conn->error_info = result->stored_data->error_info;
 		} else {
-			SET_OOM_ERROR(conn->error_info);		
+			SET_OOM_ERROR(conn->error_info);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -1310,9 +1309,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result TSRMLS_DC)
 									result->type == MYSQLND_RES_NORMAL? STAT_FLUSHED_NORMAL_SETS:
 																		STAT_FLUSHED_PS_SETS);
 
-		while ((PASS == result->m.fetch_row(result, NULL, 0, &fetched_anything TSRMLS_CC)) &&
-			   fetched_anything == TRUE)
-		{
+		while ((PASS == result->m.fetch_row(result, NULL, 0, &fetched_anything TSRMLS_CC)) && fetched_anything == TRUE) {
 			/* do nothing */;
 		}
 	}
