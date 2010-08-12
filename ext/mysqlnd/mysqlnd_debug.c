@@ -1249,7 +1249,7 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 
 /* Follows code borrowed from zend_builtin_functions.c because the functions there are static */
 
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 /* {{{ gettraceasstring() macros */
 #define TRACE_APPEND_CHR(chr)                                            \
 	*str = (char*)erealloc(*str, *len + 1 + 1);                          \

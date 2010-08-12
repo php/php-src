@@ -788,7 +788,7 @@ struct mysqlnd_field_hash_key
 {
 	zend_bool		is_numeric;
 	unsigned long	key;
-#if PHP_MAJOR_VERSION >= 6
+#if MYSQLND_UNICODE
 	zstr			ustr;
 	unsigned int	ulen;
 #endif
