@@ -86,12 +86,11 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 /* }}} */
 
 
-
 /* {{{ mysqlnd_palloc_zval_ptr_dtor */
+static
 void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
-	*copy_ctor_called = FALSE;
 
 	/*
 	  This zval is not from the cache block.
@@ -99,6 +98,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bo
 	  because the zvals from the cache are owned by it.
 	*/
 	if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
+		*copy_ctor_called = FALSE;
 		; /* do nothing, zval_ptr_dtor will do the job*/
 	} else if (Z_REFCOUNT_PP(zv) > 1) {
 		/*
@@ -120,6 +120,12 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bo
 		}
 		*copy_ctor_called = TRUE;
 	} else {
+		/*
+		  noone but us point to this, so we can safely ZVAL_NULL the zval,
+		  so Zend does not try to free what the zval points to - which is
+		  in result set buffers
+		*/
+		*copy_ctor_called = FALSE;
 		if (Z_TYPE_PP(zv) == IS_STRING) {
 			ZVAL_NULL(*zv);
 		}
