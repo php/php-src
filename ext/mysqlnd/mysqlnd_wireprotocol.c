@@ -1201,10 +1201,11 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
-	end_field = (current_field = start_field = fields) + field_count;
-	if (!current_field) {
+	if (!fields) {
 		DBG_RETURN(FAIL);
 	}
+
+	end_field = (start_field = fields) + field_count;
 
 	/* skip the first byte, not EODATA_MARKER -> 0x0, status */
 	p++;
@@ -1212,13 +1213,17 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 	p += (field_count + 9)/8;	/* skip null bits */
 	bit	= 4;					/* first 2 bits are reserved */
 
-	for (i = 0; current_field < end_field; current_field++, i++) {
+	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
 		if (!*current_field) {
 			DBG_RETURN(FAIL);
 		}
-
+	}
+	
+	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
+		enum_mysqlnd_collected_stats statistic;
+	
 		DBG_INF_FMT("Into zval=%p decoding column %u [%s.%s.%s] type=%u field->flags&unsigned=%u flags=%u is_bit=%u as_unicode=%u",
 			*current_field, i,
 			fields_metadata[i].db, fields_metadata[i].table, fields_metadata[i].name, fields_metadata[i].type,
@@ -1226,13 +1231,12 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 		if (*null_ptr & bit) {
 			DBG_INF("It's null");
 			ZVAL_NULL(*current_field);
-			MYSQLND_INC_CONN_STATISTIC(stats, STAT_BINARY_TYPE_FETCHED_NULL);
+			statistic = STAT_BINARY_TYPE_FETCHED_NULL;
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
 			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i], 0, &p, as_unicode TSRMLS_CC);
 
 			if (MYSQLND_G(collect_statistics)) {
-				enum_mysqlnd_collected_stats statistic;
 				switch (fields_metadata[i].type) {
 					case MYSQL_TYPE_DECIMAL:	statistic = STAT_BINARY_TYPE_FETCHED_DECIMAL; break;
 					case MYSQL_TYPE_TINY:		statistic = STAT_BINARY_TYPE_FETCHED_INT8; break;
@@ -1263,9 +1267,10 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_BINARY_TYPE_FETCHED_GEOMETRY; break;
 					default: statistic = STAT_BINARY_TYPE_FETCHED_OTHER; break;
 				}
-				MYSQLND_INC_CONN_STATISTIC(stats, statistic);
 			}
 		}
+		MYSQLND_INC_CONN_STATISTIC(stats, statistic);
+
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
 			null_ptr++;
@@ -1294,22 +1299,25 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
 
-	end_field = (current_field = start_field = fields) + field_count;
-	if (!current_field) {
+	if (!fields) {
 		DBG_RETURN(FAIL);
 	}
 
-	for (i = 0; current_field < end_field; current_field++, i++) {
-		/* Don't reverse the order. It is significant!*/
-		zend_uchar *this_field_len_pos = p;
-		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
-		unsigned long len = php_mysqlnd_net_field_length(&p);
+	end_field = (start_field = fields) + field_count;
 
+	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
 		if (!*current_field) {
 			DBG_RETURN(FAIL);
 		}
+	}
+
+	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
+		/* Don't reverse the order. It is significant!*/
+		zend_uchar *this_field_len_pos = p;
+		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
+		unsigned long len = php_mysqlnd_net_field_length(&p);
 
 		if (current_field > start_field && last_field_was_string) {
 			/*
