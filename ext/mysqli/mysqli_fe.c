@@ -505,6 +505,9 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(next_result, mysqli_next_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(options, mysqli_options, arginfo_class_mysqli_options)
 	PHP_FALIAS(ping, mysqli_ping, arginfo_mysqli_no_params)
+#if defined(MYSQLI_USE_MYSQLND)
+	ZEND_FENTRY(poll, ZEND_FN(mysqli_poll), arginfo_mysqli_poll, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#endif
 	PHP_FALIAS(prepare, mysqli_prepare, arginfo_class_mysqli_query)
 	PHP_FALIAS(query, mysqli_query, arginfo_class_mysqli_query)
 	PHP_FALIAS(real_connect, mysqli_real_connect, arginfo_class_mysqli_real_connect)
