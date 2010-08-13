@@ -18,6 +18,7 @@
   (Sriram Natarajan)
 - Fixed bug #52433 (Call to undefined method mysqli::poll() - must be static).
   (Andrey)
+- Fixed bug #52413 (MySQLi/libmysql build failure on OS X, FreeBSD). (Andrey)
 - Fixed bug #52302 (mysqli_fetch_all does not work with MYSQLI_USE_RESULT).
   (Andrey)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
