@@ -603,6 +603,57 @@ Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
+Inspecting method 'poll'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: yes
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 257
+Number of Parameters: 5
+Number of Required Parameters: 4
+
+Inspecting parameter 'read' of method 'poll'
+isArray: yes
+allowsNull: yes
+isPassedByReference: yes
+isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'write' of method 'poll'
+isArray: yes
+allowsNull: yes
+isPassedByReference: yes
+isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'error' of method 'poll'
+isArray: yes
+allowsNull: yes
+isPassedByReference: yes
+isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'sec' of method 'poll'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'usec' of method 'poll'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
+
 Inspecting method 'prepare'
 isFinal: no
 isAbstract: no
