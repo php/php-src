@@ -893,6 +893,7 @@ PHP_RINIT_FUNCTION(mysqli)
 #endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
+	MyG(report_mode) = 0;
 
 	return SUCCESS;
 }
