@@ -3,6 +3,7 @@
 ?? ??? 2010, PHP 5.3.4
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
+
 - Fixed bug #52573 (SplFileObject::fscanf Segmentation fault). (Felipe)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe)
@@ -19,6 +20,7 @@
 - Fixed bug #52433 (Call to undefined method mysqli::poll() - must be static).
   (Andrey)
 - Fixed bug #52413 (MySQLi/libmysql build failure on OS X, FreeBSD). (Andrey)
+- Fixed bug #52390 (mysqli_report() should be per-request setting). (Kalle)
 - Fixed bug #52302 (mysqli_fetch_all does not work with MYSQLI_USE_RESULT).
   (Andrey)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
