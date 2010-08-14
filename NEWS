@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Upgraded bundled PCRE to version 8.10. (Ilia)
+
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
 

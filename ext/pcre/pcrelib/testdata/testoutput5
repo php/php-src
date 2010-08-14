@@ -2076,4 +2076,150 @@ Partial match: abcde
     \PX
 Partial match: X
 
+/\h/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: \x09 \x20 \xa0 
+
+/\h/SI8
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: \x09 \x20 \xc2 \xe1 \xe2 \xe3 
+    ABC\x{09}
+ 0: \x{09}
+    ABC\x{20}
+ 0:  
+    ABC\x{a0}
+ 0: \x{a0}
+    ABC\x{1680}
+ 0: \x{1680}
+    ABC\x{180e}
+ 0: \x{180e}
+    ABC\x{2000}
+ 0: \x{2000}
+    ABC\x{202f} 
+ 0: \x{202f}
+    ABC\x{205f} 
+ 0: \x{205f}
+    ABC\x{3000} 
+ 0: \x{3000}
+
+/\v/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: \x0a \x0b \x0c \x0d \x85 
+
+/\v/SI8
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: \x0a \x0b \x0c \x0d \xc2 \xe2 
+    ABC\x{0a}
+ 0: \x{0a}
+    ABC\x{0b}
+ 0: \x{0b}
+    ABC\x{0c}
+ 0: \x{0c}
+    ABC\x{0d}
+ 0: \x{0d}
+    ABC\x{85}
+ 0: \x{85}
+    ABC\x{2028}
+ 0: \x{2028}
+
+/\R/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: \x0a \x0b \x0c \x0d \x85 
+
+/\R/SI8
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: \x0a \x0b \x0c \x0d \xc2 \xe2 
+
+/\h*A/SI8
+Capturing subpattern count = 0
+Options: utf8
+No first char
+Need char = 'A'
+Subject length lower bound = 1
+Starting byte set: \x09 \x20 A \xc2 \xe1 \xe2 \xe3 
+    CDBABC
+ 0: A
+    
+/\v+A/SI8
+Capturing subpattern count = 0
+Options: utf8
+No first char
+Need char = 'A'
+Subject length lower bound = 2
+Starting byte set: \x0a \x0b \x0c \x0d \xc2 \xe2 
+
+/\s?xxx\s/8SI
+Capturing subpattern count = 0
+Options: utf8
+No first char
+Need char = 'x'
+Subject length lower bound = 4
+Starting byte set: \x09 \x0a \x0c \x0d \x20 x 
+
+/\sxxx\s/8T1
+    AB\x{85}xxx\x{a0}XYZ
+ 0: \x{85}xxx\x{a0}
+    AB\x{a0}xxx\x{85}XYZ
+ 0: \x{a0}xxx\x{85}
+
+/\sxxx\s/I8ST1
+Capturing subpattern count = 0
+Options: utf8
+No first char
+Need char = 'x'
+Subject length lower bound = 5
+Starting byte set: \x09 \x0a \x0c \x0d \x20 \xc2 
+    AB\x{85}xxx\x{a0}XYZ
+ 0: \x{85}xxx\x{a0}
+    AB\x{a0}xxx\x{85}XYZ
+ 0: \x{a0}xxx\x{85}
+
+/\S \S/8T1
+    \x{a2} \x{84} 
+ 0: \x{a2} \x{84}
+
+/\S \S/I8ST1
+Capturing subpattern count = 0
+Options: utf8
+No first char
+Need char = ' '
+Subject length lower bound = 3
+Starting byte set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0b \x0e 
+  \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 \x1a \x1b \x1c \x1d 
+  \x1e \x1f ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @ 
+  A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _ ` a b c d e 
+  f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f \xc0 \xc1 \xc2 \xc3 
+  \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 
+  \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf \xe0 \xe1 
+  \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef \xf0 
+  \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 \xf8 \xf9 \xfa \xfb \xfc \xfd \xfe \xff 
+    \x{a2} \x{84} 
+ 0: \x{a2} \x{84}
+    A Z 
+ 0: A Z
+
 /-- End of testinput5 --/
