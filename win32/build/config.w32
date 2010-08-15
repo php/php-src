@@ -4,8 +4,8 @@
 // equivalent.
 
 ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
-CL = PATH_PROG('cl');
-if (!CL) {
+PHP_CL = PATH_PROG('cl', null, 'PHP_CL');
+if (!PHP_CL) {
 	ERROR("MS C++ compiler is required");
 }
 
@@ -17,7 +17,7 @@ if (!CL) {
 // 1500 is vs.net 2008
 // 1600 is vs.net 2010
 // Which version of the compiler do we have?
-VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
+VCVERS = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
 
 if (VCVERS < 1500) {
@@ -29,7 +29,7 @@ DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
 AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
 
 // do we use x64 or 80x86 version of compiler?
-X64 = probe_binary(CL, 64);
+X64 = probe_binary(PHP_CL, 64, null, 'PHP_CL');
 if (X64) {
 	STDOUT.WriteLine("  Detected 64-bit compiler");
 } else {
