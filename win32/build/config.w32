@@ -24,7 +24,7 @@ DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
 AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
 
 // do we use x64 or 80x86 version of compiler?
-X64 = probe_binary(PHP_CL, 64);
+X64 = probe_binary(PHP_CL, 64, null, 'PHP_CL');
 if (X64) {
 	STDOUT.WriteLine("  Detected 64-bit compiler");
 } else {
