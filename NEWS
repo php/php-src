@@ -4,6 +4,9 @@
 - Upgraded bundled Sqlite3 to version 3.7.0.1. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
+- Added new character sets to mysqlnd, which are available in MySQL 5.5
+  (Andrey)
+
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
 

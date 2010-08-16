@@ -47,7 +47,8 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 	foreach ($charsets as $charset) {
 		$k = $charset['Charset'];
 		/* The server currently 17.07.2007 can't handle data sent in ucs2 */
-		if ($charset['Charset'] == 'ucs2') {
+		/* The server currently 16.08.2010 can't handle data sent in utf16 and utf32 */
+		if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32') {
 			continue;
 		}
 
