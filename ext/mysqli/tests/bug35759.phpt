@@ -18,7 +18,7 @@ require_once('skipifconnectfailure.inc');
 	while (++$i < $col_num) {
 		$create .= ", a$i MEDIUMBLOB NOT NULL DEFAULT ''";
 	}
-	$create .= ")";
+	$create .= ") ENGINE=MyISAM"; // doesn't work with InnoDB, which is default in 5.5
 
 	if (!$mysql->query($create)) {
 		if (1101 == $mysql->errno) {
