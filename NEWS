@@ -24,6 +24,8 @@
   (Andrey)
 - Fixed bug #52413 (MySQLi/libmysql build failure on OS X, FreeBSD). (Andrey)
 - Fixed bug #52390 (mysqli_report() should be per-request setting). (Kalle)
+- Fixed bug #52361 (Throwing an exception in a destructor causes invalid
+  catching). (Dmitry)
 - Fixed bug #52302 (mysqli_fetch_all does not work with MYSQLI_USE_RESULT).
   (Andrey)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
