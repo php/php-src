@@ -1206,6 +1206,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_copy, 0)
 	ZEND_ARG_INFO(0, source_file)
 	ZEND_ARG_INFO(0, destination_file)
+	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_fread, 0)
@@ -5715,7 +5716,7 @@ PHP_FUNCTION(move_uploaded_file)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		}
 #endif
-	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
+	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR, NULL TSRMLS_CC) == SUCCESS) {
 		VCWD_UNLINK(path);
 		successful = 1;
 	}

@@ -1646,7 +1646,7 @@ PHP_FUNCTION(copy)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (php_copy_file(source, target TSRMLS_CC) == SUCCESS) {
+	if (php_copy_file_ex(source, target, 0, context TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1656,19 +1656,19 @@ PHP_FUNCTION(copy)
 
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
 {
-	return php_copy_file_ex(src, dest, 0 TSRMLS_CC);
+	return php_copy_file_ex(src, dest, 0, NULL TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
 	php_stream_statbuf src_s, dest_s;
 
-	switch (php_stream_stat_path_ex(src, 0, &src_s, NULL)) {
+	switch (php_stream_stat_path_ex(src, 0, &src_s, ctx)) {
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
@@ -1683,7 +1683,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 		return FAILURE;
 	}
 
-	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, NULL)) {
+	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, ctx)) {
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
@@ -1733,13 +1733,13 @@ no_stat:
 	}
 safe_to_copy:
 
-	srcstream = php_stream_open_wrapper(src, "rb", src_flg | REPORT_ERRORS, NULL);
+	srcstream = php_stream_open_wrapper_ex(src, "rb", src_flg | REPORT_ERRORS, NULL, ctx);
 
 	if (!srcstream) {
 		return ret;
 	}
 
-	deststream = php_stream_open_wrapper(dest, "wb", REPORT_ERRORS, NULL);
+	deststream = php_stream_open_wrapper_ex(dest, "wb", REPORT_ERRORS, NULL, ctx);
 
 	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
