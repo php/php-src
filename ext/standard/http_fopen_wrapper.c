@@ -213,7 +213,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
  	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
 
 			/* get response header */
-			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL) {
 				if (header_line[0] == '\n' ||
 				    header_line[0] == '\r' ||
 				    header_line[0] == '\0') {
@@ -233,7 +233,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 	}
 
-	if (stream == NULL)	
+	if (stream == NULL)
 		goto out;
 
 	/* avoid buffering issues while reading header */
@@ -309,7 +309,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 
 		/* query string */
-		if (resource->query)	{
+		if (resource->query) {
 			strlcat(scratch, "?", scratch_len);
 			strlcat(scratch, resource->query, scratch_len);
 		}
@@ -442,7 +442,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* if the user has configured who they are, send a From: line */
-	if (((have_header & HTTP_HEADER_FROM) == 0) && cfg_get_string("from", &tmp) == SUCCESS)	{
+	if (((have_header & HTTP_HEADER_FROM) == 0) && cfg_get_string("from", &tmp) == SUCCESS) {
 		if (snprintf(scratch, scratch_len, "From: %s\r\n", tmp) > 0)
 			php_stream_write(stream, scratch, strlen(scratch));
 	}
@@ -450,7 +450,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
 		if ((use_ssl && resource->port != 443 && resource->port != 0) || 
-			(!use_ssl && resource->port != 80 && resource->port != 0))	{
+			(!use_ssl && resource->port != 80 && resource->port != 0)) {
 			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
 				php_stream_write(stream, scratch, strlen(scratch));
 		} else {
@@ -685,7 +685,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		php_stream_close(stream);
 		stream = NULL;
 
-		if (location[0] != '\0')	{
+		if (location[0] != '\0') {
 
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
 			char loc_path[HTTP_HEADER_BLOCK_SIZE];
@@ -697,7 +697,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 							strncasecmp(location, "ftps://", sizeof("ftps://")-1))) 
 			{
 				if (*location != '/') {
-					if (*(location+1) != '\0' && resource->path) {		
+					if (*(location+1) != '\0' && resource->path) {
 						char *s = strrchr(resource->path, '/');
 						if (!s) {
 							s = resource->path;
@@ -839,7 +839,7 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL  /* rmdir */
 };
 
-PHPAPI php_stream_wrapper php_stream_http_wrapper =	{
+PHPAPI php_stream_wrapper php_stream_http_wrapper = {
 	&http_stream_wops,
 	NULL,
 	1 /* is_url */
