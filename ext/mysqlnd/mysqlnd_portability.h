@@ -12,6 +12,8 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef MYSQLND_PORTABILITY_H
 #define MYSQLND_PORTABILITY_H
 
+
+
 /* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
 #define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
 
