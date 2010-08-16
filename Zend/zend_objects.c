@@ -117,15 +117,13 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				zend_error(E_ERROR, "Attempt to destruct pending exception");
 			} else {
 				old_exception = EG(exception);
-				Z_ADDREF_P(old_exception);
+				EG(exception) = NULL;
 			}
 		}
-		zend_exception_save(TSRMLS_C);
 		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
-		zend_exception_restore(TSRMLS_C);
 		if (old_exception) {
 			if (EG(exception)) {
-				zval_ptr_dtor(&old_exception);				
+				zend_exception_set_previous(EG(exception), old_exception TSRMLS_CC);
 			} else {
 				EG(exception) = old_exception;
 			}
