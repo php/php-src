@@ -91,7 +91,11 @@ static
 void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
-
+	if (!zv || !*zv) {
+		*copy_ctor_called = FALSE;
+		DBG_ERR_FMT("zv was NULL");
+		DBG_VOID_RETURN;
+	}
 	/*
 	  This zval is not from the cache block.
 	  Thus the refcount is -1 than of a zval from the cache,
@@ -158,17 +162,16 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 		for (i = 0; i < result->field_count; i++) {
 			mysqlnd_palloc_zval_ptr_dtor(&(unbuf->last_row_data[i]), result->type, &copy_ctor_called TSRMLS_CC);
 			if (copy_ctor_called) {
-				ctor_called_count++;
+				++ctor_called_count;
 			}
 		}
 		DBG_INF_FMT("copy_ctor_called_count=%u", ctor_called_count);
 		/* By using value3 macros we hold a mutex only once, there is no value2 */
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE3(global_stats,
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(global_stats,
 											STAT_COPY_ON_WRITE_PERFORMED,
 											ctor_called_count,
 											STAT_COPY_ON_WRITE_SAVED,
-											result->field_count - ctor_called_count,
-											STAT_COPY_ON_WRITE_PERFORMED, 0);
+											result->field_count - ctor_called_count);
 		
 		/* Free last row's zvals */
 		mnd_efree(unbuf->last_row_data);
@@ -199,6 +202,8 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 
 	DBG_INF("Freeing data & row_buffer");
 	if (set->data) {
+		unsigned int copy_on_write_performed = 0;
+		unsigned int copy_on_write_saved = 0;
 
 		DBG_INF_FMT("before: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
 		for (row = set->row_count - 1; row >= 0; row--) {
@@ -206,16 +211,21 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
 			int col;
 
-			for (col = field_count - 1; col >= 0; --col) {
-				zend_bool copy_ctor_called;
-				if (current_row == NULL || current_row[0] == NULL) {
-					break;/* row that was never initialized */
-				}
-				mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
+			if (current_row != NULL) {
+				for (col = field_count - 1; col >= 0; --col) {
+					if (current_row[col]) {
+						zend_bool copy_ctor_called;
+						mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
-				DBG_INF_FMT("Copy_ctor_called=%u", copy_ctor_called);
+						DBG_INF_FMT("Copy_ctor_called=%u", copy_ctor_called);
 #endif
-				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED: STAT_COPY_ON_WRITE_SAVED);
+						if (copy_ctor_called) {
+							++copy_on_write_performed;
+						} else {
+							++copy_on_write_saved;
+						}
+					}
+				}
 			}
 #if MYSQLND_DEBUG_MEMORY
 			DBG_INF("Freeing current_row & current_buffer");
@@ -223,6 +233,8 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 			current_buffer->free_chunk(current_buffer TSRMLS_CC);
 		}
 
+		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_COPY_ON_WRITE_PERFORMED, copy_on_write_performed,
+											  STAT_COPY_ON_WRITE_SAVED, copy_on_write_saved);
 		mnd_pefree(set->data, set->persistent);
 		set->data = NULL;
 	}
