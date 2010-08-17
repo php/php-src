@@ -58,6 +58,8 @@ mysql_close($link);
 print "done!\n";
 ?>
 --EXPECTF--
+Deprecated: Function mysql_list_dbs() is deprecated in %s on line %d
+
 Deprecated: mysql_list_dbs(): This function is deprecated; use mysql_query() with SHOW DATABASES instead in %s on line %d
 
 Warning: mysql_db_name(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
