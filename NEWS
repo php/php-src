@@ -89,6 +89,8 @@
 - Removed support for linking against MySQL client libraries older 4.1 from
   PDO_mysql. (Johannes)
 
+- Deprecated mysql_list_dbs() (Request #50667). (Andrey)
+
 - Implemented FR #52555 (Ability to get HTTP response code). (Paul Dragoonis)
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
 - Implemented FR #48632 (OpenSSL AES support). (yonas dot y
