@@ -29,6 +29,8 @@ print "done!\n";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: Function mysql_db_query() is deprecated in %s on line %d
+
 Deprecated: mysql_db_query(): %s
 
 Deprecated: mysql_escape_string(): %s

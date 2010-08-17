@@ -251,7 +251,7 @@ static const zend_function_entry mysql_functions[] = {
 #endif	/* NETWARE */
 	PHP_FE(mysql_query,									arginfo_mysql_query)
 	PHP_FE(mysql_unbuffered_query,						arginfo_mysql_query)
-	PHP_FE(mysql_db_query,								arginfo_mysql_db_query)
+	PHP_DEP_FE(mysql_db_query,							arginfo_mysql_db_query)
 	PHP_FE(mysql_list_dbs,								arginfo__optional_mysql_link)
 	PHP_DEP_FE(mysql_list_tables,						arginfo_mysql_select_db)
 	PHP_FE(mysql_list_fields,							arginfo_mysql_list_fields)
