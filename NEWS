@@ -9,6 +9,7 @@
 
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
+- Changed the $context parameter on copy() to actually have an effect. (Kalle)
 
 - Fixed bug #52573 (SplFileObject::fscanf Segmentation fault). (Felipe)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
