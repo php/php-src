@@ -1210,7 +1210,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_fstat, 0)
 	ZEND_ARG_INFO(0, fp)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_copy, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_copy, 0, 0, 2)
 	ZEND_ARG_INFO(0, source_file)
 	ZEND_ARG_INFO(0, destination_file)
 	ZEND_ARG_INFO(0, context)
