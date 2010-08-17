@@ -1646,7 +1646,7 @@ PHP_FUNCTION(copy)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (php_copy_file_ex(source, target, 0, context TSRMLS_CC) == SUCCESS) {
+	if (php_copy_file_ctx(source, target, 0, context TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1654,15 +1654,25 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC) /* {{{ */
+/* {{{ php_copy_file
+ */
+PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
-	return php_copy_file_ex(src, dest, 0, NULL TSRMLS_CC);
+	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ php_copy_file
+/* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+{
+	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ php_copy_file_ctx
+ */
+PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;

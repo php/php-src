@@ -5716,7 +5716,7 @@ PHP_FUNCTION(move_uploaded_file)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		}
 #endif
-	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR, NULL TSRMLS_CC) == SUCCESS) {
+	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR TSRMLS_CC) == SUCCESS) {
 		VCWD_UNLINK(path);
 		successful = 1;
 	}
