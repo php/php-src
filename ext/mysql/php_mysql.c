@@ -1575,10 +1575,12 @@ PHP_FUNCTION(mysql_list_dbs)
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_query() with SHOW DATABASES instead");
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 
 	if ((mysql_result=mysql_list_dbs(mysql->conn, NULL))==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
