@@ -51,6 +51,8 @@ print "done!\n";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: Function mysql_list_dbs() is deprecated in %s on line 15
+
 Deprecated: mysql_list_dbs(): This function is deprecated; use mysql_query() with SHOW DATABASES instead in %s on line %d
 
 Deprecated: mysql_list_dbs(): This function is deprecated; use mysql_query() with SHOW DATABASES instead in %s on line %d
