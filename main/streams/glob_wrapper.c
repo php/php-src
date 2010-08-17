@@ -144,7 +144,7 @@ static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count T
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count == sizeof(php_stream_dirent) && pglob) {
-		if (pglob->index < pglob->glob.gl_pathc) {
+		if (pglob->index < (size_t)pglob->glob.gl_pathc) {
 			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[pglob->index++], pglob->flags & GLOB_APPEND, &path TSRMLS_CC);
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
 			return sizeof(php_stream_dirent);

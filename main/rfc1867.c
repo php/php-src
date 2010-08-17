@@ -769,7 +769,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int fd = -1;
 	zend_llist header;
 	void *event_extra_data = NULL;
-	int llen = 0;
+	unsigned int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
@@ -1066,12 +1066,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					}
 				}
 
-				if (PG(upload_max_filesize) > 0 && (total_bytes+blen) > PG(upload_max_filesize)) {
+				if (PG(upload_max_filesize) > 0 && (long)(total_bytes+blen) > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_A;
-				} else if (max_file_size && ((total_bytes+blen) > max_file_size)) {
+				} else if (max_file_size && ((long)(total_bytes+blen) > max_file_size)) {
 #if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 #endif
