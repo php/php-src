@@ -11,6 +11,7 @@
   (Kalle)
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 
+- Fixed bug #52613 (crash in mysqlnd after hitting memory limit). (Andrey)
 - Fixed bug #52573 (SplFileObject::fscanf Segmentation fault). (Felipe)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe)
