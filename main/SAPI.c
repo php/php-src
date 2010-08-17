@@ -570,7 +570,6 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 {
-	int retval;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	long myuid = 0L;

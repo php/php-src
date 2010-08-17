@@ -1220,7 +1220,7 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 	va_list ap;
 
 	va_start(ap, format);
@@ -1236,7 +1236,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {
