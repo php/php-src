@@ -2008,7 +2008,7 @@ PHP_FUNCTION(mysql_num_fields)
 
 /* {{{ php_mysql_fetch_hash
  */
-static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args, int into_object)
+static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int expected_args, int into_object)
 {
 	MYSQL_RES *mysql_result;
 	zval            *res, *ctor_params = NULL;
