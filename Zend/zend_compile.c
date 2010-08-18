@@ -2922,7 +2922,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 0;
 	}
 
-	if (proto->common.pass_rest_by_reference
+	if (fe->common.type != ZEND_USER_FUNCTION
+		&& proto->common.pass_rest_by_reference
 		&& !fe->common.pass_rest_by_reference) {
 		return 0;
 	}
