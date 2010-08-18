@@ -979,6 +979,14 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr, int
 		unsigned char *res_buf;
 		int res_length = dbdatlen(mssql_ptr->link, offset);
 
+		if (res_length == 0) {
+			ZVAL_NULL(result);
+			return;
+		} else if (res_length < 0) {
+			ZVAL_FALSE(result);
+			return;
+		}
+
 		res_buf = (unsigned char *) emalloc(res_length+1);
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		memcpy(res_buf, bin, res_length);

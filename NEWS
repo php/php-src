@@ -1,6 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.15
+- Fixed possible crash in php_mssql_get_column_content_without_type(). (Kalle)
+
+- Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
+  (Kalle, rein at basefarm dot no)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
 - Fixed bug #52390 (mysqli_report() should be per-request setting). (Kalle)
@@ -33,8 +37,6 @@
   PDOStatement if instantiated directly instead of doing by the PDO methods.
   (Felipe)
 
-- Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
-  (Kalle, rein at basefarm dot no)
 - Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
   bit)). (Adam)
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
