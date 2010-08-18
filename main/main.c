@@ -567,7 +567,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	/* Otherwise fall back to the default logging location, if we have one */
 
 	if (sapi_module.log_message) {
-		sapi_module.log_message(log_message);
+		sapi_module.log_message(log_message TSRMLS_CC);
 	}
 	PG(in_error_log) = 0;
 }

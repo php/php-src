@@ -313,10 +313,9 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg)
+static void php_apache_sapi_log_message(char *msg TSRMLS_DC)
 {
 	php_struct *ctx;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
 
@@ -327,12 +326,12 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(char *msg, request_rec *r TSRMLS_DC)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
 	} else {
-		php_apache_sapi_log_message(msg);
+		php_apache_sapi_log_message(msg TSRMLS_CC);
 	}
 }
 
@@ -589,12 +588,12 @@ normal:
 	}
 
 	if (r->finfo.filetype == 0) {
-		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r);
+		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
-		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r);
+		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_FORBIDDEN;
 	}

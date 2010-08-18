@@ -374,7 +374,7 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static void sapi_cli_log_message(char *message) /* {{{ */
+static void sapi_cli_log_message(char *message TSRMLS_DC) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
 }
@@ -476,7 +476,7 @@ static sapi_module_struct cli_sapi_module = {
 	sapi_cli_log_message,			/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
-
+	
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */

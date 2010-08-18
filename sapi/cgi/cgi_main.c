@@ -676,10 +676,8 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+static void sapi_cgi_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
 

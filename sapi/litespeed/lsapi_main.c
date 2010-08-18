@@ -268,7 +268,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message)
+static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 {
 	int len = strlen( message );
 	LSAPI_Write_Stderr( message, len);

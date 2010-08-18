@@ -4633,7 +4633,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message(message);
+				sapi_module.log_message(message TSRMLS_CC);
 			} else {
 				return FAILURE;
 			}

@@ -282,10 +282,9 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg)
+static void php_apache_sapi_log_message(char *msg TSRMLS_DC)
 {
 	php_struct *ctx;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
    
