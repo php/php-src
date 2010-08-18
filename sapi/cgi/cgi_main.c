@@ -587,6 +587,17 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", sizeof("HTTP_COOKIE")-1 TSRMLS_CC);
 }
 
+static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+{
+	zval *array_ptr = (zval*)arg;	
+	int filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
+	unsigned int new_val_len;
+
+	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+	}
+}
+
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (PG(http_globals)[TRACK_VARS_ENV] &&
@@ -616,26 +627,11 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
-		HashPosition pos;
 		int magic_quotes_gpc = PG(magic_quotes_gpc);
-		char *var, **val;
-		uint var_len;
-		ulong idx;
-		int filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 
 		/* turn off magic_quotes while importing environment variables */
 		PG(magic_quotes_gpc) = 0;
-		for (zend_hash_internal_pointer_reset_ex(&request->env, &pos);
-			zend_hash_get_current_key_ex(&request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
-			zend_hash_get_current_data_ex(&request->env, (void **) &val, &pos) == SUCCESS;
-			zend_hash_move_forward_ex(&request->env, &pos)
-		) {
-			unsigned int new_val_len;
-
-			if (sapi_module.input_filter(filter_arg, var, val, strlen(*val), &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, *val, new_val_len, array_ptr TSRMLS_CC);
-			}
-		}
+		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 		PG(magic_quotes_gpc) = magic_quotes_gpc;
 	}
 }
@@ -1100,8 +1096,10 @@ static void init_request_info(TSRMLS_D)
 		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
 		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
 
+#ifdef PHP_WIN32
 		/* Hack for buggy IIS that sets incorrect PATH_INFO */
 		char *env_server_software = sapi_cgibin_getenv("SERVER_SOFTWARE", sizeof("SERVER_SOFTWARE")-1 TSRMLS_CC);
+
 		if (env_server_software &&
 			env_script_name &&
 			env_path_info &&
@@ -1115,6 +1113,7 @@ static void init_request_info(TSRMLS_D)
 			}
 			env_path_info = _sapi_cgibin_putenv("PATH_INFO", env_path_info TSRMLS_CC);
 		}
+#endif
 
 		if (CGIG(fix_pathinfo)) {
 			struct stat st;
@@ -1488,7 +1487,7 @@ int main(int argc, char *argv[])
 	int fastcgi = fcgi_is_fastcgi();
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
-	fcgi_request request;
+	fcgi_request *request = NULL;
 	int repeats = 1;
 	int benchmark = 0;
 #if HAVE_GETTIMEOFDAY
@@ -1689,7 +1688,7 @@ consult the installation file that came with this distribution, or visit \n\
 		php_import_environment_variables = cgi_php_import_environment_variables;
 
 		/* library is already initialized, now init our request */
-		fcgi_init_request(&request, fcgi_fd);
+		request = fcgi_init_request(fcgi_fd);
 
 #ifndef PHP_WIN32
 	/* Pre-fork, if required */
@@ -1810,6 +1809,9 @@ consult the installation file that came with this distribution, or visit \n\
 					break;
 				case 'h':
 				case '?':
+					if (request) {
+						fcgi_destroy_request(request);
+					}
 					fcgi_shutdown();
 					no_headers = 1;
 					SG(headers_sent) = 1;
@@ -1831,8 +1833,8 @@ consult the installation file that came with this distribution, or visit \n\
 			fcgi_impersonate();
 		}
 #endif
-		while (!fastcgi || fcgi_accept_request(&request) >= 0) {
-			SG(server_context) = (void *) &request;
+		while (!fastcgi || fcgi_accept_request(request) >= 0) {
+			SG(server_context) = fastcgi ? (void *) request : (void *) 1;
 			init_request_info(TSRMLS_C);
 			CG(interactive) = 0;
 
@@ -2026,7 +2028,7 @@ consult the installation file that came with this distribution, or visit \n\
 			 * get path_translated */
 			if (php_request_startup(TSRMLS_C) == FAILURE) {
 				if (fastcgi) {
-					fcgi_finish_request(&request, 1);
+					fcgi_finish_request(request, 1);
 				}
 				SG(server_context) = NULL;
 				php_module_shutdown(TSRMLS_C);
@@ -2232,7 +2234,7 @@ fastcgi_request_done:
 			/* only fastcgi will get here */
 			requests++;
 			if (max_requests && (requests == max_requests)) {
-				fcgi_finish_request(&request, 1);
+				fcgi_finish_request(request, 1);
 				if (bindpath) {
 					free(bindpath);
 				}
@@ -2243,6 +2245,9 @@ fastcgi_request_done:
 				break;
 			}
 			/* end of fastcgi loop */
+		}
+		if (request) {
+			fcgi_destroy_request(request);
 		}
 		fcgi_shutdown();
 
