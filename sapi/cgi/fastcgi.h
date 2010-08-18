@@ -91,39 +91,23 @@ typedef struct _fcgi_end_request_rec {
 
 /* FastCGI client API */
 
-typedef struct _fcgi_request {
-	int            listen_socket;
-#ifdef _WIN32
-	int            tcp;
-#endif
-	int            fd;
-	int            id;
-	int            keep;
-	int            closed;
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
-	int            in_len;
-	int            in_pad;
-
-	fcgi_header   *out_hdr;
-	unsigned char *out_pos;
-	unsigned char  out_buf[1024*8];
-	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
-
-	int            has_env;
-	HashTable      env;
-} fcgi_request;
+typedef struct _fcgi_request fcgi_request;
 
 int fcgi_init(void);
 void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_in_shutdown(void);
 int fcgi_listen(const char *path, int backlog);
-void fcgi_init_request(fcgi_request *req, int listen_socket);
+fcgi_request* fcgi_init_request(int listen_socket);
+void fcgi_destroy_request(fcgi_request *req);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
+void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 
 int fcgi_read(fcgi_request *req, char *str, int len);
 
