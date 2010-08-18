@@ -90,7 +90,7 @@ static void php_embed_send_header(sapi_header_struct *sapi_header, void *server_
 {
 }
 
-static void php_embed_log_message(char *message)
+static void php_embed_log_message(char *message TSRMLS_DC)
 {
 	fprintf (stderr, "%s\n", message);
 }

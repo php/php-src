@@ -237,7 +237,7 @@ struct _sapi_module_struct {
 	char *(*read_cookies)(TSRMLS_D);
 
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
-	void (*log_message)(char *message);
+	void (*log_message)(char *message TSRMLS_DC);
 	time_t (*get_request_time)(TSRMLS_D);
 	void (*terminate_process)(TSRMLS_D);
 

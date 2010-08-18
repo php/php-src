@@ -773,9 +773,8 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	}
 }
 
-static void nsapi_log_message(char *message)
+static void nsapi_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
 	if (rc) {
