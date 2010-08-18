@@ -11,6 +11,8 @@
   (Kalle)
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 
+- Fixed possible crash in php_mssql_get_column_content_without_type(). (Kalle)
+
 - Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
   (Kalle, rein at basefarm dot no)
 - Fixed bug #52613 (crash in mysqlnd after hitting memory limit). (Andrey)
