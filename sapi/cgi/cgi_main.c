@@ -587,14 +587,12 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", sizeof("HTTP_COOKIE")-1 TSRMLS_CC);
 }
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC)
 {
 	zval *array_ptr = (zval*)arg;	
-	int filter_arg;
+	int filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 	unsigned int new_val_len;
-	TSRMLS_FETCH();
 
-	filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 	}
@@ -633,7 +631,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 		/* turn off magic_quotes while importing environment variables */
 		PG(magic_quotes_gpc) = 0;
-		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
+		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr TSRMLS_CC);
 		PG(magic_quotes_gpc) = magic_quotes_gpc;
 	}
 }
