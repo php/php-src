@@ -322,13 +322,13 @@ static char *fcgi_hash_get(fcgi_hash *h, char *var, unsigned int var_len, unsign
 	return NULL;
 }
 
-static void fcgi_hash_apply(fcgi_hash *h, fcgi_apply_func func, void *arg)
+static void fcgi_hash_apply(fcgi_hash *h, fcgi_apply_func func, void *arg TSRMLS_DC)
 {
 	fcgi_hash_bucket *p	= h->list;
 
 	while (p) {
 		if (EXPECTED(p->val != NULL)) {
-			func(p->var, p->var_len, p->val, p->val_len, arg);
+			func(p->var, p->var_len, p->val, p->val_len, arg TSRMLS_CC);
 		}
 		p = p->list_next;
 	}
@@ -848,7 +848,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= *p++;
 		}
 		if (UNEXPECTED(name_len + val_len < 0) ||
-		    UNEXPECTED(name_len + val_len > end - p)) {
+		    UNEXPECTED((unsigned char *) (name_len + val_len) > end - p)) {
 			/* Malformated request */
 			ret = 0;
 			break;
@@ -1435,9 +1435,9 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 	return NULL;
 }
 
-void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array)
+void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array TSRMLS_DC)
 {
-	fcgi_hash_apply(&req->env, func, array);
+	fcgi_hash_apply(&req->env, func, array TSRMLS_CC);
 }
 
 #ifdef _WIN32
