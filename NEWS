@@ -1,7 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.15
-- Fixed possible crash in php_mssql_get_column_content_without_type(). (Kalle)
+- Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
 - Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
   (Kalle, rein at basefarm dot no)
