@@ -848,7 +848,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= *p++;
 		}
 		if (UNEXPECTED(name_len + val_len < 0) ||
-		    UNEXPECTED((unsigned char *) (name_len + val_len) > end - p)) {
+		    UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
 			/* Malformated request */
 			ret = 0;
 			break;
