@@ -69,6 +69,8 @@ typedef struct _zend_declarables {
 } zend_declarables;
 
 typedef struct _zend_vm_stack *zend_vm_stack;
+typedef struct _zend_ini_entry zend_ini_entry;
+
 
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
@@ -248,6 +250,7 @@ struct _zend_executor_globals {
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
+	zend_ini_entry *error_reporting_ini_entry;	                
 
 	zend_objects_store objects_store;
 	zval *exception, *prev_exception;
