@@ -4520,7 +4520,30 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 	}
 
 	if (EG(error_reporting)) {
-		zend_alter_ini_entry_ex("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1 TSRMLS_CC);
+		do {
+			EG(error_reporting) = 0;
+			if (!EG(error_reporting_ini_entry)) {
+				if (UNEXPECTED(zend_hash_find(EG(ini_directives), "error_reporting", sizeof("error_reporting"), (void **) &EG(error_reporting_ini_entry)) == FAILURE)) {
+					break;
+				}
+			}
+			if (!EG(error_reporting_ini_entry)->modified) {
+				if (!EG(modified_ini_directives)) {
+					ALLOC_HASHTABLE(EG(modified_ini_directives));
+					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+				}
+				if (EXPECTED(zend_hash_add(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting"), &EG(error_reporting_ini_entry), sizeof(zend_ini_entry*), NULL) == SUCCESS)) {
+					EG(error_reporting_ini_entry)->orig_value = EG(error_reporting_ini_entry)->value;
+					EG(error_reporting_ini_entry)->orig_value_length = EG(error_reporting_ini_entry)->value_length;
+					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
+					EG(error_reporting_ini_entry)->modified = 1;
+				}
+			} else if (EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value) {
+				efree(EG(error_reporting_ini_entry)->value);
+			}
+			EG(error_reporting_ini_entry)->value = estrndup("0", sizeof("0")-1);
+			EG(error_reporting_ini_entry)->value_length = sizeof("0")-1;
+		} while (0);
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -4542,9 +4565,18 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 	if (!EG(error_reporting) && Z_LVAL(EX_T(opline->op1.var).tmp_var) != 0) {
 		Z_TYPE(restored_error_reporting) = IS_LONG;
 		Z_LVAL(restored_error_reporting) = Z_LVAL(EX_T(opline->op1.var).tmp_var);
+		EG(error_reporting) = Z_LVAL(restored_error_reporting);
 		convert_to_string(&restored_error_reporting);
-		zend_alter_ini_entry_ex("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME, 1 TSRMLS_CC);
-		zendi_zval_dtor(restored_error_reporting);
+		if (EXPECTED(EG(error_reporting_ini_entry) != NULL)) {
+			if (EXPECTED(EG(error_reporting_ini_entry)->modified &&
+			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
+				efree(EG(error_reporting_ini_entry)->value);
+			}
+			EG(error_reporting_ini_entry)->value = Z_STRVAL(restored_error_reporting);
+			EG(error_reporting_ini_entry)->value_length = Z_STRLEN(restored_error_reporting);
+		} else {
+			zendi_zval_dtor(restored_error_reporting);
+		}
 	}
 	if (EX(old_error_reporting) == &EX_T(opline->op1.var).tmp_var) {
 		EX(old_error_reporting) = NULL;

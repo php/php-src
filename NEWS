@@ -26,6 +26,7 @@
     flag any more. Thit is very rare and useless case. ZEND_FREE might be
     required after them instead.
   . improved performance of FastCGI request parsing
+  . improved performance of @ (silence) operator
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty
