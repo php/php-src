@@ -2340,7 +2340,13 @@ PHP_FUNCTION(ob_iconv_handler)
 				ICONVG(output_encoding), ICONVG(internal_encoding));
 		_php_iconv_show_error(err, ICONVG(output_encoding), ICONVG(internal_encoding) TSRMLS_CC);
 		if (out_buffer != NULL) {
-			int len = spprintf(&content_type, 0, "Content-Type:%s; charset=%s", mimetype, ICONVG(output_encoding));
+			int len;
+			char *p = strstr(ICONVG(output_encoding), "//"); 
+			if (p) {
+				len = spprintf(&content_type, 0, "Content-Type:%s; charset=%.*s", mimetype, (int)(p - ICONVG(output_encoding)), ICONVG(output_encoding));
+			} else {
+				len = spprintf(&content_type, 0, "Content-Type:%s; charset=%s", mimetype, ICONVG(output_encoding));
+			}
 			if (content_type && sapi_add_header(content_type, len, 0) != FAILURE) {
 				SG(sapi_headers).send_default_content_type = 0;
 			}

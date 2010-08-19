@@ -16,6 +16,8 @@
 - Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
   (Kalle, rein at basefarm dot no)
 - Fixed bug #52613 (crash in mysqlnd after hitting memory limit). (Andrey)
+- Fixed bug #52599 (iconv output handler outputs incorrect content type
+  when flags are used). (Ilia)
 - Fixed bug #52573 (SplFileObject::fscanf Segmentation fault). (Felipe)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe)
