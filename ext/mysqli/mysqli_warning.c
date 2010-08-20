@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "mysqli_priv.h"
 
 /* Define these in the PHP5 tree to make merging easy process */
 #define ZSTR_DUPLICATE (1<<0)

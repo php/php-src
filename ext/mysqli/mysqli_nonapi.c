@@ -30,6 +30,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "mysqli_priv.h"
 
 #define SAFE_STR(a) ((a)?a:"")
 
@@ -419,7 +420,6 @@ PHP_FUNCTION(mysqli_get_connection_stats)
 PHP_FUNCTION(mysqli_fetch_object) 
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 1);	
-/* todo: mysqlnd support */
 }
 /* }}} */
 
