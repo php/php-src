@@ -114,8 +114,8 @@ static int fpm_conf_is_dir(char *path) /* {{{ */
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
-	long value_y = !strcasecmp(val, "yes") || !strcmp(val,  "1") || !strcasecmp(val, "on") || !strcasecmp(val, "true");
-	long value_n = !strcasecmp(val, "no")  || !strcmp(val,  "0") || !strcasecmp(val, "off") || !strcasecmp(val, "false");
+	long value_y = !strcasecmp(val, "1");
+	long value_n = !strcasecmp(val, "");
 
 	if (!value_y && !value_n) {
 		return "invalid boolean value";
@@ -846,7 +846,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 	char *err = NULL;
 	void *config;
 
-	if (!Z_STRVAL_P(key) || !Z_STRVAL_P(value) || !*Z_STRVAL_P(key) || !*Z_STRVAL_P(value)) {
+	if (!Z_STRVAL_P(key) || !Z_STRVAL_P(value) || !*Z_STRVAL_P(key)) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ?", ini_filename, ini_lineno);
 		*error = 1;
 		return;
@@ -858,14 +858,29 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 	}
 
 	if (!strcmp("env", Z_STRVAL_P(name))) {
+		if (!*Z_STRVAL_P(value)) {
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			*error = 1;
+			return;
+		}
 		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, env);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_value", Z_STRVAL_P(name))) {
+		if (!*Z_STRVAL_P(value)) {
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			*error = 1;
+			return;
+		}
 		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_admin_value", Z_STRVAL_P(name))) {
+		if (!*Z_STRVAL_P(value)) {
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			*error = 1;
+			return;
+		}
 		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_admin_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
@@ -953,7 +968,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		buf[n++] = '\n';
 		ini_lineno++;
 		ini_filename = filename;
-		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
+		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
 			if (ini_include) free(ini_include);
