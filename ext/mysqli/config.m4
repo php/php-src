@@ -80,6 +80,7 @@ if test "$PHP_MYSQLI" != "no"; then
                   mysqli_exception.c mysqli_result_iterator.c $mysqli_extra_sources"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
+  PHP_INSTALL_HEADERS([ext/mysqli/php_mysqli_structs.h])
 
   if test "$PHP_MYSQLI" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)

@@ -28,6 +28,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "mysqli_priv.h"
 
 #define CHECK_STATUS(value) \
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
