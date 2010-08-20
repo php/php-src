@@ -847,7 +847,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 	void *config;
 
 	if (!Z_STRVAL_P(key) || !Z_STRVAL_P(value) || !*Z_STRVAL_P(key)) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ?", ini_filename, ini_lineno);
+		zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Misspelled  array ?", ini_filename, ini_lineno);
 		*error = 1;
 		return;
 	}
@@ -859,7 +859,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 
 	if (!strcmp("env", Z_STRVAL_P(name))) {
 		if (!*Z_STRVAL_P(value)) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] empty value", ini_filename, ini_lineno);
 			*error = 1;
 			return;
 		}
@@ -868,7 +868,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 
 	} else if (!strcmp("php_value", Z_STRVAL_P(name))) {
 		if (!*Z_STRVAL_P(value)) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] empty value", ini_filename, ini_lineno);
 			*error = 1;
 			return;
 		}
@@ -877,7 +877,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 
 	} else if (!strcmp("php_admin_value", Z_STRVAL_P(name))) {
 		if (!*Z_STRVAL_P(value)) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] Mispell array ? (empty value)", ini_filename, ini_lineno);
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s:%d] empty value", ini_filename, ini_lineno);
 			*error = 1;
 			return;
 		}
