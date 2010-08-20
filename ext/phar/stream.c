@@ -470,7 +470,7 @@ static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	if (stream->mode[0] == 'w' || (stream->mode[0] == 'r' && stream->mode[1] == '+')) {
 		ret = phar_flush(((phar_entry_data *)stream->abstract)->phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
-			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS TSRMLS_CC, error);
+			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 		return ret;
