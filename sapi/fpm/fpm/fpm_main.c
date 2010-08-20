@@ -1370,7 +1370,7 @@ static void init_request_info(TSRMLS_D)
 		int mode = ZEND_INI_USER;
 		char *tmp;
 		spprintf(&tmp, 0, "%s\n", ini);
-		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
+		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
 		efree(tmp);
 	}
 
@@ -1379,7 +1379,7 @@ static void init_request_info(TSRMLS_D)
 		int mode = ZEND_INI_SYSTEM;
 		char *tmp;
 		spprintf(&tmp, 0, "%s\n", ini);
-		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
+		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode TSRMLS_CC);
 		efree(tmp);
 	}
 }
@@ -1404,7 +1404,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 		return;
 	}
 
-	if (!value || strlen(value) < 1) {
+	if (!value) {
 		fprintf(stderr, "Passing INI directive through FastCGI: empty value for key '%s'\n", key);
 		return;
 	}
