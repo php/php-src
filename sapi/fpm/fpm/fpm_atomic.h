@@ -12,7 +12,19 @@
 #endif
 #include <sched.h>
 
-#if ( __i386__ || __i386 )
+#if (__GNUC__) && (__GNUC__ >= 4 &&  __GNUC_MINOR__ >= 1)
+
+/**
+ * all the cases below (as provided by upstream) define:
+ * word as atomic_int_t, and
+ * unsigned word as atomic_uint_t
+ * and only use volatile atomic_uint_t as atomic_t
+ */
+
+typedef volatile unsigned long atomic_t;
+#define atomic_cmp_set(a,b,c) __sync_bool_compare_and_swap(a,b,c)
+
+#elif ( __i386__ || __i386 )
 
 typedef int32_t                     atomic_int_t;
 typedef uint32_t                    atomic_uint_t;
