@@ -3170,6 +3170,10 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 
 	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	zend_reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
 }
@@ -3184,6 +3188,10 @@ ZEND_METHOD(reflection_method, getPrototype)
 
 	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	if (!mptr->common.prototype) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -4514,6 +4522,10 @@ ZEND_METHOD(reflection_class, isIterateable)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4528,6 +4540,10 @@ ZEND_METHOD(reflection_class, getExtension)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4544,6 +4560,10 @@ ZEND_METHOD(reflection_class, getExtensionName)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
