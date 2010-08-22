@@ -276,7 +276,7 @@ PHP_MINIT_FUNCTION(miconv)
 		return FAILURE;
 	}
 
-	php_output_handler_alias_register(ZEND_STRL("ob_iconv_handlerÂ"), php_iconv_output_handler_init TSRMLS_CC);
+	php_output_handler_alias_register(ZEND_STRL("ob_iconv_handler"), php_iconv_output_handler_init TSRMLS_CC);
 	php_output_handler_conflict_register(ZEND_STRL("ob_iconv_handler"), php_iconv_output_conflict TSRMLS_CC);
 
 	return SUCCESS;
