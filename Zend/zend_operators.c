@@ -1410,8 +1410,12 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
-				ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+				if (Z_DVAL_P(op1) == Z_DVAL_P(op2)) {
+					ZVAL_LONG(result, 0);
+				} else {
+					Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
+					ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+				}
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
