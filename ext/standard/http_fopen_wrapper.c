@@ -111,6 +111,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
+	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 
 	tmp_line[0] = '\0';
@@ -628,6 +629,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			http_header_line[http_header_line_length] = '\0';
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
+				if (context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
+					SEPARATE_ZVAL(tmpzval);
+					convert_to_long_ex(tmpzval);
+					follow_location = Z_LVAL_PP(tmpzval);
+				}
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
@@ -670,9 +676,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			break;
 		}
 	}
-	
-	if (!reqok || location[0] != '\0') {
-		if (((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) && redirect_max <= 1) {
+
+	if (!reqok || (location[0] != '\0' && follow_location)) {
+		if (!follow_location && (((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) && redirect_max <= 1)) {
 			goto out;
 		}
 
