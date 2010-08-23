@@ -65,6 +65,8 @@
   opcode operands into a separate literal table. (Dmitry)
 - Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
   either is present at compile time. (Rasmus)
+- Changed listen.backlog in the FPM configuration file to default to 128
+  instead of -1 (fat)
 
 - Improved CLI Interactive readline shell (Johannes)
   . Added cli.pager ini setting to set a pager for output.
