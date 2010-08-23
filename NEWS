@@ -7,6 +7,7 @@
 - Added new character sets to mysqlnd, which are available in MySQL 5.5
   (Andrey)
 
+- Fixed MOPS-2010-24, fix string validation. (Pierre)
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
