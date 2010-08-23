@@ -15,8 +15,6 @@
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
-- Fixed bug #52655 (SimpleXMLIterator supports ArrayAccess without implementing 
-  the interface). (Kalle)
 - Fixed bug #52654 (mysqli doesn't install headers with structures it uses).
   (Andrey)
 - Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
