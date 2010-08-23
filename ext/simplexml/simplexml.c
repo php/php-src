@@ -2536,7 +2536,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
-	zend_class_implements(sxe_class_entry TSRMLS_CC, 2, zend_ce_traversable, zend_ce_arrayaccess);
+	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 	sxe_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
