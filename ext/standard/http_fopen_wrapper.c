@@ -742,20 +742,20 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				goto out;
 			}
 
-#define CHECK_FOR_CNTRL_CHARS(val) {	\
-	if (val) {	\
-		unsigned char *s, *e;	\
-		int l;	\
-		l = php_url_decode(val, strlen(val));	\
-		s = (unsigned char*)val; e = s + l;	\
-		while (s < e) {	\
-			if (iscntrl(*s)) {	\
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid redirect URL! %s", new_path);	\
-				goto out;	\
-			}	\
-			s++;	\
-		}	\
-	}	\
+#define CHECK_FOR_CNTRL_CHARS(val) { \
+	if (val) { \
+		unsigned char *s, *e; \
+		int l; \
+		l = php_url_decode(val, strlen(val)); \
+		s = (unsigned char*)val; e = s + l; \
+		while (s < e) { \
+			if (iscntrl(*s)) { \
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid redirect URL! %s", new_path); \
+				goto out; \
+			} \
+			s++; \
+		} \
+	} \
 }
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
