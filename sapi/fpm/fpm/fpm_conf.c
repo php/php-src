@@ -322,7 +322,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	}
 
 	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
-	wp->config->listen_backlog = -1;
+	wp->config->listen_backlog = 128;
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;

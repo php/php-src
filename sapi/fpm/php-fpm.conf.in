@@ -74,9 +74,9 @@
 ; Note: This value is mandatory.
 listen = 127.0.0.1:9000
 
-; Set listen(2) backlog. A value of '-1' means unlimited.
-; Default Value: -1
-;listen.backlog = -1
+; Set listen(2) backlog.
+; Default Value: 128
+;listen.backlog = 128
  
 ; List of ipv4 addresses of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
