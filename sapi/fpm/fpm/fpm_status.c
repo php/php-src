@@ -138,7 +138,7 @@ static void fpm_status_handle_status_txt(struct fpm_status_s *status, char **out
 		"total processes:  %d\n",
 		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
 
-	spprintf(content_type, 0, "text/plain");
+	spprintf(content_type, 0, "Content-Type: text/plain");
 }
 /* }}} */
 
@@ -159,7 +159,7 @@ static void fpm_status_handle_status_html(struct fpm_status_s *status, char **ou
 		"</table>",
 		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
 
-	spprintf(content_type, 0, "text/html");
+	spprintf(content_type, 0, "Content-Type: text/html");
 }
 /* }}} */
 
@@ -180,7 +180,7 @@ static void fpm_status_handle_status_json(struct fpm_status_s *status, char **ou
 		"}",
 		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
 
-	spprintf(content_type, 0, "application/jsonrequest");
+	spprintf(content_type, 0, "Content-Type: application/json");
 }
 /* }}} */
 
