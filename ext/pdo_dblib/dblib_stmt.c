@@ -170,8 +170,8 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 					case SQLMONEY4:
 					case SQLMONEYN: {
 						DBFLT8 money_value;
-						dbconvert(NULL, S->cols[i].coltype, dbdata(H->link, i+1), dbdatlen(H->link, i+1), SQLFLT8, (LPBYTE)&money_value, val->len);
-						val->len = spprintf(val->data, 0, "%.4f", money_value);
+						dbconvert(NULL, S->cols[i].coltype, dbdata(H->link, i+1), dbdatlen(H->link, i+1), SQLFLT8, (LPBYTE)&money_value, 8);
+						val->len = spprintf(&val->data, 0, "%.4f", money_value);
 						}
 						break;
 					default:
