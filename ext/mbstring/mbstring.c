@@ -4044,7 +4044,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* other headers */
-#define PHP_MBSTR_MAIL_MIME_HEADER1 "Mime-Version: 1.0"
+#define PHP_MBSTR_MAIL_MIME_HEADER1 "MIME-Version: 1.0"
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
@@ -4057,8 +4057,10 @@ PHP_FUNCTION(mb_send_mail)
 		}
 	}
 
-	mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-	mbfl_memory_device_strncat(&device, "\n", 1);
+	if (!zend_hash_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
+		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
+		mbfl_memory_device_strncat(&device, "\n", 1);
+	}
 
 	if (!suppressed_hdrs.cnt_type) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);

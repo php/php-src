@@ -28,7 +28,7 @@ if (mb_language("simplified chinese")) {
 --EXPECTF--
 To: example@example.com
 Subject: %s
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
@@ -36,7 +36,7 @@ Content-Transfer-Encoding: %s
 To: example@example.com
 Subject: =?HZ-GB-2312?B?fnsyYlFpfn0gU2ltcGxpZmllZCBD?=
  =?HZ-GB-2312?B?aGluZXNl?=
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=HZ-GB-2312
 Content-Transfer-Encoding: 7bit
 
