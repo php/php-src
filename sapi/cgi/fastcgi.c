@@ -198,7 +198,7 @@ static void fcgi_hash_destroy(fcgi_hash *h)
 		fcgi_hash_buckets *q = b;
 		b = b->next;
 		free(q);
-	}		
+	}
 	p = h->data;
 	while (p) {
 		fcgi_data_seg *q = p;
@@ -216,7 +216,7 @@ static void fcgi_hash_clean(fcgi_hash *h)
 		fcgi_hash_buckets *q = h->buckets;
 
 		h->buckets = h->buckets->next;
-		free(q);		
+		free(q);
 	}
 	h->buckets->idx = 0;
 	/* delete all data segments except the first one */
@@ -224,7 +224,7 @@ static void fcgi_hash_clean(fcgi_hash *h)
 		fcgi_data_seg *q = h->data;
 
 		h->data = h->data->next;
-		free(q);		
+		free(q);
 	}
 	h->data->pos = h->data->data;
 }
@@ -237,7 +237,7 @@ static inline char* fcgi_hash_strndup(fcgi_hash *h, char *str, unsigned int str_
 		p->pos = p->data;
 		p->end = p->pos + str_len + 1;
 		p->next = h->data;
-		h->data = p; 
+		h->data = p;
 	}
 	memcpy(h->data->pos, str, str_len);
 	str = h->data->pos;
@@ -633,7 +633,7 @@ int fcgi_listen(const char *path, int backlog)
 			8192, 8192, 0, &saw);
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
-		}		
+		}
 		listen_socket = _open_osfhandle((long)namedPipe, 0);
 		if (!is_initialized) {
 			fcgi_init();
@@ -675,35 +675,35 @@ int fcgi_listen(const char *path, int backlog)
 	if (!tcp) {
 		chmod(path, 0777);
 	} else {
-			char *ip = getenv("FCGI_WEB_SERVER_ADDRS");
-			char *cur, *end;
-			int n;
-			
-			if (ip) {
-				ip = strdup(ip);
-				cur = ip;
-				n = 0;
-				while (*cur) {
-					if (*cur == ',') n++;
-					cur++;
+		char *ip = getenv("FCGI_WEB_SERVER_ADDRS");
+		char *cur, *end;
+		int n;
+
+		if (ip) {
+			ip = strdup(ip);
+			cur = ip;
+			n = 0;
+			while (*cur) {
+				if (*cur == ',') n++;
+				cur++;
+			}
+			allowed_clients = malloc(sizeof(in_addr_t) * (n+2));
+			n = 0;
+			cur = ip;
+			while (cur) {
+				end = strchr(cur, ',');
+				if (end) {
+					*end = 0;
+					end++;
 				}
-				allowed_clients = malloc(sizeof(in_addr_t) * (n+2));
-				n = 0;
-				cur = ip;
-				while (cur) {
-					end = strchr(cur, ',');
-					if (end) {
-						*end = 0;
-						end++;
-					}
-					allowed_clients[n] = inet_addr(cur);
-					if (allowed_clients[n] == INADDR_NONE) {
+				allowed_clients[n] = inet_addr(cur);
+				if (allowed_clients[n] == INADDR_NONE) {
 					fprintf(stderr, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS\n", cur);
-					}
-					n++;
-					cur = end;
 				}
-				allowed_clients[n] = INADDR_NONE;
+				n++;
+				cur = end;
+			}
+			allowed_clients[n] = INADDR_NONE;
 			free(ip);
 		}
 	}
@@ -741,7 +741,7 @@ fcgi_request *fcgi_init_request(int listen_socket)
 #endif
 
 	fcgi_hash_init(&req->env, 4096);
-	
+
 	return req;
 }
 
@@ -1375,8 +1375,8 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 				return -1;
 			}
 			pos += 0xfff8;
-		}		
-		
+		}
+
 		pad = (((len - pos) + 7) & ~7) - (len - pos);
 		rest = pad ? 8 - pad : 0;
 
