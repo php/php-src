@@ -117,6 +117,8 @@
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
   requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
 
+- Fixed bug #52614 (Memory leak when writing on uninitialized variable returned
+  from method call). (Dmitry)
 - Fixed bug #51338 (URL-Rewriter is still enabled if use_only_cookies is
   on). (Ilia, j dot jeising at gmail dot com)
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
