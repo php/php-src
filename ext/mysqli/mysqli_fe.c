@@ -31,6 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_fe.h"
+#include "mysqli_priv.h"
 
 #if PHP_VERSION_ID >= 50399
 #define MYSQLI_ZEND_ARG_OBJ_INFO_LINK() ZEND_ARG_OBJ_INFO(0, link, mysqli, 0)
