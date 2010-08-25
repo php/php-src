@@ -25,14 +25,14 @@ if (mb_language("english")) {
 --EXPECTF--
 To: example@example.com
 Subject: %s
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
 %s
 To: example@example.com
 Subject: test English
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s-8859-1
 Content-Transfer-Encoding: 8bit
 
