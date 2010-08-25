@@ -1540,6 +1540,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, unsigned int flags
 				break;
 			default:exit(0);
 		}
+	} else if (extension == MYSQLND_MYSQLI && PG(magic_quotes_runtime)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "magic_quotes_runtime are not supported by mysqlnd. They were deprecated in PHP 5.3 ");
 	}
 	/*
 	  return_value is IS_NULL for no more data and an array for data. Thus it's ok
