@@ -48,6 +48,7 @@
   catching). (Dmitry)
 - Fixed bug #52302 (mysqli_fetch_all does not work with MYSQLI_USE_RESULT).
   (Andrey)
+- Fixed bug #52221 (Misbehaviour of magic_quotes_runtime (get/set)). (Andrey)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
   exit). Requires Oracle bug fix 9891199 for this patch to have an
   effect. (Oracle Corp.)
