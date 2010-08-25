@@ -1624,18 +1624,20 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 static PHP_METHOD(PDOStatement, bindValue)
 {
 	struct pdo_bound_param_data param = {0};
+	long param_type = PDO_PARAM_STR;
 	PHP_STMT_GET_OBJ;
 
 	param.paramno = -1;
-	param.param_type = PDO_PARAM_STR;
 	
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-			"lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
+			"lz/|l", &param.paramno, &param.parameter, &param_type)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
-				&param.namelen, &param.parameter, &param.param_type)) {
+				&param.namelen, &param.parameter, &param_type)) {
 			RETURN_FALSE;
 		}
 	}
+
+	param.param_type = (int) param_type;
 	
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
