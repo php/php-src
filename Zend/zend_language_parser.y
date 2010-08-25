@@ -932,7 +932,7 @@ variable_property:
 
 array_method_dereference:
 		array_method_dereference '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	method '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
+	|	method '[' dim_offset ']' { $1.EA = ZEND_PARSED_METHOD_CALL; fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
 ;
 
 method:
@@ -942,7 +942,7 @@ method:
 ;
 
 method_or_not:			
-		method						{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); $$.EA = ZEND_PARSED_METHOD_CALL; }
+		method						{ $$ = $1; $$.EA = ZEND_PARSED_METHOD_CALL; zend_do_push_object(&$$ TSRMLS_CC); }
 	|	array_method_dereference	{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); }
 	|	/* empty */ { $$.EA = ZEND_PARSED_MEMBER; }
 ;
@@ -964,7 +964,7 @@ variable_class_name:
 
 array_function_dereference:
 		array_function_dereference '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$.EA = ZEND_PARSED_FUNCTION_CALL; } 
+	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $1.EA = ZEND_PARSED_FUNCTION_CALL; } 
 		'[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 TSRMLS_CC); }
 ;
 

@@ -4998,4 +4998,25 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
+{
+	USE_OPLINE
+	zval *var_ptr, *new_zv;
+
+	SAVE_OPLINE();
+	var_ptr = EX_T(opline->op1.var).var.ptr;
+	if (Z_TYPE_P(var_ptr) != IS_OBJECT &&
+	    !PZVAL_IS_REF(var_ptr) &&
+	    Z_REFCOUNT_P(var_ptr) > 1) {
+
+		Z_DELREF_P(var_ptr);
+		ALLOC_ZVAL(new_zv);
+		INIT_PZVAL_COPY(new_zv, var_ptr);
+		var_ptr = new_zv;
+		zval_copy_ctor(var_ptr);
+		EX_T(opline->op1.var).var.ptr = var_ptr;
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

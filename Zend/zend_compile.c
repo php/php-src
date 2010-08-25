@@ -550,6 +550,14 @@ int zend_add_const_name_literal(zend_op_array *op_array, const zval *zv, int unq
 		op.constant = zend_add_literal(CG(active_op_array), &_c); \
 	} while (0)
 
+static inline zend_bool zend_is_function_or_method_call(const znode *variable) /* {{{ */
+{
+	zend_uint type = variable->EA;
+
+	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
+}
+/* }}} */
+
 void zend_do_binary_op(zend_uchar op, znode *result, const znode *op1, const znode *op2 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -781,6 +789,18 @@ void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
 
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+
+	if (zend_is_function_or_method_call(parent)) {
+		init_op(&opline TSRMLS_CC);
+		opline.opcode = ZEND_SEPARATE;
+		SET_NODE(opline.op1, parent);
+		SET_UNUSED(opline.op2);
+		opline.result_type = IS_VAR;
+		opline.result.var = opline.op1.var;
+		zend_llist_add_element(fetch_list_ptr, &opline);
+	}
+	
 	init_op(&opline TSRMLS_CC);
 	opline.opcode = ZEND_FETCH_DIM_W;	/* the backpatching routine assumes W */
 	opline.result_type = IS_VAR;
@@ -802,7 +822,6 @@ void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS
 	
 	GET_NODE(result, opline.result);
 
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 	zend_llist_add_element(fetch_list_ptr, &opline);
 }
 /* }}} */
@@ -982,14 +1001,6 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	GET_NODE(result, opline->result);
-}
-/* }}} */
-
-static inline zend_bool zend_is_function_or_method_call(const znode *variable) /* {{{ */
-{
-	zend_uint type = variable->EA;
-
-	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
 /* }}} */
 
@@ -1307,6 +1318,14 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 
 		while (le) {
 			opline_ptr = (zend_op *)le->data;
+			if (opline_ptr->opcode == ZEND_SEPARATE) {
+				if (type != BP_VAR_R && type != BP_VAR_IS) {
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					memcpy(opline, opline_ptr, sizeof(zend_op));
+				}
+				le = le->next;
+				continue;
+			}
 			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 			memcpy(opline, opline_ptr, sizeof(zend_op));
 			if (opline->op1_type == IS_VAR &&
@@ -4865,6 +4884,16 @@ void zend_do_fetch_property(znode *result, znode *object, const znode *property 
 		}
 	}
 
+	if (zend_is_function_or_method_call(object)) {
+		init_op(&opline TSRMLS_CC);
+		opline.opcode = ZEND_SEPARATE;
+		SET_NODE(opline.op1, object);
+		SET_UNUSED(opline.op2);
+		opline.result_type = IS_VAR;
+		opline.result.var = opline.op1.var;
+		zend_llist_add_element(fetch_list_ptr, &opline);
+	}
+
 	init_op(&opline TSRMLS_CC);
 	opline.opcode = ZEND_FETCH_OBJ_W;	/* the backpatching routine assumes W */
 	opline.result_type = IS_VAR;
@@ -5745,7 +5774,11 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 			if (fetch->opcode == ZEND_FETCH_DIM_W && fetch->op2_type == IS_UNUSED) {
 				zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
 			}
-			fetch->opcode -= 3; /* FETCH_W -> FETCH_R */
+			if (fetch->opcode == ZEND_SEPARATE) {
+				MAKE_NOP(fetch);
+			} else {
+				fetch->opcode -= 3; /* FETCH_W -> FETCH_R */
+			}
 		}
 		/* prevent double SWITCH_FREE */
 		zend_stack_top(&CG(foreach_copy_stack), (void **) &foreach_copy);
