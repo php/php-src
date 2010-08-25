@@ -1084,19 +1084,21 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 			DisconnectNamedPipe(pipe);
 		} else {
 			if (!force) {
-				char buf[8];
+				fcgi_header buf;
 
 				shutdown(req->fd, 1);
-				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+				/* read the last FCGI_STDIN header (it may be omitted) */
+				recv(req->fd, &buf, sizeof(buf), 0);
 			}
 			closesocket(req->fd);
 		}
 #else
 		if (!force) {
-			char buf[8];
+			fcgi_header buf;
 
 			shutdown(req->fd, 1);
-			while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+			/* read the last FCGI_STDIN header (it may be omitted) */
+			recv(req->fd, &buf, sizeof(buf), 0);
 		}
 		close(req->fd);
 #endif
