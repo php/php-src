@@ -811,8 +811,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				   \\?\Volume{62d1c3f8-83b9-11de-b108-806e6f6e6963}\foo
 				*/
 				if (strncmp(substitutename, "\\??\\Volume{",11) == 0 
-					|| strncmp(substitutename, "\\\\?\\Volume{",11) == 0) {
-					isVolume = TRUE;					
+					|| strncmp(substitutename, "\\\\?\\Volume{",11) == 0
+					|| strncmp(substitutename, "\\??\\UNC\\", 8) == 0
+					) {
+					isVolume = TRUE;
 					substitutename_off = 0;
 				} else
 					/* do not use the \??\ and \\?\ prefix*/
