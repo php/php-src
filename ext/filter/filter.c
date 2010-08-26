@@ -404,7 +404,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
-	char *orig_var = NULL;
 	int retval = 0;
 
 	assert(*val != NULL);
@@ -445,10 +444,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	}
 
 	if (array_ptr) {
-		/* Make a copy of the variable name, as php_register_variable_ex seems to
-		 * modify it */
-		orig_var = estrdup(var);
-
 		/* Store the RAW variable internally */
 		Z_STRLEN(raw_var) = val_len;
 		Z_STRVAL(raw_var) = estrndup(*val, val_len);
@@ -477,10 +472,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	}
 
 	if (orig_array_ptr) {
-		php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
-	}
-	if (array_ptr) {
-		efree(orig_var);
+		php_register_variable_ex(var, &new_var, orig_array_ptr TSRMLS_CC);
 	}
 
 	if (retval) {
