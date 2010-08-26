@@ -67,6 +67,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	zval *gpc_element, **gpc_element_p;
 	zend_bool is_array = 0;
 	HashTable *symtable1 = NULL;
+	ALLOCA_FLAG(use_heap)
 
 	assert(var_name != NULL);
 
@@ -80,16 +81,18 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		return;
 	}
 
+
+	/* ignore leading spaces in the variable name */
+	while (*var_name && *var_name==' ') {
+		var_name++;
+	}
+	
 	/*
 	 * Prepare variable name
 	 */
-
-	var_orig = estrdup(var_name);
-	var = var_orig;
-	/* ignore leading spaces in the variable name */
-	while (*var && *var==' ') {
-		var++;
-	}
+	var_len = strlen(var_name);
+	var = var_orig = do_alloca(var_len + 1, use_heap);
+	memcpy(var_orig, var_name, var_len + 1);
 
 	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
 	for (p = var; *p; p++) {
@@ -106,7 +109,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
 		zval_dtor(val);
-		efree(var_orig);
+		free_alloca(var_orig, use_heap);
 		return;
 	}
 
@@ -115,7 +118,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		var_len == sizeof("GLOBALS")-1 &&
 		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
 		zval_dtor(val);
-		efree(var_orig);
+		free_alloca(var_orig, use_heap);
 		return;
 	}
 
@@ -144,7 +147,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				if (!PG(display_errors)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variable nesting level exceeded %ld. To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}
-				efree(var_orig);
+				free_alloca(var_orig, use_heap);
 				return;
 			}
 
@@ -236,7 +239,7 @@ plain_var:
 			}
 		}
 	}
-	efree(var_orig);
+	free_alloca(var_orig, use_heap);
 }
 
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
