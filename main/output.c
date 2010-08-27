@@ -116,10 +116,7 @@ PHPAPI int php_output_activate(TSRMLS_D)
 	memset(&output_globals, 0, sizeof(zend_output_globals));
 #endif
 	
-	OG(handlers) = emalloc(sizeof(zend_stack));
-	if (SUCCESS != zend_stack_init(OG(handlers))) {
-		return FAILURE;
-	}
+	zend_stack_init(&OG(handlers));
 	
 	return SUCCESS;
 }
@@ -135,14 +132,12 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 	OG(running) = NULL;
 	
 	/* release all output handlers */
-	if (OG(handlers)) {
-		while (SUCCESS == zend_stack_top(OG(handlers), (void *) &handler)) {
+	if (OG(handlers).elements) {
+		while (SUCCESS == zend_stack_top(&OG(handlers), (void *) &handler)) {
 			php_output_handler_free(handler TSRMLS_CC);
-			zend_stack_del_top(OG(handlers));
+			zend_stack_del_top(&OG(handlers));
 		}
-		zend_stack_destroy(OG(handlers));
-		efree(OG(handlers));
-		OG(handlers) = NULL;
+		zend_stack_destroy(&OG(handlers));
 	}
 }
 /* }}} */
@@ -218,9 +213,9 @@ PHPAPI int php_output_flush(TSRMLS_D)
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_FLUSH TSRMLS_CC);
 		php_output_handler_op(OG(active), &context);
 		if (context.out.data && context.out.used) {
-			zend_stack_del_top(OG(handlers));
+			zend_stack_del_top(&OG(handlers));
 			php_output_write(context.out.data, context.out.used TSRMLS_CC);
-			zend_stack_push(OG(handlers), &OG(active), sizeof(php_output_handler *));
+			zend_stack_push(&OG(handlers), &OG(active), sizeof(php_output_handler *));
 		}
 		php_output_context_dtor(&context);
 		return SUCCESS;
@@ -264,7 +259,7 @@ PHPAPI void php_output_clean_all(TSRMLS_D)
 	
 	if (OG(active)) {
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_CLEAN TSRMLS_CC);
-		zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_clean, &context);
+		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_clean, &context);
 	}
 }
 
@@ -312,7 +307,7 @@ PHPAPI void php_output_discard_all(TSRMLS_D)
 	Get output buffering level, ie. how many output handlers the stack contains */
 PHPAPI int php_output_get_level(TSRMLS_D)
 {
-	return OG(active) ? zend_stack_count(OG(handlers)) : 0;
+	return OG(active) ? zend_stack_count(&OG(handlers)) : 0;
 }
 /* }}} */
 
@@ -500,7 +495,7 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 		}
 	}
 	/* zend_stack_push never returns SUCCESS but FAILURE or stack level */
-	if (FAILURE == (handler->level = zend_stack_push(OG(handlers), &handler, sizeof(php_output_handler *)))) {
+	if (FAILURE == (handler->level = zend_stack_push(&OG(handlers), &handler, sizeof(php_output_handler *)))) {
 		return FAILURE;
 	}
 	OG(active) = handler;
@@ -516,7 +511,7 @@ PHPAPI int php_output_handler_started(const char *name, size_t name_len TSRMLS_D
 	int i, count = php_output_get_level(TSRMLS_C);
 	
 	if (count) {
-		handlers = *(php_output_handler ***) zend_stack_base(OG(handlers));
+		handlers = *(php_output_handler ***) zend_stack_base(&OG(handlers));
 		
 		for (i = 0; i < count; ++i) {
 			if (name_len == handlers[i]->name_len && !memcmp(handlers[i]->name, name, name_len)) {
@@ -977,13 +972,13 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	 *  - apply op to the one active handler; note that OG(active) might be popped off the stack on a flush
 	 *  - or apply op to the handler stack
 	 */
-	if (OG(active) && (obh_cnt = zend_stack_count(OG(handlers)))) {
+	if (OG(active) && (obh_cnt = zend_stack_count(&OG(handlers)))) {
 		context.in.data = (char *) str;
 		context.in.used = len;
 		
 		if (obh_cnt > 1) {
-			zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_op, &context);
-		} else if ((SUCCESS == zend_stack_top(OG(handlers), (void *) &active)) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
+			zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_TOPDOWN, php_output_stack_apply_op, &context);
+		} else if ((SUCCESS == zend_stack_top(&OG(handlers), (void *) &active)) && (!((*active)->flags & PHP_OUTPUT_HANDLER_DISABLED))) {
 			php_output_handler_op(*active, &context);
 		} else {
 			php_output_context_pass(&context);
@@ -1161,8 +1156,8 @@ static inline int php_output_stack_pop(int flags TSRMLS_DC)
 		}
 		
 		/* pop it off the stack */
-		zend_stack_del_top(OG(handlers));
-		if (SUCCESS == zend_stack_top(OG(handlers), (void *) &current)) {
+		zend_stack_del_top(&OG(handlers));
+		if (SUCCESS == zend_stack_top(&OG(handlers), (void *) &current)) {
 			OG(active) = *current;
 		} else {
 			OG(active) = NULL;
@@ -1411,7 +1406,7 @@ PHP_FUNCTION(ob_list_handlers)
 		return;
 	}
 	
-	zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
+	zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
 }
 /* }}} */
 
@@ -1430,7 +1425,7 @@ PHP_FUNCTION(ob_get_status)
 	
 	array_init(return_value);
 	if (full_status) {
-		zend_stack_apply_with_argument(OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
+		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
 	} else {
 		php_output_handler_status(OG(active), return_value);
 	}

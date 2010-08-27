@@ -96,8 +96,8 @@ ZEND_API int zend_stack_destroy(zend_stack *stack)
 		for (i = 0; i < stack->top; i++) {
 			efree(stack->elements[i]);
 		}
-
 		efree(stack->elements);
+		stack->elements = NULL;
 	}
 
 	return SUCCESS;
