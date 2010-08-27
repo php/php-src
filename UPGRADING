@@ -90,7 +90,8 @@ UPGRADE NOTES - PHP X.Y
 3. Changes made to existing functions
 =====================================
 
-- 
+- array_combine now returns array() instead of FALSE when two empty arrays are
+  provided as parameters.
 
 ===================================
 4. Changes made to existing methods
