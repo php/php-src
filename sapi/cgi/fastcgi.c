@@ -1157,17 +1157,19 @@ int fcgi_accept_request(fcgi_request *req)
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
 					FCGI_UNLOCK(req->listen_socket);
-					if (req->fd >= 0 && allowed_clients) {
+					if (req->fd >= 0 &&
+					    allowed_clients &&
+					    ((struct sockaddr *)&sa)->sa_family == AF_INET) {
 						int n = 0;
 						int allowed = 0;
 
-							while (allowed_clients[n] != INADDR_NONE) {
-								if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
-									allowed = 1;
-									break;
-								}
-								n++;
+						while (allowed_clients[n] != INADDR_NONE) {
+							if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
+								allowed = 1;
+								break;
 							}
+							n++;
+						}
 						if (!allowed) {
 							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
 							closesocket(req->fd);
