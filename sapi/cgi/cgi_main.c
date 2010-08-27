@@ -1444,10 +1444,205 @@ static PHP_MINFO_FUNCTION(cgi)
 }
 /* }}} */
 
+PHP_FUNCTION(apache_child_terminate) /* {{{ */
+{
+	if (ZEND_NUM_ARGS() > 0) {
+		WRONG_PARAM_COUNT;
+	}
+	if (fcgi_is_fastcgi()) {
+		fcgi_terminate();
+	}
+}
+/* }}} */
+
+static void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC) /* {{{ */
+{
+	zval *return_value = (zval*)arg;
+	char *str = NULL;
+	char *p;
+	ALLOCA_FLAG(use_heap)
+
+	if (var_len > 5 &&
+	    var[0] == 'H' &&
+	    var[1] == 'T' &&
+	    var[2] == 'T' &&
+	    var[3] == 'P' &&
+	    var[4] == '_') {
+
+		var_len -= 5;
+		if (var_len == 0) {
+			return;
+		}
+		p = var + 5;
+		var = str = do_alloca(var_len + 1, use_heap);
+		*str++ = *p++;
+		while (*p) {
+			if (*p == '_') {
+				*str++ = '-';
+				p++;
+				if (*p) {
+					*str++ = *p++;
+				}
+			} else if (*p >= 'A' && *p <= 'Z') {
+				*str++ = (*p++ - 'A' + 'a');
+			} else {
+				*str++ = *p++;
+			}
+		}
+		*str = 0;
+	} else if (var_len == sizeof("CONTENT_TYPE")-1 &&
+	           memcmp(var, "CONTENT_TYPE", sizeof("CONTENT_TYPE")-1) == 0) {
+		var = "Content-Type";
+	} else if (var_len == sizeof("CONTENT_LENGTH")-1 &&
+	           memcmp(var, "CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1) == 0) {
+		var = "Content-Length";
+	} else {
+		return;
+	}
+	add_assoc_stringl_ex(return_value, var, var_len+1, val, val_len, 1);
+	if (str) {
+		free_alloca(var, use_heap);
+	}
+}
+/* }}} */
+
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	if (ZEND_NUM_ARGS() > 0) {
+		WRONG_PARAM_COUNT;
+	}
+	array_init(return_value);
+	if (fcgi_is_fastcgi()) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+
+		fcgi_loadenv(request, add_request_header, return_value TSRMLS_CC);
+	} else {
+		char buf[128];
+		char **env, *p, *q, *var, *val, *t = buf;
+		size_t alloc_size = sizeof(buf);
+		unsigned long var_len;
+
+		for (env = environ; env != NULL && *env != NULL; env++) {
+			val = strchr(*env, '=');
+			if (!val) {				/* malformed entry? */
+				continue;
+			}
+			var_len = val - *env;
+			if (var_len >= alloc_size) {
+				alloc_size = var_len + 64;
+				t = (t == buf ? emalloc(alloc_size): erealloc(t, alloc_size));
+			}
+			var = *env;
+			if (var_len > 5 &&
+			    var[0] == 'H' &&
+			    var[1] == 'T' &&
+			    var[2] == 'T' &&
+			    var[3] == 'P' &&
+			    var[4] == '_') {
+
+				var_len -= 5;
+				if (var_len == 0) {
+					continue;
+				}
+
+				if (var_len >= alloc_size) {
+					alloc_size = var_len + 64;
+					t = (t == buf ? emalloc(alloc_size): erealloc(t, alloc_size));
+				}
+				p = var + 5;
+
+				var = q = t;
+				*q++ = *p++;
+				while (*p) {
+					if (*p == '_') {
+						*q++ = '-';
+						p++;
+						if (*p) {
+							*q++ = *p++;
+						}
+					} else if (*p >= 'A' && *p <= 'Z') {
+						*q++ = (*p++ - 'A' + 'a');
+					} else {
+						*q++ = *p++;
+					}
+				}
+				*q = 0;
+			} else if (var_len == sizeof("CONTENT_TYPE")-1 &&
+			           memcmp(var, "CONTENT_TYPE", sizeof("CONTENT_TYPE")-1) == 0) {
+				var = "Content-Type";
+			} else if (var_len == sizeof("CONTENT_LENGTH")-1 &&
+			           memcmp(var, "CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1) == 0) {
+				var = "Content-Length";
+			} else {
+				continue;
+			}
+			val++;
+			add_assoc_string_ex(return_value, var, var_len+1, val, 1);
+		}
+		if (t != buf && t != NULL) {
+			efree(t);
+		}
+	}
+}
+/* }}} */
+
+static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	char *s, *p;
+	int  len;
+	ALLOCA_FLAG(use_heap)
+
+	if (h->header_len > 0) {
+		p = strchr(h->header, ':');
+		len = p - h->header;
+		if (p && (len > 0)) {
+			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
+				len--;
+			}
+			if (len) {
+				s = do_alloca(len + 1, use_heap);
+				memcpy(s, h->header, len);
+				s[len] = 0;
+				do {
+					p++;
+				} while (*p == ' ' || *p == '\t');
+				add_assoc_stringl_ex(return_value, s, len+1, p, h->header_len - (p - h->header), 1);
+				free_alloca(s, use_heap);
+			}
+		}
+	}
+}
+/* }}} */
+
+PHP_FUNCTION(apache_response_headers) /* {{{ */
+{
+	if (ZEND_NUM_ARGS() > 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (!&SG(sapi_headers).headers) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry cgi_functions[] = {
+	PHP_FE(apache_child_terminate, arginfo_no_args)
+	PHP_FE(apache_request_headers, arginfo_no_args)
+	PHP_FE(apache_response_headers, arginfo_no_args)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
+	{NULL, NULL, NULL}
+};
+
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
-	NULL,
+	cgi_functions,
 	PHP_MINIT(cgi),
 	PHP_MSHUTDOWN(cgi),
 	NULL,

@@ -396,6 +396,11 @@ int fcgi_in_shutdown(void)
 	return in_shutdown;
 }
 
+void fcgi_terminate(void)
+{
+	in_shutdown = 1;
+}
+
 int fcgi_init(void)
 {
 	if (!is_initialized) {
