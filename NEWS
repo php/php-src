@@ -101,6 +101,8 @@
    at gmail dot com, Pierre)
 - Implemented FR #42060 (Add paged Results support). (ando@OpenLDAP.org,
   iarenuno@eteo.mondragon.edu, jeanseb@au-fil-du.net, remy.saissy@gmail.com)
+- Implemented FR #34857 (Change array_combine behaviour when called with empty
+  arrays). (joel.perras@gmail.com)
 
 - Fixed PDO objects binary incompatibility. (Dmitry)
 

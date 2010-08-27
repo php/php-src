@@ -82,9 +82,8 @@ echo "Done";
 --EXPECTF--
 *** Testing array_combine() : assoc array with diff values to both $keys and $values argument ***
 -- Iteration 1 --
-
-Warning: array_combine(): Both parameters should have at least 1 element in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 2 --
 array(1) {
   [0]=>

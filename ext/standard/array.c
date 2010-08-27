@@ -4481,12 +4481,11 @@ PHP_FUNCTION(array_combine)
 		RETURN_FALSE;
 	}
 
-	if (!num_keys) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have at least 1 element");
-		RETURN_FALSE;
-	}
-
 	array_init_size(return_value, num_keys);
+
+	if (!num_keys) {
+		return;
+	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos_keys);
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
