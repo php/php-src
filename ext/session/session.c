@@ -403,9 +403,8 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	efree(buf);
 
 	if (PS(entropy_length) > 0) {
-		unsigned char rbuf[2048];
-
 #ifdef PHP_WIN32
+		unsigned char rbuf[2048];
 		size_t toread = PS(entropy_length);
 
 		if (php_win32_get_random_bytes(rbuf, (size_t) toread) == SUCCESS){
