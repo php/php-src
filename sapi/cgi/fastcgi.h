@@ -99,6 +99,7 @@ int fcgi_init(void);
 void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_in_shutdown(void);
+void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
 fcgi_request* fcgi_init_request(int listen_socket);
 void fcgi_destroy_request(fcgi_request *req);
