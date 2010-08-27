@@ -245,7 +245,7 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 		}
 		if (tmp != cur_path) {
 			free(tmp);
-		}		    	
+		}
 	}
 	buf->st_uid = buf->st_gid = buf->st_ino = 0;
 	buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
@@ -255,9 +255,9 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 
 		if (path[len-4] == '.') {
 			if (_memicmp(path+len-3, "exe", 3) == 0 ||
-			    _memicmp(path+len-3, "com", 3) == 0 ||
-			    _memicmp(path+len-3, "bat", 3) == 0 ||
-			    _memicmp(path+len-3, "cmd", 3) == 0) {
+				_memicmp(path+len-3, "com", 3) == 0 ||
+				_memicmp(path+len-3, "bat", 3) == 0 ||
+				_memicmp(path+len-3, "cmd", 3) == 0) {
 				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
 			}
 		}
@@ -493,7 +493,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{
 
 	while (*bucket != NULL) {
 		if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
-		           memcmp(path, (*bucket)->path, path_len) == 0) {
+					memcmp(path, (*bucket)->path, path_len) == 0) {
 			realpath_cache_bucket *r = *bucket;
 			*bucket = (*bucket)->next;
 			CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
@@ -512,7 +512,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 	int same = 1;
 	
 	if (realpath_len != path_len ||
-	    memcmp(path, realpath, path_len) != 0) {
+		memcmp(path, realpath, path_len) != 0) {
 		size += realpath_len + 1;
 		same = 0;
 	}
@@ -570,7 +570,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 			CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
 			free(r);
 		} else if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
-		           memcmp(path, (*bucket)->path, path_len) == 0) {
+					memcmp(path, (*bucket)->path, path_len) == 0) {
 			return *bucket;
 		} else {
 			bucket = &(*bucket)->next;
@@ -582,7 +582,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 
 CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
-    return realpath_cache_find(path, path_len, t TSRMLS_CC);
+	return realpath_cache_find(path, path_len, t TSRMLS_CC);
 }
 /* }}} */
 
@@ -650,14 +650,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				if (!start) {
 					/* leading '..' must not be removed in case of relative path */
 					if (j == 0 && path[0] == '.' && path[1] == '.' &&
-					    IS_SLASH(path[2])) {
+							IS_SLASH(path[2])) {
 						path[3] = '.';
 						path[4] = '.';
 						path[5] = DEFAULT_SLASH;
 						j = 5;
 					} else if (j > 0 && 
-				               path[j+1] == '.' && path[j+2] == '.' &&
-				               IS_SLASH(path[j+3])) {
+							path[j+1] == '.' && path[j+2] == '.' &&
+							IS_SLASH(path[j+3])) {
 						j += 4;
 						path[j++] = '.';
 						path[j++] = '.';
@@ -683,18 +683,18 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (!*t) {
 				*t = time(0);
 			}
-		    if ((bucket = realpath_cache_find(path, len, *t TSRMLS_CC)) != NULL) {
-		    	if (is_dir && !bucket->is_dir) {
+			if ((bucket = realpath_cache_find(path, len, *t TSRMLS_CC)) != NULL) {
+				if (is_dir && !bucket->is_dir) {
 					/* not a directory */
 					return -1;
-		    	} else {
-		    		if (link_is_dir) {
-		    			*link_is_dir = bucket->is_dir;
-		    		}
+				} else {
+					if (link_is_dir) {
+						*link_is_dir = bucket->is_dir;
+					}
 					memcpy(path, bucket->realpath, bucket->realpath_len + 1);
-				    return bucket->realpath_len;
+					return bucket->realpath_len;
 				}
-	    	}
+			}
 		}
 
 #ifdef TSRM_WIN32
@@ -903,7 +903,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 		if (save && S_ISLNK(st.st_mode)) {
 			if (++(*ll) > LINK_MAX || (j = readlink(tmp, path, MAXPATHLEN)) < 0) {
-			    /* too many links or broken symlinks */
+				/* too many links or broken symlinks */
 				tsrm_free_alloca(tmp, use_heap);
 				return -1;
 			}
@@ -915,10 +915,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			} else {
-			    if (i + j >= MAXPATHLEN-1) {
+				if (i + j >= MAXPATHLEN-1) {
 					tsrm_free_alloca(tmp, use_heap);
 					return -1; /* buffer overflow */
-			    }
+				}
 				memmove(path+i, path, j+1);
 				memcpy(path, tmp, i-1);
 				path[i-1] = DEFAULT_SLASH;
@@ -1042,14 +1042,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 						state_cwd_length++;
 					}						 
 					while (state->cwd[state_cwd_length] &&
-					       !IS_SLASH(state->cwd[state_cwd_length])) {
+							!IS_SLASH(state->cwd[state_cwd_length])) {
 						state_cwd_length++;
 					}						 
 					while (IS_SLASH(state->cwd[state_cwd_length])) {
 						state_cwd_length++;
 					}						 
 					while (state->cwd[state_cwd_length] &&
-					       !IS_SLASH(state->cwd[state_cwd_length])) {
+							!IS_SLASH(state->cwd[state_cwd_length])) {
 						state_cwd_length++;
 					}						 
 				}
@@ -1078,7 +1078,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 #ifdef TSRM_WIN32
 	if (memchr(resolved_path, '*', path_length) ||
-	    memchr(resolved_path, '?', path_length)) {
+		memchr(resolved_path, '?', path_length)) {
 		return 1;
 	}
 #endif
@@ -1245,8 +1245,8 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 		new_state.cwd = (char*)malloc(1);
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;		
-	    if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
-		    path = cwd;
+		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
+			path = cwd;
 		}
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path))) {
 		CWD_STATE_COPY(&new_state, &CWDG(cwd));
@@ -1764,11 +1764,11 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 		new_state.cwd = (char*)malloc(1);
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;		
-	    if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
-		    path = cwd;
+		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
+			path = cwd;
 		}
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
-	    VCWD_GETCWD(cwd, MAXPATHLEN)) {
+					VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		new_state.cwd = strdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 	} else {
