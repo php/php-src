@@ -16,6 +16,8 @@
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
+- Fixed bug #52745 (Binding params doesn't work when selecting a date inside a
+  CASE-WHEN). (Andrey)
 - Fixed bug #52699 (PDO bindValue writes long int 32bit enum).
   (rein at basefarm dot no)
 - Fixed bug #52681 (mb_send_mail() appends an extra MIME-Version header).
