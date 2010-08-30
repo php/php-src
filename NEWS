@@ -41,6 +41,8 @@
   (Felipe)
 - Fixed bug #52468 (wddx_deserialize corrupts integer field value when left
   empty). (Felipe)
+- Fixed bug #52454 (Relative dates and getTimestamp increments by one day).
+  (Derick)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
 - Fixed bug #52433 (Call to undefined method mysqli::poll() - must be static).
