@@ -398,13 +398,35 @@ int php_init_config(TSRMLS_D)
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
+		char phprc_path[MAXPATHLEN];
 #endif
 
 		env_location = getenv("PHPRC");
-		if (!env_location) {
-			env_location = "";
-		}
 
+#ifdef PHP_WIN32
+		if (!env_location) {
+			char dummybuf;
+			int size;
+
+			SetLastError(0);
+
+			/*If the given bugger is not large enough to hold the data, the return value is 
+			the buffer size,  in characters, required to hold the string and its terminating 
+			null character. We use this return value to alloc the final buffer. */
+			size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
+			if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+				/* The environment variable doesn't exist. */
+				env_location = "";
+			} else {
+				if (size == 0) {
+					env_location = "";
+				} else {
+					size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
+					env_location = phprc_path;
+				}
+			}
+		}
+#endif
 		/*
 		 * Prepare search path
 		 */
