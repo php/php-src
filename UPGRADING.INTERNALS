@@ -1,0 +1,13 @@
+$Id$
+
+UPGRADE NOTES - PHP X.Y
+
+1. Internal API changes
+
+========================
+1. Internal API changes
+========================
+
+virtual_file_ex takes now a TSRM context as last parameter:
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, 
+ verify_path_func verify_path, int use_realpath TSRLS_DC);
