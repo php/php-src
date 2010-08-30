@@ -150,6 +150,10 @@ require_once('skipifconnectfailure.inc');
 		));
 	}
 
+	if ($version > 50110 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
+	}
+
 	/* pretty dump test, but that is the best way to mimic mysql.c */
 	if (defined('MYSQLI_DATA_TRUNCATED'))
 		$expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
