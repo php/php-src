@@ -22,6 +22,7 @@
   (Adam)
 - Fixed bug #52674 (FPM Status page returns inconsistent Content-Type headers).
   (fat)
+- Fixed bug #52668 (Iterating over a dateperiod twice is broken). (Derick)
 - Fixed bug #52654 (mysqli doesn't install headers with structures it uses).
   (Andrey)
 - Fixed bug #52636 (php_mysql_fetch_hash writes long value into int). 
