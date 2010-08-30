@@ -424,6 +424,10 @@ int php_init_config(TSRMLS_D)
 				}
 			}
 		}
+#else
+		if (!env_location) {
+			env_location = "";
+		}
 #endif
 		/*
 		 * Prepare search path
