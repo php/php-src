@@ -28,7 +28,6 @@ UPGRADE NOTES - PHP X.Y
      h. New methods
      i. New class constants
      j. New hash algorithms
-13. Internals API changes
 
 ========================================
 1. Changes made to default configuration
@@ -259,10 +258,4 @@ UPGRADE NOTES - PHP X.Y
        - fnv164
        - joaat
 
-========================
-13. Internal API changes
-========================
 
-virtual_file_ex takes now a TSRM context as last parameter:
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, 
- verify_path_func verify_path, int use_realpath TSRLS_DC);
