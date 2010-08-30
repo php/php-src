@@ -317,13 +317,13 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct event_base *base) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
-	struct fpm_child_s *last_idle_child = NULL;
-	int i;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		struct fpm_child_s *child;
+		struct fpm_child_s *last_idle_child = NULL;
 		int idle = 0;
 		int active = 0;
+		int children_to_fork;
 
 		if (wp->config == NULL) continue;
 
@@ -378,11 +378,11 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 			}
 
 			/* compute the number of idle process to spawn */
-			i = MIN(wp->idle_spawn_rate, wp->config->pm_min_spare_servers - idle);
+			children_to_fork = MIN(wp->idle_spawn_rate, wp->config->pm_min_spare_servers - idle);
 
 			/* get sure it won't exceed max_children */
-			i = MIN(i, wp->config->pm_max_children - wp->running_children);
-			if (i <= 0) {
+			children_to_fork = MIN(children_to_fork, wp->config->pm_max_children - wp->running_children);
+			if (children_to_fork <= 0) {
 				if (!wp->warn_max_children) {
 					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
@@ -392,7 +392,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 			}
 			wp->warn_max_children = 0;
 
-			fpm_children_make(wp, 1, i, 1, base);
+			fpm_children_make(wp, 1, children_to_fork, 1, base);
 
 			/* if it's a child, stop here without creating the next event
 			 * this event is reserved to the master process
@@ -401,7 +401,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 				return;
 			}
 
-			zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] %d child(ren) have been created dynamically", wp->config->name, i);	
+			zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] %d child(ren) have been created dynamically", wp->config->name, children_to_fork);	
 
 			/* Double the spawn rate for the next iteration */
 			if (wp->idle_spawn_rate < FPM_MAX_SPAWN_RATE) {
