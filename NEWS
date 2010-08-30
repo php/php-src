@@ -47,6 +47,7 @@
   (Sriram Natarajan)
 - Fixed bug #52433 (Call to undefined method mysqli::poll() - must be static).
   (Andrey)
+- Fixed bug #52430 (date_parse parse 24:xx:xx as valid time). (Derick)
 - Fixed bug #52417 (MySQLi build failure with mysqlnd on MacOS X). (Andrey)
 - Fixed bug #52413 (MySQLi/libmysql build failure on OS X, FreeBSD). (Andrey)
 - Fixed bug #52390 (mysqli_report() should be per-request setting). (Kalle)
