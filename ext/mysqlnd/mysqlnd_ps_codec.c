@@ -493,7 +493,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATE].can_ret_as_str_in_uni	= TRUE;
 
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].func		= ps_fetch_date;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].can_ret_as_str_in_uni	= TRUE;
