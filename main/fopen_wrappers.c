@@ -759,7 +759,7 @@ PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const cha
 	new_state.cwd = strdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
-	if (virtual_file_ex(&new_state, filepath, NULL, CWD_FILEPATH)) {
+	if (virtual_file_ex(&new_state, filepath, NULL, CWD_FILEPATH TSRMLS_CC)) {
 		free(new_state.cwd);
 		return NULL;
 	}

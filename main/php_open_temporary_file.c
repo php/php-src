@@ -127,7 +127,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	new_state.cwd = strdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
-	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
 		free(new_state.cwd);
 		return -1;
 	}
