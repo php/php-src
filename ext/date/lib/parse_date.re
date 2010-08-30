@@ -1798,6 +1798,10 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 #endif
 	} while(t != EOI);
 
+	/* do funky checking whether the parsed time was valid time */
+	if (in.time->have_time && !timelib_valid_time( in.time->h, in.time->i, in.time->s)) {
+		add_warning(&in, "The parsed time was invalid");
+	}
 	/* do funky checking whether the parsed date was valid date */
 	if (in.time->have_date && !timelib_valid_date( in.time->y, in.time->m, in.time->d)) {
 		add_warning(&in, "The parsed date was invalid");
