@@ -444,6 +444,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse = res;
 
 	time->sse_uptodate = 1;
+	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = 0;
 }
 
 #if 0
