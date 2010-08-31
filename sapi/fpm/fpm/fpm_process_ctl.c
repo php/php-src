@@ -366,6 +366,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 		if (idle < wp->config->pm_min_spare_servers) {
 			if (wp->running_children >= wp->config->pm_max_children) {
 				if (!wp->warn_max_children) {
+					fpm_status_increment_max_children_reached(wp->shm_status);
 					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
@@ -384,6 +385,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 			children_to_fork = MIN(children_to_fork, wp->config->pm_max_children - wp->running_children);
 			if (children_to_fork <= 0) {
 				if (!wp->warn_max_children) {
+					fpm_status_increment_max_children_reached(wp->shm_status);
 					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}

@@ -99,6 +99,40 @@ void fpm_status_update_accepted_conn(struct fpm_shm_s *shm, unsigned long int ac
 }
 /* }}} */
 
+void fpm_status_increment_max_children_reached(struct fpm_shm_s *shm) /* {{{ */
+{
+	struct fpm_status_s status;
+
+	if (!shm) shm = fpm_status_shm;
+	if (!shm || !shm->mem) return;
+
+	/* one shot operation */
+	status = *(struct fpm_status_s *)shm->mem;
+
+	status.max_children_reached++;
+
+	/* one shot operation */
+	*(struct fpm_status_s *)shm->mem = status;
+}
+/* }}} */
+
+void fpm_status_update_max_children_reached(struct fpm_shm_s *shm, unsigned int max_children_reached) /* {{{ */
+{
+	struct fpm_status_s status;
+
+	if (!shm) shm = fpm_status_shm;
+	if (!shm || !shm->mem) return;
+
+	/* one shot operation */
+	status = *(struct fpm_status_s *)shm->mem;
+
+	status.max_children_reached = max_children_reached;
+
+	/* one shot operation */
+	*(struct fpm_status_s *)shm->mem = status;
+}
+/* }}} */
+
 void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int total, int clear_last_update) /* {{{ */
 {
 	struct fpm_status_s status;
@@ -130,13 +164,14 @@ static void fpm_status_handle_status_txt(struct fpm_status_s *status, char **out
 	}
 
 	spprintf(output, 0, 
-		"accepted conn:   %lu\n"
-		"pool:             %s\n"
-		"process manager:  %s\n"
-		"idle processes:   %d\n"
-		"active processes: %d\n"
-		"total processes:  %d\n",
-		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+		"accepted conn:        %lu\n"
+		"pool:                 %s\n"
+		"process manager:      %s\n"
+		"idle processes:       %d\n"
+		"active processes:     %d\n"
+		"total processes:      %d\n"
+		"max children reached: %u\n",
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total, status->max_children_reached);
 
 	spprintf(content_type, 0, "Content-Type: text/plain");
 }
@@ -156,8 +191,9 @@ static void fpm_status_handle_status_html(struct fpm_status_s *status, char **ou
 		"<tr><th>idle processes</th><td>%d</td></tr>\n"
 		"<tr><th>active processes</th><td>%d</td></tr>\n"
 		"<tr><th>total processes</th><td>%d</td></tr>\n"
+		"<tr><th>max children reached</th><td>%u</td></tr>\n"
 		"</table>",
-		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total, status->max_children_reached);
 
 	spprintf(content_type, 0, "Content-Type: text/html");
 }
@@ -176,9 +212,10 @@ static void fpm_status_handle_status_json(struct fpm_status_s *status, char **ou
 		"\"process manager\":\"%s\","
 		"\"idle processes\":%d,"
 		"\"active processes\":%d,"
-		"\"total processes\":%d"
+		"\"total processes\":%d,"
+		"\"max children reached\":%u"
 		"}",
-		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total, status->max_children_reached);
 
 	spprintf(content_type, 0, "Content-Type: application/json");
 }

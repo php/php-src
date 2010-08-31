@@ -15,6 +15,7 @@ struct fpm_status_s {
 	int active;
 	int total;
 	unsigned long int accepted_conn;
+	unsigned int max_children_reached;
 	struct timeval last_update;
 };
 
@@ -23,6 +24,8 @@ void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int
 void fpm_status_update_accepted_conn(struct fpm_shm_s *shm, unsigned long int accepted_conn);
 void fpm_status_increment_accepted_conn(struct fpm_shm_s *shm);
 void fpm_status_set_pm(struct fpm_shm_s *shm, int pm);
+void fpm_status_update_max_children_reached(struct fpm_shm_s *shm, unsigned int max_children_reached);
+void fpm_status_increment_max_children_reached(struct fpm_shm_s *shm);
 int fpm_status_handle_status(char *uri, char *query_string, char **output, char **content_type);
 char* fpm_status_handle_ping(char *uri);
 
