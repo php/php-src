@@ -34,7 +34,7 @@ if test "$PHP_SYBASE_CT" != "no"; then
   if test -f $SYBASE_CT_INCDIR/tds.h || test -f $SYBASE_CT_INCDIR/tds_sysdep_public.h; then
     PHP_ADD_LIBRARY(ct,, SYBASE_CT_SHARED_LIBADD)
     SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lct"
-  elif test -f $SYBASE_CT_INCDIR/libsybct64; then
+  elif test -f $SYBASE_CT_INCDIR/libsybct64.so; then
     PHP_ADD_LIBRARY(sybcs64,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybct64,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybcomn64,, SYBASE_CT_SHARED_LIBADD)
@@ -57,7 +57,7 @@ if test "$PHP_SYBASE_CT" != "no"; then
   
     PHP_CHECK_LIBRARY(insck64, insck__getVdate, [PHP_ADD_LIBRARY(insck64,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
     PHP_CHECK_LIBRARY(insck64, bsd_tcp,         [PHP_ADD_LIBRARY(insck64,, SYBASE_CT_SHARED_LIBADD)],[],[-L$SYBASE_CT_LIBDIR])
-  elif test -f $SYBASE_CT_INCDIR/libsybct; then
+  elif test -f $SYBASE_CT_INCDIR/libsybct.so; then
     PHP_ADD_LIBRARY(sybcs,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybct,, SYBASE_CT_SHARED_LIBADD)
     PHP_ADD_LIBRARY(sybcomn,, SYBASE_CT_SHARED_LIBADD)
