@@ -10,6 +10,15 @@
 
 #include "fpm_worker_pool.h"
 
+/*
+  On FreeBSD and OpenBSD, backlog negative values are truncated to SOMAXCONN
+*/
+#if (__FreeBSD__) || (__OpenBSD__)
+#define FPM_BACKLOG_DEFAULT -1
+#else
+#define FPM_BACKLOG_DEFAULT 128
+#endif
+
 enum fpm_address_domain fpm_sockets_domain_from_address(char *addr);
 int fpm_sockets_init_main();
 

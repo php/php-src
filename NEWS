@@ -15,6 +15,7 @@
   (Kalle)
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
+- Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
 - Fixed bug #52745 (Binding params doesn't work when selecting a date inside a
   CASE-WHEN). (Andrey)

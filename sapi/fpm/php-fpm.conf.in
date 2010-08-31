@@ -75,7 +75,7 @@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog. A value of '-1' means unlimited.
-; Default Value: -1
+; Default Value: 128 (-1 on FreeBSD and OpenBSD)
 ;listen.backlog = -1
  
 ; List of ipv4 addresses of FastCGI clients which are allowed to connect.
