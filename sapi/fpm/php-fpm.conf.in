@@ -154,21 +154,25 @@ pm.max_children = 50
 ; The URI to view the FPM status page. If this value is not set, no URI will be
 ; recognized as a status page. By default, the status page shows the following
 ; information:
-;   accepted conn    - the number of request accepted by the pool;
-;   pool             - the name of the pool;
-;   process manager  - static or dynamic;
-;   idle processes   - the number of idle processes;
-;   active processes - the number of active processes;
-;   total processes  - the number of idle + active processes.
+;   accepted conn        - the number of request accepted by the pool;
+;   pool                 - the name of the pool;
+;   process manager      - static or dynamic;
+;   idle processes       - the number of idle processes;
+;   active processes     - the number of active processes;
+;   total processes      - the number of idle + active processes.
+;   max children reached - number of times, the process limit has been reached,
+;                          when pm tries to start more children (works only for
+;                          pm 'dynamic')
 ; The values of 'idle processes', 'active processes' and 'total processes' are
 ; updated each second. The value of 'accepted conn' is updated in real time.
 ; Example output:
-;   accepted conn:   12073
-;   pool:             www
-;   process manager:  static
-;   idle processes:   35
-;   active processes: 65
-;   total processes:  100
+;   accepted conn:        12073
+;   pool:                 www
+;   process manager:      static
+;   idle processes:       35
+;   active processes:     65
+;   total processes:      100
+;   max children reached: 1
 ; By default the status page output is formatted as text/plain. Passing either
 ; 'html' or 'json' as a query string will return the corresponding output
 ; syntax. Example:
