@@ -39,7 +39,8 @@ try {
 			$this->not_a_magic_one();
 			printf("myclass::__set(%s, -%s-) %d\n",
 				$prop, var_export($value, true), $this->set_calls, self::$static_set_calls);
-			$this->{$prop} = $value;
+			if ("" != $prop) 
+				$this->{$prop} = $value;
 		}
 
 		// NOTE: PDO can call regular methods prior to calling __construct()
