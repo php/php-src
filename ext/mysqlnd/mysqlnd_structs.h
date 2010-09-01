@@ -156,11 +156,18 @@ typedef struct st_mysqlnd_options
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-	char		* unused1;
+#if SIZEOF_CHAR_P == 4
+	uint32_t unused1;
+#elif SIZEOF_CHAR_P == 8
+	uint64_t unused1;
+#else
+#error Not supported platform
+#endif
 	char		* unused2;
 	char		* unused3;
 	char		* unused4;
 	char		* unused5;
+
 	enum_mysqlnd_protocol_type protocol;
 
 	char 		*charset_name;
@@ -190,6 +197,7 @@ typedef struct st_mysqlnd_net_options
 	char		*ssl_cipher;
 	char		*ssl_passphrase;
 	zend_bool	ssl_verify_peer;
+	uint64_t	flags;
 } MYSQLND_NET_OPTIONS;
 
 
