@@ -204,7 +204,8 @@ UPGRADE NOTES - PHP X.Y
 12. Windows support
 ===================
 
-- 
+- is_link now works properly for symbolic links on Windows Vista 
+  or later. Earlier systems do not support symbolic links.
 
 ===================
 13. New in PHP X.Y:
