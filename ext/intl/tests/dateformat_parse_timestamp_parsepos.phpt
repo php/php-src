@@ -76,8 +76,7 @@ Input text is : Sunday, September 18, 3039 4:06:40 PM PT
 Locale is : en_US_CA
 ------------
 datetype = 0 ,timetype =0 
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed text is : 33756908800
 datetype = 1 ,timetype =1 
 Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'
 datetype = 2 ,timetype =2 
@@ -117,8 +116,7 @@ Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'
 datetype = 3 ,timetype =3 
 Error while parsing as: 'Date parsing failed: U_PARSE_ERROR'
 datetype = -1 ,timetype =-1 
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed text is : -2178601860
 ------------
 
 Input text is : 19691218 08:49 AM
