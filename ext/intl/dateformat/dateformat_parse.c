@@ -19,6 +19,7 @@
 #endif
 
 #include <unicode/ustring.h>
+#include <math.h>
 
 #include "php_intl.h"
 #include "intl_convert.h"
@@ -35,7 +36,7 @@
 */
 static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* text_to_parse, int32_t text_len, int32_t *parse_pos, zval *return_value TSRMLS_DC)
 {
-	long	result =  0;
+	double	result =  0;
 	UDate 	timestamp   =0;
 	UChar* 	text_utf16  = NULL;
 	int32_t text_utf16_len = 0;
@@ -52,12 +53,12 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing failed" );
 	
 	/* Since return is in  sec. */
-	result = (long )( timestamp / 1000 );
-	if( result != (timestamp/1000) ) {
-		intl_error_set( NULL, U_BUFFER_OVERFLOW_ERROR,
-                                "datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.\nThe valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.", 0 TSRMLS_CC );
+	result = (double)timestamp / U_MILLIS_PER_SECOND;
+	if(result > LONG_MAX || result < -LONG_MAX) {
+		ZVAL_DOUBLE(return_value, result<0?ceil(result):floor(result));
+	} else {
+		ZVAL_LONG(return_value, (long)result);
 	}
-	RETURN_LONG( result );
 }
 /* }}} */
 
