@@ -26,6 +26,23 @@
 
 #define FCGI_KEEP_CONN  1
 
+/* this is near the perfect hash function for most useful FastCGI variables
+ * which combines efficiency and minimal hash collisions
+ */
+
+#define FCGI_HASH_FUNC(var, var_len) \
+	(UNEXPECTED(var_len < 3) ? var_len : \
+		(((unsigned int)var[3]) << 2) + \
+		(((unsigned int)var[var_len-2]) << 4) + \
+		(((unsigned int)var[var_len-1]) << 2) + \
+		var_len)
+
+#define FCGI_GETENV(request, name) \
+	fcgi_quick_getenv(request, name, sizeof(name)-1, FCGI_HASH_FUNC(name, sizeof(name)-1))
+
+#define FCGI_PUTENV(request, name, value) \
+	fcgi_quick_putenv(request, name, sizeof(name)-1, FCGI_HASH_FUNC(name, sizeof(name)-1), value)
+
 typedef enum _fcgi_role {
 	FCGI_RESPONDER	= 1,
 	FCGI_AUTHORIZER	= 2,
@@ -108,6 +125,8 @@ int fcgi_finish_request(fcgi_request *req, int force_close);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
+char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
+char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
 void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
 
 int fcgi_read(fcgi_request *req, char *str, int len);

@@ -142,11 +142,12 @@ static in_addr_t *allowed_clients = NULL;
 
 /* hash table */
 
-#define FCGI_HASH_TABLE_SIZE 64
+#define FCGI_HASH_TABLE_SIZE 128
 #define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
+#define FCGI_HASH_SEG_SIZE   4096
 
 typedef struct _fcgi_hash_bucket {
-	unsigned long             hash_value;
+	unsigned int              hash_value;
 	unsigned int              var_len;
 	char                     *var;
 	unsigned int              val_len;
@@ -175,16 +176,16 @@ typedef struct _fcgi_hash {
 	fcgi_data_seg     *data;
 } fcgi_hash;
 
-static void fcgi_hash_init(fcgi_hash *h, unsigned int seg_size)
+static void fcgi_hash_init(fcgi_hash *h)
 {
 	memset(h->hash_table, 0, sizeof(h->hash_table));
 	h->list = NULL;
 	h->buckets = (fcgi_hash_buckets*)malloc(sizeof(fcgi_hash_buckets));
 	h->buckets->idx = 0;
 	h->buckets->next = NULL;
-	h->data = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + seg_size);
+	h->data = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + FCGI_HASH_SEG_SIZE);
 	h->data->pos = h->data->data;
-	h->data->end = h->data->pos + seg_size;
+	h->data->end = h->data->pos + FCGI_HASH_SEG_SIZE;
 	h->data->next = NULL;
 }
 
@@ -231,29 +232,31 @@ static void fcgi_hash_clean(fcgi_hash *h)
 
 static inline char* fcgi_hash_strndup(fcgi_hash *h, char *str, unsigned int str_len)
 {
+	char *ret;
+
 	if (UNEXPECTED(h->data->pos + str_len + 1 >= h->data->end)) {
-		fcgi_data_seg *p = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) + str_len);
+		unsigned int seg_size = (str_len + 1 > FCGI_HASH_SEG_SIZE) ? str_len + 1 : FCGI_HASH_SEG_SIZE;
+		fcgi_data_seg *p = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + seg_size);
 
 		p->pos = p->data;
-		p->end = p->pos + str_len + 1;
+		p->end = p->pos + seg_size;
 		p->next = h->data;
 		h->data = p;
 	}
-	memcpy(h->data->pos, str, str_len);
-	str = h->data->pos;
-	h->data->pos[str_len] = 0;
+	ret = h->data->pos; 
+	memcpy(ret, str, str_len);
+	ret[str_len] = 0;
 	h->data->pos += str_len + 1;
-	return str;
+	return ret;
 }
 
-static char* fcgi_hash_set(fcgi_hash *h, char *var, unsigned int var_len, char *val, unsigned int val_len)
+static char* fcgi_hash_set(fcgi_hash *h, unsigned int hash_value, char *var, unsigned int var_len, char *val, unsigned int val_len)
 {
-	unsigned long     hash_value = zend_inline_hash_func(var, var_len);
 	unsigned int      idx = hash_value & FCGI_HASH_TABLE_MASK;
 	fcgi_hash_bucket *p = h->hash_table[idx];
 
-	while (p != NULL) {
-		if (p->hash_value == hash_value &&
+	while (UNEXPECTED(p != NULL)) {
+		if (UNEXPECTED(p->hash_value == hash_value) &&
 		    p->var_len == var_len &&
 		    memcmp(p->var, var, var_len) == 0) {
 
@@ -272,21 +275,20 @@ static char* fcgi_hash_set(fcgi_hash *h, char *var, unsigned int var_len, char *
 	}
 	p = h->buckets->data + h->buckets->idx;
 	h->buckets->idx++;
+	p->next = h->hash_table[idx];
+	h->hash_table[idx] = p;
+	p->list_next = h->list;
+	h->list = p;
 	p->hash_value = hash_value;
 	p->var_len = var_len;
 	p->var = fcgi_hash_strndup(h, var, var_len);
 	p->val_len = val_len;
 	p->val = fcgi_hash_strndup(h, val, val_len);
-	p->next = h->hash_table[idx];
-	h->hash_table[idx] = p;
-	p->list_next = h->list;
-	h->list = p;
 	return p->val;
 }
 
-static void fcgi_hash_del(fcgi_hash *h, char *var, unsigned int var_len)
+static void fcgi_hash_del(fcgi_hash *h, unsigned int hash_value, char *var, unsigned int var_len)
 {
-	unsigned long     hash_value = zend_inline_hash_func(var, var_len);
 	unsigned int      idx = hash_value & FCGI_HASH_TABLE_MASK;
 	fcgi_hash_bucket **p = &h->hash_table[idx];
 
@@ -304,9 +306,8 @@ static void fcgi_hash_del(fcgi_hash *h, char *var, unsigned int var_len)
 	}
 }
 
-static char *fcgi_hash_get(fcgi_hash *h, char *var, unsigned int var_len, unsigned int *val_len)
+static char *fcgi_hash_get(fcgi_hash *h, unsigned int hash_value, char *var, unsigned int var_len, unsigned int *val_len)
 {
-	unsigned long     hash_value = zend_inline_hash_func(var, var_len);
 	unsigned int      idx = hash_value & FCGI_HASH_TABLE_MASK;
 	fcgi_hash_bucket *p = h->hash_table[idx];
 
@@ -745,7 +746,7 @@ fcgi_request *fcgi_init_request(int listen_socket)
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
 #endif
 
-	fcgi_hash_init(&req->env, 4096);
+	fcgi_hash_init(&req->env);
 
 	return req;
 }
@@ -858,7 +859,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			ret = 0;
 			break;
 		}
-		fcgi_hash_set(&req->env, (char*)p, name_len, (char*)p + name_len, val_len);
+		fcgi_hash_set(&req->env, FCGI_HASH_FUNC(p, name_len), (char*)p, name_len, (char*)p + name_len, val_len);
 		p += name_len + val_len;
 	}
 	return ret;
@@ -909,13 +910,13 @@ static int fcgi_read_request(fcgi_request *req)
 		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
 		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
 			case FCGI_RESPONDER:
-				fcgi_hash_set(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
 				break;
 			case FCGI_AUTHORIZER:
-				fcgi_hash_set(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "AUTHORIZER", sizeof("AUTHORIZER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "AUTHORIZER", sizeof("AUTHORIZER")-1);
 				break;
 			case FCGI_FILTER:
-				fcgi_hash_set(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "FILTER", sizeof("FILTER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "FILTER", sizeof("FILTER")-1);
 				break;
 			default:
 				return 0;
@@ -1429,19 +1430,33 @@ char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 
 	if (!req) return NULL;
 
-	return fcgi_hash_get(&req->env, (char*)var, var_len, &val_len);
+	return fcgi_hash_get(&req->env, FCGI_HASH_FUNC(var, var_len), (char*)var, var_len, &val_len);
+}
+
+char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value)
+{
+	unsigned int val_len;
+
+	return fcgi_hash_get(&req->env, hash_value, (char*)var, var_len, &val_len);
 }
 
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 {
-	if (var && req) {
-		if (val == NULL) {
-			fcgi_hash_del(&req->env, var, var_len);
-		} else {
-			return fcgi_hash_set(&req->env, var, var_len, val, strlen(val));
-		}
+	if (!req) return NULL;
+	if (val == NULL) {
+		fcgi_hash_del(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len);
+	} else {
+		return fcgi_hash_set(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len, val, strlen(val));
 	}
-	return NULL;
+}
+
+char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val)
+{
+	if (val == NULL) {
+		fcgi_hash_del(&req->env, hash_value, var, var_len);
+	} else {
+		return fcgi_hash_set(&req->env, hash_value, var, var_len, val, strlen(val));
+	}
 }
 
 void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array TSRMLS_DC)
