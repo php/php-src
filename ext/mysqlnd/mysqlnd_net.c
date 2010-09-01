@@ -665,10 +665,8 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			net->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_COMPRESS:
-#endif
-			/* currently not supported. Todo!! */
+			net->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
 		default:
 			DBG_RETURN(FAIL);

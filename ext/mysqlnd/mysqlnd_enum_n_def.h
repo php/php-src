@@ -94,6 +94,9 @@
 
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 
+
+#define MYSQLND_NET_FLAG_USE_COMPRESSION 1
+
 typedef enum mysqlnd_extension
 {
 	MYSQLND_MYSQL = 0,
