@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Sascha Schumann <sascha@schumann.cx>                        |
+   |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -129,9 +130,12 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef TSRM_WIN32
-CWD_API int php_sys_stat(const char *path, struct stat *buf);
+CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
+# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
+# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
 #else
 # define php_sys_stat stat
+# define php_sys_lstat lstat
 #endif
 
 typedef struct _cwd_state {
@@ -155,9 +159,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC);
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
-#if !defined(TSRM_WIN32)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
-#endif
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
@@ -261,9 +263,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path TSRMLS_CC)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
-#if !defined(TSRM_WIN32)
-# define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
-#endif
+#define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
 #define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
 #define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode TSRMLS_CC)
 #define VCWD_RMDIR(pathname) virtual_rmdir(pathname TSRMLS_CC)

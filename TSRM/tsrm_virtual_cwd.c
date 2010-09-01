@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Sascha Schumann <sascha@schumann.cx>                        |
+   |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -38,6 +39,10 @@
 # ifndef IO_REPARSE_TAG_SYMLINK
 #  define IO_REPARSE_TAG_SYMLINK 0xA000000C
 # endif
+#endif
+
+#ifndef S_IFLNK
+# define S_IFLNK 0120000
 #endif
 
 #ifdef NETWARE
@@ -202,7 +207,7 @@ static inline time_t FileTimeToUnixTime(const FILETIME FileTime)
 	return (time_t)UnixTime;
 }
 
-CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
+CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
@@ -247,9 +252,46 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 			free(tmp);
 		}
 	}
+
 	buf->st_uid = buf->st_gid = buf->st_ino = 0;
-	buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
-	buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+
+	if (lstat && data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+		/* File is a reparse point. Get the target */
+		HANDLE hLink = NULL;
+		REPARSE_DATA_BUFFER * pbuffer;
+		unsigned int retlength = 0;
+		TSRM_ALLOCA_FLAG(use_heap_large);
+
+		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		if(hLink == INVALID_HANDLE_VALUE) {
+			return -1;
+		}
+
+		pbuffer = (REPARSE_DATA_BUFFER *)tsrm_do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
+			tsrm_free_alloca(pbuffer, use_heap_large);
+			CloseHandle(hLink);
+			return -1;
+		}
+
+		CloseHandle(hLink);
+
+		if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+			buf->st_mode = S_IFLNK;
+			buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+		}
+
+#if 0 /* Not used yet */
+		else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+			buf->st_mode |=;
+		}
+#endif
+		tsrm_free_alloca(pbuffer, use_heap_large);
+	} else {
+		buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
+		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
+	}
+
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
 		int len = strlen(path);
 
@@ -715,8 +757,8 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		memcpy(tmp, path, len+1);
 
 		if(save && 
-		!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
-		(data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
+				(data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
@@ -1209,7 +1251,7 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
-	}	
+	}
 	while(--length >= 0 && !IS_SLASH(path[length])) {
 	}
 
@@ -1558,7 +1600,6 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-#if !defined(TSRM_WIN32)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
@@ -1570,13 +1611,12 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ *
 		return -1;
 	}
 
-	retval = lstat(new_state.cwd, buf);
+	retval = php_sys_lstat(new_state.cwd, buf);
 
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
 /* }}} */
-#endif
 
 CWD_API int virtual_unlink(const char *path TSRMLS_DC) /* {{{ */
 {
