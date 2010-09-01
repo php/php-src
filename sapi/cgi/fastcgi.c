@@ -1445,6 +1445,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 	if (!req) return NULL;
 	if (val == NULL) {
 		fcgi_hash_del(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len);
+		return NULL;
 	} else {
 		return fcgi_hash_set(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len, val, strlen(val));
 	}
@@ -1454,6 +1455,7 @@ char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int 
 {
 	if (val == NULL) {
 		fcgi_hash_del(&req->env, hash_value, var, var_len);
+		return NULL;
 	} else {
 		return fcgi_hash_set(&req->env, hash_value, var, var_len, val, strlen(val));
 	}
