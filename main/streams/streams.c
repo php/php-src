@@ -1822,7 +1822,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	char *resolved_path = NULL;
 	char *copy_of_path = NULL;
 
-
 	if (opened_path) {
 		*opened_path = NULL;
 	}
