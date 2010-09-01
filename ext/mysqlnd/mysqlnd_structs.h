@@ -156,13 +156,7 @@ typedef struct st_mysqlnd_options
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-#if SIZEOF_CHAR_P == 4
-	uint32_t unused1;
-#elif SIZEOF_CHAR_P == 8
-	uint64_t unused1;
-#else
-#error Not supported platform
-#endif
+	char		* unused1;
 	char		* unused2;
 	char		* unused3;
 	char		* unused4;
