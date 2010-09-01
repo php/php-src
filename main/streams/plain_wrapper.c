@@ -1306,7 +1306,6 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	char *pathbuf, *ptr, *end;
 	char *exec_fname;
 	char trypath[MAXPATHLEN];
-	struct stat sb;
 	php_stream *stream;
 	int path_length;
 	int filename_length;
@@ -1448,6 +1447,8 @@ not_relative_path:
 		}
 		
 		if (PG(safe_mode)) {
+			struct stat sb;
+
 			if (VCWD_STAT(trypath, &sb) == 0) {
 				/* file exists ... check permission */
 				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
