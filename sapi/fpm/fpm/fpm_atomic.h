@@ -12,7 +12,7 @@
 #endif
 #include <sched.h>
 
-#if (__GNUC__) && (__GNUC__ >= 4 &&  __GNUC_MINOR__ >= 1)
+#ifdef HAVE_BUILTIN_ATOMIC
 
 /**
  * all the cases below (as provided by upstream) define:
