@@ -1147,7 +1147,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 #else
 		php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
 #endif
-        return 0;
+		return 0;
 	}
 
 	/* Clear stat cache (and realpath cache) */
@@ -1229,7 +1229,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 				if (*p == '\0') {
 					*p = DEFAULT_SLASH;
 					if ((*(p+1) != '\0') &&
-					    (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
+						(ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
 						if (options & REPORT_ERRORS) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 						}
