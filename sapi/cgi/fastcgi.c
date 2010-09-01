@@ -1438,7 +1438,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 		if (val == NULL) {
 			fcgi_hash_del(&req->env, var, var_len);
 		} else {
-			return fcgi_hash_set(&req->env, var, var_len+1, val, strlen(val));
+			return fcgi_hash_set(&req->env, var, var_len, val, strlen(val));
 		}
 	}
 	return NULL;
