@@ -499,6 +499,24 @@ AC_DEFUN([AC_FPM_TRACE],
   fi
   
 ])
+
+AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
+[
+  AC_MSG_CHECKING([if gcc supports __sync_bool_compare_and_swap])
+  AC_TRY_LINK(,
+  [
+    int variable = 1;
+    return (__sync_bool_compare_and_swap(&variable, 1, 2)
+           && __sync_add_and_fetch(&variable, 1)) ? 1 : 0;
+  ],
+  [
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_BUILTIN_ATOMIC, 1, [Define to 1 if gcc supports __sync_bool_compare_and_swap() a.o.])
+  ],
+  [
+    AC_MSG_RESULT([no])
+  ])
+])
 dnl }}}
 
 AC_MSG_CHECKING(for FPM build)
@@ -518,6 +536,7 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_PRCTL
   AC_FPM_CLOCK
   AC_FPM_TRACE
+  AC_FPM_BUILTIN_ATOMIC
 
   PHP_ARG_WITH(fpm-user,,
   [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
