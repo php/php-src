@@ -16,7 +16,8 @@ UPGRADE NOTES - PHP X.Y
 8. Changes in SAPI support
 9. Changes in INI directives
 10. Syntax additions
-11. Windows support
+11. Syntax additions
+12. Windows support
 12. New in PHP X.Y:
      a. New libraries
      b. New extensions
