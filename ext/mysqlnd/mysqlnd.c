@@ -714,6 +714,10 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	if (mysql_flags & CLIENT_COMPRESS) {
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
+#else
+	if (conn->net->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+		mysql_flags |= CLIENT_COMPRESS;
+	}
 #endif
 #ifndef MYSQLND_SSL_SUPPORTED
 	if (mysql_flags & CLIENT_SSL) {
@@ -2034,9 +2038,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 	DBG_ENTER("mysqlnd_conn::set_client_option");
 	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
 	switch (option) {
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_COMPRESS:
-#endif
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
