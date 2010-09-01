@@ -33,7 +33,7 @@
 typedef int uid_t;
 typedef int gid_t;
 typedef char * caddr_t;
-#define lstat(x, y) stat(x, y)
+#define lstat(x, y) php_sys_lstat(x, y)
 #define		_IFIFO	0010000	/* fifo */
 #define		_IFBLK	0060000	/* block special */
 #define		_IFLNK	0120000	/* symbolic link */
