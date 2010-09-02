@@ -1,0 +1,16 @@
+$Id$
+
+UPGRADE NOTES - PHP 5.3.4
+
+1. Internal API changes
+
+========================
+1. Internal API changes
+========================
+
+	b. stat/lstat support
+
+lstat is now available on all platforms. On unix-like platform
+php_sys_lstat is an alias to lstat (when avaible). On Windows it is now 
+available using php_sys_lstat. php_sys_stat and php_sys_lstat usage is recommended 
+instead of calling lstat directly, to ensure portability.
