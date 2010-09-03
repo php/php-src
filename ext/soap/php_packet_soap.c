@@ -340,7 +340,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				}
 			}
 		} else {
-		  /* Function hasn't WSDL description */
+		  /* Function has no WSDL description */
 			xmlNodePtr val;
 			val = resp->children;
 			while (val != NULL) {
