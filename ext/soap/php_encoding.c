@@ -373,7 +373,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		HashTable *ht = Z_OBJPROP_P(data);
 
 		if (zend_hash_find(ht, "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' property");
+			soap_error0(E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
 		}
 
 		if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
@@ -1751,7 +1751,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				return 2;
 			} else {
 				if (strict) {
-					soap_error1(E_ERROR,  "Encoding: object hasn't '%s' property", model->u.element->name);
+					soap_error1(E_ERROR,  "Encoding: object has no '%s' property", model->u.element->name);
 				}
 				return 0;
 			}
@@ -1784,7 +1784,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				return 2;
 			} else {
 				if (strict) {
-					soap_error0(E_ERROR,  "Encoding: object hasn't 'any' property");
+					soap_error0(E_ERROR,  "Encoding: object has no 'any' property");
 				}
 				return 0;
 			}
@@ -3632,7 +3632,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 			zval **ztype;
 
 			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
-				soap_error0(E_ERROR,  "Encoding: SoapVar hasn't 'enc_type' property");
+				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_PP(ztype);
 
