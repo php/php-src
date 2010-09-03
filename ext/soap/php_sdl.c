@@ -373,7 +373,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 					soap_error1(E_ERROR, "Parsing WSDL: <message> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error0(E_ERROR, "Parsing WSDL: <message> hasn't name attribute");
+				soap_error0(E_ERROR, "Parsing WSDL: <message> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"portType")) {
@@ -383,7 +383,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 					soap_error1(E_ERROR, "Parsing WSDL: <portType> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error0(E_ERROR, "Parsing WSDL: <portType> hasn't name attribute");
+				soap_error0(E_ERROR, "Parsing WSDL: <portType> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"binding")) {
@@ -393,7 +393,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 					soap_error1(E_ERROR, "Parsing WSDL: <binding> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error0(E_ERROR, "Parsing WSDL: <binding> hasn't name attribute");
+				soap_error0(E_ERROR, "Parsing WSDL: <binding> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"service")) {
@@ -403,7 +403,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 					soap_error1(E_ERROR, "Parsing WSDL: <service> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error0(E_ERROR, "Parsing WSDL: <service> hasn't name attribute");
+				soap_error0(E_ERROR, "Parsing WSDL: <service> has no name attribute");
 			}
 		} else if (!node_is_equal(trav,"documentation")) {
 			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
