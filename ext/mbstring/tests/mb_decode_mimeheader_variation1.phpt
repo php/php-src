@@ -1,5 +1,7 @@
 --TEST--
 Test mb_decode_mimeheader() function : usage variation 
+--CREDITS--
+D. Kesley
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
