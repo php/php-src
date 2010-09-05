@@ -1,10 +1,5 @@
 --TEST--
-p8_only
-Title: Test mb_decode_mimeheader() function : usage variation 
-Internal Reason: we output an extra warning message
-P8 only feature: Yes
-Author: D. Kelsey
-Date: 01/09/2008
+Test mb_decode_mimeheader() function : usage variation 
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
