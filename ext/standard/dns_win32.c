@@ -420,7 +420,7 @@ PHP_FUNCTION(dns_get_record)
 			status = DnsQuery_A(hostname, type_to_fetch, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
 
 			if (status) {
-				if (status == DNS_INFO_NO_RECORDS) {
+				if (status == DNS_INFO_NO_RECORDS || status == DNS_ERROR_RCODE_NAME_ERROR) {
 					continue;
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dns Query failed");
