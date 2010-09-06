@@ -67,6 +67,7 @@
 # include <sys/socket.h>
 # include <sys/un.h>
 # include <netinet/in.h>
+# include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
@@ -337,12 +338,13 @@ static void fcgi_hash_apply(fcgi_hash *h, fcgi_apply_func func, void *arg TSRMLS
 
 struct _fcgi_request {
 	int            listen_socket;
-#ifdef _WIN32
 	int            tcp;
-#endif
 	int            fd;
 	int            id;
 	int            keep;
+#ifdef TCP_NODELAY
+	int            nodelay;
+#endif
 	int            closed;
 
 	int            in_len;
@@ -746,6 +748,10 @@ fcgi_request *fcgi_init_request(int listen_socket)
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
 #endif
 
+#ifdef TCP_NODELAY
+	req->nodelay = 0;
+#endif
+
 	fcgi_hash_init(&req->env);
 
 	return req;
@@ -908,6 +914,18 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 
 		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
+#ifdef TCP_NODELAY
+		if (req->keep && req->tcp && !req->nodelay) {
+# ifdef _WIN32
+			BOOL on = 1;
+# else
+			int on = 1;
+# endif
+
+			setsockopt(req->fd, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof(on));
+			req->nodelay = 1;
+		}
+#endif
 		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
 			case FCGI_RESPONDER:
 				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
@@ -1108,6 +1126,9 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 		}
 		close(req->fd);
 #endif
+#ifdef TCP_NODELAY
+		req->nodelay = 0;
+#endif
 		req->fd = -1;
 	}
 }
@@ -1158,24 +1179,33 @@ int fcgi_accept_request(fcgi_request *req)
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
 					FCGI_UNLOCK(req->listen_socket);
-					if (req->fd >= 0 &&
-					    allowed_clients &&
-					    ((struct sockaddr *)&sa)->sa_family == AF_INET) {
-						int n = 0;
-						int allowed = 0;
+					if (req->fd >= 0) {
+						if (((struct sockaddr *)&sa)->sa_family == AF_INET) {
+#ifndef _WIN32
+							req->tcp = 1;
+#endif
+							if (allowed_clients) {
+								int n = 0;
+								int allowed = 0;
 
-						while (allowed_clients[n] != INADDR_NONE) {
-							if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
-								allowed = 1;
-								break;
+								while (allowed_clients[n] != INADDR_NONE) {
+									if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
+										allowed = 1;
+										break;
+									}
+									n++;
+								}
+								if (!allowed) {
+									fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
+									closesocket(req->fd);
+									req->fd = -1;
+									continue;
+								}
 							}
-							n++;
-						}
-						if (!allowed) {
-							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
-							closesocket(req->fd);
-							req->fd = -1;
-							continue;
+#ifndef _WIN32
+						} else {
+							req->tcp = 0;
+#endif
 						}
 					}
 				}
