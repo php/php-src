@@ -124,8 +124,6 @@ PHP_FUNCTION(dns_check_record)
 
 	status = DnsQuery_A(hostname, type, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
 
-	
-	
 	if (status) {
 		RETURN_FALSE;
 	}
