@@ -67,6 +67,8 @@
 - Fixed bug #50590 (IntlDateFormatter::parse result is limited to the integer
   range). (Stas)
 - Fixed bug #50481 (Storing many SPLFixedArray in an array crashes). (Felipe)
+- Fixed bug #52260 (dns_get_record fails with non-existing domain on Windows).
+  (a_jelly_doughnut at phpbb dot com, Pierre)
 
 22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
