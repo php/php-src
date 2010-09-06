@@ -8,6 +8,7 @@
   (Pierre)
 - Added new character sets to mysqlnd, which are available in MySQL 5.5
   (Andrey)
+- Improved support for is_link and related functions on Windows. (Pierre)
 
 - Fixed symbolic resolution support when the target is a DFS share. (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
@@ -61,6 +62,8 @@
 - Fixed bug #52302 (mysqli_fetch_all does not work with MYSQLI_USE_RESULT).
   (Andrey)
 - Fixed bug #52221 (Misbehaviour of magic_quotes_runtime (get/set)). (Andrey)
+- Fixed bug #51763 (SplFileInfo::getType() does not work symbolic link 
+  and directory). (Pierre)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
   exit). Requires Oracle bug fix 9891199 for this patch to have an
   effect. (Oracle Corp.)
