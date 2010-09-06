@@ -205,7 +205,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		}
 	}
 
-	assert(p - env.envp <= sizeenv);
+	assert((uint)(p - env.envp) <= sizeenv);
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
