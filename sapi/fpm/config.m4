@@ -525,12 +525,19 @@ if test "$PHP_FPM" != "no"; then
 
   AC_LIB_EVENT([$minimum_libevent_version])
 
-  PHP_ADD_LIBRARY_WITH_PATH(event, $LIBEVENT_PATH)
+  dnl check libevent build
+  LD_LIBRARY_PATH_SAVED="$LD_LIBRARY_PATH"
+  export LD_LIBRARY_PATH="$LIBEVENT_PATH:$LD_LIBRARY_PATH"
 
-  PHP_TEST_BUILD(event_init, [ ], [
+  AC_MSG_CHECKING(whether libevent build works)
+    PHP_TEST_BUILD(event_init, [
+    AC_MSG_RESULT(yes)
+  ], [
     AC_MSG_RESULT(no)
-    AC_MSG_ERROR([build test failed. Please check the config.log for details.])
+    AC_MSG_ERROR([build test failed. Please check the config.log for details])
   ], $LIBEVENT_LIBS)
+
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH_SAVED"
 
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
