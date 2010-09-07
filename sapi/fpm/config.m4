@@ -2,7 +2,6 @@ dnl
 dnl $Id$
 dnl
 
-fpm_version="0.6.5"
 minimum_libevent_version="1.4.11"
 
 PHP_ARG_ENABLE(fpm,,
@@ -564,7 +563,6 @@ if test "$PHP_FPM" != "no"; then
     php_fpm_group="$PHP_FPM_GROUP"
   fi
 
-  PHP_SUBST_OLD(fpm_version)
   PHP_SUBST_OLD(php_fpm_user)
   PHP_SUBST_OLD(php_fpm_group)
   php_fpm_sysconfdir=`eval echo $sysconfdir`
@@ -572,7 +570,6 @@ if test "$PHP_FPM" != "no"; then
   php_fpm_localstatedir=`eval echo $localstatedir`
   PHP_SUBST_OLD(php_fpm_localstatedir)
 
-  AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
   AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
 
