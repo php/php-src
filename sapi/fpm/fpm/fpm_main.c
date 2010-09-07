@@ -1480,7 +1480,6 @@ static PHP_MINFO_FUNCTION(cgi)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "php-fpm", "active");
-	php_info_print_table_row(2, "php-fpm version", PHP_FPM_VERSION);
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
