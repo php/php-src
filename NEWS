@@ -72,6 +72,8 @@
 - Fixed bug #50481 (Storing many SPLFixedArray in an array crashes). (Felipe)
 - Fixed bug #52260 (dns_get_record fails with non-existing domain on Windows).
   (a_jelly_doughnut at phpbb dot com, Pierre)
+- Fixed #50953, socket will not connect to IPv4 address when the host has both
+  IPv4 and IPv6 addresses, on Windows. (Gustavo, Pierre)
 
 22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)

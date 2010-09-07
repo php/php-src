@@ -206,7 +206,7 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	}
 	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
 # endif
-		
+
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 		if (error_string) {
 			spprintf(error_string, 0, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
@@ -337,9 +337,19 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	if (n == 0) {
 		goto ok;
 	}
-
+# ifdef PHP_WIN32
+	/* The documentation for connect() says in case of non-blocking connections
+	 * the select function reports success in the writefds set and failure in
+	 * the exceptfds set. Indeed, using PHP_POLLREADABLE results in select
+	 * failing only due to the timeout and not immediately as would be
+	 * exepected when a connection is actively refused. This way,
+	 * php_pollfd_for will return a mask with POLLOUT if the connection
+	 * is successful and with POLLPRI otherwise. */
+	if ((n = php_pollfd_for(sockfd, POLLOUT|POLLPRI, timeout)) == 0) {
+#else
 	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
 		error = PHP_TIMEOUT_ERROR_VALUE;
+#endif
 	}
 
 	if (n > 0) {
