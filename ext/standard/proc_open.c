@@ -119,7 +119,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		}
 
 		sizeenv += el_len+1;
-		
+
 		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (string_length == 0) {
@@ -220,7 +220,6 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 #ifdef PHP_WIN32
-
 	WaitForSingleObject(proc->childHandle, INFINITE);
 	GetExitCodeProcess(proc->childHandle, &wstatus);
 	FG(pclose_ret) = wstatus;
