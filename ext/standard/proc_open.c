@@ -677,6 +677,16 @@ PHP_FUNCTION(proc_open)
 	}
 
 #ifdef PHP_WIN32
+	if (cwd == NULL) {
+		char cur_cwd[MAXPATHLEN];
+		char *getcwd_result;
+		getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
+		if (!getcwd_result) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot get current directory");
+			goto exit_fail;
+		}
+	}
+
 	memset(&si, 0, sizeof(si));
 	si.cb = sizeof(si);
 	si.dwFlags = STARTF_USESTDHANDLES;
