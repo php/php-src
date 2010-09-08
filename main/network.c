@@ -376,7 +376,7 @@ ok:
 		*error_code = error;
 	}
 
-	if (error && error_string) {
+	if (error) {
 		ret = -1;
 		if (error_string) {
 			*error_string = php_socket_strerror(error, NULL, 0);
