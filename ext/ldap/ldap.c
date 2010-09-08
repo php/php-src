@@ -2190,8 +2190,8 @@ PHP_FUNCTION(ldap_8859_to_t61)
    Inject paged results control*/
 PHP_FUNCTION(ldap_ctrl_paged_results) 
 {
-	int pagesize;
-	int iscritical;
+	long pagesize;
+	zend_bool iscritical;
 	zval *link, *cookie;
 	struct berval lcookie = { 0, NULL };
 	ldap_linkdata *ld;
@@ -2226,11 +2226,11 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 			lcookie.bv_len = Z_STRLEN_PP(&cookie);
 			/* fallthru */
 		case 3:
-			ctrl.ldctl_iscritical = iscritical;
+			ctrl.ldctl_iscritical = (int)iscritical;
 			/* fallthru */
 	}
 
-	if (ber_printf(ber, "{iO}", pagesize, &lcookie) == LBER_ERROR) {
+	if (ber_printf(ber, "{iO}", (int)pagesize, &lcookie) == LBER_ERROR) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to BER printf paged results control");
 		RETVAL_BOOL(0);
 		goto lcpr_error_out;
