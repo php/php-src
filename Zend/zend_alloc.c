@@ -1568,6 +1568,10 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 	zend_mm_segment *prev;
 	int internal;
 
+	if (!heap->use_zend_alloc) {
+		return;
+	}
+
 	if (heap->reserve) {
 #if ZEND_DEBUG
 		if (!silent) {
@@ -2581,17 +2585,17 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
-	char *tmp;
-	alloc_globals->mm_heap = zend_mm_startup();
+	char *tmp = getenv("USE_ZEND_ALLOC");
 
-	tmp = getenv("USE_ZEND_ALLOC");
-	if (tmp) {
-		alloc_globals->mm_heap->use_zend_alloc = zend_atoi(tmp, 0);
-		if (!alloc_globals->mm_heap->use_zend_alloc) {
-			alloc_globals->mm_heap->_malloc = malloc;
-			alloc_globals->mm_heap->_free = free;
-			alloc_globals->mm_heap->_realloc = realloc;
-		}
+	if (tmp && !zend_atoi(tmp, 0)) {
+		alloc_globals->mm_heap = malloc(sizeof(struct _zend_mm_heap));
+		memset(alloc_globals->mm_heap, 0, sizeof(struct _zend_mm_heap));
+		alloc_globals->mm_heap->use_zend_alloc = 0;
+		alloc_globals->mm_heap->_malloc = malloc;
+		alloc_globals->mm_heap->_free = free;
+		alloc_globals->mm_heap->_realloc = realloc;
+	} else {
+		alloc_globals->mm_heap = zend_mm_startup();
 	}
 }
 
