@@ -75,6 +75,8 @@
   (a_jelly_doughnut at phpbb dot com, Pierre)
 - Fixed #50953, socket will not connect to IPv4 address when the host has both
   IPv4 and IPv6 addresses, on Windows. (Gustavo, Pierre)
+- Fixed #50524, proc_open on Windows does not respect cwd as it does on other
+  platforms. (Pierre)
 
 22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
