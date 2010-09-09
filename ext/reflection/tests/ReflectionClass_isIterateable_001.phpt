@@ -62,13 +62,27 @@ Is ExtendsIteratorAggregateImpl iterable? bool(true)
 Is A iterable? bool(false)
 
 Test invalid params:
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 34
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 2 given in %s on line 35
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 36
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 37
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 38
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 39
+NULL
+
+Warning: ReflectionClass::isIterateable() expects exactly 0 parameters, 1 given in %s on line 40
+NULL
 
 Test static invocation:
 
