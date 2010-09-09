@@ -348,8 +348,15 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_next = calendar->to_jd(year, 1 + month, 1);
 
 	if (sdn_next == 0) {
-/* if invalid, try first month of the next year... */
-		sdn_next = calendar->to_jd(year + 1, 1, 1);
+		/* If the next month is invalid, then we need to try the first month of
+		 * the next year, bearing in mind that the next year after 1 BCE is
+		 * actually 1 AD and not 0. */
+		if (year == -1) {
+			sdn_next = calendar->to_jd(1, 1, 1);
+		}
+		else {
+			sdn_next = calendar->to_jd(year + 1, 1, 1);
+		}
 	}
 
 	RETURN_LONG(sdn_next - sdn_start);

@@ -20,6 +20,8 @@
 
 - Fixed bug #52786 (PHP should reset section to [PHP] after ini sections).
   (Fedora at famillecollet dot com)
+- Fixed bug #52744 (cal_days_in_month incorrect for December 1 BCE).
+  (gpap at internet dot gr, Adam)
 - Fixed bug #52725 (gcc builtin atomic functions were sometimes used when they
   were not available). (fat)
 - Fixed bug #52745 (Binding params doesn't work when selecting a date inside a
