@@ -416,8 +416,8 @@ END_EXTERN_C()
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
 
-/* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
- * Uses mmap if the src is a plain file and at offset 0 */
+/* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL,
+ * copy until eof(src). */
 #define PHP_STREAM_COPY_ALL		((size_t)-1)
 
 BEGIN_EXTERN_C()
@@ -428,8 +428,8 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 #define php_stream_copy_to_stream_ex(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
 
 
-/* read all data from stream and put into a buffer. Caller must free buffer when done.
- * The copy will use mmap if available. */
+/* read all data from stream and put into a buffer. Caller must free buffer
+ * when done. */
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 		int persistent STREAMS_DC TSRMLS_DC);
 #define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
