@@ -29,6 +29,7 @@
 # endif
 #endif
 
+#ifdef HAVE_GLOB
 #ifndef GLOB_ONLYDIR
 #define GLOB_ONLYDIR (1<<30)
 #define GLOB_FLAGMASK (~GLOB_ONLYDIR)
@@ -278,6 +279,7 @@ php_stream_wrapper  php_glob_stream_wrapper = {
 	NULL,
 	0
 };
+#endif /* HAVE_GLOB */
 
 /*
  * Local variables:
