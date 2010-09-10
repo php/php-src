@@ -1053,8 +1053,20 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
-#ifdef HAVE_SYMLINK
-	ret = readlink(intern->file_name, buff, MAXPATHLEN-1);
+#if defined(PHP_WIN32) || HAVE_SYMLINK
+	if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
+		char expanded_path[MAXPATHLEN];
+
+		/* TODO: Fix expand_filepath to do not resolve links but only expand the path 
+		   (Pierre) */
+		if (!expand_filepath(intern->file_name, expanded_path TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+			RETURN_FALSE;
+		}
+		ret = php_sys_readlink(expanded_path, buff, MAXPATHLEN - 1);
+	} else {
+		ret = php_sys_readlink(intern->file_name, buff,  MAXPATHLEN-1);
+	}
 #else
 	ret = -1; /* always fail if not implemented */
 #endif
