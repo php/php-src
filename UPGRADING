@@ -457,6 +457,14 @@ UPGRADE NOTES - PHP 5.3
 - Firebird and SNMP support are no longer available on Windows. Firebird support
   may be reintroduced in the future.
 
+=====================
+11.1 New in PHP 5.3.4
+=====================
+
+- open_basedir supports now symbolic links (checks the target).
+- is_link and SplFileInfo symbolic links related method are now fully supported
+  (on Windows Vista or later).
+
 ===================
 12. New in PHP 5.3:
 ===================

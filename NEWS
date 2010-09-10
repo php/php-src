@@ -10,6 +10,7 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Implemented symbolic links support for open_basedir checks. (Pierre)
 - Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
 
 - Fixed symbolic resolution support when the target is a DFS share. (Pierre)
