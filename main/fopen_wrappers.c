@@ -172,20 +172,26 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
-#ifdef HAVE_SYMLINK
-		if (nesting_level == 0) {
-			int ret;
-			char buf[MAXPATHLEN];
+#if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
+#if defined(PHP_WIN32)
+		if (EG(windows_version_info).dwMajorVersion > 5) {
+#endif
+			if (nesting_level == 0) {
+				int ret;
+				char buf[MAXPATHLEN];
 
-			ret = readlink(path_tmp, buf, MAXPATHLEN - 1);
-			if (ret < 0) {
-				/* not a broken symlink, move along.. */
-			} else {
-				/* put the real path into the path buffer */
-				memcpy(path_tmp, buf, ret);
-				path_tmp[ret] = '\0';
+				ret = php_sys_readlink(path_tmp, buf, MAXPATHLEN - 1);
+				if (ret < 0) {
+					/* not a broken symlink, move along.. */
+				} else {
+					/* put the real path into the path buffer */
+					memcpy(path_tmp, buf, ret);
+					path_tmp[ret] = '\0';
+				}
 			}
+#if defined(PHP_WIN32)
 		}
+#endif
 #endif
 
 #if defined(PHP_WIN32) || defined(NETWARE)
