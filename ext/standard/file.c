@@ -557,7 +557,6 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	/* uses mmap if possible */
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
 
 		if (PG(magic_quotes_runtime)) {
