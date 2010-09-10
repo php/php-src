@@ -249,9 +249,17 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 		/* Skip first 4 characters if they are "\??\" */
 		if(target[0] == '\\' && target[1] == '\\' && target[2] == '?' && target[3] ==  '\\') {
 			char tmp[MAXPATHLEN];
-			
+			unsigned int offset = 4;
 			dwRet -= 4;
-			memcpy(tmp, target + 4, dwRet);
+
+			/* \??\UNC\ */
+			if (dwRet > 7 && target[4] == 'U' && target[5] == 'N' && target[6] == 'C') {
+				offset += 2;
+				dwRet -= 2;
+				target[offset] = '\\';
+			}
+
+			memcpy(tmp, target + offset, dwRet);
 			memcpy(target, tmp, dwRet);
 		}
 	}
