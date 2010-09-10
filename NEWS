@@ -10,6 +10,8 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
+
 - Fixed symbolic resolution support when the target is a DFS share. (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
