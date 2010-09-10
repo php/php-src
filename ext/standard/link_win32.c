@@ -157,11 +157,11 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(dest_p)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(source_p)) {
 		RETURN_FALSE;
 	}
 
@@ -212,11 +212,11 @@ PHP_FUNCTION(link)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(source_p)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(dest_p)) {
 		RETURN_FALSE;
 	}
 
