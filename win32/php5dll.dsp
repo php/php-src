@@ -1564,10 +1564,6 @@ SOURCE=..\ext\com\VARIANT.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\win32\wfile.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\winutil.c
 # End Source File
 # Begin Source File
