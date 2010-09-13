@@ -1006,7 +1006,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		memcpy(tmp, path, len+1);
 
 		if (save && S_ISLNK(st.st_mode)) {
-			if (++(*ll) > LINK_MAX || (j = readlink(tmp, path, MAXPATHLEN)) < 0) {
+			if (++(*ll) > LINK_MAX || (j = php_sys_readlink(tmp, path, MAXPATHLEN)) < 0) {
 				/* too many links or broken symlinks */
 				tsrm_free_alloca(tmp, use_heap);
 				return -1;
