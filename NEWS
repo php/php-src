@@ -3,6 +3,8 @@
 ?? ??? 2010, PHP 5.2.15
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
+- Fixed bug #52772 (var_dump() doesn't check for the existence of 
+  get_class_name before calling it). (Kalle, Gustavo)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe, Adam)
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
