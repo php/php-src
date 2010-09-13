@@ -23,6 +23,8 @@
 
 - Fixed bug #52786 (PHP should reset section to [PHP] after ini sections).
   (Fedora at famillecollet dot com)
+- Fixed bug #52772 (var_dump() doesn't check for the existence of 
+  get_class_name before calling it). (Kalle, Gustavo)
 - Fixed bug #52744 (cal_days_in_month incorrect for December 1 BCE).
   (gpap at internet dot gr, Adam)
 - Fixed bug #52725 (gcc builtin atomic functions were sometimes used when they
