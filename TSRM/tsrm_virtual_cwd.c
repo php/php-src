@@ -993,7 +993,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		tmp = tsrm_do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 #else
-		if (save && lstat(path, &st) < 0) {
+		if (save && php_sys_lstat(path, &st) < 0) {
 			if (use_realpath == CWD_REALPATH) {
 				/* file not found */
 				return -1;

@@ -860,7 +860,7 @@ g_lstat(fn, sb, pglob)
 		return(-1);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_lstat)(buf, sb));
-	return(lstat(buf, sb));
+	return(php_sys_lstat(buf, sb));
 }
 
 static int
