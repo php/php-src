@@ -317,7 +317,7 @@ static PHP_MINFO_FUNCTION(bz2)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "BZip2 Support", "Enabled");
-	php_info_print_table_row(2, "Stream Wrapper support", "compress.bz2://");
+	php_info_print_table_row(2, "Stream Wrapper support", "compress.bzip2://");
 	php_info_print_table_row(2, "Stream Filter support", "bzip2.decompress, bzip2.compress");
 	php_info_print_table_row(2, "BZip2 Version", (char *) BZ2_bzlibVersion());
 	php_info_print_table_end();
