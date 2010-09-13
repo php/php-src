@@ -873,7 +873,7 @@ g_stat(fn, sb, pglob)
 		return(-1);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_stat)(buf, sb));
-	return(stat(buf, sb));
+	return(php_sys_stat(buf, sb));
 }
 
 static Char *
