@@ -72,7 +72,7 @@ PHP_FUNCTION(readlink)
 		RETURN_FALSE;
 	}
 
-	ret = readlink(link, buff, MAXPATHLEN-1);
+	ret = php_sys_readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
