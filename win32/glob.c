@@ -514,7 +514,7 @@ glob0(pattern, pglob)
 	}
 	if (!(pglob->gl_flags & GLOB_NOSORT))
 		qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
-			pglob->gl_pathc - oldpathc, sizeof(char *), (const void *) compare);
+			pglob->gl_pathc - oldpathc, sizeof(char *), compare);
 	return(0);
 }
 
