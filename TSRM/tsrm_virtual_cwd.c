@@ -273,17 +273,20 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
+	const size_t path_len = strlen(path);
 
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
 		return stat(path, buf);
 	}
 
-	if (path[1] == ':') {
+	if (path_len >= 1 && path[1] == ':') {
 		if (path[0] >= 'A' && path[0] <= 'Z') {
 			buf->st_dev = buf->st_rdev = path[0] - 'A';
 		} else {
 			buf->st_dev = buf->st_rdev = path[0] - 'a';
 		}
+	} else if (IS_UNC_PATH(path, path_len)) {
+		buf->st_dev = buf->st_rdev = 0;
 	} else {
 		char  cur_path[MAXPATHLEN+1];
 		DWORD len = sizeof(cur_path);
