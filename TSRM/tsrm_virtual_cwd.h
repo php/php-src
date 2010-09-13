@@ -108,7 +108,7 @@ typedef unsigned short mode_t;
 #define COPY_WHEN_ABSOLUTE(path) 0
 #endif
 
-#ifndef IS_ABSOLUTE_PATH	
+#ifndef IS_ABSOLUTE_PATH
 #define IS_ABSOLUTE_PATH(path, len) \
 	(IS_SLASH(path[0]))
 #endif
@@ -194,7 +194,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link TSRMLS_DC);
 #endif
 
-/* One of the following constants must be used as the last argument 
+/* One of the following constants must be used as the last argument
    in virtual_file_ex() call. */
 
 #define CWD_EXPAND   0 /* expand "." and ".." but dont resolve symlinks      */
@@ -222,7 +222,7 @@ typedef struct _realpath_cache_bucket {
 	unsigned char                  is_wvalid;
 	unsigned char                  is_writable;
 #endif
-	struct _realpath_cache_bucket *next;	
+	struct _realpath_cache_bucket *next;
 } realpath_cache_bucket;
 
 typedef struct _virtual_cwd_globals {
@@ -250,7 +250,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 
 /* The actual macros to be used in programs using TSRM
  * If the program defines VIRTUAL_DIR it will use the
- * virtual_* functions 
+ * virtual_* functions
  */
 
 #ifdef VIRTUAL_DIR
