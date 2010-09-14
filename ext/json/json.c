@@ -565,7 +565,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must greater than zero");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must be greater than zero");
 		efree(utf16);
 		RETURN_NULL();
 	}
