@@ -41,25 +41,24 @@ magic_quotes_runtime=1
 		"\\0" 	=> "\\\\0",
 		"\\"	=> "\\\\",
 	);
+	$expectedBoth = array(
+		0		=> "\\'",
+		"'" 	=> "\\'",
+		1	 	=> "\\\"",
+		'"' 	=> "\\\"",
+		2	 	=> "\\\\0",
+		"\\0" 	=> "\\\\0",
+		3		=> "\\\\",
+		"\\"	=> "\\\\",
+	);
 
 	if (!$res = mysqli_query($link, $query)) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	$row = mysqli_fetch_row($res);
-	$idx = 0;
-	foreach ($expected as $key => $value) {
-		if (!isset($row[$idx]))
-			printf("[004] Index %d missing\n", $idx);
-
-		if ($row[$idx] !== $value)
-			printf("[005] Expecting %d => %s got %d => %s\n", $idx, $value, $idx, $row[$idx]);
-
-		unset($row[$idx]);
-		$idx++;
-	}
-	if (count($row) != 0) {
-		printf("[006] Unexpected results, dumping\n");
-		var_dump($row);
+	echo "Equal:";var_dump($row === array_values($expected));
+	if ($row !== array_values($expected)) {
+		var_dump($row, array_values($expected));
 	}
 	$res->free();
 
@@ -67,28 +66,9 @@ magic_quotes_runtime=1
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	$row = mysqli_fetch_array($res, MYSQLI_BOTH);
-	$idx = 0;
-	foreach ($expected as $key => $value) {
-		if (!isset($row[$idx]))
-			printf("[008] Index %d missing\n", $idx);
-
-		if ($row[$idx] !== $value)
-			printf("[009] Expecting %d => %s got %d => %s\n", $idx, $value, $idx, $row[$idx]);
-
-		unset($row[$idx]);
-		$idx++;
-
-		if (!isset($row[$key]))
-			printf("[010] Index %s missing\n", $key);
-
-		if ($row[$key] !== $value)
-			printf("[011] Expecting %s => %s got %s => %s\n", $key, $value, $key, $row[$key]);
-
-		unset($row[$key]);
-	}
-	if (count($row) != 0) {
-		printf("[012] Unexpected results, dumping\n");
-		var_dump($row);
+	echo "Equal:";var_dump($row === $expectedBoth);
+	if ($row !== $expectedBoth) {
+		var_dump($row, $expectedBoth);
 	}
 	$res->free();
 
@@ -120,13 +100,7 @@ magic_quotes_runtime=1
 	print "done!";
 ?>
 --EXPECTF--
-Deprecated: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in %s on line %d
-
-Warning: mysqli_result::fetch_assoc(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_result::fetch_assoc(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_result::fetch_assoc(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
+Deprecated: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line %d
 
 Warning: mysqli_result::fetch_assoc(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
 array(4) {
@@ -141,28 +115,12 @@ array(4) {
 }
 
 Warning: mysqli_fetch_row(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_row(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_row(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_row(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
+Equal:bool(true)
 
 Warning: mysqli_fetch_array(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
+Equal:bool(true)
 
-Warning: mysqli_fetch_array(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_array(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_array(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
-
-Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
+Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in /work/vanilla/php/php-src/branches/PHP_5_3/ext/mysqli/tests/mysqli_magic_quotes.php on line 69
 >'< => >\'<
 >"< => >\"<
 >\0< => >\\0<
