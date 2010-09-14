@@ -716,11 +716,13 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 #ifdef GLOB_NOMATCH
 			if (i == GLOB_NOMATCH) {
 				zlog(ZLOG_STUFF, ZLOG_WARNING, "Nothing matches the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
+				efree(filename);
 				return;
 			} 
 #endif /* GLOB_NOMATCH */
 			zlog(ZLOG_STUFF, ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
+			efree(filename);
 			return;
 		}
 
@@ -731,6 +733,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 			if (0 > fpm_conf_load_ini_file(g.gl_pathv[i] TSRMLS_CC)) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "Unable to include %s from %s at line %d", g.gl_pathv[i], filename, ini_lineno);
 				*error = 1;
+				efree(filename);
 				return;
 			}
 		}
@@ -740,9 +743,12 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 	if (0 > fpm_conf_load_ini_file(inc TSRMLS_CC)) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "Unable to include %s from %s at line %d", inc, filename, ini_lineno);
 		*error = 1;
+		efree(filename);
 		return;
 	}
 #endif /* HAVE_GLOB */
+
+	efree(filename);
 }
 /* }}} */
 
