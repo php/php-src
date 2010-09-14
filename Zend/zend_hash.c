@@ -63,6 +63,9 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 		case HT_CLEANING:
 			zend_output_debug_string(1, "%s(%d) : ht=%p is being cleaned", file, line, ht);
 			break;
+		default:
+			zend_output_debug_string(1, "%s(%d) : ht=%p is inconsistent", file, line, ht);
+			break;
 	}
 	zend_bailout();
 }
