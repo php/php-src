@@ -1816,7 +1816,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 						}
 						zval_add_ref(zvalue);
 						ch->handlers->std_err = *zvalue;
-						zend_list_addref(Z_LVAL_PP(zvalue));
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
 						RETVAL_FALSE;

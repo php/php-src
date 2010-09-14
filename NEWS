@@ -21,6 +21,8 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52827 (cURL leaks handle and causes assertion error
+  (CURLOPT_STDERR)). (Gustavo)
 - Fixed bug #52786 (PHP should reset section to [PHP] after ini sections).
   (Fedora at famillecollet dot com)
 - Fixed bug #52772 (var_dump() doesn't check for the existence of 
