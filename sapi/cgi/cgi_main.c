@@ -105,6 +105,7 @@ static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
  */
 static int children = 0;
 
+
 /**
  * Set to non-zero if we are the parent process
  */
@@ -669,7 +670,6 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		char *path_info;
-		unsigned int path_info_len;
 		int free_php_self;
 		ALLOCA_FLAG(use_heap)
 
