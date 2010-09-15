@@ -465,7 +465,6 @@ struct _zend_class_entry {
 	zend_uint name_length;
 	struct _zend_class_entry *parent;
 	int refcount;
-	zend_bool constants_updated;
 	zend_uint ce_flags;
 
 	HashTable function_table;
@@ -476,7 +475,6 @@ struct _zend_class_entry {
 	HashTable constants_table;
 	int default_properties_count;
 	int default_static_members_count;
-	const struct _zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -511,13 +509,19 @@ struct _zend_class_entry {
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
-	char *filename;
-	zend_uint line_start;
-	zend_uint line_end;
-	char *doc_comment;
-	zend_uint doc_comment_len;
-
-	struct _zend_module_entry *module;
+	union {
+		struct {
+			char *filename;
+			zend_uint line_start;
+			zend_uint line_end;
+			char *doc_comment;
+			zend_uint doc_comment_len;
+		} user;
+		struct {
+			const struct _zend_function_entry *builtin_functions;
+			struct _zend_module_entry *module;
+		} internal;
+	} info;
 };
 
 #include "zend_stream.h"

@@ -36,8 +36,8 @@
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
-#define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { ((op_array)->backpatch_count++); }
-#define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { ((op_array)->backpatch_count--); }
+#define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
+#define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count--); }
 #define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
 
 #define RESET_DOC_COMMENT()        \
@@ -51,6 +51,15 @@
 
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
+
+typedef struct _zend_compiler_context {
+	zend_uint  opcodes_size;
+	int        vars_size;
+	int        literals_size;
+	int        current_brk_cont;
+	int        backpatch_count;
+	HashTable *labels;
+} zend_compiler_context;
 
 typedef struct _zend_literal {
 	zval       constant;
@@ -171,6 +180,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
 #define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
 
+/* class constants updated */
+#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
+
 /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
@@ -179,6 +191,12 @@ typedef struct _zend_try_catch_element {
 
 /* function flag for internal user call handlers __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_HANDLER     0x200000
+
+#define ZEND_ACC_PASS_REST_BY_REFERENCE 0x1000000
+#define ZEND_ACC_PASS_REST_PREFER_REF	0x2000000
+
+#define ZEND_ACC_RETURN_REFERENCE		0x4000000
+#define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
 char *zend_visibility_string(zend_uint fn_flags);
 
@@ -203,9 +221,21 @@ typedef struct _zend_arg_info {
 	zend_uchar type_hint;
 	zend_bool allow_null;
 	zend_bool pass_by_reference;
-	zend_bool return_reference;
-	int required_num_args;
 } zend_arg_info;
+
+/* the following structure repeats the layout of zend_arg_info,
+ * but its fields have different meaning. It's used as the first element of 
+ * arg_info array to define properties of internal functions.
+ */
+typedef struct _zend_internal_function_info {
+	const char *_name;
+	zend_uint _name_len;
+	const char *_class_name;
+	zend_uint required_num_args;
+	zend_uchar _type_hint;
+	zend_bool return_reference;
+	zend_bool pass_rest_by_reference;
+} zend_internal_function_info;
 
 typedef struct _zend_compiled_variable {
 	char *name;
@@ -223,34 +253,26 @@ struct _zend_op_array {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_bool pass_rest_by_reference;
-	unsigned char return_reference;
 	/* END of common elements */
-
-	zend_bool done_pass_two;
 
 	zend_uint *refcount;
 
 	zend_op *opcodes;
-	zend_uint last, size;
+	zend_uint last;
 
 	zend_compiled_variable *vars;
-	int last_var, size_var;
+	int last_var;
 
 	zend_uint T;
 
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
-	int current_brk_cont;
 
 	zend_try_catch_element *try_catch_array;
 	int last_try_catch;
 
 	/* static variables support */
 	HashTable *static_variables;
-
-	zend_op *start_op;
-	int backpatch_count;
 
 	zend_uint this_var;
 
@@ -262,7 +284,7 @@ struct _zend_op_array {
 	zend_uint early_binding; /* the linked list of delayed declarations */
 
 	zend_literal *literals;
-	int last_literal, size_literal;
+	int last_literal;
 
 	void **run_time_cache;
 	int  last_cache_slot;
@@ -284,8 +306,6 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_bool pass_rest_by_reference;
-	unsigned char return_reference;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -306,8 +326,6 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_uint required_num_args;
 		zend_arg_info *arg_info;
-		zend_bool pass_rest_by_reference;
-		unsigned char return_reference;
 	} common;
 
 	zend_op_array op_array;
@@ -374,6 +392,7 @@ BEGIN_EXTERN_C()
 void init_compiler(TSRMLS_D);
 void shutdown_compiler(TSRMLS_D);
 void zend_init_compiler_data_structures(TSRMLS_D);
+void zend_init_compiler_context(TSRMLS_D);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
@@ -602,6 +621,7 @@ void zend_release_labels(TSRMLS_D);
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
+#define INITIAL_INTERACTIVE_OP_ARRAY_SIZE 8192
 
 
 /* helper functions in zend_language_scanner.l */
@@ -662,7 +682,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
-int zend_add_literal(zend_op_array *op_array, const zval *zv);
+int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 /* BEGIN: OPCODES */
 
@@ -766,22 +786,21 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-#define ARG_SEND_TYPE(zf, arg_num)												\
-	((zf) ?                                                                     \
-	 ((((zend_function*)(zf))->common.arg_info &&                               \
-	   arg_num<=((zend_function*)(zf))->common.num_args) ?                      \
-	  ((zend_function *)(zf))->common.arg_info[arg_num-1].pass_by_reference :   \
-	  ((zend_function *)(zf))->common.pass_rest_by_reference) :                 \
-	 ZEND_SEND_BY_VAL)	
+#define CHECK_ARG_SEND_TYPE(zf, arg_num, m1, m2)											\
+	((zf) &&																				\
+	  ((((zend_function*)(zf))->common.arg_info && 											\
+	    arg_num <= ((zend_function*)(zf))->common.num_args) ?								\
+	   (((zend_function *)(zf))->common.arg_info[arg_num-1].pass_by_reference & (m1)) :		\
+       (((zend_function *)(zf))->common.fn_flags & (m2))))
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
-	(ARG_SEND_TYPE(zf, arg_num) == ZEND_SEND_BY_REF)
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF, ZEND_ACC_PASS_REST_BY_REFERENCE)
 
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
-	(ARG_SEND_TYPE(zf, arg_num) & (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF))
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF, ZEND_ACC_PASS_REST_BY_REFERENCE|ZEND_ACC_PASS_REST_PREFER_REF)
 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
-	(ARG_SEND_TYPE(zf, arg_num) == ZEND_SEND_PREFER_REF)
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_PREFER_REF, ZEND_ACC_PASS_REST_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1

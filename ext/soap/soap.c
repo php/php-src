@@ -703,7 +703,6 @@ PHP_MINIT_FUNCTION(soap)
 		fe.prototype = NULL;
 		fe.num_args = 2;
 		fe.arg_info = NULL;
-		fe.pass_rest_by_reference = 0;
 
 		INIT_OVERLOADED_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions,
 			(zend_function *)&fe, NULL, NULL);
