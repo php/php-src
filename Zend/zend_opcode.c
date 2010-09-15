@@ -43,31 +43,28 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-static void op_array_alloc_ops(zend_op_array *op_array)
+static void op_array_alloc_ops(zend_op_array *op_array, zend_uint size)
 {
-	op_array->opcodes = erealloc(op_array->opcodes, (op_array->size)*sizeof(zend_op));
+	op_array->opcodes = erealloc(op_array->opcodes, size * sizeof(zend_op));
 }
 
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC)
 {
 	op_array->type = type;
 
-	op_array->backpatch_count = 0;
 	if (CG(interactive)) {
 		/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
 		 * will become invalid
 		 */
-		initial_ops_size = 8192;
+		initial_ops_size = INITIAL_INTERACTIVE_OP_ARRAY_SIZE;
 	}
 
 	op_array->refcount = (zend_uint *) emalloc(sizeof(zend_uint));
 	*op_array->refcount = 1;
-	op_array->size = initial_ops_size;
 	op_array->last = 0;
 	op_array->opcodes = NULL;
-	op_array_alloc_ops(op_array);
+	op_array_alloc_ops(op_array, initial_ops_size);
 
-	op_array->size_var = 0;
 	op_array->last_var = 0;
 	op_array->vars = NULL;
 
@@ -87,23 +84,16 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->brk_cont_array = NULL;
 	op_array->try_catch_array = NULL;
 	op_array->last_brk_cont = 0;
-	op_array->current_brk_cont = -1;
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
 
-	op_array->return_reference = 0;
-	op_array->done_pass_two = 0;
-
 	op_array->this_var = -1;
-
-	op_array->start_op = NULL;
 
 	op_array->fn_flags = CG(interactive)?ZEND_ACC_INTERACTIVE:0;
 
 	op_array->early_binding = -1;
 
-	op_array->size_literal = 0;
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
 
@@ -309,8 +299,8 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
-			if (ce->doc_comment) {
-				efree(ce->doc_comment);
+			if (ce->info.user.doc_comment) {
+				efree(ce->info.user.doc_comment);
 			}
 			
 			_destroy_zend_class_traits_info(ce);
@@ -344,9 +334,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
-			}
-			if (ce->doc_comment) {
-				free(ce->doc_comment);
 			}
 			free(ce);
 			break;
@@ -410,7 +397,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (op_array->try_catch_array) {
 		efree(op_array->try_catch_array);
 	}
-	if (op_array->done_pass_two) {
+	if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array TSRMLS_CC);
 	}
 	if (op_array->arg_info) {
@@ -436,15 +423,15 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 	zend_uint next_op_num = op_array->last++;
 	zend_op *next_op;
 
-	if (next_op_num >= op_array->size) {
+	if (next_op_num >= CG(context).opcodes_size) {
 		if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) {
 			/* we messed up */
 			zend_printf("Ran out of opcode space!\n"
 						"You should probably consider writing this huge script into a file!\n");
 			zend_bailout();
 		}
-		op_array->size *= 4;
-		op_array_alloc_ops(op_array);
+		CG(context).opcodes_size *= 4;
+		op_array_alloc_ops(op_array, CG(context).opcodes_size);
 	}
 	
 	next_op = &(op_array->opcodes[next_op_num]);
@@ -510,13 +497,17 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array TSRMLS_CC);
 	}
 
-	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && op_array->size != op_array->last) {
-		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
-		op_array->size = op_array->last;
+	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).vars_size != op_array->last_var) {
+		op_array->vars = (zend_compiled_variable *) erealloc(op_array->vars, sizeof(zend_compiled_variable)*op_array->last_var);
+		CG(context).vars_size = op_array->last_var;
 	}
-	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && op_array->size_literal != op_array->last_literal) {
+	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).opcodes_size != op_array->last) {
+		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
+		CG(context).opcodes_size = op_array->last;
+	}
+	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).literals_size != op_array->last_literal) {
 		op_array->literals = (zend_literal*)erealloc(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
-		op_array->size_literal = op_array->last_literal;
+		CG(context).literals_size = op_array->last_literal;
 	}
 
 	opline = op_array->opcodes;
@@ -549,7 +540,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		opline++;
 	}
 
-	op_array->done_pass_two = 1;
+	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 	return 0;
 }
 

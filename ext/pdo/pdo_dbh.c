@@ -1308,27 +1308,35 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 		ifunc->function_name = (char*)funcs->fname;
 		ifunc->scope = dbh->std.ce;
 		ifunc->prototype = NULL;
-		if (funcs->arg_info) {
-			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
-			ifunc->num_args = funcs->num_args;
-			if (funcs->arg_info[0].required_num_args == -1) {
-				ifunc->required_num_args = funcs->num_args;
-			} else {
-				ifunc->required_num_args = funcs->arg_info[0].required_num_args;
-			}
-			ifunc->pass_rest_by_reference = funcs->arg_info[0].pass_by_reference;
-			ifunc->return_reference = funcs->arg_info[0].return_reference;
-		} else {
-			ifunc->arg_info = NULL;
-			ifunc->num_args = 0;
-			ifunc->required_num_args = 0;
-			ifunc->pass_rest_by_reference = 0;
-			ifunc->return_reference = 0;
-		}
 		if (funcs->flags) {
 			ifunc->fn_flags = funcs->flags;
 		} else {
 			ifunc->fn_flags = ZEND_ACC_PUBLIC;
+		}
+		if (funcs->arg_info) {
+			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
+
+			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
+			ifunc->num_args = funcs->num_args;
+			if (info->required_num_args == -1) {
+				ifunc->required_num_args = funcs->num_args;
+			} else {
+				ifunc->required_num_args = info->required_num_args;
+			}
+			if (info->pass_rest_by_reference) {
+				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
+					ifunc->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
+				} else {
+					ifunc->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
+				}
+			}
+			if (info->return_reference) {
+				ifunc->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+		} else {
+			ifunc->arg_info = NULL;
+			ifunc->num_args = 0;
+			ifunc->required_num_args = 0;
 		}
 		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);

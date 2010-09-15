@@ -21,9 +21,32 @@ php_sys_lstat is an alias to lstat (when avaible). On Windows it is now
 available using php_sys_lstat. php_sys_stat and php_sys_lstat usage is recommended 
 instead of calling lstat directly, to ensure portability.
 
-	b. readlink support
+	c. readlink support
 
 readlink is now available on all platforms. On unix-like platform
 php_sys_readlink is an alias to readlink (when avaible). On Windows it is now 
 available using php_sys_readlink. php_sys_readlink usage is recommended 
 instead of calling readlink directly, to ensure portability.
+
+	d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
+
+. zend_function.pass_rest_by_reference is replaced by
+  ZEND_ACC_PASS_REST_BY_REFERENCE in zend_function.fn_flags
+. zend_function.return_reference is replaced by ZEND_ACC_RETURN_REFERENCE
+  in zend_function.fn_flags
+. zend_arg_info.required_num_args removed. it was needed only for internal
+  functions. Now the first arg_info for internal function (which has special
+  meaning) is represented by zend_internal_function_info structure.
+. zend_op_array.size, size_var, size_literal, current_brk_cont,
+  backpatch_count moved into CG(context), because they are used only during
+  compilation.
+. zend_op_array.start_op is moved into EG(start_op), because it's used
+  only for 'interactive' execution of single top-level op-array.
+. zend_op_array.done_pass_two is replaced by ZEND_ACC_DONE_PASS_TWO in
+  zend_op_array.fn_flags.
+. op_array.vars array is trimmed (reallocated) during pass_two.
+. zend_class_entry.constants_updated is replaced by
+  ZEND_ACC_CONSTANTS_UPDATED in zend_class_entry.ce_flags
+. the size of zend_class_entry is reduced by sharing the same memory space
+  by different information for internal and user classes.
+  See zend_class_inttry.info union. 

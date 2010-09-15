@@ -356,8 +356,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	string_printf(&sub_indent, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
-	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
-		string_printf(str, "%s%s", indent, ce->doc_comment);
+	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
+		string_printf(str, "%s%s", indent, ce->info.user.doc_comment);
 		string_write(str, "\n", 1);
 	}
 
@@ -373,8 +373,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		string_printf(str, "%s%s [ ", indent, kind);
 	}
 	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user" : "<internal");
-	if (ce->module) {
-		string_printf(str, ":%s", ce->module->name);
+	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module) {
+		string_printf(str, ":%s", ce->info.internal.module->name);
 	}
 	string_printf(str, "> ");
 	if (ce->get_iterator != NULL) {
@@ -414,8 +414,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* The information where a class is declared is only available for user classes */
 	if (ce->type == ZEND_USER_CLASS) {
-		string_printf(str, "%s  @@ %s %d-%d\n", indent, ce->filename,
-						ce->line_start, ce->line_end);
+		string_printf(str, "%s  @@ %s %d-%d\n", indent, ce->info.user.filename,
+						ce->info.user.line_start, ce->info.user.line_end);
 	}
 
 	/* Constants */
@@ -891,7 +891,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 		string_printf(str, "function ");
 	}
 
-	if (fptr->op_array.return_reference) {
+	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 		string_printf(str, "&");
 	}
 	string_printf(str, "%s ] {\n", fptr->common.function_name);
@@ -997,7 +997,7 @@ static int _extension_class_string(zend_class_entry **pce TSRMLS_DC, int num_arg
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int *num_classes = va_arg(args, int*);
 
-	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
+	if (((*pce)->type == ZEND_INTERNAL_CLASS) && (*pce)->info.internal.module && !strcasecmp((*pce)->info.internal.module->name, module->name)) {
 		string_printf(str, "\n");
 		_class_string(str, *pce, NULL, indent TSRMLS_CC);
 		(*num_classes)++;
@@ -1940,7 +1940,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_BOOL(fptr->op_array.return_reference);
+	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
 }
 /* }}} */
 
@@ -3521,7 +3521,7 @@ ZEND_METHOD(reflection_class, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_STRING(ce->filename, 1);
+		RETURN_STRING(ce->info.user.filename, 1);
 	}
 	RETURN_FALSE;
 }
@@ -3539,7 +3539,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(ce->line_start);
+		RETURN_LONG(ce->info.user.line_start);
 	}
 	RETURN_FALSE;
 }
@@ -3557,7 +3557,7 @@ ZEND_METHOD(reflection_class, getEndLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_LONG(ce->line_end);
+		RETURN_LONG(ce->info.user.line_end);
 	}
 	RETURN_FALSE;
 }
@@ -3574,8 +3574,8 @@ ZEND_METHOD(reflection_class, getDocComment)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
-		RETURN_STRINGL(ce->doc_comment, ce->doc_comment_len, 1);
+	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
+		RETURN_STRINGL(ce->info.user.doc_comment, ce->info.user.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
 }
@@ -4548,8 +4548,8 @@ ZEND_METHOD(reflection_class, getExtension)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->module) {
-		reflection_extension_factory(return_value, ce->module->name TSRMLS_CC);
+	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
+		reflection_extension_factory(return_value, ce->info.internal.module->name TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -4568,8 +4568,8 @@ ZEND_METHOD(reflection_class, getExtensionName)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->module) {
-		RETURN_STRING(ce->module->name, 1);
+	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
+		RETURN_STRING(ce->info.internal.module->name, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -5271,7 +5271,7 @@ static int add_extension_class(zend_class_entry **pce TSRMLS_DC, int num_args, v
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int add_reflection_class = va_arg(args, int);
 
-	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
+	if (((*pce)->type == ZEND_INTERNAL_CLASS) && (*pce)->info.internal.module && !strcasecmp((*pce)->info.internal.module->name, module->name)) {
 		if (add_reflection_class) {
 			ALLOC_ZVAL(zclass);
 			zend_reflection_class_factory(*pce, zclass TSRMLS_CC);

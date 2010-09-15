@@ -1015,7 +1015,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	if (!class_type->constants_updated || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
+	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0 || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 		zend_class_entry *old_scope = *scope;
 		int i;
@@ -1070,7 +1070,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		}
 
 		*scope = old_scope;
-		class_type->constants_updated = 1;
+		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
 }
 /* }}} */
@@ -1953,24 +1953,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		internal_function->function_name = (char*)ptr->fname;
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
-		if (ptr->arg_info) {
-			internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
-			internal_function->num_args = ptr->num_args;
-			/* Currently you cannot denote that the function can accept less arguments than num_args */
-			if (ptr->arg_info[0].required_num_args == -1) {
-				internal_function->required_num_args = ptr->num_args;
-			} else {
-				internal_function->required_num_args = ptr->arg_info[0].required_num_args;
-			}
-			internal_function->pass_rest_by_reference = ptr->arg_info[0].pass_by_reference;
-			internal_function->return_reference = ptr->arg_info[0].return_reference;
-		} else {
-			internal_function->arg_info = NULL;
-			internal_function->num_args = 0;
-			internal_function->required_num_args = 0;
-			internal_function->pass_rest_by_reference = 0;
-			internal_function->return_reference = 0;
-		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
 				if (ptr->flags != ZEND_ACC_DEPRECATED || scope) {
@@ -1982,6 +1964,32 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
+		}
+		if (ptr->arg_info) {
+			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
+			
+			internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
+			internal_function->num_args = ptr->num_args;
+			/* Currently you cannot denote that the function can accept less arguments than num_args */
+			if (info->required_num_args == -1) {
+				internal_function->required_num_args = ptr->num_args;
+			} else {
+				internal_function->required_num_args = info->required_num_args;
+			}
+			if (info->pass_rest_by_reference) {
+				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
+					internal_function->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
+				} else {
+					internal_function->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
+				}
+			}
+			if (info->return_reference) {
+				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+		} else {
+			internal_function->arg_info = NULL;
+			internal_function->num_args = 0;
+			internal_function->required_num_args = 0;
 		}
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
@@ -2353,10 +2361,10 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
 	class_entry->ce_flags = ce_flags;
-	class_entry->module = EG(current_module);
+	class_entry->info.internal.module = EG(current_module);
 
-	if (class_entry->builtin_functions) {
-		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
+	if (class_entry->info.internal.builtin_functions) {
+		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
@@ -2712,15 +2720,13 @@ get_function_via_handler:
 			if (strict_class && ce_org->__call) {
 				fcc->function_handler = emalloc(sizeof(zend_internal_function));
 				fcc->function_handler->internal_function.type = ZEND_INTERNAL_FUNCTION;
-				fcc->function_handler->internal_function.module = ce_org->module;
+				fcc->function_handler->internal_function.module = (ce_org->type == ZEND_INTERNAL_CLASS) ? ce_org->info.internal.module : NULL;
 				fcc->function_handler->internal_function.handler = zend_std_call_user_call;
 				fcc->function_handler->internal_function.arg_info = NULL;
 				fcc->function_handler->internal_function.num_args = 0;
 				fcc->function_handler->internal_function.scope = ce_org;
 				fcc->function_handler->internal_function.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 				fcc->function_handler->internal_function.function_name = estrndup(mname, mlen);
-				fcc->function_handler->internal_function.pass_rest_by_reference = 0;
-				fcc->function_handler->internal_function.return_reference = ZEND_RETURN_VALUE;
 				call_via_handler = 1;
 				retval = 1;
 			} else if (Z_OBJ_HT_P(fcc->object_ptr)->get_method) {

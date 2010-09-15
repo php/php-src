@@ -139,8 +139,8 @@ struct _zend_compiler_globals {
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
 
-	HashTable *labels;
-	zend_stack labels_stack;
+	zend_compiler_context context;
+	zend_stack context_stack;
 
 	/* interned strings */
 	char *interned_strings_start;
@@ -264,6 +264,8 @@ struct _zend_executor_globals {
 	zend_property_info std_property_info;
 
 	zend_bool active; 
+
+	zend_op *start_op;
 
 	void *saved_fpu_cw_ptr;
 #if XPFPA_HAVE_CW

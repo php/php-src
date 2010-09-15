@@ -2578,7 +2578,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		MAKE_STD_ZVAL(ret->var.ptr);
 		ZVAL_NULL(ret->var.ptr);
 		ret->var.ptr_ptr = &ret->var.ptr;
-		ret->var.fcall_returned_reference = fbc->common.return_reference;
+		ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
 		if (fbc->common.arg_info) {
 			zend_uint i=0;
@@ -2593,7 +2593,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
-			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, fbc->common.return_reference ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
 			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
@@ -2612,7 +2612,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			ret->var.ptr = NULL;
 			EG(return_value_ptr_ptr) = &ret->var.ptr;
 			ret->var.ptr_ptr = &ret->var.ptr;
-			ret->var.fcall_returned_reference = fbc->common.return_reference;
+			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		}
 
 		if (EXPECTED(zend_execute == execute)) {

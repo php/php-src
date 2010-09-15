@@ -194,6 +194,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(active_op_array) = NULL;
 
 	EG(active) = 1;
+	EG(start_op) = NULL;
 }
 /* }}} */
 
@@ -1256,7 +1257,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 	int orig_interactive;
 
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
-		|| CG(active_op_array)->backpatch_count>0
+		|| CG(context).backpatch_count>0
 		|| CG(active_op_array)->function_name
 		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
 		return;
@@ -1265,14 +1266,14 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 	ret_opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	ret_opline->opcode = ZEND_RETURN;
 	ret_opline->op1_type = IS_CONST;
-	ret_opline->op1.constant = zend_add_literal(CG(active_op_array), &EG(uninitialized_zval));
+	ret_opline->op1.constant = zend_add_literal(CG(active_op_array), &EG(uninitialized_zval) TSRMLS_CC);
 	SET_UNUSED(ret_opline->op2);
 
-	if (!CG(active_op_array)->start_op) {
-		CG(active_op_array)->start_op = CG(active_op_array)->opcodes;
+	if (!EG(start_op)) {
+		EG(start_op) = CG(active_op_array)->opcodes;
 	}
 
-	opline=CG(active_op_array)->start_op;
+	opline=EG(start_op);
 	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
 
 	while (opline<end) {
@@ -1317,7 +1318,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 	}
 
 	CG(active_op_array)->last -= 1;	/* get rid of that ZEND_RETURN */
-	CG(active_op_array)->start_op = CG(active_op_array)->opcodes+CG(active_op_array)->last;
+	EG(start_op) = CG(active_op_array)->opcodes+CG(active_op_array)->last;
 }
 /* }}} */
 

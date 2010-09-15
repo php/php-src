@@ -96,14 +96,14 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_NS_FALIAS(ns, name, alias, arg_info)		ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, 0)
 #define ZEND_NS_DEP_FALIAS(ns, name, alias, arg_info)	ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
 
-#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, 0, pass_by_ref, 0, 0 },
-#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, 0, pass_by_ref, 0, 0 },
-#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_CLASS, allow_null, pass_by_ref, 0, 0 },
-#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, allow_null, pass_by_ref, 0, 0 },
-#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, allow_null, pass_by_ref, 0, 0 },
+#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, 0, pass_by_ref},
+#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, 0, pass_by_ref},
+#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_CLASS, allow_null, pass_by_ref},
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, allow_null, pass_by_ref},
+#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, allow_null, pass_by_ref},
 #define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)	\
 	static const zend_arg_info name[] = {																		\
-		{ NULL, 0, NULL, 0, 0, 0, pass_rest_by_reference, return_reference, required_num_args },
+		{ NULL, 0, NULL, required_num_args, 0, return_reference, pass_rest_by_reference},
 #define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)	\
 	ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, ZEND_RETURN_VALUE, -1)
 #define ZEND_END_ARG_INFO()		};
@@ -173,7 +173,6 @@ typedef struct _zend_fcall_info_cache {
 			class_container.name = zend_strndup(cl_name, _len);	\
 		}														\
 		class_container.name_length = _len;						\
-		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
@@ -202,7 +201,8 @@ typedef struct _zend_fcall_info_cache {
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
 		class_container.iterator_funcs.funcs = NULL;			\
-		class_container.module = NULL;							\
+		class_container.info.internal.module = NULL;			\
+		class_container.info.internal.builtin_functions = functions;	\
 	}
 
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
