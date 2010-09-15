@@ -316,6 +316,14 @@ static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
 
+/* The maximum base for input and output conversions is 62 from GMP 4.2
+ * onwards. */
+#if (__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2)
+#	define MAX_BASE 62
+#else
+#	define MAX_BASE 36
+#endif
+
 /* {{{ gmp_emalloc
  */
 static void *gmp_emalloc(size_t size)
@@ -753,12 +761,8 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-#if (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2)
-	if (base && (base < 2 || base > 62)) {
-#else
-	if (base && (base < 2 || base > 36)) {
-#endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and 36)", base);
+	if (base && (base < 2 || base > MAX_BASE)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and %d)", base, MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -807,12 +811,15 @@ ZEND_FUNCTION(gmp_strval)
 		return;
 	}
 
-#if __GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2
-	if ((base < 2 && base > -2) || base > 62 || base < -36) {
+#if MAX_BASE == 62
+	/* Although the maximum base in general in GMP >= 4.2 is 62, mpz_get_str()
+	 * is explicitly limited to -36 when dealing with negative bases. */
+	if ((base < 2 && base > -2) || base > MAX_BASE || base < -36) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and %d or -2 and -36)", base, MAX_BASE);
 #else
-	if (base < 2 || base > 36) {
+	if (base < 2 || base > MAX_BASE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and %d)", base, MAX_BASE);
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld", base);
 		RETURN_FALSE;
 	}
 

@@ -21,6 +21,7 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52849 (GNU MP invalid version match). (Adam)
 - Fixed bug #52843 (Segfault when optional parameters are not passed in to
   mssql_connect). (Felipe)
 - Fixed bug #52827 (cURL leaks handle and causes assertion error
