@@ -409,15 +409,6 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND * conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ _mysqlnd_end_psession */
-PHPAPI void _mysqlnd_end_psession(MYSQLND * conn TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_end_psession");
-	conn->m->end_psession(conn TSRMLS_CC);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
 /* {{{ mysqlnd_conn::restart_psession */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, restart_psession)(MYSQLND * conn TSRMLS_DC)
