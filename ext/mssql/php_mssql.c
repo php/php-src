@@ -539,7 +539,7 @@ PHP_MINFO_FUNCTION(mssql)
 static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host = NULL, *user = NULL, *passwd = NULL;
-	int host_len, user_len, passwd_len;
+	int host_len = 0, user_len = 0, passwd_len = 0;
 	zend_bool new_link = 0;
 	char *hashed_details;
 	int hashed_details_length;
