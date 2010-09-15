@@ -3,7 +3,11 @@ $Id$
 UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
-
+  a. virtual_file_ex
+  b. stat/lstat support
+  c. readlink support
+  d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
+  e. Zend\zend_fast_cache.h has been removed
 ========================
 1. Internal API changes
 ========================
@@ -50,3 +54,9 @@ instead of calling readlink directly, to ensure portability.
 . the size of zend_class_entry is reduced by sharing the same memory space
   by different information for internal and user classes.
   See zend_class_inttry.info union. 
+  
+	e. Zend\zend_fast_cache.h 
+It should not have been used anymore since php5, but now this header has
+been removed. 
+
+
