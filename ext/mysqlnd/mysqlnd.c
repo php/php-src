@@ -399,16 +399,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn, enum_mysql
 /* }}} */
 
 
-/* {{{ _mysqlnd_restart_psession */
-PHPAPI void _mysqlnd_restart_psession(MYSQLND * conn TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_restart_psession");
-	conn->m->restart_psession(conn TSRMLS_CC);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn::restart_psession */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, restart_psession)(MYSQLND * conn TSRMLS_DC)
