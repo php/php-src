@@ -349,10 +349,6 @@ SOURCE=.\zend_extensions.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_fast_cache.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_globals.h
 # End Source File
 # Begin Source File
