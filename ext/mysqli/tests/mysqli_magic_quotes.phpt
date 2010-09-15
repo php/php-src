@@ -120,7 +120,7 @@ Equal:bool(true)
 Warning: mysqli_fetch_array(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
 Equal:bool(true)
 
-Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in /work/vanilla/php/php-src/branches/PHP_5_3/ext/mysqli/tests/mysqli_magic_quotes.php on line 69
+Warning: mysqli_fetch_object(): magic_quotes_runtime are deprecated since PHP 5.3 in %s on line %d
 >'< => >\'<
 >"< => >\"<
 >\0< => >\\0<
