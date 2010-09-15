@@ -57,6 +57,13 @@ instead of calling readlink directly, to ensure portability.
   
 	e. Zend\zend_fast_cache.h 
 It should not have been used anymore since php5, but now this header has
-been removed. 
+been removed. The following macros are not available anymore:
+
+ZEND_FAST_ALLOC(p, type, fc_type)
+ZEND_FAST_FREE(p, fc_type)
+ZEND_FAST_ALLOC_REL(p, type, fc_type)
+ZEND_FAST_FREE_REL(p, fc_type)
+
+Use emalloc, emalloc_rel, efree or efree_rel instead.
 
 
