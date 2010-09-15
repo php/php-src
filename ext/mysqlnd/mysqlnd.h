@@ -87,8 +87,7 @@ PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods);
 
 #define mysqlnd_restart_psession(conn) _mysqlnd_restart_psession((conn) TSRMLS_CC)
 PHPAPI void _mysqlnd_restart_psession(MYSQLND * conn TSRMLS_DC);
-#define mysqlnd_end_psession(conn) _mysqlnd_end_psession((conn) TSRMLS_CC)
-PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC);
+#define mysqlnd_end_psession(conn) (conn)->m->end_psession((conn) TSRMLS_CC)
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 #define mysqlnd_thread_safe()	TRUE
 
