@@ -77,6 +77,7 @@ static const zend_function_entry json_serializable_interface[] = {
 	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, json_serialize_arginfo)
 	{ NULL, NULL, NULL }
 };
+/* }}} */
 
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
@@ -457,7 +458,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 /* }}} */
 
 
-static void json_encode_serializable_object(smart_str *buf, zval *val, int options TSRMLS_DC)
+static void json_encode_serializable_object(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval *retval = NULL, fname;
@@ -488,6 +489,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 
 	zval_ptr_dtor(&retval);
 }
+/* }}} */
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
