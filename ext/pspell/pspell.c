@@ -347,7 +347,7 @@ static PHP_FUNCTION(pspell_new)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */

@@ -32,11 +32,10 @@ ZEND_API int le_index_ptr;
 static HashTable list_destructors;
 
 
-ZEND_API int zend_list_insert(void *ptr, int type)
+ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC)
 {
 	int index;
 	zend_rsrc_list_entry le;
-	TSRMLS_FETCH();
 
 	le.ptr=ptr;
 	le.type=type;
@@ -92,11 +91,11 @@ ZEND_API int _zend_list_addref(int id TSRMLS_DC)
 }
 
 
-ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type)
+ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC)
 {
 	int rsrc_id;
 
-	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type);
+	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
 	
 	if (rsrc_result) {
 		rsrc_result->value.lval = rsrc_id;

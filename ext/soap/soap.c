@@ -1298,7 +1298,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		service->typemap = soap_create_typemap(service->sdl, typemap_ht TSRMLS_CC);
 	}
 
-	ret = zend_list_insert(service, le_service);
+	ret = zend_list_insert(service, le_service TSRMLS_CC);
 	add_property_resource(this_ptr, "service", ret);
 
 	SOAP_SERVER_END_CODE();
@@ -2621,7 +2621,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		SOAP_GLOBAL(soap_version) = soap_version;
 
 		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), cache_wsdl TSRMLS_CC);
-		ret = zend_list_insert(sdl, le_sdl);
+		ret = zend_list_insert(sdl, le_sdl TSRMLS_CC);
 
 		add_property_resource(this_ptr, "sdl", ret);
 
@@ -2633,7 +2633,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (typemap) {
 			int ret;
 
-			ret = zend_list_insert(typemap, le_typemap);
+			ret = zend_list_insert(typemap, le_typemap TSRMLS_CC);
 			add_property_resource(this_ptr, "typemap", ret);
 		}
 	}

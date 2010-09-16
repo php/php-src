@@ -271,7 +271,7 @@ PHP_FUNCTION(msg_get_queue)
 			RETURN_FALSE;
 		}
 	}
-	RETVAL_RESOURCE(zend_list_insert(mq, le_sysvmsg));	
+	RETVAL_RESOURCE(zend_list_insert(mq, le_sysvmsg TSRMLS_CC));	
 }
 /* }}} */
 

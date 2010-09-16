@@ -380,7 +380,7 @@ try_again:
 
 	if (stream) {
 		zval **cookies, **login, **password;
-	  int ret = zend_list_insert(phpurl, le_url);
+	  int ret = zend_list_insert(phpurl, le_url TSRMLS_CC);
 
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/

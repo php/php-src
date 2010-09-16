@@ -3169,7 +3169,7 @@ PHP_FUNCTION(pg_lo_open)
 				} else {
 					pgsql_lofp->conn = pgsql;
 					pgsql_lofp->lofd = pgsql_lofd;
-					Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp);
+					Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp TSRMLS_CC);
 					Z_TYPE_P(return_value) = IS_LONG;
 				}
 			}
