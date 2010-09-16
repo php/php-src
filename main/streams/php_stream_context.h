@@ -36,7 +36,7 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context(TSRMLS_C)) : \
 		(nocontext) ? NULL : \
 		FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc()) )
+		(FG(default_context) = php_stream_context_alloc(TSRMLS_C)) )
 
 #define php_stream_context_to_zval(context, zval) { ZVAL_RESOURCE(zval, (context)->rsrc_id); zend_list_addref((context)->rsrc_id); }
 

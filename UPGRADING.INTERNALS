@@ -86,3 +86,12 @@ PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D)
 it has to be called using:
 
 context  = php_stream_context_alloc(TSRMLS_C);
+
+	h. php_stream_context_alloc
+php_stream_context_alloc uses now TSRMLS_D:
+
+PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
+
+it has to be called using:
+
+context  = php_stream_context_alloc(TSRMLS_C);

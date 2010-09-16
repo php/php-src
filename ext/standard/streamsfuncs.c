@@ -966,7 +966,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 				   param, but then something is called which requires a context.
 				   Don't give them the default one though since they already said they
 	 			   didn't want it. */
-				context = stream->context = php_stream_context_alloc();
+				context = stream->context = php_stream_context_alloc(TSRMLS_C);
 			}
 		}
 	}
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(stream_context_get_default)
 	}
 
 	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
+		FG(default_context) = php_stream_context_alloc(TSRMLS_C);
 	}
 	context = FG(default_context);
 
@@ -1116,7 +1116,7 @@ PHP_FUNCTION(stream_context_set_default)
 	}
 
 	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
+		FG(default_context) = php_stream_context_alloc(TSRMLS_C);
 	}
 	context = FG(default_context);
 
@@ -1137,7 +1137,7 @@ PHP_FUNCTION(stream_context_create)
 		RETURN_FALSE;
 	}
 
-	context = php_stream_context_alloc();
+	context = php_stream_context_alloc(TSRMLS_C);
 
 	if (options) {
 		parse_context_options(context, options TSRMLS_CC);
