@@ -250,6 +250,9 @@ UPGRADE NOTES - PHP X.Y
          - ReflectionClass::getTraits()
          - ReflectionClass::getTraitNames()
          - ReflectionClass::getTraitAliases()
+       
+       - PDO_dblib
+         - PDO::newRowset()
 
      i. New class constants
 
