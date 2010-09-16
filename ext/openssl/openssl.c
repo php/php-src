@@ -1236,7 +1236,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	}
 
 	if (cert && makeresource && resourceval) {
-		*resourceval = zend_list_insert(cert, le_x509);
+		*resourceval = zend_list_insert(cert, le_x509 TSRMLS_CC);
 	}
 	return cert;
 }
@@ -2435,7 +2435,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	}
 	
 	/* Succeeded; lets return the cert */
-	RETVAL_RESOURCE(zend_list_insert(new_cert, le_x509));
+	RETVAL_RESOURCE(zend_list_insert(new_cert, le_x509 TSRMLS_CC));
 	new_cert = NULL;
 	
 cleanup:
@@ -2512,7 +2512,7 @@ PHP_FUNCTION(openssl_csr_new)
 						RETVAL_TRUE;
 						
 						if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-							RETVAL_RESOURCE(zend_list_insert(csr, le_csr));
+							RETVAL_RESOURCE(zend_list_insert(csr, le_csr TSRMLS_CC));
 							csr = NULL;			
 						} else {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error signing request");
@@ -2521,7 +2521,7 @@ PHP_FUNCTION(openssl_csr_new)
 						if (we_made_the_key) {
 							/* and a resource for the private key */
 							zval_dtor(out_pkey);
-							ZVAL_RESOURCE(out_pkey, zend_list_insert(req.priv_key, le_key));
+							ZVAL_RESOURCE(out_pkey, zend_list_insert(req.priv_key, le_key TSRMLS_CC));
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						} else if (key_resource != -1) {
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
@@ -2594,7 +2594,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	}
 
 	tpubkey=X509_REQ_get_pubkey(csr);
-	RETVAL_RESOURCE(zend_list_insert(tpubkey, le_key));
+	RETVAL_RESOURCE(zend_list_insert(tpubkey, le_key TSRMLS_CC));
 	return;
 }
 /* }}} */
@@ -2948,7 +2948,7 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), rsa, iqmp);
 					if (rsa->n && rsa->d) {
 						if (EVP_PKEY_assign_RSA(pkey, rsa)) {
-							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key TSRMLS_CC));
 						}
 					}
 					RSA_free(rsa);
@@ -2972,7 +2972,7 @@ PHP_FUNCTION(openssl_pkey_new)
 							DSA_generate_key(dsa);
 						}
 						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
-							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key TSRMLS_CC));
 						}
 					}
 					DSA_free(dsa);
@@ -2995,7 +2995,7 @@ PHP_FUNCTION(openssl_pkey_new)
 							DH_generate_key(dh);
 						}
 						if (EVP_PKEY_assign_DH(pkey, dh)) {
-							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key TSRMLS_CC));
 						}
 					}
 					DH_free(dh);
@@ -3012,7 +3012,7 @@ PHP_FUNCTION(openssl_pkey_new)
 	{
 		if (php_openssl_generate_private_key(&req TSRMLS_CC)) {
 			/* pass back a key resource */
-			RETVAL_RESOURCE(zend_list_insert(req.priv_key, le_key));
+			RETVAL_RESOURCE(zend_list_insert(req.priv_key, le_key TSRMLS_CC));
 			/* make sure the cleanup code doesn't zap it! */
 			req.priv_key = NULL;
 		}

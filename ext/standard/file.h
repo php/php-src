@@ -72,7 +72,7 @@ PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(void);
+PHPAPI int php_le_stream_context(TSRMLS_D);
 PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC);

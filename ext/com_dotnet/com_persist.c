@@ -277,7 +277,7 @@ PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 	stm->stream = stream;
 
 	zend_list_addref(stream->rsrc_id);
-	stm->id = zend_list_insert(stm, le_istream);
+	stm->id = zend_list_insert(stm, le_istream TSRMLS_CC);
 
 	return (IStream*)stm;
 }

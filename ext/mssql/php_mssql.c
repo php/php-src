@@ -1998,7 +1998,7 @@ PHP_FUNCTION(mssql_init)
 	statement->link = mssql_ptr;
 	statement->executed=FALSE;
 
-	statement->id = zend_list_insert(statement,le_statement);
+	statement->id = zend_list_insert(statement,le_statement TSRMLS_CC);
 	
 	RETURN_RESOURCE(statement->id);
 }

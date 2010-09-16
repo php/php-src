@@ -1857,7 +1857,7 @@ PHP_FUNCTION(ibase_execute)
 			if (ib_query->statement_type == isc_info_sql_stmt_exec_procedure) {
 				result->stmt = NULL;
 			}
-			ib_query->result_res_id = zend_list_insert(result, le_result);
+			ib_query->result_res_id = zend_list_insert(result, le_result TSRMLS_CC);
 			RETVAL_RESOURCE(ib_query->result_res_id);
 		}
 	} while (0);

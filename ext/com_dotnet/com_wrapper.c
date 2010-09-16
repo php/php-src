@@ -548,7 +548,7 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 		Z_ADDREF_P(object);
 	disp->object = object;
 
-	disp->id = zend_list_insert(disp, le_dispatch);
+	disp->id = zend_list_insert(disp, le_dispatch TSRMLS_CC);
 	
 	return disp;
 }

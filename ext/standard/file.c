@@ -138,7 +138,7 @@ php_file_globals file_globals;
 /* sharing globals is *evil* */
 static int le_stream_context = FAILURE;
 
-PHPAPI int php_le_stream_context(void)
+PHPAPI int php_le_stream_context(TSRMLS_D)
 {
 	return le_stream_context;
 }
