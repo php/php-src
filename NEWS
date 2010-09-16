@@ -118,6 +118,7 @@
 
 - Implemented FR #52555 (Ability to get HTTP response code). (Paul Dragoonis)
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
+- Implemented FR #49366 (Make slash escaping optional in json_encode()). (Adam)
 - Implemented FR #48632 (OpenSSL AES support). (yonas dot y
    at gmail dot com, Pierre)
 - Implemented FR #42060 (Add paged Results support). (ando@OpenLDAP.org,
