@@ -94,6 +94,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -113,6 +114,7 @@ static PHP_MINIT_FUNCTION(json)
 */
 static PHP_GINIT_FUNCTION(json)
 {
+	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
 }
 /* }}} */
@@ -189,6 +191,30 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+/* {{{ Pretty printing support functions */
+
+static inline void json_pretty_print_char(smart_str *buf, int options, char c TSRMLS_DC) /* {{{ */
+{
+	if (options & PHP_JSON_PRETTY_PRINT) {
+		smart_str_appendc(buf, c);
+	}
+}
+/* }}} */
+
+static inline void json_pretty_print_indent(smart_str *buf, int options TSRMLS_DC) /* {{{ */
+{
+	int i;
+
+	if (options & PHP_JSON_PRETTY_PRINT) {
+		for (i = 0; i < JSON_G(encoder_depth); ++i) {
+			smart_str_appendl(buf, "    ", 4);
+		}
+	}
+}
+/* }}} */
+
+/* }}} */
+
 static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC) /* {{{ */
 {
 	int i, r;
@@ -213,6 +239,9 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 	} else {
 		smart_str_appendc(buf, '{');
 	}
+
+	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
+	++JSON_G(encoder_depth);
 
 	i = myht ? zend_hash_num_elements(myht) : 0;
 
@@ -241,10 +270,12 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 				if (r == PHP_JSON_OUTPUT_ARRAY) {
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
+						json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 					} else {
 						need_comma = 1;
 					}
- 
+
+					json_pretty_print_indent(buf, options TSRMLS_CC);
 					php_json_encode(buf, *data, options TSRMLS_CC);
 				} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 					if (i == HASH_KEY_IS_STRING) {
@@ -258,26 +289,36 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 						if (need_comma) {
 							smart_str_appendc(buf, ',');
+							json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						} else {
 							need_comma = 1;
 						}
+
+						json_pretty_print_indent(buf, options TSRMLS_CC);
 
 						json_escape_string(buf, key, key_len - 1, options TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
+						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
+ 
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					} else {
 						if (need_comma) {
 							smart_str_appendc(buf, ',');
+							json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 						} else {
 							need_comma = 1;
 						}
+
+						json_pretty_print_indent(buf, options TSRMLS_CC);
 
 						smart_str_appendc(buf, '"');
 						smart_str_append_long(buf, (long) index);
 						smart_str_appendc(buf, '"');
 						smart_str_appendc(buf, ':');
 
+						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
+ 
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					}
 				}
@@ -288,6 +329,10 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 			}
 		}
 	}
+	
+	--JSON_G(encoder_depth);
+	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
+	json_pretty_print_indent(buf, options TSRMLS_CC);
 
 	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, ']');

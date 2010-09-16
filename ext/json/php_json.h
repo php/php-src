@@ -38,6 +38,7 @@ extern zend_module_entry json_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(json)
+	int encoder_depth;
 	int error_code;
 ZEND_END_MODULE_GLOBALS(json)
 
@@ -60,6 +61,7 @@ extern zend_class_entry *php_json_serializable_ce;
 #define PHP_JSON_FORCE_OBJECT	(1<<4)
 #define PHP_JSON_NUMERIC_CHECK	(1<<5)
 #define PHP_JSON_UNESCAPED_SLASHES	(1<<6)
+#define PHP_JSON_PRETTY_PRINT	(1<<7)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0
