@@ -1195,9 +1195,7 @@ static void set_zval_property(zval* object, char* name, zval* val TSRMLS_DC)
 
 	old_scope = EG(scope);
 	EG(scope) = Z_OBJCE_P(object);
-#ifdef ZEND_ENGINE_2
 	Z_DELREF_P(val);
-#endif
 	add_property_zval(object, name, val);
 	EG(scope) = old_scope;
 }
@@ -2928,9 +2926,7 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 		MAKE_STD_ZVAL(soapvar);
 		object_init_ex(soapvar, soap_var_class_entry);
 		add_property_long(soapvar, "enc_type", enc->details.type);
-#ifdef ZEND_ENGINE_2
 		Z_DELREF_P(ret);
-#endif
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));
