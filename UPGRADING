@@ -235,6 +235,7 @@ UPGRADE NOTES - PHP X.Y
 
      f. New global constants
 
+       - JSON_PRETTY_PRINT
        - JSON_UNESCAPED_SLASHES
 
      g. New classes
