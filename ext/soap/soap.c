@@ -2524,7 +2524,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (zend_hash_find(ht, "local_cert", sizeof("local_cert"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 		  if (!context) {
-  			context = php_stream_context_alloc();
+  			context = php_stream_context_alloc(TSRMLS_C);
 		  }
  			php_stream_context_set_option(context, "ssl", "local_cert", *tmp);
 			if (zend_hash_find(ht, "passphrase", sizeof("passphrase"), (void**)&tmp) == SUCCESS &&

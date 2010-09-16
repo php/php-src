@@ -731,7 +731,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 {
 #ifdef MYSQLND_SSL_SUPPORTED
-	php_stream_context *context = php_stream_context_alloc();
+	php_stream_context *context = php_stream_context_alloc(TSRMLS_C);
 	DBG_ENTER("mysqlnd_net::enable_ssl");
 	if (!context) {
 		DBG_RETURN(FAIL);
