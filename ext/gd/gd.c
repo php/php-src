@@ -1560,7 +1560,7 @@ PHP_FUNCTION(imageloadfont)
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	ind = 5 + zend_list_insert(font, le_gd_font);
+	ind = 5 + zend_list_insert(font, le_gd_font TSRMLS_CC);
 
 	RETURN_LONG(ind);
 }
@@ -4095,7 +4095,7 @@ PHP_FUNCTION(imagepscopyfont)
 	}
 
 	nf_ind->extend = 1;
-	l_ind = zend_list_insert(nf_ind, le_ps_font);
+	l_ind = zend_list_insert(nf_ind, le_ps_font TSRMLS_CC);
 	RETURN_LONG(l_ind);
 }
 */
@@ -4144,7 +4144,7 @@ PHP_FUNCTION(imagepsencodefont)
 		RETURN_FALSE;
 	}
 
-	zend_list_insert(enc_vector, le_ps_enc);
+	zend_list_insert(enc_vector, le_ps_enc TSRMLS_CC);
 
 	RETURN_TRUE;
 }
