@@ -190,7 +190,7 @@ Finished:
 	return NULL;
 }
 
-TSRM_API int tsrm_win32_access(const char *pathname, int mode)
+TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 {
 	time_t t;
 	HANDLE thread_token;
@@ -207,8 +207,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL bucket_key_alloc = FALSE;
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
-
-	TSRMLS_FETCH();
 
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;

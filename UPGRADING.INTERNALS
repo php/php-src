@@ -91,3 +91,5 @@ Use emalloc, emalloc_rel, efree or efree_rel instead.
 . sapi_register_input_filter
   SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
  
+. tsrm_win32_access
+  TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
