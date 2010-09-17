@@ -93,3 +93,6 @@ Use emalloc, emalloc_rel, efree or efree_rel instead.
  
 . tsrm_win32_access
   TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
+
+. popen_ex (win32)
+  TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
