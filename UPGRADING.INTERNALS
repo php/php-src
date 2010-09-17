@@ -8,6 +8,8 @@ UPGRADE NOTES - PHP X.Y
   c. readlink support
   d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
   e. Zend\zend_fast_cache.h has been removed
+  f. API Signature changes
+
 ========================
 1. Internal API changes
 ========================
@@ -66,32 +68,26 @@ ZEND_FAST_FREE_REL(p, fc_type)
 
 Use emalloc, emalloc_rel, efree or efree_rel instead.
 
-	f. zend_list_insert
-zend_list_insert uses now TSRMLS_DC:
+	f. API Signature changes
+. zend_list_insert
+  ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
+  call: zend_list_insert(a, SOMETYPE TSRMLS_CC);
+  NB: If zend_list_insert is used to register a resource, 
+  ZEND_REGISTER_RESOURCE could be used instead.
 
-ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
+. php_le_stream_context(TSRMLS_C)
+  PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D)
+  call: context  = php_stream_context_alloc(TSRMLS_C);
 
-it has to be called using:
+. php_stream_context_alloc
+  PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
+  call: context  = php_stream_context_alloc(TSRMLS_C);
+. sapi_register_default_post_reader
+  SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
 
-zend_list_insert(a, SOMETYPE TSRMLS_CC);
+. sapi_register_treat_data
+  SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC);
 
-If zend_list_insert is used to register a resource, ZEND_REGISTER_RESOURCE
-could be used instead.
-
-	g. php_le_stream_context(TSRMLS_C)
-php_le_stream_context uses now TSRMLS_D:
-
-PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D)
-
-it has to be called using:
-
-context  = php_stream_context_alloc(TSRMLS_C);
-
-	h. php_stream_context_alloc
-php_stream_context_alloc uses now TSRMLS_D:
-
-PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
-
-it has to be called using:
-
-context  = php_stream_context_alloc(TSRMLS_C);
+. sapi_register_input_filter
+  SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
+ 
