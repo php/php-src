@@ -274,7 +274,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
 
-	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
+	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init TSRMLS_CC);
 
 	return SUCCESS;
 }
