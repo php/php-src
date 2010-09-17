@@ -310,7 +310,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
 #if defined(TSRM_WIN32)
-#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode TSRMLS_CC)
 #else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 #endif

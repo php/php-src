@@ -1433,7 +1433,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 	}
 
 #if defined(TSRM_WIN32)
-	ret = tsrm_win32_access(new_state.cwd, mode);
+	ret = tsrm_win32_access(new_state.cwd, mode TSRMLS_CC);
 #else
 	ret = access(new_state.cwd, mode);
 #endif
