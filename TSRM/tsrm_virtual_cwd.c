@@ -39,6 +39,14 @@
 # ifndef IO_REPARSE_TAG_SYMLINK
 #  define IO_REPARSE_TAG_SYMLINK 0xA000000C
 # endif
+
+# ifndef VOLUME_NAME_NT
+#  define VOLUME_NAME_NT 0x2
+# endif
+
+# ifndef VOLUME_NAME_DOS
+#  define VOLUME_NAME_DOS 0x0
+# endif
 #endif
 
 #ifndef S_IFLNK
