@@ -1764,7 +1764,7 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC) /* {{{ */
 #ifdef TSRM_WIN32
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC) /* {{{ */
 {
-	return popen_ex(command, type, CWDG(cwd).cwd, NULL);
+	return popen_ex(command, type, CWDG(cwd).cwd, NULL TSRMLS_CC);
 }
 /* }}} */
 #elif defined(NETWARE)
