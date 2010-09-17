@@ -667,7 +667,7 @@ static inline void gmp_zval_unary_op(zval *return_value, zval **a_arg, gmp_unary
 
 /* {{{ gmp_zval_unary_ui_op
  */
-static inline void gmp_zval_unary_ui_op(zval *return_value, zval **a_arg, gmp_unary_ui_op_t gmp_op)
+static inline void gmp_zval_unary_ui_op(zval *return_value, zval **a_arg, gmp_unary_ui_op_t gmp_op TSRMLS_DC)
 {
 	mpz_t *gmpnum_result;
 
@@ -691,7 +691,7 @@ static inline void _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_ui_o
 		return;
 	}
 
-	gmp_zval_unary_ui_op(return_value, a_arg, gmp_op);
+	gmp_zval_unary_ui_op(return_value, a_arg, gmp_op TSRMLS_CC);
 }
 /* }}} */
 
@@ -1022,7 +1022,7 @@ ZEND_FUNCTION(gmp_fact)
 		}
 	}
 		
-	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui);
+	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui TSRMLS_CC);
 }
 /* }}} */
 
