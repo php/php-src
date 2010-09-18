@@ -97,6 +97,8 @@
   . Don't terminate shell on fatal errors.
 - Improved ext/zlib: re-implemented non-file related functionality. (Mike)
 - Improved output layer. See README.NEW-OUTPUT-API for internals. (Mike)
+- Improved the performance of unserialize(). (galaxy dot mipt at gmail dot com, 
+  Kalle)
 
 - Removed legacy features:
   . allow_call_time_pass_reference. (Pierrick)
