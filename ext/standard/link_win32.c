@@ -51,14 +51,6 @@ TODO:
 - this file is then useless and we have a portable link API
 */
 
-#ifndef VOLUME_NAME_NT
-#define VOLUME_NAME_NT 0x2
-#endif
-
-#ifndef VOLUME_NAME_DOS
-#define VOLUME_NAME_DOS 0x0
-#endif
-
 /* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
