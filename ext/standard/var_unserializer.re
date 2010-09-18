@@ -33,25 +33,23 @@ typedef struct {
 
 static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = (*var_hashx)->first, *prev = NULL;
+	var_entries *var_hash = (*var_hashx)->last;
 #if 0
 	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
-	
-	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
-		prev = var_hash;
-		var_hash = var_hash->next;
-	}
 
-	if (!var_hash) {
+	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = emalloc(sizeof(var_entries));
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!(*var_hashx)->first)
+		if (!(*var_hashx)->first) {
 			(*var_hashx)->first = var_hash;
-		else
-			prev->next = var_hash;
+		} else {
+			((var_entries *) (*var_hashx)->last)->next = var_hash;
+		}
+
+		(*var_hashx)->last = var_hash;
 	}
 
 	var_hash->data[var_hash->used_slots++] = *rval;
@@ -59,25 +57,23 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = (*var_hashx)->first_dtor, *prev = NULL;
+	var_entries *var_hash = (*var_hashx)->last_dtor;
 #if 0
 	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
-		
-	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
-		prev = var_hash;
-		var_hash = var_hash->next;
-	}
 
-	if (!var_hash) {
+	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = emalloc(sizeof(var_entries));
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!(*var_hashx)->first_dtor)
+		if (!(*var_hashx)->first_dtor) {
 			(*var_hashx)->first_dtor = var_hash;
-		else
-			prev->next = var_hash;
+		} else {
+			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
+		}
+
+		(*var_hashx)->last_dtor = var_hash;
 	}
 
 	Z_ADDREF_PP(rval);
