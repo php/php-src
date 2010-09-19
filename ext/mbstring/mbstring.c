@@ -1344,7 +1344,7 @@ PHP_MINIT_FUNCTION(mbstring)
 	REGISTER_INI_ENTRIES();
 
 	/* This is a global handler. Should not be set in a per-request handler. */
-	sapi_register_treat_data(mbstr_treat_data);
+	sapi_register_treat_data(mbstr_treat_data TSRMLS_CC);
 
 	/* Post handlers are stored in the thread-local context. */
 	if (MBSTRG(encoding_translation)) {
