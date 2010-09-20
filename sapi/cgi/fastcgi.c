@@ -1108,7 +1108,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 			DisconnectNamedPipe(pipe);
 		} else {
 			if (!force) {
-				char buf;
+				fcgi_header buf;
 
 				shutdown(req->fd, 1);
 				/* read the last FCGI_STDIN header (it may be omitted) */
