@@ -33,6 +33,10 @@ function bug_44454($db) {
 			}
 		}
 
+		$db->exec('DROP TABLE IF EXISTS test');
+		$db->exec('CREATE TABLE test(a INT, b INT, UNIQUE KEY idx_ab (a, b))');
+		$db->exec('INSERT INTO test(a, b) VALUES (1, 1)');
+
 	} catch (Exception $e) {
 		printf("... While error %s\n", $e->getMessage()); ;
 	}
@@ -79,7 +83,7 @@ Native Prepared Statements
 ... PDO  - array (
   0 => '23000',
   1 => 1062,
-  2 => 'Duplicate entry \'1-1\' for key 1',
+  2 => 'Duplicate entry \'1-1\' for key %s',
 )
 ... SELECT has returned 1 row...
 ... INSERT should fail...
@@ -87,7 +91,7 @@ Native Prepared Statements
 ... PDO  - array (
   0 => '23000',
   1 => 1062,
-  2 => 'Duplicate entry \'1-1\' for key 1',
+  2 => 'Duplicate entry \'1-1\' for key %s',
 )
 
 Emulated Prepared Statements
@@ -97,7 +101,7 @@ Emulated Prepared Statements
 ... PDO  - array (
   0 => '23000',
   1 => 1062,
-  2 => 'Duplicate entry \'1-1\' for key 1',
+  2 => 'Duplicate entry \'1-1\' for key %s',
 )
 ... SELECT has returned 1 row...
 ... INSERT should fail...
@@ -105,6 +109,6 @@ Emulated Prepared Statements
 ... PDO  - array (
   0 => '23000',
   1 => 1062,
-  2 => 'Duplicate entry \'1-1\' for key 1',
+  2 => 'Duplicate entry \'1-1\' for key %s',
 )
 done!
