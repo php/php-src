@@ -5,9 +5,6 @@ Calling connect() on an open persistent connection to create a new persistent co
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND)
-	die("skip mysqlnd test only");
-
 ?>
 --INI--
 mysqli.allow_persistent=1
