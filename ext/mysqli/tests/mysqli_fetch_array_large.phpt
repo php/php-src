@@ -100,49 +100,61 @@ require_once('skipifconnectfailure.inc');
 	}
 
 
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket);
+	function test_fetch($host, $user, $passwd, $db, $port, $socket, $engine, $flags = null) {
+
+		$link = mysqli_init();
+		if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags)) {
+			printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+			return false;
+		}
+
+		if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
+			!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, label VARCHAR(255)) ENGINE = %s", $engine))) {
+			printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			return false;
+		}
+
+		$package_size = 524288;
+		$offset = 3;
+		$limit = (ini_get('memory_limit') > 0) ? parse_memory_limit(ini_get('memory_limit')) : pow(2, 32);
+
+		/* try to respect php.ini but make run time a soft limit */
+		$max_runtime = (ini_get('max_execution_time') > 0) ? ini_get('max_execution_time') : 30;
+		set_time_limit(0);
+
+		do {
+			if ($package_size > $limit) {
+				printf("stop: memory limit - %s vs. %s\n", $package_size, $limit);
+				break;
+			}
+
+			$start = microtime(true);
+			if (!mysqli_fetch_array_large($offset++, $link, $package_size)) {
+				printf("stop: packet size - %d\n", $package_size);
+				break;
+			}
+
+			$duration = microtime(true) - $start;
+			$max_runtime -= $duration;
+			if ($max_runtime < ($duration * 3)) {
+				/* likely the next iteration will not be within max_execution_time */
+				printf("stop: time limit - %2.2fs\n", $max_runtime);
+				break;
+			}
+
+			$package_size += $package_size;
+
+		} while (true);
+
+
+		mysqli_close($link);
+		return true;
 	}
 
-	if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
-			!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, label VARCHAR(255)) ENGINE = %s", $engine)))
-		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$package_size = 524288;
-	$offset = 3;
-	$limit = (ini_get('memory_limit') > 0) ? parse_memory_limit(ini_get('memory_limit')) : pow(2, 32);
-
-	/* try to respect php.ini but make run time a soft limit */
-	$max_runtime = (ini_get('max_execution_time') > 0) ? ini_get('max_execution_time') : 30;
-	set_time_limit(0);
-
-	do {
-		if ($package_size > $limit) {
-			printf("stop: memory limit - %s vs. %s\n", $package_size, $limit);
-			break;
-		}
-
-		$start = microtime(true);
-		if (!mysqli_fetch_array_large($offset++, $link, $package_size)) {
-			printf("stop: packet size - %d\n", $package_size);
-			break;
-		}
-
-		$duration = microtime(true) - $start;
-		$max_runtime -= $duration;
-		if ($max_runtime < ($duration * 3)) {
-			/* likely the next iteration will not be within max_execution_time */
-			printf("stop: time limit - %2.2fs\n", $max_runtime);
-			break;
-		}
-
-		$package_size += $package_size;
-
-	} while (true);
-
-
-	mysqli_close($link);
+	test_fetch($host, $user, $passwd, $db, $port, $socket, $engine, null);
+	test_fetch($host, $user, $passwd, $db, $port, $socket, $engine, MYSQLI_CLIENT_COMPRESS);
 	print "done!";
 ?>
 --CLEAN--
@@ -150,5 +162,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+stop: %s
 stop: %s
 done!
