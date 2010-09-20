@@ -1649,6 +1649,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 		}
 	} else {
 		if (segment) {
+#ifndef ZEND_WIN32
 			if (heap->reserve_size) {
 				while (segment->next_segment) {
 					prev = segment;
@@ -1657,13 +1658,16 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 				}
 				heap->segments_list = segment;
 			} else {
+#endif
 				do {
 					prev = segment;
 					segment = segment->next_segment;
 					ZEND_MM_STORAGE_FREE(prev);
 				} while (segment);
 				heap->segments_list = NULL;
+#ifndef ZEND_WIN32
 			}
+#endif
 		}
 		if (heap->compact_size &&
 		    heap->real_peak > heap->compact_size) {
