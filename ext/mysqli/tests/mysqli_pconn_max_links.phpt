@@ -5,14 +5,7 @@ Persistent connections and mysqli.max_links
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
-	require_once('connect.inc');
-
-	if (!$IS_MYSQLND)
-		die("skip mysqlnd only test");
-
-	// we need a second DB user to test for a possible flaw in the ext/mysql[i] code
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		die(sprintf("skip Cannot connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+	require_once('table.inc');
 
 	mysqli_query($link, 'DROP USER pcontest');
 	mysqli_query($link, 'DROP USER pcontest@localhost');
@@ -53,6 +46,17 @@ mysqli.max_persistent=2
 <?php
 	require_once("connect.inc");
 	require_once('table.inc');
+
+
+	if (!mysqli_query($link, 'DROP USER pcontest') ||
+		!mysqli_query($link, 'DROP USER pcontest@localhost') ||
+		!mysqli_query($link, 'CREATE USER pcontest@"%" IDENTIFIED BY "pcontest"') ||
+		!mysqli_query($link, 'CREATE USER pcontest@localhost IDENTIFIED BY "pcontest"') ||
+		!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db)) ||
+		!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'localhost'", $db))) {
+		printf("[000] Init failed, [%d] %s\n",
+			mysqli_errno($plink), mysqli_error($plink));
+	}
 
 	if (!$plink = my_mysqli_connect('p:' . $host, 'pcontest', 'pcontest', $db, $port, $socket))
 		printf("[001] Cannot connect using the second DB user created during SKIPIF, [%d] %s\n",
@@ -188,5 +192,5 @@ array(2) {
   %unicode|string%(1) "a"
 }
 
-Warning: my_mysqli_connect(): Too many open persistent links (%d) in %s on line %d
+Warning: %s: Too many open persistent links (%d) in %s on line %d
 done!
