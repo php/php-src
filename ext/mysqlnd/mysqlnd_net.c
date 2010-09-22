@@ -113,23 +113,30 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 	struct timeval tv;
 	DBG_ENTER("mysqlnd_net::connect");
 
-	if (persistent) {
-		hashed_details_len = spprintf(&hashed_details, 0, "%p", net);
-		DBG_INF_FMT("hashed_details=%s", hashed_details);
-	}
-
 	net->packet_no = net->compressed_envelope_packet_no = 0;
 
-	if (net->options.timeout_connect) {
-		tv.tv_sec = net->options.timeout_connect;
-		tv.tv_usec = 0;
+	if (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1)) {
+		if (persistent) {
+			streams_options |= STREAM_OPEN_PERSISTENT;
+		}
+		streams_options |= IGNORE_URL;
+		net->stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
+	} else {
+		if (persistent) {
+			hashed_details_len = spprintf(&hashed_details, 0, "%p", net);
+			DBG_INF_FMT("hashed_details=%s", hashed_details);
+		}
+
+		if (net->options.timeout_connect) {
+			tv.tv_sec = net->options.timeout_connect;
+			tv.tv_usec = 0;
+		}
+
+		DBG_INF_FMT("calling php_stream_xport_create");
+		net->stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
+											  hashed_details, (net->options.timeout_connect) ? &tv : NULL,
+											  NULL /*ctx*/, errstr, errcode);
 	}
-
-	DBG_INF_FMT("calling php_stream_xport_create");
-	net->stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
-										  hashed_details, (net->options.timeout_connect) ? &tv : NULL,
-										  NULL /*ctx*/, errstr, errcode);
-
 	if (*errstr || !net->stream) {
 		if (hashed_details) {
 			efree(hashed_details); /* allocated by spprintf */

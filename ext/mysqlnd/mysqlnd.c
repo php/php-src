@@ -556,6 +556,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	char *errstr = NULL;
 	int errcode = 0, host_len;
 	zend_bool unix_socket = FALSE;
+	zend_bool named_pipe = FALSE;
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 
@@ -623,9 +624,16 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			}
 			transport_len = spprintf(&transport, 0, "unix://%s", socket);
 			unix_socket = TRUE;
-		} else
+#else
+		if (host_len == sizeof(".") - 1 && host[0] == '.') {
+			/* named pipe in socket */
+			if (!socket) {
+				socket = "\\\\.\\pipe\\MySQL";
+			}
+			transport_len = spprintf(&transport, 0, "pipe://%s", socket);
+			named_pipe = TRUE;
 #endif
-		{
+		} else {
 			if (!port) {
 				port = 3306;
 			}
@@ -742,7 +750,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			goto err; /* OOM */
 		}
 
-		if (!unix_socket) {
+		if (!unix_socket && !named_pipe) {
 			conn->host = mnd_pestrdup(host, conn->persistent);
 			if (!conn->host) {
 				SET_OOM_ERROR(conn->error_info);
@@ -765,7 +773,24 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			}
 		} else {
 			conn->unix_socket	= mnd_pestrdup(socket, conn->persistent);
-			conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
+			if (unix_socket) {
+				conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
+			} else if (named_pipe) {
+				char *p;
+				spprintf(&p, 0, "%s via named pipe", conn->unix_socket);
+				if (!p) {
+					SET_OOM_ERROR(conn->error_info);
+					goto err; /* OOM */
+				}
+				conn->host_info =  mnd_pestrdup(p, conn->persistent);
+				efree(p); /* allocated by spprintf */
+				if (!conn->host_info) {
+					SET_OOM_ERROR(conn->error_info);
+					goto err; /* OOM */
+				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
+			}
 			if (!conn->unix_socket || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
