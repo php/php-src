@@ -626,7 +626,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			(stmt->param_bind[i].type == MYSQL_TYPE_LONG || stmt->param_bind[i].type == MYSQL_TYPE_LONGLONG))
 		{
 			/* always copy the var, because we do many conversions */
-			if (PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC)) {
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG &&
+				PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
+			{
 				SET_OOM_ERROR(stmt->error_info);
 				goto end;
 			}
@@ -634,7 +636,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
-			{
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 				convert_to_double_ex(&tmp_data);
 				if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
@@ -677,8 +679,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				  if it doesn't fit in a long send it as a string.
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				*/
-				{
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+
 					convert_to_double_ex(&tmp_data);
 					if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
 						convert_to_string_ex(&tmp_data);
