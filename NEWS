@@ -34,6 +34,7 @@
 - Added an optimization which saves memory and emalloc/efree calls for empty
   HashTables (Stas, Dmitry)
 
+- Added named pipes support in mysqlnd (Request#48082). (Andrey)
 - Added support for Traits. (Stefan)
 - Added array dereferencing support. (Felipe)
 - Added DTrace support. (David Soria Parra)
