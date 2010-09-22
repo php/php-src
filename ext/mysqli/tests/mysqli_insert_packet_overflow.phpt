@@ -74,8 +74,8 @@ memory_limit=256M
 	if (!mysqli_query($link, "CREATE TABLE test(col_blob LONGBLOB) ENGINE=" . $engine))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$query_prefix = 'INSERT INTO test(col_blob) VALUES ("';
-	$query_postfix = '")';
+	$query_prefix = "INSERT INTO test(col_blob) VALUES ('";
+	$query_postfix = "')";
 	$query_len = strlen($query_prefix) + strlen($query_postfix);
 	$com_query_len = 2;
 
