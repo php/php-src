@@ -482,10 +482,17 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 			/* close the statement here, the connection has been closed */
 		}
 		stmt->state = MYSQLND_STMT_PREPARED;
+		stmt->send_types_to_server = 1;
 	} else {
+		/*
+		  stmt->send_types_to_server has already been set to 0 in
+		  mysqlnd_stmt_execute_generate_request / mysqlnd_stmt_execute_store_params
+		  In case there is a situation in which binding was done for integer and the
+		  value is > LONG_MAX or < LONG_MIN, there is string conversion and we have
+		  to resend the types. Next execution will also need to resend the type.
+		*/
 		SET_EMPTY_ERROR(stmt->error_info);
 		SET_EMPTY_ERROR(stmt->conn->error_info);
-		stmt->send_types_to_server = 0;
 		stmt->upsert_status = conn->upsert_status;
 		stmt->state = MYSQLND_STMT_EXECUTED;
 		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {

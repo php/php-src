@@ -608,12 +608,46 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	size_t data_size = 0;
 	zval **copies = NULL;/* if there are different types */
 	enum_func_status ret = FAIL;
+	int resend_types_next_time = 0;
 
 	DBG_ENTER("mysqlnd_stmt_execute_store_params");
 
 /* 1. Store type information */
-	if (stmt->send_types_to_server) {
+	/*
+	  check if need to send the types even if stmt->send_types_to_server is 0. This is because
+	  if we send "i" (42) then the type will be int and the server will expect int. However, if next
+	  time we try to send > LONG_MAX, the conversion to string will send a string and the server
+	  won't expect it and interpret the value as 0. Thus we need to resend the types, if any such values
+	  occur, and force resend for the next execution.
+	
+	*/
+	for (i = 0; i < stmt->param_count; i++) {
+		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL &&
+			(stmt->param_bind[i].type == MYSQL_TYPE_LONG || stmt->param_bind[i].type == MYSQL_TYPE_LONGLONG))
+		{
+			/* always copy the var, because we do many conversions */
+			if (PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC)) {
+				SET_OOM_ERROR(stmt->error_info);
+				goto end;
+			}
+			/*
+			  if it doesn't fit in a long send it as a string.
+			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
+			*/
+			{
+				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+				convert_to_double_ex(&tmp_data);
+				if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
+					stmt->send_types_to_server = resend_types_next_time = 1;
+				}
+			}
+		}
+	}
 
+	int1store(*p, stmt->send_types_to_server); 
+	(*p)++;
+
+	if (stmt->send_types_to_server) {
 		/* 2 bytes per type, and leave 20 bytes for future use */
 		if (left < ((stmt->param_count * 2) + 20)) {
 			unsigned int offset = *p - *buf;
@@ -631,16 +665,40 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			*p = *buf + offset;
 		}
 		for (i = 0; i < stmt->param_count; i++) {
+			short current_type = stmt->param_bind[i].type;
 			/* our types are not unsigned */
 #if SIZEOF_LONG==8  
-			if (stmt->param_bind[i].type == MYSQL_TYPE_LONG) {
-				stmt->param_bind[i].type = MYSQL_TYPE_LONGLONG;
+			if (current_type == MYSQL_TYPE_LONG) {
+				current_type = MYSQL_TYPE_LONGLONG;
 			}
 #endif
-			int2store(*p, stmt->param_bind[i].type);
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+				/*
+				  if it doesn't fit in a long send it as a string.
+				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
+				*/
+				{
+					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+					convert_to_double_ex(&tmp_data);
+					if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
+						convert_to_string_ex(&tmp_data);
+						current_type = MYSQL_TYPE_VAR_STRING;
+						/*
+						  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
+						  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
+						  if the type is however not long, then we will do a goto in the next switch.
+						  We want to preserve the original bind type given by the user. Thus, we do these hacks.
+						*/
+					} else {
+						convert_to_long_ex(&tmp_data);
+					}
+				}
+			}
+			int2store(*p, current_type);
 			*p+= 2;
 		}
 	}
+	stmt->send_types_to_server = resend_types_next_time;
 
 /* 2. Store data */
 	/* 2.1 Calculate how much space we need */
@@ -654,9 +712,11 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		for (j = i + 1; j < stmt->param_count; j++) {
 			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
-				if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-					SET_OOM_ERROR(stmt->error_info);
-					goto end;
+				if (!copies || !copies[i]) {
+					if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+						SET_OOM_ERROR(stmt->error_info);
+						goto end;
+					}
 				}
 				break; 
 			}
@@ -674,23 +734,25 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					}
 				}
 				break;
-#if SIZEOF_LONG==8  
 			case MYSQL_TYPE_LONGLONG:
-				data_size += 8;
-#elif SIZEOF_LONG==4
-			case MYSQL_TYPE_LONG:
-				data_size += 4;
-#else
-#error "Should not happen"
-#endif
-				if (Z_TYPE_P(the_var) != IS_LONG) {
-					if (!copies || !copies[i]) {
-						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
-							SET_OOM_ERROR(stmt->error_info);
-							goto end;
-						}
+				{
+					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+					if (Z_TYPE_P(tmp_data) == IS_STRING) {
+						goto use_string;	
 					}
+					convert_to_long_ex(&tmp_data);
 				}
+				data_size += 8;
+				break;
+			case MYSQL_TYPE_LONG:
+				{
+					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+					if (Z_TYPE_P(tmp_data) == IS_STRING) {
+						goto use_string;	
+					}
+					convert_to_long_ex(&tmp_data);
+				}
+				data_size += 4;
 				break;
 			case MYSQL_TYPE_LONG_BLOB:
 				if (!(stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED)) {
@@ -703,6 +765,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				}
 				break;
 			case MYSQL_TYPE_VAR_STRING:
+use_string:
 				data_size += 8; /* max 8 bytes for size */
 #if MYSQLND_UNICODE
 				if (Z_TYPE_P(the_var) != IS_STRING || Z_TYPE_P(the_var) == IS_UNICODE)
@@ -757,7 +820,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 
 	/* 2.3 Store the actual data */
 	for (i = 0; i < stmt->param_count; i++) {
-		zval *data = copies && copies[i]? copies[i]: stmt->param_bind[i].zv;
+		zval *data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 		/* Handle long data */
 		if (stmt->param_bind[i].zv && Z_TYPE_P(data) == IS_NULL) {
 			(*buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
@@ -768,21 +831,22 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					float8store(*p, Z_DVAL_P(data));
 					(*p) += 8;
 					break;
-#if SIZEOF_LONG==8  
 				case MYSQL_TYPE_LONGLONG:
-					convert_to_long_ex(&data);
+					if (Z_TYPE_P(data) == IS_STRING) {
+						goto send_string;
+					}
+					/* data has alreade been converted to long */
 					int8store(*p, Z_LVAL_P(data));
 					(*p) += 8;
 					break;
-#elif SIZEOF_LONG==4
 				case MYSQL_TYPE_LONG:
-					convert_to_long_ex(&data);
+					if (Z_TYPE_P(data) == IS_STRING) {
+						goto send_string;
+					}
+					/* data has alreade been converted to long */
 					int4store(*p, Z_LVAL_P(data));
 					(*p) += 4;
 					break;
-#else
-#error "Should not happen"
-#endif
 				case MYSQL_TYPE_LONG_BLOB:
 					if (stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED) {
 						stmt->param_bind[i].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
@@ -791,7 +855,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 						*p = php_mysqlnd_net_store_length(*p, 0);
 					}
 					break;
-				case MYSQL_TYPE_VAR_STRING:{
+				case MYSQL_TYPE_VAR_STRING:
+send_string:
+					{
 						unsigned int len = Z_STRLEN_P(data);
 						/* to is after p. The latter hasn't been moved */
 						*p = php_mysqlnd_net_store_length(*p, len);
@@ -854,10 +920,6 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	null_byte_offset = p - cmd_buffer;
 	memset(p, 0, null_count);
 	p += null_count;
-
-
-	int1store(p, stmt->send_types_to_server); 
-	p++;
 
 	ret = mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
 
