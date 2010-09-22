@@ -547,7 +547,9 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(current_execute_data) = NULL;
 	EG(current_module) = NULL;
 	EG(exit_status) = 0;
-	EG(saved_fpu_cw) = NULL;
+#if XPFPA_HAVE_CW
+	EG(saved_fpu_cw) = 0;
+#endif
 	EG(saved_fpu_cw_ptr) = NULL;
 	EG(active) = 0;
 }
