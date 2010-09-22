@@ -90,10 +90,12 @@
 
 			if ($flags !== false) {
 				$link = mysqli_init();
+				$link->options(MYSQLI_SET_CHARSET_NAME, "utf8");
 				if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
 					$link = false;
 			} else {
 				$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+				$link->set_charset("utf8");
 			}
 
 			return $link;

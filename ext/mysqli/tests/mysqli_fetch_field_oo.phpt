@@ -87,9 +87,9 @@ object(stdClass)#%d (11) {
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
-  int(1)
+  int(%d)
   [%u|b%"charsetnr"]=>
-  int(8)
+  int(%d)
   [%u|b%"flags"]=>
   int(0)
   [%u|b%"type"]=>
