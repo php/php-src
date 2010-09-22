@@ -133,7 +133,7 @@ typedef unsigned short mode_t;
 CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
-CWD_API int php_sys_readlink(link, target, target_len);
+CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
