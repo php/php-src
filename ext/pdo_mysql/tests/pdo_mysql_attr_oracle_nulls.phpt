@@ -24,11 +24,11 @@ MySQLPDOTest::skip();
 		printf("[003] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
 
 	$db->setAttribute(PDO::ATTR_ORACLE_NULLS, 1);
-	$stmt = $db->query('SELECT NULL AS z, "" AS a, " " AS b, TRIM(" ") as c, " d" AS d, "' . chr(0) . ' e" AS e');
+	$stmt = $db->query("SELECT NULL AS z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, '" . chr(0) . " e' AS e");
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 	$db->setAttribute(PDO::ATTR_ORACLE_NULLS, 0);
-	$stmt = $db->query('SELECT NULL AS z, "" AS a, " " AS b, TRIM(" ") as c, " d" AS d, "' . chr(0) . ' e" AS e');
+	$stmt = $db->query("SELECT NULL AS z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, '" . chr(0) . " e' AS e");
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 	$db->setAttribute(PDO::ATTR_ORACLE_NULLS, 1);
@@ -43,7 +43,7 @@ MySQLPDOTest::skip();
 	$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
 
 	if ($have_procedures && (false !== $db->exec('DROP PROCEDURE IF EXISTS p')) &&
-		(false !== $db->exec('CREATE PROCEDURE p() BEGIN SELECT NULL as z, "" AS a, " " AS b, TRIM(" ") as c, " d" AS d, " e" AS e; END;'))) {
+		(false !== $db->exec("CREATE PROCEDURE p() BEGIN SELECT NULL as z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, ' e' AS e; END;"))) {
 		// requires MySQL 5+
 		$stmt = $db->prepare('CALL p()');
 		$stmt->execute();

@@ -60,7 +60,7 @@ $db = MySQLPDOTest::factory();
 		//
 
 		$db->exec('DELETE FROM test');
-		$db->exec('INSERT INTO test (id, label1, label2) VALUES (1, "row1", "row2")');
+		$db->exec("INSERT INTO test (id, label1, label2) VALUES (1, 'row1', 'row2')");
 		$sql = "SELECT id, label1 FROM test WHERE id = :placeholder AND label1 = (SELECT label1 AS 'SELECT' FROM test WHERE id = :placeholder)";
 
 		// emulated...

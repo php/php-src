@@ -22,7 +22,7 @@ $db = MySQLPDOTest::factory();
 			printf("[002] Unable to turn off emulated prepared statements\n");
 
 		// INSERT a single row
-		$stmt = $db->prepare('INSERT INTO test(id, label) VALUES (100, ":placeholder")');
+		$stmt = $db->prepare("INSERT INTO test(id, label) VALUES (100, ':placeholder')");
 
 		// Yes, there is no placeholder to bind to and named placeholder
 		// do not work with MySQL native PS, but lets see what happens!
@@ -45,7 +45,7 @@ $db = MySQLPDOTest::factory();
 			printf("[004] Unable to turn on emulated prepared statements\n");
 
 		// Note that the "named placeholder" is enclosed by double quotes.
-		$stmt = $db->prepare('INSERT INTO test(id, label) VALUES(101, ":placeholder")');
+		$stmt = $db->prepare("INSERT INTO test(id, label) VALUES(101, ':placeholder')");
 		// No replacement shall be made
 		$stmt->execute(array(':placeholder' => 'row1'));
 		// Again, I'd like to see an error message

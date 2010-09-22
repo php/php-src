@@ -103,8 +103,8 @@ MySQLPDOTest::skip();
 	test_type($db, 80, 'MEDIUMINT', -8388608, ($is_mysqlnd) ? -8388608 : '-8388608');
 	test_type($db, 90, 'MEDIUMINT UNSIGNED', 16777215, ($is_mysqlnd) ? 16777215 : '16777215');
 
-	test_type($db, 100, 'INT', -2147483648, 
-		($is_mysqlnd) ? ((PHP_INT_SIZE > 4) ? (int)-2147483648 : (double)-2147483648) : '-2147483648', 
+	test_type($db, 100, 'INT', -2147483648,
+		($is_mysqlnd) ? ((PHP_INT_SIZE > 4) ? (int)-2147483648 : (double)-2147483648) : '-2147483648',
 		NULL, ($is_mysqlnd) ? 'integer' : NULL);
 
 	test_type($db, 110, 'INT UNSIGNED', 4294967295, ($is_mysqlnd) ? ((PHP_INT_SIZE > 4) ? 4294967295 : '4294967295') : '4294967295');

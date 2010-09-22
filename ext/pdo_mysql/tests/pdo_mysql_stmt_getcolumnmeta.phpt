@@ -76,7 +76,7 @@ try {
 			return true;
 		}
 
-		if (!$db->exec(sprintf('INSERT INTO test(id, label) VALUES (1, "%s")', $value))) {
+		if (!$db->exec(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $value))) {
 			printf("[%03d] + 1] Insert failed, %d - %s\n", $offset,
 				$db->errorCode(), var_export($db->errorInfo(), true));
 			return false;
@@ -141,6 +141,11 @@ try {
 		return true;
 	}
 
+	$stmt = $db->prepare('SELECT @@sql_mode AS _mode');
+	$stmt->execute();
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	$real_as_float = (false === stristr($row['_mode'], "REAL_AS_FLOAT")) ? false : true;
+
 	$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 	$is_mysqlnd = MySQLPDOTest::isPDOMySQLnd();
 	test_meta($db, 20, 'BIT(8)', 1, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
@@ -160,10 +165,10 @@ try {
 	test_meta($db, 120, 'BIGINT', -9223372036854775808, 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
 	test_meta($db, 130, 'BIGINT UNSIGNED', 18446744073709551615, 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
 
-	test_meta($db, 130, 'REAL', -1.01, 'DOUBLE', PDO::PARAM_STR);
-	test_meta($db, 140, 'REAL UNSIGNED', 1.01, 'DOUBLE', PDO::PARAM_STR);
-	test_meta($db, 150, 'REAL ZEROFILL', -1.01, 'DOUBLE', PDO::PARAM_STR);
-	test_meta($db, 160, 'REAL UNSIGNED ZEROFILL', 1.01, 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 130, 'REAL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 140, 'REAL UNSIGNED', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 150, 'REAL ZEROFILL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 160, 'REAL UNSIGNED ZEROFILL', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
 
 	test_meta($db, 170, 'DOUBLE', -1.01, 'DOUBLE', PDO::PARAM_STR);
 	test_meta($db, 180, 'DOUBLE UNSIGNED', 1.01, 'DOUBLE', PDO::PARAM_STR);
