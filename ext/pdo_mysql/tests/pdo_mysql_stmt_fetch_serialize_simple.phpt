@@ -45,7 +45,7 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 		printf("\nAnd now magic PDO using fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE)...\n");
 		$db->exec('DROP TABLE IF EXISTS test');
 		$db->exec(sprintf('CREATE TABLE test(myobj BLOB) ENGINE=%s', MySQLPDOTest::getTableEngine()));
-		$db->exec('INSERT INTO test(myobj) VALUES ("Data fetched from DB to be given to unserialize()")');
+		$db->exec("INSERT INTO test(myobj) VALUES ('Data fetched from DB to be given to unserialize()')");
 
 		$stmt = $db->prepare('SELECT myobj FROM test');
 		$stmt->execute();

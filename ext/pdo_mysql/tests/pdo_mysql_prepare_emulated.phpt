@@ -98,12 +98,12 @@ $db = MySQLPDOTest::factory();
 
 		prepex(5, $db, 'DROP TABLE IF EXISTS test');
 		prepex(6, $db, sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-		prepex(7, $db, 'INSERT INTO test(id, label) VALUES(1, ":placeholder")');
+		prepex(7, $db, "INSERT INTO test(id, label) VALUES(1, ':placeholder')");
 		$stmt = prepex(8, $db, 'SELECT label FROM test');
 		var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 		prepex(9, $db, 'DELETE FROM test');
-		prepex(10, $db, 'INSERT INTO test(id, label) VALUES(1, ":placeholder")',
+		prepex(10, $db, "INSERT INTO test(id, label) VALUES(1, ':placeholder')",
 			array(':placeholder' => 'first row'));
 		$stmt = prepex(11, $db, 'SELECT label FROM test');
 
@@ -200,12 +200,12 @@ $db = MySQLPDOTest::factory();
 		// and now, the same with anonymous placeholders...
 		prepex(45, $db, 'DROP TABLE IF EXISTS test');
 		prepex(46, $db, sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-		prepex(47, $db, 'INSERT INTO test(id, label) VALUES(1, "?")');
+		prepex(47, $db, "INSERT INTO test(id, label) VALUES(1, '?')");
 		$stmt = prepex(48, $db, 'SELECT label FROM test');
 		var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 		prepex(49, $db, 'DELETE FROM test');
-		prepex(50, $db, 'INSERT INTO test(id, label) VALUES(1, "?")',
+		prepex(50, $db, "INSERT INTO test(id, label) VALUES(1, '?')",
 			array('first row'));
 		$stmt = prepex(51, $db, 'SELECT label FROM test');
 

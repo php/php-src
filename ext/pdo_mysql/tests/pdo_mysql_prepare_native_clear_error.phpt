@@ -23,7 +23,7 @@ $db = MySQLPDOTest::factory();
 			printf("[002] Unable to turn on emulated prepared statements\n");
 
 		// INSERT a single row
-		$db->exec('INSERT INTO test(id, label) VALUES (1, "row1")');
+		$db->exec("INSERT INTO test(id, label) VALUES (1, 'row1')");
 
 		$stmt = $db->prepare('SELECT unknown_column FROM test WHERE id > :placeholder ORDER BY id ASC');
 		$stmt->execute(array(':placeholder' => 0));

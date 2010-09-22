@@ -57,7 +57,7 @@ $db = MySQLPDOTest::factory();
 		$row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
 		$num = $row['_num'];
 
-		$db->query('INSERT INTO test(id, label) VALUES (100, "z")');
+		$db->query("INSERT INTO test(id, label) VALUES (100, 'z')");
 		$num++;
 		$row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
 		if ($row['_num'] != $num)

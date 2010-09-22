@@ -37,7 +37,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 		if (true !== ($tmp = $db->beginTransaction()))
 			printf("[004] Expecting true, got %s/%s\n", gettype($tmp), $tmp);
 
-		$db->exec('INSERT INTO test(id, label) VALUES (100, "z")');
+		$db->exec("INSERT INTO test(id, label) VALUES (100, 'z')");
 
 		if (true !== ($tmp = $db->commit()))
 			printf("[005] No commit allowed? [%s] %s\n",
@@ -59,7 +59,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 		if (true !== ($tmp = $db->beginTransaction()))
 			printf("[007] Expecting true, got %s/%s\n", gettype($tmp), $tmp);
 
-		$db->exec('INSERT INTO test(id, label) VALUES (100, "z")');
+		$db->exec("INSERT INTO test(id, label) VALUES (100, 'z')");
 		if (true !== ($tmp = $db->commit()))
 			printf("[008] No commit allowed? [%s] %s\n",
 				$db->errorCode(), implode(' ', $db->errorInfo()));

@@ -20,7 +20,7 @@ $db = MySQLPDOTest::factory();
 		$db->exec('DROP TABLE IF EXISTS test');
 		$db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
-		$stmt = $db->prepare('INSERT INTO test(id, label) VALUES(1, "?")');
+		$stmt = $db->prepare("INSERT INTO test(id, label) VALUES(1, '?')");
 		// you can bind as many values as you want no matter if they can be replaced or not
 		$stmt->execute(array('first row'));
 		if ('00000' !== $stmt->errorCode())
@@ -39,7 +39,7 @@ $db = MySQLPDOTest::factory();
 			printf("[004] Unable to switch off emulated prepared statements, test will fail\n");
 
 		$db->exec('DELETE FROM test');
-		$stmt = $db->prepare('INSERT INTO test(id, label) VALUES(1, "?")');
+		$stmt = $db->prepare("INSERT INTO test(id, label) VALUES(1, '?')");
 		// you can bind as many values as you want no matter if they can be replaced or not
 		$stmt->execute(array('first row'));
 		if ('00000' !== $stmt->errorCode())
