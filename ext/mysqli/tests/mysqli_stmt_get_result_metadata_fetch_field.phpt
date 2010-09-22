@@ -81,9 +81,9 @@ object(stdClass)#%d (11) {
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
-  int(1)
+  int(%d)
   [%u|b%"charsetnr"]=>
-  int(8)
+  int(%d)
   [%u|b%"flags"]=>
   int(0)
   [%u|b%"type"]=>
@@ -129,9 +129,9 @@ object(stdClass)#%d (11) {
   [%u|b%"max_length"]=>
   int(2)
   [%u|b%"length"]=>
-  int(2)
+  int(%d)
   [%u|b%"charsetnr"]=>
-  int(8)
+  int(%d)
   [%u|b%"flags"]=>
   int(0)
   [%u|b%"type"]=>
