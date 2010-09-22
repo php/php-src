@@ -1092,7 +1092,9 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 }
 /* }}} */
 
-#if MYSQLND_DEBUG_MEMORY
+#define MYSQLND_DEBUG_MEMORY 1
+
+#if MYSQLND_DEBUG_MEMORY == 0
 
 /* {{{ mysqlnd_zend_mm_emalloc */
 static void * mysqlnd_zend_mm_emalloc(size_t size MYSQLND_MEM_D)
@@ -1207,8 +1209,6 @@ static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, zend_bool persist
 
 #endif
 
-
-#define MYSQLND_DEBUG_MEMORY 1
 
 PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator = 
 {
