@@ -59,7 +59,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 	if (!$db->beginTransaction())
 		printf("[011] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-	$db->exec(sprintf('INSERT INTO test(id, label) VALUES (%d, "z")', $row['id']));
+	$db->exec(sprintf("INSERT INTO test(id, label) VALUES (%d, 'z')", $row['id']));
 
 	if (!($stmt = $db->query(sprintf('SELECT id, label FROM test WHERE id = %d', $row['id']))))
 		printf("[012] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -166,7 +166,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 		printf("[035] Cannot start a transaction, [%s] [%s]\n",
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 
-	if (0 == $db->exec('INSERT INTO test(id, label) VALUES (1, "a")'))
+	if (0 == $db->exec("INSERT INTO test(id, label) VALUES (1, 'a')"))
 		printf("[036] Cannot insert data, [%s] [%s]\n",
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 

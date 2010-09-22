@@ -22,7 +22,7 @@ $db = MySQLPDOTest::factory();
 		if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
 			printf("[002] Unable to turn on emulated prepared statements\n");
 
-		$stmt = $db->prepare('SELECT id, label, "?" as foo FROM test');
+		$stmt = $db->prepare("SELECT id, label, '?' as foo FROM test");
 		$stmt->execute();
 		var_dump($stmt->columnCount());
 
@@ -40,7 +40,7 @@ $db = MySQLPDOTest::factory();
 		if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
 			printf("[004] Unable to turn off emulated prepared statements\n");
 
-		$stmt = $db->prepare('SELECT id, label, "?" as foo, "TODO - Stored Procedure" as bar FROM test');
+		$stmt = $db->prepare("SELECT id, label, '?' as foo, 'TODO - Stored Procedure' as bar FROM test");
 		$stmt->execute();
 		var_dump($stmt->columnCount());
 

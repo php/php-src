@@ -38,19 +38,19 @@ MySQLPDOTest::skip();
 
 		exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
 		exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
-		exec_and_count(4, $db, 'INSERT INTO test(id, col1) VALUES (1, "a")', 1);
+		exec_and_count(4, $db, "INSERT INTO test(id, col1) VALUES (1, 'a')", 1);
 		// question is: will the result set be cleaned up, will it be possible to run more queries on the line?
 		// buffered or unbuffered does not matter!
 		$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 		exec_and_count(5, $db, 'SELECT id FROM test', 0);
-		exec_and_count(6, $db, 'INSERT INTO test(id, col1) VALUES (2, "b")', 1);
+		exec_and_count(6, $db, "INSERT INTO test(id, col1) VALUES (2, 'b')", 1);
 
 	} catch (PDOException $e) {
 		printf("[001] %s, [%s] %s\n",
 			$e->getMessage(),
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 	}
-	
+
 	print "done!";
 ?>
 --CLEAN--
@@ -61,5 +61,5 @@ $db = MySQLPDOTest::factory();
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
-[006] Expecting '1'/integer got ''/boolean when running 'INSERT INTO test(id, col1) VALUES (2, "b")', [HY000] HY000 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.
+[006] Expecting '1'/integer got ''/boolean when running 'INSERT INTO test(id, col1) VALUES (2, 'b')', [HY000] HY000 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.
 done!

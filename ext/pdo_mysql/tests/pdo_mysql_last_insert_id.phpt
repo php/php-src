@@ -34,7 +34,7 @@ $db = MySQLPDOTest::factory();
 			printf("[005] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
 		// no auto increment column
-		$db->exec('INSERT INTO test(id, col1) VALUES (100, "a")');
+		$db->exec("INSERT INTO test(id, col1) VALUES (100, 'a')");
 		if ('0' !== ($tmp = $db->lastInsertId()))
 			printf("[006] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
@@ -43,17 +43,17 @@ $db = MySQLPDOTest::factory();
 			printf("[006] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
 		// duplicate key
-		@$db->exec('INSERT INTO test(id, col1) VALUES (100, "a")');
+		@$db->exec("INSERT INTO test(id, col1) VALUES (100, 'a')");
 		if ('0' !== ($tmp = $db->lastInsertId()))
 			printf("[007] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-		$db->exec('INSERT INTO test(id, col1) VALUES (101, "b")');
+		$db->exec("INSERT INTO test(id, col1) VALUES (101, 'b')");
 		if ('101' !== ($tmp = $db->lastInsertId()))
 			printf("[008] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
 		$db->exec('ALTER TABLE test MODIFY col1 CHAR(10) UNIQUE');
 		// replace = delete + insert -> new auto increment value
-		$db->exec('REPLACE INTO test(col1) VALUES ("b")');
+		$db->exec("REPLACE INTO test(col1) VALUES ('b')");
 		$next_id = (int)$db->lastInsertId();
 
 		if ($next_id <= 101)
@@ -67,7 +67,7 @@ $db = MySQLPDOTest::factory();
 				$last_id, $next_id);
 		}
 
-		$db->exec('INSERT INTO test(col1) VALUES ("c"), ("d"), ("e")');
+		$db->exec("INSERT INTO test(col1) VALUES ('c'), ('d'), ('e')");
 		$next_id = (int)$db->lastInsertId();
 		if ($next_id <= $last_id)
 			printf("[011] Expecting at least %d, got %d\n", $last_id + 1, $next_id);
@@ -91,7 +91,7 @@ $db = MySQLPDOTest::factory();
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 			$last_id = $row['_last_id'];
 
-			$db->exec('INSERT INTO test(col1) VALUES ("z")');
+			$db->exec("INSERT INTO test(col1) VALUES ('z')");
 			$next_id = (int)$db->lastInsertId();
 			if ($next_id < ($last_id + $inc))
 				printf("[012] Expecting at least %d, got %d\n", $last_id + $inc, $next_id);

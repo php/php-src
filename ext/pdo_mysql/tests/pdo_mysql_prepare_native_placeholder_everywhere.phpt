@@ -18,7 +18,7 @@ $db = MySQLPDOTest::factory();
 
 		$db->exec('DROP TABLE IF EXISTS test');
 		$db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-		$db->exec('INSERT INTO test(id, label) VALUES (1, "row1")');
+		$db->exec("INSERT INTO test(id, label) VALUES (1, 'row1')");
 
 		$stmt = $db->prepare('SELECT ?, id, label FROM test WHERE ? = ? ORDER BY id ASC');
 		$stmt->execute(array('id', 'label', 'label'));
