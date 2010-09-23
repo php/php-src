@@ -246,7 +246,7 @@ PHP_MINFO_FUNCTION(ereg)
 /* {{{ php_ereg_eprint
  * php_ereg_eprint - convert error number to name
  */
-static void php_ereg_eprint(int err, regex_t *re) {
+static void php_ereg_eprint(int err, regex_t *re TSRMLS_DC) {
 	char *buf = NULL, *message = NULL;
 	size_t len;
 	size_t buf_len;
@@ -265,8 +265,6 @@ static void php_ereg_eprint(int err, regex_t *re) {
 #endif
 	len = regerror(err, re, NULL, 0);
 	if (len) {
-		TSRMLS_FETCH();
-
 		message = (char *)safe_emalloc((buf_len + len + 2), sizeof(char), 0);
 		if (!message) {
 			return; /* fail silently */
@@ -330,7 +328,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -343,7 +341,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		regfree(&re);
 		efree(subs);
 		RETURN_FALSE;
@@ -426,7 +424,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 
 	err = regcomp(&re, pattern, copts);
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		return ((char *) -1);
 	}
 
@@ -445,7 +443,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 		err = regexec(&re, &string[pos], re.re_nsub+1, subs, (pos ? REG_NOTBOL : 0));
 
 		if (err && err != REG_NOMATCH) {
-			php_ereg_eprint(err, &re);
+			php_ereg_eprint(err, &re TSRMLS_CC);
 			efree(subs);
 			efree(buf);
 			regfree(&re);
@@ -649,7 +647,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	err = regcomp(&re, spliton, REG_EXTENDED | copts);
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -693,7 +691,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* see if we encountered an error */
 	if (err && err != REG_NOMATCH) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		regfree(&re);
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
 		efree(Z_ARRVAL_P(return_value));
