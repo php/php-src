@@ -58,13 +58,18 @@ static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	TSRMLS_FETCH(); \
 	if (GetCurrentThreadId() != stm->engine_thread) \
 		return RPC_E_WRONG_THREAD;
+		
+#define FETCH_STM_EX()	\
+	php_istream *stm = (php_istream*)This;	\
+	if (GetCurrentThreadId() != stm->engine_thread)	\
+		return RPC_E_WRONG_THREAD;
 
 static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 	IStream *This,
 	/* [in] */ REFIID riid,
 	/* [iid_is][out] */ void **ppvObject)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	if (IsEqualGUID(&IID_IUnknown, riid) ||
 			IsEqualGUID(&IID_IStream, riid)) {
@@ -79,7 +84,7 @@ static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 
 static ULONG STDMETHODCALLTYPE stm_addref(IStream *This)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return InterlockedIncrement(&stm->refcount);
 }
@@ -184,7 +189,7 @@ static HRESULT STDMETHODCALLTYPE stm_set_size(IStream *This, ULARGE_INTEGER libN
 static HRESULT STDMETHODCALLTYPE stm_copy_to(IStream *This, IStream *pstm, ULARGE_INTEGER cb,
 		ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return E_NOTIMPL;
 }
