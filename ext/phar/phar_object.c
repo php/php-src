@@ -1251,8 +1251,12 @@ static spl_other_handler phar_spl_foreign_handler = {
 
 /* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
- * {{{ proto void PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
+ *
+ * proto void PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
  * Construct a PharData archive object
+ *
+ * This function is used as the constructor for both the Phar and PharData
+ * classes, hence the two prototypes above.
  */
 PHP_METHOD(Phar, __construct)
 {
