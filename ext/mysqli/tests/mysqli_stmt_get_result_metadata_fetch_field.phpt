@@ -12,26 +12,44 @@ if (!function_exists('mysqli_stmt_get_result'))
 --FILE--
 <?php
 	require('table.inc');
+	$charsets = my_get_charsets($link);
 
 	if (!($stmt = mysqli_stmt_init($link)) ||
 		!mysqli_stmt_prepare($stmt, "SELECT id, label, id + 1 as _id,  concat(label, '_') ___label FROM test ORDER BY id ASC LIMIT 3") ||
 		!mysqli_stmt_execute($stmt))
-		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+		printf("[001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
-		printf("[007] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
+		printf("[002] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
 			gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	}
 
 	if (!is_object($res_meta = mysqli_stmt_result_metadata($stmt)) ||
 		'mysqli_result' != get_class($res_meta)) {
-		printf("[008] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
+		printf("[003] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
 			gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	}
 
-	$fields = array();
-	while ($info = $res->fetch_field()) {
-		var_dump($info);
+	$i = 0;
+	while ($field = $res->fetch_field()) {
+		var_dump($field);
+		$i++;
+		if (2 == $i) {
+			/*
+			Label column, result set charset.
+			All of the following columns are "too hot" - too server dependent
+			*/
+			if ($field->charsetnr != $charsets['results']['nr']) {
+				printf("[004] Expecting charset %s/%d got %d\n",
+					$charsets['results']['charset'],
+					$charsets['results']['nr'], $field->charsetnr);
+			}
+			if ($field->length != (1 * $charsets['results']['maxlen'])) {
+				printf("[005] Expecting length %d got %d\n",
+					$charsets['results']['maxlen'],
+					$field->max_length);
+			}
+		}
 	}
 
 	mysqli_stmt_close($stmt);
@@ -79,7 +97,7 @@ object(stdClass)#%d (11) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"max_length"]=>
-  int(1)
+  int(%d)
   [%u|b%"length"]=>
   int(%d)
   [%u|b%"charsetnr"]=>
@@ -127,7 +145,7 @@ object(stdClass)#%d (11) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"max_length"]=>
-  int(2)
+  int(%d)
   [%u|b%"length"]=>
   int(%d)
   [%u|b%"charsetnr"]=>

@@ -21,13 +21,31 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
+	$charsets = my_get_charsets($link);
+
 	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 
 	$fields = mysqli_fetch_fields($res);
-	foreach ($fields as $k => $field)
+	foreach ($fields as $k => $field) {
 		var_dump($field);
+		switch ($k) {
+			case 1:
+				/* label column, result set charset */
+				if ($field->charsetnr != $charsets['results']['nr']) {
+					printf("[004] Expecting charset %s/%d got %d\n",
+						$charsets['results']['charset'],
+						$charsets['results']['nr'], $field->charsetnr);
+				}
+				if ($field->length != (1 * $charsets['results']['maxlen'])) {
+					printf("[005] Expecting length %d got %d\n",
+						$charsets['results']['maxlen'],
+						$field->max_length);
+				}
+				break;
+		}
+	}
 
 	mysqli_free_result($res);
 
