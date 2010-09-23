@@ -1211,7 +1211,7 @@ PHP_FUNCTION(dom_document_import_node)
 			nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
 			if (nsptr == NULL) {
 				int errorcode;
-				nsptr = dom_get_ns(root, nodep->ns->href, &errorcode, nodep->ns->prefix);
+				nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
 			}
 			xmlSetNs(retnodep, nsptr);
 		}
