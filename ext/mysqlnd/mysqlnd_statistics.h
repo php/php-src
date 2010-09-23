@@ -64,7 +64,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 			MYSQLND_STAT_CALL_TRIGGER((stats), (statistic), (value)); \
 			MYSQLND_STATS_UNLOCK(_p_s); \
 	}
-	
+
 #define MYSQLND_DEC_STATISTIC(enabler, stats, statistic) \
  { \
 	enum_mysqlnd_collected_stats _s = (statistic);\

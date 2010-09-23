@@ -208,7 +208,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 		int ulen, tlen;
 #endif
 		char tmp[25];
-		
+
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
 #if MYSQLND_UNICODE
 		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, names[i].s, names[i].l + 1 TSRMLS_CC);

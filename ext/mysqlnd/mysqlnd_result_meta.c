@@ -175,7 +175,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
-		
+
 		if (field_packet->stupid_list_fields_eof == TRUE) {
 			meta->field_count = i;
 			break;
@@ -224,7 +224,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 					meta->bit_fields_total_len += 3;/* 120 */
 					break;
 			}
-			
 		}
 
 #if MYSQLND_UNICODE
@@ -475,7 +474,7 @@ mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_D
 	MYSQLND_RES_METADATA *ret = mnd_pecalloc(1, alloc_size, persistent);
 	DBG_ENTER("mysqlnd_result_meta_init");
 	DBG_INF_FMT("persistent=%u", persistent);
-	
+
 	do {
 		if (!ret) {
 			break;

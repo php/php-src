@@ -172,7 +172,6 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 											ctor_called_count,
 											STAT_COPY_ON_WRITE_SAVED,
 											result->field_count - ctor_called_count);
-		
 		/* Free last row's zvals */
 		mnd_efree(unbuf->last_row_data);
 		unbuf->last_row_data = NULL;
@@ -506,7 +505,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 					ret = FAIL;
 					break;
 				}
-				
+
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn TSRMLS_CC))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt && conn->current_result) {
@@ -1166,7 +1165,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	if (!row_packet) {
 		SET_OOM_ERROR(conn->error_info);
 		ret = FAIL;
-		goto end;	
+		goto end;
 	}
 	row_packet->result_set_memory_pool = result->result_set_memory_pool;
 	row_packet->field_count = meta->field_count;
@@ -1639,7 +1638,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 		zend_hash_move_forward(Z_ARRVAL(row));
 		zend_hash_get_current_data(Z_ARRVAL(row), (void **)&entry);
 	}
-	
+
 	zend_hash_get_current_data(Z_ARRVAL(row), (void **)&entry);
 
 	*return_value = **entry;
@@ -1698,7 +1697,7 @@ mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 
 	DBG_ENTER("mysqlnd_result_init");
 	DBG_INF_FMT("field_count=%u", field_count);
-	
+
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
