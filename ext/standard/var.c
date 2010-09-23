@@ -401,7 +401,7 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 		smart_str_appends(buf, prop_name);
 		smart_str_appendc(buf, '\'');
 	} else {
-		smart_str_append_long(buf, hash_key->h);
+		smart_str_append_long(buf, (long) hash_key->h);
 	}
 	smart_str_appendl(buf, " => ", 4);
 	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
