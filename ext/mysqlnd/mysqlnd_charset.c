@@ -399,7 +399,7 @@ static unsigned int check_mb_utf16(const char *start, const char *end)
 	if (start + 2 > end) {
 		return 0;
 	}
-	
+
 	if (UTF16_HIGH_HEAD(*start)) {
 		return (start + 4 <= end) && UTF16_LOW_HEAD(start[2]) ? 4 : 0;
 	}

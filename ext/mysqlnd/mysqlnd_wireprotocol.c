@@ -1220,10 +1220,10 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 			DBG_RETURN(FAIL);
 		}
 	}
-	
+
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		enum_mysqlnd_collected_stats statistic;
-	
+
 		DBG_INF_FMT("Into zval=%p decoding column %u [%s.%s.%s] type=%u field->flags&unsigned=%u flags=%u is_bit=%u as_unicode=%u",
 			*current_field, i,
 			fields_metadata[i].db, fields_metadata[i].table, fields_metadata[i].name, fields_metadata[i].type,

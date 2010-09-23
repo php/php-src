@@ -482,7 +482,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].pack_len	= 8;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].php_type	= IS_DOUBLE;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DOUBLE].can_ret_as_str_in_uni	= TRUE;
-	
+
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].func		= ps_fetch_time;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIME].php_type	= IS_STRING;
@@ -497,7 +497,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].pack_len	= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NEWDATE].can_ret_as_str_in_uni	= TRUE;
-	
+
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].func	= ps_fetch_datetime;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].pack_len= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DATETIME].php_type= IS_STRING;
@@ -507,7 +507,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].pack_len= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].php_type= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].can_ret_as_str_in_uni	= TRUE;
-	
+
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].php_type = IS_STRING;
@@ -519,7 +519,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].php_type	= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].is_possibly_blob = TRUE;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].can_ret_as_str_in_uni	= TRUE;
-	
+
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].php_type	= IS_STRING;
@@ -619,7 +619,6 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	  time we try to send > LONG_MAX, the conversion to string will send a string and the server
 	  won't expect it and interpret the value as 0. Thus we need to resend the types, if any such values
 	  occur, and force resend for the next execution.
-	
 	*/
 	for (i = 0; i < stmt->param_count; i++) {
 		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL &&
@@ -662,7 +661,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			}
 			memcpy(tmp_buf, *buf, offset);
 			*buf = tmp_buf;
-			
+
 			/* Update our pos pointer */
 			*p = *buf + offset;
 		}
@@ -741,7 +740,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				{
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
-						goto use_string;	
+						goto use_string;
 					}
 					convert_to_long_ex(&tmp_data);
 				}
@@ -751,7 +750,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				{
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
-						goto use_string;	
+						goto use_string;
 					}
 					convert_to_long_ex(&tmp_data);
 				}
@@ -793,7 +792,6 @@ use_string:
 				data_size += Z_STRLEN_P(the_var);
 				break;
 		}
-
 	}
 
 	/* 2.2 Enlarge the buffer, if needed */

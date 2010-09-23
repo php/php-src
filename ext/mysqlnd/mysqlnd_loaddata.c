@@ -57,7 +57,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 	if (!info) {
 		DBG_RETURN(1);
 	}
-	
+
 	*ptr = info;
 
 	/* check open_basedir */

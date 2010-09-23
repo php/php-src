@@ -617,7 +617,7 @@ mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 
 	ret->m = & mysqlnd_mysqlnd_debug_methods;
 	ret->skip_functions = skip_functions;
-	
+
 	return ret;
 }
 /* }}} */
@@ -634,7 +634,7 @@ PHPAPI void _mysqlnd_debug(const char * mode TSRMLS_DC)
 			return;
 		}
 	}
-	
+
 	dbg->m->close(dbg);
 	dbg->m->set_mode(dbg, mode);
 	while (zend_stack_count(&dbg->call_stack)) {
@@ -650,7 +650,7 @@ PHPAPI void _mysqlnd_debug(const char * mode TSRMLS_DC)
 #define __zend_filename "/unknown/unknown"
 #define __zend_lineno   0
 #endif
-	
+
 #define REAL_SIZE(s) (collect_memory_statistics? (s) + sizeof(size_t) : (s))
 #define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - sizeof(size_t)) : (p))
 #define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + sizeof(size_t)) : (p))

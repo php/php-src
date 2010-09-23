@@ -104,7 +104,6 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			DBG_RETURN(FAIL);
 		}
 		chunk->ptr = new_ptr;
-		
 	}
 	DBG_RETURN(PASS);
 }
