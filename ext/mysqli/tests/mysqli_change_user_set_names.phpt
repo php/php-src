@@ -16,10 +16,10 @@ $tmp = mysqli_fetch_assoc($res);
 mysqli_free_result($res);
 $version = explode('.', $tmp['server_version']);
 if (empty($version))
-	die(sprintf("skip Cannot determine server version, need MySQL Server 4.1+ for the test!"));
+	die(sprintf("skip Cannot determine server version, we need MySQL Server 4.1+ for the test!"));
 
 if ($version[0] <= 4 && $version[1] < 1)
-	die(sprintf("ski Need MySQL Server 4.1+ for the test!"));
+	die(sprintf("skip We need MySQL Server 4.1+ for the test!"));
 ?>
 --FILE--
 <?php
