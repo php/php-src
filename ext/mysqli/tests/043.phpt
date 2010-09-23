@@ -1,5 +1,5 @@
 --TEST--
-mysqli_bind_param (UPDATE)
+mysqli_stmt_bind_param (UPDATE)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -21,13 +21,13 @@ require_once('skipifconnectfailure.inc');
 	mysqli_query($link, "INSERT INTO test_update VALUES ('foo', 2)");
 
 	$stmt = mysqli_prepare($link, "UPDATE test_update SET a=?,b=? WHERE b=?");
-	mysqli_bind_param($stmt, "sii", $c1, $c2, $c3);
+	mysqli_stmt_bind_param($stmt, "sii", $c1, $c2, $c3);
 
 	$c1 = "Rasmus";
 	$c2 = 1;
 	$c3 = 2;
 
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	$result = mysqli_query($link, "SELECT concat(a, ' is No. ', b) FROM test_update");

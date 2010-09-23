@@ -39,9 +39,9 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
-	mysqli_execute($stmt);
-	$rc = mysqli_fetch($stmt);
+	mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
+	mysqli_stmt_execute($stmt);
+	$rc = mysqli_stmt_fetch($stmt);
 
 	if (mysqli_get_server_version($link) < 50000) {
 		// 4.1 is faulty and will return big number for $c6
@@ -66,9 +66,9 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch_uint");
-	mysqli_bind_result($stmt, $c1, $c2);
-	mysqli_execute($stmt);
-	$rc = mysqli_fetch($stmt);
+	mysqli_stmt_bind_result($stmt, $c1, $c2);
+	mysqli_stmt_execute($stmt);
+	$rc = mysqli_stmt_fetch($stmt);
 
 	echo $c1, "\n", $c2, "\n";
 

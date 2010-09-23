@@ -20,11 +20,11 @@ require_once('skipifconnectfailure.inc');
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1),(2),(3),(4),(5)");
 
 	$stmt = mysqli_prepare($link, "DELETE FROM test_affected WHERE foo=?");
-	mysqli_bind_param($stmt, "i", $c1);
+	mysqli_stmt_bind_param($stmt, "i", $c1);
 
 	$c1 = 2;
 
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	$x = mysqli_stmt_affected_rows($stmt);
 
 	mysqli_stmt_close($stmt);

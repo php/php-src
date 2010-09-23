@@ -1,5 +1,5 @@
 --TEST--
-mysqli_get_metadata
+mysqli_stmt_result_metadata
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -20,8 +20,8 @@ require_once('skipifconnectfailure.inc');
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1, 'Zak'),(2, 'Greant')");
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_affected");
-	mysqli_execute($stmt);
-	$result = mysqli_get_metadata($stmt);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_result_metadata($stmt);
 
 	echo "\n=== fetch_fields ===\n";
 	var_dump(mysqli_fetch_fields($result));

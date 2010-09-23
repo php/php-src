@@ -49,7 +49,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$id = 1;
-	if (!mysqli_bind_param($stmt, 'i', $id) || !mysqli_stmt_execute($stmt))
+	if (!mysqli_stmt_bind_param($stmt, 'i', $id) || !mysqli_stmt_execute($stmt))
 		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
@@ -57,7 +57,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$id = 2;
-	if (!mysqli_bind_param($stmt, 'i', $id) || !mysqli_stmt_execute($stmt))
+	if (!mysqli_stmt_bind_param($stmt, 'i', $id) || !mysqli_stmt_execute($stmt))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
@@ -66,7 +66,7 @@ require_once('skipifconnectfailure.inc');
 
 	$id = 3;
 	$where = 2;
-	if (!mysqli_bind_param($stmt, 'ii', $id, $where) || !mysqli_stmt_execute($stmt))
+	if (!mysqli_stmt_bind_param($stmt, 'ii', $id, $where) || !mysqli_stmt_execute($stmt))
 		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
@@ -74,7 +74,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$where = 3;
-	if (!mysqli_bind_param($stmt, 'i', $where) || !mysqli_stmt_execute($stmt))
+	if (!mysqli_stmt_bind_param($stmt, 'i', $where) || !mysqli_stmt_execute($stmt))
 		printf("[016] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
@@ -82,7 +82,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$testvar = 'testvar';
-	if (!mysqli_bind_param($stmt, 's', $testvar) || !mysqli_stmt_execute($stmt))
+	if (!mysqli_stmt_bind_param($stmt, 's', $testvar) || !mysqli_stmt_execute($stmt))
 		printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
