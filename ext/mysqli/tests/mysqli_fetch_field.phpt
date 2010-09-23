@@ -22,33 +22,51 @@ require_once('skipifconnectfailure.inc');
 
 	require('table.inc');
 
+	$charsets = my_get_charsets($link);
 	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 
-	while ($tmp = mysqli_fetch_field($res))
-		var_dump($tmp);
+	/* ID column, binary charset */
+	$tmp = mysqli_fetch_field($res);
 	var_dump($tmp);
+
+	/* label column, result set charset */
+	$tmp = mysqli_fetch_field($res);
+	var_dump($tmp);
+	if ($tmp->charsetnr != $charsets['results']['nr']) {
+		printf("[004] Expecting charset %s/%d got %d\n",
+			$charsets['results']['charset'],
+			$charsets['results']['nr'], $tmp->charsetnr);
+	}
+	if ($tmp->length != (1 * $charsets['results']['maxlen'])) {
+		printf("[005] Expecting length %d got %d\n",
+			$charsets['results']['maxlen'],
+			$tmp->max_length);
+	}
+
+	var_dump(mysqli_fetch_field($res));
 
 	mysqli_free_result($res);
 
 	// Read http://bugs.php.net/bug.php?id=42344 on defaults!
 	if (NULL !== ($tmp = mysqli_fetch_field($res)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
-		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL DEFAULT 1)"))
-		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!mysqli_query($link, "INSERT INTO test(id) VALUES (2)"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!$res = mysqli_query($link, "SELECT id as _default_test FROM test")) {
+	if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL DEFAULT 1)"))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_query($link, "INSERT INTO test(id) VALUES (2)"))
+		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$res = mysqli_query($link, "SELECT id as _default_test FROM test")) {
+		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	var_dump(mysqli_fetch_assoc($res));
+	/* binary */
 	var_dump(mysqli_fetch_field($res));
 	mysqli_free_result($res);
 
@@ -97,7 +115,7 @@ object(stdClass)#%d (11) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"max_length"]=>
-  int(1)
+  int(%d)
   [%u|b%"length"]=>
   int(%d)
   [%u|b%"charsetnr"]=>

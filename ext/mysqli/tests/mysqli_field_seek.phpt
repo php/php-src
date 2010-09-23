@@ -66,6 +66,8 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
+	$charsets = my_get_charsets($link);
+
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
@@ -75,7 +77,21 @@ require_once('skipifconnectfailure.inc');
 	var_dump(mysqli_field_seek($res, 0));
 	var_dump(mysqli_fetch_field($res));
 	var_dump(mysqli_field_seek($res, 1));
-	var_dump(mysqli_fetch_field($res));
+
+	$field = mysqli_fetch_field($res);
+	var_dump($field);
+	/* label column, result set charset */
+	if ($field->charsetnr != $charsets['results']['nr']) {
+		printf("[004] Expecting charset %s/%d got %d\n",
+			$charsets['results']['charset'],
+			$charsets['results']['nr'], $field->charsetnr);
+	}
+	if ($field->length != (1 * $charsets['results']['maxlen'])) {
+		printf("[005] Expecting length %d got %d\n",
+			$charsets['results']['maxlen'],
+			$field->max_length);
+	}
+
 	var_dump(mysqli_field_tell($res));
 	var_dump(mysqli_field_seek($res, 2));
 	var_dump(mysqli_fetch_field($res));
@@ -95,8 +111,6 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 
 	var_dump(mysqli_field_seek($res, 0));
-
-
 
 	mysqli_close($link);
 	print "done!";
@@ -170,7 +184,7 @@ object(stdClass)#%d (11) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"max_length"]=>
-  int(0)
+  int(%d)
   [%u|b%"length"]=>
   int(%d)
   [%u|b%"charsetnr"]=>

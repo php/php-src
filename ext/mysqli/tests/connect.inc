@@ -20,6 +20,7 @@
 	if ($socket) {
 		ini_set('mysqli.default_socket', $socket);
 	}
+
 	/* Development setting: test experimal features and/or feature requests that never worked before? */
 	$TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
 				((1 == getenv("MYSQL_TEST_EXPERIMENTAL")) ? true : false) :
@@ -90,12 +91,10 @@
 
 			if ($flags !== false) {
 				$link = mysqli_init();
-				$link->options(MYSQLI_SET_CHARSET_NAME, "utf8");
 				if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
 					$link = false;
 			} else {
 				$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-				$link->set_charset("utf8");
 			}
 
 			return $link;
@@ -129,6 +128,100 @@
 				}
 			}
 		}
+
+		function my_get_charsets($link) {
+
+			/* Those tree are set by SET NAMES */
+			$charsets = array(
+				'client' 		=> NULL,
+				'results'		=> NULL,
+				'connection'	=> NULL,
+			);
+
+			if (!($res = mysqli_query($link, "SHOW VARIABLES LIKE '%character%'"))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+
+			$names = array();
+			while ($row = mysqli_fetch_assoc($res)) {
+				$names[$row['Variable_name']] = $row['Value'];
+			}
+			mysqli_free_result($res);
+
+			if (!($res = mysqli_query($link, sprintf("SHOW CHARACTER SET LIKE '%s'", $names['character_set_client']))) ||
+				!($details = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+
+			$charsets['client'] = array(
+				'charset' 	=> $details['Charset'],
+				'desc'		=> $details['Description'],
+				'collation'	=> $details['Default collation'],
+				'maxlen'	=> $details['Maxlen'],
+				'nr'		=> NULL,
+			);
+
+			if (!($res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $details['Default collation']))) ||
+				!($collation = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+			$charsets['client']['nr'] = $collation['Id'];
+
+			if (!($res = mysqli_query($link, sprintf("SHOW CHARACTER SET LIKE '%s'", $names['character_set_results']))) ||
+				!($details = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+
+			$charsets['results'] = array(
+				'charset' 	=> $details['Charset'],
+				'desc'		=> $details['Description'],
+				'collation'	=> $details['Default collation'],
+				'maxlen'	=> $details['Maxlen'],
+				'nr'		=> NULL,
+			);
+
+			if (!($res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $details['Default collation']))) ||
+				!($collation = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+			$charsets['results']['nr'] = $collation['Id'];
+
+
+			if (!($res = mysqli_query($link, sprintf("SHOW CHARACTER SET LIKE '%s'", $names['character_set_connection']))) ||
+				!($details = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+
+			$charsets['connection'] = array(
+				'charset' 	=> $details['Charset'],
+				'desc'		=> $details['Description'],
+				'collation'	=> $details['Default collation'],
+				'maxlen'	=> $details['Maxlen'],
+				'nr'		=> NULL,
+			);
+
+			if (!($res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $details['Default collation']))) ||
+				!($collation = mysqli_fetch_assoc($res))) {
+				printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
+				return $charsets;
+			}
+			mysqli_free_result($res);
+			$charsets['connection']['nr'] = $collation['Id'];
+
+			return $charsets;
+		}
+
 	} else {
 		printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
 	}
