@@ -735,7 +735,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
 		}
 		host_and_port=passwd=NULL;
-		user=php_get_current_user();
+		user=php_get_current_user(TSRMLS_C);
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql__%s_", user);
 		client_flags = CLIENT_INTERACTIVE;
 	} else {
