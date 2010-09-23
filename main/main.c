@@ -1087,10 +1087,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 /* {{{ php_get_current_user
  */
-PHPAPI char *php_get_current_user(void)
+PHPAPI char *php_get_current_user(TSRMLS_D)
 {
 	struct stat *pstat;
-	TSRMLS_FETCH();
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;

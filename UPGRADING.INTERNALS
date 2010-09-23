@@ -96,3 +96,7 @@ Use emalloc, emalloc_rel, efree or efree_rel instead.
 
 . popen_ex (win32)
   TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
+
+. php_get_current_user
+  PHPAPI php_get_current_user(TSRMLS_D)
+  Call: char *user = php_get_current_user(TSRMLS_C);

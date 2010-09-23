@@ -4471,7 +4471,7 @@ PHP_FUNCTION(get_current_user)
 		return;
 	}
 
-	RETURN_STRING(php_get_current_user(), 1);
+	RETURN_STRING(php_get_current_user(TSRMLS_C), 1);
 }
 /* }}} */
 

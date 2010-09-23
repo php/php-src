@@ -27,8 +27,6 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-/* for php_get_current_user() */
-#include "ext/standard/basic_functions.h"
 
 /*
   TODO :

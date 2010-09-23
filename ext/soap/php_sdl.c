@@ -3192,7 +3192,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		unsigned char digest[16];
 		int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
-		char *user = php_get_current_user();
+		char *user = php_get_current_user(TSRMLS_C);
 		int user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
