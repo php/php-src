@@ -915,8 +915,8 @@ size_t php_utf32_utf8(unsigned char *buf, int k)
  */
 PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
-	int retlen;
-	int j, k;
+	int retlen, j;
+	unsigned int k;
 	char *replaced, *ret, *p, *q, *lim, *next;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	unsigned char replacement[15];
@@ -1355,7 +1355,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 			if (!memcmp(p, basic_entities_dec[j].entity, basic_entities_dec[j].entitylen)) {
 				int e_len = basic_entities_dec[j].entitylen - 1;
 		
-				*p++ = basic_entities_dec[j].charcode;
+				*p++ = (char) basic_entities_dec[j].charcode;
 				memmove(p, p + e_len, (e - p - e_len));
 				e -= e_len;
 				goto done;
@@ -1412,7 +1412,8 @@ PHP_FUNCTION(htmlentities)
 PHP_FUNCTION(get_html_translation_table)
 {
 	long which = HTML_SPECIALCHARS, quote_style = ENT_COMPAT;
-	int i, j;
+	unsigned int i;
+	int j;
 	char ind[2];
 	enum entity_charset charset = determine_charset(NULL TSRMLS_CC);
 

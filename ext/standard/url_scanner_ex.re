@@ -245,7 +245,7 @@ static void handle_form(STD_PARA)
 static inline void handle_tag(STD_PARA) 
 {
 	int ok = 0;
-	int i;
+	unsigned int i;
 
 	ctx->tag.len = 0;
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);

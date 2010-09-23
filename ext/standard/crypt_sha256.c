@@ -470,7 +470,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_init_ctx(&alt_ctx);
 
 	/* For every character in the password add the entire password.  */
-	for (cnt = 0; cnt < 16 + alt_result[0]; ++cnt) {
+	for (cnt = 0; cnt < (size_t) (16 + alt_result[0]); ++cnt) {
 		sha256_process_bytes(salt, salt_len, &alt_ctx);
 	}
 

@@ -181,7 +181,8 @@ PHP_FUNCTION(iptcembed)
 	int iptcdata_len, jpeg_file_len;
 	long spool = 0;
 	FILE *fp;
-	unsigned int marker, done = 0, inx;
+	unsigned int marker, done = 0;
+	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
 	struct stat sb;
 	zend_bool written = 0;
@@ -295,7 +296,8 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	unsigned int inx = 0, len, tagsfound = 0;
+	int inx = 0, len;
+	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
 	int str_len;
