@@ -280,7 +280,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND * conn, enu
 			MYSQLND_PACKET_EOF * ok_response = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
 			if (!ok_response) {
 				SET_OOM_ERROR(conn->error_info);
-				break;			
+				break;
 			}
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
@@ -477,7 +477,7 @@ mysqlnd_connect_run_authentication(
 		goto err;
 	}
 	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, SCRAMBLE_LENGTH);
-	
+
 	if (!PACKET_WRITE(auth_packet, conn)) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
@@ -494,7 +494,7 @@ mysqlnd_connect_run_authentication(
 		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
 			goto err;
 		}
-		
+
 		auth_packet->send_half_packet = FALSE;
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
@@ -1196,11 +1196,11 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND * conn, const char *table, con
 									   FALSE, TRUE TSRMLS_CC)) {
 		DBG_RETURN(NULL);
 	}
-	
+
 	/*
 	   Prepare for the worst case.
 	   MyISAM goes to 2500 BIT columns, double it for safety.
-	 */
+	*/
 	result = conn->m->result_init(5000, conn->persistent TSRMLS_CC);
 	if (!result) {
 		DBG_RETURN(NULL);
@@ -1960,7 +1960,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		int2store(p, conn->charset->nr);
 		p+=2;
 	}
-	
+
 	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
 									   PROT_LAST /* we will handle the OK packet*/,
 									   silent, TRUE TSRMLS_CC)) {
@@ -2016,7 +2016,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
 		/* old authentication with new server  !*/
 		DBG_ERR(mysqlnd_old_passwd);
-		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);	
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 	}
 end:
 	PACKET_FREE(chg_user_resp);
@@ -2188,7 +2188,7 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 	}
 	conn->current_result = NULL;
-	
+
 	DBG_RETURN(result);
 }
 /* }}} */
@@ -2219,7 +2219,7 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 
 	result = conn->current_result->m.store_result(conn->current_result, conn, FALSE TSRMLS_CC);
 	if (!result) {
-		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);	
+		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 	}
 	conn->current_result = NULL;
 	DBG_RETURN(result);

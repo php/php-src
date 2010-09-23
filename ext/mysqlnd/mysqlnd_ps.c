@@ -175,7 +175,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s TSRMLS_DC)
 		}
 
 		if ((result = result->m.store_result(result, conn, TRUE TSRMLS_CC))) {
-			stmt->upsert_status.affected_rows = result->stored_data->row_count;	
+			stmt->upsert_status.affected_rows = result->stored_data->row_count;
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;
 		} else {
@@ -290,7 +290,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s TSRMLS_DC)
 	if (!prepare_resp) {
 		SET_OOM_ERROR(stmt->error_info);
 		SET_OOM_ERROR(stmt->conn->error_info);
-		goto done;	
+		goto done;
 	}
 
 	if (FAIL == PACKET_READ(prepare_resp, stmt->conn)) {
@@ -579,7 +579,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 
 	SET_ERROR_AFF_ROWS(stmt);
 	SET_ERROR_AFF_ROWS(stmt->conn);
-	
+
 	if (stmt->result && stmt->state >= MYSQLND_STMT_PREPARED && stmt->field_count) {
 		/*
 		  We don need to copy the data from the buffers which we will clean.
@@ -911,7 +911,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 			stmt->error_info = row_packet->error_info; 
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
-		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */	
+		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
@@ -1265,7 +1265,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 	MYSQLND * conn;
 	zend_uchar *cmd_buf;
 	enum php_mysqlnd_server_command cmd = COM_STMT_SEND_LONG_DATA;
-	
+
 	DBG_ENTER("mysqlnd_stmt::send_long_data");
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
@@ -1320,16 +1320,15 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
 
 			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
-			ret = conn->m->simple_command(conn, cmd, (char *)cmd_buf, packet_len,
-										 PROT_LAST , FALSE, TRUE TSRMLS_CC);
+			ret = conn->m->simple_command(conn, cmd, (char *)cmd_buf, packet_len, PROT_LAST , FALSE, TRUE TSRMLS_CC);
 			mnd_efree(cmd_buf);
 			if (FAIL == ret) {
 				stmt->error_info = conn->error_info;
 			}
 		} else {
 			ret = FAIL;
-			SET_OOM_ERROR(stmt->error_info);			
-			SET_OOM_ERROR(conn->error_info);			
+			SET_OOM_ERROR(stmt->error_info);
+			SET_OOM_ERROR(conn->error_info);
 		}
 		/*
 		  Cover protocol error: COM_STMT_SEND_LONG_DATA was designed to be quick and not
@@ -1474,7 +1473,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 				DBG_RETURN(FAIL);
 			}
 		}
-		
+
 		/* Prevent from freeing */
 		/* Don't update is_ref, or we will leak during conversion */
 		Z_ADDREF_P(zv);
@@ -1489,7 +1488,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 		}
 		stmt->param_bind[param_no].zv = zv;
 		stmt->param_bind[param_no].type = type;
-		
+
 		stmt->send_types_to_server = 1;
 	}
 	DBG_INF("PASS");
@@ -1812,7 +1811,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s TSRMLS_DC)
 	if (result) {
 		result->m.free_result(result, TRUE TSRMLS_CC);
 	}
-	DBG_RETURN(NULL);	
+	DBG_RETURN(NULL);
 }
 /* }}} */
 
@@ -2367,7 +2366,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 
 		DBG_RETURN(ret);
 	} while (0);
-	
+
 	SET_OOM_ERROR(conn->error_info);
 	if (ret) {
 		ret->m->dtor(ret, TRUE TSRMLS_CC);
