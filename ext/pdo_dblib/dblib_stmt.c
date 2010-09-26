@@ -35,60 +35,47 @@
 
 /* {{{ pdo_dblib_get_field_name
  * 
- * Taken from php_mssql_get_field_name
+ * Updated for MSSQL 2008 SR2 extended types
  * 
  */
 static char *pdo_dblib_get_field_name(int type)
 {
 	switch (type) {
-		case SQLBINARY:
-		case SQLVARBINARY:
-			return "blob";
-			break;
-		case SQLCHAR:
-		case SQLVARCHAR:
-			return "char";
-			break;
-		case SQLTEXT:
-			return "text";
-			break;
-		case SQLDATETIME:
-		case SQLDATETIM4:
-		case SQLDATETIMN:
-			return "datetime";
-			break;
-		case SQLDECIMAL:
-		case SQLFLT4:
-		case SQLFLT8:
-		case SQLFLTN:
-			return "real";
-			break;
-		case SQLINT1:
-		case SQLINT2:
-		case SQLINT4:
-		case SQLINTN:
-			return "int";
-			break;
-		case SQLNUMERIC:
-			return "numeric";
-			break;
-		case SQLMONEY:
-		case SQLMONEY4:
-		case SQLMONEYN:
-			return "money";
-			break;
-		case SQLBIT:
-			return "bit";
-			break;
-		case SQLIMAGE:
-			return "image";
-			break;
-#ifdef SQLUNIQUE
-		case SQLUNIQUE:
-			return "uniqueidentifier";
-			break;
-#endif
-		default:
+		case 34: return "image";
+		case 35: return "text";
+		case 36: return "uniqueidentifier";
+		case 40: return "date";
+		case 41: return "time";
+		case 42: return "datetime2";
+		case 43: return "datetimeoffset";
+		case 48: return "tinyint";
+		case 52: return "smallint";
+		case 56: return "int";
+		case 58: return "smalldatetime";
+		case 59: return "real";
+		case 60: return "money";
+		case 61: return "datetime";
+		case 62: return "float";
+		case 98: return "sql_variant";
+		case 99: return "ntext";
+		case 104: return "bit";
+		case 106: return "decimal";
+		case 108: return "numeric";
+		case 122: return "smallmoney";
+		case 127: return "bigint";
+		//case 240: return "hierarchyid";
+		case 240: return "geometry";
+		//case 240: return "geography";
+		case 165: return "varbinary";
+		case 167: return "varchar";
+		case 173: return "binary";
+		case 175: return "char";
+		case 189: return "timestamp";
+		//case 231: return "sysname";
+		case 231: return "nvarchar";
+		case 239: return "nchar";
+		case 241: return "xml";
+		default: 
 			return "unknown";
 			break;
 	}
