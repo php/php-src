@@ -21,6 +21,7 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52926 (zlib fopen wrapper does not use context). (Gustavo)
 - Fixed bug #52891 (Wrong data inserted with mysqli/mysqlnd when using
   mysqli_stmt_bind_param and value> PHP_INT_MAX). (Andrey)
 - Fixed bug #52849 (GNU MP invalid version match). (Adam)
