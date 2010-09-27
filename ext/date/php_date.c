@@ -1203,7 +1203,7 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 
 /* {{{ php_idate
  */
-PHPAPI int php_idate(char format, time_t ts, int localtime)
+PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC)
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -1214,7 +1214,6 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 	t = timelib_time_ctor();
 
 	if (!localtime) {
-		TSRMLS_FETCH();
 		tzi = get_timezone_info(TSRMLS_C);
 		t->tz_info = tzi;
 		t->zone_type = TIMELIB_ZONETYPE_ID;
@@ -1336,7 +1335,7 @@ PHP_FUNCTION(idate)
 		ts = time(NULL);
 	}
 
-	ret = php_idate(format[0], ts, 0);
+	ret = php_idate(format[0], ts, 0 TSRMLS_CC);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token.");
 		RETURN_FALSE;
