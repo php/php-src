@@ -84,6 +84,7 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_REPORT_ERROR"				=> true,
 		"MYSQLI_REPORT_OFF"					=> true,
 		"MYSQLI_SET_CHARSET_NAME"			=> true,
+		"MYSQLI_SET_CHARSET_DIR"			=> true,
 		"MYSQLI_REFRESH_GRANT"				=> true,
 		"MYSQLI_REFRESH_LOG"					=> true,
 		"MYSQLI_REFRESH_TABLES"				=> true,
