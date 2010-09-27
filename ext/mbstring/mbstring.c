@@ -196,7 +196,7 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "stripos", "mb_stripos", "mb_orig_stripos"},
-	{MB_OVERLOAD_STRING, "strripos", "mb_strripos", "mb_orig_stripos"},
+	{MB_OVERLOAD_STRING, "strripos", "mb_strripos", "mb_orig_strripos"},
 	{MB_OVERLOAD_STRING, "strstr", "mb_strstr", "mb_orig_strstr"},
 	{MB_OVERLOAD_STRING, "strrchr", "mb_strrchr", "mb_orig_strrchr"},
 	{MB_OVERLOAD_STRING, "stristr", "mb_stristr", "mb_orig_stristr"},
