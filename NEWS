@@ -13,8 +13,9 @@
 - Implemented symbolic links support for open_basedir checks. (Pierre)
 - Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
 
-- Fixed symbolic resolution support when the target is a DFS share. (Pierre)
+- Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
+- Fixed symbolic resolution support when the target is a DFS share. (Pierre)
 - Changed deprecated ini options on startup from E_WARNING to E_DEPRECATED. 
   (Kalle)
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
