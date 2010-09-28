@@ -52,8 +52,6 @@ enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param,
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
-static void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const stmt TSRMLS_DC);
-
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
@@ -228,7 +226,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	}
 
 	/* Free space for next result */
-	mysqlnd_internal_free_stmt_content(s TSRMLS_CC);
+	s->m->free_stmt_content(s TSRMLS_CC);
 
 	DBG_RETURN(s->m->parse_execute_response(s TSRMLS_CC));
 }
@@ -2062,12 +2060,12 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 /* }}} */
 
 
-/* {{{ mysqlnd_internal_free_stmt_content */
+/* {{{ mysqlnd_stmt::free_stmt_content */
 static void
-mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const s TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	DBG_ENTER("mysqlnd_internal_free_stmt_content");
+	DBG_ENTER("mysqlnd_stmt::free_stmt_content");
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
@@ -2186,7 +2184,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 		stmt->execute_cmd_buffer.buffer = NULL;
 	}
 
-	mysqlnd_internal_free_stmt_content(s TSRMLS_CC);
+	s->m->free_stmt_content(s TSRMLS_CC);
 
 	if (stmt->conn) {
 		stmt->conn->m->free_reference(stmt->conn TSRMLS_CC);
@@ -2324,7 +2322,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, free_result_bind),
 	MYSQLND_METHOD(mysqlnd_stmt, server_status),
 	mysqlnd_stmt_execute_generate_request,
-	mysqlnd_stmt_execute_parse_response
+	mysqlnd_stmt_execute_parse_response,
+	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)
 MYSQLND_CLASS_METHODS_END;
 
 
