@@ -1,6 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.15
+- Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
 - Fixed bug #52772 (var_dump() doesn't check for the existence of 
