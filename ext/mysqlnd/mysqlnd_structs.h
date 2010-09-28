@@ -627,6 +627,7 @@ typedef	void 				(*func_mysqlnd_stmt__free_result_bind)(MYSQLND_STMT * const stm
 typedef unsigned int		(*func_mysqlnd_stmt__server_status)(const MYSQLND_STMT * const stmt TSRMLS_DC);
 typedef enum_func_status 	(*func_mysqlnd_stmt__generate_execute_request)(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__parse_execute_response)(MYSQLND_STMT * const s TSRMLS_DC);
+typedef void 				(*func_mysqlnd_stmt__free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC);
 
 struct st_mysqlnd_stmt_methods
 {
@@ -678,6 +679,8 @@ struct st_mysqlnd_stmt_methods
 
 	func_mysqlnd_stmt__generate_execute_request generate_execute_request;
 	func_mysqlnd_stmt__parse_execute_response parse_execute_response;
+
+	func_mysqlnd_stmt__free_stmt_content free_stmt_content;
 };
 
 
