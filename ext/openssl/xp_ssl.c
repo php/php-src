@@ -502,7 +502,6 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 										zend_list_insert(mycert,
 											php_openssl_get_x509_list_id() TSRMLS_CC));
 								add_next_index_zval(arr, zcert);
-								FREE_ZVAL(zcert);
 							}
 
 						} else {
