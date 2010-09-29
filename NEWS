@@ -24,6 +24,8 @@
 
 - Fixed bug #52947 (segfault when ssl stream option capture_peer_cert_chain
   used). (Felipe)
+- Fixed bug #52944 (Invalid write on second and subsequent reads with an
+  inflate filter fed invalid data). (Gustavo)
 - Fixed bug #52931 (strripos not overloaded with function overloading enabled).
   (Felipe)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
