@@ -433,13 +433,19 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	}
 
 	if (stmt_to_prepare != stmt) {
-		/* Free old buffers, binding and resources on server */
-		s->m->net_close(s, TRUE TSRMLS_CC);
-
-		memcpy(stmt, stmt_to_prepare, sizeof(MYSQLND_STMT_DATA));
-
-		/* Now we will have a clean new statement object */
-		mnd_pefree(stmt_to_prepare, stmt_to_prepare->persistent);
+		/* swap */
+		size_t real_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
+		char * tmp_swap = mnd_malloc(real_size);
+		memcpy(tmp_swap, s, real_size);
+		memcpy(s, s_to_prepare, real_size);
+		memcpy(s_to_prepare, tmp_swap, real_size);
+		mnd_free(tmp_swap);
+		{
+			MYSQLND_STMT_DATA * tmp_swap_data = stmt_to_prepare;
+			stmt_to_prepare = stmt;
+			stmt = tmp_swap_data;
+		}
+		s_to_prepare->m->dtor(s_to_prepare, TRUE TSRMLS_CC);
 	}
 	stmt->state = MYSQLND_STMT_PREPARED;
 	DBG_INF("PASS");
