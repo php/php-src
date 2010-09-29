@@ -22,6 +22,8 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52947 (segfault when ssl stream option capture_peer_cert_chain
+  used). (Felipe)
 - Fixed bug #52931 (strripos not overloaded with function overloading enabled).
   (Felipe)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
