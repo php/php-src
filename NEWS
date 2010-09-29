@@ -40,6 +40,8 @@
   PDOStatement if instantiated directly instead of doing by the PDO methods.
   (Felipe)
 
+- Fixed bug #52944 (Invalid write on second and subsequent reads with an
+  inflate filter fed invalid data). (Gustavo)
 - Fixed bug #52317 (Segmentation fault when using mail() on a rhel 4.x (only 64
   bit)). (Adam)
 - Fixed bug #52238 (Crash when an Exception occured in iterator_to_array).
