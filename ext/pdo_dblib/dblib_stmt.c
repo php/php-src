@@ -63,15 +63,12 @@ static char *pdo_dblib_get_field_name(int type)
 		case 108: return "numeric";
 		case 122: return "smallmoney";
 		case 127: return "bigint";
-		//case 240: return "hierarchyid";
 		case 240: return "geometry";
-		//case 240: return "geography";
 		case 165: return "varbinary";
 		case 167: return "varchar";
 		case 173: return "binary";
 		case 175: return "char";
 		case 189: return "timestamp";
-		//case 231: return "sysname";
 		case 231: return "nvarchar";
 		case 239: return "nchar";
 		case 241: return "xml";
