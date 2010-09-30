@@ -714,8 +714,8 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 					ALLOC_ZVAL(variable_ptr);
 					*variable_ptr_ptr = variable_ptr;
 					*variable_ptr = *value;
-					zval_copy_ctor(variable_ptr);
 					Z_SET_REFCOUNT_P(variable_ptr, 1);
+					zval_copy_ctor(variable_ptr);
 				} else {
 					*variable_ptr_ptr = value;
 					Z_ADDREF_P(value);
