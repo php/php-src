@@ -919,9 +919,9 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
 			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
 				ALLOC_ZVAL(variable_ptr);
+				*variable_ptr_ptr = variable_ptr;
 				INIT_PZVAL_COPY(variable_ptr, value);
 				zval_copy_ctor(variable_ptr);
-				*variable_ptr_ptr = variable_ptr;
 				return variable_ptr;
 			} else {
 				*variable_ptr_ptr = value;
