@@ -4,6 +4,8 @@
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
+- Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
+  large amount of data). (Adam)
 - Fixed bug #52772 (var_dump() doesn't check for the existence of 
   get_class_name before calling it). (Kalle, Gustavo)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).

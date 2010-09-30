@@ -531,6 +531,11 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int         matches;
 
 
+	/* The maximum length of an e-mail address is 320 octets, per RFC 2821. */
+	if (Z_STRLEN_P(value) > 320) {
+		RETURN_VALIDATION_FAILED
+	}
+
 	re = pcre_get_compiled_regex((char *)regexp, &pcre_extra, &preg_options TSRMLS_CC);
 	if (!re) {
 		RETURN_VALIDATION_FAILED
