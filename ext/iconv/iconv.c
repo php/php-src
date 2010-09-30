@@ -1521,16 +1521,43 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 					if (cd == (iconv_t)(-1)) {
 						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+							/* Bad character set, but the user wants us to
+							 * press on. In this case, we'll just insert the
+							 * undecoded encoded word, since there isn't really
+							 * a more sensible behaviour available; the only
+							 * other options are to swallow the encoded word
+							 * entirely or decode it with an arbitrarily chosen
+							 * single byte encoding, both of which seem to have
+							 * a higher WTF factor than leaving it undecoded.
+							 *
+							 * Given this approach, we need to skip ahead to
+							 * the end of the encoded word. */
+							int qmarks = 2;
+							while (qmarks > 0 && str_left > 1) {
+								if (*(++p1) == '?') {
+									--qmarks;
+								}
+								--str_left;
+							}
+
+							/* Look ahead to check for the terminating = that
+							 * should be there as well; if it's there, we'll
+							 * also include that. If it's not, there isn't much
+							 * we can do at this point. */
+							if (*(p1 + 1) == '=') {
+								++p1;
+								--str_left;
+							}
+
 							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 							if (err != PHP_ICONV_ERR_SUCCESS) {
 								goto out;
 							}
-							encoded_word = NULL;
-							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-								scan_stat = 12;
-							} else {
-								scan_stat = 0;
-							}
+
+							/* Let's go back and see if there are further
+							 * encoded words or bare content, and hope they
+							 * might actually have a valid character set. */
+							scan_stat = 12;
 							break;
 						} else {
 #if ICONV_SUPPORTS_ERRNO
