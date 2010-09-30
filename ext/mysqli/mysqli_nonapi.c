@@ -123,7 +123,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 			flags &= ~CLIENT_LOCAL_FILES;
 		}
 	}
-	if (mysql->mysql && mysqli_resource && mysqli_resource->status > MYSQLI_STATUS_INITIALIZED) {
+	if (mysql->mysql && mysqli_resource && (mysqli_resource->status > MYSQLI_STATUS_INITIALIZED || (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)))) {
 		/* already connected, we should close the connection */
 		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status TSRMLS_CC);
 	}
@@ -168,9 +168,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
-#if defined(MYSQLI_USE_MYSQLND)
-							mysqlnd_end_psession(mysql->mysql);
-#endif	
 							/* reset variables */
 
 #ifndef MYSQLI_NO_CHANGE_USER_ON_PCONNECT

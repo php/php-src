@@ -588,6 +588,9 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
 			if (Z_TYPE_P(le) == php_le_pmysqli()) {
 				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+#if defined(MYSQLI_USE_MYSQLND)
+				mysqlnd_end_psession(mysql->mysql);
+#endif
 				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
 				MyG(num_active_persistent)--;
