@@ -32,7 +32,7 @@ NULL
 Warning: gmp_init() expects at most 2 parameters, 4 given in %s on line %d
 NULL
 
-Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 36) in %s on line %d
+Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and %d) in %s on line %d
 bool(false)
 bool(false)
 bool(false)
