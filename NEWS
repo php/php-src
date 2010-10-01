@@ -101,6 +101,9 @@
 - Improved the performance of unserialize(). (galaxy dot mipt at gmail dot com, 
   Kalle)
 
+- Added PHP_RAND_MAX & PHP_MT_RAND_MAX constants to get the maximum random 
+  range instead of their counterpart functions. (Kalle)
+
 - Removed legacy features:
   . allow_call_time_pass_reference. (Pierrick)
   . define_syslog_variables ini option and its associated function. (Kalle)
@@ -119,6 +122,7 @@
   PDO_mysql. (Johannes)
 
 - Deprecated mysql_list_dbs() (Request #50667). (Andrey)
+- Deprecated getrandmax() & mt_getrandmax() in favour of constants. (Kalle)
 
 - Implemented FR #52555 (Ability to get HTTP response code). (Paul Dragoonis)
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)

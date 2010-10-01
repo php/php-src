@@ -33,6 +33,7 @@
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
+#include "ext/standard/php_rand.h"
 #include "ext/standard/php_uuencode.h"
 
 #ifdef PHP_WIN32
@@ -2828,8 +2829,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(rand,															arginfo_rand)
 	PHP_FE(srand,															arginfo_srand)
-	PHP_FE(getrandmax,														arginfo_getrandmax)
-	PHP_FE(mt_rand,															arginfo_mt_rand)
+	PHP_DEP_FE(getrandmax,													arginfo_getrandmax)
+	PHP_DEP_FE(mt_rand,														arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 
@@ -3551,6 +3552,9 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_MATH_CONSTANT(M_SQRT3);
 	REGISTER_DOUBLE_CONSTANT("INF", php_get_inf(), CONST_CS | CONST_PERSISTENT);
 	REGISTER_DOUBLE_CONSTANT("NAN", php_get_nan(), CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_MATH_CONSTANT(PHP_RAND_MAX);
+	REGISTER_MATH_CONSTANT(PHP_MT_RAND_MAX);
 
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_UP", PHP_ROUND_HALF_UP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_CS | CONST_PERSISTENT);
