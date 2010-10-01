@@ -6,6 +6,8 @@
 
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
   large amount of data). (Adam)
+- Fixed bug #52879 (Objects unreferenced in __get, __set, __isset or __unset
+  can be freed too early). (mail_ben_schmidt at yahoo dot com dot au, Dmitry)
 - Fixed bug #52772 (var_dump() doesn't check for the existence of 
   get_class_name before calling it). (Kalle, Gustavo)
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).

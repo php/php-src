@@ -329,6 +329,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		    !guard->in_get) {
 			/* have getter - try with it! */
 			ZVAL_ADDREF(object);
+			if (PZVAL_IS_REF(object)) {
+				SEPARATE_ZVAL(&object);
+			}
 			guard->in_get = 1; /* prevent circular getting */
 			rv = zend_std_call_getter(object, member TSRMLS_CC);
 			guard->in_get = 0;
@@ -418,22 +421,22 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			}
 		}
 	} else {
-		int setter_done = 0;
 		zend_guard *guard;
 
 		if (zobj->ce->__set &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
 		    !guard->in_set) {
 			ZVAL_ADDREF(object);
+			if (PZVAL_IS_REF(object)) {
+				SEPARATE_ZVAL(&object);
+			}
 			guard->in_set = 1; /* prevent circular setting */
 			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
 			}
-			setter_done = 1;
 			guard->in_set = 0;
 			zval_ptr_dtor(&object);
-		}
-		if (!setter_done && property_info) {
+		} else if (property_info) {
 			zval **foo;
 
 			/* if we assign referenced variable, we should separate it */
@@ -611,6 +614,9 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 		    !guard->in_unset) {
 			/* have unseter - try with it! */
 			ZVAL_ADDREF(object);
+			if (PZVAL_IS_REF(object)) {
+				SEPARATE_ZVAL(&object);
+			}
 			guard->in_unset = 1; /* prevent circular unsetting */
 			zend_std_call_unsetter(object, member TSRMLS_CC);
 			guard->in_unset = 0;
@@ -1042,6 +1048,9 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 
 			/* have issetter - try with it! */
 			ZVAL_ADDREF(object);
+			if (PZVAL_IS_REF(object)) {
+				SEPARATE_ZVAL(&object);
+			}
 			guard->in_isset = 1; /* prevent circular getting */
 			rv = zend_std_call_issetter(object, member TSRMLS_CC);
 			if (rv) {
