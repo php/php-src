@@ -33,6 +33,8 @@
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
   large amount of data). (Adam)
 - Fixed bug #52926 (zlib fopen wrapper does not use context). (Gustavo)
+- Fixed bug #52906 (gmp_mod returns negative result when non-negative is 
+  expected). (Stas)
 - Fixed bug #52891 (Wrong data inserted with mysqli/mysqlnd when using
   mysqli_stmt_bind_param and value> PHP_INT_MAX). (Andrey)
 - Fixed bug #52849 (GNU MP invalid version match). (Adam)
