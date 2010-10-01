@@ -8,6 +8,7 @@ UPGRADE NOTES - PHP X.Y
 4. Changes made to existing methods
 5. Changes made to existing classes
 6. Deprecated
+     a. deprecated functions
 7. Extensions:
      a. moved out to PECL and actively maintained there
      b. no longer maintained
@@ -109,7 +110,10 @@ UPGRADE NOTES - PHP X.Y
 6. Deprecated
 =============
 
-- 
+    a. deprecated functions
+
+       - getrandmax()          -- use the PHP_RAND_MAX constant
+       - mt_getrandmax()       -- use the PHP_MT_RAND_MAX constant
 
 ==========
 7. Removed
@@ -237,6 +241,8 @@ UPGRADE NOTES - PHP X.Y
 
        - JSON_PRETTY_PRINT
        - JSON_UNESCAPED_SLASHES
+       - PHP_RAND_MAX
+       - PHP_MT_RAND_MAX
 
      g. New classes
 
