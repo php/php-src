@@ -37,6 +37,8 @@
   expected). (Stas)
 - Fixed bug #52891 (Wrong data inserted with mysqli/mysqlnd when using
   mysqli_stmt_bind_param and value> PHP_INT_MAX). (Andrey)
+- Fixed bug #52879 (Objects unreferenced in __get, __set, __isset or __unset
+  can be freed too early). (mail_ben_schmidt at yahoo dot com dot au, Dmitry)
 - Fixed bug #52849 (GNU MP invalid version match). (Adam)
 - Fixed bug #52843 (Segfault when optional parameters are not passed in to
   mssql_connect). (Felipe)
