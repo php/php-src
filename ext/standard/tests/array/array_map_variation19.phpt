@@ -34,7 +34,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  &string(7) "changed"
+  &string(10) "original.0"
   [1]=>
   string(10) "original.1"
 }

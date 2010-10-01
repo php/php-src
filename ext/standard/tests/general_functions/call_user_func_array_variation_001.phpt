@@ -50,7 +50,7 @@ array(1) {
 ------ Calling by_val() with referenced argument ------
 array(1) {
   [0]=>
-  &string(7) "changed"
+  &string(8) "original"
 }
 ------ Calling by_ref() with referenced argument ------
 array(1) {
