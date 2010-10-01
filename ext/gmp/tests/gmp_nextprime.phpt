@@ -27,7 +27,7 @@ echo "Done\n";
 --EXPECTF--	
 string(1) "2"
 string(1) "2"
-string(4) "-997"
+string(1) "2"
 string(4) "1009"
 string(6) "100003"
 
