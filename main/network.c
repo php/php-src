@@ -342,14 +342,14 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	 * the select function reports success in the writefds set and failure in
 	 * the exceptfds set. Indeed, using PHP_POLLREADABLE results in select
 	 * failing only due to the timeout and not immediately as would be
-	 * exepected when a connection is actively refused. This way,
+	 * expected when a connection is actively refused. This way,
 	 * php_pollfd_for will return a mask with POLLOUT if the connection
 	 * is successful and with POLLPRI otherwise. */
 	if ((n = php_pollfd_for(sockfd, POLLOUT|POLLPRI, timeout)) == 0) {
 #else
 	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
-		error = PHP_TIMEOUT_ERROR_VALUE;
 #endif
+		error = PHP_TIMEOUT_ERROR_VALUE;
 	}
 
 	if (n > 0) {
