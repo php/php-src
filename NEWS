@@ -22,6 +22,7 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52971 (PCRE-Meta-Characters not working with utf-8). (Felipe)
 - Fixed bug #52947 (segfault when ssl stream option capture_peer_cert_chain
   used). (Felipe)
 - Fixed bug #52944 (Invalid write on second and subsequent reads with an
