@@ -1003,16 +1003,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			}
 
 			total_bytes = cancel_upload = 0;
-
-			if (!skip_upload) {
-				/* Handle file */
-				fd = php_open_temporary_fd_ex(PG(upload_tmp_dir), "php", &temp_filename, 1 TSRMLS_CC);
-				upload_cnt--;
-				if (fd == -1) {
-					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
-					cancel_upload = UPLOAD_ERROR_E;
-				}
-			}
+			temp_filename = NULL;
+			fd = -1;
 
 			if (!skip_upload && php_rfc1867_callback != NULL) {
 				multipart_event_file_start event_file_start;
@@ -1021,13 +1013,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				event_file_start.name = param;
 				event_file_start.filename = &filename;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_START, &event_file_start, &event_extra_data TSRMLS_CC) == FAILURE) {
-					if (temp_filename) {
-						if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
-							close(fd);
-							unlink(temp_filename);
-						}
-						efree(temp_filename);
-					}
 					temp_filename = "";
 					efree(param);
 					efree(filename);
@@ -1050,7 +1035,26 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			offset = 0;
 			end = 0;
-			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end TSRMLS_CC)))
+			
+			if (!cancel_upload) {
+				/* only bother to open temp file if we have data */
+				blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end TSRMLS_CC);
+#if DEBUG_FILE_UPLOAD
+				if (blen > 0) {
+#else
+				/* in non-debug mode we have no problem with 0-length files */
+				{
+#endif
+					fd = php_open_temporary_fd_ex(PG(upload_tmp_dir), "php", &temp_filename, 1 TSRMLS_CC);
+					upload_cnt--;
+					if (fd == -1) {
+						sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
+						cancel_upload = UPLOAD_ERROR_E;
+					}
+				}
+			}
+
+			while (!cancel_upload && (blen > 0))
 			{
 				if (php_rfc1867_callback != NULL) {
 					multipart_event_file_data event_file_data;
@@ -1095,10 +1099,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					}
 					offset += wlen;
 				}
+
+				/* read data for next iteration */
+				blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end TSRMLS_CC);
 			}
+
 			if (fd != -1) { /* may not be initialized if file could not be created */
 				close(fd);
 			}
+
 			if (!cancel_upload && !end) {
 #if DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "Missing mime boundary at the end of the data for file %s", strlen(filename) > 0 ? filename : "");
