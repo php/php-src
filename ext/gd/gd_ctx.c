@@ -73,7 +73,9 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		/* PHP_GDIMG_TYPE_GIF
 		 * PHP_GDIMG_TYPE_PNG 
 		 * PHP_GDIMG_TYPE_JPG 
-		 * PHP_GDIMG_TYPE_WBM */
+		 * PHP_GDIMG_TYPE_WBM 
+		 * PHP_GDIMG_TYPE_WEBP 
+		 * */
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
 			return;
 		}		
@@ -123,6 +125,12 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
 			}
 		case PHP_GDIMG_TYPE_JPG:
+			(*func_p)(im, ctx, q);
+			break;
+		case PHP_GDIMG_TYPE_WEBP:
+			if (q == -1) {
+				q = 80;
+			}
 			(*func_p)(im, ctx, q);
 			break;
 		case PHP_GDIMG_TYPE_PNG:
