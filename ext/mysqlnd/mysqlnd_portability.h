@@ -481,21 +481,17 @@ typedef union {
    short/long to/from some place in memory V should be a (not
    register) variable, M is a pointer to byte */
 
-#ifdef WORDS_BIGENDIAN
-
 #ifndef float8get
+
+#ifdef WORDS_BIGENDIAN
 #define float8get(V,M)		memcpy((char*) &(V),(char*)  (M), sizeof(double))
 #define float8store(T,V)	memcpy((char*)  (T),(char*) &(V), sizeof(double))
-#endif /* float8get */
-
 #else
-
-#ifndef float8get
 #define float8get(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(double))
 #define float8store(T,V)  memcpy((char*) (T),(char*) &(V),sizeof(double))
-#endif /* float8get */
-
 #endif /* WORDS_BIGENDIAN */
+
+#endif /* float8get */
 
 #endif /* MYSQLND_PORTABILITY_H */
 
