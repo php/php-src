@@ -84,7 +84,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 #endif /* #if SIZEOF_LONG==4 */
 		{
 			if (byte_count < 8 || uval <= L64(9223372036854775807)) {
-				ZVAL_LONG(zv, uval);
+				ZVAL_LONG(zv, (long) uval); /* the cast is safe, we are in the range */
 			} else {
 				DBG_INF("stringify");
 				tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
@@ -112,7 +112,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 		} else
 #endif /* SIZEOF */
 		{
-			ZVAL_LONG(zv, lval);
+			ZVAL_LONG(zv, (long) lval); /* the cast is safe, we are in the range */
 		}
 	}
 
