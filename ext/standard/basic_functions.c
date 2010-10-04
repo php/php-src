@@ -2830,9 +2830,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(rand,															arginfo_rand)
 	PHP_FE(srand,															arginfo_srand)
 	PHP_DEP_FE(getrandmax,													arginfo_getrandmax)
-	PHP_DEP_FE(mt_rand,														arginfo_mt_rand)
+	PHP_FE(mt_rand,														arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
-	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
+	PHP_DEP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 
 #if HAVE_GETSERVBYNAME
 	PHP_FE(getservbyname,													arginfo_getservbyname)
