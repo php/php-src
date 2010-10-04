@@ -45,22 +45,22 @@
 
 ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 1)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 1)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
 	ZEND_ARG_INFO(0, types)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 1)
 	ZEND_ARG_INFO(0, types)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
 	ZEND_ARG_ARRAY_INFO(1, read, 1)
@@ -68,7 +68,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
 	ZEND_ARG_ARRAY_INFO(1, error, 1)
 	ZEND_ARG_INFO(0, sec)
 	ZEND_ARG_INFO(0, usec)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_no_params, 0, 0, 0)
 ZEND_END_ARG_INFO()
