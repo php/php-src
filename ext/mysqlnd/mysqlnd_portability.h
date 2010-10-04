@@ -483,8 +483,10 @@ typedef union {
 
 #ifdef WORDS_BIGENDIAN
 
+#ifndef float8get
 #define float8get(V,M)		memcpy((char*) &(V),(char*)  (M), sizeof(double))
 #define float8store(T,V)	memcpy((char*)  (T),(char*) &(V), sizeof(double))
+#endif /* float8get */
 
 #else
 
