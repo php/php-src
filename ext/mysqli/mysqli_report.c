@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -33,7 +33,7 @@ PHP_FUNCTION(mysqli_report)
 {
 	long		flags;
 
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
 		return;
 	}
@@ -44,14 +44,14 @@ PHP_FUNCTION(mysqli_report)
 }
 /* }}} */
 
-/* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */ 
+/* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */
 void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC)
 {
 	php_mysqli_throw_sql_exception((char *)sqlstate, errorno TSRMLS_CC, "%s", error);
 }
 /* }}} */
 
-/* {{{ void php_mysqli_report_index() */ 
+/* {{{ void php_mysqli_report_index() */
 void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC) {
 	char index[15];
 

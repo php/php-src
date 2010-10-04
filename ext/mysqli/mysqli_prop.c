@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -159,12 +159,12 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
 
-	MAKE_STD_ZVAL(*retval); 
+	MAKE_STD_ZVAL(*retval);
 
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	
+
 	if (!mysql) {
 		ZVAL_NULL(*retval);
 	} else {
@@ -175,7 +175,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
-		} 
+		}
 
 		if (rc < LONG_MAX) {
 			ZVAL_LONG(*retval, rc);
@@ -259,7 +259,7 @@ static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_STMT *p;
 
-	MAKE_STD_ZVAL(*retval); 
+	MAKE_STD_ZVAL(*retval);
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 
  	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
@@ -279,7 +279,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	MY_STMT *p;
 	my_ulonglong rc;
 
-	MAKE_STD_ZVAL(*retval); 
+	MAKE_STD_ZVAL(*retval);
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 
  	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
@@ -288,12 +288,12 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_NULL(*retval);
 	} else {
 		rc = mysql_stmt_affected_rows(p->stmt);
-	
+
 		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
-		} 
-	
+		}
+
 		if (rc < LONG_MAX) {
 			ZVAL_LONG(*retval, rc);
 		} else {
@@ -333,7 +333,7 @@ const mysqli_property_entry mysqli_link_property_entries[] = {
 	{"protocol_version",sizeof("protocol_version") - 1,	link_protocol_version_read, NULL},
 	{"thread_id",		sizeof("thread_id") - 1, 		link_thread_id_read, NULL},
 	{"warning_count",	sizeof("warning_count") - 1, 	link_warning_count_read, NULL},
-	{NULL, 0, NULL, NULL}	
+	{NULL, 0, NULL, NULL}
 };
 
 /* should not be const, as it is patched during runtime */
@@ -355,7 +355,7 @@ zend_property_info mysqli_link_property_info_entries[] = {
 	{ZEND_ACC_PUBLIC, "protocol_version", sizeof("protocol_version")-1, 0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "thread_id", 		sizeof("thread_id") - 1,		0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "warning_count",	sizeof("warning_count") - 1,	0, NULL, 0, NULL},
-	{0,					NULL, 			0,								0, NULL, 0, NULL}	
+	{0,					NULL, 			0,								0, NULL, 0, NULL}
 };
 
 
@@ -374,7 +374,7 @@ zend_property_info mysqli_result_property_info_entries[] = {
 	{ZEND_ACC_PUBLIC, "lengths",		sizeof("lengths") - 1, 		0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "num_rows",		sizeof("num_rows") - 1, 	0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "type",			sizeof("type") - 1, 		0, NULL, 0, NULL},
-	{0,					NULL, 			0,							0, NULL, 0, NULL}	
+	{0,					NULL, 			0,							0, NULL, 0, NULL}
 };
 
 const mysqli_property_entry mysqli_stmt_property_entries[] = {
@@ -401,7 +401,7 @@ zend_property_info mysqli_stmt_property_info_entries[] = {
 	{ZEND_ACC_PUBLIC, "error",		sizeof("error") - 1,			0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,			0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "id",			sizeof("id") - 1,				0, NULL, 0, NULL},
-	{0,					NULL, 			0,							0, NULL, 0, NULL}	
+	{0,					NULL, 			0,							0, NULL, 0, NULL}
 };
 
 /*

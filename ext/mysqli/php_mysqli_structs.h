@@ -17,7 +17,7 @@
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifndef PHP_MYSQLI_STRUCTS_H
@@ -126,7 +126,7 @@ typedef struct {
 	unsigned int 	multi_query;
 	zend_bool		persistent;
 #if defined(MYSQLI_USE_MYSQLND)
-	int				async_result_fetch_type;				
+	int				async_result_fetch_type;
 #endif
 } MY_MYSQL;
 
@@ -226,12 +226,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
 	mysql->multi_query = 0; \
-} 
+}
 
 #define MYSQLI_ENABLE_MQ if (!mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
 	mysql->multi_query = 1; \
-} 
+}
 
 #define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
 	zend_class_entry ce; \
