@@ -243,7 +243,7 @@ php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
 			}
 		}
 		if ((buf_len - (p - buf)) > 0) {
-			error_msg_len = MIN((buf_len - (p - buf)), error_buf_len - 1);
+			error_msg_len = MIN((int)((buf_len - (p - buf))), (int) (error_buf_len - 1));
 			memcpy(error, p, error_msg_len);
 		}
 	}
