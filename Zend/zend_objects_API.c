@@ -314,6 +314,10 @@ typedef struct _zend_proxy_object {
 
 static zend_object_handlers zend_object_proxy_handlers;
 
+ZEND_API void zend_objects_proxy_destroy(zend_object *object, zend_object_handle handle TSRMLS_DC)
+{
+}
+
 ZEND_API void zend_objects_proxy_free_storage(zend_proxy_object *object TSRMLS_DC)
 {
 	zval_ptr_dtor(&object->object);
@@ -336,13 +340,14 @@ ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 	zval *retval;
 
 	pobj->object = object;
-	pobj->property = member;
-	zval_add_ref(&pobj->property);
 	zval_add_ref(&pobj->object);
+	ALLOC_ZVAL(pobj->property);
+	INIT_PZVAL_COPY(pobj->property, member);
+	zval_copy_ctor(pobj->property);
 
 	MAKE_STD_ZVAL(retval);
 	Z_TYPE_P(retval) = IS_OBJECT;
-	Z_OBJ_HANDLE_P(retval) = zend_objects_store_put(pobj, NULL, (zend_objects_free_object_storage_t) zend_objects_proxy_free_storage, (zend_objects_store_clone_t) zend_objects_proxy_clone TSRMLS_CC);
+	Z_OBJ_HANDLE_P(retval) = zend_objects_store_put(pobj, (zend_objects_store_dtor_t)zend_objects_proxy_destroy, (zend_objects_free_object_storage_t) zend_objects_proxy_free_storage, (zend_objects_store_clone_t) zend_objects_proxy_clone TSRMLS_CC);
 	Z_OBJ_HT_P(retval) = &zend_object_proxy_handlers;
 
 	return retval;
