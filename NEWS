@@ -12,6 +12,9 @@
 
 - Implemented symbolic links support for open_basedir checks. (Pierre)
 - Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
+- Implemented FR #50692, not uploaded files don't count towards
+  max_file_uploads limit. As a side improvement, temporary files are not opened
+  for empty uploads and, in debug mode, 0-length uploads. (Gustavo)
 
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
