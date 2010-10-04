@@ -637,7 +637,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 		efree(MySG(connect_error));
 	}
 
-#ifdef A0 && MYSQL_USE_MYSQLND
+#if defined(A0) && MYSQL_USE_MYSQLND
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysql_persistent_helper TSRMLS_CC);
 #endif
 
@@ -888,7 +888,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql->multi_query = 0;
 #endif
 			/* ensure that the link did not die */
-#if A0 && defined(MYSQL_USE_MYSQLND)
+#if defined(A0) && MYSQL_USE_MYSQLND
 			mysqlnd_end_psession(mysql->conn);
 #endif
 			if (mysql_ping(mysql->conn)) {
