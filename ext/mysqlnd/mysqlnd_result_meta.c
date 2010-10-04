@@ -52,7 +52,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
   and modified for the needs of mysqlnd.
 */
 static zend_bool
-mysqlnd_is_key_numeric(char *key, size_t length, long *idx)
+mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
 {
 	register char * tmp = key;
 
