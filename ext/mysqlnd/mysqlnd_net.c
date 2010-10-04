@@ -48,7 +48,6 @@ mysqlnd_set_sock_no_delay(php_stream * stream)
 	int ret = SUCCESS;
 	int flag = 1;
 	int result = setsockopt(socketd, IPPROTO_TCP,  TCP_NODELAY, (char *) &flag, sizeof(int));
-	TSRMLS_FETCH();
 
 	DBG_ENTER("mysqlnd_set_sock_no_delay");
 
