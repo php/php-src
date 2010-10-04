@@ -2600,7 +2600,7 @@ PHP_FUNCTION(imagecreatefromwebp)
 /* }}} */
 #endif /* HAVE_GD_VPX */
 
-#ifdef HAVE_GD_WEBP
+#ifdef HAVE_GD_XBM
 /* {{{ proto resource imagecreatefromxbm(string filename)
    Create a new image from XBM file or URL */
 PHP_FUNCTION(imagecreatefromxbm)
