@@ -351,6 +351,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrompng, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#ifdef HAVE_GD_WEBP
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromwebp, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
 #ifdef HAVE_GD_XBM
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxbm, 0)
 	ZEND_ARG_INFO(0, filename)
@@ -404,6 +410,13 @@ ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_PNG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GD_WEBP
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewebp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -946,6 +959,9 @@ const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagecreatefrompng,						arginfo_imagecreatefrompng)
 #endif
+#ifdef HAVE_GD_WEBP
+	PHP_FE(imagecreatefromwebp,						arginfo_imagecreatefromwebp)
+#endif
 #ifdef HAVE_GD_GIF_READ
 	PHP_FE(imagecreatefromgif,						arginfo_imagecreatefromgif)
 #endif
@@ -968,6 +984,9 @@ const zend_function_entry gd_functions[] = {
 #endif
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								arginfo_imagepng)
+#endif
+#ifdef HAVE_GD_WEBP
+	PHP_FE(imagewebp,								arginfo_imagewebp)
 #endif
 #ifdef HAVE_GD_GIF_CREATE
 	PHP_FE(imagegif,								arginfo_imagegif)
@@ -2432,6 +2451,23 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
 #endif
 
+	if (image_type == PHP_GDIMG_TYPE_WEBP) {
+		size_t buff_size;
+		char *buff;
+
+		/* needs to be malloc (persistent) - GD will free() it later */
+		buff_size = php_stream_copy_to_mem(stream, &buff, PHP_STREAM_COPY_ALL, 1);
+		if (!buff_size) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot read image data");
+			goto out_err;
+		}
+		im = (*ioctx_func_p)(buff_size, buff);
+		if (!im) {
+			goto out_err;
+		}
+		goto register_im;
+	}
+
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
 	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS)) {
@@ -2509,6 +2545,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		fflush(fp);
 	}
 
+register_im:
 	if (im) {
 		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 		php_stream_close(stream);
@@ -2553,7 +2590,17 @@ PHP_FUNCTION(imagecreatefrompng)
 /* }}} */
 #endif /* HAVE_GD_PNG */
 
-#ifdef HAVE_GD_XBM
+#ifdef HAVE_GD_WEBP
+/* {{{ proto resource imagecreatefrompng(string filename)
+   Create a new image from PNG file or URL */
+PHP_FUNCTION(imagecreatefromwebp)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebpPtr, gdImageCreateFromWebpPtr);
+}
+/* }}} */
+#endif /* HAVE_GD_VPX */
+
+#ifdef HAVE_GD_WEBP
 /* {{{ proto resource imagecreatefromxbm(string filename)
    Create a new image from XBM file or URL */
 PHP_FUNCTION(imagecreatefromxbm)
@@ -2806,6 +2853,22 @@ PHP_FUNCTION(imagepng)
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
+
+
+#ifdef HAVE_GD_WEBP
+/* {{{ proto bool imagewebp(resource im [, string filename[, quality]] )
+   Output PNG image to browser or file */
+PHP_FUNCTION(imagewebp)
+{
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
+#else
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
+#endif
+}
+/* }}} */
+#endif /* HAVE_GD_WEBP */
+
 
 #ifdef HAVE_GD_JPG
 /* {{{ proto bool imagejpeg(resource im [, string filename [, int quality]])

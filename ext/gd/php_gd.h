@@ -48,7 +48,8 @@
 #define PHP_GDIMG_CONVERT_WBM   7
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
-#define PHP_GDIMG_TYPE_GD2PART 10
+#define PHP_GDIMG_TYPE_GD2PART  10
+#define PHP_GDIMG_TYPE_WEBP     11
 
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
@@ -135,6 +136,7 @@ PHP_FUNCTION(imagecreatefromstring);
 PHP_FUNCTION(imagecreatefromgif);
 PHP_FUNCTION(imagecreatefromjpeg);
 PHP_FUNCTION(imagecreatefromxbm);
+PHP_FUNCTION(imagecreatefromwebp);
 PHP_FUNCTION(imagecreatefrompng);
 PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
@@ -156,6 +158,7 @@ PHP_FUNCTION(imagefontheight);
 PHP_FUNCTION(imagegif );
 PHP_FUNCTION(imagejpeg );
 PHP_FUNCTION(imagepng);
+PHP_FUNCTION(imagewebp);
 PHP_FUNCTION(imagewbmp);
 PHP_FUNCTION(imagegd);
 PHP_FUNCTION(imagegd2);
