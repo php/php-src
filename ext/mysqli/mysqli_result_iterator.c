@@ -17,7 +17,7 @@
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
-  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $ 
+  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -104,7 +104,7 @@ static void php_mysqli_result_iterator_current_data(zend_object_iterator *iter, 
 /* {{{ */
 static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	
+
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 	mysqli_object *intern = iterator->result;
 	MYSQL_RES	*result;
@@ -161,7 +161,7 @@ static int php_mysqli_result_iterator_current_key(zend_object_iterator *iter, ch
 
 
 /* {{{ php_mysqli_result_iterator_funcs */
-zend_object_iterator_funcs php_mysqli_result_iterator_funcs = { 
+zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_dtor,
 	php_mysqli_result_iterator_valid,
 	php_mysqli_result_iterator_current_data,

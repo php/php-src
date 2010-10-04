@@ -17,7 +17,7 @@
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -362,7 +362,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_only_result)
 #endif
 	PHP_FE(mysqli_fetch_array,							arginfo_mysqli_fetch_array)
-	PHP_FE(mysqli_fetch_assoc,							arginfo_mysqli_only_result) 
+	PHP_FE(mysqli_fetch_assoc,							arginfo_mysqli_only_result)
 	PHP_FE(mysqli_fetch_object,							arginfo_mysqli_fetch_object)
 	PHP_FE(mysqli_fetch_row,							arginfo_mysqli_only_result)
 	PHP_FE(mysqli_field_count,							arginfo_mysqli_only_link)
@@ -373,7 +373,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_get_connection_stats,					arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_client_stats,						arginfo_mysqli_no_params)
 #endif
-#ifdef HAVE_MYSQLI_GET_CHARSET 
+#ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FE(mysqli_get_charset,							arginfo_mysqli_only_link)
 #endif
 	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_only_link)
@@ -477,7 +477,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(connect, mysqli_connect, arginfo_mysqli_connect)
 	PHP_FALIAS(dump_debug_info, mysqli_dump_debug_info, arginfo_mysqli_no_params)
 	PHP_FALIAS(debug, mysqli_debug, arginfo_mysqli_debug)
-#ifdef HAVE_MYSQLI_GET_CHARSET 
+#ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FALIAS(get_charset, mysqli_get_charset, arginfo_mysqli_no_params)
 #endif
 	PHP_FALIAS(get_client_info, mysqli_get_client_info, arginfo_mysqli_no_params)
@@ -543,8 +543,8 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_mysqli_no_params)
 #endif
 	PHP_FALIAS(fetch_array, mysqli_fetch_array, arginfo_class_mysqli_fetch_array)
-	PHP_FALIAS(fetch_assoc, mysqli_fetch_assoc, arginfo_mysqli_no_params) 
-	PHP_FALIAS(fetch_object,mysqli_fetch_object, arginfo_class_mysqli_fetch_object) 
+	PHP_FALIAS(fetch_assoc, mysqli_fetch_assoc, arginfo_mysqli_no_params)
+	PHP_FALIAS(fetch_object,mysqli_fetch_object, arginfo_class_mysqli_fetch_object)
 	PHP_FALIAS(fetch_row, mysqli_fetch_row, arginfo_mysqli_no_params)
 	PHP_FALIAS(field_seek, mysqli_field_seek, arginfo_class_mysqli_result_and_fieldnr)
 	PHP_FALIAS(free_result, mysqli_free_result, arginfo_mysqli_no_params)

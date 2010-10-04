@@ -47,7 +47,7 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 		zval_dtor(&(w->sqlstate));
 		w = w->next;
 		efree(n);
-	} 
+	}
 }
 /* }}} */
 
@@ -62,7 +62,7 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno TSRMLS_DC)
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
 	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
-	
+
 	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
@@ -112,7 +112,7 @@ MYSQLI_WARNING *php_new_warning(const zval *reason, int errorno TSRMLS_DC)
 	zval_copy_ctor(&(w->reason));
 
 	ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
-	
+
 	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
@@ -183,14 +183,14 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
 
 
 /* {{{ bool mysqli_warning::next() */
-PHP_METHOD(mysqli_warning, next) 
+PHP_METHOD(mysqli_warning, next)
 {
 	MYSQLI_WARNING 	*w;
 	zval  			*mysqli_warning;
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(getThis() TSRMLS_CC);
 
 	if (obj->ptr) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
 			return;
 		}
@@ -232,7 +232,7 @@ static
 int mysqli_warning_sqlstate(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQLI_WARNING *w;
-	
+
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		return FAILURE;
 	}
@@ -293,7 +293,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	}
 
 	if (mysql_warning_count(hdl)) {
-		w = php_get_warnings(hdl TSRMLS_CC); 
+		w = php_get_warnings(hdl TSRMLS_CC);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
 		RETURN_FALSE;
@@ -304,7 +304,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
 	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry TSRMLS_CC)) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 	} else {
 		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
 	}
@@ -334,7 +334,7 @@ zend_property_info mysqli_warning_property_info_entries[] = {
 	{ZEND_ACC_PUBLIC, "message", 	sizeof("message") - 1,	0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,	0, NULL, 0, NULL},
 	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1, 	0, NULL, 0, NULL},
-	{0,					NULL, 			0,					0, NULL, 0, NULL}	
+	{0,					NULL, 			0,					0, NULL, 0, NULL}
 };
 /* }}} */
 

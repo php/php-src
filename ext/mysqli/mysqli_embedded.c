@@ -53,7 +53,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	/* get arguments */
 	if ((argc = zend_hash_num_elements(HASH_OF(args)))) {
 		arguments = safe_emalloc(sizeof(char *), argc + 1, 0);
-		arguments[0] = NULL; 
+		arguments[0] = NULL;
 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(args), &pos);
 
@@ -74,7 +74,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	/* get groups */
 	if ((zend_hash_num_elements(HASH_OF(grps)))) {
 		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(grps)) + 1, 0);
-		groups[0] = NULL; 
+		groups[0] = NULL;
 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(grps), &pos);
 
@@ -89,7 +89,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 
 			groups[++index] = Z_STRVAL_PP(item);
 		}
-		groups[index] = NULL;	
+		groups[index] = NULL;
 	} else {
 		groups = safe_emalloc(sizeof(char *), 1, 0);
 		groups[0] = NULL;
