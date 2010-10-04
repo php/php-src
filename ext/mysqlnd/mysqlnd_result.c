@@ -49,7 +49,7 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 	if (!data_cursor || row_count == result->stored_data->initialized_rows) {
 		DBG_RETURN(ret);
 	}
-	while ((data_cursor - data_begin) < (row_count * field_count)) {
+	while ((data_cursor - data_begin) < (int)(row_count * field_count)) {
 		if (NULL == data_cursor[0]) {
 			enum_func_status rc = result->m.row_decoder(
 									result->stored_data->row_buffers[(data_cursor - data_begin) / field_count],
