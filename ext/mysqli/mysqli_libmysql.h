@@ -43,7 +43,7 @@
 
 /*
   These functions also reside in ext/mysqlnd/mysqlnd_portability.h but since it is only made
-  available if one wants to build mysqli against mysqlnd and they are useful for libmysql as 
+  available if one wants to build mysqli against mysqlnd and they are useful for libmysql as
   well, we check whether they're not defined [build with libmysql is desired] and define them.
 
   Bit values are sent in reverted order of bytes, compared to normal !!!

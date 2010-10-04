@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifndef PHP_MYSQLI_STRUCTS_H
@@ -124,7 +124,7 @@ typedef struct {
 	unsigned int 	multi_query;
 	zend_bool		persistent;
 #if defined(MYSQLI_USE_MYSQLND)
-	int				async_result_fetch_type;				
+	int				async_result_fetch_type;
 #endif
 } MY_MYSQL;
 

@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $ 
+  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $
 */
 
 #ifndef MYSQLI_PRIV_H
@@ -93,12 +93,12 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
 	mysql->multi_query = 0; \
-} 
+}
 
 #define MYSQLI_ENABLE_MQ if (!mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
 	mysql->multi_query = 1; \
-} 
+}
 
 
 #define MYSQLI_RETURN_LONG_LONG(__val) \
@@ -136,7 +136,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_REPORT_ERROR			1
 #define MYSQLI_REPORT_STRICT		2
 #define MYSQLI_REPORT_INDEX			4
-#define MYSQLI_REPORT_CLOSE			8	
+#define MYSQLI_REPORT_CLOSE			8
 #define MYSQLI_REPORT_ALL		  255
 
 #define MYSQLI_REPORT_MYSQL_ERROR(mysql) \

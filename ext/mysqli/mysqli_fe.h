@@ -16,7 +16,7 @@
             Andrey Hristov <andrey@php.net>                              |
   +----------------------------------------------------------------------+
 
-  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $ 
+  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $
 */
 
 #ifndef MYSQLI_FE_H

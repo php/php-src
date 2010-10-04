@@ -34,7 +34,7 @@
 #endif
 
 typedef struct {
-	struct timeval	starttime, 
+	struct timeval	starttime,
 					endtime;		/* execution time */
 } PR_TIME_INFO;
 

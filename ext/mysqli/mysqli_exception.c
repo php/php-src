@@ -36,13 +36,13 @@ const zend_function_entry mysqli_exception_methods[] = {
 };
 /* }}} */
 
-void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...) 
+void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...)
 {
 	zval	*sql_ex;
 	va_list arg;
 	char 	*message;
 
-	va_start(arg, format); 
+	va_start(arg, format);
 	vspprintf(&message, 0, format, arg);
 	va_end(arg);;
 
