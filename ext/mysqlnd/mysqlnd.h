@@ -102,7 +102,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND *conn,
 						  const char *passwd, unsigned int passwd_len,
 						  const char *db, unsigned int db_len,
 						  unsigned int port,
-						  const char *socket,
+						  const char *socket_or_pipe,
 						  unsigned int mysql_flags
 						  TSRMLS_DC);
 
