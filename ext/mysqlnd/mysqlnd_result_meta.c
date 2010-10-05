@@ -54,14 +54,14 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
 static zend_bool
 mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
 {
-	register char * tmp = key;
+	register const char * tmp = key;
 
 	if (*tmp=='-') {
 		tmp++;
 	}
 	if ((*tmp>='0' && *tmp<='9')) {
 		do { /* possibly a numeric index */
-			char *end=key+length-1;
+			const char *end=key+length-1;
 
 			if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */
 				break;
@@ -454,7 +454,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 /* }}} */
 
 
-static 
+static
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
