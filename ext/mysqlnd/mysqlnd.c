@@ -1368,14 +1368,14 @@ MYSQLND_METHOD(mysqlnd_conn, ping)(MYSQLND * const conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_conn::stat */
+/* {{{ mysqlnd_conn::statistic */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, stat)(MYSQLND * conn, char **message, unsigned int * message_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, statistic)(MYSQLND * conn, char **message, unsigned int * message_len TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_PACKET_STATS * stats_header;
 
-	DBG_ENTER("mysqlnd_conn::stat");
+	DBG_ENTER("mysqlnd_conn::statistic");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	ret = conn->m->simple_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE TSRMLS_CC);
@@ -1560,13 +1560,13 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 		STAT_CLOSE_IMPLICIT,
 		STAT_CLOSE_DISCONNECT
 	};
-	enum_mysqlnd_collected_stats stat = close_type_to_stat_map[close_type];
+	enum_mysqlnd_collected_stats statistic = close_type_to_stat_map[close_type];
 
 	DBG_ENTER("mysqlnd_conn::close");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (conn->state >= CONN_READY) {
-		MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
@@ -2256,7 +2256,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 
 	MYSQLND_METHOD(mysqlnd_conn, get_server_version),
 	MYSQLND_METHOD(mysqlnd_conn, get_server_info),
-	MYSQLND_METHOD(mysqlnd_conn, stat),
+	MYSQLND_METHOD(mysqlnd_conn, statistic),
 	MYSQLND_METHOD(mysqlnd_conn, get_host_info),
 	MYSQLND_METHOD(mysqlnd_conn, get_proto_info),
 	MYSQLND_METHOD(mysqlnd_conn, info),
