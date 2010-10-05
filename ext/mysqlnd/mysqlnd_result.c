@@ -42,7 +42,7 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 	zval **data_cursor = result->stored_data? result->stored_data->data:NULL;
 	zval **data_begin = result->stored_data? result->stored_data->data:NULL;
 	unsigned int field_count = result->meta? result->meta->field_count : 0;
-	unsigned int row_count = result->stored_data? result->stored_data->row_count:0;
+	uint64_t row_count = result->stored_data? result->stored_data->row_count:0;
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_res::initialize_result_set_rest");
 
@@ -208,10 +208,10 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 		for (row = set->row_count - 1; row >= 0; row--) {
 			zval **current_row = set->data + row * field_count;
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-			int col;
+			int64_t col;
 
 			if (current_row != NULL) {
-				for (col = (int64_t) field_count - 1; col >= 0; --col) {
+				for (col = field_count - 1; col >= 0; --col) {
 					if (current_row[col]) {
 						zend_bool copy_ctor_called;
 						mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
