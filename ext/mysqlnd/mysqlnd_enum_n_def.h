@@ -100,21 +100,21 @@
 typedef enum mysqlnd_extension
 {
 	MYSQLND_MYSQL = 0,
-	MYSQLND_MYSQLI,
+	MYSQLND_MYSQLI
 } enum_mysqlnd_extension;
 
 enum
 {
 	MYSQLND_FETCH_ASSOC = 1,
 	MYSQLND_FETCH_NUM = 2,
-	MYSQLND_FETCH_BOTH = 1|2,
+	MYSQLND_FETCH_BOTH = 1|2
 };
 
 /* Follow libmysql convention */
 typedef enum func_status
 {
 	PASS = 0,
-	FAIL = 1,
+	FAIL = 1
 } enum_func_status;
 
 typedef enum mysqlnd_query_type
@@ -296,7 +296,7 @@ typedef enum mysqlnd_connection_state
 	CONN_SENDING_LOAD_DATA,
 	CONN_FETCHING_DATA,
 	CONN_NEXT_RESULT_PENDING,
-	CONN_QUIT_SENT, /* object is "destroyed" at this stage */
+	CONN_QUIT_SENT /* object is "destroyed" at this stage */
 } enum_mysqlnd_connection_state;
 
 
@@ -307,7 +307,7 @@ typedef enum mysqlnd_stmt_state
 	MYSQLND_STMT_EXECUTED,
 	MYSQLND_STMT_WAITING_USE_OR_STORE,
 	MYSQLND_STMT_USE_OR_STORE_CALLED,
-	MYSQLND_STMT_USER_FETCHING, /* fetch_row_buff or fetch_row_unbuf */
+	MYSQLND_STMT_USER_FETCHING /* fetch_row_buff or fetch_row_unbuf */
 } enum_mysqlnd_stmt_state;
 
 
@@ -520,7 +520,7 @@ enum mysqlnd_packet_type
 	PROT_STATS_PACKET,
 	PROT_PREPARE_RESP_PACKET,
 	PROT_CHG_USER_RESP_PACKET,
-	PROT_LAST, /* should always be last */
+	PROT_LAST /* should always be last */
 };
 
 
