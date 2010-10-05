@@ -15,6 +15,7 @@
 - Fixed bug #52436 (Compile error if systems do not have stdint.h)
   (Sriram Natarajan)
 - Fixed bug #52390 (mysqli_report() should be per-request setting). (Kalle)
+- Fixed bug #51008 (Zend/tests/bug45877.phpt fails). (Dmitry)
 
 22 Jul 2010, PHP 5.2.14
 - Reverted bug fix #49521 (PDO fetchObject sets values before calling
