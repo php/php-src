@@ -71,7 +71,6 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 
 	do {
 		n = gdGetBuf(dummy, 1024, infile);
-		printf("%i\n", n);
 		size += n;
 	} while (n != EOF);
 
