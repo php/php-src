@@ -81,7 +81,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
-__construct('%S', '%S', '%S')
+__construct('%S', '%S', %s)
 exec('DROP TABLE IF EXISTS test')
 exec('CREATE TABLE test(id INT)')
 exec('INSERT INTO test(id) VALUES (1), (2)')
