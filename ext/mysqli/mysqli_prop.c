@@ -84,7 +84,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	} else {\
 		l = (__ret_type)__int_func(p);\
 		if (l < LONG_MAX) {\
-			ZVAL_LONG(*retval, l);\
+			ZVAL_LONG(*retval, (long) l);\
 		} else { \
 			char *ret; \
 			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
@@ -178,7 +178,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		}
 
 		if (rc < LONG_MAX) {
-			ZVAL_LONG(*retval, rc);
+			ZVAL_LONG(*retval, (long) rc);
 		} else {
 			char *ret;
 			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
@@ -295,7 +295,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		}
 
 		if (rc < LONG_MAX) {
-			ZVAL_LONG(*retval, rc);
+			ZVAL_LONG(*retval, (long) rc);
 		} else {
 			char *ret;
 			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
