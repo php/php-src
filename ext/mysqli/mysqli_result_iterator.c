@@ -154,7 +154,7 @@ static int php_mysqli_result_iterator_current_key(zend_object_iterator *iter, ch
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
-	*int_key = iterator->row_num;
+	*int_key = (ulong) iterator->row_num;
 	return HASH_KEY_IS_LONG;
 }
 /* }}} */

@@ -1087,12 +1087,12 @@ PHP_FUNCTION(mysqli_result_construct)
  */
 void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC)
 {
+#if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
 	unsigned long	*field_len;
-
-#if !defined(MYSQLI_USE_MYSQLND)
+	
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
 	}
