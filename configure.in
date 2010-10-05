@@ -611,7 +611,7 @@ asprintf \
 )
 
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc
-PHP_CHECK_FUNC(nanosleep, rt)
+PHP_CHECK_FUNC_LIB(nanosleep, rt)
 
 dnl Check for getaddrinfo, should be a better way, but...
 dnl Also check for working getaddrinfo
