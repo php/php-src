@@ -25,6 +25,9 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #52981 (Unicode casing table was out-of-date. Updated with
+  UnicodeData-6.0.0d7.txt and included the source of the generator program with
+  the distribution) (Gustavo).
 - Fixed bug #52971 (PCRE-Meta-Characters not working with utf-8). (Felipe)
 - Fixed bug #52947 (segfault when ssl stream option capture_peer_cert_chain
   used). (Felipe)
