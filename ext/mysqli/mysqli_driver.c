@@ -124,9 +124,9 @@ static int driver_driver_version_read(mysqli_object *obj, zval **retval TSRMLS_D
 }
 /* }}} */
 
-MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect);
-MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect);
-MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode);
+MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect)
+MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect)
+MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode)
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {
