@@ -1106,7 +1106,7 @@ void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 static enum_func_status
 php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
 						MYSQLND_MEMORY_POOL_CHUNK **buffer,
-						uint64_t *data_size, zend_bool persistent_alloc,
+						size_t *data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
@@ -1527,7 +1527,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	size_t old_chunk_size = net->stream->chunk_size;
 	MYSQLND_PACKET_ROW *packet= (MYSQLND_PACKET_ROW *) _packet;
 	size_t post_alloc_for_bit_fields = 0;
-	uint64_t data_size = 0;
+	size_t data_size = 0;
 
 	DBG_ENTER("php_mysqlnd_rowp_read");
 
