@@ -107,6 +107,7 @@
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
   exit). Requires Oracle bug fix 9891199 for this patch to have an
   effect. (Oracle Corp.)
+- Fixed bug #51008 (Zend/tests/bug45877.phpt fails). (Dmitry)
 - Fixed bug #50590 (IntlDateFormatter::parse result is limited to the integer
   range). (Stas)
 - Fixed bug #50481 (Storing many SPLFixedArray in an array crashes). (Felipe)

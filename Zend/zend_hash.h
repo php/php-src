@@ -312,7 +312,7 @@ END_EXTERN_C()
 	}																		\
 	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
 		const char *end = key + length - 1;									\
-		long idx;															\
+		ulong idx;															\
 																			\
 		if ((*end != '\0') /* not a null terminated string */				\
 		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
@@ -328,11 +328,11 @@ END_EXTERN_C()
 		}																	\
 		if (tmp == end) {													\
 			if (*key == '-') {												\
-				idx = -idx;													\
-				if (idx > 0) { /* overflow */								\
+				if (idx-1 > LONG_MAX) { /* overflow */						\
 					break;													\
 				}															\
-			} else if (idx < 0) { /* overflow */							\
+				idx = (ulong)(-(long)idx);									\
+			} else if (idx > LONG_MAX) { /* overflow */						\
 				break;														\
 			}																\
 			return func;													\
