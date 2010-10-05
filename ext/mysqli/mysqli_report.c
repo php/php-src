@@ -27,6 +27,8 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
+extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
+
 /* {{{ proto bool mysqli_report(int flags)
    sets report level */
 PHP_FUNCTION(mysqli_report)
