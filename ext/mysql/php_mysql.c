@@ -2370,8 +2370,8 @@ PHP_FUNCTION(mysql_fetch_field)
 	}
 	object_init(return_value);
 
-	add_property_string(return_value, "name",(mysql_field->name?mysql_field->name:""), 1);
-	add_property_string(return_value, "table",(mysql_field->table?mysql_field->table:""), 1);
+	add_property_string(return_value, "name", (char *) (mysql_field->name?mysql_field->name:""), 1);
+	add_property_string(return_value, "table",(char *) (mysql_field->table?mysql_field->table:""), 1);
 	add_property_string(return_value, "def",(mysql_field->def?mysql_field->def:""), 1);
 	add_property_long(return_value, "max_length", mysql_field->max_length);
 	add_property_long(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);
