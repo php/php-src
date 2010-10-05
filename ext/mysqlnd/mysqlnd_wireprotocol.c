@@ -1392,7 +1392,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 #else
 						_atoi64((char *) p);
 #endif
-					ZVAL_LONG(*current_field, v);
+					ZVAL_LONG(*current_field, (long) v); /* the cast is safe */
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
@@ -1414,7 +1414,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 					{
 						ZVAL_STRINGL(*current_field, (char *)p, len, 0);
 					} else {
-						ZVAL_LONG(*current_field, (int64_t)v);
+						ZVAL_LONG(*current_field, (long) v); /* the cast is safe */
 					}
 				}
 				*(p + len) = save;
