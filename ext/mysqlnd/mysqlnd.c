@@ -547,7 +547,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 						 const char *passwd, unsigned int passwd_len,
 						 const char *db, unsigned int db_len,
 						 unsigned int port,
-						 const char *socket,
+						 const char *socket_or_pipe,
 						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
@@ -616,19 +616,19 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		int transport_len;
 #ifndef PHP_WIN32
 		if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
-			DBG_INF_FMT("socket=%s", socket? socket:"n/a");
-			if (!socket) {
-				socket = "/tmp/mysql.sock";
+			DBG_INF_FMT("socket=%s", socket_or_pipe? socket_or_pipe:"n/a");
+			if (!socket_or_pipe) {
+				socket_or_pipe = "/tmp/mysql.sock";
 			}
-			transport_len = spprintf(&transport, 0, "unix://%s", socket);
+			transport_len = spprintf(&transport, 0, "unix://%s", socket_or_pipe);
 			unix_socket = TRUE;
 #else
 		if (host_len == sizeof(".") - 1 && host[0] == '.') {
 			/* named pipe in socket */
-			if (!socket) {
-				socket = "\\\\.\\pipe\\MySQL";
+			if (!socket_or_pipe) {
+				socket_or_pipe = "\\\\.\\pipe\\MySQL";
 			}
-			transport_len = spprintf(&transport, 0, "pipe://%s", socket);
+			transport_len = spprintf(&transport, 0, "pipe://%s", socket_or_pipe);
 			named_pipe = TRUE;
 #endif
 		} else {
@@ -770,7 +770,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 				}
 			}
 		} else {
-			conn->unix_socket	= mnd_pestrdup(socket, conn->persistent);
+			conn->unix_socket	= mnd_pestrdup(socket_or_pipe, conn->persistent);
 			if (unix_socket) {
 				conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
@@ -873,7 +873,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						 const char *passwd, unsigned int passwd_len,
 						 const char *db, unsigned int db_len,
 						 unsigned int port,
-						 const char *socket,
+						 const char *socket_or_pipe,
 						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
@@ -891,7 +891,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 		}
 	}
 
-	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket, mysql_flags TSRMLS_CC);
+	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
 
 	if (ret == FAIL) {
 		if (self_alloced) {
