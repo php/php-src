@@ -327,11 +327,11 @@ END_EXTERN_C()
 		}																	\
 		if (tmp == end) {													\
 			if (*key == '-') {												\
-				idx = -idx;													\
-				if (idx > 0) { /* overflow */								\
+				if (idx-1 > LONG_MAX) { /* overflow */						\
 					break;													\
 				}															\
-			} else if (idx < 0) { /* overflow */							\
+				idx = (ulong)(-(long)idx);									\
+			} else if (idx > LONG_MAX) { /* overflow */						\
 				break;														\
 			}																\
 			func;															\
@@ -340,7 +340,7 @@ END_EXTERN_C()
 } while (0)
 
 #define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
-	long idx;																\
+	ulong idx;																\
 																			\
 	ZEND_HANDLE_NUMERIC_EX(key, length, idx, return func);					\
 } while (0)
