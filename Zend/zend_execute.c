@@ -1003,7 +1003,6 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 	zval **retval;
 	char *offset_key;
 	int offset_key_length;
-	long index;
 	ulong hval;
 
 	switch (dim->type) {
@@ -1021,7 +1020,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 			if (dim_type == IS_CONST) {
 				hval = Z_HASH_P(dim);
 			} else {
-				ZEND_HANDLE_NUMERIC_EX(offset_key, offset_key_length+1, index, goto num_index);
+				ZEND_HANDLE_NUMERIC_EX(offset_key, offset_key_length+1, hval, goto num_index);
 				if (IS_INTERNED(offset_key)) {
 					hval = INTERNED_HASH(offset_key);
 				} else {
@@ -1052,32 +1051,32 @@ fetch_string_dim:
 			}
 			break;
 		case IS_DOUBLE:
-			index = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
 			/* Fall Through */
 		case IS_BOOL:
 		case IS_LONG:
-			index = Z_LVAL_P(dim);
+			hval = Z_LVAL_P(dim);
 num_index:
-			if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
+			if (zend_hash_index_find(ht, hval, (void **) &retval) == FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
-						zend_error(E_NOTICE,"Undefined offset: %ld", index);
+						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
 						/* break missing intentionally */
 					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
 					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined offset: %ld", index);
+						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
 						/* break missing intentionally */
 					case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
 
 						Z_ADDREF_P(new_zval);
-						zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
+						zend_hash_index_update(ht, hval, &new_zval, sizeof(zval *), (void **) &retval);
 					}
 					break;
 				}

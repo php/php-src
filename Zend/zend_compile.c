@@ -817,7 +817,7 @@ void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS
 	SET_NODE(opline.op1, parent);
 	SET_NODE(opline.op2, dim);
 	if (opline.op2_type == IS_CONST && Z_TYPE(CONSTANT(opline.op2.constant)) == IS_STRING) {
-		long index;
+		ulong index;
 		int numeric = 0;
 
 		ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline.op2.constant)), Z_STRLEN(CONSTANT(opline.op2.constant))+1, index, numeric = 1);
@@ -5192,7 +5192,7 @@ void zend_do_init_array(znode *result, const znode *expr, const znode *offset, z
 		if (offset) {
 			SET_NODE(opline->op2, offset);
 			if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
-				long index;
+				ulong index;
 				int numeric = 0;
 
 				ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
@@ -5224,7 +5224,7 @@ void zend_do_add_array_element(znode *result, const znode *expr, const znode *of
 	if (offset) {
 		SET_NODE(opline->op2, offset);
 		if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
-			long index;
+			ulong index;
 			int numeric = 0;
 
 			ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
