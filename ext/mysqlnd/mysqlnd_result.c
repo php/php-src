@@ -194,7 +194,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 {
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 	unsigned int field_count = result->field_count;
-	int row;
+	int64_t row;
 
 	DBG_ENTER("mysqlnd_res::free_buffered_data");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
@@ -211,7 +211,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 			int col;
 
 			if (current_row != NULL) {
-				for (col = field_count - 1; col >= 0; --col) {
+				for (col = (int64_t) field_count - 1; col >= 0; --col) {
 					if (current_row[col]) {
 						zend_bool copy_ctor_called;
 						mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
@@ -1229,7 +1229,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 			ret = FAIL;
 			goto end;
 		}
-		memset(set->data, 0, set->row_count * meta->field_count * sizeof(zval *));
+		memset(set->data, 0, (size_t)(set->row_count * meta->field_count * sizeof(zval *)));
 	}
 
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats,
