@@ -391,14 +391,14 @@ premature_end:
 
 /* {{{ php_mysqlnd_greet_free_mem */
 static
-void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_greet_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_GREET *p= (MYSQLND_PACKET_GREET *) _packet;
 	if (p->server_version) {
 		efree(p->server_version);
 		p->server_version = NULL;
 	}
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -508,9 +508,9 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 
 /* {{{ php_mysqlnd_auth_free_mem */
 static
-void php_mysqlnd_auth_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_auth_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
-	if (!alloca) {
+	if (!stack_allocation) {
 		MYSQLND_PACKET_AUTH * p = (MYSQLND_PACKET_AUTH *) _packet;
 		mnd_pefree(p, p->header.persistent);
 	}
@@ -591,14 +591,14 @@ premature_end:
 
 /* {{{ php_mysqlnd_ok_free_mem */
 static void
-php_mysqlnd_ok_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+php_mysqlnd_ok_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_OK *p= (MYSQLND_PACKET_OK *) _packet;
 	if (p->message) {
 		mnd_efree(p->message);
 		p->message = NULL;
 	}
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -674,9 +674,9 @@ premature_end:
 
 /* {{{ php_mysqlnd_eof_free_mem */
 static
-void php_mysqlnd_eof_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_eof_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(_packet, ((MYSQLND_PACKET_EOF *)_packet)->header.persistent);
 	}
 }
@@ -748,9 +748,9 @@ end:
 
 /* {{{ php_mysqlnd_cmd_free_mem */
 static
-void php_mysqlnd_cmd_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_cmd_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
-	if (!alloca) {
+	if (!stack_allocation) {
 		MYSQLND_PACKET_COMMAND * p = (MYSQLND_PACKET_COMMAND *) _packet;
 		mnd_pefree(p, p->header.persistent);
 	}
@@ -864,7 +864,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_rset_header_free_mem */
 static
-void php_mysqlnd_rset_header_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_rset_header_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_RSET_HEADER *p= (MYSQLND_PACKET_RSET_HEADER *) _packet;
 	DBG_ENTER("php_mysqlnd_rset_header_free_mem");
@@ -872,7 +872,7 @@ void php_mysqlnd_rset_header_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		mnd_efree(p->info_or_local_file);
 		p->info_or_local_file = NULL;
 	}
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 	DBG_VOID_RETURN;
@@ -1091,11 +1091,11 @@ premature_end:
 
 /* {{{ php_mysqlnd_rset_field_free_mem */
 static
-void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_RES_FIELD *p= (MYSQLND_PACKET_RES_FIELD *) _packet;
 	/* p->metadata was passed to us as temporal buffer */
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -1614,7 +1614,7 @@ end:
 
 /* {{{ php_mysqlnd_rowp_free_mem */
 static void
-php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+php_mysqlnd_rowp_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_ROW *p;
 
@@ -1624,7 +1624,7 @@ php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		p->row_buffer->free_chunk(p->row_buffer TSRMLS_CC);
 		p->row_buffer = NULL;
 	}
-	DBG_INF_FMT("alloca=%u persistent=%u", (int)alloca, (int)p->header.persistent);
+	DBG_INF_FMT("stack_allocation=%u persistent=%u", (int)stack_allocation, (int)p->header.persistent);
 	/*
 	  Don't free packet->fields :
 	  - normal queries -> store_result() | fetch_row_unbuffered() will transfer
@@ -1632,7 +1632,7 @@ php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 	  - PS will pass in it the bound variables, we have to use them! and of course
 	    not free the array. As it is passed to us, we should not clean it ourselves.
 	*/
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 	DBG_VOID_RETURN;
@@ -1664,14 +1664,14 @@ php_mysqlnd_stats_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 /* {{{ php_mysqlnd_stats_free_mem */
 static
-void php_mysqlnd_stats_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+void php_mysqlnd_stats_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_STATS *p= (MYSQLND_PACKET_STATS *) _packet;
 	if (p->message) {
 		mnd_efree(p->message);
 		p->message = NULL;
 	}
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -1760,10 +1760,10 @@ premature_end:
 
 /* {{{ php_mysqlnd_prepare_free_mem */
 static void
-php_mysqlnd_prepare_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+php_mysqlnd_prepare_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
 	MYSQLND_PACKET_PREPARE_RESPONSE *p= (MYSQLND_PACKET_PREPARE_RESPONSE *) _packet;
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -1823,9 +1823,9 @@ premature_end:
 
 /* {{{ php_mysqlnd_chg_user_free_mem */
 static void
-php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
+php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
-	if (!alloca) {
+	if (!stack_allocation) {
 		mnd_pefree(_packet, ((MYSQLND_PACKET_CHG_USER_RESPONSE *)_packet)->header.persistent);
 	}
 }
