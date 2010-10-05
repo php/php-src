@@ -1147,7 +1147,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		goto end;
 	}
 	if (free_rows) {
-		set->row_buffers = mnd_pemalloc(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
+		set->row_buffers = mnd_pemalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), to_cache);
 		if (!set->row_buffers) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
@@ -1181,8 +1181,15 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 			uint64_t total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
 			MYSQLND_MEMORY_POOL_CHUNK ** new_row_buffers;
 			total_allocated_rows += set->row_count;
+
+			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+			if (total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
+				SET_OOM_ERROR(conn->error_info);
+				ret = FAIL;
+				goto end;
+			}
 			new_row_buffers = mnd_perealloc(set->row_buffers,
-											total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
+											(size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)),
 											set->persistent);
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(conn->error_info);
@@ -1209,8 +1216,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	}
 	/* Overflow ? */
 	if (set->row_count) {
+		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+		if (set->row_count * meta->field_count * sizeof(zval *) > SIZE_MAX) {
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+			goto end;
+		}
 		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-		set->data = mnd_pemalloc(set->row_count * meta->field_count * sizeof(zval *), to_cache);
+		set->data = mnd_pemalloc((size_t)(set->row_count * meta->field_count * sizeof(zval *)), to_cache);
 		if (!set->data) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
@@ -1231,8 +1244,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	}
 	/* save some memory */
 	if (free_rows) {
+		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+		if (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+			goto end;
+		}
 		set->row_buffers = mnd_perealloc(set->row_buffers,
-										 set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
+										 (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)),
 										 set->persistent);
 	}
 
@@ -1590,7 +1609,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 		DBG_VOID_RETURN;
 	}
 
-	mysqlnd_array_init(return_value, (unsigned int) set? set->row_count : 4); /* 4 is a magic value */
+	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
+	mysqlnd_array_init(return_value, (unsigned int) set? (uint) set->row_count : 4); 
 
 	do {
 		MAKE_STD_ZVAL(row);
