@@ -41,7 +41,7 @@
 
 /* {{{ mysqlnd_set_sock_no_delay */
 static int
-mysqlnd_set_sock_no_delay(php_stream * stream)
+mysqlnd_set_sock_no_delay(php_stream * stream TSRMLS_DC)
 {
 
 	int socketd = ((php_netstream_data_t*)stream->abstract)->socket;
@@ -190,7 +190,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 
 	if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
 		/* TCP -> Set TCP_NODELAY */
-		mysqlnd_set_sock_no_delay(net->stream);
+		mysqlnd_set_sock_no_delay(net->stream TSRMLS_CC);
 	}
 
 	{
