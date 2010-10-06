@@ -92,6 +92,9 @@ require_once('skipifconnectfailure.inc');
 	$stmt = mysqli_stmt_init($link);
 	$stmt->prepare("SELECT label FROM test");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
+	if ($res !== 1)
+		printf("[007.1] max_length should be 1, got %s\n", $res);
 	$stmt->execute();
 	$stmt->store_result();
 	$res = $stmt->result_metadata();
@@ -109,6 +112,9 @@ require_once('skipifconnectfailure.inc');
 	$stmt = mysqli_stmt_init($link);
 	$stmt->prepare("SELECT label FROM test");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 0);
+	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
+	if ($res !== 0)
+		printf("[008.1] max_length should be 0, got %s\n", $res);
 	$stmt->execute();
 	$stmt->store_result();
 	$res = $stmt->result_metadata();

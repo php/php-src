@@ -380,11 +380,11 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
 			{
-#if MYSQL_VERSION_ID > 50099
+#if MYSQL_VERSION_ID >= 50107
 				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
 				my_bool tmp;
 #else
-				ulong tmp = 0;
+				uint tmp = 0;
 #endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
@@ -2231,8 +2231,10 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	long	mode_in;
+	my_bool	mode_b;
 	ulong	mode;
 	ulong	attr;
+	void	*mode_p;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode_in) == FAILURE) {
 		return;
@@ -2244,11 +2246,22 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		RETURN_FALSE;
 	}
 
-	mode = mode_in;
+	switch (attr) {
+#if MYSQL_VERSION_ID >= 50107
+	case STMT_ATTR_UPDATE_MAX_LENGTH:
+		mode_b = (my_bool) mode_in;
+		mode_p = &mode_b;
+		break;
+#endif
+	default:
+		mode = mode_in;
+		mode_p = &mode;
+		break;
+	}
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+	if (mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 #else
-	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 #endif
 		RETURN_FALSE;
 	}
@@ -2262,11 +2275,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 {
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
-#if !defined(MYSQLI_USE_MYSQLND) && MYSQL_VERSION_ID > 50099
-	my_bool value;
-#else
 	ulong	value = 0;
-#endif
 	ulong	attr;
 	int		rc;
 
@@ -2278,6 +2287,11 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
 		RETURN_FALSE;
 	}
+
+#if MYSQL_VERSION_ID >= 50107
+	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
+		value = *((my_bool *)&value);
+#endif
 	RETURN_LONG((long)value);
 }
 /* }}} */
@@ -2423,7 +2437,11 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB ||
 				stmt->stmt->fields[i].type == MYSQL_TYPE_GEOMETRY))
 			{
+#if MYSQL_VERSION_ID >= 50107
 				my_bool	tmp=1;
+#else
+				uint tmp=1;
+#endif
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
 				break;
 			}
