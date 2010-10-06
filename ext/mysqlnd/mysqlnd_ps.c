@@ -1827,39 +1827,42 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 									   const void * const value TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	unsigned long val = *(unsigned long *) value;
 	DBG_ENTER("mysqlnd_stmt::attr_set");
 	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu attr_type=%u value=%lu", stmt->stmt_id, attr_type, val);
+	DBG_INF_FMT("stmt=%lu attr_type=%u", stmt->stmt_id, attr_type);
 
 	switch (attr_type) {
-		case STMT_ATTR_UPDATE_MAX_LENGTH:
+		case STMT_ATTR_UPDATE_MAX_LENGTH:{
+			zend_uchar bval = *(zend_uchar *) value;
 			/*
 			  XXX : libmysql uses my_bool, but mysqli uses ulong as storage on the stack
 			  and mysqlnd won't be used out of the scope of PHP -> use ulong.
 			*/
-			stmt->update_max_length = val? TRUE:FALSE;
+			stmt->update_max_length = bval? TRUE:FALSE;
 			break;
+		}
 		case STMT_ATTR_CURSOR_TYPE: {
-			if (val > (unsigned long) CURSOR_TYPE_READ_ONLY) {
+			unsigned int ival = *(unsigned int *) value;
+			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
 			}
-			stmt->flags = val;
+			stmt->flags = ival;
 			break;
 		}
 		case STMT_ATTR_PREFETCH_ROWS: {
-			if (val == 0) {
-				val = MYSQLND_DEFAULT_PREFETCH_ROWS;
-			} else if (val > 1) {
+			unsigned int ival = *(unsigned int *) value;
+			if (ival == 0) {
+				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
+			} else if (ival > 1) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
 			}
-			stmt->prefetch_rows = val;
+			stmt->prefetch_rows = ival;
 			break;
 		}
 		default:
