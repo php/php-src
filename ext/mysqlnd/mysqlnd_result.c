@@ -679,7 +679,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 		if (!row_packet->skip_extraction) {
 			MYSQLND_FIELD *field = result->meta->fields;
-			struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+			struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
 
 			enum_func_status rc = result->m.row_decoder(result->unbuf->last_row_buffer,
 										  result->unbuf->last_row_data,
@@ -695,7 +695,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 			retrow = mnd_malloc(result->field_count * sizeof(char *));
 			if (retrow) {
-				for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
+				for (i = 0; i < field_count; i++, field++, hash_key++) {
 					zval *data = result->unbuf->last_row_data[i];
 					unsigned int len;
 
@@ -794,7 +794,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 		if (!row_packet->skip_extraction) {
 			HashTable *row_ht = Z_ARRVAL_P(row);
 			MYSQLND_FIELD *field = result->meta->fields;
-			struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+			struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
 			unsigned int i, field_count = result->field_count;
 			unsigned long *lengths = result->lengths;
 
@@ -809,7 +809,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 			if (PASS != rc) {
 				DBG_RETURN(FAIL);
 			}
-			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
+			for (i = 0; i < field_count; i++, field++, hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
 				unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
 
@@ -830,23 +830,23 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 					  hashing of the column name, which is not needed as it can be precomputed.
 					*/
 					Z_ADDREF_P(data);
-					if (zend_hash_key->is_numeric == FALSE) {
+					if (hash_key->is_numeric == FALSE) {
 #if MYSQLND_UNICODE
 						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-												 zend_hash_key->ustr,
-												 zend_hash_key->ulen + 1,
-												 zend_hash_key->key,
+												 hash_key->ustr,
+												 hash_key->ulen + 1,
+												 hash_key->key,
 												 (void *) &data, sizeof(zval *), NULL);
 #else
 						zend_hash_quick_update(Z_ARRVAL_P(row),
 											   field->name,
 											   field->name_length + 1,
-											   zend_hash_key->key,
+											   hash_key->key,
 											   (void *) &data, sizeof(zval *), NULL);
 #endif
 					} else {
 						zend_hash_index_update(Z_ARRVAL_P(row),
-											   zend_hash_key->key,
+											   hash_key->key,
 											   (void *) &data, sizeof(zval *), NULL);
 					}
 				}
@@ -962,7 +962,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 	{
 		zval **current_row = set->data_cursor;
 		MYSQLND_FIELD *field = result->meta->fields;
-		struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+		struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
 		unsigned int i;
 
 		if (NULL == current_row[0]) {
@@ -999,7 +999,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 		ret = mnd_malloc(result->field_count * sizeof(char *));
 		if (ret) {
-			for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
+			for (i = 0; i < result->field_count; i++, field++, hash_key++) {
 				zval *data = current_row[i];
 
 				if (Z_TYPE_P(data) != IS_NULL) {
@@ -1038,7 +1038,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 	{
 		zval **current_row = set->data_cursor;
 		MYSQLND_FIELD *field = result->meta->fields;
-		struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+		struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
 
 		if (NULL == current_row[0]) {
 			uint64_t row_num = (set->data_cursor - set->data) / result->meta->field_count;
@@ -1069,7 +1069,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 			}
 		}
 
-		for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
+		for (i = 0; i < result->field_count; i++, field++, hash_key++) {
 			zval *data = current_row[i];
 
 			if (flags & MYSQLND_FETCH_NUM) {
@@ -1085,23 +1085,23 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 				  hashing of the column name, which is not needed as it can be precomputed.
 				*/
 				Z_ADDREF_P(data);
-				if (zend_hash_key->is_numeric == FALSE) {
+				if (hash_key->is_numeric == FALSE) {
 #if MYSQLND_UNICODE
 					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-											 zend_hash_key->ustr,
-											 zend_hash_key->ulen + 1,
-											 zend_hash_key->key,
+											 hash_key->ustr,
+											 hash_key->ulen + 1,
+											 hash_key->key,
 											 (void *) &data, sizeof(zval *), NULL);
 #else
 					zend_hash_quick_update(Z_ARRVAL_P(row),
 										   field->name,
 										   field->name_length + 1,
-										   zend_hash_key->key,
+										   hash_key->key,
 										   (void *) &data, sizeof(zval *), NULL);
 #endif
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row),
-										   zend_hash_key->key,
+										   hash_key->key,
 										   (void *) &data, sizeof(zval *), NULL);
 				}
 			}
