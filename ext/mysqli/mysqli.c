@@ -1235,12 +1235,12 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.retval_ptr_ptr = &retval_ptr;
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
-					HashTable *ht = Z_ARRVAL_P(ctor_params);
+					HashTable *params_ht = Z_ARRVAL_P(ctor_params);
 					Bucket *p;
 
 					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-					p = ht->pListHead;
+					fci.params = safe_emalloc(sizeof(zval*), params_ht->nNumOfElements, 0);
+					p = params_ht->pListHead;
 					while (p != NULL) {
 						fci.params[fci.param_count++] = (zval**)p->pData;
 						p = p->pListNext;

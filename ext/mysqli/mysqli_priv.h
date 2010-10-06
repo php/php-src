@@ -79,10 +79,10 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 #endif
 
 #define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
-	zend_class_entry ce; \
-	INIT_CLASS_ENTRY(ce, name,class_functions); \
-	ce.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&ce TSRMLS_CC); \
+	zend_class_entry tmp_ce; \
+	INIT_CLASS_ENTRY(tmp_ce, name,class_functions); \
+	tmp_ce.create_object = mysqli_objects_new; \
+	mysqli_entry = zend_register_internal_class(&tmp_ce TSRMLS_CC); \
 } \
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
