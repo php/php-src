@@ -64,6 +64,10 @@
 
 #include "resourcebundle/resourcebundle_class.h"
 
+#include "transliterator/transliterator.h"
+#include "transliterator/transliterator_class.h"
+#include "transliterator/transliterator_methods.h"
+
 #include "idn/idn.h"
 
 #include "msgformat/msgformat.h"
@@ -361,6 +365,33 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message_proc, 0, 0, 1 )
   ZEND_ARG_INFO( 0, bundle )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create, 0, 0, 1 )
+	ZEND_ARG_INFO( 0, id )
+	ZEND_ARG_INFO( 0, direction )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_from_rules, 0, 0, 1 )
+	ZEND_ARG_INFO( 0, rules )
+	ZEND_ARG_INFO( 0, direction )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_inverse, 0, 0, 1 )
+	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_transliterate, 0, 0, 2 )
+	ZEND_ARG_INFO( 0, trans )
+	ZEND_ARG_INFO( 0, subject )
+	ZEND_ARG_INFO( 0, start )
+	ZEND_ARG_INFO( 0, end )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_error, 0, 0, 1 )
+	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
+ZEND_END_ARG_INFO()
 
 /* }}} */
 
@@ -481,6 +512,15 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code_proc )
 	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message_proc )
 
+	/* Transliterator functions */
+	PHP_FE( transliterator_create, arginfo_transliterator_create )
+	PHP_FE( transliterator_create_from_rules, arginfo_transliterator_create_from_rules )
+	PHP_FE( transliterator_list_ids, arginfo_transliterator_void )
+	PHP_FE( transliterator_create_inverse, arginfo_transliterator_create_inverse)
+	PHP_FE( transliterator_transliterate, arginfo_transliterator_transliterate )
+	PHP_FE( transliterator_get_error_code, arginfo_transliterator_error )
+	PHP_FE( transliterator_get_error_message, arginfo_transliterator_error )
+
 	/* common functions */
 	PHP_FE( intl_get_error_code, intl_0_args )
 	PHP_FE( intl_get_error_message, intl_0_args )
@@ -580,6 +620,12 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'ResourceBundle' PHP class */
 	resourcebundle_register_class( TSRMLS_C);
+
+	/* Register 'Transliterator' PHP class */
+	transliterator_register_Transliterator_class( TSRMLS_C );
+
+	/* Register Transliterator constants */
+	transliterator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Expose ICU error codes to PHP scripts. */
 	intl_expose_icu_error_codes( INIT_FUNC_ARGS_PASSTHRU );
