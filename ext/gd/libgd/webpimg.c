@@ -30,7 +30,8 @@
  *
  * 6. AdjustColorspaceBack:
  */
-
+#include "gd.h"
+#ifdef HAVE_LIBVPX
 #include "webpimg.h"
 
 #include <math.h>
@@ -896,3 +897,4 @@ WebPResult WebPGetInfo(const uint8* data,
 	}
 	return webp_failure;
 }
+#endif /* HAVE_LIBVPX */
