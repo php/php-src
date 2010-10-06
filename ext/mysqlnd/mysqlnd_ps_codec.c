@@ -231,7 +231,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 {
 	struct st_mysqlnd_time t;
 	unsigned int length; /* First byte encodes the length*/
-	char *to;
+	char * value;
 	DBG_ENTER("ps_fetch_time");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -262,17 +262,17 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	  QQ : How to make this unicode without copying two times the buffer -
 	  Unicode equivalent of spprintf?
 	*/
-	length = spprintf(&to, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+	length = spprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
 
-	DBG_INF_FMT("%s", to);
+	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
-		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to);  /* allocated by spprintf */
+		ZVAL_STRINGL(zv, value, length, 1);
+		efree(value);  /* allocated by spprintf */
 #if MYSQLND_UNICODE
 	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
+		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
 	}
 #endif
 	DBG_VOID_RETURN;
@@ -288,7 +288,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 {
 	struct st_mysqlnd_time t = {0};
 	unsigned int length; /* First byte encodes the length*/
-	char *to;
+	char * value;
 	DBG_ENTER("ps_fetch_date");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -313,17 +313,17 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 	  QQ : How to make this unicode without copying two times the buffer -
 	  Unicode equivalent of spprintf?
 	*/
-	length = spprintf(&to, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
+	length = spprintf(&value, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
 
-	DBG_INF_FMT("%s", to);
+	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
-		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to); /* allocated by spprintf */
+		ZVAL_STRINGL(zv, value, length, 1);
+		efree(value); /* allocated by spprintf */
 #if MYSQLND_UNICODE
 	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
+		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
 	}
 #endif
 	DBG_VOID_RETURN;
@@ -339,7 +339,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 {
 	struct st_mysqlnd_time t;
 	unsigned int length; /* First byte encodes the length*/
-	char *to;
+	char * value;
 	DBG_ENTER("ps_fetch_datetime");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
@@ -371,15 +371,15 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 	  QQ : How to make this unicode without copying two times the buffer -
 	  Unicode equivalent of spprintf?
 	*/
-	length = spprintf(&to, 0, "%04u-%02u-%02u %02u:%02u:%02u",
+	length = spprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u",
 					  t.year, t.month, t.day, t.hour, t.minute, t.second);
 
-	DBG_INF_FMT("%s", to);
+	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
-		ZVAL_STRINGL(zv, to, length, 1);
-		efree(to); /* allocated by spprintf */
+		ZVAL_STRINGL(zv, value, length, 1);
+		efree(value); /* allocated by spprintf */
 #if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
