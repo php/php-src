@@ -63,6 +63,8 @@
   CASE-WHEN). (Andrey)
 - Fixed bug #52699 (PDO bindValue writes long int 32bit enum).
   (rein at basefarm dot no)
+- Fixed bug #52686 (mysql_stmt_attr_[gs]et argument points to incorrect type).
+  (rein at basefarm dot no)
 - Fixed bug #52681 (mb_send_mail() appends an extra MIME-Version header).
   (Adam)
 - Fixed bug #52674 (FPM Status page returns inconsistent Content-Type headers).
