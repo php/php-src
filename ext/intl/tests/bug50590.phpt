@@ -10,4 +10,4 @@ var_dump($fmt->parse("Wednesday, January 20, 2038 3:14:07 AM GMT"));
 
 ?>
 --EXPECTF--
-float(2147570047)
+%s(2147570047)
