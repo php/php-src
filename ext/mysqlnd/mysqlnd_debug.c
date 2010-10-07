@@ -1593,14 +1593,14 @@ static int mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list 
 		case IS_OBJECT: {
 			char *class_name;
 			zend_uint class_name_len;
-			int dup;
+			int dupl;
 
 			TRACE_APPEND_STR("Object(");
 
-			dup = zend_get_object_classname(*arg, &class_name, &class_name_len TSRMLS_CC);
+			dupl = zend_get_object_classname(*arg, &class_name, &class_name_len TSRMLS_CC);
 
 			TRACE_APPEND_STRL(class_name, class_name_len);
-			if(!dup) {
+			if (!dupl) {
 				efree(class_name);
 			}
 

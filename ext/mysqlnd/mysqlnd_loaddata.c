@@ -173,7 +173,7 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 enum_func_status
 mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC)
 {
-	char				*buf;
+	char				*buf = NULL;
 	char				empty_packet[MYSQLND_HEADER_SIZE];
 	enum_func_status	result = FAIL;
 	unsigned int		buflen = 4096;
@@ -244,7 +244,9 @@ infile_error:
 	}
 
 	(*conn->infile.local_infile_end)(info TSRMLS_CC);
-	mnd_efree(buf);
+	if (buf) {
+		mnd_efree(buf);
+	}
 	DBG_INF_FMT("%s", result == PASS? "PASS":"FAIL");
 	DBG_RETURN(result);
 }

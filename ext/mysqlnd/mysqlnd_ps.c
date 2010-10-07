@@ -2125,7 +2125,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND * conn;
 	zend_uchar cmd_buf[STMT_ID_LENGTH /* statement id */];
-	enum_mysqlnd_collected_stats stat = STAT_LAST;
+	enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 	DBG_ENTER("mysqlnd_stmt::net_close");
 	if (!stmt || !stmt->conn) {
@@ -2176,16 +2176,16 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 	}
 	switch (stmt->execute_count) {
 		case 0:
-			stat = STAT_PS_PREPARED_NEVER_EXECUTED;
+			statistic = STAT_PS_PREPARED_NEVER_EXECUTED;
 			break;
 		case 1:
-			stat = STAT_PS_PREPARED_ONCE_USED;
+			statistic = STAT_PS_PREPARED_ONCE_USED;
 			break;
 		default:
 			break;
 	}
-	if (stat != STAT_LAST) {
-		MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
+	if (statistic != STAT_LAST) {
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 	}
 
 	if (stmt->execute_cmd_buffer.buffer) {
@@ -2209,7 +2209,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 	zend_bool persistent = s->persistent;
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
