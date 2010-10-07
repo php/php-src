@@ -4638,7 +4638,7 @@ PHP_FUNCTION(openssl_encrypt)
 {
 	zend_bool raw_output = 0;
 	char *data, *method, *password, *iv = "";
-	int data_len, method_len, password_len, iv_len = 0;
+	int data_len, method_len, password_len, iv_len = 0, max_iv_len;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i, outlen, keylen;
@@ -4663,10 +4663,11 @@ PHP_FUNCTION(openssl_encrypt)
 		key = (unsigned char*)password;
 	}
 
-	if (iv_len <= 0) {
+	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
+	if (iv_len <= 0 && max_iv_len > 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
-	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type) TSRMLS_CC);
+	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len TSRMLS_CC);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
