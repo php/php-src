@@ -459,7 +459,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				break;
 			default: do {			/* Result set */
 				MYSQLND_RES * result;
-				enum_mysqlnd_collected_stats stat = STAT_LAST;
+				enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 				DBG_INF("Result set pending");
 				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len, conn->persistent);
@@ -548,11 +548,11 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 					*/
 					conn->upsert_status.server_status = fields_eof->server_status;
 					if (fields_eof->server_status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
-						stat = STAT_BAD_INDEX_USED;
+						statistic = STAT_BAD_INDEX_USED;
 					} else if (fields_eof->server_status & SERVER_QUERY_NO_INDEX_USED) {
-						stat = STAT_NO_INDEX_USED;
+						statistic = STAT_NO_INDEX_USED;
 					} else if (fields_eof->server_status & SERVER_QUERY_WAS_SLOW) {
-						stat = STAT_QUERY_WAS_SLOW;
+						statistic = STAT_QUERY_WAS_SLOW;
 					}
 					if (to_log) {
 #if A0
@@ -561,7 +561,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 						efree(backtrace);
 #endif
 					}
-					MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
+					MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 				}
 			} while (0);
 			PACKET_FREE(fields_eof);
@@ -1610,7 +1610,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 	}
 
 	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
-	mysqlnd_array_init(return_value, (unsigned int) set? (uint) set->row_count : 4); 
+	mysqlnd_array_init(return_value, set? (unsigned int) set->row_count : 4); 
 
 	do {
 		MAKE_STD_ZVAL(row);

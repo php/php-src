@@ -274,14 +274,14 @@ mysqlnd_stats_end(MYSQLND_STATS * stats)
 
 /* {{{ mysqlnd_stats_set_trigger */
 PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC)
+mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger TSRMLS_DC)
 {
 	mysqlnd_stat_trigger ret = NULL;
 	DBG_ENTER("mysqlnd_stats_set_trigger");
 	if (stats) {
 		MYSQLND_STATS_LOCK(stats);
-		ret = stats->triggers[stat];
-		stats->triggers[stat] = trigger;
+		ret = stats->triggers[statistic];
+		stats->triggers[statistic] = trigger;
 		MYSQLND_STATS_UNLOCK(stats);
 	}
 	DBG_RETURN(ret);
