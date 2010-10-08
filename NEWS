@@ -25,6 +25,8 @@
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
+- Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
+  with ENT_NOQUOTES and ISO-8859-1) (Gustavo).
 - Fixed bug #52981 (Unicode casing table was out-of-date. Updated with
   UnicodeData-6.0.0d7.txt and included the source of the generator program with
   the distribution) (Gustavo).

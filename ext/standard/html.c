@@ -1020,7 +1020,12 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 						code = strtol(p + 2, &next, 10);
 					}
 
-					if (next != NULL && *next == ';') {
+					if (code == 39 && !(quote_style & ENT_HTML_QUOTE_SINGLE) ||
+						code == 24 && !(quote_style & ENT_HTML_QUOTE_DOUBLE)) {
+						invalid_code = 1;
+					}
+
+					if (next != NULL && *next == ';' && !invalid_code) {
 						switch (charset) {
 							case cs_utf_8:
 								q += php_utf32_utf8(q, code);
@@ -1032,11 +1037,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 								if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
 									invalid_code = 1;
 								} else {
-									if (code == 39 || !quote_style) {
-										invalid_code = 1;
-									} else {
-										*(q++) = code;
-									}
+									*(q++) = code;
 								}
 								break;
 
