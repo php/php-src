@@ -679,7 +679,15 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_string(*subarray, "replacement", name, 1);
 			break;
 		default:
-			cp += dlen;
+			{
+				char buf[10]; /* max length of short + sizeof(id #) */
+				snprintf(buf, 10, "id #%hu", type);
+				buf[10-1] = '\0';
+				add_assoc_string(*subarray, "type", buf, 1);
+				add_assoc_stringl(*subarray, "data", (char*) cp, (uint) dlen, 1);
+				cp += dlen;
+				break;
+			}
 	}
 
 	add_assoc_string(*subarray, "class", "IN", 1);
