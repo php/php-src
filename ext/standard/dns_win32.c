@@ -320,7 +320,14 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			break;
 
 		default:
-			break;
+			{
+				char buf[10]; /* max length of short + sizeof(id #) */
+				snprintf(buf, 10, "id #%hu", (unsigned short) type);
+				buf[10-1] = '\0';
+				add_assoc_string(*subarray, "type", buf, 1);
+				add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength, 1);
+				break;
+			}
 	}
 
 	add_assoc_string(*subarray, "class", "IN", 1);
