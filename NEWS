@@ -26,7 +26,10 @@
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
 
 - Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
-  with ENT_NOQUOTES and ISO-8859-1) (Gustavo).
+  with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of ENT_NOQUOTES 
+  in html_entity_decode that had introduced the bug (rev #185591) to other
+  encodings. Additionaly, html_entity_decode() now doesn't decode &#34; if
+  ENT_NOQUOTES is given. (Gustavo)
 - Fixed bug #52981 (Unicode casing table was out-of-date. Updated with
   UnicodeData-6.0.0d7.txt and included the source of the generator program with
   the distribution) (Gustavo).
