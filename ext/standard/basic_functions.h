@@ -220,6 +220,10 @@ typedef struct _php_basic_globals {
 
 	HashTable *user_filter_map;
 
+	/* html.c */
+	/* map entities to characters. Stores hash table pointers for each charset */
+	HashTable *inverse_ent_maps;
+
 	/* file.c */
 #if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
 	mbstate_t mblen_state;

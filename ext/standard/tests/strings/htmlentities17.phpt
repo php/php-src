@@ -3,7 +3,6 @@ htmlentities() / html_entity_decode() #8592 - #9002 table test
 --FILE--
 <?php
 $tests = array(
-	array(8768, '&wreath;', "e28980"),
 	array(8853, '&oplus;',  "e28a95"),
 	array(8855, '&otimes;', "e28a97"),
 	array(8869, '&perp;',   "e28aa5"),
@@ -26,7 +25,6 @@ foreach ($tests as $test) {
 }
 ?>
 --EXPECT--
-string(8) "&wreath;"
 string(7) "&oplus;"
 string(8) "&otimes;"
 string(6) "&perp;"
@@ -37,7 +35,6 @@ string(8) "&lfloor;"
 string(8) "&rfloor;"
 string(6) "&lang;"
 string(6) "&rang;"
-string(6) "e28980"
 string(6) "e28a95"
 string(6) "e28a97"
 string(6) "e28aa5"

@@ -43,14 +43,14 @@ echo "Done\n";
 *** Testing get_html_translation_table() : basic functionality ***
 -- with default arguments --
 array(4) {
+  ["&"]=>
+  string(5) "&amp;"
   ["""]=>
   string(6) "&quot;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- with table = HTML_ENTITIES --
 array(171) {
@@ -400,13 +400,13 @@ array(171) {
 }
 -- with table = HTML_SPECIALCHARS --
 array(4) {
+  ["&"]=>
+  string(5) "&amp;"
   ["""]=>
   string(6) "&quot;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 Done

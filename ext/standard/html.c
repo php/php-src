@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jaakko Hyvätti <jaakko.hyvatti@iki.fi>                      |
-   |          Wez Furlong <wez@thebrainroom.com>                          |
+   |          Wez Furlong    <wez@thebrainroom.com>                       |
+   |          Gustavo Lopes  <cataphract@php.net>                         |
    +----------------------------------------------------------------------+
 */
 
@@ -28,7 +29,11 @@
  * http://www.unicode.org/Public/MAPPINGS/OBSOLETE/UNI2SGML.TXT
  *
  * http://www.w3.org/TR/2002/REC-xhtml1-20020801/dtds.html#h-A2
- * 
+ *
+ * From HTML 4.01 strict DTD:
+ * http://www.w3.org/TR/html4/HTMLlat1.ent
+ * http://www.w3.org/TR/html4/HTMLsymbol.ent
+ * http://www.w3.org/TR/html4/HTMLspecial.ent
  */
 
 #include "php.h"
@@ -37,7 +42,7 @@
 #else
 #include <php_config.h>
 #endif
-#include "html.h"
+#include "php_standard.h"
 #include "php_string.h"
 #include "SAPI.h"
 #if HAVE_LOCALE_H
@@ -52,424 +57,8 @@
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 #endif
 
-enum entity_charset { cs_terminator, cs_8859_1, cs_cp1252,
-					  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, 
-					  cs_big5hkscs, cs_sjis, cs_eucjp, cs_koi8r,
-					  cs_cp1251, cs_8859_5, cs_cp866, cs_macroman
-					};
-typedef const char *const entity_table_t;
+#include "html_tables.h"
 
-/* codepage 1252 is a Windows extension to iso-8859-1. */
-static entity_table_t ent_cp_1252[] = {
-	"euro", NULL, "sbquo", "fnof", "bdquo", "hellip", "dagger",
-	"Dagger", "circ", "permil", "Scaron", "lsaquo", "OElig",
-	NULL, NULL, NULL, NULL, "lsquo", "rsquo", "ldquo", "rdquo",
-	"bull", "ndash", "mdash", "tilde", "trade", "scaron", "rsaquo",
-	"oelig", NULL, NULL, "Yuml" 
-};
-
-static entity_table_t ent_iso_8859_1[] = {
-	"nbsp", "iexcl", "cent", "pound", "curren", "yen", "brvbar",
-	"sect", "uml", "copy", "ordf", "laquo", "not", "shy", "reg",
-	"macr", "deg", "plusmn", "sup2", "sup3", "acute", "micro",
-	"para", "middot", "cedil", "sup1", "ordm", "raquo", "frac14",
-	"frac12", "frac34", "iquest", "Agrave", "Aacute", "Acirc",
-	"Atilde", "Auml", "Aring", "AElig", "Ccedil", "Egrave",
-	"Eacute", "Ecirc", "Euml", "Igrave", "Iacute", "Icirc",
-	"Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde",
-	"Ouml", "times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml",
-	"Yacute", "THORN", "szlig", "agrave", "aacute", "acirc",
-	"atilde", "auml", "aring", "aelig", "ccedil", "egrave",
-	"eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
-	"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
-	"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc",
-	"uuml", "yacute", "thorn", "yuml"
-};
-
-static entity_table_t ent_iso_8859_15[] = {
-	"nbsp", "iexcl", "cent", "pound", "euro", "yen", "Scaron",
-	"sect", "scaron", "copy", "ordf", "laquo", "not", "shy", "reg",
-	"macr", "deg", "plusmn", "sup2", "sup3", NULL, /* Zcaron */
-	"micro", "para", "middot", NULL, /* zcaron */ "sup1", "ordm",
-	"raquo", "OElig", "oelig", "Yuml", "iquest", "Agrave", "Aacute",
-	"Acirc", "Atilde", "Auml", "Aring", "AElig", "Ccedil", "Egrave",
-	"Eacute", "Ecirc", "Euml", "Igrave", "Iacute", "Icirc",
-	"Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde",
-	"Ouml", "times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml",
-	"Yacute", "THORN", "szlig", "agrave", "aacute", "acirc",
-	"atilde", "auml", "aring", "aelig", "ccedil", "egrave",
-	"eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
-	"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
-	"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc",
-	"uuml", "yacute", "thorn", "yuml"
-};
-
-static entity_table_t ent_uni_338_402[] = {
-	/* 338 (0x0152) */
-	"OElig", "oelig", NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 352 (0x0160) */
-	"Scaron", "scaron", NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 376 (0x0178) */
-	"Yuml", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 400 (0x0190) */
-	NULL, NULL, "fnof"
-};
-
-static entity_table_t ent_uni_spacing[] = {
-	/* 710 */
-	"circ",
-	/* 711 - 730 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 731 - 732 */
-	NULL, "tilde"
-};
-
-static entity_table_t ent_uni_greek[] = {
-	/* 913 */
-	"Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
-	"Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
-	NULL, "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
-	/* 938 - 944 are not mapped */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-	"iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho",
-	"sigmaf", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega",
-	/* 970 - 976 are not mapped */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"thetasym", "upsih",
-	NULL, NULL, NULL,
-	"piv"
-};
-
-static entity_table_t ent_uni_punct[] = {
-	/* 8194 */
-	"ensp", "emsp", NULL, NULL, NULL, NULL, NULL,
-	"thinsp", NULL, NULL, "zwnj", "zwj", "lrm", "rlm",
-	NULL, NULL, NULL, "ndash", "mdash", NULL, NULL, NULL,
-	/* 8216 */
-	"lsquo", "rsquo", "sbquo", NULL, "ldquo", "rdquo", "bdquo", NULL,
-	"dagger", "Dagger", "bull", NULL, NULL, NULL, "hellip",
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "permil", NULL,
-	/* 8242 */
-	"prime", "Prime", NULL, NULL, NULL, NULL, NULL, "lsaquo", "rsaquo", NULL,
-	NULL, NULL, "oline", NULL, NULL, NULL, NULL, NULL,
-	"frasl"
-};
-
-static entity_table_t ent_uni_euro[] = {
-	"euro"
-};
-
-static entity_table_t ent_uni_8465_8501[] = {
-	/* 8465 */
-	"image", NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8472 */
-	"weierp", NULL, NULL, NULL,
-	/* 8476 */
-	"real", NULL, NULL, NULL, NULL, NULL,
-	/* 8482 */
-	"trade", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8501 */
-	"alefsym",
-};
-
-static entity_table_t ent_uni_8592_9002[] = {
-	/* 8592 (0x2190) */
-	"larr", "uarr", "rarr", "darr", "harr", NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8608 (0x21a0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8624 (0x21b0) */
-	NULL, NULL, NULL, NULL, NULL, "crarr", NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8640 (0x21c0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8656 (0x21d0) */
-	"lArr", "uArr", "rArr", "dArr", "hArr", NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8672 (0x21e0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8704 (0x2200) */
-	"forall", NULL, "part", "exist", NULL, "empty", NULL, "nabla",
-	"isin", "notin", NULL, "ni", NULL, NULL, NULL, "prod",
-	/* 8720 (0x2210) */
-	NULL, "sum", "minus", NULL, NULL, NULL, NULL, "lowast",
-	NULL, NULL, "radic", NULL, NULL, "prop", "infin", NULL,
-	/* 8736 (0x2220) */
-	"ang", NULL, NULL, NULL, NULL, NULL, NULL, "and",
-	"or", "cap", "cup", "int", NULL, NULL, NULL, NULL,
-	/* 8752 (0x2230) */
-	NULL, NULL, NULL, NULL, "there4", NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, "sim", NULL, NULL, NULL,
-	/* 8768 (0x2240) */
-	NULL, NULL, NULL, NULL, NULL, "cong", NULL, NULL,
-	"asymp", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8784 (0x2250) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8800 (0x2260) */
-	"ne", "equiv", NULL, NULL, "le", "ge", NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8816 (0x2270) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8832 (0x2280) */
-	NULL, NULL, "sub", "sup", "nsub", NULL, "sube", "supe",
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8848 (0x2290) */
-	NULL, NULL, NULL, NULL, NULL, "oplus", NULL, "otimes",
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8864 (0x22a0) */
-	NULL, NULL, NULL, NULL, NULL, "perp", NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8880 (0x22b0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8896 (0x22c0) */
-	NULL, NULL, NULL, NULL, NULL, "sdot", NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8912 (0x22d0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8928 (0x22e0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8944 (0x22f0) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8960 (0x2300) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"lceil", "rceil", "lfloor", "rfloor", NULL, NULL, NULL, NULL,
-	/* 8976 (0x2310) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8992 (0x2320) */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, "lang", "rang"
-};
-
-static entity_table_t ent_uni_9674[] = {
-	/* 9674 */
-	"loz"
-};
-
-static entity_table_t ent_uni_9824_9830[] = {
-	/* 9824 */
-	"spades", NULL, NULL, "clubs", NULL, "hearts", "diams"
-};
-
-static entity_table_t ent_koi8r[] = {
-	"#1105", /* "jo "*/
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-	NULL, NULL, NULL, NULL, NULL, "#1025", /* "JO" */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-	"#1102", "#1072", "#1073", "#1094", "#1076", "#1077", "#1092", 
-	"#1075", "#1093", "#1080", "#1081", "#1082", "#1083", "#1084", 
-	"#1085", "#1086", "#1087", "#1103", "#1088", "#1089", "#1090", 
-	"#1091", "#1078", "#1074", "#1100", "#1099", "#1079", "#1096", 
-	"#1101", "#1097", "#1095", "#1098", "#1070", "#1040", "#1041", 
-	"#1062", "#1044", "#1045", "#1060", "#1043", "#1061", "#1048", 
-	"#1049", "#1050", "#1051", "#1052", "#1053", "#1054", "#1055", 
-	"#1071", "#1056", "#1057", "#1058", "#1059", "#1046", "#1042",
-	"#1068", "#1067", "#1047", "#1064", "#1069", "#1065", "#1063", 
-	"#1066"
-};
-
-static entity_table_t ent_cp_1251[] = {
-	"#1026", "#1027", "#8218", "#1107", "#8222", "hellip", "dagger",
-	"Dagger", "euro", "permil", "#1033", "#8249", "#1034", "#1036",
-	"#1035", "#1039", "#1106", "#8216", "#8217", "#8219", "#8220",
-	"bull", "ndash", "mdash", NULL, "trade", "#1113", "#8250",
-	"#1114", "#1116", "#1115", "#1119", "nbsp", "#1038", "#1118",
-	"#1032", "curren", "#1168", "brvbar", "sect", "#1025", "copy",
-	"#1028", "laquo", "not", "shy", "reg", "#1031", "deg", "plusmn",
-	"#1030", "#1110", "#1169", "micro", "para", "middot", "#1105",
-	"#8470", "#1108", "raquo", "#1112", "#1029", "#1109", "#1111",
-	"#1040", "#1041", "#1042", "#1043", "#1044", "#1045", "#1046",
-	"#1047", "#1048", "#1049", "#1050", "#1051", "#1052", "#1053",
-	"#1054", "#1055", "#1056", "#1057", "#1058", "#1059", "#1060",
-	"#1061", "#1062", "#1063", "#1064", "#1065", "#1066", "#1067",
-	"#1068", "#1069", "#1070", "#1071", "#1072", "#1073", "#1074",
-	"#1075", "#1076", "#1077", "#1078", "#1079", "#1080", "#1081",
-	"#1082", "#1083", "#1084", "#1085", "#1086", "#1087", "#1088",
-	"#1089", "#1090", "#1091", "#1092", "#1093", "#1094", "#1095",
-	"#1096", "#1097", "#1098", "#1099", "#1100", "#1101", "#1102",
-	"#1103"
-};
-
-static entity_table_t ent_iso_8859_5[] = {
-	"#1056", "#1057", "#1058", "#1059", "#1060", "#1061", "#1062",
-	"#1063", "#1064", "#1065", "#1066", "#1067", "#1068", "#1069",
-	"#1070", "#1071", "#1072", "#1073", "#1074", "#1075", "#1076",
-	"#1077", "#1078", "#1079", "#1080", "#1081", "#1082", "#1083",
-	"#1084", "#1085", "#1086", "#1087", "#1088", "#1089", "#1090",
-	"#1091", "#1092", "#1093", "#1094", "#1095", "#1096", "#1097",
-	"#1098", "#1099", "#1100", "#1101", "#1102", "#1103", "#1104",
-	"#1105", "#1106", "#1107", "#1108", "#1109", "#1110", "#1111",
-	"#1112", "#1113", "#1114", "#1115", "#1116", "#1117", "#1118",
-	"#1119"
-};
-
-static entity_table_t ent_cp_866[] = {
-
-	"#9492", "#9524", "#9516", "#9500", "#9472", "#9532", "#9566", 
-	"#9567", "#9562", "#9556", "#9577", "#9574", "#9568", "#9552", 
-	"#9580", "#9575", "#9576", "#9572", "#9573", "#9561", "#9560", 
-	"#9554", "#9555", "#9579", "#9578", "#9496", "#9484", "#9608", 
-	"#9604", "#9612", "#9616", "#9600", "#1088", "#1089", "#1090", 
-	"#1091", "#1092", "#1093", "#1094", "#1095", "#1096", "#1097", 
-	"#1098", "#1099", "#1100", "#1101", "#1102", "#1103", "#1025", 
-	"#1105", "#1028", "#1108", "#1031", "#1111", "#1038", "#1118", 
-	"#176", "#8729", "#183", "#8730", "#8470", "#164",  "#9632", 
-	"#160"
-};
-
-/* MacRoman has a couple of low-ascii chars that need mapping too */
-/* Vertical tab (ASCII 11) is often used to store line breaks inside */
-/* DB exports, this mapping changes it to a space */
-static entity_table_t ent_macroman[] = {
-	"sp", NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, "quot", NULL,
-	NULL, NULL, "amp", NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, "lt", NULL, "gt", NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, "Auml", "Aring", "Ccedil", "Eacute", "Ntilde", "Ouml",
-	"Uuml", "aacute", "agrave", "acirc", "auml", "atilde", "aring",
-	"ccedil", "eacute", "egrave", "ecirc", "euml", "iacute", "igrave",
-	"icirc", "iuml", "ntilde", "oacute", "ograve", "ocirc", "ouml",
-	"otilde", "uacute", "ugrave", "ucirc", "uuml", "dagger", "deg",
-	"cent", "pound", "sect", "bull", "para", "szlig", "reg",
-	"copy", "trade", "acute", "uml", "ne", "AElig", "Oslash",
-	"infin", "plusmn", "le", "ge", "yen", "micro", "part",
-	"sum", "prod", "pi", "int", "ordf", "ordm", "Omega",
-	"aelig", "oslash", "iquest", "iexcl", "not", "radic", "fnof",
-	"asymp", "#8710", "laquo", "raquo", "hellip", "nbsp", "Agrave",
-	"Atilde", "Otilde", "OElig", "oelig", "ndash", "mdash", "ldquo",
-	"rdquo", "lsquo", "rsquo", "divide", "loz", "yuml", "Yuml",
-	"frasl", "euro", "lsaquo", "rsaquo", "#xFB01", "#xFB02", "Dagger",
-	"middot", "sbquo", "bdquo", "permil", "Acirc", "Ecirc", "Aacute",
-	"Euml", "Egrave", "Iacute", "Icirc", "Iuml", "Igrave", "Oacute",
-	"Ocirc", "#xF8FF", "Ograve", "Uacute", "Ucirc", "Ugrave", "#305",
-	"circ", "tilde", "macr", "#728", "#729", "#730", "cedil",
-	"#733", "#731", "#711"
-};
-
-struct html_entity_map {
-	enum entity_charset charset;	/* charset identifier */
-	unsigned int basechar;			/* char code at start of table */
-	unsigned int endchar;			/* last char code in the table */
-	entity_table_t *table;			/* the table of mappings */
-};
-
-static const struct html_entity_map entity_map[] = {
-	{ cs_cp1252, 		0x80, 0x9f, ent_cp_1252 },
-	{ cs_cp1252, 		0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_8859_1, 		0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_8859_15, 		0xa0, 0xff, ent_iso_8859_15 },
-	{ cs_utf_8, 		0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_utf_8, 		338,  402,  ent_uni_338_402 },
-	{ cs_utf_8, 		710,  732,  ent_uni_spacing },
-	{ cs_utf_8, 		913,  982,  ent_uni_greek },
-	{ cs_utf_8, 		8194, 8260, ent_uni_punct },
-	{ cs_utf_8, 		8364, 8364, ent_uni_euro }, 
-	{ cs_utf_8, 		8465, 8501, ent_uni_8465_8501 },
-	{ cs_utf_8, 		8592, 9002, ent_uni_8592_9002 },
-	{ cs_utf_8, 		9674, 9674, ent_uni_9674 },
-	{ cs_utf_8, 		9824, 9830, ent_uni_9824_9830 },
-	{ cs_big5, 			0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_gb2312, 		0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_big5hkscs, 	0xa0, 0xff, ent_iso_8859_1 },
- 	{ cs_sjis,			0xa0, 0xff, ent_iso_8859_1 },
- 	{ cs_eucjp,			0xa0, 0xff, ent_iso_8859_1 },
-	{ cs_koi8r,		    0xa3, 0xff, ent_koi8r },
-	{ cs_cp1251,		0x80, 0xff, ent_cp_1251 },
-	{ cs_8859_5,		0xc0, 0xff, ent_iso_8859_5 },
-	{ cs_cp866,		    0xc0, 0xff, ent_cp_866 },
-	{ cs_macroman,		0x0b, 0xff, ent_macroman },
-	{ cs_terminator }
-};
-
-static const struct {
-	const char *codeset;
-	enum entity_charset charset;
-} charset_map[] = {
-	{ "ISO-8859-1", 	cs_8859_1 },
-	{ "ISO8859-1",	 	cs_8859_1 },
-	{ "ISO-8859-15", 	cs_8859_15 },
-	{ "ISO8859-15", 	cs_8859_15 },
-	{ "utf-8", 			cs_utf_8 },
-	{ "cp1252", 		cs_cp1252 },
-	{ "Windows-1252", 	cs_cp1252 },
-	{ "1252",           cs_cp1252 }, 
-	{ "BIG5",			cs_big5 },
-	{ "950",            cs_big5 },
-	{ "GB2312",			cs_gb2312 },
-	{ "936",            cs_gb2312 },
-	{ "BIG5-HKSCS",		cs_big5hkscs },
-	{ "Shift_JIS",		cs_sjis },
-	{ "SJIS",   		cs_sjis },
-	{ "932",            cs_sjis },
-	{ "EUCJP",   		cs_eucjp },
-	{ "EUC-JP",   		cs_eucjp },
-	{ "KOI8-R",         cs_koi8r },
-	{ "koi8-ru",        cs_koi8r },
-	{ "koi8r",          cs_koi8r },
-	{ "cp1251",         cs_cp1251 },
-	{ "Windows-1251",   cs_cp1251 },
-	{ "win-1251",       cs_cp1251 },
-	{ "iso8859-5",      cs_8859_5 },
-	{ "iso-8859-5",     cs_8859_5 },
-	{ "cp866",          cs_cp866 },
-	{ "866",            cs_cp866 },    
-	{ "ibm866",         cs_cp866 },
-	{ "MacRoman",       cs_macroman },
-	{ NULL }
-};
-
-static const struct {
-	unsigned short charcode;
-	char *entity;
-	int entitylen;
-	int flags;
-} basic_entities[] = {
-	{ '"',	"&quot;",	6,	ENT_HTML_QUOTE_DOUBLE },
-	{ '\'',	"&#039;",	6,	ENT_HTML_QUOTE_SINGLE },
-	{ '\'',	"&#39;",	5,	ENT_HTML_QUOTE_SINGLE },
-	{ '<',	"&lt;",		4,	0 },
-	{ '>',	"&gt;",		4,	0 },
-	{ 0, NULL, 0, 0 }
-};
-	
-struct basic_entities_dec {
-	unsigned short charcode;
-	char entity[8];
-	int entitylen;	
-};
-	
 #define MB_RETURN { \
 			*newpos = pos;       \
 		  	mbseq[mbpos] = '\0'; \
@@ -871,6 +460,8 @@ size_t php_utf32_utf8(unsigned char *buf, int k)
 {
 	size_t retval = 0;
 
+	/* assert(0x0 <= k <= 0x10FFFF); */
+
 	if (k < 0x80) {
 		buf[0] = k;
 		retval = 1;
@@ -883,226 +474,492 @@ size_t php_utf32_utf8(unsigned char *buf, int k)
 		buf[1] = 0x80 | ((k >> 6) & 0x3f);
 		buf[2] = 0x80 | (k & 0x3f);
 		retval = 3;
-	} else if (k < 0x200000) {
+	} else {
 		buf[0] = 0xf0 | (k >> 18);
 		buf[1] = 0x80 | ((k >> 12) & 0x3f);
 		buf[2] = 0x80 | ((k >> 6) & 0x3f);
 		buf[3] = 0x80 | (k & 0x3f);
 		retval = 4;
-	} else if (k < 0x4000000) {
-		buf[0] = 0xf8 | (k >> 24);
-		buf[1] = 0x80 | ((k >> 18) & 0x3f);
-		buf[2] = 0x80 | ((k >> 12) & 0x3f);
-		buf[3] = 0x80 | ((k >> 6) & 0x3f);
-		buf[4] = 0x80 | (k & 0x3f);
-		retval = 5;
-	} else {
-		buf[0] = 0xfc | (k >> 30);
-		buf[1] = 0x80 | ((k >> 24) & 0x3f);
-		buf[2] = 0x80 | ((k >> 18) & 0x3f);
-		buf[3] = 0x80 | ((k >> 12) & 0x3f);
-		buf[4] = 0x80 | ((k >> 6) & 0x3f);
-		buf[5] = 0x80 | (k & 0x3f);
-		retval = 6;
 	}
-	buf[retval] = '\0';
+	/* UTF-8 has been restricted to max 4 bytes since RFC 3629 */
 
 	return retval;
 }
 /* }}} */
 
-/* {{{ php_unescape_html_entities
+/* {{{ unimap_bsearc_cmp
+ * Binary search of unicode code points in unicode <--> charset mapping.
+ * Returns the code point in the target charset (whose mapping table was given) or 0 if
+ * the unicode code point is not in the table.
  */
-PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+static unsigned char unimap_bsearch(const unicode_mapping *table, unsigned code_key_a, size_t num)
 {
-	int retlen, j;
-	unsigned int k;
-	char *replaced, *ret, *p, *q, *lim, *next;
-	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
-	unsigned char replacement[15];
-	int replacement_len;
+	const unicode_mapping *l = table,
+						  *h = &table[num-1],
+						  *m;
+	unsigned short code_key;
 
-	ret = estrndup(old, oldlen);
-	retlen = oldlen;
-	if (!retlen) {
-		goto empty_source;
+	/* we have no mappings outside the BMP */
+	if (code_key_a > 0xFFFFU)
+		return 0;
+
+	code_key = (unsigned short) code_key_a;
+
+	while (l <= h) {
+		m = l + (h - l) / 2;
+		if (code_key < m->un_code_point)
+			h = m - 1;
+		else if (code_key > m->un_code_point)
+			l = m + 1;
+		else
+			return m->cs_code;
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ map_from_unicode */
+static int map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
+{
+	unsigned char found;
+	const unicode_mapping *table;
+	size_t table_size;
+
+	switch (charset) {
+	case cs_8859_1:
+		/* identity mapping of code points to unicode */
+		if (code > 0xFF) {
+			return FAILURE;
+		} 
+		*res = code;
+		break;
+
+	case cs_8859_5:
+		if (code <= 0xA0 || code == 0xAD /* soft hyphen */) {
+			*res = code;
+		} else if (code == 0x2116) {
+			*res = 0xF0; /* numero sign */
+		} else if (code == 0xA7) {
+			*res = 0xFD; /* section sign */
+		} else if (code >= 0x0401 && code <= 0x044F) {
+			if (code == 0x040D || code == 0x0450 || code == 0x045D)
+				return FAILURE;
+			*res = code - 0x360;
+		} else {
+			return FAILURE;
+		}
+		break;
+		
+	case cs_8859_15:
+		if (code < 0xA4 || (code > 0xBE && code <= 0xFF)) {
+			*res = code;
+		} else { /* between A4 and 0xBE */
+			found = unimap_bsearch(unimap_iso885915,
+				code, sizeof(unimap_iso885915) / sizeof(*unimap_iso885915));
+			if (found)
+				*res = found;
+			else
+				return FAILURE;
+		}
+		break;
+
+	case cs_cp1252:
+		if (code <= 0x7F || (code >= 0xA0 && code <= 0xFF)) {
+			*res = code;
+		} else {
+			found = unimap_bsearch(unimap_win1252,
+				code, sizeof(unimap_win1252) / sizeof(*unimap_win1252));
+			if (found)
+				*res = found;
+			else
+				return FAILURE;
+		}
+		break;
+
+	case cs_macroman:
+		if (code == 0x7F)
+			return FAILURE;
+		table = unimap_macroman;
+		table_size = sizeof(unimap_macroman) / sizeof(*unimap_macroman);
+		goto table_over_7F;
+	case cs_cp1251:
+		table = unimap_win1251;
+		table_size = sizeof(unimap_win1251) / sizeof(*unimap_win1251);
+		goto table_over_7F;
+	case cs_koi8r:
+		table = unimap_koi8r;
+		table_size = sizeof(unimap_koi8r) / sizeof(*unimap_koi8r);
+		goto table_over_7F;
+	case cs_cp866:
+		table = unimap_cp866;
+		table_size = sizeof(unimap_cp866) / sizeof(*unimap_cp866);
+		
+table_over_7F:
+		if (code <= 0x7F) {
+			*res = code;
+		} else {
+			found = unimap_bsearch(table, code, table_size);
+			if (found)
+				*res = found;
+			else
+				return FAILURE;
+		}
+		break;
+
+	/* from here on, only map the possible characters in the ASCII range.
+	 * to improve support here, it's a matter of building the unicode mappings.
+	 * See <http://www.unicode.org/Public/6.0.0/ucd/Unihan.zip> */
+	case cs_sjis:
+	case cs_eucjp:
+		if (code >= 0x20 && code <= 0x7D) {
+			if (code == 0x5C) /* 0x5C is mapped to the yen symbol */
+				return FAILURE;
+			*res = code;
+		} else {
+			return FAILURE;
+		}
+		break;
+
+	case cs_big5:
+	case cs_big5hkscs:
+	case cs_gb2312:
+		if (code >= 0x20 && code <= 0x7D) {
+			*res = code;
+		} else {
+			return FAILURE;
+		}
+		break;
+
+	default:
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ process_numeric_entity
+ * Auxiliary function to traverse_for_entities.
+ * On input, *buf should point to the first character after # and on output, it's the last
+ * byte read, no matter if there was success or insuccess. 
+ */
+static int process_numeric_entity(char **buf, unsigned *code_point, int all)
+{
+	long code_l;
+	int hexadecimal = (**buf == 'x' || **buf == 'X');
+
+	if (hexadecimal)
+		(*buf)++;
+			
+	/* strtol allows whitespace and other stuff in the beginning
+		* we're not interested */
+	if (hexadecimal && !isxdigit(**buf) ||
+			!hexadecimal && !isdigit(**buf)) {
+		return FAILURE;
+	}
+
+	code_l = strtol(*buf, buf, hexadecimal ? 16 : 10);
+
+	if (**buf != ';')
+		return FAILURE;
+
+	/* many more are invalid, but that depends on whether it's HTML
+		* (and which version) or XML. Rejecting 0 is handy because that's
+		* the return of strtol if no character was read */
+	if (code_l <= 0L || code_l > 0x10FFFFL)
+		return FAILURE;
+	
+	*code_point = (unsigned)code_l;
+
+	if (!all) {
+		if (*code_point != '\'' && *code_point != '"')
+			return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ process_named_entity */
+static int process_named_entity(char **buf, unsigned *code_unit_seq, HashTable *inv_map)
+{
+	size_t length;
+	char *start = *buf;
+	unsigned *stored_code;
+
+	/* "&" is represented by a 0x26 in all supported encodings. That means
+	 * the byte after represents a character or is the leading byte of an
+	 * sequence of 8-bit code units. If in the ranges below, it represents
+	 * necessarily a alpha character because none of the supported encodings
+	 * has an overlap with ASCII in the leading byte (only on the second one) */
+	while (**buf >= 'a' && **buf <= 'z' ||
+			**buf >= 'A' && **buf <= 'Z' ||
+			**buf >= '0' && **buf <= '9') {
+		(*buf)++;
+	}
+
+	if (**buf != ';')
+		return FAILURE;
+
+	/* cast to size_t OK as the quantity is always non-negative */
+	length = *buf - start;
+	if (length == 0 || length > 31) /* 31 is arbitrary */
+		return FAILURE;
+
+	if (zend_hash_find(inv_map, start, (uint)length, (void**)&stored_code) == FAILURE)
+		return FAILURE;
+
+	*code_unit_seq = *stored_code;
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ traverse_for_entities
+ * Auxiliary function to php_unescape_html_entities().
+ * - The argument "all" determines if all numeric entities are decode or only those
+ *   that correspond to quotes (depending on quote_style). Typically used with the inv_map
+ *   stored under the key 0 in BG(inverse_ent_maps).
+ * - Using cs_terminator as charset is legal and has the effect of defaulting to UTF-8. Used
+ *   when the encoding doesn't (or shouldn't...) matter.
+ */
+static void traverse_for_entities(char *ret, int *retlen_p, int all, int quote_style, HashTable *inv_map, enum entity_charset charset)
+{
+	int retlen;
+	char *p, *q, *lim;
+
+	/* note: this function assumes the entities always take equal or more space
+	 * than the characters they represent in whatever supported external encoding.
+	 * The supported encoding that can generate the longest code unit sequences is
+	 * UTF-8 (4 bytes). Theoretically, there could be entities with only 3 chars
+	 * (e.g. &z;) that would map to outside-the-BMP unicode code points and hence
+	 * needed 4 bytes and would overflow, but we have no such thing. */
+
+	if (charset == cs_terminator) /* caller doesn't care; we choose one */
+		charset = cs_utf_8;
+
+	retlen = *retlen_p;
+
+	lim = ret + retlen; /* terminator address */
+	assert(*lim == '\0');
+
+	for (p = ret, q = ret; p < lim;) {
+		unsigned code;
+		char *next = NULL;
+		/* code is unicode code point or a set of 8-bit code units packed into
+		 * an integer with the least significant bit being the last byte? */
+		int unicode;
+
+		/* Shift JIS, Big5 and HKSCS use multi-byte encodings where an
+		 * ASCII range byte can be part of a multi-byte sequence.
+		 * However, they start at 0x40, therefore if we find a 0x26 byte,
+		 * we're sure it represents the '&' character. */
+
+		/* assumes there are no single-char entities */
+		if (p[0] != '&' || (p + 3 >= lim)) {
+			*(q++) = *(p++);
+			continue;
+		}
+
+		/* now p[3] is surely valid and is no terminator */
+
+		/* numerical entity */
+		if (p[1] == '#') {
+			next = &p[2];
+			if (process_numeric_entity(&next, &code, all) == FAILURE)
+				goto invalid_code;
+			unicode = 1;
+		} else if (inv_map != NULL) {
+			next = &p[1];
+			if (process_named_entity(&next, &code, inv_map) == FAILURE)
+				goto invalid_code;
+			unicode = 0;
+		} else {
+			goto invalid_code;
+		}
+		
+		assert(*next == ';');
+		
+		if (code == '\'' && !(quote_style & ENT_HTML_QUOTE_SINGLE) ||
+				code == '"' && !(quote_style & ENT_HTML_QUOTE_DOUBLE))
+			goto invalid_code;
+
+		if (unicode && charset != cs_utf_8) {
+			/* replace unicode code point */
+			if (map_from_unicode(code, charset, &code) == FAILURE)
+				goto invalid_code; /* not representable in target charset */
+		}
+		
+		switch (charset) {
+		case cs_utf_8:
+			{
+				size_t written;
+				written = php_utf32_utf8((unsigned char*)q, code);
+				q += written;
+				/* Since we're writing in place, we hope we didn't write more than we read */
+				assert(written <= (size_t)(next - p) + 1);
+				break;
+			}
+
+		case cs_8859_1:
+		case cs_cp1252:
+		case cs_8859_15:
+		case cs_koi8r:
+		case cs_cp1251:
+		case cs_8859_5:
+		case cs_cp866:
+		case cs_macroman:
+			/* single byte stuff */
+			*(q++) = code;
+			break;
+
+		case cs_big5:
+		case cs_big5hkscs:
+		case cs_sjis:
+		case cs_gb2312:
+			/* one or two bytes */
+			*(q++) = (code & 0xFFU);
+			if (0xFF00U & code) { /* 2 */
+				*(q++) = (code >> 8);
+			}
+			break;
+
+		case cs_eucjp:
+			/* one to three bytes */
+			*(q++) = code & 0xFFU;
+			if (0xFFFF00U & code) { /* 2 */
+				*(q++) = ((code >> 8) & 0xFFU);
+				if (0xFF0000U & code) /* 3 */
+					*(q++) = (code >> 16);
+			}
+			break;
+
+		default:
+			/* for backwards compatilibity */
+			goto invalid_code;
+			break;
+		}
+
+		/* jump over the valid entity; may go beyond size of buffer; np */
+		p = next + 1;
+		continue;
+
+invalid_code:
+		for (; p < next; p++) {
+			*(q++) = *p;
+		}
 	}
 	
-	if (all) {
-		/* look for a match in the maps for this charset */
+	*q = '\0';
+	*retlen_p = (size_t)(q - ret);
+}
+/* }}} */
+
+/* {{{ inv_ent_maps_dtor
+ * Hash table destructor for BG(inverse_ent_maps)
+ */
+static void inv_ent_maps_dtor(HashTable **ht) {
+	zend_hash_destroy(*ht);
+	pefree(*ht, 1);
+}
+/* }}} */
+
+/* {{{ unescape_inverse_map
+ *     Auxiliary function to php_unescape_html_entities()
+ * charset can be cs_terminator for only basic entities.
+ */
+static HashTable *unescape_inverse_map(enum entity_charset charset TSRMLS_DC)
+{
+	HashTable **inverse_map;
+
+	/* we accept charset = cs_terminator (for specialchars) */
+
+	if (!BG(inverse_ent_maps)) {
+		BG(inverse_ent_maps) = pemalloc(sizeof *BG(inverse_ent_maps), 1);
+		zend_hash_init(BG(inverse_ent_maps), cs_numelems, NULL, (dtor_func_t)inv_ent_maps_dtor, 1);
+	}
+	if (zend_hash_index_find(BG(inverse_ent_maps), (ulong)charset, (void**)&inverse_map) == FAILURE) {
+		HashTable *ht = pemalloc(sizeof *ht, 1);
+		uint capacity = 0;
+		int j, t;
+
+		/* determine upper bound for capacity of hashtable */
 		for (j = 0; entity_map[j].charset != cs_terminator; j++) {
+			if (entity_map[j].charset == charset)
+				capacity += entity_map[j].endchar - entity_map[j].basechar + 1;
+		}
+
+		/* no destructor as we'll be storing ints */
+		zend_hash_init(ht, capacity, NULL, NULL, 1);
+
+		/* store new hash table */
+		t = zend_hash_index_update(BG(inverse_ent_maps), (ulong)charset, &ht, sizeof(ht), (void**)&inverse_map);
+		assert(t == SUCCESS);
+
+		/* build inverse map */
+		for (j = 0; entity_map[j].charset != cs_terminator; j++) {
+			unsigned k;
+
 			if (entity_map[j].charset != charset)
 				continue;
 
 			for (k = entity_map[j].basechar; k <= entity_map[j].endchar; k++) {
-				unsigned char entity[32];
-				int entity_length = 0;
+				unsigned table_offset   = k - entity_map[j].basechar;
+				const char* entity_name = entity_map[j].table[table_offset];
 
-				if (entity_map[j].table[k - entity_map[j].basechar] == NULL)
+				if (entity_name == NULL || *entity_name == '#')
 					continue;
 
-				entity_length = slprintf(entity, sizeof(entity), "&%s;", entity_map[j].table[k - entity_map[j].basechar]);
-				if (entity_length >= sizeof(entity)) {
-					continue;
-				}
-
-				/* When we have MBCS entities in the tables above, this will need to handle it */
-				replacement_len = 0;
-				switch (charset) {
-					case cs_8859_1:
-					case cs_cp1252:
-					case cs_8859_15:
-					case cs_cp1251:
-					case cs_8859_5:
-					case cs_cp866:
-					case cs_koi8r:
-						replacement[0] = k;
-						replacement[1] = '\0';
-						replacement_len = 1;
-						break;
-
-					case cs_big5:
-					case cs_gb2312:
-					case cs_big5hkscs:
-					case cs_sjis:
-					case cs_eucjp:
-						/* we cannot properly handle those multibyte encodings
-						 * with php_str_to_str. skip it. */ 
-						continue;
-
-					case cs_utf_8:
-						replacement_len = php_utf32_utf8(replacement, k);
-						break;
-
-					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot yet handle MBCS!");
-						efree(ret);
-						return NULL;
-				}
-
-				if (php_memnstr(ret, entity, entity_length, ret+retlen)) {
-					replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, replacement_len, &retlen);
-					efree(ret);
-					ret = replaced;
-				}
+				t = zend_hash_update(ht, entity_name, strlen(entity_name), &k, sizeof(k), NULL);
+				assert(t == SUCCESS);
 			}
 		}
-	}
 
-	for (j = 0; basic_entities[j].charcode != 0; j++) {
-
-		if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
-			continue;
+		/* and add the basic entitites */
+		for (j = 0; basic_entities_ex[j].charcode != 0; j++) {
+			const basic_entity_t *ent = &basic_entities_ex[j];
+			unsigned k = ent->charcode;
 		
-		replacement[0] = (unsigned char)basic_entities[j].charcode;
-		replacement[1] = '\0';
-
-		if (php_memnstr(ret, basic_entities[j].entity, basic_entities[j].entitylen, ret+retlen)) {		
-			replaced = php_str_to_str(ret, retlen, basic_entities[j].entity, basic_entities[j].entitylen, replacement, 1, &retlen);
-			efree(ret);
-			ret = replaced;
+			t = zend_hash_update(ht, &ent->entity[1] /* skip & */,
+				ent->entitylen - 2 /* skip & and ; */, &k, sizeof(k), NULL);
+			assert(t == SUCCESS);
 		}
 	}
 
-	/* replace numeric entities & "&amp;" */
-	lim = ret + retlen;
-	for (p = ret, q = ret; p < lim;) {
-		int code;
+	return *inverse_map;
+}
 
-		if (p[0] == '&') {
-			if (p + 2 < lim) {
-				if (p[1] == '#') {
-					int invalid_code = 0;
+/* {{{ php_unescape_html_entities
+ * The parameter "all" should be true to decode all possible entities, false to decode
+ * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
+ * that correspond to quotes.
+ */
+PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
+{
+	int retlen;
+	char *ret;
+	enum entity_charset charset;
+	HashTable *inverse_map = NULL;
 
-					if (p[2] == 'x' || p[2] == 'X') {
-						code = strtol(p + 3, &next, 16);
-					} else {
-						code = strtol(p + 2, &next, 10);
-					}
-
-					if (code == '\'' && !(quote_style & ENT_HTML_QUOTE_SINGLE) ||
-						code == '"' && !(quote_style & ENT_HTML_QUOTE_DOUBLE)) {
-						invalid_code = 1;
-					}
-
-					if (next != NULL && *next == ';' && !invalid_code) {
-						switch (charset) {
-							case cs_utf_8:
-								q += php_utf32_utf8(q, code);
-								break;
-
-							case cs_8859_1:
-							case cs_8859_5:
-							case cs_8859_15:
-								if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
-									invalid_code = 1;
-								} else {
-									*(q++) = code;
-								}
-								break;
-
-							case cs_cp1252:
-								if (code > 0xff) {
-									invalid_code = 1;
-								} else {
-									*(q++) = code;
-								}
-								break;
-
-							case cs_cp1251:
-							case cs_cp866:
-							case cs_big5:
-							case cs_big5hkscs:
-							case cs_sjis:
-							case cs_eucjp:
-								if (code >= 0x80) {
-									invalid_code = 1;
-								} else {
-									*(q++) = code;
-								}
-								break;
-
-							case cs_gb2312:
-								if (code >= 0x81) {
-									invalid_code = 1;
-								} else {
-									*(q++) = code;
-								}
-								break;
-
-							default:
-								/* for backwards compatilibity */
-								invalid_code = 1;
-								break;
-						}
-						if (invalid_code) {
-							for (; p <= next; p++) {
-								*(q++) = *p;
-							}
-						}
-						p = next + 1;
-					} else {
-						*(q++) = *(p++);	
-						*(q++) = *(p++);	
-					}
-				} else if (p + 4 < lim &&
-							p[1] == 'a' && p[2] == 'm' &&p[3] == 'p' &&
-							p[4] == ';') {
-					*(q++) = '&';
-					p += 5;
-				} else {
-					*(q++) = *(p++);
-					*(q++) = *(p++);
-				}
-			} else {
-				*(q++) = *(p++);	
-			}
-		} else {
-			*(q++) = *(p++);	
-		}
+	if (all) {
+		charset = determine_charset(hint_charset TSRMLS_CC);
+	} else {
+		charset = cs_terminator;
 	}
-	*q = '\0';
-	retlen = (size_t)(q - ret);
+
+	ret = estrndup(old, oldlen);
+	retlen = oldlen;
+	if (retlen == 0) {
+		goto empty_source;
+	}
+
+	/* charset == cs_terminator if !all */
+	inverse_map = unescape_inverse_map(charset TSRMLS_CC);
+	
+	/* replace numeric entities */
+	/* !all implies charset == cs_terminator && inverse_map == BG(inverse_ent_maps)[0] */
+	traverse_for_entities(ret, &retlen, all, quote_style, inverse_map, charset);
+
 empty_source:	
 	*newlen = retlen;
 	return ret;
@@ -1315,65 +1172,20 @@ PHP_FUNCTION(htmlspecialchars)
    Convert special HTML entities back to characters */
 PHP_FUNCTION(htmlspecialchars_decode)
 {
-	char *str, *new_str, *e, *p;
-	int len, j, i, new_len;
+	char *str;
+	int str_len, len;
 	long quote_style = ENT_COMPAT;
-	struct basic_entities_dec basic_entities_dec[8];
+	char *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &len, &quote_style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &quote_style) == FAILURE) {
 		return;
 	}
 
-	new_str = estrndup(str, len);
-	new_len = len;
-	e = new_str + new_len;
-
-	if (!(p = memchr(new_str, '&', new_len))) {
-		RETURN_STRINGL(new_str, new_len, 0);
+	replaced = php_unescape_html_entities(str, str_len, &len, 0 /*!all*/, quote_style, NULL TSRMLS_CC);
+	if (replaced) {
+		RETURN_STRINGL(replaced, len, 0);
 	}
-
-	for (j = 0, i = 0; basic_entities[i].charcode != 0; i++) {
-		if (basic_entities[i].flags && !(quote_style & basic_entities[i].flags)) {
-			continue;
-		}
-		basic_entities_dec[j].charcode = basic_entities[i].charcode;
-		memcpy(basic_entities_dec[j].entity, basic_entities[i].entity, basic_entities[i].entitylen + 1);
-		basic_entities_dec[j].entitylen = basic_entities[i].entitylen;
-		j++;
-	}
-	basic_entities_dec[j].charcode = '&';
-	basic_entities_dec[j].entitylen = sizeof("&amp;") - 1;
-	memcpy(basic_entities_dec[j].entity, "&amp;", sizeof("&amp;"));
-	i = j + 1;
-	
-	do {
-		int l = e - p;
-	
-		for (j = 0; j < i; j++) {
-			if (basic_entities_dec[j].entitylen > l) {
-				continue;
-			}
-			if (!memcmp(p, basic_entities_dec[j].entity, basic_entities_dec[j].entitylen)) {
-				int e_len = basic_entities_dec[j].entitylen - 1;
-		
-				*p++ = (char) basic_entities_dec[j].charcode;
-				memmove(p, p + e_len, (e - p - e_len));
-				e -= e_len;
-				goto done;
-			}
-		}
-		p++;
-
-done:
-		if (p >= e) {
-			break;
-		}
-	} while ((p = memchr(p, '&', (e - p))));
-
-	new_len = e - new_str;
-
-	new_str[new_len] = '\0';
-	RETURN_STRINGL(new_str, new_len, 0);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1391,7 +1203,7 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
-	replaced = php_unescape_html_entities(str, str_len, &len, 1, quote_style, hint_charset TSRMLS_CC);
+	replaced = php_unescape_html_entities(str, str_len, &len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
 	if (replaced) {
 		RETURN_STRINGL(replaced, len, 0);
 	}
@@ -1446,15 +1258,20 @@ PHP_FUNCTION(get_html_translation_table)
 			/* break thru */
 
 		case HTML_SPECIALCHARS:
-			for (j = 0; basic_entities[j].charcode != 0; j++) {
+			for (j = 0; basic_entities_ex[j].charcode != 0; j++) {
+				void *dummy;
 
-				if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
+				if (basic_entities_ex[j].flags && (quote_style & basic_entities_ex[j].flags) == 0)
 					continue;
 				
-				ind[0] = (unsigned char)basic_entities[j].charcode;
-				add_assoc_stringl(return_value, ind, basic_entities[j].entity, basic_entities[j].entitylen, 1);
+				ind[0] = (unsigned char)basic_entities_ex[j].charcode;
+				if (zend_hash_find(Z_ARRVAL_P(return_value), ind, sizeof(ind), &dummy) == FAILURE) {
+					/* in case of the single quote, which is repeated, the first one wins,
+					 * so don't replace the existint mapping */
+					add_assoc_stringl(return_value, ind, basic_entities_ex[j].entity,
+						basic_entities_ex[j].entitylen, 1);
+				}
 			}
-			add_assoc_stringl(return_value, "&", "&amp;", sizeof("&amp;") - 1, 1);
 
 			break;
 	}
