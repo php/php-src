@@ -996,11 +996,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 1, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(1, authns) /* ARRAY_INFO(1, authns, 1) */
-	ZEND_ARG_INFO(1, addtl)  /* ARRAY_INFO(1, addtl, 1) */
+	ZEND_ARG_ARRAY_INFO(1, authns, 1)
+	ZEND_ARG_ARRAY_INFO(1, addtl, 1)
+	ZEND_ARG_INFO(0, raw)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)

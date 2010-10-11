@@ -133,7 +133,7 @@ PHP_FUNCTION(dns_check_record)
 /* }}} */
 
 /* {{{ php_parserr */
-static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **subarray)
+static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw, zval **subarray)
 {
 	int type;
 	u_long ttl;
@@ -153,6 +153,15 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 	array_init(*subarray);
 
 	add_assoc_string(*subarray, "host", pRec->pName, 1);
+	add_assoc_string(*subarray, "class", "IN", 1);
+	add_assoc_long(*subarray, "ttl", ttl);
+
+	if (raw) {
+		add_assoc_long(*subarray, "type", type);
+		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength, 1);
+		return;
+	}
+
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
@@ -303,9 +312,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			}
 			break;
 
+#if _MSC_VER >= 1500
 		case DNS_TYPE_NAPTR:
 			{
-#if _MSC_VER >= 1500
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
 
 				add_assoc_string(*subarray, "type", "NAPTR", 1);
@@ -315,23 +324,17 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				add_assoc_string(*subarray, "services", data_naptr->pService, 1);
 				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression, 1);
 				add_assoc_string(*subarray, "replacement", data_naptr->pReplacement, 1);
-#endif
 			}
 			break;
+#endif
 
 		default:
-			{
-				char buf[10]; /* max length of short + sizeof(id #) */
-				snprintf(buf, 10, "id #%hu", (unsigned short) type);
-				buf[10-1] = '\0';
-				add_assoc_string(*subarray, "type", buf, 1);
-				add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength, 1);
-				break;
-			}
+			/* unkown type */
+			zval_ptr_dtor(subarray);
+			*subarray = NULL;
+			return;
 	}
 
-	add_assoc_string(*subarray, "class", "IN", 1);
-	add_assoc_long(*subarray, "ttl", ttl);
 }
 /* }}} */
 
@@ -345,8 +348,10 @@ PHP_FUNCTION(dns_get_record)
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	int addtl_recs = 0;
+	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!b",
+			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}
 
@@ -357,17 +362,34 @@ PHP_FUNCTION(dns_get_record)
 	if (addtl) {
 		zval_dtor(addtl);
 		array_init(addtl);
+		addtl_recs = 1;
 	}
 
-	if (type_param & ~PHP_DNS_ALL && type_param != PHP_DNS_ANY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
-		RETURN_FALSE;
+	if (!raw) {
+		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
+			RETURN_FALSE;
+		}
+	} else {
+		if ((type_param < 1) || (type_param > 0xFFFF)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
+			RETURN_FALSE;
+		}
 	}
 
 	/* Initialize the return array */
 	array_init(return_value);
 
-	for (type = (type_param == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
+	if (raw) {
+		type = -1;
+	} else if (type_param == PHP_DNS_ANY) {
+		type = PHP_DNS_NUM_TYPES + 1;
+	} else {
+		type = 0;
+	}
+
+	for ( ;
 		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
 		type++
 	) {
@@ -376,6 +398,11 @@ PHP_FUNCTION(dns_get_record)
 
 		first_query = 0;
 		switch (type) {
+			case -1: /* raw */
+				type_to_fetch = type_param;
+				/* skip over the rest and go directly to additional records */
+				type = PHP_DNS_NUM_TYPES - 1;
+				break;
 			case 0:
 				type_to_fetch = type_param&PHP_DNS_A     ? DNS_TYPE_A     : 0;
 				break;
@@ -439,7 +466,7 @@ PHP_FUNCTION(dns_get_record)
 				zval *retval = NULL;
 
 				if (pRec->Flags.S.Section == DnsSectionAnswer) {
-					php_parserr(pRec, type_to_fetch, store_results, &retval);
+					php_parserr(pRec, type_to_fetch, store_results, raw, &retval);
 					if (retval != NULL && store_results) {
 						add_next_index_zval(return_value, retval);
 					}
@@ -447,7 +474,7 @@ PHP_FUNCTION(dns_get_record)
 
 				if (authns && pRec->Flags.S.Section == DnsSectionAuthority) {
 
-					php_parserr(pRec, type_to_fetch, store_results, &retval);
+					php_parserr(pRec, type_to_fetch, 1, raw, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(authns, retval);
 					}
@@ -462,7 +489,7 @@ PHP_FUNCTION(dns_get_record)
 # endif
 #endif
 				if (addtl && pRec->Flags.S.Section == DnsSectionAdditional) {
-					php_parserr(pRec, type_to_fetch, store_results, &retval);
+					php_parserr(pRec, type_to_fetch, 1, raw, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(addtl, retval);
 					}
