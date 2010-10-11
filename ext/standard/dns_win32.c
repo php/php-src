@@ -347,7 +347,6 @@ PHP_FUNCTION(dns_get_record)
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
-	int addtl_recs = 0;
 	zend_bool raw = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!b",
@@ -362,7 +361,6 @@ PHP_FUNCTION(dns_get_record)
 	if (addtl) {
 		zval_dtor(addtl);
 		array_init(addtl);
-		addtl_recs = 1;
 	}
 
 	if (!raw) {
@@ -390,7 +388,7 @@ PHP_FUNCTION(dns_get_record)
 	}
 
 	for ( ;
-		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
+		type < (addtl ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
 		type++
 	) {
 		DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
