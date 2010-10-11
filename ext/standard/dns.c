@@ -697,7 +697,6 @@ PHP_FUNCTION(dns_get_record)
 	int hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
-	int addtl_recs = 0;
 	int type_to_fetch;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -724,7 +723,6 @@ PHP_FUNCTION(dns_get_record)
 	if (addtl) {
 		zval_dtor(addtl);
 		array_init(addtl);
-		addtl_recs = 1;
 	}
 
 	if (type_param & ~PHP_DNS_ALL && type_param != PHP_DNS_ANY) {
@@ -742,7 +740,7 @@ PHP_FUNCTION(dns_get_record)
 	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
 	 */
 	for (type = (type_param == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
-		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
+		type < (addtl ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
 		type++
 	) {
 		first_query = 0;
@@ -858,7 +856,7 @@ PHP_FUNCTION(dns_get_record)
 				}
 			}
 
-			if (addtl_recs && addtl) {
+			if (addtl) {
 				/* Additional records associated with authoritative name servers */
 				while (ar-- > 0 && cp && cp < end) {
 					zval *retval = NULL;

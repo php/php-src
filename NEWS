@@ -24,6 +24,8 @@
 - Changed the $context parameter on copy() to actually have an effect. (Kalle)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 - Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
+- Fixed bug in the Windows implementation of dns_get_record, where the two
+  last parameters wouldn't be filled unless the type were DNS_ANY (Gustavo).
 
 - Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
   with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of ENT_NOQUOTES 
