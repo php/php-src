@@ -456,7 +456,7 @@ det_charset:
 /* }}} */
 
 /* {{{ php_utf32_utf8 */
-size_t php_utf32_utf8(unsigned char *buf, int k)
+static size_t php_utf32_utf8(unsigned char *buf, unsigned k)
 {
 	size_t retval = 0;
 
@@ -486,6 +486,47 @@ size_t php_utf32_utf8(unsigned char *buf, int k)
 	return retval;
 }
 /* }}} */
+
+/* {{{ php_mb2_int_to_char
+ * Convert back big endian int representation of sequence of one or two 8-bit code units. */
+static size_t php_mb2_int_to_char(unsigned char *buf, unsigned k)
+{
+	assert(k <= 0xFFFFU);
+	/* one or two bytes */
+	if (k <= 0xFFU) { /* 1 */
+		buf[0] = k;
+		return 1U;
+	} else { /* 2 */
+		buf[0] = k >> 8;
+		buf[1] = k & 0xFFU;
+		return 2U;
+	}
+}
+/* }}} */
+
+/* {{{ php_mb3_int_to_char
+ * Convert back big endian int representation of sequence of one to three 8-bit code units.
+ * For EUC-JP. */
+static size_t php_mb3_int_to_char(unsigned char *buf, unsigned k)
+{
+	assert(k <= 0xFFFFFFU);
+	/* one to three bytes */
+	if (k <= 0xFFU) { /* 1 */
+		buf[0] = k;
+		return 1U;
+	} else if (k <= 0xFFFFU) { /* 2 */
+		buf[0] = k >> 8;
+		buf[1] = k & 0xFFU;
+		return 2U;
+	} else {
+		buf[0] = k >> 16;
+		buf[1] = (k >> 8) & 0xFFU;
+		buf[2] = k & 0xFFU;
+		return 3U;
+	}
+}
+/* }}} */
+
 
 /* {{{ unimap_bsearc_cmp
  * Binary search of unicode code points in unicode <--> charset mapping.
@@ -817,21 +858,23 @@ static void traverse_for_entities(char *ret, int *retlen_p, int all, int quote_s
 		case cs_big5hkscs:
 		case cs_sjis:
 		case cs_gb2312:
-			/* one or two bytes */
-			*(q++) = (code & 0xFFU);
-			if (0xFF00U & code) { /* 2 */
-				*(q++) = (code >> 8);
-			}
+			/* we don't have named entity or unicode mappings for these yet,
+			 * so we're guaranteed code <= 0xFF */
+#if 0
+			q += php_mb2_int_to_char((unsigned char*)q, code);
+#else
+			assert(code <= 0xFFU);
+			*(q++) = code;
+#endif
 			break;
 
 		case cs_eucjp:
-			/* one to three bytes */
-			*(q++) = code & 0xFFU;
-			if (0xFFFF00U & code) { /* 2 */
-				*(q++) = ((code >> 8) & 0xFFU);
-				if (0xFF0000U & code) /* 3 */
-					*(q++) = (code >> 16);
-			}
+#if 0 /* idem */
+			q += php_mb2_int_to_char((unsigned char*)q, code);
+#else
+			assert(code <= 0xFFU);
+			*(q++) = code;
+#endif
 			break;
 
 		default:
