@@ -348,7 +348,7 @@ char* php_get_windows_name()
 					major = "Windows Server 2008 R2";
 				}
 			} else {
-				major = "Unknow Windows version";
+				major = "Unknown Windows version";
 			}
 
 			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
@@ -454,9 +454,17 @@ char* php_get_windows_name()
 
 		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )	{
 			major = "Windows XP";
-			if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
+			if( osvi.wSuiteMask & VER_SUITE_PERSONAL ) {
 				sub = "Home Edition";
-			else sub = "Professional";
+			} else if (GetSystemMetrics(SM_MEDIACENTER)) {
+				sub = "Media Center Edition";
+			} else if (GetSystemMetrics(SM_STARTER)) {
+				sub = "Starter Edition";
+			} else if (GetSystemMetrics(SM_TABLETPC)) {
+				sub = "Tablet PC Edition";
+			} else {
+				sub = "Professional";
+			}
 		}
 
 		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) {
@@ -538,11 +546,7 @@ PHPAPI char *php_get_uname(char mode)
 	GetComputerName(ComputerName, &dwSize);
 
 	if (mode == 's') {
-		if (dwVersion < 0x80000000) {
-			php_uname = "Windows NT";
-		} else {
-			php_uname = "Windows 9x";
-		}
+		php_uname = "Windows NT";
 	} else if (mode == 'r') {
 		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
 		php_uname = tmp_uname;
@@ -564,23 +568,16 @@ PHPAPI char *php_get_uname(char mode)
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
 		php_uname = tmp_uname;
 	} else { /* assume mode == 'a' */
-		/* Get build numbers for Windows NT or Win95 */
-		if (dwVersion < 0x80000000){
-			char *winver = php_get_windows_name();
-			char wincpu[20];
+		char *winver = php_get_windows_name();
+		char wincpu[20];
 
-			php_get_windows_cpu(wincpu, sizeof(wincpu));
-			dwBuild = (DWORD)(HIWORD(dwVersion));
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
-					 "Windows NT", ComputerName,
-					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
-			if(winver) {
-				efree(winver);
-			}
-		} else {
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
-					 "Windows 9x", ComputerName,
-					 dwWindowsMajorVersion, dwWindowsMinorVersion);
+		php_get_windows_cpu(wincpu, sizeof(wincpu));
+		dwBuild = (DWORD)(HIWORD(dwVersion));
+		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
+				 "Windows NT", ComputerName,
+				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
+		if(winver) {
+			efree(winver);
 		}
 		php_uname = tmp_uname;
 	}
