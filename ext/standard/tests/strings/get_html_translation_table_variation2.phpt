@@ -1,18 +1,8 @@
 --TEST--
 Test get_html_translation_table() function : usage variations - unexpected quote_style values
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == "WIN"){  
-  die('skip Not for Windows');
-}
-
-if( !setlocale(LC_ALL, "en_US.UTF-8") ) {
-  die('skip failed to set locale settings to "en-US.UTF-8"');
-}
-?>
 --FILE--
 <?php
-/* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style]] )
+/* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style [, string charset_hint]]] )
  * Description: Returns the internal translation table used by htmlspecialchars and htmlentities
  * Source code: ext/standard/html.c
 */
@@ -118,43 +108,43 @@ Warning: get_html_translation_table() expects parameter 2 to be long, array give
 NULL
 -- Iteration 6 --
 array(4) {
+  ["&"]=>
+  string(5) "&amp;"
   ["'"]=>
-  string(5) "&#39;"
+  string(6) "&#039;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 7 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 8 --
 array(4) {
+  ["&"]=>
+  string(5) "&amp;"
   ["'"]=>
-  string(5) "&#39;"
+  string(6) "&#039;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 9 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 10 --
 
@@ -178,21 +168,21 @@ Warning: get_html_translation_table() expects parameter 2 to be long, string giv
 NULL
 -- Iteration 15 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 16 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 17 --
 
@@ -200,20 +190,20 @@ Warning: get_html_translation_table() expects parameter 2 to be long, resource g
 NULL
 -- Iteration 18 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- Iteration 19 --
 array(3) {
+  ["&"]=>
+  string(5) "&amp;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 Done
