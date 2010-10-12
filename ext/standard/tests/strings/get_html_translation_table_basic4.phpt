@@ -1,59 +1,79 @@
 --TEST--
-Test get_html_translation_table() function : basic functionality - with default args
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) != "WIN"){  
-  die('skip only for Windows');
-}
-
-if( !setlocale(LC_ALL, "English_United States.1252") ) {
-  die('skip failed to set locale settings to "English_United States.1252"');
-}
-?>
+Test get_html_translation_table() function : basic functionality - charset WINDOWS-1252
 --FILE--
 <?php
-/* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style]] )
+/* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style [, string charset_hint]]] )
  * Description: Returns the internal translation table used by htmlspecialchars and htmlentities
  * Source code: ext/standard/html.c
 */
 
-/* Test get_html_translation_table() when table is specified as HTML_ENTITIES */
 
-//set locale
-setlocale(LC_ALL, "English_United States.1252"); 
+echo "*** Testing get_html_translation_table() : basic functionality/Windows-1252 ***\n";
 
-echo "*** Testing get_html_translation_table() : basic functionality ***\n";
-
-// Calling get_html_translation_table() with default arguments
-echo "-- with default arguments --\n";
-var_dump( get_html_translation_table() );
-
-// Calling get_html_translation_table() with all possible optional arguments
 echo "-- with table = HTML_ENTITIES --\n";
 $table = HTML_ENTITIES;
-var_dump( get_html_translation_table($table) );
+var_dump( get_html_translation_table($table, ENT_COMPAT, "WINDOWS-1252") );
 
 echo "-- with table = HTML_SPECIALCHARS --\n";
 $table = HTML_SPECIALCHARS; 
-var_dump( get_html_translation_table($table) );
+var_dump( get_html_translation_table($table, ENT_COMPAT, "WINDOWS-1252") );
 
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing get_html_translation_table() : basic functionality ***
--- with default arguments --
-array(4) {
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
-  [">"]=>
-  string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
-}
+*** Testing get_html_translation_table() : basic functionality/Windows-1252 ***
 -- with table = HTML_ENTITIES --
-array(100) {
+array(125) {
+  ["€"]=>
+  string(6) "&euro;"
+  ["‚"]=>
+  string(7) "&sbquo;"
+  ["ƒ"]=>
+  string(6) "&fnof;"
+  ["„"]=>
+  string(7) "&bdquo;"
+  ["…"]=>
+  string(8) "&hellip;"
+  ["†"]=>
+  string(8) "&dagger;"
+  ["‡"]=>
+  string(8) "&Dagger;"
+  ["ˆ"]=>
+  string(6) "&circ;"
+  ["‰"]=>
+  string(8) "&permil;"
+  ["Š"]=>
+  string(8) "&Scaron;"
+  ["‹"]=>
+  string(8) "&lsaquo;"
+  ["Œ"]=>
+  string(7) "&OElig;"
+  ["‘"]=>
+  string(7) "&lsquo;"
+  ["’"]=>
+  string(7) "&rsquo;"
+  ["“"]=>
+  string(7) "&ldquo;"
+  ["”"]=>
+  string(7) "&rdquo;"
+  ["•"]=>
+  string(6) "&bull;"
+  ["–"]=>
+  string(7) "&ndash;"
+  ["—"]=>
+  string(7) "&mdash;"
+  ["˜"]=>
+  string(7) "&tilde;"
+  ["™"]=>
+  string(7) "&trade;"
+  ["š"]=>
+  string(8) "&scaron;"
+  ["›"]=>
+  string(8) "&rsaquo;"
+  ["œ"]=>
+  string(7) "&oelig;"
+  ["Ÿ"]=>
+  string(6) "&Yuml;"
   [" "]=>
   string(6) "&nbsp;"
   ["¡"]=>
@@ -246,24 +266,24 @@ array(100) {
   string(7) "&thorn;"
   ["ÿ"]=>
   string(6) "&yuml;"
+  ["&"]=>
+  string(5) "&amp;"
   ["""]=>
   string(6) "&quot;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 -- with table = HTML_SPECIALCHARS --
 array(4) {
+  ["&"]=>
+  string(5) "&amp;"
   ["""]=>
   string(6) "&quot;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
-  ["&"]=>
-  string(5) "&amp;"
 }
 Done

@@ -15,6 +15,8 @@
 - Implemented FR #50692, not uploaded files don't count towards
   max_file_uploads limit. As a side improvement, temporary files are not opened
   for empty uploads and, in debug mode, 0-length uploads. (Gustavo)
+- Added a 3rd parameter to get_html_translation_table. It now takes a charset
+  hint, like htmlentities et al. (Gustavo)
 
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
@@ -128,12 +130,15 @@
   other platforms). (Pierre)
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Ulf, Tony)
+- Fixed bug #49407 (get_html_translation_table doesn't handle UTF-8). (Gustavo)
 - Fixed bug #49215 (make fails on glob_wrapper). (Felipe)
 - Fixed bug #48831 (php -i has different output to php --ini). (Richard, 
   Pierre)
 - Fixed bug #45921 (Can't initialize character set hebrew). (Andrey)
 - Fixed bug #44248 (RFC2616 transgression while HTTPS request through proxy
   with SoapClient object). (Dmitry)
+- Fixed bug #25927 (get_html_translation_table calls the ' &#39; instead of
+  &#039;). (Gustavo)
 
 22 Jul 2010, PHP 5.3.3
 - Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
