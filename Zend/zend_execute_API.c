@@ -870,7 +870,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			if (Z_REFCOUNT_PP(fci->params[i]) > 1) {
 				zval *new_zval;
 
-				if (fci->no_separation) {
+				if (fci->no_separation &&
+				    !ARG_MAY_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
 					if(i) {
 						/* hack to clean up the stack */
 						zend_vm_stack_push_nocheck((void *) (zend_uintptr_t)i TSRMLS_CC);
