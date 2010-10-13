@@ -1097,8 +1097,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
 			case SEEK_CUR:
-				if (offset > 0 && offset < stream->writepos - stream->readpos) {
-					stream->readpos += offset;
+				if (offset > 0 && offset <= stream->writepos - stream->readpos) {
+					stream->readpos += offset; /* if offset = ..., then readpos = writepos */
 					stream->position += offset;
 					stream->eof = 0;
 					return 0;
@@ -1106,7 +1106,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 				break;
 			case SEEK_SET:
 				if (offset > stream->position &&
-						offset < stream->position + stream->writepos - stream->readpos) {
+						offset <= stream->position + stream->writepos - stream->readpos) {
 					stream->readpos += offset - stream->position;
 					stream->position = offset;
 					stream->eof = 0;
@@ -1149,14 +1149,12 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	/* emulate forward moving seeks with reads */
 	if (whence == SEEK_CUR && offset > 0) {
 		char tmp[1024];
-		while(offset >= sizeof(tmp)) {
-			if (php_stream_read(stream, tmp, sizeof(tmp)) == 0) {
+		size_t didread;
+		while(offset > 0) {
+			if ((didread = php_stream_read(stream, tmp, MIN(offset, sizeof(tmp)))) == 0) {
 				return -1;
 			}
-			offset -= sizeof(tmp);
-		}
-		if (offset && (php_stream_read(stream, tmp, offset) == 0)) {
-			return -1;
+			offset -= didread;
 		}
 		stream->eof = 0;
 		return 0;
