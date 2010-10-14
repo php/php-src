@@ -415,7 +415,7 @@ PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
 	zval *zsrc;
-	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	long maxlen = PHP_STREAM_COPY_ALL, pos = -1L;
 	int len, newlen;
 	char *contents = NULL;
 
@@ -425,9 +425,19 @@ PHP_FUNCTION(stream_get_contents)
 
 	php_stream_from_zval(stream, &zsrc);
 
-	if ((pos > 0 || (pos == 0 && ZEND_NUM_ARGS() > 2)) && php_stream_seek(stream, pos, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
-		RETURN_FALSE;
+	if (pos >= 0) {
+		int seek_res = 0;
+		if (pos > stream->position) {
+			/* use SEEK_CUR to allow emulation in streams that don't support seeking */
+			seek_res = php_stream_seek(stream, pos - stream->position, SEEK_CUR);
+		} else if (pos < stream->position)  {
+			seek_res = php_stream_seek(stream, pos, SEEK_SET);
+		}
+
+		if (seek_res != 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
+			RETURN_FALSE;
+		}
 	}
 
 	len = php_stream_copy_to_mem(stream, &contents, maxlen, 0);
