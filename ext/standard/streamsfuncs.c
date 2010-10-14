@@ -425,7 +425,7 @@ PHP_FUNCTION(stream_get_contents)
 
 	php_stream_from_zval(stream, &zsrc);
 
-	if ((pos != 0L) && php_stream_seek(stream, pos, SEEK_CUR) < 0) {
+	if ((pos > 0L) && php_stream_seek(stream, pos, SEEK_CUR) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek %ld bytes from current position in the stream", pos);
 		RETURN_FALSE;
 	} else if (pos < 0L) {
