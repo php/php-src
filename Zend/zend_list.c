@@ -106,7 +106,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 }
 
 
-ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
 {
 	int id;
 	int actual_resource_type;
@@ -289,7 +289,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 }
 
 
-ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number)
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number)
 {
 	zend_rsrc_list_dtors_entry lde;
 	
@@ -348,7 +348,7 @@ void zend_destroy_rsrc_list_dtors(void)
 }
 
 
-char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC)
+const char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC)
 {
 	zend_rsrc_list_dtors_entry *lde;
 	int rsrc_type;

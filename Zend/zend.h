@@ -461,7 +461,7 @@ typedef struct _zend_trait_alias zend_trait_alias;
 
 struct _zend_class_entry {
 	char type;
-	char *name;
+	const char *name;
 	zend_uint name_length;
 	struct _zend_class_entry *parent;
 	int refcount;

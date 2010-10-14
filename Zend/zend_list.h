@@ -48,7 +48,7 @@ typedef struct _zend_rsrc_list_dtors_entry {
 	rsrc_dtor_func_t list_dtor_ex;
 	rsrc_dtor_func_t plist_dtor_ex;
 
-	char *type_name;
+	const char *type_name;
 
 	int module_number;
 	int resource_id;
@@ -58,7 +58,7 @@ typedef struct _zend_rsrc_list_dtors_entry {
 
 #define register_list_destructors(ld, pld) zend_register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
-ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number);
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number);
 
 void list_entry_destructor(void *ptr);
 void plist_entry_destructor(void *ptr);
@@ -80,9 +80,9 @@ ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC);
 #define zend_list_find(id, type)	_zend_list_find(id, type TSRMLS_CC)
 
 ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC);
-ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
+ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
-ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC);
+ZEND_API const char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC);
 ZEND_API int zend_fetch_list_dtor_id(char *type_name);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */

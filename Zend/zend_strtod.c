@@ -2030,7 +2030,7 @@ ret1:
 	return s0;
 }
 
-ZEND_API double zend_strtod (CONST char *s00, char **se)
+ZEND_API double zend_strtod (CONST char *s00, CONST char **se)
 {
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
@@ -2563,7 +2563,7 @@ retfree:
 	Bfree(delta);
 ret:
 	if (se)
-		*se = (char *)s;
+		*se = s;
 	result = sign ? -value(rv) : value(rv);
 
 	_THREAD_PRIVATE_MUTEX_LOCK(pow5mult_mutex);
@@ -2577,7 +2577,7 @@ ret:
 	return result;
 }
 
-ZEND_API double zend_hex_strtod(const char *str, char **endptr)
+ZEND_API double zend_hex_strtod(const char *str, const char **endptr)
 {
 	const char *s = str;
 	char c;
@@ -2604,13 +2604,13 @@ ZEND_API double zend_hex_strtod(const char *str, char **endptr)
 	}
 
 	if (endptr != NULL) {
-		*endptr = (char *)(any ? s - 1 : str);
+		*endptr = any ? s - 1 : str;
 	}
 
 	return value;
 }
 
-ZEND_API double zend_oct_strtod(const char *str, char **endptr)
+ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 {
 	const char *s = str;
 	char c;
@@ -2632,7 +2632,7 @@ ZEND_API double zend_oct_strtod(const char *str, char **endptr)
 	}
 
 	if (endptr != NULL) {
-		*endptr = (char *)(any ? s - 1 : str);
+		*endptr = any ? s - 1 : str;
 	}
 
 	return value;

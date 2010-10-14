@@ -594,7 +594,7 @@ static inline int zend_verify_arg_error(const zend_function *zf, zend_uint arg_n
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	char *fname = zf->common.function_name;
 	char *fsep;
-	char *fclass;
+	const char *fclass;
 
 	if (zf->common.scope) {
 		fsep =  "::";
