@@ -33,6 +33,8 @@
   and when there was data in the buffer before the emulation started. Also made
   more consistent its behavior -- should return failure every time less data
   than was requested was skipped. (Gustavo)
+- Fixed htmlentities/htmlspecialchars accepting certain ill-formed UTF-8
+  sequences. (Gustavo)
 
 - Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
   with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of ENT_NOQUOTES 
