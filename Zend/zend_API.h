@@ -166,7 +166,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		char *cl_name = class_name;								\
+		const char *cl_name = class_name;								\
 		int _len = class_name_len;								\
 		class_container.name = zend_new_interned_string(cl_name, _len+1, 0 TSRMLS_CC);	\
 		if (class_container.name == cl_name) {					\
@@ -244,12 +244,12 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 /* Parameter parsing API -- andrei */
 
 #define ZEND_PARSE_PARAMS_QUIET 1<<1
-ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
-ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
+ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...);
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...);
 ZEND_API char *zend_zval_type_name(const zval *arg);
 
-ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
+ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...);
+ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...);
 
 /* End of parameter parsing API -- andrei */
 
@@ -331,7 +331,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, int name_length, zend_bool silent TSRMLS_DC);
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC);
-ZEND_API int zend_get_object_classname(const zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC);
+ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC);
 ZEND_API char *zend_get_type_by_const(int type);
 
 #define getThis() (this_ptr)

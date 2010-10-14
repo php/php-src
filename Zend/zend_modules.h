@@ -98,7 +98,7 @@ struct _zend_module_entry {
 	unsigned char type;
 	void *handle;
 	int module_number;
-	char *build_id;
+	const char *build_id;
 };
 
 #define MODULE_DEP_REQUIRED		1

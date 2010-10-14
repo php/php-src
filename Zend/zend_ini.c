@@ -147,11 +147,11 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 
 static int ini_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
+	const Bucket *f;
+	const Bucket *s;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
+	f = *((const Bucket **) a);
+	s = *((const Bucket **) b);
 
 	if (f->nKeyLength == 0 && s->nKeyLength == 0) { /* both numeric */
 		return ZEND_NORMALIZE_BOOL(f->nKeyLength - s->nKeyLength);

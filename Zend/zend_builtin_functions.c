@@ -1973,7 +1973,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	int lineno;
 	char *function_name;
 	char *filename;
-	char *class_name = NULL;
+	const char *class_name = NULL;
 	char *call_type;
 	char *include_filename = NULL;
 	zval *arg_array = NULL;
@@ -1989,7 +1989,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	ptr = ptr->prev_execute_data;
 
 	while (ptr) {
-		char *free_class_name = NULL;
+		const char *free_class_name = NULL;
 
 		class_name = call_type = NULL;   
 		arg_array = NULL;

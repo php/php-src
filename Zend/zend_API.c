@@ -248,7 +248,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) /
 /* }}} */
 
 /* returns 1 if you need to copy result, 0 if it's already a copy */
-ZEND_API int zend_get_object_classname(const zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HT_P(object)->get_class_name == NULL ||
 		Z_OBJ_HT_P(object)->get_class_name(object, class_name, class_name_len, 0 TSRMLS_CC) != SUCCESS) {
@@ -302,9 +302,9 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 }
 /* }}} */
 
-static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
+static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {
-	char *spec_walk = *spec;
+	const char *spec_walk = *spec;
 	char c = *spec_walk++;
 	int return_null = 0;
 
@@ -659,7 +659,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 }
 /* }}} */
 
-static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet TSRMLS_DC) /* {{{ */
+static int zend_parse_arg(int arg_num, zval **arg, va_list *va, const char **spec, int quiet TSRMLS_DC) /* {{{ */
 {
 	char *expected_type = NULL, *error = NULL;
 	int severity = E_WARNING;
@@ -689,9 +689,9 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 }
 /* }}} */
 
-static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags TSRMLS_DC) /* {{{ */
+static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, int flags TSRMLS_DC) /* {{{ */
 {
-	char *spec_walk;
+	const  char *spec_walk;
 	int c, i;
 	int min_num_args = -1;
 	int max_num_args = 0;
@@ -861,7 +861,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	}\
 }
 
-ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
@@ -876,7 +876,7 @@ ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *t
 }
 /* }}} */
 
-ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
@@ -891,11 +891,11 @@ ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...)
 }
 /* }}} */
 
-ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
-	char *p = type_spec;
+	const char *p = type_spec;
 	zval **object;
 	zend_class_entry *ce;
 
@@ -927,11 +927,11 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 }
 /* }}} */
 
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
-	char *p = type_spec;
+	const char *p = type_spec;
 	zval **object;
 	zend_class_entry *ce;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
@@ -1922,7 +1922,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
 	char *lowercase_name;
 	int fname_len;
-	char *lc_class_name = NULL;
+	const char *lc_class_name = NULL;
 	int class_name_len = 0;
 
 	if (type==MODULE_PERSISTENT) {
@@ -2594,7 +2594,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	int retval = 0;
-	char *mname, *lmname, *colon;
+	char *mname, *lmname;
+	const char *colon;
 	int clen, mlen;
 	zend_class_entry *last_scope;
 	HashTable *ftable;

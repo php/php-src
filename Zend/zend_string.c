@@ -29,11 +29,11 @@
 # include <sys/mman.h>
 #endif
 
-ZEND_API char *(*zend_new_interned_string)(char *str, int len, int free_src TSRMLS_DC);
+ZEND_API const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
 ZEND_API void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API void (*zend_interned_strings_restore)(TSRMLS_D);
 
-static char *zend_new_interned_string_int(char *str, int len, int free_src TSRMLS_DC);
+static const char *zend_new_interned_string_int(const char *str, int len, int free_src TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
 
@@ -79,7 +79,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 #endif
 }
 
-static char *zend_new_interned_string_int(char *arKey, int nKeyLength, int free_src TSRMLS_DC)
+static const char *zend_new_interned_string_int(const char *arKey, int nKeyLength, int free_src TSRMLS_DC)
 {
 #ifndef ZTS
 	ulong h;
@@ -97,7 +97,7 @@ static char *zend_new_interned_string_int(char *arKey, int nKeyLength, int free_
 		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
 			if (!memcmp(p->arKey, arKey, nKeyLength)) {
 				if (free_src) {
-					efree(arKey);
+					efree((void *)arKey);
 				}
 				return p->arKey;
 			}
@@ -121,7 +121,7 @@ static char *zend_new_interned_string_int(char *arKey, int nKeyLength, int free_
 	p->arKey = (char*)(p+1);
 	memcpy(p->arKey, arKey, nKeyLength);
 	if (free_src) {
-		efree(arKey);
+		efree((void *)arKey);
 	}
 	p->nKeyLength = nKeyLength;
 	p->h = h;

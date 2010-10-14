@@ -402,7 +402,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	if (op_array->arg_info) {
 		for (i=0; i<op_array->num_args; i++) {
-			str_efree((char*)op_array->arg_info[i].name);
+			str_efree((char *)op_array->arg_info[i].name);
 			if (op_array->arg_info[i].class_name && !IS_INTERNED(op_array->arg_info[i].class_name)) {
 				efree((char*)op_array->arg_info[i].class_name);
 			}

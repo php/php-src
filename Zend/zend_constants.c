@@ -281,7 +281,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 {
 	zend_constant *c;
 	int retval = 1;
-	char *colon;
+	const char *colon;
 	zend_class_entry *ce = NULL;
 	char *class_name;
 	zval **ret_constant;
@@ -297,7 +297,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 	    colon > name && (*(colon - 1) == ':')) {
 		int class_name_len = colon - name - 1;
 		int const_name_len = name_len - class_name_len - 2;
-		char *constant_name = colon + 1;
+		const char *constant_name = colon + 1;
 		char *lcname;
 
 		class_name = estrndup(name, class_name_len);
@@ -360,7 +360,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		/* compound constant name */
 		int prefix_len = colon - name;
 		int const_name_len = name_len - prefix_len - 1;
-		char *constant_name = colon + 1;
+		const char *constant_name = colon + 1;
 		char *lcname;
 		int found_const = 0;
 
