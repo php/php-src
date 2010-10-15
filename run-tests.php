@@ -197,7 +197,7 @@ function verify_config()
 if (getenv('TEST_PHP_LOG_FORMAT')) {
 	$log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
 } else {
-	$log_format = 'LEOD';
+	$log_format = 'LEODS';
 }
 
 // Check whether a detailed log is wanted.
@@ -1352,6 +1352,7 @@ TEST $file
 	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
 	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
 	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
+	$sh_filename       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
 	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
 	$test_file         = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
 	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
@@ -1382,6 +1383,7 @@ TEST $file
 			'exp'  => $exp_filename,
 			'out'  => $output_filename,
 			'mem'  => $memcheck_filename,
+			'sh'   => $sh_filename,
 			'php'  => $temp_file,
 			'skip' => $temp_skipif,
 			'clean'=> $temp_clean);
@@ -1398,6 +1400,7 @@ TEST $file
 	@unlink($exp_filename);
 	@unlink($output_filename);
 	@unlink($memcheck_filename);
+	@unlink($sh_filename);
 	@unlink($temp_file);
 	@unlink($test_file);
 	@unlink($temp_skipif);
@@ -1958,6 +1961,15 @@ COMMAND $cmd
 		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, (binary) $diff, FILE_BINARY) === false) {
 			error("Cannot create test diff - $diff_filename");
 		}
+
+		// write .sh
+		if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, b"#!/bin/sh
+
+{$cmd}
+", FILE_BINARY) === false) {
+			error("Cannot create test shell script - $sh_filename");
+		}
+		chmod($sh_filename, 0755);
 
 		// write .log
 		if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, b"
