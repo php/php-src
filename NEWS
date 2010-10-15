@@ -36,6 +36,8 @@
 - Fixed htmlentities/htmlspecialchars accepting certain ill-formed UTF-8
   sequences. (Gustavo)
 
+- Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
+  underlying stream does not support seeking). (Gustavo)
 - Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
   with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of ENT_NOQUOTES 
   in html_entity_decode that had introduced the bug (rev #185591) to other
