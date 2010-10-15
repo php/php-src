@@ -2059,6 +2059,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start Zend extensions */
 	zend_startup_extensions();
 
+	zend_collect_module_handlers(TSRMLS_C);
+
 	/* register additional functions */
 	if (sapi_module.additional_functions) {
 		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
