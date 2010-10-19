@@ -56,7 +56,7 @@
   FR #51815. (Pierrick)
 - Added iterator support in MySQLi. mysqli_result implements Traversable.
   (Andrey, Johannes)
-- Added scalar typehinting. (Ilia, Derick)
+- Added scalar typehints to the parser and the reflection API. (Ilia, Derick)
 - Added support for JSON_NUMERIC_CHECK option in json_encode() that converts 
   numeric strings to integers. (Ilia)
 - Added support for object references in recursive serialize() calls. FR #36424.
