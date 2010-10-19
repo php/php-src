@@ -18,6 +18,8 @@
 - Added a 3rd parameter to get_html_translation_table. It now takes a charset
   hint, like htmlentities et al. (Gustavo)
 
+- Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
+  (CVE-2010-3709). (Maksymilian Arciemowicz)
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed MOPS-2010-24, fix string validation. (CVE-2010-2950). (Pierre)
 - Fixed symbolic resolution support when the target is a DFS share. (Pierre)
@@ -35,6 +37,8 @@
   than was requested was skipped. (Gustavo)
 - Fixed htmlentities/htmlspecialchars accepting certain ill-formed UTF-8
   sequences. (Gustavo)
+- Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
+  large amount of data) (CVE-2010-3710). (Adam)
 
 - Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
   underlying stream does not support seeking). (Gustavo)
@@ -57,8 +61,6 @@
   headers). (Adam)
 - Fixed bug #52931 (strripos not overloaded with function overloading enabled).
   (Felipe)
-- Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
-  large amount of data). (Adam)
 - Fixed bug #52926 (zlib fopen wrapper does not use context). (Gustavo)
 - Fixed bug #52906 (gmp_mod returns negative result when non-negative is 
   expected). (Stas)
