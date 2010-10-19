@@ -4,8 +4,10 @@
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
+- Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
+  (CVE-2010-3709). (Maksymilian Arciemowicz)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
-  large amount of data). (Adam)
+  large amount of data). (CVE-2010-3709). (Adam)
 - Fixed bug #52879 (Objects unreferenced in __get, __set, __isset or __unset
   can be freed too early). (mail_ben_schmidt at yahoo dot com dot au, Dmitry)
 - Fixed bug #52772 (var_dump() doesn't check for the existence of 
