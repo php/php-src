@@ -1,7 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
-- Upgraded bundled Sqlite3 to version 3.7.0.1. (Ilia)
+- Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
 - Added follow_location (enabled by default) option for the http stream 
