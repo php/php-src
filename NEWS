@@ -1,7 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
-- Upgraded bundled sqlite to version 3.6.23.1. (Ilia)
+- Upgraded bundled sqlite to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
 - Added apache compatible functions (apache_child_terminate, getallheaders,
