@@ -2338,10 +2338,11 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND *ret = mnd_pecalloc(1, alloc_size, persistent);
+	MYSQLND *ret;
 
 	DBG_ENTER("mysqlnd_init");
 	DBG_INF_FMT("persistent=%u", persistent);
+	ret = mnd_pecalloc(1, alloc_size, persistent);
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
