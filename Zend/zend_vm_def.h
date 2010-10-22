@@ -3212,7 +3212,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	switch (brk_opline->opcode) {
 		case ZEND_SWITCH_FREE:
 			if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-				zend_switch_free(&EX_T(brk_opline->op1.var), brk_opline->extended_value TSRMLS_CC);
+				zval_ptr_dtor(&EX_T(brk_opline->op1.var).var.ptr);
 			}
 			break;
 		case ZEND_FREE:
@@ -3247,7 +3247,7 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH_FREE, VAR, ANY)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	zend_switch_free(&EX_T(opline->op1.var), opline->extended_value TSRMLS_CC);
+	zval_ptr_dtor(&EX_T(opline->op1.var).var.ptr);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -4030,11 +4030,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter && EXPECTED(EG(exception) == NULL)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
-				FREE_OP1_VAR_PTR();
-			} else {
-				FREE_OP1_IF_VAR();
-			}
+			FREE_OP1_IF_VAR();
 			if (!EG(exception)) {
 				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
 			}
@@ -4043,7 +4039,6 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-	PZVAL_LOCK(array_ptr);
 	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
 
 	if (iter) {
@@ -4051,25 +4046,15 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				Z_DELREF_P(array_ptr);
 				zval_ptr_dtor(&array_ptr);
-				if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
-					FREE_OP1_VAR_PTR();
-				} else {
-					FREE_OP1_IF_VAR();
-				}
+				FREE_OP1_IF_VAR();
 				HANDLE_EXCEPTION();
 			}
 		}
 		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			Z_DELREF_P(array_ptr);
 			zval_ptr_dtor(&array_ptr);
-			if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
-				FREE_OP1_VAR_PTR();
-			} else {
-				FREE_OP1_IF_VAR();
-			}
+			FREE_OP1_IF_VAR();
 			HANDLE_EXCEPTION();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
@@ -4099,11 +4084,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		is_empty = 1;
 	}
 
-	if (opline->extended_value & ZEND_FE_RESET_VARIABLE) {
-		FREE_OP1_VAR_PTR();
-	} else {
-		FREE_OP1_IF_VAR();
-	}
+	FREE_OP1_IF_VAR();
 	if (is_empty) {
 		ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
 	} else {
@@ -4182,7 +4163,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					Z_DELREF_P(array);
 					zval_ptr_dtor(&array);
 					HANDLE_EXCEPTION();
 				}
@@ -4191,7 +4171,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			if (!iter || (iter->index > 0 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					Z_DELREF_P(array);
 					zval_ptr_dtor(&array);
 					HANDLE_EXCEPTION();
 				}
@@ -4199,7 +4178,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			}
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				Z_DELREF_P(array);
 				zval_ptr_dtor(&array);
 				HANDLE_EXCEPTION();
 			}
@@ -4211,7 +4189,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				if (iter->funcs->get_current_key) {
 					key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						Z_DELREF_P(array);
 						zval_ptr_dtor(&array);
 						HANDLE_EXCEPTION();
 					}
@@ -4871,7 +4848,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				switch (brk_opline->opcode) {
 					case ZEND_SWITCH_FREE:
 						if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-							zend_switch_free(&EX_T(brk_opline->op1.var), brk_opline->extended_value TSRMLS_CC);
+							zval_ptr_dtor(&EX_T(brk_opline->op1.var).var.ptr);
 						}
 						break;
 					case ZEND_FREE:

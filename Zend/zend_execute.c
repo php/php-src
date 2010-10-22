@@ -505,21 +505,6 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const temp_vari
 	return get_zval_ptr(op_type, op, Ts, should_free, type);
 }
 
-static inline void zend_switch_free(temp_variable *T, int extended_value TSRMLS_DC)
-{
-	if (T->var.ptr) {
-		if (extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
-			Z_DELREF_P(T->var.ptr);
-		}
-		zval_ptr_dtor(&T->var.ptr);
-	} else if (!T->var.ptr_ptr) {
-		/* perform the equivalent of equivalent of a
-		 * quick & silent get_zval_ptr, and FREE_OP
-		 */
-		PZVAL_UNLOCK_FREE(T->str_offset.str);
-	}
-}
-
 static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **value_ptr_ptr TSRMLS_DC)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
@@ -1404,7 +1389,7 @@ static inline zend_brk_cont_element* zend_brk_cont(zval *nest_levels_zval, int a
 			switch (brk_opline->opcode) {
 				case ZEND_SWITCH_FREE:
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zend_switch_free(&T(brk_opline->op1.var), brk_opline->extended_value TSRMLS_CC);
+						zval_ptr_dtor(&T(brk_opline->op1.var).var.ptr);
 					}
 					break;
 				case ZEND_FREE:
