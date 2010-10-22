@@ -4039,7 +4039,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
+	EX_T(opline->result.var).fe.ptr = array_ptr;
 
 	if (iter) {
 		iter->index = 0;
@@ -4097,7 +4097,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array = EX_T(opline->op1.var).var.ptr;
+	zval *array = EX_T(opline->op1.var).fe.ptr;
 	zval **value;
 	char *str_key;
 	uint str_key_len;

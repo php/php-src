@@ -35,16 +35,13 @@ typedef union _temp_variable {
 		zend_bool fcall_returned_reference;
 	} var;
 	struct {
-		zval **ptr_ptr;
-		zval *ptr;
-		zend_bool fcall_returned_reference;
+		zval **ptr_ptr; /* shared with var.ptr_ptr */
 		zval *str;
 		zend_uint offset;
 	} str_offset;
 	struct {
-		zval **ptr_ptr;
-		zval *ptr;
-		zend_bool fcall_returned_reference;
+		zval **ptr_ptr; /* shared with var.ptr_ptr */
+		zval *ptr;      /* shared with var.ptr */
 		HashPointer fe_pos;
 	} fe;
 	zend_class_entry *class_entry;

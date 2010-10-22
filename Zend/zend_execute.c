@@ -1144,8 +1144,7 @@ convert_to_array:
 				result->str_offset.str = container;
 				PZVAL_LOCK(container);
 				result->str_offset.offset = Z_LVAL_P(dim);
-				result->var.ptr_ptr = NULL;
-				result->var.ptr = NULL;
+				result->str_offset.ptr_ptr = NULL;
 				return;
 			}
 			break;

@@ -2542,7 +2542,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		}
 	}
 
-	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
+	EX_T(opline->result.var).fe.ptr = array_ptr;
 
 	if (iter) {
 		iter->index = 0;
@@ -6805,7 +6805,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		}
 	}
 
-	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
+	EX_T(opline->result.var).fe.ptr = array_ptr;
 
 	if (iter) {
 		iter->index = 0;
@@ -11094,7 +11094,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		}
 	}
 
-	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
+	EX_T(opline->result.var).fe.ptr = array_ptr;
 
 	if (iter) {
 		iter->index = 0;
@@ -11152,7 +11152,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
-	zval *array = EX_T(opline->op1.var).var.ptr;
+	zval *array = EX_T(opline->op1.var).fe.ptr;
 	zval **value;
 	char *str_key;
 	uint str_key_len;
@@ -26765,7 +26765,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		}
 	}
 
-	AI_SET_PTR(&EX_T(opline->result.var), array_ptr);
+	EX_T(opline->result.var).fe.ptr = array_ptr;
 
 	if (iter) {
 		iter->index = 0;
