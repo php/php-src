@@ -63,7 +63,8 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_D
 
 PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
-#if defined(__GNUC__)
+/* Variadic Macros were introduced in VC 2005, which is _MSC_VER 1400 */
+#if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1400)
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
 #define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
