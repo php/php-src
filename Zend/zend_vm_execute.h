@@ -3367,6 +3367,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -4062,6 +4065,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -4724,6 +4730,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -5235,6 +5244,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -5966,6 +5978,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -7597,6 +7612,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -8254,6 +8272,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -8918,6 +8939,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -9316,6 +9340,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -9970,6 +9997,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = NULL;
 
+		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -13180,6 +13210,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
+		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -15227,6 +15260,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
+		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -17336,6 +17372,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
+		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -18551,6 +18590,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
+		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -20386,6 +20428,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
+		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -28499,6 +28544,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
 
+		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -30420,6 +30468,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
 
+		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -32402,6 +32453,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
 
+		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -33498,6 +33552,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
 
+		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
@@ -35189,6 +35246,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && opline->extended_value) {
 		zval **expr_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
 
+		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr_ptr == NULL)) {
+			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
+		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
 		expr_ptr = *expr_ptr_ptr;
 		Z_ADDREF_P(expr_ptr);
