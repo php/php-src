@@ -44,7 +44,7 @@
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 #endif
 
-#if PHP_DEBUG && !defined(PHP_WIN32)
+#if PHP_DEBUG
 #define MYSQLND_DBG_ENABLED 1
 #else
 #define MYSQLND_DBG_ENABLED 0
