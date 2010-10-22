@@ -35,7 +35,7 @@ struct st_mysqlnd_debug_methods
 							   unsigned int level, const char * type, const char *format, ...);
 	zend_bool (*func_enter)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
 							const char * const func_name, unsigned int func_name_len);
-	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file);
+	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file, uint64_t call_time);
 	enum_func_status (*close)(MYSQLND_DEBUG *self);
 	enum_func_status (*free_handle)(MYSQLND_DEBUG *self);
 };
@@ -52,6 +52,7 @@ struct st_mysqlnd_debug
 	int pid;
 	char * file_name;
 	zend_stack call_stack;
+	zend_stack call_time_stack;	
 	HashTable not_filtered_functions;
 	struct st_mysqlnd_debug_methods *m;
 	const char ** skip_functions;
@@ -63,16 +64,38 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_D
 
 PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
-/* Variadic Macros were introduced in VC 2005, which is _MSC_VER 1400 */
-#if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1400)
+#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))
+#define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)	((tp.tv_sec * 1000000LL)+ tp.tv_usec)
+#define DBG_PROFILE_DECLARE_TIMEVARS		struct timeval __tp = {0}; uint64_t __start = 0; /* initialization is needed */
+#define DBG_PROFILE_START_TIME()			gettimeofday(&__tp, NULL); __start = DBG_PROFILE_TIMEVAL_TO_DOUBLE(__tp);
+#define DBG_PROFILE_END_TIME(duration)		gettimeofday(&__tp, NULL); (duration) = (DBG_PROFILE_TIMEVAL_TO_DOUBLE(__tp) - __start);
+
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
 #define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
 #define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 
-#define DBG_ENTER_EX(dbg_obj, func_name) zend_bool dbg_skip_trace = TRUE; if ((dbg_obj)) dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name));
-#define DBG_RETURN_EX(dbg_obj, value)	do { if ((dbg_obj)) (dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__); return (value); } while (0)
-#define DBG_VOID_RETURN_EX(dbg_obj)		do { if ((dbg_obj)) (dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__); return; } while (0)
+#define DBG_ENTER_EX(dbg_obj, func_name) DBG_PROFILE_DECLARE_TIMEVARS; zend_bool dbg_skip_trace = TRUE; \
+					if ((dbg_obj)) dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name)); \
+					do { DBG_PROFILE_START_TIME(); } while (0);
+#define DBG_RETURN_EX(dbg_obj, value)	\
+			do {\
+				if ((dbg_obj)) { \
+					uint64_t this_call_duration = 0; \
+					DBG_PROFILE_END_TIME(this_call_duration); \
+					(dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__, this_call_duration); \
+				} \
+				return (value);\
+			} while (0)
+#define DBG_VOID_RETURN_EX(dbg_obj)	\
+			do {\
+				if ((dbg_obj)) { \
+					uint64_t this_call_duration = 0; \
+					DBG_PROFILE_END_TIME(this_call_duration); \
+					(dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__, this_call_duration); \
+				} \
+				return;\
+			} while (0)
 
 #else
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
