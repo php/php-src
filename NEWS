@@ -91,6 +91,7 @@
   . the size of zend_class_entry is reduced by sharing the same memory space
     by different information for internal and user classes.
     See zend_class_inttry.info union. 
+  . reduced size of temp_variariable
 - Improved CLI Interactive readline shell (Johannes)
   . Added cli.pager ini setting to set a pager for output.
   . Added cli.prompt ini settingto configure the shell prompt.
