@@ -1043,9 +1043,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		}
-		if (op_num >= EG(active_op_array)->try_catch_array[i].try_op
-			&& op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
+		} else if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
 			catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
 			catched = 1;
 		}
