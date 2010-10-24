@@ -3433,7 +3433,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
-	BG(inverse_ent_maps) = NULL;
 	
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
@@ -3455,10 +3454,6 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 	if (BG(url_adapt_state_ex).tags) {
 		zend_hash_destroy(BG(url_adapt_state_ex).tags);
 		free(BG(url_adapt_state_ex).tags);
-	}
-	if (BG(inverse_ent_maps)) {
-		zend_hash_destroy(BG(inverse_ent_maps));
-		pefree(BG(inverse_ent_maps), 1);
 	}
 }
 /* }}} */

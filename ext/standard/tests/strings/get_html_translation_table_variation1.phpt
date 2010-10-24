@@ -75,14 +75,22 @@ for($index = 0; $index < count($values); $index ++) {
   $v = get_html_translation_table($table, ENT_COMPAT, "UTF-8");
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
-   else
+   elseif (is_array($v)) {
+    asort($v);
     var_dump($v);
+   } else {
+    var_dump($v);
+   }
    
   $v = get_html_translation_table($table, $quote_style, "UTF-8");
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
-   else
+   elseif (is_array($v)) {
+    asort($v);
     var_dump($v);
+   } else {
+    var_dump($v);
+   }
 
   $counter ++;
 }
@@ -138,22 +146,22 @@ int(252)
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- Iteration 8 --
 int(252)
@@ -162,22 +170,22 @@ int(252)
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- Iteration 10 --
 
@@ -218,43 +226,43 @@ NULL
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- Iteration 16 --
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- Iteration 17 --
 
@@ -267,42 +275,42 @@ NULL
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- Iteration 19 --
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 Done
