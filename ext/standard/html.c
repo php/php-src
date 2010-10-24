@@ -1577,7 +1577,7 @@ static inline void write_s3row_data(
 	enum entity_charset charset,
 	zval *arr)
 {
-	char key[8]; /* two unicode code points in UTF-8 */
+	char key[9] = ""; /* two unicode code points in UTF-8 */
 	char entity[LONGEST_ENTITY_LENGTH + 2] = {'&'};
 	size_t written_k1;
 
