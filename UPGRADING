@@ -92,6 +92,48 @@ UPGRADE NOTES - PHP X.Y
 
 - array_combine now returns array() instead of FALSE when two empty arrays are
   provided as parameters.
+- Added an extra parameter to dns_get_record(), which allows requesting DNS
+  records by numeric type and makes the result include only the raw data of
+  the response.
+- call_user_func_array no longer allows call-time pass by reference.
+- htmlentities/htmlspecialchars are stricter in the code units they accept for
+  the asian encodings. For Big5-HKSCS, the octets 0x80 and 0xFF are rejected.
+  For GB2312/EUC-CN, the octets 0x8E, 0x8F, 0xA0 and 0xFF are rejected. For
+  SJIS, the octets 0x80, 0xA0, 0xFD, 0xFE and 0xFF are rejected, except maybe
+  after a valid starting byte. For EUC-JP, the octets 0xA0 and 0xFF are
+  rejected.
+- htmlentities now emits an E_STRICT warning when used with asian characters,
+  as in that case htmlentities has (and already had before this version) the
+  same functionality as htmlspecialchars.
+- htmlentities no longer numerically encodes high characters for single-byte
+  encodings (except when there's actually a corresponding named entity). This
+  behavior was not documented and was inconsistent with that for "UTF-8".
+- html_entity_decode/htmlspecialchars_decode behave more consistently, now
+  decoding entities in malformed strings such as "&&amp;" or "&#&amp;".
+- htmlentities/htmlspecialchars/html_entity_decode/htmlspecialchars_decode:
+  Added the flags ENT_HTML401, ENT_XML1, ENT_XHTML, and ENT_HTML5. The
+  behavior of these functions including, but not limited to, the characters
+  that are encoded and the entities that are decoded depend on the document
+  type that is specified by those flags.
+- htmlentities/htmlspecialchars with !$double_encode do more strict checks on
+  the validity of the entities. Numerical entities are checked for a valid
+  range (0 to 0x10FFFF); if the flag ENT_DISALLOWED is given, the validity of
+  such numerical entity in the target document type is also checked.  Named
+  entitities are checked for necessary existence in the target document type
+  instead of only checking whether they were constituted by alphanumeric
+  characters.
+- The flag ENT_DISALLOWED was addded. In addition to the behavior described in
+  the item before, it also makes htmlentities/htmlspecialchars substitute
+  characters that appear literally in the argument string and which are not
+  allowed in the target document type with U+FFFD (UTF-8) or &#xFFFD;.
+- The flag ENT_SUBSTITUTE was added. This flag makes invalid multibyte
+  sequences be replaced by U+FFFD (UTF-8) or &#FFFD; by htmlspecialchars and
+  htmlentities. It is an alternative to the default behavior, which just
+  returns an empty string and to ENT_IGNORE, which is a security risk. The
+  behavior follows the recommendations of Unicode Technical Report #36.
+- htmlspecialchars_decode/html_entity_decode now decode &apos; if the document
+  type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
+ 
 
 ===================================
 4. Changes made to existing methods
@@ -235,11 +277,20 @@ UPGRADE NOTES - PHP X.Y
 
        - JSON_PRETTY_PRINT
        - JSON_UNESCAPED_SLASHES
+       - ENT_SUBSTITUTE
+       - ENT_ALLOWED
+       - ENT_HTML401
+       - ENT_XML1
+       - ENT_XHTML
+       - ENT_HTML5
 
      g. New classes
 
        - Reflection:
          - ReflectionZendExtension
+       
+       - Intl:
+         - Transliterator
 
      h. New methods
 
