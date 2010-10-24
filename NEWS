@@ -40,6 +40,7 @@
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
   large amount of data) (CVE-2010-3710). (Adam)
 
+- Fixed bug #53144 (Segfault in SplObjectStorage::removeAll()). (Felipe)
 - Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
   underlying stream does not support seeking). (Gustavo)
 - Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
