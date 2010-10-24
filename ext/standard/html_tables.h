@@ -1,4 +1,4 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -28,17 +28,9 @@
 ***************************************************************************
 **************************************************************************/
 
-/* cs_terminator is overloaded in the following fashion:
- * - It terminates the list entity maps.
- * - In BG(inverse_ent_maps), it's the key of the inverse map that stores
- *   only the basic entities.
- * - When passed to traverse_for_entities (or via php_unescape_entities with !all),
- *   we don't care about the encoding (UTF-8 is chosen, but it should be used
- *   when it doesn't matter).
- */
-enum entity_charset { cs_terminator, cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15,
-					  cs_cp1251, cs_8859_5, cs_cp866, cs_macroman, cs_koi8r,
-					  cs_big5, cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
+enum entity_charset { cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
+					  cs_8859_5, cs_cp866, cs_macroman, cs_koi8r, cs_big5,
+					  cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
 					  cs_numelems /* used to count the number of charsets */
 					};
 #define CHARSET_UNICODE_COMPAT(cs)	((cs) <= cs_utf_8)
@@ -49,36 +41,36 @@ static const struct {
 	const char *codeset;
 	enum entity_charset charset;
 } charset_map[] = {
-	{ "ISO-8859-1", 	cs_8859_1 },
-	{ "ISO8859-1",	 	cs_8859_1 },
-	{ "ISO-8859-15", 	cs_8859_15 },
-	{ "ISO8859-15", 	cs_8859_15 },
-	{ "utf-8", 			cs_utf_8 },
+	{ "ISO-8859-1",		cs_8859_1 },
+	{ "ISO8859-1",		cs_8859_1 },
+	{ "ISO-8859-15",	cs_8859_15 },
+	{ "ISO8859-15",		cs_8859_15 },
+	{ "utf-8",			cs_utf_8 },
 	{ "cp1252", 		cs_cp1252 },
-	{ "Windows-1252", 	cs_cp1252 },
-	{ "1252",           cs_cp1252 }, 
+	{ "Windows-1252",	cs_cp1252 },
+	{ "1252",			cs_cp1252 }, 
 	{ "BIG5",			cs_big5 },
-	{ "950",            cs_big5 },
+	{ "950",			cs_big5 },
 	{ "GB2312",			cs_gb2312 },
-	{ "936",            cs_gb2312 },
+	{ "936",			cs_gb2312 },
 	{ "BIG5-HKSCS",		cs_big5hkscs },
 	{ "Shift_JIS",		cs_sjis },
-	{ "SJIS",   		cs_sjis },
-	{ "932",            cs_sjis },
-	{ "EUCJP",   		cs_eucjp },
-	{ "EUC-JP",   		cs_eucjp },
-	{ "KOI8-R",         cs_koi8r },
-	{ "koi8-ru",        cs_koi8r },
-	{ "koi8r",          cs_koi8r },
-	{ "cp1251",         cs_cp1251 },
-	{ "Windows-1251",   cs_cp1251 },
-	{ "win-1251",       cs_cp1251 },
-	{ "iso8859-5",      cs_8859_5 },
-	{ "iso-8859-5",     cs_8859_5 },
-	{ "cp866",          cs_cp866 },
-	{ "866",            cs_cp866 },    
-	{ "ibm866",         cs_cp866 },
-	{ "MacRoman",       cs_macroman },
+	{ "SJIS",			cs_sjis },
+	{ "932",			cs_sjis },
+	{ "EUCJP",			cs_eucjp },
+	{ "EUC-JP",			cs_eucjp },
+	{ "KOI8-R",			cs_koi8r },
+	{ "koi8-ru",		cs_koi8r },
+	{ "koi8r",			cs_koi8r },
+	{ "cp1251",			cs_cp1251 },
+	{ "Windows-1251",	cs_cp1251 },
+	{ "win-1251",		cs_cp1251 },
+	{ "iso8859-5",		cs_8859_5 },
+	{ "iso-8859-5",		cs_8859_5 },
+	{ "cp866",			cs_cp866 },
+	{ "866",			cs_cp866 },    
+	{ "ibm866",			cs_cp866 },
+	{ "MacRoman",		cs_macroman },
 	{ NULL }
 };
 
@@ -475,7 +467,6 @@ static const enc_to_uni enc_to_uni_macroman = {
 
 /* {{{ Index of tables for encoding conversion */
 static const enc_to_uni *const enc_to_uni_index[cs_numelems] = {
-	NULL,
 	NULL,
 	&enc_to_uni_iso88591,
 	&enc_to_uni_win1252,
@@ -1144,7 +1135,7 @@ typedef struct {
 	const entity_stage3_row *table;
 } entity_table_opt;
 
-/* Replaced "GT" > "gt" and "QUOT" > "quot" for consistentcy's sake. */
+/* Replaced "GT" > "gt" and "QUOT" > "quot" for consistency's sake. */
 
 /* {{{ Start of HTML5 multi-stage table for codepoint -> entity */
 
