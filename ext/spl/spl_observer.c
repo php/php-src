@@ -166,17 +166,17 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj, zval *in
 #endif
 } /* }}} */
 
-void spl_object_storage_detach(spl_SplObjectStorage *intern, zval *obj TSRMLS_DC) /* {{{ */
+int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *obj TSRMLS_DC) /* {{{ */
 {
 #if HAVE_PACKED_OBJECT_VALUE
-	zend_hash_del(&intern->storage, (char*)&Z_OBJVAL_P(obj), sizeof(zend_object_value));
+	return zend_hash_del(&intern->storage, (char*)&Z_OBJVAL_P(obj), sizeof(zend_object_value));
 #else
 	{
 		zend_object_value zvalue;
 		memset(&zvalue, 0, sizeof(zend_object_value));
 		zvalue.handle = Z_OBJ_HANDLE_P(obj);
 		zvalue.handlers = Z_OBJ_HT_P(obj);
-		zend_hash_del(&intern->storage, (char*)&zvalue, sizeof(zend_object_value));
+		return zend_hash_del(&intern->storage, (char*)&zvalue, sizeof(zend_object_value));
 	}
 #endif
 } /* }}}*/
@@ -412,7 +412,6 @@ SPL_METHOD(SplObjectStorage, removeAll)
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_SplObjectStorage *other;
 	spl_SplObjectStorageElement *element;
-	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
 		return;
@@ -420,10 +419,11 @@ SPL_METHOD(SplObjectStorage, removeAll)
 
 	other = (spl_SplObjectStorage *)zend_object_store_get_object(obj TSRMLS_CC);
 
-	zend_hash_internal_pointer_reset_ex(&other->storage, &pos);
-	while (zend_hash_get_current_data_ex(&other->storage, (void **)&element, &pos) == SUCCESS) {
-		spl_object_storage_detach(intern, element->obj TSRMLS_CC);
-		zend_hash_move_forward_ex(&other->storage, &pos);
+	zend_hash_internal_pointer_reset(&other->storage);
+	while (zend_hash_get_current_data(&other->storage, (void **)&element) == SUCCESS) {
+		if (spl_object_storage_detach(intern, element->obj TSRMLS_CC) == FAILURE) {
+			zend_hash_move_forward(&other->storage);
+		}
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
