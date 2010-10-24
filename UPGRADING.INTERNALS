@@ -104,3 +104,13 @@ Use emalloc, emalloc_rel, efree or efree_rel instead.
 . php_idate
   PHPAPI php_idate(char format, time_t ts, int localtime TSRMLS_DC)
   Call: int ret = php_idate(format, ts, localtime TSRMLS_CC)
+
+. php_escape_html_entities
+  (size_t parameters were ints, previous "quote_style" (now flags) has expanded meaning)
+  PHPAPI char *php_escape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
+
+. php_escape_html_entities_ex
+  PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset, zend_bool double_encode TSRMLS_DC);
+
+. php_unescape_html_entities
+  PHPAPI char *php_unescape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
