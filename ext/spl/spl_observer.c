@@ -389,13 +389,6 @@ static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ 
 		zend_hash_clean(Z_ARRVAL_P(gcdata_arr));
 	}
 
-	/* destroy intern->debug_info, as it's holding references to the zvals */
-	if (intern->debug_info != NULL) {
-		zend_hash_destroy(intern->debug_info);
-		efree(intern->debug_info);
-		intern->debug_info = NULL;
-	}
-
 	if (gcdata_arr == NULL) {
 		MAKE_STD_ZVAL(gcdata_arr);
 		array_init(gcdata_arr);
