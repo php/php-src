@@ -1307,9 +1307,11 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 		}
 	}
 
-	maxlen = 2 * oldlen;
-	if (maxlen < 128)
-		maxlen = 128;
+	if (oldlen < 64) {
+		maxlen = 128;	
+	} else {
+		maxlen = 2 * oldlen;
+	}
 	replaced = emalloc(maxlen);
 	len = 0;
 	cursor = 0;
@@ -1322,8 +1324,9 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
-		if (len + 40 > maxlen)
+		if (len + 40 > maxlen) {
 			replaced = erealloc(replaced, maxlen += 128);
+		}
 
 		if (status == FAILURE) {
 			/* invalid MB sequence */
@@ -1335,9 +1338,6 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 				continue;
 			} else {
 				efree(replaced);
-				if(!PG(display_errors)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid multibyte sequence in argument");
-				}
 				*newlen = 0;
 				return STR_EMPTY_ALLOC();
 			}
