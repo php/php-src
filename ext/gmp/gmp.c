@@ -957,12 +957,10 @@ ZEND_FUNCTION(gmp_div_q)
 ZEND_FUNCTION(gmp_mod)
 {
 	zval **a_arg, **b_arg;
-	zval b_copy;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &a_arg, &b_arg) == FAILURE){
 		return;
-	}
-	
+	}	
 
 	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_mod, (gmp_binary_ui_op_t)mpz_mod_ui, 1, 1, 0 TSRMLS_CC);
 }
