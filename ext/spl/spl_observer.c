@@ -324,6 +324,8 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	*is_temp = 0;
 
 	props = Z_OBJPROP_P(obj);
+	zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
+
 	if (intern->debug_info == NULL) {
 		ALLOC_HASHTABLE(intern->debug_info);
 		ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(props) + 1, 0);
@@ -338,10 +340,11 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 		zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 		while (zend_hash_get_current_data_ex(&intern->storage, (void **)&element, &pos) == SUCCESS) {
 				php_spl_object_hash(element->obj, md5str TSRMLS_CC);
-				Z_ADDREF_P(element->obj);
-				Z_ADDREF_P(element->inf);
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
+				/* Incrementing the refcount of obj and inf would confuse the garbage collector.
+				 * Prefer to null the destructor */
+				Z_ARRVAL_P(tmp)->pDestructor = NULL;
 				add_assoc_zval_ex(tmp, "obj", sizeof("obj"), element->obj);
 				add_assoc_zval_ex(tmp, "inf", sizeof("inf"), element->inf);
 				add_assoc_zval_ex(storage, md5str, 33, tmp);
@@ -354,6 +357,63 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	}
 
 	return intern->debug_info;
+}
+/* }}} */
+
+/* overriden for garbage collection
+ * This is very hacky, but unfortunately the garbage collector can only query objects for
+ * dependencies through get_properties */
+static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ */
+{
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
+	spl_SplObjectStorageElement *element;
+	HashTable *props;
+	HashPosition pos;
+	zval *gcdata_arr = NULL,
+		 **gcdata_arr_pp;
+
+	props = std_object_handlers.get_properties(obj TSRMLS_CC);
+	
+	if (!GC_G(gc_active)) {
+		zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
+		return props;
+	}
+
+	if (props->nApplyCount > 0) {
+		return props;
+	}
+
+	/* clean \x00gcdata, as it may be out of date */
+	if (zend_hash_find(props, "\x00gcdata", sizeof("\x00gcdata"), (void**) &gcdata_arr_pp) == SUCCESS) {
+		gcdata_arr = *gcdata_arr_pp;
+		zend_hash_clean(Z_ARRVAL_P(gcdata_arr));
+	}
+
+	/* destroy intern->debug_info, as it's holding references to the zvals */
+	if (intern->debug_info != NULL) {
+		zend_hash_destroy(intern->debug_info);
+		efree(intern->debug_info);
+		intern->debug_info = NULL;
+	}
+
+	if (gcdata_arr == NULL) {
+		MAKE_STD_ZVAL(gcdata_arr);
+		array_init(gcdata_arr);
+		/* don't decrease refcount of members when destroying */
+		Z_ARRVAL_P(gcdata_arr)->pDestructor = NULL;
+
+		/* name starts with \x00 to make tampering in user-land more difficult */
+		zend_hash_add(props, "\x00gcdata", sizeof("\x00gcdata"), &gcdata_arr, sizeof(gcdata_arr), NULL);
+	}
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
+	while (zend_hash_get_current_data_ex(&intern->storage, (void **)&element, &pos) == SUCCESS) {
+		add_next_index_zval(gcdata_arr, element->obj);
+		add_next_index_zval(gcdata_arr, element->inf);
+		zend_hash_move_forward_ex(&intern->storage, &pos);
+	}
+
+	return props;
 }
 /* }}} */
 
@@ -1178,6 +1238,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplObjectStorage.get_properties  = spl_object_storage_get_properties;
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
