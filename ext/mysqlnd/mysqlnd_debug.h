@@ -66,9 +66,9 @@ PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)	((tp.tv_sec * 1000000LL)+ tp.tv_usec)
-#define DBG_PROFILE_DECLARE_TIMEVARS		struct timeval __tp = {0}; uint64_t __start = 0; /* initialization is needed */
-#define DBG_PROFILE_START_TIME()			gettimeofday(&__tp, NULL); __start = DBG_PROFILE_TIMEVAL_TO_DOUBLE(__tp);
-#define DBG_PROFILE_END_TIME(duration)		gettimeofday(&__tp, NULL); (duration) = (DBG_PROFILE_TIMEVAL_TO_DOUBLE(__tp) - __start);
+#define DBG_PROFILE_DECLARE_TIMEVARS	struct timeval __dbg_prof_tp = {0}; uint64_t __dbg_prof_start = 0; /* initialization is needed */
+#define DBG_PROFILE_START_TIME()		gettimeofday(&__dbg_prof_tp, NULL); __dbg_prof_start = DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp);
+#define DBG_PROFILE_END_TIME(duration)	gettimeofday(&__dbg_prof_tp, NULL); (duration) = (DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp) - __dbg_prof_start);
 
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
