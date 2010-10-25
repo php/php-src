@@ -27,7 +27,6 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "zend_builtin_functions.h"
-#include "inttypes.h"
 
 static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace";
 
