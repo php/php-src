@@ -41,6 +41,8 @@
   sequences. (Gustavo)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
   large amount of data) (CVE-2010-3710). (Adam)
+- Fixed ReflectionProperty::isDefault() giving a wrong result for properties
+  obtained with ReflectionClass::getProperties(). (Gustavo)
 
 - Fixed bug #53144 (Segfault in SplObjectStorage::removeAll()). (Felipe)
 - Fixed bug #53071 (SPLObjectStorage defeats gc_collect_cycles). (Gustavo)
