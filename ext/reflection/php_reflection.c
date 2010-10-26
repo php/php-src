@@ -3902,6 +3902,7 @@ static int _adddynproperty(zval **pptr TSRMLS_DC, int num_args, va_list args, ze
 	ZVAL_STRINGL(&member, hash_key->arKey, hash_key->nKeyLength-1, 0);
 	if (zend_get_property_info(ce, &member, 1 TSRMLS_CC) == &EG(std_property_info)) {
 		MAKE_STD_ZVAL(property);
+		EG(std_property_info).flags = ZEND_ACC_IMPLICIT_PUBLIC;
 		reflection_property_factory(ce, &EG(std_property_info), property TSRMLS_CC);
 		add_next_index_zval(retval, property);
 	}
