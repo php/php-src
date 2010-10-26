@@ -657,6 +657,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
+			} else if (!STRCASECMP(header_line, "Content-Length")) {
+				/* Script is setting Content-length. The script cannot reasonably
+				 * know the size of the message body after compression, so it's best
+				 * do disable compression altogether. This contributes to making scripts
+				 * portable between setups that have and don't have zlib compression
+				 * enabled globally. See req #44164 */
+				zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"),
+					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 307) &&
