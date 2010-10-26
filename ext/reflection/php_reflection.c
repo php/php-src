@@ -2519,6 +2519,23 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::canBePassedByValue()
+   Returns whether this parameter can be passed by value */
+ZEND_METHOD(reflection_parameter, canBePassedByValue)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	/* true if it's ZEND_SEND_BY_VAL or ZEND_SEND_PREFER_REF */
+	RETVAL_BOOL(param->arg_info->pass_by_reference != ZEND_SEND_BY_REF);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::getPosition()
    Returns whether this parameter is an optional parameter */
 ZEND_METHOD(reflection_parameter, getPosition)
@@ -5901,6 +5918,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isPassedByReference, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, canBePassedByValue, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDeclaringFunction, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
