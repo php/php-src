@@ -659,10 +659,111 @@ PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char
 }
 /* }}} */
 
+/* copied from trunk's implementation of get_next_char in ext/standard/html.c */
+#define MB_FAILURE(pos, advance) do { \
+	*cursor = pos + (advance); \
+	*status = FAILURE; \
+	return 0; \
+} while (0)
+
+#define CHECK_LEN(pos, chars_need) ((str_len - (pos)) >= (chars_need))
+#define utf8_lead(c)  ((c) < 0x80 || ((c) >= 0xC2 && (c) <= 0xF4))
+#define utf8_trail(c) ((c) >= 0x80 && (c) <= 0xBF)
+
+/* {{{ php_next_utf8_char
+ */
+static inline unsigned int php_next_utf8_char(
+		const unsigned char *str,
+		size_t str_len,
+		size_t *cursor,
+		int *status)
+{
+	size_t pos = *cursor;
+	unsigned int this_char = 0;
+	unsigned char c;
+
+	*status = SUCCESS;
+
+	if (!CHECK_LEN(pos, 1))
+		MB_FAILURE(pos, 1);
+
+	/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
+		* "In a reported illegal byte sequence, do not include any
+		*  non-initial byte that encodes a valid character or is a leading
+		*  byte for a valid sequence.» */
+	c = str[pos];
+	if (c < 0x80) {
+		this_char = c;
+		pos++;
+	} else if (c < 0xc2) {
+		MB_FAILURE(pos, 1);
+	} else if (c < 0xe0) {
+		if (!CHECK_LEN(pos, 2))
+			MB_FAILURE(pos, 1);
+
+		if (!utf8_trail(str[pos + 1])) {
+			MB_FAILURE(pos, utf8_lead(str[pos + 1]) ? 1 : 2);
+		}
+		this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
+		if (this_char < 0x80) { /* non-shortest form */
+			MB_FAILURE(pos, 2);
+		}
+		pos += 2;
+	} else if (c < 0xf0) {
+		size_t avail = str_len - pos;
+
+		if (avail < 3 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2])) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE(pos, 2);
+			else
+				MB_FAILURE(pos, 3);
+		}
+
+		this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
+		if (this_char < 0x800) { /* non-shortest form */
+			MB_FAILURE(pos, 3);
+		} else if (this_char >= 0xd800 && this_char <= 0xdfff) { /* surrogate */
+			MB_FAILURE(pos, 3);
+		}
+		pos += 3;
+	} else if (c < 0xf5) {
+		size_t avail = str_len - pos;
+
+		if (avail < 4 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]) ||
+				!utf8_trail(str[pos + 3])) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE(pos, 2);
+			else if (avail < 4 || utf8_lead(str[pos + 3]))
+				MB_FAILURE(pos, 3);
+			else
+				MB_FAILURE(pos, 4);
+		}
+				
+		this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
+		if (this_char < 0x10000 || this_char > 0x10FFFF) { /* non-shortest form or outside range */
+			MB_FAILURE(pos, 4);
+		}
+		pos += 4;
+	} else {
+		MB_FAILURE(pos, 1);
+	}
+	
+	*cursor = pos;
+	return this_char;
+}
+/* }}} */
+
+
 /* {{{ xml_utf8_decode */
 PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_Char *encoding)
 {
-	int pos = len;
+	size_t pos = 0;
 	char *newbuf = emalloc(len + 1);
 	unsigned int c;
 	char (*decoder)(unsigned short) = NULL;
@@ -681,36 +782,15 @@ PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_
 		newbuf[*newlen] = '\0';
 		return newbuf;
 	}
-	while (pos > 0) {
-		c = (unsigned char)(*s);
-		if (c >= 0xf0) { /* four bytes encoded, 21 bits */
-			if(pos-4 >= 0) {
-				c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
-			} else {
-				c = '?';	
-			}
-			s += 4;
-			pos -= 4;
-		} else if (c >= 0xe0) { /* three bytes encoded, 16 bits */
-			if(pos-3 >= 0) {
-				c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
-			} else {
-				c = '?';
-			}
-			s += 3;
-			pos -= 3;
-		} else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-			if(pos-2 >= 0) {
-				c = ((s[0]&63)<<6) | (s[1]&63);
-			} else {
-				c = '?';
-			}
-			s += 2;
-			pos -= 2;
-		} else {
-			s++;
-			pos--;
+
+	while (pos < (size_t)len) {
+		int status = FAILURE;
+		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
+
+		if (status == FAILURE || c > 0xFFU) {
+			c = '?';
 		}
+
 		newbuf[*newlen] = decoder ? decoder(c) : c;
 		++*newlen;
 	}

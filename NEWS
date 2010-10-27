@@ -152,6 +152,8 @@
   other platforms). (Pierre)
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Ulf, Tony)
+- Fixed bug #49687 (utf8_decode vulnerabilities and deficiencies in the number
+  of reported malformed sequences). (Gustavo)
 - Fixed bug #49407 (get_html_translation_table doesn't handle UTF-8). (Gustavo)
 - Fixed bug #49215 (make fails on glob_wrapper). (Felipe)
 - Fixed bug #48831 (php -i has different output to php --ini). (Richard, 
