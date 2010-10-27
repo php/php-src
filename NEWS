@@ -44,6 +44,9 @@
 - Fixed ReflectionProperty::isDefault() giving a wrong result for properties
   obtained with ReflectionClass::getProperties(). (Gustavo)
 
+- Fixed bug #53180 (post_max_size=0 not disabling the limit when the content
+  type is application/x-www-form-urlencoded or is not registered with PHP).
+  (gm at tlink dot de, Gustavo)
 - Fixed bug #53144 (Segfault in SplObjectStorage::removeAll()). (Felipe)
 - Fixed bug #53071 (SPLObjectStorage defeats gc_collect_cycles). (Gustavo)
 - Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
