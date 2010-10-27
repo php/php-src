@@ -92,9 +92,9 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
 /* {{{ get_next_char
  */
-static unsigned int get_next_char(
+static inline unsigned int get_next_char(
 		enum entity_charset charset,
-		unsigned char *str,
+		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,
 		int *status)
@@ -349,6 +349,18 @@ static unsigned int get_next_char(
 
 	*cursor = pos;
   	return this_char;
+}
+/* }}} */
+
+/* {{{ php_next_utf8_char
+ * Public interface for get_next_char used with UTF-8 */
+ PHPAPI unsigned int php_next_utf8_char(
+		const unsigned char *str,
+		size_t str_len,
+		size_t *cursor,
+		int *status)
+{
+	return get_next_char(cs_utf_8, str, str_len, cursor, status);
 }
 /* }}} */
 
