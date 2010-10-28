@@ -122,6 +122,8 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	php_info_print_table_row(2, "Read timeout", buf);
 	php_info_print_table_row(2, "Collecting statistics", MYSQLND_G(collect_statistics)? "Yes":"No");
 	php_info_print_table_row(2, "Collecting memory statistics", MYSQLND_G(collect_memory_statistics)? "Yes":"No");
+
+	php_info_print_table_row(2, "Tracing", MYSQLND_G(debug)? MYSQLND_G(debug):"n/a");
 	php_info_print_table_end();
 
 	/* Print client stats */
