@@ -443,8 +443,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* if the user has configured who they are, send a From: line */
-	if (((have_header & HTTP_HEADER_FROM) == 0) && cfg_get_string("from", &tmp) == SUCCESS) {
-		if (snprintf(scratch, scratch_len, "From: %s\r\n", tmp) > 0)
+	if (((have_header & HTTP_HEADER_FROM) == 0) && FG(from_address)) {
+		if (snprintf(scratch, scratch_len, "From: %s\r\n", FG(from_address)) > 0)
 			php_stream_write(stream, scratch, strlen(scratch));
 	}
 
