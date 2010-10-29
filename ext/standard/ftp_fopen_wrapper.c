@@ -116,7 +116,6 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
 	int result, use_ssl, use_ssl_on_data = 0, tmp_len;
-	char *scratch;
 	char tmp_line[512];
 	char *transport;
 	int transport_len;
@@ -250,8 +249,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
-			if (cfg_get_string("from", &scratch) == SUCCESS) {
-				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", scratch);
+			if (FG(from_address)) {
+				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", FG(from_address));
 			} else {
 				php_stream_write_string(stream, "PASS anonymous\r\n");
 			}
