@@ -27,17 +27,17 @@
 
 struct st_mysqlnd_debug_methods
 {
-	enum_func_status (*open)(MYSQLND_DEBUG *self, zend_bool reopen);
-	void			 (*set_mode)(MYSQLND_DEBUG *self, const char * const mode);
-	enum_func_status (*log)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
+	enum_func_status (*open)(MYSQLND_DEBUG * self, zend_bool reopen);
+	void			 (*set_mode)(MYSQLND_DEBUG * self, const char * const mode);
+	enum_func_status (*log)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							unsigned int level, const char * type, const char *message);
-	enum_func_status (*log_va)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
+	enum_func_status (*log_va)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							   unsigned int level, const char * type, const char *format, ...);
-	zend_bool (*func_enter)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
+	zend_bool (*func_enter)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							const char * const func_name, unsigned int func_name_len);
-	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file, uint64_t call_time);
-	enum_func_status (*close)(MYSQLND_DEBUG *self);
-	enum_func_status (*free_handle)(MYSQLND_DEBUG *self);
+	enum_func_status (*func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time);
+	enum_func_status (*close)(MYSQLND_DEBUG * self);
+	enum_func_status (*free_handle)(MYSQLND_DEBUG * self);
 };
 
 
@@ -54,6 +54,7 @@ struct st_mysqlnd_debug
 	zend_stack call_stack;
 	zend_stack call_time_stack;	
 	HashTable not_filtered_functions;
+	HashTable function_profiles;
 	struct st_mysqlnd_debug_methods *m;
 	const char ** skip_functions;
 };
@@ -74,23 +75,41 @@ PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 #include <sys/time.h>
 #endif
 
+#ifndef MYSQLND_PROFILING_DISABLED
 #define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)	((tp.tv_sec * 1000000LL)+ tp.tv_usec)
 #define DBG_PROFILE_START_TIME()		gettimeofday(&__dbg_prof_tp, NULL); __dbg_prof_start = DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp);
 #define DBG_PROFILE_END_TIME(duration)	gettimeofday(&__dbg_prof_tp, NULL); (duration) = (DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp) - __dbg_prof_start);
+#else
+#define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)
+#define DBG_PROFILE_START_TIME()
+#define DBG_PROFILE_END_TIME(duration)
+#endif
 
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
 #define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
 #define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 
-#define DBG_ENTER_EX(dbg_obj, func_name) struct timeval __dbg_prof_tp = {0}; uint64_t __dbg_prof_start = 0; /* initialization is needed */zend_bool dbg_skip_trace = TRUE; \
-					if ((dbg_obj)) dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name)); \
-					do { DBG_PROFILE_START_TIME(); } while (0);
+#define DBG_ENTER_EX(dbg_obj, func_name) \
+					struct timeval __dbg_prof_tp = {0}; \
+					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
+					zend_bool dbg_skip_trace = TRUE; \
+					if ((dbg_obj)) { \
+						dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name)); \
+					} \
+					do { \
+						if ((dbg_obj) && (dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
+							DBG_PROFILE_START_TIME(); \
+						} \
+					} while (0); 
+
 #define DBG_RETURN_EX(dbg_obj, value)	\
 			do {\
 				if ((dbg_obj)) { \
 					uint64_t this_call_duration = 0; \
-					DBG_PROFILE_END_TIME(this_call_duration); \
+					if ((dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
+						DBG_PROFILE_END_TIME(this_call_duration); \
+					} \
 					(dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__, this_call_duration); \
 				} \
 				return (value);\
@@ -99,7 +118,9 @@ PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 			do {\
 				if ((dbg_obj)) { \
 					uint64_t this_call_duration = 0; \
-					DBG_PROFILE_END_TIME(this_call_duration); \
+					if ((dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
+						DBG_PROFILE_END_TIME(this_call_duration); \
+					} \
 					(dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__, this_call_duration); \
 				} \
 				return;\

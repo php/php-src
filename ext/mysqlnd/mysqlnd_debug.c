@@ -36,16 +36,6 @@ static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace
 #define MYSQLND_ZTS(self)
 #endif
 
-#define MYSQLND_DEBUG_DUMP_TIME				1
-#define MYSQLND_DEBUG_DUMP_TRACE			2
-#define MYSQLND_DEBUG_DUMP_PID				4
-#define MYSQLND_DEBUG_DUMP_LINE				8
-#define MYSQLND_DEBUG_DUMP_FILE				16
-#define MYSQLND_DEBUG_DUMP_LEVEL			32
-#define MYSQLND_DEBUG_APPEND				64
-#define MYSQLND_DEBUG_FLUSH					128
-#define MYSQLND_DEBUG_TRACE_MEMORY_CALLS	256
-
 static const char mysqlnd_emalloc_name[]	= "_mysqlnd_emalloc";
 static const char mysqlnd_pemalloc_name[]	= "_mysqlnd_pemalloc";
 static const char mysqlnd_ecalloc_name[]	= "_mysqlnd_ecalloc";
@@ -80,6 +70,7 @@ const char * mysqlnd_debug_std_no_trace_funcs[] =
 	mysqlnd_read_body_name,
 	NULL /* must be always last */
 };
+
 
 /* {{{ mysqlnd_debug::open */
 static enum_func_status
@@ -300,13 +291,12 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 
 
 /* FALSE - The DBG_ calls won't be traced, TRUE - will be traced */
-/* {{{ mysqlnd_res_meta::func_enter */
+/* {{{ mysqlnd_debug::func_enter */
 static zend_bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
 										  const char * const func_name, unsigned int func_name_len)
 {
-	uint64_t some_time = 0;
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
@@ -319,7 +309,12 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 		while (*p) {
 			if (*p == func_name) {
 				zend_stack_push(&self->call_stack, "", sizeof(""));
-				zend_stack_push(&self->call_time_stack, &some_time, sizeof(some_time));
+#ifndef MYSQLND_PROFILING_DISABLED
+				if (self->flags & MYSQLND_DEBUG_PROFILE_CALLS) {
+					uint64_t some_time = 0;
+					zend_stack_push(&self->call_time_stack, &some_time, sizeof(some_time));
+				}
+#endif
 				return FALSE;
 			}
 			p++;
@@ -327,7 +322,12 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	}
 
 	zend_stack_push(&self->call_stack, func_name, func_name_len + 1);
-	zend_stack_push(&self->call_time_stack, &some_time, sizeof(some_time));
+#ifndef MYSQLND_PROFILING_DISABLED
+	if (self->flags & MYSQLND_DEBUG_PROFILE_CALLS) {
+		uint64_t some_time = 0;
+		zend_stack_push(&self->call_time_stack, &some_time, sizeof(some_time));
+	}
+#endif
 
 	if (zend_hash_num_elements(&self->not_filtered_functions) &&
 		0 == zend_hash_exists(&self->not_filtered_functions, func_name, strlen(func_name) + 1))
@@ -340,14 +340,33 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 }
 /* }}} */
 
+#ifndef MYSQLND_PROFILING_DISABLED
+struct st_mysqlnd_dbg_function_profile {
+	uint64_t calls;
+	uint64_t min_own;
+	uint64_t max_own;
+	uint64_t avg_own;
+	uint64_t own_underporm_calls;
+	uint64_t min_in_calls;
+	uint64_t max_in_calls;
+	uint64_t avg_in_calls;
+	uint64_t in_calls_underporm_calls;
+	uint64_t min_total;
+	uint64_t max_total;
+	uint64_t avg_total;	
+	uint64_t total_underporm_calls;
+};
+#define PROFILE_UNDERPERFORM_THRESHOLD 10
+#endif
 
-/* {{{ mysqlnd_res_meta::func_leave */
+/* {{{ mysqlnd_debug::func_leave */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time)
 {
 	char *func_name;
 	uint64_t * parent_non_own_time_ptr = NULL, * mine_non_own_time_ptr = NULL;
-	uint64_t mine_non_own_time;
+	uint64_t mine_non_own_time = 0;
+	zend_bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
 
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
@@ -358,47 +377,150 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 
 	zend_stack_top(&self->call_stack, (void **)&func_name);
 
-
-	zend_stack_top(&self->call_time_stack, (void **)&mine_non_own_time_ptr);
-	mine_non_own_time = *mine_non_own_time_ptr;
-	zend_stack_del_top(&self->call_time_stack); /* callee - removing ourselves */
+#ifndef MYSQLND_PROFILING_DISABLED
+	if (profile_calls) {
+		zend_stack_top(&self->call_time_stack, (void **)&mine_non_own_time_ptr);
+		mine_non_own_time = *mine_non_own_time_ptr;
+		zend_stack_del_top(&self->call_time_stack); /* callee - removing ourselves */
+	}
+#endif
 
 	if (func_name[0] == '\0') {
 		; /* don't log that function */
 	} else if (!zend_hash_num_elements(&self->not_filtered_functions) ||
 			   1 == zend_hash_exists(&self->not_filtered_functions, func_name, strlen(func_name) + 1))
 	{
-		self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
-						func_name, (unsigned int) call_time, (unsigned int) (call_time - mine_non_own_time), (unsigned int) mine_non_own_time
+#ifndef MYSQLND_PROFILING_DISABLED
+		if (FALSE == profile_calls) {
+#endif
+			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s", func_name);
+
+#ifndef MYSQLND_PROFILING_DISABLED
+		} else {
+			struct st_mysqlnd_dbg_function_profile f_profile_stack = {0};
+			struct st_mysqlnd_dbg_function_profile * f_profile = NULL;
+			uint64_t own_time = call_time - mine_non_own_time;
+			uint func_name_len = strlen(func_name);
+
+			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
+						func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
 					);
-	}
 
-	{
-		enum_func_status ret = zend_stack_del_top(&self->call_stack) == SUCCESS? PASS:FAIL;
-		if ((uint) zend_stack_count(&self->call_time_stack)) {
-			uint64_t parent_non_own_time = 0;
+			if (SUCCESS == zend_hash_find(&self->function_profiles, func_name, func_name_len + 1, (void **) &f_profile)) {
+				/* found */
+					if (f_profile) {
+					if (mine_non_own_time < f_profile->min_in_calls) {
+						f_profile->min_in_calls = mine_non_own_time;
+					} else if (mine_non_own_time > f_profile->max_in_calls) {
+						f_profile->max_in_calls = mine_non_own_time;
+					}
+					f_profile->avg_in_calls = (f_profile->avg_in_calls * f_profile->calls + mine_non_own_time) / (f_profile->calls + 1);
 
-			zend_stack_top(&self->call_time_stack, (void **)&parent_non_own_time_ptr);
-			parent_non_own_time = *parent_non_own_time_ptr;
-			parent_non_own_time += call_time;
-			zend_stack_del_top(&self->call_time_stack); /* the caller */
-			zend_stack_push(&self->call_time_stack, &parent_non_own_time, sizeof(parent_non_own_time)); /* add back the caller */
+					if (own_time < f_profile->min_own) {
+						f_profile->min_own = own_time;
+					} else if (own_time > f_profile->max_own) {
+						f_profile->max_own = own_time;
+					}
+					f_profile->avg_own = (f_profile->avg_own * f_profile->calls + own_time) / (f_profile->calls + 1);
+
+					if (call_time < f_profile->min_total) {
+						f_profile->min_total = call_time;
+					} else if (call_time > f_profile->max_total) {
+						f_profile->max_total = call_time;
+					}
+					f_profile->avg_total = (f_profile->avg_total * f_profile->calls + call_time) / (f_profile->calls + 1);
+
+					++f_profile->calls;
+					if (f_profile->calls > PROFILE_UNDERPERFORM_THRESHOLD) {
+						if (f_profile->avg_in_calls < mine_non_own_time) {
+							f_profile->in_calls_underporm_calls++;
+						}
+						if (f_profile->avg_own < own_time) {
+							f_profile->own_underporm_calls++;
+						}
+						if (f_profile->avg_total < call_time) {
+							f_profile->total_underporm_calls++;
+						}
+					}
+				}
+			} else {
+				/* add */
+				f_profile = &f_profile_stack;
+				f_profile->min_in_calls = f_profile->max_in_calls = f_profile->avg_in_calls = mine_non_own_time;
+				f_profile->min_total = f_profile->max_total = f_profile->avg_total = call_time;
+				f_profile->min_own = f_profile->max_own = f_profile->avg_own = own_time;
+				f_profile->calls = 1;
+				zend_hash_add(&self->function_profiles, func_name, func_name_len+1, f_profile, sizeof(struct st_mysqlnd_dbg_function_profile), NULL);
+			}
+			if ((uint) zend_stack_count(&self->call_time_stack)) {
+				uint64_t parent_non_own_time = 0;
+
+				zend_stack_top(&self->call_time_stack, (void **)&parent_non_own_time_ptr);
+				parent_non_own_time = *parent_non_own_time_ptr;
+				parent_non_own_time += call_time;
+				zend_stack_del_top(&self->call_time_stack); /* the caller */
+				zend_stack_push(&self->call_time_stack, &parent_non_own_time, sizeof(parent_non_own_time)); /* add back the caller */
+			}
 		}
-		return ret;
+#endif
 	}
+
+	return zend_stack_del_top(&self->call_stack) == SUCCESS? PASS:FAIL;
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_res_meta::close */
+/* {{{ mysqlnd_debug::close */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 {
 	MYSQLND_ZTS(self);
 	if (self->stream) {
+#ifndef MYSQLND_PROFILING_DISABLED
+		if (!(self->flags & MYSQLND_DEBUG_FLUSH) && (self->flags & MYSQLND_DEBUG_PROFILE_CALLS)) {
+			struct st_mysqlnd_dbg_function_profile * f_profile;
+			HashPosition pos_values;
+
+			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",	
+					"number of functions: %d", zend_hash_num_elements(&self->function_profiles));
+			zend_hash_internal_pointer_reset_ex(&self->function_profiles, &pos_values);
+			while (zend_hash_get_current_data_ex(&self->function_profiles, (void **) &f_profile, &pos_values) == SUCCESS) {
+				char	*string_key = NULL;
+				uint	string_key_len;
+				ulong	num_key;
+
+				zend_hash_get_current_key_ex(&self->function_profiles, &string_key, &string_key_len, &num_key, 0, &pos_values);
+
+				self->m->log_va(self, __LINE__, __FILE__, -1, "info : ",
+						"%-40s\tcalls=%5llu  own_slow=%5llu  in_calls_slow=%5llu  total_slow=%5llu"
+						"   min_own=%5llu  max_own=%7llu  avg_own=%7llu   "
+						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
+						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
+						,string_key
+						,(unsigned long long) f_profile->calls
+						,(unsigned long long) f_profile->own_underporm_calls
+						,(unsigned long long) f_profile->in_calls_underporm_calls
+						,(unsigned long long) f_profile->total_underporm_calls
+						
+						,(unsigned long long) f_profile->min_own
+						,(unsigned long long) f_profile->max_own
+						,(unsigned long long) f_profile->avg_own
+						,(unsigned long long) f_profile->min_in_calls
+						,(unsigned long long) f_profile->max_in_calls
+						,(unsigned long long) f_profile->avg_in_calls
+						,(unsigned long long) f_profile->min_total
+						,(unsigned long long) f_profile->max_total
+						,(unsigned long long) f_profile->avg_total
+						);
+				zend_hash_move_forward_ex(&self->function_profiles, &pos_values);
+			}
+		}
+#endif	
+
 		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE);
 		self->stream = NULL;
 	}
+	/* no DBG_RETURN please */
 	return PASS;
 }
 /* }}} */
@@ -415,6 +537,7 @@ MYSQLND_METHOD(mysqlnd_debug, free)(MYSQLND_DEBUG * self)
 	zend_stack_destroy(&self->call_stack);
 	zend_stack_destroy(&self->call_time_stack);
 	zend_hash_destroy(&self->not_filtered_functions);
+	zend_hash_destroy(&self->function_profiles);
 	efree(self);
 	return PASS;
 }
@@ -458,6 +581,11 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				}
 				if (i + 1 < mode_len && mode[i+1] == ',') {
 					unsigned int j = i + 2;
+#ifdef PHP_WIN32
+					if (i+4 < mode_len && mode[i+3] == ':' && (mode[i+4] == '\\' || mode[i+5] == '/')) {
+						j = i + 5;
+					}
+#endif
 					while (j < mode_len) {
 						if (mode[j] == ':') {
 							break;
@@ -587,6 +715,10 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				self->flags |= MYSQLND_DEBUG_TRACE_MEMORY_CALLS;
 				state = PARSER_WAIT_COLON;
 				break;
+			case 'x': /* mysqlnd extension - profile calls */
+				self->flags |= MYSQLND_DEBUG_PROFILE_CALLS;
+				state = PARSER_WAIT_COLON;
+				break;				
 			default:
 				if (state == PARSER_WAIT_MODIFIER) {
 #if 0
@@ -613,7 +745,6 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 }
 /* }}} */
 
-
 MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 	MYSQLND_METHOD(mysqlnd_debug, open),
 	MYSQLND_METHOD(mysqlnd_debug, set_mode),
@@ -624,7 +755,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 	MYSQLND_METHOD(mysqlnd_debug, close),
 	MYSQLND_METHOD(mysqlnd_debug, free),
 MYSQLND_CLASS_METHODS_END;
-
 
 
 /* {{{ mysqlnd_debug_init */
@@ -640,6 +770,7 @@ mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 	zend_stack_init(&ret->call_stack);
 	zend_stack_init(&ret->call_time_stack);
 	zend_hash_init(&ret->not_filtered_functions, 0, NULL, NULL, 0);
+	zend_hash_init(&ret->function_profiles, 0, NULL, NULL, 0);
 
 	ret->m = & mysqlnd_mysqlnd_debug_methods;
 	ret->skip_functions = skip_functions;
