@@ -31,5 +31,6 @@
 
 typedef void Sigfunc(int);
 Sigfunc *php_signal(int signo, Sigfunc *func, int restart);
+Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all);
 
 #endif
