@@ -160,6 +160,8 @@
 - Fixed bug #49215 (make fails on glob_wrapper). (Felipe)
 - Fixed bug #48831 (php -i has different output to php --ini). (Richard, 
   Pierre)
+- Fixed bug #47643 (array_diff() takes over 3000 times longer than php 5.2.4).
+  (Felipe)
 - Fixed bug #45921 (Can't initialize character set hebrew). (Andrey)
 - Fixed bug #44248 (RFC2616 transgression while HTTPS request through proxy
   with SoapClient object). (Dmitry)
