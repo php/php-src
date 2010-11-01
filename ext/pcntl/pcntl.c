@@ -1233,8 +1233,10 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
 	/* Bail if the queue is empty or if we are already playing the queue*/
-	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue))
+	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
+		sigprocmask(SIG_SETMASK, &old_mask, NULL);
 		return;
+	}
 
 	/* Prevent reentrant handler calls */
 	PCNTL_G(processing_signal_queue) = 1;
