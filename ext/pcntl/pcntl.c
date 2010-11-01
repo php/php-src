@@ -887,7 +887,7 @@ PHP_FUNCTION(pcntl_signal)
 	zend_hash_index_update(&PCNTL_G(php_signal_table), signo, (void **) &handle, sizeof(zval *), (void **) &dest_handle);
 	if (dest_handle) zval_add_ref(dest_handle);
 	
-	if (php_signal(signo, pcntl_signal_handler, (int) restart_syscalls) == SIG_ERR) {
+	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
@@ -1224,11 +1224,19 @@ void pcntl_signal_dispatch()
 {
 	zval *param, **handle, *retval;
 	struct php_pcntl_pending_signal *queue, *next;
+	sigset_t mask;
+	sigset_t old_mask;
 	TSRMLS_FETCH();
+		
+	/* Mask all signals */
+	sigfillset(&mask);
+	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
 	/* Bail if the queue is empty or if we are already playing the queue*/
-	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue))
+	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
+		sigprocmask(SIG_SETMASK, &old_mask, NULL);
 		return;
+	}
 
 	/* Prevent reentrant handler calls */
 	PCNTL_G(processing_signal_queue) = 1;
@@ -1260,6 +1268,9 @@ void pcntl_signal_dispatch()
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;
+	
+	/* return signal mask to previous state */
+	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
 
