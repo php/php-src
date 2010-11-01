@@ -10,6 +10,8 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Implemented FR #52173, added functions pcntl_get_last_error() and 
+  pcntl_strerror(). (nick dot telford at gmail dot com, Arnaud)
 - Implemented symbolic links support for open_basedir checks. (Pierre)
 - Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
 - Implemented FR #50692, not uploaded files don't count towards
