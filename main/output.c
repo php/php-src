@@ -902,7 +902,9 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			}
 			
 		} else {
-			
+			if (context->in.data && context->in.free) {
+				efree(context->in.data);
+			}
 			context->in.data = handler->buffer.data;
 			context->in.used = handler->buffer.used;
 			context->in.free = 0;
