@@ -1209,10 +1209,12 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (IMAPG(imap_user)) {
 		efree(IMAPG(imap_user));
+		IMAPG(imap_user) = 0;
 	}
 
 	if (IMAPG(imap_password)) {
 		efree(IMAPG(imap_password));
+		IMAPG(imap_password) = 0;
 	}
 
 	/* local filename, need to perform open_basedir check */
