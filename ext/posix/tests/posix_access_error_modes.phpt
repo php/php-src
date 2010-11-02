@@ -17,8 +17,6 @@ if (PHP_VERSION_ID < 503099) {
     die('SKIP Safe mode is no longer available.');
 }
 ?>
---INI--
-safe_mode = 1
 --FILE--
 <?php
 $filename = dirname(__FILE__) . '/foo.test';

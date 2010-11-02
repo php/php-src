@@ -14,8 +14,6 @@ if (posix_geteuid() == 0) {
 if (PHP_VERSION_ID < 503099) {
     die('SKIP Safe mode is no longer available.');
 }
---INI--
-safe_mode = 1
 --FILE--
 <?php
 var_dump(posix_access('/tmp', POSIX_W_OK));
