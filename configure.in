@@ -764,7 +764,7 @@ if test "$PHP_DEBUG" = "yes"; then
   changequote([,])
   dnl add -O0 only if GCC or ICC is used
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
-    CFLAGS="$CFLAGS -g -O0"
+    CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -g -O0"
   fi
   if test "$SUNCC" = "yes"; then
