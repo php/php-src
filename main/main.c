@@ -1825,7 +1825,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
-	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
+	int retval = SUCCESS, module_number=0;	/* for REGISTER_INI_ENTRIES() */
 	char *php_os;
 	zend_module_entry *module;
 #ifdef ZTS
@@ -2135,21 +2135,25 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		};
 
 		unsigned int i;
+		
+		zend_try {
+			/* 2 = Count of deprecation structs */
+			for (i = 0; i < 2; i++) {
+				const char **p = directives[i].directives;
 
-		/* 2 = Count of deprecation structs */
-		for (i = 0; i < 2; i++) {
-			const char **p = directives[i].directives;
+				while(*p) {
+					long value;
 
-			while(*p) {
-				long value;
+					if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
+						zend_error(directives[i].error_level, directives[i].phrase, *p);
+					}
 
-				if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
-					zend_error(directives[i].error_level, directives[i].phrase, *p);
+					++p;
 				}
-
-				++p;
 			}
-		}
+		} zend_catch {
+			retval = FAILURE;
+		} zend_end_try();
 	}
 	
 	sapi_deactivate(TSRMLS_C);
@@ -2159,7 +2163,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_interned_strings_snapshot(TSRMLS_C);
 
 	/* we're done */
-	return SUCCESS;
+	return retval;
 }
 /* }}} */
 
