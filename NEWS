@@ -26,7 +26,7 @@
   disables zlib.output_compression.
 
 - Fixed a possible double free in imap extension (Identified by Mateusz 
-  Kocielski). (Ilia)
+  Kocielski). (CVE-2010-4150). (Ilia)
 - Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
   (CVE-2010-3709). (Maksymilian Arciemowicz)
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
