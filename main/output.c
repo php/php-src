@@ -570,7 +570,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 		if (SUCCESS != zend_hash_next_index_insert(&rev, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
- 		}
+		}
 		if (SUCCESS != zend_hash_update(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable), NULL)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
@@ -730,6 +730,20 @@ static inline void php_output_context_reset(php_output_context *context)
 }
 /* }}} */
 
+/* {{{ static void php_output_context_feed(php_output_context *context, char *, size_t, size_t) 
+	Feed output contexts input buffer */
+static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, zend_bool free)
+{
+	if (context->in.free && context->in.data) {
+		efree(context->in.data);
+	}
+	context->in.data = data;
+	context->in.used = used;
+	context->in.free = free;
+	context->in.size = size;
+}
+/* }}} */
+
 /* {{{ static void php_output_context_swap(php_output_context *context)
 	Swap output contexts buffers */
 static inline void php_output_context_swap(php_output_context *context)
@@ -743,6 +757,7 @@ static inline void php_output_context_swap(php_output_context *context)
 	context->in.size = context->out.size;
 	context->out.data = NULL;
 	context->out.used = 0;
+	context->out.free = 0;
 	context->out.size = 0;
 }
 /* }}} */
@@ -757,6 +772,7 @@ static inline void php_output_context_pass(php_output_context *context)
 	context->out.free = context->in.free;
 	context->in.data = NULL;
 	context->in.used = 0;
+	context->in.free = 0;
 	context->in.size = 0;
 }
 /* }}} */
@@ -902,12 +918,8 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			}
 			
 		} else {
-			if (context->in.data && context->in.free) {
-				efree(context->in.data);
-			}
-			context->in.data = handler->buffer.data;
-			context->in.used = handler->buffer.used;
-			context->in.free = 0;
+
+			php_output_context_feed(context, handler->buffer.data, handler->buffer.size, handler->buffer.used, 0);
 			
 			if (SUCCESS == handler->func.internal(&handler->opaq, context)) {
 				if (context->out.used) {
@@ -1077,7 +1089,7 @@ static int php_output_stack_apply_clean(void *h, void *c)
 	return 0;
 }
 /* }}} */
- 
+
 /* {{{ static int php_output_stack_apply_list(void *h, void *z)
 	List callback for the stack apply function */
 static int php_output_stack_apply_list(void *h, void *z)
@@ -1202,12 +1214,7 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 	Default output handler */
 static int php_output_handler_default_func(void **handler_context, php_output_context *output_context)
 {
-	output_context->out.data = output_context->in.data;
-	output_context->out.used = output_context->in.used;
-	output_context->out.free = output_context->in.free;
-	output_context->in.data = NULL;
-	output_context->in.used = 0;
-	output_context->in.free = 0;
+	php_output_context_pass(output_context);
 	return SUCCESS;
 }
 /* }}} */
