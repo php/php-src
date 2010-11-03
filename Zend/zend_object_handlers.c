@@ -984,13 +984,13 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 	if (!fbc && zend_hash_find(&ce->function_table, lc_function_name, function_name_strlen+1, (void **) &fbc)==FAILURE) {
 		efree(lc_function_name);
 
-		if (ce->__callstatic) {
-			return zend_get_user_callstatic_function(ce, function_name_strval, function_name_strlen);
-		} else if (ce->__call &&
+		if (ce->__call &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
 		    instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 			return zend_get_user_call_function(ce, function_name_strval, function_name_strlen);
+		} else if (ce->__callstatic) {
+			return zend_get_user_callstatic_function(ce, function_name_strval, function_name_strlen);
 		} else {
 	   		return NULL;
 		}
