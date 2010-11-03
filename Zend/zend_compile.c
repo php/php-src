@@ -2557,7 +2557,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 0;
 	}
 
-	if (fe->common.return_reference != proto->common.return_reference) {
+	/* by-ref constraints on return values are covariant */
+	if (proto->common.return_reference && !fe->common.return_reference) {
 		return 0;
 	}
 
@@ -2581,6 +2582,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			/* Only one has an array type hint and the other one doesn't */
 			return 0;
 		}
+
+		/* by-ref constraints on arguments are invariant */
 		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
 			return 0;
 		}

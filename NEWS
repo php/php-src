@@ -50,6 +50,7 @@
   large amount of data) (CVE-2010-3710). (Adam)
 - Fixed ReflectionProperty::isDefault() giving a wrong result for properties
   obtained with ReflectionClass::getProperties(). (Gustavo)
+- Fixed covariance of return-by-ref constraints. (Etienne)
 
 - Fixed bug #53198 (changing INI setting "from" with ini_set did not have any
   effect). (Gustavo)
