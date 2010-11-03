@@ -4,6 +4,9 @@
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
+- Reverted fix for bug #51176 (Static calling in non-static method behaves
+  like $this->). (Felipe)
+
 - Added follow_location (enabled by default) option for the http stream 
   support. (Pierre)
 - Added new character sets to mysqlnd, which are available in MySQL 5.5
