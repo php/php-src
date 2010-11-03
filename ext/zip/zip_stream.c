@@ -30,7 +30,7 @@ struct php_zip_stream_data_t {
 /* {{{ php_zip_ops_read */
 static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	int n = 0;
+	size_t n = 0;
 	STREAM_DATA_FROM_STREAM();
 
 	if (self->za && self->zf) {
