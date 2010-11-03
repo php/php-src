@@ -2956,8 +2956,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 0;
 	}
 
-	if ((fe->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) !=
-	    (proto->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+	/* by-ref constraints on return values are covariant */
+	if ((proto->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+		&& !(fe->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 		return 0;
 	}
 
@@ -2981,6 +2982,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			/* Incompatible type hint */
 			return 0;
 		}
+
+		/* by-ref constraints on arguments are invariant */
 		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
 			return 0;
 		}
