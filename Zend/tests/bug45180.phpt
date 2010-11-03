@@ -43,11 +43,11 @@ __call:
 string(3) "ABC"
 __call:
 string(3) "ABC"
-__callstatic:
+__call:
 string(3) "XYZ"
-__callstatic:
+__call:
 string(3) "WWW"
-__callstatic:
+__call:
 string(3) "ABC"
 __callstatic:
 string(1) "A"

@@ -30,5 +30,5 @@ a::Foo();
 --EXPECT--
 __callstatic: Test
 __call: Test
-__callstatic: Bar
+__call: Bar
 __callstatic: Foo

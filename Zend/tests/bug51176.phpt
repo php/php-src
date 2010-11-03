@@ -27,6 +27,6 @@ $foo->start();
 
 ?>
 --EXPECT--
-static
-static
-static
+instance
+instance
+instance
