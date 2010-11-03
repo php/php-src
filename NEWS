@@ -2,7 +2,7 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.15
 - Fixed a possible double free in imap extension (Identified by Mateusz 
-  Kocielski). (Ilia)
+  Kocielski). (CVE-2010-4150). (Ilia)
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
 
