@@ -7,6 +7,7 @@
 - Reverted fix for bug #51176 (Static calling in non-static method behaves
   like $this->). (Felipe)
 
+- Added stat support for zip stream. (Pierre)
 - Added follow_location (enabled by default) option for the http stream 
   support. (Pierre)
 - Added new character sets to mysqlnd, which are available in MySQL 5.5
