@@ -277,6 +277,18 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 }
 /* }}} */
 
+CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
+{
+	return php_sys_stat_ex(path, buf, 0);
+}
+/* }}} */
+
+CWD_API int php_sys_lstat(const char *path, struct stat *buf) /* {{{ */
+{
+	return php_sys_stat_ex(path, buf, 1);
+}
+/* }}} */
+
 CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;

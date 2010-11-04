@@ -131,8 +131,8 @@ typedef unsigned short mode_t;
 
 #ifdef TSRM_WIN32
 CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
+CWD_API int php_sys_stat(const char *path, struct stat *buf);
+CWD_API int php_sys_lstat(const char *path, struct stat *buf);
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
 #else
 # define php_sys_stat stat
