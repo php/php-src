@@ -502,6 +502,8 @@ typedef enum mysqlnd_collected_stats
 	STAT_COM_SET_OPTION,
 	STAT_COM_STMT_FETCH,
 	STAT_COM_DAEMON,
+	STAT_BYTES_RECEIVED_PURE_DATA_TEXT,
+	STAT_BYTES_RECEIVED_PURE_DATA_PS,
 	STAT_LAST /* Should be always the last */
 } enum_mysqlnd_collected_stats;
 
