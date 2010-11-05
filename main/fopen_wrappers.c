@@ -291,6 +291,14 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC)
 		char *ptr;
 		char *end;
 
+		/* Check if the path is too long so we can give a more useful error
+		* message. */
+		if (strlen(path) > (MAXPATHLEN - 1)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name is longer than the maximum allowed path length on this platform (%d): %s", MAXPATHLEN, path);
+			errno = EINVAL;
+			return -1;
+		}
+
 		pathbuf = estrdup(PG(open_basedir));
 
 		ptr = pathbuf;
