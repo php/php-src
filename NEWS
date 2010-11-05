@@ -121,6 +121,8 @@
 
 - Deprecated mysql_list_dbs() (Request #50667). (Andrey)
 
+- Implemented FR #53238 (Make third parameter of preg_match_all optional).
+  (Adam)
 - Implemented FR #52555 (Ability to get HTTP response code). (Paul Dragoonis)
 - Implemented FR #51295 (SQLite3::busyTimeout not existing). (Mark)
 - Implemented FR #49366 (Make slash escaping optional in json_encode()). (Adam)

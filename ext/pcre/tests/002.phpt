@@ -20,7 +20,7 @@ var_dump(preg_replace('/(.)/e', 'for ($', 'abc'));
 Warning: preg_match() expects at least 2 parameters, 0 given in %s002.php on line 3
 bool(false)
 
-Warning: preg_match_all() expects at least 3 parameters, 0 given in %s002.php on line 4
+Warning: preg_match_all() expects at least 2 parameters, 0 given in %s002.php on line 4
 bool(false)
 
 Warning: preg_match_all(): Invalid flags specified in %s002.php on line 5
