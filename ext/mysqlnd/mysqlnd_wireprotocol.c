@@ -1223,6 +1223,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 
 	for (i = 0, current_field = start_field; current_field < end_field; current_field++, i++) {
 		enum_mysqlnd_collected_stats statistic;
+		zend_uchar * orig_p = p;
 
 		DBG_INF_FMT("Into zval=%p decoding column %u [%s.%s.%s] type=%u field->flags&unsigned=%u flags=%u is_bit=%u as_unicode=%u",
 			*current_field, i,
@@ -1269,7 +1270,10 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 				}
 			}
 		}
-		MYSQLND_INC_CONN_STATISTIC(stats, statistic);
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1,
+										STAT_BYTES_RECEIVED_PURE_DATA_PS,
+										(Z_TYPE_PP(current_field) == IS_STRING)?
+											Z_STRLEN_PP(current_field) : (p - orig_p));
 
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
@@ -1376,9 +1380,8 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_TEXT_TYPE_FETCHED_GEOMETRY; break;
 					default: statistic = STAT_TEXT_TYPE_FETCHED_OTHER; break;
 				}
-				MYSQLND_INC_CONN_STATISTIC(stats, statistic);
+				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
-
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
 				zend_uchar save = *(p + len);
