@@ -144,6 +144,50 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 #endif
 /* }}} */
 
+/* {{{ php_stream_rep_nonstand_mode
+ * Result should have at least size 5, e.g. to write wbx+\0 */
+PHPAPI void php_stream_rep_nonstand_mode(php_stream *stream, char *result)
+{
+	/* replace modes not supported by fdopen and fopencookie, but supported 
+	 * by PHP's fread(), so that their calls won't fail */
+	const char *cur_mode = stream->mode;
+	int         has_plus = 0,
+		        has_bin  = 0,
+				i,
+				res_curs = 0;
+
+	if (cur_mode[0] == 'r' || cur_mode[0] == 'w' || cur_mode[0] == 'a') {
+		result[res_curs++] = cur_mode[0];
+	} else {
+		/* assume cur_mode[0] is 'c' or 'x'; substitute by 'w', which should not
+		 * truncate anything in fdopen/fopencookie */
+		result[res_curs++] = 'w';
+
+		/* x is allowed (at least by glibc & compat), but not as the 1st mode
+		 * as in PHP and in any case is (at best) ignored by fdopen and fopencookie */
+	}
+	
+	/* assume current mode has at most length 4 (e.g. wbn+) */
+	for (i = 1; i < 4 && cur_mode[i] != '\0'; i++) {
+		if (cur_mode[i] == 'b') {
+			has_bin = 1;
+		} else if (cur_mode[i] == '+') {
+			has_plus = 1;
+		}
+		/* ignore 'n', 't' or other stuff */
+	}
+
+	if (has_bin) {
+		result[res_curs++] = 'b';
+	}
+	if (has_plus) {
+		result[res_curs++] = '+';
+	}
+
+	result[res_curs] = '\0';
+}
+/* }}} */
+
 /* {{{ php_stream_cast */
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC)
 {
@@ -187,7 +231,11 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-		*(FILE**)ret = fopencookie(stream, stream->mode, PHP_STREAM_COOKIE_FUNCTIONS);
+		{
+			char fixed_mode[5];
+			php_stream_rep_nonstand_mode(stream, fixed_mode);
+			*(FILE**)ret = fopencookie(stream, fixed_mode, PHP_STREAM_COOKIE_FUNCTIONS);
+		}
 
 		if (*ret != NULL) {
 			off_t pos;
