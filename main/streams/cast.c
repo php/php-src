@@ -144,9 +144,9 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 #endif
 /* }}} */
 
-/* {{{ php_stream_rep_nonstand_mode
+/* {{{ php_stream_mode_sanitize_fdopen_fopencookie
  * Result should have at least size 5, e.g. to write wbx+\0 */
-PHPAPI void php_stream_rep_nonstand_mode(php_stream *stream, char *result)
+void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *result)
 {
 	/* replace modes not supported by fdopen and fopencookie, but supported 
 	 * by PHP's fread(), so that their calls won't fail */
@@ -233,7 +233,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 		{
 			char fixed_mode[5];
-			php_stream_rep_nonstand_mode(stream, fixed_mode);
+			php_stream_mode_sanitize_fdopen_fopencookie(stream, fixed_mode);
 			*(FILE**)ret = fopencookie(stream, fixed_mode, PHP_STREAM_COOKIE_FUNCTIONS);
 		}
 
