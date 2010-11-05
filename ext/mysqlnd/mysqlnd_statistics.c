@@ -190,7 +190,9 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ STR_W_LEN("com_stmt_reset") },
 	{ STR_W_LEN("com_stmt_set_option") },
 	{ STR_W_LEN("com_stmt_fetch") },
-	{ STR_W_LEN("com_deamon") }
+	{ STR_W_LEN("com_deamon") },
+	{ STR_W_LEN("bytes_received_real_data_normal") },
+	{ STR_W_LEN("bytes_received_real_data_ps") }
 };
 /* }}} */
 

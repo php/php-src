@@ -887,7 +887,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(158) {
+array(160) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1203,6 +1203,10 @@ array(158) {
   [%u|b%"com_stmt_fetch"]=>
   %unicode|string%(1) "0"
   [%u|b%"com_deamon"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_real_data_normal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_real_data_ps"]=>
   %unicode|string%(1) "0"
 }
 Testing buffered normal...
