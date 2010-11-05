@@ -766,7 +766,7 @@ static PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject, [array &subpatterns [, int flags [, int offset]]])
+/* {{{ proto int preg_match_all(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
    Perform a Perl-style global regular expression match */
 static PHP_FUNCTION(preg_match_all)
 {
