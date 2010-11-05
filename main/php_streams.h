@@ -462,12 +462,6 @@ END_EXTERN_C()
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 BEGIN_EXTERN_C()
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC);
-/* This functions transforms the first char to 'w' if it's not 'r', 'a' or 'w'
- * and strips any subsequent chars except '+' and 'b'.
- * Use this to sanitize stream->mode if you call e.g. fdopen, fopencookie or
- * any other function that expects standard modes and you allow non-standard
- * ones. result should be a char[5]. */
-PHPAPI void php_stream_rep_nonstand_mode(php_stream *stream, char *result);
 END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0 TSRMLS_CC)
