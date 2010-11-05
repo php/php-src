@@ -55,6 +55,7 @@
 
 - Fixed bug #53241 (stream casting that relies on fdopen/fopencookie fails
   with streams opened with, inter alia, the 'xb' mode). (Gustavo)
+- Fixed bug #53226 (file_exists fails on big filenames). (Adam)
 - Fixed bug #53198 (changing INI setting "from" with ini_set did not have any
   effect). (Gustavo)
 - Fixed bug #53180 (post_max_size=0 not disabling the limit when the content
