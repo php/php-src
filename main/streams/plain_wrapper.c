@@ -491,7 +491,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 					/* we were opened as a plain file descriptor, so we
 					 * need fdopen now */
 					char fixed_mode[5];
-					php_stream_rep_nonstand_mode(stream, fixed_mode);
+					php_stream_mode_sanitize_fdopen_fopencookie(stream, fixed_mode);
 					data->file = fdopen(data->fd, fixed_mode);
 					if (data->file == NULL) {
 						return FAILURE;
