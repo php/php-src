@@ -5930,7 +5930,7 @@ PHP_FUNCTION(pg_insert)
 }
 /* }}} */
 
-static inline int build_assignment_string(smart_str *querystr, HashTable *ht, const char *pad, int pad_len TSRMLS_DC)
+static inline int build_assignment_string(smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len TSRMLS_DC)
 {
 	HashPosition pos;
 	uint fld_len;
@@ -5949,7 +5949,11 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, co
 			return -1;
 		}
 		smart_str_appendl(querystr, fld, fld_len - 1);
-		smart_str_appendc(querystr, '=');
+		if (where_cond && Z_TYPE_PP(val) == IS_STRING && !strcmp(Z_STRVAL_PP(val), "NULL")) {
+			smart_str_appends(querystr, " IS ");
+		} else {
+			smart_str_appendc(querystr, '=');
+		}
 		
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
@@ -6011,12 +6015,12 @@ PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var
 	smart_str_appends(&querystr, table);
 	smart_str_appends(&querystr, " SET ");
 
-	if (build_assignment_string(&querystr, Z_ARRVAL_P(var_array), ",", 1 TSRMLS_CC))
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(var_array), 0, ",", 1 TSRMLS_CC))
 		goto cleanup;
 	
 	smart_str_appends(&querystr, " WHERE ");
 	
-	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1 TSRMLS_CC))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');	
@@ -6112,7 +6116,7 @@ PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids
 	smart_str_appends(&querystr, table);
 	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1 TSRMLS_CC))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');
@@ -6251,7 +6255,7 @@ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids
 	smart_str_appends(&querystr, table);
 	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1 TSRMLS_CC))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');
