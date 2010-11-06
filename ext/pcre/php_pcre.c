@@ -755,10 +755,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	efree(subpat_names);
 
 	/* Did we encounter an error? */
-	if(PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
+	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
 		RETVAL_LONG(matched);
-	}
-	else {
+	} else {
 		RETVAL_FALSE;
 	}
 }
