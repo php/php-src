@@ -4,6 +4,7 @@
 - Upgraded bundled sqlite to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
+- Updated _SERVER['REQUEST_TIME'] to include microsecond precision. (Ilia)
 - Added apache compatible functions (apache_child_terminate, getallheaders,
   apache_request_headers, apache_response_headers) to FastCGI SAPI (Dmitry)
 - Added caches to eliminate repeatable run-time bindings of functions, classes,

@@ -438,9 +438,9 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 
 /* {{{ php_apache_get_request_time
  */
-static time_t php_apache_get_request_time(TSRMLS_D)
+static double php_apache_get_request_time(TSRMLS_D)
 {
-	return ((request_rec *)SG(server_context))->request_time;
+	return (double) ((request_rec *)SG(server_context))->request_time;
 }
 /* }}} */
 
