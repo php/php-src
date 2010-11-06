@@ -106,6 +106,8 @@
   get_class_name before calling it). (Kalle, Gustavo)
 - Fixed bug #52744 (cal_days_in_month incorrect for December 1 BCE).
   (gpap at internet dot gr, Adam)
+- Fixed bug #52732 (Docs say preg_match() returns FALSE on error, but it
+  returns int(0)). (slugonamission at gmail dot com)
 - Fixed bug #52725 (gcc builtin atomic functions were sometimes used when they
   were not available). (fat)
 - Fixed bug #52745 (Binding params doesn't work when selecting a date inside a
