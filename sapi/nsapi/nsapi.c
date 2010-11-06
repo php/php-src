@@ -784,7 +784,7 @@ static void nsapi_log_message(char *message TSRMLS_DC)
 	}
 }
 
-static time_t sapi_nsapi_get_request_time(TSRMLS_D)
+static double sapi_nsapi_get_request_time(TSRMLS_D)
 {
 	return REQ_TIME( ((nsapi_request_context *)SG(server_context))->rq );
 }
