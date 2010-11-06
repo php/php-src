@@ -1733,7 +1733,7 @@ SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char       *subject, tmp[32], *result;
-	int        subject_len, use_copy, count, result_len;
+	int        subject_len, use_copy, count = 0, result_len;
 	zval       subject_copy, zcount, *replacement;
 	
 	if (intern->current.data == NULL) {
@@ -1796,8 +1796,8 @@ SPL_METHOD(RegexIterator, accept)
 		break;
 
 	case REGIT_MODE_REPLACE:
-		replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1 TSRMLS_CC);
-		result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
+		replacement = zend_read_property(intern->std.ce, intern->inner.zobject, "replacement", sizeof("replacement")-1, 1 TSRMLS_CC);
+		result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, &result_len, -1, &count TSRMLS_CC);
 		
 		if (intern->u.regex.flags & REGIT_USE_KEY) {
 			if (intern->current.key_type != HASH_KEY_IS_LONG) {
@@ -1811,6 +1811,7 @@ SPL_METHOD(RegexIterator, accept)
 			MAKE_STD_ZVAL(intern->current.data);
 			ZVAL_STRINGL(intern->current.data, result, result_len, 0);
 		}
+		RETVAL_BOOL(count > 0);
 	}
 
 	if (intern->u.regex.flags & REGIT_INVERTED) {
