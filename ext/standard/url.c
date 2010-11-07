@@ -585,7 +585,7 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 			str[y++] = hexchars[(unsigned char) s[x] >> 4];
 			str[y] = hexchars[(unsigned char) s[x] & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(str[y]) && strchr("_-.", str[y]) != NULL) {
+		if (!isalnum(str[y]) && strchr("_-.~", str[y]) != NULL) {
 			str[y++] = '%';
 			str[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
 			str[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
