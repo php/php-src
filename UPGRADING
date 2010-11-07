@@ -224,7 +224,9 @@ UPGRADE NOTES - PHP X.Y
 9. Changes in SAPI support
 ==========================
 
-- 
+- The REQUEST_TIME value insde server now returns a  floating point number
+  indicating the time with microsecond precision. All SAPIs provinding this
+  value should be returning float and not time_t.
 
 =============================
 10. Changes in INI directives
