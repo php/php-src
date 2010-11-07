@@ -336,7 +336,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 				if (last_idle_child == NULL) {
 					last_idle_child = child;
 				} else {
-					if (child->started.tv_sec < last_idle_child->started.tv_sec) {
+					if (timercmp(&child->started, &last_idle_child->started, <)) {
 						last_idle_child = child;
 					}
 				}
