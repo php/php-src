@@ -38,7 +38,8 @@ enum {
 enum {
 	FPM_PCTL_TERM,
 	FPM_PCTL_STOP,
-	FPM_PCTL_CONT
+	FPM_PCTL_CONT,
+	FPM_PCTL_QUIT
 };
 
 #endif
