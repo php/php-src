@@ -212,7 +212,7 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 			/* if it's been killed because of dynamic process management
 			 * don't restart it automaticaly
 			 */
-			if (child && child->idle_kill && WTERMSIG(status) == SIGTERM) {
+			if (child && child->idle_kill && WTERMSIG(status) == SIGQUIT) {
 				restart_child = 0;
 			}
 

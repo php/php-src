@@ -143,6 +143,9 @@ int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
 		case FPM_PCTL_CONT :
 			s = SIGCONT;
 			break;
+		case FPM_PCTL_QUIT :
+			s = SIGQUIT;
+			break;
 		default :
 			break;
 	}
@@ -358,7 +361,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 
 		if (idle > wp->config->pm_max_spare_servers && last_idle_child) {
 			last_idle_child->idle_kill = 1;
-			fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_TERM);
+			fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_QUIT);
 			wp->idle_spawn_rate = 1;
 			continue;
 		}
