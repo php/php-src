@@ -134,6 +134,8 @@
 - Fixed bug #52546 (pdo_dblib segmentation fault when iterating MONEY values).
   (Felipe)
 - Fixed bug #52534 (var_export array with negative key). (Felipe)
+- Fixed bug #52512 (Broken error handling in odbc_execute).
+  (mkoegler at auto dot tuwien dot ac dot at)
 - Fixed bug #52508 (newline problem with parse_ini_file+INI_SCANNER_RAW).
   (Felipe)
 - Fixed bug #52498 (libevent was not only linked to php-fpm). (fat)
