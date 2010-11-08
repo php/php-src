@@ -26,9 +26,9 @@ echo "Done\n";
 --EXPECTF--	
 string(9) "x.changed"
 
-Warning: Invocation of C's constructor failed in %s/bug42976.php on line %d
+Warning: Invocation of C's constructor failed in %sbug42976.php on line %d
 string(10) "x.original"
 
-Warning: Invocation of C's constructor failed in %s/bug42976.php on line %d
+Warning: Invocation of C's constructor failed in %sbug42976.php on line %d
 string(10) "x.original"
 Done
