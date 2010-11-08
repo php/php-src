@@ -3239,10 +3239,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		php_stream_context_set_option(context, "http", "proxy", str_proxy);
 		zval_ptr_dtor(&str_proxy);
 
-		MAKE_STD_ZVAL(str_proxy);
-		ZVAL_BOOL(str_proxy, 1);
-		php_stream_context_set_option(context, "http", "request_fulluri", str_proxy);
-		zval_ptr_dtor(&str_proxy);
+		if (uri_len < sizeof("https://")-1 ||
+		    strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
+			MAKE_STD_ZVAL(str_proxy);
+			ZVAL_BOOL(str_proxy, 1);
+			php_stream_context_set_option(context, "http", "request_fulluri", str_proxy);
+			zval_ptr_dtor(&str_proxy);
+		}
 
 		proxy_authentication(this_ptr, &headers TSRMLS_CC);
 	}
