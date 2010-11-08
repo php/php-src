@@ -10,9 +10,7 @@ create_directories();
 var_dump(file_exists('./test/ok/ok.txt'));
 var_dump(file_exists('./test/foo'));
 
-// Picked an arbitrarily large number that should be beyond PATH_MAX on every
-// OS I know about.
-$file = str_repeat('x', 40000);
+$file = str_repeat('x', 2 * PHP_MAXPATHLEN);
 var_dump(file_exists("./test/$file"));
 ?>
 --CLEAN--
