@@ -52,11 +52,15 @@
 - Fixed ReflectionProperty::isDefault() giving a wrong result for properties
   obtained with ReflectionClass::getProperties(). (Gustavo)
 - Fixed covariance of return-by-ref constraints. (Etienne)
+- Fixed the filter extension accepting IPv4 octets with a leading 0 as that
+  belongs to the unsupported "dotted octal" representation. (Gustavo)
 
 - Fixed bug #53248 (rawurlencode RFC 3986 EBCDIC support misses tilde char).
   (Justin Martin)
 - Fixed bug #53241 (stream casting that relies on fdopen/fopencookie fails
   with streams opened with, inter alia, the 'xb' mode). (Gustavo)
+- Fixed bug #53236 (problems in the validation of IPv6 addresses with leading
+  and trailing :: in the filter extension). (Gustavo)
 - Fixed bug #53226 (file_exists fails on big filenames). (Adam)
 - Fixed bug #53198 (changing INI setting "from" with ini_set did not have any
   effect). (Gustavo)
@@ -177,6 +181,8 @@
   other platforms). (Pierre)
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Ulf, Tony)
+- Fixed bug #50117 (problems in the validation of IPv6 addresses with IPv4
+  addresses and ::). (Gustavo)
 - Fixed bug #49687 (utf8_decode vulnerabilities and deficiencies in the number
   of reported malformed sequences). (CVE-2010-3870) (Gustavo)
 - Fixed bug #49407 (get_html_translation_table doesn't handle UTF-8). (Gustavo)
