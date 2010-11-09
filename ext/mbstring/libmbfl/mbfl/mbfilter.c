@@ -1397,6 +1397,10 @@ mbfl_strcut(
 			start = string->val + from;
 			end   = start + (length & -4);
 		} else if ((encoding->flag & MBFL_ENCTYPE_SBCS)) {
+			if (from + length >= string->len) {
+				length = string->len - from;
+			}
+
 			start = string->val + from;
 			end = start + length;
 		} else if (encoding->mblen_table != NULL) {
