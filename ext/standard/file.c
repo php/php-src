@@ -1845,13 +1845,10 @@ PHP_FUNCTION(fputcsv)
 	char enclosure = '"';	/* allow this to be set as parameter */
 	const char escape_char = '\\';
 	php_stream *stream;
+	zval *fp = NULL, *fields = NULL;
 	int ret;
-	zval *fp = NULL, *fields = NULL, **field_tmp = NULL, field;
 	char *delimiter_str = NULL, *enclosure_str = NULL;
 	int delimiter_str_len = 0, enclosure_str_len = 0;
-	HashPosition pos;
-	int count, i = 0;
-	smart_str csvline = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|ss",
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
@@ -1884,6 +1881,19 @@ PHP_FUNCTION(fputcsv)
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &fp);
+
+	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char TSRMLS_CC);
+	RETURN_LONG(ret);
+}
+/* }}} */
+
+/* {{{ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
+PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
+{
+	int count, i = 0, ret;
+	zval **field_tmp = NULL, field;
+	smart_str csvline = {0};
+	HashPosition pos;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
@@ -1950,7 +1960,7 @@ PHP_FUNCTION(fputcsv)
 
 	smart_str_free(&csvline);
 
-	RETURN_LONG(ret);
+	return ret;
 }
 /* }}} */
 

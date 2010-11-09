@@ -309,6 +309,9 @@ UPGRADE NOTES - PHP X.Y
        - PDO_dblib
          - PDO::newRowset()
 
+       - SplFileObject
+         - SplFileObject::fputcsv()
+
      i. New class constants
 
        - 
