@@ -275,6 +275,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';
+	intern->u.file.escape = '\\';
 
 	zend_hash_find(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline"), (void **) &intern->u.file.func_getCurr);
 

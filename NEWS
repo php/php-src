@@ -55,6 +55,8 @@
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
 
+- Fixed bug #53279 (SplFileObject doesn't initialise default CSV escape
+  character). (Adam)
 - Fixed bug #53273 (mb_strcut() returns garbage with the excessive length parameter). (CVE-2010-4156) (Mateusz Kocielski, Pierre, Moriyoshi)
 - Fixed bug #53248 (rawurlencode RFC 3986 EBCDIC support misses tilde char).
   (Justin Martin)
