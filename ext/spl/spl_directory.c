@@ -2310,6 +2310,43 @@ SPL_METHOD(SplFileObject, fgetcsv)
 }
 /* }}} */
 
+/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure]])
+   Output a field array as a CSV line */
+SPL_METHOD(SplFileObject, fputcsv)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
+	char *delim = NULL, *enclo = NULL;
+	int d_len = 0, e_len = 0, ret;
+	zval *fields = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|ss", &fields, &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+		switch(ZEND_NUM_ARGS())
+		{
+		case 3:
+			if (e_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				RETURN_FALSE;
+			}
+			enclosure = enclo[0];
+			/* no break */
+		case 2:
+			if (d_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				RETURN_FALSE;
+			}
+			delimiter = delim[0];
+			/* no break */
+		case 1:
+		case 0:
+			break;
+		}
+		ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape TSRMLS_CC);
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
 /* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
    Set the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
@@ -2585,6 +2622,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0)
 	ZEND_ARG_INFO(0, enclosure)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fputcsv, 0, 0, 1)
+	ZEND_ARG_INFO(0, fields)
+	ZEND_ARG_INFO(0, delimiter)
+	ZEND_ARG_INFO(0, enclosure)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
 	ZEND_ARG_INFO(0, operation)
 	ZEND_ARG_INFO(1, wouldblock)
@@ -2623,6 +2666,7 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, valid,          arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgets,          arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgetcsv,        arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileObject, fputcsv,        arginfo_file_object_fputcsv,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, setCsvControl,  arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, getCsvControl,  arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
