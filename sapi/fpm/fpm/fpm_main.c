@@ -1917,8 +1917,10 @@ fastcgi_request_done:
 out:
 
 	SG(server_context) = NULL;
-	php_module_shutdown(TSRMLS_C);
-	sapi_shutdown();
+	if (parent) {
+		php_module_shutdown(TSRMLS_C);
+		sapi_shutdown();
+	}
 
 #ifdef ZTS
 	tsrm_shutdown();
