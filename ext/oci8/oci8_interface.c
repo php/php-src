@@ -1719,7 +1719,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *client_id;
-	long client_id_len;
+	int client_id_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_id, &client_id_len) == FAILURE) {
 		return;
@@ -1744,7 +1744,7 @@ PHP_FUNCTION(oci_set_edition)
 {
 #if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	char *edition;
-	long edition_len;
+	int edition_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &edition, &edition_len) == FAILURE) {
 		return;
@@ -1777,7 +1777,7 @@ PHP_FUNCTION(oci_set_module_name)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *module;
-	long module_len;
+	int module_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &module, &module_len) == FAILURE) {
 		return;
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(oci_set_action)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *action;
-	long action_len;
+	int action_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &action, &action_len) == FAILURE) {
 		return;
@@ -1839,7 +1839,7 @@ PHP_FUNCTION(oci_set_client_info)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *client_info;
-	long client_info_len;
+	int client_info_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_info, &client_info_len) == FAILURE) {
 		return;
