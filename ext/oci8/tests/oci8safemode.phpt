@@ -15,7 +15,7 @@ $r = oci_password_change($c, "hr", "hrpwd", "hrpwd");
 echo "Done\n";
 ?>
 --EXPECTF--
-Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
+%s: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Warning: oci_connect(): Privileged connect is disabled in Safe Mode in %s on line %d
 
