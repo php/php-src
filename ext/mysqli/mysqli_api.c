@@ -1763,7 +1763,7 @@ PHP_FUNCTION(mysqli_prepare)
 	MY_MYSQL		*mysql;
 	MY_STMT			*stmt;
 	char			*query = NULL;
-	unsigned int	query_len;
+	int				query_len;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE	*mysqli_resource;
 
@@ -1847,10 +1847,10 @@ PHP_FUNCTION(mysqli_real_connect)
    Binary-safe version of mysql_query() */
 PHP_FUNCTION(mysqli_real_query)
 {
-	MY_MYSQL		*mysql;
-	zval			*mysql_link;
-	char			*query = NULL;
-	unsigned int	query_len;
+	MY_MYSQL	*mysql;
+	zval		*mysql_link;
+	char		*query = NULL;
+	int			query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
