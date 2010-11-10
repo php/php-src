@@ -8,13 +8,18 @@ $sv = oci_server_version($c);
 $sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
 if ($sv !== 1) {
 	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+} else {
+    ob_start();
+    phpinfo(INFO_MODULES);
+    $phpinfo = ob_get_clean();
+    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
+    if ($iv != 1) {
+        die ("skip test expected to work only with Oracle 11g or greater version of client");
+    }
 }
 ?>
 --FILE--
 <?php
-
-// Note: expected output is valid for 32bit clients to 32bit 10gR2 XE or 11.2.0.1 64bit DBs.
-// It will diff on the undefined cases with a 32bit 11.2.0.1 DB
 
 // Same test as bind_char_3 but the PL/SQL function uses VARCHAR2 instead of CHAR
 
