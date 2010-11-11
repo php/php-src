@@ -14,6 +14,8 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Added statistics about listening socket queue length for FPM.
+  (andrei dot nigmatulin at gmail dot com, fat)
 - Implemented FR #52348, Ability to detect zend multibyte at runtime. (Kalle)
 - Implemented FR #52173, added functions pcntl_get_last_error() and 
   pcntl_strerror(). (nick dot telford at gmail dot com, Arnaud)
