@@ -14,13 +14,15 @@ struct fpm_status_s {
 	int idle;
 	int active;
 	int total;
+	unsigned cur_lq;
+	int max_lq;
 	unsigned long int accepted_conn;
 	unsigned int max_children_reached;
 	struct timeval last_update;
 };
 
 int fpm_status_init_child(struct fpm_worker_pool_s *wp);
-void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int total, int clear_last_update);
+void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int total, unsigned cur_lq, int max_lq, int clear_last_update);
 void fpm_status_update_accepted_conn(struct fpm_shm_s *shm, unsigned long int accepted_conn);
 void fpm_status_increment_accepted_conn(struct fpm_shm_s *shm);
 void fpm_status_set_pm(struct fpm_shm_s *shm, int pm);

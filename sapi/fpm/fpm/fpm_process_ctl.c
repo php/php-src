@@ -19,6 +19,7 @@
 #include "fpm_request.h"
 #include "fpm_worker_pool.h"
 #include "fpm_status.h"
+#include "fpm_sockets.h"
 #include "zlog.h"
 
 
@@ -327,6 +328,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 		int idle = 0;
 		int active = 0;
 		int children_to_fork;
+		unsigned cur_lq;
 
 		if (wp->config == NULL) continue;
 
@@ -352,7 +354,10 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 		}
 
 		/* update status structure for all PMs */
-		fpm_status_update_activity(wp->shm_status, idle, active, idle + active, 0);
+		if (0 > fpm_socket_get_listening_queue(wp, &cur_lq, NULL)) {
+			cur_lq = 0;
+		}
+		fpm_status_update_activity(wp->shm_status, idle, active, idle + active, cur_lq, wp->listening_queue_len, 0);
 
 		/* the rest is only used by PM_STYLE_DYNAMIC */
 		if (wp->config->pm != PM_STYLE_DYNAMIC) continue;

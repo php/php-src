@@ -576,7 +576,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				return -1;
 			}
 			fpm_status_update_accepted_conn(wp->shm_status, 0);
-			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 1);
+			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 0, -1, 1);
 			fpm_status_update_max_children_reached(wp->shm_status, 0);
 			fpm_status_set_pm(wp->shm_status, wp->config->pm);
 			/* memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update)); */

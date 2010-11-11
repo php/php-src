@@ -344,6 +344,10 @@ int fpm_sockets_init_main() /* {{{ */
 				break;
 		}
 
+		if (0 > fpm_socket_get_listening_queue(wp, NULL, (unsigned *) &wp->listening_queue_len)) {
+			wp->listening_queue_len = -1;
+		}
+
 		if (wp->listening_socket == -1) {
 			return -1;
 		}
@@ -373,3 +377,76 @@ int fpm_sockets_init_main() /* {{{ */
 }
 /* }}} */
 
+#if HAVE_FPM_LQ
+
+#ifdef HAVE_LQ_TCP_INFO
+
+#include <netinet/tcp.h>
+
+int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+{
+	if (wp->listen_address_domain != FPM_AF_INET) {
+		return -1;
+	}
+
+	struct tcp_info info;
+	socklen_t len = sizeof(info);
+
+	if (0 > getsockopt(wp->listening_socket, IPPROTO_TCP, TCP_INFO, &info, &len)) {
+		return -1;
+	}
+
+	/* kernel >= 2.6.24 return non-zero here, that means operation is supported */
+	if (info.tcpi_sacked == 0) {
+		return -1;
+	}
+
+	if (cur_lq) {
+		*cur_lq = info.tcpi_unacked;
+	}
+
+	if (max_lq) {
+		*max_lq = info.tcpi_sacked;
+	}
+
+	return 0;
+}
+
+#endif
+
+#ifdef HAVE_LQ_SO_LISTENQ
+
+int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+{
+	int val;
+	socklen_t len = sizeof(val);
+
+	if (cur_lq) {
+		if (0 > getsockopt(wp->listening_socket, SOL_SOCKET, SO_LISTENQLEN, &val, &len)) {
+			return -1;
+		}
+
+		*cur_lq = val;
+	}
+
+	if (max_lq) {
+		if (0 > getsockopt(wp->listening_socket, SOL_SOCKET, SO_LISTENQLIMIT, &val, &len)) {
+			return -1;
+		}
+
+		*max_lq = val;
+	}
+
+	return 0;
+}
+
+#endif
+
+#else
+
+int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+{
+	return -1;
+}
+
+#endif
