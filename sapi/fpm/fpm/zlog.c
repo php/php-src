@@ -18,6 +18,7 @@
 
 static int zlog_fd = -1;
 static int zlog_level = ZLOG_NOTICE;
+static int launched = 0;
 
 static const char *level_names[] = {
 	[ZLOG_DEBUG]		= "DEBUG",
@@ -26,6 +27,10 @@ static const char *level_names[] = {
 	[ZLOG_ERROR]		= "ERROR",
 	[ZLOG_ALERT]		= "ALERT",
 };
+
+void zlog_set_launched(void) {
+	launched = 1;
+}
 
 size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /* {{{ */
 {
@@ -110,6 +115,9 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 
 	buf[len++] = '\n';
 	write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
+	if (zlog_fd != STDERR_FILENO && zlog_fd > -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_WARNING) {
+		write(STDERR_FILENO, buf, len);
+	}
 }
 /* }}} */
 
