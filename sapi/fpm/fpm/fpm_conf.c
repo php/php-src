@@ -52,50 +52,53 @@ static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset);
 
-struct fpm_global_config_s fpm_global_config = { 0, 0, 0, 1, NULL, NULL};
+struct fpm_global_config_s fpm_global_config = { .daemonize = 1 };
 static struct fpm_worker_pool_s *current_wp = NULL;
 static int ini_recursion = 0;
 static char *ini_filename = NULL;
 static int ini_lineno = 0;
 static char *ini_include = NULL;
 
+#define GO(field) offsetof(struct fpm_global_config_s, field)
+#define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
+
 static struct ini_value_parser_s ini_fpm_global_options[] = {
-	{ "emergency_restart_threshold", 	&fpm_conf_set_integer, 	offsetof(struct fpm_global_config_s, emergency_restart_threshold) },
-	{ "emergency_restart_interval",		&fpm_conf_set_time,			offsetof(struct fpm_global_config_s, emergency_restart_interval) },
-	{ "process_control_timeout",			&fpm_conf_set_time,			offsetof(struct fpm_global_config_s, process_control_timeout) },
-	{ "daemonize",										&fpm_conf_set_boolean,	offsetof(struct fpm_global_config_s, daemonize) },
-	{ "pid",													&fpm_conf_set_string,		offsetof(struct fpm_global_config_s, pid_file) },
-	{ "error_log",										&fpm_conf_set_string,		offsetof(struct fpm_global_config_s, error_log) },
+	{ "emergency_restart_threshold", 	&fpm_conf_set_integer, 	GO(emergency_restart_threshold) },
+	{ "emergency_restart_interval",		&fpm_conf_set_time,			GO(emergency_restart_interval) },
+	{ "process_control_timeout",			&fpm_conf_set_time,			GO(process_control_timeout) },
+	{ "daemonize",										&fpm_conf_set_boolean,	GO(daemonize) },
+	{ "pid",													&fpm_conf_set_string,		GO(pid_file) },
+	{ "error_log",										&fpm_conf_set_string,		GO(error_log) },
 	{ "log_level",										&fpm_conf_set_log_level,	0 },
 	{ 0, 0, 0 }
 };
 
 static struct ini_value_parser_s ini_fpm_pool_options[] = {
-	{ "user", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, user) },
-	{ "group", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, group) },
-	{ "chroot", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, chroot) },
-	{ "chdir", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, chdir) },
-	{ "request_terminate_timeout", &fpm_conf_set_time, offsetof(struct fpm_worker_pool_config_s, request_terminate_timeout) },
-	{ "request_slowlog_timeout", &fpm_conf_set_time, offsetof(struct fpm_worker_pool_config_s, request_slowlog_timeout) },
-	{ "slowlog", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, slowlog) },
-	{ "rlimit_files", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, rlimit_files) },
-	{ "rlimit_core", &fpm_conf_set_rlimit_core, offsetof(struct fpm_worker_pool_config_s, rlimit_core) },
-	{ "catch_workers_output", &fpm_conf_set_boolean, offsetof(struct fpm_worker_pool_config_s, catch_workers_output) },
-	{ "listen", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, listen_address) },
-	{ "listen.owner", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, listen_owner) },
-	{ "listen.group", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, listen_group) },
-	{ "listen.mode", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, listen_mode) },
-	{ "listen.backlog", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, listen_backlog) },
-	{ "listen.allowed_clients", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, listen_allowed_clients) },
-	{ "pm", &fpm_conf_set_pm, offsetof(struct fpm_worker_pool_config_s, pm) },
-	{ "pm.max_requests", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, pm_max_requests) },
-	{ "pm.max_children", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, pm_max_children) },
-	{ "pm.start_servers", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, pm_start_servers) },
-	{ "pm.min_spare_servers", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, pm_min_spare_servers) },
-	{ "pm.max_spare_servers", &fpm_conf_set_integer, offsetof(struct fpm_worker_pool_config_s, pm_max_spare_servers) },
-	{ "pm.status_path", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, pm_status_path) },
-	{ "ping.path", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, ping_path) },
-	{ "ping.response", &fpm_conf_set_string, offsetof(struct fpm_worker_pool_config_s, ping_response) },
+	{ "user", &fpm_conf_set_string, WPO(user) },
+	{ "group", &fpm_conf_set_string, WPO(group) },
+	{ "chroot", &fpm_conf_set_string, WPO(chroot) },
+	{ "chdir", &fpm_conf_set_string, WPO(chdir) },
+	{ "request_terminate_timeout", &fpm_conf_set_time, WPO(request_terminate_timeout) },
+	{ "request_slowlog_timeout", &fpm_conf_set_time, WPO(request_slowlog_timeout) },
+	{ "slowlog", &fpm_conf_set_string, WPO(slowlog) },
+	{ "rlimit_files", &fpm_conf_set_integer, WPO(rlimit_files) },
+	{ "rlimit_core", &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
+	{ "catch_workers_output", &fpm_conf_set_boolean, WPO(catch_workers_output) },
+	{ "listen", &fpm_conf_set_string, WPO(listen_address) },
+	{ "listen.owner", &fpm_conf_set_string, WPO(listen_owner) },
+	{ "listen.group", &fpm_conf_set_string, WPO(listen_group) },
+	{ "listen.mode", &fpm_conf_set_string, WPO(listen_mode) },
+	{ "listen.backlog", &fpm_conf_set_integer, WPO(listen_backlog) },
+	{ "listen.allowed_clients", &fpm_conf_set_string, WPO(listen_allowed_clients) },
+	{ "pm", &fpm_conf_set_pm, WPO(pm) },
+	{ "pm.max_requests", &fpm_conf_set_integer, WPO(pm_max_requests) },
+	{ "pm.max_children", &fpm_conf_set_integer, WPO(pm_max_children) },
+	{ "pm.start_servers", &fpm_conf_set_integer, WPO(pm_start_servers) },
+	{ "pm.min_spare_servers", &fpm_conf_set_integer, WPO(pm_min_spare_servers) },
+	{ "pm.max_spare_servers", &fpm_conf_set_integer, WPO(pm_max_spare_servers) },
+	{ "pm.status_path", &fpm_conf_set_string, WPO(pm_status_path) },
+	{ "ping.path", &fpm_conf_set_string, WPO(ping_path) },
+	{ "ping.response", &fpm_conf_set_string, WPO(ping_response) },
 	{ 0, 0, 0 }
 };
 
@@ -146,17 +149,17 @@ static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset) /*
 
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /* {{{ */
 {
-	int i;
 	char *val = Z_STRVAL_P(value);
+	char *p;
 
-	for (i=0; i<strlen(val); i++) {
-		if ( i == 0 && val[i] == '-' ) continue;
-		if (val[i] < '0' || val[i] > '9') {
-			return("is not a valid number (greater or equal than zero");
+	for(p=val; *p; p++) {
+		if ( p == val && *p == '-' ) continue;
+		if (*p < '0' || *p > '9') {
+			return "is not a valid number (greater or equal than zero)";
 		}
 	}
 	* (int *) ((char *) *config + offset) = atoi(val);
-	return(NULL);
+	return NULL;
 }
 /* }}} */
 
@@ -288,7 +291,7 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 
 	if (convert_to_bool) {
 		char *err = fpm_conf_set_boolean(value, &subconf, 0);
-		if (err) return(err);
+		if (err) return err;
 		kv->value = strdup(b ? "On" : "Off");
 	} else {
 		kv->value = strdup(Z_STRVAL_P(value));
@@ -870,7 +873,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 			*error = 1;
 			return;
 		}
-		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, env);
+		config = (char *)current_wp->config + WPO(env);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_value", Z_STRVAL_P(name))) {
@@ -879,7 +882,7 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 			*error = 1;
 			return;
 		}
-		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_values);
+		config = (char *)current_wp->config + WPO(php_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_admin_value", Z_STRVAL_P(name))) {
@@ -888,15 +891,15 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 			*error = 1;
 			return;
 		}
-		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_admin_values);
+		config = (char *)current_wp->config + WPO(php_admin_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_flag", Z_STRVAL_P(name))) {
-		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_values);
+		config = (char *)current_wp->config + WPO(php_values);
 		err = fpm_conf_set_array(key, value, &config, 1);
 
 	} else if (!strcmp("php_admin_flag", Z_STRVAL_P(name))) {
-		config = (char *)current_wp->config + offsetof(struct fpm_worker_pool_config_s, php_admin_values);
+		config = (char *)current_wp->config + WPO(php_admin_values);
 		err = fpm_conf_set_array(key, value, &config, 1);
 
 	} else {

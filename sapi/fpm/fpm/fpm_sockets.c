@@ -65,7 +65,7 @@ enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
 static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 {
-	int i;
+	unsigned i;
 	char *env_value = 0;
 	int p = 0;
 	struct listening_socket_s *ls = sockets_list.data;
@@ -124,7 +124,7 @@ static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int typ
 
 		case FPM_GET_USE_SOCKET :
 		{
-			int i;
+			unsigned i;
 			struct listening_socket_s *ls = sockets_list.data;
 
 			for (i = 0; i < sockets_list.used; i++, ls++) {
@@ -179,17 +179,22 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		unlink( ((struct sockaddr_un *) sa)->sun_path);
+		saved_umask = umask(0777 ^ wp->socket_mode);
 	}
-
-	saved_umask = umask(0777 ^ wp->socket_mode);
 
 	if (0 > bind(sock, sa, socklen)) {
 		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "bind() for address '%s' failed", wp->config->listen_address);
+		if (wp->listen_address_domain == FPM_AF_UNIX) {
+			umask(saved_umask);
+		}
 		return -1;
 	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		char *path = ((struct sockaddr_un *) sa)->sun_path;
+
+		umask(saved_umask);
+
 		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
 			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
 				zlog(ZLOG_STUFF, ZLOG_SYSERROR, "chown() for address '%s' failed", wp->config->listen_address);
@@ -197,7 +202,6 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 			}
 		}
 	}
-	umask(saved_umask);
 
 	if (0 > listen(sock, wp->config->listen_backlog)) {
 		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
@@ -290,7 +294,7 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 
 int fpm_sockets_init_main() /* {{{ */
 {
-	int i;
+	unsigned i;
 	struct fpm_worker_pool_s *wp;
 	char *inherited = getenv("FPM_SOCKETS");
 	struct listening_socket_s *ls;
