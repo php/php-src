@@ -14,6 +14,7 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Added '-t/--test' to php-fpm to check and validate FPM conf file. (fat)
 - Added statistics about listening socket queue length for FPM.
   (andrei dot nigmatulin at gmail dot com, fat)
 - Implemented FR #52348, Ability to detect zend multibyte at runtime. (Kalle)

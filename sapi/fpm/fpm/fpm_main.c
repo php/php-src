@@ -152,6 +152,7 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'y', 1, "fpm-config"},
+	{'t', 0, "test"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -959,7 +960,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -969,7 +970,8 @@ static void php_cgi_usage(char *argv0)
 				"  -m               Show compiled in modules\n"
 				"  -v               Version number\n"
 				"  -y, --fpm-config <file>\n"
-				"                   Specify alternative path to FastCGI process manager config file.\n",
+				"                   Specify alternative path to FastCGI process manager config file.\n"
+				"  -t, --test       Test FPM configuration and exit\n",
 				prog);
 }
 /* }}} */
@@ -1624,6 +1626,10 @@ int main(int argc, char *argv[])
 
 			case 'e': /* enable extended info output */
 				CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+				break;
+
+			case 't': 
+				fpm_globals.test_conf = 1;
 				break;
 
 			case 'm': /* list compiled in modules */
