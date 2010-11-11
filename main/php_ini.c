@@ -461,7 +461,7 @@ int php_init_config(TSRMLS_D)
 #endif
 
 		/* Add cwd (not with CLI) */
-		if (strcmp(sapi_module.name, "cli") != 0) {
+		if (!sapi_module.php_ini_ignore_cwd) {
 			if (*php_ini_search_path) {
 				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
