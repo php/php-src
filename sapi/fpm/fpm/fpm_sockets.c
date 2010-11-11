@@ -49,7 +49,7 @@ static int fpm_sockets_resolve_af_inet(char *node, char *service, struct sockadd
 	ret = getaddrinfo(node, service, &hints, &res);
 
 	if (ret != 0) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "can't resolve hostname '%s%s%s': getaddrinfo said: %s%s%s\n",
+		zlog(ZLOG_ERROR, "can't resolve hostname '%s%s%s': getaddrinfo said: %s%s%s\n",
 					node, service ? ":" : "", service ? service : "",
 					gai_strerror(ret), ret == EAI_SYSTEM ? ", system error: " : "", ret == EAI_SYSTEM ? strerror(errno) : "");
 		return -1;
@@ -171,7 +171,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	sock = socket(sa->sa_family, SOCK_STREAM, 0);
 
 	if (0 > sock) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "socket() failed");
+		zlog(ZLOG_SYSERROR, "socket() failed");
 		return -1;
 	}
 
@@ -183,7 +183,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	}
 
 	if (0 > bind(sock, sa, socklen)) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "bind() for address '%s' failed", wp->config->listen_address);
+		zlog(ZLOG_SYSERROR, "bind() for address '%s' failed", wp->config->listen_address);
 		if (wp->listen_address_domain == FPM_AF_UNIX) {
 			umask(saved_umask);
 		}
@@ -197,14 +197,14 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
 			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
-				zlog(ZLOG_STUFF, ZLOG_SYSERROR, "chown() for address '%s' failed", wp->config->listen_address);
+				zlog(ZLOG_SYSERROR, "chown() for address '%s' failed", wp->config->listen_address);
 				return -1;
 			}
 		}
 	}
 
 	if (0 > listen(sock, wp->config->listen_backlog)) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
+		zlog(ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
 		return -1;
 	}
 	return sock;
@@ -257,7 +257,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	}
 
 	if (port == 0) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "invalid port value '%s'", port_str);
+		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
 		return -1;
 	}
 
@@ -269,7 +269,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 			if (0 > fpm_sockets_resolve_af_inet(addr, NULL, &sa_in)) {
 				return -1;
 			}
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "address '%s' resolved as %u.%u.%u.%u", addr, IPQUAD(&sa_in.sin_addr));
+			zlog(ZLOG_NOTICE, "address '%s' resolved as %u.%u.%u.%u", addr, IPQUAD(&sa_in.sin_addr));
 		}
 	} else {
 		sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -318,7 +318,7 @@ int fpm_sockets_init_main() /* {{{ */
 			*eq = '\0';
 			fd_no = atoi(eq + 1);
 			type = fpm_sockets_domain_from_address(inherited);
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "using inherited socket fd=%d, \"%s\"", fd_no, inherited);
+			zlog(ZLOG_NOTICE, "using inherited socket fd=%d, \"%s\"", fd_no, inherited);
 			fpm_sockets_hash_op(fd_no, 0, inherited, type, FPM_STORE_SOCKET);
 		}
 

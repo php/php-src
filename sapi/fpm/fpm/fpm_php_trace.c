@@ -139,12 +139,12 @@ void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 	TSRMLS_FETCH();
 	FILE *slowlog;
 
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "about to trace %d", (int) child->pid);
+	zlog(ZLOG_NOTICE, "about to trace %d", (int) child->pid);
 
 	slowlog = fopen(child->wp->config->slowlog, "a+");
 
 	if (!slowlog) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "fopen(%s) failed", child->wp->config->slowlog);
+		zlog(ZLOG_SYSERROR, "fopen(%s) failed", child->wp->config->slowlog);
 		goto done0;
 	}
 
@@ -167,7 +167,7 @@ done0:
 	fpm_pctl_kill(child->pid, FPM_PCTL_CONT);
 	child->tracer = 0;
 
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "finished trace of %d", (int) child->pid);
+	zlog(ZLOG_NOTICE, "finished trace of %d", (int) child->pid);
 }
 /* }}} */
 

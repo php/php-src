@@ -37,7 +37,7 @@ static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 
 	kr = mach_vm_read(target, page, fpm_pagesize, &local_page, &local_size);
 	if (kr != KERN_SUCCESS) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "mach_vm_read() failed: %s (%d)", mach_error_string(kr), kr);
+		zlog(ZLOG_ERROR, "mach_vm_read() failed: %s (%d)", mach_error_string(kr), kr);
 		return -1;
 	}
 	return 0;
@@ -47,7 +47,7 @@ static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 int fpm_trace_signal(pid_t pid) /* {{{ */
 {
 	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "kill(SIGSTOP) failed");
+		zlog(ZLOG_SYSERROR, "kill(SIGSTOP) failed");
 		return -1;
 	}
 	return 0;
@@ -65,7 +65,7 @@ int fpm_trace_ready(pid_t pid) /* {{{ */
 		if (kr == KERN_FAILURE) {
 			msg = " It seems that master process does not have enough privileges to trace processes.";
 		}
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "task_for_pid() failed: %s (%d)%s", mach_error_string(kr), kr, msg);
+		zlog(ZLOG_ERROR, "task_for_pid() failed: %s (%d)%s", mach_error_string(kr), kr, msg);
 		return -1;
 	}
 	return 0;

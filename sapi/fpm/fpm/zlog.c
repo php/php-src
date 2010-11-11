@@ -58,7 +58,7 @@ int zlog_set_level(int new_value) /* {{{ */
 }
 /* }}} */
 
-void zlog(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */
+void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */
 {
 	struct timeval tv;
 	char buf[MAX_LINE_LENGTH];
