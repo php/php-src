@@ -86,6 +86,13 @@ Version number
 Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_sysconfdir@/php-fpm.conf)
 .TP
 .PD 0
+.B \-\-test
+.TP
+.PD 1
+.B \-t
+Test FPM configuration file and exit
+.TP
+.PD 0
 .B \-\-zend\-extension \fIfile\fP
 .TP
 .PD 1

@@ -1028,12 +1028,19 @@ int fpm_conf_init_main() /* {{{ */
 		return -1;
 	}
 
-	if (free) efree(filename);
-
 	if (0 > fpm_conf_post_process()) {
 		zlog(ZLOG_ERROR, "failed to post process the configuration");
+		if (free) efree(filename);
 		return -1;
 	}
+
+	if (fpm_globals.test_conf) {
+		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", filename);
+		if (free) efree(filename);
+		return -1;
+	}
+
+	if (free) efree(filename);
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_conf_cleanup, 0)) {
 		return -1;
