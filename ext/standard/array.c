@@ -3842,8 +3842,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		for (i = 1; i < arr_argc; i++) {
 			Bucket **ptr = ptrs[i];
 			if (behavior == DIFF_NORMAL) {
-				while (*ptr && (0 < (c = diff_data_compare_func(ptrs[0], ptr TSRMLS_CC)))) {
-					ptr++;
+				while (*ptrs[i] && (0 < (c = diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
+					ptrs[i]++;
 				}
 			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
 				while (*ptr && (0 != (c = diff_key_compare_func(ptrs[0], ptr TSRMLS_CC)))) {
