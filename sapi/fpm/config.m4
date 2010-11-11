@@ -516,6 +516,39 @@ AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
     AC_MSG_RESULT([no])
   ])
 ])
+
+AC_DEFUN([AC_FPM_LQ],
+[
+  have_lq=no
+
+  AC_MSG_CHECKING([for TCP_INFO])
+
+  AC_TRY_COMPILE([ #include <netinet/tcp.h> ], [struct tcp_info ti; int x = TCP_INFO;], [
+    have_lq=tcp_info
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+
+  if test "$have_lq" = "tcp_info"; then
+    AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
+  fi
+
+  if test "$have_lq" = "no" ; then
+    AC_MSG_CHECKING([for SO_LISTENQLEN])
+
+    AC_TRY_COMPILE([ #include <sys/socket.h> ], [int x = SO_LISTENQLIMIT; int y = SO_LISTENQLEN;], [
+      have_lq=so_listenq
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+
+    if test "$have_lq" = "tcp_info"; then
+      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQxxx?])
+    fi
+  fi
+])
 dnl }}}
 
 AC_MSG_CHECKING(for FPM build)
@@ -543,6 +576,7 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
+  AC_FPM_LQ
 
   PHP_ARG_WITH(fpm-user,,
   [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
