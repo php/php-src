@@ -139,6 +139,7 @@ static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
+#if 0 /* Comment out this non used function. It could be used later. */
 static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	char max_workers[10 + 1]; /* 4294967295 */
@@ -151,6 +152,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 	return 0;
 }
 /* }}} */
+#endif
 
 char *fpm_php_script_filename(TSRMLS_D) /* {{{ */
 {
