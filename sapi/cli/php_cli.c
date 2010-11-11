@@ -734,6 +734,7 @@ int main(int argc, char *argv[])
 	cli_sapi_module.ini_defaults = sapi_cli_ini_defaults;
 	cli_sapi_module.php_ini_path_override = NULL;
 	cli_sapi_module.phpinfo_as_text = 1;
+	cli_sapi_module.php_ini_ignore_cwd = 1;
 	sapi_startup(&cli_sapi_module);
 
 #ifdef PHP_WIN32

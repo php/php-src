@@ -1566,6 +1566,7 @@ int main(int argc, char *argv[])
 
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
+	cgi_sapi_module.php_ini_ignore_cwd = 1;
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY; /* sets default for file streams to binary */

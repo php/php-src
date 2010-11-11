@@ -251,6 +251,7 @@ struct _sapi_module_struct {
 	char *executable_location;
 
 	int php_ini_ignore;
+	int php_ini_ignore_cwd; /* don't look for php.ini in the current directory */
 
 	int (*get_fd)(int *fd TSRMLS_DC);
 
