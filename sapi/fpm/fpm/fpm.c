@@ -47,7 +47,7 @@ int fpm_init(int argc, char **argv, char *config, struct event_base **base) /* {
 		return -1;
 	}
 
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "fpm is running, pid %d", (int) fpm_globals.parent_pid);
+	zlog(ZLOG_NOTICE, "fpm is running, pid %d", (int) fpm_globals.parent_pid);
 
 	return 0;
 }

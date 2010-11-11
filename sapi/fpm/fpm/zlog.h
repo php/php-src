@@ -5,7 +5,7 @@
 #ifndef ZLOG_H
 #define ZLOG_H 1
 
-#define ZLOG_STUFF		__func__, __LINE__
+#define zlog(flags,...) zlog_ex(__func__, __LINE__, flags, __VA_ARGS__)
 
 struct timeval;
 
@@ -14,7 +14,7 @@ int zlog_set_level(int new_value);
 
 size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len);
 
-void zlog(const char *function, int line, int flags, const char *fmt, ...)
+void zlog_ex(const char *function, int line, int flags, const char *fmt, ...)
 		__attribute__ ((format(printf,4,5)));
 
 enum {

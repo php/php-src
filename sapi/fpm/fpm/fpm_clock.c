@@ -37,7 +37,7 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 		struct timespec ts;
 
 		if (0 > clock_gettime(CLOCK_MONOTONIC, &ts)) {
-			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "clock_gettime() failed");
+			zlog(ZLOG_SYSERROR, "clock_gettime() failed");
 			return -1;
 		}
 
@@ -69,7 +69,7 @@ int fpm_clock_init() /* {{{ */
 	ret = host_get_clock_service(mach_host_self(), REALTIME_CLOCK, &mach_clock);
 
 	if (ret != KERN_SUCCESS) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "host_get_clock_service() failed: %s", mach_error_string(ret));
+		zlog(ZLOG_ERROR, "host_get_clock_service() failed: %s", mach_error_string(ret));
 		return -1;
 	}
 
@@ -77,7 +77,7 @@ int fpm_clock_init() /* {{{ */
 	ret = clock_get_time(mach_clock, &aTime);
 
 	if (ret != KERN_SUCCESS) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
+		zlog(ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
 		return -1;
 	}
 
@@ -93,7 +93,7 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 	ret = clock_get_time(mach_clock, &aTime);
 
 	if (ret != KERN_SUCCESS) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
+		zlog(ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
 		return -1;
 	}
 

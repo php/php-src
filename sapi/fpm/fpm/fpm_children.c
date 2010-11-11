@@ -152,7 +152,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 		0 > fpm_env_init_child(wp) ||
 		0 > fpm_php_init_child(wp)) {
 
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
+		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(255);
 	}
 }
@@ -221,7 +221,7 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 			}
 		} else if (WIFSTOPPED(status)) {
 
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "child %d stopped for tracing", (int) pid);
+			zlog(ZLOG_NOTICE, "child %d stopped for tracing", (int) pid);
 
 			if (child && child->tracer) {
 				child->tracer(child);
@@ -246,9 +246,9 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 				if (!fpm_pctl_can_spawn_children()) {
 					severity = ZLOG_DEBUG;
 				}
-				zlog(ZLOG_STUFF, severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] child %d has been killed by the process managment after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process managment after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -275,7 +275,7 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 
 				if (restart_condition) {
 
-					zlog(ZLOG_STUFF, ZLOG_WARNING, "failed processes threshold (%d in %d sec) is reached, initiating reload", fpm_global_config.emergency_restart_threshold, fpm_global_config.emergency_restart_interval);
+					zlog(ZLOG_WARNING, "failed processes threshold (%d in %d sec) is reached, initiating reload", fpm_global_config.emergency_restart_threshold, fpm_global_config.emergency_restart_interval);
 
 					fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET, base);
 				}
@@ -289,7 +289,7 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 				}
 			}
 		} else {
-			zlog(ZLOG_STUFF, ZLOG_ALERT, "oops, unknown child exited %s", buf);
+			zlog(ZLOG_ALERT, "oops, unknown child exited %s", buf);
 		}
 	}
 }
@@ -302,7 +302,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 	c = fpm_child_alloc();
 
 	if (!c) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] malloc failed", wp->config->name);
+		zlog(ZLOG_ERROR, "[pool %s] malloc failed", wp->config->name);
 		return 0;
 	}
 
@@ -388,7 +388,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				return 0;
 
 			case -1 :
-				zlog(ZLOG_STUFF, ZLOG_SYSERROR, "fork() failed");
+				zlog(ZLOG_SYSERROR, "fork() failed");
 				enough = 1;
 
 				fpm_resources_discard(child);
@@ -400,7 +400,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				fpm_clock_get(&child->started);
 				fpm_parent_resources_use(child, base);
 
-				zlog(ZLOG_STUFF, is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
+				zlog(is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
 		}
 
 	}
