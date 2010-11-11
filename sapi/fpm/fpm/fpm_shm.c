@@ -30,7 +30,7 @@ struct fpm_shm_s *fpm_shm_alloc(size_t sz) /* {{{ */
 	shm->mem = mmap(0, sz, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
 	if (!shm->mem) {
-		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "mmap(MAP_ANONYMOUS | MAP_SHARED) failed");
+		zlog(ZLOG_SYSERROR, "mmap(MAP_ANONYMOUS | MAP_SHARED) failed");
 		free(shm);
 		return 0;
 	}

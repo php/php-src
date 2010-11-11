@@ -38,42 +38,42 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 
 		if (res <= 0) {
 			if (res < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
-				zlog(ZLOG_STUFF, ZLOG_SYSERROR, "read() failed");
+				zlog(ZLOG_SYSERROR, "read() failed");
 			}
 			return;
 		}
 
 		switch (c) {
 			case 'C' :                  /* SIGCHLD */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGCHLD");
+				zlog(ZLOG_DEBUG, "received SIGCHLD");
 				fpm_children_bury(base);
 				break;
 			case 'I' :                  /* SIGINT  */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGINT");
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
+				zlog(ZLOG_DEBUG, "received SIGINT");
+				zlog(ZLOG_NOTICE, "Terminating ...");
 				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case 'T' :                  /* SIGTERM */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGTERM");
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
+				zlog(ZLOG_DEBUG, "received SIGTERM");
+				zlog(ZLOG_NOTICE, "Terminating ...");
 				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case 'Q' :                  /* SIGQUIT */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGQUIT");
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Finishing ...");
+				zlog(ZLOG_DEBUG, "received SIGQUIT");
+				zlog(ZLOG_NOTICE, "Finishing ...");
 				fpm_pctl(FPM_PCTL_STATE_FINISHING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case '1' :                  /* SIGUSR1 */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR1");
+				zlog(ZLOG_DEBUG, "received SIGUSR1");
 				if (0 == fpm_stdio_open_error_log(1)) {
-					zlog(ZLOG_STUFF, ZLOG_NOTICE, "log file re-opened");
+					zlog(ZLOG_NOTICE, "log file re-opened");
 				} else {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "unable to re-opened log file");
+					zlog(ZLOG_ERROR, "unable to re-opened log file");
 				}
 				break;
 			case '2' :                  /* SIGUSR2 */
-				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR2");
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Reloading in progress ...");
+				zlog(ZLOG_DEBUG, "received SIGUSR2");
+				zlog(ZLOG_NOTICE, "Reloading in progress ...");
 				fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET, base);
 				break;
 		}
@@ -90,7 +90,7 @@ int fpm_event_init_main(struct event_base **base) /* {{{ */
 {
 	*base = event_base_new();
 
-	zlog(ZLOG_STUFF, ZLOG_DEBUG, "libevent %s: using %s", event_get_version(), event_base_get_method(*base));
+	zlog(ZLOG_DEBUG, "libevent %s: using %s", event_get_version(), event_base_get_method(*base));
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, *base)) {
 		return -1;
@@ -108,7 +108,7 @@ int fpm_event_loop(struct event_base *base) /* {{{ */
 	event_add(&signal_fd_event, 0);
 	fpm_pctl_heartbeat(-1, 0, base);
 	fpm_pctl_perform_idle_server_maintenance_heartbeat(-1, 0, base);
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "ready to handle connections");
+	zlog(ZLOG_NOTICE, "ready to handle connections");
 	event_base_dispatch(base);
 	return 0;
 }
