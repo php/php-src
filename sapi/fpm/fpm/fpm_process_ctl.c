@@ -333,8 +333,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 		if (wp->config == NULL) continue;
 
 		for (child = wp->children; child; child = child->next) {
-			int ret = fpm_request_is_idle(child);
-			if (ret == 1) {
+			if (fpm_request_is_idle(child)) {
 				if (last_idle_child == NULL) {
 					last_idle_child = child;
 				} else {
@@ -343,14 +342,9 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct
 					}
 				}
 				idle++;
-			} else if (ret == 0) {
+			} else {
 				active++;
 			}
-		}
-
-		if ((active + idle) != wp->running_children) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to retrieve process activity of one or more child(ren). Will try again later.", wp->config->name);
-			continue;
 		}
 
 		/* update status structure for all PMs */
