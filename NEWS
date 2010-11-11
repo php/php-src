@@ -58,6 +58,7 @@
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
 
+- Fixed bug #52693 (configuration file errors are not logged to stderr). (fat)
 - Fixed bug #53279 (SplFileObject doesn't initialise default CSV escape
   character). (Adam)
 - Fixed bug #53273 (mb_strcut() returns garbage with the excessive length
