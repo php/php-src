@@ -41,7 +41,6 @@ int fpm_stdio_init_main() /* {{{ */
 
 int fpm_stdio_init_final() /* {{{ */
 {
-	zlog_set_level(fpm_globals.log_level);
 	if (fpm_global_config.daemonize) {
 		if (fpm_globals.error_log_fd != STDERR_FILENO) {
 			/* there might be messages to stderr from libevent, we need to log them all */
@@ -50,8 +49,8 @@ int fpm_stdio_init_final() /* {{{ */
 				return -1;
 			}
 		}
-		zlog_set_fd(fpm_globals.error_log_fd);
 	}
+	zlog_set_launched();
 	return 0;
 }
 /* }}} */
@@ -251,6 +250,9 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		fd = fpm_globals.error_log_fd; /* for FD_CLOSEXEC to work */
 	} else {
 		fpm_globals.error_log_fd = fd;
+		if (fpm_global_config.daemonize) {
+			zlog_set_fd(fpm_globals.error_log_fd);
+		}
 	}
 	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	return 0;

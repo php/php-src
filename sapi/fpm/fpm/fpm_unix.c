@@ -246,7 +246,7 @@ int fpm_unix_init_main() /* {{{ */
 		}
 	}
 
-	fpm_stdio_init_final();
+	zlog_set_level(fpm_globals.log_level);
 	return 0;
 }
 /* }}} */
