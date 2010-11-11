@@ -23,6 +23,7 @@ struct fpm_globals_s {
 	int listening_socket; /* for this child */
 	int max_requests; /* for this child */
 	int is_child;
+	int test_conf;
 };
 
 extern struct fpm_globals_s fpm_globals;
