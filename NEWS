@@ -60,7 +60,8 @@
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
 
-- Fixed bug #52693 (configuration file errors are not logged to stderr). (fat)
+- Fixed bug #53297 (gettimeofday implementation in php/win32/time.c can return
+  1 million microsecs). (ped at 7gods dot org)
 - Fixed bug #53279 (SplFileObject doesn't initialise default CSV escape
   character). (Adam)
 - Fixed bug #53273 (mb_strcut() returns garbage with the excessive length
@@ -130,6 +131,7 @@
   CASE-WHEN). (Andrey)
 - Fixed bug #52699 (PDO bindValue writes long int 32bit enum).
   (rein at basefarm dot no)
+- Fixed bug #52693 (configuration file errors are not logged to stderr). (fat)
 - Fixed bug #52686 (mysql_stmt_attr_[gs]et argument points to incorrect type).
   (rein at basefarm dot no)
 - Fixed bug #52681 (mb_send_mail() appends an extra MIME-Version header).
