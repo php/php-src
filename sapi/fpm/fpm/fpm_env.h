@@ -7,8 +7,11 @@
 
 #include "fpm_worker_pool.h"
 
+#define SETPROCTITLE_PREFIX "php-fpm: "
+
 int fpm_env_init_child(struct fpm_worker_pool_s *wp);
 int fpm_env_init_main();
+void fpm_env_setproctitle(char *title);
 
 extern char **environ;
 
