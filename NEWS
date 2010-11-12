@@ -81,6 +81,7 @@
 - Fixed bug #53144 (Segfault in SplObjectStorage::removeAll()). (Felipe)
 - Fixed bug #53141 (autoload misbehaves if called from closing session).
   (ladislav at marek dot su)
+- Fixed bug #53136 (Invalid read on openssl_csr_new()). (Felipe)
 - Fixed bug #53071 (SPLObjectStorage defeats gc_collect_cycles). (Gustavo)
 - Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
   underlying stream does not support seeking). (Gustavo)
