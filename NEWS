@@ -14,6 +14,7 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Added custom process title for FPM. (fat)
 - Added '-t/--test' to php-fpm to check and validate FPM conf file. (fat)
 - Added statistics about listening socket queue length for FPM.
   (andrei dot nigmatulin at gmail dot com, fat)

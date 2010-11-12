@@ -33,9 +33,9 @@ int fpm_init(int argc, char **argv, char *config, struct event_base **base) /* {
 		0 > fpm_stdio_init_main()            ||
 		0 > fpm_conf_init_main()             ||
 		0 > fpm_unix_init_main()             ||
+		0 > fpm_pctl_init_main()             ||
 		0 > fpm_env_init_main()              ||
 		0 > fpm_signals_init_main()          ||
-		0 > fpm_pctl_init_main()             ||
 		0 > fpm_children_init_main()         ||
 		0 > fpm_sockets_init_main()          ||
 		0 > fpm_worker_pool_init_main()      ||
