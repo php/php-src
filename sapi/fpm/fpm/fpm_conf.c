@@ -698,6 +698,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 	free(fpm_global_config.error_log);
 	fpm_global_config.pid_file = 0;
 	fpm_global_config.error_log = 0;
+	efree(fpm_globals.config);
 }
 /* }}} */
 
@@ -1010,37 +1011,33 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 
 int fpm_conf_init_main() /* {{{ */
 {
-	char *filename = fpm_globals.config;
-	int free = 0;
 	int ret;
 	TSRMLS_FETCH();
 
-	if (filename == NULL) {
-		spprintf(&filename, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
-		free = 1;
+	if (fpm_globals.config == NULL) {
+		spprintf(&fpm_globals.config, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
+		if (!fpm_globals.config) {
+			zlog(ZLOG_SYSERROR, "spprintf() failed (\"%s/php-fpm.conf\")", PHP_SYSCONFDIR);
+			return -1;
+		}
 	}
 
-	ret = fpm_conf_load_ini_file(filename TSRMLS_CC);
+	ret = fpm_conf_load_ini_file(fpm_globals.config TSRMLS_CC);
 
 	if (0 > ret) {
-		zlog(ZLOG_ERROR, "failed to load configuration file '%s'", filename);
-		if (free) efree(filename);
+		zlog(ZLOG_ERROR, "failed to load configuration file '%s'", fpm_globals.config);
 		return -1;
 	}
 
 	if (0 > fpm_conf_post_process()) {
 		zlog(ZLOG_ERROR, "failed to post process the configuration");
-		if (free) efree(filename);
 		return -1;
 	}
 
 	if (fpm_globals.test_conf) {
-		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", filename);
-		if (free) efree(filename);
+		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", fpm_globals.config);
 		return -1;
 	}
-
-	if (free) efree(filename);
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_conf_cleanup, 0)) {
 		return -1;

@@ -219,7 +219,7 @@ dnl }}}
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
 [
-  AC_CHECK_FUNCS(setenv clearenv)
+  AC_CHECK_FUNCS(setenv clearenv setproctitle)
 
   AC_SEARCH_LIBS(socket, socket)
   AC_SEARCH_LIBS(inet_addr, nsl)

@@ -12,7 +12,15 @@
 #include <string.h>
 
 #include "fpm_env.h"
+#include "fpm.h"
 #include "zlog.h"
+
+#ifndef HAVE_SETPROCTITLE
+#ifdef __linux__
+static char **fpm_env_argv = NULL;
+static size_t fpm_env_argv_len = 0;
+#endif
+#endif
 
 #ifndef HAVE_SETENV
 # ifdef (__sparc__ || __sparc)
@@ -111,9 +119,30 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 /* }}} */
 #endif
 
+void fpm_env_setproctitle(char *title) /* {{{ */
+{
+#ifdef HAVE_SETPROCTITLE
+	setproctitle("%s", title);
+#else
+#ifdef __linux__
+	if (fpm_env_argv != NULL && fpm_env_argv_len > strlen(SETPROCTITLE_PREFIX) + 3) {
+		memset(fpm_env_argv[0], 0, fpm_env_argv_len);
+		strncpy(fpm_env_argv[0], SETPROCTITLE_PREFIX, fpm_env_argv_len - 2);
+		strncpy(fpm_env_argv[0] + strlen(SETPROCTITLE_PREFIX), title, fpm_env_argv_len - strlen(SETPROCTITLE_PREFIX) - 2);
+		fpm_env_argv[1] = NULL;
+	}
+#endif
+#endif
+}
+/* }}} */
+
 int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
+	char *title;
+	spprintf(&title, 0, "pool %s", wp->config->name);
+	fpm_env_setproctitle(title); 
+	efree(title);
 
 	clearenv();
 
@@ -169,12 +198,79 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_env_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
+	int i;
+	char *first = NULL;
+	char *last = NULL;
+	char *title;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (0 > fpm_env_conf_wp(wp)) {
 			return -1;
 		}
 	}
+#ifndef HAVE_SETPROCTITLE
+#ifdef __linux__
+	/*
+	 * This piece of code has been inspirated from nginx and pureftpd code, whic
+	 * are under BSD licence.
+	 *
+	 * To change the process title in Linux we have to set argv[1] to NULL
+	 * and to copy the title to the same place where the argv[0] points to.
+	 * However, argv[0] may be too small to hold a new title.  Fortunately, Linux
+	 * store argv[] and environ[] one after another.  So we should ensure that is
+	 * the continuous memory and then we allocate the new memory for environ[]
+	 * and copy it.  After this we could use the memory starting from argv[0] for
+	 * our process title.
+	 */
+
+	for (i = 0; i < fpm_globals.argc; i++) {
+		if (first == NULL) {
+			first = fpm_globals.argv[i];
+		}
+		if (last == NULL || fpm_globals.argv[i] == last + 1) {
+			last = fpm_globals.argv[i] + strlen(fpm_globals.argv[i]);
+		}
+	}
+	if (environ) {
+		for (i = 0; environ[i]; i++) {
+			if (first == NULL) {
+				first = environ[i];
+			}
+			if (last == NULL || environ[i] == last + 1) {
+				last = environ[i] + strlen(environ[i]);
+			}
+		}
+	}
+	if (first == NULL || last == NULL) {
+		return 0;
+	}
+
+	fpm_env_argv_len = last - first;
+	fpm_env_argv = fpm_globals.argv;
+	if (environ != NULL) {
+		char **new_environ;
+		unsigned int env_nb = 0U;
+
+		while (environ[env_nb]) {
+			env_nb++;
+		}
+
+		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {
+			return -1;
+		}
+		new_environ[env_nb] = NULL;
+		while (env_nb > 0U) {
+			env_nb--;
+			new_environ[env_nb] = strdup(environ[env_nb]);
+		}
+		environ = new_environ;
+	}
+#endif
+#endif
+
+	spprintf(&title, 0, "master process (%s)", fpm_globals.config);
+	fpm_env_setproctitle(title); 
+	efree(title);
 	return 0;
 }
 /* }}} */
