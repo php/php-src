@@ -1997,7 +1997,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '#': /* separation symbol */
-				if (*ptr == ';' || *ptr == ':' || *ptr == '/' || *ptr == '.' || *ptr == ',' || *ptr == '-') {
+				if (*ptr == ';' || *ptr == ':' || *ptr == '/' || *ptr == '.' || *ptr == ',' || *ptr == '-' || *ptr == '(' || *ptr == ')') {
 					++ptr;
 				} else {
 					add_pbf_error(s, "The separation symbol ([;:/.,-]) could not be found", string, begin);
@@ -2010,6 +2010,8 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 			case '.':
 			case ',':
 			case '-':
+			case '(':
+			case ')':
 				if (*ptr == *fptr) {
 					++ptr;
 				} else {
