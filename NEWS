@@ -136,6 +136,8 @@ PHP                                                                        NEWS
 
 - Deprecated mysql_list_dbs() (Request #50667). (Andrey)
 
+- Implemented FR #53271, FR #52410 (Building multiple PHP binary SAPIs and
+  one SAPI module the same time). (Jani)
 - Implemented FR #53238 (Make third parameter of preg_match_all optional).
   (Adam)
 - Implemented FR #53213 (Adler32 algorithm is very slow).

@@ -304,8 +304,8 @@ dnl -------------------------------------------------------------------------
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAMES
-PHP_SAPI=default
 PHP_BUILD_PROGRAM
+PHP_SAPI=none
 
 
 dnl SAPI configuration.
@@ -324,6 +324,20 @@ dnl Show which main SAPI was selected
 AC_MSG_CHECKING([for chosen SAPI module])
 AC_MSG_RESULT([$PHP_SAPI])
 
+dnl Show which binaries were selected
+AC_MSG_CHECKING([for executable SAPI binaries])
+if test "$PHP_BINARIES"; then
+  AC_MSG_RESULT([$PHP_BINARIES])
+else
+  AC_MSG_RESULT([none])
+fi
+
+dnl Exit early
+if test -z "$PHP_INSTALLED_SAPIS"; then
+  AC_MSG_ERROR([Nothing to build.])
+fi
+
+dnl force ZTS
 if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
@@ -954,14 +968,8 @@ dnl -------------------------------------------------------------------------
 enable_shared=yes
 enable_static=yes
 
-case $php_build_target in
-  program|static)
-    standard_libtool_flag='-prefer-non-pic -static'
-    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
-        enable_shared=no
-    fi
-    ;;
-  shared)
+case $php_sapi_module in
+  shared[)]
     enable_static=no
     case $with_pic in
       yes)
@@ -972,6 +980,12 @@ case $php_build_target in
         ;;
     esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
+    ;;
+  *[)]
+    standard_libtool_flag='-prefer-non-pic -static'
+    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
+      enable_shared=no
+    fi
     ;;
 esac
 
@@ -1208,24 +1222,15 @@ case $host_alias in
   ;;
 esac
 
-if test "$PHP_CLI" != "no"; then
-  PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
-  PHP_INSTALL_CLI_TARGET="install-cli"
-  PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c,, cli)
-  PHP_INSTALLED_SAPIS="cli $PHP_SAPI"
-  PHP_EXECUTABLE="\$(top_builddir)/\$(SAPI_CLI_PATH)"
-else
-  PHP_INSTALLED_SAPIS="$PHP_SAPI"
-fi
-
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
 PHP_SUBST(PHP_EXECUTABLE)
-PHP_SUBST(PHP_CLI_TARGET)
+
 PHP_SUBST(PHP_SAPI_OBJS)
-PHP_SUBST(PHP_CLI_OBJS)
+PHP_SUBST(PHP_BINARY_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
+PHP_SUBST(PHP_BINARIES)
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
 
@@ -1369,20 +1374,12 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET) $pharcmd"
-install_targets="$install_modules install-build install-headers install-programs $install_pear $pharcmd_install"
-
-case $PHP_SAPI in
-  cli)
-    install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-  *)
-    install_targets="install-sapi $PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-esac
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
+PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
@@ -1407,7 +1404,7 @@ case $host_alias in
     PHP_ADD_BUILD_DIR(netware)
     ;;
   *)
-    PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
     ;;
 esac
 
@@ -1438,7 +1435,6 @@ fi
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend)
 

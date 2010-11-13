@@ -194,7 +194,7 @@ dnl the path is interpreted relative to the top build-directory.
 dnl
 dnl which array to append to?
 AC_DEFUN([PHP_ADD_SOURCES],[
-  PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,cli,PHP_CLI_OBJS,ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS)))
+  PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS))
 ])
 
 dnl
@@ -777,7 +777,7 @@ dnl
 AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
-  php_build_target=shared
+  php_sapi_module=shared
   
   php_c_pre=$shared_c_pre
   php_c_meta=$shared_c_meta
@@ -794,7 +794,7 @@ dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
-  php_build_target=static
+  php_sapi_module=static
 ])
 
 dnl
@@ -803,14 +803,13 @@ dnl
 AC_DEFUN([PHP_BUILD_BUNDLE],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libs/libphp[]$PHP_MAJOR_VERSION[.bundle]
-  php_build_target=static
+  php_sapi_module=static
 ])
 
 dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  OVERALL_TARGET=[]ifelse($1,,php,$1)
   php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
@@ -832,7 +831,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   shared_cxx_post=
   shared_lo=lo
 
-  php_build_target=program
+  php_sapi_module=program
 ])
 
 dnl
@@ -878,21 +877,46 @@ EOF
 dnl
 dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags [, build-target]]])
 dnl
-dnl Selects the SAPI name and type (static, shared, programm)
+dnl Selects the SAPI name and type (static, shared, bundle, program)
 dnl and optionally also the source-files for the SAPI-specific
 dnl objects.
 dnl
 AC_DEFUN([PHP_SELECT_SAPI],[
-  PHP_SAPI=$1
-  
+  if test "$2" = "program"; then
+    PHP_BINARIES="$PHP_BINARIES $1"
+  elif test "$PHP_SAPI" != "none"; then
+    AC_MSG_ERROR([
++--------------------------------------------------------------------+
+|                        *** ATTENTION ***                           |
+|                                                                    |
+| You've configured multiple SAPIs to be build. You can build only   |
+| one SAPI module plus CGI, CLI and FPM binaries at the same time.   |
++--------------------------------------------------------------------+
+])
+  else
+    PHP_SAPI=$1
+  fi  
+
+  PHP_ADD_BUILD_DIR([sapi/$1])
+
+  PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS $1"
+
   case "$2" in
   static[)] PHP_BUILD_STATIC;;
   shared[)] PHP_BUILD_SHARED;;
   bundle[)] PHP_BUILD_BUNDLE;;
-  program[)] PHP_BUILD_PROGRAM($5);;
+  program[)] PHP_BUILD_PROGRAM;;
   esac
-    
-  ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
+
+  ifelse($2,program,[
+    install_binaries="install-binaries"
+    install_binary_targets="$install_binary_targets install-$1"
+    PHP_SUBST(PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)
+    ifelse($3,,,[PHP_ADD_SOURCES_X([sapi/$1],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)])
+  ],[
+    install_sapi="install-sapi"
+    ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
+  ])
 ])
 
 dnl deprecated
@@ -2912,7 +2936,7 @@ dnl DTrace objects
     PHP_DTRACE_OBJS="[$]PHP_DTRACE_OBJS [$]ac_bdir[$]ac_obj.lo"
   done;
 
-  case [$]php_build_target in
+  case [$]php_sapi_module in
   program|static)
     dtrace_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
     ;;

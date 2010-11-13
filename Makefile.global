@@ -13,6 +13,8 @@ all: $(all_targets)
 	
 build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 
+build-binaries: $(PHP_BINARIES)
+
 libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
 	-@$(LIBTOOL) --silent --mode=install cp $@ $(phptempdir)/$@ >/dev/null 2>&1
@@ -34,6 +36,8 @@ install-sapi: $(OVERALL_TARGET)
 		done; \
 	fi
 	@$(INSTALL_IT)
+
+install-binaries: build-binaries $(install_binary_targets)
 
 install-modules: build-modules
 	@test -d modules && \
