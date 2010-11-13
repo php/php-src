@@ -1,16 +1,9 @@
 fpm: $(SAPI_FPM_PATH)
 
-$(builddir)/fpm: 
-	@mkdir -p $(builddir)/fpm
-
-$(SAPI_FPM_PATH): $(builddir)/fpm $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(SAPI_EXTRA_DEPS)
+$(SAPI_FPM_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FPM_OBJS)
 	$(BUILD_FPM)
 
-$(builddir)/fpm/fpm_conf.lo: $(builddir)/../../main/build-defs.h
-
-install-build: install-fpm
-
-install-fpm: install-sapi
+install-fpm: $(SAPI_FPM_PATH)
 	@echo "Installing PHP FPM binary:        $(INSTALL_ROOT)$(sbindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(sbindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
@@ -19,7 +12,6 @@ install-fpm: install-sapi
 
 	@echo "Installing PHP FPM config:        $(INSTALL_ROOT)$(sysconfdir)/" && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(sysconfdir) || :
-
 	@$(INSTALL_DATA) sapi/fpm/php-fpm.conf $(INSTALL_ROOT)$(sysconfdir)/php-fpm.conf.default || :
 
 	@echo "Installing PHP FPM man page:      $(INSTALL_ROOT)$(mandir)/man8/"
