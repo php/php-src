@@ -711,10 +711,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_WITH($1,[$3],$5=[$]withval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
@@ -739,10 +736,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
