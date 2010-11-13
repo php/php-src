@@ -230,8 +230,6 @@ void timelib_dump_date(timelib_time *d, int options)
 				printf(" %05d%s", d->z, d->dst == 1 ? " (DST)" : "");
 				break;
 		}
-	} else {
-		printf(" GMT 00000");
 	}
 
 	if ((options & 1) == 1) {
