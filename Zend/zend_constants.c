@@ -479,7 +479,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		|| zend_hash_add(EG(zend_constants), name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
-		if (strncmp(name+1, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")) == 0) {
+		if (memcmp(name, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
 			name++;
 		}
 		zend_error(E_NOTICE,"Constant %s already defined", name);
