@@ -711,10 +711,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_WITH($1,[$3],$5=[$]withval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
@@ -739,10 +736,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
@@ -2883,43 +2877,33 @@ main()
 ])
 
 dnl
-dnl Generate dtrace targets
+dnl PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
 dnl
-AC_DEFUN([PHP_GENERATE_DTRACE],[
-  old_IFS=[$]IFS
-  IFS=.
-  set $ac_src
-  IFS=$old_IFS
-  build_target=$2
-  PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS $1.o"
-  for src in $PHP_DTRACE_OBJS; do
-    case [$]build_target in
-      program|static)
-        obj="$obj `dirname $src`/`basename $src | sed 's,\.lo$,.o,'` " ;;
-      *)
-        obj="$obj `dirname $src`/.libs/`basename $src | sed 's,\.lo$,.o,'` " ;;
-    esac
-  done
-
-  cat >>Makefile.objects<<EOF
-$1.o: \$(PHP_DTRACE_OBJS)
-	dtrace -G -o $abs_builddir/$1.o -s $abs_srcdir/$1 $obj
-EOF
-
-])
-
-dnl
-dnl Link given source files with dtrace
-dnl PHP_ADD_DTRACE(providerdesc, sources, module)
-dnl
-AC_DEFUN([PHP_ADD_DTRACE],[
-   case "$3" in
+AC_DEFUN([PHP_INIT_DTRACE],[
+dnl Set paths properly when called from extension
+  case "$4" in
     ""[)] unset ac_bdir;;
     /*[)] ac_bdir=$ac_srcdir;;
     *[)] extdir=PHP_EXT_DIR($3); ac_bdir="$extdir/";;
-    esac
+  esac
+
+dnl providerdesc
+  ac_provsrc=$1
   old_IFS=[$]IFS
-  for ac_src in $2; do
+  IFS=.
+  set $ac_provsrc
+  ac_provobj=[$]1
+  IFS=$old_IFS
+
+dnl header-file
+  ac_hdrobj=$2
+
+dnl Add providerdesc.o in global objects
+  PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+
+dnl DTrace objects
+  old_IFS=[$]IFS
+  for ac_src in $3; do
     IFS=.
     set $ac_src
     ac_obj=[$]1
@@ -2927,16 +2911,28 @@ AC_DEFUN([PHP_ADD_DTRACE],[
 
     PHP_DTRACE_OBJS="[$]PHP_DTRACE_OBJS [$]ac_bdir[$]ac_obj.lo"
   done;
-])
 
-dnl
-dnl Generate platform specific dtrace header
-dnl
-AC_DEFUN([PHP_INIT_DTRACE], [
-  dtrace -h -C -s $abs_srcdir/$1 -o $abs_builddir/$2
-  if test "$?" != "0"; then 
-    AC_MSG_ERROR([cannot create DTrace header file])
-  fi
-  $SED -ibak 's,PHP_,DTRACE_,g' $abs_builddir/$2
-])
+  case [$]php_build_target in
+  program|static)
+    dtrace_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
+    ;;
+  *)
+    for ac_lo in $PHP_DTRACE_OBJS; do
+      dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+    done;
+    ;;
+  esac
 
+dnl Generate Makefile.objects entries
+  cat>>Makefile.objects<<EOF
+
+$ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
+	dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@ && \$(SED) -ibak 's,PHP_,DTRACE_,g' \$[]@
+
+\$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
+
+$ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
+	dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
+
+EOF
+])

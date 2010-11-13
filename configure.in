@@ -881,22 +881,21 @@ fi
 
 dnl ##
 dnl ## DTRACE CHECKS
-dnl ## this needs to be done before SAPI configuration
+dnl ## Note: this has to be done after SAPI configuration!
 dnl ##
 PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
 [  --enable-dtrace         Enable DTrace support], no, no)
 
 if test "$PHP_DTRACE" = "yes"; then
   AC_CHECK_HEADERS([sys/sdt.h], [
-    PHP_ADD_DTRACE([Zend/zend_dtrace.d], [main/main.c, Zend/zend_API.c \
+    PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
       Zend/zend_execute.c Zend/zend_exceptions.c \
       Zend/zend_dtrace.c Zend/zend.c])
     AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
-    PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h])
+    PHP_SUBST(PHP_DTRACE_OBJS)
   ], [
     AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
   ])
-  PHP_SUBST(PHP_DTRACE_OBJS)
 fi
 
 AC_MSG_CHECKING([how big to make fd sets])
@@ -1446,13 +1445,6 @@ PHP_ADD_BUILD_DIR(Zend)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
-
-if test "$PHP_DTRACE" = "yes"; then
-  case $host_alias in
-    *solaris*)
-      PHP_GENERATE_DTRACE([Zend/zend_dtrace.d],$php_build_target);;
-  esac
-fi
 
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
