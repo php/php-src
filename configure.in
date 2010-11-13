@@ -879,13 +879,13 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
 fi
 
-dnl ## DTRACE CHECHKS
-dnl ## this needs to be done before SAPI configureation
+dnl ##
+dnl ## DTRACE CHECKS
+dnl ## this needs to be done before SAPI configuration
+dnl ##
 PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
 [  --enable-dtrace         Enable DTrace support], no, no)
 
-dnl ## DTRACE CHECHKS
-dnl ## this needs to be done before SAPI configureation
 if test "$PHP_DTRACE" = "yes"; then
   AC_CHECK_HEADERS([sys/sdt.h], [
     PHP_ADD_DTRACE([Zend/zend_dtrace.d], [main/main.c, Zend/zend_API.c \
@@ -896,6 +896,7 @@ if test "$PHP_DTRACE" = "yes"; then
   ], [
     AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
   ])
+  PHP_SUBST(PHP_DTRACE_OBJS)
 fi
 
 AC_MSG_CHECKING([how big to make fd sets])
@@ -1224,7 +1225,6 @@ PHP_SUBST(PHP_EXECUTABLE)
 PHP_SUBST(PHP_CLI_TARGET)
 PHP_SUBST(PHP_SAPI_OBJS)
 PHP_SUBST(PHP_CLI_OBJS)
-PHP_SUBST(PHP_DTRACE_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
 PHP_SUBST(PHP_MODULES)
@@ -1327,8 +1327,8 @@ dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
 dnl This hack works around it. Ugly.
 case $host_alias in
 *darwin9*|*darwin10*)
-	ac_cv_exeext=
-	;;
+  ac_cv_exeext=
+  ;;
 esac
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
