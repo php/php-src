@@ -1,14 +1,17 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
 - Upgraded bundled sqlite to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
-- Updated _SERVER['REQUEST_TIME'] to include microsecond precision. (Ilia)
+- Changed $_SERVER['REQUEST_TIME'] to include microsecond precision. (Ilia)
+
 - Added apache compatible functions (apache_child_terminate, getallheaders,
-  apache_request_headers, apache_response_headers) to FastCGI SAPI (Dmitry)
+  apache_request_headers, apache_response_headers) to FastCGI SAPI. (Dmitry)
+
 - Added caches to eliminate repeatable run-time bindings of functions, classes,
-  constants, methods and properties (Dmitry)
+  constants, methods and properties. (Dmitry)
+
 - Added a number of small performance tweaks and optimizations (Dmitry)
   . ZEND_RECV now always has IS_CV as its result
   . ZEND_CATCH now has to be used only with constant class names
@@ -30,44 +33,55 @@
     required after them instead.
   . improved performance of FastCGI request parsing
   . improved performance of @ (silence) operator
+
 - Added concept of interned strings. All strings constants known at compile
   time are allocated in a single copy and never changed. (Dmitry)
 - Added an optimization which saves memory and emalloc/efree calls for empty
-  HashTables (Stas, Dmitry)
+  HashTables. (Stas, Dmitry)
 
-- Added named pipes support in mysqlnd (Request#48082). (Andrey)
+- Added named pipes support in mysqlnd (FR #48082). (Andrey)
 - Added support for Traits. (Stefan)
 - Added array dereferencing support. (Felipe)
 - Added DTrace support. (David Soria Parra)
 - Added Tokyo Cabinet abstract DB support to ext/dba. (Michael Maclean)
+- Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
+
 - Added Jenkins's one-at-a-time hash support to ext/hash. (Martin Jansen)
 - Added FNV-1 hash support to ext/hash. (Michael Maclean)
-- Added ReflectionExtension::isTemporary() and
-  ReflectionExtension::isPersistent(). (Johannes)
+
+- Added ReflectionExtension::isTemporary() and ReflectionExtension::isPersistent(). (Johannes)
 - Added ReflectionZendExtension class. (Johannes)
 - Added ReflectionClass::isCloneable(). (Felipe)
+
 - Added command line option --rz to CLI. (Johannes)
+
 - Added closure $this support back. (Stas)
+
 - Added SplObjectStorage::getHash() hook. (Etienne)
-- Added JsonSerializable interface (Sara)
+
+- Added JsonSerializable interface. (Sara)
 - Added JSON_BIGINT_AS_STRING, extended json_decode() sig with $options. (Sara)
-- Added support for storing upload progress feedback in session data. (Arnaud)
-- Added nextRowset support for PDO_dblib. (Stanley)
-- Added support for CURLOPT_MAX_RECV_SPEED_LARGE and CURLOPT_MAX_SEND_SPEED_LARGE.
-  FR #51815. (Pierrick)
-- Added iterator support in MySQLi. mysqli_result implements Traversable.
-  (Andrey, Johannes)
-- Added scalar typehints to the parser and the reflection API. (Ilia, Derick)
 - Added support for JSON_NUMERIC_CHECK option in json_encode() that converts 
   numeric strings to integers. (Ilia)
-- Added support for object references in recursive serialize() calls. FR #36424.
-  (Mike)
-- Added Berkeley DB 5 support to the DBA extension (Johannes, Chris Jones)
+
+- Added support for storing upload progress feedback in session data. (Arnaud)
+- Added nextRowset support for PDO_dblib. (Stanley)
+
+- Added support for CURLOPT_MAX_RECV_SPEED_LARGE and CURLOPT_MAX_SEND_SPEED_LARGE.
+  (FR #51815). (Pierrick)
+
+- Added iterator support in MySQLi. mysqli_result implements Traversable.
+  (Andrey, Johannes)
+
+- Added scalar typehints to the parser and the reflection API. (Ilia, Derick)
+
+- Added support for object references in recursive serialize() calls. (FR #36424). (Mike)
 
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 
 - Changed the structure of op_array.opcodes. The constant values are moved from
   opcode operands into a separate literal table. (Dmitry)
+
 - Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
   either is present at compile time. (Rasmus)
 
@@ -141,6 +155,7 @@
 
 - Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
 - Fixed bug #50755 (PDO DBLIB Fails with OOM). (Stanley)
+
 
 	
 ?? ??? 20??, PHP 5.3.3
