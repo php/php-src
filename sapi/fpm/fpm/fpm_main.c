@@ -153,6 +153,7 @@ static const opt_struct OPTIONS[] = {
 	{'v', 0, "version"},
 	{'y', 1, "fpm-config"},
 	{'t', 0, "test"},
+	{'p', 1, "prefix"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -960,7 +961,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix> ] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -969,10 +970,12 @@ static void php_cgi_usage(char *argv0)
 				"  -i               PHP information\n"
 				"  -m               Show compiled in modules\n"
 				"  -v               Version number\n"
+				"  -p, --prefix <dir>\n"
+				"                   Specify alternative prefix path to FastCGI process manager (default: %s).\n"
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
 				"  -t, --test       Test FPM configuration and exit\n",
-				prog);
+				prog, PHP_PREFIX);
 }
 /* }}} */
 
@@ -1549,6 +1552,7 @@ int main(int argc, char *argv[])
 	int fcgi_fd = 0;
 	fcgi_request request;
 	char *fpm_config = NULL;
+	char *fpm_prefix = NULL;
 
 	fcgi_init();
 
@@ -1586,9 +1590,11 @@ int main(int argc, char *argv[])
 				}
 				cgi_sapi_module.php_ini_path_override = strdup(php_optarg);
 				break;
+
 			case 'n':
 				cgi_sapi_module.php_ini_ignore = 1;
 				break;
+
 			case 'd': {
 				/* define ini entries on command line */
 				int len = strlen(php_optarg);
@@ -1620,8 +1626,13 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+
 			case 'y':
 				fpm_config = php_optarg;
+				break;
+
+			case 'p':
+				fpm_prefix = php_optarg;
 				break;
 
 			case 'e': /* enable extended info output */
@@ -1768,7 +1779,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), &CGIG(event_base))) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, &CGIG(event_base))) {
 		return FAILURE;
 	}
 

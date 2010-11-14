@@ -74,6 +74,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 };
 
 static struct ini_value_parser_s ini_fpm_pool_options[] = {
+	{ "prefix", &fpm_conf_set_string, WPO(prefix) },
 	{ "user", &fpm_conf_set_string, WPO(user) },
 	{ "group", &fpm_conf_set_string, WPO(group) },
 	{ "chroot", &fpm_conf_set_string, WPO(chroot) },
@@ -114,6 +115,29 @@ static int fpm_conf_is_dir(char *path) /* {{{ */
 }
 /* }}} */
 
+static int fpm_conf_expand_pool_name(char **value) {
+	char *token;
+
+	if (!value || !*value) {
+		return 0;
+	}
+
+	while ((token = strstr(*value, "$pool"))) {
+		char *buf;
+		char *p1 = *value;
+		char *p2 = token + strlen("$pool");
+		if (!current_wp || !current_wp->config  || !current_wp->config->name) {
+			return -1;
+		}
+		token[0] = '\0';
+		spprintf(&buf, 0, "%s%s%s", p1, current_wp->config->name, p2);
+		*value = strdup(buf);
+		efree(buf);
+	}
+
+	return 0;
+}
+
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
@@ -140,6 +164,9 @@ static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset) /*
 	new = strdup(Z_STRVAL_P(value));
 	if (!new) {
 		return "fpm_conf_set_string(): strdup() failed";
+	}
+	if (fpm_conf_expand_pool_name(&new) == -1) {
+		return "Can't use '$pool' when the pool is not defined";
 	}
 
 	*old = new;
@@ -295,6 +322,9 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 		kv->value = strdup(b ? "On" : "Off");
 	} else {
 		kv->value = strdup(Z_STRVAL_P(value));
+		if (fpm_conf_expand_pool_name(&kv->value) == -1) {
+			return "Can't use '$pool' when the pool is not defined";
+		}
 	}
 
 	if (!kv->value) {
@@ -381,27 +411,68 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->chroot);
 	free(wpc->chdir);
 	free(wpc->slowlog);
+	free(wpc->prefix);
 
 	return 0;
 }
 /* }}} */
 
-static int fpm_evaluate_full_path(char **path) /* {{{ */
+static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, char *default_prefix, int expand) /* {{{ */
 {
-	if (**path != '/') {
-		char *full_path;
+	char *prefix = NULL;
+	char *full_path;
 
-		full_path = malloc(sizeof(PHP_PREFIX) + strlen(*path) + 1);
-
-		if (!full_path) { 
-			return -1;
-		}
-
-		sprintf(full_path, "%s/%s", PHP_PREFIX, *path);
-		free(*path);
-		*path = full_path;
+	if (!path || !*path || **path == '/') {
+		return 0;
 	}
 
+	if (wp && wp->config) {
+		prefix = wp->config->prefix;
+	}
+
+	/* if the wp prefix is not set */
+	if (prefix == NULL) {
+		prefix = fpm_globals.prefix;
+	}
+
+	/* if the global prefix is not set */
+	if (prefix == NULL) {
+		prefix = default_prefix ? default_prefix : PHP_PREFIX;
+	}
+
+	if (expand) {
+		char *tmp;
+		tmp = strstr(*path, "$prefix");
+		if (tmp != NULL) {
+
+			if (tmp != *path) {
+				zlog(ZLOG_ERROR, "'$prefix' must be use at the begining of the value");
+				return -1;
+			}
+
+			if (strlen(*path) > strlen("$prefix")) {
+				free(*path);
+				tmp = strdup((*path) + strlen("$prefix"));
+				*path = tmp;
+			} else {
+				free(*path);
+				*path = NULL;
+			}
+		}
+	}
+
+	if (*path) {
+		spprintf(&full_path, 0, "%s/%s", prefix, *path);
+		free(*path);
+		*path = strdup(full_path);
+		efree(full_path);
+	} else {
+		*path = strdup(prefix);
+	}
+
+	if (**path != '/' && wp != NULL && wp->config) {
+		return fpm_evaluate_full_path(path, NULL, default_prefix, expand);
+	}
 	return 0;
 }
 /* }}} */
@@ -417,11 +488,20 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 
+		if (wp->config->prefix && *wp->config->prefix) {
+			fpm_evaluate_full_path(&wp->config->prefix, NULL, NULL, 0);
+
+			if (!fpm_conf_is_dir(wp->config->prefix)) {
+				zlog(ZLOG_ERROR, "[pool %s] the prefix '%s' does not exist or is not a directory", wp->config->name, wp->config->prefix);
+				return -1;
+			}
+		}
+
 		if (wp->config->listen_address && *wp->config->listen_address) {
 			wp->listen_address_domain = fpm_sockets_domain_from_address(wp->config->listen_address);
 
 			if (wp->listen_address_domain == FPM_AF_UNIX && *wp->config->listen_address != '/') {
-				fpm_evaluate_full_path(&wp->config->listen_address);
+				fpm_evaluate_full_path(&wp->config->listen_address, wp, NULL, 0);
 			}
 		} else {
 			zlog(ZLOG_ALERT, "[pool %s] no listen address have been defined!", wp->config->name);
@@ -478,6 +558,9 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		}
 
+		if (wp->config->slowlog && *wp->config->slowlog) {
+			fpm_evaluate_full_path(&wp->config->slowlog, wp, NULL, 0);
+		}
 
 		if (wp->config->request_slowlog_timeout) {
 #if HAVE_FPM_TRACE
@@ -495,14 +578,10 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			wp->config->request_slowlog_timeout = 0;
 #endif
-		}
 
-		if (wp->config->request_slowlog_timeout && wp->config->slowlog && *wp->config->slowlog) {
-			int fd;
+			if (wp->config->slowlog && *wp->config->slowlog) {
+				int fd;
 
-			fpm_evaluate_full_path(&wp->config->slowlog);
-
-			if (wp->config->request_slowlog_timeout) {
 				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 
 				if (0 > fd) {
@@ -583,6 +662,9 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		}
 
 		if (wp->config->chroot && *wp->config->chroot) {
+
+			fpm_evaluate_full_path(&wp->config->chroot, wp, NULL, 1);
+
 			if (*wp->config->chroot != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' must start with a '/'", wp->config->name, wp->config->chroot);
 				return -1;
@@ -594,6 +676,9 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		}
 
 		if (wp->config->chdir && *wp->config->chdir) {
+
+			fpm_evaluate_full_path(&wp->config->chdir, wp, NULL, 0);
+
 			if (*wp->config->chdir != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' must start with a '/'", wp->config->name, wp->config->chdir);
 				return -1;
@@ -601,25 +686,40 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			if (wp->config->chroot) {
 				char *buf;
-				size_t len;
 
-				len = strlen(wp->config->chroot) + strlen(wp->config->chdir) + 1;
-				buf = malloc(sizeof(char) * len);
-				if (!buf) {
-					zlog(ZLOG_SYSERROR, "[pool %s] malloc() failed", wp->config->name);
-					return -1;
-				}
-				snprintf(buf, len, "%s%s", wp->config->chroot, wp->config->chdir);
+				spprintf(&buf, 0, "%s/%s", wp->config->chroot, wp->config->chdir);
+
 				if (!fpm_conf_is_dir(buf)) {
 					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' within the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
-					free(buf);
+					efree(buf);
 					return -1;
 				}
-				free(buf);
+
+				efree(buf);
 			} else {
 				if (!fpm_conf_is_dir(wp->config->chdir)) {
 					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' does not exist or is not a directory", wp->config->name, wp->config->chdir);
 					return -1;
+				}
+			}
+		}
+		if (!wp->config->chroot) {
+			struct key_value_s *kv;
+			char *options[] = FPM_PHP_INI_TO_EXPAND;
+			char **p;
+
+			for (kv = wp->config->php_values; kv; kv = kv->next) {
+				for (p=options; *p; p++) {
+					if (!strcasecmp(kv->key, *p)) {
+						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
+					}
+				}
+			}
+			for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+				for (p=options; *p; p++) {
+					if (!strcasecmp(kv->key, *p)) {
+						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
+					}
 				}
 			}
 		}
@@ -671,18 +771,14 @@ int fpm_conf_write_pid() /* {{{ */
 static int fpm_conf_post_process() /* {{{ */
 {
 	if (fpm_global_config.pid_file) {
-		fpm_evaluate_full_path(&fpm_global_config.pid_file);
+		fpm_evaluate_full_path(&fpm_global_config.pid_file, NULL, PHP_LOCALSTATEDIR, 0);
 	}
 
 	if (!fpm_global_config.error_log) {
-		char *tmp_log_path;
-
-		spprintf(&tmp_log_path, 0, "%s/log/php-fpm.log", PHP_LOCALSTATEDIR);
-		fpm_global_config.error_log = strdup(tmp_log_path);
-		efree(tmp_log_path);
+		fpm_global_config.error_log = strdup("log/php-fpm.log");
 	}
 
-	fpm_evaluate_full_path(&fpm_global_config.error_log);
+	fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
 
 	if (0 > fpm_stdio_open_error_log(0)) {
 		return -1;
@@ -990,7 +1086,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 		if (ini_include) {
 			char *tmp = ini_include;
 			ini_include = NULL;
-			fpm_evaluate_full_path(&tmp);
+			fpm_evaluate_full_path(&tmp, NULL, NULL, 0);
 			fpm_conf_ini_parser_include(tmp, &error TSRMLS_CC);
 			if (error) {
 				free(tmp);
@@ -1014,10 +1110,23 @@ int fpm_conf_init_main() /* {{{ */
 	int ret;
 	TSRMLS_FETCH();
 
+	if (fpm_globals.prefix && *fpm_globals.prefix) {
+		if (!fpm_conf_is_dir(fpm_globals.prefix)) {
+			zlog(ZLOG_ERROR, "the global prefix '%s' does not exist or is not a directory", fpm_globals.prefix);
+			return -1;
+		}
+	}
+
 	if (fpm_globals.config == NULL) {
-		spprintf(&fpm_globals.config, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
+
+		if (fpm_globals.prefix == NULL) {
+			spprintf(&fpm_globals.config, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
+		} else {
+			spprintf(&fpm_globals.config, 0, "%s/etc/php-fpm.conf", fpm_globals.prefix);
+		}
+
 		if (!fpm_globals.config) {
-			zlog(ZLOG_SYSERROR, "spprintf() failed (\"%s/php-fpm.conf\")", PHP_SYSCONFDIR);
+			zlog(ZLOG_SYSERROR, "spprintf() failed (fpm_globals.config)");
 			return -1;
 		}
 	}

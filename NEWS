@@ -14,6 +14,8 @@
   (Andrey)
 - Improved support for is_link and related functions on Windows. (Pierre)
 
+- Added '-p/--prefix' to php-fpm to use a custom prefix and run multiple
+  instances. (fat)
 - Added support for the ( and ) delimiters/separators to
   DateTime::createFromFormat(). (Derick)
 - Added custom process title for FPM. (fat)

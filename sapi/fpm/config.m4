@@ -603,6 +603,8 @@ if test "$PHP_FPM" != "no"; then
   PHP_SUBST_OLD(php_fpm_sysconfdir)
   php_fpm_localstatedir=`eval echo $localstatedir`
   PHP_SUBST_OLD(php_fpm_localstatedir)
+  php_fpm_prefix=`eval echo $prefix`
+  PHP_SUBST_OLD(php_fpm_prefix)
 
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
   AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
