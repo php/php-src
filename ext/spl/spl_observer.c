@@ -504,6 +504,10 @@ SPL_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
@@ -512,6 +516,10 @@ SPL_METHOD(SplObjectStorage, count)
 SPL_METHOD(SplObjectStorage, rewind)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
@@ -523,6 +531,10 @@ SPL_METHOD(SplObjectStorage, valid)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	RETURN_BOOL(zend_hash_has_more_elements_ex(&intern->storage, &intern->pos) == SUCCESS);
 } /* }}} */
 
@@ -531,6 +543,10 @@ SPL_METHOD(SplObjectStorage, valid)
 SPL_METHOD(SplObjectStorage, key)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	RETURN_LONG(intern->index);
 } /* }}} */
@@ -541,6 +557,10 @@ SPL_METHOD(SplObjectStorage, current)
 {
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	if (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == FAILURE) {
 		return;
@@ -554,6 +574,10 @@ SPL_METHOD(SplObjectStorage, getInfo)
 {
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	if (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == FAILURE) {
 		return;
@@ -587,6 +611,10 @@ SPL_METHOD(SplObjectStorage, next)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	zend_hash_move_forward_ex(&intern->storage, &intern->pos);
 	intern->index++;
 } /* }}} */
@@ -603,8 +631,12 @@ SPL_METHOD(SplObjectStorage, serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	PHP_VAR_SERIALIZE_INIT(var_hash);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+	
 	/* storage */
 	smart_str_appendl(&buf, "x:i:", 4);
 	smart_str_append_long(&buf, zend_hash_num_elements(&intern->storage));
@@ -852,6 +884,10 @@ SPL_METHOD(MultipleIterator, __construct)
 SPL_METHOD(MultipleIterator, getFlags)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	RETURN_LONG(intern->flags);
 }
 /* }}} */
@@ -915,6 +951,10 @@ SPL_METHOD(MultipleIterator, rewind)
 	zval                        *it;
 
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
@@ -934,6 +974,10 @@ SPL_METHOD(MultipleIterator, next)
 	zval                        *it;
 
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
@@ -954,6 +998,10 @@ SPL_METHOD(MultipleIterator, valid)
 	long                         expect, valid;
 
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (!zend_hash_num_elements(&intern->storage)) {
 		RETURN_FALSE;
@@ -1058,6 +1106,10 @@ SPL_METHOD(MultipleIterator, current)
 {
 	spl_SplObjectStorage        *intern;
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT, return_value TSRMLS_CC);
 }
@@ -1069,6 +1121,10 @@ SPL_METHOD(MultipleIterator, key)
 {
 	spl_SplObjectStorage        *intern;
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_KEY, return_value TSRMLS_CC);
 }

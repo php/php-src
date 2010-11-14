@@ -339,14 +339,13 @@ PHP_FUNCTION(spl_autoload)
  Register and return default file extensions for spl_autoload */
 PHP_FUNCTION(spl_autoload_extensions)
 {
-	char *file_exts;
+	char *file_exts = NULL;
 	int file_exts_len;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_exts, &file_exts_len) == FAILURE) {
-			return;
-		}
-	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &file_exts, &file_exts_len) == FAILURE) {
+		return;
+	}
+	if (file_exts) {
 		if (SPL_G(autoload_extensions)) {
 			efree(SPL_G(autoload_extensions));
 		}
@@ -669,6 +668,10 @@ PHP_FUNCTION(spl_autoload_functions)
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	if (!EG(autoload_func)) {
 		if (zend_hash_find(EG(function_table), ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME), (void **) &fptr) == SUCCESS) {
 			array_init(return_value);
