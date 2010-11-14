@@ -33,7 +33,9 @@ unlink($path);
 ?>
 --EXPECTF--
 bool(true)
-string(4) "blah"
+
+Warning: SplFileObject::fgets() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 Warning: SplFileObject::ftruncate() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

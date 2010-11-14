@@ -985,6 +985,10 @@ SPL_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}		
+	
 	RETURN_LONG(intern->heap->count - 1);
 }
 /* }}} */
@@ -995,6 +999,10 @@ SPL_METHOD(SplHeap, next)
 {
 	spl_heap_object      *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_ptr_heap_element  elem   = spl_ptr_heap_delete_top(intern->heap, getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (elem != NULL) {
 		zval_ptr_dtor((zval **)&elem);
@@ -1007,6 +1015,10 @@ SPL_METHOD(SplHeap, next)
 SPL_METHOD(SplHeap, valid)
 {
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	RETURN_BOOL(intern->heap->count != 0);
 }
@@ -1016,6 +1028,9 @@ SPL_METHOD(SplHeap, valid)
    Rewind the datastructure back to the start */
 SPL_METHOD(SplHeap, rewind)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	/* do nothing, the iterator always points to the top element */
 }
 /* }}} */
@@ -1026,6 +1041,10 @@ SPL_METHOD(SplHeap, current)
 {
 	spl_heap_object *intern  = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval            *element = (zval *)intern->heap->elements[0];
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (!intern->heap->count || !element) {
 		RETURN_NULL();
@@ -1041,6 +1060,10 @@ SPL_METHOD(SplPriorityQueue, current)
 {
 	spl_heap_object  *intern  = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval            **element = (zval **)&intern->heap->elements[0];
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (!intern->heap->count || !*element) {
 		RETURN_NULL();

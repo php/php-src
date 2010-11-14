@@ -1045,6 +1045,10 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* 
 SPL_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	RETURN_LONG(intern->traverse_position);
 }
@@ -1055,6 +1059,10 @@ SPL_METHOD(SplDoublyLinkedList, key)
 SPL_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO TSRMLS_CC);
 }
@@ -1065,6 +1073,10 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 SPL_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags TSRMLS_CC);
 }
@@ -1075,6 +1087,10 @@ SPL_METHOD(SplDoublyLinkedList, next)
 SPL_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
 }
@@ -1085,6 +1101,10 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 SPL_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags TSRMLS_CC);
 }
@@ -1096,6 +1116,10 @@ SPL_METHOD(SplDoublyLinkedList, current)
 {
 	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (element == NULL || element->data == NULL) {
 		RETURN_NULL();
