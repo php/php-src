@@ -3,12 +3,16 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 ; All relative paths in this configuration file are relative to PHP's install
-; prefix.
+; prefix (@prefix@). This prefix can be dynamicaly changed by using the
+; '-p' argument from the command line.
 
 ; Include one or more files. If glob(3) exists, it is used to include a bunch of
 ; files from a glob(3) pattern. This directive can be used everywhere in the
 ; file.
-;include=@EXPANDED_SYSCONFDIR@/fpm.d/*.conf
+; Relative path can also be used. They will be prefixed by:
+;  - the global prefix if it's been set (-p arguement)
+;  - @prefix@ otherwise
+;include=etc/fpm.d/*.conf
 
 ;;;;;;;;;;;;;;;;;;
 ; Global Options ;
@@ -16,12 +20,14 @@
 
 [global]
 ; Pid file
+; Note: the default prefix is @EXPANDED_LOCALSTATEDIR@
 ; Default Value: none
-;pid = @EXPANDED_LOCALSTATEDIR@/run/php-fpm.pid
+;pid = run/php-fpm.pid
 
 ; Error log file
-; Default Value: @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log
-;error_log = @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log
+; Note: the default prefix is @EXPANDED_LOCALSTATEDIR@
+; Default Value: log/php-fpm.log
+;error_log = log/php-fpm.log
 
 ; Log level
 ; Possible Values: alert, error, warning, notice, debug
@@ -62,7 +68,22 @@
 ; FPM can handle. Your system will tell you anyway :)
 
 ; Start a new pool named 'www'.
+; the variable $pool can we used in any directive and will be replaced by the
+; pool name ('www' here)
 [www]
+
+; Per pool prefix
+; It only applies on the following directives:
+; - 'slowlog'
+; - 'listen' (unixsocket)
+; - 'chroot'
+; - 'chdir'
+; - 'php_values'
+; - 'php_admin_values'
+; When not set, the global prefix (or @php_fpm_prefix@) applies instead.
+; Note: This directive can also be relative to the global prefix.
+; Default Value: none
+;prefix = /path/to/pools/$pool
 
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
@@ -218,7 +239,7 @@ pm.max_children = 50
 ; The log file for slow requests
 ; Default Value: not set
 ; Note: slowlog is mandatory if request_slowlog_timeout is set
-;slowlog = @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow
+;slowlog = log/$pool.log.slow
  
 ; Set open file descriptor rlimit.
 ; Default Value: system defined value
@@ -231,13 +252,17 @@ pm.max_children = 50
  
 ; Chroot to this directory at the start. This value must be defined as an
 ; absolute path. When this value is not set, chroot is not used.
+; Note: you can prefix with '$prefix' to chroot to the pool prefix or one
+; of its subdirectories. If the pool prefix is not set, the global prefix
+; will be used instead.
 ; Note: chrooting is a great security feature and should be used whenever 
 ;       possible. However, all PHP paths will be relative to the chroot
 ;       (error_log, sessions.save_path, ...).
 ; Default Value: not set
 ;chroot = 
  
-; Chdir to this directory at the start. This value must be an absolute path.
+; Chdir to this directory at the start.
+; Note: relative path can be used.
 ; Default Value: current directory or / when chroot
 ;chdir = /var/www
  
@@ -268,6 +293,9 @@ pm.max_children = 50
 ; extension_dir. Defining 'disable_functions' or 'disable_classes' will not
 ; overwrite previously defined php.ini values, but will append the new value
 ; instead.
+
+; Note: path INI options can be relative and will be expanded with the prefix
+; (pool, global or @prefix@)
 
 ; Default Value: nothing is defined by default except the values in php.ini and
 ;                specified at startup with the -d argument

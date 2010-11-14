@@ -10,13 +10,14 @@
 #include <event.h>
 
 int fpm_run(int *max_requests, struct event_base *base);
-int fpm_init(int argc, char **argv, char *config, struct event_base **base);
+int fpm_init(int argc, char **argv, char *config, char *prefix, struct event_base **base);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
 	int argc;
 	char **argv;
 	char *config;
+	char *prefix;
 	int running_children;
 	int error_log_fd;
 	int log_level;

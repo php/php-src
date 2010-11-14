@@ -77,6 +77,11 @@ Show compiled in modules
 .PD 1
 .B \-v
 Version number
+.B \-\-prefix \fIpath\fP
+.TP
+.PD 1
+.B \-p
+Specify alternative prefix path (the default is @php_fpm_prefix@)
 .TP
 .PD 0
 .B \-\-fpm\-config \fIfile\fP
