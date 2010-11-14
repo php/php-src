@@ -1553,6 +1553,7 @@ int main(int argc, char *argv[])
 	fcgi_request request;
 	char *fpm_config = NULL;
 	char *fpm_prefix = NULL;
+	int test_conf = 0;
 
 	fcgi_init();
 
@@ -1640,7 +1641,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 't': 
-				fpm_globals.test_conf = 1;
+				test_conf++;
 				break;
 
 			case 'm': /* list compiled in modules */
@@ -1779,7 +1780,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, &CGIG(event_base))) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, test_conf, &CGIG(event_base))) {
 		return FAILURE;
 	}
 

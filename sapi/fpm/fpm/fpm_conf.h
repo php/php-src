@@ -10,6 +10,10 @@
 
 #define FPM_CONF_MAX_PONG_LENGTH 64
 
+#define STR2STR(a) (a ? a : "undefined")
+#define BOOL2STR(a) (a ? "yes" : "no")
+#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : "dynamic")
+
 struct key_value_s;
 
 struct key_value_s {
@@ -70,7 +74,7 @@ struct ini_value_parser_s {
 
 enum { PM_STYLE_STATIC = 1, PM_STYLE_DYNAMIC = 2 };
 
-int fpm_conf_init_main();
+int fpm_conf_init_main(int test_conf);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
 int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();
