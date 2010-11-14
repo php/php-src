@@ -28,6 +28,12 @@ static const char *level_names[] = {
 	[ZLOG_ALERT]		= "ALERT",
 };
 
+const char *zlog_get_level_name() /* {{{ */
+{
+	return level_names[zlog_level];
+}
+/* }}} */
+
 void zlog_set_launched(void) {
 	launched = 1;
 }
