@@ -10,7 +10,7 @@
 #include <event.h>
 
 int fpm_run(int *max_requests, struct event_base *base);
-int fpm_init(int argc, char **argv, char *config, char *prefix, struct event_base **base);
+int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf, struct event_base **base);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
@@ -24,7 +24,6 @@ struct fpm_globals_s {
 	int listening_socket; /* for this child */
 	int max_requests; /* for this child */
 	int is_child;
-	int test_conf;
 };
 
 extern struct fpm_globals_s fpm_globals;

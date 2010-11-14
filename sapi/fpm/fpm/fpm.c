@@ -23,16 +23,16 @@
 
 struct fpm_globals_s fpm_globals;
 
-int fpm_init(int argc, char **argv, char *config, char *prefix, struct event_base **base) /* {{{ */
+int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf, struct event_base **base) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
 	fpm_globals.config = config;
 	fpm_globals.prefix = prefix;
 
-	if (0 > fpm_php_init_main()            ||
+	if (0 > fpm_php_init_main()              ||
 		0 > fpm_stdio_init_main()            ||
-		0 > fpm_conf_init_main()             ||
+		0 > fpm_conf_init_main(test_conf)    ||
 		0 > fpm_unix_init_main()             ||
 		0 > fpm_pctl_init_main()             ||
 		0 > fpm_env_init_main()              ||
