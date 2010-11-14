@@ -31,6 +31,7 @@ extern struct fpm_global_config_s fpm_global_config;
 
 struct fpm_worker_pool_config_s {
 	char *name;
+	char *prefix;
 	char *user;
 	char *group;
 	char *chroot;
