@@ -14,9 +14,9 @@ for($i=0; $i<256; $i++)
 /* giving arguments as NULL */
 echo "\n*** Testing htmlentities() with NULL as first,second and third argument ***\n";
 var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", NULL, 'cp1252') );
-var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_QUOTES, NULL) );
-var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_NOQUOTES, NULL) );
-var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_COMPAT, NULL) );
+var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_QUOTES, NULL) ); /* UTF-8 assumed */
+var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_NOQUOTES, NULL) ); /* UTF-8 assumed */
+var_dump( htmlentities("\x82\x86\x99\x9f\x80\x82\x81", ENT_COMPAT, NULL) ); /* UTF-8 assumed */
 var_dump( htmlentities(NULL, NULL, NULL) );
 
 /* giving long string to check for proper memory re-allocation */
@@ -305,9 +305,9 @@ string(16) "6368722832353529"
 
 *** Testing htmlentities() with NULL as first,second and third argument ***
 string(42) "&sbquo;&dagger;&trade;&Yuml;&euro;&sbquo;"
-string(7) "‚†™Ÿ€‚"
-string(7) "‚†™Ÿ€‚"
-string(7) "‚†™Ÿ€‚"
+string(0) ""
+string(0) ""
+string(0) ""
 string(0) ""
 
 *** Checking for proper memory allocation with long string ***
