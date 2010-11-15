@@ -106,11 +106,10 @@ To prevent this from happening when the inner stream is freed from the outer
 stream, the macro php_stream_free_enclosed should be used instead of
 php_stream_free/php_stream_close/php_stream_pclose, or the flag
 PHP_STREAM_FREE_IGNORE_ENCLOSING should be directly passed to php_stream_free.
-The outer stream cannot abstain, in its close callback, from either closing the
-inner stream or clear the enclosing_stream pointer in its enclosed stream by
-calling php_stream_encloses with the 2nd argument NULL. If this is not done,
-there will be problems, so observe this requirement when using
-php_stream_encloses.
+The outer stream cannot abstain, in its close callback, from closing the inner
+stream or clear the enclosing_stream pointer in its enclosed stream by calling
+php_stream_encloses with the 2nd argument NULL. If this is not done, there will
+be problems, so observe this requirement when using php_stream_encloses.
 
 	g. leak_variable
 The function leak_variable(variable [, leak_data]) was added. It is only
