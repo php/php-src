@@ -8,7 +8,9 @@ UPGRADE NOTES - PHP X.Y
   c. readlink support
   d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
   e. Zend\zend_fast_cache.h has been removed
-  f. API Signature changes
+  f. streams that enclose private streams
+  g. leak_variable
+  h. API Signature changes
 
 ========================
 1. Internal API changes
@@ -68,7 +70,55 @@ ZEND_FAST_FREE_REL(p, fc_type)
 
 Use emalloc, emalloc_rel, efree or efree_rel instead.
 
-	f. API Signature changes
+	f. Streams that enclose private streams
+Some streams, like the temp:// stream, may enclose private streams. If the
+outer stream leaks due to a programming error or is not exposed through a
+zval (and therefore is not deleted when all the zvals are gone), it will
+be destroyed on shutdown.
+The problem is that the outer usually wants itself to close the inner stream,
+so that it may do any other shutdown action that requires the inner stream to
+be live (e.g. commit data to it). If the outer stream is exposed through a
+zval and the inner one isn't, this is not a problem because the outer stream
+will be freed when the zval is destroyed, which happens before the resources
+are destroyed on shutdown.
+On resource list shutdown, the cleanup happens in reverse order of resource
+creation, so if the inner stream was created in the opener of the outer stream,
+it will be destroyed first.
+The following functions were added to the streams API to force a predictable
+destruction order:
+
+PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
+#define php_stream_free_enclosed(stream_enclosed, close_options)
+PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options TSRMLS_DC);
+
+Additionally, the following member was added to php_stream:
+
+	struct _php_stream *enclosing_stream;
+    
+and the following macro was added:
+
+#define PHP_STREAM_FREE_IGNORE_ENCLOSING	32
+
+The function php_stream_encloses declares the first stream encloses the second.
+This has the effect that, when the inner stream is closed from a resource
+destructor it will abort and try to free its enclosing stream instead.
+To prevent this from happening when the inner stream is freed from the outer
+stream, the macro php_stream_free_enclosed should be used instead of
+php_stream_free/php_stream_close/php_stream_pclose, or the flag
+PHP_STREAM_FREE_IGNORE_ENCLOSING should be directly passed to php_stream_free.
+The outer stream cannot abstain, in its close callback, from either closing the
+inner stream or clear the enclosing_stream pointer in its enclosed stream by
+calling php_stream_encloses with the 2nd argument NULL. If this is not done,
+there will be problems, so observe this requirement when using
+php_stream_encloses.
+
+	g. leak_variable
+The function leak_variable(variable [, leak_data]) was added. It is only
+available on debug builds. It increments the refcount of a zval or, if the
+second argument is true and the variable is either an object or a resource
+it increments the refcounts of those objects instead.
+
+	h. API Signature changes
 . zend_list_insert
   ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
   call: zend_list_insert(a, SOMETYPE TSRMLS_CC);
