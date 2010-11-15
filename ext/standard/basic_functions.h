@@ -127,6 +127,7 @@ PHP_FUNCTION(parse_ini_file);
 PHP_FUNCTION(parse_ini_string);
 #if ZEND_DEBUG
 PHP_FUNCTION(config_get_hash);
+PHP_FUNCTION(leak_variable);
 #endif
 
 PHP_FUNCTION(str_rot13);

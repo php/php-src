@@ -105,6 +105,15 @@ PHP_RSHUTDOWN_FUNCTION(streams)
 	return SUCCESS;
 }
 
+PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed)
+{
+	php_stream *orig = enclosed->enclosing_stream;
+
+	php_stream_auto_cleanup(enclosed);
+	enclosed->enclosing_stream = enclosing;
+	return orig;
+}
+
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
@@ -272,14 +281,52 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, persistent_id ? le_pstream : le_stream);
 	strlcpy(ret->mode, mode, sizeof(ret->mode));
 
+	ret->wrapper          = NULL;
+	ret->wrapperthis      = NULL;
+	ret->wrapperdata      = NULL;
+	ret->stdiocast        = NULL;
+	ret->orig_path        = NULL;
+	ret->context          = NULL;
+	ret->readbuf          = NULL;
+	ret->enclosing_stream = NULL;
+
 	return ret;
 }
 /* }}} */
+
+PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options TSRMLS_DC) /* {{{ */
+{
+	return _php_stream_free(stream_enclosed,
+		close_options | PHP_STREAM_FREE_IGNORE_ENCLOSING TSRMLS_CC);
+}
+/* }}} */
+
+#if STREAM_DEBUG
+static const char *_php_stream_pretty_free_options(int close_options, char *out)
+{
+	if (close_options & PHP_STREAM_FREE_CALL_DTOR)
+		strcat(out, "CALL_DTOR, ");
+	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM)
+		strcat(out, "RELEASE_STREAM, ");
+	if (close_options & PHP_STREAM_FREE_PRESERVE_HANDLE)
+		strcat(out, "PREVERSE_HANDLE, ");
+	if (close_options & PHP_STREAM_FREE_RSRC_DTOR)
+		strcat(out, "RSRC_DTOR, ");
+	if (close_options & PHP_STREAM_FREE_PERSISTENT)
+		strcat(out, "PERSISTENT, ");
+	if (close_options & PHP_STREAM_FREE_IGNORE_ENCLOSING)
+		strcat(out, "IGNORE_ENCLOSING, ");
+	if (out[0] != '\0')
+		out[strlen(out) - 2] = '\0';
+	return out;
+}
+#endif
 
 static int _php_stream_free_persistent(zend_rsrc_list_entry *le, void *pStream TSRMLS_DC)
 {
 	return le->ptr == pStream;
 }
+
 
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
 {
@@ -294,15 +341,39 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	}
 
 #if STREAM_DEBUG
-fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->orig_path, stream->in_free, close_options);
+	{
+		char out[200] = "";
+		fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%s\n",
+			stream->ops->label, stream, stream->orig_path, stream->in_free, _php_stream_pretty_free_options(close_options, out));
+	}
+	
 #endif
 
-	/* recursion protection */
 	if (stream->in_free) {
-		return 1;
+		/* hopefully called recursively from the enclosing stream; the pointer was NULLed below */
+		if ((stream->in_free == 1) && (close_options & PHP_STREAM_FREE_IGNORE_ENCLOSING) && (stream->enclosing_stream == NULL)) {
+			close_options |= PHP_STREAM_FREE_RSRC_DTOR; /* restore flag */
+		} else {
+			return 1; /* recursion protection */
+		}
 	}
 
 	stream->in_free++;
+
+	/* force correct order on enclosing/enclosed stream destruction (only from resource
+	 * destructor as in when reverse destroying the resource list) */
+	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) &&
+			!(close_options & PHP_STREAM_FREE_IGNORE_ENCLOSING) &&
+			(close_options & (PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)) && /* always? */
+			(stream->enclosing_stream != NULL)) {
+		php_stream *enclosing_stream = stream->enclosing_stream;
+		stream->enclosing_stream = NULL;
+		/* we force PHP_STREAM_CALL_DTOR because that's from where the
+		 * enclosing stream can free this stream. We remove rsrc_dtor because
+		 * we want the enclosing stream to be deleted from the resource list */
+		return _php_stream_free(enclosing_stream,
+			(close_options | PHP_STREAM_FREE_CALL_DTOR) & ~PHP_STREAM_FREE_RSRC_DTOR TSRMLS_CC);
+	}
 
 	/* if we are releasing the stream only (and preserving the underlying handle),
 	 * we need to do things a little differently.
@@ -404,7 +475,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 				stream->orig_path = NULL;
 			}
 
-# if defined(PHP_WIN32)
+# if defined(PHP_WIN32_)
 			OutputDebugString(leakinfo);
 # else
 			fprintf(stderr, "%s", leakinfo);
