@@ -2363,12 +2363,12 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-    if (php_stream_stat_path(pathto, &ssb) < 0) {
-        ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
-        if (!ret) {
-            RETURN_FALSE;
-        }
-    }
+	if (php_stream_stat_path(pathto, &ssb) < 0) {
+		ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+		if (!ret) {
+			RETURN_FALSE;
+		}
+	}
 
 	ZIP_FROM_OBJECT(intern, this);
 	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
