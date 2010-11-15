@@ -2621,7 +2621,7 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 			}
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 				zval_ptr_dtor(&return_value);
-				return std_object_handlers.read_property(object, member, IS_STRING TSRMLS_CC);
+				return std_object_handlers.read_property(object, member, type TSRMLS_CC);
 			}
 		}
 	}
