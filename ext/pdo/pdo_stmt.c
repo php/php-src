@@ -2610,7 +2610,7 @@ static zval *row_prop_read(zval *object, zval *member, int type, const zend_lite
 			}
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 				zval_ptr_dtor(&return_value);
-				return std_object_handlers.read_property(object, member, IS_STRING, key TSRMLS_CC);
+				return std_object_handlers.read_property(object, member, type, key TSRMLS_CC);
 			}
 		}
 	}
