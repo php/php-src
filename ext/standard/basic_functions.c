@@ -853,11 +853,6 @@ ZEND_END_ARG_INFO()
 #if ZEND_DEBUG
 ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leak_variable, 0, 0, 1)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, leak_data)
-ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GETLOADAVG
@@ -3002,7 +2997,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(parse_ini_string,												arginfo_parse_ini_string)
 #if ZEND_DEBUG
 	PHP_FE(config_get_hash,													arginfo_config_get_hash)
-	PHP_FE(leak_variable,													arginfo_leak_variable)
 #endif
 	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
 	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
@@ -5921,32 +5915,6 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(hash TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, return_value);
-}
-/* }}} */
-
-/* {{{ proto leak_variable(variable [, leak_data]) */
-PHP_FUNCTION(leak_variable)
-{
-	zval *zv;
-	zend_bool leak_data = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &zv, &leak_data) == FAILURE) {
-		return;
-	}
-
-	if (leak_data && (Z_TYPE_P(zv) != IS_RESOURCE && Z_TYPE_P(zv) != IS_OBJECT)) {
-		php_error_docref0(NULL TSRMLS_CC, E_WARNING,
-			"Leaking non-zval data is only applicable to resources and objects");
-		return;
-	}
-
-	if (!leak_data) {
-		zval_add_ref(&zv);
-	} else if (Z_TYPE_P(zv) == IS_RESOURCE) {
-		zend_list_addref(Z_RESVAL_P(zv));
-	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-		Z_OBJ_HANDLER_P(zv, add_ref)(zv TSRMLS_CC);
-	}
 }
 /* }}} */
 #endif
