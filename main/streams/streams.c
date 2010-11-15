@@ -1164,6 +1164,11 @@ PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
 {
+	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+		/* flush to commit data written to the fopencookie FILE* */
+		fflush(stream->stdiocast);
+	}
+
 	/* handle the case where we are in the buffer */
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
