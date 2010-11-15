@@ -497,20 +497,20 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
 						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
 						,string_key
-						,(unsigned long long) f_profile->calls
-						,(unsigned long long) f_profile->own_underporm_calls
-						,(unsigned long long) f_profile->in_calls_underporm_calls
-						,(unsigned long long) f_profile->total_underporm_calls
+						,(uint64_t) f_profile->calls
+						,(uint64_t) f_profile->own_underporm_calls
+						,(uint64_t) f_profile->in_calls_underporm_calls
+						,(uint64_t) f_profile->total_underporm_calls
 						
-						,(unsigned long long) f_profile->min_own
-						,(unsigned long long) f_profile->max_own
-						,(unsigned long long) f_profile->avg_own
-						,(unsigned long long) f_profile->min_in_calls
-						,(unsigned long long) f_profile->max_in_calls
-						,(unsigned long long) f_profile->avg_in_calls
-						,(unsigned long long) f_profile->min_total
-						,(unsigned long long) f_profile->max_total
-						,(unsigned long long) f_profile->avg_total
+						,(uint64_t) f_profile->min_own
+						,(uint64_t) f_profile->max_own
+						,(uint64_t) f_profile->avg_own
+						,(uint64_t) f_profile->min_in_calls
+						,(uint64_t) f_profile->max_in_calls
+						,(uint64_t) f_profile->avg_in_calls
+						,(uint64_t) f_profile->min_total
+						,(uint64_t) f_profile->max_total
+						,(uint64_t) f_profile->avg_total
 						);
 				zend_hash_move_forward_ex(&self->function_profiles, &pos_values);
 			}
