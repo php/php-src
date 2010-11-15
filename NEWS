@@ -122,6 +122,8 @@
   mssql_connect). (Felipe)
 - Fixed bug #52827 (cURL leaks handle and causes assertion error
   (CURLOPT_STDERR)). (Gustavo)
+- Fixed bug #52820 (writes to fopencookie FILE* not commited when seeking the
+  stream). (Gustavo)
 - Fixed bug #52786 (PHP should reset section to [PHP] after ini sections).
   (Fedora at famillecollet dot com)
 - Fixed bug #52784 (Race condition when handling many concurrent signals).
