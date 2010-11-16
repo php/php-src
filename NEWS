@@ -8,6 +8,8 @@
 
 - Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
   (CVE-2010-3709). (Maksymilian Arciemowicz)
+- Fixed bug #53323 (pdo_firebird getAttribute() crash).
+  (preeves at ibphoenix dot com)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
   large amount of data). (CVE-2010-3709). (Adam)
 - Fixed bug #52879 (Objects unreferenced in __get, __set, __isset or __unset
