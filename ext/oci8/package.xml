@@ -33,21 +33,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2010-11-10</date>
+ <date>2010-11-16</date>
  <time>15:00:00</time>
 
  <version>
-  <release>1.4.4</release>
-  <api>1.4.4</api>
+  <release>1.4.5</release>
+  <api>1.4.5</api>
  </version>
  <stability>
-  <release>stable</release>
+  <release>devel</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-    Fixed bug #53284 (Valgrind warnings in oci_set_* functions)
-    Enhancement - improve startup failure error messages
+    Protect against null bytes in LOB filenames (http://news.php.net/php.internals/50202)
  </notes>
  <contents>
   <dir name="/">
@@ -306,6 +305,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
     <file name="minfo.phpt" role="test" />
+    <file name="null_byte_1.phpt" role="test" />
+    <file name="null_byte_2.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
@@ -376,6 +377,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.4</release>
+  <api>1.4.4</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #53284 (Valgrind warnings in oci_set_* functions)
+    Enhancement - improve startup failure error messages
+ </notes>
+</release>
 
 <release>
  <version>
