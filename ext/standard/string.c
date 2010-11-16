@@ -4211,9 +4211,8 @@ int php_tag_find(char *tag, int len, char *set) {
 				if (!isspace((int)c)) {
 					if (state == 0) {
 						state=1;
-						if (c != '/')
-							*(n++) = c;
-					} else {
+					}
+					if (c != '/') {
 						*(n++) = c;
 					}
 				} else {

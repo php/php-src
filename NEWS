@@ -66,6 +66,7 @@
 
 - Fixed bug #53323 (pdo_firebird getAttribute() crash).
   (preeves at ibphoenix dot com)
+- Fixed Bug #53319 (strip_tags() may strip '<br />' incorrectly). (Felipe)
 - Fixed bug #53305 (E_NOTICE when defining a constant starts with
   __COMPILER_HALT_OFFSET__). (Felipe)
 - Fixed bug #53297 (gettimeofday implementation in php/win32/time.c can return
