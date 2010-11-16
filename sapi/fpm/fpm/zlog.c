@@ -121,7 +121,7 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 
 	buf[len++] = '\n';
 	write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
-	if (zlog_fd != STDERR_FILENO && zlog_fd > -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_WARNING) {
+	if (zlog_fd != STDERR_FILENO && zlog_fd > -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
 		write(STDERR_FILENO, buf, len);
 	}
 }
