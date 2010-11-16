@@ -68,6 +68,7 @@
   __COMPILER_HALT_OFFSET__). (Felipe)
 - Fixed bug #53297 (gettimeofday implementation in php/win32/time.c can return
   1 million microsecs). (ped at 7gods dot org)
+- Fixed bug #53284 (Valgrind warnings in oci_set_* functions) (Oracle Corp.)
 - Fixed bug #53279 (SplFileObject doesn't initialise default CSV escape
   character). (Adam)
 - Fixed bug #53273 (mb_strcut() returns garbage with the excessive length
