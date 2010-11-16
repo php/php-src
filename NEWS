@@ -64,6 +64,8 @@
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
 
+- Fixed bug #53323 (pdo_firebird getAttribute() crash).
+  (preeves at ibphoenix dot com)
 - Fixed bug #53305 (E_NOTICE when defining a constant starts with
   __COMPILER_HALT_OFFSET__). (Felipe)
 - Fixed bug #53297 (gettimeofday implementation in php/win32/time.c can return
