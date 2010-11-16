@@ -242,7 +242,12 @@ PHP_FUNCTION(oci_lob_import)
 			return;
 		}	
 	}
-	
+
+	if (strlen(filename) != filename_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
+		RETURN_FALSE;  
+	}
+
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
@@ -894,7 +899,12 @@ PHP_FUNCTION(oci_lob_export)
 			RETURN_FALSE;
 		}
 	}
-	
+
+	if (strlen(filename) != filename_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
+		RETURN_FALSE;  
+	}
+
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
@@ -1666,8 +1676,8 @@ PHP_FUNCTION(oci_num_fields)
 }
 /* }}} */
 
-/* {{{ proto resource oci_parse(resource connection, string query)
-   Parse a query and return a statement */
+/* {{{ proto resource oci_parse(resource connection, string statement)
+   Parse a SQL or PL/SQL statement and return a statement resource */
 PHP_FUNCTION(oci_parse)
 {
 	zval *z_connection;
