@@ -183,6 +183,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="connect_scope_try5.phpt" role="test" />
     <file name="connect_scope_try6.phpt" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
+    <file name="connect_without_oracle_home_11.phpt" role="test" />
+    <file name="connect_without_oracle_home_old_11.phpt" role="test" />
     <file name="connect_without_oracle_home_old.phpt" role="test" />
     <file name="connect_without_oracle_home.phpt" role="test" />
     <file name="create_table.inc" role="test" />
