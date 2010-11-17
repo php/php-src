@@ -284,6 +284,10 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 			SCNG(script_filtered_size) = SCNG(script_org_size);
 		} else {
 			SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
+			if (SCNG(script_filtered) == NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
+						"encoding \"%s\" to a compatible encoding", LANG_SCNG(script_encoding)->name);
+			}
 		}
 		SCNG(yy_start) = SCNG(script_filtered) - offset;
 		yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);
