@@ -551,10 +551,6 @@ static int firebird_handle_get_attribute(pdo_dbh_t const *dbh, long attr, zval *
 				ZVAL_STRING(val,tmp,1);
 				return 1;
 			}
-			
-		case PDO_ATTR_FETCH_TABLE_NAMES:
-			ZVAL_BOOL(val, H->fetch_table_names);
-			return 1;
 	}
 	return 0;
 }       
