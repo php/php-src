@@ -45,7 +45,7 @@ PHP                                                                        NEWS
   . Replaced zend_function.return_reference by ZEND_ACC_RETURN_REFERENCE
     in zend_function.fn_flags.
   . Removed zend_arg_info.required_num_args as it was only needed for internal
-    functions. Now the first arg_info for internal function (which has special
+    functions. Now the first arg_info for internal functions (which has special
     meaning) is represented by zend_internal_function_info structure.
   . Moved zend_op_array.size, size_var, size_literal, current_brk_cont,
     backpatch_count into CG(context) as they are used only during compilation.
@@ -79,22 +79,21 @@ PHP                                                                        NEWS
   . ZEND_RECV now always has IS_CV as its result.
   . ZEND_CATCH now has to be used only with constant class names.
   . ZEND_FETCH_DIM_? may fetch array and dimension operands in different order.
-  . ZEND_FETCH_*_R operations simplified and can't be used with EXT_TYPE_UNUSED
-    flag any more. This is very rare and useless case. ZEND_FREE might be
-    required after them instead.
-  . ZEND_RETURN is splitted into two new instructions ZEND_RETURN and 
+  . Simplified ZEND_FETCH_*_R operations. They can't be used with the
+    EXT_TYPE_UNUSED flag any more. This is a very rare and useless case.
+    ZEND_FREE might be required after them instead.
+  . Split ZEND_RETURN into two new instructions ZEND_RETURN and
     ZEND_RETURN_BY_REF.
   . Optimized access to global constants using values with pre-calculated
-    hash_values from literals table.
+    hash_values from the literals table.
   . Optimized access to static properties using executor specialization.
     A constant class name may be used as a direct operand of ZEND_FETCH_*
     instruction without previous ZEND_FETCH_CLASS.
-  . zend_stack and zend_ptr_stack allocation is delayed before the actual
-    usage.
+  . zend_stack and zend_ptr_stack allocation is delayed until actual usage.
 
 - Improved CLI SAPI: (Johannes)
-  . Added command line option --rz <name> which shows information of named
-    Zend extension.
+  . Added command line option --rz <name> which shows information of the
+    named Zend extension.
   . Interactive readline shell improvements:
     . Added "cli.pager" php.ini setting to set a pager for output.
     . Added "cli.prompt" php.ini setting to configure the shell prompt.
