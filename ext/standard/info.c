@@ -73,7 +73,8 @@ PHPAPI extern char *php_ini_scanned_files;
 
 static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 {
-	int new_len, written;
+	size_t new_len;
+	int written;
 	char *new_str;
 	TSRMLS_FETCH();
 	
@@ -299,7 +300,7 @@ void php_info_print_style(TSRMLS_D)
  */
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 {
-	int new_len;
+	size_t new_len;
 	return php_escape_html_entities(string, strlen(string), &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 }
 /* }}} */
@@ -880,13 +881,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_PP(data));
 		}
-		php_print_gpcse_array("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
-		php_print_gpcse_array("_GET", sizeof("_GET")-1 TSRMLS_CC);
-		php_print_gpcse_array("_POST", sizeof("_POST")-1 TSRMLS_CC);
-		php_print_gpcse_array("_FILES", sizeof("_FILES")-1 TSRMLS_CC);
-		php_print_gpcse_array("_COOKIE", sizeof("_COOKIE")-1 TSRMLS_CC);
-		php_print_gpcse_array("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
-		php_print_gpcse_array("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_REQUEST") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_GET") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_POST") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_FILES") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_COOKIE") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_SERVER") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_ENV") TSRMLS_CC);
 		php_info_print_table_end();
 	}
 
