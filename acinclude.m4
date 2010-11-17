@@ -830,8 +830,6 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
-
-  php_sapi_module=program
 ])
 
 dnl
@@ -901,19 +899,18 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 
   PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS $1"
 
-  case "$2" in
-  static[)] PHP_BUILD_STATIC;;
-  shared[)] PHP_BUILD_SHARED;;
-  bundle[)] PHP_BUILD_BUNDLE;;
-  program[)] PHP_BUILD_PROGRAM;;
-  esac
-
   ifelse($2,program,[
+    PHP_BUILD_PROGRAM
     install_binaries="install-binaries"
     install_binary_targets="$install_binary_targets install-$1"
     PHP_SUBST(PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)
     ifelse($3,,,[PHP_ADD_SOURCES_X([sapi/$1],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)])
   ],[
+    case "$2" in
+    static[)] PHP_BUILD_STATIC;;
+    shared[)] PHP_BUILD_SHARED;;
+    bundle[)] PHP_BUILD_BUNDLE;;
+    esac
     install_sapi="install-sapi"
     ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
   ])
@@ -2937,13 +2934,13 @@ dnl DTrace objects
   done;
 
   case [$]php_sapi_module in
-  program|static)
-    dtrace_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
-    ;;
-  *)
+  shared[)]
     for ac_lo in $PHP_DTRACE_OBJS; do
       dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
     done;
+    ;;
+  *[)]
+    dtrace_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
     ;;
   esac
 
