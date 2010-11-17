@@ -22,10 +22,6 @@ Content-Type: text/plain-file2
 --FILE--
 <?php
 var_dump($_FILES);
-var_dump($GLOBALS["o1\'file_name"]);
-var_dump($GLOBALS["o1\'file_name"] === $_FILES["o1\'file"]["name"]);
-var_dump($GLOBALS["o1\'file"]);
-var_dump($GLOBALS["o1\'file"] === $_FILES["o1\'file"]["tmp_name"]);
 ?>
 --EXPECTF--
 array(2) {
@@ -56,7 +52,3 @@ array(2) {
     int(1)
   }
 }
-string(12) "o1\'file.png"
-bool(true)
-string(%d) "%s"
-bool(true)
