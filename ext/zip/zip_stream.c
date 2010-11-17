@@ -104,7 +104,6 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	size_t file_basename_len;
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
-	struct zip_file *zf = NULL;
 	char *fragment;
 	int fragment_len;
 	int err;

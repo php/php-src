@@ -1360,7 +1360,6 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 		matches_map = 0;
 
 		if (this_char != '&') { /* no entity on this position */
-			int					found	= 0;
 			const unsigned char *rep	= NULL;
 			size_t				rep_len	= 0;
 
