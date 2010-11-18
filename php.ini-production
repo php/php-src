@@ -588,11 +588,11 @@ html_errors = Off
 ;arg_separator.input = ";&"
 
 ; This directive determines which super global arrays are registered when PHP
-; starts up. G,P,C,E & S are abbreviations for the following respective super 
-; globals: GET, POST, COOKIE, ENV and SERVER. There is a performance penalty 
-: paid for the registration of these arrays and because ENV is not as commonly 
-; used as the others, ENV is is not recommended on productions servers. You 
-; can still get access to the environment variables through getenv() should you 
+; starts up. G,P,C,E & S are abbreviations for the following respective super
+; globals: GET, POST, COOKIE, ENV and SERVER. There is a performance penalty
+: paid for the registration of these arrays and because ENV is not as commonly
+; used as the others, ENV is is not recommended on productions servers. You
+; can still get access to the environment variables through getenv() should you
 ; need to.
 ; Default Value: "EGPCS"
 ; Development Value: "GPCS"
@@ -631,7 +631,7 @@ register_argc_argv = Off
 ; When enabled, the SERVER and ENV variables are created when they're first
 ; used (Just In Time) instead of when the script starts. If these variables
 ; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directive register_argc_argv must be disabled 
+; performance gain. The PHP directive register_argc_argv must be disabled
 ; for this directive to have any affect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
@@ -1200,12 +1200,12 @@ mysqli.default_pw =
 mysqli.reconnect = Off
 
 [mysqlnd]
-; Enable / Disable collection of general statstics by mysqlnd which can be
+; Enable / Disable collection of general statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_statistics
 mysqlnd.collect_statistics = On
 
-; Enable / Disable collection of memory usage statstics by mysqlnd which can be
+; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = Off
@@ -1272,7 +1272,7 @@ mysqlnd.collect_memory_statistics = Off
 ; http://php.net/oci8.old-oci-close-semantics
 ;oci8.old_oci_close_semantics = Off
 
-[PostgresSQL]
+[PostgreSQL]
 ; Allow or prevent persistent links.
 ; http://php.net/pgsql.allow-persistent
 pgsql.allow_persistent = On
@@ -1390,7 +1390,7 @@ session.use_cookies = 1
 ;session.cookie_secure =
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
-; the session id. We encourage this operation as it's very helpful in combatting
+; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
 ; not the end all be all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
@@ -1464,7 +1464,7 @@ session.gc_maxlifetime = 1440
 ;          find /path/to/sessions -cmin +24 | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope. 
+; to initialize a session variable in the global scope.
 ; PHP 4.3 and later will warn you, if this feature is used.
 ; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled. This feature
@@ -1497,12 +1497,13 @@ session.referer_check =
 ; How many bytes to read from the file.
 ; http://php.net/session.entropy-length
 ;session.entropy_length = 32
+
 ; Specified here to create the session id.
 ; http://php.net/session.entropy-file
 ; Defaults to /dev/urandom
 ; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
 ; If neither are found at compile time, the default is no entropy file.
-; On windows, setting the entropy_length setting will activate the 
+; On windows, setting the entropy_length setting will activate the
 ; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
 
@@ -1521,7 +1522,7 @@ session.cache_expire = 180
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
 ; - URL that contains active session ID may be stored
-;   in publically accessible computer.
+;   in publicly accessible computer.
 ; - User may access your site with the same session ID
 ;   always using URL stored in browser's history or bookmarks.
 ; http://php.net/session.use-trans-sid
