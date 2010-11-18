@@ -61,6 +61,8 @@
 - Fixed covariance of return-by-ref constraints. (Etienne)
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
+- Fixed NULL dereference in lex_scan on zend multibyte builds where the script
+  had a flex incompatible encoding and there was no converter. (Gustavo)
 
 - Fixed bug #53335 (pdo_firebird did not implement rowCount()).
   (preeves at ibphoenix dot com)
