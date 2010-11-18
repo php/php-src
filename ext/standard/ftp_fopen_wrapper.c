@@ -249,8 +249,9 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
-			if (FG(from_address)) {
-				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", FG(from_address));
+			char *from_address = php_ini_string("from", sizeof("from"), 0);
+			if (from_address[0] != '\0') {
+				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", from_address);
 			} else {
 				php_stream_write_string(stream, "PASS anonymous\r\n");
 			}

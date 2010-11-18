@@ -119,7 +119,6 @@ typedef struct {
 	long auto_detect_line_endings;
 	long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
-	char *from_address; /* for the ftp and http wrappers */
 	char *user_stream_current_filename; /* for simple recursion protection */
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
