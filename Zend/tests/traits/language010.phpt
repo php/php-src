@@ -27,6 +27,4 @@ $o->world();
 
 ?>
 --EXPECTF--	
-Warning: Trait method world has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
-Hello
-Fatal error: Call to undefined method MyClass::world() in %s on line %d
+Fatal error: Failed to add trait method (world) to the trait table. There is probably already a trait method with the same name in %s on line %d
