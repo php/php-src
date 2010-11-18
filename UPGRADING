@@ -224,10 +224,6 @@ UPGRADE NOTES - PHP X.Y
 9. Changes in SAPI support
 ==========================
 
-- When adding new binary SAPI (executable, like CLI/CGI/FPM) use CLI
-  config.m4 and Makefile.frag files as templates and replace CLI/cli with
-  your SAPI name.
-
 - The REQUEST_TIME value inside server now returns a floating point number
   indicating the time with microsecond precision. All SAPIs providing this
   value should be returning float and not time_t.
