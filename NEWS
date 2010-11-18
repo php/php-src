@@ -64,6 +64,8 @@
 - Fixed the filter extension accepting IPv4 octets with a leading 0 as that
   belongs to the unsupported "dotted octal" representation. (Gustavo)
 
+- Fixed bug #53335 (pdo_firebird did not implement rowCount()).
+  (preeves at ibphoenix dot com)
 - Fixed bug #53323 (pdo_firebird getAttribute() crash).
   (preeves at ibphoenix dot com)
 - Fixed Bug #53319 (strip_tags() may strip '<br />' incorrectly). (Felipe)
