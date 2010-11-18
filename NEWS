@@ -32,8 +32,6 @@
   for empty uploads and, in debug mode, 0-length uploads. (Gustavo)
 - Added a 3rd parameter to get_html_translation_table. It now takes a charset
   hint, like htmlentities et al. (Gustavo)
-- Implemented FR #44164, setting the header "Content-length" implicitly
-  disables zlib.output_compression.
 
 - Fixed a possible double free in imap extension (Identified by Mateusz 
   Kocielski). (CVE-2010-4150). (Ilia)
