@@ -12,6 +12,11 @@ UPGRADE NOTES - PHP X.Y
   g. leak_variable
   h. API Signature changes
 
+2. Build system changes
+  a. Unix build system changes
+  b. Windows build system changes
+
+
 ========================
 1. Internal API changes
 ========================
@@ -22,6 +27,7 @@ virtual_file_ex takes now a TSRM context as last parameter:
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, 
  verify_path_func verify_path, int use_realpath TSRLS_DC);
 
+
 	b. stat/lstat support
 
 lstat is now available on all platforms. On unix-like platform
@@ -29,12 +35,14 @@ php_sys_lstat is an alias to lstat (when avaible). On Windows it is now
 available using php_sys_lstat. php_sys_stat and php_sys_lstat usage is recommended 
 instead of calling lstat directly, to ensure portability.
 
+
 	c. readlink support
 
 readlink is now available on all platforms. On unix-like platform
 php_sys_readlink is an alias to readlink (when avaible). On Windows it is now 
 available using php_sys_readlink. php_sys_readlink usage is recommended 
 instead of calling readlink directly, to ensure portability.
+
 
 	d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
 
@@ -59,7 +67,9 @@ instead of calling readlink directly, to ensure portability.
   by different information for internal and user classes.
   See zend_class_inttry.info union. 
   
+
 	e. Zend\zend_fast_cache.h 
+
 It should not have been used anymore since php5, but now this header has
 been removed. The following macros are not available anymore:
 
@@ -70,7 +80,9 @@ ZEND_FAST_FREE_REL(p, fc_type)
 
 Use emalloc, emalloc_rel, efree or efree_rel instead.
 
+
 	f. Streams that enclose private streams
+
 Some streams, like the temp:// stream, may enclose private streams. If the
 outer stream leaks due to a programming error or is not exposed through a
 zval (and therefore is not deleted when all the zvals are gone), it will
@@ -111,13 +123,17 @@ stream or clear the enclosing_stream pointer in its enclosed stream by calling
 php_stream_encloses with the 2nd argument NULL. If this is not done, there will
 be problems, so observe this requirement when using php_stream_encloses.
 
+
 	g. leak_variable
+
 The function leak_variable(variable [, leak_data]) was added. It is only
 available on debug builds. It increments the refcount of a zval or, if the
 second argument is true and the variable is either an object or a resource
 it increments the refcounts of those objects instead.
 
+
 	h. API Signature changes
+
 . zend_list_insert
   ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
   call: zend_list_insert(a, SOMETYPE TSRMLS_CC);
@@ -131,6 +147,10 @@ it increments the refcounts of those objects instead.
 . php_stream_context_alloc
   PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
   call: context  = php_stream_context_alloc(TSRMLS_C);
+
+. sapi_get_request_time(TSRMLS_D);
+  SAPI_API double sapi_get_request_time(TSRMLS_D);
+
 . sapi_register_default_post_reader
   SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
 
@@ -163,3 +183,21 @@ it increments the refcounts of those objects instead.
 
 . php_unescape_html_entities
   PHPAPI char *php_unescape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
+
+
+========================
+2. Build system changes
+========================
+
+  a. Unix build system changes
+
+    - Changes in SAPI module build:
+      . When adding new binary SAPI (executable, like CLI/CGI/FPM) use CLI config.m4 and Makefile.frag files as templates and replace CLI/cli with your SAPI name.
+
+    - New macros:
+      . PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
+
+
+  b. Windows build system changes
+    -
+  
