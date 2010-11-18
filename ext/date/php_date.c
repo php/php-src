@@ -1210,7 +1210,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 	int retval = -1;
 	timelib_time_offset *offset = NULL;
 	timelib_sll isoweek, isoyear;
-	TSRMLS_FETCH()
+	TSRMLS_FETCH();
 
 	t = timelib_time_ctor();
 
