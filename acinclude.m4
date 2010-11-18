@@ -2903,9 +2903,9 @@ dnl
 AC_DEFUN([PHP_INIT_DTRACE],[
 dnl Set paths properly when called from extension
   case "$4" in
-    ""[)] unset ac_bdir;;
-    /*[)] ac_bdir=$ac_srcdir;;
-    *[)] extdir=PHP_EXT_DIR($3); ac_bdir="$extdir/";;
+    ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
+    /*[)] ac_srcdir=`echo "$4"|cut -c 2-`"/"; ac_bdir=$ac_srcdir;;
+    *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$4/";;
   esac
 
 dnl providerdesc
