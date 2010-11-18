@@ -1,5 +1,6 @@
 --TEST--
-Trying to add an alias to a trait method where there is another with same name
+Trying to add an alias to a trait method where there is another with same name.
+Should warn about the conflict.
 --FILE--
 <?php
 
@@ -22,4 +23,6 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Failed to add aliased trait method (zzz) to the trait table. There is probably already a trait method with the same name in %s on line %d
+Warning: Trait method test has not been applied, because there are collisions with other trait methods on bar in %s on line %d
+
+Fatal error: Call to undefined method bar::test() in %s on line %d

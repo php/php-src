@@ -3674,13 +3674,13 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	target = va_arg(args, HashTable*);
 	aliases = va_arg(args, zend_trait_alias**);
 	exclude_table = va_arg(args, HashTable*);
-
+  
 	fnname_len = strlen(fn->common.function_name);
 
-	/* apply aliases which are qualified with a class name, there should not be any ambiguatty */
+	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (aliases) {
 		while (aliases[i]) {
-			if (fn->common.scope == aliases[i]->trait_method->ce &&
+			if (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce &&
 				(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
                                  aliases[i]->trait_method->mname_len,
                                  fn->common.function_name, fnname_len) == 0)) {
@@ -3716,9 +3716,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		fn_copy = *fn;
 		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len) TSRMLS_CC);
 
-		/* apply aliases which are not qualified by a class name, or which have not alias name, just setting visibility */
-		/* TODO: i am still not sure, that there will be no ambigousities... */
-
+		/* apply aliases which are not qualified by a class name, or which have not
+     alias name, just setting visibility */
 		if (aliases) {
 			i = 0;
 			while (aliases[i]) {
@@ -3726,33 +3725,10 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
                                    aliases[i]->trait_method->mname_len,
                                    fn->common.function_name, fnname_len) == 0)) {
-					if (aliases[i]->alias) {
-						zend_uint lcname2_len;
-						char* lcname2;
-						zend_function fn_copy2 = *fn;
-
-						zend_traits_duplicate_function(&fn_copy2, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
-
-						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
-							fn_copy2.common.fn_flags = aliases[i]->modifiers;
-							if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
-								fn_copy2.common.fn_flags |= ZEND_ACC_PUBLIC;
-							}
-						}
-
-						lcname2_len = aliases[i]->alias_len;
-						lcname2 = zend_str_tolower_dup(aliases[i]->alias, lcname2_len);
-
-						if (zend_hash_add(target, lcname2, lcname2_len+1, &fn_copy2, sizeof(zend_function), NULL)==FAILURE) {
-							zend_error(E_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy2.common.function_name);
-						}
-						efree(lcname2);
-					} else {
-						if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
-							fn_copy.common.fn_flags = aliases[i]->modifiers;
-							if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
-								fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
-							}
+					if (!aliases[i]->alias && aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
+						fn_copy.common.fn_flags = aliases[i]->modifiers;
+						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
+							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 						}
 					}
 				}
