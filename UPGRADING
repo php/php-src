@@ -40,6 +40,9 @@ UPGRADE NOTES - PHP 5.3
 2. Changes made to existing functions
 =====================================
 
+- Paths containing NULL (like /some/path\0foo.txt) are now considered invalid. 
+  See http://news.php.net/php.internals/50191
+
 - The HTTP stream wrapper now considers all status codes from 200 to 399 to be
   successful.
 
