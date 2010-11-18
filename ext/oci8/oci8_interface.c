@@ -276,10 +276,6 @@ PHP_FUNCTION(oci_lob_load)
 			return;
 		}	
 	}
-
-	if (strlen(filename) != filename_len) {
-		RETURN_FALSE;
-	}
 	
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
