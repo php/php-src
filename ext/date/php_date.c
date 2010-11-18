@@ -1203,13 +1203,14 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 
 /* {{{ php_idate
  */
-PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC)
+PHPAPI int php_idate(char format, time_t ts, int localtime)
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
 	int retval = -1;
 	timelib_time_offset *offset = NULL;
 	timelib_sll isoweek, isoyear;
+	TSRMLS_FETCH()
 
 	t = timelib_time_ctor();
 
