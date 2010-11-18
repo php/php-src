@@ -2919,8 +2919,12 @@ dnl providerdesc
 dnl header-file
   ac_hdrobj=$2
 
-dnl Add providerdesc.o in global objects
-  PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+dnl Add providerdesc.o into global objects when needed
+  case $host_alias in
+  *solaris*)
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    ;;
+  esac
 
 dnl DTrace objects
   old_IFS=[$]IFS
