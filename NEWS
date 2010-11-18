@@ -1,6 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, PHP 5.3.4
+18 Nov 2010, PHP 5.3.4RC1
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
