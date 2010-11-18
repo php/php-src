@@ -1,7 +1,5 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, PHP 5.2.15RC2
-
 18 Nov 2010, PHP 5.2.15RC1
 - Fixed a possible double free in imap extension (Identified by Mateusz 
   Kocielski). (CVE-2010-4150). (Ilia)
