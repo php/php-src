@@ -387,6 +387,9 @@ static PHP_FUNCTION(bzopen)
 	if (Z_TYPE_PP(file) == IS_STRING) {
 		convert_to_string_ex(file);
 
+		if (strlen(Z_STRVAL_PP(file)) != Z_STRLEN_PP(file)) {
+			RETURN_FALSE;
+		}
 		if (Z_STRLEN_PP(file) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
 			RETURN_FALSE;

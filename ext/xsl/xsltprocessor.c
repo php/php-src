@@ -642,6 +642,9 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 
 	ret = -1;
 	if (newdocp) {
+		if (strlen(uri) != uri_len) {
+			RETURN_FALSE;
+		}
 		ret = xsltSaveResultToFilename(uri, newdocp, sheetp, 0);
 		xmlFreeDoc(newdocp);
 	}
@@ -845,7 +848,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 		if (intern->profiling) {
 			efree(intern->profiling);
 		}
-		if (filename != NULL) {
+		if (filename != NULL && strlen(filename) == filename_len) {
 			intern->profiling = estrndup(filename,filename_len);
 		} else {
 			intern->profiling = NULL;

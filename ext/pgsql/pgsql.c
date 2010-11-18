@@ -3339,6 +3339,10 @@ PHP_FUNCTION(pg_lo_import)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (strlen(file_in) != name_len) {
+		RETURN_FALSE;
+	}
+
 	if (PG(safe_mode) &&(!php_checkuid(file_in, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
@@ -3473,6 +3477,10 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 2 or 3 arguments");
+		RETURN_FALSE;
+	}
+
+	if (strlen(file_out) != name_len) {
 		RETURN_FALSE;
 	}
 

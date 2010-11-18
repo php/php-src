@@ -1218,10 +1218,14 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	/* local filename, need to perform open_basedir and safe_mode checks */
-	if (mailbox[0] != '{' &&
-			(php_check_open_basedir(mailbox TSRMLS_CC) ||
-			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
-		RETURN_FALSE;
+	if (mailbox[0] != '{') {
+		if (strlen(mailbox) != mailbox_len) {
+			RETURN_FALSE;
+		}
+		if (php_check_open_basedir(mailbox TSRMLS_CC) ||
+			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			RETURN_FALSE;
+		}
 	}
 
 	IMAPG(imap_user)     = estrndup(user, user_len);

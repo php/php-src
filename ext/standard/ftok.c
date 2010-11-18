@@ -39,6 +39,10 @@ PHP_FUNCTION(ftok)
 		return;
 	}
 
+	if (strlen(pathname) != pathname_len) {
+		RETURN_FALSE;
+	}
+
 	if (pathname_len == 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pathname is invalid");
 		RETURN_LONG(-1);

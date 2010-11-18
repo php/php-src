@@ -389,6 +389,9 @@ CPH_METHOD(SaveToFile)
 		}
 
 		if (filename) {
+			if (strlen(filename) != filename_len) {
+				RETURN_FALSE;
+			}
 			fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 			if (!fullpath) {
 				RETURN_FALSE;
@@ -451,6 +454,10 @@ CPH_METHOD(LoadFromFile)
 					&filename, &filename_len, &flags)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
+		}
+
+		if (strlen(filename) != filename_len) {
+			RETURN_FALSE;
 		}
 
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {

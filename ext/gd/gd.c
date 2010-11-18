@@ -2642,6 +2642,9 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 
 	if (argc >= 2 && file_len) {
+		if (strlen(file) != file_len) {
+			RETURN_FALSE;
+		}
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
@@ -4551,6 +4554,14 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	dest_height = height;
 	dest_width = width;
 	int_threshold = threshold;
+
+	if (strlen(f_org) != f_org_len) {
+		RETURN_FALSE;
+	}
+
+	if (strlen(f_dest) != f_dest_len) {
+		RETURN_FALSE;
+	}
 
 	/* Check threshold value */
 	if (int_threshold < 0 || int_threshold > 8) {

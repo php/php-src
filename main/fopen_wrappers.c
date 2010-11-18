@@ -538,6 +538,10 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 		return NULL;
 	}
 
+	if (strlen(filename) != filename_length) {
+		return NULL;
+	}
+
 	/* Don't resolve paths which contain protocol (except of file://) */
 	for (p = filename; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
 	if ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/')) {

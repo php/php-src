@@ -1560,6 +1560,9 @@ PHP_FUNCTION(sqlite_popen)
 		ZVAL_NULL(errmsg);
 	}
 
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
+	}
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
@@ -1637,6 +1640,9 @@ PHP_FUNCTION(sqlite_open)
 		ZVAL_NULL(errmsg);
 	}
 
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
+	}
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
@@ -1688,6 +1694,10 @@ PHP_FUNCTION(sqlite_factory)
 	if (errmsg) {
 		zval_dtor(errmsg);
 		ZVAL_NULL(errmsg);
+	}
+
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {

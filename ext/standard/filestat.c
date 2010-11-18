@@ -379,6 +379,10 @@ PHP_FUNCTION(disk_free_space)
 		RETURN_FALSE;
 	}
 
+	if (strlen(path) != path_len) {
+		RETURN_FALSE;
+	}
+
 	if (php_disk_free_space(path, &bytesfree TSRMLS_CC) == SUCCESS) {
 		RETURN_DOUBLE(bytesfree);
 	}
@@ -396,6 +400,10 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (strlen(filename) != filename_len) {
 		RETURN_FALSE;
 	}
 
@@ -498,6 +506,10 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
 		return;
+	}
+
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(user) == IS_LONG) {
@@ -607,6 +619,10 @@ PHP_FUNCTION(chmod)
 		RETURN_FALSE;
 	}
 
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
+	}
+
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -658,6 +674,10 @@ PHP_FUNCTION(touch)
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
+	}
+
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
 	}
 
 	switch (argc) {
@@ -715,8 +735,9 @@ PHP_FUNCTION(touch)
 PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
-	 * as it may contains outdated data (e.g. "nlink" for a directory when deleting a file
+	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
 	 * in this directory, as shown by lstat_stat_variation9.phpt) */
+
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
@@ -774,6 +795,10 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	char safe_mode_buf[MAXPATHLEN];
 
 	if (!filename_length) {
+		RETURN_FALSE;
+	}
+
+	if (strlen(filename) != filename_length) {
 		RETURN_FALSE;
 	}
 

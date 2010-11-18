@@ -1148,6 +1148,10 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 		RETURN_FALSE;
 	}
 
+	if (strlen(filename) != filename_len) {
+		RETURN_FALSE;
+	}
+
 	if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 		RETURN_FALSE;
 	}
@@ -1434,6 +1438,10 @@ static ZIPARCHIVE_METHOD(open)
 
 	if (filename_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string as source");
+		RETURN_FALSE;
+	}
+
+	if (strlen(filename) != filename_len) {
 		RETURN_FALSE;
 	}
 
@@ -2363,6 +2371,10 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
+	if (strlen(pathto) != pathto_len) {
+		RETURN_FALSE;
+	}
+
 	if (php_stream_stat_path(pathto, &ssb) < 0) {
 		ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
 		if (!ret) {
@@ -2447,6 +2459,9 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &filename, &filename_len, &len, &flags) == FAILURE) {
+			return;
+		}
+		if (strlen(filename) != filename_len) {
 			return;
 		}
 		PHP_ZIP_STAT_PATH(intern, filename, filename_len, flags, sb);
