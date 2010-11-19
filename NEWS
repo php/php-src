@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Fixed extract() to do not overwrite $GLOBALS and $this when using
+  EXTR_OVERWRITE. (jorto at redhat dot com)
 - Fixed bug #53362 (Segmentation fault when extending SplFixedArray). (Felipe)
 - Fixed bug #47168 (printf of floating point variable prints maximum of 40 
   decimal places). (Ilia)
