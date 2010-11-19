@@ -41,7 +41,7 @@
 #define FLOAT_DIGITS 6
 #define FLOAT_PRECISION 6
 #define MAX_FLOAT_DIGITS 38
-#define MAX_FLOAT_PRECISION 40
+#define MAX_FLOAT_PRECISION 53
 
 #if 0
 /* trick to control varargs functions through cpp */
