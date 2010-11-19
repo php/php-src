@@ -3065,7 +3065,7 @@ ZEND_METHOD(reflection_function, isDeprecated)
 ZEND_METHOD(reflection_function, inNamespace)
 {
 	zval **name;
-	char *colon;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -3074,8 +3074,8 @@ ZEND_METHOD(reflection_function, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name))
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -3088,7 +3088,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 ZEND_METHOD(reflection_function, getNamespaceName)
 {
 	zval **name;
-	char *backslash;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -3111,7 +3111,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 ZEND_METHOD(reflection_function, getShortName)
 {
 	zval **name;
-	char *backslash;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4599,7 +4599,7 @@ ZEND_METHOD(reflection_class, getExtensionName)
 ZEND_METHOD(reflection_class, inNamespace)
 {
 	zval **name;
-	char *colon;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4608,8 +4608,8 @@ ZEND_METHOD(reflection_class, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name))
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -4622,7 +4622,7 @@ ZEND_METHOD(reflection_class, inNamespace)
 ZEND_METHOD(reflection_class, getNamespaceName)
 {
 	zval **name;
-	char *backslash;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4645,7 +4645,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 ZEND_METHOD(reflection_class, getShortName)
 {
 	zval **name;
-	char *backslash;
+	const char *backslash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
