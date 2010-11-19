@@ -878,6 +878,17 @@ dnl and optionally also the source-files for the SAPI-specific
 dnl objects.
 dnl
 AC_DEFUN([PHP_SELECT_SAPI],[
+  if test "$PHP_SAPI" != "default"; then
+AC_MSG_ERROR([
++--------------------------------------------------------------------+
+|                        *** ATTENTION ***                           |
+|                                                                    |
+| You've configured multiple SAPIs to be build. You can build only   |
+| one SAPI module and CLI binary at the same time.                   |
++--------------------------------------------------------------------+
+])
+  fi
+
   PHP_SAPI=$1
   
   case "$2" in
