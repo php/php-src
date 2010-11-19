@@ -208,7 +208,7 @@ UPGRADE NOTES - PHP X.Y
 
      b. no longer maintained
 
-        - 
+        - ext/sqlite
 
      c. with changed behaviour
 
