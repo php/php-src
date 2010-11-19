@@ -196,8 +196,8 @@
 - Fixed bug #51763 (SplFileInfo::getType() does not work symbolic link 
   and directory). (Pierre)
 - Fixed bug #51610 (Using oci_connect causes PHP to take a long time to
-  exit). Requires Oracle bug fix 9891199 for this patch to have an
-  effect. (Oracle Corp.)
+  exit).  Requires Oracle 11.2.0.2 client libraries (or Oracle bug fix
+  9891199) for this patch to have an effect. (Oracle Corp.)
 - Fixed bug #51008 (Zend/tests/bug45877.phpt fails). (Dmitry)
 - Fixed bug #50590 (IntlDateFormatter::parse result is limited to the integer
   range). (Stas)
