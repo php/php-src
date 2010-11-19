@@ -409,7 +409,11 @@ static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zv
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (intern->fptr_offset_set) {
-		SEPARATE_ARG_IF_REF(offset);
+		if (!offset) {
+			ALLOC_INIT_ZVAL(offset);
+		} else {
+			SEPARATE_ARG_IF_REF(offset);
+		}
 		SEPARATE_ARG_IF_REF(value);
 		zend_call_method_with_2_params(&object, intern->std.ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
 		zval_ptr_dtor(&value);
