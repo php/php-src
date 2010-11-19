@@ -2213,7 +2213,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
 {
-	char *s;
+	const char *s;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;

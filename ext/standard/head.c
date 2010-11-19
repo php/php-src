@@ -123,7 +123,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	} else {
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
-			char *p;
+			const char *p;
 			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */

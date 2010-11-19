@@ -1489,7 +1489,7 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
-		char *p;
+		const char *p;
 		int idx;
 
 		if (!have_basename) {
@@ -1505,7 +1505,7 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
-		char *p;
+		const char *p;
 		int idx;
 
 		/* Have we alrady looked up the basename? */
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(strrchr)
 {
 	zval *needle;
 	char *haystack;
-	char *found = NULL;
+	const char *found = NULL;
 	long found_offset;
 	int  haystack_len;
 	
