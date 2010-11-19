@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Fixed bug #47168 (printf of floating point variable prints maximum of 40 
+  decimal places). (Ilia)
 
 18 Nov 2010, PHP 5.3.4RC1
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
