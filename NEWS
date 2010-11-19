@@ -1,6 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Fixed bug #53362 (Segmentation fault when extending SplFixedArray). (Felipe)
 - Fixed bug #47168 (printf of floating point variable prints maximum of 40 
   decimal places). (Ilia)
 
