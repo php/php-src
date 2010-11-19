@@ -37,7 +37,7 @@
 - Added a 3rd parameter to get_html_translation_table. It now takes a charset
   hint, like htmlentities et al. (Gustavo)
 
-- Path with NULL in them (foo\obar.txt) are now considered as invalid. (Rasmus)
+- Paths with NULL in them (foo\0bar.txt) are now considered as invalid. (Rasmus)
 - Fixed a possible double free in imap extension (Identified by Mateusz 
   Kocielski). (CVE-2010-4150). (Ilia)
 - Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
