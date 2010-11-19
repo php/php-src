@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.15RC2
+- Fixed extract() to do not overwrite $GLOBALS and $this when using
+  EXTR_OVERWRITE. (jorto at redhat dot com)
 
 18 Nov 2010, PHP 5.2.15RC1
 - Fixed a possible double free in imap extension (Identified by Mateusz 

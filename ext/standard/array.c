@@ -1516,10 +1516,10 @@ PHP_FUNCTION(extract)
 
 			case EXTR_OVERWRITE:
 				/* GLOBALS protection */
- 				if (var_exists && var_name_len == sizeof("GLOBALS") && !strcmp(var_name, "GLOBALS")) {
+ 				if (var_exists && var_name_len == sizeof("GLOBALS")-1 && !strcmp(var_name, "GLOBALS")) {
  					break;
  				}
-				if (var_exists && var_name_len == sizeof("this")  && !strcmp(var_name, "this") && EG(scope) && EG(scope)->name_length != 0) {
+				if (var_exists && var_name_len == sizeof("this")-1  && !strcmp(var_name, "this") && EG(scope) && EG(scope)->name_length != 0) {
 					break;
 				}
 				smart_str_appendl(&final_name, var_name, var_name_len);
