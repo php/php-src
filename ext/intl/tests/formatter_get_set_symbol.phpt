@@ -73,7 +73,12 @@ function ut_main()
         // Restore attribute's symbol.
         ut_nfmt_set_symbol( $fmt, $symb, $orig_val );
     }
-
+    $badvals = array(2147483648, -2147483648, -1, 4294901761);
+    foreach($badvals as $badval) {
+	    if(ut_nfmt_get_symbol( $fmt, 2147483648 ))  {
+		$res_str .= "Bad value $badval should return false!\n";
+	    }
+    }
     return $res_str;
 }
 
