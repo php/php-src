@@ -257,7 +257,8 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, char *basename, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
-	char *name = NULL, buf[8192], *cwd;
+	char *name = NULL, buf[8192];
+	const char *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	sapi_header_line ctr = {0};
 	size_t got;
@@ -658,7 +659,8 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL, *rewrite = NULL;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
-	char *fname, *basename, *path_info, *mime_type = NULL, *entry, *pt;
+	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
+	const char *basename;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info;
@@ -934,7 +936,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if (mimeoverride && zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
-		char *ext = zend_memrchr(entry, '.', entry_len);
+		const char *ext = zend_memrchr(entry, '.', entry_len);
 		zval **val;
 
 		if (ext) {
@@ -2164,7 +2166,8 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 
 static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC) /* {{{ */
 {
-	char *oldname = NULL, *oldpath = NULL;
+	const char *oldname = NULL;
+	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
 	zval *ret, arg1;
@@ -4204,7 +4207,8 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	php_stream_statbuf ssb;
 	int len;
 	php_stream *fp;
-	char *fullpath, *slash;
+	char *fullpath;
+	const char *slash;
 	mode_t mode;
 
 	if (entry->is_mounted) {

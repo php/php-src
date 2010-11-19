@@ -409,7 +409,7 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 
 #define POPULATE_CTOR(f, fn)	\
 	f.type = ZEND_INTERNAL_FUNCTION; \
-	f.function_name = obj->ce->name; \
+	f.function_name = (char *) obj->ce->name; \
 	f.scope = obj->ce; \
 	f.arg_info = NULL; \
 	f.num_args = 0; \
