@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     functions. (Kalle)
   . y2k_compliance ini option. (Kalle)
 
+- Moved extensions to PECL: (Johannes)
+  . ext/sqlite.
+
 - Changed $_SERVER['REQUEST_TIME'] to include microsecond precision. (Ilia)
 - Changed default value of "default_charset" php.ini option from ISO-8859-1 to
   UTF-8. (Rasmus)
