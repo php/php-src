@@ -512,7 +512,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
-	var = *(php_uint32*)(buffer); \
+	memcpy(&var, buffer, sizeof(var)); \
 	buffer += 4
 # define PHAR_GET_16(buffer, var) \
 	var = *(php_uint16*)(buffer); \
