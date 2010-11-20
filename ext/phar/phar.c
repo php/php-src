@@ -2489,7 +2489,7 @@ static inline void phar_set_32(char *buffer, int var) /* {{{ */
 	*((buffer) + 1) = (unsigned char) (((var) >> 8) & 0xFF);
 	*((buffer) + 0) = (unsigned char) ((var) & 0xFF);
 #else
-	*(php_uint32 *)(buffer) = (php_uint32)(var);
+	 memcpy(buffer, &var, sizeof(var));
 #endif
 } /* }}} */
 
