@@ -190,7 +190,8 @@ typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
 	REF_TYPE_PARAMETER,
-	REF_TYPE_PROPERTY
+	REF_TYPE_PROPERTY,
+	REF_TYPE_DYNAMIC_PROPERTY
 } reflection_type_t;
 
 /* Struct for reflection objects */
@@ -272,6 +273,7 @@ static void reflection_free_objects_storage(void *object TSRMLS_DC)
 {
 	reflection_object *intern = (reflection_object *) object;
 	parameter_reference *reference;
+	property_reference *prop_reference;
 
 	if (intern->ptr) {
 		switch (intern->ref_type) {
@@ -284,6 +286,11 @@ static void reflection_free_objects_storage(void *object TSRMLS_DC)
 			_free_function(intern->ptr TSRMLS_CC);
 			break;
 		case REF_TYPE_PROPERTY:
+			efree(intern->ptr);
+			break;
+		case REF_TYPE_DYNAMIC_PROPERTY:
+			prop_reference = (property_reference*)intern->ptr;
+			efree(prop_reference->prop.name);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_OTHER:
@@ -3583,13 +3590,15 @@ ZEND_METHOD(reflection_class, getProperty)
 		if (zend_hash_exists(Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC), name, name_len+1)) {
 			zend_property_info property_info_tmp;
 			property_info_tmp.flags = ZEND_ACC_IMPLICIT_PUBLIC;
-			property_info_tmp.name = name;
+			property_info_tmp.name = estrndup(name, name_len);
 			property_info_tmp.name_length = name_len;
 			property_info_tmp.h = zend_get_hash_value(name, name_len+1);
 			property_info_tmp.doc_comment = NULL;
 			property_info_tmp.ce = ce;
 
 			reflection_property_factory(ce, &property_info_tmp, return_value TSRMLS_CC);
+			intern = (reflection_object *) zend_object_store_get_object(return_value TSRMLS_CC);
+			intern->ref_type = REF_TYPE_DYNAMIC_PROPERTY;
 			return;
 		}
 	}
