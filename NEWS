@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
+- Added DateTime support for intl date formatting. (Stas)
+
 - Fixed extract() to do not overwrite $GLOBALS and $this when using
   EXTR_OVERWRITE. (jorto at redhat dot com)
 - Fixed crashes on invalid parameters in intl extension (Stas, Maksymilian
