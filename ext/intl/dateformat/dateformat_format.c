@@ -170,7 +170,7 @@ PHP_FUNCTION(datefmt_format)
 			INIT_ZVAL(retval);
 			MAKE_STD_ZVAL(zfuncname);
 			ZVAL_STRING(zfuncname, "getTimestamp", 1);
-			if(call_user_function(NULL, &zarg, zfuncname, &retval, 0, NULL) != SUCCESS || Z_TYPE(retval) != IS_LONG) {
+			if(call_user_function(NULL, &zarg, zfuncname, &retval, 0, NULL TSRMLS_CC) != SUCCESS || Z_TYPE(retval) != IS_LONG) {
 				intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: cannot get timestamp", 0 TSRMLS_CC );
 				zval_ptr_dtor(&zfuncname);
 				RETURN_FALSE;
