@@ -17,12 +17,12 @@ try {
 }
 ?>
 --EXPECTF--
-object(Test)#2 (0) {
+object(Test)#%d (0) {
 }
-object(Test)#2 (0) {
+object(Test)#%d (0) {
 }
-object(Test)#2 (0) {
+object(Test)#%d (0) {
 }
-object(Test)#2 (0) {
+object(Test)#%d (0) {
 }
 Class Test does not have a constructor, so you cannot pass any constructor arguments
