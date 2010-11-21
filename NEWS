@@ -10,6 +10,8 @@
 - Fixed bug #53366 (Reflection doesnt get dynamic property value from
   getProperty()). (Felipe)
 - Fixed bug #53362 (Segmentation fault when extending SplFixedArray). (Felipe)
+- Fixed bug #52854 (ReflectionClass::newInstanceArgs does not work for classes
+  without constructors). (Johannes)
 - Fixed bug #50987 (unaligned memory access in phar.c).
   (geissert at debian dot org, Ilia)
 - Fixed bug #47168 (printf of floating point variable prints maximum of 40 

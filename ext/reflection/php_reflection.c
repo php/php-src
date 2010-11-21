@@ -4013,7 +4013,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (params) {
 			efree(params);
 		}
-	} else if (!ZEND_NUM_ARGS()) {
+	} else if (!ZEND_NUM_ARGS() || !argc) {
 		object_init_ex(return_value, ce);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
