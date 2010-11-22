@@ -74,8 +74,8 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-int(%d)
+bool(false)
 - Iteration 8 -
-int(%d)
+bool(false)
 
 *** Done ***

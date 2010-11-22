@@ -89,9 +89,9 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-File name is => %s%et%s
-File permissions are => 100666
-File created in => temp dir
+-- File is not created --
+
+Warning: unlink(): %s in %s on line %d
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 1 to be string, array given in %s on line %d

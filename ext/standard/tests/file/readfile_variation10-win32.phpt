@@ -37,7 +37,7 @@ $names_arr = array(
 
 foreach($names_arr as $key => $value) {
       echo "\n-- Filename: $key --\n";
-      readfile($value);
+      var_dump(readfile($value));
 };
 
 ?>
@@ -48,40 +48,48 @@ foreach($names_arr as $key => $value) {
 -- Filename: -1 --
 
 Warning: readfile(-1): failed to open stream: No such file or directory in %s on line %d
+bool(false)
 
 -- Filename: TRUE --
 
 Warning: readfile(1): failed to open stream: No such file or directory in %s on line %d
+bool(false)
 
 -- Filename: FALSE --
 
 Warning: readfile(): Filename cannot be empty in %s on line %d
+bool(false)
 
 -- Filename: NULL --
 
 Warning: readfile(): Filename cannot be empty in %s on line %d
+bool(false)
 
 -- Filename: "" --
 
 Warning: readfile(): Filename cannot be empty in %s on line %d
+bool(false)
 
 -- Filename: " " --
 
 Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
+bool(false)
 
 -- Filename: \0 --
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
+bool(false)
 
 -- Filename: array() --
 
 Warning: readfile() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 
 -- Filename: /no/such/file/dir --
 
 Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+bool(false)
 
 -- Filename: php/php --
 
 Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
+bool(false)
 ===Done===

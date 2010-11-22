@@ -325,20 +325,12 @@ array(0) {
 }
 
 -- Iteration 8 --
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  string(%d) "%s/glob_variation/WONDER5"
-}
-array(0) {
-}
-array(0) {
-}
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 -- Iteration 9 --
 array(0) {
@@ -441,8 +433,7 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-array(0) {
-}
+bool(false)
 -- Iteration 9 --
 array(0) {
 }

@@ -77,9 +77,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-bool(true)
+bool(false)
 
 -- Iteration 10 --
-bool(true)
+bool(false)
 
 *** Done ***

@@ -74,8 +74,8 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-int(%d)
+bool(false)
 - Iteration 8 -
-int(%d)
+bool(false)
 
 *** Done ***

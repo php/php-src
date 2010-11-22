@@ -68,8 +68,6 @@ bool(false)
 Warning: file_get_contents( ): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 7 --
 

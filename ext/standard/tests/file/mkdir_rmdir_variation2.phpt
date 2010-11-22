@@ -64,8 +64,8 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 
 *** Testing mkdir() with miscelleneous input ***
 bool(true)

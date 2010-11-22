@@ -105,19 +105,19 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-float(%d)
-float(%d)
+bool(false)
+bool(false)
 
 -- Iteration 10 --
-float(%d)
-float(%d)
+bool(false)
+bool(false)
 
 -- Iteration 11 --
-float(%d)
-float(%d)
+bool(false)
+bool(false)
 
 -- Iteration 12 --
-float(%d)
-float(%d)
+bool(false)
+bool(false)
 
 --- Done ---

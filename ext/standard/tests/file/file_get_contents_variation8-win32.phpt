@@ -76,8 +76,6 @@ Warning: file_get_contents( ): failed to open stream: Permission denied in %s on
 bool(false)
 
 -- Filename: \0 --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 
 -- Filename: array() --

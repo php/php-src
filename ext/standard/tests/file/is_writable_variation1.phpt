@@ -96,14 +96,14 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 8 --
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 9 --
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 -- Iteration 10 --
 bool(true)
 bool(true)

@@ -21,8 +21,8 @@ foreach($streams as $stream)
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-string(0) ""
-string(6) "foobar"
+bool(false)
+bool(false)
 string(13) "foobar foobar"
 
 Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhc=): failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
