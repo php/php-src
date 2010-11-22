@@ -58,7 +58,8 @@
     DateTime::createFromFormat(). (Derick)
  
 - Implemented feature requests:
-  . Implemented FR #52348, Ability to detect zend multibyte at runtime. (Kalle)
+  . Implemented FR #52348, added new constant ZEND_MULTIBYTE to detect
+    zend multibyte at runtime. (Kalle)
   . Implemented FR #52173, added functions pcntl_get_last_error() and 
      pcntl_strerror(). (nick dot telford at gmail dot com, Arnaud)
   . Implemented symbolic links support for open_basedir checks. (Pierre)
