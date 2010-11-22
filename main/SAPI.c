@@ -37,6 +37,8 @@
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#elif defined(PHP_WIN32)
+#include "win32/time.h"
 #endif
 
 #include "rfc1867.h"
