@@ -17,6 +17,10 @@
 - Phar extension:
   . Fixed bug #50987 (unaligned memory access in phar.c).
     (geissert at debian dot org, Ilia)
+
+- Hash extension:
+  . Fixed bug #51003 (unaligned memory access in ext/hash/hash_tiger.c).
+    (Mike, Ilia)
     
 - Reflection extension:
   . Fixed bug #53366 (Reflection doesnt get dynamic property value from
