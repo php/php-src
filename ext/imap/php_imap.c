@@ -4235,7 +4235,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 					}
 
 					offset = end_token+2;
-					for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d); i++);
+					for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d) || (string[offset + i] == '\t'); i++);
 					if ((string[offset + i] == '=') && (string[offset + i + 1] == '?') && (offset + i < end)) {
 						offset += i;
 					}
