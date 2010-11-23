@@ -1,5 +1,11 @@
 --TEST--
 Testing declare statement with several type values
+--SKIPIF--
+<?php
+if (in_array("detect_unicode", array_keys(ini_get_all()))) {
+  die("skip");
+}
+?>
 --FILE--
 <?php
 
