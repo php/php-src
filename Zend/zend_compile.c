@@ -777,7 +777,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 				opline_ptr->op2.constant =
 					zend_add_class_name_literal(CG(active_op_array), &class_node.u.constant TSRMLS_CC);
 			} else {
-				SET_NODE(opline.op2, &class_node);
+				SET_NODE(opline_ptr->op2, &class_node);
 			}
 			opline_ptr->extended_value |= ZEND_FETCH_STATIC_MEMBER;
 		}
