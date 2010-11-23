@@ -3680,10 +3680,10 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (aliases) {
 		while (aliases[i]) {
-			if (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce &&
+			if (!aliases[i]->trait_method->ce || (fn->common.scope == aliases[i]->trait_method->ce &&
 				(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
                                  aliases[i]->trait_method->mname_len,
-                                 fn->common.function_name, fnname_len) == 0)) {
+                                 fn->common.function_name, fnname_len) == 0))) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
 					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
