@@ -9,6 +9,8 @@
     EXTR_OVERWRITE. (jorto at redhat dot com)
   . Fixed bug #47168 (printf of floating point variable prints maximum of 40 
     decimal places). (Ilia)
+  . Fixed bug #46587 (mt_rand() does not check that max is greater than min).
+    (Ilia)  
       
 - Intl extension:
   . Fixed crashes on invalid parameters in intl extension (Stas, Maksymilian

@@ -322,6 +322,11 @@ PHP_FUNCTION(mt_rand)
 		php_mt_srand(GENERATE_SEED() TSRMLS_CC);
 	}
 
+	if (max < min) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%d) is smaller than min(%d)", max, min);
+		RETURN_FALSE;
+	}
+
 	/*
 	 * Melo: hmms.. randomMT() returns 32 random bits...
 	 * Yet, the previous php_rand only returns 31 at most.
