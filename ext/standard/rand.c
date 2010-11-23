@@ -323,7 +323,7 @@ PHP_FUNCTION(mt_rand)
 	}
 
 	if (max < min) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%d) is smaller than min(%d)", max, min);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%ld) is smaller than min(%ld)", max, min);
 		RETURN_FALSE;
 	}
 
