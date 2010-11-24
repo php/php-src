@@ -3171,27 +3171,25 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 {
 	USE_OPLINE
-	zend_free_op free_op2;
 	zend_brk_cont_element *el;
 
 	SAVE_OPLINE();
-	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.opline_num,
+	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
-ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 {
 	USE_OPLINE
-	zend_free_op free_op2;
 	zend_brk_cont_element *el;
 
 	SAVE_OPLINE();
-	el = zend_brk_cont(GET_OP2_ZVAL_PTR(BP_VAR_R), opline->op1.opline_num,
+	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
@@ -3204,7 +3202,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	zend_brk_cont_element *el;
 
 	SAVE_OPLINE();
-	el = zend_brk_cont(opline->op2.zv, opline->extended_value,
+	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->extended_value,
  	                   EX(op_array), EX_Ts() TSRMLS_CC);
 
 	brk_opline = EX(op_array)->opcodes + el->brk;

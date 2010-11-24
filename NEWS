@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
 - Removed legacy features:
+  . break/continue $var syntax. (Dmitry)
   . Safe mode and all related ini options. (Kalle)
   . register_globals and register_long_arrays ini options. (Kalle)
   . import_request_variables(). (Kalle)

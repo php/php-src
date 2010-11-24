@@ -1362,21 +1362,12 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	}
 }
 
-static inline zend_brk_cont_element* zend_brk_cont(zval *nest_levels_zval, int array_offset, const zend_op_array *op_array, const temp_variable *Ts TSRMLS_DC)
+static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, const zend_op_array *op_array, const temp_variable *Ts TSRMLS_DC)
 {
 	zval tmp;
-	int nest_levels, original_nest_levels;
+	int original_nest_levels = nest_levels;
 	zend_brk_cont_element *jmp_to;
 
-	if (nest_levels_zval->type != IS_LONG) {
-		tmp = *nest_levels_zval;
-		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
-		nest_levels = tmp.value.lval;
-	} else {
-		nest_levels = nest_levels_zval->value.lval;
-	}
-	original_nest_levels = nest_levels;
 	do {
 		if (array_offset==-1) {
 			zend_error_noreturn(E_ERROR, "Cannot break/continue %d level%s", original_nest_levels, (original_nest_levels == 1) ? "" : "s");
