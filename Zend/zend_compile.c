@@ -4302,6 +4302,11 @@ void zend_do_brk_cont(zend_uchar op, const znode *expr TSRMLS_DC) /* {{{ */
 	opline->op1.opline_num = CG(context).current_brk_cont;
 	SET_UNUSED(opline->op1);
 	if (expr) {
+		if (expr->op_type != IS_CONST) {
+			zend_error(E_COMPILE_ERROR, "'%s' operator with non-constant operand is no longer supported", op == ZEND_BRK ? "break" : "continue");
+		} else if (Z_TYPE(expr->u.constant) != IS_LONG || Z_LVAL(expr->u.constant) < 1) {
+			zend_error(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers", op == ZEND_BRK ? "break" : "continue");
+		}
 		SET_NODE(opline->op2, expr);
 	} else {
 		LITERAL_LONG(opline->op2, 1);
