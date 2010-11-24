@@ -22,8 +22,6 @@
 #ifndef ZEND_MULTIBYTE_H
 #define ZEND_MULTIBYTE_H
 
-#ifdef ZEND_MULTIBYTE
-
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
 #define	BOM_UTF32_LE	"\xff\xfe\x00\x00"
 #define	BOM_UTF16_BE	"\xfe\xff"
@@ -66,8 +64,6 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
 ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC);
 END_EXTERN_C()
-
-#endif /* ZEND_MULTIBYTE */
 
 #endif /* ZEND_MULTIBYTE_H */
 
