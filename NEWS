@@ -61,7 +61,7 @@ PHP                                                                        NEWS
     in zend_class_entry.ce_flags.
   . Reduced the size of zend_class_entry by sharing the same memory space
     by different information for internal and user classes.
-    See zend_class_inttry.info union. 
+    See zend_class_entry.info union. 
   . Reduced size of temp_variable.
 
 - Changed the structure of op_array.opcodes. The constant values are moved from
