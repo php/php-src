@@ -24,7 +24,6 @@
 #include "zend_operators.h"
 #include "zend_multibyte.h"
 
-#ifdef ZEND_MULTIBYTE
 static size_t zend_multibyte_encoding_filter(unsigned char **to, size_t *to_length, const char *to_encoding, const unsigned char *from, size_t from_length, const char *from_encoding TSRMLS_DC);
 size_t sjis_input_filter(unsigned char **buf, size_t *length, const unsigned char *sjis, size_t sjis_length TSRMLS_DC);
 size_t sjis_output_filter(unsigned char **buf, size_t *length, const unsigned char *sjis, size_t sjis_length TSRMLS_DC);
@@ -1080,6 +1079,7 @@ static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 	zend_encoding *script_encoding = NULL;
 	int bom_size;
 	unsigned char *script;
+	unsigned char *pos1, *pos2;
 
 	if (LANG_SCNG(script_org_size) < sizeof(BOM_UTF32_LE)-1) {
 		return NULL;
@@ -1115,7 +1115,45 @@ static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 	}
 
 	/* script contains NULL bytes -> auto-detection */
-	if (memchr(LANG_SCNG(script_org), 0, LANG_SCNG(script_org_size))) {
+	if ((pos1 = memchr(LANG_SCNG(script_org), 0, LANG_SCNG(script_org_size)))) {
+		/* check if the NULL byte is after the __HALT_COMPILER(); */
+		pos2 = LANG_SCNG(script_org);
+
+		while (pos1 - pos2 >= sizeof("__HALT_COMPILER();")-1) {
+			pos2 = memchr(pos2, '_', pos1 - pos2);
+			if (!pos2) break;
+			pos2++;
+			if (strncasecmp((char*)pos2, "_HALT_COMPILER", sizeof("_HALT_COMPILER")-1) == 0) {
+				pos2 += sizeof("_HALT_COMPILER")-1;
+				while (*pos2 == ' '  ||
+				       *pos2 == '\t' ||
+				       *pos2 == '\r' ||
+				       *pos2 == '\n') {
+					pos2++;
+				}
+				if (*pos2 == '(') {
+					pos2++;
+					while (*pos2 == ' '  ||
+					       *pos2 == '\t' ||
+					       *pos2 == '\r' ||
+					       *pos2 == '\n') {
+						pos2++;
+					}
+					if (*pos2 == ')') {
+						pos2++;
+						while (*pos2 == ' '  ||
+						       *pos2 == '\t' ||
+						       *pos2 == '\r' ||
+				    		   *pos2 == '\n') {
+							pos2++;
+						}
+						if (*pos2 == ';') {
+							return NULL;
+						}
+					}
+				}
+			}
+		}
 		/* make best effort if BOM is missing */
 		return zend_multibyte_detect_utf_encoding(LANG_SCNG(script_org), LANG_SCNG(script_org_size) TSRMLS_CC);
 	}
@@ -1168,7 +1206,6 @@ static zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned char *sc
 
 	return NULL;
 }
-#endif /* ZEND_MULTIBYTE */
 
 /*
  * Local variables:

@@ -57,8 +57,6 @@ ZEND_API void zend_html_putc(char c)
 ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const char *ptr=s, *end=s+len;
-
-#ifdef ZEND_MULTIBYTE
 	char *filtered;
 	int filtered_len;
 
@@ -67,7 +65,6 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 		ptr = filtered;
 		end = filtered + filtered_len;
 	}
-#endif /* ZEND_MULTIBYTE */
 
 	while (ptr<end) {
 		if (*ptr==' ') {
@@ -79,11 +76,9 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 		}
 	}
 
-#ifdef ZEND_MULTIBYTE
 	if (LANG_SCNG(output_filter)) {
 		efree(filtered);
 	}
-#endif /* ZEND_MULTIBYTE */
 }
 
 

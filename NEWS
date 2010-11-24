@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - Changed third parameter of preg_match_all() to optional. FR #53238. (Adam)
 
 - General improvements:
+  . Added multibyte suppport by default. Previosly php had to be compiled
+    with --enable-zend-multibyte. Now it can be enabled or disabled throug
+    zend.multibyte directive in php.ini (Dmitry)
   . Added scalar typehints to the parser and the reflection API. (Ilia, Derick)
   . Added support for Traits. (Stefan)
   . Added closure $this support back. (Stas)

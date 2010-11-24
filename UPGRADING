@@ -235,6 +235,11 @@ UPGRADE NOTES - PHP X.Y
 - Added session.upload_progress.enabled, session.upload_progress.cleanup, 
   session.upload_progress.prefix, session.upload_progress.name, 
   session.upload_progress.freq, session.upload_progress.min_freq.
+- Added zend.multibyte directive as a replacement of PHP compile time
+  configuration option --enable-zend-multibyte. Now ZE always contains code for
+  multibyte support, but may enable or disable it by zend.multibyte. It doesn't
+  make a lot of sense to enable this option without ext/mbstring, because the
+  most functionality is implemented by mbstrings callbacks.
 
 ====================
 11. Syntax additions

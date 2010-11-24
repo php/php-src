@@ -10,6 +10,7 @@ if (!extension_loaded("mbstring")) {
 }
 ?>
 --INI--
+zend.multibyte=1
 mbstring.script_encoding=Shift_JIS
 mbstring.internal_encoding=Shift_JIS
 --FILE--

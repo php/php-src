@@ -2,8 +2,8 @@
 Testing declare statement with several type values
 --SKIPIF--
 <?php
-if (in_array("detect_unicode", array_keys(ini_get_all()))) {
-  die("skip");
+if (ini_get("zend.multibyte")) {
+  die("skip Requires zend.multibyte=0");
 }
 ?>
 --FILE--

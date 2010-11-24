@@ -167,10 +167,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_language language;
 	enum mbfl_no_encoding internal_encoding;
 	enum mbfl_no_encoding current_internal_encoding;
-#ifdef ZEND_MULTIBYTE
 	enum mbfl_no_encoding *script_encoding_list;
 	int script_encoding_list_size;
-#endif /* ZEND_MULTIBYTE */
 	enum mbfl_no_encoding http_output_encoding;
 	enum mbfl_no_encoding current_http_output_encoding;
 	enum mbfl_no_encoding http_input_identify;
