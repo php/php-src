@@ -1364,7 +1364,6 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 
 static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, const zend_op_array *op_array, const temp_variable *Ts TSRMLS_DC)
 {
-	zval tmp;
 	int original_nest_levels = nest_levels;
 	zend_brk_cont_element *jmp_to;
 
