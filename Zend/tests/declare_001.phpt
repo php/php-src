@@ -12,11 +12,11 @@ if (ini_get("zend.multibyte")) {
 declare(encoding = 1);
 declare(encoding = 1123131232131312321);
 declare(encoding = NULL);
-declare(encoding = M_PI);
 declare(encoding = 'utf-8');
+declare(encoding = M_PI);
 
 print 'DONE';
 
 ?>
---EXPECT--
-DONE
+--EXPECTF--
+Fatal error: Cannot use constants as encoding in %sdeclare_001.php on line 7
