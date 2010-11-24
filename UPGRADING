@@ -198,6 +198,11 @@ UPGRADE NOTES - PHP X.Y
 	   - mysqli::client_encoding() (alias of mysqli::character_set_name)
 	   - mysqli_stmt::stmt() (never worked/always throws, undocumented)
 
+    d. removed syntax
+
+       - break $var;
+       - continue $var;
+
 =============
 8. Extensions
 =============
