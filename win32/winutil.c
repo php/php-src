@@ -22,7 +22,7 @@
 #include "php.h"
 #include <wincrypt.h>
 
-PHPAPI char *php_win_err(int error)
+PHPAPI char *php_win32_error_to_msg(int error)
 {
 	char *buf = NULL;
 
@@ -75,3 +75,4 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 	return FAILURE;
 }
 /* }}} */
+

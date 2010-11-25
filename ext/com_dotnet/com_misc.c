@@ -33,7 +33,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 {
 	int free_msg = 0;
 	if (message == NULL) {
-		message = php_win_err(code);
+		message = php_win32_error_to_msg(code);
 		free_msg = 1;
 	}
 	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);
