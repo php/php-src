@@ -168,7 +168,6 @@ typedef struct _php_cgi_globals_struct {
 	HashTable user_config_cache;
 	char *error_header;
 	char *fpm_config;
-	struct event_base *event_base;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -1780,11 +1779,11 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, test_conf, &CGIG(event_base))) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, test_conf)) {
 		return FAILURE;
 	}
 
-	fcgi_fd = fpm_run(&max_requests, CGIG(event_base));
+	fcgi_fd = fpm_run(&max_requests);
 	parent = 0;
 	fcgi_set_is_fastcgi(1);
 

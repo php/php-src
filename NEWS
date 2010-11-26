@@ -261,6 +261,8 @@
    
 - PHP-FPM SAPI:
   . Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
+  . Fixed bug #52501 (libevent made FPM crashed when forking -- libevent has
+    been removed). (fat)
   . Fixed bug #52725 (gcc builtin atomic functions were sometimes used when they
     were not available). (fat)
   . Fixed bug #52693 (configuration file errors are not logged to stderr). (fat)
