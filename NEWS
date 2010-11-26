@@ -7,6 +7,8 @@
 - Core:
   . Fixed extract() to do not overwrite $GLOBALS and $this when using
     EXTR_OVERWRITE. (jorto at redhat dot com)
+  . Fixed bug #52327 (base64_decode() improper handling of leading padding in
+    strict mode). (Ilia)
   . Fixed bug #53304 (quot_print_decode does not handle lower-case hex digits).
     (Ilia, daniel dot mueller at inexio dot net)
   . Fixed bug #47168 (printf of floating point variable prints maximum of 40 
