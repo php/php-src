@@ -16,7 +16,7 @@ echo "*** Testing scandir() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $dir = dirname(__FILE__) . '/scandir_variation3';
 mkdir($dir);
-$sorting_order = 0;
+$sorting_order = SCANDIR_SORT_ASCENDING;
 
 //get an unset variable
 $unset_var = 10;

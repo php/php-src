@@ -128,6 +128,10 @@ PHP                                                                        NEWS
   . PDO_mysql: Removed support for linking with MySQL client libraries older
     than 4.1. (Johannes)
 
+- Improved filesystem functions:
+  . scandir() now accepts SCANDIR_SORT_NONE as a possible sorting_order value.
+    FR #53407. (Adam)
+
 - Improved HASH extension:
   . Added Jenkins's one-at-a-time hash support. (Martin Jansen)
   . Added FNV-1 hash support. (Michael Maclean)
