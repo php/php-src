@@ -71,17 +71,29 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-static void fpm_stdio_child_said(int fd, short which, void *arg) /* {{{ */
+static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
 	static const int max_buf_size = 1024;
+	int fd = ev->fd;
 	char buf[max_buf_size];
-	struct fpm_child_s *child = arg;
-	int is_stdout = fd == child->fd_stdout;
-	struct event *ev = is_stdout ? &child->ev_stdout : &child->ev_stderr;
+	struct fpm_child_s *child;
+	int is_stdout;
+	struct fpm_event_s *event;
 	int fifo_in = 1, fifo_out = 1;
 	int is_last_message = 0;
 	int in_buf = 0;
 	int res;
+
+	if (!arg) {
+		return;
+	}
+	child = (struct fpm_child_s *)arg;
+	is_stdout = (fd == child->fd_stdout);
+	if (is_stdout) {
+		event = &child->ev_stdout;
+	} else {
+		event = &child->ev_stderr;
+	}
 
 	while (fifo_in || fifo_out) {
 		if (fifo_in) {
@@ -96,7 +108,7 @@ static void fpm_stdio_child_said(int fd, short which, void *arg) /* {{{ */
 						zlog(ZLOG_SYSERROR, "read() failed");
 					}
 
-					fpm_event_del(ev);
+					fpm_event_del(event);
 					is_last_message = 1;
 
 					if (is_stdout) {
@@ -183,7 +195,7 @@ int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_stdio_parent_use_pipes(struct fpm_child_s *child, struct event_base *base) /* {{{ */
+int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
 		return 0;
@@ -195,8 +207,11 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child, struct event_base *bas
 	child->fd_stdout = fd_stdout[0];
 	child->fd_stderr = fd_stderr[0];
 
-	fpm_event_add(child->fd_stdout, base, &child->ev_stdout, fpm_stdio_child_said, child);
-	fpm_event_add(child->fd_stderr, base, &child->ev_stderr, fpm_stdio_child_said, child);
+	fpm_event_set(&child->ev_stdout, child->fd_stdout, FPM_EV_READ, fpm_stdio_child_said, child);
+	fpm_event_add(&child->ev_stdout, 0);
+
+	fpm_event_set(&child->ev_stderr, child->fd_stderr, FPM_EV_READ, fpm_stdio_child_said, child);
+	fpm_event_add(&child->ev_stderr, 0);
 	return 0;
 }
 /* }}} */

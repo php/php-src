@@ -5,12 +5,28 @@
 #ifndef FPM_EVENTS_H
 #define FPM_EVENTS_H 1
 
-void fpm_event_exit_loop(struct event_base *base);
-int fpm_event_loop(struct event_base *base);
-int fpm_event_add(int fd, struct event_base *base, struct event *ev, void (*callback)(int, short, void *), void *arg);
-int fpm_event_del(struct event *ev);
-void fpm_event_fire(struct event *ev);
-int fpm_event_init_main(struct event_base **base);
+#define FPM_EV_TIMEOUT  (1 << 0)
+#define FPM_EV_READ     (1 << 1)
+#define FPM_EV_PERSIST  (1 << 2)
 
+#define fpm_event_set_timer(ev, flags, cb, arg) fpm_event_set((ev), -1, (flags), (cb), (arg))
+
+struct fpm_event_s {
+	int fd;                   /* not set with FPM_EV_TIMEOUT */
+	struct timeval timeout;   /* next time to trigger */
+	struct timeval frequency;
+	void (*callback)(struct fpm_event_s *, short, void *);
+	void *arg;
+	int flags;
+	int index;                /* index of the fd in the ufds array */
+	short which;              /* type of event */
+};
+
+void fpm_event_loop();
+void fpm_event_fire(struct fpm_event_s *ev);
+int fpm_event_init_main();
+int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
+int fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
+int fpm_event_del(struct fpm_event_s *ev);
 
 #endif
