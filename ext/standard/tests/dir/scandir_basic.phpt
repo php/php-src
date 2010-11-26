@@ -25,7 +25,7 @@ echo "\n-- scandir() with mandatory arguments --\n";
 var_dump(scandir($directory));
 
 echo "\n-- scandir() with all arguments --\n";
-$sorting_order = 1;
+$sorting_order = SCANDIR_SORT_DESCENDING;
 $context = stream_context_create();
 var_dump(scandir($directory, $sorting_order, $context));
 

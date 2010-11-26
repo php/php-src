@@ -148,6 +148,10 @@ PHP_MINIT_FUNCTION(dir)
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_CS | CONST_PERSISTENT);
+
 #ifdef HAVE_GLOB
 
 #ifdef GLOB_BRACE
@@ -563,8 +567,10 @@ PHP_FUNCTION(scandir)
 		context = php_stream_context_from_zval(zcontext, 0);
 	}
 
-	if (!flags) {
+	if (flags == PHP_SCANDIR_SORT_ASCENDING) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
+	} else if (flags == PHP_SCANDIR_SORT_NONE) {
+		n = php_stream_scandir(dirn, &namelist, context, NULL);
 	} else {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
 	}

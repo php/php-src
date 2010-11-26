@@ -136,6 +136,10 @@ UPGRADE NOTES - PHP X.Y
 - The third parameter ($matches) to preg_match_all() is now optional. If
   omitted, the function will simply return the number of times the pattern was
   matched in the subject and will have no other side effects.
+- The second argument of scandir() now accepts SCANDIR_SORT_NONE (2) as a
+  possible value. This value results in scandir() performing no sorting: on
+  local filesystems, this allows files to be returned in native filesystem
+  order.
  
 
 ===================================
@@ -298,6 +302,9 @@ UPGRADE NOTES - PHP X.Y
        - ENT_XML1
        - ENT_XHTML
        - ENT_HTML5
+       - SCANDIR_SORT_ASCENDING
+       - SCANDIR_SORT_DESCENDING
+       - SCANDIR_SORT_NONE
 
      g. New classes
 
