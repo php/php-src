@@ -171,7 +171,7 @@ int fpm_children_free(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-void fpm_children_bury(struct event_base *base) /* {{{ */
+void fpm_children_bury() /* {{{ */
 {
 	int status;
 	pid_t pid;
@@ -201,13 +201,13 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 
 		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
-			const char *have_core = WCOREDUMP(status) ? " (core dumped)" : "";
+			const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
 
 			if (signame == NULL) {
 				signame = "";
 			}
 
-			snprintf(buf, sizeof(buf), "on signal %d %s%s", WTERMSIG(status), signame, have_core);
+			snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
 
 			/* if it's been killed because of dynamic process management
 			 * don't restart it automaticaly
@@ -277,19 +277,19 @@ void fpm_children_bury(struct event_base *base) /* {{{ */
 
 					zlog(ZLOG_WARNING, "failed processes threshold (%d in %d sec) is reached, initiating reload", fpm_global_config.emergency_restart_threshold, fpm_global_config.emergency_restart_interval);
 
-					fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET, base);
+					fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET);
 				}
 			}
 
 			if (restart_child) {
-				fpm_children_make(wp, 1 /* in event loop */, 1, 0, base);
+				fpm_children_make(wp, 1 /* in event loop */, 1, 0);
 
 				if (fpm_globals.is_child) {
 					break;
 				}
 			}
 		} else {
-			zlog(ZLOG_ALERT, "oops, unknown child exited %s", buf);
+			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s", pid, buf);
 		}
 	}
 }
@@ -340,15 +340,15 @@ static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-static void fpm_parent_resources_use(struct fpm_child_s *child, struct event_base *base) /* {{{ */
+static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 {
 	fpm_shm_slots_parent_use_slot(child);
-	fpm_stdio_parent_use_pipes(child, base);
+	fpm_stdio_parent_use_pipes(child);
 	fpm_child_link(child);
 }
 /* }}} */
 
-int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn, int is_debug, struct event_base *base) /* {{{ */
+int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn, int is_debug) /* {{{ */
 {
 	int enough = 0;
 	pid_t pid;
@@ -378,12 +378,8 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		switch (pid) {
 
 			case 0 :
-				event_reinit(base); /* reinitialize event base after fork() */
 				fpm_child_resources_use(child);
 				fpm_globals.is_child = 1;
-				if (in_event_loop) {
-					fpm_event_exit_loop(base);
-				}
 				fpm_child_init(wp);
 				return 0;
 
@@ -398,7 +394,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 			default :
 				child->pid = pid;
 				fpm_clock_get(&child->started);
-				fpm_parent_resources_use(child, base);
+				fpm_parent_resources_use(child);
 
 				zlog(is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
 		}
@@ -409,9 +405,9 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 }
 /* }}} */
 
-int fpm_children_create_initial(struct fpm_worker_pool_s *wp, struct event_base *base) /* {{{ */
+int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	return fpm_children_make(wp, 0 /* not in event loop yet */, 0, 1, base);
+	return fpm_children_make(wp, 0 /* not in event loop yet */, 0, 1);
 }
 /* }}} */
 
