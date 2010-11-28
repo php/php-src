@@ -250,8 +250,8 @@ wanted=Sunday            00:30:00
 
 TZ=Pacific/Truk - Is it OK for this to be 10 AM?  Note: does not
 appear to have a DST or timezone transition.
-tStamp=Thursday 1970-01-01 17:17:17 TRUT 0
-result=Tuesday 1970-01-06 00:00:00 TRUT 0
+tStamp=Thursday 1970-01-01 17:17:17 CHUT 0
+result=Tuesday 1970-01-06 00:00:00 CHUT 0
 wanted=Tuesday            00:00:00
 
 TZ=Pacific/Ponape - Is it OK for this to be 11 AM?  Note: does
