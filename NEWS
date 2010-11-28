@@ -1,9 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.4
-- General improvements:
-  . Added DateTime support for intl date formatting. (Stas)
-
 - Core:
   . Fixed extract() to do not overwrite $GLOBALS and $this when using
     EXTR_OVERWRITE. (jorto at redhat dot com)
@@ -22,8 +19,10 @@
     (Mike, Ilia)
     
 - Intl extension:
-  . Fixed crashes on invalid parameters in intl extension (Stas, Maksymilian
+  . Fixed crashes on invalid parameters in intl extension. (Stas, Maksymilian
     Arciemowicz)
+  . Added support for formatting the timestamp stored in a DateTime object.
+    (Stas)
 
 - Phar extension:
   . Fixed bug #50987 (unaligned memory access in phar.c).
@@ -61,8 +60,6 @@
   . Improved support for is_link and related functions on Windows. (Pierre)
   . Added a 3rd parameter to get_html_translation_table. It now takes a charset
     hint, like htmlentities et al. (Gustavo)
-  . Added support for the ( and ) delimiters/separators to
-    DateTime::createFromFormat(). (Derick)
  
 - Implemented feature requests:
   . Implemented FR #52348, added new constant ZEND_MULTIBYTE to detect
@@ -176,6 +173,8 @@
   . Fixed bug #52454 (Relative dates and getTimestamp increments by one day).
     (Derick)
   . Fixed bug #52430 (date_parse parse 24:xx:xx as valid time). (Derick)
+  . Added support for the ( and ) delimiters/separators to
+    DateTime::createFromFormat(). (Derick)
 
 - Filter extension:
   . Fixed the filter extension accepting IPv4 octets with a leading 0 as that
