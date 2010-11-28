@@ -16,7 +16,7 @@ echo $from->getTimestamp(), "\n"; //B
 echo date('d.m.Y H:i', $from->getTimestamp()), "\n"; //C
 ?>
 --EXPECT--
-12.07.2010
+12.07.2010 00:00
 1278885600
 12.07.2010 00:00
 1278885600
