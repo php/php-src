@@ -26,7 +26,7 @@ var_dump( $abbr["acst"] );
 --EXPECT--
 *** Testing timezone_abbreviations_list() : basic functionality ***
 string(5) "array"
-int(338)
+int(399)
 
 -- Format a sample entry --
 array(4) {
