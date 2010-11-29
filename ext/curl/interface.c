@@ -1771,7 +1771,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			int type;
 			void * what;
 
-			what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+			what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream(), php_file_le_pstream());
 			if (!what) {
 				RETVAL_FALSE;
 				return 1;
