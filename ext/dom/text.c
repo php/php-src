@@ -160,7 +160,7 @@ PHP_FUNCTION(dom_text_split_text)
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	if (node->type != XML_TEXT_NODE) {
+	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
 		RETURN_FALSE;
 	}
 
