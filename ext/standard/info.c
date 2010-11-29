@@ -49,16 +49,6 @@ typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # endif
 #endif
 
-#if HAVE_MBSTRING
-#include "ext/mbstring/mbstring.h"
-ZEND_EXTERN_MODULE_GLOBALS(mbstring)
-#endif
-
-#if HAVE_ICONV
-#include "ext/iconv/php_iconv.h"
-ZEND_EXTERN_MODULE_GLOBALS(iconv)
-#endif
-
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
 							php_info_print("<h2>" name "</h2>\n"); \
 						} else { \
