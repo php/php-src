@@ -18,6 +18,9 @@
   . Fixed bug #52828 (curl_setopt does not accept persistent streams).
     (Gustavo, Ilia)
 
+- DOM extension:
+  . Fixed bug #52656 (DOMCdataSection does not work with splitText). (Ilia)
+
 - Hash extension:
   . Fixed bug #51003 (unaligned memory access in ext/hash/hash_tiger.c).
     (Mike, Ilia)
