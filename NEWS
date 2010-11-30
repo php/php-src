@@ -5,6 +5,8 @@
   EXTR_OVERWRITE. (jorto at redhat dot com)
 
 18 Nov 2010, PHP 5.2.15RC1
+- Fixed crash in zip extract method (possible CWE-170). 
+  (Maksymilian Arciemowicz, Pierre)
 - Fixed a possible double free in imap extension (Identified by Mateusz 
   Kocielski). (CVE-2010-4150). (Ilia)
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
