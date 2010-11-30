@@ -49,6 +49,8 @@
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
 - Security enhancements:
+  . Fixed crash in zip extract method (possible CWE-170). 
+    (Maksymilian Arciemowicz, Pierre)
   . Paths with NULL in them (foo\0bar.txt) are now considered as invalid. (Rasmus)
   . Fixed a possible double free in imap extension (Identified by Mateusz 
     Kocielski). (CVE-2010-4150). (Ilia)
