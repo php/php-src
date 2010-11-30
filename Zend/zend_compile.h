@@ -505,8 +505,8 @@ void zend_add_trait_alias(znode *alias_znode TSRMLS_DC);
 void zend_do_implements_trait(znode *interface_znode /*, znode* aliases */ TSRMLS_DC);
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
-//void zend_do_binds_traits(TSRMLS_D);
-//ZEND_API void zend_do_add_trait_preparative_to_class(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
+/* void zend_do_binds_traits(TSRMLS_D); */
+/* ZEND_API void zend_do_add_trait_preparative_to_class(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC); */
 void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
 void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
 void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
