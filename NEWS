@@ -272,6 +272,7 @@
     returns int(0)). (slugonamission at gmail dot com)
    
 - PHP-FPM SAPI:
+  . Fixed bug #53412 (segfault when using -y). (fat)
   . Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
   . Fixed bug #52501 (libevent made FPM crashed when forking -- libevent has
     been removed). (fat)
