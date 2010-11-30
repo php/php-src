@@ -27,7 +27,9 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
-	fpm_globals.config = config;
+	if (config && *config) {
+		fpm_globals.config = strdup(config);
+	}
 	fpm_globals.prefix = prefix;
 
 	if (0 > fpm_php_init_main()              ||

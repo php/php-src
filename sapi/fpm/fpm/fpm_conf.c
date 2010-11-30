@@ -794,7 +794,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 	free(fpm_global_config.error_log);
 	fpm_global_config.pid_file = 0;
 	fpm_global_config.error_log = 0;
-	efree(fpm_globals.config);
+	free(fpm_globals.config);
 }
 /* }}} */
 
@@ -1179,12 +1179,21 @@ int fpm_conf_init_main(int test_conf) /* {{{ */
 	}
 
 	if (fpm_globals.config == NULL) {
+		char *tmp;
 
 		if (fpm_globals.prefix == NULL) {
-			spprintf(&fpm_globals.config, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
+			spprintf(&tmp, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
 		} else {
-			spprintf(&fpm_globals.config, 0, "%s/etc/php-fpm.conf", fpm_globals.prefix);
+			spprintf(&tmp, 0, "%s/etc/php-fpm.conf", fpm_globals.prefix);
 		}
+
+		if (!tmp) {
+			zlog(ZLOG_SYSERROR, "spprintf() failed (tmp for fpm_globals.config)");
+			return -1;
+		}
+
+		fpm_globals.config = strdup(tmp);
+		efree(tmp);
 
 		if (!fpm_globals.config) {
 			zlog(ZLOG_SYSERROR, "spprintf() failed (fpm_globals.config)");
