@@ -140,6 +140,10 @@ UPGRADE NOTES - PHP X.Y
   possible value. This value results in scandir() performing no sorting: on
   local filesystems, this allows files to be returned in native filesystem
   order.
+- stream_select() now preserves the keys of the passed array, be they numeric or
+  strings. This breaks code that iterated the resulting stream array using a
+  numeric index, but makes easier to identify which of the passed streams are
+  present in the result.
  
 
 ===================================
