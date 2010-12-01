@@ -268,7 +268,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     AC_MSG_CHECKING([for DB4 minor version and patch level])
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-#if DB_VERSION_MINOR != 1 || (DB_VERSION_MINOR == 1 && DB_VERSION_PATCH >= 25)
+#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR != 1) || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 1 && DB_VERSION_PATCH >= 25)
       yes
 #endif
     ],[
