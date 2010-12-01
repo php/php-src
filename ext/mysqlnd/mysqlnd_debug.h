@@ -135,7 +135,7 @@ static inline void DBG_ENTER_EX(MYSQLND_DEBUG * dbg_obj, const char * const func
 #define DBG_RETURN_EX(dbg_obj, value) return (value)
 #define DBG_VOID_RETURN_EX(dbg_obj) return
 
-#endif
+#endif /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
 
 #if MYSQLND_DBG_ENABLED == 1
 
