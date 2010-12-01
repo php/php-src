@@ -19,6 +19,9 @@
     (Gustavo, Ilia)
   . Fixed bug #52202 (CURLOPT_PRIVATE gets corrupted). (Ilia)
 
+- DBA extension:
+  . Added Berkeley DB 5.1 support to the DBA extension. (Oracle Corp.)
+
 - DOM extension:
   . Fixed bug #52656 (DOMCdataSection does not work with splitText). (Ilia)
 
