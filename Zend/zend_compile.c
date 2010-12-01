@@ -5543,6 +5543,10 @@ void zend_do_indirect_references(znode *result, const znode *num_references, zno
 	}
 	zend_do_begin_variable_parse(TSRMLS_C);
 	fetch_simple_variable(result, variable, 1 TSRMLS_CC);
+	/* there is a chance someone is accessing $this */
+	if (CG(active_op_array)->scope && CG(active_op_array)->this_var == -1) {
+		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1);
+	}
 }
 /* }}} */
 
