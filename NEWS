@@ -25,6 +25,10 @@
 - Hash extension:
   . Fixed bug #51003 (unaligned memory access in ext/hash/hash_tiger.c).
     (Mike, Ilia)
+
+- Iconv extension:
+  . Fixed bug #51250 (iconv_mime_decode() does not ignore malformed Q-encoded 
+    words). (Ilia)
     
 - Intl extension:
   . Fixed crashes on invalid parameters in intl extension. (Stas, Maksymilian
