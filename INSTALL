@@ -279,7 +279,15 @@ ir if
     it is your first install then you need to "make install" as well)
 
 13. cd ../php-5.x.y
-14. cp php.ini-dist /usr/local/lib/php.ini
+
+14. The PHP distribution provides two sample php.ini files, you can use them
+    by
+      cp php.ini-development /usr/local/lib/php.ini
+    or
+      cp php.ini-production  /usr/local/lib/php.ini
+
+    If you choose one of these php.ini files be certain to read the list
+    of changes within, as they affect how PHP behaves.
 
 15. You can edit /usr/local/lib/php.ini file to set PHP options.
     Edit your httpd.conf or srm.conf file and add:
@@ -451,14 +459,18 @@ Apache 2.0 on Unix systems
 
 13. Setup your php.ini
 
-    cp php.ini-dist /usr/local/lib/php.ini
+    The PHP distribution provides two sample php.ini files, you can use them
+    by
+      cp php.ini-development /usr/local/lib/php.ini
+    or
+      cp php.ini-production  /usr/local/lib/php.ini
+
+    If you choose one of these php.ini files be certain to read the list
+    of changes within, as they affect how PHP behaves.
 
     You may edit your .ini file to set PHP options.  If you prefer having
     php.ini in another location, use --with-config-file-path=/some/path in
     step 10.
-
-    If you instead choose php.ini-recommended, be certain to read the list
-    of changes within, as they affect how PHP behaves.
 
 14. Edit your httpd.conf to load the PHP module.  The path on the right hand
     side of the LoadModule statement must point to the path of the PHP
@@ -850,7 +862,7 @@ Using Binary Packages
    Example 2-6. OpenBSD Package Install Example
 # pkg_add php4-core-4.3.8.tgz
 # /usr/local/sbin/phpxs -s
-# cp /usr/local/share/doc/php4/php.ini-recommended /var/www/conf/php.ini
+# cp /usr/local/share/doc/php4/php.ini-development /var/www/conf/php.ini
   (add in mysql)
 # pkg_add php4-mysql-4.3.8.tgz
 # /usr/local/sbin/phpxs -a mysql
@@ -1234,10 +1246,10 @@ setenv OPTIM=-O2
        back to the root of the Apache source directory and run the above
        configure command again. That'll bring the link table up to date.
        Run make and make install again.
-    7. Copy and rename the php.ini-dist file to your bin directory from
-       your PHP 4 source directory: cp php.ini-dist /usr/local/bin/php.ini
-       or (if your don't have a local directory) cp php.ini-dist
-       /usr/bin/php.ini.
+    7. Copy and rename the php.ini-development or php.ini-production file to
+       your bin directory from your PHP 4 source directory:
+       cp php.ini-development /usr/local/bin/php.ini or (if your don't have a
+       local directory) cp php.ini-development /usr/bin/php.ini.
      __________________________________________________________________
 
 Compiling for MacOS X Client
@@ -1723,8 +1735,8 @@ cgi error:
    example, set it with something like:
    --with-config-file-path=/etc
 
-   And then you would copy php.ini-dist from the distribution to
-   /etc/php.ini and edit it to make any local changes you want.
+   And then you would copy php.ini-development or php.ini-production from the
+   distribution to /etc/php.ini and edit it to make any local changes you want.
    --with-config-file-scan-dir=PATH
 
    On Windows the default path for the php.ini file is the Windows
