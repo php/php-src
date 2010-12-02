@@ -1,5 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Dec 2010, PHP 5.3.4
+
 02 Dec 2010, PHP 5.3.4RC2
 - Core:
   . Fixed extract() to do not overwrite $GLOBALS and $this when using
