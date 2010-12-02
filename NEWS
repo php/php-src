@@ -16,11 +16,11 @@
     (Ilia)  
   . Fixed #53409 (sleep() returns NULL on Windows). (Pierre)
 
-- Curl extension:
-  . Fixed bug #50410 (curl extension slows down PHP on Windows). (Pierre)
+- cURL extension:
   . Fixed bug #52828 (curl_setopt does not accept persistent streams).
     (Gustavo, Ilia)
   . Fixed bug #52202 (CURLOPT_PRIVATE gets corrupted). (Ilia)
+  . Fixed bug #50410 (curl extension slows down PHP on Windows). (Pierre)
 
 - DBA extension:
   . Added Berkeley DB 5.1 support to the DBA extension. (Oracle Corp.)
@@ -305,7 +305,7 @@
     (Felipe)
     
 - PDO Firebird driver:
-  . Restore firebird support (VC9 builds only). (Pierre)
+  . Restored firebird support (VC9 builds only). (Pierre)
   . Fixed bug #53335 (pdo_firebird did not implement rowCount()).
     (preeves at ibphoenix dot com)
   . Fixed bug #53323 (pdo_firebird getAttribute() crash).
