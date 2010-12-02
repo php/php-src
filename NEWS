@@ -17,6 +17,7 @@
   . Fixed #53409 (sleep() returns NULL on Windows). (Pierre)
 
 - Curl extension:
+  . Fixed bug #50410 (curl extension slows down PHP on Windows). (Pierre)
   . Fixed bug #52828 (curl_setopt does not accept persistent streams).
     (Gustavo, Ilia)
   . Fixed bug #52202 (CURLOPT_PRIVATE gets corrupted). (Ilia)
@@ -261,6 +262,8 @@
     (mkoegler at auto dot tuwien dot ac dot at)
 
 - Openssl extension:
+  . Fixed possible blocking behavior in openssl_random_pseudo_bytes on Windows.
+    (Pierre)
   . Fixed bug #53136 (Invalid read on openssl_csr_new()). (Felipe)
   . Fixed bug #52947 (segfault when ssl stream option capture_peer_cert_chain
     used). (Felipe)
@@ -302,6 +305,7 @@
     (Felipe)
     
 - PDO Firebird driver:
+  . Restore firebird support (VC9 builds only). (Pierre)
   . Fixed bug #53335 (pdo_firebird did not implement rowCount()).
     (preeves at ibphoenix dot com)
   . Fixed bug #53323 (pdo_firebird getAttribute() crash).
