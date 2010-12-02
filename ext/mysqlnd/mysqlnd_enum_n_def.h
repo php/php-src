@@ -64,6 +64,7 @@
 #define SERVER_STATUS_DB_DROPPED				256 /* A database was dropped */
 #define SERVER_STATUS_NO_BACKSLASH_ESCAPES		512
 #define SERVER_QUERY_WAS_SLOW					2048
+#define SERVER_PS_OUT_PARAMS            		4096
 
 #define MYSQLND_NO_DATA			100
 #define MYSQLND_DATA_TRUNCATED	101
