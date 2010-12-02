@@ -111,6 +111,7 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_ASYNC'] = true;
 
+		$expected_constants['MYSQLI_SERVER_PS_OUT_PARAMS'] = true;
 	} else {
 		$version = mysqli_get_client_version();
 	}
