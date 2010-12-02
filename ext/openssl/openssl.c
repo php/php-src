@@ -886,10 +886,7 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 
 	*egdsocket = 0;
 	*seeded = 0;
-	
-#ifdef WINDOWS
-	RAND_screen();
-#endif
+
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
 	} else if (RAND_egd(file) > 0) {
