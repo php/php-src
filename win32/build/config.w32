@@ -104,7 +104,7 @@ ARG_ENABLE('zts', 'Thread safety', 'yes');
 // Configures the hard-coded installation dir
 ARG_ENABLE('prefix', 'where PHP will be installed', '');
 if (PHP_PREFIX == '') {
-	PHP_PREFIX = "C:\\php" + PHP_VERSION;
+	PHP_PREFIX = "C:\\php";
 	if (PHP_DEBUG == "yes")
 		PHP_PREFIX += "\\debug";
 }
