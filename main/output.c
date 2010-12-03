@@ -745,7 +745,7 @@ PHP_FUNCTION(ob_start)
 	long chunk_size=0;
 	zend_bool erase=1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zlb", &output_handler, &chunk_size, &erase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/lb", &output_handler, &chunk_size, &erase) == FAILURE) {
 		return;
 	}
 
