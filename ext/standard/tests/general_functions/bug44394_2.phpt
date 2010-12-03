@@ -4,6 +4,7 @@ Bug #44394 (Last two bytes missing from output) with session.use_trans_id
 <?php if (!extension_loaded("session")) print "skip"; ?>
 --INI--
 session.name=PHPSESSID
+session.use_only_cookies=0
 --FILE--
 <?php
 
