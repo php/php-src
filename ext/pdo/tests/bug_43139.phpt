@@ -17,7 +17,12 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-var_dump($db->query('select 0 as abc, 1 as xyz, 2 as def')->fetchAll(PDO::FETCH_GROUP));
+$from = '';
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+	$from = 'from dual';
+}
+
+var_dump($db->query("select 0 as abc, 1 as xyz, 2 as def $from")->fetchAll(PDO::FETCH_GROUP));
 ?>
 --EXPECT--
 array(1) {
