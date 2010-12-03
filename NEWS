@@ -112,6 +112,10 @@ PHP                                                                        NEWS
     getallheaders(), apache_request_headers() and apache_response_headers()
   . Improved performance of FastCGI request parsing.
 
+- Improved core functions:
+  . number_format() no longer truncates multibyte decimal points and thousand
+    separators to the first byte. FR #53457. (Adam)
+
 - Improved CURL extension:
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and
     CURLOPT_MAX_SEND_SPEED_LARGE. FR #51815. (Pierrick)
