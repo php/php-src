@@ -133,6 +133,8 @@ UPGRADE NOTES - PHP X.Y
   behavior follows the recommendations of Unicode Technical Report #36.
 - htmlspecialchars_decode/html_entity_decode now decode &apos; if the document
   type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
+- number_format() no longer truncates multibyte decimal points and thousand
+  separators to the first byte.
 - The third parameter ($matches) to preg_match_all() is now optional. If
   omitted, the function will simply return the number of times the pattern was
   matched in the subject and will have no other side effects.
