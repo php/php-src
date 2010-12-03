@@ -1,6 +1,9 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2010, PHP 5.3.4
+- SQLite3 extension:
+  . Fixed bug #53463 (sqlite3 columnName() segfaults on bad column_number).
+    (Felipe)
 
 02 Dec 2010, PHP 5.3.4RC2
 - Core:

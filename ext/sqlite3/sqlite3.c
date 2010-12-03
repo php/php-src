@@ -1532,6 +1532,7 @@ PHP_METHOD(sqlite3result, columnName)
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
 	long column = 0;
+	char *column_name;
 	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
@@ -1539,8 +1540,13 @@ PHP_METHOD(sqlite3result, columnName)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &column) == FAILURE) {
 		return;
 	}
+	column_name = (char*) sqlite3_column_name(result_obj->stmt_obj->stmt, column);
 
-	RETVAL_STRING((char*)sqlite3_column_name(result_obj->stmt_obj->stmt, column), 1);
+	if (column_name == NULL) {
+		RETURN_FALSE;
+	}
+		
+	RETVAL_STRING(column_name, 1);
 }
 /* }}} */
 
