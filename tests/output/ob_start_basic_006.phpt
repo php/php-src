@@ -74,11 +74,15 @@ checkAndClean();
 --EXPECTF--
  ---> Test arrays: 
 
+Warning: ob_start(): array must have exactly two members in %s on line 44
+
 Notice: ob_start(): failed to create buffer in %s on line 44
 bool(false)
 Array
 (
 )
+
+Warning: ob_start(): class 'f' not found in %s on line 47
 
 Notice: ob_start(): failed to create buffer in %s on line 47
 bool(false)
@@ -86,17 +90,23 @@ Array
 (
 )
 
+Warning: ob_start(): array must have exactly two members in %s on line 50
+
 Notice: ob_start(): failed to create buffer in %s on line 50
 bool(false)
 Array
 (
 )
 
+Warning: ob_start(): array must have exactly two members in %s on line 53
+
 Notice: ob_start(): failed to create buffer in %s on line 53
 bool(false)
 Array
 (
 )
+
+Warning: ob_start(): array must have exactly two members in %s on line 56
 
 Notice: ob_start(): failed to create buffer in %s on line 56
 bool(false)
@@ -115,6 +125,8 @@ Array
     [0] => C::h
 )
 
+
+Warning: ob_start(): array must have exactly two members in %s on line 68
 
 Notice: ob_start(): failed to create buffer in %s on line 68
 bool(false)
