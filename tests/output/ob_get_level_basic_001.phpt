@@ -42,6 +42,6 @@ int(2)
 int(1)
 int(0)
 
-Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush. in %s on line 26
+Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line 26
 int(0)
 Done

@@ -17,5 +17,5 @@ var_dump($str);
 --EXPECTF--
 [callback:1]This call will fail to flush and fail to obtain the content:
 
-Notice: ob_get_flush(): failed to delete buffer callback. in %s on line 11
+Notice: ob_get_flush(): failed to delete buffer callback in %s on line 11
 bool(false)

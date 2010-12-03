@@ -30,12 +30,12 @@ echo "Done";
 
 -- Testing ob_end_flush() function with Zero arguments --
 
-Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush. in %s on line 12
+Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line 12
 bool(false)
 bool(true)
 Hello
 bool(true)
 
-Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush. in %s on line 21
+Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line 21
 bool(false)
 Done

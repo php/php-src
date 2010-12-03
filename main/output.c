@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@ PHPAPI int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 /* {{{ php_output_init_globals */
 static void php_output_init_globals(php_output_globals *output_globals_p TSRMLS_DC)
 {
- 	OG(php_body_write) = php_default_output_func;
+	OG(php_body_write) = php_default_output_func;
 	OG(php_header_write) = php_default_output_func;
 	OG(implicit_flush) = 0;
 	OG(output_start_filename) = NULL;
@@ -69,22 +69,20 @@ static void php_output_init_globals(php_output_globals *output_globals_p TSRMLS_
 }
 /* }}} */
 
-
 /* {{{ php_output_startup
-   Start output layer */
+ * Start output layer */
 PHPAPI void php_output_startup(void)
 {
 #ifdef ZTS
 	ts_allocate_id(&output_globals_id, sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
-#else 
+#else
 	php_output_init_globals(&output_globals TSRMLS_CC);
 #endif
 }
 /* }}} */
 
-
 /* {{{ php_output_activate
-   Initilize output global for activation */
+ * Initilize output global for activation */
 PHPAPI void php_output_activate(TSRMLS_D)
 {
 	OG(php_body_write) = php_ub_body_write;
@@ -97,15 +95,6 @@ PHPAPI void php_output_activate(TSRMLS_D)
 }
 /* }}} */
 
-
-/* {{{ php_output_set_status
-   Toggle output status.  Do NOT use in application code, only in SAPIs where appropriate. */
-PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
-{
-	OG(disable_output) = !status;
-}
-/* }}} */
-
 /* {{{ php_output_register_constants */
 void php_output_register_constants(TSRMLS_D)
 {
@@ -115,12 +104,19 @@ void php_output_register_constants(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_output_set_status
+ * Toggle output status.  Do NOT use in application code, only in SAPIs where appropriate. */
+PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
+{
+	OG(disable_output) = !status;
+}
+/* }}} */
 
 /* {{{ php_body_write
  * Write body part */
 PHPAPI int php_body_write(const char *str, uint str_length TSRMLS_DC)
 {
-	return OG(php_body_write)(str, str_length TSRMLS_CC);	
+	return OG(php_body_write)(str, str_length TSRMLS_CC);
 }
 /* }}} */
 
@@ -219,7 +215,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	 fclose(fp);
  }
 #endif
-	
+
 	if (OG(active_ob_buffer).internal_output_handler) {
 		final_buffer = OG(active_ob_buffer).internal_output_handler_buffer;
 		final_buffer_length = OG(active_ob_buffer).internal_output_handler_buffer_size;
@@ -343,7 +339,7 @@ PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
  */
 PHPAPI void php_start_implicit_flush(TSRMLS_D)
 {
-	OG(implicit_flush)=1;
+	OG(implicit_flush) = 1;
 }
 /* }}} */
 
@@ -351,7 +347,23 @@ PHPAPI void php_start_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_end_implicit_flush(TSRMLS_D)
 {
-	OG(implicit_flush)=0;
+	OG(implicit_flush) = 0;
+}
+/* }}} */
+
+/* {{{ char *php_get_output_start_filename(TSRMLS_D)
+ *  Return filename start output something */
+PHPAPI char *php_get_output_start_filename(TSRMLS_D)
+{
+	return OG(output_start_filename);
+}
+/* }}} */
+
+/* {{{ char *php_get_output_start_lineno(TSRMLS_D)
+ * Return line number start output something */
+PHPAPI int php_get_output_start_lineno(TSRMLS_D)
+{
+	return OG(output_start_lineno);
 }
 /* }}} */
 
@@ -359,7 +371,7 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
+	if (OG(ob_nesting_level) == 0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
 		php_start_ob_buffer(NULL, buffer_size, erase TSRMLS_CC);
 	}
 
@@ -398,8 +410,7 @@ static inline void php_ob_allocate(uint text_length TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_ob_init_conflict
- * Returns 1 if handler_set is already used and generates error message
- */
+ * Returns 1 if handler_set is already used and generates error message */
 PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 {
 	if (php_ob_handler_used(handler_set TSRMLS_CC)) {
@@ -419,7 +430,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	if (output_handler && !zend_is_callable(output_handler, 0, NULL TSRMLS_CC)) {
 		return FAILURE;
 	}
-	
+
 	tmp_buf.block_size = block_size;
 	tmp_buf.size = initial_size;
 	tmp_buf.buffer = (char *) emalloc(initial_size+1);
@@ -452,8 +463,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 /* }}} */
 
 /* {{{ php_ob_handler_from_string
- * Create zval output handler from string 
- */
+ * Create zval output handler from string */
 static zval* php_ob_handler_from_string(const char *handler_name, int len TSRMLS_DC)
 {
 	zval *output_handler;
@@ -544,36 +554,16 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 
 /* {{{ php_ob_list_each
  */
-static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array) 
+static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array)
 {
 	add_next_index_string(ob_handler_array, ob_buffer->handler_name, 1);
 	return 0;
 }
 /* }}} */
 
-/* {{{ proto false|array ob_list_handlers()
- *  List all output_buffers in an array 
- */
-PHP_FUNCTION(ob_list_handlers)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	
-	array_init(return_value);
-	if (OG(ob_nesting_level)) {
-		if (OG(ob_nesting_level)>1) {
-			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_list_each, return_value);
-		}
-		php_ob_list_each(&OG(active_ob_buffer), return_value);
-	}
-}
-/* }}} */
-
 /* {{{ php_ob_used_each
- *  Sets handler_name to NULL is found
- */
-static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_name) 
+   Sets handler_name to NULL is found */
+static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_name)
 {
 	if (!strcmp(ob_buffer->handler_name, *handler_name)) {
 		*handler_name = NULL;
@@ -584,8 +574,7 @@ static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_nam
 /* }}} */
 
 /* {{{ php_ob_used
- * returns 1 if given handler_name is used as output_handler
- */
+   returns 1 if given handler_name is used as output_handler */
 PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 {
 	char *tmp = handler_name;
@@ -616,10 +605,10 @@ static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	memcpy(target, text, text_length);
 	target[text_length]=0;
 
- 	/* If implicit_flush is On or chunked buffering, send contents to next buffer and return. */
+	/* If implicit_flush is On or chunked buffering, send contents to next buffer and return. */
 	if (OG(active_ob_buffer).chunk_size
 		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
-		
+
 		php_end_ob_buffer(1, 1 TSRMLS_CC);
 		return;
 	}
@@ -645,7 +634,6 @@ static inline void php_ob_prepend(const char *text, uint text_length)
 	OG(ob_buffer)[OG(active_ob_buffer).text_length]=0;
 }
 #endif
-
 
 /* {{{ php_ob_get_buffer
  * Return the current output buffer */
@@ -675,7 +663,6 @@ PHPAPI int php_ob_get_length(zval *p TSRMLS_DC)
  * Wrapper functions - implementation
  */
 
-
 /* buffered output function */
 static int php_b_body_write(const char *str, uint str_length TSRMLS_DC)
 {
@@ -691,7 +678,7 @@ PHPAPI int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_D
 
 	if (OG(disable_output)) {
 		return 0;
-	}		
+	}
 
 	result = OG(php_header_write)(str, str_length TSRMLS_CC);
 
@@ -733,26 +720,56 @@ PHPAPI int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
+ */
+static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
+{
+	zval *elem;
+
+	MAKE_STD_ZVAL(elem);
+	array_init(elem);
+
+	add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
+	if (!ob_buffer->chunk_size) {
+		add_assoc_long(elem, "size", ob_buffer->size);
+		add_assoc_long(elem, "block_size", ob_buffer->block_size);
+	}
+	if (ob_buffer->internal_output_handler) {
+		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
+		add_assoc_long(elem, "buffer_size", ob_buffer->internal_output_handler_buffer_size);
+	} else {
+		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
+	}
+	add_assoc_long(elem, "status", ob_buffer->status);
+	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
+	add_assoc_bool(elem, "del", ob_buffer->erase);
+	add_next_index_zval(result, elem);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /*
- * HEAD support
+ * USERLAND (nearly 1:1 of old output.c)
  */
 
-/* {{{ proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
+/* {{{ proto bool ob_start([string|array user_function [, int chunk_size [, bool erase]]])
    Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
-	zval *output_handler=NULL;
-	long chunk_size=0;
-	zend_bool erase=1;
+	zval *output_handler = NULL;
+	long chunk_size = 0;
+	zend_bool erase = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/lb", &output_handler, &chunk_size, &erase) == FAILURE) {
 		return;
 	}
 
-	if (chunk_size < 0)
+	if (chunk_size < 0) {
 		chunk_size = 0;
+	}
 
-	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
+	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -768,20 +785,19 @@ PHP_FUNCTION(ob_flush)
 	}
 
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush");
 		RETURN_FALSE;
 	}
-	
+
 	if (!OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer %s", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
-	
+
 	php_end_ob_buffer(1, 1 TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto bool ob_clean(void)
    Clean (delete) the current output buffer */
@@ -790,17 +806,17 @@ PHP_FUNCTION(ob_clean)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 
 	if (!OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
-	
+
 	php_end_ob_buffer(0, 1 TSRMLS_CC);
 	RETURN_TRUE;
 }
@@ -813,16 +829,17 @@ PHP_FUNCTION(ob_end_flush)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
 		RETURN_FALSE;
 	}
+
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
-	
+
 	php_end_ob_buffer(1, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
@@ -835,16 +852,17 @@ PHP_FUNCTION(ob_end_clean)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-		
+
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
+
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
-	
+
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
@@ -858,22 +876,22 @@ PHP_FUNCTION(ob_get_flush)
 		return;
 	}
 
-	/* get contents */
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	/* error checks */
+
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
+
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s", OG(active_ob_buffer).handler_name);
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	/* flush */
+
 	php_end_ob_buffer(1, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -885,22 +903,22 @@ PHP_FUNCTION(ob_get_clean)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	/* get contents */
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	/* error checks */
+
 	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s", OG(active_ob_buffer).handler_name);
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	/* delete buffer */
+
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -912,8 +930,8 @@ PHP_FUNCTION(ob_get_contents)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-		
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -926,8 +944,8 @@ PHP_FUNCTION(ob_get_level)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-		
-	RETURN_LONG (OG(ob_nesting_level));
+
+	RETURN_LONG(OG(ob_nesting_level));
 }
 /* }}} */
 
@@ -938,42 +956,31 @@ PHP_FUNCTION(ob_get_length)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-		
-	if (php_ob_get_length(return_value TSRMLS_CC)==FAILURE) {
+
+	if (php_ob_get_length(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) */
-static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) 
+/* {{{ proto false|array ob_list_handlers()
+   List all output_buffers in an array */
+PHP_FUNCTION(ob_list_handlers)
 {
-	zval *elem;
-
-	MAKE_STD_ZVAL(elem);
-	array_init(elem);
-
-	add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
-	if (!ob_buffer->chunk_size) {
-		add_assoc_long(elem, "size", ob_buffer->size);
-		add_assoc_long(elem, "block_size", ob_buffer->block_size);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
-	if (ob_buffer->internal_output_handler) {
-		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
-		add_assoc_long(elem, "buffer_size", ob_buffer->internal_output_handler_buffer_size);
-	}
-	else {
-		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
-	}
-	add_assoc_long(elem, "status", ob_buffer->status);
-	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
-	add_assoc_bool(elem, "del", ob_buffer->erase);
-	add_next_index_zval(result, elem);
 
-	return SUCCESS;
+	array_init(return_value);
+
+	if (OG(ob_nesting_level)) {
+		if (OG(ob_nesting_level) > 1) {
+			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_list_each, return_value);
+		}
+		php_ob_list_each(&OG(active_ob_buffer), return_value);
+	}
 }
 /* }}} */
-
 
 /* {{{ proto false|array ob_get_status([bool full_status])
    Return the status of the active or all output buffers */
@@ -981,20 +988,20 @@ PHP_FUNCTION(ob_get_status)
 {
 	zend_bool full_status = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE ) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	if (full_status) {
-		if (OG(ob_nesting_level)>1) {
+		if (OG(ob_nesting_level) > 1) {
 			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *elem, void *))php_ob_buffer_status, return_value);
 		}
-		if (OG(ob_nesting_level)>0 && php_ob_buffer_status(&OG(active_ob_buffer), return_value)==FAILURE) {
+		if (OG(ob_nesting_level) > 0 && php_ob_buffer_status(&OG(active_ob_buffer), return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-	} else if (OG(ob_nesting_level)>0) {
+	} else if (OG(ob_nesting_level) > 0) {
 		add_assoc_long(return_value, "level", OG(ob_nesting_level));
 		if (OG(active_ob_buffer).internal_output_handler) {
 			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_INTERNAL);
@@ -1007,7 +1014,6 @@ PHP_FUNCTION(ob_get_status)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto void ob_implicit_flush([int flag])
    Turn implicit flush on/off and is equivalent to calling flush() after every output call */
@@ -1027,25 +1033,6 @@ PHP_FUNCTION(ob_implicit_flush)
 }
 /* }}} */
 
-
-/* {{{ char *php_get_output_start_filename(TSRMLS_D)
-   Return filename start output something */
-PHPAPI char *php_get_output_start_filename(TSRMLS_D)
-{
-	return OG(output_start_filename);
-}
-/* }}} */
-
-
-/* {{{ char *php_get_output_start_lineno(TSRMLS_D)
-   Return line number start output something */
-PHPAPI int php_get_output_start_lineno(TSRMLS_D)
-{
-	return OG(output_start_lineno);
-}
-/* }}} */
-
-
 /* {{{ proto bool output_reset_rewrite_vars(void)
    Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
@@ -1057,7 +1044,6 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool output_add_rewrite_var(string name, string value)
    Add URL rewriter values */

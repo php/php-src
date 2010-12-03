@@ -17,5 +17,5 @@ var_dump($str);
 --EXPECTF--
 [callback:1]This call will fail to obtain the content, since it is also requesting a clean:
 
-Notice: ob_get_clean(): failed to delete buffer callback. in %s on line 11
+Notice: ob_get_clean(): failed to delete buffer callback in %s on line 11
 bool(false)
