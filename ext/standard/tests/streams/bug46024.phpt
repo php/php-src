@@ -1,7 +1,7 @@
 --TEST--
 Bug #46024 stream_select() doesn't return the correct number
 --SKIPIF--
-<?php if (!getenv('TEST_PHP_EXECUTABLE')) die("TEST_PHP_EXECUTABLE not defined"); ?>
+<?php if (!getenv('TEST_PHP_EXECUTABLE')) die("skip TEST_PHP_EXECUTABLE not defined"); ?>
 --FILE--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE'); 
