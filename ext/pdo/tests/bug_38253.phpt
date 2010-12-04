@@ -24,7 +24,13 @@ var_dump($stmt->fetchAll());
 
 $pdo = PDOTest::factory();
 
-$pdo->exec ("create table test2 (id integer primary key, n text)");
+if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+    $type = "clob";
+} else{
+    $type = "text";
+}
+
+$pdo->exec ("create table test2 (id integer primary key, n $type)");
 $pdo->exec ("INSERT INTO test2 (id, n) VALUES (1,'hi')");
 
 $pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_FUNC);
