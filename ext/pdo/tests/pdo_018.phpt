@@ -127,7 +127,13 @@ foreach($objs as $idx => $obj)
 unset($stmt);
 
 echo "===DATA===\n";
-var_dump($db->query('SELECT test.val FROM test')->fetchAll(PDO::FETCH_COLUMN));
+$res = $db->query('SELECT test.val FROM test')->fetchAll(PDO::FETCH_COLUMN);
+
+// For Oracle map NULL to empty string so the test doesn't diff
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci' && $res[0] === null) {
+    $res[0] = "";
+}
+var_dump($res);
 
 echo "===FAILURE===\n";
 try
