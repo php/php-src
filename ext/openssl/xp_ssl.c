@@ -373,7 +373,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	{
 		zval **val;
 
-		if (SUCCESS == php_stream_context_get_option(
+		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "no_ticket", &val) && 
 				zval_is_true(*val)) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
