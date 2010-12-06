@@ -1971,15 +1971,19 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		}
 	}
 	if (ret == PASS) {
+		char * tmp = NULL;
+		/* if we get conn->user as parameter and then we first free it, then estrndup it, we will crash */
+		tmp = mnd_pestrndup(user, user_len, conn->persistent);
 		if (conn->user) {
 			mnd_pefree(conn->user, conn->persistent);
 		}
-		conn->user = mnd_pestrndup(user, user_len, conn->persistent);
+		conn->user = tmp;
 
+		tmp = mnd_pestrdup(passwd, conn->persistent);
 		if (conn->passwd) {
 			mnd_pefree(conn->passwd, conn->persistent);
 		}
-		conn->passwd = mnd_pestrdup(passwd, conn->persistent);
+		conn->passwd = tmp;
 
 		if (conn->last_message) {
 			mnd_pefree(conn->last_message, conn->persistent);
