@@ -561,7 +561,8 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 			}
 		}
 	}
-#ifndef MYSQLND_DONT_SKIP_OUT_PARAMS_RESULTSET
+/* #ifndef MYSQLND_DONT_SKIP_OUT_PARAMS_RESULTSET */
+#if A0
 	if (stmt->upsert_status.server_status & SERVER_PS_OUT_PARAMS) {
 		s->m->free_stmt_content(s TSRMLS_CC);
 		DBG_INF("PS OUT Variable RSet, skipping");
