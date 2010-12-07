@@ -18,6 +18,7 @@
   . Fixed bug #46587 (mt_rand() does not check that max is greater than min).
     (Ilia)  
   . Fixed #53409 (sleep() returns NULL on Windows). (Pierre)
+  . Fixed #29085 (bad default include_path on Windows). (Pierre)
 
 - cURL extension:
   . Fixed bug #52828 (curl_setopt does not accept persistent streams).
@@ -40,7 +41,7 @@
     words). (Ilia)
     
 - Intl extension:
-  . Fixed crashes on invalid parameters in intl extension. (Stas, Maksymilian
+  . Fixed crashes on invalid parameters in intl extension. (CVE-2010-4409). (Stas, Maksymilian
     Arciemowicz)
   . Added support for formatting the timestamp stored in a DateTime object.
     (Stas)
