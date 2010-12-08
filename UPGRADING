@@ -276,6 +276,8 @@ UPGRADE NOTES - PHP 5.3
         - MySQLi: Now supports persistent connections by prepending the hostname 
           with "p:".
 
+        - imagepstext now rejects invalid antialiasing steps and raises a warning.
+
      d. no longer possible to disable
 
         - PCRE
