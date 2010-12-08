@@ -4593,6 +4593,11 @@ PHP_FUNCTION(imagepstext)
 		return;
 	}
 
+	if (aa_steps != 4 || aa_steps != 16) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "AA steps must be 4 or 16");
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, &img, -1, "Image", le_gd);
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 

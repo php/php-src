@@ -1,21 +1,18 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, PHP 5.2.15
-
-02 Dec 2010, PHP 5.2.15RC2
+09 Dec 2010, PHP 5.2.15
 - Fixed extract() to do not overwrite $GLOBALS and $this when using
-  EXTR_OVERWRITE. (jorto at redhat dot com)
-
-18 Nov 2010, PHP 5.2.15RC1
+  EXTR_OVERWRITE. (jorto at redhat dot com)  
 - Fixed crash in zip extract method (possible CWE-170). 
   (Maksymilian Arciemowicz, Pierre)
 - Fixed a possible double free in imap extension (Identified by Mateusz 
   Kocielski). (CVE-2010-4150). (Ilia)
 - Fixed possible flaw in open_basedir (CVE-2010-3436). (Pierre)
 - Fixed possible crash in mssql_fetch_batch(). (Kalle)
-
 - Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
   (CVE-2010-3709). (Maksymilian Arciemowicz)
+
+- Fixed bug #53492 (fix crash if anti-aliasing steps are invalid). (Pierre)
 - Fixed bug #53323 (pdo_firebird getAttribute() crash).
   (preeves at ibphoenix dot com)
 - Fixed bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with
