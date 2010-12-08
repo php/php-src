@@ -530,7 +530,8 @@ static size_t dummy_encoding_oddlen(const unsigned char *string, size_t length, 
 
 static int dummy_encoding_list_checker(const char *encoding_list TSRMLS_DC)
 {
-	return 0;
+	/* ignore encoding */
+	return 1;
 }
 
 static const char* dummy_get_internal_encoding(TSRMLS_D)
