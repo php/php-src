@@ -2648,7 +2648,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					ImageInfo->encode_unicode,
 					decode
-					TSRMLS_DC) != 0) {
+					TSRMLS_CC) != 0) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2668,7 +2668,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					ImageInfo->encode_jis,
 					ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le
-					TSRMLS_DC) != 0) {
+					TSRMLS_CC) != 0) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2707,7 +2707,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 			ByteCount,
 			ImageInfo->encode_unicode,
 			ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le
-			TSRMLS_DC) != 0) {
+			TSRMLS_CC) != 0) {
 		xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
 	}
 	return xp_field->size;
