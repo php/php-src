@@ -200,9 +200,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(script_encoding_list) = NULL;
 	CG(script_encoding_list_size) = 0;
 	CG(internal_encoding) = NULL;
-	CG(encoding_detector) = NULL;
-	CG(encoding_converter) = NULL;
-	CG(encoding_oddlen) = NULL;
 	CG(encoding_declared) = 0;
 }
 /* }}} */

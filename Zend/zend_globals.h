@@ -155,11 +155,6 @@ struct _zend_compiler_globals {
 
 	zend_encoding *internal_encoding;
 
-	/* multibyte utility functions */
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
-
 #ifdef ZTS
 	zval ***static_members_table;
 	int last_static_member;

@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Added multibyte suppport by default. Previosly php had to be compiled
     with --enable-zend-multibyte. Now it can be enabled or disabled throug
     zend.multibyte directive in php.ini (Dmitry)
+  . Removed compile time dependency from ext/mbstring (Dmitry)
   . Added scalar typehints to the parser and the reflection API. (Ilia, Derick)
   . Added support for Traits. (Stefan)
   . Added closure $this support back. (Stas)

@@ -96,6 +96,7 @@ ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 static PHP_GINIT_FUNCTION(mbstring);
 static PHP_GSHUTDOWN_FUNCTION(mbstring);
 
+static const char* php_mb_internal_encoding_name(TSRMLS_D);
 static size_t php_mb_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC);
 static int php_mb_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC);
 static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t arg_length, char *arg_list TSRMLS_DC);
@@ -769,7 +770,8 @@ php_mb_parse_encoding_list(const char *value, int value_length, enum mbfl_no_enc
 /* }}} */
 
 /* {{{ MBSTRING_API php_mb_check_encoding_list */
-MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
+MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC)
+{
 	return php_mb_parse_encoding_list(encoding_list, strlen(encoding_list), NULL, NULL, 0 TSRMLS_CC);	
 }
 /* }}} */
@@ -953,6 +955,76 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 		}
 	}
 	return 0;
+}
+/* }}} */
+
+static char *php_mb_rfc1867_substring(char *start, int len, char quote TSRMLS_DC)
+{
+	char *result = emalloc(len + 2);
+	char *resp = result;
+	int i;
+
+	for (i = 0; i < len && start[i] != quote; ++i) {
+		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
+			*resp++ = start[++i];
+		} else {
+			size_t j = php_mb_gpc_mbchar_bytes(start+i TSRMLS_CC);
+
+			while (j-- > 0 && i < len) {
+				*resp++ = start[i++];
+			}
+			--i;
+		}
+	}
+
+	*resp = '\0';
+	return result;
+}
+
+static char *php_mb_rfc1867_getword(char *str TSRMLS_DC) /* {{{ */
+{
+	while (*str && isspace(*str)) {
+		++str;
+	}
+
+	if (!*str) {
+		return estrdup("");
+	}
+
+	if (*str == '"' || *str == '\'') {
+		char quote = *str;
+
+		str++;
+		return php_mb_rfc1867_substring(str, strlen(str), quote TSRMLS_CC);
+	} else {
+		char *strend = str;
+
+		while (*strend && !isspace(*strend)) {
+			++strend;
+		}
+		return php_mb_rfc1867_substring(str, strend - str, 0 TSRMLS_CC);
+	}
+}
+/* }}} */
+
+static char *php_mb_rfc1867_basename(char *filename TSRMLS_DC) /* {{{ */
+{
+	char *s, *tmp;
+	
+	/* The \ check should technically be needed for win32 systems only where
+	 * it is a valid path separator. However, IE in all it's wisdom always sends
+	 * the full path of the file on the user's filesystem, which means that unless
+	 * the user does basename() they get a bogus file name. Until IE's user base drops
+	 * to nill or problem is fixed this code must remain enabled for all systems. */
+	s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
+	if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
+		s = tmp;
+	}
+	if (s) {
+		return s + 1;
+	} else {
+		return filename;
+	}
 }
 /* }}} */
 
@@ -1353,6 +1425,21 @@ PHP_MINIT_FUNCTION(mbstring)
 #if HAVE_MBREGEX
 	PHP_MINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+	zend_multibyte_set_functions(
+		php_mb_encoding_detector,
+		php_mb_encoding_converter,
+		php_mb_oddlen,
+		php_mb_check_encoding_list,
+		php_mb_internal_encoding_name TSRMLS_CC);
+
+	php_rfc1867_set_multibyte_callbacks(
+		php_mb_encoding_translation,
+		php_mb_gpc_encoding_detector,
+		php_mb_gpc_encoding_converter,
+		php_mb_rfc1867_getword,
+		php_mb_rfc1867_basename);
+	
 	return SUCCESS;
 }
 /* }}} */
@@ -4697,9 +4784,6 @@ static int php_mb_set_zend_encoding(TSRMLS_D)
 	/* 'd better use mbfl_memory_device? */
 	char *name, *list = NULL;
 	int n, *entry, list_size = 0;
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
 
 	/* notify script encoding to Zend Engine */
 	entry = MBSTRG(script_encoding_list);
@@ -4724,9 +4808,6 @@ static int php_mb_set_zend_encoding(TSRMLS_D)
 	if (list) {
 		efree(list);
 	}
-	encoding_detector = php_mb_encoding_detector;
-	encoding_converter = php_mb_encoding_converter;
-	encoding_oddlen = php_mb_oddlen;
 
 	/* TODO: make independent from mbstring.encoding_translation? */
 	if (MBSTRG(encoding_translation)) {
@@ -4734,8 +4815,6 @@ static int php_mb_set_zend_encoding(TSRMLS_D)
 		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
 		zend_multibyte_set_internal_encoding(name TSRMLS_CC);
 	}
-
-	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen TSRMLS_CC);
 
 	return 0;
 }
@@ -4848,6 +4927,26 @@ static size_t php_mb_oddlen(const unsigned char *string, size_t length, const ch
 	return mbfl_oddlen(&mb_string);
 }
 /* }}} */
+
+/* {{{ const char* php_mb_internal_encoding_name()
+ *	returns name of internal encoding
+ */
+static const char* php_mb_internal_encoding_name(TSRMLS_D)
+{
+	const char *name = mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
+
+	if (!name ||
+	    !*name ||
+	    (strlen(name) == 4 &&
+		 (!memcmp("pass", name, sizeof("pass") - 1) || 
+		 !memcmp("auto", name, sizeof("auto") - 1) || 
+	     !memcmp("none", name, sizeof("none") - 1)))) {
+		return NULL;
+	}
+	return name;
+}
+/* }}} */
+
 
 #endif	/* HAVE_MBSTRING */
 
