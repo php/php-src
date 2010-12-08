@@ -207,7 +207,10 @@
     and trailing :: in the filter extension). (Gustavo)
   . Fixed bug #50117 (problems in the validation of IPv6 addresses with IPv4
     addresses and ::). (Gustavo)
-    
+
+- GD extension:
+  . Fixed bug #53492 (fix crash if anti-aliasing steps are invalid). (Pierre)
+
 - GMP extension:
   . Fixed bug #52906 (gmp_mod returns negative result when non-negative is 
     expected). (Stas)
