@@ -54,11 +54,6 @@
 #include <langinfo.h>
 #endif
 
-#if HAVE_MBSTRING
-# include "ext/mbstring/mbstring.h"
-ZEND_EXTERN_MODULE_GLOBALS(mbstring)
-#endif
-
 #include <zend_hash.h>
 #include "html_tables.h"
 
@@ -372,7 +367,6 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	int i;
 	enum entity_charset charset = cs_utf_8;
 	int len = 0;
-	zval *uf_result = NULL;
 
 	/* Default is now UTF-8 */
 	if (charset_hint == NULL)
@@ -381,79 +375,11 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	if ((len = strlen(charset_hint)) != 0) {
 		goto det_charset;
 	}
-#if HAVE_MBSTRING
-#if !defined(COMPILE_DL_MBSTRING)
-	/* XXX: Ugly things. Why don't we look for a more sophisticated way? */
-	switch (MBSTRG(current_internal_encoding)) {
-		case mbfl_no_encoding_8859_1:
-			return cs_8859_1;
 
-		case mbfl_no_encoding_utf8:
-			return cs_utf_8;
-
-		case mbfl_no_encoding_euc_jp:
-		case mbfl_no_encoding_eucjp_win:
-			return cs_eucjp;
-
-		case mbfl_no_encoding_sjis:
-		case mbfl_no_encoding_sjis_open:
-		case mbfl_no_encoding_cp932:
-			return cs_sjis;
-
-		case mbfl_no_encoding_cp1252:
-			return cs_cp1252;
-
-		case mbfl_no_encoding_8859_15:
-			return cs_8859_15;
-
-		case mbfl_no_encoding_big5:
-			return cs_big5;
-
-		case mbfl_no_encoding_euc_cn:
-		case mbfl_no_encoding_hz:
-		case mbfl_no_encoding_cp936:
-			return cs_gb2312;
-
-		case mbfl_no_encoding_koi8r:
-			return cs_koi8r;
-
-		case mbfl_no_encoding_cp866:
-			return cs_cp866;
-
-		case mbfl_no_encoding_cp1251:
-			return cs_cp1251;
-
-		case mbfl_no_encoding_8859_5:
-			return cs_8859_5;
-
-		default:
-			;
+	charset_hint = (char*)zend_multibyte_get_internal_encoding(TSRMLS_C);
+	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
+		goto det_charset;
 	}
-#else
-	{
-		zval nm_mb_internal_encoding;
-
-		ZVAL_STRING(&nm_mb_internal_encoding, "mb_internal_encoding", 0);
-
-		if (call_user_function_ex(CG(function_table), NULL, &nm_mb_internal_encoding, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE) {
-
-			charset_hint = Z_STRVAL_P(uf_result);
-			len = Z_STRLEN_P(uf_result);
-			
-			if ((len == 4) && /* sizeof(none|auto|pass)-1 */
-					(!memcmp("pass", charset_hint, sizeof("pass") - 1) || 
-					!memcmp("auto", charset_hint, sizeof("auto") - 1) || 
-				    !memcmp("none", charset_hint, sizeof("none") - 1))) {
-					
-				charset_hint = NULL;
-				len = 0;
-			} else {
-				goto det_charset;
-			}
-		}
-	}
-#endif
-#endif
 
 	charset_hint = SG(default_charset);
 	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
@@ -513,9 +439,6 @@ det_charset:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "charset `%s' not supported, assuming utf-8",
 					charset_hint);
 		}
-	}
-	if (uf_result != NULL) {
-		zval_ptr_dtor(&uf_result);
 	}
 	return charset;
 }

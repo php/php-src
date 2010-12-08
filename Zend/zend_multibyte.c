@@ -513,7 +513,36 @@ static zend_encoding *zend_encoding_table[] = {
 	NULL
 };
 
+static char* dummy_encoding_detector(const unsigned char *string, size_t length, char *list TSRMLS_DC)
+{
+	return NULL;
+}
 
+static int dummy_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC)
+{
+	return -1;
+}
+
+static size_t dummy_encoding_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC)
+{
+	return 0;
+}
+
+static int dummy_encoding_list_checker(const char *encoding_list TSRMLS_DC)
+{
+	return 0;
+}
+
+static const char* dummy_get_internal_encoding(TSRMLS_D)
+{
+	return NULL;
+}
+
+ZEND_API zend_encoding_detector zend_multibyte_encoding_detector = dummy_encoding_detector;
+ZEND_API zend_encoding_converter zend_multibyte_encoding_converter = dummy_encoding_converter;
+ZEND_API zend_encoding_oddlen zend_multibyte_encoding_oddlen = dummy_encoding_oddlen;
+ZEND_API zend_encoding_list_checker zend_multibyte_check_encoding_list = dummy_encoding_list_checker;
+ZEND_API zend_encoding_name_getter zend_multibyte_get_internal_encoding = dummy_get_internal_encoding;
 
 ZEND_API int zend_multibyte_set_script_encoding(const char *encoding_list,
 size_t encoding_list_size TSRMLS_DC)
@@ -540,11 +569,13 @@ ZEND_API int zend_multibyte_set_internal_encoding(const char *encoding_name TSRM
 	return 0;
 }
 
-ZEND_API int zend_multibyte_set_functions(zend_encoding_detector encoding_detector, zend_encoding_converter encoding_converter, zend_encoding_oddlen encoding_oddlen TSRMLS_DC)
+ZEND_API int zend_multibyte_set_functions(zend_encoding_detector encoding_detector, zend_encoding_converter encoding_converter, zend_encoding_oddlen encoding_oddlen, zend_encoding_list_checker encoding_list_checker, zend_encoding_name_getter get_internal_encoding TSRMLS_DC)
 {
-	CG(encoding_detector) = encoding_detector;
-	CG(encoding_converter) = encoding_converter;
-	CG(encoding_oddlen) = encoding_oddlen;
+	zend_multibyte_encoding_detector = encoding_detector;
+	zend_multibyte_encoding_converter = encoding_converter;
+	zend_multibyte_encoding_oddlen = encoding_oddlen;
+	zend_multibyte_check_encoding_list = encoding_list_checker;
+	zend_multibyte_get_internal_encoding = get_internal_encoding;	
 	return 0;
 }
 
@@ -659,18 +690,16 @@ static size_t zend_multibyte_encoding_filter(unsigned char **to, size_t *to_leng
 {
 	size_t oddlen;
 
-	if (!CG(encoding_converter)) {
+	if (zend_multibyte_encoding_converter == dummy_encoding_converter) {
 		return 0;
 	}
 
-	if (CG(encoding_oddlen)) {
-		oddlen = CG(encoding_oddlen)(from, from_length, from_encoding TSRMLS_CC);
-		if (oddlen > 0) {
-			from_length -= oddlen;
-		}
+	oddlen = zend_multibyte_encoding_oddlen(from, from_length, from_encoding TSRMLS_CC);
+	if (oddlen > 0) {
+		from_length -= oddlen;
 	}
 
-	if (CG(encoding_converter)(to, to_length, from, from_length, to_encoding, from_encoding TSRMLS_CC) != 0) {
+	if (zend_multibyte_encoding_converter(to, to_length, from, from_length, to_encoding, from_encoding TSRMLS_CC) != 0) {
 		return 0;
 	}
 
@@ -1053,10 +1082,11 @@ static zend_encoding* zend_multibyte_find_script_encoding(zend_encoding *onetime
 	}
 
 	/* if multiple encodings specified, detect automagically */
-	if (CG(script_encoding_list_size) > 1 && CG(encoding_detector)) {
+	if (CG(script_encoding_list_size) > 1 && 
+	    zend_multibyte_encoding_detector != dummy_encoding_detector) {
 		list = zend_multibyte_assemble_encoding_list(CG(script_encoding_list),
 				CG(script_encoding_list_size));
-		name = CG(encoding_detector)(LANG_SCNG(script_org), 
+		name = zend_multibyte_encoding_detector(LANG_SCNG(script_org), 
 				LANG_SCNG(script_org_size), list TSRMLS_CC);
 		if (list) {
 			efree(list);
