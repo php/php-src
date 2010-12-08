@@ -1,65 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Dec 2010, PHP 5.3.4
-- SQLite3 extension:
-  . Fixed bug #53463 (sqlite3 columnName() segfaults on bad column_number).
-    (Felipe)
-
-02 Dec 2010, PHP 5.3.4RC2
-- Core:
-  . Fixed extract() to do not overwrite $GLOBALS and $this when using
-    EXTR_OVERWRITE. (jorto at redhat dot com)
-  . Fixed bug #53304 (quot_print_decode does not handle lower-case hex digits).
-    (Ilia, daniel dot mueller at inexio dot net)
-  . Fixed bug #52327 (base64_decode() improper handling of leading padding in
-    strict mode). (Ilia)
-  . Fixed bug #47168 (printf of floating point variable prints maximum of 40 
-    decimal places). (Ilia)
-  . Fixed bug #46587 (mt_rand() does not check that max is greater than min).
-    (Ilia)  
-  . Fixed #53409 (sleep() returns NULL on Windows). (Pierre)
-  . Fixed #29085 (bad default include_path on Windows). (Pierre)
-
-- cURL extension:
-  . Fixed bug #52828 (curl_setopt does not accept persistent streams).
-    (Gustavo, Ilia)
-  . Fixed bug #52202 (CURLOPT_PRIVATE gets corrupted). (Ilia)
-  . Fixed bug #50410 (curl extension slows down PHP on Windows). (Pierre)
-
-- DBA extension:
-  . Added Berkeley DB 5.1 support to the DBA extension. (Oracle Corp.)
-
-- DOM extension:
-  . Fixed bug #52656 (DOMCdataSection does not work with splitText). (Ilia)
-
-- Hash extension:
-  . Fixed bug #51003 (unaligned memory access in ext/hash/hash_tiger.c).
-    (Mike, Ilia)
-
-- Iconv extension:
-  . Fixed bug #51250 (iconv_mime_decode() does not ignore malformed Q-encoded 
-    words). (Ilia)
-    
-- Intl extension:
-  . Fixed crashes on invalid parameters in intl extension. (CVE-2010-4409). (Stas, Maksymilian
-    Arciemowicz)
-  . Added support for formatting the timestamp stored in a DateTime object.
-    (Stas)
-
-- Phar extension:
-  . Fixed bug #50987 (unaligned memory access in phar.c).
-    (geissert at debian dot org, Ilia)
-   
-- Reflection extension:
-  . Fixed bug #53366 (Reflection doesnt get dynamic property value from
-    getProperty()). (Felipe)
-  . Fixed bug #52854 (ReflectionClass::newInstanceArgs does not work for classes
-    without constructors). (Johannes)
-      
-- SPL extension:
-  . Fixed bug #53362 (Segmentation fault when extending SplFixedArray). (Felipe)
-
-18 Nov 2010, PHP 5.3.4RC1
+09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
@@ -109,12 +50,17 @@
     (andrei dot nigmatulin at gmail dot com, fat)
     
 - Core:
+  . Fixed extract() to do not overwrite $GLOBALS and $this when using
+    EXTR_OVERWRITE. (jorto at redhat dot com)
   . Fixed bug in the Windows implementation of dns_get_record, where the two
     last parameters wouldn't be filled unless the type were DNS_ANY (Gustavo).
   . Changed the $context parameter on copy() to actually have an effect. (Kalle)
   . Fixed htmlentities/htmlspecialchars accepting certain ill-formed UTF-8
     sequences. (Gustavo)
-  . Fixed Bug #53319 (strip_tags() may strip '<br />' incorrectly). (Felipe)
+  . Fixed bug #53409 (sleep() returns NULL on Windows). (Pierre)
+  . Fixed bug #53319 (strip_tags() may strip '<br />' incorrectly). (Felipe)
+  . Fixed bug #53304 (quot_print_decode does not handle lower-case hex digits).
+    (Ilia, daniel dot mueller at inexio dot net)
   . Fixed bug #53248 (rawurlencode RFC 3986 EBCDIC support misses tilde char).
     (Justin Martin)  
   . Fixed bug #53226 (file_exists fails on big filenames). (Adam)
@@ -135,6 +81,8 @@
   . Fixed bug #52772 (var_dump() doesn't check for the existence of 
     get_class_name before calling it). (Kalle, Gustavo)
   . Fixed bug #52534 (var_export array with negative key). (Felipe)
+  . Fixed bug #52327 (base64_decode() improper handling of leading padding in
+    strict mode). (Ilia)
   . Fixed bug #52260 (dns_get_record fails with non-existing domain on Windows).
     (a_jelly_doughnut at phpbb dot com, Pierre)
   . Fixed bug #50953 (socket will not connect to IPv4 address when the host has
@@ -148,6 +96,11 @@
     Pierre)
   . Fixed bug #47643 (array_diff() takes over 3000 times longer than php 5.2.4).
     (Felipe)
+  . Fixed bug #47168 (printf of floating point variable prints maximum of 40 
+    decimal places). (Ilia)
+  . Fixed bug #46587 (mt_rand() does not check that max is greater than min).
+    (Ilia)
+  . Fixed bug #29085 (bad default include_path on Windows). (Pierre)
   . Fixed bug #25927 (get_html_translation_table calls the ' &#39; instead of
     &#039;). (Gustavo)
     
@@ -187,8 +140,12 @@
    (gpap at internet dot gr, Adam)
     
 - cURL extension:
+  . Fixed bug #52828 (curl_setopt does not accept persistent streams).
+    (Gustavo, Ilia)
   . Fixed bug #52827 (cURL leaks handle and causes assertion error
     (CURLOPT_STDERR)). (Gustavo)
+  . Fixed bug #52202 (CURLOPT_PRIVATE gets corrupted). (Ilia)
+  . Fixed bug #50410 (curl extension slows down PHP on Windows). (Pierre)
     
 - DateTime extension:
   . Fixed bug #53297 (gettimeofday implementation in php/win32/time.c can return
@@ -199,6 +156,12 @@
   . Fixed bug #52430 (date_parse parse 24:xx:xx as valid time). (Derick)
   . Added support for the ( and ) delimiters/separators to
     DateTime::createFromFormat(). (Derick)
+
+- DBA extension:
+  . Added Berkeley DB 5.1 support to the DBA extension. (Oracle Corp.)
+
+- DOM extension:
+  . Fixed bug #52656 (DOMCdataSection does not work with splitText). (Ilia)
 
 - Filter extension:
   . Fixed the filter extension accepting IPv4 octets with a leading 0 as that
@@ -215,14 +178,24 @@
   . Fixed bug #52906 (gmp_mod returns negative result when non-negative is 
     expected). (Stas)
   . Fixed bug #52849 (GNU MP invalid version match). (Adam)
-  
+
+- Hash extension:
+  . Fixed bug #51003 (unaligned memory access in ext/hash/hash_tiger.c).
+    (Mike, Ilia)
+
 - Iconv extension:
   . Fixed bug #52941 (The 'iconv_mime_decode_headers' function is skipping
     headers). (Adam)
   . Fixed bug #52599 (iconv output handler outputs incorrect content type
     when flags are used). (Ilia)
-    
+  . Fixed bug #51250 (iconv_mime_decode() does not ignore malformed Q-encoded 
+    words). (Ilia)
+
 - Intl extension:
+  . Fixed crashes on invalid parameters in intl extension. (CVE-2010-4409). (Stas, Maksymilian
+    Arciemowicz)
+  . Added support for formatting the timestamp stored in a DateTime object.
+    (Stas)
   . Fixed bug #50590 (IntlDateFormatter::parse result is limited to the integer
     range). (Stas)
     
@@ -289,7 +262,11 @@
   . Fixed bug #52971 (PCRE-Meta-Characters not working with utf-8). (Felipe)
   . Fixed bug #52732 (Docs say preg_match() returns FALSE on error, but it
     returns int(0)). (slugonamission at gmail dot com)
-   
+
+- PHAR extension:
+  . Fixed bug #50987 (unaligned memory access in phar.c).
+    (geissert at debian dot org, Ilia)
+
 - PHP-FPM SAPI:
   . Fixed bug #53412 (segfault when using -y). (fat)
   . Fixed inconsistent backlog default value (-1) in FPM on many systems. (fat)
@@ -328,12 +305,18 @@
 - Reflection extension:
   . Fixed ReflectionProperty::isDefault() giving a wrong result for properties
     obtained with ReflectionClass::getProperties(). (Gustavo)
+- Reflection extension:
+  . Fixed bug #53366 (Reflection doesnt get dynamic property value from
+    getProperty()). (Felipe)
+  . Fixed bug #52854 (ReflectionClass::newInstanceArgs does not work for classes
+    without constructors). (Johannes)
   
 - SOAP extension:
   . Fixed bug #44248 (RFC2616 transgression while HTTPS request through proxy
     with SoapClient object). (Dmitry)
     
 - SPL extension:
+  . Fixed bug #53362 (Segmentation fault when extending SplFixedArray). (Felipe)
   . Fixed bug #53279 (SplFileObject doesn't initialise default CSV escape
     character). (Adam)
   . Fixed bug #53144 (Segfault in SplObjectStorage::removeAll()). (Felipe)
@@ -343,6 +326,10 @@
     and directory). (Pierre)
   . Fixed bug #50481 (Storing many SPLFixedArray in an array crashes). (Felipe)
   . Fixed bug #50579 (RegexIterator::REPLACE doesn't work). (Felipe)
+
+- SQLite3 extension:
+  . Fixed bug #53463 (sqlite3 columnName() segfaults on bad column_number).
+    (Felipe)
     
 - Streams:
   . Fixed forward stream seeking emulation in streams that don't support seeking
