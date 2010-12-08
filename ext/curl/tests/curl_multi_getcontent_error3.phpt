@@ -16,8 +16,8 @@ if (!extension_loaded('curl')) print 'skip';
 	$ch2=curl_init();
 
 	//SET URL AND OTHER OPTIONS
-	curl_setopt($ch1, CURLOPT_URL, "file://".dirname(__FILE__)."/curl_testdata1.txt");
-	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__)."/curl_testdata2.txt");
+	curl_setopt($ch1, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata1.txt");
+	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
 	
