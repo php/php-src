@@ -2918,7 +2918,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		    &EG(exception), sizeof(zval *), (void**)&EX_CV(opline->op2.var));
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
-		EG(exception) = NULL;
+		Z_ADDREF_P(EG(exception));
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;
