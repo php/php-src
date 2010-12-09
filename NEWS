@@ -1,6 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ?? ????, PHP 5.2.15
+?? ?? ????, PHP 5.2.16
 
 09 Dec 2010, PHP 5.2.15
 - Fixed extract() to do not overwrite $GLOBALS and $this when using
