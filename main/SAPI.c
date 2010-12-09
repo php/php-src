@@ -393,7 +393,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 
 	/* handle request mehtod */
 	if (SG(server_context)) {
-		if ( SG(request_info).request_method) {
+		if (PG(enable_post_data_reading) && SG(request_info).request_method) {
 			if(!strcmp(SG(request_info).request_method, "POST")
 			   && (SG(request_info).content_type)) {
 				/* HTTP POST -> may contain form data to be read into variables
