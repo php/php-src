@@ -19,7 +19,6 @@ if ($count > 0) {
 }
 ?>
 ===DONE===
-?>
 --EXPECTF--
 Found %i entries!
 ===DONE===
