@@ -5843,7 +5843,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		    &EG(exception), sizeof(zval *), (void**)&EX_CV(opline->op2.var));
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
-		EG(exception) = NULL;
+		Z_ADDREF_P(EG(exception));
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;
