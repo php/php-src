@@ -172,6 +172,9 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 				resolved_basedir[resolved_basedir_len] = PHP_DIR_SEPARATOR;
 				resolved_basedir[++resolved_basedir_len] = '\0';
 			}
+		} else {
+				resolved_basedir[resolved_basedir_len++] = PHP_DIR_SEPARATOR;
+				resolved_basedir[resolved_basedir_len] = '\0';
 		}
 
 		resolved_name_len = strlen(resolved_name);
