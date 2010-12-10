@@ -311,6 +311,11 @@ PHP_FUNCTION( numfmt_set_symbol )
 
 		RETURN_FALSE;
 	}
+	
+	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_set_symbol: invalid symbol value", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
