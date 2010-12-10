@@ -2315,12 +2315,33 @@ PHP_FUNCTION(curl_getinfo)
 			create_certinfo(ci, listcode TSRMLS_CC);
 			CAAZ("certinfo", listcode);
 		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
+			CAAS("primary_ip", s_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM > 0x071500
+		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_PORT, &l_code) == CURLE_OK) {
+			CAAL("primary_port", l_code);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_LOCAL_IP, &s_code) == CURLE_OK) {
+			CAAS("local_ip", s_code);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
+			CAAL("local_port", l_code);
+		}
 #endif
 		if (ch->header.str_len > 0) {
 			CAAS("request_header", ch->header.str);
 		}
 	} else {
 		switch (option) {
+			/* string variable types */
+#if LIBCURL_VERSION_NUM >= 0x071500
+			case CURLINFO_PRIMARY_IP:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071500
+			case CURLINFO_LOCAL_IP:
+#endif
 			case CURLINFO_PRIVATE:
 			case CURLINFO_EFFECTIVE_URL:
 			case CURLINFO_CONTENT_TYPE: {
@@ -2333,6 +2354,11 @@ PHP_FUNCTION(curl_getinfo)
 				}
 				break;
 			}
+			/* Long variable types */
+#if LIBCURL_VERSION_NUM >= 0x071500
+			case CURLINFO_PRIMARY_PORT:
+			case CURLINFO_LOCAL_PORT:
+#endif
 			case CURLINFO_HTTP_CODE:
 			case CURLINFO_HEADER_SIZE:
 			case CURLINFO_REQUEST_SIZE:
@@ -2348,6 +2374,7 @@ PHP_FUNCTION(curl_getinfo)
 				}
 				break;
 			}
+			/* Double variable types */
 			case CURLINFO_TOTAL_TIME:
 			case CURLINFO_NAMELOOKUP_TIME:
 			case CURLINFO_CONNECT_TIME:
