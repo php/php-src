@@ -9,6 +9,10 @@
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
     ORACLE 10). (spatar at mail dot nnov dot ru)
     
+- PDO PostgreSQL driver:
+  . Fixed bug #53517 (segfault in pgsql_stmt_execute() when postgres is down).
+    (gyp at balabit dot hu)
+    
 - Zend Engine:
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
