@@ -34,6 +34,9 @@ var extensions_enabled = new Array();
 /* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
 
+/* Store the headers to install */
+var headers_install = new Array();
+
 /* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
 VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
@@ -1848,6 +1851,26 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
+function PHP_INSTALL_HEADERS(headers_list)
+{
+	headers_list = headers_list.split(new RegExp("\\s+"));
+	headers_list.sort();
+
+	for (i in headers_list) {
+		src = headers_list[i];
+		src = src.replace(new RegExp("/", "g"), "\\");
+		isdir = FSO.FolderExists(src);
+		isfile = FSO.FileExists(src);
+		if (isdir) {
+			headers_install[headers_install.length] = [src, 'dir'];
+			ADD_FLAG("INSTALL_HEADERS_DIR", src);
+		} else if (isfile) {
+			headers_install[headers_install.length] = [src, 'file'];
+			ADD_FLAG("INSTALL_HEADERS", src);
+		}
+	}
+	output_as_table(["Headers", "Type"], headers_install);
+}
 
 // for snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
