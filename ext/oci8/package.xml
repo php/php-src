@@ -33,15 +33,15 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2010-11-16</date>
- <time>15:00:00</time>
+ <date>2010-12-09</date>
+ <time>20:00:00</time>
 
  <version>
   <release>1.4.5</release>
   <api>1.4.5</api>
  </version>
  <stability>
-  <release>devel</release>
+  <release>stable</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
