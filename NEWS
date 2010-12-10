@@ -1,6 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.2.16
+- Fixed bug #53516 (Regression in open_basedir handling). (Ilia)
 
 09 Dec 2010, PHP 5.2.15
 - Fixed extract() to do not overwrite $GLOBALS and $this when using
