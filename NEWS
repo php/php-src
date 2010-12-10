@@ -9,8 +9,9 @@
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
     ORACLE 10). (spatar at mail dot nnov dot ru)
     
-- Indirect reference to $this fails to resolve if direct $this is never used
-  in method. (Scott)
+- Zend Engine:
+  . Indirect reference to $this fails to resolve if direct $this is never used
+    in method. (Scott)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
