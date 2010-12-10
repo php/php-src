@@ -343,6 +343,11 @@ void LSAPI_Set_Max_Process_Time( int secs );
 
 void LSAPI_Init_Env_Parameters( fn_select_t fp );
 
+void LSAPI_Set_Slow_Req_Msecs( int msecs );
+
+int  LSAPI_Get_Slow_Req_Msecs( );
+
+
 #if defined (c_plusplus) || defined (__cplusplus)
 }
 #endif
