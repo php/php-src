@@ -569,8 +569,15 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (check_empty) {
-			if (zend_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE && zend_is_true(*tmp)) {
-				return 1;
+			if (zend_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE) {
+				switch (check_empty) {
+					case 0:
+						return Z_TYPE_PP(tmp) != IS_NULL;
+					case 2:
+						return 1;
+					default:
+						return zend_is_true(*tmp);
+				}
 			}
 			return 0;
 		} else {
@@ -587,8 +594,15 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		}
 		if (check_empty) {
 			HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-			if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE && zend_is_true(*tmp)) {
-				return 1;
+			if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE) {
+				switch (check_empty) {
+					case 0:
+						return Z_TYPE_PP(tmp) != IS_NULL;
+					case 2:
+						return 1;
+					default:
+						return zend_is_true(*tmp);
+				}
 			}
 			return 0;
 		} else {
