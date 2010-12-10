@@ -8,17 +8,18 @@ UPGRADE NOTES - PHP X.Y
 4. Changes made to existing methods
 5. Changes made to existing classes
 6. Deprecated
-7. Extensions:
+7. Removed
+8. Extensions:
      a. moved out to PECL and actively maintained there
      b. no longer maintained
      c. with changed behaviour
      d. no longer possible to disable
-8. Changes in SAPI support
-9. Changes in INI directives
-10. Syntax additions
+9. Changes in SAPI support
+10. Changes in INI directives
 11. Syntax additions
-12. Windows support
-12. New in PHP X.Y:
+12. Syntax additions
+13. Windows support
+14. New in PHP X.Y:
      a. New libraries
      b. New extensions
      c. New stream wrappers
@@ -255,6 +256,12 @@ UPGRADE NOTES - PHP X.Y
   multibyte support, but may enable or disable it by zend.multibyte. It doesn't
   make a lot of sense to enable this option without ext/mbstring, because the
   most functionality is implemented by mbstrings callbacks.
+- Added enable_post_data_reading, which is enable by default. When it's
+  disabled, the POST data is not read (and processed); the behavior is similar
+  to that of other request methods with body, like PUT. This allows reading the
+  raw POST data in multipart requests and read/process the POST data in a
+  stream fashion (through php://input), without having it copied in memory two/
+  three times.
 
 ====================
 11. Syntax additions
