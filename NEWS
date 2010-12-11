@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.5
+- Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
+
 - Zend Engine:
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
