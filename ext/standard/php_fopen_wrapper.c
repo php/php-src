@@ -265,7 +265,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 
 		start = &path[3];
 		fildes_ori = strtol(start, &end, 10);
-		if (end == start || (*end != '\0' && *end != '/')) {
+		if (end == start || *end != '\0') {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
 			return NULL;
