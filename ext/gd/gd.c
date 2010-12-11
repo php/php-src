@@ -4228,8 +4228,8 @@ PHP_FUNCTION(imagepstext)
 		return;
 	}
 
-	if (aa_steps != 4 || aa_steps != 16) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "AA steps must be 4 or 16");
+	if (aa_steps != 4 && aa_steps != 16) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Antialias steps must be 4 or 16");
 		RETURN_FALSE;
 	}
 
