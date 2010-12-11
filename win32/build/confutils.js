@@ -1631,6 +1631,18 @@ function generate_makefile()
 
 	var TF = FSO.OpenTextFile("win32/build/Makefile", 1);
 	MF.Write(TF.ReadAll());
+
+	MF.WriteLine("install-headers:");
+	MF.WriteLine("	@if not exist $(PHP_PREFIX)\\include mkdir $(PHP_PREFIX)\\include >nul");
+	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @if not exist $(PHP_PREFIX)\\include\\%D mkdir $(PHP_PREFIX)\\include\\%D >nul");
+	for (i in headers_install) {
+		if (headers_install[i][2] != "") {
+				MF.WriteLine("	@if not exist $(PHP_PREFIX)\\include\\" + headers_install[i][2] + " mkdir $(PHP_PREFIX)\\include\\" + 
+												headers_install[i][2] + ">nul");
+				MF.WriteLine("	@copy " + headers_install[i][0] + " " + "$(PHP_PREFIX)\\include\\" + headers_install[i][2] + " /y >nul");
+		}
+	}
+	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(PHP_PREFIX)\\include\\%D /y >nul");
 	TF.Close();
 
 	MF.WriteBlankLines(2);
@@ -1851,25 +1863,36 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
-function PHP_INSTALL_HEADERS(headers_list)
+function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
 	headers_list.sort();
+	if (dir.length > 0 && dir.substr(dir.length - 1) != '/') {
+		dir += '/';
+	}
+	dir = dir.replace(new RegExp("/", "g"), "\\");
 
 	for (i in headers_list) {
 		src = headers_list[i];
 		src = src.replace(new RegExp("/", "g"), "\\");
-		isdir = FSO.FolderExists(src);
-		isfile = FSO.FileExists(src);
+		isdir = FSO.FolderExists(dir + src);
+		isfile = FSO.FileExists(dir + src);
 		if (isdir) {
-			headers_install[headers_install.length] = [src, 'dir'];
-			ADD_FLAG("INSTALL_HEADERS_DIR", src);
+			if (src.length > 0 && src.substr(src.length - 1) != '/') {
+				src += '\\';
+			}
+			headers_install[headers_install.length] = [dir + src, 'dir',''];
+			ADD_FLAG("INSTALL_HEADERS_DIR", dir + src);
 		} else if (isfile) {
-			headers_install[headers_install.length] = [src, 'file'];
-			ADD_FLAG("INSTALL_HEADERS", src);
+			dirname = FSO.GetParentFolderName(dir + src);
+			headers_install[headers_install.length] = [dir + src, 'file', dirname];
+			ADD_FLAG("INSTALL_HEADERS", dir + src);
+		} else {
+			STDOUT.WriteLine(headers_list);
+			ERROR("Cannot find header " + dir + src);
 		}
 	}
-	output_as_table(["Headers", "Type"], headers_install);
+	output_as_table(["Headers", "Type", "target"], headers_install);
 }
 
 // for snapshot builders, this option will attempt to enable everything
