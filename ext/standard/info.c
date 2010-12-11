@@ -68,7 +68,7 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 	char *new_str;
 	TSRMLS_FETCH();
 	
-	new_str = php_escape_html_entities((char *) str, len, &new_len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
+	new_str = php_escape_html_entities((unsigned char *) str, len, &new_len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
 	written = php_output_write(new_str, new_len TSRMLS_CC);
 	efree(new_str);
 	return written;
