@@ -152,13 +152,11 @@ msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
 # need to redirect, since INSTALL is a file in the root...
-install: really-install install-headers
+install: really-install install-headers install-lib
 
-install-headers:
-	@if not exist $(PHP_PREFIX)\include mkdir $(PHP_PREFIX)\include >nul
-	@for %D in ($(INSTALL_HEADERS_DIR)) do @if not exist $(PHP_PREFIX)\include\%D mkdir $(PHP_PREFIX)\include\%D >nul
-	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(PHP_PREFIX)\include\%D /y >nul
-	@for %D in ($(INSTALL_HEADERS)) do @copy %D $(PHP_PREFIX)\include /y >nul
+install-lib:
+	@if not exist $(PHP_PREFIX)\lib mkdir $(PHP_PREFIX)\lib >nul
+	@copy $(BUILD_DIR)\$(PHPLIB) $(PHP_PREFIX)\lib /y >nul
 
 really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
