@@ -21,6 +21,9 @@
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
 
+- Streams
+  . Implemented FR #26158 (open arbitrary file descriptor with fopen)
+
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
