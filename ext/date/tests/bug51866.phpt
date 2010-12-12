@@ -48,7 +48,7 @@ object(DateTime)#2 (3) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(13) "Europe/London"
+  string(%d) "%s"
 }
 array(4) {
   ["warning_count"]=>
@@ -74,7 +74,7 @@ object(DateTime)#3 (3) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(13) "Europe/London"
+  string(%d) "%s"
 }
 array(4) {
   ["warning_count"]=>
@@ -100,7 +100,7 @@ object(DateTime)#2 (3) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(13) "Europe/London"
+  string(%d) "%s"
 }
 array(4) {
   ["warning_count"]=>
@@ -143,7 +143,7 @@ object(DateTime)#2 (3) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(13) "Europe/London"
+  string(%d) "%s"
 }
 array(4) {
   ["warning_count"]=>
