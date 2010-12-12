@@ -8,7 +8,7 @@ date_default_timezone_set('UTC');
   echo "Done\n";
 ?>
 --EXPECTF--
-array(8) {
+array(6) {
   [0]=>
   array(3) {
     ["dst"]=>
@@ -52,27 +52,9 @@ array(8) {
     ["offset"]=>
     int(0)
     ["timezone_id"]=>
-    string(9) "Universal"
-  }
-  [5]=>
-  array(3) {
-    ["dst"]=>
-    bool(false)
-    ["offset"]=>
-    int(0)
-    ["timezone_id"]=>
     string(3) "UTC"
   }
-  [6]=>
-  array(3) {
-    ["dst"]=>
-    bool(false)
-    ["offset"]=>
-    int(0)
-    ["timezone_id"]=>
-    string(4) "Zulu"
-  }
-  [7]=>
+  [5]=>
   array(3) {
     ["dst"]=>
     bool(false)
