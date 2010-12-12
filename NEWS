@@ -7,6 +7,9 @@
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
 
+- Core:
+  . Bug 48484 (array_product() always returns 0 for an empty array). (Ilia)
+  
 - Filter extension:
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
     (Ilia)
