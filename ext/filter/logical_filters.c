@@ -735,8 +735,40 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 						RETURN_VALIDATION_FAILED
 					}
 				}
-				if (flags & FILTER_FLAG_NO_RES_RANGE && Z_STRLEN_P(value) == 3 && !strcmp("::1", Z_STRVAL_P(value))) {
-					RETURN_VALIDATION_FAILED
+				if (flags & FILTER_FLAG_NO_RES_RANGE) {
+					switch (Z_STRLEN_P(value)) {
+						case 1: case 0:
+							break;
+						case 2:
+							if (!strcmp("::", Z_STRVAL_P(value))) {
+								RETURN_VALIDATION_FAILED
+							}
+							break;
+						case 3:
+							if (!strcmp("::1", Z_STRVAL_P(value)) || !strcmp("5f:", Z_STRVAL_P(value))) {
+								RETURN_VALIDATION_FAILED
+							}
+							break;
+						default:
+							if (Z_STRLEN_P(value) >= 5) {
+								if (
+									!strncasecmp("fe8", Z_STRVAL_P(value), 3) ||
+									!strncasecmp("fe9", Z_STRVAL_P(value), 3) ||
+									!strncasecmp("fea", Z_STRVAL_P(value), 3) ||
+									!strncasecmp("feb", Z_STRVAL_P(value), 3)
+								) {
+									RETURN_VALIDATION_FAILED
+								}
+							}
+							if (
+								(Z_STRLEN_P(value) >= 9 &&  !strncasecmp("2001:0db8", Z_STRVAL_P(value), 9)) ||
+								(Z_STRLEN_P(value) >= 2 &&  !strncasecmp("5f", Z_STRVAL_P(value), 2)) ||
+								(Z_STRLEN_P(value) >= 4 &&  !strncasecmp("3ff3", Z_STRVAL_P(value), 4)) ||
+								(Z_STRLEN_P(value) >= 8 &&  !strncasecmp("2001:001", Z_STRVAL_P(value), 8))
+							) {
+								RETURN_VALIDATION_FAILED
+							}
+					}
 				}
 			}
 			break;
