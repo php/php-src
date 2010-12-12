@@ -11,6 +11,10 @@
   . Fixed bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values).
     (Felipe)
 
+- MySQL Improved extension:
+  . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 
+    query). (Kalle)
+
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
     ORACLE 10). (spatar at mail dot nnov dot ru)
