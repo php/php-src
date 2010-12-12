@@ -231,7 +231,10 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #endif
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL)
+	/* BC for prior to bug fix #53425 */
+	flags |= CLIENT_MULTI_RESULTS;
+
+	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
 						port, socket, flags TSRMLS_CC) == NULL)
