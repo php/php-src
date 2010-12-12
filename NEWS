@@ -14,6 +14,8 @@
 - MySQL Improved extension:
   . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 
     query). (Kalle)
+  . Fixed bug #53425 (mysqli_real_connect() ignores client flags when built to 
+    call libmysql). (Kalle, tre-php-net at crushedhat dot com)
 
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
