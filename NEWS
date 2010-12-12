@@ -8,7 +8,8 @@
     in method. (Scott)
 
 - Core:
-  . Bug 48484 (array_product() always returns 0 for an empty array). (Ilia)
+  . Fixed bug #48484 (array_product() always returns 0 for an empty array).
+    (Ilia)
   
 - Filter extension:
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
@@ -38,8 +39,8 @@
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
 
-- Streams
-  . Implemented FR #26158 (open arbitrary file descriptor with fopen)
+- Streams:
+  . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
