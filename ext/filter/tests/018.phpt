@@ -24,6 +24,7 @@ var_dump(filter_var(-1, FILTER_VALIDATE_IP));
 var_dump(filter_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
 var_dump(filter_var("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 var_dump(filter_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
+var_dump(filter_var("::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_RES_RANGE));
 var_dump(filter_var("127.0.0.1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
 echo "Done\n";
 ?>
@@ -48,5 +49,6 @@ bool(false)
 bool(false)
 bool(false)
 string(3) "::1"
+bool(false)
 string(9) "127.0.0.1"
 Done
