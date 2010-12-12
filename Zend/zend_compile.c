@@ -3459,7 +3459,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 
 		if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
-				zend_error(E_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
+				zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
 		}
 
 		zend_function_dtor(fn);
@@ -3468,7 +3468,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	} else {
 		/* Add it to result function table */
 		if (zend_hash_quick_add(resulting_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table", fn->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table", fn->common.function_name);
 		}
 	}
 
@@ -3632,7 +3632,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		zend_traits_duplicate_function(&fn_copy, estrdup(fn->common.function_name) TSRMLS_CC);
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
-			zend_error(E_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
 
 		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p);
@@ -3687,7 +3687,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					lcname = zend_str_tolower_dup(aliases[i]->alias, lcname_len);
 
 					if (zend_hash_add(target, lcname, lcname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-						zend_error(E_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
+						zend_error(E_COMPILE_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
 					}
 					/* aliases[i]->function = fn_copy; */
 					efree(lcname);
@@ -3725,7 +3725,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		}
 
 		if (zend_hash_add(target, lcname, fnname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_ERROR, "Failed to add trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
+			zend_error(E_COMPILE_ERROR, "Failed to add trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
 		}
 	}
 
@@ -3799,7 +3799,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 						char* lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name,
                                                 lcname_len);
 						if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL)==FAILURE) {
-							zend_error(E_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
+							zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
 						}
 						efree(lcname);
 					}
