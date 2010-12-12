@@ -20,6 +20,4 @@ class MyClass {
 }
 ?>
 --EXPECTF--
-Warning: Trait method M1 has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
-
-Warning: Trait method M2 has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
+Fatal error: Trait method M1 has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d

@@ -25,6 +25,4 @@ var_dump(clone $o);
 
 ?>
 --EXPECTF--
-Warning: Trait method __clone has not been applied, because there are collisions with other trait methods on bar in %s on line %d
-object(bar)#%d (0) {
-}
+Fatal error: Trait method __clone has not been applied, because there are collisions with other trait methods on bar in %s on line %d

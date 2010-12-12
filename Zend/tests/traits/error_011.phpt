@@ -23,6 +23,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Warning: Trait method test has not been applied, because there are collisions with other trait methods on bar in %s on line %d
-
-Fatal error: Call to undefined method bar::test() in %s on line %d
+Fatal error: Trait method test has not been applied, because there are collisions with other trait methods on bar in %s on line %d
