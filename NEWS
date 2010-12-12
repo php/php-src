@@ -125,14 +125,6 @@ PHP                                                                        NEWS
   . Added Tokyo Cabinet abstract DB support. (Michael Maclean)
   . Added Berkeley DB 5 support. (Johannes, Chris Jones)
 
-- Improved MySQL extensions:
-  . MySQL: Deprecated mysql_list_dbs(). FR #50667. (Andrey)
-  . mysqlnd: Added named pipes support. FR #48082. (Andrey)
-  . MySQLi: Added iterator support in MySQLi. mysqli_result implements 
-    Traversable. (Andrey, Johannes)
-  . PDO_mysql: Removed support for linking with MySQL client libraries older
-    than 4.1. (Johannes)
-
 - Improved filesystem functions:
   . scandir() now accepts SCANDIR_SORT_NONE as a possible sorting_order value.
     FR #53407. (Adam)
@@ -154,6 +146,14 @@ PHP                                                                        NEWS
 - Improved LDAP extension:
   . Added paged results support. FR #42060. (ando@OpenLDAP.org,
     iarenuno@eteo.mondragon.edu, jeanseb@au-fil-du.net, remy.saissy@gmail.com)
+
+- Improved MySQL extensions:
+  . MySQL: Deprecated mysql_list_dbs(). FR #50667. (Andrey)
+  . mysqlnd: Added named pipes support. FR #48082. (Andrey)
+  . MySQLi: Added iterator support in MySQLi. mysqli_result implements 
+    Traversable. (Andrey, Johannes)
+  . PDO_mysql: Removed support for linking with MySQL client libraries older
+    than 4.1. (Johannes)
 
 - Improved OpenSSL extension:
   . Added AES support. FR #48632. (yonas dot y at gmail dot com, Pierre)
