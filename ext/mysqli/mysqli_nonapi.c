@@ -526,7 +526,7 @@ PHP_FUNCTION(mysqli_query)
 			result = mysql_use_result(mysql->mysql);
 			break;
 	}
-	if (!result) {
+	if (!result && mysql_errno(mysql->mysql)) {
 		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
 										"%s", mysql_error(mysql->mysql));
 		RETURN_FALSE;
