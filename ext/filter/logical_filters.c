@@ -710,8 +710,11 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_RES_RANGE) {
 				if (
 					(ip[0] == 0) ||
+					(ip[0] == 128 && ip[1] == 0) ||
+					(ip[0] == 191 && ip[1] == 255) ||
 					(ip[0] == 169 && ip[1] == 254) ||
 					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
+					(ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1) ||
 					(ip[0] >= 224 && ip[0] <= 255)
 				) {
 					RETURN_VALIDATION_FAILED
@@ -731,6 +734,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					if (Z_STRLEN_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
 						RETURN_VALIDATION_FAILED
 					}
+				}
+				if (flags & FILTER_FLAG_NO_RES_RANGE && Z_STRLEN_P(value) == 3 && !strcmp("::1", Z_STRVAL_P(value))) {
+					RETURN_VALIDATION_FAILED
 				}
 			}
 			break;
