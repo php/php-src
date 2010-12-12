@@ -22,4 +22,4 @@ class TraitsTest {
 }
 ?>
 --EXPECTF--	
-Warning: Trait method hello has not been applied, because there are collisions with other trait methods on TraitsTest in %s on line %d
+Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on TraitsTest in %s on line %d

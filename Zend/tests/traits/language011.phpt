@@ -27,8 +27,4 @@ $o->sayWorld();
 
 ?>
 --EXPECTF--	
-Warning: Trait method sayWorld has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
-
-Warning: Trait method sayHello has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
-
-Fatal error: Call to undefined method MyClass::sayHello() in %s on line %d
+Fatal error: Trait method sayWorld has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d

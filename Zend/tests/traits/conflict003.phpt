@@ -28,6 +28,4 @@ class Talker {
 
 ?>
 --EXPECTF--	
-Warning: Trait method smallTalk has not been applied, because there are collisions with other trait methods on Talker in %s on line %d
-
-Warning: Trait method bigTalk has not been applied, because there are collisions with other trait methods on Talker in %s on line %d
+Fatal error: Trait method smallTalk has not been applied, because there are collisions with other trait methods on Talker in %s on line %d

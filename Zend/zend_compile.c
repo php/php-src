@@ -3459,7 +3459,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 
 		if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
-				zend_error(E_WARNING, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
+				zend_error(E_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
 		}
 
 		zend_function_dtor(fn);
