@@ -112,22 +112,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: DateTime::modify(): Failed to parse time string (0) at position 0 (0): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (0) at position 0 (0): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- int 1 --
 
-Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- int 12345 --
 
-Warning: DateTime::modify(): Failed to parse time string (12345) at position 4 (5): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (12345) at position 4 (5): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- int -12345 --
 
-Warning: DateTime::modify(): Failed to parse time string (-12345) at position 5 (5): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (-12345) at position 5 (5): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- float 10.5 --
@@ -142,7 +142,7 @@ object(DateTime)#3 (3) {
 
 -- float -10.5 --
 
-Warning: DateTime::modify(): Failed to parse time string (-10.5) at position 4 (5): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (-10.5) at position 4 (5): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- float .5 --
@@ -157,106 +157,106 @@ object(DateTime)#3 (3) {
 
 -- empty array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::modify() expects parameter 1 to be string, array given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, array given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- uppercase NULL --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- lowercase null --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- lowercase true --
 
-Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- lowercase false --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- empty string DQ --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::modify(): Failed to parse time string (sTrInG) at position 0 (s): The timezone could not be found in the database in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (sTrInG) at position 0 (s): The timezone could not be found in the database in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::modify(): Failed to parse time string (hello world) at position 0 (h): The timezone could not be found in the database in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (hello world) at position 0 (h): The timezone could not be found in the database in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: DateTime::modify(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::modify() expects parameter 1 to be string, object given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, object given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- undefined var --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- unset var --
 
-Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify(): Failed to parse time string () at position 0 ( in %sDateTime_modify_variation1.php on line 99
 bool(false)
 
 -- resource --
 
-Warning: DateTime::modify() expects parameter 1 to be string, resource given in /home/derick/dev/php/php-src/trunk/ext/date/tests/DateTime_modify_variation1.php on line 99
+Warning: DateTime::modify() expects parameter 1 to be string, resource given in %sDateTime_modify_variation1.php on line 99
 bool(false)
 ===DONE===
