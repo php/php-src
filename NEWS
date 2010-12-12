@@ -6,6 +6,10 @@
 - Zend Engine:
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
+
+- Filter extension:
+  . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
+    (Ilia)
     
 - Intl extension:
   . Fixed bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values).
