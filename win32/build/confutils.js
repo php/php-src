@@ -1955,7 +1955,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
 	headers_list.sort();
-	if (dir.length > 0 && dir.substr(dir.length - 1) != '/') {
+	if (dir.length > 0 && dir.substr(dir.length - 1) != '/' && dir.substr(dir.length - 1) != '\\') {
 		dir += '/';
 	}
 	dir = dir.replace(new RegExp("/", "g"), "\\");
@@ -1966,7 +1966,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 		isdir = FSO.FolderExists(dir + src);
 		isfile = FSO.FileExists(dir + src);
 		if (isdir) {
-			if (src.length > 0 && src.substr(src.length - 1) != '/') {
+			if (src.length > 0 && src.substr(src.length - 1) != '/' && src.substr(src.length - 1) != '\\') {
 				src += '\\';
 			}
 			headers_install[headers_install.length] = [dir + src, 'dir',''];
