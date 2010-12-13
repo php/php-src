@@ -1516,11 +1516,6 @@ function write_summary()
 
 	STDOUT.WriteBlankLines(2);
 
-
-	STDOUT.WriteLine("Shared headers:");
-	output_as_table(["Headers", "Type", "target"], headers_install);
-	STDOUT.WriteBlankLines(2);
-
 	STDOUT.WriteLine("Enabled extensions:");
 	output_as_table(["Extension", "Mode"], extensions_enabled.sort());
 	STDOUT.WriteBlankLines(2);
