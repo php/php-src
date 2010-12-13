@@ -1475,6 +1475,11 @@ function write_summary()
 
 	STDOUT.WriteBlankLines(2);
 
+
+	STDOUT.WriteLine("Shared headers:");
+	output_as_table(["Headers", "Type", "target"], headers_install);
+	STDOUT.WriteBlankLines(2);
+
 	STDOUT.WriteLine("Enabled extensions:");
 	output_as_table(["Extension", "Mode"], extensions_enabled.sort());
 	STDOUT.WriteBlankLines(2);
@@ -1867,7 +1872,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
 	headers_list.sort();
-	if (dir.length > 0 && dir.substr(dir.length - 1) != '/') {
+	if (dir.length > 0 && dir.substr(dir.length - 1) != '/' && dir.substr(dir.length - 1) != '\\') {
 		dir += '/';
 	}
 	dir = dir.replace(new RegExp("/", "g"), "\\");
@@ -1878,7 +1883,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 		isdir = FSO.FolderExists(dir + src);
 		isfile = FSO.FileExists(dir + src);
 		if (isdir) {
-			if (src.length > 0 && src.substr(src.length - 1) != '/') {
+			if (src.length > 0 && src.substr(src.length - 1) != '/' && src.substr(src.length - 1) != '\\') {
 				src += '\\';
 			}
 			headers_install[headers_install.length] = [dir + src, 'dir',''];
@@ -1892,7 +1897,6 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 			ERROR("Cannot find header " + dir + src);
 		}
 	}
-	output_as_table(["Headers", "Type", "target"], headers_install);
 }
 
 // for snapshot builders, this option will attempt to enable everything
