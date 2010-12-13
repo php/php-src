@@ -209,6 +209,7 @@ buildconf_process_args();
 
 // Write the head of the configure script
 C.WriteLine("/* This file automatically generated from win32/build/confutils.js */");
+C.WriteLine("MODE_PHPIZE=false;");
 C.Write(file_get_contents("win32/build/confutils.js"));
 
 // If project files were requested, pull in the code to generate them

@@ -152,11 +152,23 @@ msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
 # need to redirect, since INSTALL is a file in the root...
-install: really-install install-headers install-lib
+install: really-install install-devel install-lib
 
 install-lib:
 	@if not exist $(PHP_PREFIX)\lib mkdir $(PHP_PREFIX)\lib >nul
 	@copy $(BUILD_DIR)\$(PHPLIB) $(PHP_PREFIX)\lib /y >nul
+
+install-devel: install-headers
+	@if not exist $(PHP_PREFIX)\script mkdir $(PHP_PREFIX)\script >nul
+	@if not exist $(PHP_PREFIX)\build mkdir $(PHP_PREFIX)\build >nul
+	@copy win32\build\confutils.js $(PHP_PREFIX)\script\ /y >nul
+	@copy win32\build\configure.tail $(PHP_PREFIX)\script\ /y >nul
+	@copy win32\build\config.w32.phpize.in $(PHP_PREFIX)\script\ /y >nul
+	@copy win32\build\Makefile.phpize $(PHP_PREFIX)\script\ /y >nul
+	@copy win32\build\phpize.bat $(PHP_PREFIX)\ /y >nul
+	@copy win32\build\template.rc $(PHP_PREFIX)\build\ /y >nul
+	@copy $(BUILD_DIR)\devel\config.phpize.js $(PHP_PREFIX)\script\ /y >nul
+	@copy $(BUILD_DIR)\devel\phpize.js $(PHP_PREFIX)\script\ /y >nul
 
 really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
@@ -166,5 +178,3 @@ really-install:
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
-
-
