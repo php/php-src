@@ -16,6 +16,10 @@
     (Ilia)
   . Fixed bug #47435 (FILTER_FLAG_NO_RES_RANGE don't work with ipv6).
     (Ilia, valli at icsurselva dot ch)
+
+- IMAP extension:
+  . Fixed bug #53377 (imap_mime_header_decode() doesn't ignore \t during long
+    MIME header unfolding). (Adam)
     
 - Intl extension:
   . Fixed bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values).
