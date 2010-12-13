@@ -7,5 +7,3 @@ if (PHP_SESSION == "yes") {
 	EXTENSION("session", "session.c mod_files.c mod_mm.c mod_user.c", false /* never shared */);
 	AC_DEFINE("HAVE_PHP_SESSION", 1, "Session support");
 }
-
-
