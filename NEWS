@@ -27,6 +27,11 @@
   . Fixed bug #53425 (mysqli_real_connect() ignores client flags when built to 
     call libmysql). (Kalle, tre-php-net at crushedhat dot com)
 
+- OpenSSL extension:
+  . Implemented FR #53447 (Cannot disable SessionTicket extension for servers
+    that do not support it) by adding a no_ticket SSL context option. (Adam,
+    Tony)
+
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
     ORACLE 10). (spatar at mail dot nnov dot ru)
