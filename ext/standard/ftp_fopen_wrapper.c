@@ -98,13 +98,33 @@ static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper, php_stream *s
 static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC)
 {
 	php_stream *controlstream = (php_stream *)stream->wrapperdata;
+	int ret = 0;
 	
 	if (controlstream) {
+		if (strpbrk(stream->mode, "wa+")) {
+			char tmp_line[512];
+			int result;
+
+			/* For write modes close data stream first to signal EOF to server */
+			stream->wrapperdata = NULL;
+			php_stream_close(stream);
+			stream = NULL;
+
+			result = GET_FTP_RESULT(controlstream);
+			if (result != 226 && result != 250) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "FTP server error %d:%s", result, tmp_line);
+				ret = EOF;
+			}
+		}
+
 		php_stream_write_string(controlstream, "QUIT\r\n");
 		php_stream_close(controlstream);
-		stream->wrapperdata = NULL;
+		if (stream) {
+			stream->wrapperdata = NULL;
+		}
 	}
-	return 0;
+
+	return ret;
 }
 /* }}} */
 
