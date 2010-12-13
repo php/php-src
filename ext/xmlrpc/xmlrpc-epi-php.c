@@ -845,10 +845,7 @@ PHP_FUNCTION(xmlrpc_decode)
 	}
 
 	if (return_value_used) {
-		zval* retval;
-		char *trimmed = php_trim(arg1, arg1_len, NULL, 0, NULL, 1 TSRMLS_CC);
-
-		retval = decode_request_worker(trimmed, strlen(trimmed), arg2_len ? arg2 : NULL, NULL);
+		zval* retval = decode_request_worker(arg1, arg1_len, arg2_len ? arg2 : NULL, NULL);
 		if (retval) {
 			*return_value = *retval;
 			FREE_ZVAL(retval);
