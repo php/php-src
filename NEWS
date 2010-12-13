@@ -51,9 +51,6 @@
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
-- XMLRPC-EPI:
-  . Fixed bug #53493 (xmlrpc_decode should not be sensitive to leading 
-    whitespace). (Kalle)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
