@@ -10,4 +10,5 @@ if (PHP_SQLITE3 != "no") {
 	ADD_SOURCES(configure_module_dirname + "/libsqlite", "sqlite3.c", "sqlite3");
 
 	AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
+	PHP_INSTALL_HEADERS("ext/sqlite3", "libsqlite/sqlite3.h");
 }

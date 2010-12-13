@@ -735,8 +735,6 @@ static const zend_function_entry zip_functions[] = {
 static zend_class_entry *zip_class_entry;
 static zend_object_handlers zip_object_handlers;
 
-static HashTable zip_prop_handlers;
-
 typedef int (*zip_read_int_t)(struct zip *za TSRMLS_DC);
 typedef char *(*zip_read_const_char_t)(struct zip *za, int *len TSRMLS_DC);
 typedef char *(*zip_read_const_char_from_ze_t)(ze_zip_object *obj TSRMLS_DC);

@@ -8,4 +8,5 @@ if (PHP_EREG != "no") {
 	ADD_SOURCES("ext/ereg/regex", "regcomp.c regexec.c regerror.c regfree.c", "ereg");
 	AC_DEFINE('REGEX', 1, 'Bundled regex');
 	AC_DEFINE('HSREGEX', 1, 'Bundled regex');
+	PHP_INSTALL_HEADERS("ext/ereg", "php_ereg.h php_regex.h regex/");
 }

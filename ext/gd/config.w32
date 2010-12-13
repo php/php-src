@@ -66,6 +66,8 @@ if (PHP_GD != "no") {
 /D USE_GD_IOCTX \
 /D MSWIN32 \
 		");
+		
+		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
 		} else {
 		WARNING("gd not enabled; libraries and headers not found");
 	}

@@ -102,7 +102,7 @@ if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 }
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 // Configures the hard-coded installation dir
-ARG_ENABLE('prefix', 'where PHP will be installed', '');
+ARG_WITH('prefix', 'where PHP will be installed', '');
 if (PHP_PREFIX == '') {
 	PHP_PREFIX = "C:\\php";
 	if (PHP_DEBUG == "yes")
@@ -199,6 +199,9 @@ if (PHP_DEBUG == "yes") {
 
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
+	ADD_FLAG("ZTS", "1");
+} else {
+	ADD_FLAG("ZTS", "0");
 }
 
 DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
@@ -350,6 +353,8 @@ ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c 
 
 ADD_SOURCES("win32", "glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c");
+
+PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
 
 STDOUT.WriteBlankLines(1);
 
