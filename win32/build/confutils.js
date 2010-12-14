@@ -1720,17 +1720,17 @@ function generate_makefile()
 
 	MF.Write(TF.ReadAll());
 
-	MF.WriteLine("install-headers:");
-	MF.WriteLine("	@if not exist $(PHP_PREFIX)\\include mkdir $(PHP_PREFIX)\\include >nul");
-	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @if not exist $(PHP_PREFIX)\\include\\%D mkdir $(PHP_PREFIX)\\include\\%D >nul");
+	MF.WriteLine("build-headers:");
+	MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\include mkdir $(BUILD_DIR_DEV)\\include >nul");
+	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @if not exist $(BUILD_DIR_DEV)\\include\\%D mkdir $(BUILD_DIR_DEV)\\include\\%D >nul");
 	for (i in headers_install) {
 		if (headers_install[i][2] != "") {
-				MF.WriteLine("	@if not exist $(PHP_PREFIX)\\include\\" + headers_install[i][2] + " mkdir $(PHP_PREFIX)\\include\\" + 
+				MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " mkdir $(BUILD_DIR_DEV)\\include\\" + 
 												headers_install[i][2] + ">nul");
-				MF.WriteLine("	@copy " + headers_install[i][0] + " " + "$(PHP_PREFIX)\\include\\" + headers_install[i][2] + " /y >nul");
+				MF.WriteLine("	@copy " + headers_install[i][0] + " " + "$(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " /y >nul");
 		}
 	}
-	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(PHP_PREFIX)\\include\\%D /y >nul");
+	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
 	TF.Close();
 
 	MF.WriteBlankLines(2);
