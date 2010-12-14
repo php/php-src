@@ -10,6 +10,8 @@ if (!defined('PHP_MAXPATHLEN')) {
 		define('PHP_MAXPATHLEN', 260);
 	} else if (stristr(PHP_OS, 'linux')) {
 		define('PHP_MAXPATHLEN', 4096);
+	} else {
+		define('PHP_MAXPATHLEN', 1024); // Darwin, AIX for instance
 	}
 }
 $path = str_repeat('a', PHP_MAXPATHLEN + 1);
