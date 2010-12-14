@@ -628,10 +628,10 @@ request_order = "GP"
 ; http://php.net/register-argc-argv
 register_argc_argv = Off
 
-; When enabled, the SERVER and ENV variables are created when they're first
-; used (Just In Time) instead of when the script starts. If these variables
-; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directive register_argc_argv must be disabled
+; When enabled, the ENV, REQUEST and SERVER variables are created when they're
+; first used (Just In Time) instead of when the script starts. If these
+; variables are not used within a script, having this directive on will result
+; in a performance gain. The PHP directive register_argc_argv must be disabled
 ; for this directive to have any affect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
