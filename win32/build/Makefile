@@ -4,7 +4,7 @@
 #  | Copyright (c) 1997-2008 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
-#  | that is bundled with this package in the file LICENSE, and is        |
+#  | that is bundled with this package in the file LICENSE, and is        |3
 #  | available through the world-wide-web at the following url:           |
 #  | http://www.php.net/license/3_01.txt                                  |
 #  | If you did not receive a copy of the PHP license and are unable to   |
@@ -92,8 +92,9 @@ $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@cd $(BUILD_DIR)
 	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
-	@cd ../..
 	@if not exist $(BUILD_DIR_DEV) @mkdir $(BUILD_DIR_DEV) > NUL
+	@cd $(PHP_SRC_DIR)
+	
 
 clean-sapi:
 	@echo Cleaning SAPI
@@ -106,7 +107,7 @@ clean: clean-sapi
 	@echo Cleaning distribution build dirs
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
-	@cd ..\..
+	@cd $(PHP_SRC_DIR)
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
@@ -118,7 +119,7 @@ clean-all:
 	@echo Cleaning standard build dirs
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
-	@cd ..\..
+	@cd $(PHP_SRC_DIR)
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
@@ -131,7 +132,7 @@ build-snap: generated_files
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
 
-build-dist: $(BUILD_DIR)\deplister.exe build-devel build-lib 
+build-dist: $(BUILD_DIR)\deplister.exe
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip

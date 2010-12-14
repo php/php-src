@@ -27,6 +27,7 @@ var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 var DSP_FLAGS = new Array();
+var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
@@ -1553,12 +1554,14 @@ function generate_files()
 			continue;
 		}
 		last = bd;
+
 		build_dir = get_define('BUILD_DIR');
 		build_dir = build_dir.replace(new RegExp("\\\\", "g"), "\\\\");
 		if (build_dir.substr(build_dir.Length - 2, 2) != '\\\\') {
 			build_dir += '\\\\';
 		}
 		ADD_FLAG("BUILD_DIRS_SUB", bd.replace(new RegExp(build_dir), ''));
+
 		if (!FSO.FolderExists(bd)) {
 			FSO.CreateFolder(bd);
 		}
@@ -1704,7 +1707,7 @@ function generate_makefile()
 	/* spit out variable definitions */
 	var keys = (new VBArray(configure_subst.Keys())).toArray();
 	var i;
-
+	MF.WriteLine("PHP_SRC_DIR =" + PHP_SRC_DIR);
 	for (i in keys) {
 		// The trailing space is needed to prevent the trailing backslash
 		// that is part of the build dir flags (CFLAGS_BD_XXX) from being
