@@ -45,6 +45,10 @@
 - PDO PostgreSQL driver:
   . Fixed bug #53517 (segfault in pgsql_stmt_execute() when postgres is down).
     (gyp at balabit dot hu)
+
+- Phar Extension:
+  . Fixed bug #53541 (format string bug in ext/phar).
+    (crrodriguez at opensuse dot org, Ilia)
     
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
