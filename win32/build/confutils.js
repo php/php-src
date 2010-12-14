@@ -1553,7 +1553,12 @@ function generate_files()
 			continue;
 		}
 		last = bd;
-		ADD_FLAG("BUILD_DIRS_SUB", bd.replace(new RegExp('^'+dir+'\\\\'), '$(BUILD_DIR)\\'));
+		build_dir = get_define('BUILD_DIR');
+		build_dir = build_dir.replace(new RegExp("\\\\", "g"), "\\\\");
+		if (build_dir.substr(build_dir.Length - 2, 2) != '\\\\') {
+			build_dir += '\\\\';
+		}
+		ADD_FLAG("BUILD_DIRS_SUB", bd.replace(new RegExp(build_dir), ''));
 		if (!FSO.FolderExists(bd)) {
 			FSO.CreateFolder(bd);
 		}

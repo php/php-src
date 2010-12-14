@@ -90,7 +90,9 @@ $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
 	@echo Recreating build dirs
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@cd $(BUILD_DIR)
 	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
+	@cd ../..
 	@if not exist $(BUILD_DIR_DEV) @mkdir $(BUILD_DIR_DEV) > NUL
 
 clean-sapi:
@@ -102,7 +104,9 @@ clean-sapi:
 
 clean: clean-sapi
 	@echo Cleaning distribution build dirs
+	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
+	@cd ..\..
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
@@ -112,7 +116,9 @@ clean-pecl:
 
 clean-all:
 	@echo Cleaning standard build dirs
+	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
+	@cd ..\..
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
@@ -125,7 +131,7 @@ build-snap: generated_files
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
 
-build-dist: $(BUILD_DIR)\deplister.exe
+build-dist: $(BUILD_DIR)\deplister.exe build-devel build-lib 
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
@@ -149,7 +155,7 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	cd ..\..
 
 dist: all build-dist
-snap: build-devel build-lib build-snap build-dist
+snap: build-snap build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
@@ -187,3 +193,4 @@ really-install:
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
+
