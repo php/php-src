@@ -1,5 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 5.2.17
+
 16 Dec 2010, PHP 5.2.16
 - Fixed bug #53517 (segfault in pgsql_stmt_execute() when postgres is down).
   (gyp at balabit dot hu)
