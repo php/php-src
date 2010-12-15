@@ -56,6 +56,9 @@ function get_depends($module)
 		/* sybase */
 		'libcs.dll', 'libct.dll',
 
+		/* firebird */
+		'fbclient.dll',
+
 		/* visual C++; mscvrt.dll is present on everyones system,
 		 * but the debug version (msvcrtd.dll) and those from visual studio.net
 		 * (msvcrt7x.dll) are not */
