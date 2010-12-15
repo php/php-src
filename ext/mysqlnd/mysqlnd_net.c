@@ -64,6 +64,7 @@ mysqlnd_set_sock_no_delay(php_stream * stream TSRMLS_DC)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, network_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 {
+	enum_func_status return_value = PASS;
 	size_t to_read = count, ret;
 	size_t old_chunk_size = conn->net->stream->chunk_size;
 	DBG_ENTER("mysqlnd_net::network_read");
@@ -72,14 +73,15 @@ MYSQLND_METHOD(mysqlnd_net, network_read)(MYSQLND * conn, zend_uchar * buffer, s
 	while (to_read) {
 		if (!(ret = php_stream_read(conn->net->stream, (char *) buffer, to_read))) {
 			DBG_ERR_FMT("Error while reading header from socket");
-			DBG_RETURN(FAIL);
+			return_value = FAIL;
+			break;
 		}
 		buffer += ret;
 		to_read -= ret;
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_BYTES_RECEIVED, count);
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_BYTES_RECEIVED, count - to_read);
 	conn->net->stream->chunk_size = old_chunk_size;
-	DBG_RETURN(PASS);
+	DBG_RETURN(return_value);
 }
 /* }}} */
 
