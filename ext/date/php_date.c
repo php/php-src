@@ -2797,6 +2797,31 @@ PHP_FUNCTION(date_modify)
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->sse_uptodate = 0;
+
+	if (tmp_time->y != -99999) {
+		dateobj->time->y = tmp_time->y;
+	}
+	if (tmp_time->m != -99999) {
+		dateobj->time->m = tmp_time->m;
+	}
+	if (tmp_time->d != -99999) {
+		dateobj->time->d = tmp_time->d;
+	}
+
+	if (tmp_time->h != -99999) {
+		dateobj->time->h = tmp_time->h;
+		if (tmp_time->i != -99999) {
+			dateobj->time->i = tmp_time->i;
+			if (tmp_time->s != -99999) {
+				dateobj->time->s = tmp_time->s;
+			} else {
+				dateobj->time->s = 0;
+			}
+		} else {
+			dateobj->time->i = 0;
+			dateobj->time->s = 0;
+		}
+	}
 	timelib_time_dtor(tmp_time);
 
 	timelib_update_ts(dateobj->time, NULL);

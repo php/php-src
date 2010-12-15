@@ -13,6 +13,10 @@
   . Fixed bug #48607 (fwrite() doesn't check reply from ftp server before
     exiting). (Ilia)
   
+- DateTime extension:
+  . Fixed a bug in DateTime->modify() where absolute date/time statements had
+    no effect. (Derick)
+
 - Filter extension:
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
     (Ilia)
