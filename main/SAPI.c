@@ -381,9 +381,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
 
-	/* It's possible to override this general case in the activate() callback, if
-	 * necessary.
-	 */
+	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
 	} else {
@@ -391,22 +389,19 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	}
 	SG(rfc1867_uploaded_files) = NULL;
 
-	/* handle request mehtod */
+	/* Handle request method */
 	if (SG(server_context)) {
 		if (PG(enable_post_data_reading) && SG(request_info).request_method) {
-			if(!strcmp(SG(request_info).request_method, "POST")
-			   && (SG(request_info).content_type)) {
-				/* HTTP POST -> may contain form data to be read into variables
-				   depending on content type given
-				*/
+			if (SG(request_info).content_type && !strcmp(SG(request_info).request_method, "POST")) {
+				/* HTTP POST may contain form data to be processed into variables
+				 * depending on given content type */
 				sapi_read_post_data(TSRMLS_C);
 			} else {
-				/* any other method with content payload will fill 
-				   $HTTP_RAW_POST_DATA if enabled by always_populate_raw_post_data 
-				   it is up to the webserver to decide whether to allow a method or not
-				*/
+				/* Any other method with content payload will fill $HTTP_RAW_POST_DATA 
+				 * if it is enabled by always_populate_raw_post_data. 
+				 * It's up to the webserver to decide whether to allow a method or not. */
 				SG(request_info).content_type_dup = NULL;
-				if(sapi_module.default_post_reader) {
+				if (sapi_module.default_post_reader) {
 					sapi_module.default_post_reader(TSRMLS_C);
 				}
 			}
@@ -416,11 +411,12 @@ SAPI_API void sapi_activate(TSRMLS_D)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies(TSRMLS_C);
+
 		if (sapi_module.activate) {
 			sapi_module.activate(TSRMLS_C);
 		}
 	}
-	if (sapi_module.input_filter_init ) {
+	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init(TSRMLS_C);
 	}
 }
