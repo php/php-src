@@ -636,7 +636,18 @@ register_argc_argv = Off
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
+; Whether PHP will read the POST data.
+; This option is enabled by default.
+; Most likely, you won't want to disable this option globally. It causes $_POST
+; and $_FILES to always be empty; the only way you will be able to read the
+; POST data will be through the php://input stream wrapper. This can be useful
+; to proxy requests or to process the POST data in a memory efficient fashion.
+; http://php.net/enable-post-data-reading
+;enable_post_data_reading = Off
+
 ; Maximum size of POST data that PHP will accept.
+; Its value may be 0 to disable the limit. It is ignored if POST data reading
+; is disabled through enable_post_data_reading.
 ; http://php.net/post-max-size
 post_max_size = 8M
 
@@ -685,7 +696,8 @@ default_mimetype = "text/html"
 ;default_charset = "UTF-8"
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature.
+; to disable this feature. If post reading is disabled through
+; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
 ; http://php.net/always-populate-raw-post-data
 ;always_populate_raw_post_data = On
 
