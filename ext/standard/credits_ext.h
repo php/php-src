@@ -59,7 +59,7 @@ CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
 CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
 CREDIT_LINE("Pspell", "Vlad Krupin");
 CREDIT_LINE("Readline", "Thies C. Arntzen");
-CREDIT_LINE("Recode", "Kristian Köhntopp");
+CREDIT_LINE("Recode", "Kristian Koehntopp");
 CREDIT_LINE("Reflection", "Marcus Boerger, Timm Friebe, George Schlossnagle, Andrei Zmievski, Johannes Schlueter");
 CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 CREDIT_LINE("Shared Memory Operations", "Slava Poliakov, Ilia Alshanetsky");
@@ -68,7 +68,7 @@ CREDIT_LINE("SNMP", "Rasmus Lerdorf, Harrie Hazewinkel, Mike Jackson, Steven Law
 CREDIT_LINE("SOAP", "Brad Lafountain, Shane Caraveo, Dmitry Stogov");
 CREDIT_LINE("Sockets", "Chris Vandomelen, Sterling Hughes, Daniel Beulshausen, Jason Greene");
 CREDIT_LINE("SPL", "Marcus Boerger, Etienne Kneuss");
-CREDIT_LINE("SQLite3", "Scott MacVicar");
+CREDIT_LINE("SQLite3", "Scott MacVicar, Ilia Alshanetsky");
 CREDIT_LINE("SQLite 3.x driver for PDO", "Wez Furlong");
 CREDIT_LINE("SQLite", "Wez Furlong, Tal Peer, Marcus Boerger, Ilia Alshanetsky");
 CREDIT_LINE("Sybase-CT", "Zeev Suraski, Tom May, Timm Friebe");
