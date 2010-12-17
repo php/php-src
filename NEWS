@@ -64,6 +64,10 @@
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
+- Zip extension
+  . Fixed bug #53568 (swapped memset arguments in struct initialization).
+    (crrodriguez at opensuse dot org)
+
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)

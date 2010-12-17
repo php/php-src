@@ -473,10 +473,8 @@ _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 static time_t
 _zip_d2u_time(int dtime, int ddate)
 {
-    struct tm tm;
+    struct tm tm = {0};
 
-    memset(&tm, sizeof(tm), 0);
-    
     /* let mktime decide if DST is in effect */
     tm.tm_isdst = -1;
     
