@@ -59,7 +59,13 @@
 
 - PHP-FPM SAPI:
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
-    
+
+- Soap Extension:
+  . Fixed possible crash introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+
+- Sqlite Extension:
+  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
@@ -67,10 +73,12 @@
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
+- Xsl Extension:
+  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+
 - Zip extension
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
-
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
