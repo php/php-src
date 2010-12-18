@@ -56,6 +56,9 @@
 - Phar Extension:
   . Fixed bug #53541 (format string bug in ext/phar).
     (crrodriguez at opensuse dot org, Ilia)
+
+- PHP-FPM SAPI:
+  . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
     
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0

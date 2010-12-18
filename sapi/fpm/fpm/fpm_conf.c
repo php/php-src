@@ -1218,6 +1218,7 @@ int fpm_conf_init_main(int test_conf) /* {{{ */
 			fpm_conf_dump();
 		}
 		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", fpm_globals.config);
+		fpm_globals.test_successful = 1;
 		return -1;
 	}
 
