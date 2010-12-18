@@ -1641,8 +1641,10 @@ PHP_FUNCTION(sqlite_open)
 	}
 
 	if (strlen(filename) != filename_len) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		RETURN_FALSE;
 	}
+
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
@@ -1697,6 +1699,7 @@ PHP_FUNCTION(sqlite_factory)
 	}
 
 	if (strlen(filename) != filename_len) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
