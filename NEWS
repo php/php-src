@@ -53,30 +53,30 @@
   . Fixed bug #53517 (segfault in pgsql_stmt_execute() when postgres is down).
     (gyp at balabit dot hu)
 
-- Phar Extension:
+- Phar extension:
   . Fixed bug #53541 (format string bug in ext/phar).
     (crrodriguez at opensuse dot org, Ilia)
 
 - PHP-FPM SAPI:
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
 
-- SOAP Extension:
+- SOAP extension:
   . Fixed possible crash introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
     
-- SQLite Extension:
+- SQLite extension:
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
-- XSL Extension:
+- XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
-- Zip extension
+- Zip extension:
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
 
