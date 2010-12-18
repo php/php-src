@@ -403,6 +403,7 @@ static PHP_FUNCTION(pspell_new_personal)
 #endif
 
 	if (strlen(personal) != personal_len) {
+		delete_pspell_config(config);
 		RETURN_FALSE;
 	}
 
