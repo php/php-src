@@ -60,20 +60,20 @@
 - PHP-FPM SAPI:
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
 
-- Soap Extension:
+- SOAP Extension:
   . Fixed possible crash introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
-
-- Sqlite Extension:
-  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
+    
+- SQLite Extension:
+  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
-- Xsl Extension:
+- XSL Extension:
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - Zip extension
