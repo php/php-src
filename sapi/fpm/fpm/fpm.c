@@ -21,7 +21,20 @@
 #include "fpm_stdio.h"
 #include "zlog.h"
 
-struct fpm_globals_s fpm_globals;
+struct fpm_globals_s fpm_globals = {
+		.parent_pid = 0, 
+		.argc = NULL,
+		.argv = NULL,
+		.config = NULL,
+		.prefix = NULL,
+		.running_children = 0,
+		.error_log_fd = 0,
+		.log_level = 0,
+		.listening_socket = 0,
+		.max_requests = 0,
+		.is_child = 0,
+		.test_successful = 0
+	};
 
 int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /* {{{ */
 {
@@ -43,7 +56,12 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 		0 > fpm_sockets_init_main()          ||
 		0 > fpm_worker_pool_init_main()      ||
 		0 > fpm_event_init_main()) {
-		return -1;
+		
+		if (fpm_globals.test_successful) {
+			exit(0);
+		} else {
+			return -1;
+		}
 	}
 
 	if (0 > fpm_conf_write_pid()) {
