@@ -643,6 +643,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	ret = -1;
 	if (newdocp) {
 		if (strlen(uri) != uri_len) {
+			xmlFreeDoc(newdocp);
 			RETURN_FALSE;
 		}
 		ret = xsltSaveResultToFilename(uri, newdocp, sheetp, 0);
