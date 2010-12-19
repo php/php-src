@@ -799,7 +799,7 @@ PHP_FUNCTION(grapheme_extract)
 
 	if ( NULL != next ) {
 		if ( !PZVAL_IS_REF(next) ) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, 
 				 "grapheme_extract: 'next' was not passed by reference", 0 TSRMLS_CC );
 			 
 			RETURN_FALSE;
@@ -819,10 +819,16 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || lstart >= str_len ) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 1 TSRMLS_CC );
-
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 TSRMLS_CC );
 		RETURN_FALSE;
+	}
+
+	if ( size > INT32_MAX || size < 0) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: size is invalid", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
+	if (size == 0) {
+		RETURN_EMPTY_STRING();
 	}
 
 	/* we checked that it will fit: */
