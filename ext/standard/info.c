@@ -749,7 +749,17 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_row(2, "Zend Memory Manager", is_zend_mm(TSRMLS_C) ? "enabled" : "disabled" );
 
-		php_info_print_table_row(2, "Zend Multibyte Support", CG(multibyte) ? "enabled" : "disabled");
+		{
+			const zend_multibyte_functions *functions = zend_multibyte_get_functions(TSRMLS_C);
+			char *descr;
+			if (functions) {
+				spprintf(&descr, 0, "provided by %s", functions->provider_name);
+			} else {
+				descr = estrdup("disabled");
+			}
+            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			efree(descr);
+		}
 
 #if HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );

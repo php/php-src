@@ -197,9 +197,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
-	CG(script_encoding_list) = NULL;
-	CG(script_encoding_list_size) = 0;
-	CG(internal_encoding) = NULL;
 	CG(encoding_declared) = 0;
 }
 /* }}} */
@@ -238,10 +235,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 	zend_stack_destroy(&CG(context_stack));
-
-	if (CG(script_encoding_list)) {
-		efree(CG(script_encoding_list));
-	}
 }
 /* }}} */
 
@@ -5864,7 +5857,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 			CG(encoding_declared) = 1;
 
 			convert_to_string(&val->u.constant);
-			new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val);
+			new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val TSRMLS_CC);
 			if (!new_encoding) {
 				zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", val->u.constant.value.str.val);
 			} else {
@@ -5879,6 +5872,8 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 					zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
 				}
 			}
+		} else {
+			zend_error(E_COMPILE_WARNING, "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings");
 		}
 		zval_dtor(&val->u.constant);
 	} else {
