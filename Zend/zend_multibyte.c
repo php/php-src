@@ -32,7 +32,7 @@ static const zend_encoding *dummy_encoding_fetcher(const char *encoding_name TSR
 
 static const char *dummy_encoding_name_getter(const zend_encoding *encoding)
 {
-    return NULL;
+	return NULL;
 }
 
 static int dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
@@ -66,9 +66,9 @@ static int dummy_internal_encoding_setter(const zend_encoding *encoding TSRMLS_D
 }
 
 static zend_multibyte_functions multibyte_functions = {
-    NULL,
+	NULL,
 	dummy_encoding_fetcher,
-    dummy_encoding_name_getter,
+	dummy_encoding_name_getter,
 	dummy_encoding_lexer_compatibility_checker,
 	dummy_encoding_detector,
 	dummy_encoding_converter,
@@ -120,7 +120,7 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 
 ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(TSRMLS_D)
 {
-    return multibyte_functions.provider_name ? &multibyte_functions: NULL;
+	return multibyte_functions.provider_name ? &multibyte_functions: NULL;
 }
 
 ZEND_API const zend_encoding *zend_multibyte_fetch_encoding(const char *name TSRMLS_DC)
@@ -216,11 +216,11 @@ ZEND_API size_t zend_multibyte_script_encoding_filter(unsigned char **to, size_t
 
 ZEND_API size_t zend_multibyte_internal_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
-    const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
 	const zend_encoding *script_encoding = LANG_SCNG(script_encoding);
-    if (!internal_encoding || !zend_multibyte_check_lexer_compatibility(internal_encoding)) {
+	if (!internal_encoding || !zend_multibyte_check_lexer_compatibility(internal_encoding)) {
 		internal_encoding = zend_multibyte_encoding_utf8;
-    }
+	}
 	if (!zend_multibyte_check_lexer_compatibility(script_encoding)) {
 		script_encoding = zend_multibyte_encoding_utf8;
 	}
