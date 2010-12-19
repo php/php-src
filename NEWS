@@ -12,6 +12,10 @@
     (Ilia)
   . Fixed bug #48607 (fwrite() doesn't check reply from ftp server before
     exiting). (Ilia)
+
+- Calendar extension:
+  . Fixed bug #53574 (Integer overflow in SdnToJulian, sometimes leading to
+    segfault). (Gustavo)
   
 - DateTime extension:
   . Fixed a bug in DateTime->modify() where absolute date/time statements had
