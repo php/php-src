@@ -558,7 +558,7 @@ const zend_function_entry mbstring_functions[] = {
 
 /* {{{ zend_module_entry mbstring_module_entry */
 zend_module_entry mbstring_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"mbstring",
 	mbstring_functions,
 	PHP_MINIT(mbstring),
@@ -566,11 +566,11 @@ zend_module_entry mbstring_module_entry = {
 	PHP_RINIT(mbstring),
 	PHP_RSHUTDOWN(mbstring),
 	PHP_MINFO(mbstring),
-    NO_VERSION_YET,
-    PHP_MODULE_GLOBALS(mbstring),
-    PHP_GINIT(mbstring),
-    PHP_GSHUTDOWN(mbstring),
-    NULL,
+	NO_VERSION_YET,
+	PHP_MODULE_GLOBALS(mbstring),
+	PHP_GINIT(mbstring),
+	PHP_GSHUTDOWN(mbstring),
+	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -2899,7 +2899,7 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 	if (_from_encodings) {
 		list = NULL;
 		size = 0;
-	    php_mb_parse_encoding_list(_from_encodings, strlen(_from_encodings), &list, &size, 0 TSRMLS_CC);
+		php_mb_parse_encoding_list(_from_encodings, strlen(_from_encodings), &list, &size, 0 TSRMLS_CC);
 		if (size == 1) {
 			from_encoding = *list;
 			string.no_encoding = from_encoding->no_encoding;
@@ -3948,9 +3948,9 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_string orig_str, conv_str;
 	mbfl_string *pstr;	/* pointer to mbfl string for return value */
 	enum mbfl_no_encoding
-	    tran_cs,	/* transfar text charset */
-	    head_enc,	/* header transfar encoding */
-	    body_enc;	/* body transfar encoding */
+		tran_cs,	/* transfar text charset */
+		head_enc,	/* header transfar encoding */
+		body_enc;	/* body transfar encoding */
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
@@ -3958,7 +3958,7 @@ PHP_FUNCTION(mb_send_mail)
 	smart_str *s;
 	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 	char *pp, *ee;
-    
+	
 	/* initialize */
 	mbfl_memory_device_init(&device, 0, 0);
 	mbfl_string_init(&orig_str);
@@ -4057,15 +4057,15 @@ PHP_FUNCTION(mb_send_mail)
 
 	/* To: */
 	if (to != NULL) {
-        if (to_len > 0) {
-            to_r = estrndup(to, to_len);
-            for (; to_len; to_len--) {
-                if (!isspace((unsigned char) to_r[to_len - 1])) {
-                    break;
-                }
-                to_r[to_len - 1] = '\0';
-            }
-            for (i = 0; to_r[i]; i++) {
+		if (to_len > 0) {
+			to_r = estrndup(to, to_len);
+			for (; to_len; to_len--) {
+				if (!isspace((unsigned char) to_r[to_len - 1])) {
+					break;
+				}
+				to_r[to_len - 1] = '\0';
+			}
+			for (i = 0; to_r[i]; i++) {
 			if (iscntrl((unsigned char) to_r[i])) {
 				/* According to RFC 822, section 3.1.1 long headers may be separated into
 				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
@@ -4075,11 +4075,11 @@ PHP_FUNCTION(mb_send_mail)
 				SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
 				to_r[i] = ' ';
 			}
-            }
-        } else {
-            to_r = to;
-        }
-    } else {
+			}
+		} else {
+			to_r = to;
+		}
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing To: field");
 		err = 1;
 	}
