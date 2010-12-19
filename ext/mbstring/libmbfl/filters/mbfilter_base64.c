@@ -41,7 +41,7 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	"BASE64",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_b64 = {

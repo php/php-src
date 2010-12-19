@@ -70,7 +70,7 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	"HTML-ENTITIES",
 	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
 	NULL,
-	MBFL_ENCTYPE_HTML_ENT
+	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {

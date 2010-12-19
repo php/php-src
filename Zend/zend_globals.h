@@ -147,13 +147,11 @@ struct _zend_compiler_globals {
 
 	HashTable interned_strings;
 
-	zend_encoding **script_encoding_list;
+	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
 	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
-
-	zend_encoding *internal_encoding;
 
 #ifdef ZTS
 	zval ***static_members_table;
@@ -310,8 +308,7 @@ struct _zend_php_scanner_globals {
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
+	const zend_encoding *script_encoding;
 };
 
 #endif /* ZEND_GLOBALS_H */

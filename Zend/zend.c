@@ -89,11 +89,25 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
+{
+	if (!CG(multibyte)) {
+		return FAILURE;
+	}
+	if (!zend_multibyte_get_functions(TSRMLS_C)) {
+		return SUCCESS;
+	}
+	return zend_multibyte_set_script_encoding_by_string(new_value, new_value_length TSRMLS_CC);
+}
+/* }}} */
+
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
- 	STD_ZEND_INI_BOOLEAN("detect_unicode", "1", ZEND_INI_ALL, OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
+ 	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
+ 	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
 ZEND_INI_END()
 
 
@@ -527,6 +541,9 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 	}
 	if (compiler_globals->static_members_table) {
 		free(compiler_globals->static_members_table);
+	}
+	if (compiler_globals->script_encoding_list) {
+		pefree(compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
 }
