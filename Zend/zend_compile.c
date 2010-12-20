@@ -3876,7 +3876,6 @@ static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t curr
 
 static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
-	/* HashTable* resulting_table; */
 	size_t i;
 	zend_property_info *property_info;
 	zend_property_info *coliding_prop;
