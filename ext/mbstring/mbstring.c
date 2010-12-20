@@ -1733,10 +1733,10 @@ PHP_FUNCTION(mb_http_input)
 		case 'I':
 		case 'i':
 			{
-				array_init(return_value);
 				const mbfl_encoding **entry = MBSTRG(http_input_list);
 				const size_t n = MBSTRG(http_input_list_size);
 				size_t i;
+				array_init(return_value);
 				for (i = 0; i < n; i++) {
 					add_next_index_string(return_value, (*entry)->name, 1);
 					entry++;
@@ -4468,9 +4468,9 @@ static void php_mb_populate_current_detect_order_list(TSRMLS_D)
 		memcpy(entry, MBSTRG(detect_order_list), sizeof(mbfl_encoding*) * nentries);
 	} else {
 		const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
+		size_t i;
 		nentries = MBSTRG(default_detect_order_list_size);
 		entry = (const mbfl_encoding **)safe_emalloc(nentries, sizeof(mbfl_encoding*), 0);
-		size_t i;
 		for (i = 0; i < nentries; i++) {
 			entry[i] = mbfl_no2encoding(src[i]);
 		}
