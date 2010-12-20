@@ -459,7 +459,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	if (size != -1) {
 		if (CG(multibyte)) {
 			SCNG(script_org) = buf;
-			SCNG(script_org_size) = n;	
+			SCNG(script_org_size) = size;	
 			SCNG(script_filtered) = NULL;
 
 			zend_multibyte_set_filter(NULL TSRMLS_CC);
