@@ -3804,59 +3804,49 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 	}
 }
 
-ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	HashTable** function_tables;
 	HashTable* resulting_table;
 	HashTable exclude_table;
 	size_t i;
 
-	if (ce->num_traits <= 0) {
-		return;
-	}
-
-/*	zend_error(E_NOTICE, "Do bind Traits on %v with %d traits.\n Class has already %d methods.\n",
-			   ce->name.s, ce->num_traits, ce->function_table.nNumOfElements); */
-
-	/* complete initialization of trait strutures in ce */
-	zend_traits_init_trait_structures(ce TSRMLS_CC);
-
 	/* prepare copies of trait function tables for combination */
 	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
 	resulting_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(resulting_table, 10, /* TODO: revisit this start size, may be its not optimal */
-						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
-					  	  NULL, NULL, 0, 0);
-
+					  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
+					  NULL, NULL, 0, 0);
+  
 	for (i = 0; i < ce->num_traits; i++) {
 		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
-    	zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements,
+		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements,
 						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
 						  NULL, NULL, 0, 0);
-
+    
 		zend_hash_init_ex(&exclude_table, 2, /* TODO: revisit this start size, may be its not optimal */
-							NULL, NULL, 0, 0);
+						  NULL, NULL, 0, 0);
 		zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
-
+    
 		/* copies functions, applies defined aliasing, and excludes unused trait methods */
 		zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
 		zend_hash_graceful_destroy(&exclude_table);
 	}
-
+  
 	/* now merge trait methods */
 	for (i = 0; i < ce->num_traits; i++) {
 		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions, 5, /* 5 is number of args for apply_func */
-						i, ce->num_traits, resulting_table, function_tables, ce);
+									   i, ce->num_traits, resulting_table, function_tables, ce);
 	}
-
-	/* now the resulting_table contains all trait methods we would have to
-	   add to the class
-	   in the following step the methods are inserted into the method table
-	   if there is already a method with the same name it is replaced iff ce != fn.scope
-	   --> all inherited methods are overridden, methods defined in the class are leaved
-	   untouched */
+  
+	/*  now the resulting_table contains all trait methods we would have to
+		add to the class
+		in the following step the methods are inserted into the method table
+		if there is already a method with the same name it is replaced iff ce != fn.scope
+		--> all inherited methods are overridden, methods defined in the class are left
+		untouched */
 	zend_hash_apply_with_arguments(resulting_table TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions_to_class, 1, ce);
-
+  
 	/* free temporary function tables */
 	for (i = 0; i < ce->num_traits; i++) {
 		/* zend_hash_destroy(function_tables[i]); */
@@ -3869,8 +3859,145 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
 	free(resulting_table);
+}
 
+static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, char* prop_name, int prop_name_length, zend_class_entry *coliding_ce) /* {{{ */
+{
+	size_t i;
+	zend_property_info *coliding_prop;
+	for (i = 0; (i < current_trait) && (i < ce->num_traits); i++) {
+		if (zend_hash_find(&ce->traits[i]->properties_info, prop_name, prop_name_length+1, (void **) &coliding_prop) == SUCCESS) {
+			return ce->traits[i];
+		}
+	}
+
+	return coliding_ce;
+}
+
+static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+	//HashTable* resulting_table;
+	size_t i;
+	zend_property_info *property_info;
+	zend_property_info *coliding_prop;
+	zval compare_result;
+	char* prop_name;
+	int   prop_name_length;
+
+	char* class_name_unused;
+	bool prop_found;
+	bool not_compatible;
+	zval* prop_value;
+  
+  
+	/*  in the following steps the properties are inserted into the property table
+		for that, a very strict approach is applied:
+		 - check for compatibility, if not compatible with any property in class -> fatal
+		 - if compatible, then strict notice
+	*/
+  
+  
+	for (i = 0; i < ce->num_traits; i++) {
+		for (zend_hash_internal_pointer_reset(&ce->traits[i]->properties_info);
+			 zend_hash_get_current_data(&ce->traits[i]->properties_info, (void *) &property_info) == SUCCESS;
+			 zend_hash_move_forward(&ce->traits[i]->properties_info)) {
+			/* property_info now contains the property */
+      
+			/* first get the unmangeld name if necessary,
+			   then check whether the property is already there */
+			if ((property_info->flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+				prop_name = property_info->name;
+				prop_name_length = property_info->name_length;
+				prop_found = zend_hash_quick_find(&ce->properties_info,
+												  property_info->name, property_info->name_length+1, 
+												  property_info->h, (void **) &coliding_prop) == SUCCESS;
+			}
+			else {
+				/* for private and protected we need to unmangle the names */
+				zend_unmangle_property_name(property_info->name, property_info->name_length,
+											&class_name_unused, &prop_name);
+				prop_name_length = strlen(prop_name);
+				prop_found = zend_hash_find(&ce->properties_info, prop_name, prop_name_length+1, (void **) &coliding_prop) == SUCCESS;
+			}
+      
+			/* next: check for conflicts with current class */
+			if (prop_found) {
+				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
+					/* this one is inherited, lets look it up in its own class */
+					zend_hash_find(&coliding_prop->ce->properties_info, prop_name, prop_name_length+1, (void **) &coliding_prop);
+				}
+				if ((coliding_prop->flags & ZEND_ACC_PPP_MASK) == (property_info->flags & ZEND_ACC_PPP_MASK)) {
+					/* flags are identical, now the value needs to be checked */
+					if (property_info->flags & ZEND_ACC_STATIC) {
+						not_compatible = compare_function(&compare_result,
+														  ce->default_static_members_table[coliding_prop->offset],
+														  ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC) == FAILURE;
+					}
+					else {
+						not_compatible = compare_function(&compare_result,
+            		                 	                  ce->default_properties_table[coliding_prop->offset],
+                		         	                      ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC) == FAILURE;
+					}
+				}
+				else {
+					/* the flags are not identical, thus, we assume properties are not compatible */
+					not_compatible = true;
+				}
+        
+				if (not_compatible) {
+					zend_error(E_COMPILE_ERROR, 
+							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+								find_first_definition(ce, i, prop_name, prop_name_length, coliding_prop->ce)->name,
+								property_info->ce->name,
+								prop_name,
+								ce->name);
+				}
+				else {
+					zend_error(E_STRICT, 
+							   "%s and %s define the same property ($%s) in the composition of %s. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed",
+								find_first_definition(ce, i, prop_name, prop_name_length, coliding_prop->ce)->name,
+								property_info->ce->name,
+								prop_name,
+								ce->name);
+				}
+			}
+      
+			/* property not found, so lets add it */
+			if (property_info->flags & ZEND_ACC_STATIC) {
+				prop_value = ce->traits[i]->default_static_members_table[property_info->offset];
+			}
+			else {
+				prop_value = ce->traits[i]->default_properties_table[property_info->offset];
+			}
+
+
+			zend_declare_property_ex(ce, prop_name, prop_name_length, 
+									 prop_value, property_info->flags, 
+								     property_info->doc_comment, property_info->doc_comment_len TSRMLS_CC);
+		}
+	}
+}
+
+
+ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+
+	if (ce->num_traits <= 0) {
+		return;
+	}
+
+	/* complete initialization of trait strutures in ce */
+	zend_traits_init_trait_structures(ce TSRMLS_CC);
+
+	/* first care about all methods to be flattened into the class */
+	zend_do_traits_method_binding(ce TSRMLS_CC);
+
+	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
+	zend_do_traits_property_binding(ce TSRMLS_CC);
+
+	/* verify that all abstract methods from traits have been implemented */
 	zend_verify_abstract_class(ce TSRMLS_CC);
+  
 	/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
