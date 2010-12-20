@@ -216,6 +216,7 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
+			stream->orig_path = estrdup(path);
 		} else {
 			zip_close(stream_za);
 		}
