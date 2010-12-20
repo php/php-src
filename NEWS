@@ -81,8 +81,10 @@
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
 
 - Zip extension:
+  . Added the filename into the return value of stream_get_meta_data(). (Hannes)
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
+  . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams) (Hannes)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
