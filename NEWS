@@ -70,8 +70,6 @@
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
-  . Fixed bug #53588 (SplMinHeap bad sorting with custom compare function).
-    (Gustavo)
     
 - SQLite extension:
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
