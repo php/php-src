@@ -352,6 +352,18 @@ disable_classes =
 ; http://php.net/realpath-cache-ttl
 ;realpath_cache_ttl = 120
 
+; If enabled, scripts may be written in encodings that are incompatible with
+; the scanner.  CP936, Big5, CP949 and Shift_JIS are the examples of such
+; encodings.  To use this feature, mbstring extension must be enabled.
+; Default: Off
+;zend.multibyte = Off
+
+; Allows to set the default encoding for the scripts.  This value will be used
+; unless "declare(encoding=...)" directive appears at the top of the script.
+; Only affects if zend.multibyte is set.
+; Default: ""
+;zend.script_encoding =
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;
@@ -1733,10 +1745,6 @@ mssql.secure_connection = Off
 ; is activated.
 ; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
 ;mbstring.http_output_conv_mimetype=
-
-; Allows to set script encoding. Only affects if PHP is compiled with --enable-zend-multibyte
-; Default: ""
-;mbstring.script_encoding=
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
