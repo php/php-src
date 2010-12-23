@@ -844,6 +844,66 @@ SPL_METHOD(DirectoryIterator, getFilename)
 }
 /* }}} */
 
+/* {{{ proto string SplFileInfo::getExtension()
+   Returns file extension component of path */
+SPL_METHOD(SplFileInfo, getExtension)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *fname, *p;
+	size_t flen;
+	int path_len, idx;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+
+	if (path_len && path_len < intern->file_name_len) {
+		fname = intern->file_name + path_len + 1;
+		flen = intern->file_name_len - (path_len + 1);
+	} else {
+		fname = intern->file_name;
+		flen = intern->file_name_len;
+	}
+
+	php_basename(fname, flen, NULL, 0, &fname, &flen TSRMLS_CC);
+
+	p = zend_memrchr(fname, '.', flen);
+	if (p) {
+		idx = p - fname;
+		RETURN_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+	}
+
+	RETURN_EMPTY_STRING();
+}
+/* }}}*/
+
+/* {{{ proto string DirectoryIterator::getExtension()
+   Returns the file extension component of path */
+SPL_METHOD(DirectoryIterator, getExtension)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *fname, *p;
+	size_t flen;
+	int idx;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0, &fname, &flen TSRMLS_CC);
+
+	p = zend_memrchr(fname, '.', flen);
+	if (p) {
+		idx = p - fname;
+		RETURN_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+	}
+
+	RETURN_EMPTY_STRING();
+}
+/* }}} */
+
 /* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
    Returns filename component of path */
 SPL_METHOD(SplFileInfo, getBasename)
@@ -1778,6 +1838,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       __construct,   arginfo_info___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPath,       arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getFilename,   arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       getExtension,  arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getBasename,   arginfo_optinalSuffix, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathname,   arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPerms,      arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
@@ -1821,6 +1882,7 @@ ZEND_END_ARG_INFO();
 static const zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getFilename,   arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getExtension,  arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, getBasename,   arginfo_optinalSuffix, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, isDot,         arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, rewind,        arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)

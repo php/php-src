@@ -329,6 +329,9 @@ UPGRADE NOTES - PHP X.Y
 
      h. New methods
 
+       - DirectoryIterator
+         - DirectoryIterator::getExtension()
+
        - Reflection:
          - ReflectionClass::isCloneable()
          - ReflectionClass::getTraits()
@@ -338,6 +341,9 @@ UPGRADE NOTES - PHP X.Y
        
        - PDO_dblib
          - PDO::newRowset()
+
+       - SplFileInfo
+         - SplFileInfo::getExtension()
 
        - SplFileObject
          - SplFileObject::fputcsv()
