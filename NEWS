@@ -49,6 +49,10 @@
   . Implemented FR #53447 (Cannot disable SessionTicket extension for servers
     that do not support it) by adding a no_ticket SSL context option. (Adam,
     Tony)
+  . Fixed bug #53592 (stream_socket_enable_crypto() busy-waits in client mode).
+    (Gustavo)
+  . Fixed stream_socket_enable_crypto() not honoring the socket timeout in
+    server mode. (Gustavo)
 
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on

@@ -411,8 +411,10 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	int n, retry = 1;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
-		float timeout = sslsock->connect_timeout.tv_sec + sslsock->connect_timeout.tv_usec / 1000000;
-		int blocked = sslsock->s.is_blocked;
+		struct timeval	start_time,
+						*timeout;
+		int				blocked		= sslsock->s.is_blocked,
+						has_timeout = 0;
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
 		if (sslsock->is_client && sslsock->sni) {
@@ -429,36 +431,70 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			sslsock->state_set = 1;
 		}
 	
-		if (sslsock->is_client && SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
-                	sslsock->s.is_blocked = 0;
+		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
+			sslsock->s.is_blocked = 0;
 		}
+		
+		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
+		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec || timeout->tv_usec);
+		/* gettimeofday is not monotonic; using it here is not strictly correct */
+		if (has_timeout) {
+			gettimeofday(&start_time, NULL);
+		}
+		
 		do {
+			struct timeval	cur_time,
+							elapsed_time;
+			
 			if (sslsock->is_client) {
-				struct timeval tvs, tve;
-				struct timezone tz;
-
-				gettimeofday(&tvs, &tz);
 				n = SSL_connect(sslsock->ssl_handle);
-				gettimeofday(&tve, &tz);
-
-				timeout -= (tve.tv_sec + (float) tve.tv_usec / 1000000) - (tvs.tv_sec + (float) tvs.tv_usec / 1000000);
-				if (timeout < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: connection timeout");
-					return -1;
-				}
 			} else {
 				n = SSL_accept(sslsock->ssl_handle);
 			}
 
-			if (n <= 0) {
-				retry = handle_ssl_error(stream, n, sslsock->is_client || sslsock->s.is_blocked TSRMLS_CC);
+			if (has_timeout) {
+				gettimeofday(&cur_time, NULL);
+				elapsed_time.tv_sec  = cur_time.tv_sec  - start_time.tv_sec;
+				elapsed_time.tv_usec = cur_time.tv_usec - start_time.tv_usec;
+				if (cur_time.tv_usec < start_time.tv_usec) {
+					elapsed_time.tv_sec  -= 1L;
+					elapsed_time.tv_usec += 1000000L;
+				}
+			
+				if (elapsed_time.tv_sec > timeout->tv_sec ||
+						(elapsed_time.tv_sec == timeout->tv_sec &&
+						elapsed_time.tv_usec > timeout->tv_usec)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: crypto enabling timeout");
+					return -1;
+				}
+			}
 
+			if (n <= 0) {
+				/* in case of SSL_ERROR_WANT_READ/WRITE, do not retry in non-blocking mode */
+				retry = handle_ssl_error(stream, n, blocked TSRMLS_CC);
+				if (retry) {
+					/* wait until something interesting happens in the socket. It may be a
+					 * timeout. Also consider the unlikely of possibility of a write block  */
+					int err = SSL_get_error(sslsock->ssl_handle, n);
+					struct timeval left_time;
+					
+					if (has_timeout) {
+						left_time.tv_sec  = timeout->tv_sec  - elapsed_time.tv_sec;
+						left_time.tv_usec =	timeout->tv_usec - elapsed_time.tv_usec;
+						if (timeout->tv_usec < elapsed_time.tv_usec) {
+							left_time.tv_sec  -= 1L;
+							left_time.tv_usec += 1000000L;
+						}
+					}
+					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+						(POLLIN|POLLPRI) : POLLOUT, has_timeout ? &left_time : NULL);
+				}
 			} else {
-				break;
+				retry = 0;
 			}
 		} while (retry);
 
-		if (sslsock->is_client && sslsock->s.is_blocked != blocked && SUCCESS == php_set_sock_blocking(sslsock->s.socket, blocked TSRMLS_CC)) {
+		if (sslsock->s.is_blocked != blocked && SUCCESS == php_set_sock_blocking(sslsock->s.socket, blocked TSRMLS_CC)) {
 			sslsock->s.is_blocked = blocked;
 		}
 
