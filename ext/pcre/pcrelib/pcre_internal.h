@@ -192,9 +192,7 @@ stdint.h is available, include it; it may define INT64_MAX. Systems that do not
 have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
 by "configure". */
 
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#elif HAVE_STDINT_H
+#if HAVE_STDINT_H
 #include <stdint.h>
 #elif HAVE_INTTYPES_H
 #include <inttypes.h>
@@ -410,9 +408,10 @@ capturing parenthesis numbers in back references. */
 
 /* When UTF-8 encoding is being used, a character is no longer just a single
 byte. The macros for character handling generate simple sequences when used in
-byte-mode, and more complicated ones for UTF-8 characters. BACKCHAR should
-never be called in byte mode. To make sure it can never even appear when UTF-8
-support is omitted, we don't even define it. */
+byte-mode, and more complicated ones for UTF-8 characters. GETCHARLENTEST is
+not used when UTF-8 is not supported, so it is not defined, and BACKCHAR should
+never be called in byte mode. To make sure they can never even appear when
+UTF-8 support is omitted, we don't even define them. */
 
 #ifndef SUPPORT_UTF8
 #define GETCHAR(c, eptr) c = *eptr;
@@ -420,43 +419,83 @@ support is omitted, we don't even define it. */
 #define GETCHARINC(c, eptr) c = *eptr++;
 #define GETCHARINCTEST(c, eptr) c = *eptr++;
 #define GETCHARLEN(c, eptr, len) c = *eptr;
+/* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
 
 #else   /* SUPPORT_UTF8 */
+
+/* These macros were originally written in the form of loops that used data
+from the tables whose names start with _pcre_utf8_table. They were rewritten by
+a user so as not to use loops, because in some environments this gives a
+significant performance advantage, and it seems never to do any harm. */
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, not
+advancing the pointer. */
+
+#define GETUTF8(c, eptr) \
+    { \
+    if ((c & 0x20) == 0) \
+      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+    else if ((c & 0x10) == 0) \
+      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+    else if ((c & 0x08) == 0) \
+      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
+      ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+    else if ((c & 0x04) == 0) \
+      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
+          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
+          (eptr[4] & 0x3f); \
+    else \
+      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
+          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
+          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+    }
 
 /* Get the next UTF-8 character, not advancing the pointer. This is called when
 we know we are in UTF-8 mode. */
 
 #define GETCHAR(c, eptr) \
   c = *eptr; \
-  if (c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    }
+  if (c >= 0xc0) GETUTF8(c, eptr);
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, and not advancing the
 pointer. */
 
 #define GETCHARTEST(c, eptr) \
   c = *eptr; \
-  if (utf8 && c >= 0xc0) \
+  if (utf8 && c >= 0xc0) GETUTF8(c, eptr);
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
+the pointer. */
+
+#define GETUTF8INC(c, eptr) \
     { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
+    if ((c & 0x20) == 0) \
+      c = ((c & 0x1f) << 6) | (*eptr++ & 0x3f); \
+    else if ((c & 0x10) == 0) \
       { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
+      c = ((c & 0x0f) << 12) | ((*eptr & 0x3f) << 6) | (eptr[1] & 0x3f); \
+      eptr += 2; \
+      } \
+    else if ((c & 0x08) == 0) \
+      { \
+      c = ((c & 0x07) << 18) | ((*eptr & 0x3f) << 12) | \
+          ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      eptr += 3; \
+      } \
+    else if ((c & 0x04) == 0) \
+      { \
+      c = ((c & 0x03) << 24) | ((*eptr & 0x3f) << 18) | \
+          ((eptr[1] & 0x3f) << 12) | ((eptr[2] & 0x3f) << 6) | \
+          (eptr[3] & 0x3f); \
+      eptr += 4; \
+      } \
+    else \
+      { \
+      c = ((c & 0x01) << 30) | ((*eptr & 0x3f) << 24) | \
+          ((eptr[1] & 0x3f) << 18) | ((eptr[2] & 0x3f) << 12) | \
+          ((eptr[3] & 0x3f) << 6) | (eptr[4] & 0x3f); \
+      eptr += 5; \
       } \
     }
 
@@ -465,32 +504,49 @@ know we are in UTF-8 mode. */
 
 #define GETCHARINC(c, eptr) \
   c = *eptr++; \
-  if (c >= 0xc0) \
-    { \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    while (gcaa-- > 0) \
-      { \
-      gcss -= 6; \
-      c |= (*eptr++ & 0x3f) << gcss; \
-      } \
-    }
+  if (c >= 0xc0) GETUTF8INC(c, eptr);
 
 /* Get the next character, testing for UTF-8 mode, and advancing the pointer.
 This is called when we don't know if we are in UTF-8 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
   c = *eptr++; \
-  if (utf8 && c >= 0xc0) \
+  if (utf8 && c >= 0xc0) GETUTF8INC(c, eptr);
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, not
+advancing the pointer, incrementing the length. */
+
+#define GETUTF8LEN(c, eptr, len) \
     { \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    while (gcaa-- > 0) \
+    if ((c & 0x20) == 0) \
       { \
-      gcss -= 6; \
-      c |= (*eptr++ & 0x3f) << gcss; \
+      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+      len++; \
+      } \
+    else if ((c & 0x10)  == 0) \
+      { \
+      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      len += 2; \
+      } \
+    else if ((c & 0x08)  == 0) \
+      {\
+      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
+          ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+      len += 3; \
+      } \
+    else if ((c & 0x04)  == 0) \
+      { \
+      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
+          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
+          (eptr[4] & 0x3f); \
+      len += 4; \
+      } \
+    else \
+      {\
+      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
+          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
+          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+      len += 5; \
       } \
     }
 
@@ -499,19 +555,7 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
 
 #define GETCHARLEN(c, eptr, len) \
   c = *eptr; \
-  if (c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    len += gcaa; \
-    }
+  if (c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, not advancing the
 pointer, incrementing length if there are extra bytes. This is called when we
@@ -519,19 +563,7 @@ do not know if we are in UTF-8 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   c = *eptr; \
-  if (utf8 && c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    len += gcaa; \
-    }
+  if (utf8 && c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
@@ -539,7 +571,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 
 #define BACKCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr--
 
-#endif
+#endif  /* SUPPORT_UTF8 */
 
 
 /* In case there is no definition of offsetof() provided - though any proper
@@ -583,7 +615,7 @@ time, run time, or study time, respectively. */
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
    PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
    PCRE_DUPNAMES|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
-   PCRE_JAVASCRIPT_COMPAT|PCRE_UCP)
+   PCRE_JAVASCRIPT_COMPAT|PCRE_UCP|PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
@@ -900,15 +932,16 @@ so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
 
 #define STRING_DEFINE               "DEFINE"
 
-#define STRING_CR_RIGHTPAR          "CR)"
-#define STRING_LF_RIGHTPAR          "LF)"
-#define STRING_CRLF_RIGHTPAR        "CRLF)"
-#define STRING_ANY_RIGHTPAR         "ANY)"
-#define STRING_ANYCRLF_RIGHTPAR     "ANYCRLF)"
-#define STRING_BSR_ANYCRLF_RIGHTPAR "BSR_ANYCRLF)"
-#define STRING_BSR_UNICODE_RIGHTPAR "BSR_UNICODE)"
-#define STRING_UTF8_RIGHTPAR        "UTF8)"
-#define STRING_UCP_RIGHTPAR         "UCP)"
+#define STRING_CR_RIGHTPAR             "CR)"
+#define STRING_LF_RIGHTPAR             "LF)"
+#define STRING_CRLF_RIGHTPAR           "CRLF)"
+#define STRING_ANY_RIGHTPAR            "ANY)"
+#define STRING_ANYCRLF_RIGHTPAR        "ANYCRLF)"
+#define STRING_BSR_ANYCRLF_RIGHTPAR    "BSR_ANYCRLF)"
+#define STRING_BSR_UNICODE_RIGHTPAR    "BSR_UNICODE)"
+#define STRING_UTF8_RIGHTPAR           "UTF8)"
+#define STRING_UCP_RIGHTPAR            "UCP)"
+#define STRING_NO_START_OPT_RIGHTPAR   "NO_START_OPT)"
 
 #else  /* SUPPORT_UTF8 */
 
@@ -1154,15 +1187,16 @@ only. */
 
 #define STRING_DEFINE               STR_D STR_E STR_F STR_I STR_N STR_E
 
-#define STRING_CR_RIGHTPAR          STR_C STR_R STR_RIGHT_PARENTHESIS
-#define STRING_LF_RIGHTPAR          STR_L STR_F STR_RIGHT_PARENTHESIS
-#define STRING_CRLF_RIGHTPAR        STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
-#define STRING_ANY_RIGHTPAR         STR_A STR_N STR_Y STR_RIGHT_PARENTHESIS
-#define STRING_ANYCRLF_RIGHTPAR     STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
-#define STRING_BSR_ANYCRLF_RIGHTPAR STR_B STR_S STR_R STR_UNDERSCORE STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
-#define STRING_BSR_UNICODE_RIGHTPAR STR_B STR_S STR_R STR_UNDERSCORE STR_U STR_N STR_I STR_C STR_O STR_D STR_E STR_RIGHT_PARENTHESIS
-#define STRING_UTF8_RIGHTPAR        STR_U STR_T STR_F STR_8 STR_RIGHT_PARENTHESIS
-#define STRING_UCP_RIGHTPAR         STR_U STR_C STR_P STR_RIGHT_PARENTHESIS
+#define STRING_CR_RIGHTPAR             STR_C STR_R STR_RIGHT_PARENTHESIS
+#define STRING_LF_RIGHTPAR             STR_L STR_F STR_RIGHT_PARENTHESIS
+#define STRING_CRLF_RIGHTPAR           STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
+#define STRING_ANY_RIGHTPAR            STR_A STR_N STR_Y STR_RIGHT_PARENTHESIS
+#define STRING_ANYCRLF_RIGHTPAR        STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
+#define STRING_BSR_ANYCRLF_RIGHTPAR    STR_B STR_S STR_R STR_UNDERSCORE STR_A STR_N STR_Y STR_C STR_R STR_L STR_F STR_RIGHT_PARENTHESIS
+#define STRING_BSR_UNICODE_RIGHTPAR    STR_B STR_S STR_R STR_UNDERSCORE STR_U STR_N STR_I STR_C STR_O STR_D STR_E STR_RIGHT_PARENTHESIS
+#define STRING_UTF8_RIGHTPAR           STR_U STR_T STR_F STR_8 STR_RIGHT_PARENTHESIS
+#define STRING_UCP_RIGHTPAR            STR_U STR_C STR_P STR_RIGHT_PARENTHESIS
+#define STRING_NO_START_OPT_RIGHTPAR   STR_N STR_O STR_UNDERSCORE STR_S STR_T STR_A STR_R STR_T STR_UNDERSCORE STR_O STR_P STR_T STR_RIGHT_PARENTHESIS
 
 #endif  /* SUPPORT_UTF8 */
 
@@ -1516,8 +1550,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 3,                          /* RREF, NRREF                            */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
-  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG,                */ \
-  1, 3, 1, 3,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */ \
+  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG                 */ \
+  1, 3,                          /* SKIP, SKIP_ARG                         */ \
+  1+LINK_SIZE, 3+LINK_SIZE,      /* THEN, THEN_ARG                         */ \
   1, 1, 1, 3, 1                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 
 
@@ -1536,7 +1571,8 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERRCOUNT };
+       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68,
+       ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit

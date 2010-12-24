@@ -50,13 +50,16 @@ const char *error;
 char *pattern;
 char *subject;
 unsigned char *name_table;
+unsigned int option_bits;
 int erroffset;
 int find_all;
+int crlf_is_newline;
 int namecount;
 int name_entry_size;
 int ovector[OVECCOUNT];
 int subject_length;
 int rc, i;
+int utf8;
 
 
 /**************************************************************************
@@ -238,14 +241,55 @@ if (namecount <= 0) printf("No named substrings\n"); else
 * subject is not a valid match; other possibilities must be tried. The   *
 * second flag restricts PCRE to one match attempt at the initial string  *
 * position. If this match succeeds, an alternative to the empty string   *
-* match has been found, and we can proceed round the loop.               *
+* match has been found, and we can print it and proceed round the loop,  *
+* advancing by the length of whatever was found. If this match does not  *
+* succeed, we still stay in the loop, advancing by just one character.   *
+* In UTF-8 mode, which can be set by (*UTF8) in the pattern, this may be *
+* more than one byte.                                                    *
+*                                                                        *
+* However, there is a complication concerned with newlines. When the     *
+* newline convention is such that CRLF is a valid newline, we want must  *
+* advance by two characters rather than one. The newline convention can  *
+* be set in the regex by (*CR), etc.; if not, we must find the default.  *
 *************************************************************************/
 
-if (!find_all)
+if (!find_all)     /* Check for -g */
   {
   pcre_free(re);   /* Release the memory used for the compiled pattern */
   return 0;        /* Finish unless -g was given */
   }
+
+/* Before running the loop, check for UTF-8 and whether CRLF is a valid newline
+sequence. First, find the options with which the regex was compiled; extract
+the UTF-8 state, and mask off all but the newline options. */
+
+(void)pcre_fullinfo(re, NULL, PCRE_INFO_OPTIONS, &option_bits);
+utf8 = option_bits & PCRE_UTF8;
+option_bits &= PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|PCRE_NEWLINE_CRLF|
+               PCRE_NEWLINE_ANY|PCRE_NEWLINE_ANYCRLF;
+
+/* If no newline options were set, find the default newline convention from the
+build configuration. */
+
+if (option_bits == 0)
+  {
+  int d;
+  (void)pcre_config(PCRE_CONFIG_NEWLINE, &d);
+  /* Note that these values are always the ASCII ones, even in
+  EBCDIC environments. CR = 13, NL = 10. */
+  option_bits = (d == 13)? PCRE_NEWLINE_CR :
+          (d == 10)? PCRE_NEWLINE_LF :
+          (d == (13<<8 | 10))? PCRE_NEWLINE_CRLF :
+          (d == -2)? PCRE_NEWLINE_ANYCRLF :
+          (d == -1)? PCRE_NEWLINE_ANY : 0;
+  }
+
+/* See if CRLF is a valid newline sequence. */
+
+crlf_is_newline =
+     option_bits == PCRE_NEWLINE_ANY ||
+     option_bits == PCRE_NEWLINE_CRLF ||
+     option_bits == PCRE_NEWLINE_ANYCRLF;
 
 /* Loop for second and subsequent matches */
 
@@ -280,14 +324,32 @@ for (;;)
   is zero, it just means we have found all possible matches, so the loop ends.
   Otherwise, it means we have failed to find a non-empty-string match at a
   point where there was a previous empty-string match. In this case, we do what
-  Perl does: advance the matching position by one, and continue. We do this by
-  setting the "end of previous match" offset, because that is picked up at the
-  top of the loop as the point at which to start again. */
+  Perl does: advance the matching position by one character, and continue. We
+  do this by setting the "end of previous match" offset, because that is picked
+  up at the top of the loop as the point at which to start again.
+
+  There are two complications: (a) When CRLF is a valid newline sequence, and
+  the current position is just before it, advance by an extra byte. (b)
+  Otherwise we must ensure that we skip an entire UTF-8 character if we are in
+  UTF-8 mode. */
 
   if (rc == PCRE_ERROR_NOMATCH)
     {
-    if (options == 0) break;
-    ovector[1] = start_offset + 1;
+    if (options == 0) break;                    /* All matches found */
+    ovector[1] = start_offset + 1;              /* Advance one byte */
+    if (crlf_is_newline &&                      /* If CRLF is newline & */
+        start_offset < subject_length - 1 &&    /* we are at CRLF, */
+        subject[start_offset] == '\r' &&
+        subject[start_offset + 1] == '\n')
+      ovector[1] += 1;                          /* Advance by one more. */
+    else if (utf8)                              /* Otherwise, ensure we */
+      {                                         /* advance a whole UTF-8 */
+      while (ovector[1] < subject_length)       /* character. */
+        {
+        if ((subject[ovector[1]] & 0xc0) != 0x80) break;
+        ovector[1] += 1;
+        }
+      }
     continue;    /* Go round the loop again */
     }
 
