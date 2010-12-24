@@ -196,7 +196,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	}
 
 	/* let see if the path already exists */
-	if (php_stream_stat_path(file_dirname_fullpath, &ssb) < 0) {
+	if (php_stream_stat_path_ex(file_dirname_fullpath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
 
 #if defined(PHP_WIN32) && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1)
 		char *e;
@@ -2379,7 +2379,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-    if (php_stream_stat_path(pathto, &ssb) < 0) {
+    if (php_stream_stat_path_ex(pathto, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
         ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
         if (!ret) {
             RETURN_FALSE;
