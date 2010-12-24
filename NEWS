@@ -91,6 +91,8 @@
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
   . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams) (Hannes)
+  . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
+    gmail dot com, Gustavo)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
