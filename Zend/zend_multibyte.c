@@ -52,7 +52,9 @@ static size_t dummy_encoding_converter(unsigned char **to, size_t *to_length, co
 
 static int dummy_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent TSRMLS_DC)
 {
-	return FAILURE;
+	*return_list = pemalloc(0, persistent);
+	return_size = 0;
+	return SUCCESS;
 }
 
 static const zend_encoding *dummy_internal_encoding_getter(TSRMLS_D)
