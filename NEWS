@@ -181,6 +181,7 @@ PHP                                                                        NEWS
 
 - Improved SPL extension:
   . Added SplObjectStorage::getHash() hook. (Etienne)
+  . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
 
 - Improved ZLIB extension:
   . Re-implemented non-file related functionality. (Mike)
