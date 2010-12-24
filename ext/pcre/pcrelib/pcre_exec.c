@@ -292,7 +292,7 @@ argument of match(), which never changes. */
 
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
-  heapframe *newframe = (pcre_stack_malloc)(sizeof(heapframe));\
+  heapframe *newframe = (heapframe *)(pcre_stack_malloc)(sizeof(heapframe));\
   if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
@@ -420,17 +420,18 @@ immediately. The second one is used when we already know we are past the end of
 the subject. */
 
 #define CHECK_PARTIAL()\
-  if (md->partial != 0 && eptr >= md->end_subject && eptr > mstart)\
-    {\
-    md->hitend = TRUE;\
-    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL);\
+  if (md->partial != 0 && eptr >= md->end_subject && \
+      eptr > md->start_used_ptr) \
+    { \
+    md->hitend = TRUE; \
+    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL); \
     }
 
 #define SCHECK_PARTIAL()\
-  if (md->partial != 0 && eptr > mstart)\
-    {\
-    md->hitend = TRUE;\
-    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL);\
+  if (md->partial != 0 && eptr > md->start_used_ptr) \
+    { \
+    md->hitend = TRUE; \
+    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL); \
     }
 
 
@@ -486,7 +487,7 @@ heap storage. Set up the top-level frame here; others are obtained from the
 heap whenever RMATCH() does a "recursion". See the macro definitions above. */
 
 #ifdef NO_RECURSE
-heapframe *frame = (pcre_stack_malloc)(sizeof(heapframe));
+heapframe *frame = (heapframe *)(pcre_stack_malloc)(sizeof(heapframe));
 if (frame == NULL) RRETURN(PCRE_ERROR_NOMEMORY);
 frame->Xprevframe = NULL;            /* Marks the top level */
 
@@ -708,36 +709,47 @@ for (;;)
     case OP_FAIL:
     MRRETURN(MATCH_NOMATCH);
 
+    /* COMMIT overrides PRUNE, SKIP, and THEN */
+
     case OP_COMMIT:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM52);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE &&
+        rrc != MATCH_SKIP && rrc != MATCH_SKIP_ARG &&
+        rrc != MATCH_THEN)
+      RRETURN(rrc);
     MRRETURN(MATCH_COMMIT);
+
+    /* PRUNE overrides THEN */
 
     case OP_PRUNE:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM51);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
     MRRETURN(MATCH_PRUNE);
 
     case OP_PRUNE_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
       ims, eptrb, flags, RM56);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
     md->mark = ecode + 2;
     RRETURN(MATCH_PRUNE);
+
+    /* SKIP overrides PRUNE and THEN */
 
     case OP_SKIP:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM53);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
+      RRETURN(rrc);
     md->start_match_ptr = eptr;   /* Pass back current position */
     MRRETURN(MATCH_SKIP);
 
     case OP_SKIP_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
       ims, eptrb, flags, RM57);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
+      RRETURN(rrc);
 
     /* Pass back the current skip name by overloading md->start_match_ptr and
     returning the special MATCH_SKIP_ARG return code. This will either be
@@ -747,17 +759,24 @@ for (;;)
     md->start_match_ptr = ecode + 2;
     RRETURN(MATCH_SKIP_ARG);
 
+    /* For THEN (and THEN_ARG) we pass back the address of the bracket or
+    the alt that is at the start of the current branch. This makes it possible
+    to skip back past alternatives that precede the THEN within the current
+    branch. */
+
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM54);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    md->start_match_ptr = ecode - GET(ecode, 1);
     MRRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
-    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM58);
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1+LINK_SIZE],
+      offset_top, md, ims, eptrb, flags, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    md->mark = ecode + 2;
+    md->start_match_ptr = ecode - GET(ecode, 1);
+    md->mark = ecode + LINK_SIZE + 2;
     RRETURN(MATCH_THEN);
 
     /* Handle a capturing bracket. If there is space in the offset vector, save
@@ -802,7 +821,9 @@ for (;;)
         {
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           ims, eptrb, flags, RM1);
-        if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+        if (rrc != MATCH_NOMATCH &&
+            (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+          RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         }
@@ -863,7 +884,9 @@ for (;;)
 
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
         eptrb, flags, RM2);
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH &&
+          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+        RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     /* Control never reaches here. */
@@ -1064,7 +1087,8 @@ for (;;)
         ecode += 1 + LINK_SIZE + GET(ecode, LINK_SIZE + 2);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
         }
-      else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
+      else if (rrc != MATCH_NOMATCH &&
+              (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         {
         RRETURN(rrc);         /* Need braces because of following else */
         }
@@ -1192,7 +1216,9 @@ for (;;)
         mstart = md->start_match_ptr;   /* In case \K reset it */
         break;
         }
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH &&
+          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+        RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
@@ -1226,7 +1252,9 @@ for (;;)
         do ecode += GET(ecode,1); while (*ecode == OP_ALT);
         break;
         }
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH &&
+          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+        RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1363,7 +1391,8 @@ for (;;)
             (pcre_free)(new_recursive.offset_save);
           MRRETURN(MATCH_MATCH);
           }
-        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
+        else if (rrc != MATCH_NOMATCH &&
+                (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)
@@ -1406,7 +1435,9 @@ for (;;)
         mstart = md->start_match_ptr;
         break;
         }
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH &&
+          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+        RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1672,37 +1703,40 @@ for (;;)
       if (eptr < md->end_subject)
         { if (!IS_NEWLINE(eptr)) MRRETURN(MATCH_NOMATCH); }
       else
-        { if (md->noteol) MRRETURN(MATCH_NOMATCH); }
+        {
+        if (md->noteol) MRRETURN(MATCH_NOMATCH);
+        SCHECK_PARTIAL();
+        }
       ecode++;
       break;
       }
-    else
+    else  /* Not multiline */
       {
       if (md->noteol) MRRETURN(MATCH_NOMATCH);
-      if (!md->endonly)
-        {
-        if (eptr != md->end_subject &&
-            (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
-          MRRETURN(MATCH_NOMATCH);
-        ecode++;
-        break;
-        }
+      if (!md->endonly) goto ASSERT_NL_OR_EOS;
       }
+
     /* ... else fall through for endonly */
 
     /* End of subject assertion (\z) */
 
     case OP_EOD:
     if (eptr < md->end_subject) MRRETURN(MATCH_NOMATCH);
+    SCHECK_PARTIAL();
     ecode++;
     break;
 
     /* End of subject or ending \n assertion (\Z) */
 
     case OP_EODN:
-    if (eptr != md->end_subject &&
+    ASSERT_NL_OR_EOS:
+    if (eptr < md->end_subject &&
         (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
       MRRETURN(MATCH_NOMATCH);
+
+    /* Either at end of string or \n before end. */
+
+    SCHECK_PARTIAL();
     ecode++;
     break;
 
@@ -5598,6 +5632,7 @@ if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
 if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
+if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
 /* This information is for finding all the numbers associated with a given
 name, for condition testing. */
@@ -5764,16 +5799,14 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  if (_pcre_valid_utf8((USPTR)subject, length) >= 0)
-    return PCRE_ERROR_BADUTF8;
+  int tb;
+  if ((tb = _pcre_valid_utf8((USPTR)subject, length)) >= 0)
+    return (tb == length && md->partial > 1)?
+      PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
-    int tb = ((USPTR)subject)[start_offset];
-    if (tb > 127)
-      {
-      tb &= 0xc0;
-      if (tb != 0 && tb != 0xc0) return PCRE_ERROR_BADUTF8_OFFSET;
-      }
+    tb = ((USPTR)subject)[start_offset] & 0xc0;
+    if (tb == 0x80) return PCRE_ERROR_BADUTF8_OFFSET;
     }
   }
 #endif
@@ -5901,9 +5934,10 @@ for(;;)
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later character is not present.
   However, there is an option that disables these, for testing and for ensuring
-  that all callouts do actually occur. */
+  that all callouts do actually occur. The option can be set in the regex by
+  (*NO_START_OPT) or passed in match-time options. */
 
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0)
+  if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0)
     {
     /* Advance to a unique first byte if there is one. */
 
