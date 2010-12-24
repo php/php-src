@@ -1,6 +1,136 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.11 10-Dec-2010
+------------------------
+
+1.  (*THEN) was not working properly if there were untried alternatives prior
+    to it in the current branch. For example, in ((a|b)(*THEN)(*F)|c..) it
+    backtracked to try for "b" instead of moving to the next alternative branch
+    at the same level (in this case, to look for "c"). The Perl documentation
+    is clear that when (*THEN) is backtracked onto, it goes to the "next
+    alternative in the innermost enclosing group".
+
+2.  (*COMMIT) was not overriding (*THEN), as it does in Perl. In a pattern
+    such as   (A(*COMMIT)B(*THEN)C|D)  any failure after matching A should
+    result in overall failure. Similarly, (*COMMIT) now overrides (*PRUNE) and
+    (*SKIP), (*SKIP) overrides (*PRUNE) and (*THEN), and (*PRUNE) overrides
+    (*THEN).
+
+3.  If \s appeared in a character class, it removed the VT character from
+    the class, even if it had been included by some previous item, for example
+    in [\x00-\xff\s]. (This was a bug related to the fact that VT is not part
+    of \s, but is part of the POSIX "space" class.)
+
+4.  A partial match never returns an empty string (because you can always
+    match an empty string at the end of the subject); however the checking for
+    an empty string was starting at the "start of match" point. This has been
+    changed to the "earliest inspected character" point, because the returned
+    data for a partial match starts at this character. This means that, for
+    example, /(?<=abc)def/ gives a partial match for the subject "abc"
+    (previously it gave "no match").
+
+5.  Changes have been made to the way PCRE_PARTIAL_HARD affects the matching
+    of $, \z, \Z, \b, and \B. If the match point is at the end of the string,
+    previously a full match would be given. However, setting PCRE_PARTIAL_HARD
+    has an implication that the given string is incomplete (because a partial
+    match is preferred over a full match). For this reason, these items now
+    give a partial match in this situation. [Aside: previously, the one case
+    /t\b/ matched against "cat" with PCRE_PARTIAL_HARD set did return a partial
+    match rather than a full match, which was wrong by the old rules, but is
+    now correct.]
+
+6.  There was a bug in the handling of #-introduced comments, recognized when
+    PCRE_EXTENDED is set, when PCRE_NEWLINE_ANY and PCRE_UTF8 were also set.
+    If a UTF-8 multi-byte character included the byte 0x85 (e.g. +U0445, whose
+    UTF-8 encoding is 0xd1,0x85), this was misinterpreted as a newline when
+    scanning for the end of the comment. (*Character* 0x85 is an "any" newline,
+    but *byte* 0x85 is not, in UTF-8 mode). This bug was present in several
+    places in pcre_compile().
+
+7.  Related to (6) above, when pcre_compile() was skipping #-introduced
+    comments when looking ahead for named forward references to subpatterns,
+    the only newline sequence it recognized was NL. It now handles newlines
+    according to the set newline convention.
+
+8.  SunOS4 doesn't have strerror() or strtoul(); pcregrep dealt with the
+    former, but used strtoul(), whereas pcretest avoided strtoul() but did not
+    cater for a lack of strerror(). These oversights have been fixed.
+
+9.  Added --match-limit and --recursion-limit to pcregrep.
+
+10. Added two casts needed to build with Visual Studio when NO_RECURSE is set.
+
+11. When the -o option was used, pcregrep was setting a return code of 1, even
+    when matches were found, and --line-buffered was not being honoured.
+
+12. Added an optional parentheses number to the -o and --only-matching options
+    of pcregrep.
+
+13. Imitating Perl's /g action for multiple matches is tricky when the pattern
+    can match an empty string. The code to do it in pcretest and pcredemo
+    needed fixing:
+
+    (a) When the newline convention was "crlf", pcretest got it wrong, skipping
+        only one byte after an empty string match just before CRLF (this case
+        just got forgotten; "any" and "anycrlf" were OK).
+
+    (b) The pcretest code also had a bug, causing it to loop forever in UTF-8
+        mode when an empty string match preceded an ASCII character followed by
+        a non-ASCII character. (The code for advancing by one character rather
+        than one byte was nonsense.)
+
+    (c) The pcredemo.c sample program did not have any code at all to handle
+        the cases when CRLF is a valid newline sequence.
+
+14. Neither pcre_exec() nor pcre_dfa_exec() was checking that the value given
+    as a starting offset was within the subject string. There is now a new
+    error, PCRE_ERROR_BADOFFSET, which is returned if the starting offset is
+    negative or greater than the length of the string. In order to test this,
+    pcretest is extended to allow the setting of negative starting offsets.
+
+15. In both pcre_exec() and pcre_dfa_exec() the code for checking that the
+    starting offset points to the beginning of a UTF-8 character was
+    unnecessarily clumsy. I tidied it up.
+
+16. Added PCRE_ERROR_SHORTUTF8 to make it possible to distinguish between a
+    bad UTF-8 sequence and one that is incomplete when using PCRE_PARTIAL_HARD.
+
+17. Nobody had reported that the --include_dir option, which was added in
+    release 7.7 should have been called --include-dir (hyphen, not underscore)
+    for compatibility with GNU grep. I have changed it to --include-dir, but
+    left --include_dir as an undocumented synonym, and the same for
+    --exclude-dir, though that is not available in GNU grep, at least as of
+    release 2.5.4.
+
+18. At a user's suggestion, the macros GETCHAR and friends (which pick up UTF-8
+    characters from a string of bytes) have been redefined so as not to use
+    loops, in order to improve performance in some environments. At the same
+    time, I abstracted some of the common code into auxiliary macros to save
+    repetition (this should not affect the compiled code).
+
+19. If \c was followed by a multibyte UTF-8 character, bad things happened. A
+    compile-time error is now given if \c is not followed by an ASCII
+    character, that is, a byte less than 128. (In EBCDIC mode, the code is
+    different, and any byte value is allowed.)
+
+20. Recognize (*NO_START_OPT) at the start of a pattern to set the PCRE_NO_
+    START_OPTIMIZE option, which is now allowed at compile time - but just
+    passed through to pcre_exec() or pcre_dfa_exec(). This makes it available
+    to pcregrep and other applications that have no direct access to PCRE
+    options. The new /Y option in pcretest sets this option when calling
+    pcre_compile().
+
+21. Change 18 of release 8.01 broke the use of named subpatterns for recursive
+    back references. Groups containing recursive back references were forced to
+    be atomic by that change, but in the case of named groups, the amount of
+    memory required was incorrectly computed, leading to "Failed: internal
+    error: code overflow". This has been fixed.
+
+22. Some patches to pcre_stringpiece.h, pcre_stringpiece_unittest.cc, and
+    pcretest.c, to avoid build problems in some Borland environments.
+
+
 Version 8.10 25-Jun-2010
 ------------------------
 

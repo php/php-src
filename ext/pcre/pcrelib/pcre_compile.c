@@ -406,6 +406,7 @@ static const char error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "this version of PCRE is not compiled with PCRE_UCP support\0"
+  "\\c must be followed by an ASCII character\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -839,7 +840,8 @@ else
     break;
 
     /* For \c, a following letter is upper-cased; then the 0x40 bit is flipped.
-    This coding is ASCII-specific, but then the whole concept of \cx is
+    An error is given if the byte following \c is not an ASCII character. This
+    coding is ASCII-specific, but then the whole concept of \cx is
     ASCII-specific. (However, an EBCDIC equivalent has now been added.) */
 
     case CHAR_c:
@@ -849,11 +851,15 @@ else
       *errorcodeptr = ERR2;
       break;
       }
-
-#ifndef EBCDIC  /* ASCII/UTF-8 coding */
+#ifndef EBCDIC    /* ASCII/UTF-8 coding */
+    if (c > 127)  /* Excludes all non-ASCII in either mode */
+      {
+      *errorcodeptr = ERR68;
+      break;
+      }
     if (c >= CHAR_a && c <= CHAR_z) c -= 32;
     c ^= 0x40;
-#else           /* EBCDIC coding */
+#else             /* EBCDIC coding */
     if (c >= CHAR_a && c <= CHAR_z) c += 64;
     c ^= 0xC0;
 #endif
@@ -1097,10 +1103,21 @@ top-level call starts at the beginning of the pattern. All other calls must
 start at a parenthesis. It scans along a pattern's text looking for capturing
 subpatterns, and counting them. If it finds a named pattern that matches the
 name it is given, it returns its number. Alternatively, if the name is NULL, it
-returns when it reaches a given numbered subpattern. We know that if (?P< is
-encountered, the name will be terminated by '>' because that is checked in the
-first pass. Recursion is used to keep track of subpatterns that reset the
-capturing group numbers - the (?| feature.
+returns when it reaches a given numbered subpattern. Recursion is used to keep
+track of subpatterns that reset the capturing group numbers - the (?| feature.
+
+This function was originally called only from the second pass, in which we know
+that if (?< or (?' or (?P< is encountered, the name will be correctly
+terminated because that is checked in the first pass. There is now one call to
+this function in the first pass, to check for a recursive back reference by
+name (so that we can make the whole group atomic). In this case, we need check
+only up to the current position in the pattern, and that is still OK because
+and previous occurrences will have been checked. To make this work, the test
+for "end of pattern" is a check against cd->end_pattern in the main loop,
+instead of looking for a binary zero. This means that the special first-pass
+call can adjust cd->end_pattern temporarily. (Checks for binary zero while
+processing items within the loop are OK, because afterwards the main loop will
+terminate.)
 
 Arguments:
   ptrptr       address of the current character pointer (updated)
@@ -1108,6 +1125,7 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
+  utf8         TRUE if we are in UTF-8 mode
   count        pointer to the current capturing subpattern number (updated)
 
 Returns:       the number of the named subpattern, or -1 if not found
@@ -1115,7 +1133,7 @@ Returns:       the number of the named subpattern, or -1 if not found
 
 static int
 find_parens_sub(uschar **ptrptr, compile_data *cd, const uschar *name, int lorn,
-  BOOL xmode, int *count)
+  BOOL xmode, BOOL utf8, int *count)
 {
 uschar *ptr = *ptrptr;
 int start_count = *count;
@@ -1200,9 +1218,11 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
   }
 
 /* Past any initial parenthesis handling, scan for parentheses or vertical
-bars. */
+bars. Stop if we get to cd->end_pattern. Note that this is important for the
+first-pass call when this value is temporarily adjusted to stop at the current
+position. So DO NOT change this to a test for binary zero. */
 
-for (; *ptr != 0; ptr++)
+for (; ptr < cd->end_pattern; ptr++)
   {
   /* Skip over backslashed characters and also entire \Q...\E */
 
@@ -1276,7 +1296,15 @@ for (; *ptr != 0; ptr++)
 
   if (xmode && *ptr == CHAR_NUMBER_SIGN)
     {
-    while (*(++ptr) != 0 && *ptr != CHAR_NL) {};
+    ptr++;
+    while (*ptr != 0)
+      {
+      if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
+      ptr++;
+#ifdef SUPPORT_UTF8
+      if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+      }
     if (*ptr == 0) goto FAIL_EXIT;
     continue;
     }
@@ -1285,7 +1313,7 @@ for (; *ptr != 0; ptr++)
 
   if (*ptr == CHAR_LEFT_PARENTHESIS)
     {
-    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, count);
+    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf8, count);
     if (rc > 0) return rc;
     if (*ptr == 0) goto FAIL_EXIT;
     }
@@ -1331,12 +1359,14 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
+  utf8         TRUE if we are in UTF-8 mode
 
 Returns:       the number of the found subpattern, or -1 if not found
 */
 
 static int
-find_parens(compile_data *cd, const uschar *name, int lorn, BOOL xmode)
+find_parens(compile_data *cd, const uschar *name, int lorn, BOOL xmode,
+  BOOL utf8)
 {
 uschar *ptr = (uschar *)cd->start_pattern;
 int count = 0;
@@ -1349,7 +1379,7 @@ matching closing parens. That is why we have to have a loop. */
 
 for (;;)
   {
-  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, &count);
+  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf8, &count);
   if (rc > 0 || *ptr++ == 0) break;
   }
 
@@ -1722,8 +1752,11 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      case OP_THEN_ARG:
       code += code[1];
+      break;
+
+      case OP_THEN_ARG:
+      code += code[1+LINK_SIZE];
       break;
       }
 
@@ -1825,8 +1858,11 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      case OP_THEN_ARG:
       code += code[1];
+      break;
+
+      case OP_THEN_ARG:
+      code += code[1+LINK_SIZE];
       break;
       }
 
@@ -2103,8 +2139,11 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    case OP_THEN_ARG:
     code += code[1];
+    break;
+
+    case OP_THEN_ARG:
+    code += code[1+LINK_SIZE];
     break;
 
     /* None of the remaining opcodes are required to match a character. */
@@ -2504,8 +2543,15 @@ if ((options & PCRE_EXTENDED) != 0)
     while ((cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
     if (*ptr == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++;
+      while (*ptr != 0)
+        {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+        }
       }
     else break;
     }
@@ -2541,8 +2587,15 @@ if ((options & PCRE_EXTENDED) != 0)
     while ((cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
     if (*ptr == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++;
+      while (*ptr != 0)
+        {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+        }
       }
     else break;
     }
@@ -3115,9 +3168,14 @@ for (;; ptr++)
     if ((cd->ctypes[c] & ctype_space) != 0) continue;
     if (c == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++;
+      while (*ptr != 0)
         {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
         }
       if (*ptr != 0) continue;
 
@@ -3492,9 +3550,14 @@ for (;; ptr++)
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_word];
             continue;
 
+            /* Perl 5.004 onwards omits VT from \s, but we must preserve it
+            if it was previously set by something earlier in the character
+            class. */
+
             case ESC_s:
-            for (c = 0; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
-            classbits[1] &= ~0x08;   /* Perl 5.004 onwards omits VT from \s */
+            classbits[0] |= cbits[cbit_space];
+            classbits[1] |= cbits[cbit_space+1] & ~0x08;
+            for (c = 2; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
             continue;
 
             case ESC_S:
@@ -4806,7 +4869,12 @@ for (;; ptr++)
               *errorcodeptr = ERR66;
               goto FAILED;
               }
-            *code++ = verbs[i].op;
+            *code = verbs[i].op;
+            if (*code++ == OP_THEN)
+              {
+              PUT(code, 0, code - bcptr->current_branch - 1);
+              code += LINK_SIZE;
+              }
             }
 
           else
@@ -4816,7 +4884,12 @@ for (;; ptr++)
               *errorcodeptr = ERR59;
               goto FAILED;
               }
-            *code++ = verbs[i].op_arg;
+            *code = verbs[i].op_arg;
+            if (*code++ == OP_THEN_ARG)
+              {
+              PUT(code, 0, code - bcptr->current_branch - 1);
+              code += LINK_SIZE;
+              }
             *code++ = arglen;
             memcpy(code, arg, arglen);
             code += arglen;
@@ -5010,7 +5083,7 @@ for (;; ptr++)
         /* Search the pattern for a forward reference */
 
         else if ((i = find_parens(cd, name, namelen,
-                        (options & PCRE_EXTENDED) != 0)) > 0)
+                        (options & PCRE_EXTENDED) != 0, utf8)) > 0)
           {
           PUT2(code, 2+LINK_SIZE, i);
           code[1+LINK_SIZE]++;
@@ -5311,11 +5384,17 @@ for (;; ptr++)
         while ((cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
-        /* In the pre-compile phase, do a syntax check and set a dummy
-        reference number. */
+        /* In the pre-compile phase, do a syntax check. We used to just set
+        a dummy reference number, because it was not used in the first pass.
+        However, with the change of recursive back references to be atomic,
+        we have to look for the number so that this state can be identified, as
+        otherwise the incorrect length is computed. If it's not a backwards
+        reference, the dummy number will do. */
 
         if (lengthptr != NULL)
           {
+          const uschar *temp;
+
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -5331,7 +5410,22 @@ for (;; ptr++)
             *errorcodeptr = ERR48;
             goto FAILED;
             }
-          recno = 0;
+
+          /* The name table does not exist in the first pass, so we cannot
+          do a simple search as in the code below. Instead, we have to scan the
+          pattern to find the number. It is important that we scan it only as
+          far as we have got because the syntax of named subpatterns has not
+          been checked for the rest of the pattern, and find_parens() assumes
+          correct syntax. In any case, it's a waste of resources to scan
+          further. We stop the scan at the current point by temporarily
+          adjusting the value of cd->endpattern. */
+
+          temp = cd->end_pattern;
+          cd->end_pattern = ptr;
+          recno = find_parens(cd, name, namelen,
+            (options & PCRE_EXTENDED) != 0, utf8);
+          cd->end_pattern = temp;
+          if (recno < 0) recno = 0;    /* Forward ref; set dummy number */
           }
 
         /* In the real compile, seek the name in the table. We check the name
@@ -5356,7 +5450,7 @@ for (;; ptr++)
             }
           else if ((recno =                /* Forward back reference */
                     find_parens(cd, name, namelen,
-                      (options & PCRE_EXTENDED) != 0)) <= 0)
+                      (options & PCRE_EXTENDED) != 0, utf8)) <= 0)
             {
             *errorcodeptr = ERR15;
             goto FAILED;
@@ -5467,7 +5561,7 @@ for (;; ptr++)
             if (called == NULL)
               {
               if (find_parens(cd, NULL, recno,
-                    (options & PCRE_EXTENDED) != 0) < 0)
+                    (options & PCRE_EXTENDED) != 0, utf8) < 0)
                 {
                 *errorcodeptr = ERR15;
                 goto FAILED;
@@ -6797,6 +6891,8 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
     { skipatstart += 7; options |= PCRE_UTF8; continue; }
   else if (strncmp((char *)(ptr+skipatstart+2), STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
+  else if (strncmp((char *)(ptr+skipatstart+2), STRING_NO_START_OPT_RIGHTPAR, 13) == 0)
+    { skipatstart += 15; options |= PCRE_NO_START_OPTIMIZE; continue; }
 
   if (strncmp((char *)(ptr+skipatstart+2), STRING_CR_RIGHTPAR, 3) == 0)
     { skipatstart += 5; newnl = PCRE_NEWLINE_CR; }

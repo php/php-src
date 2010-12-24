@@ -537,9 +537,24 @@ for(;;)
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    case OP_THEN_ARG:
     fprintf(f, "    %s %s", OP_names[*code], code + 2);
     extra += code[1];
+    break;
+
+    case OP_THEN:
+    if (print_lengths)
+      fprintf(f, "    %s %d", OP_names[*code], GET(code, 1));
+    else
+      fprintf(f, "    %s", OP_names[*code]);
+    break;
+
+    case OP_THEN_ARG:
+    if (print_lengths)
+      fprintf(f, "    %s %d %s", OP_names[*code], GET(code, 1),
+        code + 2 + LINK_SIZE);
+    else
+      fprintf(f, "    %s %s", OP_names[*code], code + 2 + LINK_SIZE);
+    extra += code[1+LINK_SIZE];
     break;
 
     /* Anything else is just an item with no data*/

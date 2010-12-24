@@ -149,6 +149,7 @@ static const int eint[] = {
   REG_BADPAT,  /* different names for subpatterns of the same number are not allowed */
   REG_BADPAT,  /* (*MARK) must have an argument */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
+  REG_BADPAT,  /* \c must be followed by an ASCII character */
 };
 
 /* Table of texts corresponding to POSIX error codes */
