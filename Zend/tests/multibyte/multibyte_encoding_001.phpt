@@ -2,7 +2,7 @@
 Zend Multibyte and ShiftJIS
 --SKIPIF--
 <?php
-if (!in_array("detect_unicode", array_keys(ini_get_all()))) {
+if (!in_array("zend.detect_unicode", array_keys(ini_get_all()))) {
   die("skip Requires configure --enable-zend-multibyte option");
 }
 if (!extension_loaded("mbstring")) {
