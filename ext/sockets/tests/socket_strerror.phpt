@@ -8,6 +8,9 @@ fa@php.net
     if (!extension_loaded('sockets')) {
         die('skip sockets extension not available.');
     }
+    if (!stristr(PHP_OS, "linux") {
+        die('skip - test validtes linux error strings only.');
+    }
 ?>
 --FILE--
 <?php
