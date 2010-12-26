@@ -44,7 +44,7 @@ if (!extension_loaded('sockets')) {
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [%d]: Resource temporarily unavailable in %s on line %d
+Warning: socket_recvfrom(): unable to recvfrom [%d]: %a in %s on line %d
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
 
