@@ -1099,7 +1099,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 		}
-		if (node->type != XML_ENTITY_DECL) {
+		if (!node || node->type != XML_ENTITY_DECL) {
 			attr = node ? (xmlAttrPtr)node->properties : NULL;
 			zattr = NULL;
 			test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
