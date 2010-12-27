@@ -1099,22 +1099,24 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 		}
-		attr = node ? (xmlAttrPtr)node->properties : NULL;
-		zattr = NULL;
-		test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
-		while (attr) {
-			if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
-				MAKE_STD_ZVAL(value);
-				ZVAL_STRING(value, sxe_xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1), 0);
-				namelen = xmlStrlen(attr->name) + 1;
-				if (!zattr) {
-					MAKE_STD_ZVAL(zattr);
-					array_init(zattr);
-					sxe_properties_add(rv, "@attributes", sizeof("@attributes"), zattr TSRMLS_CC);
+		if (node->tpye != XML_ENTITY_DECL) {
+			attr = node ? (xmlAttrPtr)node->properties : NULL;
+			zattr = NULL;
+			test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
+			while (attr) {
+				if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
+					MAKE_STD_ZVAL(value);
+					ZVAL_STRING(value, sxe_xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1), 0);
+					namelen = xmlStrlen(attr->name) + 1;
+					if (!zattr) {
+						MAKE_STD_ZVAL(zattr);
+						array_init(zattr);
+						sxe_properties_add(rv, "@attributes", sizeof("@attributes"), zattr TSRMLS_CC);
+					}
+					add_assoc_zval_ex(zattr, (char*)attr->name, namelen, value);
 				}
-				add_assoc_zval_ex(zattr, (char*)attr->name, namelen, value);
+				attr = attr->next;
 			}
-			attr = attr->next;
 		}
 	}
 
