@@ -29,6 +29,7 @@
 #include <unicode/ucol.h>
 
 zend_class_entry *Collator_ce_ptr = NULL;
+static zend_object_handlers Collator_handlers;
 
 /*
  * Auxiliary functions needed by objects of 'Collator' class
@@ -73,7 +74,7 @@ zend_object_value Collator_object_create(
 		(zend_objects_free_object_storage_t)Collator_objects_free,
 		NULL TSRMLS_CC );
 
-	retval.handlers = zend_get_std_object_handlers();
+	retval.handlers = &Collator_handlers;
 
 	return retval;
 }
@@ -141,6 +142,10 @@ void collator_register_Collator_class( TSRMLS_D )
 	INIT_CLASS_ENTRY( ce, "Collator", Collator_class_functions );
 	ce.create_object = Collator_object_create;
 	Collator_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+
+	memcpy(&Collator_handlers, zend_get_std_object_handlers(),
+		sizeof Collator_handlers);
+	Collator_handlers.clone_obj = NULL;
 
 	/* Declare 'Collator' class properties. */
 	if( !Collator_ce_ptr )
