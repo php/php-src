@@ -522,6 +522,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
+	compiler_globals->script_encoding_list = NULL;
 }
 /* }}} */
 
