@@ -24,6 +24,7 @@
 #include "dateformat_attr.h"
 
 zend_class_entry *IntlDateFormatter_ce_ptr = NULL;
+static zend_object_handlers IntlDateFormatter_handlers;
 
 /*
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
@@ -73,7 +74,7 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 		(zend_objects_free_object_storage_t)IntlDateFormatter_object_free,
 		NULL TSRMLS_CC );
 
-	retval.handlers = zend_get_std_object_handlers();
+	retval.handlers = &IntlDateFormatter_handlers;
 
 	return retval;
 }
@@ -160,6 +161,10 @@ void dateformat_register_IntlDateFormatter_class( TSRMLS_D )
 	INIT_CLASS_ENTRY( ce, "IntlDateFormatter", IntlDateFormatter_class_functions );
 	ce.create_object = IntlDateFormatter_object_create;
 	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+
+	memcpy(&IntlDateFormatter_handlers, zend_get_std_object_handlers(),
+		sizeof IntlDateFormatter_handlers);
+	IntlDateFormatter_handlers.clone_obj = NULL;
 
 	/* Declare 'IntlDateFormatter' class properties. */
 	if( !IntlDateFormatter_ce_ptr )
