@@ -22,8 +22,10 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.7-dev - 091210 - $Revision$"
-#define MYSQLND_VERSION_ID 50007
+#define MYSQLND_VERSION "mysqlnd 5.0.8-dev - 20101228 - $Revision$"
+#define MYSQLND_VERSION_ID 50008
+
+#define MYSQLND_PLUGIN_API_VERSION 1
 
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 0
@@ -64,7 +66,14 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D);
 PHPAPI void mysqlnd_library_end(TSRMLS_D);
 
 PHPAPI unsigned int mysqlnd_plugin_register();
+PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC);
 PHPAPI unsigned int mysqlnd_plugin_count();
+PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC);
+#define mysqlnd_plugin_find(name) _mysqlnd_plugin_find((name) TSRMLS_CC);
+
+PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument TSRMLS_DC);
+#define mysqlnd_plugin_apply_with_argument(func, argument) _mysqlnd_plugin_apply_with_argument((func), (argument) TSRMLS_CC);
+
 PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC);
 #define mysqlnd_plugin_get_plugin_connection_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data((c), (p_id) TSRMLS_CC)
 

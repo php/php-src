@@ -921,4 +921,46 @@ struct st_mysqlnd_stmt
 	zend_bool persistent;
 };
 
+
+typedef struct st_mysqlnd_string
+{
+	char	*s;
+	size_t	l;
+} MYSQLND_STRING;
+
+
+struct st_mysqlnd_plugin_header
+{
+	unsigned int	plugin_api_version; 
+	const char *	plugin_name;
+	unsigned long	plugin_version;
+	const char *	plugin_string_version;
+	const char *	plugin_license;
+	const char *	plugin_author;
+	struct
+	{
+		MYSQLND_STATS *			values;
+		const MYSQLND_STRING *	names;
+	} plugin_stats;
+
+	struct
+	{
+		enum_func_status (*plugin_shutdown)(void * plugin TSRMLS_DC);
+	} m;
+};
+
+
+struct st_mysqlnd_plugin_core
+{
+	struct st_mysqlnd_plugin_header plugin_header;
+};
+
+
+struct st_mysqlnd_typeii_plugin_example
+{
+	struct st_mysqlnd_plugin_header plugin_header;
+	void * methods;
+	unsigned int counter;
+};
+
 #endif /* MYSQLND_STRUCTS_H */

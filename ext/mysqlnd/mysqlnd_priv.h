@@ -67,6 +67,7 @@
 }
 #endif
 
+#define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
 #define MYSQLND_DEBUG_DUMP_TIME				1
 #define MYSQLND_DEBUG_DUMP_TRACE			2
@@ -187,6 +188,13 @@ void _mysqlnd_init_ps_fetch_subsystem();
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
 								unsigned int byte_count TSRMLS_DC);
+
+void mysqlnd_plugin_subsystem_init(TSRMLS_D);
+void mysqlnd_plugin_subsystem_end(TSRMLS_D);
+
+
+
+void mysqlnd_example_plugin_register(TSRMLS_D);
 
 #endif	/* MYSQLND_PRIV_H */
 

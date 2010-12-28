@@ -1856,6 +1856,39 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
 	return res;
 }
 
+
+static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"debug_trace",
+		MYSQLND_VERSION_ID,
+		MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		{
+			NULL, /* no statistics , will be filled later if there are some */
+			NULL, /* no statistics */
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	},
+	{/* methods */
+		mysqlnd_debug_init,
+		mysqlnd_get_backtrace
+	}
+};
+
+/* {{{ mysqlnd_debug_trace_plugin_register */
+void
+mysqlnd_debug_trace_plugin_register(TSRMLS_D)
+{
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_trace_log_plugin TSRMLS_CC);
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4

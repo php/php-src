@@ -66,10 +66,14 @@ static zend_bool mysqlnd_library_initted = FALSE;
 
 static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
+static struct st_mysqlnd_plugin_core mysqlnd_plugin_core;
+
+
 /* {{{ mysqlnd_library_end */
 PHPAPI void mysqlnd_library_end(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == TRUE) {
+		mysqlnd_plugin_subsystem_end(TSRMLS_C);
 		mysqlnd_stats_end(mysqlnd_global_stats);
 		mysqlnd_global_stats = NULL;
 		mysqlnd_library_initted = FALSE;
@@ -2378,9 +2382,17 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
 		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
+		mysqlnd_plugin_subsystem_init(TSRMLS_C);
+		{
+			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
+			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core TSRMLS_CC);
+		}
+		mysqlnd_example_plugin_register(TSRMLS_C);
+		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
 	}
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_conn_get_methods */
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods()
@@ -2397,24 +2409,6 @@ PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
 /* }}} */
 
 
-static unsigned int mysqlnd_plugins_counter = 0;
-
-/* {{{ mysqlnd_plugin_register */
-PHPAPI unsigned int mysqlnd_plugin_register()
-{
-	return mysqlnd_plugins_counter++;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_plugin_count */
-PHPAPI unsigned int mysqlnd_plugin_count()
-{
-	return mysqlnd_plugins_counter;
-}
-/* }}} */
-
-
 /* {{{ _mysqlnd_plugin_get_plugin_connection_data */
 PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC)
 {
@@ -2426,6 +2420,27 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, 
 	DBG_RETURN((void *)((char *)conn + sizeof(MYSQLND) + plugin_id * sizeof(void *)));
 }
 /* }}} */
+
+
+static struct st_mysqlnd_plugin_core mysqlnd_plugin_core =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"mysqlnd",
+		MYSQLND_VERSION_ID,
+		MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		{
+			NULL, /* will be filled later */
+			mysqlnd_stats_values_names,
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	}
+};
+
 
 /*
  * Local variables:

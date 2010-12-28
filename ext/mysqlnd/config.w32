@@ -12,6 +12,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_debug.c " +
 			"mysqlnd_loaddata.c " +
 			"mysqlnd_net.c " +
+			"mysqlnd_plugin.c " +
 			"mysqlnd_ps.c " +
 			"mysqlnd_ps_codec.c " +
 			"mysqlnd_result.c " +
