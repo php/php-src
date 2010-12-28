@@ -78,7 +78,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		 * */
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
 			return;
-		}		
+		}
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &imgind, -1, "Image", phpi_get_le_gd());
