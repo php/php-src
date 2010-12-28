@@ -24,7 +24,9 @@
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_statistics.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
 
 /* {{{ mysqlnd_functions[]
  *
@@ -92,12 +94,51 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 /* }}} */
 
 
+/* {{{ mysqlnd_minfo_dump_plugin_stats */
+static int
+mysqlnd_minfo_dump_plugin_stats(void *pDest, void * argument TSRMLS_DC)
+{
+	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **) pDest;
+	if (plugin_header->plugin_stats.values) {
+		char buf[64];
+		zval values;
+		snprintf(buf, sizeof(buf), "%s statistics", plugin_header->plugin_name);
+
+		mysqlnd_fill_stats_hash(plugin_header->plugin_stats.values, plugin_header->plugin_stats.names, &values TSRMLS_CC ZEND_FILE_LINE_CC); 
+
+		php_info_print_table_start();
+		php_info_print_table_header(2, buf, "");
+		mysqlnd_minfo_print_hash(&values);
+		php_info_print_table_end();
+		zval_dtor(&values);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_minfo_dump_loaded_plugins */
+static int 
+mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
+{
+	smart_str * buffer = (smart_str *) buf;
+	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **) pDest;
+	if (plugin_header->plugin_name) {
+		if (buffer->len) {
+			smart_str_appendc(buffer, ',');
+		}
+		smart_str_appends(buffer, plugin_header->plugin_name);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mysqlnd)
 {
 	char buf[32];
-	zval values;
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "mysqlnd", "enabled");
@@ -126,14 +167,17 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	php_info_print_table_row(2, "Tracing", MYSQLND_G(debug)? MYSQLND_G(debug):"n/a");
 	php_info_print_table_end();
 
-	/* Print client stats */
-	php_info_print_table_start();
-	php_info_print_table_header(2, "Client statistics", "");
-	mysqlnd_get_client_stats(&values);
-	mysqlnd_minfo_print_hash(&values);
+	/* loaded plugins */
+	{
+		smart_str tmp_str = {0, 0, 0};
+		mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_loaded_plugins, &tmp_str);
+		smart_str_0(&tmp_str);
+		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
+		smart_str_free(&tmp_str);
+	}
 
-	zval_dtor(&values);
-	php_info_print_table_end();
+	/* Print client stats */
+	mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_plugin_stats, NULL);
 }
 /* }}} */
 
@@ -230,12 +274,16 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
 	if (MYSQLND_G(debug)) {
-		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
-		if (!dbg) {
-			return FAILURE;
+		MYSQLND_G(dbg) = NULL;
+		struct st_mysqlnd_plugin_trace_log * trace_log_plugin = mysqlnd_plugin_find("debug_trace");
+		if (trace_log_plugin) {
+			MYSQLND_DEBUG * dbg = trace_log_plugin->methods.trace_instance_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
+			if (!dbg) {
+				return FAILURE;
+			}
+			dbg->m->set_mode(dbg, MYSQLND_G(debug));
+			MYSQLND_G(dbg) = dbg;
 		}
-		dbg->m->set_mode(dbg, MYSQLND_G(debug));
-		MYSQLND_G(dbg) = dbg;
 	}
 	return SUCCESS;
 }

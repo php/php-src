@@ -59,6 +59,18 @@ struct st_mysqlnd_debug
 	const char ** skip_functions;
 };
 
+struct st_mysqlnd_plugin_trace_log
+{
+	struct st_mysqlnd_plugin_header plugin_header;
+	struct
+	{
+		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[] TSRMLS_DC);
+		char * (*get_backtrace)(uint max_levels, size_t * length TSRMLS_DC);
+	} methods;
+};
+
+void mysqlnd_debug_trace_plugin_register(TSRMLS_D);
+
 PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
