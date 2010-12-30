@@ -413,29 +413,36 @@ PHP_FUNCTION(stream_socket_recvfrom)
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
-	php_stream *stream;
-	zval *zsrc;
-	long maxlen = PHP_STREAM_COPY_ALL, pos = -1L;
-	int len, newlen;
-	char *contents = NULL;
+	php_stream	*stream;
+	zval		*zsrc;
+	long		maxlen		= PHP_STREAM_COPY_ALL,
+				desiredpos	= -1L;
+	int			len,
+				newlen;
+	char		*contents	= NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &desiredpos) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zsrc);
 
-	if (pos >= 0) {
-		int seek_res = 0;
-		if (pos > stream->position) {
+	if (desiredpos >= 0) {
+		int		seek_res = 0;
+		off_t	position;
+
+		position = php_stream_tell(stream);
+		if (position >= 0 && desiredpos > position) {
 			/* use SEEK_CUR to allow emulation in streams that don't support seeking */
-			seek_res = php_stream_seek(stream, pos - stream->position, SEEK_CUR);
-		} else if (pos < stream->position)  {
-			seek_res = php_stream_seek(stream, pos, SEEK_SET);
+			seek_res = php_stream_seek(stream, desiredpos - position, SEEK_CUR);
+		} else if (desiredpos < position)  {
+			/* desired position before position or error on tell */
+			seek_res = php_stream_seek(stream, desiredpos, SEEK_SET);
 		}
 
 		if (seek_res != 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Failed to seek to position %ld in the stream", desiredpos);
 			RETURN_FALSE;
 		}
 	}
