@@ -1081,10 +1081,9 @@ static int php_sqlite3_stream_cast(php_stream *stream, int castas, void **ret TS
 
 static int php_sqlite3_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
 {
-	/* TODO: fill in details based on Data: and Content-Length: headers, and/or data
-	 * from curl_easy_getinfo().
-	 * For now, return -1 to indicate that it doesn't make sense to stat this stream */
-	return -1;
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+	ssb->sb.st_size = sqlite3_stream->size;
+	return 0;
 }
 
 static php_stream_ops php_stream_sqlite3_ops = {
@@ -1231,6 +1230,27 @@ PHP_METHOD(sqlite3stmt, clear)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool SQLite3Stmt::readOnly()
+   Returns true if a statement is definitely read only */
+PHP_METHOD(sqlite3stmt, readOnly)
+{
+	php_sqlite3_stmt *stmt_obj;
+	zval *object = getThis();
+	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+#if SQLITE_VERSION_NUMBER >= 3007004
+	if (sqlite3_stmt_readonly(stmt_obj->stmt)) {
+		RETURN_TRUE;
+	}
+#endif
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1804,6 +1824,7 @@ static zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, execute,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, bindParam,	arginfo_sqlite3stmt_bindparam, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, bindValue,	arginfo_sqlite3stmt_bindvalue, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, readOnly,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
 };
