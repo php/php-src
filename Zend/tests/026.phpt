@@ -21,5 +21,5 @@ print "ok\n";
 Notice: Trying to get property of non-object in %s on line %d
 ok
 
-Strict Standards: Creating default object from empty value in %s on line %d
+Warning: Creating default object from empty value in %s on line %d
 ok

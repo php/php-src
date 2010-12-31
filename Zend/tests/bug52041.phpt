@@ -25,27 +25,27 @@ var_dump(foo());
 --EXPECTF--
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 6
+Warning: Creating default object from empty value in %sbug52041.php on line 6
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 7
+Warning: Creating default object from empty value in %sbug52041.php on line 7
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 8
+Warning: Creating default object from empty value in %sbug52041.php on line 8
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 9
+Warning: Creating default object from empty value in %sbug52041.php on line 9
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 10
+Warning: Creating default object from empty value in %sbug52041.php on line 10
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Strict Standards: Creating default object from empty value in %sbug52041.php on line 11
+Warning: Creating default object from empty value in %sbug52041.php on line 11
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 

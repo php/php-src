@@ -554,7 +554,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0)
 		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0)
 	) {
-		zend_error(E_STRICT, "Creating default object from empty value");
+		zend_error(E_WARNING, "Creating default object from empty value");
 
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		zval_dtor(*object_ptr);
@@ -660,7 +660,7 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 			zval_dtor(*object_ptr);
 			object_init(*object_ptr);
 			object = *object_ptr;
-			zend_error(E_STRICT, "Creating default object from empty value");
+			zend_error(E_WARNING, "Creating default object from empty value");
 		} else {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (retval) {

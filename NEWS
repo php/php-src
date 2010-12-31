@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Changed array_combine() to return empty array instead of FALSE when both 
   parameter arrays are empty. FR #34857. (joel.perras@gmail.com)
 - Changed third parameter of preg_match_all() to optional. FR #53238. (Adam)
+- Changed silent casting of null/''/false into an Object when adding
+  a property into a warning. (Scott)
 
 - General improvements:
   . Added multibyte suppport by default. Previosly php had to be compiled
