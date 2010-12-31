@@ -72,7 +72,7 @@ array(0) {
 array(0) {
 }
 
-Strict Standards: Creating default object from empty value in %sbug52614.php on line 52
+Warning: Creating default object from empty value in %sbug52614.php on line 52
 NULL
 object(stdClass)#%d (1) {
   ["a"]=>

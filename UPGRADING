@@ -4,19 +4,19 @@ UPGRADE NOTES - PHP X.Y
 
 1. Changes made to default configuration
 2. Reserved words and classes
-3. Changes made to existing functions
-4. Changes made to existing methods
-5. Changes made to existing classes
-6. Deprecated
-7. Removed
-8. Extensions:
+3. Changes made to engine behaviour
+4. Changes made to existing functions
+5. Changes made to existing methods
+6. Changes made to existing classes
+7. Deprecated
+8. Removed
+9. Extensions:
      a. moved out to PECL and actively maintained there
      b. no longer maintained
      c. with changed behaviour
      d. no longer possible to disable
-9. Changes in SAPI support
-10. Changes in INI directives
-11. Syntax additions
+10. Changes in SAPI support
+11. Changes in INI directives
 12. Syntax additions
 13. Windows support
 14. New in PHP X.Y:
@@ -87,8 +87,22 @@ UPGRADE NOTES - PHP X.Y
 
 - 
 
+=============================
+3. Changes made to engine behaviour
+=============================
+
+- Turning null, false or empty string into an object by adding a property
+  will now emit a warning instead of an E_STRICT error.
+  
+  $test = null;
+  $test->baz = 1;
+  
+  To create a generic object you can use StdClass:
+  $test = new StdClass;
+  $text->baz = 1;
+
 =====================================
-3. Changes made to existing functions
+4. Changes made to existing functions
 =====================================
 
 - array_combine now returns array() instead of FALSE when two empty arrays are
@@ -150,23 +164,23 @@ UPGRADE NOTES - PHP X.Y
  
 
 ===================================
-4. Changes made to existing methods
+5. Changes made to existing methods
 ===================================
 
 - 
 
 ===================================
-5. Changes made to existing classes
+6. Changes made to existing classes
 ===================================
 
 - 
 
 =============
-6. Deprecated
+7. Deprecated
 =============
 
 ==========
-7. Removed
+8. Removed
 ==========
 
     a. removed features
@@ -215,7 +229,7 @@ UPGRADE NOTES - PHP X.Y
        - continue $var;
 
 =============
-8. Extensions
+9. Extensions
 =============
 
      a. moved out to PECL and actively maintained there
@@ -237,7 +251,7 @@ UPGRADE NOTES - PHP X.Y
         - 
 
 ==========================
-9. Changes in SAPI support
+10. Changes in SAPI support
 ==========================
 
 - The REQUEST_TIME value inside server now returns a floating point number
@@ -245,7 +259,7 @@ UPGRADE NOTES - PHP X.Y
   value should be returning float and not time_t.
 
 =============================
-10. Changes in INI directives
+11. Changes in INI directives
 =============================
 
 - Added session.upload_progress.enabled, session.upload_progress.cleanup, 
@@ -264,7 +278,7 @@ UPGRADE NOTES - PHP X.Y
   three times.
 
 ====================
-11. Syntax additions
+12. Syntax additions
 ====================
 
 - Array dereferencing.
@@ -273,14 +287,14 @@ UPGRADE NOTES - PHP X.Y
     $foo->bar()[0]
 
 ===================
-12. Windows support
+13. Windows support
 ===================
 
 - is_link now works properly for symbolic links on Windows Vista 
   or later. Earlier systems do not support symbolic links.
 
 ===================
-13. New in PHP X.Y:
+14. New in PHP X.Y:
 ===================
 
      a. New libraries
