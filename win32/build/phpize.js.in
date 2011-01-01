@@ -59,6 +59,7 @@ function get_module_dep(contents)
 {
 	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\)", "gm");
 	var calls = contents.match(re_dep_line);
+	var deps = new Array();
 	if (calls != null) {
 		for (i = 0; i < calls.length; i++) {
 			// now we need the extension name out of this thing
@@ -68,6 +69,7 @@ function get_module_dep(contents)
 			}
 		}
 	}
+	return deps;
 }
 
 function find_config_w32(dirname)
@@ -86,9 +88,8 @@ function find_config_w32(dirname)
 		var dir_line = "configure_module_dirname = condense_path(FSO.GetParentFolderName('"
 								+ c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
 		var contents = file_get_contents(c);
-		var deps = new Array();
 
-		get_module_dep(contents);
+		deps = get_module_dep(contents);
 
 		item = new Module_Item(n, c, dir_line, deps, contents);
 		MODULES.Add(n, item);
@@ -107,9 +108,8 @@ function find_config_w32(dirname)
 			var dir_line = "configure_module_dirname = condense_path(FSO.GetParentFolderName('"
 							   	+ c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
 			var contents = file_get_contents(c);
-			var deps = new Array();
 
-			get_module_dep(contents);
+			deps = get_module_dep(contents);
 
 			item = new Module_Item(n, c, dir_line, deps, contents);
 			MODULES.Add(n, item);
