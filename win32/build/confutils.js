@@ -1666,6 +1666,7 @@ function generate_phpize()
 	}
 
 	var MF = FSO.CreateTextFile(dest + "/phpize.js", true);
+	var DEPS = FSO.CreateTextFile(dest + "/ext_deps.js", true);
 	prefix = get_define("PHP_PREFIX");
 	prefix = prefix.replace(new RegExp("/", "g"), "\\");
 	prefix = prefix.replace(new RegExp("\\\\", "g"), "\\\\");
@@ -1675,11 +1676,22 @@ function generate_phpize()
 	MF.WriteLine("var PHP_VERSION=" + PHP_VERSION);
 	MF.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
 	MF.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
+	MF.WriteBlankLines(1);
+	MF.WriteLine("/* Genereted extensions list with mode (static/shared) */");
+
+	var count = extensions_enabled.length;
+	for (i in extensions_enabled) {
+		out = "PHP_" + extensions_enabled[i][0].toUpperCase() + "_SHARED=" + (extensions_enabled[i][1] == 'shared' ? 'True' : 'False');
+		DEPS.WriteLine(out);
+		MF.WriteLine(out);
+	}
+
 	MF.WriteBlankLines(2);
 	MF.WriteLine("/* Genereted win32/build/phpize.js.in */");
 	MF.WriteBlankLines(1);
 	MF.Write(file_get_contents("win32/build/phpize.js.in"));
 	MF.Close();
+	DEPS.Close();
 
 	/* Generate flags file */
 	/* spit out variable definitions */
