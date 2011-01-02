@@ -1129,6 +1129,11 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	var dep_present = false;
 	var dep_shared = false;
 
+	if (MODE_PHPIZE) {
+		ext_deps_js = file_get_contents(PHP_DIR + "\\script\\ext_deps.js");
+		eval(ext_deps_js);
+	}
+
 	try {
 		dep_present = eval("PHP_" + DEP);
 
@@ -1681,7 +1686,8 @@ function generate_phpize()
 
 	var count = extensions_enabled.length;
 	for (i in extensions_enabled) {
-		out = "PHP_" + extensions_enabled[i][0].toUpperCase() + "_SHARED=" + (extensions_enabled[i][1] == 'shared' ? 'True' : 'False');
+		out = "PHP_" + extensions_enabled[i][0].toUpperCase() + "_SHARED=" + (extensions_enabled[i][1] == 'shared' ? 'true' : 'false') + ";";
+		DEPS.WriteLine("PHP_" + extensions_enabled[i][0].toUpperCase() + "=true;");
 		DEPS.WriteLine(out);
 		MF.WriteLine(out);
 	}
