@@ -1129,6 +1129,11 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	var dep_present = false;
 	var dep_shared = false;
 
+	if (MODE_PHPIZE) {
+		ext_deps_js = file_get_contents(PHP_DIR + "\\ext_deps.js");
+		eval(ext_deps_js);
+	}
+
 	try {
 		dep_present = eval("PHP_" + DEP);
 
