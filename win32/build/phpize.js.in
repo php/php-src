@@ -223,6 +223,7 @@ if (DSP == true) {
 }
 
 // Pull in code from sapi and extensions
+
 modules = file_get_contents(PHP_DIR + "/script/config.w32.phpize.in");
 
 C.WriteLine("ARG_ENABLE('debug', 'Compile with debugging symbols', \"no\");");
