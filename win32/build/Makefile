@@ -182,7 +182,7 @@ build-devel: build-headers build-lib
 	@copy win32\build\template.rc $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy $(BUILD_DIR)\devel\config.phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
-	copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
 
 install-sdk: build-devel
 	@xcopy /Q /Y /E /I $(BUILD_DIR_DEV)\* $(PHP_PREFIX)\SDK
