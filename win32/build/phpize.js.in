@@ -222,7 +222,7 @@ if (DSP == true) {
 	C.WriteBlankLines(1);
 }
 
-// Pull in code from sapi and extensions
+// Pull in code for the base detection
 modules = file_get_contents(PHP_DIR + "/script/config.w32.phpize.in");
 
 C.WriteLine("ARG_ENABLE('debug', 'Compile with debugging symbols', \"no\");");
@@ -247,8 +247,6 @@ for (i = 0; i < calls.length; i++) {
 C.WriteBlankLines(1);
 C.WriteLine("conf_process_args();");
 C.WriteBlankLines(1);
-
-C.Write(file_get_contents(PHP_DIR + "/script/config.w32.phpize.in"));
 
 // Comment out the calls from their original positions
 modules = modules.replace(re, "/* $1 */");
