@@ -218,6 +218,12 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
+
+	if (CG(heredoc)) {
+		efree(CG(heredoc));
+		CG(heredoc) = NULL;
+		CG(heredoc_len) = 0;
+	}
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
