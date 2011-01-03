@@ -80,6 +80,30 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 }
 /* }}} */
 
+/* {{{ IntlDateFormatter_object_clone */
+zend_object_value IntlDateFormatter_object_clone(zval *object TSRMLS_DC)
+{
+	zend_object_value new_obj_val;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
+	IntlDateFormatter_object *dfo, *new_dfo;
+
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
+	new_obj_val = IntlDateFormatter_ce_ptr->create_object(IntlDateFormatter_ce_ptr TSRMLS_CC);
+	new_dfo = (IntlDateFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
+	/* clone standard parts */	
+	zend_objects_clone_members(&new_dfo->zo, new_obj_val, &dfo->zo, handle TSRMLS_CC);
+	/* clone formatter object */
+	DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(new_dfo));
+	if(U_FAILURE(INTL_DATA_ERROR_CODE(new_dfo))) {
+		/* set up error in case error handler is interested */
+		intl_error_set( NULL, INTL_DATA_ERROR_CODE(new_dfo), "Failed to clone IntlDateFormatter object", 0 TSRMLS_CC );
+		IntlDateFormatter_object_dtor(new_dfo, new_obj_val.handle TSRMLS_CC); /* free new object */
+		zend_error(E_ERROR, "Failed to clone IntlDateFormatter object");
+	}
+	return new_obj_val;
+}
+/* }}} */
+
 /* 
  * 'IntlDateFormatter' class registration structures & functions
  */
@@ -164,7 +188,7 @@ void dateformat_register_IntlDateFormatter_class( TSRMLS_D )
 
 	memcpy(&IntlDateFormatter_handlers, zend_get_std_object_handlers(),
 		sizeof IntlDateFormatter_handlers);
-	IntlDateFormatter_handlers.clone_obj = NULL;
+	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
 
 	/* Declare 'IntlDateFormatter' class properties. */
 	if( !IntlDateFormatter_ce_ptr )

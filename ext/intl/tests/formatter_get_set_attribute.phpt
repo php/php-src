@@ -25,7 +25,7 @@ function ut_main()
         'FRACTION_DIGITS' => array( NumberFormatter::FRACTION_DIGITS, 5, 12345.123456 ),
         'MULTIPLIER' => array( NumberFormatter::MULTIPLIER, 2, 12345.123456 ),
         'GROUPING_SIZE' => array( NumberFormatter::GROUPING_SIZE, 2, 12345.123456 ),
-        'ROUNDING_MODE' => array( NumberFormatter::ROUNDING_MODE, 7, 12345.123456 ),
+        'ROUNDING_MODE' => array( NumberFormatter::ROUNDING_MODE, 1, 12345.123456 ),
         'ROUNDING_INCREMENT' => array( NumberFormatter::ROUNDING_INCREMENT, (float)2, 12345.123456 ),
         'FORMAT_WIDTH' => array( NumberFormatter::FORMAT_WIDTH, 27, 12345.123456 ),
         'PADDING_POSITION' => array( NumberFormatter::PADDING_POSITION, 21, 12345.123456 ),
@@ -155,10 +155,10 @@ New attribute value: 2 ;  Format result: '0,01,23,45.12346' ; Parse result: 1234
 Attribute ROUNDING_MODE
 Old attribute value: 4 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
 Setting attribute: ok
-New attribute value: 7 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
+New attribute value: 1 ;  Format result: '0,012,345.12345' ; Parse result: 12345.12345
 
 Attribute ROUNDING_INCREMENT
-Old attribute value: 0 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
+Old attribute value: 1.0E-5 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
 Setting attribute: ok
 New attribute value: 2 ;  Format result: '0,012,346.00000' ; Parse result: 12346
 
