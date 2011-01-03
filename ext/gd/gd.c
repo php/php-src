@@ -2821,7 +2821,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 #if HAVE_GD_BUNDLED
 PHP_FUNCTION(imagexbm)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageXbmCtx);
+//	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageXbmCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "GIF", gdImageXbmCtx);
 }
 #endif
 /* }}} */
@@ -2831,11 +2832,7 @@ PHP_FUNCTION(imagexbm)
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
-#ifdef HAVE_GD_GIF_CTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGif);
-#endif
 }
 /* }}} */
 #endif /* HAVE_GD_GIF_CREATE */
@@ -2845,11 +2842,7 @@ PHP_FUNCTION(imagegif)
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
-#ifdef USE_GD_IOCTX
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtxEx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePng);
-#endif
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "GIF", gdImagePngCtxEx);
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
@@ -2860,11 +2853,7 @@ PHP_FUNCTION(imagepng)
    Output PNG image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
-#ifdef USE_GD_IOCTX
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
-#endif
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "GIF", gdImageWebpCtx);
 }
 /* }}} */
 #endif /* HAVE_GD_WEBP */
@@ -2875,11 +2864,7 @@ PHP_FUNCTION(imagewebp)
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
-#ifdef USE_GD_IOCTX
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpeg);
-#endif
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "GIF", gdImageJpegCtx);
 }
 /* }}} */
 #endif /* HAVE_GD_JPG */
@@ -2889,11 +2874,7 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
-#ifdef USE_GD_IOCTX
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMPCtx);
-#else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMP);
-#endif
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "GIF", gdImageWBMPCtx);
 }
 /* }}} */
 #endif /* HAVE_GD_WBMP */
