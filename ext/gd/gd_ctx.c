@@ -118,7 +118,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	}
 
-	if (argc > 1 && to_zval) {
+	if (argc > 1 && to_zval != NULL) {
 		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
 			php_stream_from_zval_no_verify(stream, &to_zval);
 			if (stream == NULL) {
