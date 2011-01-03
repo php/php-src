@@ -145,7 +145,9 @@ void collator_register_Collator_class( TSRMLS_D )
 
 	memcpy(&Collator_handlers, zend_get_std_object_handlers(),
 		sizeof Collator_handlers);
-	Collator_handlers.clone_obj = NULL;
+	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer 
+	   for which we don't have the place to keep */	
+	Collator_handlers.clone_obj = NULL; 
 
 	/* Declare 'Collator' class properties. */
 	if( !Collator_ce_ptr )

@@ -38,6 +38,8 @@
     (Felipe)
   . Fixed bug #53612 (Segmentation fault when using cloned several intl
     objects). (Gustavo)
+  . Implemented clone functionality for number, date & message formatters. 
+    (Stas).
 
 - MySQL Improved extension:
   . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 

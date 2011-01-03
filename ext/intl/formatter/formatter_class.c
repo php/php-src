@@ -54,8 +54,7 @@ void NumberFormatter_object_free( zend_object *object TSRMLS_DC )
 /* }}} */
 
 /* {{{ NumberFormatter_object_create */
-zend_object_value NumberFormatter_object_create(
-	zend_class_entry *ce TSRMLS_DC )
+zend_object_value NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value    retval;
 	NumberFormatter_object*     intern;
@@ -73,6 +72,30 @@ zend_object_value NumberFormatter_object_create(
 	retval.handlers = &NumberFormatter_handlers;
 
 	return retval;
+}
+/* }}} */
+
+/* {{{ NumberFormatter_object_clone */
+zend_object_value NumberFormatter_object_clone(zval *object TSRMLS_DC)
+{
+	zend_object_value new_obj_val;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
+	NumberFormatter_object *nfo, *new_nfo;
+
+	FORMATTER_METHOD_FETCH_OBJECT;
+	new_obj_val = NumberFormatter_ce_ptr->create_object(NumberFormatter_ce_ptr TSRMLS_CC);
+	new_nfo = (NumberFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
+	/* clone standard parts */	
+	zend_objects_clone_members(&new_nfo->zo, new_obj_val, &nfo->zo, handle TSRMLS_CC);
+	/* clone formatter object */
+	FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo),  &INTL_DATA_ERROR_CODE(new_nfo));
+	if(U_FAILURE(INTL_DATA_ERROR_CODE(new_nfo))) {
+		/* set up error in case error handler is interested */
+		intl_error_set( NULL, INTL_DATA_ERROR_CODE(new_nfo), "Failed to clone NumberFormatter object", 0 TSRMLS_CC );
+		NumberFormatter_object_dtor(new_nfo, new_obj_val.handle TSRMLS_CC); /* free new object */
+		zend_error(E_ERROR, "Failed to clone NumberFormatter object");
+	}
+	return new_obj_val;
 }
 /* }}} */
 
@@ -173,8 +196,8 @@ void formatter_register_class( TSRMLS_D )
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
 
 	memcpy(&NumberFormatter_handlers, zend_get_std_object_handlers(),
-		sizeof NumberFormatter_handlers);
-	NumberFormatter_handlers.clone_obj = NULL;
+		sizeof(NumberFormatter_handlers));
+	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 
 	/* Declare 'NumberFormatter' class properties. */
 	if( !NumberFormatter_ce_ptr )

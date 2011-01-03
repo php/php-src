@@ -58,12 +58,12 @@ ut_run();
 Creating IntlDateFormatter with pattern = dd-MM-YY 
 After call to get_pattern :  pattern= dd-MM-YY
 Result of formatting timestamp=0 is :  
-31-12-70
+31-12-69
 -------------------
 Setting IntlDateFormatter with pattern = DD-MM-YYYY hh:mm:ss 
 After call to get_pattern :  pattern= DD-MM-YYYY hh:mm:ss
 Result of formatting timestamp=0 with the new pattern is :  
-365-12-1970 07:00:00
+365-12-1969 07:00:00
 
 -------------------
 Setting IntlDateFormatter with pattern = yyyy-DDD.hh:mm:ss z 
