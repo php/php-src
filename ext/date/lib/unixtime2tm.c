@@ -51,7 +51,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		days++;
 		remainder -= SECS_PER_DAY;
 	}
-	DEBUG(printf("days=%lld, rem=%lld\n", days, remainder););
+	TIMELIB_DEBUG(printf("days=%lld, rem=%lld\n", days, remainder););
 
 	if (ts >= 0) {
 		tmp_days = days + 1;
@@ -78,11 +78,11 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		while (tmp_days <= 0) {
 			if (tmp_days < -1460970) {
 				cur_year -= 4000;
-				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 				tmp_days += 1460970;
 			} else {
 				cur_year--;
-				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 				if (timelib_is_leap(cur_year)) {
 					tmp_days += DAYS_PER_LYEAR;
 				} else {
@@ -92,7 +92,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		}
 		remainder += SECS_PER_DAY;
 	}
-	DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+	TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
 	months = timelib_is_leap(cur_year) ? month_tab_leap : month_tab;
 	if (timelib_is_leap(cur_year) && cur_year < 1970) {
@@ -100,19 +100,19 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	}
 	i = 11;
 	while (i > 0) {
-		DEBUG(printf("month=%lld (%d)\n", i, months[i]););
+		TIMELIB_DEBUG(printf("month=%lld (%d)\n", i, months[i]););
 		if (tmp_days > months[i]) {
 			break;
 		}
 		i--;
 	}
-	DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
+	TIMELIB_DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
 
 	/* That was the date, now we do the tiiiime */
 	hours = remainder / 3600;
 	minutes = (remainder - hours * 3600) / 60;
 	seconds = remainder % 60;
-	DEBUG(printf(" hour=%lld, minute=%lld, second=%lld\n", hours, minutes, seconds););
+	TIMELIB_DEBUG(printf(" hour=%lld, minute=%lld, second=%lld\n", hours, minutes, seconds););
 
 	tm->y = cur_year;
 	tm->m = i + 1;
@@ -240,18 +240,18 @@ int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 {
 	if (localtime) {
 		/* Converting from GMT time to local time */
-		DEBUG(printf("Converting from GMT time to local time\n"););
+		TIMELIB_DEBUG(printf("Converting from GMT time to local time\n"););
 
 		/* Check if TZ is set */
 		if (!t->tz_info) {
-			DEBUG(printf("E: No timezone configured, can't switch to local time\n"););
+			TIMELIB_DEBUG(printf("E: No timezone configured, can't switch to local time\n"););
 			return -1;
 		}
 
 		timelib_unixtime2local(t, t->sse);
 	} else {
 		/* Converting from local time to GMT time */
-		DEBUG(printf("Converting from local time to GMT time\n"););
+		TIMELIB_DEBUG(printf("Converting from local time to GMT time\n"););
 
 		timelib_unixtime2gmt(t, t->sse);
 	}
