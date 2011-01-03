@@ -109,7 +109,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		intl_errors_set_code( NULL, INTL_DATA_ERROR_CODE(rb) TSRMLS_CC );
 		spprintf( &pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource '%s' without fallback from %s to %s",
-				bundlename, locale, ures_getLocale( rb->me, &INTL_DATA_ERROR_CODE(rb)) );
+				bundlename, locale, ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)) );
 		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC );
 		efree(pbuf);
 		zval_dtor( return_value );
@@ -187,7 +187,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		UErrorCode icuerror;
-		const char * locale = ures_getLocale( rb->me, &icuerror );
+		const char * locale = ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &icuerror );
 		if (is_numeric) {
 			spprintf( &pbuf, 0, "Cannot load element %d without fallback from to %s", meindex, locale );
 		} else {
@@ -420,7 +420,7 @@ void resourcebundle_register_class( TSRMLS_D )
 	}
 
 	ResourceBundle_object_handlers = std_object_handlers;
-	ResourceBundle_object_handlers.clone_obj	  = NULL;
+	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 }
