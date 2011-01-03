@@ -1,0 +1,358 @@
+// vim:ft=javascript
+// $Id: config.w32 306241 2010-12-11 22:18:10Z pajoye $
+// "Master" config file; think of it as a configure.in
+// equivalent.
+
+var PHP_CYGWIN="notset";
+PHP_CL = PATH_PROG('cl', null, 'PHP_CL');
+if (!PHP_CL) {
+	ERROR("MS C++ compiler is required");
+}
+/* For the record here: */
+// 1200 is VC6
+// 1300 is vs.net 2002
+// 1310 is vs.net 2003
+// 1400 is vs.net 2005
+// 1500 is vs.net 2008
+// 1600 is vs.net 2010
+// Which version of the compiler do we have?
+VCVERS = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
+STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
+
+if (VCVERS < 1500) {
+	ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
+}
+
+AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
+DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
+AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+
+// do we use x64 or 80x86 version of compiler?
+X64 = probe_binary(PHP_CL, 64, null, 'PHP_CL');
+if (X64) {
+	STDOUT.WriteLine("  Detected 64-bit compiler");
+} else {
+	STDOUT.WriteLine("  Detected 32-bit compiler");
+}
+AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+
+// cygwin now ships with link.exe.  Avoid searching the cygwin path
+// for this, as we want the MS linker, not the fileutil
+PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
+PATH_PROG('nmake');
+
+// we don't want to define LIB, as that will override the default library path
+// that is set in that env var
+PATH_PROG('lib', null, 'MAKE_LIB');
+if (!PATH_PROG('bison')) {
+	ERROR('bison is required')
+}
+
+// There's a minimum requirement for re2c..
+MINRE2C = "0.13.4";
+
+RE2C = PATH_PROG('re2c');
+if (RE2C) {
+	var intvers, intmin;
+	var pattern = /\./g;
+
+	RE2CVERS = probe_binary(RE2C, "version");
+	STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
+
+	intvers = RE2CVERS.replace(pattern, '') - 0;
+	intmin = MINRE2C.replace(pattern, '') - 0;
+
+	if (intvers < intmin) {
+		STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
+		STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
+		DEFINE('RE2C', '');
+	} else {
+		DEFINE('RE2C_FLAGS', '');
+	}
+} else {
+	STDOUT.WriteLine('Parsers will not be regenerated');
+}
+PATH_PROG('zip');
+PATH_PROG('lemon');
+
+// avoid picking up midnight commander from cygwin
+PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
+
+// Try locating manifest tool
+if (VCVERS > 1200) {
+	PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+}
+
+// stick objects somewhere outside of the source tree
+ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
+if (PHP_OBJECT_OUT_DIR.length) {
+	PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
+	if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
+		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
+	}
+	PHP_OBJECT_OUT_DIR += '\\';
+} else if (X64) {
+	if (!FSO.FolderExists("x64")) {
+		FSO.CreateFolder("x64");
+	}
+	PHP_OBJECT_OUT_DIR = 'x64\\';
+}
+
+ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
+ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
+if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
+	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
+}
+
+DEFINE('PHP_PREFIX', PHP_PREFIX);
+
+DEFINE("BASE_INCLUDES", "/I " + PHP_DIR + "/include /I " + PHP_DIR + "/include/main /I " + PHP_DIR + "/include/Zend /I " + PHP_DIR + "/include/TSRM /I " + PHP_DIR + "/include/ext ");
+
+// CFLAGS for building the PHP dll
+DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS \
+/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=0x500");
+
+DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
+
+// General CFLAGS for building objects
+DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
+/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
+
+if (VCVERS < 1400) {
+	// Enable automatic precompiled headers
+	ADD_FLAG('CFLAGS', ' /YX ');
+
+	if (PHP_DEBUG == "yes") {
+		// Set some debug/release specific options
+		ADD_FLAG('CFLAGS', ' /GZ ');
+	}
+}
+
+if (VCVERS >= 1400) {
+	// fun stuff: MS deprecated ANSI stdio and similar functions
+	// disable annoying warnings.  In addition, time_t defaults
+	// to 64-bit.  Ask for 32-bit.
+	if (X64) {
+		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
+	} else {
+		ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
+	}
+
+	if (PHP_DEBUG == "yes") {
+		// Set some debug/release specific options
+		ADD_FLAG('CFLAGS', ' /RTC1 ');
+	}
+}
+
+ARG_WITH('prefix', 'PHP installation prefix', '');
+ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
+if (VCVERS >= 1500 && PHP_MP != 'disable') {
+		// no from disable-all 
+		if(PHP_MP == 'auto' || PHP_MP == 'no') {
+			 ADD_FLAG('CFLAGS', ' /MP ');
+		} else {
+			if(parseInt(PHP_MP) != 0) {
+				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+			} else {
+				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+			}
+		}
+}
+
+/* For snapshot builders, where can we find the additional
+ * files that make up the snapshot template? */
+ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
+
+// General DLL link flags
+DEFINE("DLL_LDFLAGS", "/dll ");
+
+// PHP DLL link flags
+DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
+
+// General libs
+// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
+DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib");
+
+// Set some debug/release specific options
+if (PHP_DEBUG == "yes") {
+	ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+		(X64?"/Zi":"/ZI"));
+	ADD_FLAG("LDFLAGS", "/debug");
+	// Avoid problems when linking to release libraries that use the release
+	// version of the libc
+	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
+} else {
+	// Generate external debug files when --enable-debug-pack is specified
+	if (PHP_DEBUG_PACK == "yes") {
+		ADD_FLAG("CFLAGS", "/Zi");
+		ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
+	}
+	// Equivalent to Release_TSInline build -> best optimization
+	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+
+	// if you have VS.Net /GS hardens the binary against buffer overruns
+	// ADD_FLAG("CFLAGS", "/GS");
+}
+
+if (PHP_ZTS == "yes") {
+	ADD_FLAG("CFLAGS", "/D ZTS=1");
+}
+
+DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
+
+
+// we want msvcrt in the PHP DLL
+ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
+
+// set up the build dir and DLL name
+if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
+	if (!MODE_PHPIZE) {
+		DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
+		DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
+	}
+} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
+	if (!MODE_PHPIZE) {
+		DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
+		DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
+	}
+} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
+	if (!MODE_PHPIZE) {
+		DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
+		DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
+	}
+} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
+	if (!MODE_PHPIZE) {
+		DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
+		DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
+	}
+}
+
+if (MODE_PHPIZE) {
+	DEFINE("PHPDLL", PHP_DLL);
+	DEFINE("PHPLIB", PHP_DLL_LIB);
+}
+
+// Find the php_build dir - it contains headers and libraries
+// that we need
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
+
+if (PHP_PHP_BUILD == 'no') {
+	if (FSO.FolderExists("..\\deps")) {
+		PHP_PHP_BUILD = "..\\deps";
+	} else {
+		if (FSO.FolderExists("..\\php_build")) {
+			PHP_PHP_BUILD = "..\\php_build";
+		} else {
+			if (X64) {
+				if (FSO.FolderExists("..\\win64build")) {
+					PHP_PHP_BUILD = "..\\win64build";
+				} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
+					PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
+				}
+			} else {
+				if (FSO.FolderExists("..\\win32build")) {
+					PHP_PHP_BUILD = "..\\win32build";
+				} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
+					PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+				}
+			}
+		}
+	}
+	PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
+}
+DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+
+ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
+ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
+
+var php_usual_include_suspects = PHP_PHP_BUILD+"\\include";
+var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib";
+
+ADD_FLAG("CFLAGS", '/I "' + php_usual_include_suspects + '" ');
+ADD_FLAG("LDFLAGS", '/libpath:"\\"' + php_usual_lib_suspects + '\\"" ');
+
+// Poke around for some headers
+function probe_basic_headers()
+{
+	var p;
+
+	if (PHP_PHP_BUILD != "no") {
+		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
+		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
+	}
+}
+
+function add_extra_dirs()
+{
+	var path, i, f;
+
+	if (PHP_EXTRA_INCLUDES.length) {
+		path = PHP_EXTRA_INCLUDES.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+			}
+		}
+	}
+	if (PHP_EXTRA_LIBS.length) {
+		path = PHP_EXTRA_LIBS.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				}
+			}
+		}
+	}
+
+}
+
+probe_basic_headers();
+add_extra_dirs();
+
+//DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+
+STDOUT.WriteBlankLines(1);
+STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
+STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
+
+
+if (VCVERS == 1200) {
+	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+}
+
+if (VCVERS >= 1400) {
+	AC_DEFINE('HAVE_STRNLEN', 1);
+}
+
+STDOUT.WriteBlankLines(1);
+
+if (PHP_SNAPSHOT_TEMPLATE == "no") {
+	/* default is as a sibling of the php_build dir */
+	if (FSO.FolderExists(PHP_PHP_BUILD + "\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\template");
+	} else if (FSO.FolderExists(PHP_PHP_BUILD + "\\..\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\..\\template");
+	}
+}
+
+DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
+
+if (PHP_DSP != "no") {
+	if (FSO.FolderExists("tmp")) {
+		FSO.DeleteFolder("tmp");
+	}
+	FSO.CreateFolder("tmp");
+}
+
+AC_DEFINE("PHP_DIR", PHP_DIR);
+DEFINE("PHP_DIR", PHP_DIR);
