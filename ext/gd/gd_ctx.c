@@ -103,7 +103,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		 * PHP_GDIMG_TYPE_WBM 
 		 * PHP_GDIMG_TYPE_WEBP 
 		 * */
-		//if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
 			return;
 		}
