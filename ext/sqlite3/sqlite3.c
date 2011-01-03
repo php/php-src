@@ -40,7 +40,7 @@ ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
 static PHP_GINIT_FUNCTION(sqlite3);
 static int php_sqlite3_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4, const char *arg5, const char *arg6);
 static void sqlite3_param_dtor(void *data);
-static int php_sqlite3_compare_stmt_zval_free( php_sqlite3_free_list **free_list, zval *statement );
+static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list, zval *statement);
 
 /* {{{ Error Handler
 */
@@ -152,8 +152,6 @@ PHP_METHOD(sqlite3, open)
 		return;
 	}
 
-	db_obj->initialised = 1;
-
 #if SQLITE_HAS_CODEC
 	if (encryption_key_len > 0) {
 		if (sqlite3_key(db_obj->db, encryption_key, encryption_key_len) != SQLITE_OK) {
@@ -162,6 +160,8 @@ PHP_METHOD(sqlite3, open)
 		}
 	}
 #endif
+
+	db_obj->initialised = 1;
 
 #if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
