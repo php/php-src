@@ -2,6 +2,8 @@
 collator_get_sort_key()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--XFAIL--
+Sort keys are not fixed, comparing them to fixed strings doesn't work.
 --FILE--
 <?php
 
@@ -30,7 +32,7 @@ function ut_main()
 
     // Regular strings keys
     $test_params = array(
-		'abc', 'abd', 'aaa', 
+		'abc', 'abd', 'aaa',
 		'аа', 'а', 'z',
 		'', null , '3',
         'y'  , 'i'  , 'k'
@@ -40,7 +42,7 @@ function ut_main()
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = array(
-		'абг', 'абв', 'жжж', 'эюя' 
+		'абг', 'абв', 'жжж', 'эюя'
     );
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );
@@ -67,9 +69,9 @@ source: %D0%B0
 key: _+%01%05%01%05%00
 source: z
 key: %5B%01%05%01%05%00
-source: 
+source:
 key: %01%01%00
-source: 
+source:
 key: %01%01%00
 source: 3
 key: %26%80%01%05%01%05%00
