@@ -8,6 +8,7 @@
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
   . Fixed Bug #53629 (memory leak inside highlight_string()). (Hannes, Ilia)
+  . Fixed Bug #53632 (infinite loop with x87 fpu). (Scott, Rasmus)
 
 - Core:
   . Fixed bug #48484 (array_product() always returns 0 for an empty array).
