@@ -1,11 +1,7 @@
 --TEST--
 Testing declare statement with several type values
---SKIPIF--
-<?php
-if (ini_get("zend.multibyte")) {
-  die("skip Requires zend.multibyte=0");
-}
-?>
+--INI--
+zend.multibyte=1
 --FILE--
 <?php
 
@@ -19,4 +15,10 @@ print 'DONE';
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use constants as encoding in %sdeclare_001.php on line 7
+Warning: Unsupported encoding [1] in %sdeclare_001.php on line %d
+
+Warning: Unsupported encoding [1.1231312321313E+18] in %sdeclare_001.php on line %d
+
+Warning: Unsupported encoding [] in %sdeclare_001.php on line %d
+
+Fatal error: Cannot use constants as encoding in %sdeclare_001.php on line %d
