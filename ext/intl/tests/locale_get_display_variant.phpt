@@ -175,7 +175,7 @@ disp_locale=de :  display_variant=
 locale='de-CH-1901'
 disp_locale=en :  display_variant=Traditional German orthography
 disp_locale=fr :  display_variant=orthographe allemande traditionnelle
-disp_locale=de :  display_variant=(1901|alte deutsche Rechtschreibung)
+disp_locale=de :  display_variant=(1901|[Aa]lte deutsche Rechtschreibung)
 -----------------
 locale='sl-IT-nedis'
 disp_locale=en :  display_variant=Natisone dialect
@@ -208,9 +208,9 @@ disp_locale=fr :  display_variant=X_PHONEBK
 disp_locale=de :  display_variant=X_PHONEBK
 -----------------
 locale='az-Arab-x-AZE-derbend'
-disp_locale=en :  display_variant=AZE_DERBEND
-disp_locale=fr :  display_variant=AZE_DERBEND
-disp_locale=de :  display_variant=AZE_DERBEND
+disp_locale=en :  display_variant=(AZE_DERBEND)?
+disp_locale=fr :  display_variant=(AZE_DERBEND)?
+disp_locale=de :  display_variant=(AZE_DERBEND)?
 -----------------
 locale='zh-min'
 disp_locale=en :  display_variant=
@@ -253,9 +253,9 @@ disp_locale=fr :  display_variant=A_MYEXT_X_PRIVATE
 disp_locale=de :  display_variant=A_MYEXT_X_PRIVATE
 -----------------
 locale='en-a-myExt-b-another'
-disp_locale=en :  display_variant=MYEXT_B_ANOTHER
-disp_locale=fr :  display_variant=MYEXT_B_ANOTHER
-disp_locale=de :  display_variant=MYEXT_B_ANOTHER
+disp_locale=en :  display_variant=(MYEXT_B_ANOTHER)?
+disp_locale=fr :  display_variant=(MYEXT_B_ANOTHER)?
+disp_locale=de :  display_variant=(MYEXT_B_ANOTHER)?
 -----------------
 locale='de-419-DE'
 disp_locale=en :  display_variant=DE
@@ -268,7 +268,7 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='ar-a-aaa-b-bbb-a-ccc'
-disp_locale=en :  display_variant=AAA_B_BBB_A_CCC
-disp_locale=fr :  display_variant=AAA_B_BBB_A_CCC
-disp_locale=de :  display_variant=AAA_B_BBB_A_CCC
+disp_locale=en :  display_variant=(AAA_B_BBB_A_CCC)?
+disp_locale=fr :  display_variant=(AAA_B_BBB_A_CCC)?
+disp_locale=de :  display_variant=(AAA_B_BBB_A_CCC)?
 -----------------

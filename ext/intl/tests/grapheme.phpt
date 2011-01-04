@@ -772,8 +772,8 @@ function check_result($result, $expected) {
 
 function grapheme_strlen($string) {}
 
-"hindi" in devanagari strlen 5
-"ab" + "hindi" + "cde" strlen 10
+"hindi" in devanagari strlen 3
+"ab" + "hindi" + "cde" strlen 8
 "" strlen 0
 char_a_ring_nfd strlen 1
 char_a_ring_nfd + "bc" strlen 3

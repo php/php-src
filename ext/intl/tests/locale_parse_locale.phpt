@@ -138,10 +138,10 @@ sr-Latn-CS:
 language : 'sr' , script : 'Latn' , region : 'CS' , 
 ---------------------
 sl-rozaj: 
-language : 'sl' , region : 'ROZAJ' , 
+language : 'sl' , 
 ---------------------
 sl-nedis: 
-language : 'sl' , region : 'NEDIS' , 
+language : 'sl' , 
 ---------------------
 de-CH-1901: 
 language : 'de' , region : 'CH' , variant0 : '1901' , 
