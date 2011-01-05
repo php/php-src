@@ -580,6 +580,36 @@ SPL_METHOD(SplObjectStorage, removeAll)
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
+/* {{{ proto bool SplObjectStorage::removeAllExcept(SplObjectStorage $os)
+ Remove elements not common to both this SplObjectStorage instance and $os */
+SPL_METHOD(SplObjectStorage, removeAllExcept)
+{
+	zval *obj;
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	spl_SplObjectStorage *other;
+	spl_SplObjectStorageElement *element;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
+		return;
+	}
+
+	other = (spl_SplObjectStorage *)zend_object_store_get_object(obj TSRMLS_CC);
+
+	zend_hash_internal_pointer_reset(&intern->storage);
+	while (zend_hash_get_current_data(&intern->storage, (void **)&element) == SUCCESS) {
+		if (!spl_object_storage_contains(other, getThis(), element->obj TSRMLS_CC)) {
+			spl_object_storage_detach(intern, getThis(), element->obj TSRMLS_CC);
+		}
+		zend_hash_move_forward(&intern->storage);
+	}
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	intern->index = 0;
+
+	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+}
+/* }}} */
+
 /* {{{ proto bool SplObjectStorage::contains($obj)
  Determine whethe an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
@@ -940,6 +970,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  contains,    arginfo_Object,        0)
 	SPL_ME(SplObjectStorage,  addAll,      arginfo_Object,        0)
 	SPL_ME(SplObjectStorage,  removeAll,   arginfo_Object,        0)
+	SPL_ME(SplObjectStorage,  removeAllExcept,   arginfo_Object,  0)
 	SPL_ME(SplObjectStorage,  getInfo,     arginfo_splobject_void,0)
 	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
 	SPL_ME(SplObjectStorage,  getHash,     arginfo_getHash,       0)
