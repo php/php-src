@@ -55,6 +55,12 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 
 	if (ts >= 0) {
 		tmp_days = days + 1;
+
+		if (tmp_days >= DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
+			cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+			tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+		}
+
 		while (tmp_days >= DAYS_PER_LYEAR) {
 			cur_year++;
 			if (timelib_is_leap(cur_year)) {
