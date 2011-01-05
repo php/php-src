@@ -1,6 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.5
+?? ??? 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.11. (Ilia)
 
@@ -8,7 +8,6 @@
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
   . Fixed Bug #53629 (memory leak inside highlight_string()). (Hannes, Ilia)
-  . Fixed Bug #53632 (infinite loop with x87 fpu). (Scott, Rasmus)
 
 - Core:
   . Fixed bug #48484 (array_product() always returns 0 for an empty array).
@@ -100,6 +99,9 @@
   . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams) (Hannes)
   . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
     gmail dot com, Gustavo)
+
+?? ??? 2011, PHP 5.3.5
+- Fixed Bug #53632 (infinite loop with x87 fpu). (Scott, Rasmus)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
