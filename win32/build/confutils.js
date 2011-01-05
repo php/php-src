@@ -648,9 +648,6 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 	// Expand path to include general dirs
 	path_to_check += ";" + php_usual_lib_suspects;
 
-	// For static libs
-	eval('var static_lib = !PHP_' + common_name.toUpperCase() + '_SHARED;');
-
 	// It is common practice to put libs under one of these dir names
 	var subdirs = new Array(PHP_DEBUG == "yes" ? "Debug" : (PHP_DEBUG_PACK == "yes"?"Release_Dbg":"Release"), "lib", "libs", "libexec");
 
@@ -664,14 +661,6 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			var name = new String(libnames[i]);
 			rExp = /.lib$/i;
 			name = name.replace(rExp,"_debug.lib");
-			libnames.unshift(name);
-		}
-	} else if (!static_lib) {
-		var length = libnames.length;
-		for (var i = 0; i < length; i++) {
-			var name = new String(libnames[i]);
-			rExp = /_a.lib$/i;
-			name = name.replace(rExp,".lib");
 			libnames.unshift(name);
 		}
 	}
