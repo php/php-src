@@ -164,6 +164,7 @@ typedef unsigned long int uint32_t;
 
 #ifdef __vax__
 #define VAX
+#undef IEEE_LITTLE_ENDIAN
 #endif
 
 #if defined(_MSC_VER)
