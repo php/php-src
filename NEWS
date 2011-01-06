@@ -14,6 +14,7 @@
     (Ilia)
   . Fixed bug #48607 (fwrite() doesn't check reply from ftp server before
     exiting). (Ilia)
+  . Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)
 
 - Calendar extension:
   . Fixed bug #53574 (Integer overflow in SdnToJulian, sometimes leading to
