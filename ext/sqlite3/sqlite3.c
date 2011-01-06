@@ -1582,6 +1582,10 @@ PHP_METHOD(sqlite3result, columnType)
 		return;
 	}
 
+	if (result_obj->complete) {
+		RETURN_FALSE;
+	}
+
 	RETURN_LONG(sqlite3_column_type(result_obj->stmt_obj->stmt, column));
 }
 /* }}} */
@@ -1631,6 +1635,7 @@ PHP_METHOD(sqlite3result, fetchArray)
 			break;
 
 		case SQLITE_DONE:
+			result_obj->complete = 1;
 			RETURN_FALSE;
 			break;
 
