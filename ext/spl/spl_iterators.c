@@ -1465,6 +1465,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			intern->u.regex.mode = mode;
 			intern->u.regex.regex = estrndup(regex, regex_len);
+			intern->u.regex.regex_len = regex_len;
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC);
 			if (intern->u.regex.pce == NULL) {
 				/* pcre_get_compiled_regex_cache has already sent error */
@@ -1941,6 +1942,19 @@ SPL_METHOD(RegexIterator, accept)
 	}
 } /* }}} */
 
+/* {{{ proto string RegexIterator::getRegex()
+   Returns current regular expression */
+SPL_METHOD(RegexIterator, getRegex)
+{
+	spl_dual_it_object *intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_STRINGL(intern->u.regex.regex, intern->u.regex.regex_len, 1);
+} /* }}} */
+
 /* {{{ proto bool RegexIterator::getMode()
    Returns current operation mode */
 SPL_METHOD(RegexIterator, getMode)
@@ -2205,6 +2219,7 @@ static const zend_function_entry spl_funcs_RegexIterator[] = {
 	SPL_ME(RegexIterator,   setFlags,         arginfo_regex_it_set_flags,      ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   getPregFlags,     arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   setPregFlags,     arginfo_regex_it_set_preg_flags, ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getRegex,         arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
