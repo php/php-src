@@ -102,7 +102,8 @@
     gmail dot com, Gustavo)
 
 ?? ??? 2011, PHP 5.3.5
-- Fixed Bug #53632 (infinite loop with x87 fpu). (Scott, Rasmus)
+- Fixed Bug #53632 (infinite loop with x87 fpu). (CVE-2010-4645) (Scott, 
+  Rasmus)
 
 09 Dec 2010, PHP 5.3.4
 - Upgraded bundled Sqlite3 to version 3.7.3. (Ilia)
