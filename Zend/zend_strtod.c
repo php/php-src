@@ -2030,6 +2030,10 @@ ret1:
 	return s0;
 }
 
+/* F* VC6 */
+#if _MSC_VER <= 1300
+# pragma optimize( "", off )
+#endif
 ZEND_API double zend_strtod (CONST char *s00, char **se)
 {
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
