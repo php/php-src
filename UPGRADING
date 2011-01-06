@@ -353,6 +353,9 @@ UPGRADE NOTES - PHP X.Y
          - ReflectionClass::getTraitAliases()
          - ReflectionParameter::canBePassedByValue()
        
+       - RegexIterator
+         - RegexIterator::getRegex()
+
        - PDO_dblib
          - PDO::newRowset()
 

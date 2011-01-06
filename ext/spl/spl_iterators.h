@@ -154,6 +154,7 @@ typedef struct _spl_dual_it_object {
 			long             preg_flags;
 			pcre_cache_entry *pce;
 			char             *regex;
+			uint             regex_len;
 		} regex;
 #endif
 	} u;

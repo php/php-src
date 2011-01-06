@@ -182,6 +182,7 @@ PHP                                                                        NEWS
     either is present at compile time. (Rasmus)
 
 - Improved SPL extension:
+  . Added RegexIterator::getRegex() method. (Joshua Thijssen)
   . Added SplObjectStorage::getHash() hook. (Etienne)
   . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
 
