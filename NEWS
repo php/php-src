@@ -85,6 +85,7 @@
 - SQLite3 extension:
   . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
   . Add SQlite3_Stmt::readonly() for checking if a statement is read only. (Scott)
+  . Implemented FR #53466 (SQLite3Result::columnType() should return false after all of the rows have been fetched). (Scott)
 
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
