@@ -122,7 +122,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (12) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -133,6 +133,8 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -147,7 +149,7 @@ object(stdClass)#%d (11) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (12) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -158,6 +160,8 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -172,7 +176,7 @@ object(stdClass)#%d (11) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (12) {
   [%u|b%"name"]=>
   %unicode|string%(5) "label"
   [%u|b%"orgname"]=>
@@ -183,6 +187,8 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(%d)
   [%u|b%"length"]=>
@@ -205,7 +211,7 @@ bool(false)
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
 bool(true)
-object(stdClass)#3 (11) {
+object(stdClass)#3 (12) {
   [%u|b%"name"]=>
   %unicode|string%(5) "_null"
   [%u|b%"orgname"]=>
@@ -215,6 +221,8 @@ object(stdClass)#3 (11) {
   [%u|b%"orgtable"]=>
   %unicode|string%(0) ""
   [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"db"]=>
   %unicode|string%(0) ""
   [%u|b%"max_length"]=>
   int(0)

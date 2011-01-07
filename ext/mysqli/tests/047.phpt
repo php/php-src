@@ -60,7 +60,7 @@ mysqli_close($link);
 === fetch_fields ===
 array(2) {
   [0]=>
-  object(stdClass)#5 (11) {
+  object(stdClass)#5 (12) {
     [%u|b%"name"]=>
     %unicode|string%(3) "foo"
     [%u|b%"orgname"]=>
@@ -71,6 +71,8 @@ array(2) {
     %unicode|string%(13) "test_affected"
     [%u|b%"def"]=>
     %unicode|string%(0) ""
+    [%u|b%"db"]=>
+    %unicode|string%(4) "test"
     [%u|b%"max_length"]=>
     int(0)
     [%u|b%"length"]=>
@@ -85,7 +87,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object(stdClass)#6 (11) {
+  object(stdClass)#6 (12) {
     [%u|b%"name"]=>
     %unicode|string%(3) "bar"
     [%u|b%"orgname"]=>
@@ -96,6 +98,8 @@ array(2) {
     %unicode|string%(13) "test_affected"
     [%u|b%"def"]=>
     %unicode|string%(0) ""
+    [%u|b%"db"]=>
+    %unicode|string%(4) "test"
     [%u|b%"max_length"]=>
     int(0)
     [%u|b%"length"]=>
@@ -112,7 +116,7 @@ array(2) {
 }
 
 === fetch_field_direct ===
-object(stdClass)#6 (11) {
+object(stdClass)#6 (12) {
   [%u|b%"name"]=>
   %unicode|string%(3) "foo"
   [%u|b%"orgname"]=>
@@ -123,6 +127,8 @@ object(stdClass)#6 (11) {
   %unicode|string%(13) "test_affected"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -136,7 +142,7 @@ object(stdClass)#6 (11) {
   [%u|b%"decimals"]=>
   int(0)
 }
-object(stdClass)#6 (11) {
+object(stdClass)#6 (12) {
   [%u|b%"name"]=>
   %unicode|string%(3) "bar"
   [%u|b%"orgname"]=>
@@ -147,6 +153,8 @@ object(stdClass)#6 (11) {
   %unicode|string%(13) "test_affected"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -162,7 +170,7 @@ object(stdClass)#6 (11) {
 }
 
 === fetch_field ===
-object(stdClass)#6 (11) {
+object(stdClass)#6 (12) {
   [%u|b%"name"]=>
   %unicode|string%(3) "foo"
   [%u|b%"orgname"]=>
@@ -173,6 +181,8 @@ object(stdClass)#6 (11) {
   %unicode|string%(13) "test_affected"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -186,7 +196,7 @@ object(stdClass)#6 (11) {
   [%u|b%"decimals"]=>
   int(0)
 }
-object(stdClass)#5 (11) {
+object(stdClass)#5 (12) {
   [%u|b%"name"]=>
   %unicode|string%(3) "bar"
   [%u|b%"orgname"]=>
@@ -197,6 +207,8 @@ object(stdClass)#5 (11) {
   %unicode|string%(13) "test_affected"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>

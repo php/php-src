@@ -101,7 +101,7 @@ require_once('skipifconnectfailure.inc');
 
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
  in %s on line %d
-object(stdClass)#5 (%d) {
+object(stdClass)#5 (12) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -112,6 +112,8 @@ object(stdClass)#5 (%d) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(4) "test"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
