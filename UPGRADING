@@ -161,6 +161,8 @@ UPGRADE NOTES - PHP X.Y
   strings. This breaks code that iterated the resulting stream array using a
   numeric index, but makes easier to identify which of the passed streams are
   present in the result.
+- pdo_mysql now supports setting character sets when connecting in the DSN 
+  string.
  
 
 ===================================
