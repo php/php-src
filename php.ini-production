@@ -566,13 +566,13 @@ html_errors = Off
 ; this setting blank.
 ; http://php.net/error-prepend-string
 ; Example:
-;error_prepend_string = "<font color=#ff0000>"
+;error_prepend_string = "<span style='color: #ff0000'>"
 
 ; String to output after an error message. PHP's default behavior is to leave
 ; this setting blank.
 ; http://php.net/error-append-string
 ; Example:
-;error_append_string = "</font>"
+;error_append_string = "</span>"
 
 ; Log errors to specified file. PHP's default behavior is to leave this value
 ; empty.
