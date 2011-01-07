@@ -77,28 +77,35 @@
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
 
 - SOAP extension:
-  . Fixed possible crash introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+  . Fixed possible crash introduced by the NULL poisoning patch.
+    (Mateusz Kocielski, Pierre)
 
 - SPL extension:
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
     
 - SQLite3 extension:
-  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+  . Fixed memory leaked introduced by the NULL poisoning patch.
+    (Mateusz Kocielski, Pierre)
+  . Fixed memory leak on SQLite3Result and SQLite3Stmt when assigning to a
+    reference. (Felipe)
   . Add SQlite3_Stmt::readonly() for checking if a statement is read only. (Scott)
-  . Implemented FR #53466 (SQLite3Result::columnType() should return false after all of the rows have been fetched). (Scott)
+  . Implemented FR #53466 (SQLite3Result::columnType() should return false after
+    all of the rows have been fetched). (Scott)
 
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
 - XSL extension:
-  . Fixed memory leaked introduced by the NULL poisoning patch (Mateusz Kocielski, Pierre)
+  . Fixed memory leaked introduced by the NULL poisoning patch.
+    (Mateusz Kocielski, Pierre)
 
 - Zip extension:
   . Added the filename into the return value of stream_get_meta_data(). (Hannes)
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
-  . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams) (Hannes)
+  . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams).
+    (Hannes)
   . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
     gmail dot com, Gustavo)
 
