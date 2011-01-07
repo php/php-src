@@ -683,7 +683,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 	}
 
-#ifdef PDO_MYSQL_HAS_CHARSET_X
+#ifdef PDO_MYSQL_HAS_CHARSET
 	if (vars[0].optval && mysql_options(H->server, MYSQL_SET_CHARSET_NAME, vars[0].optval)) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
