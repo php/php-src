@@ -163,6 +163,8 @@ UPGRADE NOTES - PHP X.Y
   present in the result.
 - pdo_mysql now supports setting character sets when connecting in the DSN 
   string.
+- mysqli_fetch_[field|fields|field_direct] now returns an additional property 
+  named 'db' that contains the database name of the associated result.
  
 
 ===================================
