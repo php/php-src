@@ -1702,16 +1702,10 @@ function generate_phpize()
 	/* Generate flags file */
 	/* spit out variable definitions */
 	CJ = FSO.CreateTextFile(dest + "/config.phpize.js");
-/*
-	function escape(in) {
-		val = t.replace(new RegExp('("\\\\)', "g"), '\\$1');
-	}
-*/
-	//if (typeof t == "string") {
-	
-	CJ.WriteLine("var PHP_ZTS =" + '"' + PHP_ZTS + '"');
-	CJ.WriteLine("var PHP_LIB =" + '"' + get_define('PHPLIB') + '"');
 
+	CJ.WriteLine("var PHP_ZTS =" + '"' + PHP_ZTS + '"');
+	CJ.WriteLine("var PHP_DLL_LIB =" + '"' + get_define('PHPLIB') + '"');
+	CJ.WriteLine("var PHP_DLL =" + '"' + get_define('PHPDLL') + '"');
 	CJ.WriteBlankLines(1);
 	CJ.Close();
 }
