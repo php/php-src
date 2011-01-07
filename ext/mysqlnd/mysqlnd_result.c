@@ -431,6 +431,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 				zend_bool is_warning;
 				DBG_INF("LOAD DATA");
 				conn->last_query_type = QUERY_LOAD_LOCAL;
+				conn->field_count = 0; /* overwrite previous value, or the last value could be used and lead to bug#53503 */
 				CONN_SET_STATE(conn, CONN_SENDING_LOAD_DATA);
 				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file, &is_warning TSRMLS_CC);
 				CONN_SET_STATE(conn,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
