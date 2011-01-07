@@ -1,5 +1,5 @@
 --TEST--
-Bug #53503 (mysqli::query returns false after successful LOAD DATA query)
+Bug #53649 (mysql_query with "load data" unable to save result set)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -9,45 +9,45 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 
-	if (!$link->query("DROP TABLE IF EXISTS tlocaldata")) {
+	if (!mysql_query("DROP TABLE IF EXISTS tlocaldata", $link)) {
 		printf("[002] [%d] %s\n", $link->errno, $link->error);
 	}
 
-	if (!$link->query("CREATE TABLE tlocaldata (dump1 INT UNSIGNED NOT NULL PRIMARY KEY) ENGINE=" . $engine)) {
+	if (!mysql_query("CREATE TABLE tlocaldata (dump1 INT UNSIGNED NOT NULL PRIMARY KEY) ENGINE=" . $engine, $link)) {
 		printf("[003] [%d] %s\n", $link->errno, $link->error);
 	}
 
-	file_put_contents('bug53503.data', "1\n2\n3\n");
+	file_put_contents('bug53649.data', "1\n2\n3\n");
 
-	$link->query("SELECT 1 FROM DUAL");
+	mysql_query("SELECT 1 FROM DUAL", $link);
 
-	if (!$link->query("LOAD DATA LOCAL INFILE 'bug53503.data' INTO TABLE tlocaldata")) {
+	if (!mysql_query("LOAD DATA LOCAL INFILE 'bug53649.data' INTO TABLE tlocaldata", $link)) {
 		echo "bug";
 	} else {
 		echo "done";
 	}
-	$link->close();
+	mysql_close($link);
 ?>
 --CLEAN--
 <?php
 require_once('connect.inc');
 
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket);
 }
 
-if (!$link->query($link, 'DROP TABLE IF EXISTS tlocaldata')) {
+if (!mysql_query($link, 'DROP TABLE IF EXISTS tlocaldata', $link)) {
 	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 
-$link->close();
+mysql_close($link);
 
-unlink('bug53503.data');
+unlink('bug53649.data');
 ?>
 --EXPECT--
 done
