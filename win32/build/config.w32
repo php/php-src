@@ -411,3 +411,8 @@ ARG_ENABLE("security-flags", "Enable the compiler security flags", "yes");
 if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
+
+ARG_ENABLE("static-analyze", "Enable the VC compiler static analyze", "no");
+if (PHP_STATIC_ANALYZE == "yes") {
+	ADD_FLAG("CFLAGS", " /analyze ");
+}
