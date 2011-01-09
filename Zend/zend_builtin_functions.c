@@ -50,6 +50,7 @@ static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(property_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(interface_exists);
+static ZEND_FUNCTION(trait_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(class_alias);
 #if ZEND_DEBUG
@@ -171,6 +172,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_exists, 0, 0, 1)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trait_exists, 0, 0, 1)
+	ZEND_ARG_INFO(0, traitname)
+	ZEND_ARG_INFO(0, autoload)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_function_exists, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
@@ -249,6 +255,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(property_exists,	arginfo_property_exists)
 	ZEND_FE(class_exists,		arginfo_class_exists)
 	ZEND_FE(interface_exists,	arginfo_class_exists)
+	ZEND_FE(trait_exists,		arginfo_trait_exists)
 	ZEND_FE(function_exists,	arginfo_function_exists)
 	ZEND_FE(class_alias,		arginfo_class_alias)
 #if ZEND_DEBUG
@@ -1223,11 +1230,11 @@ ZEND_FUNCTION(class_exists)
 	
 		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
 		free_alloca(lc_name, use_heap);
-		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & ZEND_ACC_INTERFACE));
+		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
 
  	if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == SUCCESS) {
- 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_INTERFACE) == 0);
+ 		RETURN_BOOL(((*ce)->ce_flags & (ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT - ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) == 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1271,6 +1278,49 @@ ZEND_FUNCTION(interface_exists)
 
  	if (zend_lookup_class(iface_name, iface_name_len, &ce TSRMLS_CC) == SUCCESS) {
  		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_INTERFACE) > 0);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool trait_exists(string traitname [, bool autoload])
+ Checks if the trait exists */
+ZEND_FUNCTION(trait_exists)
+{
+	char *trait_name, *lc_name;
+	zend_class_entry **ce;
+	int trait_name_len;
+	int found;
+	zend_bool autoload = 1;
+	ALLOCA_FLAG(use_heap)
+  
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &trait_name, &trait_name_len, &autoload) == FAILURE) {
+		return;
+	}
+  
+	if (!autoload) {
+		char *name;
+		int len;
+		
+		lc_name = do_alloca(trait_name_len + 1, use_heap);
+		zend_str_tolower_copy(lc_name, trait_name, trait_name_len);
+    
+		/* Ignore leading "\" */
+		name = lc_name;
+		len = trait_name_len;
+		if (lc_name[0] == '\\') {
+			name = &lc_name[1];
+			len--;
+		}
+    
+		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
+		free_alloca(lc_name, use_heap);
+		RETURN_BOOL(found == SUCCESS && (((*ce)->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+	}
+  
+ 	if (zend_lookup_class(trait_name, trait_name_len, &ce TSRMLS_CC) == SUCCESS) {
+ 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	} else {
 		RETURN_FALSE;
 	}

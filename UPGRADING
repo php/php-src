@@ -322,6 +322,7 @@ UPGRADE NOTES - PHP X.Y
        - Core:
          - get_declared_traits()
          - http_response_code()
+         - trait_exists()
 
      f. New global constants
 
