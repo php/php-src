@@ -860,7 +860,8 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (use_env == null) {
 		use_env = true;
 	}
-
+MESSAGE("******************" + path_to_check);
+MESSAGE("******************" + flag_name);
 	// if true, add the dir part of the header_name to the include path
 	if (add_dir_part == null) {
 		add_dir_part = false;
@@ -1981,6 +1982,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 	dir = dir.replace(new RegExp("/", "g"), "\\");
 
 	for (i in headers_list) {
+		found = false;
 		src = headers_list[i];
 		src = src.replace(new RegExp("/", "g"), "\\");
 		isdir = FSO.FolderExists(dir + src);
@@ -1991,11 +1993,31 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 			}
 			headers_install[headers_install.length] = [dir + src, 'dir',''];
 			ADD_FLAG("INSTALL_HEADERS_DIR", dir + src);
+			found = true;
 		} else if (isfile) {
 			dirname = FSO.GetParentFolderName(dir + src);
 			headers_install[headers_install.length] = [dir + src, 'file', dirname];
 			ADD_FLAG("INSTALL_HEADERS", dir + src);
+			found = true;
 		} else {
+			path =  configure_module_dirname + "\\"+ src;
+			isdir = FSO.FolderExists(path);
+			isfile = FSO.FileExists(path);
+			if (isdir) {
+				if (src.length > 0 && src.substr(src.length - 1) != '/' && src.substr(src.length - 1) != '\\') {
+					src += '\\';
+				}
+				headers_install[headers_install.length] = [path, 'dir',''];
+				ADD_FLAG("INSTALL_HEADERS_DIR", path);
+			} else if (isfile) {
+				dirname = FSO.GetParentFolderName(path);
+				headers_install[headers_install.length] = [path, 'file', dir];
+				ADD_FLAG("INSTALL_HEADERS", dir + src);
+				found = true;
+			}
+		}
+
+		if (found == false) {
 			STDOUT.WriteLine(headers_list);
 			ERROR("Cannot find header " + dir + src);
 		}
