@@ -408,7 +408,7 @@ if (PHP_DSP != "no") {
 	FSO.CreateFolder("tmp");
 }
 
-ARG_ENABLE("security-flags", "Enable the compiler security flags", "yes");
+ARG_ENABLE("security-flags", "Enable the compiler security flags", "no");
 if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
