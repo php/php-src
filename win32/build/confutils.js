@@ -860,8 +860,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (use_env == null) {
 		use_env = true;
 	}
-MESSAGE("******************" + path_to_check);
-MESSAGE("******************" + flag_name);
+
 	// if true, add the dir part of the header_name to the include path
 	if (add_dir_part == null) {
 		add_dir_part = false;
