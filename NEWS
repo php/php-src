@@ -76,6 +76,10 @@
 - PHP-FPM SAPI:
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
 
+- Readline extension:
+  . Fixed bug #53630 (Fixed parameter handling inside readline() function).
+    (jo at feuersee dot de, Ilia)
+
 - SOAP extension:
   . Fixed possible crash introduced by the NULL poisoning patch.
     (Mateusz Kocielski, Pierre)
