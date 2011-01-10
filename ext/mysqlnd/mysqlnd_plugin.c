@@ -75,11 +75,10 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 static 
 enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 {
-#if A0
 	struct st_mysqlnd_typeii_plugin_example * plugin = (struct st_mysqlnd_typeii_plugin_example *) p;
-#endif
 	DBG_ENTER("mysqlnd_example_plugin_end");
-
+	mysqlnd_stats_end(plugin->plugin_header.plugin_stats.values);
+	plugin->plugin_header.plugin_stats.values = NULL;
 	DBG_RETURN(PASS);
 }
 /* }}} */
