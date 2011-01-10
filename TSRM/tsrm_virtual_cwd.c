@@ -509,6 +509,9 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 
 		*length = 1;
 		retval = (char *) malloc(2);
+		if (retval == NULL) {
+			return NULL;
+		}
 		retval[0] = DEFAULT_SLASH;
 		retval[1] = '\0';
 		return retval;
@@ -521,6 +524,9 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 
 		*length = state->cwd_length+1;
 		retval = (char *) malloc(*length+1);
+		if (retval == NULL) {
+			return NULL;
+		}
 		memcpy(retval, state->cwd, *length);
 		retval[0] = toupper(retval[0]);
 		retval[*length-1] = DEFAULT_SLASH;
@@ -647,6 +653,10 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
 		realpath_cache_bucket *bucket = malloc(size);
 		unsigned long n;
+
+		if (bucket == NULL) {
+			return;
+		}
 
 #ifdef PHP_WIN32
 		bucket->key = realpath_cache_key(path, path_len TSRMLS_CC);
@@ -866,6 +876,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 
 			pbuffer = (REPARSE_DATA_BUFFER *)tsrm_do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+			if (pbuffer == NULL) {
+				return -1;
+			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 				tsrm_free_alloca(pbuffer, use_heap_large);
 				CloseHandle(hLink);
@@ -952,9 +965,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 
 			if (!isVolume) {
-				char * tmp = substitutename + substitutename_off;
+				char * tmp2 = substitutename + substitutename_off;
 				for(bufindex = 0; bufindex < (substitutename_len - substitutename_off); bufindex++) {
-					*(path + bufindex) = *(tmp + bufindex);
+					*(path + bufindex) = *(tmp2 + bufindex);
 				}
 
 				*(path + bufindex) = 0;
@@ -1370,6 +1383,10 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)malloc(1);
+		if (new_state.cwd == NULL) {
+			retval = NULL;
+			goto end;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1379,6 +1396,10 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 		CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	} else {
 		new_state.cwd = (char*)malloc(1);
+		if (new_state.cwd == NULL) {
+			retval = NULL;
+			goto end;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
@@ -1394,7 +1415,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 	}
 
 	CWD_STATE_FREE(&new_state);
-
+end:
 	return retval;
 }
 /* }}} */
