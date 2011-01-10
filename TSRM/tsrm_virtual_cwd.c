@@ -840,8 +840,8 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		memcpy(tmp, path, len+1);
 
 		if(save &&
-		!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
-		(data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
+				(data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
