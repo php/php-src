@@ -92,6 +92,7 @@
 #define CLIENT_MULTI_STATEMENTS		(1UL << 16) /* Enable/disable multi-stmt support */
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
 #define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
+#define CLIENT_PLUGIN_AUTH			(1UL << 19) /* Client supports plugin authentication */
 
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 
