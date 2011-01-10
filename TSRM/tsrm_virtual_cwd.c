@@ -1887,6 +1887,9 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)malloc(1);
+		if (new_state.cwd == NULL) {
+			return NULL;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 		if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
@@ -1898,6 +1901,9 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 		new_state.cwd_length = strlen(cwd);
 	} else {
 		new_state.cwd = (char*)malloc(1);
+		if (new_state.cwd == NULL) {
+			return NULL;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
