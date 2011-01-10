@@ -95,14 +95,14 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					char *index;
 					uint index_len;
 					ulong num;
-					zval **data;
+					zval **tmpdata;
 
 					for (zend_hash_internal_pointer_reset_ex(parent_ht, &pos);
-					     zend_hash_get_current_data_ex(parent_ht, (void**)&data, &pos) == SUCCESS &&
+					     zend_hash_get_current_data_ex(parent_ht, (void**)&tmpdata, &pos) == SUCCESS &&
 					     zend_hash_get_current_key_ex(parent_ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
 					     zend_hash_move_forward_ex(parent_ht, &pos)) {
-						if (zend_hash_add(ht, index, index_len, data, sizeof(zval*), NULL) == SUCCESS) {
-						    Z_ADDREF_PP(data);
+						if (zend_hash_add(ht, index, index_len, tmpdata, sizeof(zval*), NULL) == SUCCESS) {
+						    Z_ADDREF_PP(tmpdata);
 						}
 					}
 				}
