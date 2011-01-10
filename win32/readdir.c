@@ -33,6 +33,9 @@ DIR *opendir(const char *dir)
 	}
 
 	filespec = (char *)malloc(strlen(resolved_path_buff) + 2 + 1);
+	if (filespec == NULL) {
+		return NULL;
+	}
 	strcpy(filespec, resolved_path_buff);
 	index = strlen(filespec) - 1;
 	if (index >= 0 && (filespec[index] == '/' || 
@@ -41,6 +44,9 @@ DIR *opendir(const char *dir)
 	strcat(filespec, "\\*");
 
 	dp = (DIR *) malloc(sizeof(DIR));
+	if (dp == NULL) {
+		return NULL;
+	}
 	dp->offset = 0;
 	dp->finished = 0;
 
@@ -140,6 +146,10 @@ int rewinddir(DIR *dp)
 	dp->finished = 0;
 
 	filespec = (char *)malloc(strlen(dp->dir) + 2 + 1);
+	if (filespec == NULL) {
+		return -1;
+	}
+
 	strcpy(filespec, dp->dir);
 	index = strlen(filespec) - 1;
 	if (index >= 0 && (filespec[index] == '/' || 
