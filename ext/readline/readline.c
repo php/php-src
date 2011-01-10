@@ -196,7 +196,7 @@ PHP_FUNCTION(readline)
 	int prompt_len;
 	char *result;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &prompt, &prompt_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &prompt, &prompt_len)) {
 		RETURN_FALSE;
 	}
 
