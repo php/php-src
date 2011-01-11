@@ -101,7 +101,9 @@ typedef struct st_mysqlnd_packet_auth {
 	/* +1 for \0 because of scramble() */
 	unsigned char	*server_scramble_buf;
 	size_t			db_len;
-	zend_bool		send_half_packet;
+	zend_bool		send_auth_data;
+	zend_bool		is_change_user_packet;
+	zend_bool		silent;
 } MYSQLND_PACKET_AUTH;
 
 /* OK packet */

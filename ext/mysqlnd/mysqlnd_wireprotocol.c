@@ -447,7 +447,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 /* }}} */
 
 
-#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SHA1_MAX_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 128)
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 128)
 
 /* {{{ php_mysqlnd_auth_write */
 static
@@ -460,19 +460,21 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_auth_write");
 
-	int4store(p, packet->client_flags);
-	p+= 4;
+	if (!packet->is_change_user_packet) {
+		int4store(p, packet->client_flags);
+		p+= 4;
 
-	int4store(p, packet->max_packet_size);
-	p+= 4;
+		int4store(p, packet->max_packet_size);
+		p+= 4;
 
-	int1store(p, packet->charset_no);
-	p++;
+		int1store(p, packet->charset_no);
+		p++;
 
-	memset(p, 0, 23); /* filler */
-	p+= 23;
+		memset(p, 0, 23); /* filler */
+		p+= 23;
+	}
 
-	if (!packet->send_half_packet) {
+	if (packet->send_auth_data || packet->is_change_user_packet) {
 		len = MIN(strlen(packet->user), MYSQLND_MAX_ALLOWED_USER_LEN);
 		memcpy(p, packet->user, len);
 		p+= len;
@@ -481,10 +483,10 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		/* copy scrambled pass*/
 		if (packet->password && packet->password[0]) {
 			/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
-			int1store(p, SHA1_MAX_LENGTH);
+			int1store(p, SCRAMBLE_LENGTH);
 			p++;
 			php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
-			p+= SHA1_MAX_LENGTH;
+			p+= SCRAMBLE_LENGTH;
 		} else {
 			/* Zero length */
 			int1store(p, 0);
@@ -492,16 +494,29 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		}
 
 		if (packet->db) {
+			/* CLIENT_CONNECT_WITH_DB should have been set */
 			size_t real_db_len = MIN(MYSQLND_MAX_ALLOWED_DB_LEN, packet->db_len);
 			memcpy(p, packet->db, real_db_len);
 			p+= real_db_len;
 			*p++= '\0';
 		}
-		/* Handle CLIENT_CONNECT_WITH_DB */
 		/* no \0 for no DB */
-	}
 
-	DBG_RETURN(conn->net->m.send(conn, buffer, p - buffer - MYSQLND_HEADER_SIZE TSRMLS_CC));
+		if (packet->is_change_user_packet && packet->charset_no) {
+			int2store(p, packet->charset_no);
+			p+= 2;
+		}
+	}
+	if (packet->is_change_user_packet) {
+		if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer + MYSQLND_HEADER_SIZE, p - buffer - MYSQLND_HEADER_SIZE,
+										   PROT_LAST /* the caller will handle the OK packet */,
+										   packet->silent, TRUE TSRMLS_CC)) {
+			DBG_RETURN(0);
+		}
+		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);
+	} else {
+		DBG_RETURN(conn->net->m.send(conn, buffer, p - buffer - MYSQLND_HEADER_SIZE TSRMLS_CC));
+	}
 }
 /* }}} */
 
