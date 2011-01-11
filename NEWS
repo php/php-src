@@ -2,6 +2,8 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.2.18
 - Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)
+- Fixed bug #53568 (swapped memset arguments in struct initialization).
+  (crrodriguez at opensuse dot org)
 
 06 Jan 2010, PHP 5.2.17
 - Fixed Bug #53632 (infinite loop with x87 fpu). (CVE-2010-4645) (Scott, 
