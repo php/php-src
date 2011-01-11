@@ -427,7 +427,63 @@ MYSQLND_METHOD(mysqlnd_conn, end_psession)(MYSQLND * conn TSRMLS_DC)
 /* }}} */
 
 
-#define MYSQLND_ASSEBLED_PACKET_MAX_SIZE 3UL*1024UL*1024UL*1024UL
+#define MYSQLND_ASSEMBLED_PACKET_MAX_SIZE 3UL*1024UL*1024UL*1024UL
+/* {{{ mysqlnd_switch_to_ssl_if_needed */
+static MYSQLND_PACKET_AUTH *
+mysqlnd_switch_to_ssl_if_needed(
+			MYSQLND * conn,
+			const MYSQLND_PACKET_GREET * const greet_packet,
+			const MYSQLND_OPTIONS * const options,
+			unsigned long mysql_flags
+			TSRMLS_DC
+		)
+{
+	const MYSQLND_CHARSET * charset = NULL;
+	MYSQLND_PACKET_AUTH * auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
+
+	if (!auth_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		goto err;
+	}
+	auth_packet->client_flags = mysql_flags;
+	auth_packet->max_packet_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
+
+	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
+		auth_packet->charset_no	= charset->nr;
+	} else {
+#if MYSQLND_UNICODE
+		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
+#else
+		auth_packet->charset_no	= greet_packet->charset_no;
+#endif
+	}
+
+#ifdef MYSQLND_SSL_SUPPORTED
+	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
+		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
+		DBG_INF("Switching to SSL");
+		if (!PACKET_WRITE(auth_packet, conn)) {
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			goto err;
+		}
+
+		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
+
+		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
+			goto err;
+		}
+	}
+#endif
+	DBG_RETURN(auth_packet);
+err:
+	PACKET_FREE(auth_packet);
+	DBG_RETURN(NULL);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_connect_run_authentication */
 static enum_func_status
 mysqlnd_connect_run_authentication(
@@ -441,39 +497,28 @@ mysqlnd_connect_run_authentication(
 			unsigned long mysql_flags
 			TSRMLS_DC)
 {
-	const MYSQLND_CHARSET * charset = NULL;
 	enum_func_status ret = FAIL;
-	MYSQLND_PACKET_AUTH * auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+	MYSQLND_PACKET_AUTH * auth_packet = NULL;
 	MYSQLND_PACKET_OK * ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 
 	DBG_ENTER("mysqlnd_connect_run_authentication");
 
-	if (!auth_packet || !ok_packet) {
+	if (!ok_packet) {
 		SET_OOM_ERROR(conn->error_info);
 		goto err;
 	}
 
-#ifdef MYSQLND_SSL_SUPPORTED
-	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
-		auth_packet->send_half_packet = TRUE;
+	auth_packet = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, options, mysql_flags TSRMLS_CC);
+
+	if (!auth_packet) {
+		goto err;
 	}
-#endif
+
+	auth_packet->send_auth_data = TRUE;
 	auth_packet->user		= user;
 	auth_packet->password	= passwd;
-
-	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
-		auth_packet->charset_no	= charset->nr;
-	} else {
-#if MYSQLND_UNICODE
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
-		auth_packet->charset_no	= greet_packet->charset_no;
-#endif
-	}
 	auth_packet->db			= db;
 	auth_packet->db_len		= db_len;
-	auth_packet->max_packet_size= MYSQLND_ASSEBLED_PACKET_MAX_SIZE;
-	auth_packet->client_flags= mysql_flags;
 
 	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
 	if (!conn->scramble) {
@@ -487,27 +532,6 @@ mysqlnd_connect_run_authentication(
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		goto err;
 	}
-
-#ifdef MYSQLND_SSL_SUPPORTED
-	if (auth_packet->send_half_packet) {
-		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
-		DBG_INF("Switching to SSL");
-
-		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
-
-		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
-			goto err;
-		}
-
-		auth_packet->send_half_packet = FALSE;
-		if (!PACKET_WRITE(auth_packet, conn)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-			goto err;
-		}
-	}
-#endif
-
 
 	if (FAIL == PACKET_READ(ok_packet, conn) || ok_packet->field_count >= 0xFE) {
 		if (ok_packet->field_count == 0xFE) {
@@ -800,7 +824,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			conn->unix_socket_len = strlen(conn->unix_socket);
 		}
 		conn->client_flag		= mysql_flags;
-		conn->max_packet_size	= MYSQLND_ASSEBLED_PACKET_MAX_SIZE;
+		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		/* todo: check if charset is available */
 		conn->server_capabilities = greet_packet->server_capabilities;
 		conn->upsert_status.warning_count = 0;
@@ -1912,18 +1936,26 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	  Stack space is not that expensive, so use a bit more to be protected against
 	  buffer overflows.
 	*/
-	size_t user_len;
+	size_t user_len, db_len;
 	enum_func_status ret = FAIL;
-	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
+	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp = NULL;
 	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 2 /* charset*/ ];
 	char *p = buffer;
 	const MYSQLND_CHARSET * old_cs = conn->charset;
+
+	MYSQLND_PACKET_AUTH * auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+
 
 	DBG_ENTER("mysqlnd_conn::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
 				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
 
 	SET_ERROR_AFF_ROWS(conn);
+
+	if (!auth_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		goto end;
+	}
 
 	if (!user) {
 		user = "";
@@ -1934,44 +1966,25 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	if (!db) {
 		db = "";
 	}
+	user_len = strlen(user);
+	db_len = strlen(db);
 
-	/* 1. user ASCIIZ */
-	user_len = MIN(strlen(user), MYSQLND_MAX_ALLOWED_USER_LEN);
-	memcpy(p, user, user_len);
-	p += user_len;
-	*p++ = '\0';
-
-	/* 2. password SCRAMBLE_LENGTH followed by the scramble or \0 */
-	if (passwd[0]) {
-		*p++ = SCRAMBLE_LENGTH;
-		php_mysqlnd_scramble((unsigned char *)p, conn->scramble, (unsigned char *)passwd);
-		p += SCRAMBLE_LENGTH;
-	} else {
-		*p++ = '\0';
-	}
-
-	/* 3. db ASCIIZ */
-	if (db[0]) {
-		size_t db_len = MIN(strlen(db), MYSQLND_MAX_ALLOWED_DB_LEN);
-		memcpy(p, db, db_len);
-		p += db_len;
-	}
-	*p++ = '\0';
-
-	/*
-	  4. request the current charset, or it will be reset to the system one.
-	  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug : 
-	  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
-	*/
+	auth_packet->is_change_user_packet = TRUE;
+	auth_packet->user		= user;
+	auth_packet->password	= passwd;
+	auth_packet->db			= db;
+	auth_packet->db_len		= db_len;
+	auth_packet->server_scramble_buf = conn->scramble;
+	auth_packet->silent		= silent;
 	if (mysqlnd_get_server_version(conn) >= 50123) {
-		int2store(p, conn->charset->nr);
+		auth_packet->charset_no	= conn->charset->nr;
 		p+=2;
 	}
-
-	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
-									   PROT_LAST /* we will handle the OK packet*/,
-									   silent, TRUE TSRMLS_CC)) {
-		DBG_RETURN(FAIL);
+	
+	if (!PACKET_WRITE(auth_packet, conn)) {
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		goto end;
 	}
 
 	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
@@ -2030,6 +2043,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 	}
 end:
+	PACKET_FREE(auth_packet);
 	PACKET_FREE(chg_user_resp);
 
 	/*
