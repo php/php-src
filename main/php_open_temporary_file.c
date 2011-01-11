@@ -149,7 +149,11 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	if (GetTempFileName(new_state.cwd, pfx, 0, opened_path)) {
 		/* Some versions of windows set the temp file to be read-only,
 		 * which means that opening it will fail... */
-		VCWD_CHMOD(opened_path, 0600);
+		if (VCWD_CHMOD(opened_path, 0600)) {
+			efree(opened_path);
+			free(new_state.cwd);
+			return -1;
+		}
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
 	}
 
