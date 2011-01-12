@@ -288,12 +288,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	if (!request_fulluri &&
 		context &&
 		php_stream_context_get_option(context, "http", "request_fulluri", &tmpzval) == SUCCESS) {
-		zval tmp = **tmpzval;
+		zval ztmp = **tmpzval;
 
-		zval_copy_ctor(&tmp);
-		convert_to_boolean(&tmp);
-		request_fulluri = Z_BVAL(tmp) ? 1 : 0;
-		zval_dtor(&tmp);
+		zval_copy_ctor(&ztmp);
+		convert_to_boolean(&ztmp);
+		request_fulluri = Z_BVAL(ztmp) ? 1 : 0;
+		zval_dtor(&ztmp);
 	}
 
 	if (request_fulluri) {
@@ -543,10 +543,10 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	if (header_init) {
-		zval *tmp;
-		MAKE_STD_ZVAL(tmp);
-		array_init(tmp);
-		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", tmp);
+		zval *ztmp;
+		MAKE_STD_ZVAL(ztmp);
+		array_init(ztmp);
+		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", ztmp);
 	}
 
 	{
