@@ -306,12 +306,24 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	zend_uchar buf[2048];
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
+	zend_uchar *pad_start = NULL;
 	MYSQLND_PACKET_GREET *packet= (MYSQLND_PACKET_GREET *) _packet;
 
 	DBG_ENTER("php_mysqlnd_greet_read");
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "greeting", PROT_GREET_PACKET);
 	BAIL_IF_NO_MORE_DATA;
+
+	packet->scramble_buf = &packet->intern_scramble_buf;
+	packet->scramble_buf_len = sizeof(packet->intern_scramble_buf);
+
+	if (packet->header.size < sizeof(buf)) {
+		/*
+		  Null-terminate the string, so strdup can work even if the packets have a string at the end,
+		  which is not ASCIIZ
+		*/
+		buf[packet->header.size] = '\0'; 
+	}
 
 	packet->protocol_version = uint1korr(p);
 	p++;
@@ -342,7 +354,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	BAIL_IF_NO_MORE_DATA;
 
 	memcpy(packet->scramble_buf, p, SCRAMBLE_LENGTH_323);
-	p+= 8;
+	p+= SCRAMBLE_LENGTH_323;
 	BAIL_IF_NO_MORE_DATA;
 
 	/* pad1 */
@@ -362,22 +374,56 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	BAIL_IF_NO_MORE_DATA;
 
 	/* pad2 */
+	pad_start = p;
 	p+= 13;
 	BAIL_IF_NO_MORE_DATA;
 
 	if ((size_t) (p - buf) < packet->header.size) {
 		/* scramble_buf is split into two parts */
-		memcpy(packet->scramble_buf + SCRAMBLE_LENGTH_323,
-				p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
+		memcpy(packet->scramble_buf + SCRAMBLE_LENGTH_323, p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
+		p+= SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323;
+		p++; /* 0x0 at the end of the scramble and thus last byte in the packet in 5.1 and previous */
 	} else {
 		packet->pre41 = TRUE;
+	}
+
+	/* Is this a 5.5+ server ? */
+	if ((size_t) (p - buf) < packet->header.size) {
+		 /* backtrack one byte, the 0x0 at the end of the scramble in 5.1 and previous */
+		p--;
+
+    	/* Additional 16 bits for server capabilities */
+		packet->server_capabilities |= uint2korr(pad_start) << 16;
+		/* And a length of the server scramble in one byte */
+		packet->scramble_buf_len = uint1korr(pad_start + 2);
+		if (packet->scramble_buf_len > SCRAMBLE_LENGTH) {
+			/* more data*/
+			char * new_scramble_buf = emalloc(packet->scramble_buf_len);
+			if (!new_scramble_buf) {
+				goto premature_end;
+			}
+			/* copy what we already have */
+			memcpy(new_scramble_buf, packet->scramble_buf, SCRAMBLE_LENGTH);
+			/* add additional scramble data 5.5+ sent us */
+			memcpy(new_scramble_buf + SCRAMBLE_LENGTH, p, packet->scramble_buf_len - SCRAMBLE_LENGTH);
+			p+= (packet->scramble_buf_len - SCRAMBLE_LENGTH);
+			packet->scramble_buf = new_scramble_buf;
+		}
+	}
+
+	if (packet->server_capabilities & CLIENT_PLUGIN_AUTH) {
+		BAIL_IF_NO_MORE_DATA;
+		/* The server is 5.5.x and supports authentication plugins */
+		packet->auth_protocol = estrdup((char *)p);
+		p+= strlen(packet->auth_protocol) + 1; /* eat the '\0' */
 	}
 
 	DBG_INF_FMT("proto=%u server=%s thread_id=%u",
 				packet->protocol_version, packet->server_version, packet->thread_id);
 
-	DBG_INF_FMT("server_capabilities=%u charset_no=%u server_status=%i",
-				packet->server_capabilities, packet->charset_no, packet->server_status);
+	DBG_INF_FMT("server_capabilities=%u charset_no=%u server_status=%i auth_protocol=%s scramble_length=%u",
+				packet->server_capabilities, packet->charset_no, packet->server_status,
+				packet->auth_protocol? packet->auth_protocol:"n/a", packet->scramble_buf_len);
 
 	DBG_RETURN(PASS);
 premature_end:
@@ -397,6 +443,14 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool stack_allocation TSRMLS
 	if (p->server_version) {
 		efree(p->server_version);
 		p->server_version = NULL;
+	}
+	if (p->scramble_buf && p->scramble_buf != &p->intern_scramble_buf) {
+		efree(p->scramble_buf);
+		p->scramble_buf = NULL;
+	}
+	if (p->auth_protocol) {
+		efree(p->auth_protocol);
+		p->auth_protocol = NULL;
 	}
 	if (!stack_allocation) {
 		mnd_pefree(p, p->header.persistent);
@@ -423,7 +477,6 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 	PHP_SHA1_CTX context;
 	zend_uchar sha1[SHA1_MAX_LENGTH];
 	zend_uchar sha2[SHA1_MAX_LENGTH];
-
 
 	/* Phase 1: hash password */
 	PHP_SHA1Init(&context);

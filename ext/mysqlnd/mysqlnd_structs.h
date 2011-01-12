@@ -151,12 +151,12 @@ typedef struct st_mysqlnd_options
 	char 		*cfg_file;
 	char		*cfg_section;
 
+	char		*auth_protocol;
 	/*
 	  We need to keep these because otherwise st_mysqlnd_conn will be changed.
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-	char		* unused1;
 	char		* unused2;
 	char		* unused3;
 	char		* unused4;
@@ -961,6 +961,23 @@ struct st_mysqlnd_typeii_plugin_example
 	struct st_mysqlnd_plugin_header plugin_header;
 	void * methods;
 	unsigned int counter;
+};
+
+struct st_mysqlnd_packet_greet;
+
+struct st_mysqlnd_authentication_plugin
+{
+	struct st_mysqlnd_plugin_header plugin_header;
+	struct {
+		enum_func_status (*auth_handshake)(MYSQLND * conn, const char * const user, const char * const passwd, const char * const db,
+										   const size_t db_len, const struct st_mysqlnd_packet_greet * const greet_packet,
+										   const MYSQLND_OPTIONS * const options, unsigned long mysql_flags,
+										   char ** switch_to_auth_protocol TSRMLS_DC);
+
+		enum_func_status (*auth_change_user)(MYSQLND * const conn, const char * const user, const size_t user_len, const char * const passwd,
+											 const char * const db, const size_t db_len, const zend_bool silent,
+											 char ** switch_to_auth_protocol TSRMLS_DC);
+	} methods;
 };
 
 #endif /* MYSQLND_STRUCTS_H */

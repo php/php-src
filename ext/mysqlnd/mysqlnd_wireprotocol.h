@@ -70,17 +70,20 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
-	zend_uchar	scramble_buf[SCRAMBLE_LENGTH];
+	zend_uchar	intern_scramble_buf[SCRAMBLE_LENGTH];
+	zend_uchar	* scramble_buf;
+	size_t		scramble_buf_len;
 	/* 1 byte pad */
-	uint16_t	server_capabilities;
+	uint32_t	server_capabilities;
 	uint8_t		charset_no;
 	uint16_t	server_status;
-	/* 13 byte pad*/
+	/* 13 byte pad, in 5.5 first 2 bytes are more capabilities followed by 1 byte scramble_length */
 	zend_bool	pre41;
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
+	char		*auth_protocol;
 } MYSQLND_PACKET_GREET;
 
 
@@ -100,6 +103,7 @@ typedef struct st_mysqlnd_packet_auth {
 	const char	*password;
 	/* +1 for \0 because of scramble() */
 	unsigned char	*server_scramble_buf;
+	size_t			server_scramble_buf_len;
 	size_t			db_len;
 	zend_bool		send_auth_data;
 	zend_bool		is_change_user_packet;

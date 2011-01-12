@@ -192,7 +192,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 void mysqlnd_plugin_subsystem_init(TSRMLS_D);
 void mysqlnd_plugin_subsystem_end(TSRMLS_D);
 
-
+void mysqlnd_native_authentication_plugin_register(TSRMLS_D);
 
 void mysqlnd_example_plugin_register(TSRMLS_D);
 
