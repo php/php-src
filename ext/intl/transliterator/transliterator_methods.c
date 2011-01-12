@@ -259,7 +259,7 @@ PHP_FUNCTION( transliterator_list_ids )
 		"transliterator_list_ids: Failed to obtain registered transliterators" );
 
 	array_init( return_value );
-	while( elem = uenum_unext( en, &elem_len, &status ) )
+	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		char *el_char = NULL;
 		int  el_len   = 0;
@@ -365,7 +365,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		RETURN_FALSE;
 	}
 
-	if( start < 0 || (limit != -1 ) && (start > limit ) )
+	if( start < 0 || ((limit != -1 ) && (start > limit )) )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"transliterator_transliterate: \"start\" argument should be "
