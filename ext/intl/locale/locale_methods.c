@@ -264,7 +264,7 @@ static char* get_icu_value_internal( char* loc_name , char* tag_name, int* resul
 	UErrorCode  	status          = U_ZERO_ERROR;
 
 
-	if( tag_name != LOC_CANONICALIZE_TAG ){
+	if( strcmp(tag_name, LOC_CANONICALIZE_TAG) != 0 ){
 		/* Handle  grandfathered languages */
 		grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 		if( grOffset >= 0 ){
@@ -501,7 +501,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	loc_name = INTL_G(default_locale);
 	}
 
-	if( tag_name != DISP_NAME ){
+	if( strcmp(tag_name, DISP_NAME) != 0 ){
 		/* Handle grandfathered languages */
 		grOffset = findOffset( LOC_GRANDFATHERED , loc_name );
 		if( grOffset >= 0 ){
@@ -1042,9 +1042,10 @@ static int add_array_entry(char* loc_name, zval* hash_arr, char* key_name TSRMLS
 				sprintf( cur_key_name , "%s%d", key_name , cnt++);	
 				add_assoc_string( hash_arr, cur_key_name , token , TRUE );
 			}
-
-			if( key_name == LOC_PRIVATE_TAG ){
+/*
+			if( strcmp(key_name, LOC_PRIVATE_TAG) == 0 ){
 			}
+*/
 		}
 	} else {
 		if( result == 1 ){
