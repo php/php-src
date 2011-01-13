@@ -58,7 +58,11 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator.c \
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
-    idn/idn.c, $ext_shared,,$ICU_INCS)
+    idn/idn.c \
+    spoofchecker/spoofchecker_class.c \
+    spoofchecker/spoofchecker.c\
+    spoofchecker/spoofchecker_create.c\
+    spoofchecker/spoofchecker_main.c, $ext_shared,,$ICU_INCS)
 
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/common)
@@ -71,4 +75,5 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/resourcebundle)
   PHP_ADD_BUILD_DIR($ext_builddir/transliterator)
   PHP_ADD_BUILD_DIR($ext_builddir/idn)
+  PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
 fi

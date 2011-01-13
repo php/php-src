@@ -70,6 +70,11 @@
 
 #include "idn/idn.h"
 
+#include "spoofchecker/spoofchecker_class.h"
+#include "spoofchecker/spoofchecker.h"
+#include "spoofchecker/spoofchecker_create.h"
+#include "spoofchecker/spoofchecker_main.h"
+
 #include "msgformat/msgformat.h"
 #include "common/common_error.h"
 
@@ -511,7 +516,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( resourcebundle_locales, arginfo_resourcebundle_locales_proc )
 	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code_proc )
 	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message_proc )
-
+	
 	/* Transliterator functions */
 	PHP_FE( transliterator_create, arginfo_transliterator_create )
 	PHP_FE( transliterator_create_from_rules, arginfo_transliterator_create_from_rules )
@@ -632,6 +637,12 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+
+	/* Register 'Spoofchecker' PHP class */
+	spoofchecker_register_Spoofchecker_class( TSRMLS_C );
+
+	/* Expose Spoofchecker constants to PHP scripts */
+	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
