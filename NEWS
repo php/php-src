@@ -140,6 +140,10 @@ PHP                                                                        NEWS
   . Added FNV-1 hash support. (Michael Maclean)
   . Made Adler32 algorithm faster. FR #53213. (zavasek at yandex dot ru)
 
+- Improved intl extension:
+  . Added Spoofchecker, allows checking for visibly confusable characters and
+    other security issues. (Scott)
+
 - Improved JSON extension:
   . Added JsonSerializable interface. (Sara)
   . Added JSON_BIGINT_AS_STRING, extended json_decode() sig with $options.
