@@ -271,7 +271,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 			newstream = php_stream_fopen_tmpfile();
 			if (newstream) {
-				int ret = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
+				int retval = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
 
 				if (ret != SUCCESS) {
 					php_stream_close(newstream);
@@ -279,7 +279,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 					int retcode = php_stream_cast(newstream, castas | flags, (void **)ret, show_err);
 
 					if (retcode == SUCCESS) {
-						rewind(*(FILE**)ret);
+						rewind(*(FILE**)retval);
 					}
 
 					/* do some specialized cleanup */
