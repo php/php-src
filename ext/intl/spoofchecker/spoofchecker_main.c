@@ -21,7 +21,7 @@
 #include "php_intl.h"
 #include "spoofchecker_class.h"
 
-/* {{{ proto void Spoofchecker::isSuspicious( string $text[, int $error_code ] )
+/* {{{ proto bool Spoofchecker::isSuspicious( string $text[, int $error_code ] )
  * Checks if a given text contains any suspicious characters
  */
 PHP_METHOD(Spoofchecker, isSuspicious)
@@ -29,14 +29,14 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	int ret;
 	char *text;
 	int text_len;
-	zval *issued_found = NULL;
-	SPOOFCHECKER_METHOD_INIT_VARS
+	zval *error_code = NULL;
+	SPOOFCHECKER_METHOD_INIT_VARS;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &text, &text_len, &issued_found)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &text, &text_len, &error_code)) {
 		return;
 	}
 	
-	SPOOFCHECKER_METHOD_FETCH_OBJECT
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	ret = uspoof_checkUTF8(co->uspoof, text, text_len, NULL, SPOOFCHECKER_ERROR_CODE_P(co));
 
@@ -45,15 +45,15 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 		return;
 	}
 	
-	if (issued_found) {
-		zval_dtor(issued_found);
-		ZVAL_LONG(issued_found, ret);
+	if (error_code) {
+		zval_dtor(error_code);
+		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }
 /* }}} */
 
-/* {{{ proto void Spoofchecker::areConfusable( string $str1, string $str2[, int $error_code ] )
+/* {{{ proto bool Spoofchecker::areConfusable( string $str1, string $str2[, int $error_code ] )
  * Checks if a given text contains any confusable characters
  */
 PHP_METHOD(Spoofchecker, areConfusable)
@@ -61,15 +61,15 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	int ret;
 	char *s1, *s2;
 	int s1_len, s2_len;
-	zval *issued_found = NULL;
-	SPOOFCHECKER_METHOD_INIT_VARS
+	zval *error_code = NULL;
+	SPOOFCHECKER_METHOD_INIT_VARS;
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z", &s1, &s1_len,
-										 &s2, &s2_len, &issued_found)) {
+										 &s2, &s2_len, &error_code)) {
 		return;
 	}
 
-	SPOOFCHECKER_METHOD_FETCH_OBJECT
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	ret = uspoof_areConfusableUTF8(co->uspoof, s1, s1_len, s2, s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
 
@@ -78,9 +78,9 @@ PHP_METHOD(Spoofchecker, areConfusable)
 		return;
 	}
 	
-	if (issued_found) {
-		zval_dtor(issued_found);
-		ZVAL_LONG(issued_found, ret);
+	if (error_code) {
+		zval_dtor(error_code);
+		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
 }
@@ -94,13 +94,13 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	int ret;
 	char *locales;
 	int locales_len;
-	SPOOFCHECKER_METHOD_INIT_VARS
+	SPOOFCHECKER_METHOD_INIT_VARS;
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &locales, &locales_len)) {
 		return;
 	}
 
-	SPOOFCHECKER_METHOD_FETCH_OBJECT
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	uspoof_setAllowedLocales(co->uspoof, locales, SPOOFCHECKER_ERROR_CODE_P(co));
 
@@ -118,13 +118,13 @@ PHP_METHOD(Spoofchecker, setChecks)
 {
 	int ret;
 	long checks;
-	SPOOFCHECKER_METHOD_INIT_VARS
+	SPOOFCHECKER_METHOD_INIT_VARS;
 		
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {
 		return;
 	}
 
-	SPOOFCHECKER_METHOD_FETCH_OBJECT
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	uspoof_setChecks(co->uspoof, checks, SPOOFCHECKER_ERROR_CODE_P(co));
 
