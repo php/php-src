@@ -117,6 +117,31 @@ zend_function_entry Spoofchecker_class_functions[] = {
 };
 /* }}} */
 
+static zend_object_value spoofchecker_clone_obj(zval *object TSRMLS_DC) /* {{{ */
+{
+	zend_object_value new_obj_val;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
+	Spoofchecker_object *sfo, *new_sfo;
+
+    sfo = (Spoofchecker_object *) zend_object_store_get_object(object TSRMLS_CC);
+    intl_error_reset(SPOOFCHECKER_ERROR_P(sfo) TSRMLS_CC);
+
+	new_obj_val = Spoofchecker_ce_ptr->create_object(Spoofchecker_ce_ptr TSRMLS_CC);
+	new_sfo = (Spoofchecker_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
+	/* clone standard parts */	
+	zend_objects_clone_members(&new_sfo->zo, new_obj_val, &sfo->zo, handle TSRMLS_CC);
+	/* clone internal object */
+	new_sfo->uspoof = uspoof_clone(sfo->uspoof, SPOOFCHECKER_ERROR_CODE_P(new_sfo));
+	if(U_FAILURE(SPOOFCHECKER_ERROR_CODE(new_sfo))) {
+		/* set up error in case error handler is interested */
+		intl_error_set( NULL, SPOOFCHECKER_ERROR_CODE(new_sfo), "Failed to clone SpoofChecker object", 0 TSRMLS_CC );
+		Spoofchecker_objects_dtor(new_sfo, new_obj_val.handle TSRMLS_CC); /* free new object */
+		zend_error(E_ERROR, "Failed to clone SpoofChecker object");
+	}
+	return new_obj_val;
+}
+/* }}} */
+
 /* {{{ spoofchecker_register_Spoofchecker_class
  * Initialize 'Spoofchecker' class
  */
@@ -131,8 +156,7 @@ void spoofchecker_register_Spoofchecker_class(TSRMLS_D)
 
 	memcpy(&Spoofchecker_handlers, zend_get_std_object_handlers(),
 		sizeof Spoofchecker_handlers);
-	/* Doesn't make sense to clone */
-	Spoofchecker_handlers.clone_obj = NULL; 
+	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj; 
 
 	if (!Spoofchecker_ce_ptr) {
 		zend_error(E_ERROR,
