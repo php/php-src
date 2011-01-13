@@ -414,6 +414,6 @@ if (PHP_SECURITY_FLAGS == "yes") {
 }
 
 ARG_ENABLE("static-analyze", "Enable the VC compiler static analyze", "no");
-if (PHP_STATIC_ANALYZE == "yes") {
+if (PHP_STATIC_ANALYZE == "yes" && PHP_SNAPSHOT_BUILD == "no") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 }
