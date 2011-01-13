@@ -55,9 +55,6 @@ PHP_FUNCTION(get_headers);
 #define PHP_URL_QUERY 6
 #define PHP_URL_FRAGMENT 7
 
-#define PHP_QUERY_RFC1738 1
-#define PHP_QUERY_RFC3986 2
-
 #endif /* URL_H */
 
 /*
