@@ -50,7 +50,7 @@
 typedef enum _php_output_handler_status_t {
 	PHP_OUTPUT_HANDLER_FAILURE,
 	PHP_OUTPUT_HANDLER_SUCCESS,
-	PHP_OUTPUT_HANDLER_NO_DATA,
+	PHP_OUTPUT_HANDLER_NO_DATA
 } php_output_handler_status_t;
 
 /* php_output_stack_pop() flags */
@@ -76,7 +76,7 @@ typedef enum _php_output_handler_hook_t {
 	PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE,
 	PHP_OUTPUT_HANDLER_HOOK_DISABLE,
 	/* unused */
-	PHP_OUTPUT_HANDLER_HOOK_LAST,
+	PHP_OUTPUT_HANDLER_HOOK_LAST
 } php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
@@ -147,7 +147,7 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	php_output_handler *running;
 	char *output_start_filename;
 	int output_start_lineno;
-ZEND_END_MODULE_GLOBALS(output);
+ZEND_END_MODULE_GLOBALS(output)
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
