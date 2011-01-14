@@ -736,7 +736,8 @@ struct st_mysqlnd_connection
 	uint64_t		thread_id;
 	char			*server_version;
 	char			*host_info;
-	unsigned char	*scramble;
+	zend_uchar		*auth_plugin_data;
+	size_t			auth_plugin_data_len;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
 	char			*connect_or_select_db;
@@ -964,21 +965,22 @@ struct st_mysqlnd_typeii_plugin_example
 	unsigned int counter;
 };
 
-struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_authentication_plugin;
+
+typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authentication_plugin * self,
+														size_t * auth_data_len,
+														MYSQLND * conn, const char * const user, const char * const passwd,
+														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+														const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+														TSRMLS_DC);
 
 struct st_mysqlnd_authentication_plugin
 {
 	struct st_mysqlnd_plugin_header plugin_header;
 	struct {
-		enum_func_status (*auth_handshake)(MYSQLND * conn, const char * const user, const char * const passwd, const char * const db,
-										   const size_t db_len, const size_t passwd_len, const struct st_mysqlnd_packet_greet * const greet_packet,
-										   const MYSQLND_OPTIONS * const options, unsigned long mysql_flags,
-										   char ** switch_to_auth_protocol TSRMLS_DC);
-
-		enum_func_status (*auth_change_user)(MYSQLND * const conn, const char * const user, const size_t user_len, const char * const passwd,
-											 const char * const db, const size_t db_len, const size_t passwd_len, const zend_bool silent,
-											 char ** switch_to_auth_protocol TSRMLS_DC);
+		func_auth_plugin__get_auth_data get_auth_data;
 	} methods;
 };
+
 
 #endif /* MYSQLND_STRUCTS_H */

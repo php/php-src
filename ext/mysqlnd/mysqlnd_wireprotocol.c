@@ -314,8 +314,8 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "greeting", PROT_GREET_PACKET);
 	BAIL_IF_NO_MORE_DATA;
 
-	packet->scramble_buf = &packet->intern_scramble_buf;
-	packet->scramble_buf_len = sizeof(packet->intern_scramble_buf);
+	packet->auth_plugin_data = packet->intern_auth_plugin_data;
+	packet->auth_plugin_data_len = sizeof(packet->intern_auth_plugin_data);
 
 	if (packet->header.size < sizeof(buf)) {
 		/*
@@ -353,7 +353,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	p+=4;
 	BAIL_IF_NO_MORE_DATA;
 
-	memcpy(packet->scramble_buf, p, SCRAMBLE_LENGTH_323);
+	memcpy(packet->auth_plugin_data, p, SCRAMBLE_LENGTH_323);
 	p+= SCRAMBLE_LENGTH_323;
 	BAIL_IF_NO_MORE_DATA;
 
@@ -379,8 +379,8 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	BAIL_IF_NO_MORE_DATA;
 
 	if ((size_t) (p - buf) < packet->header.size) {
-		/* scramble_buf is split into two parts */
-		memcpy(packet->scramble_buf + SCRAMBLE_LENGTH_323, p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
+		/* auth_plugin_data is split into two parts */
+		memcpy(packet->auth_plugin_data + SCRAMBLE_LENGTH_323, p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
 		p+= SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323;
 		p++; /* 0x0 at the end of the scramble and thus last byte in the packet in 5.1 and previous */
 	} else {
@@ -395,19 +395,19 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
     	/* Additional 16 bits for server capabilities */
 		packet->server_capabilities |= uint2korr(pad_start) << 16;
 		/* And a length of the server scramble in one byte */
-		packet->scramble_buf_len = uint1korr(pad_start + 2);
-		if (packet->scramble_buf_len > SCRAMBLE_LENGTH) {
+		packet->auth_plugin_data_len = uint1korr(pad_start + 2);
+		if (packet->auth_plugin_data_len > SCRAMBLE_LENGTH) {
 			/* more data*/
-			char * new_scramble_buf = emalloc(packet->scramble_buf_len);
-			if (!new_scramble_buf) {
+			zend_uchar * new_auth_plugin_data = emalloc(packet->auth_plugin_data_len);
+			if (!new_auth_plugin_data) {
 				goto premature_end;
 			}
 			/* copy what we already have */
-			memcpy(new_scramble_buf, packet->scramble_buf, SCRAMBLE_LENGTH);
+			memcpy(new_auth_plugin_data, packet->auth_plugin_data, SCRAMBLE_LENGTH);
 			/* add additional scramble data 5.5+ sent us */
-			memcpy(new_scramble_buf + SCRAMBLE_LENGTH, p, packet->scramble_buf_len - SCRAMBLE_LENGTH);
-			p+= (packet->scramble_buf_len - SCRAMBLE_LENGTH);
-			packet->scramble_buf = new_scramble_buf;
+			memcpy(new_auth_plugin_data + SCRAMBLE_LENGTH, p, packet->auth_plugin_data_len - SCRAMBLE_LENGTH);
+			p+= (packet->auth_plugin_data_len - SCRAMBLE_LENGTH);
+			packet->auth_plugin_data = new_auth_plugin_data;
 		}
 	}
 
@@ -423,7 +423,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_INF_FMT("server_capabilities=%u charset_no=%u server_status=%i auth_protocol=%s scramble_length=%u",
 				packet->server_capabilities, packet->charset_no, packet->server_status,
-				packet->auth_protocol? packet->auth_protocol:"n/a", packet->scramble_buf_len);
+				packet->auth_protocol? packet->auth_protocol:"n/a", packet->auth_plugin_data_len);
 
 	DBG_RETURN(PASS);
 premature_end:
@@ -444,9 +444,9 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool stack_allocation TSRMLS
 		efree(p->server_version);
 		p->server_version = NULL;
 	}
-	if (p->scramble_buf && p->scramble_buf != &p->intern_scramble_buf) {
-		efree(p->scramble_buf);
-		p->scramble_buf = NULL;
+	if (p->auth_plugin_data && p->auth_plugin_data != p->intern_auth_plugin_data) {
+		efree(p->auth_plugin_data);
+		p->auth_plugin_data = NULL;
 	}
 	if (p->auth_protocol) {
 		efree(p->auth_protocol);
@@ -472,7 +472,7 @@ php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2
 
 
 /* {{{ php_mysqlnd_scramble */
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password)
+void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password, size_t password_len)
 {
 	PHP_SHA1_CTX context;
 	zend_uchar sha1[SHA1_MAX_LENGTH];
@@ -480,7 +480,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 
 	/* Phase 1: hash password */
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, password, strlen((char *)password));
+	PHP_SHA1Update(&context, password, password_len);
 	PHP_SHA1Final(sha1, &context);
 
 	/* Phase 2: hash sha1 */
@@ -500,7 +500,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 /* }}} */
 
 
-#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 128)
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 1024)
 
 /* {{{ php_mysqlnd_auth_write */
 static
@@ -533,17 +533,20 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		p+= len;
 		*p++ = '\0';
 
-		/* copy scrambled pass*/
-		if (packet->password && packet->password[0]) {
-			/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
-			int1store(p, SCRAMBLE_LENGTH);
-			p++;
-			php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
-			p+= SCRAMBLE_LENGTH;
-		} else {
-			/* Zero length */
-			int1store(p, 0);
-			p++;
+		/* defensive coding */
+		if (!packet->auth_data) {
+			packet->auth_data = 0;
+		}
+		int1store(p, packet->auth_data_len);
+		++p;
+/*!!!!! is the buffer big enough ??? */
+		if ((sizeof(buffer) - (p - buffer)) < packet->auth_data_len) {
+			DBG_ERR("the stack buffer was not enough!!");
+			DBG_RETURN(0);
+		}
+		if (packet->auth_data_len) {
+			memcpy(p, packet->auth_data, packet->auth_data_len);
+			p+= packet->auth_data_len;
 		}
 
 		if (packet->db) {
@@ -555,9 +558,18 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		}
 		/* no \0 for no DB */
 
-		if (packet->is_change_user_packet && packet->charset_no) {
-			int2store(p, packet->charset_no);
-			p+= 2;
+		if (packet->is_change_user_packet) {
+			if (packet->charset_no) {
+				int2store(p, packet->charset_no);
+				p+= 2;
+			}
+		} else {
+			if (packet->auth_plugin_name) {
+				size_t len = MIN(strlen(packet->auth_plugin_name), sizeof(buffer) - (p - buffer) - 1);
+				memcpy(p, packet->auth_plugin_name, len);
+				p+= len;
+				*p++= '\0';
+			}
 		}
 	}
 	if (packet->is_change_user_packet) {
