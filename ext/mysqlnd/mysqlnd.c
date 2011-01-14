@@ -177,10 +177,10 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND * conn TSRMLS_DC)
 		mnd_pefree(conn->host_info, pers);
 		conn->host_info = NULL;
 	}
-	if (conn->scramble) {
-		DBG_INF("Freeing scramble");
-		mnd_pefree(conn->scramble, pers);
-		conn->scramble = NULL;
+	if (conn->auth_plugin_data) {
+		DBG_INF("Freeing auth_plugin_data");
+		mnd_pefree(conn->auth_plugin_data, pers);
+		conn->auth_plugin_data = NULL;
 	}
 	if (conn->last_message) {
 		mnd_pefree(conn->last_message, pers);
@@ -524,15 +524,15 @@ mysqlnd_connect_run_authentication(
 			auth_plugin = mysqlnd_plugin_find(plugin_name);
 			efree(plugin_name);
 			if (!auth_plugin) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Server requested authentication method uknown to the client [%s]", requested_protocol);
-				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Server requested authentication method uknown to the client");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method uknown to the client [%s]", requested_protocol);
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method uknown to the client");
 				break;
 			}
 
 			DBG_INF("plugin found");
 
-			ret = auth_plugin->methods.auth_handshake(conn, user, passwd, db, db_len, passwd_len, greet_packet, options, mysql_flags,
-													  &switch_to_auth_protocol TSRMLS_CC);
+			ret = mysqlnd_auth_handshake(conn, user, passwd, db, db_len, passwd_len, greet_packet, options, mysql_flags,
+										 auth_plugin, &switch_to_auth_protocol TSRMLS_CC);
 			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
 		} while (ret == FAIL && switch_to_auth_protocol != NULL);
 
@@ -1942,6 +1942,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		db = "";
 	}
 
+
 	{
 		char * switch_to_auth_protocol = NULL;
 		const char * requested_protocol = NULL;
@@ -1961,13 +1962,15 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 			efree(plugin_name);
 			if (!auth_plugin) {
 				if (!silent) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Server requested authentication method uknown to the client [%s]", requested_protocol);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method uknown to the client [%s]", requested_protocol);
 				}
-				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Server requested authentication method uknown to the client");
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method uknown to the client");
 				break;
 			}	
 			DBG_INF("plugin found");
-			ret = auth_plugin->methods.auth_change_user(conn, user, strlen(user), passwd, db, strlen(db), passwd_len, silent, &switch_to_auth_protocol TSRMLS_CC);
+			ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, db, strlen(db), passwd_len, silent,
+										   auth_plugin, &switch_to_auth_protocol TSRMLS_CC);
+
 			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
 		} while (ret == FAIL && switch_to_auth_protocol != NULL);
 		if (ret == PASS) {

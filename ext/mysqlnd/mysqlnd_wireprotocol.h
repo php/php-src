@@ -70,9 +70,9 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
-	zend_uchar	intern_scramble_buf[SCRAMBLE_LENGTH];
-	zend_uchar	* scramble_buf;
-	size_t		scramble_buf_len;
+	zend_uchar	intern_auth_plugin_data[SCRAMBLE_LENGTH];
+	zend_uchar	* auth_plugin_data;
+	size_t		auth_plugin_data_len;
 	/* 1 byte pad */
 	uint32_t	server_capabilities;
 	uint8_t		charset_no;
@@ -92,22 +92,18 @@ typedef struct st_mysqlnd_packet_auth {
 	MYSQLND_PACKET_HEADER		header;
 	uint32_t	client_flags;
 	uint32_t	max_packet_size;
-	uint8_t	charset_no;
-	/* 23 byte pad */
+	uint8_t		charset_no;
 	const char	*user;
-	/* 8 byte scramble */
+	zend_uchar	*auth_data;
+	size_t		auth_data_len;
 	const char	*db;
-	/* 12 byte scramble */
-
+	char		*auth_plugin_name;
 	/* Here the packet ends. This is user supplied data */
-	const char	*password;
-	/* +1 for \0 because of scramble() */
-	unsigned char	*server_scramble_buf;
-	size_t			server_scramble_buf_len;
-	size_t			db_len;
-	zend_bool		send_auth_data;
-	zend_bool		is_change_user_packet;
-	zend_bool		silent;
+	size_t		db_len;
+	zend_bool	send_auth_data;
+	zend_bool	is_change_user_packet;
+	zend_bool	silent;
+
 } MYSQLND_PACKET_AUTH;
 
 /* OK packet */
@@ -255,7 +251,7 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
-PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
+PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);

@@ -30,8 +30,8 @@
 
 
 /* {{{ mysqlnd_native_auth_handshake */
-static enum_func_status
-mysqlnd_native_auth_handshake(MYSQLND * conn,
+enum_func_status
+mysqlnd_auth_handshake(MYSQLND * conn,
 							  const char * const user,
 							  const char * const passwd,
 							  const char * const db,
@@ -40,6 +40,7 @@ mysqlnd_native_auth_handshake(MYSQLND * conn,
 							  const MYSQLND_PACKET_GREET * const greet_packet,
 							  const MYSQLND_OPTIONS * const options,
 							  unsigned long mysql_flags,
+							  struct st_mysqlnd_authentication_plugin * auth_plugin,
 							  char ** switch_to_auth_protocol
 							  TSRMLS_DC)
 {
@@ -49,14 +50,6 @@ mysqlnd_native_auth_handshake(MYSQLND * conn,
 	MYSQLND_PACKET_AUTH * auth_packet = NULL;
 
 	DBG_ENTER("mysqlnd_native_auth_handshake");
-
-	/* 5.5.x reports 21 as scramble length because it needs to show the length of the data before the plugin name */
-	if (greet_packet->scramble_buf_len != SCRAMBLE_LENGTH && (greet_packet->scramble_buf_len != 21)) {
-		/* mysql_native_password only works with SCRAMBLE_LENGTH scramble */
-		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
-		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", greet_packet->scramble_buf_len, SCRAMBLE_LENGTH);
-		goto end;
-	}
 
 	ok_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
@@ -80,17 +73,21 @@ mysqlnd_native_auth_handshake(MYSQLND * conn,
 
 	auth_packet->send_auth_data = TRUE;
 	auth_packet->user		= user;
-	auth_packet->password	= passwd;
 	auth_packet->db			= db;
 	auth_packet->db_len		= db_len;
 
-	auth_packet->server_scramble_buf_len = greet_packet->scramble_buf_len;
-	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(auth_packet->server_scramble_buf_len, conn->persistent);
-	if (!conn->scramble) {
+	conn->auth_plugin_data_len = greet_packet->auth_plugin_data_len;
+	conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
+	if (!conn->auth_plugin_data) {
 		SET_OOM_ERROR(conn->error_info);
 		goto end;
 	}
-	memcpy(auth_packet->server_scramble_buf, greet_packet->scramble_buf, greet_packet->scramble_buf_len);
+	memcpy(conn->auth_plugin_data, greet_packet->auth_plugin_data, greet_packet->auth_plugin_data_len);
+
+	auth_packet->auth_data =
+		auth_plugin->methods.get_auth_data(NULL, &auth_packet->auth_data_len, conn, user, passwd, passwd_len,
+										   conn->auth_plugin_data, conn->auth_plugin_data_len, options, mysql_flags TSRMLS_CC);
+							
 
 	if (!PACKET_WRITE(auth_packet, conn)) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
@@ -118,6 +115,7 @@ mysqlnd_native_auth_handshake(MYSQLND * conn,
 	conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
 	ret = PASS;
 end:
+	mnd_efree(auth_packet->auth_data);
 	PACKET_FREE(auth_packet);
 	PACKET_FREE(ok_packet);
 	DBG_RETURN(ret);
@@ -126,8 +124,8 @@ end:
 
 
 /* {{{ mysqlnd_native_auth_change_user */
-static enum_func_status
-mysqlnd_native_auth_change_user(MYSQLND * const conn,
+enum_func_status
+mysqlnd_auth_change_user(MYSQLND * const conn,
 								const char * const user,
 								const size_t user_len,
 								const char * const passwd,
@@ -135,6 +133,7 @@ mysqlnd_native_auth_change_user(MYSQLND * const conn,
 								const size_t db_len,
 								const size_t passwd_len,
 								const zend_bool silent,
+								struct st_mysqlnd_authentication_plugin * auth_plugin,
 								char ** switch_to_auth_protocol
 								TSRMLS_DC)
 {
@@ -156,13 +155,17 @@ mysqlnd_native_auth_change_user(MYSQLND * const conn,
 		SET_OOM_ERROR(conn->error_info);
 		goto end;
 	}
+
 	auth_packet->is_change_user_packet = TRUE;
 	auth_packet->user		= user;
-	auth_packet->password	= passwd;
 	auth_packet->db			= db;
 	auth_packet->db_len		= db_len;
-	auth_packet->server_scramble_buf = conn->scramble;
 	auth_packet->silent		= silent;
+
+	auth_packet->auth_data =
+		auth_plugin->methods.get_auth_data(NULL, &auth_packet->auth_data_len, conn, user, passwd, passwd_len,
+										   conn->auth_plugin_data, conn->auth_plugin_data_len, NULL /* options */, 0 /* mysql_flags */ TSRMLS_CC);
+
 	if (mysqlnd_get_server_version(conn) >= 50123) {
 		auth_packet->charset_no	= conn->charset->nr;
 		p+=2;
@@ -225,11 +228,46 @@ mysqlnd_native_auth_change_user(MYSQLND * const conn,
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 	}
 end:
+	mnd_efree(auth_packet->auth_data);
 	PACKET_FREE(auth_packet);
 	PACKET_FREE(chg_user_resp);
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+
+/* {{{ mysqlnd_native_auth_get_auth_data */
+static zend_uchar *
+mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
+								  size_t * auth_data_len,
+								  MYSQLND * conn, const char * const user, const char * const passwd,
+								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								  const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+								  TSRMLS_DC)
+{
+	zend_uchar * ret = NULL;
+	DBG_ENTER("mysqlnd_native_auth_get_auth_data");
+	*auth_data_len = 0;
+
+	/* 5.5.x reports 21 as scramble length because it needs to show the length of the data before the plugin name */
+	if (auth_plugin_data_len != SCRAMBLE_LENGTH && (auth_plugin_data_len != 21)) {
+		/* mysql_native_password only works with SCRAMBLE_LENGTH scramble */
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_RETURN(NULL);
+	}
+
+	/* copy scrambled pass*/
+	if (passwd && passwd_len) {
+		ret = mnd_emalloc(SCRAMBLE_LENGTH);
+		*auth_data_len = SCRAMBLE_LENGTH;
+		/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
+		php_mysqlnd_scramble((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
+	}
+	DBG_RETURN(ret);
+}
+/* }}} */
+
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 {
@@ -249,10 +287,10 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 		}
 	},
 	{/* methods */
-		mysqlnd_native_auth_handshake,
-		mysqlnd_native_auth_change_user
+		mysqlnd_native_auth_get_auth_data
 	}
 };
+
 
 /* {{{ mysqlnd_native_authentication_plugin_register */
 void

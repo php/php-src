@@ -196,6 +196,36 @@ void mysqlnd_native_authentication_plugin_register(TSRMLS_D);
 
 void mysqlnd_example_plugin_register(TSRMLS_D);
 
+struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_authentication_plugin;
+
+enum_func_status
+mysqlnd_auth_handshake(MYSQLND * conn,
+						const char * const user,
+						const char * const passwd,
+						const char * const db,
+						const size_t db_len,
+						const size_t passwd_len,
+						const struct st_mysqlnd_packet_greet * const greet_packet,
+						const MYSQLND_OPTIONS * const options,
+						unsigned long mysql_flags,
+						struct st_mysqlnd_authentication_plugin * auth_plugin,
+						char ** switch_to_auth_protocol
+						TSRMLS_DC);
+
+enum_func_status
+mysqlnd_auth_change_user(MYSQLND * const conn,
+								const char * const user,
+								const size_t user_len,
+								const char * const passwd,
+								const char * const db,
+								const size_t db_len,
+								const size_t passwd_len,
+								const zend_bool silent,
+								struct st_mysqlnd_authentication_plugin * auth_plugin,
+								char ** switch_to_auth_protocol
+								TSRMLS_DC);
+
 #endif	/* MYSQLND_PRIV_H */
 
 
