@@ -63,6 +63,10 @@
   . Fixed stream_socket_enable_crypto() not honoring the socket timeout in
     server mode. (Gustavo)
 
+- PDO MySQL driver:
+  . Fixed bug #53551 (PDOStatement execute segfaults for pdo_mysql driver).
+    (Johannes)
+
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
     ORACLE 10). (spatar at mail dot nnov dot ru)
