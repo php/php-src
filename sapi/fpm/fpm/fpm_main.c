@@ -1729,6 +1729,7 @@ int main(int argc, char *argv[])
 	SG(request_info).path_translated = NULL;
 #endif
 
+	cgi_sapi_module.additional_functions = additional_functions;
 	cgi_sapi_module.executable_location = argv[0];
 
 	/* startup after we get the above ini override se we get things right */
