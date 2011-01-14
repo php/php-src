@@ -115,7 +115,8 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND *conn,
 						  unsigned int mysql_flags
 						  TSRMLS_DC);
 
-#define mysqlnd_change_user(conn, user, passwd, db, silent)		(conn)->m->change_user((conn), (user), (passwd), (db), (silent) TSRMLS_CC)
+#define mysqlnd_change_user(conn, user, passwd, db, silent)		(conn)->m->change_user((conn), (user), (passwd), (db), (silent), strlen((passwd)) TSRMLS_CC)
+#define mysqlnd_change_user_ex(conn, user, passwd, db, silent, passwd_len)		(conn)->m->change_user((conn), (user), (passwd), (db), (silent), (passwd_len) TSRMLS_CC)
 
 #define mysqlnd_debug(x)								_mysqlnd_debug((x) TSRMLS_CC)
 PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);

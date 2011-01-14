@@ -535,7 +535,11 @@ PHP_FUNCTION(mysqli_change_user)
 	old_charset = mysql->mysql->charset;
 #endif
 
+#if defined(MYSQLI_USE_MYSQLND)
+	rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, FALSE, (size_t) password_len);
+#else
 	rc = mysql_change_user(mysql->mysql, user, password, dbname);
+#endif
 	MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 
 	if (rc) {

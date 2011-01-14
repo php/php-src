@@ -300,6 +300,7 @@ struct st_mysqlnd_packet_row;
 struct st_mysqlnd_packet_stats;
 struct st_mysqlnd_packet_prepare_response;
 struct st_mysqlnd_packet_chg_user_resp;
+struct st_mysqlnd_packet_auth_pam;
 
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol__get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol__get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
@@ -357,7 +358,7 @@ typedef enum_func_status	(*func_mysqlnd_conn__ping)(MYSQLND * const conn TSRMLS_
 typedef enum_func_status	(*func_mysqlnd_conn__kill_connection)(MYSQLND *conn, unsigned int pid TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__select_db)(MYSQLND * const conn, const char * const db, unsigned int db_len TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__server_dump_debug_information)(MYSQLND * const conn TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_conn__change_user)(MYSQLND * const conn, const char * user, const char * passwd, const char * db, zend_bool silent TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn__change_user)(MYSQLND * const conn, const char * user, const char * passwd, const char * db, zend_bool silent, size_t passwd_len TSRMLS_DC);
 
 typedef unsigned int		(*func_mysqlnd_conn__get_error_no)(const MYSQLND * const conn TSRMLS_DC);
 typedef const char *		(*func_mysqlnd_conn__get_error_str)(const MYSQLND * const conn TSRMLS_DC);
@@ -970,12 +971,12 @@ struct st_mysqlnd_authentication_plugin
 	struct st_mysqlnd_plugin_header plugin_header;
 	struct {
 		enum_func_status (*auth_handshake)(MYSQLND * conn, const char * const user, const char * const passwd, const char * const db,
-										   const size_t db_len, const struct st_mysqlnd_packet_greet * const greet_packet,
+										   const size_t db_len, const size_t passwd_len, const struct st_mysqlnd_packet_greet * const greet_packet,
 										   const MYSQLND_OPTIONS * const options, unsigned long mysql_flags,
 										   char ** switch_to_auth_protocol TSRMLS_DC);
 
 		enum_func_status (*auth_change_user)(MYSQLND * const conn, const char * const user, const size_t user_len, const char * const passwd,
-											 const char * const db, const size_t db_len, const zend_bool silent,
+											 const char * const db, const size_t db_len, const size_t passwd_len, const zend_bool silent,
 											 char ** switch_to_auth_protocol TSRMLS_DC);
 	} methods;
 };
