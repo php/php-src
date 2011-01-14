@@ -172,7 +172,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							/* reset variables */
 
 #ifndef MYSQLI_NO_CHANGE_USER_ON_PCONNECT
-							if (!mysqli_change_user_silent(mysql->mysql, username, passwd, dbname)) {
+							if (!mysqli_change_user_silent(mysql->mysql, username, passwd, dbname, passwd_len)) {
 #else
 							if (!mysql_ping(mysql->mysql)) {
 #endif

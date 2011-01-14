@@ -497,6 +497,7 @@ mysqlnd_connect_run_authentication(
 			const char * const passwd,
 			const char * const db,
 			size_t db_len,
+			size_t passwd_len,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
 			unsigned long mysql_flags
@@ -530,7 +531,7 @@ mysqlnd_connect_run_authentication(
 
 			DBG_INF("plugin found");
 
-			ret = auth_plugin->methods.auth_handshake(conn, user, passwd, db, db_len, greet_packet, options, mysql_flags,
+			ret = auth_plugin->methods.auth_handshake(conn, user, passwd, db, db_len, passwd_len, greet_packet, options, mysql_flags,
 													  &switch_to_auth_protocol TSRMLS_CC);
 			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
 		} while (ret == FAIL && switch_to_auth_protocol != NULL);
@@ -729,7 +730,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	}
 #endif
 
-	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, greet_packet, &conn->options, mysql_flags TSRMLS_CC)) {
+	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
+												   greet_packet, &conn->options, mysql_flags TSRMLS_CC))
+	{
 		goto err;
 	}
 
@@ -1912,7 +1915,9 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 										  const char *user,
 										  const char *passwd,
 										  const char *db,
-										  zend_bool silent TSRMLS_DC)
+										  zend_bool silent,
+										  size_t passwd_len
+										  TSRMLS_DC)
 {
 	/*
 	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
@@ -1962,7 +1967,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 				break;
 			}	
 			DBG_INF("plugin found");
-			ret = auth_plugin->methods.auth_change_user(conn, user, strlen(user), passwd, db, strlen(db), silent, &switch_to_auth_protocol TSRMLS_CC);
+			ret = auth_plugin->methods.auth_change_user(conn, user, strlen(user), passwd, db, strlen(db), passwd_len, silent, &switch_to_auth_protocol TSRMLS_CC);
 			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
 		} while (ret == FAIL && switch_to_auth_protocol != NULL);
 		if (ret == PASS) {
