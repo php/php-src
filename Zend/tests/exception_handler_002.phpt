@@ -20,4 +20,8 @@ echo "Done\n";
 --EXPECTF--	
 string(12) "test thrown!"
 
-Fatal error: Exception thrown without a stack frame in Unknown on line 0
+Fatal error: Uncaught exception 'Exception' in %sexception_handler_002.php:7
+Stack trace:
+#0 [internal function]: foo(Object(test))
+#1 {main}
+  thrown in %sexception_handler_002.php on line %d
