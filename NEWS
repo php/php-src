@@ -9,6 +9,9 @@
     in method. (Scott)
   . Added options to debug backtrace functions. (Stas)
   . Fixed Bug #53629 (memory leak inside highlight_string()). (Hannes, Ilia)
+  . Fixed Bug #51458 (Lack of error context with nested exceptions). (Stas)
+  . Fixed Bug #47143 (Throwing an exception in a destructor causes a fatal error).
+    (Stas)
 
 - Core:
   . Fixed bug #48484 (array_product() always returns 0 for an empty array).
