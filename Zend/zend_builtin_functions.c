@@ -211,7 +211,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_constants, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_backtrace, 0, 0, 0)
-	ZEND_ARG_INFO(0, provide_object)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
@@ -272,7 +272,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_extension_funcs,		arginfo_extension_loaded)
 	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
 	ZEND_FE(debug_backtrace, 			arginfo_debug_backtrace)
-	ZEND_FE(debug_print_backtrace, 		arginfo_zend__void)
+	ZEND_FE(debug_print_backtrace, 		arginfo_debug_backtrace)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #ifdef ZTS
@@ -1944,7 +1944,7 @@ void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 	}
 }
 
-/* {{{ proto void debug_print_backtrace(void) */
+/* {{{ proto void debug_print_backtrace([int options]) */
 ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_execute_data *ptr, *skip;
@@ -1956,8 +1956,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 	char *include_filename = NULL;
 	zval *arg_array = NULL;
 	int indent = 0;
+	long options = 0;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
 	}
 
@@ -2016,7 +2017,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				call_type = NULL;
 			}
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (ptr->function_state.arguments) {
+				if (ptr->function_state.arguments && (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0) {
 					arg_array = debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC);
 				}
 			}
@@ -2103,7 +2104,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 /* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int provide_object TSRMLS_DC)
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options TSRMLS_DC)
 {
 	zend_execute_data *ptr, *skip;
 	int lineno;
@@ -2187,7 +2188,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, dup);
 					
 				}
-				if (provide_object) {
+				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
 					add_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
 					Z_ADDREF_P(ptr->object);
 				}
@@ -2198,7 +2199,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 			}
 
-			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
+			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 && 
+				((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL)))) {
 				if (ptr->function_state.arguments) {
 					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC));
 				}
@@ -2264,17 +2266,17 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 /* }}} */
 
 
-/* {{{ proto array debug_backtrace([bool provide_object])
+/* {{{ proto array debug_backtrace([int options])
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	zend_bool provide_object = 1;
+	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &provide_object) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
 	}
 
-	zend_fetch_debug_backtrace(return_value, 1, provide_object TSRMLS_CC);
+	zend_fetch_debug_backtrace(return_value, 1, options TSRMLS_CC);
 }
 /* }}} */
 
