@@ -7,7 +7,7 @@ if (PHP_MYSQLND != "no") {
 	if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 		mysqlnd_source = 
 			"mysqlnd.c " +
-			"mysqlnd_auth.c" +
+			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
