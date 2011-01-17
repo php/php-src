@@ -286,7 +286,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		fd = dup(fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
-				"Error duping file descriptor %d; possibly it doesn't exist: "
+				"Error duping file descriptor %ld; possibly it doesn't exist: "
 				"[%d]: %s", fildes_ori, errno, strerror(errno));
 			return NULL;
 		}
