@@ -47,6 +47,10 @@ require_once('skipifconnectfailure.inc');
 			$charsets['results']['maxlen'],
 			$tmp->max_length);
 	}
+	if ($tmp->db != $db) {
+		printf("008] Expecting database '%s' got '%s'\n",
+		  $db, $tmp->db);
+	}
 
 	var_dump($res->fetch_field());
 
@@ -75,9 +79,9 @@ object(stdClass)#%d (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
@@ -103,9 +107,9 @@ object(stdClass)#%d (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(%d)
   [%u|b%"length"]=>
