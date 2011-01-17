@@ -245,6 +245,10 @@ PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
+	if (*stats == NULL) {
+		DBG_ENTER("mysqlnd_stats_init failed to calloc stats context");
+		return;
+	}
 	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
 	(*stats)->triggers = calloc(statistic_count, sizeof(mysqlnd_stat_trigger));
 	(*stats)->in_trigger = FALSE;
