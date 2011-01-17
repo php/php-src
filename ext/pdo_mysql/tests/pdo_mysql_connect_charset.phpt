@@ -8,7 +8,6 @@ MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-	/* TODO: remove this test after fix and enable the BIT test in pdo_mysql_types.phpt again */
 	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	/* Connect to mysql to determine the current charset so we can diffinate it */
