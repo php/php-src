@@ -164,8 +164,6 @@ PHP                                                                        NEWS
     Traversable. (Andrey, Johannes)
   . MySQLi: Implemented FR #39847 (mysqli_fetch_[field|fields|field_direct] 
     need to return db). (Kalle)
-  . PDO_mysql: Implemented FR #47802 (Support for setting character sets in 
-    DSN strings). (Kalle)
   . PDO_mysql: Removed support for linking with MySQL client libraries older
     than 4.1. (Johannes)
 
