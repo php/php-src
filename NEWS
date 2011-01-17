@@ -162,8 +162,6 @@ PHP                                                                        NEWS
   . mysqlnd: Added named pipes support. FR #48082. (Andrey)
   . MySQLi: Added iterator support in MySQLi. mysqli_result implements 
     Traversable. (Andrey, Johannes)
-  . MySQLi: Implemented FR #39847 (mysqli_fetch_[field|fields|field_direct] 
-    need to return db). (Kalle)
   . PDO_mysql: Removed support for linking with MySQL client libraries older
     than 4.1. (Johannes)
 

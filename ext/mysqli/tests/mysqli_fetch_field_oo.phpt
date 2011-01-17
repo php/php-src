@@ -63,7 +63,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-object(stdClass)#%d (12) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "ID"
   [%u|b%"orgname"]=>
@@ -76,6 +76,8 @@ object(stdClass)#%d (12) {
   %unicode|string%(0) ""
   [%u|b%"db"]=>
   %unicode|string%(4) "test"
+  [%u|b%"catalog"]=>
+  %unicode|string%(3) "def"
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
@@ -89,7 +91,7 @@ object(stdClass)#%d (12) {
   [%u|b%"decimals"]=>
   int(0)
 }
-object(stdClass)#%d (12) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(5) "label"
   [%u|b%"orgname"]=>
@@ -102,6 +104,8 @@ object(stdClass)#%d (12) {
   %unicode|string%(0) ""
   [%u|b%"db"]=>
   %unicode|string%(4) "test"
+  [%u|b%"catalog"]=>
+  %unicode|string%(3) "def"
   [%u|b%"max_length"]=>
   int(%d)
   [%u|b%"length"]=>
