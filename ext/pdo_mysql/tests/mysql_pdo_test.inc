@@ -4,9 +4,9 @@ require_once(dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc');
 
 class MySQLPDOTest extends PDOTest {
 
-	static function factory($classname = 'PDO', $drop_test_tables = false, $myattr = null) {
+	static function factory($classname = 'PDO', $drop_test_tables = false, $myattr = null, $mydsn = null) {
 
-		$dsn 	= self::getDSN();
+		$dsn 	= self::getDSN($mydsn);
 		$user	= PDO_MYSQL_TEST_USER;
 		$pass	= PDO_MYSQL_TEST_PASS;
 		$attr	= getenv('PDOTEST_ATTR');

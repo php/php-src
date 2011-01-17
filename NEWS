@@ -68,6 +68,8 @@
     server mode. (Gustavo)
 
 - PDO MySQL driver:
+  . Implemented FR #47802 (Support for setting character sets in DSN strings). 
+    (Kalle)
   . Fixed bug #53551 (PDOStatement execute segfaults for pdo_mysql driver).
     (Johannes)
 
