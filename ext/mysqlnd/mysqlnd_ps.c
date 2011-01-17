@@ -735,7 +735,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_buffered");
 	*fetched_anything = FALSE;
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=%lu", stmt != NULL ? stmt->stmt_id : 0L);
 
 	/* If we haven't read everything */
 	if (set->data_cursor &&
@@ -2223,9 +2223,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit TSRMLS_DC)
 {
-	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
+	MYSQLND_STMT_DATA * stmt = (s == NULL) ? s->data:NULL;
 	enum_func_status ret = FAIL;
-	zend_bool persistent = s->persistent;
+	zend_bool persistent = (s == NULL) ? s->persistent : 0;
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
 	if (stmt) {
