@@ -72,9 +72,9 @@ array(2) {
     [%u|b%"def"]=>
     %unicode|string%(0) ""
     [%u|b%"db"]=>
-    %unicode|string%(4) "test"
+    %unicode|string%(%d) "%s"
     [%u|b%"catalog"]=>
-    %unicode|string%(3) "def"
+    %unicode|string%(%d) "%s"
     [%u|b%"max_length"]=>
     int(0)
     [%u|b%"length"]=>
@@ -101,9 +101,9 @@ array(2) {
     [%u|b%"def"]=>
     %unicode|string%(0) ""
     [%u|b%"db"]=>
-    %unicode|string%(4) "test"
+    %unicode|string%(%d) "%s"
     [%u|b%"catalog"]=>
-    %unicode|string%(3) "def"
+    %unicode|string%(%d) "%s"
     [%u|b%"max_length"]=>
     int(0)
     [%u|b%"length"]=>
@@ -132,9 +132,9 @@ object(stdClass)#6 (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -160,9 +160,9 @@ object(stdClass)#6 (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -190,9 +190,9 @@ object(stdClass)#6 (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -218,9 +218,9 @@ object(stdClass)#5 (13) {
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>

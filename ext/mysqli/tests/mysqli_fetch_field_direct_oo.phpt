@@ -64,13 +64,13 @@ object(stdClass)#%d (13) {
   [%u|b%"table"]=>
   %unicode|string%(4) "TEST"
   [%u|b%"orgtable"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(%d)
   [%u|b%"length"]=>

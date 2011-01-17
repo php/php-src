@@ -44,6 +44,10 @@ require_once('skipifconnectfailure.inc');
 			$charsets['results']['maxlen'],
 			$tmp->max_length);
 	}
+	if ($tmp->db != $db) {
+		printf("011] Expecting database '%s' got '%s'\n",
+		  $db, $tmp->db);
+	}
 
 	var_dump(mysqli_fetch_field($res));
 
@@ -87,13 +91,13 @@ object(stdClass)#%d (13) {
   [%u|b%"table"]=>
   %unicode|string%(4) "TEST"
   [%u|b%"orgtable"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
@@ -115,13 +119,13 @@ object(stdClass)#%d (13) {
   [%u|b%"table"]=>
   %unicode|string%(4) "TEST"
   [%u|b%"orgtable"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(%d)
   [%u|b%"length"]=>
@@ -148,15 +152,15 @@ object(stdClass)#%d (13) {
   [%u|b%"orgname"]=>
   %unicode|string%(2) "id"
   [%u|b%"table"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"orgtable"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
   [%u|b%"db"]=>
-  %unicode|string%(4) "test"
+  %unicode|string%(%d) "%s"
   [%u|b%"catalog"]=>
-  %unicode|string%(3) "def"
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
