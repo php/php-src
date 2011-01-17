@@ -50,13 +50,15 @@
     (Stas).
 
 - MySQL Improved extension:
+  . Added 'db' and 'catalog' keys to the field fetching functions (FR #39847). 
+    (Kalle)
   . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 
     query). (Kalle, Andrey)
   . Fixed bug #53425 (mysqli_real_connect() ignores client flags when built to 
     call libmysql). (Kalle, tre-php-net at crushedhat dot com)
   . Fixed buggy counting of affected rows when using the text protocol. The
-    collected statistics were wrong when multi_query was used with mysqlnd.
-	(Andrey)
+    collected statistics were wrong when multi_query was used with mysqlnd
+    (Andrey)
 
 - OpenSSL extension:
   . Implemented FR #53447 (Cannot disable SessionTicket extension for servers

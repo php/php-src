@@ -1052,6 +1052,8 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRML
 	add_property_string(value, "table", (char *) (field->table ? field->table : ""), 1);
 	add_property_string(value, "orgtable", (char *) (field->org_table ? field->org_table : ""), 1);
 	add_property_string(value, "def", (field->def ? field->def : ""), 1);
+	add_property_string(value, "db", (field->db ? field->db : ""), 1);
+	add_property_string(value, "catalog", (field->catalog ? field->catalog : ""), 1);
 
 	add_property_long(value, "max_length", field->max_length);
 	add_property_long(value, "length", field->length);
