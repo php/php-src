@@ -89,6 +89,8 @@
 
 - PHP-FPM SAPI:
   . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
+  . Enforce security in the fastcgi protocol parsing.
+    (ef-lists at email dotde)
 
 - Readline extension:
   . Fixed bug #53630 (Fixed parameter handling inside readline() function).

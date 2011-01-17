@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <limits.h>
 
 #ifdef FPM_AUTOCONFIG_H
 #include <fpm_autoconfig.h>
@@ -402,44 +403,113 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 	return pad;
 }
 
+static inline size_t fcgi_get_params_len( int *result, unsigned char *p, unsigned char *end)
+{
+	size_t ret = 0;
+
+	if (p < end) {
+		*result = p[0];
+		if (*result < 128) {
+			ret = 1;
+		}
+		else if (p + 3 < end) {
+			*result = ((*result & 0x7f) << 24);
+			*result |= (p[1] << 16);
+			*result |= (p[2] << 8);
+			*result |= p[3];
+			ret = 4;
+		}
+	}
+	if (*result < 0) {
+		ret = 0;
+	}
+	return ret;
+}
+
+static inline int fcgi_param_get_eff_len( unsigned char *p, unsigned char *end, uint *eff_len)
+{
+	int ret = 1;
+	int zero_found = 0;
+        *eff_len = 0;
+	for (; p != end; ++p) {
+		if (*p == '\0') {
+			zero_found = 1;
+		}
+		else {
+			if (zero_found) {
+				ret = 0;
+				break;
+			}
+			if (*eff_len < ((uint)-1)) {
+				++*eff_len;
+			}
+			else {
+				ret = 0;
+				break;
+			}
+		}
+	}
+	return ret;
+}
+
 static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
 	char buf[128];
 	char *tmp = buf;
-	int buf_size = sizeof(buf);
+	size_t buf_size = sizeof(buf);
 	int name_len, val_len;
+	uint eff_name_len, eff_val_len;
 	char *s;
 	int ret = 1;
+	size_t bytes_consumed;
 
 	while (p < end) {
-		name_len = *p++;
-		if (name_len >= 128) {
-			name_len = ((name_len & 0x7f) << 24);
-			name_len |= (*p++ << 16);
-			name_len |= (*p++ << 8);
-			name_len |= *p++;
-		}
-		val_len = *p++;
-		if (val_len >= 128) {
-			val_len = ((val_len & 0x7f) << 24);
-			val_len |= (*p++ << 16);
-			val_len |= (*p++ << 8);
-			val_len |= *p++;
-		}
-		if (name_len + val_len < 0 ||
-		    name_len + val_len > end - p) {
+		bytes_consumed = fcgi_get_params_len(&name_len, p, end);
+		if (!bytes_consumed) {
 			/* Malformated request */
 			ret = 0;
 			break;
 		}
-		if (name_len+1 >= buf_size) {
-			buf_size = name_len + 64;
-			tmp = (tmp == buf ? emalloc(buf_size): erealloc(tmp, buf_size));
+		p += bytes_consumed;
+		bytes_consumed = fcgi_get_params_len(&val_len, p, end);
+		if (!bytes_consumed) {
+			/* Malformated request */
+			ret = 0;
+			break;
 		}
-		memcpy(tmp, p, name_len);
-		tmp[name_len] = 0;
-		s = estrndup((char*)p + name_len, val_len);
-		zend_hash_update(req->env, tmp, name_len+1, &s, sizeof(char*), NULL);
+		p += bytes_consumed;
+		if (name_len > (INT_MAX - val_len) || /* would the addition overflow? */
+		    name_len + val_len > end - p) {   /* would we exceed the buffer? */
+			/* Malformated request */
+			ret = 0;
+			break;
+		}
+		if (!fcgi_param_get_eff_len(p, p+name_len, &eff_name_len) ||
+		    !fcgi_param_get_eff_len(p+name_len, p+name_len+val_len, &eff_val_len)) {
+			/* Malicious request */
+			ret = 0;
+			break;
+		}
+		if (eff_name_len >= buf_size-1) {
+			if (eff_name_len > ((uint)-1)-64) { 
+				ret = 0;
+				break;
+			}
+			buf_size = eff_name_len + 64;
+			tmp = (tmp == buf ? emalloc(buf_size): erealloc(tmp, buf_size));
+			if (tmp == NULL) {
+				ret = 0;
+				break;
+			}
+		}
+		memcpy(tmp, p, eff_name_len);
+		tmp[eff_name_len] = 0;
+		s = estrndup((char*)p + name_len, eff_val_len);
+		if (s == NULL) {
+			ret = 0;
+			break;
+		}
+		zend_hash_update(req->env, tmp, eff_name_len+1, &s, sizeof(char*), NULL);
 		p += name_len + val_len;
 	}
 	if (tmp != buf && tmp != NULL) {
