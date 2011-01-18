@@ -989,7 +989,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			/* New Rule: never repair potential malicious user input */
 			if (!skip_upload) {
-				char *tmp = param;
+				tmp = param;
 				long c = 0;
 
 				while (*tmp) {
