@@ -1821,7 +1821,7 @@ PHP_FUNCTION(dom_document_savexml)
 			saveempty = xmlSaveNoEmptyTags;
 			xmlSaveNoEmptyTags = 1;
 		}
-		xmlNodeDump(buf, docp, node, 0, format);
+		htmlNodeDumpFormatOutput(buf, docp, node, 0, format);
 		if (options & LIBXML_SAVE_NOEMPTYTAG) {
 			xmlSaveNoEmptyTags = saveempty;
 		}
