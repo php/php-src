@@ -2318,7 +2318,7 @@ PHP_FUNCTION(dom_document_save_html)
 			RETURN_FALSE;
 		}
 		
-		xmlNodeDump(buf, docp, node, 0, format);
+		htmlNodeDumpFormatOutput(buf, docp, node, 0, format);
 		mem = (xmlChar*) xmlBufferContent(buf);
 		if (!mem) {
 			RETVAL_FALSE;
