@@ -228,7 +228,11 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	if (expand_filepath(local_open_basedir, resolved_basedir TSRMLS_CC) != NULL) {
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = strlen(resolved_basedir);
+#if defined(PHP_WIN32) || defined(NETWARE)
+		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR || basedir[strlen(basedir) - 1] == '/') {
+#else
 		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR) {
+#endif
 			if (resolved_basedir[resolved_basedir_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_basedir[resolved_basedir_len] = PHP_DIR_SEPARATOR;
 				resolved_basedir[++resolved_basedir_len] = '\0';
