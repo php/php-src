@@ -23,6 +23,10 @@
 - Calendar extension:
   . Fixed bug #53574 (Integer overflow in SdnToJulian, sometimes leading to
     segfault). (Gustavo)
+
+- DOM extension:
+  . Implemented FR #39771 (Made DOMDocument::saveHTML accept an optional DOMNode
+	like DOMDocument::saveXML). (Gustavo)
   
 - DateTime extension:
   . Fixed a bug in DateTime->modify() where absolute date/time statements had
