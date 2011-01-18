@@ -14,7 +14,7 @@
     (Stas)
 
 - Core:
-  . Fixed bug #53577 (Regression (5.3.3-5.3.4) in open_basedir with a
+  . Fixed bug #53577 (Regression introduced in 5.3.4 in open_basedir with a
     trailing forward slash). (lekensteyn at gmail dot com, Pierre)
   . Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)
   . Fixed bug #48484 (array_product() always returns 0 for an empty array).
