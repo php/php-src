@@ -2223,9 +2223,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit TSRMLS_DC)
 {
-	MYSQLND_STMT_DATA * stmt = (s == NULL) ? s->data:NULL;
+	MYSQLND_STMT_DATA * stmt = (s != NULL) ? s->data:NULL;
 	enum_func_status ret = FAIL;
-	zend_bool persistent = (s == NULL) ? s->persistent : 0;
+	zend_bool persistent = (s != NULL) ? s->persistent : 0;
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
 	if (stmt) {
