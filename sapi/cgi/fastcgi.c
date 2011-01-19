@@ -842,33 +842,33 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
 	unsigned int name_len, val_len;
-	int ret = 1;
 
 	while (p < end) {
 		name_len = *p++;
 		if (UNEXPECTED(name_len >= 128)) {
+			if (UNEXPECTED(p + 3 >= end)) return 0;
 			name_len = ((name_len & 0x7f) << 24);
 			name_len |= (*p++ << 16);
 			name_len |= (*p++ << 8);
 			name_len |= *p++;
 		}
+		if (UNEXPECTED(p >= end)) return 0;
 		val_len = *p++;
 		if (UNEXPECTED(val_len >= 128)) {
+			if (UNEXPECTED(p + 3 >= end)) return 0;
 			val_len = ((val_len & 0x7f) << 24);
 			val_len |= (*p++ << 16);
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		if (UNEXPECTED(name_len + val_len < 0) ||
-		    UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
+		if (UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
 			/* Malformated request */
-			ret = 0;
-			break;
+			return 0;
 		}
 		fcgi_hash_set(&req->env, FCGI_HASH_FUNC(p, name_len), (char*)p, name_len, (char*)p + name_len, val_len);
 		p += name_len + val_len;
 	}
-	return ret;
+	return 1;
 }
 
 static int fcgi_read_request(fcgi_request *req)
