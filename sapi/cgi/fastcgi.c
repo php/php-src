@@ -605,28 +605,39 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 {
 	char buf[128];
 	char *tmp = buf;
-	int buf_size = sizeof(buf);
-	int name_len, val_len;
+	size_t buf_size = sizeof(buf);
+	unsigned int name_len, val_len;
 	char *s;
 	int ret = 1;
 
 	while (p < end) {
 		name_len = *p++;
 		if (name_len >= 128) {
+			if (p + 3 >= end) {
+				ret = 0;
+				break;
+			}
 			name_len = ((name_len & 0x7f) << 24);
 			name_len |= (*p++ << 16);
 			name_len |= (*p++ << 8);
 			name_len |= *p++;
 		}
+		if (p >= end) {
+			ret = 0;
+			break;
+		}
 		val_len = *p++;
 		if (val_len >= 128) {
+			if (p + 3 >= end) {
+				ret = 0;
+				break;
+			}
 			val_len = ((val_len & 0x7f) << 24);
 			val_len |= (*p++ << 16);
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		if (name_len + val_len < 0 ||
-		    name_len + val_len > end - p) {
+		if (name_len + val_len > end - p) {
 			/* Malformated request */
 			ret = 0;
 			break;
