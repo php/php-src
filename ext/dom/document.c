@@ -2318,12 +2318,17 @@ PHP_FUNCTION(dom_document_save_html)
 			RETURN_FALSE;
 		}
 		
-		htmlNodeDumpFormatOutput(buf, docp, node, 0, format);
-		mem = (xmlChar*) xmlBufferContent(buf);
-		if (!mem) {
-			RETVAL_FALSE;
+		size = htmlNodeDump(buf, docp, node);
+		if (size >= 0) {
+			mem = (xmlChar*) xmlBufferContent(buf);
+			if (!mem) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRINGL((const char*) mem, size, 1);
+			}
 		} else {
-			RETVAL_STRING(mem, 1);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error dumping HTML node");
+			RETVAL_FALSE;
 		}
 		xmlBufferFree(buf);
 	} else {
@@ -2335,7 +2340,7 @@ PHP_FUNCTION(dom_document_save_html)
 		if (!size) {
 			RETVAL_FALSE;
 		} else {
-			RETVAL_STRINGL(mem, size, 1);
+			RETVAL_STRINGL((const char*) mem, size, 1);
 		}
 		if (mem)
 			xmlFree(mem);
