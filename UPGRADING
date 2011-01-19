@@ -134,10 +134,10 @@ UPGRADE NOTES - PHP X.Y
   the validity of the entities. Numerical entities are checked for a valid
   range (0 to 0x10FFFF); if the flag ENT_DISALLOWED is given, the validity of
   such numerical entity in the target document type is also checked.  Named
-  entitities are checked for necessary existence in the target document type
+  entities are checked for necessary existence in the target document type
   instead of only checking whether they were constituted by alphanumeric
   characters.
-- The flag ENT_DISALLOWED was addded. In addition to the behavior described in
+- The flag ENT_DISALLOWED was added. In addition to the behavior described in
   the item before, it also makes htmlentities/htmlspecialchars substitute
   characters that appear literally in the argument string and which are not
   allowed in the target document type with U+FFFD (UTF-8) or &#xFFFD;.
