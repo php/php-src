@@ -65,7 +65,7 @@
 		} else { \
 			Z_HASH_P(&CONSTANT(num)) = zend_hash_func(Z_STRVAL(CONSTANT(num)), Z_STRLEN(CONSTANT(num))+1); \
 		} \
-    } while (0)
+	} while (0)
 
 #define GET_CACHE_SLOT(literal) do { \
 		CG(active_op_array)->literals[literal].cache_slot = CG(active_op_array)->last_cache_slot++; \
@@ -931,7 +931,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 	if (variable->op_type == IS_CV) {
 		if (variable->u.op.var == CG(active_op_array)->this_var) {
 			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
-	    }
+		}
 	} else if (variable->op_type == IS_VAR) {
 		int n = 0;
 
@@ -1001,7 +1001,7 @@ void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRM
 	if (lvar->op_type == IS_CV) {
 		if (lvar->u.op.var == CG(active_op_array)->this_var) {
  			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
-	    }
+		}
 	} else if (lvar->op_type == IS_VAR) {
 		int last_op_number = get_next_op_number(CG(active_op_array));
 
@@ -1171,7 +1171,7 @@ void zend_do_post_incdec(znode *result, const znode *op1, zend_uchar op TSRMLS_D
 	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
 
-	if (last_op_number > 0) {       	
+	if (last_op_number > 0) {
 		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
 
 		if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
@@ -1301,7 +1301,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 					variable->op_type = IS_CV;
 					variable->u.op.var = CG(active_op_array)->this_var;
 				}
-		    } else if (CG(active_op_array)->this_var == -1) {
+			} else if (CG(active_op_array)->this_var == -1) {
 				CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1 TSRMLS_CC);
 			}
 		}
@@ -1741,7 +1741,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	SET_UNUSED(current_op->op2);
 	SET_NODE(current_op->result, result);
 	if (is_static) {
-	    CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
 	}
 	CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
 }
@@ -2104,12 +2104,12 @@ void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_
 	if (compound) {
 		/* This is a compound class name that contains namespace prefix */
 		if (Z_STRVAL(class_name->u.constant)[0] == '\\') {
-		    /* The STRING name has "\" prefix */
-		    Z_STRLEN(class_name->u.constant) -= 1;
-		    memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+1, Z_STRLEN(class_name->u.constant)+1);
+			/* The STRING name has "\" prefix */
+			Z_STRLEN(class_name->u.constant) -= 1;
+			memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+1, Z_STRLEN(class_name->u.constant)+1);
 			Z_STRVAL(class_name->u.constant) = erealloc(
-				Z_STRVAL(class_name->u.constant),
-				Z_STRLEN(class_name->u.constant) + 1);
+			Z_STRVAL(class_name->u.constant),
+			Z_STRLEN(class_name->u.constant) + 1);
 
 			if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
 				zend_error(E_COMPILE_ERROR, "'\\%s' is an invalid class name", Z_STRVAL(class_name->u.constant));
@@ -2251,12 +2251,12 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	if (CG(context).labels == NULL ||
 	    zend_hash_find(CG(context).labels, Z_STRVAL_P(label), Z_STRLEN_P(label)+1, (void**)&dest) == FAILURE) {
 
-	    if (pass2) {
-	    	CG(in_compilation) = 1;
-	    	CG(active_op_array) = op_array;
-	    	CG(zend_lineno) = opline->lineno;
-			zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
-	    } else {
+		if (pass2) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = opline->lineno;
+		zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+		} else {
 			/* Label is not defined. Delay to pass 2. */
 			INC_BPC(op_array);
 			return;
@@ -2271,11 +2271,11 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	current = opline->extended_value;
 	for (distance = 0; current != dest->brk_cont; distance++) {
 		if (current == -1) {
-		    if (pass2) {
-		    	CG(in_compilation) = 1;
-	    		CG(active_op_array) = op_array;
-	    		CG(zend_lineno) = opline->lineno;
-	    	}
+			if (pass2) {
+				CG(in_compilation) = 1;
+				CG(active_op_array) = op_array;
+				CG(zend_lineno) = opline->lineno;
+			}
 			zend_error(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
 		current = op_array->brk_cont_array[current].parent;
@@ -2291,9 +2291,9 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 		ZVAL_LONG(label, distance);
 	}
 
-    if (pass2) {
+	if (pass2) {
 		DEC_BPC(op_array);
-    }
+	}
 }
 /* }}} */
 
@@ -2984,8 +2984,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC)
 {
 	zend_uint child_flags;
-    zend_uint parent_flags = parent->common.fn_flags;
-    	
+	zend_uint parent_flags = parent->common.fn_flags;
+
 	if (parent->common.fn_flags & ZEND_ACC_ABSTRACT
 		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
 		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
@@ -3277,10 +3277,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			}
 		}
 	}
-	                                                               	
+
 	for (zend_hash_internal_pointer_reset(&ce->properties_info);
-	     zend_hash_get_current_data(&ce->properties_info, (void *) &property_info) == SUCCESS;
-	     zend_hash_move_forward(&ce->properties_info)) {
+	zend_hash_get_current_data(&ce->properties_info, (void *) &property_info) == SUCCESS;
+	zend_hash_move_forward(&ce->properties_info)) {
 		if (property_info->ce == ce) {
 			if (property_info->flags & ZEND_ACC_STATIC) {
 				property_info->offset += parent_ce->default_static_members_count;
@@ -3502,7 +3502,7 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRM
 		ALLOC_HASHTABLE(tmpHash);
 		zend_hash_init(tmpHash, zend_hash_num_elements(fe->op_array.static_variables), NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_apply_with_arguments(tmpHash TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, fe->op_array.static_variables);
-    
+
 		fe->op_array.static_variables = tmpHash;
 	}
 
@@ -3527,7 +3527,7 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRM
 				opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
 				opcode_copy[i].op1.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op1.jmp_addr - fe->op_array.opcodes);
 			}
-        }
+		}
 
 		if (opcode_copy[i].op2_type != IS_CONST) {
 			if (opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
@@ -3663,8 +3663,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		while (aliases[i]) {
 			if (!aliases[i]->trait_method->ce || (fn->common.scope == aliases[i]->trait_method->ce &&
 				(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
-                                 aliases[i]->trait_method->mname_len,
-                                 fn->common.function_name, fnname_len) == 0))) {
+																 aliases[i]->trait_method->mname_len,
+																 fn->common.function_name, fnname_len) == 0))) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
 					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
@@ -3704,8 +3704,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 			while (aliases[i]) {
 				if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce) &&
 					(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
-                                   aliases[i]->trait_method->mname_len,
-                                   fn->common.function_name, fnname_len) == 0)) {
+																	 aliases[i]->trait_method->mname_len,
+																	 fn->common.function_name, fnname_len) == 0)) {
 					if (!aliases[i]->alias && aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
@@ -3790,7 +3790,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 					if (precedences[i]->exclude_from_classes[j] == trait) {
 						zend_uint lcname_len = precedences[i]->trait_method->mname_len;
 						char* lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name,
-                                                lcname_len);
+																								lcname_len);
 						if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL)==FAILURE) {
 							zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
 						}
@@ -3823,11 +3823,11 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements,
 						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
 						  NULL, NULL, 0, 0);
-    
+
 		zend_hash_init_ex(&exclude_table, 2, /* TODO: revisit this start size, may be its not optimal */
 						  NULL, NULL, 0, 0);
 		zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
-    
+
 		/* copies functions, applies defined aliasing, and excludes unused trait methods */
 		zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
 		zend_hash_graceful_destroy(&exclude_table);
@@ -3900,7 +3900,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 			 zend_hash_get_current_data(&ce->traits[i]->properties_info, (void *) &property_info) == SUCCESS;
 			 zend_hash_move_forward(&ce->traits[i]->properties_info)) {
 			/* property_info now contains the property */
-      
+
 			/* first get the unmangeld name if necessary,
 			   then check whether the property is already there */
 			if ((property_info->flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
@@ -3916,7 +3916,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				prop_name_length = strlen(prop_name);
 				prop_found = zend_hash_find(&ce->properties_info, prop_name, prop_name_length+1, (void **) &coliding_prop) == SUCCESS;
 			}
-      
+
 			/* next: check for conflicts with current class */
 			if (prop_found) {
 				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
@@ -3931,14 +3931,14 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 														  ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC) == FAILURE;
 					} else {
 						not_compatible = compare_function(&compare_result,
-            		                 	                  ce->default_properties_table[coliding_prop->offset],
-                		         	                      ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC) == FAILURE;
+																							ce->default_properties_table[coliding_prop->offset],
+																							ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC) == FAILURE;
 					}
 				} else {
 					/* the flags are not identical, thus, we assume properties are not compatible */
 					not_compatible = 1;
 				}
-        
+
 				if (not_compatible) {
 					zend_error(E_COMPILE_ERROR, 
 							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
@@ -3955,7 +3955,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 								ce->name);
 				}
 			}
-      
+
 			/* property not found, so lets add it */
 			if (property_info->flags & ZEND_ACC_STATIC) {
 				prop_value = ce->traits[i]->default_static_members_table[property_info->offset];
@@ -4457,7 +4457,7 @@ void zend_do_switch_end(const znode *case_list TSRMLS_DC) /* {{{ */
 
 	if (case_list->op_type != IS_UNUSED) { /* non-empty switch */
 		int next_op_number = get_next_op_number(CG(active_op_array));
-		           	
+
 		CG(active_op_array)->opcodes[case_list->u.op.opline_num].op1.opline_num = next_op_number;
 	}
 
@@ -4752,8 +4752,8 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	/* Traits can not implement interfaces */
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' since it is a Trait",
-               Z_STRVAL(interface_name->u.constant),
-               CG(active_class_entry)->name);
+							 Z_STRVAL(interface_name->u.constant),
+							 CG(active_class_entry)->name);
 	}
 
 	switch (zend_get_class_fetch_type(Z_STRVAL(interface_name->u.constant), Z_STRLEN(interface_name->u.constant))) {
@@ -4938,7 +4938,7 @@ void zend_do_fetch_property(znode *result, znode *object, const znode *property 
 	if (object->op_type == IS_CV) {
 		if (object->u.op.var == CG(active_op_array)->this_var) {
 			object->op_type = IS_UNUSED; /* this means $this for objects */
-	    }
+		}
 	} else if (fetch_list_ptr->count == 1) {
 		zend_llist_element *le = fetch_list_ptr->head;
 		zend_op *opline_ptr = (zend_op *) le->data;
@@ -6235,10 +6235,10 @@ int zend_register_auto_global(const char *name, uint name_len, zend_bool jit, ze
 
 static int zend_auto_global_init(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
 {
-    if (auto_global->jit) {
+	if (auto_global->jit) {
 		auto_global->armed = 1;
-    } else if (auto_global->auto_global_callback) {
-    	auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+	} else if (auto_global->auto_global_callback) {
+		auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
 	} else {
 		auto_global->armed = 0;
 	}
@@ -6672,7 +6672,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 		if (len_adjust == len) {
 			return len;
 		}
-    }
+	}
 #endif
 
 	if (len == 0) {
