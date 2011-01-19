@@ -246,7 +246,6 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
 	if (*stats == NULL) {
-		DBG_ENTER("mysqlnd_stats_init failed to calloc stats context");
 		return;
 	}
 	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
@@ -256,7 +255,6 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
-
 }
 /* }}} */
 
