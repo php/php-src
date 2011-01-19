@@ -159,6 +159,9 @@ cacheFetch( char **error, void *key )
 	key_value_t *map;
 
 	map = (key_value_t *)malloc(sizeof(key_value_t));
+	if (map == NULL) {
+		return NULL;
+	}
 	map->key = *(int *)key;
 	map->value = 3;
 
