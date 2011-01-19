@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "tsrm_virtual_cwd.h"
 #include "zend_multibyte.h"
+#include "zend_language_scanner.h"
 
 #define CONSTANT_EX(op_array, op) \
 	(op_array)->literals[op].constant
