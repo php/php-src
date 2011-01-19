@@ -2307,7 +2307,7 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
 	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
 
-	DBG_RETURN(conn->net && conn->protocol? PASS:FAIL);
+	DBG_RETURN(conn->stats && conn->net && conn->protocol? PASS:FAIL);
 }
 /* }}} */
 
