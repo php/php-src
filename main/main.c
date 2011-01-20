@@ -180,7 +180,9 @@ static void php_disable_functions(TSRMLS_D)
 	}
 
 	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
-
+	if (e == NULL) {
+		return;
+	}
 	while (*e) {
 		switch (*e) {
 			case ' ':
@@ -1715,8 +1717,9 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 {
 #ifdef PHP_WIN32
 	if (!PG(com_initialized)) {
-		CoInitialize(NULL);
-		PG(com_initialized) = 1;
+		if (CoInitialize(NULL) == S_OK) {
+			PG(com_initialized) = 1;
+		}
 	}
 #endif
 }
@@ -1820,6 +1823,7 @@ void dummy_invalid_parameter_handler(
 	}
 }
 #endif
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 /* {{{ php_module_startup
  */
@@ -1835,6 +1839,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	void ***tsrm_ls;
 	php_core_globals *core_globals;
 #endif
+#ifdef PHP_WIN32
+	char module_path[MAX_PATH];
+#endif
+
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
@@ -1854,7 +1862,15 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #else
 	php_os=PHP_OS;
 #endif
-
+	GetModuleFileName((HINSTANCE)&__ImageBase, module_path, MAX_PATH);
+	php_dirname(module_path, strlen(module_path));
+	{
+		char dll_dir[MAX_PATH];
+		sprintf(dll_dir, "%s\\%s", module_path, "..\\..\\deps\\bin");
+		SetDllDirectory(dll_dir);
+	}
+//	GetModuleFileName (NULL, module_path, MAX_PATH);
+//__debugbreak();
 #ifdef ZTS
 	tsrm_ls = ts_resource(0);
 #endif
