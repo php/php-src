@@ -86,9 +86,7 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	}
 
 	if (!ok) {
-		char *msg;
-		err = GetLastError();
-		msg = php_win32_error_to_msg(err);
+		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
