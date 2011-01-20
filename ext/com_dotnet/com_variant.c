@@ -755,6 +755,8 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 		case VOP_NOT:
 			result = VarNot(vleft, &vres);
 			break;
+		default:
+			result = E_INVALIDARG;
 	}
 
 	if (SUCCEEDED(result)) {
