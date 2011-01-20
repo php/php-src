@@ -179,7 +179,9 @@ static void php_disable_functions(TSRMLS_D)
 	}
 
 	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
-
+	if (e == NULL) {
+		return;
+	}
 	while (*e) {
 		switch (*e) {
 			case ' ':
@@ -1672,8 +1674,9 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 {
 #ifdef PHP_WIN32
 	if (!PG(com_initialized)) {
-		CoInitialize(NULL);
-		PG(com_initialized) = 1;
+		if (CoInitialize(NULL) == S_OK) {
+			PG(com_initialized) = 1;
+		}
 	}
 #endif
 }
