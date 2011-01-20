@@ -366,8 +366,9 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 /* {{{ php_stream_make_seekable */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC)
 {
-	assert(newstream != NULL);
-
+	if (newstream == NULL) {
+		return PHP_STREAM_FAILED;
+	}
 	*newstream = NULL;
 
 	if (((flags & PHP_STREAM_FORCE_CONVERSION) == 0) && origstream->ops->seek != NULL) {
