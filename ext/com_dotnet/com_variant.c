@@ -593,6 +593,9 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 		case VOP_XOR:
 			result = VarXor(vleft, vright, &vres);
 			break;
+		/*Let say it fails as no valid op has been given */
+		default:
+			result = E_INVALIDARG;
 	}
 
 	if (SUCCEEDED(result)) {
