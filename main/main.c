@@ -1864,13 +1864,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	GetModuleFileName((HINSTANCE)&__ImageBase, module_path, MAX_PATH);
 	php_dirname(module_path, strlen(module_path));
-	{
-		char dll_dir[MAX_PATH];
-		sprintf(dll_dir, "%s\\%s", module_path, "..\\..\\deps\\bin");
-		SetDllDirectory(dll_dir);
-	}
-//	GetModuleFileName (NULL, module_path, MAX_PATH);
-//__debugbreak();
+
 #ifdef ZTS
 	tsrm_ls = ts_resource(0);
 #endif
