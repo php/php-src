@@ -70,7 +70,6 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	char *string;
 	uint length = 0;
 	BOOL ok;
-	LONG err;
 
 	length = WideCharToMultiByte(codepage, 0, olestring, -1, NULL, 0, NULL, NULL);
 
