@@ -1823,7 +1823,6 @@ void dummy_invalid_parameter_handler(
 	}
 }
 #endif
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 /* {{{ php_module_startup
  */
@@ -1862,8 +1861,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #else
 	php_os=PHP_OS;
 #endif
-	GetModuleFileName((HINSTANCE)&__ImageBase, module_path, MAX_PATH);
-	php_dirname(module_path, strlen(module_path));
 
 #ifdef ZTS
 	tsrm_ls = ts_resource(0);
