@@ -79,7 +79,6 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 		length = WideCharToMultiByte(codepage, 0, olestring, -1, string, length, NULL, NULL);
 		ok = length > 0;
 	} else {
-		err = GetLastError();
 		string = (char*)emalloc(sizeof(char));
 		*string = '\0';
 		ok = FALSE;
@@ -87,7 +86,9 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	}
 
 	if (!ok) {
-		char *msg = php_win32_error_to_msg(err);
+		char *msg;
+		err = GetLastError();
+		msg = php_win32_error_to_msg(err);
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
