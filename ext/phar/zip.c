@@ -1434,9 +1434,9 @@ nocentralerror:
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
 	{
-		size_t len;
-		int ret = phar_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &len);
-		if (SUCCESS != ret || len != cdir_size) {
+		size_t clen;
+		int ret = phar_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &clen);
+		if (SUCCESS != ret || clen != cdir_size) {
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 			}
