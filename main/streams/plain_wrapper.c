@@ -713,6 +713,8 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 								acc = FILE_MAP_READ | FILE_MAP_WRITE;
 								/* TODO: we should assign a name for the mapping */
 								break;
+							default:
+								return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 
 						/* create a mapping capable of viewing the whole file (this costs no real resources) */
