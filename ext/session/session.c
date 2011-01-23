@@ -1914,10 +1914,10 @@ static PHP_FUNCTION(session_unset)
 	}
 
 	IF_SESSION_VARS() {
-		HashTable *ht;
+		HashTable *ht_sess_var;
 
 		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
-		ht = Z_ARRVAL_P(PS(http_session_vars));
+		ht_sess_var = Z_ARRVAL_P(PS(http_session_vars));
 
 		if (PG(register_globals)) {
 			uint str_len;
@@ -1925,16 +1925,16 @@ static PHP_FUNCTION(session_unset)
 			ulong num_key;
 			HashPosition pos;
 
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
+			zend_hash_internal_pointer_reset_ex(ht_sess_var, &pos);
 
-			while (zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING) {
+			while (zend_hash_get_current_key_ex(ht_sess_var, &str, &str_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING) {
 				zend_delete_global_variable(str, str_len - 1 TSRMLS_CC);
-				zend_hash_move_forward_ex(ht, &pos);
+				zend_hash_move_forward_ex(ht_sess_var, &pos);
 			}
 		}
 
 		/* Clean $_SESSION. */
-		zend_hash_clean(ht);
+		zend_hash_clean(ht_sess_var);
 	}
 }
 /* }}} */
