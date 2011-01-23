@@ -114,10 +114,10 @@
 
 #define PHP_FILTER_GET_LONG_OPT(zv, opt) { \
 	if (Z_TYPE_PP(zv) != IS_LONG) {                                                                      \
-		zval tmp = **zv;                                                                                 \
-		zval_copy_ctor(&tmp);                                                                                    \
-		convert_to_long(&tmp);                                                                                   \
-		opt = Z_LVAL(tmp);                                                                                  \
+		zval ___tmp = **zv;                                                                                 \
+		zval_copy_ctor(&___tmp);                                                                                    \
+		convert_to_long(&___tmp);                                                                                   \
+		opt = Z_LVAL(___tmp);                                                                                  \
 	} else {                                                                                                     \
 		opt = Z_LVAL_PP(zv);                                                                        \
 	}                                                                                                            \
