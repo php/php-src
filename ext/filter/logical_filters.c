@@ -88,7 +88,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 	}
 
 	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_LONG == 4 && end - str == MAX_LENGTH_OF_LONG - 1 && *str > '2')) {
+	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) && *str > '2')) {
 		/* overflow */
 		return -1;
 	}
