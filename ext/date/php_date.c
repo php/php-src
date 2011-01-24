@@ -3527,7 +3527,6 @@ void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS
 {
 	php_interval_obj *obj;
 	zval tmp_member, tmp_value;
-	int found = 0;
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
