@@ -36,6 +36,8 @@
     no effect. (Derick)
   . Fixed bug #53729 (DatePeriod fails to initialize recurrences on 64bit
     big-endian systems). (Derick, rein@basefarm.no)
+  . Fixed bug #52063 (DateTime constructor's second argument doesn't have a 
+    null default value). (Gustavo, Stas)
 
 - Filter extension:
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
