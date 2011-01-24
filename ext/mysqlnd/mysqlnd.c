@@ -577,7 +577,7 @@ mysqlnd_connect_run_authentication(
 													   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
 
 
-				ret = mysqlnd_auth_handshake(conn, user, passwd, db, db_len, passwd_len, options, mysql_flags, greet_packet->charset_no,
+				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags, greet_packet->charset_no,
 											first_call,
 											requested_protocol,
 											scrambled_data, scrambled_data_len,
@@ -2084,7 +2084,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 														   plugin_data, plugin_data_len, 0, conn->server_capabilities TSRMLS_CC);
 
 
-				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, db, strlen(db), passwd_len, silent,
+				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, strlen(db), silent,
 											   first_call,
 											   requested_protocol,
 											   scrambled_data, scrambled_data_len,
