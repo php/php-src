@@ -439,10 +439,10 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 {
 	{
 		MYSQLND_PLUGIN_API_VERSION,
-		"auth_plugin_authentication_pam",
+		"auth_plugin_mysql_clear_password",
 		MYSQLND_VERSION_ID,
 		MYSQLND_VERSION,
-		"Proprietatry",
+		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
