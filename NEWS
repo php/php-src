@@ -49,6 +49,7 @@
     (Ilia, valli at icsurselva dot ch)
 
 - IMAP extension:
+  . Implemented FR #53812 (get MIME headers of the part of the email). (Stas)
   . Fixed bug #53377 (imap_mime_header_decode() doesn't ignore \t during long
     MIME header unfolding). (Adam)
     
