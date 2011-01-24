@@ -1029,7 +1029,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			offset->offset = (t->z) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = 0;
-			offset->abbr = malloc(9); /* GMT±xxxx\0 */
+			offset->abbr = malloc(9); /* GMTï¿½xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d", 
 			                          localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 			                          localtime ? abs(offset->offset / 3600) : 0,
@@ -1238,7 +1238,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 			offset->offset = (t->z - (t->dst * 60)) * -60;
 			offset->leap_secs = 0;
 			offset->is_dst = t->dst;
-			offset->abbr = malloc(9); /* GMT±xxxx\0 */
+			offset->abbr = malloc(9); /* GMTï¿½xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d", 
 			                          !localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 			                          !localtime ? abs(offset->offset / 3600) : 0,
@@ -1997,6 +1997,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
+	date_object_handlers_interval.get_property_ptr_ptr = NULL;
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -3487,22 +3488,29 @@ zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC
 #define GET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
 		value = obj->diff->n;                 \
+		break;								  \
 	}
-	GET_VALUE_FROM_STRUCT(y, "y");
-	GET_VALUE_FROM_STRUCT(m, "m");
-	GET_VALUE_FROM_STRUCT(d, "d");
-	GET_VALUE_FROM_STRUCT(h, "h");
-	GET_VALUE_FROM_STRUCT(i, "i");
-	GET_VALUE_FROM_STRUCT(s, "s");
-	GET_VALUE_FROM_STRUCT(invert, "invert");
-	GET_VALUE_FROM_STRUCT(days, "days");
+	do {
+		GET_VALUE_FROM_STRUCT(y, "y");
+		GET_VALUE_FROM_STRUCT(m, "m");
+		GET_VALUE_FROM_STRUCT(d, "d");
+		GET_VALUE_FROM_STRUCT(h, "h");
+		GET_VALUE_FROM_STRUCT(i, "i");
+		GET_VALUE_FROM_STRUCT(s, "s");
+		GET_VALUE_FROM_STRUCT(invert, "invert");
+		GET_VALUE_FROM_STRUCT(days, "days");
+		/* didn't find any */
+		retval = (zend_get_std_object_handlers())->read_property(object, member, type TSRMLS_CC);
+
+		if (member == &tmp_member) {
+			zval_dtor(member);
+		}
+
+		return retval;
+	} while(0);
 
 	ALLOC_INIT_ZVAL(retval);
 	Z_SET_REFCOUNT_P(retval, 0);
-
-	if (value == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown property (%s)", Z_STRVAL_P(member));
-	}
 
 	ZVAL_LONG(retval, value);
 
@@ -3537,24 +3545,24 @@ void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS
 			convert_to_long(&tmp_value);      \
 			value = &tmp_value;               \
 		}                                     \
-		found = 1;                            \
-		obj->diff->n = Z_LVAL_P(value); \
-		if (value == &tmp_value) {         \
-			zval_dtor(value);              \
-		}                                  \
+		obj->diff->n = Z_LVAL_P(value);       \
+		if (value == &tmp_value) {            \
+			zval_dtor(value);                 \
+		}                                     \
+		break;								  \
 	}
 
-	SET_VALUE_FROM_STRUCT(y, "y");
-	SET_VALUE_FROM_STRUCT(m, "m");
-	SET_VALUE_FROM_STRUCT(d, "d");
-	SET_VALUE_FROM_STRUCT(h, "h");
-	SET_VALUE_FROM_STRUCT(i, "i");
-	SET_VALUE_FROM_STRUCT(s, "s");
-	SET_VALUE_FROM_STRUCT(invert, "invert");
-
-	if (!found) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown property (%s)", Z_STRVAL_P(member));
-	}
+	do {
+		SET_VALUE_FROM_STRUCT(y, "y");
+		SET_VALUE_FROM_STRUCT(m, "m");
+		SET_VALUE_FROM_STRUCT(d, "d");
+		SET_VALUE_FROM_STRUCT(h, "h");
+		SET_VALUE_FROM_STRUCT(i, "i");
+		SET_VALUE_FROM_STRUCT(s, "s");
+		SET_VALUE_FROM_STRUCT(invert, "invert");
+		/* didn't find any */
+		(zend_get_std_object_handlers())->write_property(object, member, value TSRMLS_CC);
+	} while(0);
 
 	if (member == &tmp_member) {
 		zval_dtor(member);
