@@ -192,7 +192,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 void mysqlnd_plugin_subsystem_init(TSRMLS_D);
 void mysqlnd_plugin_subsystem_end(TSRMLS_D);
 
-void mysqlnd_native_authentication_plugin_register(TSRMLS_D);
+void mysqlnd_register_builtin_authentication_plugins(TSRMLS_D);
 
 void mysqlnd_example_plugin_register(TSRMLS_D);
 
@@ -206,11 +206,17 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 						const char * const db,
 						const size_t db_len,
 						const size_t passwd_len,
-						const struct st_mysqlnd_packet_greet * const greet_packet,
 						const MYSQLND_OPTIONS * const options,
 						unsigned long mysql_flags,
-						struct st_mysqlnd_authentication_plugin * auth_plugin,
-						char ** switch_to_auth_protocol
+						unsigned int server_charset_no,
+						zend_bool use_full_blown_auth_packet,
+						const char * const auth_protocol,
+						const zend_uchar * const auth_plugin_data,
+						const size_t auth_plugin_data_len,
+						char ** switch_to_auth_protocol,
+						size_t * switch_to_auth_protocol_len,
+						zend_uchar ** switch_to_auth_protocol_data,
+						size_t * switch_to_auth_protocol_data_len
 						TSRMLS_DC);
 
 enum_func_status
@@ -222,8 +228,14 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 								const size_t db_len,
 								const size_t passwd_len,
 								const zend_bool silent,
-								struct st_mysqlnd_authentication_plugin * auth_plugin,
-								char ** switch_to_auth_protocol
+								zend_bool use_full_blown_auth_packet,
+								const char * const auth_protocol,
+								zend_uchar * auth_plugin_data,
+								size_t auth_plugin_data_len,
+								char ** switch_to_auth_protocol,
+								size_t * switch_to_auth_protocol_len,
+								zend_uchar ** switch_to_auth_protocol_data,
+								size_t * switch_to_auth_protocol_data_len
 								TSRMLS_DC);
 
 #endif	/* MYSQLND_PRIV_H */
