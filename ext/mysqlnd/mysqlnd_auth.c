@@ -34,9 +34,9 @@ enum_func_status
 mysqlnd_auth_handshake(MYSQLND * conn,
 							  const char * const user,
 							  const char * const passwd,
+							  const size_t passwd_len,
 							  const char * const db,
 							  const size_t db_len,
-							  const size_t passwd_len,
 							  const MYSQLND_OPTIONS * const options,
 							  unsigned long mysql_flags,
 							  unsigned int server_charset_no,
@@ -158,9 +158,9 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 								const char * const user,
 								const size_t user_len,
 								const char * const passwd,
+								const size_t passwd_len,
 								const char * const db,
 								const size_t db_len,
-								const size_t passwd_len,
 								const zend_bool silent,
 								zend_bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
@@ -172,14 +172,7 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 								size_t * switch_to_auth_protocol_data_len
 								TSRMLS_DC)
 {
-	/*
-	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
-	  Stack space is not that expensive, so use a bit more to be protected against
-	  buffer overflows.
-	*/
 	enum_func_status ret = FAIL;
-	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 2 /* charset*/ ];
-	char *p = buffer;
 	const MYSQLND_CHARSET * old_cs = conn->charset;
 	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE * change_auth_resp_packet = NULL;
 	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp = NULL;
@@ -230,7 +223,6 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 
 		if (mysqlnd_get_server_version(conn) >= 50123) {
 			auth_packet->charset_no	= conn->charset->nr;
-			p+=2;
 		}
 	
 		if (!PACKET_WRITE(auth_packet, conn)) {
