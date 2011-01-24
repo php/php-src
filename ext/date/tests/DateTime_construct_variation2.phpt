@@ -114,7 +114,7 @@ fclose( $file_handle);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing new DateTime() : usage variation -  unexpected values to second argument $timezone***
 
 -- int 0 --
@@ -151,10 +151,24 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array gi
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
 
 -- uppercase NULL --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, null given
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- lowercase null --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, null given
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- lowercase true --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
@@ -193,10 +207,24 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object g
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object given
 
 -- undefined var --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, null given
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- unset var --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, null given
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- resource --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, resource given

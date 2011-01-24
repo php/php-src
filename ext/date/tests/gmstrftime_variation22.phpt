@@ -35,24 +35,24 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( gmstrftime($value) );
+      var_dump( $value );
       var_dump( gmstrftime($value, $timestamp) );
 };
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gmstrftime() : usage variation ***
 
 --Preferred date and time representation--
-string(%d) "%s %d %s %d %d:%d:%d %s GMT"
-string(31) "Fri 08 Aug 2008 08:08:08 AM GMT"
+string(2) "%c"
+string(24) "Fri Aug  8 08:08:08 2008"
 
 --Preferred date representation--
-string(%d) "%d/%d/%d"
+string(2) "%x"
 string(10) "08/08/2008"
 
 --Preferred time representation--
-string(%d) "%d:%d:%d %s"
-string(11) "08:08:08 AM"
+string(2) "%X"
+string(8) "08:08:08"
 ===DONE===
