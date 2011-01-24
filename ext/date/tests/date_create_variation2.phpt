@@ -166,14 +166,24 @@ Warning: date_create() expects parameter 2 to be DateTimeZone, array given in %s
 bool(false)
 
 -- uppercase NULL --
-
-Warning: date_create() expects parameter 2 to be DateTimeZone, null given in %s on line %d
-bool(false)
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- lowercase null --
-
-Warning: date_create() expects parameter 2 to be DateTimeZone, null given in %s on line %d
-bool(false)
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- lowercase true --
 
@@ -236,14 +246,24 @@ Warning: date_create() expects parameter 2 to be DateTimeZone, object given in %
 bool(false)
 
 -- undefined var --
-
-Warning: date_create() expects parameter 2 to be DateTimeZone, null given in %s on line %d
-bool(false)
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- unset var --
-
-Warning: date_create() expects parameter 2 to be DateTimeZone, null given in %s on line %d
-bool(false)
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
 
 -- resource --
 
