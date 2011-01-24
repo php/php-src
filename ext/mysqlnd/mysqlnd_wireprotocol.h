@@ -82,7 +82,7 @@ typedef struct st_mysqlnd_packet_greet {
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int 	error_no;
+	unsigned int	error_no;
 	char		*auth_protocol;
 } MYSQLND_PACKET_GREET;
 
@@ -94,10 +94,10 @@ typedef struct st_mysqlnd_packet_auth {
 	uint32_t	max_packet_size;
 	uint8_t		charset_no;
 	const char	*user;
-	zend_uchar	*auth_data;
+	const zend_uchar	*auth_data;
 	size_t		auth_data_len;
 	const char	*db;
-	char		*auth_plugin_name;
+	const char	*auth_plugin_name;
 	/* Here the packet ends. This is user supplied data */
 	size_t		db_len;
 	zend_bool	send_auth_data;
@@ -105,6 +105,36 @@ typedef struct st_mysqlnd_packet_auth {
 	zend_bool	silent;
 
 } MYSQLND_PACKET_AUTH;
+
+/* Auth response packet */
+typedef struct st_mysqlnd_packet_auth_response {
+	MYSQLND_PACKET_HEADER		header;
+	uint8_t		response_code;
+	uint64_t	affected_rows;
+	uint64_t	last_insert_id;
+	uint16_t	server_status;
+	uint16_t	warning_count;
+	char		*message;
+	size_t		message_len;
+	/* If error packet, we use these */
+	char 		error[MYSQLND_ERRMSG_SIZE+1];
+	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	unsigned int 	error_no;
+
+	char		*new_auth_protocol;
+	size_t		new_auth_protocol_len;
+	zend_uchar	*new_auth_protocol_data;
+	size_t		new_auth_protocol_data_len;
+} MYSQLND_PACKET_AUTH_RESPONSE;
+
+
+/* Auth response packet */
+typedef struct st_mysqlnd_packet_change_auth_response {
+	MYSQLND_PACKET_HEADER		header;
+	const zend_uchar	*auth_data;
+	size_t				auth_data_len;
+} MYSQLND_PACKET_CHANGE_AUTH_RESPONSE;
+
 
 /* OK packet */
 typedef struct st_mysqlnd_packet_ok {
@@ -127,7 +157,7 @@ typedef struct st_mysqlnd_packet_ok {
 typedef struct st_mysqlnd_packet_command {
 	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
-	const char						*argument;
+	const zend_uchar				*argument;
 	size_t							arg_len;
 } MYSQLND_PACKET_COMMAND;
 
@@ -241,13 +271,18 @@ typedef struct st_mysqlnd_packet_prepare_response {
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_chg_user_resp {
 	MYSQLND_PACKET_HEADER	header;
-	uint32_t			field_count;
+	uint32_t			response_code;
 
 	/* message_len is not part of the packet*/
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
 	zend_bool			server_asked_323_auth;
+
+	char		*new_auth_protocol;
+	size_t		new_auth_protocol_len;
+	zend_uchar	*new_auth_protocol_data;
+	size_t		new_auth_protocol_data_len;
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 

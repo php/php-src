@@ -252,7 +252,7 @@ typedef struct st_mysqlnd_read_buffer {
 
 
 typedef enum_func_status	(*func_mysqlnd_net__connect)(MYSQLND_NET * net, const char * const scheme, size_t scheme_len, zend_bool persistent, char **errstr, int * errcode TSRMLS_DC);
-typedef size_t				(*func_mysqlnd_net__send)(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
+typedef size_t				(*func_mysqlnd_net__send)(MYSQLND * const conn, zend_uchar * const buf, size_t count TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__receive)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__set_client_option)(MYSQLND_NET * const net, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__network_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
@@ -304,6 +304,8 @@ struct st_mysqlnd_packet_auth_pam;
 
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol__get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol__get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol__get_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_change_auth_response *	(*func_mysqlnd_protocol__get_change_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_ok *			(*func_mysqlnd_protocol__get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_command *		(*func_mysqlnd_protocol__get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_eof *			(*func_mysqlnd_protocol__get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
@@ -318,6 +320,8 @@ struct st_mysqlnd_protocol_methods
 {
 	func_mysqlnd_protocol__get_greet_packet get_greet_packet;
 	func_mysqlnd_protocol__get_auth_packet get_auth_packet;
+	func_mysqlnd_protocol__get_auth_response_packet get_auth_response_packet;
+	func_mysqlnd_protocol__get_change_auth_response_packet get_change_auth_response_packet;
 	func_mysqlnd_protocol__get_ok_packet get_ok_packet;
 	func_mysqlnd_protocol__get_command_packet get_command_packet;
 	func_mysqlnd_protocol__get_eof_packet get_eof_packet;
@@ -396,7 +400,7 @@ typedef enum_func_status	(*func_mysqlnd_conn__free_reference)(MYSQLND * const co
 typedef enum mysqlnd_connection_state (*func_mysqlnd_conn__get_state)(MYSQLND * const conn TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn__set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
 
-typedef enum_func_status	(*func_mysqlnd_conn__simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const char * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn__simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__simple_command_handle_response)(MYSQLND *conn, enum mysqlnd_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn__restart_psession)(MYSQLND *conn TSRMLS_DC);

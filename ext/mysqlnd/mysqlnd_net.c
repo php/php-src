@@ -227,7 +227,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
   count + MYSQLND_HEADER_SIZE = sizeof(buf) (not the pointer but the actual buffer)
 */
 size_t
-MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, zend_uchar * const buf, size_t count TSRMLS_DC)
 {
 	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
 	zend_uchar *safe_storage = safe_buf;

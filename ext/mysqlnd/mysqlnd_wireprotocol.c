@@ -25,7 +25,6 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
-#include "ext/standard/sha1.h"
 #include "zend_ini.h"
 
 #define MYSQLND_SILENT 1
@@ -459,57 +458,16 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool stack_allocation TSRMLS
 /* }}} */
 
 
-/* {{{ php_mysqlnd_crypt */
-static void
-php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
-{
-	const zend_uchar *s1_end = s1 + len;
-	while (s1 < s1_end) {
-		*buffer++= *s1++ ^ *s2++;
-	}
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_scramble */
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password, size_t password_len)
-{
-	PHP_SHA1_CTX context;
-	zend_uchar sha1[SHA1_MAX_LENGTH];
-	zend_uchar sha2[SHA1_MAX_LENGTH];
-
-	/* Phase 1: hash password */
-	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, password, password_len);
-	PHP_SHA1Final(sha1, &context);
-
-	/* Phase 2: hash sha1 */
-	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (zend_uchar*)sha1, SHA1_MAX_LENGTH);
-	PHP_SHA1Final(sha2, &context);
-
-	/* Phase 3: hash scramble + sha2 */
-	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, scramble, SCRAMBLE_LENGTH);
-	PHP_SHA1Update(&context, (zend_uchar*)sha2, SHA1_MAX_LENGTH);
-	PHP_SHA1Final(buffer, &context);
-
-	/* let's crypt buffer now */
-	php_mysqlnd_crypt(buffer, (const zend_uchar *)buffer, (const zend_uchar *)sha1, SHA1_MAX_LENGTH);
-}
-/* }}} */
-
-
 #define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 1024)
 
 /* {{{ php_mysqlnd_auth_write */
 static
 size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 {
-	char buffer[AUTH_WRITE_BUFFER_LEN];
-	register char *p= buffer + MYSQLND_HEADER_SIZE; /* start after the header */
+	zend_uchar buffer[AUTH_WRITE_BUFFER_LEN];
+	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 	int len;
-	register MYSQLND_PACKET_AUTH *packet= (MYSQLND_PACKET_AUTH *) _packet;
+	MYSQLND_PACKET_AUTH * packet= (MYSQLND_PACKET_AUTH *) _packet;
 
 	DBG_ENTER("php_mysqlnd_auth_write");
 
@@ -534,8 +492,8 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 		*p++ = '\0';
 
 		/* defensive coding */
-		if (!packet->auth_data) {
-			packet->auth_data = 0;
+		if (packet->auth_data == NULL) {
+			packet->auth_data_len = 0;
 		}
 		int1store(p, packet->auth_data_len);
 		++p;
@@ -555,6 +513,8 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 			memcpy(p, packet->db, real_db_len);
 			p+= real_db_len;
 			*p++= '\0';
+		} else if (packet->is_change_user_packet) {
+			*p++= '\0';		
 		}
 		/* no \0 for no DB */
 
@@ -563,13 +523,13 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND * conn TSRMLS_DC)
 				int2store(p, packet->charset_no);
 				p+= 2;
 			}
-		} else {
-			if (packet->auth_plugin_name) {
-				size_t len = MIN(strlen(packet->auth_plugin_name), sizeof(buffer) - (p - buffer) - 1);
-				memcpy(p, packet->auth_plugin_name, len);
-				p+= len;
-				*p++= '\0';
-			}
+		}
+		
+		if (packet->auth_plugin_name) {
+			size_t len = MIN(strlen(packet->auth_plugin_name), sizeof(buffer) - (p - buffer) - 1);
+			memcpy(p, packet->auth_plugin_name, len);
+			p+= len;
+			*p++= '\0';
 		}
 	}
 	if (packet->is_change_user_packet) {
@@ -592,6 +552,166 @@ void php_mysqlnd_auth_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_
 {
 	if (!stack_allocation) {
 		MYSQLND_PACKET_AUTH * p = (MYSQLND_PACKET_AUTH *) _packet;
+		mnd_pefree(p, p->header.persistent);
+	}
+}
+/* }}} */
+
+
+#define AUTH_RESP_BUFFER_SIZE 2048
+
+/* {{{ php_mysqlnd_auth_response_read */
+static enum_func_status
+php_mysqlnd_auth_response_read(void *_packet, MYSQLND *conn TSRMLS_DC)
+{
+	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
+	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
+	zend_uchar *buf = conn->net->cmd_buffer.buffer? (zend_uchar *) conn->net->cmd_buffer.buffer : local_buf;
+	zend_uchar *p = buf;
+	zend_uchar *begin = buf;
+	unsigned long i;
+	register MYSQLND_PACKET_AUTH_RESPONSE * packet= (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
+
+	DBG_ENTER("php_mysqlnd_auth_response_read");
+
+	/* leave space for terminating safety \0 */
+	buf_len--;
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "OK", PROT_OK_PACKET);
+	BAIL_IF_NO_MORE_DATA;
+
+	/*
+	  zero-terminate the buffer for safety. We are sure there is place for the \0
+	  because buf_len is -1 the size of the buffer pointed
+	*/
+	buf[packet->header.size] = '\0';
+	
+	/* Should be always 0x0 or ERROR_MARKER for error */
+	packet->response_code = uint1korr(p);
+	p++;
+	BAIL_IF_NO_MORE_DATA;
+
+	if (ERROR_MARKER == packet->response_code) {
+		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
+										 packet->error, sizeof(packet->error),
+										 &packet->error_no, packet->sqlstate
+										 TSRMLS_CC);
+		DBG_RETURN(PASS);
+	}
+	if (0xFE == packet->response_code) {
+		/* Authentication Switch Response */
+		if (packet->header.size > (size_t) (p - buf)) {
+			packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
+			packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
+			p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+
+			packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
+			if (packet->new_auth_protocol_data_len) {
+				packet->new_auth_protocol_data = mnd_emalloc(packet->new_auth_protocol_data_len);
+				memcpy(packet->new_auth_protocol_data, p, packet->new_auth_protocol_data_len);
+			}
+			DBG_INF_FMT("The server requested switching auth plugin to : %s", packet->new_auth_protocol);
+			DBG_INF_FMT("Server salt : [%*s]", packet->new_auth_protocol_data_len, packet->new_auth_protocol_data);
+		}
+	} else {
+		/* Everything was fine! */
+		packet->affected_rows  = php_mysqlnd_net_field_length_ll(&p);
+		BAIL_IF_NO_MORE_DATA;
+
+		packet->last_insert_id = php_mysqlnd_net_field_length_ll(&p);
+		BAIL_IF_NO_MORE_DATA;
+
+		packet->server_status = uint2korr(p);
+		p+= 2;
+		BAIL_IF_NO_MORE_DATA;
+
+		packet->warning_count = uint2korr(p);
+		p+= 2;
+		BAIL_IF_NO_MORE_DATA;
+
+		/* There is a message */
+		if (packet->header.size > (size_t) (p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
+			packet->message_len = MIN(i, buf_len - (p - begin));
+			packet->message = mnd_pestrndup((char *)p, packet->message_len, FALSE);
+		} else {
+			packet->message = NULL;
+			packet->message_len = 0;
+		}
+
+		DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%ld server_status=%u warnings=%u",
+					packet->affected_rows, packet->last_insert_id, packet->server_status,
+					packet->warning_count);
+	}
+
+	DBG_RETURN(PASS);
+premature_end:
+	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTH_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_auth_response_free_mem */
+static void
+php_mysqlnd_auth_response_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
+{
+	MYSQLND_PACKET_AUTH_RESPONSE * p = (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
+	if (p->message) {
+		mnd_efree(p->message);
+		p->message = NULL;
+	}
+	if (p->new_auth_protocol) {
+		mnd_efree(p->new_auth_protocol);
+		p->new_auth_protocol = NULL;
+	}
+	p->new_auth_protocol_len = 0;
+
+	if (p->new_auth_protocol_data) {
+		mnd_efree(p->new_auth_protocol_data);
+		p->new_auth_protocol_data = NULL;
+	}
+	p->new_auth_protocol_data_len = 0;
+
+	if (!stack_allocation) {
+		mnd_pefree(p, p->header.persistent);
+	}
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_change_auth_response_write */
+static
+size_t php_mysqlnd_change_auth_response_write(void *_packet, MYSQLND * conn TSRMLS_DC)
+{
+	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *packet= (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
+	zend_uchar * buffer = conn->net->cmd_buffer.length >= packet->auth_data_len? conn->net->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
+
+	DBG_ENTER("php_mysqlnd_change_auth_response_write");
+
+	if (packet->auth_data_len) {
+		memcpy(p, packet->auth_data, packet->auth_data_len);
+		p+= packet->auth_data_len;
+	}
+
+	{
+		size_t ret = conn->net->m.send(conn, buffer, p - buffer - MYSQLND_HEADER_SIZE TSRMLS_CC);
+		if (buffer != conn->net->cmd_buffer.buffer) {
+			mnd_efree(buffer);
+		}
+		DBG_RETURN(ret);
+	}
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_change_auth_response_free_mem */
+static
+void php_mysqlnd_change_auth_response_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
+{
+	if (!stack_allocation) {
+		MYSQLND_PACKET_CHANGE_AUTH_RESPONSE * p = (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
 		mnd_pefree(p, p->header.persistent);
 	}
 }
@@ -791,7 +911,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 #endif
 
 	if (!packet->argument || !packet->arg_len) {
-		char buffer[MYSQLND_HEADER_SIZE + 1];
+		zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 
 		int1store(buffer + MYSQLND_HEADER_SIZE, packet->command);
 		written = conn->net->m.send(conn, buffer, 1 TSRMLS_CC);
@@ -809,7 +929,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 		memcpy(p, packet->argument, packet->arg_len);
 
-		ret = conn->net->m.send(conn, (char *)tmp, tmp_len - MYSQLND_HEADER_SIZE TSRMLS_CC);
+		ret = conn->net->m.send(conn, tmp, tmp_len - MYSQLND_HEADER_SIZE TSRMLS_CC);
 		if (tmp != net->cmd_buffer.buffer) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
@@ -1875,7 +1995,7 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	*/
 
 	/* Should be always 0x0 or ERROR_MARKER for error */
-	packet->field_count= uint1korr(p);
+	packet->response_code = uint1korr(p);
 	p++;
 
 	if (packet->header.size == 1 && buf[0] == EODATA_MARKER && packet->server_capabilities & CLIENT_SECURE_CONNECTION) {
@@ -1884,7 +2004,7 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		DBG_RETURN(FAIL);
 	}
 
-	if (ERROR_MARKER == packet->field_count) {
+	if (ERROR_MARKER == packet->response_code) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error,
 										 sizeof(packet->error_info.error),
@@ -1893,6 +2013,18 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 										 TSRMLS_CC);
 	}
 	BAIL_IF_NO_MORE_DATA;
+	if (packet->response_code == 0xFE && packet->header.size > (size_t) (p - buf)) {
+		packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
+		packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
+		p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+		packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
+		if (packet->new_auth_protocol_data_len) {
+			packet->new_auth_protocol_data = mnd_emalloc(packet->new_auth_protocol_data_len);
+			memcpy(packet->new_auth_protocol_data, p, packet->new_auth_protocol_data_len);
+		}
+		DBG_INF_FMT("The server requested switching auth plugin to : %s", packet->new_auth_protocol);
+		DBG_INF_FMT("Server salt : [%*s]", packet->new_auth_protocol_data_len, packet->new_auth_protocol_data);
+	}
 
 	DBG_RETURN(PASS);
 premature_end:
@@ -1908,8 +2040,22 @@ premature_end:
 static void
 php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool stack_allocation TSRMLS_DC)
 {
+	MYSQLND_PACKET_CHG_USER_RESPONSE * p = (MYSQLND_PACKET_CHG_USER_RESPONSE *) _packet;
+
+	if (p->new_auth_protocol) {
+		mnd_efree(p->new_auth_protocol);
+		p->new_auth_protocol = NULL;
+	}
+	p->new_auth_protocol_len = 0;
+
+	if (p->new_auth_protocol_data) {
+		mnd_efree(p->new_auth_protocol_data);
+		p->new_auth_protocol_data = NULL;
+	}
+	p->new_auth_protocol_data_len = 0;
+
 	if (!stack_allocation) {
-		mnd_pefree(_packet, ((MYSQLND_PACKET_CHG_USER_RESPONSE *)_packet)->header.persistent);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1931,6 +2077,18 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 		php_mysqlnd_auth_write,
 		php_mysqlnd_auth_free_mem,
 	}, /* PROT_AUTH_PACKET */
+	{
+		sizeof(MYSQLND_PACKET_AUTH_RESPONSE),
+		php_mysqlnd_auth_response_read, /* read */
+		NULL, /* write */
+		php_mysqlnd_auth_response_free_mem,
+	}, /* PROT_AUTH_RESP_PACKET */
+	{
+		sizeof(MYSQLND_PACKET_CHANGE_AUTH_RESPONSE),
+		NULL, /* read */
+		php_mysqlnd_change_auth_response_write, /* write */
+		php_mysqlnd_change_auth_response_free_mem,
+	}, /* PROT_CHANGE_AUTH_RESP_PACKET */
 	{
 		sizeof(MYSQLND_PACKET_OK),
 		php_mysqlnd_ok_read, /* read */
@@ -2012,6 +2170,36 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const proto
 	DBG_ENTER("mysqlnd_protocol::get_auth_packet");
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_AUTH_PACKET];
+		packet->header.persistent = persistent;
+	}
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_auth_response_packet */
+static struct st_mysqlnd_packet_auth_response *
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_mysqlnd_packet_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_RESP_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_auth_response_packet");
+	if (packet) {
+		packet->header.m = &packet_methods[PROT_AUTH_RESP_PACKET];
+		packet->header.persistent = persistent;
+	}
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_change_auth_response_packet */
+static struct st_mysqlnd_packet_change_auth_response *
+MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_mysqlnd_packet_change_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_CHANGE_AUTH_RESP_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_change_auth_response_packet");
+	if (packet) {
+		packet->header.m = &packet_methods[PROT_CHANGE_AUTH_RESP_PACKET];
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2158,6 +2346,8 @@ static
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol)
 	MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_command_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet),
