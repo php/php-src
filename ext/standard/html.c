@@ -367,6 +367,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	int i;
 	enum entity_charset charset = cs_utf_8;
 	int len = 0;
+	const zend_encoding *zenc;
 
 	/* Default is now UTF-8 */
 	if (charset_hint == NULL)
@@ -376,9 +377,20 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 		goto det_charset;
 	}
 
-	charset_hint = (char*)zend_multibyte_get_internal_encoding(TSRMLS_C);
-	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-		goto det_charset;
+	zenc = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	if (zenc != NULL) {
+		charset_hint = zend_multibyte_get_encoding_name(zenc);
+		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
+			if ((len == 4) /* sizeof (none|auto|pass) */ &&
+					(!memcmp("pass", charset_hint, 4) ||
+					 !memcmp("auto", charset_hint, 4) ||
+					 !memcmp("auto", charset_hint, 4))) {
+				charset_hint = NULL;
+				len = 0;
+			} else {
+				goto det_charset;
+			}
+		}
 	}
 
 	charset_hint = SG(default_charset);
