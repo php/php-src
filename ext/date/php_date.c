@@ -897,7 +897,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 				}
 				
 				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.DaylightBias) * -60, 1);
-				if (tzid == NULL) {
+				if (! tzid) {
 					tzid = "UTC";
 				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/DST' instead", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
