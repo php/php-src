@@ -148,6 +148,9 @@ UPGRADE NOTES - PHP X.Y
   behavior follows the recommendations of Unicode Technical Report #36.
 - htmlspecialchars_decode/html_entity_decode now decode &apos; if the document
   type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
+- Charset detection with $charset == '' no longer turns to mbstring's
+  internal encoding defined through mb_internal_encoding(). Only the encoding
+  defined through the ini setting mbstring.internal_encoding is considered.
 - number_format() no longer truncates multibyte decimal points and thousand
   separators to the first byte.
 - The third parameter ($matches) to preg_match_all() is now optional. If
