@@ -48,6 +48,10 @@
   . Fixed bug #47435 (FILTER_FLAG_NO_RES_RANGE don't work with ipv6).
     (Ilia, valli at icsurselva dot ch)
 
+- Gettext
+  . Fixed bug #53837 (_() crashes on Windows when no LANG or LANGUAGE 
+    environment variable are set). (Pierre)
+
 - IMAP extension:
   . Implemented FR #53812 (get MIME headers of the part of the email). (Stas)
   . Fixed bug #53377 (imap_mime_header_decode() doesn't ignore \t during long
