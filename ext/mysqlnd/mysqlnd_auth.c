@@ -141,7 +141,9 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 	}
 
 	SET_NEW_MESSAGE(conn->last_message, conn->last_message_len, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
-	conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+	if (use_full_blown_auth_packet == TRUE) {
+		conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+	}
 	ret = PASS;
 end:
 	PACKET_FREE(change_auth_resp_packet);
