@@ -1252,7 +1252,7 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
   				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_9);
   				break;
   			default:
-  				encoding = NULL;
+  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_1);
   				break;
   		}
   	}
