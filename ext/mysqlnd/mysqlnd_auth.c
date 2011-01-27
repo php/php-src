@@ -110,6 +110,9 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 			goto end;
 		}
 	}
+	if (use_full_blown_auth_packet == TRUE) {
+		conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+	}
 
 	if (FAIL == PACKET_READ(auth_resp_packet, conn) || auth_resp_packet->response_code >= 0xFE) {
 		if (auth_resp_packet->response_code == 0xFE) {
@@ -141,9 +144,6 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 	}
 
 	SET_NEW_MESSAGE(conn->last_message, conn->last_message_len, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
-	if (use_full_blown_auth_packet == TRUE) {
-		conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
-	}
 	ret = PASS;
 end:
 	PACKET_FREE(change_auth_resp_packet);
