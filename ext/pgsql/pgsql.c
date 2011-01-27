@@ -4782,10 +4782,24 @@ PHP_FUNCTION(pg_get_notify)
 	if (result_type & PGSQL_NUM) {
 		add_index_string(return_value, 0, pgsql_notify->relname, 1);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
+#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
+		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+#else 
+		if (atof(PG_VERSION) >= 9.0) {
+#endif 
+			add_index_string(return_value, 2, pgsql_notify->extra, 1);
+		}
 	}
 	if (result_type & PGSQL_ASSOC) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
+		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+#else 
+		if (atof(PG_VERSION) >= 9.0) {
+#endif 
+			add_assoc_string(return_value, "payload", pgsql_notify->extra, 1);
+		}
 	}
 	PQfreemem(pgsql_notify);
 }

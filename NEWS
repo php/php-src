@@ -174,6 +174,10 @@ PHP                                                                        NEWS
   . Added nextRowset support.
   . Fixed bug #50755 (PDO DBLIB Fails with OOM).
 
+- Improved PostgreSQL extension:
+  . Added support for "extra" parameter for PGNotify().
+    (r dot i dot k at free dot fr, Ilia)
+
 - Improved Reflection extension: (Johannes)
   . Added ReflectionExtension::isTemporary() and
     ReflectionExtension::isPersistent() methods.
