@@ -3963,6 +3963,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 			} else {
 				prop_value = ce->traits[i]->default_properties_table[property_info->offset];
 			}
+			Z_ADDREF_P(prop_value);
 
 			zend_declare_property_ex(ce, prop_name, prop_name_length, 
 									 prop_value, property_info->flags, 
