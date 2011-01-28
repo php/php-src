@@ -138,14 +138,14 @@
 
 - Zip extension:
   . Added the filename into the return value of stream_get_meta_data(). (Hannes)
+  . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
+    (Richard)
   . Fixed bug #53568 (swapped memset arguments in struct initialization).
     (crrodriguez at opensuse dot org)
   . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams).
     (Hannes)
   . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
     gmail dot com, Gustavo)
-  . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
-    (Richard)
   . Fixed bug #53854 (Missing constants for compression type). (Richard, Adam)
 
 06 Jan 2011, PHP 5.3.5
