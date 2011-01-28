@@ -641,6 +641,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 
 	DBG_ENTER("mysqlnd_conn::connect");
 
+	SET_EMPTY_ERROR(conn->error_info);
+	SET_ERROR_AFF_ROWS(conn);
+
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
