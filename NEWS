@@ -144,7 +144,7 @@
     (Hannes)
   . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
     gmail dot com, Gustavo)
-  . Fixed bzg #53166 (Missing parameters in docs and reflection definition). 
+  . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
     (Richard)
 
 06 Jan 2011, PHP 5.3.5
