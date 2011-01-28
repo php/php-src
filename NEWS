@@ -14,6 +14,8 @@
     (Stas)
 
 - Core:
+  . Added ability to connect to HTTPS sites through proxy with basic
+    authentication using stream_context/http/header/Proxy-Authorization (Dmitry)
   . Fixed bug #53577 (Regression introduced in 5.3.4 in open_basedir with a
     trailing forward slash). (lekensteyn at gmail dot com, Pierre)
   . Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)
