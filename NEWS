@@ -1,6 +1,9 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.2.18
+- Added ability to connect to HTTPS sites through proxy with basic
+  authentication using stream_context/http/header/Proxy-Authorization (Dmitry)
+
 - Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)
 - Fixed bug #53568 (swapped memset arguments in struct initialization).
   (crrodriguez at opensuse dot org)
