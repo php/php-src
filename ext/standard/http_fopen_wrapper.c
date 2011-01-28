@@ -202,7 +202,70 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		smart_str_appends(&header, resource->host);
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
-		smart_str_appendl(&header, " HTTP/1.0\r\n\r\n", sizeof(" HTTP/1.0\r\n\r\n")-1);
+		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
+
+	    /* check if we have Proxy-Authorization header */
+		if (context && php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS) {
+			char *s, *p;
+
+			if (Z_TYPE_PP(tmpzval) == IS_ARRAY) {
+				HashPosition pos;
+				zval **tmpheader = NULL;
+
+				for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmpzval), &pos);
+					SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmpzval), (void *)&tmpheader, &pos);
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(tmpzval), &pos)) {
+					if (Z_TYPE_PP(tmpheader) == IS_STRING) {
+						s = Z_STRVAL_PP(tmpheader);
+						do {
+							while (*s == ' ' || *s == '\t') s++;
+							p = s;
+							while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
+							if (*p == ':') {
+								p++;
+								if (p - s == sizeof("Proxy-Authorization:") - 1 &&
+								    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
+								        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+									while (*p != 0 && *p != '\r' && *p !='\n') p++;
+									smart_str_appendl(&header, s, p - s);
+									smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+									goto finish;
+								} else {
+									while (*p != 0 && *p != '\r' && *p !='\n') p++;
+								}
+							}
+							s = p;
+							while (*s == '\r' || *s == '\n') s++;
+						} while (*s != 0);
+					}
+				}
+			} else if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval)) {
+				s = Z_STRVAL_PP(tmpzval);
+				do {
+					while (*s == ' ' || *s == '\t') s++;
+					p = s;
+					while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
+					if (*p == ':') {
+						p++;
+						if (p - s == sizeof("Proxy-Authorization:") - 1 &&
+						    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
+						        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+							while (*p != 0 && *p != '\r' && *p !='\n') p++;
+							smart_str_appendl(&header, s, p - s);
+							smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+							goto finish;
+						} else {
+							while (*p != 0 && *p != '\r' && *p !='\n') p++;
+						}
+					}
+					s = p;
+					while (*s == '\r' || *s == '\n') s++;
+				} while (*s != 0);
+			}
+		}
+finish:
+		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+
 		if (php_stream_write(stream, header.c, header.len) != header.len) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
@@ -359,9 +422,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
 		}
 		if (tmp && strlen(tmp) > 0) {
+			char *s;
+
 			if (!header_init) { /* Remove post headers for redirects */
 				int l = strlen(tmp);
-				char *s, *s2, *tmp_c = estrdup(tmp);
+				char *s2, *tmp_c = estrdup(tmp);
 				
 				php_strtolower(tmp_c, l);
 				if ((s = strstr(tmp_c, "content-length:"))) {
@@ -382,6 +447,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 						tmp[s - tmp_c] = '\0';
 					}
 				}
+
 				efree(tmp_c);
 				tmp_c = php_trim(tmp, strlen(tmp), NULL, 0, NULL, 3 TSRMLS_CC);
 				efree(tmp);
@@ -392,24 +458,58 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 			/* Make lowercase for easy comparison against 'standard' headers */
 			php_strtolower(tmp, strlen(tmp));
-			if (strstr(tmp, "user-agent:")) {
+			if ((s = strstr(tmp, "user-agent:")) && 
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_USER_AGENT;
 			}
-			if (strstr(tmp, "host:")) {
+			if ((s = strstr(tmp, "host:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_HOST;
 			}
-			if (strstr(tmp, "from:")) {
+			if ((s = strstr(tmp, "from:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_FROM;
 				}
-			if (strstr(tmp, "authorization:")) {
+			if ((s = strstr(tmp, "authorization:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_AUTH;
 			}
-			if (strstr(tmp, "content-length:")) {
+			if ((s = strstr(tmp, "content-length:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
 			}
-			if (strstr(tmp, "content-type:")) {
+			if ((s = strstr(tmp, "content-type:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_TYPE;
 			}
+			/* remove Proxy-Authorization header */
+			if (use_proxy && use_ssl && (s = strstr(tmp, "proxy-authorization:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
+				char *p = s + sizeof("proxy-authorization:") - 1;
+				
+				while (s > tmp && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
+				while (*p != 0 && *p != '\r' && *p != '\n') p++;
+				while (*p == '\r' || *p == '\n') p++;
+				if (*p == 0) {
+					if (s == tmp) {
+						efree(user_headers);
+						user_headers = NULL;
+					} else {
+						while (s > tmp && (*(s-1) == '\r' || *(s-1) == '\n')) s--;
+						user_headers[s - tmp] = 0;
+					}
+				} else {
+					memmove(user_headers + (s - tmp), user_headers + (p - tmp), strlen(p) + 1);
+				}
+			}
+
 		}
 		if (tmp) {
 			efree(tmp);
