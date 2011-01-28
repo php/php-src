@@ -78,18 +78,23 @@ mysqli.reconnect=0
 			mysqli_connect_errno(), mysqli_connect_error());
 
 	$thread_id_timeout = mysqli_thread_id($link);
+	/*
+	  Don't test for the mysqli_query() return value here.
+	  It is undefined if the server replies to the query and how.
+	  For example, it seems that on Linux when connecting to MySQL 5.1,
+	  the server always manages to send a full a reply. Whereas MySQl 5.5
+	  may not. The behaviour is undefined. Any return value is fine.
+	*/
 	if ($IS_MYSQLND) {
-		/* 
+		/*
 		mysqlnd is a bit more verbose than libmysql. mysqlnd should print:
 		Warning: mysqli_query(): MySQL server has gone away in %s on line %d
 
 		Warning: mysqli_query(): Error reading result set's header in %d on line %d
 		*/
-		if (!@mysqli_query($link, sprintf('KILL %d', $thread_id_timeout)))
-			printf("[013] Cannot KILL timeout connection, [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
+		@mysqli_query($link, sprintf('KILL %d', $thread_id_timeout));
 	} else {
-		if (!mysqli_query($link, sprintf('KILL %d', $thread_id_timeout)))
-			printf("[013] Cannot KILL timeout connection, [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
+		mysqli_query($link, sprintf('KILL %d', $thread_id_timeout));
 	}
 	// Give the server a second to really kill the other thread...
 	sleep(1);
