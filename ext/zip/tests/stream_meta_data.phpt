@@ -64,7 +64,7 @@ array(9) {
   ["seekable"]=>
   bool(false)
   ["uri"]=>
-  string(99) "zip:///%stest_with_comment.zip#foo"
+  string(%d) "zip:///%stest_with_comment.zip#foo"
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
