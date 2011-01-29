@@ -371,12 +371,7 @@ UPGRADE NOTES - PHP X.Y
 
      i. New class constants
 
-       - ZipArchive::CM_BZIP2
-       - ZipArchive::CM_LZ77
-       - ZipArchive::CM_LZMA
-       - ZipArchive::CM_PPMD
-       - ZipArchive::CM_TERSE
-       - ZipArchive::CM_WAVPACK
+       - 
 
      j. New Hash algorithms
 
