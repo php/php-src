@@ -26,6 +26,7 @@ void fpm_request_accepting() /* {{{ */
 	slot = fpm_shm_slots_acquire(0, 0);
 	slot->request_stage = FPM_REQUEST_ACCEPTING;
 	fpm_clock_get(&slot->tv);
+	memset(slot->request_uri, 0, sizeof(slot->request_uri));
 	memset(slot->request_method, 0, sizeof(slot->request_method));
 	slot->content_length = 0;
 	memset(slot->script_filename, 0, sizeof(slot->script_filename));
@@ -51,12 +52,17 @@ void fpm_request_info() /* {{{ */
 {
 	TSRMLS_FETCH();
 	struct fpm_shm_slot_s *slot;
+	char *request_uri = fpm_php_request_uri(TSRMLS_C);
 	char *request_method = fpm_php_request_method(TSRMLS_C);
 	char *script_filename = fpm_php_script_filename(TSRMLS_C);
 
 	slot = fpm_shm_slots_acquire(0, 0);
 	slot->request_stage = FPM_REQUEST_INFO;
 	fpm_clock_get(&slot->tv);
+
+	if (request_uri) {
+		cpystrn(slot->request_uri, request_uri, sizeof(slot->request_uri));
+	}
 
 	if (request_method) {
 		cpystrn(slot->request_method, request_method, sizeof(slot->request_method));
@@ -136,8 +142,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 			fpm_trace_signal(child->pid);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' executing too slow (%d.%06d sec), logging",
-				child->wp->config->name, (int) child->pid, purified_script_filename, (int) tv.tv_sec, (int) tv.tv_usec);
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") executing too slow (%d.%06d sec), logging",
+				child->wp->config->name, (int) child->pid, purified_script_filename, slot_c.request_method, slot_c.request_uri,
+				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 		else
 #endif
