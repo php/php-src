@@ -43,8 +43,11 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /*
 	struct tm t;
 	size_t len;
 
-	len = strftime(timebuf, timebuf_len, "%b %d %H:%M:%S", localtime_r((const time_t *) &tv->tv_sec, &t));
-	len += snprintf(timebuf + len, timebuf_len - len, ".%06d", (int) tv->tv_usec);
+	len = strftime(timebuf, timebuf_len, "[%d-%b-%Y %H:%M:%S", localtime_r((const time_t *) &tv->tv_sec, &t));
+	if (zlog_level == ZLOG_DEBUG) {
+		len += snprintf(timebuf + len, timebuf_len - len, ".%06d", (int) tv->tv_usec);
+	}
+	len += snprintf(timebuf + len, timebuf_len - len, "]");
 	return len;
 }
 /* }}} */
@@ -87,9 +90,9 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	gettimeofday(&tv, 0);
 	len = zlog_print_time(&tv, buf, buf_size);
 	if (zlog_level == ZLOG_DEBUG) {
-		len += snprintf(buf + len, buf_size - len, " [%s] pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+		len += snprintf(buf + len, buf_size - len, " %s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
 	} else {
-		len += snprintf(buf + len, buf_size - len, " [%s] ", level_names[flags & ZLOG_LEVEL_MASK]);
+		len += snprintf(buf + len, buf_size - len, " %s: ", level_names[flags & ZLOG_LEVEL_MASK]);
 	}
 
 	if (len > buf_size - 1) {
