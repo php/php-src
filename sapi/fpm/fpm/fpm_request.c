@@ -152,8 +152,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 			str_purify_filename(purified_script_filename, slot_c.script_filename, sizeof(slot_c.script_filename));
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' execution timed out (%d.%06d sec), terminating",
-				child->wp->config->name, (int) child->pid, purified_script_filename, (int) tv.tv_sec, (int) tv.tv_usec);
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") execution timed out (%d.%06d sec), terminating",
+				child->wp->config->name, (int) child->pid, purified_script_filename, slot_c.request_method, slot_c.request_uri,
+				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 	}
 }
