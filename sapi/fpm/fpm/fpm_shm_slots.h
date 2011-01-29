@@ -19,6 +19,7 @@ struct fpm_shm_slot_s {
 	enum fpm_request_stage_e request_stage;
 	struct timeval accepted;
 	struct timeval tv;
+	char request_uri[128];
 	char request_method[16];
 	size_t content_length; /* used with POST only */
 	char script_filename[256];

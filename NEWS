@@ -110,6 +110,7 @@
   . Enforce security in the fastcgi protocol parsing.
     (ef-lists at email dotde)
   . Fixed bug #53777 (php-fpm log format now match php_error log format). (fat)
+  . Fixed bug #53434 (php-fpm slowlog now also logs the original request). (fat)
 
 - Readline extension:
   . Fixed bug #53630 (Fixed parameter handling inside readline() function).

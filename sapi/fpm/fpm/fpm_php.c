@@ -160,6 +160,12 @@ char *fpm_php_script_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+char *fpm_php_request_uri(TSRMLS_D) /* {{{ */
+{
+	return (char *) SG(request_info).request_uri;
+}
+/* }}} */
+
 char *fpm_php_request_method(TSRMLS_D) /* {{{ */
 {
 	return (char *) SG(request_info).request_method;
