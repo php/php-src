@@ -60,6 +60,10 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	return -1;
     }
 
+    if((flags & ZIP_FL_UNCHANGED)  && !za->cdir) {
+    	return -1;
+    }
+
     cmp = (flags & ZIP_FL_NOCASE) ? strcmpi : strcmp;
 
     n = (flags & ZIP_FL_UNCHANGED) ? za->cdir->nentry : za->nentry;
