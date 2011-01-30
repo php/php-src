@@ -41,6 +41,8 @@
   . Fixed bug #52808 (Segfault when specifying interval as two dates). (Stas)
   . Fixed bug #52738 (Can't use new properties in class extended from 
     DateInterval). (Stas)
+  . Fixed bug #52290 (setDate, setISODate, setTime works wrong when DateTime
+    created from timestamp). (Stas)
   . Fixed bug #52063 (DateTime constructor's second argument doesn't have a 
     null default value). (Gustavo, Stas)
 
