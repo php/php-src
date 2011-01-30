@@ -38,6 +38,7 @@
     no effect. (Derick)
   . Fixed bug #53729 (DatePeriod fails to initialize recurrences on 64bit
     big-endian systems). (Derick, rein@basefarm.no)
+  . Fixed bug #52808 (Segfault when specifying interval as two dates). (Stas)
   . Fixed bug #52738 (Can't use new properties in class extended from 
     DateInterval). (Stas)
   . Fixed bug #52063 (DateTime constructor's second argument doesn't have a 
