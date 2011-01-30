@@ -61,11 +61,11 @@ void fpm_request_info() /* {{{ */
 	fpm_clock_get(&slot->tv);
 
 	if (request_uri) {
-		cpystrn(slot->request_uri, request_uri, sizeof(slot->request_uri));
+		strlcpy(slot->request_uri, request_uri, sizeof(slot->request_uri));
 	}
 
 	if (request_method) {
-		cpystrn(slot->request_method, request_method, sizeof(slot->request_method));
+		strlcpy(slot->request_method, request_method, sizeof(slot->request_method));
 	}
 
 	slot->content_length = fpm_php_content_length(TSRMLS_C);
@@ -73,7 +73,7 @@ void fpm_request_info() /* {{{ */
 	/* if cgi.fix_pathinfo is set to "1" and script cannot be found (404)
 		the sapi_globals.request_info.path_translated is set to NULL */
 	if (script_filename) {
-		cpystrn(slot->script_filename, script_filename, sizeof(slot->script_filename));
+		strlcpy(slot->script_filename, script_filename, sizeof(slot->script_filename));
 	}
 
 	fpm_shm_slots_release(slot);

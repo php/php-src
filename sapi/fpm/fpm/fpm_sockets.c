@@ -286,7 +286,7 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	struct sockaddr_un sa_un;
 
 	memset(&sa_un, 0, sizeof(sa_un));
-	cpystrn(sa_un.sun_path, wp->config->listen_address, sizeof(sa_un.sun_path));
+	strlcpy(sa_un.sun_path, wp->config->listen_address, sizeof(sa_un.sun_path));
 	sa_un.sun_family = AF_UNIX;
 	return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_un, sizeof(struct sockaddr_un));
 }
