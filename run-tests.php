@@ -2143,7 +2143,7 @@ function settings2array($settings, &$ini_settings)
 
 		if (strpos($setting, '=') !== false) {
 			$setting = explode("=", $setting, 2);
-			$name = trim(strtolower($setting[0]));
+			$name = trim($setting[0]);
 			$value = trim($setting[1]);
 
 			if ($name == 'extension') {
