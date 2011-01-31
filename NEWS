@@ -8,9 +8,6 @@
 - Fixed bug #53568 (swapped memset arguments in struct initialization).
   (crrodriguez at opensuse dot org)
 
-- Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree correctly)
-  (Boris Lytochkin)
-
 06 Jan 2010, PHP 5.2.17
 - Fixed Bug #53632 (infinite loop with x87 fpu). (CVE-2010-4645) (Scott, 
   Rasmus)
