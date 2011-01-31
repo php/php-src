@@ -428,7 +428,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 
 	/* copy pass*/
 	if (passwd && passwd_len) {
-		ret = (zend_uchar*) strndup(passwd, passwd_len);
+		ret = (zend_uchar*) zend_strndup(passwd, passwd_len);
 	}
 	*auth_data_len = passwd_len;
 
