@@ -502,7 +502,7 @@ retry:
 					}
 				}	
 			} else {
-				if (st != SNMP_CMD_WALK || response->errstat != SNMP_ERR_NOSUCHNAME) {
+				if ((st != SNMP_CMD_WALK && st != SNMP_CMD_REALWALK) || response->errstat != SNMP_ERR_NOSUCHNAME) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in packet: %s", snmp_errstring(response->errstat));
 					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
 						for (count=1, vars = response->variables; vars && count != response->errindex;
