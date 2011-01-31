@@ -73,6 +73,8 @@
 - MySQL Improved extension:
   . Added 'db' and 'catalog' keys to the field fetching functions (FR #39847). 
     (Kalle)
+  . Fixed bug #53795 (Connect Error from MySqli (mysqlnd) when using SSL). 
+    (Kalle)
   . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 
     query). (Kalle, Andrey)
   . Fixed bug #53425 (mysqli_real_connect() ignores client flags when built to 
