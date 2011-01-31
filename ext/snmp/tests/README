@@ -1,0 +1,63 @@
+SNMP Tests
+----------
+
+To enable these tests, you must have :
+- PHP compiled with SNMP (--with-snmp)
+- an SNMP server running.
+
+
+** How to test **
+You need to give credentials with environment vars if default ones are not
+sutable (see snmp_include.inc for more info):
+SNMP_HOSTNAME : IP or IP:PORT to connect to
+SNMP_COMMUNITY : community name
+SNMP_COMMUNITY_WRITE : community used for write tests (snmpset()).
+SNMP_MIBDIR : Directory containing MIBS
+
+** Configuring the SNMPD server **
+
+On Linux/FreeBSD
+--------
+
+- Install package net-snmpd (name may differ based on your distribution)
+- Edit config file (by default this is /etc/snmp/snmpd.conf on Linux and
+  usr/local/etc/snmp/snmpd.conf on FreeBSD) and replace whole content 
+  with following lines:
+  
+###### Config file #####
+rocommunity public 127.0.0.1
+rwcommunity private 127.0.0.1
+
+Do not enable them - being set here they make appropriate OID switch into r/o
+#syslocation  "Somewhere in the world"
+#syscontact  "root"
+
+#SNMPv3 credentials
+rouser adminMD5
+rouser adminSHA
+rwuser adminMD5AES
+rouser adminMD5AES128
+rouser adminMD5DES
+createUser adminMD5 MD5 test1234
+createUser adminSHA SHA test1234
+createUser adminMD5AES MD5 test1234 AES test1234
+createUser adminMD5AES128 MD5 test1234 AES test1234
+createUser adminMD5DES MD5 test1234 DES test1234
+
+createUser noAuthUser
+authuser read noAuthUser noauth
+###### End #####
+
+Before launching daemon make sure that there is no file /var/net-snmp/snmpd.conf
+Delete it if exists. Ingoring to to so will fail SNMPv3 tests
+
+Make snmpd bind on localhost only. To do so, pass '127.0.0.1' into it's startup arguments
+(see /etc/init.d/snmpd on Linux and set snmpd_flags="127.0.0.1" in rc.conf in FreeBSD).
+Otherwise your SNMP daemon will answer SNMPv3 messages from remote clients.
+
+- Launch snmpd (service snmpd start  or /etc/init.d/snmpd start)
+
+On Windows
+----------
+
+[to be completed]
