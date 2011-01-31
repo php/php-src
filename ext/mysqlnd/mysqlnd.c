@@ -588,10 +588,10 @@ mysqlnd_connect_run_authentication(
 				free(scrambled_data);
 
 				DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-				if (requested_protocol) {
+				if (requested_protocol && switch_to_auth_protocol) {
 					mnd_efree(requested_protocol);
+					requested_protocol = switch_to_auth_protocol;
 				}
-				requested_protocol = switch_to_auth_protocol;
 
 				if (plugin_data) {
 					mnd_efree(plugin_data);
@@ -606,6 +606,7 @@ mysqlnd_connect_run_authentication(
 		}
 		
 		if (ret == PASS) {
+			DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
 			conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
 		}
 
