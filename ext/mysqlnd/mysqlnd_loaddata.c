@@ -212,7 +212,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE, buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
-		if ((ret = conn->net->m.send(conn, buf, bufsize TSRMLS_CC)) < 0) {
+		if ((ret = conn->net->m.send(conn, buf, bufsize TSRMLS_CC)) == 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
@@ -220,7 +220,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	}
 
 	/* send empty packet for eof */
-	if ((ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC)) < 0) {
+	if ((ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC)) == 0) {
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		goto infile_error;
 	}
