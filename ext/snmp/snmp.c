@@ -506,6 +506,9 @@ static void php_snmp_object_free_storage(void *object TSRMLS_DC)
 
 static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
+#if PHP_VERSION_ID < 503099
+	zval *tmp;
+#endif
 	zend_object_value retval;
 	php_snmp_object *intern;
 
@@ -514,7 +517,11 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 	memset(&intern->zo, 0, sizeof(php_snmp_object));
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
+#if PHP_VERSION_ID < 503099
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+#else
 	object_properties_init(&intern->zo, class_type);
+#endif
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) php_snmp_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &php_snmp_object_handlers;
@@ -1795,9 +1802,13 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 }
 /* }}} */
 
-/* {{{ php_snmp_read_property(zval *object, zval *member, int type)
+/* {{{ php_snmp_read_property(zval *object, zval *member, int type[, const zend_literal *key])
    Generic object property reader */
+#if PHP_VERSION_ID < 503099
+zval *php_snmp_read_property(zval *object, zval *member, int type TSRMLS_DC)
+#else
 zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	zval tmp_member;
 	zval *retval;
@@ -1827,7 +1838,11 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_li
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 503099
+		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+#else
 		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
+#endif
 	}
 
 	if (member == &tmp_member) {
@@ -1837,9 +1852,13 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_li
 }
 /* }}} */
 
-/* {{{ php_snmp_write_property(zval *object, zval *member, zval *value)
+/* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
    Generic object property writer */
+#if PHP_VERSION_ID < 503099
+void php_snmp_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+#else
 void php_snmp_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	zval tmp_member;
 	php_snmp_object *obj;
@@ -1866,7 +1885,11 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, const zend
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 503099
+		std_hnd->write_property(object, member, value TSRMLS_CC);
+#else
 		std_hnd->write_property(object, member, value, key TSRMLS_CC);
+#endif
 	}
 
 	if (member == &tmp_member) {
@@ -1875,9 +1898,13 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, const zend
 }
 /* }}} */
 
-/* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists)
+/* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists[, const zend_literal *key])
    Generic object property checker */
+#if PHP_VERSION_ID < 503099
+static int php_snmp_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC)
+#else
 static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	php_snmp_object *obj = (php_snmp_object *)zend_objects_get_address(object TSRMLS_CC);
 	php_snmp_prop_handler *hnd;
@@ -1889,7 +1916,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 				ret = 1;
 				break;
 			case 0: {
+#if PHP_VERSION_ID < 503099
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+#else
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
+#endif
 				if (value != EG(uninitialized_zval_ptr)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1:0;
 					/* refcount is 0 */
@@ -1899,7 +1930,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 				break;
 			}
 			default: {
+#if PHP_VERSION_ID < 503099
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+#else
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
+#endif
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
 					ret = Z_BVAL_P(value)? 1:0;
@@ -1912,7 +1947,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 503099
+		ret = std_hnd->has_property(object, member, has_set_exists TSRMLS_CC);
+#else
 		ret = std_hnd->has_property(object, member, has_set_exists, key TSRMLS_CC);
+#endif
 	}
 	return ret;
 }
