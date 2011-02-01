@@ -140,6 +140,8 @@
 
 - Streams:
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
+  . Fixed bug #53903 (userspace stream stat callback does not separate the
+    elements of the returned array before converting them). (Gustavo)
 
 - XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
