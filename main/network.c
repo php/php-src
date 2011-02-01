@@ -1133,7 +1133,8 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 {
 	fd_set rset, wset, eset;
 	php_socket_t max_fd = SOCK_ERR;
-	unsigned int i, n;
+	unsigned int i;
+	int n;
 	struct timeval tv;
 
 	/* check the highest numbered descriptor */

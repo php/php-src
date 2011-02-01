@@ -360,7 +360,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
 
-		if (stream->readpos + consumed > (uint)stream->writepos || consumed < 0) {
+		if (stream->readpos + consumed > (uint)stream->writepos) {
 			/* No behaving filter should cause this. */
 			status = PSFS_ERR_FATAL;
 		}
