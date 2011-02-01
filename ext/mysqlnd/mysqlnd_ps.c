@@ -1477,7 +1477,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 		DBG_RETURN(FAIL);
 	}
 
-	if (param_no < 0 || param_no >= stmt->param_count) {
+	if (param_no >= stmt->param_count) {
 		SET_STMT_ERROR(stmt, CR_INVALID_PARAMETER_NO, UNKNOWN_SQLSTATE, "Invalid parameter number");
 		DBG_ERR("invalid param_no");
 		DBG_RETURN(FAIL);
@@ -1617,7 +1617,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		DBG_RETURN(FAIL);
 	}
 
-	if (param_no < 0 || param_no >= stmt->field_count) {
+	if (param_no >= stmt->field_count) {
 		SET_STMT_ERROR(stmt, CR_INVALID_PARAMETER_NO, UNKNOWN_SQLSTATE, "Invalid parameter number");
 		DBG_ERR("invalid param_no");
 		DBG_RETURN(FAIL);
