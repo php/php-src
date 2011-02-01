@@ -2379,12 +2379,12 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-    if (php_stream_stat_path_ex(pathto, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
-        ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
-        if (!ret) {
-            RETURN_FALSE;
-        }
-    }
+	if (php_stream_stat_path_ex(pathto, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
+			ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+			if (!ret) {
+					RETURN_FALSE;
+			}
+	}
 
 	ZIP_FROM_OBJECT(intern, this);
 	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
@@ -2419,21 +2419,21 @@ static ZIPARCHIVE_METHOD(extractTo)
 				break;
 		}
 	} else {
-        /* Extract all files */
-        int filecount = zip_get_num_files(intern);
+		/* Extract all files */
+		int filecount = zip_get_num_files(intern);
 
-        if (filecount == -1) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal archive");
-            RETURN_FALSE;
-        }
+		if (filecount == -1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal archive");
+				RETURN_FALSE;
+		}
 
-        for (i = 0; i < filecount; i++) {
+		for (i = 0; i < filecount; i++) {
 			char *file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
-            if (!php_zip_extract_file(intern, pathto, file, strlen(file) TSRMLS_CC)) {
-                RETURN_FALSE;
-            }
-        }
-    }
+			if (!php_zip_extract_file(intern, pathto, file, strlen(file) TSRMLS_CC)) {
+					RETURN_FALSE;
+			}
+		}
+	}
 	RETURN_TRUE;
 }
 /* }}} */
