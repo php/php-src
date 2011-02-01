@@ -31,5 +31,5 @@ phar://%sodt.odt%cmeta.xml
 phar://%sodt.odt%cmimetype
 phar://%sodt.odt%csettings.xml
 phar://%sodt.odt%cstyles.xml
-Cannot create phar '%sodt.odt', file extension (or combination) not recognised
+Cannot create phar '%sodt.odt', file extension (or combination) not recognised or the directory does not exist
 ===DONE===
