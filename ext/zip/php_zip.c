@@ -2418,21 +2418,21 @@ static ZIPARCHIVE_METHOD(extractTo)
 				break;
 		}
 	} else {
-        /* Extract all files */
-        int filecount = zip_get_num_files(intern);
+				/* Extract all files */
+				int filecount = zip_get_num_files(intern);
 
-        if (filecount == -1) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal archive");
-            RETURN_FALSE;
-        }
+				if (filecount == -1) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal archive");
+						RETURN_FALSE;
+				}
 
-        for (i = 0; i < filecount; i++) {
-			char *file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
-            if (!php_zip_extract_file(intern, pathto, file, strlen(file) TSRMLS_CC)) {
-                RETURN_FALSE;
-            }
-        }
-    }
+				for (i = 0; i < filecount; i++) {
+						char *file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
+						if (!php_zip_extract_file(intern, pathto, file, strlen(file) TSRMLS_CC)) {
+							RETURN_FALSE;
+						}
+				}
+		}
 	RETURN_TRUE;
 }
 /* }}} */
