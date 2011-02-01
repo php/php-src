@@ -1265,7 +1265,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 			if (ext_len == -2) {
 				spprintf(error, 0, "Cannot create a phar archive from a URL like \"%s\". Phar objects can only be created from local files", fname);
 			} else {
-				spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
+				spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist", fname);
 			}
 		}
 		return FAILURE;
