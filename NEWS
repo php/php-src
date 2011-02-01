@@ -158,6 +158,8 @@
   . Fixed bug #53854 (Missing constants for compression type). (Richard, Adam)
   . Fixed bug #53885 (ZipArchive segfault with FL_UNCHANGED on empty archive).
     (Stas, Maksymilian Arciemowicz).
+  . Fixed bug #49072 (feof never returns true for damaged file in zip).
+    (Gustavo, Richard Quadling)
 
 - Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree correctly)
   (Boris Lytochkin)
