@@ -869,6 +869,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 
 	len = stream->writepos - stream->readpos;
 
+	/* make sure the stream read buffer has maxlen bytes */
 	while (len < maxlen) {
 
 		size_t just_read;
@@ -879,6 +880,8 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		just_read = (stream->writepos - stream->readpos) - len;
 		len += just_read;
 
+		/* read operation have less data than request; assume the stream is
+		 * temporarily or permanently out of data */
 		if (just_read < toread) {
 			break;
 		}
@@ -889,6 +892,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	} else {
 		size_t seek_len;
 
+		/* set the maximum number of bytes we're allowed to read from buffer */
 		seek_len = stream->writepos - stream->readpos;
 		if (seek_len > maxlen) {
 			seek_len = maxlen;
@@ -901,12 +905,17 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		}
 
 		if (!e) {
+			/* return with error if the delimiter string was not found, we
+			 * could not completely fill the read buffer with maxlen bytes
+			 * and we don't know we've reached end of file. Added with
+			 * non-blocking streams in mind, where this situation is frequent */
 			if (seek_len < maxlen && !stream->eof) {
 				return NULL;
 			}
 			toread = maxlen;
 		} else {
 			toread = e - (char *) stream->readbuf - stream->readpos;
+			/* we found the delimiter, so advance the read pointer past it */
 			skip = 1;
 		}
 	}
@@ -918,17 +927,12 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	buf = emalloc(toread + 1);
 	*returned_len = php_stream_read(stream, buf, toread);
 
-	if (*returned_len >= 0) {
-		if (skip) {
-			stream->readpos += delim_len;
-			stream->position += delim_len;
-		}
-		buf[*returned_len] = '\0';
-		return buf;
-	} else {
-		efree(buf);
-		return NULL;
+	if (skip) {
+		stream->readpos += delim_len;
+		stream->position += delim_len;
 	}
+	buf[*returned_len] = '\0';
+	return buf;
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
