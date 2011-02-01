@@ -507,7 +507,6 @@ static void php_snmp_object_free_storage(void *object TSRMLS_DC)
 
 static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
 	zend_object_value retval;
 	php_snmp_object *intern;
 
@@ -516,9 +515,9 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 	memset(&intern->zo, 0, sizeof(php_snmp_object));
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
-	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) php_snmp_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) php_snmp_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &php_snmp_object_handlers;
 
 	return retval;
@@ -894,7 +893,7 @@ retry:
 * OID parser (and type, value for SNMP_SET command)
 */
 
-static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, zval **type, zval **value)
+static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, zval **type, zval **value TSRMLS_DC)
 {
 	char *pptr;
 	HashPosition pos_oid, pos_type, pos_value;
@@ -1010,7 +1009,7 @@ static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, z
 /* {{{ netsnmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using netsnmp_session_free() and efree()
 */
-static int netsnmp_session_init(php_snmp_session **session_p, int version, char *hostname, char *community, int timeout, int retries)
+static int netsnmp_session_init(php_snmp_session **session_p, int version, char *hostname, char *community, int timeout, int retries TSRMLS_DC)
 {
 	int remote_port = SNMP_PORT;
 	php_snmp_session *session;
@@ -1064,7 +1063,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 
 /* {{{ int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
    Set the security level in the snmpv3 session */
-static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level TSRMLS_DC)
+static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
 {
 	if (!strcasecmp(level, "noAuthNoPriv") || !strcasecmp(level, "nanp")) {
 		s->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -1090,7 +1089,7 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot 
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
 		s->securityAuthProtoLen = OIDSIZE(usmHMACSHA1AuthProtocol);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown authentication protocol '%s'", prot TSRMLS_DC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown authentication protocol '%s'", prot);
 		return (-1);
 	}
 	return (0);
@@ -1179,7 +1178,7 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 
 /* {{{ in netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID)
    Set context Engine Id in the snmpv3 session */
-static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID)
+static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID TSRMLS_DC)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
 	u_char	*ebuf = (u_char *) malloc(ebuf_len); /* memory freed by SNMP library, strdup NOT estrdup */
@@ -1201,7 +1200,7 @@ static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * 
 
 /* {{{ php_set_security(struct snmp_session *session, char *sec_level, char *auth_protocol, char *auth_passphrase, char *priv_protocol, char *priv_passphrase, char *contextName, char *contextEngineID)
    Set all snmpv3-related security options */
-static int netsnmp_session_set_security(struct snmp_session *session, char *sec_level, char *auth_protocol, char *auth_passphrase, char *priv_protocol, char *priv_passphrase, char *contextName, char *contextEngineID)
+static int netsnmp_session_set_security(struct snmp_session *session, char *sec_level, char *auth_protocol, char *auth_passphrase, char *priv_protocol, char *priv_passphrase, char *contextName, char *contextEngineID TSRMLS_DC)
 {
 
 	/* Setting the security level. */
@@ -1213,26 +1212,26 @@ static int netsnmp_session_set_security(struct snmp_session *session, char *sec_
 	if (session->securityLevel == SNMP_SEC_LEVEL_AUTHNOPRIV || session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
 		/* Setting the authentication protocol. */
-		if (netsnmp_session_set_auth_protocol(session, auth_protocol)) {
+		if (netsnmp_session_set_auth_protocol(session, auth_protocol TSRMLS_CC)) {
 			/* Warning message sent already, just bail out */
 			return (-1);
 		}
 
 		/* Setting the authentication passphrase. */
-		if (netsnmp_session_gen_auth_key(session, auth_passphrase)) {
+		if (netsnmp_session_gen_auth_key(session, auth_passphrase TSRMLS_CC)) {
 			/* Warning message sent already, just bail out */
 			return (-1);
 		}
 
 		if (session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 			/* Setting the security protocol. */
-			if (netsnmp_session_set_sec_protocol(session, priv_protocol)) {
+			if (netsnmp_session_set_sec_protocol(session, priv_protocol TSRMLS_CC)) {
 				/* Warning message sent already, just bail out */
 				return (-1);
 			}
 
 			/* Setting the security protocol passphrase. */
-			if (netsnmp_session_gen_sec_key(session, priv_passphrase)) {
+			if (netsnmp_session_gen_sec_key(session, priv_passphrase TSRMLS_CC)) {
 				/* Warning message sent already, just bail out */
 				return (-1);
 			}
@@ -1246,7 +1245,7 @@ static int netsnmp_session_set_security(struct snmp_session *session, char *sec_
 	}
 
 	/* Setting contextEngineIS if specified */
-	if (contextEngineID && strlen(contextEngineID) && netsnmp_session_set_contextEngineID(session, contextEngineID)) {
+	if (contextEngineID && strlen(contextEngineID) && netsnmp_session_set_contextEngineID(session, contextEngineID TSRMLS_CC)) {
 		/* Warning message sent already, just bail out */
 		return (-1);
 	}
@@ -1330,15 +1329,15 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		}
 	}
 
-	if (!php_snmp_parse_oid(st, &objid_set, oid, type, value)) {
+	if (!php_snmp_parse_oid(st, &objid_set, oid, type, value TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
 	if (session_less_mode) {
-		if (netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
+		if (netsnmp_session_init(&session, version, a1, a2, timeout, retries TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && netsnmp_session_set_security(session, a3 TSRMLS_CC, a4 TSRMLS_CC, a5 TSRMLS_CC, a6 TSRMLS_CC, a7 TSRMLS_CC, NULL, NULL)) {
+		if (version == SNMP_VERSION_3 && netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL TSRMLS_CC)) {
 			/* Warning message sent already, just bail out */
 			RETURN_FALSE;
 		}
@@ -1594,7 +1593,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%d'", method);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", method);
 			RETURN_FALSE;
 	}
 }
@@ -1676,7 +1675,7 @@ PHP_METHOD(snmp, open)
 			return;
 	}
 
-	if (netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
+	if (netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries TSRMLS_CC)) {
 		return;
 	}
 	snmp_object->valueretrieval = SNMP_G(valueretrieval);
@@ -1721,7 +1720,6 @@ PHP_METHOD(snmp, get)
    Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, getnext)
 {
-	zval *object = getThis();
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, (-1));
 }
 /* }}} */
@@ -1730,7 +1728,6 @@ PHP_METHOD(snmp, getnext)
    Return all objects including their respective object id withing the specified one as array of oid->value pairs */
 PHP_METHOD(snmp, walk)
 {
-	zval *object = getThis();
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_WALK, (-1));
 }
 /* }}} */
@@ -1739,7 +1736,6 @@ PHP_METHOD(snmp, walk)
    Set the value of a SNMP object */
 PHP_METHOD(snmp, set)
 {
-	zval *object = getThis();
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, (-1));
 }
 
@@ -1760,7 +1756,7 @@ PHP_METHOD(snmp, set_security)
 		RETURN_FALSE;
 	}
 
-	if (netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7)) {
+	if (netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7 TSRMLS_CC)) {
 		/* Warning message sent already, just bail out */
 		RETURN_FALSE;
 	}
@@ -1783,7 +1779,7 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 
 /* {{{ php_snmp_read_property(zval *object, zval *member, int type)
    Generic object property reader */
-zval *php_snmp_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval tmp_member;
 	zval *retval;
@@ -1813,7 +1809,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -1825,7 +1821,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type TSRMLS_DC)
 
 /* {{{ php_snmp_write_property(zval *object, zval *member, zval *value)
    Generic object property writer */
-void php_snmp_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void php_snmp_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	zval tmp_member;
 	php_snmp_object *obj;
@@ -1852,7 +1848,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -1863,7 +1859,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 
 /* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists)
    Generic object property checker */
-static int php_snmp_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC)
+static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC)
 {
 	php_snmp_object *obj = (php_snmp_object *)zend_objects_get_address(object TSRMLS_CC);
 	php_snmp_prop_handler *hnd;
@@ -1875,7 +1871,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists 
 				ret = 1;
 				break;
 			case 0: {
-				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1:0;
 					/* refcount is 0 */
@@ -1885,7 +1881,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists 
 				break;
 			}
 			default: {
-				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
 					ret = Z_BVAL_P(value)? 1:0;
@@ -1898,7 +1894,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists 
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
-		ret = std_hnd->has_property(object, member, has_set_exists TSRMLS_CC);
+		ret = std_hnd->has_property(object, member, has_set_exists, key TSRMLS_CC);
 	}
 	return ret;
 }
@@ -1992,7 +1988,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 			snmp_object->valueretrieval = Z_LVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%d'", Z_LVAL_P(newval));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}
@@ -2068,7 +2064,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 			snmp_object->oid_output_format = Z_LVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%d'", Z_LVAL_P(newval));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%ld'", Z_LVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}
