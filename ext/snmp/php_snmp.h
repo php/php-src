@@ -83,6 +83,7 @@ PHP_METHOD(SNMP, set);
 typedef struct _php_snmp_object {
       zend_object zo;
       struct snmp_session *session;
+      int max_oids;
       int valueretrieval;
       int quick_print;
 #ifdef HAVE_NET_SNMP

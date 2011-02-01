@@ -405,13 +405,12 @@ typedef struct _snmpobjarg {
 
 } snmpobjarg;
 
-#define SNMP_MAXOIDS_IN_PDU 64
 struct objid_set {
 	int count;
 	int offset;
 	int step;
 	int array_output;
-	snmpobjarg vars[SNMP_MAXOIDS_IN_PDU];
+	snmpobjarg *vars;
 };
 
 /* {{{ snmp_functions[]
@@ -548,7 +547,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 			buf = dbuf;
 			buflen = val_len;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malloc() failed: %s, fallback to static array", strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed: %s, fallback to static array", strerror(errno));
 		}
 	}
 
@@ -931,6 +930,11 @@ static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, z
 	objid_set->count = 0;
 	objid_set->array_output = ((st & SNMP_CMD_WALK) ? TRUE : FALSE);
 	if (Z_TYPE_PP(oid) == IS_STRING) {
+		objid_set->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg));
+		if (objid_set->vars == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while parsing oid: %s", strerror(errno));
+			return FALSE;
+		}
 		objid_set->vars[objid_set->count].oid = Z_STRVAL_PP(oid);
 		if (st & SNMP_CMD_SET) {
 			if (Z_TYPE_PP(type) == IS_STRING && Z_TYPE_PP(value) == IS_STRING) {
@@ -950,6 +954,11 @@ static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, z
 	} else if (Z_TYPE_PP(oid) == IS_ARRAY) { // we got objid array
 		if (zend_hash_num_elements(Z_ARRVAL_PP(oid)) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Got empty OID array");
+			return FALSE;
+		}
+		objid_set->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg) * zend_hash_num_elements(Z_ARRVAL_PP(oid)));
+		if (objid_set->vars == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while parsing oid array: %s", strerror(errno));
 			return FALSE;
 		}
 		objid_set->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
@@ -992,11 +1001,7 @@ static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, z
 					}
 				}
 			}
-
-			if (objid_set->count++ >= SNMP_MAXOIDS_IN_PDU) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not process more than %u OIDs in singe GET/GETNEXT/SET query", SNMP_MAXOIDS_IN_PDU);
-				return FALSE;
-			}
+			objid_set->count++;
 		}
 	}
 
@@ -1269,7 +1274,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	long timeout = SNMP_DEFAULT_TIMEOUT;
 	long retries = SNMP_DEFAULT_RETRIES;
 	int non_repeaters = 0;
-	int max_repetitions = 20;
+	int max_repetitions = -1;
 	int argc = ZEND_NUM_ARGS();
 	struct objid_set objid_set;
 	php_snmp_session *session;
@@ -1345,6 +1350,12 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		zval *object = getThis();
 		PHP_SNMP_SESSION_FROM_OBJECT(session, object);
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
+		if (snmp_object->max_oids > 0) {
+			objid_set.step = snmp_object->max_oids;
+			if (max_repetitions < 0) { // unspecified in function call, use session-wise
+				max_repetitions = snmp_object->max_oids;
+			}
+		}
 		valueretrieval = snmp_object->valueretrieval;
 #ifdef HAVE_NET_SNMP
 		glob_snmp_object.enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
@@ -1359,7 +1370,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 #endif
 	}
 
+	if (max_repetitions < 0) {
+		max_repetitions = 20; // provide correct default value
+	}
+
 	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, session, &objid_set, non_repeaters, max_repetitions, valueretrieval);
+	
+	efree(objid_set.vars);
 
 	if (session_less_mode) {
 		netsnmp_session_free(&session);
@@ -1678,6 +1695,7 @@ PHP_METHOD(snmp, open)
 	if (netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries TSRMLS_CC)) {
 		return;
 	}
+	snmp_object->max_oids = 0;
 	snmp_object->valueretrieval = SNMP_G(valueretrieval);
 #ifdef HAVE_NET_SNMP
 	snmp_object->enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
@@ -1932,6 +1950,15 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ */
+static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval **retval TSRMLS_DC)
+{
+	MAKE_STD_ZVAL(*retval);
+	ZVAL_LONG(*retval, snmp_object->max_oids);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
 static int php_snmp_read_valueretrieval(php_snmp_object *snmp_object, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
@@ -1968,6 +1995,28 @@ static int php_snmp_read_oid_output_format(php_snmp_object *snmp_object, zval **
 }
 /* }}} */
 #endif
+
+/* {{{ */
+static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
+{
+	zval ztmp;
+	int ret = SUCCESS;
+	if (Z_TYPE_P(newval) != IS_LONG) {
+		ztmp = *newval;
+		zval_copy_ctor(&ztmp);
+		convert_to_long(&ztmp);
+		newval = &ztmp;
+	}
+
+	snmp_object->max_oids = Z_LVAL_P(newval);
+	
+	if (newval == &ztmp) {
+		zval_dtor(newval);
+	}
+
+	return ret;
+}
+/* }}} */
 
 /* {{{ */
 static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2096,6 +2145,7 @@ static zend_function_entry php_snmp_class_methods[] = {
 	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	php_snmp_write_##name }
 
 const php_snmp_prop_handler php_snmp_property_entries[] = {
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(max_oids),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
 #ifdef HAVE_NET_SNMP

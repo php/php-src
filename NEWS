@@ -200,9 +200,11 @@ PHP                                                                        NEWS
 - Improved SNMP extension:
   . Added OO API. FR #53594. 
   . Sanitized return values of existing functions. Now it returns FALSE on
-    failure
-  . Introducing unit tests for extension with ~full coverage
-  . Fixed bugs #44193, #44193, #45893, #46065, #51336, #53862
+    failure.
+  . Allow ~infinite OIDs in GET/GETNEXT/SET queries. Autochunk them to max_oids
+    upon request.
+  . Introducing unit tests for extension with ~full coverage.
+  . Fixed bugs #44193, #44193, #45893, #46065, #51336, #53862.
 
 ## UNSORTED ##
 
