@@ -145,7 +145,7 @@ PHP_FUNCTION(header_register_callback)
 }
 /* }}} */
 
-static void sapi_run_header_callback()
+static void sapi_run_header_callback(TSRMLS_D)
 {
 	int   error;
 	zend_fcall_info fci;
@@ -831,7 +831,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 
 	if (SG(callback_func) && !SG(callback_run)) {
 		SG(callback_run) = 1;
-		sapi_run_header_callback();
+		sapi_run_header_callback(TSRMLS_C);
 	}
 
 	SG(headers_sent) = 1;
