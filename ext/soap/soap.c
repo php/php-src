@@ -3006,18 +3006,18 @@ PHP_METHOD(SoapClient, __call)
 	}
 
 	if (options) {
-		HashTable *ht = Z_ARRVAL_P(options);
-		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+		HashTable *hto = Z_ARRVAL_P(options);
+		if (zend_hash_find(hto, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_STRING) {
 			location = Z_STRVAL_PP(tmp);
 		}
 
-		if (zend_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
+		if (zend_hash_find(hto, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_STRING) {
 			soap_action = Z_STRVAL_PP(tmp);
 		}
 
-		if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
+		if (zend_hash_find(hto, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_STRING) {
 			uri = Z_STRVAL_PP(tmp);
 		}
@@ -3045,10 +3045,10 @@ PHP_METHOD(SoapClient, __call)
 		HashTable *default_headers = Z_ARRVAL_P(*tmp);
 		if (soap_headers) {
 			if (!free_soap_headers) {
-				HashTable *tmp =  emalloc(sizeof(HashTable));
-				zend_hash_init(tmp, 0, NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(tmp, soap_headers, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
-				soap_headers = tmp;
+				HashTable *t =  emalloc(sizeof(HashTable));
+				zend_hash_init(t, 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_copy(t, soap_headers, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
+				soap_headers = t;
 				free_soap_headers = 1;
 			}
 			zend_hash_internal_pointer_reset(default_headers);
@@ -3756,7 +3756,6 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 		while (trav != NULL) {
 			if (trav->type == XML_ELEMENT_NODE) {
 				xmlNodePtr hdr_func = trav;
-				xmlAttrPtr attr;
 				int mustUnderstand = 0;
 
 				if (*version == SOAP_1_1) {
@@ -4002,7 +4001,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 		if (headers &&
 		    zend_hash_find(prop, "headerfault", sizeof("headerfault"), (void**)&tmp) == SUCCESS) {
-			xmlNodePtr head;
 			encodePtr hdr_enc = NULL;
 			int hdr_use = SOAP_LITERAL;
 			zval *hdr_ret  = *tmp;
@@ -4013,7 +4011,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			if (Z_TYPE_P(hdr_ret) == IS_OBJECT &&
 			    instanceof_function(Z_OBJCE_P(hdr_ret), soap_header_class_entry TSRMLS_CC)) {
 				HashTable* ht = Z_OBJPROP_P(hdr_ret);
-				zval **tmp;
 				sdlSoapBindingFunctionHeaderPtr *hdr;
 				smart_str key = {0};
 
@@ -4202,7 +4199,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					}
 				} else {
 					if (sparam->element) {
-						xmlNsPtr ns = encode_add_ns(x, sparam->element->namens);
+						ns = encode_add_ns(x, sparam->element->namens);
 						xmlNodeSetName(x, BAD_CAST(sparam->element->name));
 						xmlSetNs(x, ns);
 					}
