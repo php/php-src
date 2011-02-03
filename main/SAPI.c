@@ -116,6 +116,58 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 	efree(sapi_header->header);
 }
 
+/* {{{ proto bool header_register_callback(mixed callback)
+   call a header function */
+PHP_FUNCTION(header_register_callback)
+{
+	zval *callback_func;
+	char *callback_name;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &callback_func) == FAILURE) {
+		return;
+	}
+	
+	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
+		efree(callback_name);
+		RETURN_FALSE;
+	}
+	efree(callback_name);
+
+	if (SG(callback_func)) {
+		zval_ptr_dtor(&SG(callback_func));
+		SG(fci_cache) = empty_fcall_info_cache;
+	}
+
+	Z_ADDREF_P(callback_func);
+
+	SG(callback_func) = callback_func;
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+static void sapi_run_header_callback()
+{
+	int   error;
+	zend_fcall_info fci;
+	zval *retval_ptr = NULL;
+
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.object_ptr = NULL;
+	fci.function_name = SG(callback_func);
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.no_separation = 0;
+	fci.symbol_table = NULL;
+
+	error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
+	if (error == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
+	} else if (retval_ptr) {
+		zval_ptr_dtor(&retval_ptr);
+	}
+}
 
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
@@ -433,6 +485,9 @@ static void sapi_send_headers_free(TSRMLS_D)
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
+	if (SG(callback_func)) {
+		zval_ptr_dtor(&SG(callback_func));
+	}
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
 	}  else 	if (SG(server_context)) {
@@ -574,7 +629,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	char *header_line;
 	uint header_line_len;
 	int http_response_code;
-	
+
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
 		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
@@ -772,6 +827,11 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
 		sapi_header_add_op(SAPI_HEADER_ADD, &default_header TSRMLS_CC);
 		SG(sapi_headers).send_default_content_type = 0;
+	}
+
+	if (SG(callback_func) && !SG(callback_run)) {
+		SG(callback_run) = 1;
+		sapi_run_header_callback();
 	}
 
 	SG(headers_sent) = 1;

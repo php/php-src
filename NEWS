@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Added support for object references in recursive serialize() calls.
     FR #36424. (Mike)
   . Added http_response_code() function. FR #52555. (Paul Dragoonis, Kalle)
+  . Added header_register_callback() which is invoked immediately
+    prior to the sending of headers and after default headers have
+    been added. (Scott)
   . Added DTrace support. (David Soria Parra)
   . Improved output layer, see README.NEW-OUTPUT-API for internals. (Mike)
   . Improved unserialize() performance.
