@@ -141,6 +141,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_set_time_limit, 0)
 	ZEND_ARG_INFO(0, seconds)
 ZEND_END_ARG_INFO()
 /* }}} */
+
+/* {{{ main/sapi.c */
+ZEND_BEGIN_ARG_INFO(arginfo_header_register_callback, 0)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ main/output.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_start, 0, 0, 0)
 	ZEND_ARG_INFO(0, user_function)
@@ -2940,6 +2947,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
+	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
 	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		arginfo_set_magic_quotes_runtime)
