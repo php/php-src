@@ -10,8 +10,8 @@
   . Added options to debug backtrace functions. (Stas)
   . Fixed Bug #53629 (memory leak inside highlight_string()). (Hannes, Ilia)
   . Fixed Bug #51458 (Lack of error context with nested exceptions). (Stas)
-  . Fixed Bug #47143 (Throwing an exception in a destructor causes a fatal error).
-    (Stas)
+  . Fixed Bug #47143 (Throwing an exception in a destructor causes a fatal
+    error). (Stas)
 
 - Core:
   . Added ability to connect to HTTPS sites through proxy with basic
@@ -121,6 +121,10 @@
   . Fixed bug #53630 (Fixed parameter handling inside readline() function).
     (jo at feuersee dot de, Ilia)
 
+- Reflection extension:
+  . Fixed bug #53915 (ReflectionClass::getConstant(s) emits fatal error on
+    constants with self::). (Gustavo)
+
 - SOAP extension:
   . Fixed possible crash introduced by the NULL poisoning patch.
     (Mateusz Kocielski, Pierre)
@@ -134,7 +138,8 @@
     (Mateusz Kocielski, Pierre)
   . Fixed memory leak on SQLite3Result and SQLite3Stmt when assigning to a
     reference. (Felipe)
-  . Add SQlite3_Stmt::readonly() for checking if a statement is read only. (Scott)
+  . Add SQlite3_Stmt::readonly() for checking if a statement is read only.
+    (Scott)
   . Implemented FR #53466 (SQLite3Result::columnType() should return false after
     all of the rows have been fetched). (Scott)
 
@@ -163,8 +168,8 @@
   . Fixed bug #49072 (feof never returns true for damaged file in zip).
     (Gustavo, Richard Quadling)
 
-- Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree correctly)
-  (Boris Lytochkin)
+- Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree
+  correctly). (Boris Lytochkin)
 
 06 Jan 2011, PHP 5.3.5
 - Fixed Bug #53632 (infinite loop with x87 fpu). (CVE-2010-4645) (Scott, 
@@ -177,7 +182,8 @@
 - Security enhancements:
   . Fixed crash in zip extract method (possible CWE-170). 
     (Maksymilian Arciemowicz, Pierre)
-  . Paths with NULL in them (foo\0bar.txt) are now considered as invalid. (Rasmus)
+  . Paths with NULL in them (foo\0bar.txt) are now considered as invalid.
+    (Rasmus)
   . Fixed a possible double free in imap extension (Identified by Mateusz 
     Kocielski). (CVE-2010-4150). (Ilia)
   . Fixed NULL pointer dereference in ZipArchive::getArchiveComment.
@@ -204,8 +210,8 @@
   . Implemented symbolic links support for open_basedir checks. (Pierre)
   . Implemented FR #51804, SplFileInfo::getLinkTarget on Windows. (Pierre)
   . Implemented FR #50692, not uploaded files don't count towards
-    max_file_uploads limit. As a side improvement, temporary files are not opened
-    for empty uploads and, in debug mode, 0-length uploads. (Gustavo)
+    max_file_uploads limit. As a side improvement, temporary files are not
+    opened for empty uploads and, in debug mode, 0-length uploads. (Gustavo)
     
 - Improved MySQLnd:
   . Added new character sets to mysqlnd, which are available in MySQL 5.5
@@ -242,12 +248,12 @@
   . Fixed bug #53141 (autoload misbehaves if called from closing session).
     (ladislav at marek dot su)
   . Fixed bug #53021 (In html_entity_decode, failure to convert numeric entities
-    with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of ENT_NOQUOTES 
-    in html_entity_decode that had introduced the bug (rev #185591) to other
-    encodings. Additionaly, html_entity_decode() now doesn't decode &#34; if
-    ENT_NOQUOTES is given. (Gustavo)
-  . Fixed bug #52931 (strripos not overloaded with function overloading enabled).
-    (Felipe)
+    with ENT_NOQUOTES and ISO-8859-1). Fixed and extended the fix of
+    ENT_NOQUOTES in html_entity_decode that had introduced the bug (rev
+    #185591) to other encodings. Additionaly, html_entity_decode() now doesn't
+    decode &#34; if ENT_NOQUOTES is given. (Gustavo)
+  . Fixed bug #52931 (strripos not overloaded with function overloading
+    enabled). (Felipe)
   . Fixed bug #52772 (var_dump() doesn't check for the existence of 
     get_class_name before calling it). (Kalle, Gustavo)
   . Fixed bug #52534 (var_export array with negative key). (Felipe)
@@ -261,7 +267,8 @@
     other platforms). (Pierre)
   . Fixed bug #49687 (utf8_decode vulnerabilities and deficiencies in the number
     of reported malformed sequences). (CVE-2010-3870) (Gustavo)
-  . Fixed bug #49407 (get_html_translation_table doesn't handle UTF-8). (Gustavo)
+  . Fixed bug #49407 (get_html_translation_table doesn't handle UTF-8).
+    (Gustavo)
   . Fixed bug #48831 (php -i has different output to php --ini). (Richard, 
     Pierre)
   . Fixed bug #47643 (array_diff() takes over 3000 times longer than php 5.2.4).
@@ -362,8 +369,8 @@
     words). (Ilia)
 
 - Intl extension:
-  . Fixed crashes on invalid parameters in intl extension. (CVE-2010-4409). (Stas, Maksymilian
-    Arciemowicz)
+  . Fixed crashes on invalid parameters in intl extension. (CVE-2010-4409).
+    (Stas, Maksymilian Arciemowicz)
   . Added support for formatting the timestamp stored in a DateTime object.
     (Stas)
   . Fixed bug #50590 (IntlDateFormatter::parse result is limited to the integer
@@ -373,8 +380,8 @@
   . Fixed bug #53273 (mb_strcut() returns garbage with the excessive length
     parameter). (CVE-2010-4156) (Mateusz Kocielski, Pierre, Moriyoshi)
   . Fixed bug #52981 (Unicode casing table was out-of-date. Updated with
-    UnicodeData-6.0.0d7.txt and included the source of the generator program with
-    the distribution) (Gustavo).
+    UnicodeData-6.0.0d7.txt and included the source of the generator program
+    with the distribution) (Gustavo).
   . Fixed bug #52681 (mb_send_mail() appends an extra MIME-Version header).
     (Adam)
  
@@ -445,8 +452,8 @@
   . Fixed bug #52725 (gcc builtin atomic functions were sometimes used when they
     were not available). (fat)
   . Fixed bug #52693 (configuration file errors are not logged to stderr). (fat)
-  . Fixed bug #52674 (FPM Status page returns inconsistent Content-Type headers).
-    (fat)
+  . Fixed bug #52674 (FPM Status page returns inconsistent Content-Type
+    headers). (fat)
   . Fixed bug #52498 (libevent was not only linked to php-fpm). (fat)
 
 - PDO:
@@ -504,9 +511,9 @@
 - Streams:
   . Fixed forward stream seeking emulation in streams that don't support seeking
     in situations where the read operation gives back less data than requested
-    and when there was data in the buffer before the emulation started. Also made
-    more consistent its behavior -- should return failure every time less data
-    than was requested was skipped. (Gustavo)
+    and when there was data in the buffer before the emulation started. Also
+    made more consistent its behavior -- should return failure every time less
+    data than was requested was skipped. (Gustavo)
   . Fixed bug #53241 (stream casting that relies on fdopen/fopencookie fails
     with streams opened with, inter alia, the 'xb' mode). (Gustavo)
   . Fixed bug #53006 (stream_get_contents has an unpredictable behavior when the
