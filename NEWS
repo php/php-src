@@ -157,6 +157,7 @@
 
 - Zip extension:
   . Added the filename into the return value of stream_get_meta_data(). (Hannes)
+  . Fixed bug #53923 (Zip functions assume HAVE_GLOB is defined). (Adam)
   . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
     (Richard)
   . Fixed bug #53568 (swapped memset arguments in struct initialization).

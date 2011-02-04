@@ -565,6 +565,7 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 	return globbuf.gl_pathc;
 }
 /* }}} */
+#endif /* HAVE_GLOB */
 
 int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
@@ -665,8 +666,6 @@ int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *r
 }
 /* }}} */
 #endif 
-
-#endif
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
@@ -1592,9 +1591,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	char *add_path = NULL;
 	int pattern_len, add_path_len, remove_path_len, path_len = 0;
 	long remove_all_path = 0;
-	long flags = 0;
 	zval *options = NULL;
 	int found;
+#ifdef HAVE_GLOB
+	long flags = 0;
+#endif
 
 	if (!this) {
 		RETURN_FALSE;
@@ -1603,10 +1604,15 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	ZIP_FROM_OBJECT(intern, this);
 	/* 1 == glob, 2==pcre */
 	if (type == 1) {
+#ifdef HAVE_GLOB
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|la", 
 					&pattern, &pattern_len, &flags, &options) == FAILURE) {
 			return;
 		}
+#else
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Glob support is not available");
+		RETURN_FALSE;
+#endif
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sa", 
 					&pattern, &pattern_len, &path, &path_len, &options) == FAILURE) {
@@ -1629,7 +1635,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	}
 
 	if (type == 1) {
+#ifdef HAVE_GLOB
 		found = php_zip_glob(pattern, pattern_len, flags, return_value TSRMLS_CC);
+#endif
 	} else {
 		found = php_zip_pcre(pattern, pattern_len, path, path_len, return_value TSRMLS_CC);
 	}
@@ -1688,6 +1696,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 }
 /* }}} */
 
+#ifdef HAVE_GLOB
 /* {{{ proto bool ZipArchive::addGlob(string pattern[,int flags [, array options]])
 Add files matching the glob pattern. See php's glob for the pattern syntax. */
 static ZIPARCHIVE_METHOD(addGlob)
@@ -1695,6 +1704,7 @@ static ZIPARCHIVE_METHOD(addGlob)
 	php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+#endif
 
 /* {{{ proto bool ZipArchive::addPattern(string pattern[, string path [, array options]])
 Add files matching the pcre pattern. See php's pcre for the pattern syntax. */
@@ -2570,11 +2580,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_addemptydir, 0, 0, 1)
 	ZEND_ARG_INFO(0, dirname)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_GLOB
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_addglob, 0, 0, 1)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_addpattern, 0, 0, 1)
 	ZEND_ARG_INFO(0, pattern)
@@ -2680,7 +2692,9 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(addEmptyDir,			arginfo_ziparchive_addemptydir, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFromString,		arginfo_ziparchive_addfromstring, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFile,				arginfo_ziparchive_addfile, ZEND_ACC_PUBLIC)
+#ifdef HAVE_GLOB
 	ZIPARCHIVE_ME(addGlob,				arginfo_ziparchive_addglob, ZEND_ACC_PUBLIC)
+#endif
 	ZIPARCHIVE_ME(addPattern,			arginfo_ziparchive_addpattern, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(renameIndex,			arginfo_ziparchive_renameindex, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(renameName,			arginfo_ziparchive_renamename, ZEND_ACC_PUBLIC)
