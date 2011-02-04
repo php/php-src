@@ -63,40 +63,40 @@
     MIME header unfolding). (Adam)
     
 - Intl extension:
-  . Fixed bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values).
-    (Felipe)
   . Fixed bug #53612 (Segmentation fault when using cloned several intl
     objects). (Gustavo)
+  . Fixed bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values).
+    (Felipe)
   . Implemented clone functionality for number, date & message formatters. 
     (Stas).
 
 - MySQL Improved extension:
   . Added 'db' and 'catalog' keys to the field fetching functions (FR #39847). 
     (Kalle)
+  . Fixed buggy counting of affected rows when using the text protocol. The
+    collected statistics were wrong when multi_query was used with mysqlnd
+    (Andrey)
   . Fixed bug #53795 (Connect Error from MySqli (mysqlnd) when using SSL). 
     (Kalle)
   . Fixed bug #53503 (mysqli::query returns false after successful LOAD DATA 
     query). (Kalle, Andrey)
   . Fixed bug #53425 (mysqli_real_connect() ignores client flags when built to 
     call libmysql). (Kalle, tre-php-net at crushedhat dot com)
-  . Fixed buggy counting of affected rows when using the text protocol. The
-    collected statistics were wrong when multi_query was used with mysqlnd
-    (Andrey)
 
 - OpenSSL extension:
+  . Fixed stream_socket_enable_crypto() not honoring the socket timeout in
+    server mode. (Gustavo)
+  . Fixed bug #53592 (stream_socket_enable_crypto() busy-waits in client mode).
+    (Gustavo)
   . Implemented FR #53447 (Cannot disable SessionTicket extension for servers
     that do not support it) by adding a no_ticket SSL context option. (Adam,
     Tony)
-  . Fixed bug #53592 (stream_socket_enable_crypto() busy-waits in client mode).
-    (Gustavo)
-  . Fixed stream_socket_enable_crypto() not honoring the socket timeout in
-    server mode. (Gustavo)
 
 - PDO MySQL driver:
-  . Implemented FR #47802 (Support for setting character sets in DSN strings). 
-    (Kalle)
   . Fixed bug #53551 (PDOStatement execute segfaults for pdo_mysql driver).
     (Johannes)
+  . Implemented FR #47802 (Support for setting character sets in DSN strings). 
+    (Kalle)
 
 - PDO Oracle driver:
   . Fixed bug #39199 (Cannot load Lob data with more than 4000 bytes on
@@ -111,10 +111,10 @@
     (crrodriguez at opensuse dot org, Ilia)
 
 - PHP-FPM SAPI:
-  . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
   . Enforce security in the fastcgi protocol parsing.
     (ef-lists at email dotde)
   . Fixed bug #53777 (php-fpm log format now match php_error log format). (fat)
+  . Fixed bug #53527 (php-fpm --test doesn't set a valuable return value). (fat)
   . Fixed bug #53434 (php-fpm slowlog now also logs the original request). (fat)
 
 - Readline extension:
@@ -124,6 +124,10 @@
 - Reflection extension:
   . Fixed bug #53915 (ReflectionClass::getConstant(s) emits fatal error on
     constants with self::). (Gustavo)
+
+- SNMP extension:
+  . Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree
+    correctly). (Boris Lytochkin)
 
 - SOAP extension:
   . Fixed possible crash introduced by the NULL poisoning patch.
@@ -145,11 +149,11 @@
     all of the rows have been fetched). (Scott)
 
 - Streams:
-  . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
   . Fixed bug #53913 (Streams functions assume HAVE_GLOB is defined). (Chris
     Jones)
   . Fixed bug #53903 (userspace stream stat callback does not separate the
     elements of the returned array before converting them). (Gustavo)
+  . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
 
 - XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
@@ -158,22 +162,19 @@
 - Zip extension:
   . Added the filename into the return value of stream_get_meta_data(). (Hannes)
   . Fixed bug #53923 (Zip functions assume HAVE_GLOB is defined). (Adam)
-  . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
-    (Richard)
-  . Fixed bug #53568 (swapped memset arguments in struct initialization).
-    (crrodriguez at opensuse dot org)
-  . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams).
-    (Hannes)
-  . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
-    gmail dot com, Gustavo)
-  . Fixed bug #53854 (Missing constants for compression type). (Richard, Adam)
   . Fixed bug #53885 (ZipArchive segfault with FL_UNCHANGED on empty archive).
     (Stas, Maksymilian Arciemowicz).
+  . Fixed bug #53854 (Missing constants for compression type). (Richard, Adam)
+  . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
+    gmail dot com, Gustavo)
+  . Fixed bug #53579 (stream_get_contents() segfaults on ziparchive streams).
+    (Hannes)
+  . Fixed bug #53568 (swapped memset arguments in struct initialization).
+    (crrodriguez at opensuse dot org)
+  . Fixed bug #53166 (Missing parameters in docs and reflection definition). 
+    (Richard)
   . Fixed bug #49072 (feof never returns true for damaged file in zip).
     (Gustavo, Richard Quadling)
-
-- Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree
-  correctly). (Boris Lytochkin)
 
 06 Jan 2011, PHP 5.3.5
 - Fixed Bug #53632 (infinite loop with x87 fpu). (CVE-2010-4645) (Scott, 
