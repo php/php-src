@@ -164,11 +164,13 @@ static zend_object_value spl_filesystem_object_new(zend_class_entry *class_type 
 
 PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /* {{{ */
 {
+#ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR) {
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			return php_glob_stream_get_path(intern->u.dir.dirp, 0, len);
 		}
 	}
+#endif
 	if (len) {
 		*len = intern->_path_len;
 	}
@@ -575,6 +577,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 		efree(pnstr);
 	}
 	if (intern->type == SPL_FS_DIR) {
+#ifdef HAVE_GLOB
 		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", sizeof("glob")-1, &pnlen TSRMLS_CC);
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			add_assoc_stringl_ex(&zrv, pnstr, pnlen+1, intern->_path, intern->_path_len, 1);
@@ -582,6 +585,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 			add_assoc_bool_ex(&zrv, pnstr, pnlen+1, 0);
 		}
 		efree(pnstr);
+#endif
 		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1, &pnlen TSRMLS_CC);
 		if (intern->u.dir.sub_path) {
 			add_assoc_stringl_ex(&zrv, pnstr, pnlen+1, intern->u.dir.sub_path, intern->u.dir.sub_path_len, 1);
@@ -647,12 +651,16 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->flags = flags;
+#ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
 		spprintf(&path, 0, "glob://%s", path);
 		spl_filesystem_dir_open(intern, path TSRMLS_CC);
 		efree(path);
-	} else {
+	} else
+#endif
+	{
 		spl_filesystem_dir_open(intern, path TSRMLS_CC);
+
 	}
 
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
@@ -1439,6 +1447,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 }
 /* }}} */
 
+#ifdef HAVE_GLOB
 /* {{{ proto int GlobIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
 SPL_METHOD(GlobIterator, __construct)
@@ -1465,6 +1474,7 @@ SPL_METHOD(GlobIterator, count)
 	}
 }
 /* }}} */
+#endif /* HAVE_GLOB */
 
 /* {{{ forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
@@ -1864,11 +1874,13 @@ static const zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#ifdef HAVE_GLOB
 static const zend_function_entry spl_GlobIterator_functions[] = {
 	SPL_ME(GlobIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(GlobIterator, count,         arginfo_splfileinfo_void,  ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+#endif
 /* }}} */
 
 static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
@@ -2824,8 +2836,10 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, FilesystemIterator, spl_filesystem_object_new, spl_RecursiveDirectoryIterator_functions);
 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 
+#ifdef HAVE_GLOB
 	REGISTER_SPL_SUB_CLASS_EX(GlobIterator, FilesystemIterator, spl_filesystem_object_new, spl_GlobIterator_functions);
 	REGISTER_SPL_IMPLEMENTS(GlobIterator, Countable);
+#endif
 
 	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new, spl_SplFileObject_functions);
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);
