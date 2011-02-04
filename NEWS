@@ -47,6 +47,8 @@
     null default value). (Gustavo, Stas)
 
 - Filter extension:
+  . Fixed bug #53924 (FILTER_VALIDATE_URL doesn't validate port number).
+    (Ilia)
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
     (Ilia)
   . Fixed bug #52209 (INPUT_ENV returns NULL for set variables (CLI)). (Ilia)
@@ -109,6 +111,8 @@
 - Phar extension:
   . Fixed bug #53541 (format string bug in ext/phar).
     (crrodriguez at opensuse dot org, Ilia)
+  . Fixed bug #53898 (PHAR reports invalid error message, when the directory 
+    does not exist). (Ilia)
 
 - PHP-FPM SAPI:
   . Enforce security in the fastcgi protocol parsing.

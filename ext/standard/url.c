@@ -180,15 +180,20 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		parse_port:
 		p = e + 1;
 		pp = p;
-		
+
 		while (pp-p < 6 && isdigit(*pp)) {
 			pp++;
 		}
-		
+
 		if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
 			memcpy(port_buf, p, (pp-p));
 			port_buf[pp-p] = '\0';
 			ret->port = atoi(port_buf);
+			if (!ret->port && (pp - p) > 0) {
+				STR_FREE(ret->scheme);
+				efree(ret);
+				return NULL;
+			}
 		} else {
 			goto just_path;
 		}
@@ -267,6 +272,13 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				memcpy(port_buf, p, (e-p));
 				port_buf[e-p] = '\0';
 				ret->port = atoi(port_buf);
+				if (!ret->port && (e - p)) {
+					STR_FREE(ret->scheme);
+					STR_FREE(ret->user);
+					STR_FREE(ret->pass);
+					efree(ret);
+					return NULL;
+				}
 			}
 			p--;
 		}	
