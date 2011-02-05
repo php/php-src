@@ -843,7 +843,7 @@ retry:
 						vars = vars->next_variable, count++);
 
 					if (st & (SNMP_CMD_GET | SNMP_CMD_GETNEXT) && response->errstat == SNMP_ERR_TOOBIG && objid_set->step > 1) { /* Answer will not fit into single packet */
-						objid_set->offset -= objid_set->step;
+						objid_set->offset = ((objid_set->offset > objid_set->step) ? (objid_set->offset - objid_set->step) : 0 );
 						objid_set->step /= 2;
 						snmp_free_pdu(response);
 						keepwalking = 1;
