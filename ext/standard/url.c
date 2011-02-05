@@ -176,7 +176,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				}	
 			}
 		}	
-	} else if (e) { /* no scheme, look for port */
+	} else if (e) { /* no scheme; starts with colon: look for port */
 		parse_port:
 		p = e + 1;
 		pp = p;
@@ -185,11 +185,14 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			pp++;
 		}
 
-		if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
-			memcpy(port_buf, p, (pp-p));
-			port_buf[pp-p] = '\0';
-			ret->port = atoi(port_buf);
-			if (!ret->port && (pp - p) > 0) {
+		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
+			long port;
+			memcpy(port_buf, p, (pp - p));
+			port_buf[pp - p] = '\0';
+			port = strtol(port_buf, NULL, 10);
+			if (port > 0 && port <= 65535) {
+				ret->port = (unsigned short) port;
+			} else {
 				STR_FREE(ret->scheme);
 				efree(ret);
 				return NULL;
@@ -269,10 +272,13 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
-				memcpy(port_buf, p, (e-p));
-				port_buf[e-p] = '\0';
-				ret->port = atoi(port_buf);
-				if (!ret->port && (e - p)) {
+				long port;
+				memcpy(port_buf, p, (e - p));
+				port_buf[e - p] = '\0';
+				port = strtol(port_buf, NULL, 10);
+				if (port > 0 && port <= 65535) {
+					ret->port = (unsigned short)port;
+				} else {
 					STR_FREE(ret->scheme);
 					STR_FREE(ret->user);
 					STR_FREE(ret->pass);

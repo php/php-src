@@ -48,7 +48,7 @@
 
 - Filter extension:
   . Fixed bug #53924 (FILTER_VALIDATE_URL doesn't validate port number).
-    (Ilia)
+    (Ilia, Gustavo)
   . Fixed bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges).
     (Ilia)
   . Fixed bug #52209 (INPUT_ENV returns NULL for set variables (CLI)). (Ilia)
