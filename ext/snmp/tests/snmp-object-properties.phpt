@@ -21,6 +21,7 @@ echo "Check working\n";
 $session = new SNMP(SNMP_VERSION_1, $hostname, $community, $timeout, $retries);
 var_dump($session);
 
+$session->max_oids = 40;
 $session->enum_print = TRUE;
 $session->quick_print = TRUE;
 $session->valueretrieval = SNMP_VALUE_LIBRARY;
@@ -28,6 +29,7 @@ $session->oid_output_format = SNMP_OID_OUTPUT_NUMERIC;
 
 var_dump($session);
 
+$session->max_oids = "40";
 $session->enum_print = "1";
 $session->quick_print = "1";
 $session->valueretrieval = "1";
@@ -55,10 +57,25 @@ var_dump($session->valueretrieval);
 $session->oid_output_format = 78;
 var_dump($session->oid_output_format);
 
+$session->info = array("blah" => 2);
+var_dump($session->info);
 ?>
 --EXPECTF--
 Check working
 object(SNMP)#%d (%d) {
+  ["info"]=>
+  array(4) {
+    ["hostname"]=>
+    %string|unicode%(%d) "%s"
+    ["port"]=>
+    int(%d)
+    ["timeout"]=>
+    int(%i)
+    ["retries"]=>
+    int(%d)
+  }
+  ["max_oids"]=>
+  int(0)
   ["valueretrieval"]=>
   int(1)
   ["quick_print"]=>
@@ -69,6 +86,19 @@ object(SNMP)#%d (%d) {
   int(3)
 }
 object(SNMP)#%d (%d) {
+  ["info"]=>
+  array(4) {
+    ["hostname"]=>
+    %string|unicode%(%d) "%s"
+    ["port"]=>
+    int(%d)
+    ["timeout"]=>
+    int(%i)
+    ["retries"]=>
+    int(%d)
+  }
+  ["max_oids"]=>
+  int(40)
   ["valueretrieval"]=>
   int(0)
   ["quick_print"]=>
@@ -79,6 +109,19 @@ object(SNMP)#%d (%d) {
   int(4)
 }
 object(SNMP)#%d (%d) {
+  ["info"]=>
+  array(4) {
+    ["hostname"]=>
+    %string|unicode%(%d) "%s"
+    ["port"]=>
+    int(%d)
+    ["timeout"]=>
+    int(%i)
+    ["retries"]=>
+    int(%d)
+  }
+  ["max_oids"]=>
+  int(40)
   ["valueretrieval"]=>
   int(1)
   ["quick_print"]=>
@@ -92,6 +135,19 @@ bool(true)
 bool(true)
 bool(false)
 object(SNMP)#%d (%d) {
+  ["info"]=>
+  array(4) {
+    ["hostname"]=>
+    %string|unicode%(%d) "%s"
+    ["port"]=>
+    int(%d)
+    ["timeout"]=>
+    int(%i)
+    ["retries"]=>
+    int(%d)
+  }
+  ["max_oids"]=>
+  int(40)
   ["valueretrieval"]=>
   int(1)
   ["quick_print"]=>
@@ -116,3 +172,15 @@ int(1)
 
 Warning: main(): Unknown SNMP output print format '78' in %s on line %d
 int(3)
+
+Warning: main(): info property is read-only in %s on line %d
+array(4) {
+  ["hostname"]=>
+  %string|unicode%(%d) "%s"
+  ["port"]=>
+  int(%d)
+  ["timeout"]=>
+  int(%i)
+  ["retries"]=>
+  int(%d)
+}
