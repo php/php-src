@@ -1193,7 +1193,7 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID TSRMLS_DC)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
-	u_char	*ebuf = (u_char *) malloc(ebuf_len); /* memory freed by SNMP library, strdup NOT estrdup */
+	u_char	*ebuf = (u_char *) malloc(ebuf_len); /* memory freed by SNMP library, malloc NOT emalloc */
 
 	if (ebuf == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "malloc failure setting contextEngineID");
@@ -1204,6 +1204,11 @@ static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * 
 		free(ebuf);
 		return (-1);
 	}
+
+	if (s->contextEngineID) {
+		free(s->contextEngineID);
+	}
+
 	s->contextEngineID = ebuf;
 	s->contextEngineIDLen = eout_len;
 	return (0);
@@ -1971,7 +1976,11 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 	ulong num_key;
 
 	obj = (php_snmp_object *)zend_objects_get_address(object TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
 	props = obj->zo.properties;
+#else
+	props = zend_std_get_properties(object TSRMLS_CC);
+#endif
 
 	zend_hash_internal_pointer_reset_ex(&php_snmp_properties, &pos);
 
@@ -1985,6 +1994,34 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 		zend_hash_move_forward_ex(&php_snmp_properties, &pos);
 	}
 	return obj->zo.properties;
+}
+/* }}} */
+
+/* {{{ */
+static int php_snmp_read_info(php_snmp_object *snmp_object, zval **retval TSRMLS_DC)
+{
+	zval *val;
+
+	MAKE_STD_ZVAL(*retval);
+	array_init(*retval);
+
+	MAKE_STD_ZVAL(val);
+	ZVAL_STRINGL(val, snmp_object->session->peername, strlen(snmp_object->session->peername), 1);
+	add_assoc_zval(*retval, "hostname", val);
+	
+	MAKE_STD_ZVAL(val);
+	ZVAL_LONG(val, snmp_object->session->remote_port);
+	add_assoc_zval(*retval, "port", val);
+	
+	MAKE_STD_ZVAL(val);
+	ZVAL_LONG(val, snmp_object->session->timeout);
+	add_assoc_zval(*retval, "timeout", val);
+	
+	MAKE_STD_ZVAL(val);
+	ZVAL_LONG(val, snmp_object->session->retries);
+	add_assoc_zval(*retval, "retries", val);
+	
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2034,6 +2071,14 @@ static int php_snmp_read_oid_output_format(php_snmp_object *snmp_object, zval **
 }
 /* }}} */
 #endif
+
+/* {{{ */
+static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "info property is read-only");
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ */
 static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2184,6 +2229,7 @@ static zend_function_entry php_snmp_class_methods[] = {
 	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	php_snmp_write_##name }
 
 const php_snmp_prop_handler php_snmp_property_entries[] = {
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(info),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(max_oids),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
