@@ -94,7 +94,7 @@ echo "Done";
 --> http://x:?   : string(4) "http"
 --> x:blah.com   : string(1) "x"
 --> x:/blah.com   : string(1) "x"
---> x://::abc/?   : string(1) "x"
+--> x://::abc/?   : bool(false)
 --> http://::?   : string(4) "http"
 --> x://::6.5   : string(1) "x"
 --> http://?:/   : string(4) "http"

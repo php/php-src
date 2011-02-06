@@ -734,14 +734,7 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: array(3) {
-  ["scheme"]=>
-  string(1) "x"
-  ["host"]=>
-  string(1) ":"
-  ["path"]=>
-  string(1) "/"
-}
+--> x://::abc/?: bool(false)
 
 --> http://::?: array(2) {
   ["scheme"]=>
