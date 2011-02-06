@@ -93,7 +93,7 @@ echo "Done";
 --> http://x:?   : NULL
 --> x:blah.com   : NULL
 --> x:/blah.com   : NULL
---> x://::abc/?   : NULL
+--> x://::abc/?   : bool(false)
 --> http://::?   : NULL
 --> x://::6.5   : NULL
 --> http://?:/   : NULL
