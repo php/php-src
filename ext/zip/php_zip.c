@@ -235,6 +235,10 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
+		efree(file_dirname_fullpath);
+		efree(file_basename);
+		free(new_state.cwd);
+		return 0;
 	}
 
 	/* check again the full path, not sure if it
@@ -249,27 +253,42 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 0;
 	}
 
-	zf = zip_fopen(za, file, 0);
-	if (zf == NULL) {
-		efree(fullpath);
-		efree(file_dirname_fullpath);
-		efree(file_basename);
-		free(new_state.cwd);
-		return 0;
-	}
-
 #if PHP_API_VERSION < 20100412
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
 #endif
-	n = 0;
-	if (stream) {
-		while ((n=zip_fread(zf, b, sizeof(b))) > 0) php_stream_write(stream, b, n);
-		php_stream_close(stream);
+
+	if (stream == NULL) {
+		n = -1;
+		goto done;
 	}
+
+	zf = zip_fopen(za, file, 0);
+	if (zf == NULL) {
+		n = -1;
+		php_stream_close(stream);
+		goto done;
+	}
+
+	n = 0;
+	if (stream == NULL) {
+		int ret = zip_fclose(zf);
+		efree(fullpath);
+		efree(file_basename);
+		efree(file_dirname_fullpath);
+		free(new_state.cwd);
+		return 0;
+	}
+
+	while ((n=zip_fread(zf, b, sizeof(b))) > 0) {
+		php_stream_write(stream, b, n);
+	}
+
+	php_stream_close(stream);
 	n = zip_fclose(zf);
 
+done:
 	efree(fullpath);
 	efree(file_basename);
 	efree(file_dirname_fullpath);
