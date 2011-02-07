@@ -241,6 +241,10 @@ static zend_mm_storage* zend_mm_mem_win32_init(void *params)
 		return NULL;
 	}
 	storage = (zend_mm_storage*)malloc(sizeof(zend_mm_storage));
+	if (storage == NULL) {
+		HeapDestroy(heap);
+		return NULL;
+	}
 	storage->data = (void*) heap;
 	return storage;
 }
@@ -1066,7 +1070,13 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	storage->handlers = handlers;
 
 	heap = malloc(sizeof(struct _zend_mm_heap));
-
+	if (heap == NULL) {
+		fprintf(stderr, "Cannot allocate heap for zend_mm storage [%s]\n", handlers->name);
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		exit(255);
+	}
 	heap->storage = storage;
 	heap->block_size = block_size;
 	heap->compact_size = 0;
