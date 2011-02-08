@@ -23,7 +23,7 @@
 
 struct fpm_globals_s fpm_globals = {
 		.parent_pid = 0, 
-		.argc = NULL,
+		.argc = 0,
 		.argv = NULL,
 		.config = NULL,
 		.prefix = NULL,
