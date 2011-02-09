@@ -673,6 +673,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
 					/* fall through if not IS_STRING */
                 default:
                     FREE_BUFFERS();
+                    jp->error_code = PHP_JSON_ERROR_SYNTAX;
                     return false;
                 }
                 break;
@@ -712,6 +713,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
                         break;
                     default:
                         FREE_BUFFERS();
+                        jp->error_code = PHP_JSON_ERROR_SYNTAX;
                         return false;
                 }
                 buf.len = 0;
