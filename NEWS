@@ -75,6 +75,10 @@
   . Implemented clone functionality for number, date & message formatters. 
     (Stas).
 
+- JSON extension:
+  . Fixed bug #53963 (Ensure error_code is always set during some failed
+    decodings). (Scott)
+
 - MySQL Improved extension:
   . Added 'db' and 'catalog' keys to the field fetching functions (FR #39847). 
     (Kalle)
