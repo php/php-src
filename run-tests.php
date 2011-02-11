@@ -77,7 +77,7 @@ if (PHP_VERSION_ID < 50300) {
 	// FILE_BINARY is available from 5.2.7
 	if (PHP_VERSION_ID < 50207) {
 		define('FILE_BINARY', 0);
-	}	
+	}
 }
 
 // (unicode) is available from 6.0.0
@@ -937,7 +937,7 @@ if ($html_output) {
 }
 
 save_or_mail_results();
- 
+
 if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 	exit(1);
 }
@@ -977,7 +977,7 @@ function mail_qa_team($data, $compression, $status = false)
 	fclose($fs);
 
 	return 1;
-} 
+}
 
 
 //
@@ -1001,7 +1001,7 @@ function save_text($filename, $text, $filename_copy = null)
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
-}}} 
+}}}
 ";
 }
 
@@ -1009,7 +1009,7 @@ $text
 //  Write an error in a format recognizable to Emacs or MSVC.
 //
 
-function error_report($testname, $logname, $tested) 
+function error_report($testname, $logname, $tested)
 {
 	$testname = realpath($testname);
 	$logname  = realpath($logname);
@@ -1051,7 +1051,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		fwrite($pipes[0], (binary) $stdin);
 	}
 	fclose($pipes[0]);
-	
+
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
 	while (true) {
@@ -1139,7 +1139,7 @@ function show_file_block($file, $block, $section = null)
 
 function binary_section($section)
 {
-	return PHP_MAJOR_VERSION < 6 || 
+	return PHP_MAJOR_VERSION < 6 ||
 		(
 			$section == 'FILE'			||
 	        $section == 'FILEEOF'		||
@@ -1821,7 +1821,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-		
+
 			$wanted_re = str_replace(
 				array(b'%binary_string_optional%'),
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'binary string',
@@ -2240,7 +2240,7 @@ function get_summary($show_ext_summary, $show_html)
 	if ($show_html) {
 		$summary .= "<pre>\n";
 	}
-	
+
 	if ($show_ext_summary) {
 		$summary .= '
 =====================================================================
@@ -2457,12 +2457,12 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 			$mem = "&nbsp;";
 		}
 
-		fwrite($html_file, 
+		fwrite($html_file,
 			"<tr>" .
 			"<td>$result</td>" .
 			"<td>$tested</td>" .
 			"<td>$extra</td>" .
-			"<td>$diff</td>" . 
+			"<td>$diff</td>" .
 			"<td>$mem</td>" .
 			"</tr>\n");
 	}
