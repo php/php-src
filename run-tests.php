@@ -1935,6 +1935,7 @@ COMMAND $cmd
 	if (!$passed) {
 		if (isset($section_text['XFAIL'])) {
 			$restype[] = 'XFAIL';
+			$info = '  XFAIL REASON: ' . $section_text['XFAIL'];
 		} else {
 			$restype[] = 'FAIL';
 		}
