@@ -670,7 +670,9 @@ UPGRADE NOTES - PHP 5.3
                        ReflectionClass::inNamespace()
                        ReflectionClass::getNamespaceName()
                        ReflectionClass::getShortName()
-       - SPL           SplObjectStorage::addAll()
+       - SPL:          DirectoryIterator::getExtension()
+                       SplFileObject::getExtension()
+                       SplObjectStorage::addAll()
                        SplObjectStorage::removeAll()
        - XSL:          XSLTProcessor::setProfiling()
 

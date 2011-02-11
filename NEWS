@@ -148,7 +148,8 @@
   . Fixed bug #53914 (SPL assumes HAVE_GLOB is defined). (Chris Jones)
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
-    
+  . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
+
 - SQLite3 extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
     (Mateusz Kocielski, Pierre)
