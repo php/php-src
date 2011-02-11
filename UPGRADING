@@ -671,7 +671,7 @@ UPGRADE NOTES - PHP 5.3
                        ReflectionClass::getNamespaceName()
                        ReflectionClass::getShortName()
        - SPL:          DirectoryIterator::getExtension()
-                       SplFileObject::getExtension()
+                       SplFileInfo::getExtension()
                        SplObjectStorage::addAll()
                        SplObjectStorage::removeAll()
        - XSL:          XSLTProcessor::setProfiling()
