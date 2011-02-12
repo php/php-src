@@ -174,8 +174,9 @@
 - Zip extension:
   . Added the filename into the return value of stream_get_meta_data(). (Hannes)
   . Fixed bug #53923 (Zip functions assume HAVE_GLOB is defined). (Adam)
+  . Fixed bug #53893 (Wrong return value for ZipArchive::extractTo()). (Pierre)
   . Fixed bug #53885 (ZipArchive segfault with FL_UNCHANGED on empty archive).
-    (Stas, Maksymilian Arciemowicz).
+    (Stas, Maksymilian Arciemowicz). (CVE-2011-0421)
   . Fixed bug #53854 (Missing constants for compression type). (Richard, Adam)
   . Fixed bug #53603 (ZipArchive should quiet stat errors). (brad dot froehle at
     gmail dot com, Gustavo)
