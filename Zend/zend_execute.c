@@ -1258,7 +1258,9 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				Z_TYPE_P(ptr) = IS_STRING;
 
 				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
-					zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+					if (type != BP_VAR_IS) {
+						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+					}
 					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
 					Z_STRLEN_P(ptr) = 0;
 				} else {
