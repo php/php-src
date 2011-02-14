@@ -502,6 +502,8 @@ static void php_snmp_object_free_storage(void *object TSRMLS_DC)
 	netsnmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
+	
+	efree(intern);
 }
 
 static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
