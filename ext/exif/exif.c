@@ -41,7 +41,7 @@
 #include "ext/standard/file.h"
 
 #ifdef PHP_WIN32
-include "win32/php_stdint.h"
+#include "win32/php_stdint.h"
 #endif
 
 #if HAVE_EXIF
@@ -2847,13 +2847,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	}
 
 	if (components < 0) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), byte_count);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal components(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), components);
 		return FALSE;
 	}
+
 	byte_count_signed = (int64_t)components * php_tiff_bytes_per_format[format];
 
 	if (byte_count_signed < 0 || (byte_count_signed > 2147483648)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), byte_count);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC));
 		return FALSE;
 	}
 
