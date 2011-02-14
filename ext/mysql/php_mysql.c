@@ -371,11 +371,11 @@ void timeout(int sig);
 	if (mysql->active_result_id) { \
 		do {					\
 			int type;			\
-			MYSQL_RES *mysql_result;	\
+			MYSQL_RES *_mysql_result;	\
 							\
-			mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);	\
-			if (mysql_result && type==le_result) {						\
-				if (mysql_result_is_unbuffered(mysql_result) && !mysql_eof(mysql_result)) { \
+			_mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);	\
+			if (_mysql_result && type==le_result) {						\
+				if (mysql_result_is_unbuffered(_mysql_result) && !mysql_eof(_mysql_result)) { \
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Function called without first fetching all rows from a previous unbuffered query");	\
 				}						\
 				zend_list_delete(mysql->active_result_id);	\
@@ -2126,12 +2126,12 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			fci.retval_ptr_ptr = &retval_ptr;
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
-					HashTable *ht = Z_ARRVAL_P(ctor_params);
+					HashTable *htl = Z_ARRVAL_P(ctor_params);
 					Bucket *p;
 
 					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-					p = ht->pListHead;
+					fci.params = safe_emalloc(sizeof(zval*), htl->nNumOfElements, 0);
+					p = htl->pListHead;
 					while (p != NULL) {
 						fci.params[fci.param_count++] = (zval**)p->pData;
 						p = p->pListNext;
