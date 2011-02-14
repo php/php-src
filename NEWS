@@ -8,6 +8,8 @@
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
   . Added options to debug backtrace functions. (Stas)
+  . Fixed Bug #53971 (isset() and empty() produce apparently spurious runtime
+    error). (Dmitry)
   . Fixed Bug #53629 (memory leak inside highlight_string()). (Hannes, Ilia)
   . Fixed Bug #51458 (Lack of error context with nested exceptions). (Stas)
   . Fixed Bug #47143 (Throwing an exception in a destructor causes a fatal
