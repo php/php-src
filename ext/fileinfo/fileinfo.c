@@ -474,21 +474,10 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			/* determine if the file is a local file or remote URL */
 			char *tmp2;
 			php_stream_wrapper *wrap;
-			struct stat sb;
+			php_stream_statbuf ssb;
 
 			if (buffer == NULL || !*buffer) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename or path");
-				RETVAL_FALSE;
-				goto clean;
-			}
-
-			if (php_sys_stat(buffer, &sb) == 0) {
-					  if (sb.st_mode & _S_IFDIR) {
-								 ret_val = mime_directory;
-								 goto common;
-					  }
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "File or path not found '%s'", buffer);
 				RETVAL_FALSE;
 				goto clean;
 			}
@@ -508,7 +497,14 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 					goto clean;
 				}
 
-				ret_val = (char *)magic_stream(magic, stream);
+				if (php_stream_stat(stream, &ssb) == SUCCESS) {
+					if (ssb.sb.st_mode & S_IFDIR) {
+						ret_val = mime_directory;
+					} else {
+						ret_val = (char *)magic_stream(magic, stream);
+					}
+				}
+
 				php_stream_close(stream);
 			}
 			break;
