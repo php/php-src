@@ -62,6 +62,10 @@
   . Fixed bug #47435 (FILTER_FLAG_NO_RES_RANGE don't work with ipv6).
     (Ilia, valli at icsurselva dot ch)
 
+- Fileinfo extension:
+  . Fixed bug #54016 (finfo_file() Cannot determine filetype in archives).
+    (Hannes)
+
 - Gettext
   . Fixed bug #53837 (_() crashes on Windows when no LANG or LANGUAGE 
     environment variable are set). (Pierre)
