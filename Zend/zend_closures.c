@@ -323,6 +323,7 @@ static int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, 
 {
 	HashTable *target = va_arg(args, HashTable*);
 	zend_bool is_ref;
+	zval *tmp;
 
 	if (Z_TYPE_PP(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
 		is_ref = Z_TYPE_PP(p) & IS_LEXICAL_REF;
@@ -332,25 +333,31 @@ static int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, 
 		}
 		if (zend_hash_quick_find(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, (void **) &p) == FAILURE) {
 			if (is_ref) {
-				zval *tmp;
-
 				ALLOC_INIT_ZVAL(tmp);
 				Z_SET_ISREF_P(tmp);
 				zend_hash_quick_add(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, &tmp, sizeof(zval*), (void**)&p);
 			} else {
-				p = &EG(uninitialized_zval_ptr);
+				tmp = EG(uninitialized_zval_ptr);
 				zend_error(E_NOTICE,"Undefined variable: %s", key->arKey);
 			}
 		} else {
 			if (is_ref) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+				tmp = *p;
 			} else if (Z_ISREF_PP(p)) {
-				SEPARATE_ZVAL(p);
+				ALLOC_INIT_ZVAL(tmp);
+				*tmp = **p;
+				Z_SET_REFCOUNT_P(tmp, 0);
+				Z_UNSET_ISREF_P(tmp);
+			} else {
+				tmp = *p;
 			}
 		}
+	} else {
+		tmp = *p;
 	}
-	if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, p, sizeof(zval*), NULL) == SUCCESS) {
-		Z_ADDREF_PP(p);
+	if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, &tmp, sizeof(zval*), NULL) == SUCCESS) {
+		Z_ADDREF_P(tmp);
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
