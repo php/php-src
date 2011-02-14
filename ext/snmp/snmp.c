@@ -1988,9 +1988,9 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 
 	while (zend_hash_get_current_data_ex(&php_snmp_properties, (void**)&hnd, &pos) == SUCCESS) {
 		zend_hash_get_current_key_ex(&php_snmp_properties, &key, &key_len, &num_key, 0, &pos);
-		MAKE_STD_ZVAL(val);
 		if (!hnd->read_func || hnd->read_func(obj, &val TSRMLS_CC) != SUCCESS) {
 			val = EG(uninitialized_zval_ptr);
+			Z_ADDREF_P(val);
 		}
 		zend_hash_update(props, key, key_len, (void *)&val, sizeof(zval *), NULL);
 		zend_hash_move_forward_ex(&php_snmp_properties, &pos);
