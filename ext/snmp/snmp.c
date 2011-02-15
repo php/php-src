@@ -2007,6 +2007,10 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval **retval TSRMLS
 	MAKE_STD_ZVAL(*retval);
 	array_init(*retval);
 
+	if (snmp_object->session == NULL) {
+		return SUCCESS;
+	}
+		
 	MAKE_STD_ZVAL(val);
 	ZVAL_STRINGL(val, snmp_object->session->peername, strlen(snmp_object->session->peername), 1);
 	add_assoc_zval(*retval, "hostname", val);
