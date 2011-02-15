@@ -2243,6 +2243,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
       AC_MSG_ERROR([ICU version 3.4 or later is required])
     fi
 
+    ICU_VERSION=$icu_version
     ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
     ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
     PHP_EVAL_INCLINE($ICU_INCS)
