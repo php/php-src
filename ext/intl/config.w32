@@ -71,12 +71,17 @@ if (PHP_INTL != "no") {
 				resourcebundle_class.c \
 				resourcebundle_iterator.c",
 				"intl");
-		ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
-				spoofchecker.c \
-				spoofchecker_class.c \
-				spoofchecker_create.c \
-				spoofchecker_main.c",
-				"intl");
+
+		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
+			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
+					spoofchecker.c \
+					spoofchecker_class.c \
+					spoofchecker_create.c \
+					spoofchecker_main.c",
+					"intl");
+					AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
+		}
+
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
 				transliterator.c \
 				transliterator_class.c \
