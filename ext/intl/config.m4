@@ -9,7 +9,14 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
   PHP_REQUIRE_CXX()
-
+  if test "$icu_version" -ge "4002"; then
+    icu_spoof_src=" spoofchecker/spoofchecker_class.c \
+    spoofchecker/spoofchecker.c\
+    spoofchecker/spoofchecker_create.c\
+    spoofchecker/spoofchecker_main.c"
+  else
+    icu_spoof_src=""
+  fi
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
@@ -59,11 +66,7 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
     idn/idn.c \
-    spoofchecker/spoofchecker_class.c \
-    spoofchecker/spoofchecker.c\
-    spoofchecker/spoofchecker_create.c\
-    spoofchecker/spoofchecker_main.c, $ext_shared,,$ICU_INCS)
-
+    $icu_spoof_src, $ext_shared,,$ICU_INCS)
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/common)
   PHP_ADD_BUILD_DIR($ext_builddir/formatter)

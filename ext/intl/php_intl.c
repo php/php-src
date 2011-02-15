@@ -70,10 +70,12 @@
 
 #include "idn/idn.h"
 
-#include "spoofchecker/spoofchecker_class.h"
-#include "spoofchecker/spoofchecker.h"
-#include "spoofchecker/spoofchecker_create.h"
-#include "spoofchecker/spoofchecker_main.h"
+#if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
+# include "spoofchecker/spoofchecker_class.h"
+# include "spoofchecker/spoofchecker.h"
+# include "spoofchecker/spoofchecker_create.h"
+# include "spoofchecker/spoofchecker_main.h"
+#endif
 
 #include "msgformat/msgformat.h"
 #include "common/common_error.h"
@@ -638,12 +640,13 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
+#if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class( TSRMLS_C );
 
 	/* Expose Spoofchecker constants to PHP scripts */
 	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
+#endif
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
 
