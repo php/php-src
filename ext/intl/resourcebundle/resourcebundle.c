@@ -29,7 +29,6 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 	UResType               restype;
 	const UChar*           ufield;
 	const uint8_t*         bfield;
-	char *                 cfield;
 	const int32_t*         vfield;
 	int32_t                ilen;
 	int                    i;
