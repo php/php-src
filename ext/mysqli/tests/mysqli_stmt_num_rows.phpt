@@ -82,8 +82,8 @@ require_once('skipifconnectfailure.inc');
 			$i++;
 		} while (mysqli_stmt_fetch($stmt));
 
-		if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
-			printf("[54] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+		if (7 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+			printf("[54] Expecting int/7, got %s/%s\n", gettype($tmp), $tmp);
 
 	} else {
 		printf("[055] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));

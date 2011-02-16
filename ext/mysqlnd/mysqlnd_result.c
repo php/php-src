@@ -1401,7 +1401,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result TSRMLS_DC)
 {
 	/* Be compatible with libmysql. We count row_count, but will return 0 */
-	return result->stored_data? result->stored_data->row_count:0;
+	return result->stored_data? result->stored_data->row_count:(result->unbuf && result->unbuf->eof_reached? result->unbuf->row_count:0);
 }
 /* }}} */
 
