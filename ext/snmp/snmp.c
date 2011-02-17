@@ -117,6 +117,17 @@
 #define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
 #endif
 
+/* For net-snmp prior to 5.4 */
+//#ifndef HAVE_SHUTDOWN_SNMP_LOGGING
+extern netsnmp_log_handler *logh_head;
+#define shutdown_snmp_logging() \
+	{ \
+		snmp_disable_log(); \
+		while(NULL != logh_head) \
+			netsnmp_remove_loghandler( logh_head ); \
+	}
+//#endif
+
 /* For really old ucd-snmp versions.. */
 #ifndef HAVE_SNMP_PARSE_OID
 #define snmp_parse_oid read_objid
@@ -960,7 +971,7 @@ static int php_snmp_parse_oid(int st, struct objid_set *objid_set, zval **oid, z
 			}
 		}
 		objid_set->count++;
-	} else if (Z_TYPE_PP(oid) == IS_ARRAY) { // we got objid array
+	} else if (Z_TYPE_PP(oid) == IS_ARRAY) { /* we got objid array */
 		if (zend_hash_num_elements(Z_ARRVAL_PP(oid)) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Got empty OID array");
 			return FALSE;
@@ -1366,7 +1377,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
 		if (snmp_object->max_oids > 0) {
 			objid_set.step = snmp_object->max_oids;
-			if (max_repetitions < 0) { // unspecified in function call, use session-wise
+			if (max_repetitions < 0) { /* unspecified in function call, use session-wise */
 				max_repetitions = snmp_object->max_oids;
 			}
 		}
@@ -1385,7 +1396,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (max_repetitions < 0) {
-		max_repetitions = 20; // provide correct default value
+		max_repetitions = 20; /* provide correct default value */
 	}
 
 	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, session, &objid_set, non_repeaters, max_repetitions, valueretrieval);
@@ -1706,6 +1717,11 @@ PHP_METHOD(snmp, open)
 			return;
 	}
 
+	/* handle re-open of snmp session */
+	if (snmp_object->session) {
+		netsnmp_session_free(&(snmp_object->session));
+	}
+	
 	if (netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries TSRMLS_CC)) {
 		return;
 	}

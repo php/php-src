@@ -112,6 +112,14 @@ if test "$PHP_SNMP" != "no"; then
     $SNMP_SHARED_LIBADD
   ])
 
+  dnl Check whether shutdown_snmp_logging() exists.
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, shutdown_snmp_logging,
+  [
+    AC_DEFINE(HAVE_SHUTDOWN_SNMP_LOGGING, 1, [ ])
+  ], [], [
+    $SNMP_SHARED_LIBADD
+  ])
+
   dnl Test build.
   PHP_CHECK_LIBRARY($SNMP_LIBNAME, init_snmp,
   [
