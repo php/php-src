@@ -118,7 +118,7 @@
 #endif
 
 /* For net-snmp prior to 5.4 */
-//#ifndef HAVE_SHUTDOWN_SNMP_LOGGING
+#ifndef HAVE_SHUTDOWN_SNMP_LOGGING
 extern netsnmp_log_handler *logh_head;
 #define shutdown_snmp_logging() \
 	{ \
@@ -126,7 +126,7 @@ extern netsnmp_log_handler *logh_head;
 		while(NULL != logh_head) \
 			netsnmp_remove_loghandler( logh_head ); \
 	}
-//#endif
+#endif
 
 /* For really old ucd-snmp versions.. */
 #ifndef HAVE_SNMP_PARSE_OID
