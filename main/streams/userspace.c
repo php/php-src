@@ -26,6 +26,7 @@
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#include <stddef.h>
 
 static int le_protocols;
 
@@ -129,6 +130,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_LOCK     "stream_lock"
 #define USERSTREAM_CAST		"stream_cast"
 #define USERSTREAM_SET_OPTION	"stream_set_option"
+#define USERSTREAM_TRUNCATE	"stream_truncate"
 
 /* {{{ class should have methods like these:
  
@@ -251,6 +253,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	}
 
 	function stream_lock($operation)
+	{
+		return true / false;
+	}
+
+ 	function stream_truncate($new_size)
 	{
 		return true / false;
 	}
@@ -991,6 +998,51 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			}
 		}
 
+		break;
+		
+	case PHP_STREAM_OPTION_TRUNCATE_API:
+		ZVAL_STRINGL(&func_name, USERSTREAM_TRUNCATE, sizeof(USERSTREAM_TRUNCATE)-1, 0);
+		
+		switch (value) {
+		case PHP_STREAM_TRUNCATE_SUPPORTED:
+			if (zend_is_callable_ex(&func_name, us->object, IS_CALLABLE_CHECK_SILENT,
+					NULL, NULL, NULL, NULL TSRMLS_CC))
+				ret = PHP_STREAM_OPTION_RETURN_OK;
+			else
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+			break;
+			
+		case PHP_STREAM_TRUNCATE_SET_SIZE: {
+			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;
+			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
+				MAKE_STD_ZVAL(zvalue);
+				ZVAL_LONG(zvalue, (long)new_size);
+				args[0] = &zvalue;
+				call_result = call_user_function_ex(NULL,
+													&us->object,
+													&func_name,
+													&retval,
+													1, args, 0, NULL TSRMLS_CC);
+				if (call_result == SUCCESS && retval != NULL) {
+					if (Z_TYPE_P(retval) == IS_BOOL) {
+						ret = Z_LVAL_P(retval) ? PHP_STREAM_OPTION_RETURN_OK :
+												 PHP_STREAM_OPTION_RETURN_ERR;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,
+								"%s::" USERSTREAM_TRUNCATE " did not return a boolean!",
+								us->wrapper->classname);
+					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"%s::" USERSTREAM_TRUNCATE " is not implemented!",
+							us->wrapper->classname);
+				}
+			} else { /* bad new size */
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			break;
+		}
+		}
 		break;
 	
 	case PHP_STREAM_OPTION_READ_BUFFER:
