@@ -176,7 +176,10 @@ UPGRADE NOTES - PHP X.Y
 6. Changes made to existing classes
 ===================================
 
-- 
+- Classes that implement stream wrappers can define a method called
+  stream_truncate that will respond to truncation, e.g. through ftruncate.
+  Strictly speaking, this is an addition to the user-space stream wrapper
+  template, not a change to an actual class.
 
 =============
 7. Deprecated
