@@ -1,6 +1,9 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.6
+- Zend Engine:
+  . Fixed bug #43512 (same parameter name can be used multiple times in
+    method/function definition). (Felipe)
 
 17 Feb 2011, PHP 5.3.6RC1
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)

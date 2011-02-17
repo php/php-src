@@ -387,6 +387,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 			result->op_type = IS_CV;
 			result->u.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len);
 			result->u.EA.type = 0;
+			varname->u.constant.value.str.val = CG(active_op_array)->vars[result->u.var].name;
 			return;
 		}
 	}
