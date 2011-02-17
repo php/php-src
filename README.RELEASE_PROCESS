@@ -43,15 +43,15 @@ Rolling a non stable release (alpha/beta/RC)
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
-2. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
-Do not use abbreviations for alpha and beta.
-
-3. Commit those changes
-
-4. run the "scripts/dev/credits" script in php-src and commit the changes in the
+2. run the "scripts/dev/credits" script in php-src and commit the changes in the
 credits files in ext/standard.
 
-5. tag the repository with the version f.e. "``cvs tag php_4_4_1RC1``"
+3. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+Do not use abbreviations for alpha and beta.
+
+4. Commit those changes and note the revision id.
+
+5. tag the repository with the version. To do the tag in a fast way do a svn copy on the server using full URLs. You should use the revision id from the above commit to prevent mistakes in case there was a commit in between. f.e. "``svn cp https://svn.php.net/repository/php/php-src/branches/PHP_5_3@308399  https://svn.php.net/repository/php/php-src/tags/php_5_3_6RC1``"
 (of course, you need to change that to the version you're rolling an RC for).
 
 6. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
@@ -65,7 +65,7 @@ correctly work.
 8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
 branch if you're rolling 4.4.x releases).
 
-9. You do not have to update the tree, but of course you can with "``cvs up -dP``".
+9. You do not have to update the tree, but of course you can with "``svn up``".
 
 10. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
@@ -100,7 +100,7 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-3. Update the MD5 sums in ``web/qa/trunk/include/rc-md5sums.txt`` (no empty lines).
+3. Update the MD5 sums in ``web/qa/trunk/include/rc-md5sums.txt`` (no empty lines, ordered by filename, odler version number first, .bz2 before .gz).
 
 4. Update in ``web/qa/trunk/include/release-qa.php`` constants with the new RC and
 commit this.
@@ -111,10 +111,9 @@ commit this.
 
  c. ``$RELEASE_PROCESS`` = array(4 => true, 5 => true)
 
-1. Update in ``php-bugs/trunk/include/functions.inc`` the ``show_version_option``
-function to include the new RC and commit.
+1. Update in ``php-bugs/trunk/include/php_versions.php`` to include the new RC and commit.
 
-2. Update ``phpweb/include/version.inc`` (x=major version number)
+2. Update ``php/trunk/include/version.inc`` (x=major version number)
 
  a. ``$PHP_x_RC`` = "5.3.0RC1"
 
@@ -122,7 +121,7 @@ function to include the new RC and commit.
 
 3. Commit those changes:
 
- a. ``cvs commit include/version.inc include/releases.inc``
+ a. ``svn commit include/version.inc include/releases.inc``
 
 4. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
