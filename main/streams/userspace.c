@@ -938,7 +938,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 	zval *retval = NULL;
 	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
-	int ret = -1;
+	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	zval *zvalue = NULL;
 	zval **args[3];
 
@@ -991,10 +991,11 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		} else if (call_result == FAILURE) {
 			if (value == 0) { 
 			   	/* lock support test (TODO: more check) */
-				ret = 0;
+				ret = PHP_STREAM_OPTION_RETURN_OK;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_LOCK " is not implemented!", 
 								 us->wrapper->classname);
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
 			}
 		}
 
@@ -1093,16 +1094,15 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			&retval,
 			3, args, 0, NULL TSRMLS_CC);
 	
-		do {
-			if (call_result == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
-						us->wrapper->classname);
-				break;
-			}
-			if (retval && zend_is_true(retval)) {
-				ret = PHP_STREAM_OPTION_RETURN_OK;
-			}
-		} while (0);
+		if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
+					us->wrapper->classname);
+			ret = PHP_STREAM_OPTION_RETURN_ERR;
+		} else if (retval && zend_is_true(retval)) {
+			ret = PHP_STREAM_OPTION_RETURN_OK;
+		} else {
+			ret = PHP_STREAM_OPTION_RETURN_ERR;
+		}
 
 		if (zoption) {
 			zval_ptr_dtor(&zoption);
