@@ -61,6 +61,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
+#include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
@@ -74,16 +75,6 @@
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
-
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-#if HAVE_LIBEDIT
-#include <editline/readline.h>
-#else
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-#include "php_cli_readline.h"
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -121,6 +112,12 @@ PHPAPI extern char *php_ini_scanned_files;
 #define PHP_MODE_REFLECTION_ZEND_EXTENSION 12
 #define PHP_MODE_SHOW_INI_CONFIG        13
 
+cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
+PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks()
+{
+	return &cli_shell_callbacks;
+}
+
 const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"register_argc_argv=1\n"
@@ -131,10 +128,6 @@ const char HARDCODED_INI[] =
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-static char php_last_char = '\0';
-static FILE *pager_pipe = NULL;
-#endif
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -256,25 +249,19 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-static inline size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
 #endif
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-	if (CLIR_G(prompt_str)) {
-		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
-		return str_length;
+	if (cli_shell_callbacks.cli_shell_write) {
+		size_t shell_wrote;
+		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length TSRMLS_CC);
+		if (shell_wrote > -1) {
+			return shell_wrote;
+		}
 	}
-
-	if (CLIR_G(pager) && *CLIR_G(pager) && !pager_pipe) {
-		pager_pipe = VCWD_POPEN(CLIR_G(pager), "w");
-	}
-	if (pager_pipe) {
-		return fwrite(str, 1, MIN(str_length, 16384), pager_pipe);
-	}
-#endif
 
 #ifdef PHP_WRITE_STDOUT
 	do {
@@ -301,12 +288,17 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	uint remaining = str_length;
 	size_t ret;
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 	if (!str_length) {
 		return 0;
 	}
-	php_last_char = str[str_length-1];
-#endif
+
+	if (cli_shell_callbacks.cli_shell_ub_write) {
+		int ub_wrote;
+		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
+		if (ub_wrote > -1) {
+			return ub_wrote;
+		}
+	}
 
 	while (remaining > 0)
 	{
@@ -419,11 +411,7 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-	if (php_module_startup(sapi_module, &cli_readline_module_entry, 1)==FAILURE) {
-#else
 	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
-#endif
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1142,117 +1130,13 @@ int main(int argc, char *argv[])
 				cli_register_file_handles(TSRMLS_C);
 			}
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-			if (interactive) {
-				char *line;
-				size_t size = 4096, pos = 0, len;
-				char *code = emalloc(size);
-				char *prompt = cli_get_prompt("php", '>' TSRMLS_CC);
-				char *history_file;
-
-				if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
-					zend_file_handle *prepend_file_p;
-					zend_file_handle prepend_file = {0};
-
-					prepend_file.filename = PG(auto_prepend_file);
-					prepend_file.opened_path = NULL;
-					prepend_file.free_filename = 0;
-					prepend_file.type = ZEND_HANDLE_FILENAME;
-					prepend_file_p = &prepend_file;
-
-					zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
-				}
-
-				history_file = tilde_expand("~/.php_history");
-				rl_attempted_completion_function = cli_code_completion;
-				rl_special_prefixes = "$";
-				read_history(history_file);
-
-				EG(exit_status) = 0;
-				while ((line = readline(prompt)) != NULL) {
-					if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
-						free(line);
-						break;
-					}
-
-					if (!pos && !*line) {
-						free(line);
-						continue;
-					}
-
-					len = strlen(line);
-
-					if (line[0] == '#') {
-						char *param = strstr(&line[1], "=");
-						if (param) {
-							char *cmd;
-							uint cmd_len;
-							param++;
-							cmd_len = param - &line[1] - 1;
-							cmd = estrndup(&line[1], cmd_len);
-
-							zend_alter_ini_entry_ex(cmd, cmd_len + 1, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
-							efree(cmd);
-							add_history(line);
-
-							efree(prompt);
-							/* TODO: This might be wrong! */
-							prompt = cli_get_prompt("php", '>' TSRMLS_CC);
-							continue;
-						}
-					}
-
-					if (pos + len + 2 > size) {
-						size = pos + len + 2;
-						code = erealloc(code, size);
-					}
-					memcpy(&code[pos], line, len);
-					pos += len;
-					code[pos] = '\n';
-					code[++pos] = '\0';
-
-					if (*line) {
-						add_history(line);
-					}
-
-					free(line);
-					efree(prompt);
-
-					if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
-						continue;
-					}
-
-					zend_try {
-						zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
-					} zend_end_try();
-
-					pos = 0;
-					
-					if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
-						sapi_cli_single_write("\n", 1 TSRMLS_CC);
-					}
-
-					if (EG(exception)) {
-						zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
-					}
-
-					if (pager_pipe) {
-						fclose(pager_pipe);
-						pager_pipe = NULL;
-					}
-
-					php_last_char = '\0';
-				}
-				write_history(history_file);
-				free(history_file);
-				efree(code);
-				efree(prompt);
+			if (interactive && cli_shell_callbacks.cli_shell_run) {
+				exit_status = cli_shell_callbacks.cli_shell_run();
+			} else {
+				php_execute_script(&file_handle TSRMLS_CC);
 				exit_status = EG(exit_status);
-				break;
 			}
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
-			php_execute_script(&file_handle TSRMLS_CC);
-			exit_status = EG(exit_status);
+
 			break;
 		case PHP_MODE_LINT:
 			exit_status = php_lint_script(&file_handle TSRMLS_CC);

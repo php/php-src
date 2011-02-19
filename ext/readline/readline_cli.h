@@ -34,11 +34,10 @@ ZEND_END_MODULE_GLOBALS(cli_readline)
 # define CLIR_G(v) (cli_readline_globals.v)
 #endif
 
+extern PHP_MINIT_FUNCTION(cli_readline);
+extern PHP_MSHUTDOWN_FUNCTION(cli_readline);
+extern PHP_MINFO_FUNCTION(cli_readline);
+
 ZEND_EXTERN_MODULE_GLOBALS(cli_readline)
 
-extern zend_module_entry cli_readline_module_entry;
 
-char *cli_get_prompt(char *block, char prompt TSRMLS_DC);
-int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC);
-
-char **cli_code_completion(const char *text, int start, int end);

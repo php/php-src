@@ -112,6 +112,7 @@ PHP                                                                        NEWS
     . Added "cli.prompt" php.ini setting to configure the shell prompt.
     . Added shortcut #inisetting=value to change ini settings at run-time.
     . Changed shell not to terminate on fatal errors.
+    . Interactive shell works with shared readline extension. FR #53878.
 
 - Improved FastCGI SAPI: (Dmitry)
   . Added apache compatible functions: apache_child_terminate(),
