@@ -26,6 +26,7 @@
 
 #include "php.h"
 #include "php_readline.h"
+#include "readline_cli.h"
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
@@ -66,7 +67,9 @@ static zval *_readline_completion = NULL;
 static zval _readline_array;
 
 PHP_MINIT_FUNCTION(readline);
+PHP_MSHUTDOWN_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
+PHP_MINFO_FUNCTION(readline);
 
 /* }}} */
 
@@ -151,11 +154,11 @@ zend_module_entry readline_module_entry = {
 	"readline", 
 	php_readline_functions, 
 	PHP_MINIT(readline), 
-	NULL,
+	PHP_MSHUTDOWN(readline),
 	NULL,
 	PHP_RSHUTDOWN(readline),
-	NULL, 
-	NO_VERSION_YET,
+	PHP_MINFO(readline), 
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -166,7 +169,12 @@ ZEND_GET_MODULE(readline)
 PHP_MINIT_FUNCTION(readline)
 {
     	using_history();
-    	return SUCCESS;
+    	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
+}
+
+PHP_MSHUTDOWN_FUNCTION(readline)
+{
+	return PHP_MSHUTDOWN(cli_readline)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 }
 
 PHP_RSHUTDOWN_FUNCTION(readline)
@@ -184,6 +192,11 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 #endif
 
 	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(readline)
+{
+	return PHP_MINFO(cli_readline)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 
 /* }}} */

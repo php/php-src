@@ -21,8 +21,6 @@
 
 #include "php.h"
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
 #endif
@@ -61,12 +59,46 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
+#include "zend_exceptions.h"
 
-#include "php_cli_readline.h"
+#include "sapi/cli/cli.h"
+#include "readline_cli.h"
+
+#ifdef COMPILE_DL_READLINE
+#include <dlfcn.h>
+#endif
 
 #define DEFAULT_PROMPT "\\b \\> "
 
 ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
+
+static char php_last_char = '\0';
+static FILE *pager_pipe = NULL;
+
+static size_t readline_shell_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+{
+	if (CLIR_G(prompt_str)) {
+		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
+		return str_length;
+	}
+
+	if (CLIR_G(pager) && *CLIR_G(pager) && !pager_pipe) {
+		pager_pipe = VCWD_POPEN(CLIR_G(pager), "w");
+	}
+	if (pager_pipe) {
+		return fwrite(str, 1, MIN(str_length, 16384), pager_pipe);
+	}
+
+	return -1;
+}
+/* }}} */
+
+static int readline_shell_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+{
+	php_last_char = str[str_length-1];
+	return -1;
+}
+/* }}} */
 
 static void cli_readline_init_globals(zend_cli_readline_globals *rg TSRMLS_DC)
 {
@@ -80,36 +112,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cli.prompt", DEFAULT_PROMPT, PHP_INI_ALL, OnUpdateString, prompt, zend_cli_readline_globals, cli_readline_globals)
 PHP_INI_END()
 
-static PHP_MINIT_FUNCTION(cli_readline)
-{
-	ZEND_INIT_MODULE_GLOBALS(cli_readline, cli_readline_init_globals, NULL);
-	REGISTER_INI_ENTRIES();
-	return SUCCESS;
-}
 
-static PHP_MSHUTDOWN_FUNCTION(cli_readline)
-{
-	UNREGISTER_INI_ENTRIES();
-	return SUCCESS;
-}
-
-static PHP_MINFO_FUNCTION(cli_readline)
-{
-	DISPLAY_INI_ENTRIES();
-}
-
-zend_module_entry cli_readline_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"cli-readline",
-	NULL,
-	PHP_MINIT(cli_readline),
-	PHP_MSHUTDOWN(cli_readline),
-	NULL,
-	NULL,
-	PHP_MINFO(cli_readline),
-	PHP_VERSION,
-	STANDARD_MODULE_PROPERTIES
-};
 
 typedef enum {
 	body,
@@ -124,7 +127,7 @@ typedef enum {
 	outside,
 } php_code_type;
 
-char *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
+static char *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
 {
 	smart_str retval = {0};
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
@@ -192,8 +195,9 @@ char *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
 	smart_str_0(&retval);	
 	return retval.c;
 }
+/* }}} */
 
-int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
+static int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{{ */
 {
 	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
@@ -566,13 +570,177 @@ TODO:
 	return retval;
 } /* }}} */
 
-char **cli_code_completion(const char *text, int start, int end) /* {{{ */
+static char **cli_code_completion(const char *text, int start, int end) /* {{{ */
 {
 	return rl_completion_matches(text, cli_completion_generator);
 }
 /* }}} */
 
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
+static int readline_shell_run(TSRMLS_D) /* {{{ */
+{
+	char *line;
+	size_t size = 4096, pos = 0, len;
+	char *code = emalloc(size);
+	char *prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+	char *history_file;
+
+	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
+		zend_file_handle *prepend_file_p;
+		zend_file_handle prepend_file = {0};
+
+		prepend_file.filename = PG(auto_prepend_file);
+		prepend_file.opened_path = NULL;
+		prepend_file.free_filename = 0;
+		prepend_file.type = ZEND_HANDLE_FILENAME;
+		prepend_file_p = &prepend_file;
+
+		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
+	}
+
+	history_file = tilde_expand("~/.php_history");
+	rl_attempted_completion_function = cli_code_completion;
+	rl_special_prefixes = "$";
+	read_history(history_file);
+
+	EG(exit_status) = 0;
+	while ((line = readline(prompt)) != NULL) {
+		if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
+			free(line);
+			break;
+		}
+
+		if (!pos && !*line) {
+			free(line);
+			continue;
+		}
+
+		len = strlen(line);
+
+		if (line[0] == '#') {
+			char *param = strstr(&line[1], "=");
+			if (param) {
+				char *cmd;
+				uint cmd_len;
+				param++;
+				cmd_len = param - &line[1] - 1;
+				cmd = estrndup(&line[1], cmd_len);
+
+				zend_alter_ini_entry_ex(cmd, cmd_len + 1, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+				efree(cmd);
+				add_history(line);
+
+				efree(prompt);
+				/* TODO: This might be wrong! */
+				prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+				continue;
+			}
+		}
+
+		if (pos + len + 2 > size) {
+			size = pos + len + 2;
+			code = erealloc(code, size);
+		}
+		memcpy(&code[pos], line, len);
+		pos += len;
+		code[pos] = '\n';
+		code[++pos] = '\0';
+
+		if (*line) {
+			add_history(line);
+		}
+
+		free(line);
+		efree(prompt);
+
+		if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
+			continue;
+		}
+
+		zend_try {
+			zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
+		} zend_end_try();
+
+		pos = 0;
+					
+		if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
+			readline_shell_write("\n", 1 TSRMLS_CC);
+		}
+
+		if (EG(exception)) {
+			zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
+		}
+
+		if (pager_pipe) {
+			fclose(pager_pipe);
+			pager_pipe = NULL;
+		}
+
+		php_last_char = '\0';
+	}
+	write_history(history_file);
+	free(history_file);
+	efree(code);
+	efree(prompt);
+	return EG(exit_status);
+}
+/* }}} */
+
+/*
+#ifdef COMPILE_DL_READLINE
+This dlsym() is always used as even the CGI SAPI is linked against "CLI"-only
+extensions. If that is being changed dlsym() should only be used when building
+this extension sharedto offer compatibility.
+*/
+#define GET_SHELL_CB(cb) \
+	do { \
+		(cb) = NULL; \
+		cli_shell_callbacks_t *(*get_callbacks)(); \
+		get_callbacks = dlsym(RTLD_DEFAULT, "php_cli_get_shell_callbacks"); \
+		if (get_callbacks) { \
+			(cb) = get_callbacks(); \
+		} \
+	} while(0)
+/*#else
+#define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()
+#endif*/
+
+PHP_MINIT_FUNCTION(cli_readline)
+{
+	cli_shell_callbacks_t *cb;
+
+	ZEND_INIT_MODULE_GLOBALS(cli_readline, cli_readline_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
+
+	GET_SHELL_CB(cb);
+	if (cb) {
+		cb->cli_shell_write = readline_shell_write;
+		cb->cli_shell_ub_write = readline_shell_ub_write;
+		cb->cli_shell_run = readline_shell_run;
+	}
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(cli_readline)
+{
+	cli_shell_callbacks_t *cb;
+
+	UNREGISTER_INI_ENTRIES();
+
+	GET_SHELL_CB(cb);
+	if (cb) {
+		cb->cli_shell_write = NULL;
+		cb->cli_shell_ub_write = NULL;
+		cb->cli_shell_run = NULL;
+	}
+
+	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(cli_readline)
+{
+	DISPLAY_INI_ENTRIES();
+}
 
 /*
  * Local variables:

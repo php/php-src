@@ -14,7 +14,7 @@ if test "$PHP_CLI" != "no"; then
   SAPI_CLI_PATH=sapi/cli/php
 
   dnl Select SAPI
-  PHP_SELECT_SAPI(cli, program, php_cli.c php_cli_readline.c,, '$(SAPI_CLI_PATH)')
+  PHP_SELECT_SAPI(cli, program, php_cli.c,, '$(SAPI_CLI_PATH)')
 
   case $host_alias in
   *aix*)
