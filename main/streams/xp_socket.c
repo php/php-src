@@ -400,10 +400,6 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				}
 #endif
 				
-				case PHP_STREAM_OPTION_WRITE_BUFFER:
-					php_stream_set_chunk_size(stream, (ptrparam ? *(size_t *)ptrparam : PHP_SOCK_CHUNK_SIZE));
-					return PHP_STREAM_OPTION_RETURN_OK;
-
 				default:
 					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 			}

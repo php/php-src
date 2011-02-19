@@ -164,7 +164,9 @@ UPGRADE NOTES - PHP X.Y
   strings. This breaks code that iterated the resulting stream array using a
   numeric index, but makes easier to identify which of the passed streams are
   present in the result.
- 
+- stream_set_write_buffer() no longer disables the read buffer of a plain
+  stream when 0 is given as the second argument.
+- stream_set_write_buffer() no longer changes the chunk size in socket streams.
 
 ===================================
 5. Changes made to existing methods
@@ -325,6 +327,7 @@ UPGRADE NOTES - PHP X.Y
          - get_declared_traits()
          - http_response_code()
          - trait_exists()
+         - stream_set_chunk_size()
 
      f. New global constants
 

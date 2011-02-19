@@ -557,7 +557,7 @@ PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
 	char *stream_xport;
-	int stream_xport_len;
+	uint stream_xport_len;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -586,7 +586,8 @@ PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
 	char *stream_protocol;
-	int key_flags, stream_protocol_len = 0;
+	int key_flags;
+	uint stream_protocol_len = 0;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -924,7 +925,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 	HashPosition pos, opos;
 	zval **wval, **oval;
 	char *wkey, *okey;
-	int wkey_len, okey_len;
+	uint wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
 
@@ -1430,6 +1431,40 @@ PHP_FUNCTION(stream_set_write_buffer)
 	}
 
 	RETURN_LONG(ret == 0 ? 0 : EOF);
+}
+/* }}} */
+
+/* {{{ proto int stream_set_chunk_size(resource fp, int chunk_size)
+   Set the stream chunk size */
+PHP_FUNCTION(stream_set_chunk_size)
+{
+	int			ret;
+	long		csize;
+	zval		*zstream;
+	php_stream	*stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &csize) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (csize <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size must be a positive integer, given %ld", csize);
+		RETURN_FALSE;
+	}
+	/* stream.chunk_size is actually a size_t, but php_stream_set_option 
+	 * can only use an int to accept the new value and return the old one.
+	 * In any case, values larger than INT_MAX for a chunk size make no sense.
+	 */
+	if (csize > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size cannot be larger than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, &zstream);
+
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_SET_CHUNK_SIZE, (int)csize, NULL);
+	
+	RETURN_LONG(ret > 0 ? (long)ret : (long)EOF);
 }
 /* }}} */
 
