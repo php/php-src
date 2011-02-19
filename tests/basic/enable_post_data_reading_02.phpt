@@ -20,7 +20,7 @@ array(0) {
 }
 array(0) {
 }
-string(224) "-----------------------------20896060251896012921717172737
+string(%d) "-----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="file1"; filename="file1.txt"
 Content-Type: text/plain-file
 
