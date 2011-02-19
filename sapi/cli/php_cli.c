@@ -1131,7 +1131,7 @@ int main(int argc, char *argv[])
 			}
 
 			if (interactive && cli_shell_callbacks.cli_shell_run) {
-				exit_status = cli_shell_callbacks.cli_shell_run();
+				exit_status = cli_shell_callbacks.cli_shell_run(TSRMLS_C);
 			} else {
 				php_execute_script(&file_handle TSRMLS_CC);
 				exit_status = EG(exit_status);

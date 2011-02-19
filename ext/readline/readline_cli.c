@@ -68,6 +68,10 @@
 #include <dlfcn.h>
 #endif
 
+#ifndef RTLD_DEFAULT
+#define RTLD_DEFAULT NULL
+#endif
+
 #define DEFAULT_PROMPT "\\b \\> "
 
 ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
