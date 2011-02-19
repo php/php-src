@@ -588,15 +588,12 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 			switch(value) {
 				case PHP_STREAM_BUFFER_NONE:
-					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IONBF, 0);
 					
 				case PHP_STREAM_BUFFER_LINE:
-					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IOLBF, size);
 					
 				case PHP_STREAM_BUFFER_FULL:
-					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IOFBF, size);
 
 				default:

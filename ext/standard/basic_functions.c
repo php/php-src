@@ -2117,6 +2117,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_write_buffer, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, buffer)
 ZEND_END_ARG_INFO()
+		
+ZEND_BEGIN_ARG_INFO(arginfo_stream_set_chunk_size, 0)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, chunk_size)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_enable_crypto, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
@@ -3119,6 +3124,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_set_read_buffer,											arginfo_stream_set_read_buffer)
 	PHP_FE(stream_set_write_buffer,											arginfo_stream_set_write_buffer)
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
+	PHP_FE(stream_set_chunk_size,											arginfo_stream_set_chunk_size)
 
 	PHP_DEP_FALIAS(set_socket_blocking, stream_set_blocking,				arginfo_stream_set_blocking)
 	PHP_FE(stream_set_blocking,												arginfo_stream_set_blocking)
