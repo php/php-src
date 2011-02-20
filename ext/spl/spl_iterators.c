@@ -2753,7 +2753,7 @@ SPL_METHOD(CachingIterator, setFlags)
 		zend_throw_exception(spl_ce_InvalidArgumentException, "Unsetting flag TOSTRING_USE_INNER is not possible", 0 TSRMLS_CC);
 		return;
 	}
-	if ((flags && CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
+	if ((flags & CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
 		/* clear on (re)enable */
 		zend_hash_clean(HASH_OF(intern->u.caching.zcache));
 	}
