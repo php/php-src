@@ -857,7 +857,8 @@ SPL_METHOD(DirectoryIterator, getFilename)
 SPL_METHOD(SplFileInfo, getExtension)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	char *fname, *p;
+	char *fname = NULL;
+	const char *p;
 	size_t flen;
 	int path_len, idx;
 
@@ -880,10 +881,15 @@ SPL_METHOD(SplFileInfo, getExtension)
 	p = zend_memrchr(fname, '.', flen);
 	if (p) {
 		idx = p - fname;
-		RETURN_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+		RETVAL_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+		efree(fname);
+		return;
+	} else {
+		if (fname) {
+			efree(fname);
+		}
+		RETURN_EMPTY_STRING();
 	}
-
-	RETURN_EMPTY_STRING();
 }
 /* }}}*/
 
@@ -892,7 +898,8 @@ SPL_METHOD(SplFileInfo, getExtension)
 SPL_METHOD(DirectoryIterator, getExtension)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	char *fname, *p;
+	char *fname = NULL;
+	const char *p;
 	size_t flen;
 	int idx;
 
@@ -905,10 +912,15 @@ SPL_METHOD(DirectoryIterator, getExtension)
 	p = zend_memrchr(fname, '.', flen);
 	if (p) {
 		idx = p - fname;
-		RETURN_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+		RETVAL_STRINGL(fname + idx + 1, flen - idx - 1, 1);
+		efree(fname);
+		return;
+	} else {
+		if (fname) {
+			efree(fname);
+		}
+		RETURN_EMPTY_STRING();
 	}
-
-	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
