@@ -285,10 +285,6 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 
 				/*
 				 * Check if a precision was specified
-				 *
-				 * XXX: an unreasonable amount of precision may be specified
-				 * resulting in overflow of num_buf. Currently we
-				 * ignore this possibility.
 				 */
 				if (*fmt == '.') {
 					adjust_precision = YES;
@@ -302,6 +298,10 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 							precision = 0;
 					} else
 						precision = 0;
+					
+					if (precision > FORMAT_CONV_MAX_PRECISION) {
+						precision = FORMAT_CONV_MAX_PRECISION;
+					}
 				} else
 					adjust_precision = NO;
 			} else
