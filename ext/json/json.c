@@ -538,7 +538,6 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
-	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 	switch (Z_TYPE_P(val))
 	{
 		case IS_NULL:
@@ -679,6 +678,8 @@ static PHP_FUNCTION(json_encode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &parameter, &options) == FAILURE) {
 		return;
 	}
+
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
