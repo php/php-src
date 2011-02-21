@@ -3543,14 +3543,13 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * outfilename;	int outfilename_len;
 	char * extracertsfilename = NULL; int extracertsfilename_len;
 
-	RETVAL_FALSE;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZZa!|ls",
 				&infilename, &infilename_len, &outfilename, &outfilename_len,
 				&zcert, &zprivkey, &zheaders, &flags, &extracertsfilename,
 				&extracertsfilename_len) == FAILURE) {
 		return;
 	}
+	RETVAL_FALSE;
 
 	if (strlen(infilename) != infilename_len) {
 		return;
