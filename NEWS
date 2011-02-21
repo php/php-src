@@ -34,6 +34,8 @@
     authentication using stream_context/http/header/Proxy-Authorization (Dmitry)
   . Changed default value of ini directive serialize_precision from 100 to 17.
     (Gustavo)
+  . Fixed bug #54055 (buffer overrun with high values for precision ini
+    setting). (Gustavo)
   . Fixed bug #53959 (reflection data for fgetcsv out-of-date). (Richard)
   . Fixed bug #53577 (Regression introduced in 5.3.4 in open_basedir with a
     trailing forward slash). (lekensteyn at gmail dot com, Pierre)
