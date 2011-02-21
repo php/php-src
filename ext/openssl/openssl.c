@@ -4731,6 +4731,7 @@ PHP_FUNCTION(openssl_encrypt)
 	if (free_iv) {
 		efree(iv);
 	}
+	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
 }
 /* }}} */
 

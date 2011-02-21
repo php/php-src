@@ -8,6 +8,8 @@
 - Exif extension:
   . Fixed bug #54002 (crash on crafted tag, reported by Luca Carettoni). (Pierre)
     (CVE-2011-0708)
+- OpenSSL extension:
+  . Fixed bug #54060 (Memory leaks when openssl_encrypt). (Pierre)
 
 - SPL extension:
   . Fixed memory leak in DirectoryIterator::getExtension() and 
