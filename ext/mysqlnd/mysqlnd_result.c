@@ -1271,7 +1271,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status.affected_rows = set->row_count;
 	}
-	DBG_INF_FMT("ret=%s row_count="MYSQLND_LLU_SPEC" warnings=%u server_status=%u",
+	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u",
 				ret == PASS? "PASS":"FAIL", (uint) set->row_count, conn->upsert_status.warning_count, conn->upsert_status.server_status);
 end:
 	PACKET_FREE(row_packet);
