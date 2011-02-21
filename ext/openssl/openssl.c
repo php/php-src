@@ -4804,6 +4804,7 @@ PHP_FUNCTION(openssl_decrypt)
 	if (base64_str) {
 		efree(base64_str);
 	}
+ 	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
 }
 /* }}} */
 
