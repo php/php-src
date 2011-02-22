@@ -253,6 +253,8 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
+#else
+	size_t ret;
 #endif
 
 	if (cli_shell_callbacks.cli_shell_write) {
@@ -274,8 +276,6 @@ PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS
 
 	return ret;
 #else
-	size_t ret;
-
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
 	return ret;
 #endif
