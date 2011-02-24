@@ -1424,6 +1424,11 @@ PHP_FUNCTION(ibase_gen_id)
 			&inc, &link)) {
 		RETURN_FALSE;
 	}
+	
+	if (gen_len > 31) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid generator name");
+		RETURN_FALSE;
+	}
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 	
