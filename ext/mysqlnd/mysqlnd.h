@@ -198,7 +198,7 @@ PHPAPI void mysqlnd_local_infile_default(MYSQLND *conn);
 PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND * const conn, const char * const funcname);
 
 /* Simple commands */
-#if AUTOCOMMIT_TX_COMMIT_ROLLBACK
+#ifdef AUTOCOMMIT_TX_COMMIT_ROLLBACK
 #define mysqlnd_autocommit(conn, mode)		(conn)->m->set_autocommit((conn), (mode) TSRMLS_CC)
 #define mysqlnd_commit(conn)				(conn)->m->tx_commit((conn) TSRMLS_CC)
 #define mysqlnd_rollback(conn)				(conn)->m->tx_rollback((conn) TSRMLS_CC)
