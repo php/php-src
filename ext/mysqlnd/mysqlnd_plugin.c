@@ -148,13 +148,13 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 	if (plugin) {
 		if (plugin->plugin_api_version == MYSQLND_PLUGIN_API_VERSION) {
 			zend_hash_update(&mysqlnd_registered_plugins, plugin->plugin_name, strlen(plugin->plugin_name) + 1, &plugin, sizeof(void *), NULL);
-			return mysqlnd_plugins_counter++;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plugin API version mismatch while loading plugin %s. Expected %d, got %d",
-							plugin->plugin_name, MYSQLND_PLUGIN_API_VERSION, plugin->plugin_api_version);	
+							plugin->plugin_name, MYSQLND_PLUGIN_API_VERSION, plugin->plugin_api_version);
+			return 0xCAFE;
 		}
 	}
-	return 0xCAFE;
+	return mysqlnd_plugins_counter++;
 }
 /* }}} */
 
