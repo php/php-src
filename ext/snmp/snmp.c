@@ -420,8 +420,8 @@ struct objid_query {
 	int count;
 	int offset;
 	int step;
-	int non_repeaters;
-	int max_repetitions;
+	long non_repeaters;
+	long max_repetitions;
 	int valueretrieval;
 	int array_output;
 	snmpobjarg *vars;
