@@ -680,7 +680,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		do {
 			header_line_len--;
 		} while(header_line_len && isspace(header_line[header_line_len-1]));
-		header_line[--header_line_len]='\0';
+		header_line[header_line_len]='\0';
 	}
 	
 	if (op == SAPI_HEADER_DELETE) {
