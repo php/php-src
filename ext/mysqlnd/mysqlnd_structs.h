@@ -482,9 +482,11 @@ struct st_mysqlnd_conn_methods
 	func_mysqlnd_conn__ssl_set ssl_set;
 
 	func_mysqlnd_conn__result_init result_init;
+#if AUTOCOMMIT_TX_COMMIT_ROLLBACK
 	func_mysqlnd_conn__set_autocommit set_autocommit;
 	func_mysqlnd_conn__tx_commit tx_commit;
 	func_mysqlnd_conn__tx_rollback tx_rollback;
+#endif
 };
 
 

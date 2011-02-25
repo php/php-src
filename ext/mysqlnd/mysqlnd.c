@@ -2335,10 +2335,12 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, send_close),
 
 	MYSQLND_METHOD(mysqlnd_conn, ssl_set),
-	mysqlnd_result_init,
-	MYSQLND_METHOD(mysqlnd_conn, set_autocommit),
+	mysqlnd_result_init
+#ifdef AUTOCOMMIT_TX_COMMIT_ROLLBACK
+	,MYSQLND_METHOD(mysqlnd_conn, set_autocommit),
 	MYSQLND_METHOD(mysqlnd_conn, tx_commit),
 	MYSQLND_METHOD(mysqlnd_conn, tx_rollback)
+#endif
 MYSQLND_CLASS_METHODS_END;
 
 
