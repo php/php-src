@@ -59,6 +59,9 @@ var_dump($session->oid_output_format);
 
 $session->info = array("blah" => 2);
 var_dump($session->info);
+
+$session->max_oids = NULL;
+var_dump($session->max_oids);
 ?>
 --EXPECTF--
 Check working
@@ -75,7 +78,7 @@ object(SNMP)#%d (%d) {
     int(%d)
   }
   ["max_oids"]=>
-  int(0)
+  NULL
   ["valueretrieval"]=>
   int(1)
   ["quick_print"]=>
@@ -184,3 +187,4 @@ array(4) {
   ["retries"]=>
   int(%d)
 }
+NULL

@@ -79,17 +79,21 @@ PHP_METHOD(SNMP, get);
 PHP_METHOD(SNMP, getnext);
 PHP_METHOD(SNMP, walk);
 PHP_METHOD(SNMP, set);
+PHP_METHOD(SNMP, get_errno);
+PHP_METHOD(SNMP, get_error);
 
 typedef struct _php_snmp_object {
-      zend_object zo;
-      struct snmp_session *session;
-      int max_oids;
-      int valueretrieval;
-      int quick_print;
+	zend_object zo;
+	struct snmp_session *session;
+	int max_oids;
+	int valueretrieval;
+	int quick_print;
 #ifdef HAVE_NET_SNMP
-      int enum_print;
-      int oid_output_format;
+	int enum_print;
+	int oid_output_format;
 #endif
+	int snmp_errno;
+	char snmp_errstr[128];
 } php_snmp_object;
 
 
@@ -97,14 +101,21 @@ typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval **retval TSRML
 typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval TSRMLS_DC);
 
 typedef struct _ptp_snmp_prop_handler {
-      const char *name;
-      size_t name_length;
-      php_snmp_read_t read_func;
-      php_snmp_write_t write_func;
+	const char *name;
+	size_t name_length;
+	php_snmp_read_t read_func;
+	php_snmp_write_t write_func;
 } php_snmp_prop_handler;
 
+typedef struct _snmpobjarg {
+	char *oid;
+	char type;
+	char *value;
+
+} snmpobjarg;
+
 ZEND_BEGIN_MODULE_GLOBALS(snmp)
-      int valueretrieval;
+	int valueretrieval;
 ZEND_END_MODULE_GLOBALS(snmp)
 
 #ifdef ZTS
@@ -112,6 +123,9 @@ ZEND_END_MODULE_GLOBALS(snmp)
 #else
 #define SNMP_G(v) (snmp_globals.v)
 #endif
+
+#define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
+	zend_declare_class_constant_long(php_snmp_get_ce(), const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
 #else
 

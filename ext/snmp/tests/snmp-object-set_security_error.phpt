@@ -1,5 +1,5 @@
 --TEST--                                 
-OO API SNMP::set_security (errors)
+OO API: SNMP::set_security (errors)
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
