@@ -140,17 +140,6 @@ extern netsnmp_log_handler *logh_head;
 typedef struct snmp_session php_snmp_session;
 #define PHP_SNMP_SESSION_RES_NAME "SNMP session"
 
-#define PHP_SNMP_SESSION_FROM_OBJECT(session, object) \
-	{ \
-		php_snmp_object *snmp_object; \
-		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC); \
-		session = snmp_object->session; \
-		if (!session) { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or uninitialized SNMP object"); \
-			RETURN_FALSE; \
-		} \
-	}
-
 #define PHP_SNMP_ADD_PROPERTIES(a, b) \
 { \
 	int i = 0; \
@@ -614,6 +603,9 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	if (valueretrieval == SNMP_VALUE_LIBRARY) {
 		SNMP_SNPRINT_VALUE(buf, buflen, vars->name, vars->name_length, vars);
 		ZVAL_STRING(snmpval, buf, 1);
+		if(dbuf){ /* malloc was used to store value */
+			efree(dbuf);
+		}
 		return;
 	}
 
@@ -621,12 +613,12 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 
 	switch (vars->type) {
 	case ASN_BIT_STR:		/* 0x03, asn1.h */
-		ZVAL_STRINGL(val, vars->val.bitstring, vars->val_len, 1);
+		ZVAL_STRINGL(val, (char *)vars->val.bitstring, vars->val_len, 1);
 		break;
 
 	case ASN_OCTET_STR:		/* 0x04, asn1.h */
 	case ASN_OPAQUE:		/* 0x44, snmp_impl.h */
-		ZVAL_STRINGL(val, vars->val.string, vars->val_len, 1);
+		ZVAL_STRINGL(val, (char *)vars->val.string, vars->val_len, 1);
 		break;
 
 	case ASN_NULL:			/* 0x05, asn1.h */
@@ -699,6 +691,8 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 		add_property_long(snmpval, "type", vars->type);
 		add_property_zval(snmpval, "value", val);
 	}
+	zval_ptr_dtor(&val);
+
 	if(dbuf){ /* malloc was used to store value */
 		efree(dbuf);
 	}
@@ -747,7 +741,8 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				gotroot = 1;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[0].oid);
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				return;
 			}
 		}
 
@@ -766,7 +761,8 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		snmp_error(session, NULL, NULL, &err);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open snmp connection: %s", err);
 		free(err);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		return;
 	}
 
 	while (keepwalking) {
@@ -784,7 +780,8 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 			if(pdu->variables == NULL){
 				snmp_free_pdu(pdu);
 				snmp_close(ss);
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				return;
 			}
 		} else if (st & SNMP_CMD_SET) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
@@ -794,14 +791,16 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
 					snmp_free_pdu(pdu);
 					snmp_close(ss);
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					return;
 				} else {
 					if ((snmp_errno = snmp_add_var(pdu, name, name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
 						SNMP_SNPRINT_OBJID(buf, sizeof(buf), name, name_length);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
 						snmp_free_pdu(pdu);
 						snmp_close(ss);
-						RETURN_FALSE;
+						RETVAL_FALSE;
+						return;
 					}
 				}
 			}
@@ -823,7 +822,8 @@ retry:
 				if (st & SNMP_CMD_SET) {
 					snmp_free_pdu(response);
 					snmp_close(ss);
-					RETURN_TRUE;
+					RETVAL_TRUE;
+					return;
 				}
 				for (vars = response->variables; vars; vars = vars->next_variable) {
 					/* do not output errors as values */
@@ -918,7 +918,8 @@ retry:
 					if (objid_query->array_output) {
 						zval_dtor(return_value);
 					}
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					return;
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
@@ -927,7 +928,8 @@ retry:
 				zval_dtor(return_value);
 			}
 			snmp_close(ss);
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			return;
 		} else {    /* status == STAT_ERROR */
 			snmp_error(ss, NULL, NULL, &err);
 			php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_GENERIC, "Fatal error: %s", err);
@@ -936,7 +938,8 @@ retry:
 				zval_dtor(return_value);
 			}
 			snmp_close(ss);
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			return;
 		}
 		if (response) {
 			snmp_free_pdu(response);
@@ -992,6 +995,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg));
 		if (objid_query->vars == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while parsing oid: %s", strerror(errno));
+			efree(objid_query->vars);
 			return FALSE;
 		}
 		objid_query->vars[objid_query->count].oid = Z_STRVAL_PP(oid);
@@ -999,6 +1003,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 			if (Z_TYPE_PP(type) == IS_STRING && Z_TYPE_PP(value) == IS_STRING) {
 				if (Z_STRLEN_PP(type) != 1) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bogus type '%s', should be single char, got %u", Z_STRVAL_PP(type), Z_STRLEN_PP(type));
+					efree(objid_query->vars);
 					return FALSE;
 				}
 				pptr = Z_STRVAL_PP(type);
@@ -1006,6 +1011,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 				objid_query->vars[objid_query->count].value = Z_STRVAL_PP(value);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Single objid and multiple type or values are not supported");
+				efree(objid_query->vars);
 				return FALSE;
 			}
 		}
@@ -1018,6 +1024,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 		objid_query->vars = (snmpobjarg *)emalloc(sizeof(snmpobjarg) * zend_hash_num_elements(Z_ARRVAL_PP(oid)));
 		if (objid_query->vars == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while parsing oid array: %s", strerror(errno));
+			efree(objid_query->vars);
 			return FALSE;
 		}
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
@@ -1036,6 +1043,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 						convert_to_string_ex(tmp_type);
 						if (Z_STRLEN_PP(tmp_type) != 1) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s': bogus type '%s', should be single char, got %u", Z_STRVAL_PP(tmp_oid), Z_STRVAL_PP(tmp_type), Z_STRLEN_PP(tmp_type));
+							efree(objid_query->vars);
 							return FALSE;
 						}
 						pptr = Z_STRVAL_PP(tmp_type);
@@ -1043,6 +1051,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 						zend_hash_move_forward_ex(Z_ARRVAL_PP(type), &pos_type);
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s': no type set", Z_STRVAL_PP(tmp_oid));
+						efree(objid_query->vars);
 						return FALSE;
 					}
 				}
@@ -1056,6 +1065,7 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 						zend_hash_move_forward_ex(Z_ARRVAL_PP(value), &pos_value);
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s': no value set", Z_STRVAL_PP(tmp_oid));
+						efree(objid_query->vars);
 						return FALSE;
 					}
 				}
@@ -1225,13 +1235,13 @@ static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass TSRML
 
 /* {{{ int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
    Make key from pass phrase in the snmpv3 session */
-static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRMLS_DC)
+static int netsnmp_session_gen_sec_key(struct snmp_session *s, char *pass TSRMLS_DC)
 {
 	int snmp_errno;
 
 	s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
-			pass, strlen(pass),
+			(u_char *)pass, strlen(pass),
 			s->securityPrivKey, &(s->securityPrivKeyLen)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error generating a key for privacy pass phrase '%s': %s", pass, snmp_api_errstring(snmp_errno));
 		return (-2);
@@ -1242,7 +1252,7 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 
 /* {{{ in netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID)
    Set context Engine Id in the snmpv3 session */
-static int netsnmp_session_set_contextEngineID(struct snmp_session *s, u_char * contextEngineID TSRMLS_DC)
+static int netsnmp_session_set_contextEngineID(struct snmp_session *s, char * contextEngineID TSRMLS_DC)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
 	u_char	*ebuf = (u_char *) malloc(ebuf_len); /* memory freed by SNMP library, malloc NOT emalloc */
@@ -1405,16 +1415,26 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 
 	if (session_less_mode) {
 		if (netsnmp_session_init(&session, version, a1, a2, timeout, retries TSRMLS_CC)) {
+			efree(objid_query.vars);
+			netsnmp_session_free(&session);
 			RETURN_FALSE;
 		}
 		if (version == SNMP_VERSION_3 && netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL TSRMLS_CC)) {
+			efree(objid_query.vars);
+			netsnmp_session_free(&session);
 			/* Warning message sent already, just bail out */
 			RETURN_FALSE;
 		}
 	} else {
 		zval *object = getThis();
-		PHP_SNMP_SESSION_FROM_OBJECT(session, object);
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
+		session = snmp_object->session;
+		if (!session) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or uninitialized SNMP object");
+			efree(objid_query.vars);
+			RETURN_FALSE;
+		}
+
 		if (snmp_object->max_oids > 0) {
 			objid_query.step = snmp_object->max_oids;
 			if (objid_query.max_repetitions < 0) { /* unspecified in function call, use session-wise */
@@ -1997,7 +2017,6 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists 
 static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC)
 #endif
 {
-	php_snmp_object *obj = (php_snmp_object *)zend_objects_get_address(object TSRMLS_CC);
 	php_snmp_prop_handler *hnd;
 	int ret = 0;
 
