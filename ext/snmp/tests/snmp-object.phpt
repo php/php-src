@@ -57,6 +57,16 @@ var_dump(key($z));
 var_dump(array_shift($z));
 var_dump($session->close());
 
+echo "WALK multiple on single OID, max_oids set to 30\n";
+$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session->max_oids = 30;
+$z = $session->walk('.1.3.6.1.2.1.1');
+var_dump(gettype($z));
+var_dump(count($z));
+var_dump(key($z));
+var_dump(array_shift($z));
+var_dump($session->close());
+
 echo "SNMPv3 (default security settings)\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 #$session->set_security($user_noauth, 'noAuthNoPriv', '', '', '', '', '', '');
@@ -129,6 +139,12 @@ string(%d) "%S"
 string(%d) "%S"
 bool(true)
 WALK multiple on single OID, non_repeaters set to 0, max_repetitions set to 30
+string(5) "array"
+int(%d)
+string(%d) "%S"
+string(%d) "%S"
+bool(true)
+WALK multiple on single OID, max_oids set to 30
 string(5) "array"
 int(%d)
 string(%d) "%S"

@@ -1,5 +1,5 @@
 --TEST--                                 
-Errors in SNMP session-wise functions 
+OO API: Generic errors
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
@@ -51,6 +51,10 @@ var_dump($session->walk('.1.3.6.1.2.1.1', 0, ''));
 var_dump($session->get());
 var_dump($session->set());
 
+var_dump($session->max_oids);
+$session->max_oids = "ttt";
+$session->max_oids = 0;
+var_dump($session->max_oids);
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given
@@ -82,3 +86,9 @@ bool(false)
 
 Warning: SNMP::set() expects exactly 3 parameters, 0 given in %s on line %d
 bool(false)
+NULL
+
+Warning: main(): max_oids should be positive integer or NULL, got 0 in %s on line %d
+
+Warning: main(): max_oids should be positive integer or NULL, got 0 in %s on line %d
+NULL
