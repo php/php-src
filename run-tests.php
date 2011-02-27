@@ -567,7 +567,7 @@ if (isset($argc) && $argc > 1) {
 				case 'm':
 					$leak_check = true;
 					$valgrind_cmd = "valgrind --version";
-					$valgrind_header = system_with_timeout($valgrind_cmd);
+					$valgrind_header = system_with_timeout($valgrind_cmd, $environment);
 					$replace_count = 0;
 					if (!$valgrind_header) {
 						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
