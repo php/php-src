@@ -191,6 +191,8 @@
     all of the rows have been fetched). (Scott)
 
 - Streams:
+  . Fixed bug #54092 (Segmentation fault when using HTTP proxy with the FTP
+    wrapper). (Gustavo)
   . Fixed bug #53913 (Streams functions assume HAVE_GLOB is defined). (Chris
     Jones)
   . Fixed bug #53903 (userspace stream stat callback does not separate the

@@ -72,6 +72,12 @@
 #define FTPS_ENCRYPT_DATA 1
 #define GET_FTP_RESULT(stream)	get_ftp_result((stream), tmp_line, sizeof(tmp_line) TSRMLS_CC)
 
+typedef struct _php_ftp_dirstream_data {
+	php_stream *datastream;
+	php_stream *controlstream;
+	php_stream *dirstream;
+} php_ftp_dirstream_data;
+
 /* {{{ get_ftp_result
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC)
@@ -97,7 +103,7 @@ static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper, php_stream *s
  */
 static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC)
 {
-	php_stream *controlstream = (php_stream *)stream->wrapperdata;
+	php_stream *controlstream = stream->wrapperthis;
 	int ret = 0;
 	
 	if (controlstream) {
@@ -106,10 +112,6 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 			int result;
 
 			/* For write modes close data stream first to signal EOF to server */
-			stream->wrapperdata = NULL;
-			php_stream_close(stream);
-			stream = NULL;
-
 			result = GET_FTP_RESULT(controlstream);
 			if (result != 226 && result != 250) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "FTP server error %d:%s", result, tmp_line);
@@ -119,9 +121,7 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 
 		php_stream_write_string(controlstream, "QUIT\r\n");
 		php_stream_close(controlstream);
-		if (stream) {
-			stream->wrapperdata = NULL;
-		}
+		stream->wrapperthis = NULL;
 	}
 
 	return ret;
@@ -584,7 +584,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	/* remember control stream */	
-	datastream->wrapperdata = (zval *)stream;
+	datastream->wrapperthis = stream;
 
 	php_url_free(resource);
 	return datastream;
@@ -608,10 +608,12 @@ errexit:
 static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_stream_dirent *ent = (php_stream_dirent *)buf;
-	php_stream *innerstream = (php_stream *)stream->abstract;
+	php_stream *innerstream;
 	size_t tmp_len;
 	char *basename;
 	size_t basename_len;
+
+	innerstream =  ((php_ftp_dirstream_data *)stream->abstract)->datastream;
 
 	if (count != sizeof(php_stream_dirent)) {
 		return 0;
@@ -656,13 +658,18 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
  */
 static int php_ftp_dirstream_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
-	php_stream *innerstream = (php_stream *)stream->abstract;
+	php_ftp_dirstream_data *data = stream->abstract;
 
-	if (innerstream->wrapperdata) {
-		php_stream_close((php_stream *)innerstream->wrapperdata);
-		innerstream->wrapperdata = NULL;
+	/* close control connection */
+	if (data->controlstream) {
+		php_stream_close(data->controlstream);
+		data->controlstream = NULL;
 	}
-	php_stream_close((php_stream *)stream->abstract);
+	/* close data connection */
+	php_stream_close(data->datastream);
+	data->datastream = NULL;
+	
+	efree(data);
 	stream->abstract = NULL;
 
 	return 0;
@@ -688,6 +695,7 @@ static php_stream_ops php_ftp_dirstream_ops = {
 php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream, *reuseid, *datastream = NULL;
+	php_ftp_dirstream_data *dirsdata;
 	php_url *resource = NULL;
 	int result = 0, use_ssl, use_ssl_on_data = 0;
 	char *hoststart = NULL, tmp_line[512];
@@ -747,11 +755,14 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 		goto opendir_errexit;
 	}
 
-	/* remember control stream */	
-	datastream->wrapperdata = (zval *)stream;
-
 	php_url_free(resource);
-	return php_stream_alloc(&php_ftp_dirstream_ops, datastream, 0, mode);
+
+	dirsdata = emalloc(sizeof *dirsdata);
+	dirsdata->datastream = datastream;
+	dirsdata->controlstream = stream;
+	dirsdata->dirstream = php_stream_alloc(&php_ftp_dirstream_ops, dirsdata, 0, mode);
+
+	return dirsdata->dirstream;
 
 opendir_errexit:
 	if (resource) {
