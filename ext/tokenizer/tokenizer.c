@@ -151,6 +151,10 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		ZVAL_NULL(&token);
 
 		token_line = CG(zend_lineno);
+
+		if (token_type == T_HALT_COMPILER) {
+			break;
+		}
 	}
 }
 

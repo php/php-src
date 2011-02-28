@@ -55,7 +55,7 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : with different function constructs ***
-array(142) {
+array(135) {
   [0]=>
   array(3) {
     [0]=>
@@ -114,11 +114,11 @@ array(142) {
   [9]=>
   array(3) {
     [0]=>
-    int(262)
+    int(%d)
     [1]=>
     string(7) "include"
     [2]=>
-    int(%d)
+    int(3)
   }
   [10]=>
   string(1) "("
@@ -129,7 +129,7 @@ array(142) {
     [1]=>
     string(13) ""addfile.php""
     [2]=>
-    int(%d)
+    int(3)
   }
   [12]=>
   string(1) ")"
@@ -143,12 +143,12 @@ array(142) {
     string(1) "
 "
     [2]=>
-    int(%d)
+    int(3)
   }
   [15]=>
   array(3) {
     [0]=>
-    int(259)
+    int(%d)
     [1]=>
     string(7) "require"
     [2]=>
@@ -590,7 +590,7 @@ array(142) {
   [79]=>
   array(3) {
     [0]=>
-    int(267)
+    int(%d)
     [1]=>
     string(3) ">>="
     [2]=>
@@ -659,7 +659,7 @@ array(142) {
   [88]=>
   array(3) {
     [0]=>
-    int(285)
+    int(%d)
     [1]=>
     string(2) "<="
     [2]=>
@@ -738,7 +738,7 @@ array(142) {
   [98]=>
   array(3) {
     [0]=>
-    int(266)
+    int(%d)
     [1]=>
     string(5) "print"
     [2]=>
@@ -889,7 +889,7 @@ array(142) {
   [123]=>
   array(3) {
     [0]=>
-    int(279)
+    int(%d)
     [1]=>
     string(2) "&&"
     [2]=>
@@ -959,43 +959,6 @@ array(142) {
     string(15) "__halt_compiler"
     [2]=>
     int(26)
-  }
-  [135]=>
-  string(1) "("
-  [136]=>
-  string(1) ")"
-  [137]=>
-  string(1) ";"
-  [138]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) "
-"
-    [2]=>
-    int(26)
-  }
-  [139]=>
-  string(1) "}"
-  [140]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) "
-"
-    [2]=>
-    int(27)
-  }
-  [141]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(2) "?>"
-    [2]=>
-    int(28)
   }
 }
 Done
