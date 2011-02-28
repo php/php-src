@@ -16,6 +16,11 @@
 - SPL extension:
   . Fixed memory leak in DirectoryIterator::getExtension() and 
     SplFileInfo::getExtension(). (Felipe)
+
+- Tokenizer Extension
+  . Fixed bug #54089 (token_get_all() does not stop after __halt_compiler).
+    (Ilia)
+
 17 Feb 2011, PHP 5.3.6RC1
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.11. (Ilia)
