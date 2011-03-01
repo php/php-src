@@ -843,11 +843,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, info)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_splobject_void, 0)
 ZEND_END_ARG_INFO()
 
@@ -873,7 +868,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  serialize,   arginfo_splobject_void,0)
 	/* ArrayAccess */
 	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_offsetGet, 0)
-	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_offsetSet, 0)
+	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_attach, 0)
 	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_offsetGet, 0)
 	SPL_ME(SplObjectStorage, offsetGet,    arginfo_offsetGet,     0)
 	{NULL, NULL, NULL}
