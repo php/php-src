@@ -1,13 +1,13 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.6
+03 Mar 2011, PHP 5.3.6RC2
 - Zend Engine:
   . Fixed bug #43512 (same parameter name can be used multiple times in
     method/function definition). (Felipe)
 
 - Exif extension:
-  . Fixed bug #54002 (crash on crafted tag, reported by Luca Carettoni). (Pierre)
-    (CVE-2011-0708)
+  . Fixed bug #54002 (crash on crafted tag, reported by Luca Carettoni).
+    (Pierre) (CVE-2011-0708)
 
 - OpenSSL extension:
   . Fixed bug #54060 (Memory leaks when openssl_encrypt). (Pierre)
