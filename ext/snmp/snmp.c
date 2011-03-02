@@ -1739,7 +1739,7 @@ PHP_METHOD(snmp, open)
 	int a1_len, a2_len;
 	long timeout = SNMP_DEFAULT_TIMEOUT;
 	long retries = SNMP_DEFAULT_RETRIES;
-	int version = SNMP_DEFAULT_VERSION;
+	long version = SNMP_DEFAULT_VERSION;
 	int argc = ZEND_NUM_ARGS();
 #if PHP_VERSION_ID > 50300
 	zend_error_handling error_handling;
@@ -1854,7 +1854,7 @@ PHP_METHOD(snmp, set_security)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
-	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
+	int a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
