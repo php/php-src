@@ -93,7 +93,7 @@ $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
 	@cd $(BUILD_DIR)
 	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
 	@if not exist $(BUILD_DIR_DEV) @mkdir $(BUILD_DIR_DEV) > NUL
-	@cd $(PHP_SRC_DIR)
+	@cd "$(PHP_SRC_DIR)"
 	
 
 clean-sapi:
@@ -107,7 +107,7 @@ clean: clean-sapi
 	@echo Cleaning distribution build dirs
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
-	@cd $(PHP_SRC_DIR)
+	@cd "$(PHP_SRC_DIR)"
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
@@ -119,7 +119,7 @@ clean-all:
 	@echo Cleaning standard build dirs
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
-	@cd $(PHP_SRC_DIR)
+	@cd "$(PHP_SRC_DIR)"
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
