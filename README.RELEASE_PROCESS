@@ -111,9 +111,9 @@ commit this.
 
  c. ``$RELEASE_PROCESS`` = array(4 => true, 5 => true)
 
-1. Update in ``php-bugs/trunk/include/php_versions.php`` to include the new RC and commit.
+1. Update in ``web/php-bugs/trunk/include/php_versions.php`` to include the new RC and commit.
 
-2. Update ``php/trunk/include/version.inc`` (x=major version number)
+2. Update ``web/php/trunk/include/version.inc`` (x=major version number)
 
  a. ``$PHP_x_RC`` = "5.3.0RC1"
 
@@ -121,7 +121,7 @@ commit this.
 
 3. Commit those changes:
 
- a. ``svn commit include/version.inc include/releases.inc``
+ a. ``svn commit web/qa/trunk web/php-bugs/trunk web/php/trunk``
 
 4. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
