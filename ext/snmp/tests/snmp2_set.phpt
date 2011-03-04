@@ -224,13 +224,13 @@ bool(true)
 bool(true)
 Multiple OID, 1st bogus, single type, multiple value
 
-Warning: snmp2_set(): Error in packet at '%s': noCreation (That table does not support row creation or that object can not ever be created) in %s on line %d
+Warning: snmp2_set(): Error in packet at '%s': %rnoCreation|notWritable%r (%s) in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Multiple OID, 2nd bogus, single type, multiple value
 
-Warning: snmp2_set(): Error in packet at '%s': noCreation (That table does not support row creation or that object can not ever be created) in %s on line %d
+Warning: snmp2_set(): Error in packet at '%s': %rnoCreation|notWritable%r (%s) in %s on line %d
 bool(false)
 bool(true)
 bool(true)
