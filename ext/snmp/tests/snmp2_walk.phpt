@@ -68,7 +68,7 @@ bool(false)
 Checking working
 Single OID
 %unicode|string%(5) "array"
-int(32)
+int(%d)
 %unicode|string%(6) "string"
 %unicode|string%(6) "string"
 Single OID in array

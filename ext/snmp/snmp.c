@@ -654,7 +654,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 		ZVAL_STRING(val, buf, 1);
 		break;
 
-#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+#if defined(NETSNMP_WITH_OPAQUE_SPECIAL_TYPES) || defined(OPAQUE_SPECIAL_TYPES)
 	case ASN_OPAQUE_FLOAT:		/* 0x78, asn1.h */
 		snprintf(buf, buflen, "%f", *vars->val.floatVal);
 		ZVAL_STRING(val, buf, 1);
