@@ -25,6 +25,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
@@ -221,6 +222,24 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			DBFLT8 money_value;
 			dbconvert(NULL, coltype, *ptr, *len, SQLFLT8, (LPBYTE)&money_value, 8);
 			*len = spprintf(&tmp_ptr, 0, "%.4f", money_value);
+			*ptr = tmp_ptr;
+			break;
+		}
+#ifdef SQLUNIQUE
+		case SQLUNIQUE: {
+#else
+		case 36: { /* FreeTDS hack, also used by ext/mssql */
+#endif
+			*len = 36+1;
+			tmp_ptr = emalloc(*len + 1);
+
+			/* uniqueidentifier is a 16-byte binary number, convert to 32 char hex string */
+#ifdef SQLUNIQUE
+			*len = dbconvert(NULL, SQLUNIQUE, ptr, *len, SQLCHAR, tmp_ptr, *len);
+#else
+			*len = dbconvert(NULL, 36, ptr, *len, SQLCHAR, tmp_ptr, *len);
+#endif
+			php_strtoupper(tmp_ptr, *len);
 			*ptr = tmp_ptr;
 			break;
 		}
