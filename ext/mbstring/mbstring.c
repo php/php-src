@@ -1132,14 +1132,14 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 		char quote = *str;
 
 		str++;
-		return php_mb_rfc1867_substring_conf(encoding, str, strlen(str), quote);
+		return php_mb_rfc1867_substring_conf(encoding, str, strlen(str), quote TSRMLS_CC);
 	} else {
 		char *strend = str;
 
 		while (*strend && !isspace(*(unsigned char *)strend)) {
 			++strend;
 		}
-		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0);
+		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1154,8 +1154,8 @@ static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filena
 	 * the full path of the file on the user's filesystem, which means that unless
 	 * the user does basename() they get a bogus file name. Until IE's user base drops
 	 * to nill or problem is fixed this code must remain enabled for all systems. */
-	s = php_mb_safe_strrchr_ex(filename, '\\', filename_len, (const mbfl_encoding *)encoding TSRMLS_CC);
-	if ((tmp = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding TSRMLS_CC)) > s) {
+	s = php_mb_safe_strrchr_ex(filename, '\\', filename_len, (const mbfl_encoding *)encoding);
+	if ((tmp = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding)) > s) {
 		s = tmp;
 	}
 	if (s) {
