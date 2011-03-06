@@ -99,6 +99,12 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring);
 
 static void php_mb_populate_current_detect_order_list(TSRMLS_D);
 
+static int php_mb_encoding_translation(TSRMLS_D);
+
+static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *list_size TSRMLS_DC);
+
+static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding TSRMLS_DC);
+
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -1049,7 +1055,7 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 }
 /* }}} */
 
-static char *php_mb_rfc1867_substring(char *start, int len, char quote TSRMLS_DC)
+static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *start, int len, char quote TSRMLS_DC)
 {
 	char *result = emalloc(len + 2);
 	char *resp = result;
@@ -1059,7 +1065,7 @@ static char *php_mb_rfc1867_substring(char *start, int len, char quote TSRMLS_DC
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
 			*resp++ = start[++i];
 		} else {
-			size_t j = php_mb_gpc_mbchar_bytes(start+i TSRMLS_CC);
+			size_t j = php_mb_mbchar_bytes_ex(start+i, (const mbfl_encoding *)encoding);
 
 			while (j-- > 0 && i < len) {
 				*resp++ = start[i++];
@@ -1072,9 +1078,49 @@ static char *php_mb_rfc1867_substring(char *start, int len, char quote TSRMLS_DC
 	return result;
 }
 
-static char *php_mb_rfc1867_getword(char *str TSRMLS_DC) /* {{{ */
+static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, char stop TSRMLS_DC) /* {{{ */
 {
-	while (*str && isspace(*str)) {
+	char *pos = *line, quote;
+	char *res;
+
+	while (*pos && *pos != stop) {
+		if ((quote = *pos) == '"' || quote == '\'') {
+			++pos;
+			while (*pos && *pos != quote) {
+				if (*pos == '\\' && pos[1] && pos[1] == quote) {
+					pos += 2;
+				} else {
+					++pos;
+				}
+			}
+			if (*pos) {
+				++pos;
+			}
+		} else {
+			pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+
+		}
+	}
+	if (*pos == '\0') {
+		res = estrdup(*line);
+		*line += strlen(*line);
+		return res;
+	}
+
+	res = estrndup(*line, pos - *line);
+
+	while (*pos == stop) {
+		pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+	}
+
+	*line = pos;
+	return res;
+}
+/* }}} */
+
+static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *str TSRMLS_DC) /* {{{ */
+{
+	while (*str && isspace(*(unsigned char *)str)) {
 		++str;
 	}
 
@@ -1086,29 +1132,30 @@ static char *php_mb_rfc1867_getword(char *str TSRMLS_DC) /* {{{ */
 		char quote = *str;
 
 		str++;
-		return php_mb_rfc1867_substring(str, strlen(str), quote TSRMLS_CC);
+		return php_mb_rfc1867_substring_conf(encoding, str, strlen(str), quote);
 	} else {
 		char *strend = str;
 
-		while (*strend && !isspace(*strend)) {
+		while (*strend && !isspace(*(unsigned char *)strend)) {
 			++strend;
 		}
-		return php_mb_rfc1867_substring(str, strend - str, 0 TSRMLS_CC);
+		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0);
 	}
 }
 /* }}} */
 
-static char *php_mb_rfc1867_basename(char *filename TSRMLS_DC) /* {{{ */
+static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filename TSRMLS_DC) /* {{{ */
 {
 	char *s, *tmp;
-	
+	const size_t filename_len = strlen(filename);
+
 	/* The \ check should technically be needed for win32 systems only where
 	 * it is a valid path separator. However, IE in all it's wisdom always sends
 	 * the full path of the file on the user's filesystem, which means that unless
 	 * the user does basename() they get a bogus file name. Until IE's user base drops
 	 * to nill or problem is fixed this code must remain enabled for all systems. */
-	s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-	if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
+	s = php_mb_safe_strrchr_ex(filename, '\\', filename_len, (const mbfl_encoding *)encoding TSRMLS_CC);
+	if ((tmp = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding TSRMLS_CC)) > s) {
 		s = tmp;
 	}
 	if (s) {
@@ -1499,11 +1546,12 @@ PHP_MINIT_FUNCTION(mbstring)
 
 	php_rfc1867_set_multibyte_callbacks(
 		php_mb_encoding_translation,
-		php_mb_gpc_encoding_detector,
-		php_mb_gpc_encoding_converter,
+		php_mb_gpc_get_detect_order,
+		php_mb_gpc_set_input_encoding,
 		php_mb_rfc1867_getword,
+		php_mb_rfc1867_getword_conf,
 		php_mb_rfc1867_basename);
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1512,7 +1560,7 @@ PHP_MINIT_FUNCTION(mbstring)
 PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
-	
+
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -2150,7 +2198,7 @@ PHP_FUNCTION(mb_strpos)
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
-	
+
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
 	haystack.no_language = MBSTRG(language);
@@ -3415,7 +3463,7 @@ PHP_FUNCTION(mb_convert_variables)
 	const mbfl_encoding **elist;
 	char *to_enc;
 	void *ptmp;	
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
 		return;
 	}
@@ -3958,7 +4006,7 @@ PHP_FUNCTION(mb_send_mail)
 	smart_str *s;
 	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 	char *pp, *ee;
-	
+
 	/* initialize */
 	mbfl_memory_device_init(&device, 0, 0);
 	mbfl_string_init(&orig_str);
@@ -4422,7 +4470,7 @@ PHP_FUNCTION(mb_check_encoding)
 			RETURN_FALSE;
 		}
 	}
-	
+
 	convd = mbfl_buffer_converter_new2(encoding, encoding, 0);
 	if (convd == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
@@ -4430,7 +4478,7 @@ PHP_FUNCTION(mb_check_encoding)
 	}	
 	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
 	mbfl_buffer_converter_illegal_substchar(convd, 0);	
-	
+
 	/* initialize string */
 	mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding->no_encoding);
 	mbfl_string_init(&result);
@@ -4479,8 +4527,8 @@ static void php_mb_populate_current_detect_order_list(TSRMLS_D)
 	MBSTRG(current_detect_order_list_size) = nentries;
 }
 
-/* {{{ MBSTRING_API int php_mb_encoding_translation() */
-MBSTRING_API int php_mb_encoding_translation(TSRMLS_D) 
+/* {{{ static int php_mb_encoding_translation() */
+static int php_mb_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
 }
@@ -4559,154 +4607,6 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 }
 /* }}} */
 
-/* {{{ MBSTRING_API char *php_mb_strrchr() */
-MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
-{
-	return php_mb_safe_strrchr(s, c, -1 TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ MBSTRING_API size_t php_mb_gpc_mbchar_bytes() */
-MBSTRING_API size_t php_mb_gpc_mbchar_bytes(const char *s TSRMLS_DC)
-{
-
-	if (MBSTRG(http_input_identify)) {
-		return php_mb_mbchar_bytes_ex(s, MBSTRG(http_input_identify));
-	} else {
-		return php_mb_mbchar_bytes_ex(s, MBSTRG(internal_encoding));
-	}
-}
-/* }}} */
-
-/*	{{{ MBSTRING_API int php_mb_gpc_encoding_converter() */
-MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, const char *encoding_to, const char *encoding_from TSRMLS_DC)
-{
-	int i;
-	mbfl_string string, result, *ret = NULL;
-	const mbfl_encoding *from_encoding, *to_encoding;
-	mbfl_buffer_converter *convd;
-
-	if (encoding_to) {
-		/* new encoding */
-		to_encoding = mbfl_name2encoding(encoding_to);
-		if (!to_encoding) {
-			return -1;
-		}
-	} else {
-		to_encoding = MBSTRG(current_internal_encoding);
-	}	
-	if (encoding_from) {
-		/* old encoding */
-		from_encoding = mbfl_name2encoding(encoding_from);
-		if (from_encoding) {
-			return -1;
-		}
-	} else {
-		from_encoding = MBSTRG(http_input_identify);
-	}
-
-	if (from_encoding == mbfl_no_encoding_pass) {
-		return 0;
-	}
-
-	/* initialize string */
-	mbfl_string_init(&string);
-	mbfl_string_init(&result);
-	string.no_encoding = from_encoding->no_encoding;
-	string.no_language = MBSTRG(language);
-
-	for (i=0; i<num; i++){
-		string.val = (unsigned char *)str[i];
-		string.len = len[i];
-
-		/* initialize converter */
-		convd = mbfl_buffer_converter_new2(from_encoding, to_encoding, string.len);
-		if (convd == NULL) {
-			return -1;
-		}
-		mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-		
-		/* do it */
-		ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-		if (ret != NULL) {
-			efree(str[i]);
-			str[i] = (char *)ret->val;
-			len[i] = (int)ret->len;
-		}
-		
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-		mbfl_buffer_converter_delete(convd);
-	}
-
-	return ret ? 0 : -1;
-}
-/* }}} */
-
-/* {{{ MBSTRING_API int php_mb_gpc_encoding_detector()
- */
-MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length, int num, char *arg_list TSRMLS_DC)
-{
-	mbfl_string string;
-	const mbfl_encoding **elist;
-	const mbfl_encoding *encoding = NULL;
-	mbfl_encoding_detector *identd = NULL; 
-
-	size_t size;
-	const mbfl_encoding **list;
-
-	php_mb_populate_current_detect_order_list(TSRMLS_C);
-
-	if (MBSTRG(http_input_list_size) == 1 && MBSTRG(http_input_list)[0] == &mbfl_encoding_pass) {
-		MBSTRG(http_input_identify) = &mbfl_encoding_pass;
-		return SUCCESS;
-	}
-
-	if (arg_list && strlen(arg_list)>0) {
-		/* make encoding list */
-		list = NULL;
-		size = 0;
-		php_mb_parse_encoding_list(arg_list, strlen(arg_list), &list, &size, 0 TSRMLS_CC);
-		
-		if (size > 0 && list != NULL) {
-			elist = list;
-		} else {
-			elist = MBSTRG(current_detect_order_list);
-			size = MBSTRG(current_detect_order_list_size);
-		}
-	} else {
-		elist = MBSTRG(current_detect_order_list);
-		size = MBSTRG(current_detect_order_list_size);
-	}
-
-	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
-
-	identd = mbfl_encoding_detector_new2(elist, size, MBSTRG(strict_detection));
-
-	if (identd) {
-		int n = 0;
-		while(n < num){
-			string.val = (unsigned char *)arg_string[n];
-			string.len = arg_length[n];
-			if (mbfl_encoding_detector_feed(identd, &string)) {
-				break;
-			}
-			n++;
-		}
-		encoding = mbfl_encoding_detector_judge2(identd);
-		mbfl_encoding_detector_delete(identd);
-	}
-
-	if (encoding) {
-		MBSTRG(http_input_identify) = encoding;
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-/* }}} */
-
 /* {{{ MBSTRING_API int php_mb_stripos()
  */
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding TSRMLS_DC)
@@ -4781,6 +4681,19 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 	}
 
 	return n;
+}
+/* }}} */
+
+static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *list_size TSRMLS_DC) /* {{{ */
+{
+	*list = (const zend_encoding **)MBSTRG(http_input_list);
+	*list_size = MBSTRG(http_input_list_size);
+}
+/* }}} */
+
+static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding TSRMLS_DC) /* {{{ */
+{
+	MBSTRG(http_input_identify) = encoding;
 }
 /* }}} */
 

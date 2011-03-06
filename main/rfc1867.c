@@ -41,84 +41,19 @@ static int dummy_encoding_translation(TSRMLS_D)
 	return 0;
 }
 
+static char *php_ap_getword(const zend_encoding *encoding, char **line, char stop TSRMLS_DC);
+static char *php_ap_getword_conf(const zend_encoding *encoding, char *str TSRMLS_DC);
+
 static php_rfc1867_encoding_translation_t php_rfc1867_encoding_translation = dummy_encoding_translation;
-static php_rfc1867_encoding_detector_t php_rfc1867_encoding_detector = NULL;
-static php_rfc1867_encoding_converter_t php_rfc1867_encoding_converter = NULL;
-static php_rfc1867_getword_t php_rfc1867_getword = NULL;
+static php_rfc1867_get_detect_order_t php_rfc1867_get_detect_order = NULL;
+static php_rfc1867_set_input_encoding_t php_rfc1867_set_input_encoding = NULL;
+static php_rfc1867_getword_t php_rfc1867_getword = php_ap_getword;
+static php_rfc1867_getword_conf_t php_rfc1867_getword_conf = php_ap_getword_conf;
 static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
 PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
 
 static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
-
-static void php_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zval *array_ptr  TSRMLS_DC) /* {{{ */
-{
-	int i;
-	unsigned int new_val_len;
-
-	if (num_vars > 0 &&
-		php_rfc1867_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC) == SUCCESS) {
-		php_rfc1867_encoding_converter(val_list, len_list, num_vars, NULL, NULL TSRMLS_CC);
-	}
-	for (i = 0; i<num_vars; i += 2) {
-		if (sapi_module.input_filter(PARSE_POST, val_list[i], &val_list[i+1], len_list[i+1], &new_val_len TSRMLS_CC)) {
-			if (php_rfc1867_callback != NULL) {
-				multipart_event_formdata event_formdata;
-				void *event_extra_data = NULL;
-
-				event_formdata.post_bytes_processed = SG(read_post_bytes);
-				event_formdata.name = val_list[i];
-				event_formdata.value = &val_list[i+1];
-				event_formdata.length = new_val_len;
-				event_formdata.newlength = &new_val_len;
-				if (php_rfc1867_callback(MULTIPART_EVENT_FORMDATA, &event_formdata, &event_extra_data TSRMLS_CC) == FAILURE) {
-					efree(val_list[i]);
-					efree(val_list[i+1]);
-					continue;
-				}
-			}
-			safe_php_register_variable(val_list[i], val_list[i+1], new_val_len, array_ptr, 0 TSRMLS_CC);
-		}
-		efree(val_list[i]);
-		efree(val_list[i+1]);
-	}
-	efree(val_list);
-	efree(len_list);
-}
-/* }}} */
-
-static void php_gpc_realloc_buffer(char ***pval_list, int **plen_list, int *num_vars_max, int inc  TSRMLS_DC) /* {{{ */
-{
-	/* allow only even increments */
-	if (inc & 1) {
-		inc++;
-	}
-	(*num_vars_max) += inc;
-	*pval_list = (char **)erealloc(*pval_list, (*num_vars_max+2)*sizeof(char *));
-	*plen_list = (int *)erealloc(*plen_list, (*num_vars_max+2)*sizeof(int));
-}
-/* }}} */
-
-static void php_gpc_stack_variable(char *param, char *value, char ***pval_list, int **plen_list, int *num_vars, int *num_vars_max TSRMLS_DC) /* {{{ */
-{
-	char **val_list = *pval_list;
-	int *len_list = *plen_list;
-
-	if (*num_vars >= *num_vars_max) {
-		php_gpc_realloc_buffer(pval_list, plen_list, num_vars_max, 16 TSRMLS_CC);
-		/* in case realloc relocated the buffer */
-		val_list = *pval_list;
-		len_list = *plen_list;
-	}
-
-	val_list[*num_vars] = (char *)estrdup(param);
-	len_list[*num_vars] = strlen(param);
-	(*num_vars)++;
-	val_list[*num_vars] = (char *)estrdup(value);
-	len_list[*num_vars] = strlen(value);
-	(*num_vars)++;
-}
-/* }}} */
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -283,6 +218,9 @@ typedef struct {
 	char *boundary_next;
 	int  boundary_next_len;
 
+	const zend_encoding *input_encoding;
+	const zend_encoding **detect_order;
+	size_t detect_order_size;
 } multipart_buffer;
 
 typedef struct {
@@ -340,7 +278,7 @@ static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 }
 
 /* create new multipart_buffer structure */
-static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
+static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len TSRMLS_DC)
 {
 	multipart_buffer *self = (multipart_buffer *) ecalloc(1, sizeof(multipart_buffer));
 
@@ -356,6 +294,15 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 
 	self->buf_begin = self->buffer;
 	self->bytes_in_buffer = 0;
+
+	if (php_rfc1867_encoding_translation(TSRMLS_C)) {
+		php_rfc1867_get_detect_order(&self->detect_order, &self->detect_order_size TSRMLS_CC);
+	} else {
+		self->detect_order = NULL;
+		self->detect_order_size = 0;
+	}
+
+	self->input_encoding = NULL;
 
 	return self;
 }
@@ -467,6 +414,10 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 		char *key = line;
 		char *value = NULL;
 
+		if (php_rfc1867_encoding_translation(TSRMLS_C)) {
+			self->input_encoding = zend_multibyte_encoding_detector(line, strlen(line), self->detect_order, self->detect_order_size TSRMLS_CC);
+		}
+
 		/* space in the beginning means same header */
 		if (!isspace(line[0])) {
 			value = strchr(line, ':');
@@ -522,7 +473,7 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 	return NULL;
 }
 
-static char *php_ap_getword(char **line, char stop)
+static char *php_ap_getword(const zend_encoding *encoding, char **line, char stop TSRMLS_DC)
 {
 	char *pos = *line, quote;
 	char *res;
@@ -558,7 +509,7 @@ static char *php_ap_getword(char **line, char stop)
 	return res;
 }
 
-static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
+static char *substring_conf(char *start, int len, char quote)
 {
 	char *result = emalloc(len + 1);
 	char *resp = result;
@@ -576,7 +527,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 	return result;
 }
 
-static char *php_ap_getword_conf(char *str TSRMLS_DC)
+static char *php_ap_getword_conf(const zend_encoding *encoding, char *str TSRMLS_DC)
 {
 	while (*str && isspace(*str)) {
 		++str;
@@ -590,15 +541,31 @@ static char *php_ap_getword_conf(char *str TSRMLS_DC)
 		char quote = *str;
 
 		str++;
-		return substring_conf(str, strlen(str), quote TSRMLS_CC);
+		return substring_conf(str, strlen(str), quote);
 	} else {
 		char *strend = str;
 
 		while (*strend && !isspace(*strend)) {
 			++strend;
 		}
-		return substring_conf(str, strend - str, 0 TSRMLS_CC);
+		return substring_conf(str, strend - str, 0);
 	}
+}
+
+static char *php_ap_basename(const zend_encoding *encoding, char *path TSRMLS_DC)
+{
+	char *s = strrchr(path, '\\');
+	if (s) {
+		char *tmp = strrchr(path, '/');
+		if (tmp && tmp > s) {
+			s = tmp + 1;
+		} else {
+			s++;
+		}
+	} else {
+		s = path;
+	}
+	return s;
 }
 
 /*
@@ -709,8 +676,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
-	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
-	char **val_list = NULL;
+	int str_len = 0;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	int fd = -1;
@@ -718,6 +684,20 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	void *event_extra_data = NULL;
 	unsigned int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
+	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	php_rfc1867_getword_t getword;
+	php_rfc1867_getword_conf_t getword_conf;
+	php_rfc1867_basename_t _basename;
+
+	if (php_rfc1867_encoding_translation(TSRMLS_C) && internal_encoding) {
+		getword = php_rfc1867_getword;
+		getword_conf = php_rfc1867_getword_conf;
+		_basename = php_rfc1867_basename;
+	} else {
+		getword = php_ap_getword;
+		getword_conf = php_ap_getword_conf;
+		_basename = php_ap_basename;
+	}
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -780,11 +760,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	INIT_PZVAL(http_post_files);
 	PG(http_globals)[TRACK_VARS_FILES] = http_post_files;
 
-	if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-		val_list = (char **)ecalloc(num_vars_max+2, sizeof(char *));
-		len_list = (int *)ecalloc(num_vars_max+2, sizeof(int));
-	}
-
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
 
 	if (php_rfc1867_callback != NULL) {
@@ -817,7 +792,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				++cd;
 			}
 
-			while (*cd && (pair = php_ap_getword(&cd, ';')))
+			while (*cd && (pair = getword(mbuff->input_encoding, &cd, ';' TSRMLS_CC)))
 			{
 				char *key = NULL, *word = pair;
 
@@ -826,41 +801,33 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (strchr(pair, '=')) {
-					key = php_ap_getword(&pair, '=');
+					key = getword(mbuff->input_encoding, &pair, '=' TSRMLS_CC);
 
 					if (!strcasecmp(key, "name")) {
 						if (param) {
 							efree(param);
 						}
-						if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-							if (num_vars >= num_vars_max) {
-								php_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 1 TSRMLS_CC);
+						param = getword_conf(mbuff->input_encoding, pair TSRMLS_CC);
+						if (mbuff->input_encoding && internal_encoding) {
+							unsigned char *new_param;
+							size_t new_param_len;
+							if ((size_t)-1 != zend_multibyte_encoding_converter(&new_param, &new_param_len, (unsigned char *)param, strlen(param), internal_encoding, mbuff->input_encoding TSRMLS_CC)) {
+								efree(param);
+								param = (char *)new_param;
 							}
-							val_list[num_vars] = pair;
-							len_list[num_vars] = strlen(pair);
-							num_vars++;
-							php_rfc1867_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC);
-							num_vars--;
-							param = php_rfc1867_getword(pair TSRMLS_CC);
-						} else {
-							param = php_ap_getword_conf(pair TSRMLS_CC);
 						}
 					} else if (!strcasecmp(key, "filename")) {
 						if (filename) {
 							efree(filename);
 						}
-						if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-							if (num_vars >= num_vars_max) {
-								php_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 1 TSRMLS_CC);
+						filename = getword_conf(mbuff->input_encoding, pair TSRMLS_CC);
+						if (mbuff->input_encoding && internal_encoding) {
+							unsigned char *new_filename;
+							size_t new_filename_len;
+							if ((size_t)-1 != zend_multibyte_encoding_converter(&new_filename, &new_filename_len, (unsigned char *)filename, strlen(filename), internal_encoding, mbuff->input_encoding TSRMLS_CC)) {
+								efree(filename);
+								filename = (char *)new_filename;
 							}
-							val_list[num_vars] = pair;
-							len_list[num_vars] = strlen(pair);
-							num_vars++;
-							php_rfc1867_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC);
-							num_vars--;
-							filename = php_rfc1867_getword(pair TSRMLS_CC);
-						} else {
-							filename = php_ap_getword_conf(pair TSRMLS_CC);
 						}
 					}
 				}
@@ -878,12 +845,20 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 				if (!value) {
 					value = estrdup("");
+					value_len = 0;
 				}
 
-				if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-					/* postpone filtering, callback call and registration */
-					php_gpc_stack_variable(param, value, &val_list, &len_list, &num_vars, &num_vars_max TSRMLS_CC);
-				} else if (sapi_module.input_filter(PARSE_POST, param, &value, value_len, &new_val_len TSRMLS_CC)) {
+				if (mbuff->input_encoding && internal_encoding) {
+					unsigned char *new_value;
+					size_t new_value_len;
+					if ((size_t)-1 != zend_multibyte_encoding_converter(&new_value, &new_value_len, (unsigned char *)value, value_len, internal_encoding, mbuff->input_encoding TSRMLS_CC)) {
+						efree(value);
+						value = (char *)new_value;
+						value_len = new_value_len;
+					}
+				}
+
+				if (sapi_module.input_filter(PARSE_POST, param, &value, value_len, &new_val_len TSRMLS_CC)) {
 					if (php_rfc1867_callback != NULL) {
 						multipart_event_formdata event_formdata;
 						size_t newlength = new_val_len;
@@ -1135,43 +1110,23 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				snprintf(lbuf, llen, "%s_name", param);
 			}
 
-			if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-				if (num_vars >= num_vars_max) {
-					php_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 1 TSRMLS_CC);
-				}
-				val_list[num_vars] = filename;
-				len_list[num_vars] = strlen(filename);
-				num_vars++;
-				if (php_rfc1867_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC) == SUCCESS) {
-					str_len = strlen(filename);
-					php_rfc1867_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
-				}
-				s = php_rfc1867_basename(filename TSRMLS_CC);
-				num_vars--;
-			} else {
-				/* The \ check should technically be needed for win32 systems only where
-				 * it is a valid path separator. However, IE in all it's wisdom always sends
-				 * the full path of the file on the user's filesystem, which means that unless
-				 * the user does basename() they get a bogus file name. Until IE's user base drops
-				 * to nill or problem is fixed this code must remain enabled for all systems. */
-				s = strrchr(filename, '\\');
-				if ((tmp = strrchr(filename, '/')) > s) {
-					s = tmp;
-				}
+			/* The \ check should technically be needed for win32 systems only where
+			 * it is a valid path separator. However, IE in all it's wisdom always sends
+			 * the full path of the file on the user's filesystem, which means that unless
+			 * the user does basename() they get a bogus file name. Until IE's user base drops
+			 * to nill or problem is fixed this code must remain enabled for all systems. */
+			s = _basename(internal_encoding, filename TSRMLS_CC);
 #ifdef PHP_WIN32
-				if (PG(magic_quotes_gpc)) {
-					s = s ? s : filename;
-					tmp = strrchr(s, '\'');
-					s = tmp > s ? tmp : s;
-					tmp = strrchr(s, '"');
-					s = tmp > s ? tmp : s;
-				}
+			if (PG(magic_quotes_gpc)) {
+				s = s ? s : filename;
+				tmp = strrchr(s, '\'');
+				s = tmp >= s ? tmp + 1: s;
+				tmp = strrchr(s, '"');
+				s = tmp >= s ? tmp + 1: s;
+			}
 #endif
-				if (s) {
-					s++;
-				} else {
-					s = filename;
-				}
+			if (!s) {
+				s = filename;
 			}
 
 			if (!is_anonymous) {
@@ -1300,10 +1255,6 @@ fileupload_done:
 		php_rfc1867_callback(MULTIPART_EVENT_END, &event_end, &event_extra_data TSRMLS_CC);
 	}
 
-	if (php_rfc1867_encoding_translation(TSRMLS_C)) {
-		php_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC);
-	}
-
 	if (lbuf) efree(lbuf);
 	if (abuf) efree(abuf);
 	if (array_index) efree(array_index);
@@ -1318,15 +1269,17 @@ fileupload_done:
 
 SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_encoding_translation_t encoding_translation,
-					php_rfc1867_encoding_detector_t encoding_detector,
-					php_rfc1867_encoding_converter_t encoding_converter,
+					php_rfc1867_get_detect_order_t get_detect_order,
+					php_rfc1867_set_input_encoding_t set_input_encoding,
 					php_rfc1867_getword_t getword,
+					php_rfc1867_getword_conf_t getword_conf,
 					php_rfc1867_basename_t basename) /* {{{ */
 {
 	php_rfc1867_encoding_translation = encoding_translation;
-	php_rfc1867_encoding_detector = encoding_detector;
-	php_rfc1867_encoding_converter = encoding_converter;
+	php_rfc1867_get_detect_order = get_detect_order;
+	php_rfc1867_set_input_encoding = set_input_encoding;
 	php_rfc1867_getword = getword;
+	php_rfc1867_getword_conf = getword_conf;
 	php_rfc1867_basename = basename;
 }	
 /* }}} */

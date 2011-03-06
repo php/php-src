@@ -68,10 +68,11 @@ typedef struct _multipart_event_end {
 } multipart_event_end;
 
 typedef int (*php_rfc1867_encoding_translation_t)(TSRMLS_D);
-typedef int (*php_rfc1867_encoding_detector_t)(char **arg_string, int *arg_length, int num, char *arg_list TSRMLS_DC);
-typedef int (*php_rfc1867_encoding_converter_t)(char **str, int *len, int num, const char *encoding_to, const char *encoding_from TSRMLS_DC);
-typedef char* (*php_rfc1867_getword_t)(char *str TSRMLS_DC);
-typedef char* (*php_rfc1867_basename_t)(char *str TSRMLS_DC);
+typedef void (*php_rfc1867_get_detect_order_t)(const zend_encoding ***list, size_t *list_size TSRMLS_DC);
+typedef void (*php_rfc1867_set_input_encoding_t)(const zend_encoding *encoding TSRMLS_DC);
+typedef char* (*php_rfc1867_getword_t)(const zend_encoding *encoding, char **line, char stop TSRMLS_DC);
+typedef char* (*php_rfc1867_getword_conf_t)(const zend_encoding *encoding, char *str TSRMLS_DC);
+typedef char* (*php_rfc1867_basename_t)(const zend_encoding *encoding, char *str TSRMLS_DC);
 
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
@@ -81,9 +82,10 @@ extern PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, 
 
 SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_encoding_translation_t encoding_translation,
-					php_rfc1867_encoding_detector_t encoding_detector,
-					php_rfc1867_encoding_converter_t encoding_converter,
+					php_rfc1867_get_detect_order_t get_detect_order,
+					php_rfc1867_set_input_encoding_t set_input_encoding,
 					php_rfc1867_getword_t getword,
+					php_rfc1867_getword_conf_t getword_conf,
 					php_rfc1867_basename_t basename);	
 
 #endif /* RFC1867_H */

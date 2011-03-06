@@ -206,26 +206,6 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
 	return SUCCESS;
 }
 
-ZEND_API size_t zend_multibyte_script_encoding_filter(unsigned char **to, size_t
-*to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
-{
-	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	if (!internal_encoding || !zend_multibyte_check_lexer_compatibility(internal_encoding)) {
-		internal_encoding = zend_multibyte_encoding_utf8;
-	}
-	return zend_multibyte_encoding_converter(to, to_length, from, from_length, internal_encoding, LANG_SCNG(script_encoding) TSRMLS_CC);
-}
-
-ZEND_API size_t zend_multibyte_internal_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
-{
-	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	if (!internal_encoding || !zend_multibyte_check_lexer_compatibility(internal_encoding)) {
-		internal_encoding = zend_multibyte_encoding_utf8;
-	}
-	return zend_multibyte_encoding_converter(to, to_length, from, from_length,
-LANG_SCNG(script_encoding), internal_encoding TSRMLS_CC);
-}
-
 /*
  * Local variables:
  * tab-width: 4
