@@ -128,13 +128,10 @@ PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 PHP_FUNCTION(mb_check_encoding);
 
-MBSTRING_API int php_mb_encoding_translation(TSRMLS_D);
-
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
                                  size_t nbytes TSRMLS_DC);
-MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
 
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
                                       const char *_to_encoding,
@@ -146,17 +143,11 @@ MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC)
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
 
-MBSTRING_API size_t php_mb_gpc_mbchar_bytes(const char *s TSRMLS_DC);
-
 MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length, 
 											 char *arg_list TSRMLS_DC);
 
 MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to, 
 											  const char *encoding_from TSRMLS_DC);
-MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, const char *encoding_to, const char *encoding_from TSRMLS_DC);
-
-MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length, int num, char *arg_list TSRMLS_DC);
-
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding TSRMLS_DC);
 
 /* internal use only */

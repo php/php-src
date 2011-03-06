@@ -5988,8 +5988,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 
 				/* need to re-scan if input filter changed */
 				if (old_input_filter != LANG_SCNG(input_filter) ||
-					((old_input_filter == zend_multibyte_script_encoding_filter) &&
-					 (new_encoding != old_encoding))) {
+					 (old_input_filter && new_encoding != old_encoding)) {
 					zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
 				}
 			}

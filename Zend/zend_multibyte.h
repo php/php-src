@@ -75,9 +75,6 @@ ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_l
 ZEND_API int zend_multibyte_set_internal_encoding(const zend_encoding *encoding TSRMLS_DC);
 ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length TSRMLS_DC);
 
-ZEND_API size_t zend_multibyte_script_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC);
-ZEND_API size_t zend_multibyte_internal_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC);
-
 END_EXTERN_C()
 
 #endif /* ZEND_MULTIBYTE_H */
