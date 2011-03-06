@@ -743,7 +743,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	/* Initialize the buffer */
-	if (!(mbuff = multipart_buffer_new(boundary, boundary_len))) {
+	if (!(mbuff = multipart_buffer_new(boundary, boundary_len TSRMLS_CC))) {
 		sapi_module.sapi_error(E_WARNING, "Unable to initialize the input buffer");
 		return;
 	}
