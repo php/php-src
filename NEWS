@@ -1,9 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.6
-- PDO DBLib driver:
-  . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
-    (mjh at hodginsmedia dot com, Felipe)
 
 03 Mar 2011, PHP 5.3.6RC2
 - Zend Engine:
