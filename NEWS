@@ -3,6 +3,7 @@
 ?? ??? 2011, PHP 5.3.6
 - Shmop extension:
   . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
+    Reported by Jose Carlos Norte <jose at eyeos dot org>
 
 03 Mar 2011, PHP 5.3.6RC2
 - Zend Engine:
