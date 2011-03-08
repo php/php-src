@@ -1598,7 +1598,9 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 
 	iterator->intern.data = NULL; /* mark as unused */
 	zval_ptr_dtor(&iterator->current);
-	zval_ptr_dtor(&zfree);
+	if (zfree) {
+		zval_ptr_dtor(&zfree);
+	}
 }
 /* }}} */
 
