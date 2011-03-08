@@ -5,6 +5,10 @@
   . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
     Reported by Jose Carlos Norte <jose at eyeos dot org> (CVE-2011-1092)
 
+- SPL extension:
+  . Fixed bug #49608 (Using CachingIterator on DirectoryIterator instance
+    segfaults). (Felipe)
+
 03 Mar 2011, PHP 5.3.6RC2
 - Zend Engine:
   . Fixed bug #43512 (same parameter name can be used multiple times in
