@@ -1,6 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.6
+10 Mar 2011, PHP 5.3.6RC3
 - Shmop extension:
   . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
     Reported by Jose Carlos Norte <jose at eyeos dot org> (CVE-2011-1092)
