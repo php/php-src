@@ -26,6 +26,8 @@
 #include <limits.h>
 #endif
 
+#define TIMELIB_VERSION 201101
+
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
 #define TIMELIB_NO_CLONE         0x02
