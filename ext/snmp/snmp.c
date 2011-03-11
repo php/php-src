@@ -601,7 +601,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	*buf = 0;
 
 	if (valueretrieval == SNMP_VALUE_LIBRARY) {
-		SNMP_SNPRINT_VALUE(buf, buflen, vars->name, vars->name_length, vars);
+		SNMP_SNPRINT_VALUE(buf, buflen, vars->name, vars->val_len, vars);
 		ZVAL_STRING(snmpval, buf, 1);
 		if(dbuf){ /* malloc was used to store value */
 			efree(dbuf);
@@ -834,7 +834,7 @@ retry:
 							break;
 						}
 						SNMP_SNPRINT_OBJID(buf, sizeof(buf), vars->name, vars->name_length);
-						SNMP_SNPRINT_VALUE(buf2, sizeof(buf2), vars->name, vars->name_length, vars);
+						SNMP_SNPRINT_VALUE(buf2, sizeof(buf2), vars->name, vars->val_len, vars);
 						php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_ERROR_IN_REPLY, "Error in packet at '%s': %s", buf, buf2);
 						continue;
 					}
