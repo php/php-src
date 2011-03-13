@@ -1,10 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 10 Mar 2011, PHP 5.3.6RC3
-- Core:
-  . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
-    (tomas dot brastavicius at quantum dot lt, Pierrick)
-
 - Shmop extension:
   . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
     Reported by Jose Carlos Norte <jose at eyeos dot org> (CVE-2011-1092)
