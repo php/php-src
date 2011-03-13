@@ -96,7 +96,7 @@ DBA_UPDATE_FUNC(flatfile)
 		return SUCCESS;
 	case 1:
 		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Key already exists");
-		return SUCCESS;
+		return FAILURE;
 	}
 }
 
