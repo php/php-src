@@ -676,7 +676,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
-	int str_len = 0;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	int fd = -1;
