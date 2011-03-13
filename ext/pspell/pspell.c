@@ -452,7 +452,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -482,7 +482,7 @@ static PHP_FUNCTION(pspell_new_config)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -742,7 +742,7 @@ static PHP_FUNCTION(pspell_config_create)
 	which is not what we want */
 	pspell_config_replace(config, "save-repl", "false");
 
-	ind = zend_list_insert(config, le_pspell_config);
+	ind = zend_list_insert(config, le_pspell_config TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
