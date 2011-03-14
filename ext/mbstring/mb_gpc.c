@@ -282,7 +282,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			if (info->report_errors) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
 			}
-			from_encoding = mbfl_no_encoding_pass;
+			from_encoding = &mbfl_encoding_pass;
 		}
 	}
 

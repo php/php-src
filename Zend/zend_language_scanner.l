@@ -346,9 +346,7 @@ static const zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 
 	if (script_encoding) {
 		/* remove BOM */
-		script = (unsigned char*)emalloc(LANG_SCNG(script_org_size)+1-bom_size);
-		memcpy(script, LANG_SCNG(script_org)+bom_size, LANG_SCNG(script_org_size)+1-bom_size);
-		LANG_SCNG(script_org) = script;
+		LANG_SCNG(script_org) += bom_size;
 		LANG_SCNG(script_org_size) -= bom_size;
 
 		return script_encoding;
