@@ -308,7 +308,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				char *error;
 				if (!phar_open_jit(phar, info, &error TSRMLS_CC)) {
 					if (error) {
-						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 						efree(error);
 					}
 					return -1;
@@ -675,7 +675,7 @@ PHP_METHOD(Phar, webPhar)
 
 	if (phar_open_executed_filename(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 		return;
@@ -1097,7 +1097,7 @@ PHP_METHOD(Phar, createDefaultStub)
 	stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 		return;
 	}
@@ -1122,7 +1122,7 @@ PHP_METHOD(Phar, mapPhar)
 	RETVAL_BOOL(phar_open_executed_filename(alias, alias_len, &error TSRMLS_CC) == SUCCESS);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 } /* }}} */
