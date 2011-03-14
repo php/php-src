@@ -1,5 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Mar 2011, PHP 5.3.6
+- Phar extension:
+  . Fixed bug #54247 (format-string vulnerability on Phar). (Felipe)
+    (CVE-2011-1153)
+
 10 Mar 2011, PHP 5.3.6RC3
 - Shmop extension:
   . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
