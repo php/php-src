@@ -2958,7 +2958,7 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 				string.no_encoding = from_encoding->no_encoding;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect character encoding");
-				from_encoding = mbfl_no_encoding_pass;
+				from_encoding = &mbfl_encoding_pass;
 				to_encoding = from_encoding;
 				string.no_encoding = from_encoding->no_encoding;
 			}
@@ -3496,7 +3496,7 @@ PHP_FUNCTION(mb_convert_variables)
 		break;
 	}
 	if (elistsz <= 0) {
-		from_encoding = mbfl_no_encoding_pass;
+		from_encoding = &mbfl_encoding_pass;
 	} else if (elistsz == 1) {
 		from_encoding = *elist;
 	} else {
@@ -3565,7 +3565,7 @@ detect_end:
 
 		if (!from_encoding) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
-			from_encoding = mbfl_no_encoding_pass;
+			from_encoding = &mbfl_encoding_pass;
 		}
 	}
 	if (elist != NULL) {
@@ -3573,7 +3573,7 @@ detect_end:
 	}
 	/* create converter */
 	convd = NULL;
-	if (from_encoding != mbfl_no_encoding_pass) {
+	if (from_encoding != &mbfl_encoding_pass) {
 		convd = mbfl_buffer_converter_new2(from_encoding, to_encoding, 0);
 		if (convd == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
@@ -4418,6 +4418,7 @@ PHP_FUNCTION(mb_get_info)
 			array_init(return_value);
 			for (i = 0; i < n; i++) {
 				add_next_index_string(return_value, (*entry)->name, 1);
+				entry++;
 			}
 		}
 	} else if (!strcasecmp("substitute_character", typ)) {
@@ -4693,7 +4694,7 @@ static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *lis
 
 static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding TSRMLS_DC) /* {{{ */
 {
-	MBSTRG(http_input_identify) = encoding;
+	MBSTRG(http_input_identify) = (const mbfl_encoding*)encoding;
 }
 /* }}} */
 

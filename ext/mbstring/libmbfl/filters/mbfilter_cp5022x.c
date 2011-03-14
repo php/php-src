@@ -462,7 +462,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -693,7 +693,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -841,7 +841,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
