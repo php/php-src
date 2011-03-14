@@ -402,22 +402,23 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSR
 }
 /* }}} */
 
-static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC) /* {{{ */
+static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, socklen_t *la_len TSRMLS_DC) /* {{{ */
 {
-	socklen_t	salen;
 	php_socket	*out_sock = (php_socket*)emalloc(sizeof(php_socket));
 
 	*new_sock = out_sock;
-	salen = sizeof(*la);
-	out_sock->blocking = 1;
 
-	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, &salen);
+	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
 		efree(out_sock);
 		return 0;
 	}
+
+	out_sock->error = 0;
+	out_sock->blocking = 1;
+	out_sock->type = la->sa_family;
 
 	return 1;
 }
@@ -1023,9 +1024,10 @@ PHP_FUNCTION(socket_create_listen)
    Accepts a connection on the listening socket fd */
 PHP_FUNCTION(socket_accept)
 {
-	zval				*arg1;
-	php_socket			*php_sock, *new_sock;
-	struct sockaddr_in	sa;
+	zval				 *arg1;
+	php_socket			 *php_sock, *new_sock;
+	php_sockaddr_storage sa;
+	socklen_t			 sa_len = sizeof(sa);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		return;
@@ -1033,12 +1035,9 @@ PHP_FUNCTION(socket_accept)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
+	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr*)&sa, &sa_len TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-
-	new_sock->error = 0;
-	new_sock->blocking = 1;
 
 	ZEND_REGISTER_RESOURCE(return_value, new_sock, le_socket);
 }
