@@ -1143,7 +1143,7 @@ PHP_METHOD(Phar, loadPhar)
 	RETVAL_BOOL(phar_open_from_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 } /* }}} */
@@ -2009,7 +2009,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 
@@ -2072,7 +2072,7 @@ PHP_METHOD(Phar, buildFromIterator)
 		phar_obj->arc.archive->ufp = pass.fp;
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 	} else {
@@ -2330,7 +2330,7 @@ its_ok:
 	phar_flush(phar, 0, 0, 1, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 		efree(oldpath);
 		return NULL;
@@ -2790,7 +2790,7 @@ PHP_METHOD(Phar, delete)
 
 	phar_flush(phar_obj->arc.archive, NULL, 0, 0, &error TSRMLS_CC);
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 
@@ -2865,7 +2865,7 @@ PHP_METHOD(Phar, setAlias)
 				efree(error);
 				goto valid_alias;
 			}
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 			RETURN_FALSE;
 		}
@@ -2902,7 +2902,7 @@ valid_alias:
 			phar_obj->arc.archive->alias = oldalias;
 			phar_obj->arc.archive->alias_len = oldalias_len;
 			phar_obj->arc.archive->is_temporary_alias = old_temp;
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			if (readd) {
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), oldalias, oldalias_len, (void*)&(phar_obj->arc.archive), sizeof(phar_archive_data*), NULL);
 			}
@@ -2975,7 +2975,7 @@ PHP_METHOD(Phar, stopBuffering)
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 }
@@ -3024,7 +3024,7 @@ PHP_METHOD(Phar, setStub)
 			}
 			phar_flush(phar_obj->arc.archive, (char *) &zstub, len, 0, &error TSRMLS_CC);
 			if (error) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 				efree(error);
 			}
 			RETURN_TRUE;
@@ -3040,7 +3040,7 @@ PHP_METHOD(Phar, setStub)
 		phar_flush(phar_obj->arc.archive, stub, stub_len, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 
@@ -3101,7 +3101,7 @@ PHP_METHOD(Phar, setDefaultStub)
 		stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 			if (stub) {
 				efree(stub);
@@ -3123,7 +3123,7 @@ PHP_METHOD(Phar, setDefaultStub)
 	}
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 		RETURN_FALSE;
 	}
@@ -3178,7 +3178,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 
 			phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 			if (error) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 				efree(error);
 			}
 			break;
@@ -3480,7 +3480,7 @@ PHP_METHOD(Phar, compressFiles)
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 }
@@ -3520,7 +3520,7 @@ PHP_METHOD(Phar, decompressFiles)
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 
@@ -3620,7 +3620,7 @@ PHP_METHOD(Phar, copy)
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error TSRMLS_CC)) {
 			efree(newentry.filename);
 			php_stream_close(newentry.fp);
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 			return;
 		}
@@ -3631,7 +3631,7 @@ PHP_METHOD(Phar, copy)
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 
@@ -3777,7 +3777,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 		phar_flush(*pphar, 0, 0, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 	}
@@ -3813,7 +3813,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, int dirname_len
 		phar_flush(*pphar, 0, 0, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 		}
 	}
@@ -3899,7 +3899,7 @@ PHP_METHOD(Phar, offsetUnset)
 			phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 			if (error) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 				efree(error);
 			}
 
@@ -4155,7 +4155,7 @@ PHP_METHOD(Phar, setMetadata)
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 }
@@ -4182,7 +4182,7 @@ PHP_METHOD(Phar, delMetadata)
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 			RETURN_FALSE;
 		} else {
@@ -4731,7 +4731,7 @@ PHP_METHOD(PharFileInfo, chmod)
 	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 }
@@ -4817,7 +4817,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 }
@@ -4862,7 +4862,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 
 		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 			efree(error);
 			RETURN_FALSE;
 		} else {
@@ -5044,7 +5044,7 @@ PHP_METHOD(PharFileInfo, compress)
 	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 
@@ -5119,7 +5119,7 @@ PHP_METHOD(PharFileInfo, decompress)
 	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s", error);
 		efree(error);
 	}
 	RETURN_TRUE;
