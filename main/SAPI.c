@@ -80,6 +80,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 
 #ifdef ZTS
 	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
+	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 #else
 	sapi_globals_ctor(&sapi_globals);
 #endif
