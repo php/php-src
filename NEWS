@@ -2,10 +2,13 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2011, PHP 5.3.6
 - Zend Engine:
+  . Fixed bug numerous crashes due to setlocale (crash on error, pcre, mysql
+    etc.) on Windows in thread safe mode. (Pierre)
   . Fixed bug #54265 (crash when variable gets reassigned in error handler).
     (Dmitry)
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
     (Dmitry)
+
 
 - Phar extension:
   . Fixed bug #54247 (format-string vulnerability on Phar). (Felipe)
