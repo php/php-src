@@ -671,7 +671,7 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 			return;
 		}
 	}
-	
+
 	/* separate our value if necessary */
 	if (value_type == IS_TMP_VAR) {
 		zval *orig_value = value;
@@ -737,7 +737,7 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 			if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
 				char *tmp = (char *) emalloc(T->str_offset.offset+1+1);
 
-				memcpy(tmp, Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+				memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str)+1);
 				Z_STRVAL_P(T->str_offset.str) = tmp;
 			} else {
 				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
@@ -756,7 +756,7 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 
 		if (Z_TYPE_P(value) != IS_STRING) {
 			zval tmp;
-			
+
 			ZVAL_COPY_VALUE(&tmp, value);
 			if (value_type != IS_TMP_VAR) {
 				zval_copy_ctor(&tmp);
@@ -979,7 +979,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 			goto fetch_string_dim;
 
 		case IS_STRING:
-			
+
 			offset_key = dim->value.str.val;
 			offset_key_length = dim->value.str.len;
 
@@ -992,7 +992,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 				} else {
 					hval = zend_hash_func(offset_key, offset_key_length+1);
 				}
-			}	
+			}
 fetch_string_dim:
 			if (zend_hash_quick_find(ht, offset_key, offset_key_length+1, hval, (void **) &retval) == FAILURE) {
 				switch (type) {
@@ -1267,7 +1267,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					Z_STRVAL_P(ptr) = (char*)emalloc(2);
 					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
 					Z_STRVAL_P(ptr)[1] = 0;
-					Z_STRLEN_P(ptr) = 1;						
+					Z_STRLEN_P(ptr) = 1;
 				}
 				AI_SET_PTR(result, ptr);
 				return;
