@@ -7606,10 +7606,9 @@ static int ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (IS_VAR == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
-		(*varptr_ptr)->refcount--;
-		ALLOC_ZVAL(*varptr_ptr);
-		INIT_ZVAL(**varptr_ptr);
-		(*varptr_ptr)->refcount = 0;
+		ALLOC_INIT_ZVAL(varptr);
+		zend_ptr_stack_push(&EG(argument_stack), varptr);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
@@ -20049,10 +20048,9 @@ static int ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (IS_CV == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
-		(*varptr_ptr)->refcount--;
-		ALLOC_ZVAL(*varptr_ptr);
-		INIT_ZVAL(**varptr_ptr);
-		(*varptr_ptr)->refcount = 0;
+		ALLOC_INIT_ZVAL(varptr);
+		zend_ptr_stack_push(&EG(argument_stack), varptr);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
