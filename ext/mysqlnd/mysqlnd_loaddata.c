@@ -85,14 +85,14 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 /* {{{ mysqlnd_local_infile_read */
 static
-int mysqlnd_local_infile_read(void *ptr, char *buf, unsigned int buf_len TSRMLS_DC)
+int mysqlnd_local_infile_read(void *ptr, zend_uchar * buf, unsigned int buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int count;
 
 	DBG_ENTER("mysqlnd_local_infile_read");
 
-	count = (int)php_stream_read(info->fd, buf, buf_len);
+	count = (int)php_stream_read(info->fd, (char *) buf, buf_len);
 
 	if (count < 0) {
 		strcpy(info->error_msg, "Error reading file");
@@ -173,8 +173,8 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 enum_func_status
 mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC)
 {
-	char				*buf = NULL;
-	char				empty_packet[MYSQLND_HEADER_SIZE];
+	zend_uchar			*buf = NULL;
+	zend_uchar			empty_packet[MYSQLND_HEADER_SIZE];
 	enum_func_status	result = FAIL;
 	unsigned int		buflen = 4096;
 	void				*info = NULL;
@@ -194,7 +194,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	infile = conn->infile;
 	/* allocate buffer for reading data */
-	buf = (char *)mnd_ecalloc(1, buflen);
+	buf = (zend_uchar *)mnd_ecalloc(1, buflen);
 
 	*is_warning = FALSE;
 

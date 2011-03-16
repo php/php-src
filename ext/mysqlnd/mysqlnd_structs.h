@@ -132,7 +132,7 @@ typedef struct st_mysqlnd_charset
 typedef struct st_mysqlnd_infile
 {
 	int		(*local_infile_init)(void **ptr, char *filename, void **userdata TSRMLS_DC);
-	int		(*local_infile_read)(void *ptr, char *buf, unsigned int buf_len TSRMLS_DC);
+	int		(*local_infile_read)(void *ptr, zend_uchar * buf, unsigned int buf_len TSRMLS_DC);
 	int		(*local_infile_error)(void *ptr, char *error_msg, unsigned int error_msg_len TSRMLS_DC);
 	void	(*local_infile_end)(void *ptr TSRMLS_DC);
 	zval	*callback;
