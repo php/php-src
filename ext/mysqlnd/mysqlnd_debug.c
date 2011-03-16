@@ -538,7 +538,7 @@ MYSQLND_METHOD(mysqlnd_debug, free)(MYSQLND_DEBUG * self)
 	zend_stack_destroy(&self->call_time_stack);
 	zend_hash_destroy(&self->not_filtered_functions);
 	zend_hash_destroy(&self->function_profiles);
-	efree(self);
+	free(self);
 	return PASS;
 }
 /* }}} */
@@ -761,7 +761,7 @@ MYSQLND_CLASS_METHODS_END;
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 {
-	MYSQLND_DEBUG *ret = ecalloc(1, sizeof(MYSQLND_DEBUG));
+	MYSQLND_DEBUG *ret = calloc(1, sizeof(MYSQLND_DEBUG));
 #ifdef ZTS
 	ret->TSRMLS_C = TSRMLS_C;
 #endif
