@@ -2694,10 +2694,9 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 	}
 
 	if (OP1_TYPE == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
-		Z_DELREF_PP(varptr_ptr);
-		ALLOC_ZVAL(*varptr_ptr);
-		INIT_ZVAL(**varptr_ptr);
-		Z_SET_REFCOUNT_PP(varptr_ptr, 0);
+		ALLOC_INIT_ZVAL(varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {

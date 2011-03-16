@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1880,16 +1880,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 
 	return_value_used = RETURN_VALUE_USED(opline);
 
-	if (Z_LVAL(opline->op2.u.constant) != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
-		if (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE ||
-		    Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		}
-		goto done;
-	}
-
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
@@ -1943,7 +1933,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-done:
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
@@ -5165,16 +5154,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 
 	return_value_used = RETURN_VALUE_USED(opline);
 
-	if (Z_LVAL(opline->op2.u.constant) != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
-		if (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE ||
-		    Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		}
-		goto done;
-	}
-
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
@@ -5228,7 +5207,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-done:
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
@@ -8364,10 +8342,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	if (IS_VAR == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
-		Z_DELREF_PP(varptr_ptr);
-		ALLOC_ZVAL(*varptr_ptr);
-		INIT_ZVAL(**varptr_ptr);
-		Z_SET_REFCOUNT_PP(varptr_ptr, 0);
+		ALLOC_INIT_ZVAL(varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
@@ -8546,16 +8523,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 
 	return_value_used = RETURN_VALUE_USED(opline);
 
-	if (Z_LVAL(opline->op2.u.constant) != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
-		if (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE ||
-		    Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		}
-		goto done;
-	}
-
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
@@ -8609,7 +8576,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-done:
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
@@ -22248,10 +22214,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	if (IS_CV == IS_VAR && *varptr_ptr == EG(error_zval_ptr)) {
-		Z_DELREF_PP(varptr_ptr);
-		ALLOC_ZVAL(*varptr_ptr);
-		INIT_ZVAL(**varptr_ptr);
-		Z_SET_REFCOUNT_PP(varptr_ptr, 0);
+		ALLOC_INIT_ZVAL(varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
+		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
@@ -22420,16 +22385,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 
 	return_value_used = RETURN_VALUE_USED(opline);
 
-	if (Z_LVAL(opline->op2.u.constant) != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
-		if (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE ||
-		    Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename) TSRMLS_CC);
-		}
-		goto done;
-	}
-
 	switch (Z_LVAL(opline->op2.u.constant)) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
@@ -22483,7 +22438,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-done:
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}

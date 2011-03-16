@@ -1,6 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2011, PHP 5.3.6
+- Zend Engine:
+  . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
+    (Dmitry)
+
 - Phar extension:
   . Fixed bug #54247 (format-string vulnerability on Phar). (Felipe)
     (CVE-2011-1153)
