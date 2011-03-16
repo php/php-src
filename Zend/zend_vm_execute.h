@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2874,6 +2874,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
  	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -4351,6 +4353,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
  	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -4883,6 +4887,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
  	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -7188,6 +7194,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
  	if (IS_TMP_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -8538,6 +8546,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
  	if (IS_TMP_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -9072,6 +9082,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
  	if (IS_TMP_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -12053,6 +12065,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
  	if (IS_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -16248,6 +16262,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
  	if (IS_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -18020,6 +18036,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
  	if (IS_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -27579,6 +27597,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
  	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -31431,6 +31451,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
  	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
@@ -33076,6 +33098,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
  	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_COPY_VALUE(&tmp_varname, varname);
 		zval_copy_ctor(&tmp_varname);
+		Z_SET_REFCOUNT(tmp_varname, 1);
+		Z_UNSET_ISREF(tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
