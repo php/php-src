@@ -4,6 +4,8 @@
 - Added ability to connect to HTTPS sites through proxy with basic
   authentication using stream_context/http/header/Proxy-Authorization (Dmitry)
 
+- Fixed bug #54265 (crash when variable gets reassigned in error handler).
+  (Dmitry)
 - Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
   (Dmitry)
 - Fixed bug #53682 (Fix compile on the VAX). (Rasmus, jklos)

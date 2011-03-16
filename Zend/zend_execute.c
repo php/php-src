@@ -542,7 +542,30 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		return;
 	}
 
-	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
+	if (Z_TYPE_PP(object_ptr) == IS_NULL
+		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0)
+		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0)
+	) {
+		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
+		object = *object_ptr;
+		object->refcount++;
+		zend_error(E_STRICT, "Creating default object from empty value");
+		if (object->refcount == 1) {
+			/* object was removed by error handler, nothing to assign to */
+			zval_ptr_dtor(&object);
+			FREE_OP(free_op2);
+			if (!RETURN_VALUE_UNUSED(result)) {
+				*retval = &EG(uninitialized_zval);
+				PZVAL_LOCK(*retval);
+			}
+			FREE_OP(free_value);
+			return;
+		}
+		object->refcount--;
+		zval_dtor(object);
+		object_init(object);
+	}
+
 	object = *object_ptr;
 
 	if (Z_TYPE_P(object) != IS_OBJECT || (opcode == ZEND_ASSIGN_OBJ && !Z_OBJ_HT_P(object)->write_property)) {
