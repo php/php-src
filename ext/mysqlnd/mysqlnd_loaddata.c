@@ -25,25 +25,6 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 
-
-#define ALLOC_CALLBACK_ARGS(a, b, c)\
-if (c) {\
-	a = (zval ***)safe_emalloc(c, sizeof(zval **), 0);\
-	for (i = b; i < c; i++) {\
-		a[i] = mnd_emalloc(sizeof(zval *));\
-		MAKE_STD_ZVAL(*a[i]);\
-	}\
-}
-
-#define FREE_CALLBACK_ARGS(a, b, c)\
-if (a) {\
-	for (i = b; i < c; i++) {\
-		zval_ptr_dtor(a[i]);\
-		mnd_efree(a[i]);\
-	}\
-	mnd_efree(a);\
-}
-
 /* {{{ mysqlnd_local_infile_init */
 static
 int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS_DC)
