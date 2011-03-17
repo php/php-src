@@ -197,7 +197,7 @@ PHP_METHOD(mysqli_warning, next)
 
 		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, &mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
 
-		if (w->next) {
+		if (w && w->next) {
 			w = w->next;
 	        ((MYSQLI_RESOURCE *)(obj->ptr))->ptr = w;
 			RETURN_TRUE;
