@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
     (mjh at hodginsmedia dot com, Felipe)
 
+- Sockets extension
+  . Fixed bug #51958 (socket_accept() fails on IPv6 server sockets). (Gustavo)
+
 17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.11. (Ilia)
