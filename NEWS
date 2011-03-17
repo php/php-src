@@ -1,48 +1,6 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Mar 2011, PHP 5.3.6
-- Zend Engine:
-  . Fixed bug numerous crashes due to setlocale (crash on error, pcre, mysql
-    etc.) on Windows in thread safe mode. (Pierre)
-  . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
-    (Dmitry)
-
-
-- Phar extension:
-  . Fixed bug #54247 (format-string vulnerability on Phar). (Felipe)
-    (CVE-2011-1153)
-
-10 Mar 2011, PHP 5.3.6RC3
-- Shmop extension:
-  . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
-    Reported by Jose Carlos Norte <jose at eyeos dot org> (CVE-2011-1092)
-
-- SPL extension:
-  . Fixed bug #49608 (Using CachingIterator on DirectoryIterator instance
-    segfaults). (Felipe)
-
-03 Mar 2011, PHP 5.3.6RC2
-- Zend Engine:
-  . Fixed bug #43512 (same parameter name can be used multiple times in
-    method/function definition). (Felipe)
-
-- Exif extension:
-  . Fixed bug #54002 (crash on crafted tag, reported by Luca Carettoni).
-    (Pierre) (CVE-2011-0708)
-
-- OpenSSL extension:
-  . Fixed bug #54060 (Memory leaks when openssl_encrypt). (Pierre)
-  . Fixed bug #54061 (Memory leaks when openssl_decrypt). (Pierre)
-
-- SPL extension:
-  . Fixed memory leak in DirectoryIterator::getExtension() and 
-    SplFileInfo::getExtension(). (Felipe)
-
-- Tokenizer Extension
-  . Fixed bug #54089 (token_get_all() does not stop after __halt_compiler).
-    (Ilia)
-
-17 Feb 2011, PHP 5.3.6RC1
+17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.11. (Ilia)
 
@@ -50,6 +8,8 @@
   . Indirect reference to $this fails to resolve if direct $this is never used
     in method. (Scott)
   . Added options to debug backtrace functions. (Stas)
+  . Fixed bug numerous crashes due to setlocale (crash on error, pcre, mysql
+    etc.) on Windows in thread safe mode. (Pierre)
   . Fixed Bug #53971 (isset() and empty() produce apparently spurious runtime
     error). (Dmitry)
   . Fixed Bug #53958 (Closures can't 'use' shared variables by value and by
@@ -58,6 +18,8 @@
   . Fixed Bug #51458 (Lack of error context with nested exceptions). (Stas)
   . Fixed Bug #47143 (Throwing an exception in a destructor causes a fatal
     error). (Stas)
+  . Fixed bug #43512 (same parameter name can be used multiple times in
+    method/function definition). (Felipe)
 
 - Core:
   . Added ability to connect to HTTPS sites through proxy with basic
@@ -96,6 +58,10 @@
     created from timestamp). (Stas)
   . Fixed bug #52063 (DateTime constructor's second argument doesn't have a 
     null default value). (Gustavo, Stas)
+
+- Exif extension:
+  . Fixed bug #54002 (crash on crafted tag, reported by Luca Carettoni).
+    (Pierre) (CVE-2011-0708)
 
 - Filter extension:
   . Fixed bug #53924 (FILTER_VALIDATE_URL doesn't validate port number).
@@ -151,6 +117,8 @@
 - OpenSSL extension:
   . Fixed stream_socket_enable_crypto() not honoring the socket timeout in
     server mode. (Gustavo)
+  . Fixed bug #54060 (Memory leaks when openssl_encrypt). (Pierre)
+  . Fixed bug #54061 (Memory leaks when openssl_decrypt). (Pierre)
   . Fixed bug #53592 (stream_socket_enable_crypto() busy-waits in client mode).
     (Gustavo)
   . Implemented FR #53447 (Cannot disable SessionTicket extension for servers
@@ -172,6 +140,8 @@
     (gyp at balabit dot hu)
 
 - Phar extension:
+  . Fixed bug #54247 (format-string vulnerability on Phar). (Felipe)
+    (CVE-2011-1153)
   . Fixed bug #53541 (format string bug in ext/phar).
     (crrodriguez at opensuse dot org, Ilia)
   . Fixed bug #53898 (PHAR reports invalid error message, when the directory 
@@ -192,6 +162,10 @@
   . Fixed bug #53915 (ReflectionClass::getConstant(s) emits fatal error on
     constants with self::). (Gustavo)
 
+- Shmop extension:
+  . Fixed bug #54193 (Integer overflow in shmop_read()). (Felipe)
+    Reported by Jose Carlos Norte <jose at eyeos dot org> (CVE-2011-1092)
+
 - SNMP extension:
   . Fixed bug #51336 (snmprealwalk (snmp v1) does not handle end of OID tree
     correctly). (Boris Lytochkin)
@@ -201,9 +175,14 @@
     (Mateusz Kocielski, Pierre)
 
 - SPL extension:
+  . Fixed memory leak in DirectoryIterator::getExtension() and 
+    SplFileInfo::getExtension(). (Felipe)
   . Fixed bug #53914 (SPL assumes HAVE_GLOB is defined). (Chris Jones)
   . Fixed bug #53515 (property_exists incorrect on ArrayObject null and 0
     values). (Felipe)
+  . Fixed bug #49608 (Using CachingIterator on DirectoryIterator instance
+    segfaults). (Felipe)
+
   . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
 
 - SQLite3 extension:
@@ -224,6 +203,10 @@
   . Fixed bug #53903 (userspace stream stat callback does not separate the
     elements of the returned array before converting them). (Gustavo)
   . Implemented FR #26158 (open arbitrary file descriptor with fopen). (Gustavo)
+
+- Tokenizer Extension
+  . Fixed bug #54089 (token_get_all() does not stop after __halt_compiler).
+    (Ilia)
 
 - XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
