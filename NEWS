@@ -5,10 +5,17 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
     (Dmitry)
+    
+- DBA extension:
+  . Fixed bug #54242 (dba_insert returns true if key already exists). (Felipe)
 
 - MySQL Improved extension:
   . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
     (Andrey)
+    
+- PDO Dblib driver:
+  . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
+    (mjh at hodginsmedia dot com, Felipe)
 
 17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
