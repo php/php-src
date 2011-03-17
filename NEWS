@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+
+- Zend Engine:
+  . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
+    (Dmitry)
+
 - MySQL Improved extension:
   . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
     (Andrey)
