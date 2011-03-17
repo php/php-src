@@ -316,6 +316,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		pp = strchr(s, '#');
 
 		if (pp && pp < p) {
+			if (pp - s) {
+				ret->path = estrndup(s, (pp-s));
+				php_replace_controlchars_ex(ret->path, (pp - s));
+			}
 			p = pp;
 			goto label_parse;
 		}

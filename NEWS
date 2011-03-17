@@ -5,7 +5,11 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
     (Dmitry)
-    
+
+- Core:
+  . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
+    (tomas dot brastavicius at quantum dot lt, Pierrick)
+
 - DBA extension:
   . Fixed bug #54242 (dba_insert returns true if key already exists). (Felipe)
 
