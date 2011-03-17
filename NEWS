@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+- MySQL Improved extension:
+  . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
+    (Andrey)
 
 17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
