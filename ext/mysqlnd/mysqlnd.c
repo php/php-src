@@ -524,11 +524,11 @@ mysqlnd_connect_run_authentication(
 			{
 				char * plugin_name = NULL;
 
-				spprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
+				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
 
 				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
 				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				efree(plugin_name);
+				mnd_sprintf_free(plugin_name);
 
 				if (!auth_plugin) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
@@ -695,7 +695,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			if (!socket_or_pipe) {
 				socket_or_pipe = "/tmp/mysql.sock";
 			}
-			transport_len = spprintf(&transport, 0, "unix://%s", socket_or_pipe);
+			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe);
 			unix_socket = TRUE;
 #else
 		if (host_len == sizeof(".") - 1 && host[0] == '.') {
@@ -703,14 +703,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			if (!socket_or_pipe) {
 				socket_or_pipe = "\\\\.\\pipe\\MySQL";
 			}
-			transport_len = spprintf(&transport, 0, "pipe://%s", socket_or_pipe);
+			transport_len = mnd_sprintf(&transport, 0, "pipe://%s", socket_or_pipe);
 			named_pipe = TRUE;
 #endif
 		} else {
 			if (!port) {
 				port = 3306;
 			}
-			transport_len = spprintf(&transport, 0, "tcp://%s:%u", host, port);
+			transport_len = mnd_sprintf(&transport, 0, "tcp://%s:%u", host, port);
 		}
 		if (!transport) {
 			SET_OOM_ERROR(conn->error_info);
@@ -719,7 +719,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		DBG_INF_FMT("transport=%s", transport);
 		conn->scheme = mnd_pestrndup(transport, transport_len, conn->persistent);
 		conn->scheme_len = transport_len;
-		efree(transport); /* allocated by spprintf */
+		mnd_sprintf_free(transport);
 		transport = NULL;
 		if (!conn->scheme) {
 			goto err; /* OOM */
@@ -833,13 +833,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			conn->host_len = strlen(conn->host);
 			{
 				char *p;
-				spprintf(&p, 0, "%s via TCP/IP", conn->host);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->host);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
 				}
 				conn->host_info =  mnd_pestrdup(p, conn->persistent);
-				efree(p); /* allocated by spprintf */
+				mnd_sprintf_free(p);
 				if (!conn->host_info) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -851,13 +851,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 				conn->host_info		= mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
 				char *p;
-				spprintf(&p, 0, "%s via named pipe", conn->unix_socket);
+				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
 				}
 				conn->host_info =  mnd_pestrdup(p, conn->persistent);
-				efree(p); /* allocated by spprintf */
+				mnd_sprintf_free(p);
 				if (!conn->host_info) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -1317,13 +1317,13 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND * conn, const char * query, co
 
 	if (par1) {
 		if (achtung_wild) {
-			show_query_len = spprintf(&show_query, 0, query, par1, achtung_wild);
+			show_query_len = mnd_sprintf(&show_query, 0, query, par1, achtung_wild);
 		} else {
-			show_query_len = spprintf(&show_query, 0, query, par1);
+			show_query_len = mnd_sprintf(&show_query, 0, query, par1);
 		}
 	} else {
 		if (achtung_wild) {
-			show_query_len = spprintf(&show_query, 0, query, achtung_wild);
+			show_query_len = mnd_sprintf(&show_query, 0, query, achtung_wild);
 		} else {
 			show_query_len = strlen(show_query = (char *)query);
 		}
@@ -1333,7 +1333,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND * conn, const char * query, co
 		result = conn->m->store_result(conn TSRMLS_CC);
 	}
 	if (show_query != query) {
-		efree(show_query); /* allocated by spprintf */
+		mnd_sprintf_free(show_query);
 	}
 	DBG_RETURN(result);
 }
@@ -1547,7 +1547,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_charset)(MYSQLND * const conn, const char * con
 		DBG_RETURN(FAIL);
 	}
 
-	query_len = spprintf(&query, 0, "SET NAMES %s", csname);
+	query_len = mnd_sprintf(&query, 0, "SET NAMES %s", csname);
 
 	if (FAIL == conn->m->query(conn, query, query_len TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error executing query");
@@ -1556,7 +1556,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_charset)(MYSQLND * const conn, const char * con
 	} else {
 		conn->charset = charset;
 	}
-	efree(query); /* allocated by spprintf */
+	mnd_sprintf_free(query);
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -2033,11 +2033,11 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 			{
 				char * plugin_name = NULL;
 
-				spprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
+				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
 
 				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
 				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				efree(plugin_name);
+				mnd_sprintf_free(plugin_name);
 
 				if (!auth_plugin) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);

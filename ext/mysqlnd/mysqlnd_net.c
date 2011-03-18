@@ -124,7 +124,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 		net->stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	} else {
 		if (persistent) {
-			hashed_details_len = spprintf(&hashed_details, 0, "%p", net);
+			hashed_details_len = mnd_sprintf(&hashed_details, 0, "%p", net);
 			DBG_INF_FMT("hashed_details=%s", hashed_details);
 		}
 
@@ -140,7 +140,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 	}
 	if (*errstr || !net->stream) {
 		if (hashed_details) {
-			efree(hashed_details); /* allocated by spprintf */
+			mnd_sprintf_free(hashed_details);
 		}
 		*errcode = CR_CONNECTION_ERROR;
 		DBG_RETURN(FAIL);
@@ -168,7 +168,7 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 		/* Shut-up the streams, they don't know what they are doing */
 		net->stream->__exposed = 1;
 #endif
-		efree(hashed_details);
+		mnd_sprintf_free(hashed_details);
 	}
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
