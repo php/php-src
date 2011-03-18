@@ -660,11 +660,11 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 		}
 		if (not_bound) {
 			char * msg;
-			spprintf(&msg, 0, "No data supplied for %u parameter%s in prepared statement",
-					 not_bound, not_bound>1 ?"s":"");
+			mnd_sprintf(&msg, 0, "No data supplied for %u parameter%s in prepared statement",
+						not_bound, not_bound>1 ?"s":"");
 			SET_STMT_ERROR(stmt, CR_PARAMS_NOT_BOUND, UNKNOWN_SQLSTATE, msg);
 			if (msg) {
-				efree(msg); /* allocated by spprintf */
+				mnd_sprintf_free(msg);
 			}
 			DBG_INF("FAIL");
 			DBG_RETURN(FAIL);

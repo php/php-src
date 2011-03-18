@@ -258,18 +258,14 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-	/*
-	  QQ : How to make this unicode without copying two times the buffer -
-	  Unicode equivalent of spprintf?
-	*/
-	length = spprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+	length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, value, length, 1);
-		efree(value);  /* allocated by spprintf */
+		mnd_sprintf_free(value);
 #if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
@@ -309,18 +305,14 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 		t.time_type = MYSQLND_TIMESTAMP_DATE;
 	}
 
-	/*
-	  QQ : How to make this unicode without copying two times the buffer -
-	  Unicode equivalent of spprintf?
-	*/
-	length = spprintf(&value, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
+	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
 
 	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, value, length, 1);
-		efree(value); /* allocated by spprintf */
+		mnd_sprintf_free(value);
 #if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
@@ -367,19 +359,14 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-	/*
-	  QQ : How to make this unicode without copying two times the buffer -
-	  Unicode equivalent of spprintf?
-	*/
-	length = spprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u",
-					  t.year, t.month, t.day, t.hour, t.minute, t.second);
+	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", value);
 #if MYSQLND_UNICODE
 	if (!as_unicode) {
 #endif
 		ZVAL_STRINGL(zv, value, length, 1);
-		efree(value); /* allocated by spprintf */
+		mnd_sprintf_free(value);
 #if MYSQLND_UNICODE
 	} else {
 		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);

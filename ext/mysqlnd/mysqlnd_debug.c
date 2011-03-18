@@ -129,7 +129,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 		level_buffer[sizeof(level_buffer) - 1 ] = '\0';
 	}
 
-	message_line_len = spprintf(&message_line, 0, "%s%s%s%s%s%s%s%s\n",
+	message_line_len = mnd_sprintf(&message_line, 0, "%s%s%s%s%s%s%s%s\n",
 								flags & MYSQLND_DEBUG_DUMP_PID? pid_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_TIME? time_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_FILE? file_buffer:"",
@@ -138,7 +138,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 								pipe_buffer, type? type:"", message);
 
 	ret = php_stream_write(self->stream, message_line, message_line_len)? PASS:FAIL;
-	efree(message_line); /* allocated by spprintf */
+	mnd_sprintf_free(message_line);
 	if (flags & MYSQLND_DEBUG_FLUSH) {
 		self->m->close(self);
 		self->m->open(self, TRUE);
@@ -227,21 +227,20 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 		level_buffer[sizeof(level_buffer) - 1 ] = '\0';
 	}
 
-
 	va_start(args, format);
-	vspprintf(&buffer, 0, format, args);
+	mnd_vsprintf(&buffer, 0, format, args);
 	va_end(args);
 
-	message_line_len = spprintf(&message_line, 0, "%s%s%s%s%s%s%s%s\n",
+	message_line_len = mnd_sprintf(&message_line, 0, "%s%s%s%s%s%s%s%s\n",
 								flags & MYSQLND_DEBUG_DUMP_PID? pid_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_TIME? time_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_FILE? file_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_LINE? line_buffer:"",
 								flags & MYSQLND_DEBUG_DUMP_LEVEL? level_buffer:"",
 								pipe_buffer, type? type:"", buffer);
-	efree(buffer);
+	mnd_sprintf_free(buffer);
 	ret = php_stream_write(self->stream, message_line, message_line_len)? PASS:FAIL;
-	efree(message_line); /* allocated by spprintf */
+	mnd_sprintf_free(message_line);
 
 	if (flags & MYSQLND_DEBUG_FLUSH) {
 		self->m->close(self);
