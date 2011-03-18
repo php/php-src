@@ -226,7 +226,6 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s TSRMLS_DC)
 	}
 
 	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status.server_status, stmt->upsert_status.server_status & SERVER_STATUS_CURSOR_EXISTS);
-	DBG_INF_FMT("server_status=%u cursor=%u", conn->upsert_status.server_status, conn->upsert_status.server_status & SERVER_STATUS_CURSOR_EXISTS);
 
 	/* Free space for next result */
 	s->m->free_stmt_content(s TSRMLS_CC);
@@ -838,7 +837,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 
 	if (result->unbuf->eof_reached) {
 		/* No more rows obviously */
-		DBG_INF("eof reached");
+		DBG_INF("EOF already reached");
 		DBG_RETURN(PASS);
 	}
 	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
@@ -864,7 +863,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		if (!row_packet->skip_extraction) {
 			result->m.unbuffered_free_last_data(result TSRMLS_CC);
 
-			DBG_INF("extracting data");
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
@@ -986,7 +984,6 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s TSRMLS_DC)
 	MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_PS_UNBUFFERED_SETS);
 	result = stmt->result;
 
-	DBG_INF_FMT("%scursor exists", stmt->cursor_exists? "":"no ");
 	result->m.use_result(stmt->result, TRUE TSRMLS_CC);
 	result->m.fetch_row	= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
 											   mysqlnd_stmt_fetch_row_unbuffered;
@@ -1048,11 +1045,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
 
-		DBG_INF_FMT("skip_extraction=%u", row_packet->skip_extraction); 
 		if (!row_packet->skip_extraction) {
 			result->m.unbuffered_free_last_data(result TSRMLS_CC);
 
-			DBG_INF("extracting data");
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
@@ -1468,8 +1463,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_no=%u param_count=%u type=%u",
-				stmt->stmt_id, param_no, stmt->param_count, type);
+	DBG_INF_FMT("stmt=%lu param_no=%u param_count=%u type=%u", stmt->stmt_id, param_no, stmt->param_count, type);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_STMT_ERROR(stmt, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1539,7 +1533,6 @@ MYSQLND_METHOD(mysqlnd_stmt, refresh_bind_param)(MYSQLND_STMT * const s TSRMLS_D
 	if (stmt->param_count) {
 		stmt->send_types_to_server = 1;
 	}
-	DBG_INF("PASS");
 	DBG_RETURN(PASS);
 }
 /* }}} */
@@ -1987,8 +1980,7 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
-	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u",
-				stmt->stmt_id, stmt->result_bind, stmt->field_count);
+	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u", stmt->stmt_id, stmt->result_bind, stmt->field_count);
 
 	if (!stmt->result_bind) {
 		DBG_VOID_RETURN;
@@ -2042,8 +2034,7 @@ mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
-	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%u",
-				stmt->stmt_id, stmt->result_bind, stmt->field_count, param_no);
+	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%u", stmt->stmt_id, stmt->result_bind, stmt->field_count, param_no);
 
 	if (!stmt->result_bind) {
 		DBG_VOID_RETURN;
@@ -2093,8 +2084,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
-	DBG_INF_FMT("stmt=%lu param_bind=%p param_count=%u",
-				stmt->stmt_id, stmt->param_bind, stmt->param_count);
+	DBG_INF_FMT("stmt=%lu param_bind=%p param_count=%u", stmt->stmt_id, stmt->param_bind, stmt->param_count);
 
 	/* Destroy the input bind */
 	if (stmt->param_bind) {
@@ -2159,7 +2149,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 	  clean.
 	*/
 	do {
-		DBG_INF_FMT("stmt->state=%u", stmt->state);
 		if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
 			DBG_INF("fetching result set header");
 			stmt->default_rset_handler(s TSRMLS_CC);
@@ -2229,7 +2218,6 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit TS
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
 	if (stmt) {
-
 		DBG_INF_FMT("stmt=%p", stmt);
 
 		MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_STMT_CLOSE_IMPLICIT:

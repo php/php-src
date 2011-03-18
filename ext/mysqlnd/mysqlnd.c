@@ -138,47 +138,38 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND * conn TSRMLS_DC)
 	DBG_INF("Freeing memory of members");
 
 	if (conn->host) {
-		DBG_INF("Freeing host");
 		mnd_pefree(conn->host, pers);
 		conn->host = NULL;
 	}
 	if (conn->user) {
-		DBG_INF("Freeing user");
 		mnd_pefree(conn->user, pers);
 		conn->user = NULL;
 	}
 	if (conn->passwd) {
-		DBG_INF("Freeing passwd");
 		mnd_pefree(conn->passwd, pers);
 		conn->passwd = NULL;
 	}
 	if (conn->connect_or_select_db) {
-		DBG_INF("Freeing connect_or_select_db");
 		mnd_pefree(conn->connect_or_select_db, pers);
 		conn->connect_or_select_db = NULL;
 	}
 	if (conn->unix_socket) {
-		DBG_INF("Freeing unix_socket");
 		mnd_pefree(conn->unix_socket, pers);
 		conn->unix_socket = NULL;
 	}
 	if (conn->scheme) {
-		DBG_INF("Freeing scheme");
 		mnd_pefree(conn->scheme, pers);
 		conn->scheme = NULL;
 	}
 	if (conn->server_version) {
-		DBG_INF("Freeing server_version");
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
 	}
 	if (conn->host_info) {
-		DBG_INF("Freeing host_info");
 		mnd_pefree(conn->host_info, pers);
 		conn->host_info = NULL;
 	}
 	if (conn->auth_plugin_data) {
-		DBG_INF("Freeing auth_plugin_data");
 		mnd_pefree(conn->auth_plugin_data, pers);
 		conn->auth_plugin_data = NULL;
 	}
@@ -205,13 +196,11 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn TSRMLS_DC)
 	conn->m->free_options(conn TSRMLS_CC);
 
 	if (conn->net) {
-		DBG_INF("Freeing net");
 		mysqlnd_net_free(conn->net TSRMLS_CC);
 		conn->net = NULL;
 	}
 
 	if (conn->protocol) {
-		DBG_INF("Freeing protocol");
 		mysqlnd_protocol_free(conn->protocol TSRMLS_CC);
 		conn->protocol = NULL;
 	}
@@ -2168,12 +2157,10 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 #endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
-			DBG_INF("MYSQLND_OPT_INT_AND_FLOAT_NATIVE");
 			conn->options.int_and_float_native = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			DBG_INF("MYSQL_OPT_LOCAL_INFILE");
 			if (!value || (*(unsigned int*) value) ? 1 : 0) {
 				conn->options.flags |= CLIENT_LOCAL_FILES;
 			} else {
@@ -2184,8 +2171,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		{
 			char ** new_init_commands;
 			char * new_command;
-			DBG_INF("MYSQL_INIT_COMMAND");
-			DBG_INF_FMT("command=%s", value);
 			/* when num_commands is 0, then realloc will be effectively a malloc call, internally */
 			/* Don't assign to conn->options.init_commands because in case of OOM we will lose the pointer and leak */
 			new_init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1), conn->persistent);
@@ -2212,7 +2197,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		case MYSQL_SET_CHARSET_NAME:
 		{
 			char * new_charset_name = mnd_pestrdup(value, conn->persistent);
-			DBG_INF("MYSQL_SET_CHARSET_NAME");
 			if (!new_charset_name) {
 				goto oom;
 			}
@@ -2251,7 +2235,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 		case MYSQLND_OPT_AUTH_PROTOCOL:
 		{
 			char * new_auth_protocol = value? mnd_pestrdup(value, conn->persistent) : NULL;
-			DBG_INF("MYSQLND_OPT_AUTH_PROTOCOL");
 			if (value && !new_auth_protocol) {
 				goto oom;
 			}
@@ -2294,8 +2277,7 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 
 	/* Nothing to store for UPSERT/LOAD DATA */
 	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-						 mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("Command out of sync");
 		DBG_RETURN(NULL);
 	}
@@ -2330,8 +2312,7 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
 	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-						 mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("Command out of sync");
 		DBG_RETURN(NULL);
 	}
@@ -2355,7 +2336,6 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 												   TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	DBG_ENTER("mysqlnd_conn::get_connection_stats");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
 	mysqlnd_fill_stats_hash(conn->stats, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
