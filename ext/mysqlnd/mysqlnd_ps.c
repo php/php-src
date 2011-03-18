@@ -1305,7 +1305,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);
 	}
-
 	if (param_no >= stmt->param_count) {
 		SET_STMT_ERROR(stmt, CR_INVALID_PARAMETER_NO, UNKNOWN_SQLSTATE, "Invalid parameter number");
 		DBG_ERR("invalid param_no");
@@ -1424,8 +1423,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 			*/
 			for (i = 0; i < stmt->param_count; i++) {
 				/*
-				  We may have the last reference, then call zval_ptr_dtor()
-				  or we may leak memory.
+				  We may have the last reference, then call zval_ptr_dtor() or we may leak memory.
 				  Switching from bind_one_parameter to bind_parameters may result in zv being NULL
 				*/
 				if (stmt->param_bind[i].zv) {
@@ -1917,6 +1915,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 	DBG_RETURN(PASS);
 }
 /* }}} */
+
 
 /* free_result() doesn't actually free stmt->result but only the buffers */
 /* {{{ mysqlnd_stmt::free_result */
