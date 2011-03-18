@@ -628,27 +628,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 		}
 #endif
 
-		/*
-		  If right after execute() we have to call the appropriate
-		  use_result() or store_result() and clean.
-		*/
-		if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
-			DBG_INF("fetching result set header");
-			/* Do implicit use_result and then flush the result */
-			stmt->default_rset_handler = s->m->use_result;
-			stmt->default_rset_handler(s TSRMLS_CC);
-		}
-
-		if (stmt->state > MYSQLND_STMT_WAITING_USE_OR_STORE) {
-			DBG_INF("skipping result");
-			/* Flush if anything is left and unbuffered set */
-			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
-		}
-
-		if (stmt->state > MYSQLND_STMT_PREPARED) {
-			/* As the buffers have been freed, we should go back to PREPARED */
-			stmt->state = MYSQLND_STMT_PREPARED;
-		}
+		s->m->flush(s TSRMLS_CC);
 
 		/*
 		  Executed, but the user hasn't started to fetch
@@ -1228,6 +1208,45 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 			}
 		}
 
+		s->m->flush(s TSRMLS_CC);
+
+		/*
+		  Don't free now, let the result be usable. When the stmt will again be
+		  executed then the result set will be cleaned, the bound variables will
+		  be separated before that.
+		*/
+
+		int4store(cmd_buf, stmt->stmt_id);
+		if (CONN_GET_STATE(conn) == CONN_READY &&
+			FAIL == (ret = conn->m->simple_command(conn, COM_STMT_RESET, cmd_buf,
+												  sizeof(cmd_buf), PROT_OK_PACKET,
+												  FALSE, TRUE TSRMLS_CC))) {
+			stmt->error_info = conn->error_info;
+		}
+		stmt->upsert_status = conn->upsert_status;
+
+		stmt->state = MYSQLND_STMT_PREPARED;
+	}
+	DBG_INF(ret == PASS? "PASS":"FAIL");
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stmt::flush */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s TSRMLS_DC)
+{
+	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
+	enum_func_status ret = PASS;
+
+	DBG_ENTER("mysqlnd_stmt::flush");
+	if (!stmt || !stmt->conn) {
+		DBG_RETURN(FAIL);
+	}
+	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+
+	if (stmt->stmt_id) {
 		/*
 		  If the user decided to close the statement right after execute()
 		  We have to call the appropriate use_result() or store_result() and
@@ -1245,21 +1264,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 				stmt->result->m.skip_result(stmt->result TSRMLS_CC);
 			}
 		} while (mysqlnd_stmt_more_results(s) && mysqlnd_stmt_next_result(s) == PASS);
-
-		/*
-		  Don't free now, let the result be usable. When the stmt will again be
-		  executed then the result set will be cleaned, the bound variables will
-		  be separated before that.
-		*/
-
-		int4store(cmd_buf, stmt->stmt_id);
-		if (CONN_GET_STATE(conn) == CONN_READY &&
-			FAIL == (ret = conn->m->simple_command(conn, COM_STMT_RESET, cmd_buf,
-												  sizeof(cmd_buf), PROT_OK_PACKET,
-												  FALSE, TRUE TSRMLS_CC))) {
-			stmt->error_info = conn->error_info;
-		}
-		stmt->upsert_status = conn->upsert_status;
 
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
@@ -2335,7 +2339,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, server_status),
 	mysqlnd_stmt_execute_generate_request,
 	mysqlnd_stmt_execute_parse_response,
-	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)
+	MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content),
+	MYSQLND_METHOD(mysqlnd_stmt, flush)
 MYSQLND_CLASS_METHODS_END;
 
 
