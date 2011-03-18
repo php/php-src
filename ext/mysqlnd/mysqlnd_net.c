@@ -68,7 +68,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read)(MYSQLND * conn, zend_uchar * buffer, s
 	size_t to_read = count, ret;
 	size_t old_chunk_size = conn->net->stream->chunk_size;
 	DBG_ENTER("mysqlnd_net::network_read");
-	DBG_INF_FMT("count=%u", count);
+	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
 	conn->net->stream->chunk_size = MIN(to_read, conn->net->options.net_read_buffer_size);
 	while (to_read) {
 		if (!(ret = php_stream_read(conn->net->stream, (char *) buffer, to_read))) {
@@ -240,7 +240,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, zend_uchar * const buf, 
 	size_t to_be_sent;
 
 	DBG_ENTER("mysqlnd_net::send");
-	DBG_INF_FMT("conn=%llu count=%lu compression=%u", conn->thread_id, count, net->compressed);
+	DBG_INF_FMT("conn=%llu count=" MYSQLND_SZ_T_SPEC " compression=%u", conn->thread_id, count, net->compressed);
 
 	net->stream->chunk_size = MYSQLND_MAX_PACKET_SIZE;
 
@@ -665,11 +665,9 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
-			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
 			net->options.timeout_read = *(unsigned int*) value;
 			break;
 		case MYSQL_OPT_WRITE_TIMEOUT:
-			DBG_INF("MYSQL_OPT_WRITE_TIMEOUT");
 			net->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
@@ -748,19 +746,16 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	if (net->options.ssl_key) {
 		zval key_zval;
 		ZVAL_STRING(&key_zval, net->options.ssl_key, 0);
-		DBG_INF("key");
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
 	if (net->options.ssl_verify_peer) {
 		zval verify_peer_zval;
 		ZVAL_TRUE(&verify_peer_zval);
-		DBG_INF("verify peer");
 		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
 	}
 	if (net->options.ssl_cert) {
 		zval cert_zval;
 		ZVAL_STRING(&cert_zval, net->options.ssl_cert, 0);
-		DBG_INF_FMT("local_cert=%s", net->options.ssl_cert);
 		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
 		if (!net->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
@@ -769,13 +764,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	if (net->options.ssl_ca) {
 		zval cafile_zval;
 		ZVAL_STRING(&cafile_zval, net->options.ssl_ca, 0);
-		DBG_INF_FMT("cafile=%s", net->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
 	}
 	if (net->options.ssl_capath) {
 		zval capath_zval;
 		ZVAL_STRING(&capath_zval, net->options.ssl_capath, 0);
-		DBG_INF_FMT("capath=%s", net->options.ssl_capath);
 		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
 	}
 	if (net->options.ssl_passphrase) {
@@ -786,7 +779,6 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	if (net->options.ssl_cipher) {
 		zval cipher_zval;
 		ZVAL_STRING(&cipher_zval, net->options.ssl_cipher, 0);
-		DBG_INF_FMT("ciphers=%s", net->options.ssl_cipher);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
 	php_stream_context_set(net->stream, context);
