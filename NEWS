@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
-
 - Zend Engine:
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
     (Dmitry)
@@ -21,11 +20,14 @@ PHP                                                                        NEWS
   . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
     (Andrey)
     
-- PDO Dblib driver:
+- PDO DBlib driver:
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
     (mjh at hodginsmedia dot com, Felipe)
 
-- Sockets extension
+- SOAP extension:
+  . Fixed bug #54312 (soap_version logic bug). (tom at samplonius dot org)
+
+- Sockets extension:
   . Fixed bug #51958 (socket_accept() fails on IPv6 server sockets). (Gustavo)
 
 17 Mar 2011, PHP 5.3.6
