@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Jaakko Hyv‰tti <jaakko.hyvatti@iki.fi>                      |
+   |          Jaakko Hyv√§tti <jaakko.hyvatti@iki.fi>                      |
    |          Wez Furlong    <wez@thebrainroom.com>                       |
    |          Gustavo Lopes  <cataphract@php.net>                         |
    +----------------------------------------------------------------------+
@@ -60,8 +60,7 @@
 /* Macro for disabling flag of translation of non-basic entities where this isn't supported.
  * Not appropriate for html_entity_decode/htmlspecialchars_decode */
 #define LIMIT_ALL(all, doctype, charset) do { \
-	if ((all) && (CHARSET_PARTIAL_SUPPORT((charset)) || (doctype) == ENT_HTML_DOC_XML1)) \
-		(all) = 0; \
+	(all) = (all) && !CHARSET_PARTIAL_SUPPORT((charset)) && ((doctype) != ENT_HTML_DOC_XML1); \
 } while (0)
 
 #define MB_FAILURE(pos, advance) do { \
@@ -109,7 +108,7 @@ static inline unsigned int get_next_char(
 			/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
 			 * "In a reported illegal byte sequence, do not include any
 			 *  non-initial byte that encodes a valid character or is a leading
-			 *  byte for a valid sequence.ª */
+			 *  byte for a valid sequence." */
 			unsigned char c;
 			c = str[pos];
 			if (c < 0x80) {
@@ -1419,7 +1418,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	char *str, *hint_charset = NULL;
 	int str_len, hint_charset_len = 0;
-	int len;
+	size_t new_len;
 	long flags = ENT_COMPAT;
 	char *replaced;
 	zend_bool double_encode = 1;
@@ -1428,8 +1427,8 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
-	replaced = php_escape_html_entities_ex(str, str_len, &len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
-	RETVAL_STRINGL(replaced, len, 0);
+	replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
+	RETVAL_STRINGL(replaced, (int)new_len, 0);
 }
 /* }}} */
 
@@ -1468,7 +1467,8 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	char *str;
-	int str_len, len;
+	int str_len;
+	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
 
@@ -1476,9 +1476,9 @@ PHP_FUNCTION(htmlspecialchars_decode)
 		return;
 	}
 
-	replaced = php_unescape_html_entities(str, str_len, &len, 0 /*!all*/, quote_style, NULL TSRMLS_CC);
+	replaced = php_unescape_html_entities(str, str_len, &new_len, 0 /*!all*/, quote_style, NULL TSRMLS_CC);
 	if (replaced) {
-		RETURN_STRINGL(replaced, len, 0);
+		RETURN_STRINGL(replaced, (int)new_len, 0);
 	}
 	RETURN_FALSE;
 }
@@ -1489,7 +1489,8 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0, len;
+	int str_len, hint_charset_len = 0;
+	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
 
@@ -1498,9 +1499,9 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
-	replaced = php_unescape_html_entities(str, str_len, &len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
+	replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
 	if (replaced) {
-		RETURN_STRINGL(replaced, len, 0);
+		RETURN_STRINGL(replaced, (int)new_len, 0);
 	}
 	RETURN_FALSE;
 }
@@ -1599,10 +1600,7 @@ PHP_FUNCTION(get_html_translation_table)
 	LIMIT_ALL(all, doctype, charset);
 
 	array_init(return_value);
-
-	if (CHARSET_PARTIAL_SUPPORT(charset)) {
-		all = 0;
-	}
+	
 	entity_table = determine_entity_table(all, doctype);
 	if (all && !CHARSET_UNICODE_COMPAT(charset)) {
 		to_uni_table = enc_to_uni_index[charset];
