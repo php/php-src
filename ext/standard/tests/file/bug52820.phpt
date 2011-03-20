@@ -2,6 +2,8 @@
 Bug #52820 (writes to fopencookie FILE* not commited when seeking the stream)
 --SKIPIF--
 <?php
+if (!function_exists('leak_variable'))
+   die("skip only for debug builds");
 /* unfortunately no standard function does a cast to FILE*, so we need
  * curl to test this */
 if (!extension_loaded("curl")) exit("skip curl extension not loaded");
