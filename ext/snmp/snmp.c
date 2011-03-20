@@ -374,7 +374,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_snmp_void, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_security, 0, 0, 8)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
 	ZEND_ARG_INFO(0, session)
 	ZEND_ARG_INFO(0, sec_level)
 	ZEND_ARG_INFO(0, auth_protocol)
@@ -1847,9 +1847,9 @@ PHP_METHOD(snmp, set)
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, (-1));
 }
 
-/* {{{ proto bool SNMP::set_security(resource session, string sec_level, [ string auth_protocol, string auth_passphrase [, string priv_protocol, string priv_passphrase [, string contextName [, string contextEngineID]]]])
+/* {{{ proto bool SNMP::setSecurity(resource session, string sec_level, [ string auth_protocol, string auth_passphrase [, string priv_protocol, string priv_passphrase [, string contextName [, string contextEngineID]]]])
 	Set SNMPv3 security-related session parameters */
-PHP_METHOD(snmp, set_security)
+PHP_METHOD(snmp, setSecurity)
 {
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
@@ -2338,7 +2338,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 static zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 open,				arginfo_snmp_open,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 close,				arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 set_security,			arginfo_snmp_set_security,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 setSecurity,			arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
 
 	PHP_ME(snmp,	 get,				arginfo_snmp_get,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,		ZEND_ACC_PUBLIC)
@@ -2434,6 +2434,7 @@ PHP_MINIT_FUNCTION(snmp)
 
 	REGISTER_LONG_CONSTANT("SNMP_VERSION_1",	SNMP_VERSION_1,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VERSION_2c",	SNMP_VERSION_2c,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_VERSION_2C",	SNMP_VERSION_2c,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VERSION_3",	SNMP_VERSION_3,		CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_NOERROR",			(long)PHP_SNMP_ERRNO_NOERROR);
