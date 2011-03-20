@@ -69,21 +69,21 @@ var_dump($session->close());
 
 echo "SNMPv3 (default security settings)\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
-#$session->set_security($user_noauth, 'noAuthNoPriv', '', '', '', '', '', '');
+#$session->setSecurity($user_noauth, 'noAuthNoPriv', '', '', '', '', '', '');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SNMPv3 (noAuthNoPriv)\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
-$session->set_security('noAuthNoPriv');
+$session->setSecurity('noAuthNoPriv');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SNMPv3 (authPriv)\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
-$session->set_security('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->walk('.1.3.6.1.2.1.1.1.0'));
@@ -91,7 +91,7 @@ var_dump($session->close());
 
 echo "SET single OID\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
-$session->set_security('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 $oid1 = 'SNMPv2-MIB::sysContact.0';
 $oldvalue1 = $session->get($oid1);
 $newvalue1 = $oldvalue1 . '0';
@@ -106,7 +106,7 @@ var_dump($session->close());
 
 echo "SNMPv3, setting contextEngineID (authPriv)\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
-$session->set_security('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '', 'aeeeff');
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '', 'aeeeff');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 

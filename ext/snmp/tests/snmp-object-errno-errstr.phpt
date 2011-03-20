@@ -38,7 +38,7 @@ var_dump($session->get_error());
 $session->close();
 echo "SNMP::ERRNO_GENERIC\n";
 $session = new SNMP(SNMP_VERSION_3, $hostname, 'somebogususer', $timeout, $retries);
-$session->set_security('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 var_dump(@$session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->get_errno() == SNMP::ERRNO_GENERIC);
 var_dump($session->get_error());

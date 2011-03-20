@@ -73,7 +73,7 @@ PHP_FUNCTION(snmp_get_valueretrieval);
 PHP_FUNCTION(snmp_read_mib);
 
 PHP_METHOD(SNMP, open);
-PHP_METHOD(SNMP, set_security);
+PHP_METHOD(SNMP, setSecurity);
 PHP_METHOD(SNMP, close);
 PHP_METHOD(SNMP, get);
 PHP_METHOD(SNMP, getnext);
