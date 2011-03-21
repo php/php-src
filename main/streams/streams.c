@@ -331,7 +331,6 @@ static int _php_stream_free_persistent(zend_rsrc_list_entry *le, void *pStream T
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
 {
 	int ret = 1;
-	int remove_rsrc = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
 	php_stream_context *context = stream->context;
@@ -395,15 +394,21 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remove_rsrc=%d\n",
-		stream->ops->label, stream, stream->orig_path, preserve_handle, release_cast, remove_rsrc);
+		stream->ops->label, stream, stream->orig_path, preserve_handle, release_cast,
+		(close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0);
 #endif
 
 	/* make sure everything is saved */
 	_php_stream_flush(stream, 1 TSRMLS_CC);
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
-	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && remove_rsrc) {
-		zend_list_delete(stream->rsrc_id);
+	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0) {
+		/* zend_list_delete actually only decreases the refcount; if we're
+		 * releasing the stream, we want to actually delete the resource from
+		 * the resource list, otherwise the resource will point to invalid memory.
+		 * In any case, let's always completely delete it from the resource list,
+		 * not only when PHP_STREAM_FREE_RELEASE_STREAM is set */
+		while (zend_list_delete(stream->rsrc_id) == SUCCESS) {}
 	}
 
 	/* Remove stream from any context link list */
