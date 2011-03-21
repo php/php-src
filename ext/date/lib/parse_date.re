@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <assert.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -1822,6 +1823,30 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 			add_pbf_error(s, "Unexpected data found.", string, begin); \
 		}
 
+void timelib_time_reset_fields(timelib_time *time)
+{
+	assert(time != NULL);
+
+	time->y = 1970;
+	time->m = 1;
+	time->d = 1;
+	time->h = time->i = time->s = 0;
+	time->f = 0.0;
+	time->tz_info = NULL;
+}
+
+void timelib_time_reset_unset_fields(timelib_time *time)
+{
+	assert(time != NULL);
+
+	if (time->y == TIMELIB_UNSET ) time->y = 1970;
+	if (time->m == TIMELIB_UNSET ) time->m = 1;
+	if (time->d == TIMELIB_UNSET ) time->d = 1;
+	if (time->h == TIMELIB_UNSET ) time->h = 0;
+	if (time->i == TIMELIB_UNSET ) time->i = 0;
+	if (time->s == TIMELIB_UNSET ) time->s = 0;
+	if (time->f == TIMELIB_UNSET ) time->f = 0.0;
+}
 
 timelib_time *timelib_parse_from_format(char *format, char *string, int len, timelib_error_container **errors, const timelib_tzdb *tzdb)
 {
@@ -2021,23 +2046,11 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '!': /* reset all fields to default */
-				s->time->y = 1970;
-				s->time->m = 1;
-				s->time->d = 1;
-				s->time->h = s->time->i = s->time->s = 0;
-				s->time->f = 0.0;
-				s->time->tz_info = NULL;
+				timelib_time_reset_fields(s->time);
 				break; /* break intentionally not missing */
 
 			case '|': /* reset all fields to default when not set */
-				if (s->time->y == TIMELIB_UNSET ) s->time->y = 1970;
-				if (s->time->m == TIMELIB_UNSET ) s->time->m = 1;
-				if (s->time->d == TIMELIB_UNSET ) s->time->d = 1;
-				if (s->time->h == TIMELIB_UNSET ) s->time->h = 0;
-				if (s->time->i == TIMELIB_UNSET ) s->time->i = 0;
-				if (s->time->s == TIMELIB_UNSET ) s->time->s = 0;
-				if (s->time->f == TIMELIB_UNSET ) s->time->f = 0.0;
-				
+				timelib_time_reset_unset_fields(s->time);
 				break; /* break intentionally not missing */
 
 			case '?': /* random char */
@@ -2081,7 +2094,21 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 		fptr++;
 	}
 	if (*fptr) {
-		add_pbf_error(s, "Data missing", string, ptr);
+		/* Trailing | and ! specifiers are valid. */
+		while (*fptr) {
+			switch (*fptr++) {
+				case '!': /* reset all fields to default */
+					timelib_time_reset_fields(s->time);
+					break;
+
+				case '|': /* reset all fields to default when not set */
+					timelib_time_reset_unset_fields(s->time);
+					break;
+
+				default:
+					add_pbf_error(s, "Data missing", string, ptr);
+			}
+		}
 	}
 
 	/* clean up a bit */
