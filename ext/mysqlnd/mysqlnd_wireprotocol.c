@@ -1390,7 +1390,6 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									  unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-									  zend_bool persistent,
 									  zend_bool as_unicode, zend_bool as_int_or_float,
 									  MYSQLND_STATS * stats TSRMLS_DC)
 {
@@ -1490,7 +1489,6 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-									zend_bool persistent,
 									zend_bool as_unicode, zend_bool as_int_or_float,
 									MYSQLND_STATS * stats TSRMLS_DC)
 {

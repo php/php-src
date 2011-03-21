@@ -60,7 +60,6 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	enum_func_status ret;
 	MYSQLND * conn;
 	MYSQLND_RES * result;
-	zend_bool to_cache = FALSE;
 
 	DBG_ENTER("mysqlnd_stmt::store_result");
 	if (!stmt || !stmt->conn || !stmt->result) {
@@ -99,10 +98,11 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	result->type			= MYSQLND_RES_PS_BUF;
 	result->m.fetch_row		= mysqlnd_fetch_stmt_row_buffered;
 	result->m.fetch_lengths	= NULL;/* makes no sense */
+	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol;
 
 	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE, to_cache TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
 
 	if (PASS == ret) {
 		/* libmysql API docs say it should be so for SELECT statements */
@@ -732,7 +732,6 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 												current_row,
 												meta->field_count,
 												meta->fields,
-												result->stored_data->persistent,
 												result->conn->options.numeric_and_datetime_as_unicode,
 												result->conn->options.int_and_float_native,
 												result->conn->stats TSRMLS_CC);
@@ -852,7 +851,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 									result->unbuf->last_row_data,
 									row_packet->field_count,
 									row_packet->fields_metadata,
-									FALSE,
 									result->conn->options.numeric_and_datetime_as_unicode,
 									result->conn->options.int_and_float_native,
 									result->conn->stats TSRMLS_CC))
@@ -1037,7 +1035,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 									  result->unbuf->last_row_data,
 									  row_packet->field_count,
 									  row_packet->fields_metadata,
-									  FALSE,
 									  result->conn->options.numeric_and_datetime_as_unicode,
 									  result->conn->options.int_and_float_native,
 									  result->conn->stats TSRMLS_CC))

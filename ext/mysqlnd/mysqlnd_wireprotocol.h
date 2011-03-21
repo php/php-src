@@ -296,14 +296,12 @@ PHPAPI const extern char * const mysqlnd_empty_string;
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
