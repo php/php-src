@@ -167,6 +167,8 @@ UPGRADE NOTES - PHP X.Y
 - stream_set_write_buffer() no longer disables the read buffer of a plain
   stream when 0 is given as the second argument.
 - stream_set_write_buffer() no longer changes the chunk size in socket streams.
+- fclose() closes streams with resource refcount > 1; it doesn't merely
+  decrement the resource refcount.
 
 ===================================
 5. Changes made to existing methods

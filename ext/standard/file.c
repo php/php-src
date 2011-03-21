@@ -920,7 +920,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	}
 
 	if (!stream->is_persistent) {
-		zend_list_delete(stream->rsrc_id);
+		php_stream_close(stream);
 	} else {
 		php_stream_pclose(stream);
 	}
