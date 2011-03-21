@@ -56,7 +56,6 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 									data_cursor,
 									result->meta->field_count,
 									result->meta->fields,
-									result->stored_data->persistent,
 									result->conn->options.numeric_and_datetime_as_unicode,
 									result->conn->options.int_and_float_native,
 									result->conn->stats TSRMLS_CC);
@@ -224,18 +223,18 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_COPY_ON_WRITE_PERFORMED, copy_on_write_performed,
 											  STAT_COPY_ON_WRITE_SAVED, copy_on_write_saved);
-		mnd_pefree(set->data, set->persistent);
+		mnd_efree(set->data);
 		set->data = NULL;
 	}
 
 	if (set->row_buffers) {
-		mnd_pefree(set->row_buffers, set->persistent);
+		mnd_efree(set->row_buffers);
 		set->row_buffers	= NULL;
 	}
 	set->data_cursor = NULL;
 	set->row_count	= 0;
 
-	mnd_pefree(set, set->persistent);
+	mnd_efree(set);
 
 	DBG_VOID_RETURN;
 }
@@ -672,7 +671,6 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 										  result->unbuf->last_row_data,
 										  row_packet->field_count,
 										  row_packet->fields_metadata,
-										  FALSE,
 										  result->conn->options.numeric_and_datetime_as_unicode,
 										  result->conn->options.int_and_float_native,
 										  result->conn->stats TSRMLS_CC);
@@ -788,7 +786,6 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 											result->unbuf->last_row_data,
 											field_count,
 											row_packet->fields_metadata,
-											FALSE,
 											result->conn->options.numeric_and_datetime_as_unicode,
 											result->conn->options.int_and_float_native,
 											result->conn->stats TSRMLS_CC);
@@ -956,7 +953,6 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 											current_row,
 											result->meta->field_count,
 											result->meta->fields,
-											FALSE,
 											result->conn->options.numeric_and_datetime_as_unicode,
 											result->conn->options.int_and_float_native,
 											result->conn->stats TSRMLS_CC);
@@ -1030,7 +1026,6 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 											current_row,
 											result->meta->field_count,
 											result->meta->fields,
-											result->stored_data->persistent,
 											result->conn->options.numeric_and_datetime_as_unicode,
 											result->conn->options.int_and_float_native,
 											result->conn->stats TSRMLS_CC);
@@ -1112,8 +1107,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA *meta,
-													zend_bool binary_protocol,
-													zend_bool to_cache TSRMLS_DC)
+													zend_bool binary_protocol TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_PACKET_ROW *row_packet = NULL;
@@ -1122,25 +1116,21 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 
 	DBG_ENTER("mysqlnd_res::store_result_fetch_data");
 
-	result->stored_data	= set = mnd_pecalloc(1, sizeof(MYSQLND_RES_BUFFERED), to_cache);
+	result->stored_data	= set = mnd_ecalloc(1, sizeof(MYSQLND_RES_BUFFERED));
 	if (!set) {
 		SET_OOM_ERROR(conn->error_info);
 		ret = FAIL;
 		goto end;
 	}
 	if (free_rows) {
-		set->row_buffers = mnd_pemalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), to_cache);
+		set->row_buffers = mnd_emalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 		if (!set->row_buffers) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
 			goto end;
 		}
 	}
-	set->persistent	= to_cache;
 	set->references	= 1;
-
-	result->m.row_decoder = binary_protocol? php_mysqlnd_rowp_read_binary_protocol:
-											 php_mysqlnd_rowp_read_text_protocol;
 
 	/* non-persistent */
 	row_packet = conn->protocol->m.get_row_packet(conn->protocol, FALSE TSRMLS_CC);
@@ -1170,9 +1160,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 				ret = FAIL;
 				goto end;
 			}
-			new_row_buffers = mnd_perealloc(set->row_buffers,
-											(size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)),
-											set->persistent);
+			new_row_buffers = mnd_erealloc(set->row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
@@ -1205,7 +1193,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 			goto end;
 		}
 		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-		set->data = mnd_pemalloc((size_t)(set->row_count * meta->field_count * sizeof(zval *)), to_cache);
+		set->data = mnd_emalloc((size_t)(set->row_count * meta->field_count * sizeof(zval *)));
 		if (!set->data) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
@@ -1232,9 +1220,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 			ret = FAIL;
 			goto end;
 		}
-		set->row_buffers = mnd_perealloc(set->row_buffers,
-										 (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)),
-										 set->persistent);
+		set->row_buffers = mnd_erealloc(set->row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 	}
 
 	if (conn->upsert_status.server_status & SERVER_MORE_RESULTS_EXISTS) {
@@ -1269,7 +1255,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										  zend_bool ps_protocol TSRMLS_DC)
 {
 	enum_func_status ret;
-	zend_bool to_cache = FALSE;
 
 	DBG_ENTER("mysqlnd_res::store_result");
 
@@ -1278,9 +1263,12 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	result->type			= MYSQLND_RES_NORMAL;
 	result->m.fetch_row		= result->m.fetch_row_normal_buffered;
 	result->m.fetch_lengths	= mysqlnd_fetch_lengths_buffered;
+	result->m.row_decoder = ps_protocol? php_mysqlnd_rowp_read_binary_protocol:
+										 php_mysqlnd_rowp_read_text_protocol;
 
 	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
 	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
+
 	if (!result->result_set_memory_pool || !result->lengths) {
 		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(NULL);
@@ -1288,7 +1276,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol, to_cache TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol TSRMLS_CC);
 	if (FAIL == ret) {
 		if (result->stored_data) {
 			conn->error_info = result->stored_data->error_info;
