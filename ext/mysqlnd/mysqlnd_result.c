@@ -84,11 +84,11 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_zval_ptr_dtor */
-static
-void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
+/* {{{ mysqlnd_rset_zval_ptr_dtor */
+static void
+mysqlnd_rset_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
+	DBG_ENTER("mysqlnd_rset_zval_ptr_dtor");
 	if (!zv || !*zv) {
 		*copy_ctor_called = FALSE;
 		DBG_ERR_FMT("zv was NULL");
@@ -158,7 +158,7 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 
 		DBG_INF_FMT("%u columns to free", result->field_count);
 		for (i = 0; i < result->field_count; i++) {
-			mysqlnd_palloc_zval_ptr_dtor(&(unbuf->last_row_data[i]), result->type, &copy_ctor_called TSRMLS_CC);
+			mysqlnd_rset_zval_ptr_dtor(&(unbuf->last_row_data[i]), result->type, &copy_ctor_called TSRMLS_CC);
 			if (copy_ctor_called) {
 				++ctor_called_count;
 			}
@@ -212,7 +212,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 				for (col = field_count - 1; col >= 0; --col) {
 					if (current_row[col]) {
 						zend_bool copy_ctor_called;
-						mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
+						mysqlnd_rset_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
 						DBG_INF_FMT("Copy_ctor_called=%u", copy_ctor_called);
 #endif
