@@ -2855,14 +2855,13 @@ PHP_FUNCTION(date_add)
 		if (intobj->diff->invert) {
 			bias = -1;
 		}
+		memset(&dateobj->time->relative, 0, sizeof(struct timelib_rel_time));
 		dateobj->time->relative.y = intobj->diff->y * bias;
 		dateobj->time->relative.m = intobj->diff->m * bias;
 		dateobj->time->relative.d = intobj->diff->d * bias;
 		dateobj->time->relative.h = intobj->diff->h * bias;
 		dateobj->time->relative.i = intobj->diff->i * bias;
 		dateobj->time->relative.s = intobj->diff->s * bias;
-		dateobj->time->relative.weekday = 0;
-		dateobj->time->relative.have_weekday_relative = 0;
 	}
 	dateobj->time->have_relative = 1;
 	dateobj->time->sse_uptodate = 0;
@@ -2902,6 +2901,7 @@ PHP_FUNCTION(date_sub)
 		bias = -1;
 	}
 
+	memset(&dateobj->time->relative, 0, sizeof(struct timelib_rel_time));
 	dateobj->time->relative.y = 0 - (intobj->diff->y * bias);
 	dateobj->time->relative.m = 0 - (intobj->diff->m * bias);
 	dateobj->time->relative.d = 0 - (intobj->diff->d * bias);
@@ -2909,8 +2909,6 @@ PHP_FUNCTION(date_sub)
 	dateobj->time->relative.i = 0 - (intobj->diff->i * bias);
 	dateobj->time->relative.s = 0 - (intobj->diff->s * bias);
 	dateobj->time->have_relative = 1;
-	dateobj->time->relative.weekday = 0;
-	dateobj->time->relative.have_weekday_relative = 0;
 	dateobj->time->sse_uptodate = 0;
 
 	timelib_update_ts(dateobj->time, NULL);
