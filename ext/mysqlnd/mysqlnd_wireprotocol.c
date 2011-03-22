@@ -24,7 +24,6 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
-#include "mysqlnd_block_alloc.h"
 #include "zend_ini.h"
 
 #define MYSQLND_SILENT 1
