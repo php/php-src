@@ -360,6 +360,10 @@ next_step:
 static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zthis TSRMLS_DC)
 {
 	zend_object_iterator      *sub_iter;
+	
+	if (!object->iterators) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", Z_OBJCE_P(zthis)->name);
+	}
 
 	while (object->level) {
 		sub_iter = object->iterators[object->level].iterator;
