@@ -5,7 +5,7 @@ dnl config.m4 for mysqlnd driver
 
 PHP_ARG_ENABLE(disable_mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
-                            Enable support for the MySQL compressed protocol in mysqlnd], yes)
+                            Disable support for the MySQL compressed protocol in mysqlnd], yes)
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
