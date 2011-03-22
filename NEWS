@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (tomas dot brastavicius at quantum dot lt, Pierrick)
 
 - DateTime extension:
+  . Fixed bug #54340 (DateTime::add() method bug). (Adam)
   . Fixed bug #54316 (DateTime::createFromFormat does not handle trailing '|'
     correctly). (Adam)
 
