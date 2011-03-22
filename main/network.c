@@ -1095,7 +1095,9 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 	} else {
 		flags &= ~myflag;
 	}
-	fcntl(socketd, F_SETFL, flags);
+	if (fcntl(socketd, F_SETFL, flags) == -1) {
+		ret = FAILURE;
+	}
 #endif
 	return ret;
 }

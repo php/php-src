@@ -270,6 +270,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_clear_error, 0, 0, 0)
 	ZEND_ARG_INFO(0, socket)
 ZEND_END_ARG_INFO()
+		
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_import_stream, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ sockets_functions[]
@@ -304,6 +308,7 @@ const zend_function_entry sockets_functions[] = {
 #endif
 	PHP_FE(socket_last_error,		arginfo_socket_last_error)
 	PHP_FE(socket_clear_error,		arginfo_socket_clear_error)
+	PHP_FE(socket_import_stream,	arginfo_socket_import_stream)
 
 	/* for downwards compatability */
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
@@ -344,11 +349,33 @@ PHP_SOCKETS_API int php_sockets_le_socket(void) /* {{{ */
 }
 /* }}} */
 
+/* allocating function to make programming errors due to uninitialized fields
+ * less likely */
+static php_socket *php_create_socket(void) /* {{{ */
+{
+	php_socket *php_sock = emalloc(sizeof *php_sock);
+	
+	php_sock->bsd_socket = -1; /* invalid socket */
+	php_sock->type		 = PF_UNSPEC;
+	php_sock->error		 = 0;
+	php_sock->blocking	 = 1;
+	php_sock->zstream	 = NULL;
+	
+	return php_sock;
+}
+/* }}} */
+
 static void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
-	php_socket *php_sock = (php_socket *) rsrc->ptr;
+	php_socket *php_sock = rsrc->ptr;
 
-	close(php_sock->bsd_socket);
+	if (php_sock->zstream == NULL) {
+		if (!IS_INVALID_SOCKET(php_sock)) {
+			close(php_sock->bsd_socket);
+		}
+	} else {
+		zval_ptr_dtor(&php_sock->zstream);
+	}
 	efree(php_sock);
 }
 /* }}} */
@@ -357,7 +384,7 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSR
 {
 	struct sockaddr_in  la;
 	struct hostent		*hp;
-	php_socket			*sock = (php_socket*)emalloc(sizeof(php_socket));
+	php_socket			*sock = php_create_socket();
 
 	*php_sock = sock;
 
@@ -405,7 +432,7 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSR
 
 static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, socklen_t *la_len TSRMLS_DC) /* {{{ */
 {
-	php_socket	*out_sock = (php_socket*)emalloc(sizeof(php_socket));
+	php_socket	*out_sock = php_create_socket();
 
 	*new_sock = out_sock;
 
@@ -731,8 +758,6 @@ static PHP_GINIT_FUNCTION(sockets)
  */
 PHP_MINIT_FUNCTION(sockets)
 {
-	struct protoent *pe;
-
 	le_socket = zend_register_list_destructors_ex(php_destroy_socket, NULL, le_socket_name, module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
@@ -1051,12 +1076,28 @@ PHP_FUNCTION(socket_set_nonblock)
 	}
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+	
+	if (php_sock->zstream != NULL) {
+		php_stream *stream;
+		/* omit notice if resource doesn't exist anymore */
+		stream = zend_fetch_resource(&php_sock->zstream TSRMLS_CC, -1,
+			NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream != NULL) {
+			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 0,
+					NULL) != -1) {
+				php_sock->blocking = 1;
+				RETURN_TRUE;
+			}
+		}
+	}
 
 	if (php_set_sock_blocking(php_sock->bsd_socket, 0 TSRMLS_CC) == SUCCESS) {
 		php_sock->blocking = 0;
 		RETURN_TRUE;
+	} else {
+		PHP_SOCKET_ERROR(php_sock, "unable to set nonblocking mode", errno);
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1072,12 +1113,30 @@ PHP_FUNCTION(socket_set_block)
 	}
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+	
+	/* if socket was created from a stream, give the stream a chance to take
+	 * care of the operation itself, thereby allowing it to update its internal
+	 * state */
+	if (php_sock->zstream != NULL) {
+		php_stream *stream;
+		stream = zend_fetch_resource(&php_sock->zstream TSRMLS_CC, -1,
+			NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream != NULL) {
+			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 1,
+					NULL) != -1) {
+				php_sock->blocking = 1;
+				RETURN_TRUE;
+			}
+		}
+	}
 
 	if (php_set_sock_blocking(php_sock->bsd_socket, 1 TSRMLS_CC) == SUCCESS) {
 		php_sock->blocking = 1;
 		RETURN_TRUE;
+	} else {
+		PHP_SOCKET_ERROR(php_sock, "unable to set blocking mode", errno);
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1115,6 +1174,16 @@ PHP_FUNCTION(socket_close)
 	}
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+	if (php_sock->zstream != NULL) {
+		php_stream *stream = NULL;
+		php_stream_from_zval_no_verify(stream, &php_sock->zstream);
+		if (stream != NULL) {
+			/* close & destroy stream, incl. removing it from the rsrc list;
+			 * resource stored in php_sock->zstream will become invalid */
+			php_stream_free(stream, PHP_STREAM_FREE_CLOSE |
+					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
+		}
+	}
 	zend_list_delete(Z_RESVAL_P(arg1));
 }
 /* }}} */
@@ -1372,7 +1441,7 @@ PHP_FUNCTION(socket_getpeername)
 PHP_FUNCTION(socket_create)
 {
 	long		arg1, arg2, arg3;
-	php_socket	*php_sock = (php_socket*)emalloc(sizeof(php_socket));
+	php_socket	*php_sock = php_create_socket();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &arg1, &arg2, &arg3) == FAILURE) {
 		efree(php_sock);
@@ -2244,8 +2313,8 @@ PHP_FUNCTION(socket_create_pair)
 		return;
 	}
 
-	php_sock[0] = (php_socket*)emalloc(sizeof(php_socket));
-	php_sock[1] = (php_socket*)emalloc(sizeof(php_socket));
+	php_sock[0] = php_create_socket();
+	php_sock[1] = php_create_socket();
 
 	if (domain != AF_INET
 #if HAVE_IPV6
@@ -2359,6 +2428,80 @@ PHP_FUNCTION(socket_clear_error)
 	}
 
 	return;
+}
+/* }}} */
+
+/* {{{ proto void socket_import_stream(resource stream)
+   Imports a stream that encapsulates a socket into a socket extension resource. */
+PHP_FUNCTION(socket_import_stream)
+{
+	zval				 *zstream;
+	php_stream			 *stream;
+	php_socket			 *retsock = NULL;;
+	PHP_SOCKET			 socket; /* fd */
+	php_sockaddr_storage addr;
+	socklen_t			 addr_len = sizeof(addr);
+	int					 t;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zstream) == FAILURE) {
+		return;
+	}
+	php_stream_from_zval(stream, &zstream);
+	
+	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1)) {
+		/* error supposedly already shown */
+		RETURN_FALSE;
+	}
+	
+	retsock = php_create_socket();
+	
+	retsock->bsd_socket = socket;
+	
+	/* determine family */
+	if (getsockname(socket, (struct sockaddr*)&addr, &addr_len) == 0) {
+		retsock->type = addr.ss_family;
+	} else {
+		PHP_SOCKET_ERROR(retsock, "unable to obtain socket family", errno);
+		goto error;
+	}
+	
+	/* determine blocking mode */
+#ifndef PHP_WIN32
+	t = fcntl(socket, F_GETFL);
+	if(t == -1) {
+		PHP_SOCKET_ERROR(retsock, "unable to obtain blocking state", errno);
+		goto error;
+	} else {
+		retsock->blocking = !(t & O_NONBLOCK);
+	}
+#else
+	/* on windows, check if the stream is a socket stream and read its
+	 * private data; otherwise assume it's in non-blocking mode */
+	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		retsock->blocking =
+				((php_netstream_data_t)stream->abstract)->is_blocked;
+	} else {
+		retsock->blocking = 1;
+	}
+#endif
+	
+	/* hold a zval reference to the stream (holding a php_stream* directly could
+	 * also be done, but this might be slightly better if in the future we want
+	 * to provide a socket_export_stream) */
+	MAKE_STD_ZVAL(retsock->zstream);
+	*retsock->zstream = *zstream;
+	zval_copy_ctor(retsock->zstream);
+	Z_UNSET_ISREF_P(retsock->zstream);
+	Z_SET_REFCOUNT_P(retsock->zstream, 1);
+	
+	php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER,
+		PHP_STREAM_BUFFER_NONE, NULL);
+	
+	ZEND_REGISTER_RESOURCE(return_value, retsock, le_socket);
+	return;
+error:
+	if (retsock != NULL)
+		efree(retsock);
 }
 /* }}} */
 
