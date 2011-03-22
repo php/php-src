@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - SPL extension:
   . Fixed bug #54291 (Crash iterating DirectoryIterator for dir name starting
     with \0). (Gustavo)
+  . Fixed bug #54281 (Crash in non-initialized RecursiveIteratorIterator).
+    (Felipe)
 
 17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
