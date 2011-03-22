@@ -27,9 +27,7 @@
 #include "mysqlnd_result.h"
 #include "mysqlnd_result_meta.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-#include "ext/standard/basic_functions.h"
 
 #define MYSQLND_SILENT
 
