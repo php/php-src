@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
     (mjh at hodginsmedia dot com, Felipe)
 
+- PDO PostgreSQL driver:
+  . Fixed bug #54318 (Non-portable grep option used in PDO pgsql
+    configuration). (bwalton at artsci dot utoronto dot ca)
+
 - SOAP extension:
   . Fixed bug #54312 (soap_version logic bug). (tom at samplonius dot org)
 
