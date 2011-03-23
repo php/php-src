@@ -2209,15 +2209,22 @@ SPL_METHOD(SplFileObject, __construct)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
-	intern->u.file.open_mode = "r";
-	intern->u.file.open_mode_len = 1;
+	intern->u.file.open_mode = NULL;
+	intern->u.file.open_mode_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbr", 
 			&intern->file_name, &intern->file_name_len,
 			&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
-			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
+			&use_include_path, &intern->u.file.zcontext) == FAILURE) {		
+		intern->u.file.open_mode = NULL;
+		intern->file_name = NULL;
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
+	}
+	
+	if (intern->u.file.open_mode == NULL) {
+		intern->u.file.open_mode = "r";
+		intern->u.file.open_mode_len = 1;
 	}
 	
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
