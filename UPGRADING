@@ -330,6 +330,7 @@ UPGRADE NOTES - PHP X.Y
          - http_response_code()
          - trait_exists()
          - stream_set_chunk_size()
+         - socket_import_stream()
 
      f. New global constants
 
