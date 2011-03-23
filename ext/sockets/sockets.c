@@ -916,8 +916,10 @@ PHP_FUNCTION(socket_set_nonblock)
 	if (php_set_sock_blocking(php_sock->bsd_socket, 0 TSRMLS_CC) == SUCCESS) {
 		php_sock->blocking = 0;
 		RETURN_TRUE;
+	} else {
+		PHP_SOCKET_ERROR(php_sock, "unable to set nonblocking mode", errno);
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -937,8 +939,10 @@ PHP_FUNCTION(socket_set_block)
 	if (php_set_sock_blocking(php_sock->bsd_socket, 1 TSRMLS_CC) == SUCCESS) {
 		php_sock->blocking = 1;
 		RETURN_TRUE;
+	} else {
+		PHP_SOCKET_ERROR(php_sock, "unable to set blocking mode", errno);
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
