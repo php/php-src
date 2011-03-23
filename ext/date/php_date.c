@@ -3767,7 +3767,7 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj = zend_object_store_get_object(getThis() TSRMLS_CC);
 	dpobj->current = NULL;
 
-	if (isostr_len) {
+	if (isostr) {
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len TSRMLS_CC);
 		if (dpobj->start == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ISO interval '%s' did not contain a start date.", isostr);
