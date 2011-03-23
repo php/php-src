@@ -50,6 +50,10 @@
 #define MYSQLND_DBG_ENABLED 0
 #endif
 
+#if defined(MYSQLND_COMPRESSION_WANTED) && defined(HAVE_ZLIB)
+#define MYSQLND_COMPRESSION_ENABLED 1
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
