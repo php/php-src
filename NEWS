@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - MySQL Improved extension:
   . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
     (Andrey)
+
+- mysqlnd
+  . Fixed crash when using more than 28,000 bound parameters. Workaround is to
+    set mysqlnd.net_cmd_buffer_size to at least 9000. (Andrey)
     
 - PDO DBlib driver:
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
