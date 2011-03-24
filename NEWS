@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
     (tomas dot brastavicius at quantum dot lt, Pierrick)
+  . Fixed a crash inside dtor for error handling. (Ilia)
 
 - DateTime extension:
   . Fixed bug #54340 (DateTime::add() method bug). (Adam)
