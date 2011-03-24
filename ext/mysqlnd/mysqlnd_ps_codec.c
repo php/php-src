@@ -585,8 +585,7 @@ mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, 
 
 /* {{{ mysqlnd_stmt_execute_store_params */
 static enum_func_status
-mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p,
-								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
+mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t *buf_len  TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	unsigned int i = 0;
@@ -596,8 +595,36 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	zval **copies = NULL;/* if there are different types */
 	enum_func_status ret = FAIL;
 	int resend_types_next_time = 0;
+	size_t null_byte_offset;
 
 	DBG_ENTER("mysqlnd_stmt_execute_store_params");
+
+	{
+		unsigned int null_count = (stmt->param_count + 7) / 8;
+		/* give it some reserved space - 20 bytes */
+		if (left < (null_count + 20)) {
+			unsigned int offset = *p - *buf;
+			zend_uchar *tmp_buf;
+			*buf_len = offset + null_count + 20;
+			tmp_buf = mnd_emalloc(*buf_len);
+			if (!tmp_buf) {
+				SET_OOM_ERROR(stmt->error_info);
+				goto end;
+			}
+			memcpy(tmp_buf, *buf, offset);
+			if (*buf != provided_buffer) {
+				mnd_efree(*buf);
+			}
+			*buf = tmp_buf;
+
+			/* Update our pos pointer */
+			*p = *buf + offset;
+		}
+		/* put `null` bytes */
+		null_byte_offset = *p - *buf;
+		memset(*p, 0, null_count);
+		*p += null_count;
+	}
 
 /* 1. Store type information */
 	/*
@@ -647,6 +674,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				goto end;
 			}
 			memcpy(tmp_buf, *buf, offset);
+			if (*buf != provided_buffer) {
+				mnd_efree(*buf);
+			}
 			*buf = tmp_buf;
 
 			/* Update our pos pointer */
@@ -885,8 +915,6 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	zend_uchar	*p = stmt->execute_cmd_buffer.buffer,
 				*cmd_buffer = stmt->execute_cmd_buffer.buffer;
 	size_t cmd_buffer_length = stmt->execute_cmd_buffer.length;
-	unsigned int	null_byte_offset,
-					null_count= (stmt->param_count + 7) / 8;
 	enum_func_status ret;
 
 	DBG_ENTER("mysqlnd_stmt_execute_generate_request");
@@ -904,12 +932,7 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	int1store(p, 1); /* and send 1 for iteration count */
 	p+= 4;
 
-
-	null_byte_offset = p - cmd_buffer;
-	memset(p, 0, null_count);
-	p += null_count;
-
-	ret = mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
+	ret = mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length TSRMLS_CC);
 
 	*free_buffer = (cmd_buffer != stmt->execute_cmd_buffer.buffer);
 	*request_len = (p - cmd_buffer);
