@@ -880,9 +880,11 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if (display) {
 		if (PG(last_error_message)) {
 			free(PG(last_error_message));
+			PG(last_error_message) = NULL;
 		}
 		if (PG(last_error_file)) {
 			free(PG(last_error_file));
+			PG(last_error_file) = NULL;
 		}
 		if (!error_filename) {
 			error_filename = "Unknown";
