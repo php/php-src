@@ -115,8 +115,15 @@ require_once('skipifconnectfailure.inc');
 <?php
 require_once("clean_table.inc");
 ?>
---XFAIL--
-Statement limits hit, should crash
 --EXPECTF--
-TODO
+Testing 273 columns with 240 rows...
+... table created
+... statement with 65520 parameters prepared
+Statement done
+bool(true)
+Testing 273 columns with 240 rows...
+... table created
+... statement with 65520 parameters prepared
+Statement done
+bool(true)
 done!
