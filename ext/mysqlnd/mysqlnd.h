@@ -22,8 +22,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.8-dev - 20101228 - $Revision$"
-#define MYSQLND_VERSION_ID 50008
+#define MYSQLND_VERSION "mysqlnd 5.0.9-dev - 20110325 - $Revision$"
+#define MYSQLND_VERSION_ID 50009
 
 #define MYSQLND_PLUGIN_API_VERSION 1
 
