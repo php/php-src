@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - PDO PostgreSQL driver:
   . Fixed bug #54318 (Non-portable grep option used in PDO pgsql
     configuration). (bwalton at artsci dot utoronto dot ca)
+    
+- Phar extension:
+  . Fixed bug #54395 (Phar::mount() crashes when calling with wrong parameters).
+    (Felipe)
 
 - SOAP extension:
   . Fixed bug #54312 (soap_version logic bug). (tom at samplonius dot org)
