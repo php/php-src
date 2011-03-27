@@ -848,6 +848,34 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 	return function_handler;
 }
 
+static int spl_recursive_it_constructor_validator(void *object_data TSRMLS_DC) /* {{{ */
+{
+	spl_recursive_it_object *sobj = object_data;
+	return (sobj->iterators != NULL);
+}
+/* }}} */
+
+static zend_function *spl_recursive_it_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+{
+	return php_spl_get_constructor_helper(object,
+			spl_recursive_it_constructor_validator TSRMLS_CC);
+}
+/* }}} */
+
+static int spl_dual_it_constructor_validator(void *object_data TSRMLS_DC) /* {{{ */
+{
+	spl_dual_it_object *dobj = object_data;
+	return (dobj->dit_type != DIT_Unknown);
+}
+/* }}} */
+
+static zend_function *spl_dual_it_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+{
+	return php_spl_get_constructor_helper(object,
+			spl_dual_it_constructor_validator TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ spl_RecursiveIteratorIterator_dtor */
 static void spl_RecursiveIteratorIterator_dtor(zend_object *_object, zend_object_handle handle TSRMLS_DC)
 {
@@ -1320,15 +1348,6 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	return success;
 }
 #endif
-
-#define SPL_CHECK_CTOR(intern, classname) \
-	if (intern->dit_type == DIT_Unknown) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Classes derived from %s must call %s::__construct()", \
-				(spl_ce_##classname)->name, (spl_ce_##classname)->name); \
-		return; \
-	}
-
-#define APPENDIT_CHECK_CTOR(intern) SPL_CHECK_CTOR(intern, AppendIterator)
 
 static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
 
@@ -3166,8 +3185,6 @@ SPL_METHOD(AppendIterator, append)
 	zval *it;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
-	APPENDIT_CHECK_CTOR(intern);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "O", &it, zend_ce_iterator) == FAILURE) {
 		return;
@@ -3244,8 +3261,7 @@ SPL_METHOD(AppendIterator, getIteratorIndex)
 	}
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	APPENDIT_CHECK_CTOR(intern);
+	
 	spl_array_iterator_key(intern->u.append.zarrayit, return_value TSRMLS_CC);
 } /* }}} */
 
@@ -3260,8 +3276,7 @@ SPL_METHOD(AppendIterator, getArrayIterator)
 	}
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	APPENDIT_CHECK_CTOR(intern);
+	
 	RETURN_ZVAL(intern->u.append.zarrayit, 1, 0);
 } /* }}} */
 
@@ -3491,11 +3506,13 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	memcpy(&spl_handlers_rec_it_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
+	spl_handlers_rec_it_it.get_constructor = spl_recursive_it_get_constructor;
 
 	memcpy(&spl_handlers_dual_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
 	/*spl_handlers_dual_it.call_method = spl_dual_it_call_method;*/
 	spl_handlers_dual_it.clone_obj = NULL;
+	spl_handlers_dual_it.get_constructor = spl_dual_it_get_constructor;
 	
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 	spl_ce_RecursiveIteratorIterator->iterator_funcs.funcs = &spl_recursive_it_iterator_funcs;
