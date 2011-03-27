@@ -367,6 +367,10 @@ UPGRADE NOTES - PHP X.Y
        - SNMP:
          - SNMP
 
+       - SPL:
+         - CallbackFilterIterator
+         - RecursiveCallbackFilterIterator
+
      h. New methods
 
        - DirectoryIterator
