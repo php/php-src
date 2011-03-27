@@ -41,7 +41,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	ret = uspoof_checkUTF8(co->uspoof, text, text_len, NULL, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%ld) %s", u_errorName(SPOOFCHECKER_ERROR_CODE(co)), SPOOFCHECKER_ERROR_CODE(co));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
 	
@@ -74,7 +74,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	ret = uspoof_areConfusableUTF8(co->uspoof, s1, s1_len, s2, s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%ld) %s", u_errorName(SPOOFCHECKER_ERROR_CODE(co)), SPOOFCHECKER_ERROR_CODE(co));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
 	
@@ -91,7 +91,6 @@ PHP_METHOD(Spoofchecker, areConfusable)
  */
 PHP_METHOD(Spoofchecker, setAllowedLocales)
 {
-	int ret;
 	char *locales;
 	int locales_len;
 	SPOOFCHECKER_METHOD_INIT_VARS;
@@ -105,7 +104,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	uspoof_setAllowedLocales(co->uspoof, locales, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%ld) %s", u_errorName(SPOOFCHECKER_ERROR_CODE(co)), SPOOFCHECKER_ERROR_CODE(co));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		return;
 	}
 }
@@ -116,7 +115,6 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
  */
 PHP_METHOD(Spoofchecker, setChecks)
 {
-	int ret;
 	long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 		
@@ -129,7 +127,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	uspoof_setChecks(co->uspoof, checks, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%ld) %s", u_errorName(SPOOFCHECKER_ERROR_CODE(co)), SPOOFCHECKER_ERROR_CODE(co));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
 /* }}} */
