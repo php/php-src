@@ -51,14 +51,30 @@ ZEND_DECLARE_MODULE_GLOBALS(spl)
 
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
 
+static void construction_wrapper(INTERNAL_FUNCTION_PARAMETERS);
+
 /* {{{ PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(spl)
 {
+	zend_function *cwf = &spl_globals->constr_wrapper_fun;
 	spl_globals->autoload_extensions     = NULL;
 	spl_globals->autoload_extensions_len = 0;
 	spl_globals->autoload_functions      = NULL;
 	spl_globals->autoload_running        = 0;
+	spl_globals->validating_fun			 = NULL;
+	
+	cwf->type							 = ZEND_INTERNAL_FUNCTION;
+	cwf->common.function_name			 = "internal_construction_wrapper";
+	cwf->common.scope					 = NULL; /* to be filled */
+	cwf->common.fn_flags				 = ZEND_ACC_PRIVATE;
+	cwf->common.prototype				 = NULL;
+	cwf->common.num_args				 = 0; /* not necessarily true but not enforced */
+	cwf->common.required_num_args		 = 0;
+	cwf->common.arg_info				 = NULL;
+	
+	cwf->internal_function.handler		 = construction_wrapper;
+	cwf->internal_function.module		 = &spl_module_entry;
 }
 /* }}} */
 
@@ -775,6 +791,75 @@ int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC) /* {{{ */
 	*list = res;
 	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
+
+zend_function *php_spl_get_constructor_helper(zval *object, int (*validating_fun)(void *object_data TSRMLS_DC) TSRMLS_DC) /* {{{ */
+{
+	if (Z_OBJCE_P(object)->type == ZEND_INTERNAL_CLASS) {
+		return std_object_handlers.get_constructor(object TSRMLS_CC);
+	} else {
+		SPL_G(validating_fun) = validating_fun;
+		SPL_G(constr_wrapper_fun).common.scope = Z_OBJCE_P(object);
+		return &SPL_G(constr_wrapper_fun);
+	}
+}
+/* }}} */
+
+static void construction_wrapper(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+{
+	zval				  *this = getThis();
+	void				  *object_data;
+	zend_class_entry	  *this_ce;
+	zend_function		  *zf;
+	zend_fcall_info		  fci = {0};
+	zend_fcall_info_cache fci_cache = {0};
+	zval *retval_ptr	  = NULL;
+	
+	object_data = zend_object_store_get_object(this TSRMLS_CC);
+	zf			= zend_get_std_object_handlers()->get_constructor(this TSRMLS_CC);
+	this_ce		= Z_OBJCE_P(this);
+
+	fci.size					= sizeof(fci);
+	fci.function_table			= &this_ce->function_table;
+	/* fci.function_name = ; not necessary */
+	/* fci.symbol_table = ; not necessary */
+	fci.retval_ptr_ptr			= &retval_ptr;
+	fci.param_count				= ZEND_NUM_ARGS();
+	if (fci.param_count > 0) {
+		fci.params				= emalloc(fci.param_count * sizeof *fci.params);
+		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), fci.params) == FAILURE) {
+			zend_throw_exception(NULL, "Unexpected error fetching arguments", 0 TSRMLS_CC);
+			return;
+		}
+	}
+	fci.object_ptr				= this;
+	fci.no_separation			= 0;
+
+	fci_cache.initialized		= 1;
+	fci_cache.called_scope		= EG(current_execute_data)->called_scope;
+	fci_cache.calling_scope		= EG(current_execute_data)->current_scope;
+	fci_cache.function_handler	= zf;
+	fci_cache.object_ptr		= this;
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(NULL, "Error calling parent constructor", 0 TSRMLS_CC);
+		}
+		goto cleanup;
+	}
+	if (!EG(exception) && SPL_G(validating_fun)(object_data TSRMLS_CC) == 0)
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC,
+			"In the constructor of %s, parent::__construct() must be called "
+			"and its exceptions cannot be cleared", this_ce->name);
+	
+cleanup:
+	if (fci.params != NULL) {
+		efree(fci.params);
+	}
+	if (retval_ptr != NULL) {
+		zval_ptr_dtor(&retval_ptr);
+	}
+}
+/* }}} */
 
 /* {{{ PHP_MINFO(spl)
  */
