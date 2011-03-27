@@ -255,6 +255,16 @@ UPGRADE NOTES - PHP X.Y
         - The session extension now can hook into the file upload feature
           in order to provide upload progress information through session 
           variables.
+        - SNMP extension
+             - Functions in SNMP extension now returns FALSE on every error 
+               condition including SNMP-related (no such instance, end of MIB,
+               etc). Thus, in patricular, breaks previous behaviour of get/walk
+               functions returning an empty string on SNMP-related errors.
+             - Multi OID get/getnext/set queries are now supported.
+             - New constants added for use in snmp_set_oid_output_format()
+               function.
+             - Added feature-rich OO API (SNMP class)
+          
 
      d. no longer possible to disable
 
@@ -353,6 +363,9 @@ UPGRADE NOTES - PHP X.Y
        
        - Intl:
          - Transliterator
+       
+       - SNMP:
+         - SNMP
 
      h. New methods
 
