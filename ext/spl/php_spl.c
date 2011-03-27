@@ -66,7 +66,7 @@ static PHP_GINIT_FUNCTION(spl)
 	
 	cwf->type							 = ZEND_INTERNAL_FUNCTION;
 	cwf->common.function_name			 = "internal_construction_wrapper";
-	cwf->common.scope					 = NULL; /* to be filled */
+	cwf->common.scope					 = NULL; /* to be filled w/ object runtime class */
 	cwf->common.fn_flags				 = ZEND_ACC_PRIVATE;
 	cwf->common.prototype				 = NULL;
 	cwf->common.num_args				 = 0; /* not necessarily true but not enforced */
@@ -815,8 +815,18 @@ static void construction_wrapper(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zval *retval_ptr	  = NULL;
 	
 	object_data = zend_object_store_get_object(this TSRMLS_CC);
-	zf			= zend_get_std_object_handlers()->get_constructor(this TSRMLS_CC);
 	this_ce		= Z_OBJCE_P(this);
+	
+	/* The call of this internal function did not change the scope because
+	 * zend_do_fcall_common_helper doesn't do that for internal instance
+	 * function calls. So the visibility checks on zend_std_get_constructor
+	 * will still work. Reflection refuses to instantiate classes whose
+	 * constructor is not public so we're OK there too*/
+	zf		  = zend_std_get_constructor(this TSRMLS_CC);
+	
+	if (zf == NULL) {
+		return;
+	}
 
 	fci.size					= sizeof(fci);
 	fci.function_table			= &this_ce->function_table;
@@ -828,15 +838,17 @@ static void construction_wrapper(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 		fci.params				= emalloc(fci.param_count * sizeof *fci.params);
 		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), fci.params) == FAILURE) {
 			zend_throw_exception(NULL, "Unexpected error fetching arguments", 0 TSRMLS_CC);
-			return;
+			goto cleanup;
 		}
 	}
 	fci.object_ptr				= this;
 	fci.no_separation			= 0;
-
+	
 	fci_cache.initialized		= 1;
-	fci_cache.called_scope		= EG(current_execute_data)->called_scope;
-	fci_cache.calling_scope		= EG(current_execute_data)->current_scope;
+	fci_cache.called_scope		= this_ce; /* set called scope to class of this */
+	/* function->common.scope will replace it, except for
+	 * ZEND_OVERLOADED_FUNCTION, which we won't get */
+	fci_cache.calling_scope		= EG(scope);
 	fci_cache.function_handler	= zf;
 	fci_cache.object_ptr		= this;
 
@@ -852,6 +864,8 @@ static void construction_wrapper(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 			"and its exceptions cannot be cleared", this_ce->name);
 	
 cleanup:
+	/* no need to cleanup zf, zend_std_get_constructor never allocates a new
+	 * function (so no ZEND_OVERLOADED_FUNCTION or call-via-handlers) */
 	if (fci.params != NULL) {
 		efree(fci.params);
 	}
