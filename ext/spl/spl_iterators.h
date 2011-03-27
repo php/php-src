@@ -75,6 +75,8 @@ typedef enum {
 	DIT_RegexIterator,
 	DIT_RecursiveRegexIterator,
 #endif
+	DIT_CallbackFilterIterator,
+	DIT_RecursiveCallbackFilterIterator,
 	DIT_Unknown = ~0
 } dual_it_type;
 
@@ -113,6 +115,11 @@ typedef enum {
 	REGIT_MODE_REPLACE,
 	REGIT_MODE_MAX
 } regex_mode;
+
+typedef struct _spl_cbfilter_it_intern {
+	zend_fcall_info       fci;
+	zend_fcall_info_cache fcc;
+} _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {
 	zend_object              std;
@@ -157,6 +164,7 @@ typedef struct _spl_dual_it_object {
 			uint             regex_len;
 		} regex;
 #endif
+		_spl_cbfilter_it_intern *cbfilter;
 	} u;
 } spl_dual_it_object;
 
