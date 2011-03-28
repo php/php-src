@@ -414,7 +414,7 @@ if (PHP_SECURITY_FLAGS == "yes") {
 }
 
 ARG_ENABLE("static-analyze", "Enable the VC compiler static analyze", "no");
-if (PHP_STATIC_ANALYZE == "yes" && PHP_SNAPSHOT_BUILD == "no") {
+if (PHP_STATIC_ANALYZE == "yes") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
 }
