@@ -1823,7 +1823,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 			add_pbf_error(s, "Unexpected data found.", string, begin); \
 		}
 
-void timelib_time_reset_fields(timelib_time *time)
+static void timelib_time_reset_fields(timelib_time *time)
 {
 	assert(time != NULL);
 
@@ -1835,7 +1835,7 @@ void timelib_time_reset_fields(timelib_time *time)
 	time->tz_info = NULL;
 }
 
-void timelib_time_reset_unset_fields(timelib_time *time)
+static void timelib_time_reset_unset_fields(timelib_time *time)
 {
 	assert(time != NULL);
 
