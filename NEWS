@@ -12,10 +12,6 @@ PHP                                                                        NEWS
    . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
      TMPDIR on Windows). (Pierre)
 
-- cURL extension:
-  . Add curl.cainfo ini option to set the path to a defailt CA bundle file, used
-    by CURLOPT_CAINFO option. (Pierre)
-
 - DateTime extension:
   . Fixed bug #54340 (DateTime::add() method bug). (Adam)
   . Fixed bug #54316 (DateTime::createFromFormat does not handle trailing '|'
