@@ -2437,7 +2437,7 @@ PHP_FUNCTION(socket_import_stream)
 {
 	zval				 *zstream;
 	php_stream			 *stream;
-	php_socket			 *retsock = NULL;;
+	php_socket			 *retsock = NULL;
 	PHP_SOCKET			 socket; /* fd */
 	php_sockaddr_storage addr;
 	socklen_t			 addr_len = sizeof(addr);
