@@ -2441,8 +2441,10 @@ PHP_FUNCTION(socket_import_stream)
 	PHP_SOCKET			 socket; /* fd */
 	php_sockaddr_storage addr;
 	socklen_t			 addr_len = sizeof(addr);
+#ifndef PHP_WIN32
 	int					 t;
-	
+#endif
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zstream) == FAILURE) {
 		return;
 	}
