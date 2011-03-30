@@ -2479,7 +2479,7 @@ PHP_FUNCTION(socket_import_stream)
 	 * private data; otherwise assume it's in non-blocking mode */
 	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
 		retsock->blocking =
-				((php_netstream_data_t)stream->abstract)->is_blocked;
+				((php_netstream_data_t *)stream->abstract)->is_blocked;
 	} else {
 		retsock->blocking = 1;
 	}
