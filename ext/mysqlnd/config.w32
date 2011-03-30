@@ -7,10 +7,10 @@ if (PHP_MYSQLND != "no") {
 	if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 		mysqlnd_source = 
 			"mysqlnd.c " +
-			"mysqlnd_alloc.c" +
+			"mysqlnd_alloc.c " +
 			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +
-			"mysqlnd_bt.c" +
+			"mysqlnd_bt.c " +
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_loaddata.c " +
@@ -22,7 +22,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_result_meta.c " +
 			"mysqlnd_statistics.c " +
 			"mysqlnd_wireprotocol.c " +
-			"php_mysqlnd.c";
+			"php_mysqlnd.c ";
 		EXTENSION("mysqlnd", mysqlnd_source, false);
 		if (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "mysqlnd", PHP_MYSQLND))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "mysqlnd", PHP_MYSQLND)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
