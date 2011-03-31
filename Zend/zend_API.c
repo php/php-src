@@ -2208,6 +2208,22 @@ ZEND_API int zend_get_module_started(const char *module_name) /* {{{ */
 }
 /* }}} */
 
+static int clean_module_class(const zend_class_entry **ce, int *module_number TSRMLS_DC) /* {{{ */
+{
+	if ((*ce)->type == ZEND_INTERNAL_CLASS && (*ce)->module->module_number == *module_number) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+}
+/* }}} */
+
+static void clean_module_classes(int module_number TSRMLS_DC) /* {{{ */
+{
+	zend_hash_apply_with_argument(EG(class_table), (apply_func_arg_t) clean_module_class, (void *) &module_number TSRMLS_CC);
+}
+/* }}} */
+
 void module_destructor(zend_module_entry *module) /* {{{ */
 {
 	TSRMLS_FETCH();
@@ -2215,6 +2231,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number TSRMLS_CC);
 		clean_module_constants(module->module_number TSRMLS_CC);
+		clean_module_classes(module->module_number TSRMLS_CC);
 	}
 
 	if (module->module_started && module->module_shutdown_func) {
