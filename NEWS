@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (tomas dot brastavicius at quantum dot lt, Pierrick)
    . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
      TMPDIR on Windows). (Pierre)
+- cURL
+  . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
 
 - DateTime extension:
   . Fixed bug #54340 (DateTime::add() method bug). (Adam)
