@@ -644,6 +644,10 @@ PHP_MINIT_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM >  0x071301
 	REGISTER_CURL_CONSTANT(CURLINFO_CERTINFO);
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071202
+    REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_URL);
+#endif
+
 
 	/* cURL protocol constants (curl_version) */
 	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
@@ -2347,6 +2351,11 @@ PHP_FUNCTION(curl_getinfo)
 			CAAL("local_port", l_code);
 		}
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071202
+		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_URL, &s_code) == CURLE_OK) {
+			CAAS("redirect_url", s_code);
+		}
+#endif
 		if (ch->header.str_len > 0) {
 			CAAS("request_header", ch->header.str);
 		}
@@ -2361,7 +2370,11 @@ PHP_FUNCTION(curl_getinfo)
 #endif
 			case CURLINFO_PRIVATE:
 			case CURLINFO_EFFECTIVE_URL:
-			case CURLINFO_CONTENT_TYPE: {
+			case CURLINFO_CONTENT_TYPE:
+#if LIBCURL_VERSION_NUM >= 0x071202
+			case CURLINFO_REDIRECT_URL:
+#endif
+			{
 				char *s_code = NULL;
 
 				if (curl_easy_getinfo(ch->cp, option, &s_code) == CURLE_OK && s_code) {
