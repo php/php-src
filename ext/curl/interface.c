@@ -329,6 +329,13 @@ zend_module_entry curl_module_entry = {
 ZEND_GET_MODULE (curl)
 #endif
 
+/* {{{ PHP_INI_BEGIN */
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("curl.cainfo", "", PHP_INI_SYSTEM, NULL)
+PHP_INI_END()
+/* }}} */
+
+/* }}} */
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(curl)
@@ -455,6 +462,8 @@ PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl_multi", module_number);
+
+	REGISTER_INI_ENTRIES();
 
 	/* See http://curl.haxx.se/lxr/source/docs/libcurl/symbols-in-versions
 	   or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list
@@ -882,6 +891,7 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 		php_curl_openssl_tsl = NULL;
 	}
 #endif
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */
@@ -1430,6 +1440,7 @@ PHP_FUNCTION(curl_init)
 	zval		*clone;
 	char		*url = NULL;
 	int		url_len = 0;
+	char *cainfo;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
 		return;
@@ -1468,6 +1479,12 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
+
+	cainfo = INI_STR("curl.cainfo");
+	if (cainfo && strlen(cainfo) > 0) {
+		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
+	}
+
 #if defined(ZTS)
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
