@@ -44,8 +44,10 @@ PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to \$ORACLE_HOME.
                             Use --with-pdo-oci=instantclient,prefix,version 
                             for an Oracle Instant Client SDK. 
-                            For Linux with 10.2.0.3 RPMs (for example) use:
-                            --with-pdo-oci=instantclient,/usr,10.2.0.3])
+                            For example on Linux with 11.2 RPMs use:
+                            --with-pdo-oci=instantclient,/usr,11.2
+                            With 10.2 RPMs use:
+                            --with-pdo-oci=instantclient,/usr,10.2.0.4])
 
 if test "$PHP_PDO_OCI" != "no"; then
 
@@ -79,6 +81,13 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
     fi
     PDO_OCI_IC_PREFIX="`echo $PDO_OCI_DIR | cut -d, -f2`"
     PDO_OCI_IC_VERS="`echo $PDO_OCI_DIR | cut -d, -f3`"
+    if test -n "$PDO_OCI_IC_VERS"; then
+      PDO_OCI_IC_MAJ_VER="`echo $PDO_OCI_IC_VERS | cut -d. -f1`"
+      if test "$PDO_OCI_IC_MAJ_VER" -ge 11; then
+        # From 11.1.0.7 the RPM path only has an X.Y component
+        PDO_OCI_IC_VERS="`echo $PDO_OCI_IC_VERS | cut -d. -f1-2`"
+      fi
+    fi
     AC_MSG_CHECKING([for oci.h])
     if test -f $PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/$PDO_OCI_CLIENT_DIR/oci.h ; then
       PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/$PDO_OCI_CLIENT_DIR)
@@ -95,11 +104,11 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
     else
       AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your Instant Client install])
     fi
-    if test -f "$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/$PDO_OCI_CLIENT_DIR/lib/libclntsh.so" ; then
+    if test -f "$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/$PDO_OCI_CLIENT_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME" ; then
     PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/$PDO_OCI_CLIENT_DIR/lib"
-    elif test -f "$PDO_OCI_IC_PREFIX/$PDO_OCI_CLIENT_DIR/lib/libclntsh.so" ; then
+    elif test -f "$PDO_OCI_IC_PREFIX/$PDO_OCI_CLIENT_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME" ; then
       PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/$PDO_OCI_CLIENT_DIR/lib"
-    elif test -f "$PDO_OCI_IC_PREFIX/libclntsh.so" ; then
+    elif test -f "$PDO_OCI_IC_PREFIX/libclntsh.$SHLIB_SUFFIX_NAME" ; then
       PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX"
     else
       AC_MSG_ERROR([I'm too dumb to figure out where the libraries are in your Instant Client install])
