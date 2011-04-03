@@ -319,7 +319,6 @@ static const zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 {
 	const zend_encoding *script_encoding = NULL;
 	int bom_size;
-	unsigned char *script;
 	unsigned char *pos1, *pos2;
 
 	if (LANG_SCNG(script_org_size) < sizeof(BOM_UTF32_LE)-1) {
