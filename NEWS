@@ -9,10 +9,13 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed a crash inside dtor for error handling. (Ilia)
+  . Fixed bug #54454 (substr_compare incorrectly reports equality in some 
+    cases). (Pierrick)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
     (tomas dot brastavicius at quantum dot lt, Pierrick)
-   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
-     TMPDIR on Windows). (Pierre)
+  . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
+    TMPDIR on Windows). (Pierre)
+
 - cURL
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
 
