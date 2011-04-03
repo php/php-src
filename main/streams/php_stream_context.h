@@ -31,7 +31,7 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 
 /* Attempt to fetch context from the zval passed,
    If no context was passed, use the default context
-   The the default context has not yet been created, do it now. */
+   The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
 		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context(TSRMLS_C)) : \
 		(nocontext) ? NULL : \

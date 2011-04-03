@@ -86,7 +86,7 @@ class CachingIterator implements OuterIterator
 		$this->it->next();
 	}
 	
-	/** @return whether teh iterator is valid
+	/** @return whether the iterator is valid
 	 */
 	function valid()
 	{
