@@ -4299,7 +4299,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 			charset_token = offset;
 		}
 		/* Return the rest of the data as unencoded, as it was either unencoded or was missing separators
-		   which rendered the the remainder of the string impossible for us to decode. */
+		   which rendered the remainder of the string impossible for us to decode. */
 		memcpy(text, &string[charset_token], end - charset_token);	/* Extract unencoded text from string */
 		text[end - charset_token] = 0x00;
 		MAKE_STD_ZVAL(myobject);

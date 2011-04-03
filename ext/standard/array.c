@@ -606,7 +606,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 
 	/* Clear FCI cache otherwise : for example the same or other array with
 	 * (partly) the same key values has been sorted with uasort() or
-	 * other sorting function the comparison is cached, however the the name
+	 * other sorting function the comparison is cached, however the name
 	 * of the function for comparison is not respected. see bug #28739 AND #33295
 	 *
 	 * Following defines will assist in backup / restore values. */

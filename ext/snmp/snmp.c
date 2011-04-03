@@ -1160,7 +1160,7 @@ PHP_FUNCTION(snmp2_set)
 /* {{{ proto void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 *
 * Generic SNMPv3 object fetcher
-* From here is passed on the the common internal object fetcher.
+* From here is passed on the common internal object fetcher.
 *
 * st=SNMP_CMD_GET   snmp3_get() - query an agent and return a single value.
 * st=SNMP_CMD_GETNEXT   snmp3_getnext() - query an agent and return the next single value.

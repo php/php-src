@@ -1427,7 +1427,7 @@ The configuration file
    core directives is available in the appendix. Probably not all PHP
    directives are documented in the manual though. For a complete list of
    directives available in your PHP version, please read your well
-   commented php.ini file. Alternatively, you may find the the latest
+   commented php.ini file. Alternatively, you may find the latest
    php.ini from SVN helpful too.
 
    Example 5-1. php.ini example

@@ -31,7 +31,7 @@ class AppendIterator implements OuterIterator
 	 * @param $it Iterator to append
 	 *
 	 * If the current state is invalid but the appended iterator is valid
-	 * the the AppendIterator itself becomes valid. However there will be no
+	 * the AppendIterator itself becomes valid. However there will be no
 	 * call to $it->rewind(). Also if the current state is invalid the inner
 	 * ArrayIterator will be rewound und forwarded to the appended element.
 	 */	

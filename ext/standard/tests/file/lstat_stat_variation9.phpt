@@ -36,7 +36,7 @@ fclose($file_handle);
 
 $old_stat = stat($dirname);
 
-/* now delete teh surdir and file and record the stat */
+/* now delete the surdir and file and record the stat */
 unlink("$dirname/lstat_stat_variation9a.tmp");
 rmdir("$dirname/lstat_stat_variation9_subdir");
 
