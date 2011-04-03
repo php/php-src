@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - DBA extension:
   . Fixed bug #54242 (dba_insert returns true if key already exists). (Felipe)
 
+- Filter extension:
+  . Fixed bug #53037 (FILTER_FLAG_EMPTY_STRING_NULL is not implemented). (Ilia)
+  
 - LDAP extension:
   . Fixed bug #53339 (Fails to build when compilng with gcc 4.5 and DSO
     libraries). (Clint Byrum, Raphael)
