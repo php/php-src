@@ -128,7 +128,7 @@ abstract class gtTestSubject {
 
 
   /**
-   * Returns the argument list with teh greatest possible number of arguments.
+   * Returns the argument list with the greatest possible number of arguments.
    *
    * @return string
    */

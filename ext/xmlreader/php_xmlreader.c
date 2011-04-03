@@ -859,7 +859,7 @@ PHP_METHOD(xmlreader, next)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::open(string URI [, string encoding [, int options]])
-Sets the URI that the the XMLReader will parse. */
+Sets the URI that the XMLReader will parse. */
 PHP_METHOD(xmlreader, open)
 {
 	zval *id;
@@ -1020,7 +1020,7 @@ PHP_METHOD(xmlreader, setParserProperty)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::setRelaxNGSchema(string filename)
-Sets the string that the the XMLReader will parse. */
+Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, setRelaxNGSchema)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_FILE);
@@ -1028,7 +1028,7 @@ PHP_METHOD(xmlreader, setRelaxNGSchema)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::setRelaxNGSchemaSource(string source)
-Sets the string that the the XMLReader will parse. */
+Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, setRelaxNGSchemaSource)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_STRING);
@@ -1042,7 +1042,7 @@ XMLPUBFUN int XMLCALL
 */
 
 /* {{{ proto boolean XMLReader::XML(string source [, string encoding [, int options]])
-Sets the string that the the XMLReader will parse. */
+Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, XML)
 {
 	zval *id;

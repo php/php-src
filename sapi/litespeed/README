@@ -20,7 +20,7 @@ server configuration to enhance server security when mod_php is used.
 usually, FastCGI PHP is not an option in shared hosting environment 
 due to lacking of this flexibility. LiteSpeed SAPI is carefully designed
 to address this issue. PHP configurations can be modified the same way 
-as that in mod_php with the the same configuration directives. 
+as that in mod_php with the same configuration directives. 
 
 PHP with LiteSpeed SAPI is highly recommended over FastCGI PHP for 
 PHP scripting with LiteSpeed web server. 

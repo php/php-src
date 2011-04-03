@@ -23,7 +23,7 @@ abstract class gtTestCase {
 
 
   /**
-   * Object containing teh ooptional sections that may be added to the test case
+   * Object containing the optional sections that may be added to the test case
    *
    * @var gtOptionalSections
    */
@@ -140,7 +140,7 @@ abstract class gtTestCase {
 
 
   /**
-   * Add FILE section closing tag to teh test case
+   * Add FILE section closing tag to the test case
    *
    */
   public function fileClosing() {

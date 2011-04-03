@@ -603,7 +603,7 @@ html_errors = On
 ; starts up. G,P,C,E & S are abbreviations for the following respective super
 ; globals: GET, POST, COOKIE, ENV and SERVER. There is a performance penalty
 : paid for the registration of these arrays and because ENV is not as commonly
-; used as the others, ENV is is not recommended on productions servers. You
+; used as the others, ENV is not recommended on productions servers. You
 ; can still get access to the environment variables through getenv() should you
 ; need to.
 ; Default Value: "EGPCS"

@@ -11,7 +11,7 @@ Francesco Fullone ff@ideato.it
 ?>
 --FILE--
 <?php
-echo "*** Test by calling method or function with its expected arguments, first print the child PID and the the father ***\n";
+echo "*** Test by calling method or function with its expected arguments, first print the child PID and the father ***\n";
 
 $pid = pcntl_fork();
 if ($pid > 0) {
@@ -22,6 +22,6 @@ if ($pid > 0) {
 }
 ?>
 --EXPECTF--
-*** Test by calling method or function with its expected arguments, first print the child PID and the the father ***
+*** Test by calling method or function with its expected arguments, first print the child PID and the father ***
 int(0)
 int(%d)

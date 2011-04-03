@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Check that teh method name is valid
+ * Check that the method name is valid
  *
  */
 class gtIsValidMethod extends gtPreCondition {
