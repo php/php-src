@@ -68,6 +68,9 @@ PHP                                                                        NEWS
   . Fixed bug #51958 (socket_accept() fails on IPv6 server sockets). (Gustavo)
 
 - SPL extension:
+  . Fixed bug #54384 (Dual iterators, GlobIterator, SplFileObject and
+    SplTempFileObject crash when user-space classes don't call the paren
+    constructor). (Gustavo)
   . Fixed bug #54292 (Wrong parameter causes crash in
     SplFileObject::__construct()). (Felipe)
   . Fixed bug #54291 (Crash iterating DirectoryIterator for dir name starting

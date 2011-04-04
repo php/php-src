@@ -56,7 +56,7 @@ try
 {
 	$ap->append($it);
 }
-catch(BadMethodCallException $e)
+catch(LogicException $e)
 {
 	echo $e->getMessage() . "\n";
 }
@@ -90,7 +90,7 @@ MyArrayIterator::rewind
 1=>2
 MyAppendIterator::__construct
 MyAppendIterator::append
-Classes derived from AppendIterator must call AppendIterator::__construct()
+The object is in an invalid state as the parent constructor was not called
 AppendIterator::getIterator() must be called exactly once per instance
 MyAppendIterator::append
 MyArrayIterator::rewind
