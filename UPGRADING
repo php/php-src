@@ -276,6 +276,8 @@ UPGRADE NOTES - PHP X.Y
              - New constants added for use in snmp_set_oid_output_format()
                function.
              - Added feature-rich OO API (SNMP class)
+             - Dropped UCD-SNMP compatibility code. Consider upgrading to
+               net-snmp v5.3+. Net-SNMP v5.4+ is required for Windows version.
           
 
      d. no longer possible to disable
