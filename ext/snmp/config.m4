@@ -8,14 +8,8 @@ PHP_ARG_WITH(snmp,for SNMP support,
 PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
 [  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
 
-PHP_ARG_ENABLE(ucd-snmp-hack, whether to enable UCD SNMP hack, 
-[  --enable-ucd-snmp-hack    SNMP: Enable UCD SNMP hack], no, no)
-
 if test "$PHP_SNMP" != "no"; then
 
-  dnl
-  dnl Try net-snmp first
-  dnl
   if test "$PHP_SNMP" = "yes"; then
     AC_PATH_PROG(SNMP_CONFIG,net-snmp-config,,[/usr/local/bin:$PATH])
   else
@@ -30,78 +24,12 @@ if test "$PHP_SNMP" != "no"; then
     if test -n "$SNMP_LIBS" && test -n "$SNMP_PREFIX"; then
       PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
       PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
-      AC_DEFINE(HAVE_NET_SNMP,1,[ ])
       SNMP_LIBNAME=netsnmp
     else
       AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
     fi
   else 
-
-    dnl
-    dnl Try ucd-snmp if net-snmp test failed
-    dnl
-
-    if test "$PHP_SNMP" = "yes"; then
-      for i in /usr/include /usr/local/include; do
-        test -f $i/snmp.h                       && SNMP_INCDIR=$i
-        test -f $i/ucd-snmp/snmp.h              && SNMP_INCDIR=$i/ucd-snmp
-        test -f $i/snmp/snmp.h                  && SNMP_INCDIR=$i/snmp
-        test -f $i/snmp/include/ucd-snmp/snmp.h && SNMP_INCDIR=$i/snmp/include/ucd-snmp
-      done
-      for i in /usr/$PHP_LIBDIR /usr/snmp/lib /usr/local/$PHP_LIBDIR /usr/local/lib /usr/local/snmp/lib; do
-        test -f $i/libsnmp.a || test -f $i/libsnmp.$SHLIB_SUFFIX_NAME && SNMP_LIBDIR=$i
-      done
-    else
-      SNMP_INCDIR=$PHP_SNMP/include
-      test -d $PHP_SNMP/include/ucd-snmp && SNMP_INCDIR=$PHP_SNMP/include/ucd-snmp
-      SNMP_LIBDIR=$PHP_SNMP/lib
-    fi
-
-    if test -z "$SNMP_INCDIR"; then
-      AC_MSG_ERROR(snmp.h not found. Check your SNMP installation.)
-    elif test -z "$SNMP_LIBDIR"; then
-      AC_MSG_ERROR(libsnmp not found. Check your SNMP installation.)
-    fi
-
-    old_CPPFLAGS=$CPPFLAGS
-    CPPFLAGS=-I$SNMP_INCDIR
-    AC_CHECK_HEADERS(default_store.h)
-    if test "$ac_cv_header_default_store_h" = "yes"; then
-      AC_MSG_CHECKING(for OpenSSL support in SNMP libraries)
-      AC_EGREP_CPP(yes,[
-#include <ucd-snmp-config.h>
-#if USE_OPENSSL
-        yes
-#endif
-      ],[
-        SNMP_SSL=yes
-      ],[
-        SNMP_SSL=no
-      ])
-    fi
-    CPPFLAGS=$old_CPPFLAGS
-    AC_MSG_RESULT($SNMP_SSL)
-  
-    if test "$SNMP_SSL" = "yes"; then
-      if test "$PHP_OPENSSL_DIR" != "no"; then
-        PHP_OPENSSL=$PHP_OPENSSL_DIR
-      fi
-      
-      if test "$PHP_OPENSSL" = "no"; then
-        AC_MSG_ERROR([The UCD-SNMP in this system is built with SSL support. 
-
-        Add --with-openssl-dir=DIR to your configure line.])
-      else
-        PHP_SETUP_OPENSSL(SNMP_SHARED_LIBADD, [], [
-          AC_MSG_ERROR([SNMP: OpenSSL check failed. Please check config.log for more information.])
-        ])
-      fi
-    fi
-
-    AC_CHECK_LIB(kstat, kstat_read, [ PHP_ADD_LIBRARY(kstat,,SNMP_SHARED_LIBADD) ])
-    PHP_ADD_INCLUDE($SNMP_INCDIR)
-    PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
-    SNMP_LIBNAME=snmp
+    AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
   fi
 
   dnl Check whether snmp_parse_oid() exists.
@@ -130,10 +58,68 @@ if test "$PHP_SNMP" != "no"; then
     $SNMP_SHARED_LIBADD
   ])
 
-  if test "$PHP_UCD_SNMP_HACK" = "yes" ; then
-    AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
+  dnl Check for buggy snmp_snprint_value() (net-snmp BUGid 2027834)
+  AC_CACHE_CHECK([for buggy snmp_snprint_value], ac_cv_buggy_snprint_value,[
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -I${SNMP_PREFIX}/include"
+    AC_TRY_RUN( [
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+
+u_char uname[] = "Linux nex1.php.net 2.6.18-194.32.1.el5 #1 SMP Wed Jan 5 17:53:09 EST 2011 i686";
+
+int main(int argc, char **argv)
+{
+	int result = 0;
+	struct variable_list vars;
+	char buf1[2048];
+	char buf2[sizeof(buf1)];
+	
+	memset(&(buf1[0]), 0, sizeof(buf1));
+	memset(&(buf2[0]), 0, sizeof(buf2));
+	memset(&vars, 0, sizeof(vars));
+	vars.type = 4;
+	vars.val.integer = (long *)&(uname[0]);
+	vars.val.string = &(uname[0]);
+	vars.val.bitstring = &(uname[0]);
+	vars.val.counter64 = (struct counter64 *)&(uname[0]);
+	vars.val.floatVal = (float *)&(uname[0]);
+	vars.val_len = sizeof(uname),
+	vars.name_loc[0] = 1;
+	vars.name_loc[1] = 3;
+	vars.name_loc[2] = 6;
+	vars.name_loc[3] = 1;
+	vars.name_loc[4] = 2;
+	vars.name_loc[5] = 1;
+	vars.name_loc[6] = 1;
+	vars.name_loc[7] = 1;
+	vars.name = (oid *)&(vars.name_loc);
+	vars.name_length = 9;
+
+	init_snmp("snmpapp");
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, 0);
+
+	snprint_value(buf1, (sizeof(uname) + 32), vars.name, vars.name_length, &vars);
+	snprint_value(buf2, sizeof(buf2), vars.name, vars.name_length, &vars);
+	exit((strncmp(buf1, buf2, sizeof(buf1)) != 0));
+}
+    ],[
+      ac_cv_buggy_snprint_value=no
+    ],[
+      ac_cv_buggy_snprint_value=yes
+    ],[
+      ac_cv_buggy_snprint_value=no
+    ])
+    CFLAGS="$save_CFLAGS"
+  ])
+  if test "ac_cv_buggy_snprint_value" = "yes"; then
+     AC_DEFINE(BUGGY_SNMPRINT_VALUE, 1, [ ])
   fi
-  
+
   PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
   PHP_SUBST(SNMP_SHARED_LIBADD)
 fi

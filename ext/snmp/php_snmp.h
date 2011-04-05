@@ -88,10 +88,8 @@ typedef struct _php_snmp_object {
 	int max_oids;
 	int valueretrieval;
 	int quick_print;
-#ifdef HAVE_NET_SNMP
 	int enum_print;
 	int oid_output_format;
-#endif
 	int snmp_errno;
 	char snmp_errstr[128];
 } php_snmp_object;

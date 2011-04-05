@@ -72,42 +72,13 @@
 #endif
 #endif
 
-#ifdef HAVE_NET_SNMP
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-#else
-#ifdef HAVE_DEFAULT_STORE_H
-#include "default_store.h"
-#endif
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_client.h"
-#include "snmp_impl.h"
-#include "snmp.h"
-#include "snmpv3.h"
-#include "keytools.h"
-#include "parse.h"
-#include "mib.h"
-#ifndef PHP_WIN32
-/* this doesn't appear to be needed under win32 (perhaps at all)
- * and the header file is not present in my UCD-SNMP headers */
-# include "version.h"
-#endif
-#include "transform_oids.h"
-#endif
+
 /* Ugly macro, since the length of OIDs in UCD-SNMP and NET-SNMP
  * is different and this way the code is not full of 'ifdef's.
  */
 #define OIDSIZE(p) (sizeof(p)/sizeof(oid))
-
-/* Another ugly macros, since UCD-SNMP has no snprint_* */
-#ifdef HAVE_NET_SNMP
-#define SNMP_SNPRINT_OBJID(dst, dstlen, src, srclen) (snprint_objid((dst), (dstlen), (src), (srclen)))
-#define SNMP_SNPRINT_VALUE(dst, dstlen, srcname, srcnamelen, src) (snprint_value((dst), (dstlen), (srcname), (srcnamelen), (src)))
-#else
-#define SNMP_SNPRINT_OBJID(dst, dstlen, src, srclen) (sprint_objid((dst), (src), (srclen)))
-#define SNMP_SNPRINT_VALUE(dst, dstlen, srcname, srcnamelen, src) (sprint_value((dst), (srcname), (srcnamelen), (src)))
-#endif
 
 #if PHP_VERSION_ID < 50300
 #define Z_ADDREF_P(pz) pz->refcount++
@@ -231,7 +202,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_quick_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, quick_print)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_NET_SNMP
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_enum_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, enum_print)
 ZEND_END_ARG_INFO()
@@ -239,7 +209,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, oid_format)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
@@ -429,11 +398,9 @@ const zend_function_entry snmp_functions[] = {
 	PHP_FE(snmpset, 				arginfo_snmpset)
 	PHP_FE(snmp_get_quick_print, 			arginfo_snmp_get_quick_print)
 	PHP_FE(snmp_set_quick_print, 			arginfo_snmp_set_quick_print)
-#ifdef HAVE_NET_SNMP
 	PHP_FE(snmp_set_enum_print, 			arginfo_snmp_set_enum_print)
 	PHP_FE(snmp_set_oid_output_format, 		arginfo_snmp_set_oid_output_format)
 	PHP_FALIAS(snmp_set_oid_numeric_print, snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
-#endif
 
 	PHP_FE(snmp2_get, 				arginfo_snmp2_get)
 	PHP_FE(snmp2_getnext, 				arginfo_snmp2_getnext)
@@ -578,7 +545,11 @@ static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type,
 static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_DC, int valueretrieval)
 {
 	zval *val;
+#ifdef BUGGY_SNMPRINT_VALUE
+	char sbuf[2048];
+#else
 	char sbuf[64];
+#endif
 	char *buf = &(sbuf[0]);
 	char *dbuf = (char *)NULL;
 	int buflen = sizeof(sbuf) - 1;
@@ -601,7 +572,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	*buf = 0;
 
 	if (valueretrieval == SNMP_VALUE_LIBRARY) {
-		SNMP_SNPRINT_VALUE(buf, buflen, vars->name, vars->name_length, vars);
+		snprint_value(buf, buflen, vars->name, vars->name_length, vars);
 		ZVAL_STRING(snmpval, buf, 1);
 		if(dbuf){ /* malloc was used to store value */
 			efree(dbuf);
@@ -626,7 +597,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 		break;
 
 	case ASN_OBJECT_ID:		/* 0x06, asn1.h */
-		SNMP_SNPRINT_OBJID(buf, buflen, vars->val.objid, vars->val_len / sizeof(oid));
+		snprint_objid(buf, buflen, vars->val.objid, vars->val_len / sizeof(oid));
 		ZVAL_STRING(val, buf, 1);
 		break;
 
@@ -795,7 +766,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 					return;
 				} else {
 					if ((snmp_errno = snmp_add_var(pdu, name, name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
-						SNMP_SNPRINT_OBJID(buf, sizeof(buf), name, name_length);
+						snprint_objid(buf, sizeof(buf), name, name_length);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
 						snmp_free_pdu(pdu);
 						snmp_close(ss);
@@ -833,8 +804,8 @@ retry:
 						if ((st & SNMP_CMD_WALK) && Z_TYPE_P(return_value) == IS_ARRAY) {
 							break;
 						}
-						SNMP_SNPRINT_OBJID(buf, sizeof(buf), vars->name, vars->name_length);
-						SNMP_SNPRINT_VALUE(buf2, sizeof(buf2), vars->name, vars->name_length, vars);
+						snprint_objid(buf, sizeof(buf), vars->name, vars->name_length);
+						snprint_value(buf2, sizeof(buf2), vars->name, vars->name_length, vars);
 						php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_ERROR_IN_REPLY, "Error in packet at '%s': %s", buf, buf2);
 						continue;
 					}
@@ -863,7 +834,7 @@ retry:
 						if (st & SNMP_NUMERIC_KEYS) {
 							add_next_index_zval(return_value, snmpval);
 						} else {
-							SNMP_SNPRINT_OBJID(buf2, sizeof(buf2), vars->name, vars->name_length);
+							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							add_assoc_zval(return_value, buf2, snmpval);
 						}
 					} else {
@@ -902,7 +873,7 @@ retry:
 						continue;
 					}
 					if (vars) {
-						SNMP_SNPRINT_OBJID(buf, sizeof(buf), vars->name, vars->name_length);
+						snprint_objid(buf, sizeof(buf), vars->name, vars->name_length);
 						php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_ERROR_IN_REPLY, "Error in packet at '%s': %s", buf, snmp_errstring(response->errstat));
 					} else {
 						php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_ERROR_IN_REPLY, "Error in packet at %u object_id: %s", response->errindex, snmp_errstring(response->errstat));
@@ -1442,17 +1413,12 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			}
 		}
 		objid_query.valueretrieval = snmp_object->valueretrieval;
-#ifdef HAVE_NET_SNMP
 		glob_snmp_object.enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, snmp_object->enum_print);
 		glob_snmp_object.quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, snmp_object->quick_print);
 		glob_snmp_object.oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 		netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, snmp_object->oid_output_format);
-#else
-		glob_snmp_object.quick_print = snmp_get_quick_print();
-		snmp_set_quick_print(snmp_object->quick_print);
-#endif
 	}
 
 	if (objid_query.max_repetitions < 0) {
@@ -1466,13 +1432,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	if (session_less_mode) {
 		netsnmp_session_free(&session);
 	} else {
-#ifdef HAVE_NET_SNMP
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, glob_snmp_object.quick_print);
 		netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, glob_snmp_object.oid_output_format);
-#else
-		snmp_set_quick_print(glob_snmp_object.quick_print);
-#endif
 	}
 }
 /* }}} */
@@ -1525,11 +1487,7 @@ PHP_FUNCTION(snmp_get_quick_print)
 		return;
 	}
 
-#ifdef HAVE_NET_SNMP
 	RETURN_BOOL(netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT));
-#else
-	RETURN_BOOL(snmp_get_quick_print());
-#endif
 }
 /* }}} */
 
@@ -1543,16 +1501,11 @@ PHP_FUNCTION(snmp_set_quick_print)
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_NET_SNMP
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)a1);
-#else
-	snmp_set_quick_print((int)a1);
-#endif
 	RETURN_TRUE;
 }
 /* }}} */
 
-#ifdef HAVE_NET_SNMP
 /* {{{ proto bool snmp_set_enum_print(int enum_print)
    Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
@@ -1595,7 +1548,6 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 	}
 } 
 /* }}} */
-#endif
 
 /* {{{ proto mixed snmp2_get(string host, string community, mixed object_id [, int timeout [, int retries]]) 
    Fetch a SNMP object */
@@ -1787,13 +1739,9 @@ PHP_METHOD(snmp, open)
 	}
 	snmp_object->max_oids = 0;
 	snmp_object->valueretrieval = SNMP_G(valueretrieval);
-#ifdef HAVE_NET_SNMP
 	snmp_object->enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 	snmp_object->oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 	snmp_object->quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
-#else
-	snmp_object->quick_print = snmp_get_quick_print();
-#endif
 }
 /* }}} */
 
@@ -2165,7 +2113,6 @@ static int php_snmp_read_quick_print(php_snmp_object *snmp_object, zval **retval
 }
 /* }}} */
 
-#ifdef HAVE_NET_SNMP
 /* {{{ */
 static int php_snmp_read_enum_print(php_snmp_object *snmp_object, zval **retval TSRMLS_DC)
 {
@@ -2183,7 +2130,6 @@ static int php_snmp_read_oid_output_format(php_snmp_object *snmp_object, zval **
 	return SUCCESS;
 }
 /* }}} */
-#endif
 
 /* {{{ */
 static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2278,7 +2224,6 @@ static int php_snmp_write_quick_print(php_snmp_object *snmp_object, zval *newval
 }
 /* }}} */
 
-#ifdef HAVE_NET_SNMP
 /* {{{ */
 static int php_snmp_write_enum_print(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
 {
@@ -2331,7 +2276,6 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 	}
 	return ret;
 }
-#endif
 /* }}} */
 
 /* {{{ php_snmp_class_methods[] */
@@ -2359,10 +2303,8 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(max_oids),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
-#ifdef HAVE_NET_SNMP
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(enum_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_output_format),
-#endif
 	{ NULL, 0, NULL, NULL}
 };
 /* }}} */
@@ -2406,14 +2348,12 @@ PHP_MINIT_FUNCTION(snmp)
 	zend_hash_init(&php_snmp_properties, 0, NULL, NULL, 1);
 	PHP_SNMP_ADD_PROPERTIES(&php_snmp_properties, php_snmp_property_entries);
 
-#ifdef HAVE_NET_SNMP
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_SUFFIX",	NETSNMP_OID_OUTPUT_SUFFIX,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_MODULE",	NETSNMP_OID_OUTPUT_MODULE,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_FULL",		NETSNMP_OID_OUTPUT_FULL,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NUMERIC",	NETSNMP_OID_OUTPUT_NUMERIC,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_UCD",		NETSNMP_OID_OUTPUT_UCD,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NONE",		NETSNMP_OID_OUTPUT_NONE,	CONST_CS | CONST_PERSISTENT);
-#endif
 
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY",	SNMP_VALUE_LIBRARY,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN",	SNMP_VALUE_PLAIN,	CONST_CS | CONST_PERSISTENT);
@@ -2464,13 +2404,8 @@ PHP_MSHUTDOWN_FUNCTION(snmp)
 PHP_MINFO_FUNCTION(snmp)
 {
 	php_info_print_table_start();
-#ifdef HAVE_NET_SNMP
 	php_info_print_table_row(2, "NET-SNMP Support", "enabled");
 	php_info_print_table_row(2, "NET-SNMP Version", netsnmp_get_version());
-#else
-	php_info_print_table_row(2, "UCD-SNMP Support", "enabled");
-	php_info_print_table_row(2, "UCD-SNMP Version", VersionInfo);
-#endif
 	php_info_print_table_row(2, "PHP SNMP Version", PHP_SNMP_VERSION);
 	php_info_print_table_end();
 }
