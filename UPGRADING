@@ -169,6 +169,7 @@ UPGRADE NOTES - PHP X.Y
 - stream_set_write_buffer() no longer changes the chunk size in socket streams.
 - fclose() closes streams with resource refcount > 1; it doesn't merely
   decrement the resource refcount.
+- socket_set_options() and socket_get_options() now support multicast options.
 
 ===================================
 5. Changes made to existing methods
@@ -369,6 +370,20 @@ UPGRADE NOTES - PHP X.Y
        - SCANDIR_SORT_ASCENDING
        - SCANDIR_SORT_DESCENDING
        - SCANDIR_SORT_NONE
+       - MCAST_JOIN_GROUP
+       - MCAST_LEAVE_GROUP
+       - MCAST_BLOCK_SOURCE
+       - MCAST_UNBLOCK_SOURCE
+       - MCAST_JOIN_SOURCE_GROUP
+       - MCAST_LEAVE_SOURCE_GROUP
+       - IP_MULTICAST_IF
+       - IP_MULTICAST_TTL
+       - IP_MULTICAST_LOOP
+       - IPV6_MULTICAST_IF
+       - IPV6_MULTICAST_HOPS
+       - IPV6_MULTICAST_LOOP
+       - IPPROTO_IP
+       - IPPROTO_IPV6
 
      g. New classes
 
