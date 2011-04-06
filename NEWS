@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed a crash inside dtor for error handling. (Ilia)
+  . Implemented FR #54459 (Range function accuracy). (Adam)
   . Fixed bug #54454 (substr_compare incorrectly reports equality in some 
     cases). (Pierrick)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
