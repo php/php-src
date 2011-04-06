@@ -20,33 +20,26 @@ if test "$PHP_SNMP" != "no"; then
     SNMP_LIBS=`$SNMP_CONFIG --netsnmp-libs`
     SNMP_LIBS="$SNMP_LIBS `$SNMP_CONFIG --external-libs`"
     SNMP_PREFIX=`$SNMP_CONFIG --prefix`
-
-    if test -n "$SNMP_LIBS" && test -n "$SNMP_PREFIX"; then
-      PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
-      PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
-      SNMP_LIBNAME=netsnmp
+    snmp_full_version=`$SNMP_CONFIG --version`
+    ac_IFS=$IFS
+    IFS="."
+    set $snmp_full_version
+    IFS=$ac_IFS
+    SNMP_VERSION=`expr [$]1 \* 1000 + [$]2`
+    if test "$SNMP_VERSION" -ge "5003"; then
+      if test -n "$SNMP_LIBS" && test -n "$SNMP_PREFIX"; then
+        PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
+        PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
+        SNMP_LIBNAME=netsnmp
+      else
+        AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
+      fi
     else
-      AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
+      AC_MSG_ERROR([Net-SNMP version 5.3 or greater reqired (detected $snmp_full_version).])
     fi
   else 
     AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
   fi
-
-  dnl Check whether snmp_parse_oid() exists.
-  PHP_CHECK_LIBRARY($SNMP_LIBNAME, snmp_parse_oid,
-  [
-    AC_DEFINE(HAVE_SNMP_PARSE_OID, 1, [ ])
-  ], [], [
-    $SNMP_SHARED_LIBADD
-  ])
-
-  dnl Check whether shutdown_snmp_logging() exists.
-  PHP_CHECK_LIBRARY($SNMP_LIBNAME, shutdown_snmp_logging,
-  [
-    AC_DEFINE(HAVE_SHUTDOWN_SNMP_LOGGING, 1, [ ])
-  ], [], [
-    $SNMP_SHARED_LIBADD
-  ])
 
   dnl Test build.
   PHP_CHECK_LIBRARY($SNMP_LIBNAME, init_snmp,
@@ -55,6 +48,14 @@ if test "$PHP_SNMP" != "no"; then
   ], [
     AC_MSG_ERROR([SNMP sanity check failed. Please check config.log for more information.])
   ], [
+    $SNMP_SHARED_LIBADD
+  ])
+
+  dnl Check whether shutdown_snmp_logging() exists.
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, shutdown_snmp_logging,
+  [
+    AC_DEFINE(HAVE_SHUTDOWN_SNMP_LOGGING, 1, [ ])
+  ], [], [
     $SNMP_SHARED_LIBADD
   ])
 

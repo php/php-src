@@ -75,11 +75,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
-/* Ugly macro, since the length of OIDs in UCD-SNMP and NET-SNMP
- * is different and this way the code is not full of 'ifdef's.
- */
-#define OIDSIZE(p) (sizeof(p)/sizeof(oid))
-
 #if PHP_VERSION_ID < 50300
 #define Z_ADDREF_P(pz) pz->refcount++
 #define Z_ISREF_PP(oid) (PZVAL_IS_REF(*(oid)))
@@ -97,11 +92,6 @@ extern netsnmp_log_handler *logh_head;
 		while(NULL != logh_head) \
 			netsnmp_remove_loghandler( logh_head ); \
 	}
-#endif
-
-/* For really old ucd-snmp versions.. */
-#ifndef HAVE_SNMP_PARSE_OID
-#define snmp_parse_oid read_objid
 #endif
 
 #define SNMP_VALUE_LIBRARY	0
@@ -1092,11 +1082,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		session->securityNameLen = strlen(session->securityName);
 	} else {
 		session->authenticator = NULL;
-#ifdef UCD_SNMP_HACK
-		session->community = (u_char *)strdup(community); /* memory freed by SNMP library, strdup NOT estrdup */
-#else
 		session->community = (u_char *)community;
-#endif
 		session->community_len = strlen(community);
 	}
 
@@ -1129,10 +1115,10 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot 
 {
 	if (!strcasecmp(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
-		s->securityAuthProtoLen = OIDSIZE(usmHMACMD5AuthProtocol);
+		s->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
 	} else if (!strcasecmp(prot, "SHA")) {
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
-		s->securityAuthProtoLen = OIDSIZE(usmHMACSHA1AuthProtocol);
+		s->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown authentication protocol '%s'", prot);
 		return (-1);
@@ -1147,38 +1133,11 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot T
 {
 	if (!strcasecmp(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
-		s->securityPrivProtoLen = OIDSIZE(usmDESPrivProtocol);
+		s->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
 #ifdef HAVE_AES
-	} else if (!strcasecmp(prot, "AES128")
-#ifdef SNMP_VALIDATE_ERR
-/* 
-* In Net-SNMP before 5.2, the following symbols exist:
-* usmAES128PrivProtocol, usmAES192PrivProtocol, usmAES256PrivProtocol
-* In an effort to be more standards-compliant, 5.2 removed the last two.
-* As of 5.2, the symbols are:
-* usmAESPrivProtocol, usmAES128PrivProtocol
-* 
-* As we want this extension to compile on both versions, we use the latter
-* symbol on purpose, as it's defined to be the same as the former.
-*
-* However, in 5.2 the type of usmAES128PrivProtocol is a pointer, not an
-* array, so we cannot use the OIDSIZE macro because it uses sizeof().
-*
-*/
-		|| !strcasecmp(prot, "AES")) {
-		s->securityPrivProto = usmAES128PrivProtocol;
-		s->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
-#else			
-	) {
-		s->securityPrivProto = usmAES128PrivProtocol;
-		s->securityPrivProtoLen = OIDSIZE(usmAES128PrivProtocol);
-	} else if (!strcasecmp(prot, "AES192")) {
-		s->securityPrivProto = usmAES192PrivProtocol;
-		s->securityPrivProtoLen = OIDSIZE(usmAES192PrivProtocol);
-	} else if (!strcasecmp(prot, "AES256")) {
-		s->securityPrivProto = usmAES256PrivProtocol;
-		s->securityPrivProtoLen = OIDSIZE(usmAES256PrivProtocol);
-#endif
+	} else if (!strcasecmp(prot, "AES128") || !strcasecmp(prot, "AES")) {
+		s->securityPrivProto = usmAESPrivProtocol;
+		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
 #endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown security protocol '%s'", prot);
