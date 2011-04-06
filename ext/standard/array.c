@@ -1692,28 +1692,32 @@ PHP_FUNCTION(range)
 		}
 
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
-		double low, high;
+		double low, high, value;
+		long i;
 double_str:
 		convert_to_double(zlow);
 		convert_to_double(zhigh);
 		low = Z_DVAL_P(zlow);
 		high = Z_DVAL_P(zhigh);
+		i = 0;
 
 		if (low > high) { 		/* Negative steps */
 			if (low - high < step || step <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low >= (high - DOUBLE_DRIFT_FIX); low -= step) {
-				add_next_index_double(return_value, low);
+
+			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
+				add_next_index_double(return_value, value);
 			}
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < step || step <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low <= (high + DOUBLE_DRIFT_FIX); low += step) {
-				add_next_index_double(return_value, low);
+
+			for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
+				add_next_index_double(return_value, value);
 			}
 		} else {
 			add_next_index_double(return_value, low);
