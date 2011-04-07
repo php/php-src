@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #54423 (classes from dl()'ed extensions are not destroyed). 
     (Tony, Dmitry)
+  . Fixed bug #54372 (Crash accessing global object itself returned from its
+    __get() handle). (Dmitry)
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).
     (Dmitry)
 
