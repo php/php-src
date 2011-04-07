@@ -446,7 +446,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 			} else {
 				retval = &EG(uninitialized_zval_ptr);
 			}
-			zval_ptr_dtor(&object);
+			if (EXPECTED(*retval != object)) {
+				zval_ptr_dtor(&object);
+			} else {
+				Z_DELREF_P(object);
+			}
 		} else {
 			if (zobj->ce->__get && guard && guard->in_get == 1) {
 				if (Z_STRVAL_P(member)[0] == '\0') {
