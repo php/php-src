@@ -513,7 +513,34 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		} else {
 			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
-			}
+			} else {
+				spl_array_object *obj = intern;
+
+				while (1) {
+					if ((obj->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
+						break;
+					} else if (Z_TYPE_P(obj->array) == IS_OBJECT) {
+					    if ((obj->ar_flags & SPL_ARRAY_USE_OTHER) == 0) {
+							obj = (spl_array_object*)zend_object_store_get_object(obj->array TSRMLS_CC);
+					    	break;
+						} else {
+							obj = (spl_array_object*)zend_object_store_get_object(obj->array TSRMLS_CC);
+					    }
+					} else {
+						obj = NULL;
+						break;
+					}
+				}
+				if (obj) {
+					zend_property_info *property_info = zend_get_property_info(obj->std.ce, offset, 1 TSRMLS_CC);
+
+					if (property_info &&
+					    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
+					    property_info->offset >= 0) {
+					    obj->std.properties_table[property_info->offset] = NULL;
+					}
+				}
+			}			
 		}
 		break;
 	case IS_DOUBLE:
