@@ -216,6 +216,7 @@ ZEND_API int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args
 			} else if (Z_ISREF_PP(p)) {
 				ALLOC_INIT_ZVAL(tmp);
 				ZVAL_COPY_VALUE(tmp, *p);
+				zval_copy_ctor(tmp);
 				Z_SET_REFCOUNT_P(tmp, 0);
 				Z_UNSET_ISREF_P(tmp);
 			} else {
