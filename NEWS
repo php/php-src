@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #53339 (Fails to build when compilng with gcc 4.5 and DSO
     libraries). (Clint Byrum, Raphael)
 
+- mbstring extension:
+  . Fixed bug #54494 (mb_substr() mishandles UTF-32LE and UCS-2LE). (Gustavo)
+
 - MySQL Improved extension:
   . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
     (Andrey)

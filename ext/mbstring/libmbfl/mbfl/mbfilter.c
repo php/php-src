@@ -1202,10 +1202,10 @@ mbfl_substr(
 		len = string->len;
 		start = from;
 		end = from + length;
-		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_MWC2LE)) {
+		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
 			start *= 2;
 			end = start + length*2;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_MWC4LE)) {
+		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
 			start *= 4;
 			end = start + length*4;
 		} else if (encoding->mblen_table != NULL) {
