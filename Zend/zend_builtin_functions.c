@@ -227,6 +227,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_backtrace, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, limit)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_print_backtrace, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
@@ -290,7 +295,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_extension_funcs,		arginfo_extension_loaded)
 	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
 	ZEND_FE(debug_backtrace, 			arginfo_debug_backtrace)
-	ZEND_FE(debug_print_backtrace, 		arginfo_debug_backtrace)
+	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #ifdef ZTS
@@ -2047,11 +2052,11 @@ void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 	}
 }
 
-/* {{{ proto void debug_print_backtrace([int options]) */
+/* {{{ proto void debug_print_backtrace([int options[, int limit]]) */
 ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_execute_data *ptr, *skip;
-	int lineno;
+	int lineno, frameno = 0;
 	char *function_name;
 	char *filename;
 	const char *class_name = NULL;
@@ -2060,8 +2065,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 	zval *arg_array = NULL;
 	int indent = 0;
 	long options = 0;
+	long limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
 		return;
 	}
 
@@ -2070,9 +2076,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
 
-	while (ptr) {
+	while (ptr && (limit == 0 || frameno < limit)) {
 		const char *free_class_name = NULL;
 
+		frameno++;
 		class_name = call_type = NULL;   
 		arg_array = NULL;
 
@@ -2207,10 +2214,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 /* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options TSRMLS_DC)
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit TSRMLS_DC)
 {
 	zend_execute_data *ptr, *skip;
-	int lineno;
+	int lineno, frameno = 0;
 	char *function_name;
 	char *filename;
 	char *class_name;
@@ -2231,7 +2238,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	array_init(return_value);
 
-	while (ptr) {
+	while (ptr && (limit == 0 || frameno < limit)) {
+		frameno++;
 		MAKE_STD_ZVAL(stack_frame);
 		array_init(stack_frame);
 
@@ -2369,17 +2377,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 /* }}} */
 
 
-/* {{{ proto array debug_backtrace([int options])
+/* {{{ proto array debug_backtrace([int options[, int limit]])
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
 	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	long limit = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
 		return;
 	}
 
-	zend_fetch_debug_backtrace(return_value, 1, options TSRMLS_CC);
+	zend_fetch_debug_backtrace(return_value, 1, options, limit TSRMLS_CC);
 }
 /* }}} */
 

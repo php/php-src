@@ -454,7 +454,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
 	}
 
 	MAKE_STD_ZVAL(trace);
-	zend_fetch_debug_backtrace(trace, 0, 0 TSRMLS_CC);
+	zend_fetch_debug_backtrace(trace, 0, 0, 0 TSRMLS_CC);
 
 	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_string, 4, &max_levels, str, len, &num);
 	zval_ptr_dtor(&trace);
