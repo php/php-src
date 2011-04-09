@@ -51,6 +51,8 @@ PHP                                                                        NEWS
     (galaxy dot mipt at gmail dot com, Kalle)
   . Improved unix build system to allow building multiple PHP binary SAPIs and
     one SAPI module the same time. FR #53271, FR #52410. (Jani)
+  . Added optional argument to debug_backtrace() and debug_print_backtrace()
+    to limit the amount of stack frames returned. (Sebastian, Patrick)
 
 - Improved Zend Engine memory usage: (Dmitry)
   . Replaced zend_function.pass_rest_by_reference by 
