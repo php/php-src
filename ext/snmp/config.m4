@@ -74,7 +74,6 @@ u_char uname[] = "Linux nex1.php.net 2.6.18-194.32.1.el5 #1 SMP Wed Jan 5 17:53:
 
 int main(int argc, char **argv)
 {
-	int result = 0;
 	struct variable_list vars;
 	char buf1[2048];
 	char buf2[sizeof(buf1)];
@@ -117,7 +116,7 @@ int main(int argc, char **argv)
     ])
     CFLAGS="$save_CFLAGS"
   ])
-  if test "ac_cv_buggy_snprint_value" = "yes"; then
+  if test "$ac_cv_buggy_snprint_value" = "yes"; then
      AC_DEFINE(BUGGY_SNMPRINT_VALUE, 1, [ ])
   fi
 
