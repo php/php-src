@@ -2408,8 +2408,6 @@ PHP_FUNCTION(substr_replace)
 					} else {
 						l = Z_LVAL_PP(tmp_len);
 					}
-
-					l = Z_LVAL_PP(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(len), &pos_len);
 				} else {
 					l = Z_STRLEN_P(orig_str);
