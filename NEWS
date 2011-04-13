@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Implemented FR #54459 (Range function accuracy). (Adam)
   . Fixed bug #54454 (substr_compare incorrectly reports equality in some 
     cases). (Pierrick)
+  . Fixed bug #54238 (use-after-free in substr_replace()). (Stas)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
     (tomas dot brastavicius at quantum dot lt, Pierrick)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
