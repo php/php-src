@@ -296,7 +296,9 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 			zend_hash_reverse_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
 		}
 		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
+	} zend_end_try();
 
+	zend_try {
 		zend_vm_stack_destroy(TSRMLS_C);
 
 		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);

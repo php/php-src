@@ -545,9 +545,15 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-	SET_INCONSISTENT(HT_CLEANING);
-
 	p = ht->pListHead;
+
+	memset(ht->arBuckets, 0, ht->nTableSize*sizeof(Bucket *));
+	ht->pListHead = NULL;
+	ht->pListTail = NULL;
+	ht->nNumOfElements = 0;
+	ht->nNextFreeElement = 0;
+	ht->pInternalPointer = NULL;
+
 	while (p != NULL) {
 		q = p;
 		p = p->pListNext;
@@ -559,14 +565,6 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 		}
 		pefree(q, ht->persistent);
 	}
-	memset(ht->arBuckets, 0, ht->nTableSize*sizeof(Bucket *));
-	ht->pListHead = NULL;
-	ht->pListTail = NULL;
-	ht->nNumOfElements = 0;
-	ht->nNextFreeElement = 0;
-	ht->pInternalPointer = NULL;
-
-	SET_INCONSISTENT(HT_OK);
 }
 
 /* This function is used by the various apply() functions.
