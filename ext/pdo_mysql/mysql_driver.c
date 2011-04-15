@@ -597,6 +597,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		char *default_file = NULL, *default_group = NULL;
 		long compress = 0;
 #endif
+		char *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
 
 		H->emulate_prepare = pdo_attr_lval(driver_options,
@@ -681,6 +682,30 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			}
 		}
 #endif
+		ssl_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_KEY, NULL TSRMLS_CC);
+		ssl_cert = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CERT, NULL TSRMLS_CC);
+		ssl_ca = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CA, NULL TSRMLS_CC);
+		ssl_capath = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CAPATH, NULL TSRMLS_CC);
+		ssl_cipher = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CIPHER, NULL TSRMLS_CC);
+		
+		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
+			mysql_ssl_set(H->server, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
+			if (ssl_key) {
+				efree(ssl_key);
+			}
+			if (ssl_cert) {
+				efree(ssl_cert);
+			}
+			if (ssl_ca) {
+				efree(ssl_ca);
+			}
+			if (ssl_capath) {
+				efree(ssl_capath);
+			}
+			if (ssl_cipher) {
+				efree(ssl_cipher);
+			}
+		}
 	}
 
 #ifdef PDO_MYSQL_HAS_CHARSET
