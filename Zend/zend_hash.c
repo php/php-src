@@ -138,8 +138,8 @@ ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
 
 #define CHECK_INIT(ht) do {												\
 	if (UNEXPECTED((ht)->nTableMask == 0)) {								\
-		(ht)->nTableMask = (ht)->nTableSize - 1;						\
 		(ht)->arBuckets = (Bucket **) pecalloc((ht)->nTableSize, sizeof(Bucket *), (ht)->persistent);	\
+		(ht)->nTableMask = (ht)->nTableSize - 1;						\
 	}																	\
 } while (0)
  
