@@ -64,6 +64,10 @@ PHP                                                                        NEWS
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
     (mjh at hodginsmedia dot com, Felipe)
 
+- PDO MySQL driver:
+  . Implemented FR #48587 (MySQL PDO driver doesn't support SSL connections).
+    (Rob)
+
 - PDO PostgreSQL driver:
   . Fixed bug #54318 (Non-portable grep option used in PDO pgsql
     configuration). (bwalton at artsci dot utoronto dot ca)
