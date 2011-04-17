@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - Filter extension:
   . Fixed bug #53037 (FILTER_FLAG_EMPTY_STRING_NULL is not implemented). (Ilia)
   
+- intl extension:
+  . Implemented FR #54540 (Allow loading of arbitrary resource bundles when
+    fallback is disabled). (David Zuelke, Stas)
+
 - LDAP extension:
   . Fixed bug #53339 (Fails to build when compilng with gcc 4.5 and DSO
     libraries). (Clint Byrum, Raphael)
