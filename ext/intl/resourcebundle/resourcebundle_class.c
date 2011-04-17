@@ -102,7 +102,11 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 
-	rb->me = ures_open(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	if (fallback) {
+		rb->me = ures_open(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	} else {
+		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	}
 
 	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
 
