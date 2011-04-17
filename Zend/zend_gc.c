@@ -311,7 +311,7 @@ tail_call:
 						p = zobj->properties->pListHead;
 					}
 				} else {
-					HashTable *props = get_props(pz);
+					HashTable *props = get_props(pz TSRMLS_CC);
 					if(!props) {
 						return;
 					}
@@ -370,7 +370,7 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 				p = zobj->properties->pListHead;
 			}
 		} else {
-			HashTable *props = get_props(pz);
+			HashTable *props = get_props(pz TSRMLS_CC);
 			if(!props) {
 				return;
 			}
@@ -435,7 +435,7 @@ tail_call:
 							p = zobj->properties->pListHead;
 						}
 					} else {
-						HashTable *props = get_props(pz);
+						HashTable *props = get_props(pz TSRMLS_CC);
 						if(!props) {
 							return;
 						}
@@ -495,7 +495,7 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 					p = zobj->properties->pListHead;
 				}
 			} else {
-				HashTable *props = get_props(pz);
+				HashTable *props = get_props(pz TSRMLS_CC);
 				if(!props) {
 					return;
 				}
@@ -591,7 +591,7 @@ tail_call:
 									p = zobj->properties->pListHead;
 								}
 							} else {
-								HashTable *props = get_props(pz);
+								HashTable *props = get_props(pz TSRMLS_CC);
 								if(!props) {
 									return;
 								}
@@ -652,7 +652,7 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 							p = zobj->properties->pListHead;
 						}
 					} else {
-						HashTable *props = get_props(pz);
+						HashTable *props = get_props(pz TSRMLS_CC);
 						if(!props) {
 							return;
 						}
@@ -737,7 +737,7 @@ tail_call:
 							p = zobj->properties->pListHead;
 						}
 					} else {
-						HashTable *props = get_props(pz);
+						HashTable *props = get_props(pz TSRMLS_CC);
 						if(!props) {
 							return;
 						}
@@ -804,7 +804,7 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 						p = zobj->properties->pListHead;
 					}
 				} else {
-					HashTable *props = get_props(pz);
+					HashTable *props = get_props(pz TSRMLS_CC);
 					if(!props) {
 						return;
 					}
