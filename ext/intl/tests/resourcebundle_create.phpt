@@ -57,6 +57,6 @@ ResourceBundle Object
 
  -127: U_USING_DEFAULT_WARNING
 NULL
- -127: resourcebundle_ctor: Cannot load libICU resource '%s/resourcebundle' without fallback from en_US to root: U_USING_DEFAULT_WARNING
+    2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR
 NULL
     2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR
