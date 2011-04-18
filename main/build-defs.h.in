@@ -81,6 +81,7 @@
 #define PHP_PREFIX              "@prefix@"
 #define PHP_BINDIR              "@EXPANDED_BINDIR@"
 #define PHP_SBINDIR             "@EXPANDED_SBINDIR@"
+#define PHP_MANDIR              "@EXPANDED_MANDIR@"
 #define PHP_LIBDIR              "@EXPANDED_LIBDIR@"
 #define PHP_DATADIR             "@EXPANDED_DATADIR@"
 #define PHP_SYSCONFDIR          "@EXPANDED_SYSCONFDIR@"
