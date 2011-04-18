@@ -27,6 +27,10 @@ LD Flags which PHP was compiled with
 Extra libraries which PHP was compiled with
 .TP
 .PD 0
+.B \-\-man-dir
+The directory prefix where the manpages is installed
+.TP
+.PD 0
 .B \-\-extension-dir
 Directory where extensions are searched by default
 .TP
