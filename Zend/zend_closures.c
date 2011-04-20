@@ -407,6 +407,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure = (zend_closure *)zend_object_store_get_object(res TSRMLS_CC);
 
 	closure->func = *func;
+	closure->func.common.prototype = NULL;
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
 		if (closure->func.op_array.static_variables) {
