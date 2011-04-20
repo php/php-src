@@ -2370,14 +2370,20 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			EX(object) = NULL;
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
-		} else if (OP2_TYPE != IS_CONST &&
+		} else if (OP2_TYPE != IS_CONST && OP2_TYPE != IS_TMP_VAR &&
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
-			FREE_OP2();
+			if (OP2_TYPE == IS_VAR && OP2_FREE &&
+			    EX(fbc)->common.fn_flags & ZEND_ACC_CLOSURE) {
+				/* Delay closure destruction until its invocation */
+				EX(fbc)->common.prototype = (zend_function*)function_name;
+			} else {
+				FREE_OP2();
+			}
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -2429,6 +2435,10 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			cv++;
 		}
+	}
+
+	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
+		zval_ptr_dtor((zval**)&op_array->prototype);
 	}
 
 	nested = EX(nested);
