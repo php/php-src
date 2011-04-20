@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #54372 (Crash accessing global object itself returned from its
     __get() handle). (Dmitry)
   . Fixed bug #54358 (Closure, use and reference). (Dmitry)
+  . Fixed bug #54367 (Use of closure causes problem in ArrayAccess). (Dmitry)
   . Fixed bug #54039 (use() of static variables in lambda functions can break
      staticness). (Dmitry)
   . Fixed bug #54262 (Crash when assigning value to a dimension in a non-array).

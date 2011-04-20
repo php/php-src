@@ -163,6 +163,10 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
+		zval_ptr_dtor((zval**)&op_array->prototype);
+	}
+
 	nested = EX(nested);
 
 	zend_vm_stack_free(execute_data TSRMLS_CC);
@@ -750,14 +754,20 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	} else {
 		function_name = &opline->op2.u.constant;
 
-		if (IS_CONST != IS_CONST &&
+		if (IS_CONST != IS_CONST && IS_CONST != IS_TMP_VAR &&
 		    Z_TYPE_P(function_name) == IS_OBJECT &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
+			if (IS_CONST == IS_VAR && 0 &&
+			    EX(fbc)->common.fn_flags & ZEND_ACC_CLOSURE) {
+				/* Delay closure destruction until its invocation */
+				EX(fbc)->common.prototype = (zend_function*)function_name;
+			} else {
 
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -944,14 +954,20 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 	} else {
 		function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
-		if (IS_TMP_VAR != IS_CONST &&
+		if (IS_TMP_VAR != IS_CONST && IS_TMP_VAR != IS_TMP_VAR &&
 		    Z_TYPE_P(function_name) == IS_OBJECT &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
-			zval_dtor(free_op2.var);
+			if (IS_TMP_VAR == IS_VAR && 1 &&
+			    EX(fbc)->common.fn_flags & ZEND_ACC_CLOSURE) {
+				/* Delay closure destruction until its invocation */
+				EX(fbc)->common.prototype = (zend_function*)function_name;
+			} else {
+				zval_dtor(free_op2.var);
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -1045,14 +1061,20 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 	} else {
 		function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
-		if (IS_VAR != IS_CONST &&
+		if (IS_VAR != IS_CONST && IS_VAR != IS_TMP_VAR &&
 		    Z_TYPE_P(function_name) == IS_OBJECT &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
-			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+			if (IS_VAR == IS_VAR && (free_op2.var != NULL) &&
+			    EX(fbc)->common.fn_flags & ZEND_ACC_CLOSURE) {
+				/* Delay closure destruction until its invocation */
+				EX(fbc)->common.prototype = (zend_function*)function_name;
+			} else {
+				if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -1169,14 +1191,20 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 	} else {
 		function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
-		if (IS_CV != IS_CONST &&
+		if (IS_CV != IS_CONST && IS_CV != IS_TMP_VAR &&
 		    Z_TYPE_P(function_name) == IS_OBJECT &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
+			if (IS_CV == IS_VAR && 0 &&
+			    EX(fbc)->common.fn_flags & ZEND_ACC_CLOSURE) {
+				/* Delay closure destruction until its invocation */
+				EX(fbc)->common.prototype = (zend_function*)function_name;
+			} else {
 
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 
