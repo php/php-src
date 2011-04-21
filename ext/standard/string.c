@@ -5278,6 +5278,10 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
+	if (len > s1_len - offset) {
+		len = s1_len - offset;
+	}
+
 	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
 
 	if (!cs) {

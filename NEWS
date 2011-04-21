@@ -18,8 +18,6 @@ PHP                                                                        NEWS
   . Implemented FR #54459 (Range function accuracy). (Adam)
   . Added PHP_MANDIR constant telling where the manpages were installed into,
     and an --man-dir argument to php-config. (Hannes)
-  . Fixed bug #54454 (substr_compare incorrectly reports equality in some 
-    cases). (Pierrick)
   . Fixed bug #54238 (use-after-free in substr_replace()). (Stas)
     (CVE-2011-1148)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
