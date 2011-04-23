@@ -84,7 +84,7 @@ case "$1" in
 		wait_for_pid removed $php_fpm_PID
 
 		if [ -n "$try" ] ; then
-			echo " failed. Use force-exit"
+			echo " failed. Use force-quit"
 			exit 1
 		else
 			echo " done"
