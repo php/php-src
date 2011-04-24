@@ -1074,7 +1074,9 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory TSRMLS_CC);
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory TSRMLS_CC);
+#ifndef OPENSSL_NO_SSL2
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
+#endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
 
 	/* override the default tcp socket provider */
@@ -1109,7 +1111,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps" TSRMLS_CC);
 
 	php_stream_xport_unregister("ssl" TSRMLS_CC);
+#ifndef OPENSSL_NO_SSL2
 	php_stream_xport_unregister("sslv2" TSRMLS_CC);
+#endif
 	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
 
