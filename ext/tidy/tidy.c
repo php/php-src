@@ -985,10 +985,10 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 		case is_body_node:
 			node = tidyGetBody(obj->ptdoc->doc);
 			break;
-	}
 
-	if (!node) {
-		RETURN_NULL();
+		default:
+			RETURN_NULL();
+			break;
 	}
 
 	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
