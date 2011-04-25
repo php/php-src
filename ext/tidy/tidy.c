@@ -987,7 +987,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			break;
 	}
 
-	if (!inode) {
+	if (!node) {
 		RETURN_NULL();
 	}
 
