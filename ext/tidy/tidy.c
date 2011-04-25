@@ -991,6 +991,10 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			break;
 	}
 
+	if (!inode) {
+		RETURN_NULL();
+	}
+
 	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
 	newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	newobj->type  = is_node;
