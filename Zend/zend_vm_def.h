@@ -3430,12 +3430,14 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
-	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	zval *offset;
+
+	if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE != IS_VAR || container) {
-		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);

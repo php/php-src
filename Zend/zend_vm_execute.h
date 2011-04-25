@@ -10725,12 +10725,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval *offset = &opline->op2.u.constant;
+	zval *offset;
+
+	if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = &opline->op2.u.constant;
 
 	if (IS_VAR != IS_VAR || container) {
-		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -12474,12 +12476,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
-		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -14274,12 +14278,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
-		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -16660,12 +16666,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+	zval *offset;
+
+	if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
-		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -17852,12 +17860,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 	zend_op *opline = EX(opline);
 
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	zval *offset = &opline->op2.u.constant;
+	zval *offset;
+
+	if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = &opline->op2.u.constant;
 
 	if (IS_UNUSED != IS_VAR || container) {
-		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -18909,12 +18919,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
-		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -19966,12 +19978,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
-		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -21282,12 +21296,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 	zend_op *opline = EX(opline);
 
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
-	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+	zval *offset;
+
+	if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
-		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -24280,12 +24296,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	zend_op *opline = EX(opline);
 
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
-	zval *offset = &opline->op2.u.constant;
+	zval *offset;
+
+	if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = &opline->op2.u.constant;
 
 	if (IS_CV != IS_VAR || container) {
-		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -25920,12 +25938,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
-	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
-		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -27610,12 +27630,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
-	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+	zval *offset;
+
+	if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
-		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
@@ -29787,12 +29809,14 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	zend_op *opline = EX(opline);
 
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
-	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+	zval *offset;
+
+	if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+		SEPARATE_ZVAL_IF_NOT_REF(container);
+	}
+	offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
-		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
-			SEPARATE_ZVAL_IF_NOT_REF(container);
-		}
 		switch (Z_TYPE_PP(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_PP(container);
