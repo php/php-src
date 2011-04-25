@@ -330,7 +330,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 			break;
 		case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:
 #ifdef OPENSSL_NO_SSL2
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the openSSL library PHP is linked against");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
 			return -1;
 #else
 			sslsock->is_client = 1;
@@ -355,7 +355,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 			break;
 		case STREAM_CRYPTO_METHOD_SSLv2_SERVER:
 #ifdef OPENSSL_NO_SSL2
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the openSSL library PHP is linked against");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
 			return -1;
 #else
 			sslsock->is_client = 0;
@@ -923,7 +923,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
 #ifdef OPENSSL_NO_SSL2
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the openSSL library PHP is linked against");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
 		return NULL;
 #else
 		sslsock->enable_on_connect = 1;
