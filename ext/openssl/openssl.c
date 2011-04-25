@@ -1020,8 +1020,8 @@ PHP_MINIT_FUNCTION(openssl)
 	ERR_load_crypto_strings();
 	ERR_load_EVP_strings();
 
-	/* register a resource id number with openSSL so that we can map SSL -> stream structures in
-	 * openSSL callbacks */
+	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
+	 * OpenSSL callbacks */
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
 	
 	REGISTER_STRING_CONSTANT("OPENSSL_VERSION_TEXT", OPENSSL_VERSION_TEXT, CONST_CS|CONST_PERSISTENT);
