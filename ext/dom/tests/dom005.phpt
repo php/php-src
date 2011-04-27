@@ -27,10 +27,7 @@ html files with undeclared entities&#xA0;
 </body></html>
 --- save as HTML
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head><title>Hello world</title></head>
-<body>
+<html><head><title>Hello world</title></head><body>
 This is a not well-formed<br>
 html files with undeclared entities&nbsp;
-</body>
-</html>
+</body></html>
