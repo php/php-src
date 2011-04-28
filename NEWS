@@ -42,6 +42,8 @@ PHP                                                                        NEWS
   . Fixed bug #54121 (error message format string typo). (Ilia)
 
 - Filter extension:
+  . Added 3rd parameter to filter_var_array() and filter_input_array()
+    functions that allows disabling addition of empty elements. (Ilia)
   . Fixed bug #53037 (FILTER_FLAG_EMPTY_STRING_NULL is not implemented). (Ilia)
   
 - intl extension:
