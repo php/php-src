@@ -590,6 +590,11 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFUNMODSINCE);
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_LASTMOD);
 
+#if LIBCURL_VERSION_NUM > 0x070f04 /* CURLOPT_MAX_RECV_SPEED_LARGE & CURLOPT_MAX_SEND_SPEED_LARGE  are available since curl 7.15.5 */
+	REGISTER_CURL_CONSTANT(CURLOPT_MAX_RECV_SPEED_LARGE);
+	REGISTER_CURL_CONSTANT(CURLOPT_MAX_SEND_SPEED_LARGE);
+#endif 
+
 #if LIBCURL_VERSION_NUM > 0x070a05 /* CURLOPT_HTTPAUTH is available since curl 7.10.6 */
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPAUTH);
 	/* http authentication options */
@@ -1692,6 +1697,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
+#if LIBCURL_VERSION_NUM > 0x070f04
+		case CURLOPT_MAX_RECV_SPEED_LARGE:
+		case CURLOPT_MAX_SEND_SPEED_LARGE:
+			convert_to_long_ex(zvalue);
+			error = curl_easy_setopt(ch->cp, option, (curl_off_t)Z_LVAL_PP(zvalue));
+			break;
+#endif
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
 			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {

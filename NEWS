@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 
 - cURL
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
+  . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and 
+    CURLOPT_MAX_SEND_SPEED_LARGE. FR #51815. (Pierrick)
 
 - DateTime extension:
   . Fixed bug #54340 (DateTime::add() method bug). (Adam)
