@@ -42,6 +42,9 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
@@ -411,13 +414,24 @@ int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_add
 		out_addr->s_addr = INADDR_ANY;
 		return SUCCESS;
 	}
-
+	
+#if !defined(ifr_ifindex) && defined(ifr_index)
+#define ifr_ifindex ifr_index
+#endif
+	
 	if_req.ifr_ifindex = if_index;
+#if defined(SIOCGIFNAME)
 	if (ioctl(php_sock->bsd_socket, SIOCGIFNAME, &if_req) == -1) {
+#elif defined(HAVE_IF_INDEXTONAME)
+	if (if_indextoname(if_index, if_req.ifr_name) == NULL) {
+#else
+#error Neither SIOCGIFNAME nor if_indextoname are available
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Failed obtaining address for interface %u: error %d", if_index, errno);
 		return FAILURE;
 	}
+	
 	if (ioctl(php_sock->bsd_socket, SIOCGIFADDR, &if_req) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Failed obtaining address for interface %u: error %d", if_index, errno);
