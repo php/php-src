@@ -18,8 +18,8 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_CMSGHDR,1,[Whether you have struct cmsghdr])
   fi 
 
-  AC_CHECK_FUNCS([hstrerror socketpair if_nametoindex])
-  AC_CHECK_HEADERS([netdb.h netinet/tcp.h sys/un.h errno.h])
+  AC_CHECK_FUNCS([hstrerror socketpair if_nametoindex if_indextoname])
+  AC_CHECK_HEADERS([netdb.h netinet/tcp.h sys/un.h sys/sockio.h errno.h]) 
   AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
