@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
 	die('SKIP sockets extension not available.');
 }
 if (!function_exists('leak_variable'))
-	die('SKIP only for debug builds')
+	die('SKIP only for debug builds');
 --FILE--
 <?php
 
