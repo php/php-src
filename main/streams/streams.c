@@ -427,7 +427,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 				stream->orig_path = NULL;
 			}
 
-# if defined(PHP_WIN32_)
+# if defined(PHP_WIN32)
 			OutputDebugString(leakinfo);
 # else
 			fprintf(stderr, "%s", leakinfo);
