@@ -109,6 +109,10 @@ PHP                                                                        NEWS
   . Fixed bug #54281 (Crash in non-initialized RecursiveIteratorIterator).
     (Felipe)
 
+- Streams:
+  . Fixed bug #54623 (Segfault when when writing to a persistent socket after
+    closing a copy of the socket). (Gustavo)
+
 17 Mar 2011, PHP 5.3.6
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.11. (Ilia)

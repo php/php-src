@@ -112,9 +112,32 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	if (zend_hash_find(&EG(persistent_list), (char*)persistent_id, strlen(persistent_id)+1, (void*) &le) == SUCCESS) {
 		if (Z_TYPE_P(le) == le_pstream) {
 			if (stream) {
+				HashPosition pos;
+				zend_rsrc_list_entry *regentry;
+				ulong index = -1; /* intentional */
+
+				/* see if this persistent resource already has been loaded to the
+				 * regular list; allowing the same resource in several entries in the
+				 * regular list causes trouble (see bug #54623) */
+				zend_hash_internal_pointer_reset_ex(&EG(regular_list), &pos);
+				while (zend_hash_get_current_data_ex(&EG(regular_list),
+						(void **)&regentry, &pos) == SUCCESS) {
+					if (regentry->ptr == le->ptr) {
+						zend_hash_get_current_key_ex(&EG(regular_list), NULL, NULL,
+							&index, 0, &pos);
+						break;
+					}
+					zend_hash_move_forward_ex(&EG(regular_list), &pos);
+				}
+				
 				*stream = (php_stream*)le->ptr;
-				le->refcount++;
-				(*stream)->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
+				if (index == -1) { /* not found in regular list */
+					le->refcount++;
+					(*stream)->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
+				} else {
+					regentry->refcount++;
+					(*stream)->rsrc_id = index;
+				}
 			}
 			return PHP_STREAM_PERSISTENT_SUCCESS;
 		}
@@ -404,7 +427,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 				stream->orig_path = NULL;
 			}
 
-# if defined(PHP_WIN32)
+# if defined(PHP_WIN32_)
 			OutputDebugString(leakinfo);
 # else
 			fprintf(stderr, "%s", leakinfo);
