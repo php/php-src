@@ -3803,6 +3803,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	}
 
 	PHP_RSHUTDOWN(user_filters)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
  	BG(page_uid) = -1;
  	BG(page_gid) = -1;

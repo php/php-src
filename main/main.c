@@ -399,6 +399,8 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 }
 /* }}} */
 
+/* defined in browscap.c */
+PHP_INI_MH(OnChangeBrowscap);
 
 /* Need to convert to strings and make use of:
  * PHP_SAFE_MODE
@@ -510,7 +512,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
-	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
+	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)

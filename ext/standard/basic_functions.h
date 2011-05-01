@@ -140,6 +140,7 @@ PHP_FUNCTION(stream_bucket_append);
 PHP_FUNCTION(stream_bucket_new);
 PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
+PHP_RSHUTDOWN_FUNCTION(browscap);
 
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
