@@ -348,7 +348,7 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 	
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data),
-		browscap_globals_ctor, NULL);
+		(ts_allocate_ctor)browscap_globals_ctor, NULL);
 #endif
 	/* ctor call not really needed for non-ZTS */
 
@@ -360,7 +360,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
 	browser_data *bdata = &BROWSCAP_G(activation_bdata);
 	if (bdata->filename[0] != '\0') {
-		browscap_bdata_dtor(bdata, 0);
+		browscap_bdata_dtor(bdata, 0 TSRMLS_CC);
 	}
 	
 	return SUCCESS;
@@ -369,7 +369,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 
 PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
-	browscap_bdata_dtor(&global_bdata, 1);
+	browscap_bdata_dtor(&global_bdata, 1 TSRMLS_CC);
 	
 	return SUCCESS;
 }
