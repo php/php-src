@@ -545,7 +545,7 @@ finish:
 	/* if the user has configured who they are, send a From: line */
 	{
 		char *from_address = php_ini_string("from", sizeof("from"), 0);
-		if (((have_header & HTTP_HEADER_FROM) == 0) && from_address[0] != '\0') {
+		if (((have_header & HTTP_HEADER_FROM) == 0) && from_address && from_address[0] != '\0') {
 			if (snprintf(scratch, scratch_len, "From: %s\r\n", from_address) > 0)
 				php_stream_write(stream, scratch, strlen(scratch));
 		}
