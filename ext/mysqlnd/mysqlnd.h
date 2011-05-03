@@ -27,6 +27,7 @@
 
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 0
+#define AUTOCOMMIT_TX_COMMIT_ROLLBACK
 
 #define MYSQLND_STRING_TO_INT_CONVERSION
 /*
