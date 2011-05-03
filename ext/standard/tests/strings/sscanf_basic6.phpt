@@ -1,5 +1,11 @@
 --TEST--
 Test sscanf() function : basic functionality - unsigned format
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) {
+	die("skip this test is for 32bit platform only");
+}
+?>
 --FILE--
 <?php
 

@@ -671,7 +671,7 @@ Array
 *** Output for precision value more than maximum ***
 
 Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum of %d digits in %s on line %d
-12345678900.0000000000000000000000000000000000000000
+12345678900.0000000000%d
 
 *** Output for invalid width(-15) specifier ***
 15s
