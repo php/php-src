@@ -506,12 +506,13 @@ mysqlnd_connect_run_authentication(
 		size_t plugin_data_len;
 
 		plugin_data_len = greet_packet->auth_plugin_data_len;
-		plugin_data = mnd_emalloc(plugin_data_len);
+		plugin_data = mnd_emalloc(plugin_data_len + 1);
 		if (!plugin_data) {
 			ret = FAIL;
 			goto end;
 		}
 		memcpy(plugin_data, greet_packet->auth_plugin_data, plugin_data_len);
+		plugin_data[plugin_data_len] = '\0';
 
 		requested_protocol = mnd_pestrdup(greet_packet->auth_protocol? greet_packet->auth_protocol: "mysql_native_password", FALSE);
 		if (!requested_protocol) {
