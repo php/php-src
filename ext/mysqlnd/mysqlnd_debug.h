@@ -136,9 +136,10 @@ static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}
 static inline void DBG_ERR_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}
 static inline void DBG_ENTER_EX(MYSQLND_DEBUG * dbg_obj, const char * const func_name) {}
-#define DBG_RETURN_EX(dbg_obj, value) return (value)
-#define DBG_VOID_RETURN_EX(dbg_obj) return
-#define DBG_BLOCK_LEAVE_EX(dbg_obj) ;
+#define DBG_BLOCK_ENTER(bname)			{
+#define DBG_RETURN_EX(dbg_obj, value)	return (value)
+#define DBG_VOID_RETURN_EX(dbg_obj)		return
+#define DBG_BLOCK_LEAVE_EX(dbg_obj)		}
 
 #endif /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
 
