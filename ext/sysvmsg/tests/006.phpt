@@ -37,7 +37,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-Sending/receiving '%d':
+Sending/receiving '%s':
 bool(true)
 bool(true)
 bool(true)
