@@ -19,20 +19,20 @@ var_dump(`"$php" -n -r '' -r ''`);
 echo "Done\n";
 ?>
 --EXPECTF--	
-You can use -R or -F only once.
-NULL
-You can use -R or -F only once.
-NULL
-You can use -R or -F only once.
-NULL
-You can use -R or -F only once.
-NULL
-You can use -f only once.
-NULL
-You can use -B only once.
-NULL
-You can use -E only once.
-NULL
-You can use -r only once.
-NULL
+string(32) "You can use -R or -F only once.
+"
+string(32) "You can use -R or -F only once.
+"
+string(32) "You can use -R or -F only once.
+"
+string(32) "You can use -R or -F only once.
+"
+string(26) "You can use -f only once.
+"
+string(26) "You can use -B only once.
+"
+string(26) "You can use -E only once.
+"
+string(26) "You can use -r only once.
+"
 Done
