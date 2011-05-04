@@ -38,6 +38,6 @@ string(%d) "
 
 Fatal error: Cannot access private property test::$pri in %s on line %d
 "
-Could not open input file: wrong
-NULL
+string(33) "Could not open input file: wrong
+"
 Done
