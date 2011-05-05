@@ -990,10 +990,11 @@ static int ZEND_FASTCALL  ZEND_NOP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
+	USE_OPLINE
 	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
 	zend_class_entry *trait;
 
+	SAVE_OPLINE();
 	if (CACHED_PTR(opline->op2.literal->cache_slot)) {
 		trait = CACHED_PTR(opline->op2.literal->cache_slot);
 	} else {
@@ -1019,11 +1020,12 @@ static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_FASTCALL  ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
+	USE_OPLINE
 	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
 
+	SAVE_OPLINE();
 	zend_do_bind_traits(ce TSRMLS_CC);
-
+ 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 

@@ -4764,10 +4764,11 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 
 ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
 {
-	zend_op *opline = EX(opline);
+	USE_OPLINE
 	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
 	zend_class_entry *trait;
 
+	SAVE_OPLINE();
 	if (CACHED_PTR(opline->op2.literal->cache_slot)) {
 		trait = CACHED_PTR(opline->op2.literal->cache_slot);
 	} else {
@@ -4793,11 +4794,12 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
 
 ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 {
-	zend_op *opline = EX(opline);
+	USE_OPLINE
 	zend_class_entry *ce = EX_T(opline->op1.var).class_entry;
 
+	SAVE_OPLINE();
 	zend_do_bind_traits(ce TSRMLS_CC);
-
+ 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
