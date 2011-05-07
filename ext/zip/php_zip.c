@@ -494,6 +494,28 @@ static char * php_zipobj_get_zip_comment(struct zip *za, int *len TSRMLS_DC) /* 
 #else
 #define GLOB_FLAGMASK (~0)
 #endif
+#ifndef GLOB_BRACE
+# define GLOB_BRACE 0
+#endif
+#ifndef GLOB_MARK
+# define GLOB_MARK 0
+#endif
+#ifndef GLOB_NOSORT
+# define GLOB_NOSORT 0
+#endif
+#ifndef GLOB_NOCHECK
+# define GLOB_NOCHECK 0
+#endif
+#ifndef GLOB_NOESCAPE
+# define GLOB_NOESCAPE 0
+#endif
+#ifndef GLOB_ERR
+# define GLOB_ERR 0
+#endif
+
+/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
+#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
+
 #endif /* }}} */
 
 int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value TSRMLS_DC) /* {{{ */
@@ -508,6 +530,16 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 	glob_t globbuf;
 	int n;
 	int ret;
+	
+	if (pattern_len >= MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		return -1;
+	}
+
+	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
+		return -1;
+	}
 
 #ifdef ZTS 
 	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
