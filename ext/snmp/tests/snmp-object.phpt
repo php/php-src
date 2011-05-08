@@ -30,6 +30,15 @@ var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
+echo "GET with preserving original OID names\n";
+$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$orig = array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.5.0');
+$result = $session->get($orig, TRUE);
+foreach($orig as $oid){
+	var_dump($result[$oid]);
+}
+var_dump($session->close());
+
 echo "WALK multiple on single OID\n";
 $session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
 $z = $session->walk('.1.3.6.1.2.1.1');
@@ -61,6 +70,15 @@ echo "WALK multiple on single OID, max_oids set to 30\n";
 $session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
 $session->max_oids = 30;
 $z = $session->walk('.1.3.6.1.2.1.1');
+var_dump(gettype($z));
+var_dump(count($z));
+var_dump(key($z));
+var_dump(array_shift($z));
+var_dump($session->close());
+
+echo "WALK multiple on single OID with OID suffix as keys\n";
+$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$z = $session->walk('.1.3.6.1.2.1.1', TRUE);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
@@ -126,6 +144,10 @@ SNMPv2
 string(%d) "%S"
 string(%d) "%S"
 bool(true)
+GET with preserving original OID names
+string(%d) "%s"
+string(%d) "%s"
+bool(true)
 WALK multiple on single OID
 string(5) "array"
 int(%d)
@@ -149,6 +171,12 @@ string(5) "array"
 int(%d)
 string(%d) "%S"
 string(%d) "%S"
+bool(true)
+WALK multiple on single OID with OID suffix as keys
+string(5) "array"
+int(%d)
+string(3) "1.0"
+string(%d) "%s"
 bool(true)
 SNMPv3 (default security settings)
 string(%d) "%S"

@@ -41,6 +41,9 @@ extern zend_module_entry snmp_module_entry;
 #include "TSRM.h"
 #endif
 
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+
 PHP_MINIT_FUNCTION(snmp);
 PHP_MSHUTDOWN_FUNCTION(snmp);
 PHP_MINFO_FUNCTION(snmp);
@@ -109,7 +112,8 @@ typedef struct _snmpobjarg {
 	char *oid;
 	char type;
 	char *value;
-
+	oid  name[MAX_OID_LEN];
+	size_t name_length;
 } snmpobjarg;
 
 ZEND_BEGIN_MODULE_GLOBALS(snmp)
