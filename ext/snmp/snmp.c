@@ -837,10 +837,11 @@ retry:
 					/* OID increase check */
 					if (st & SNMP_CMD_WALK) {
 						if (snmp_oid_compare(name, name_length, vars->name, vars->name_length) >= 0) {
-							php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", name);
+							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
+							php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = 0;
 						} else {
-							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
+							memmove((char *)name, (char *)vars->name, vars->name_length * sizeof(oid));
 							name_length = vars->name_length;
 							keepwalking = 1;
 						}
