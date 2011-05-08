@@ -421,6 +421,10 @@ const zend_function_entry snmp_functions[] = {
 #define SNMP_CMD_WALK		(1<<3)
 /* force values-only output */
 #define SNMP_NUMERIC_KEYS	(1<<7)
+/* use user-supplied OID names for keys in array output mode in GET method */
+#define SNMP_ORIGINAL_NAMES_AS_KEYS	(1<<8)
+/* use OID suffix (`index') for keys in array output mode in WALK  method */
+#define SNMP_USE_SUFFIX_AS_KEYS	(1<<9)
 
 #ifdef COMPILE_DL_SNMP
 ZEND_GET_MODULE(snmp)
@@ -677,7 +681,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	oid root[MAX_NAME_LEN];
 	size_t rootlen = 0;
 	int gotroot = 0;
-	int status, count;
+	int status, count, found;
 	char buf[2048];
 	char buf2[2048];
 	int keepwalking=1;
@@ -716,6 +720,10 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
 		name_length = rootlen;
 		objid_query->offset = objid_query->count;
+
+		memmove((char *)objid_query->vars[0].name, (char *)root, rootlen * sizeof(oid));
+		objid_query->vars[0].name_length = rootlen;
+
 	}
 
 	if ((ss = snmp_open(session)) == NULL) {
@@ -731,11 +739,11 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		if (st & (SNMP_CMD_GET | SNMP_CMD_GETNEXT)) {
 			pdu = snmp_pdu_create((st & SNMP_CMD_GET) ? SNMP_MSG_GET : SNMP_MSG_GETNEXT);
 			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
-				name_length = MAX_OID_LEN;
-				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, name, &name_length)) {
+				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
+				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
 				} else {
-					snmp_add_null_var(pdu, name, name_length);
+					snmp_add_null_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
 				}
 			}
 			if(pdu->variables == NULL){
@@ -747,16 +755,16 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		} else if (st & SNMP_CMD_SET) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
 			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
-				name_length = MAX_OID_LEN;
-				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, name, &name_length)) {
+				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
+				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
 					snmp_free_pdu(pdu);
 					snmp_close(ss);
 					RETVAL_FALSE;
 					return;
 				} else {
-					if ((snmp_errno = snmp_add_var(pdu, name, name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
-						snprint_objid(buf, sizeof(buf), name, name_length);
+					if ((snmp_errno = snmp_add_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
+						snprint_objid(buf, sizeof(buf), objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
 						snmp_free_pdu(pdu);
 						snmp_close(ss);
@@ -823,6 +831,34 @@ retry:
 						}
 						if (st & SNMP_NUMERIC_KEYS) {
 							add_next_index_zval(return_value, snmpval);
+						} else if (st & SNMP_ORIGINAL_NAMES_AS_KEYS && st & SNMP_CMD_GET) {
+							found = 0;
+							for (count = 0; count < objid_query->count; count++) {
+								if (objid_query->vars[count].name_length == vars->name_length && snmp_oid_compare(objid_query->vars[count].name, objid_query->vars[count].name_length, vars->name, vars->name_length) == 0) {
+									found = 1;
+									objid_query->vars[count].name_length = 0; /* mark this name as used */
+									break;
+								}
+							}
+							if (found) {
+								add_assoc_zval(return_value, objid_query->vars[count].oid, snmpval);
+							} else {
+								snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find original OID name for '%s'", buf2);
+							}
+						} else if (st & SNMP_USE_SUFFIX_AS_KEYS && st & SNMP_CMD_WALK) {
+							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
+							if (objid_query->vars[0].name_length <= vars->name_length && snmp_oid_compare(objid_query->vars[0].name, objid_query->vars[0].name_length, vars->name, objid_query->vars[0].name_length) == 0) {
+								buf2[0] = '\0';
+								count = objid_query->vars[0].name_length;
+								while(count < vars->name_length){
+									sprintf(buf, "%lu.", vars->name[count]);
+									strcat(buf2, buf);
+									count++;
+								}
+								buf2[strlen(buf2) - 1] = '\0'; /* remove trailing '.' */
+							}
+							add_assoc_zval(return_value, buf2, snmpval);
 						} else {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							add_assoc_zval(return_value, buf2, snmpval);
@@ -1276,6 +1312,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	zval **oid, **value, **type;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
 	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
+	zend_bool use_orignames = 0, suffix_keys = 0;
 	long timeout = SNMP_DEFAULT_TIMEOUT;
 	long retries = SNMP_DEFAULT_RETRIES;
 	int argc = ZEND_NUM_ARGS();
@@ -1327,12 +1364,21 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				RETURN_FALSE;
 			}
 		} else if (st & SNMP_CMD_WALK) {
-			if (zend_parse_parameters(argc TSRMLS_CC, "Z|ll", &oid, &(objid_query.non_repeaters), &(objid_query.max_repetitions)) == FAILURE) {
+			if (zend_parse_parameters(argc TSRMLS_CC, "Z|bll", &oid, &suffix_keys, &(objid_query.non_repeaters), &(objid_query.max_repetitions)) == FAILURE) {
 				RETURN_FALSE;
 			}
+			if (suffix_keys) {
+				st |= SNMP_USE_SUFFIX_AS_KEYS;
+			}
+		} else if (st & SNMP_CMD_GET) {
+			if (zend_parse_parameters(argc TSRMLS_CC, "Z|b", &oid, &use_orignames) == FAILURE) {
+				RETURN_FALSE;
+			}
+			if (use_orignames) {
+				st |= SNMP_ORIGINAL_NAMES_AS_KEYS;
+			}
 		} else {
-			/* SNMP_CMD_GET
-			 * SNMP_CMD_GETNEXT
+			/* SNMP_CMD_GETNEXT
 			 */
 			if (zend_parse_parameters(argc TSRMLS_CC, "Z", &oid) == FAILURE) {
 				RETURN_FALSE;

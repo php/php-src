@@ -46,9 +46,10 @@ var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 $session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
-var_dump($session->walk('.1.3.6.1.2.1.1', ''));
-var_dump($session->walk('.1.3.6.1.2.1.1', 0, ''));
+var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, ''));
+var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, 0, ''));
 var_dump($session->get());
+var_dump($session->getnext());
 var_dump($session->set());
 
 var_dump($session->max_oids);
@@ -75,13 +76,16 @@ Warning: SNMP::get(): Invalid or uninitialized SNMP object in %s on line %d
 bool(false)
 bool(true)
 
-Warning: SNMP::walk() expects parameter 2 to be long, string given in %s on line %d
-bool(false)
-
 Warning: SNMP::walk() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
-Warning: SNMP::get() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: SNMP::walk() expects parameter 4 to be long, string given in %s on line %d
+bool(false)
+
+Warning: SNMP::get() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
+
+Warning: SNMP::getnext() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
 Warning: SNMP::set() expects exactly 3 parameters, 0 given in %s on line %d
