@@ -25,7 +25,6 @@
 
 #if defined(PDO_USE_MYSQLND)
 #	include "ext/mysqlnd/mysqlnd.h"
-#	include "ext/mysql/mysql_mysqlnd.h"
 #	include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
 #	define PDO_MYSQL_PARAM_BIND MYSQLND_PARAM_BIND
 #else
