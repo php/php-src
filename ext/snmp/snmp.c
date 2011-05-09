@@ -322,7 +322,7 @@ ZEND_END_ARG_INFO()
 
 /* OO arginfo */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_open, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, version)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -1687,9 +1687,9 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ proto SNMP SNMP::open(int version, string hostname, string community|securityName [, long timeout [, long retries]])
+/* {{{ proto SNMP SNMP::__construct(int version, string hostname, string community|securityName [, long timeout [, long retries]])
 	Creates a new SNMP session to specified host. */
-PHP_METHOD(snmp, open)
+PHP_METHOD(snmp, __construct)
 {
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
@@ -2286,7 +2286,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 
 /* {{{ php_snmp_class_methods[] */
 static zend_function_entry php_snmp_class_methods[] = {
-	PHP_ME(snmp,	 open,				arginfo_snmp_open,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 __construct,			arginfo_snmp_create,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 close,				arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 setSecurity,			arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
 
@@ -2297,7 +2297,6 @@ static zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 get_errno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 get_error,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 
-	PHP_MALIAS(snmp, __construct,	open,		arginfo_snmp_open,		ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
 };
 
