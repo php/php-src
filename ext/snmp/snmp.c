@@ -1826,9 +1826,9 @@ PHP_METHOD(snmp, setSecurity)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::get_errno() 
+/* {{{ proto long SNMP::getErrno() 
 	Get last error code number */
-PHP_METHOD(snmp, get_errno)
+PHP_METHOD(snmp, getErrno)
 {
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
@@ -1840,9 +1840,9 @@ PHP_METHOD(snmp, get_errno)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::error() 
+/* {{{ proto long SNMP::getError() 
 	Get last error message */
-PHP_METHOD(snmp, get_error)
+PHP_METHOD(snmp, getError)
 {
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
@@ -2294,8 +2294,8 @@ static zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 set,				arginfo_snmp_set,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 get_errno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 get_error,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getError,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };
