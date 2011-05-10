@@ -1,5 +1,5 @@
 --TEST--                                 
-Generic timeout (wrong community)
+Wrong hostname
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--

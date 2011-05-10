@@ -1,5 +1,5 @@
 --TEST--                                 
-OO API: getErrno & getError functions
+OO API: getErrno & getError methods
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--

@@ -62,7 +62,7 @@ if test "$PHP_SNMP" != "no"; then
   dnl Check for buggy snmp_snprint_value() (net-snmp BUGid 2027834)
   AC_CACHE_CHECK([for buggy snmp_snprint_value], ac_cv_buggy_snprint_value,[
     save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -I${SNMP_PREFIX}/include"
+    CFLAGS="$CFLAGS -I${SNMP_PREFIX}/include $SNMP_SHARED_LIBADD"
     AC_TRY_RUN( [
 #include <stdio.h>
 #include <stdlib.h>
