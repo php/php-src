@@ -89,7 +89,7 @@ zend_class_entry *php_sqlite3_sc_entry;
 zend_class_entry *php_sqlite3_stmt_entry;
 zend_class_entry *php_sqlite3_result_entry;
 
-/* {{{ proto bool SQLite3::open(String filename [, int Flags [, string Encryption Key]])
+/* {{{ proto void SQLite3::open(String filename [, int Flags [, string Encryption Key]])
    Opens a SQLite 3 Database, if the build includes encryption then it will attempt to use the key. */
 PHP_METHOD(sqlite3, open)
 {
