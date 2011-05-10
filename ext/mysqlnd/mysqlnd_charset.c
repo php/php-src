@@ -327,7 +327,7 @@ static unsigned int mysqlnd_mbcharlen_gbk(unsigned int gbk)
 
 /* {{{  functions */
 #define valid_sjis_head(c)	((0x81 <= (c) && (c) <= 0x9F) || (0xE0 <= (c) && (c) <= 0xFC))
-#define valid_sjis_tail(c)	((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && (c) <= 0x7C))
+#define valid_sjis_tail(c)	((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && (c) <= 0xFC))
 
 
 static unsigned int check_mb_sjis(const char *start, const char *end)
