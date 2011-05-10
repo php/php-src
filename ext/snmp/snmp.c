@@ -440,12 +440,20 @@ static PHP_GINIT_FUNCTION(snmp)
 }
 /* }}} */
 
+#define PHP_SNMP_SESSION_FREE(a) { \
+	if ((*session)->a) { \
+		efree((*session)->a); \
+		(*session)->a = NULL; \
+	} \
+}
+
 static void netsnmp_session_free(php_snmp_session **session)
 {
 	if (*session) {
-		if ((*session)->peername) {
-			efree((*session)->peername);
-		}
+		PHP_SNMP_SESSION_FREE(peername);
+		PHP_SNMP_SESSION_FREE(community);
+		PHP_SNMP_SESSION_FREE(securityName);
+		PHP_SNMP_SESSION_FREE(contextEngineID);
 		efree(*session);
 		*session = NULL;
 	}
@@ -1115,11 +1123,11 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 
 	if (version == SNMP_VERSION_3) {
 		/* Setting the security name. */
-		session->securityName = strdup(community);
+		session->securityName = estrdup(community);
 		session->securityNameLen = strlen(session->securityName);
 	} else {
 		session->authenticator = NULL;
-		session->community = (u_char *)community;
+		session->community = (u_char *)estrdup(community);
 		session->community_len = strlen(community);
 	}
 
@@ -1222,7 +1230,7 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, char *pass TSRMLS
 static int netsnmp_session_set_contextEngineID(struct snmp_session *s, char * contextEngineID TSRMLS_DC)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
-	u_char	*ebuf = (u_char *) malloc(ebuf_len); /* memory freed by SNMP library, malloc NOT emalloc */
+	u_char	*ebuf = (u_char *) emalloc(ebuf_len);
 
 	if (ebuf == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "malloc failure setting contextEngineID");
@@ -1230,12 +1238,12 @@ static int netsnmp_session_set_contextEngineID(struct snmp_session *s, char * co
 	}
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, contextEngineID)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad engine ID value '%s'", contextEngineID);
-		free(ebuf);
+		efree(ebuf);
 		return (-1);
 	}
 
 	if (s->contextEngineID) {
-		free(s->contextEngineID);
+		efree(s->contextEngineID);
 	}
 
 	s->contextEngineID = ebuf;
