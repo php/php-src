@@ -2,6 +2,8 @@
 Bug #48187 (DateTime::diff() corrupting microtime() result)
 --FILE--
 <?php
+date_default_timezone_set('UTC');
+
 // two arbitrary dates
 $date1 = new DateTime('2005-07-23');
 $date2 = new DateTime('2006-02-14');
