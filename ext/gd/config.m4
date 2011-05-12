@@ -72,11 +72,11 @@ AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in $PHP_JPEG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libjpeg.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libjpeg.a && GD_JPEG_DIR=$i && break
+      test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
-      AC_MSG_ERROR([libjpeg.(a|so) not found.])
+      AC_MSG_ERROR([jpeglib.h not found.])
     fi
 
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
@@ -97,19 +97,15 @@ AC_DEFUN([PHP_GD_PNG],[
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libpng.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libpng.a && GD_PNG_DIR=$i && break
+      test -f $i/include/png.h && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
-      AC_MSG_ERROR([libpng.(a|so) not found.])
+      AC_MSG_ERROR([png.h not found.])
     fi
 
     if test "$PHP_ZLIB_DIR" = "no"; then
       AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib-dir=<DIR>])
-    fi
-
-    if test ! -f $GD_PNG_DIR/include/png.h; then
-      AC_MSG_ERROR([png.h not found.])
     fi
 
     PHP_CHECK_LIBRARY(png,png_write_image,
