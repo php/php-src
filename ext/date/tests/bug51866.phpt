@@ -2,6 +2,8 @@
 Bug #51866 (Lenient parsing with parseFromFormat)
 --FILE--
 <?php
+date_default_timezone_set('UTC');
+
 $tests = array(
 	array( 'Y-m-d',   '2001-11-29 13:20:01' ),
 	array( 'Y-m-d+',  '2001-11-29 13:20:01' ),
