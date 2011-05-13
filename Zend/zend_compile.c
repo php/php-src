@@ -3662,10 +3662,13 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (aliases) {
 		while (aliases[i]) {
-			if (!aliases[i]->trait_method->ce || (fn->common.scope == aliases[i]->trait_method->ce &&
-				(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
+      
+			if (/* Scope unset or equal to the function we compare to */
+          (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+          && /* and, the alias applies to fn */
+          (zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
 																 aliases[i]->trait_method->mname_len,
-																 fn->common.function_name, fnname_len) == 0))) {
+																 fn->common.function_name, fnname_len) == 0)) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
 					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
@@ -3703,10 +3706,12 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		if (aliases) {
 			i = 0;
 			while (aliases[i]) {
-				if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce) &&
-					(zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
-																	 aliases[i]->trait_method->mname_len,
-																	 fn->common.function_name, fnname_len) == 0)) {
+				if (/* Scope unset or equal to the function we compare to */
+            (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+            && /* and, the alias applies to fn */
+					  (zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
+                                    aliases[i]->trait_method->mname_len,
+																	  fn->common.function_name, fnname_len) == 0)) {
 					if (!aliases[i]->alias && aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
