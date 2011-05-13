@@ -1,6 +1,40 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.12 15-Jan-2011
+------------------------
+
+1.  Fixed some typos in the markup of the man pages, and wrote a script that
+    checks for such things as part of the documentation building process.
+
+2.  On a big-endian 64-bit system, pcregrep did not correctly process the
+    --match-limit and --recursion-limit options (added for 8.11). In
+    particular, this made one of the standard tests fail. (The integer value
+    went into the wrong half of a long int.)
+
+3.  If the --colour option was given to pcregrep with -v (invert match), it
+    did strange things, either producing crazy output, or crashing. It should,
+    of course, ignore a request for colour when reporting lines that do not
+    match.
+
+4.  Another pcregrep bug caused similar problems if --colour was specified with
+    -M (multiline) and the pattern match finished with a line ending.
+
+5.  In pcregrep, when a pattern that ended with a literal newline sequence was
+    matched in multiline mode, the following line was shown as part of the
+    match. This seems wrong, so I have changed it.
+
+6.  Another pcregrep bug in multiline mode, when --colour was specified, caused
+    the check for further matches in the same line (so they could be coloured)
+    to overrun the end of the current line. If another match was found, it was
+    incorrectly shown (and then shown again when found in the next line).
+
+7.  If pcregrep was compiled under Windows, there was a reference to the
+    function pcregrep_exit() before it was defined. I am assuming this was
+    the cause of the "error C2371: 'pcregrep_exit' : redefinition;" that was
+    reported by a user. I've moved the definition above the reference.
+
+
 Version 8.11 10-Dec-2010
 ------------------------
 

@@ -63,6 +63,9 @@
     ร
     รรร
     รรร\?
+    \xe1\x88 
+    \P\xe1\x88 
+    \P\P\xe1\x88 
 
 /a.b/8
     acb
@@ -684,5 +687,17 @@
 /abc[de]*/8
     xxxxabcde\P
     xxxxabcde\P\P
+
+/\bthe cat\b/8
+    the cat\P
+    the cat\P\P
+
+/a+/8
+    a\x{123}aa\>1
+    a\x{123}aa\>2
+    a\x{123}aa\>3
+    a\x{123}aa\>4
+    a\x{123}aa\>5
+    a\x{123}aa\>6
 
 /-- End of testinput8 --/ 

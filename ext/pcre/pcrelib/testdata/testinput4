@@ -463,7 +463,8 @@
 /a\Cb/8
     aXb
     a\nb
-    *** Failers 
+    
+/a\C\Cb/8 
     a\x{100}b 
 
 /[z-\x{100}]/8i
@@ -639,5 +640,8 @@
 /^([a\x{c0}]*)a\x{c0}/8
     a\x{c0}aaaa/ 
     a\x{c0}a\x{c0}aaa/ 
+
+/A*/g8
+    AAB\x{123}BAA
 
 /-- End of testinput4 --/
