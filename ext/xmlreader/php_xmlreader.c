@@ -30,6 +30,7 @@
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
 #endif
+#include <libxml/xmlreader.h>
 #include <libxml/uri.h>
 
 zend_class_entry *xmlreader_class_entry;
@@ -1091,9 +1092,7 @@ PHP_METHOD(xmlreader, XML)
 			uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
 		reader = xmlNewTextReader(inputbfr, uri);
-		if (uri) {
-			xmlFree(uri);
-		}
+
 		if (reader != NULL) {
 #if LIBXML_VERSION >= 20628
 			ret = xmlTextReaderSetup(reader, NULL, uri, encoding, options);
@@ -1107,9 +1106,18 @@ PHP_METHOD(xmlreader, XML)
 				}
 				intern->input = inputbfr;
 				intern->ptr = reader;
+
+				if (uri) {
+					xmlFree(uri);
+				}
+
 				return;
 			}
 		}
+	}
+
+	if (uri) {
+		xmlFree(uri);
 	}
 
 	if (inputbfr) {
