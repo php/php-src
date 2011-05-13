@@ -51,7 +51,7 @@ PHPAPI const char php_sig_jp2[12] = {(char)0x00, (char)0x00, (char)0x00, (char)0
                                      (char)0x6a, (char)0x50, (char)0x20, (char)0x20,
                                      (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
-PHPAPI const char php_sig_ico[3] = {(char)0x00, (char)0x00, (char)0x01};
+PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -1265,7 +1265,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		return IMAGE_FILETYPE_TIFF_MM;
 	} else if (!memcmp(filetype, php_sig_iff, 4)) {
 		return IMAGE_FILETYPE_IFF;
-	} else if (!memcmp(filetype, php_sig_ico, 3)) {
+	} else if (!memcmp(filetype, php_sig_ico, 4)) {
 		return IMAGE_FILETYPE_ICO;
 	}
 
