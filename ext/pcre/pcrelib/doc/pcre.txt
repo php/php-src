@@ -6512,6 +6512,7 @@ SAVING AND RE-USING PRECOMPILED PCRE PATTERNS
 
 
 SAVING A COMPILED PATTERN
+
        The value returned by pcre_compile() points to a single block of memory
        that  holds  the compiled pattern and associated data. You can find the
        length of this block in bytes by calling pcre_fullinfo() with an  argu-

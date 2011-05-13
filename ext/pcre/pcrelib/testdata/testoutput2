@@ -5,7 +5,7 @@
     either because PCRE can't be compatible, or there is a possible Perl 
     bug. --/  
   
-/-- Originally, the Perl 5.10 and 5.11 things were in here too, but now I have 
+/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
     separated many (most?) of them out into test 11. However, there may still 
     be some that were overlooked. --/   
 
@@ -8787,6 +8787,27 @@ No match
 No match
     a\x85b 
 No match
+    
+/(*ANY).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*CRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
 
 /a\Rb/I<bsr_anycrlf>
 Capturing subpattern count = 0
@@ -9273,6 +9294,30 @@ No match
  +0        ^     x
  +0         ^    x
 No match
+  
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+--->abcxyz
++15 ^          x
++15  ^         x
++15   ^        x
++15    ^       x
++16    ^^      y
++17    ^ ^     z
++18    ^  ^    
+ 0: xyz
+
+/xyz/CY
+  abcxyz 
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
 
 /^"((?(?=[a])[^"])|b)*"$/C
     "ab"
@@ -10459,9 +10504,9 @@ Partial match: abca
     xxxxabcde\P\P
 Partial match: abcde
 
-/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
-    and not behaving as specified in that it *does* bumpalong after hitting
-    (*COMMIT). --/ 
+/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+    broken and not behaving as specified in that it *does* bumpalong after
+    hitting (*COMMIT). --/
 
 /(?1)(A(*COMMIT)|B)D/
     ABD
@@ -10664,7 +10709,7 @@ No match
         End
 ------------------------------------------------------------------
 
-/ -- The first four of these are not in the Perl 5.10 test because Perl 
+/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
      documents that the use of \K in assertions is "not well defined". The
      last is here because Perl gives the match as "b" rather than "ab". I
      believe this to be a Perl bug. --/  
@@ -11043,13 +11088,13 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-  ACBD
+    ACBD
  0: ACBD
-  ** Failers
+    *** Failers
 No match
-  A\nB
+    A\nB
 No match
-  ACB\n   
+    ACB\n   
 No match
 
 /A\NB./sBZ
@@ -11062,23 +11107,23 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-  ACBD
+    ACBD
  0: ACBD
-  ACB\n 
+    ACB\n 
  0: ACB\x0a
-  ** Failers
+    *** Failers
 No match
-  A\nB  
+    A\nB  
 No match
   
 /A\NB/<crlf>
-  A\nB
+    A\nB
  0: A\x0aB
-  A\rB
+    A\rB
  0: A\x0dB
-  ** Failers
+    ** Failers
 No match
-  A\r\nB    
+    A\r\nB    
 No match
 
 /\R+b/BZ
@@ -11122,6 +11167,140 @@ No match
         Bra
         \s*+
         \R
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+ 0: abcd
+ 1: abcd
+    *** Failers 
+No match
+    abcxy 
+No match
+
+/(?<=abc)def/
+    abc\P\P
+Partial match: abc
+
+/abc$/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc$/m
+    abc
+ 0: abc
+    abc\n
+ 0: abc
+    abc\P\P
+Partial match: abc
+    abc\n\P\P 
+ 0: abc
+    abc\P
+ 0: abc
+    abc\n\P
+ 0: abc
+
+/abc\z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\Z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\b/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\B/
+    abc
+No match
+    abc\P
+Partial match: abc
+    abc\P\P
+Partial match: abc
+
+/.+/
+    abc\>0
+ 0: abc
+    abc\>1
+ 0: bc
+    abc\>2
+ 0: c
+    abc\>3
+No match
+    abc\>4
+Error -24
+    abc\>-4 
+Error -24
+
+/^\cģ/
+Failed: \c must be followed by an ASCII character at offset 3
+
+/(?P<abn>(?P=abn)xxx)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        \1
+        xxx
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a\1z)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        a
+        \1
+        z
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+Failed: syntax error in subpattern name (missing terminator) at offset 29
+
+/(?P<abn>(?P=axn)xxx)/BZ
+Failed: reference to non-existent subpattern at offset 15
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        \2
+        xxx
+        Ket
+        CBra 2
+        yy
+        Ket
         Ket
         End
 ------------------------------------------------------------------

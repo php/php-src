@@ -1,5 +1,5 @@
 /-- This set of tests is for Unicode property support. It is compatible with
-    Perl 5.10, but not 5.8 because it tests some extra properties that are
+    Perl >= 5.10, but not 5.8 because it tests some extra properties that are
     not in the earlier release. --/ 
 
 /^\pC\pL\pM\pN\pP\pS\pZ</8

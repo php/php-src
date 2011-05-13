@@ -802,10 +802,10 @@ No match
  0: aXb
     a\nb
  0: a\x{0a}b
-    *** Failers 
-No match
+    
+/a\C\Cb/8 
     a\x{100}b 
-No match
+ 0: a\x{100}b
 
 /[z-\x{100}]/8i
     z
@@ -1118,5 +1118,14 @@ No match
     a\x{c0}a\x{c0}aaa/ 
  0: a\x{c0}a\x{c0}
  1: a\x{c0}
+
+/A*/g8
+    AAB\x{123}BAA
+ 0: AA
+ 0: 
+ 0: 
+ 0: 
+ 0: AA
+ 0: 
 
 /-- End of testinput4 --/
