@@ -4411,6 +4411,9 @@
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+
+/(*NO_START_OPT)xyz/C
+  abcxyz 
   
 /(?C)ab/
   ab
@@ -4559,5 +4562,49 @@
 
 /^(?(?!a(*SKIP)b))/
     ac
+
+/(?<=abc)def/
+    abc\P\P
+
+/abc$/
+    abc
+    abc\P
+    abc\P\P
+
+/abc$/m
+    abc
+    abc\n
+    abc\P\P
+    abc\n\P\P 
+    abc\P
+    abc\n\P
+
+/abc\z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\Z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\b/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\B/
+    abc
+    abc\P
+    abc\P\P
+
+/.+/
+    abc\>0
+    abc\>1
+    abc\>2
+    abc\>3
+    abc\>4
+    abc\>-4 
 
 /-- End of testinput7 --/

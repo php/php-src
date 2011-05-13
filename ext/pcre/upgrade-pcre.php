@@ -103,6 +103,11 @@ foreach ($diff as $file) {
 // the config.h needs special care
 $prepend_config_h = '
 #include <php_compat.h>
+
+#ifndef PHP_WIN32
+# include <php_config.h>
+#endif
+
 #undef PACKAGE_NAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_TARNAME

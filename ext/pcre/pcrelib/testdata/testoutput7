@@ -7319,6 +7319,18 @@ No match
  +0        ^     x
  +0         ^    x
 No match
+
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+--->abcxyz
++15 ^          x
++15  ^         x
++15   ^        x
++15    ^       x
++16    ^^      y
++17    ^ ^     z
++18    ^  ^    
+ 0: xyz
   
 /(?C)ab/
   ab
@@ -7609,5 +7621,80 @@ Error -16
 /^(?(?!a(*SKIP)b))/
     ac
 Error -16
+
+/(?<=abc)def/
+    abc\P\P
+Partial match: abc
+
+/abc$/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc$/m
+    abc
+ 0: abc
+    abc\n
+ 0: abc
+    abc\P\P
+Partial match: abc
+    abc\n\P\P 
+ 0: abc
+    abc\P
+ 0: abc
+    abc\n\P
+ 0: abc
+
+/abc\z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\Z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\b/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\B/
+    abc
+No match
+    abc\P
+Partial match: abc
+    abc\P\P
+Partial match: abc
+
+/.+/
+    abc\>0
+ 0: abc
+ 1: ab
+ 2: a
+    abc\>1
+ 0: bc
+ 1: b
+    abc\>2
+ 0: c
+    abc\>3
+No match
+    abc\>4
+Error -24
+    abc\>-4 
+Error -24
 
 /-- End of testinput7 --/

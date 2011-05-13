@@ -5,7 +5,7 @@
     either because PCRE can't be compatible, or there is a possible Perl 
     bug. --/  
   
-/-- Originally, the Perl 5.10 and 5.11 things were in here too, but now I have 
+/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
     separated many (most?) of them out into test 11. However, there may still 
     be some that were overlooked. --/   
 
@@ -2346,6 +2346,15 @@ a random value. /Ix
     a\nb  
     a\r\nb  
     a\x85b 
+    
+/(*ANY).*/g
+    abc\r\ndef
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+
+/(*CRLF).*/g
+    abc\r\ndef
 
 /a\Rb/I<bsr_anycrlf>
     a\rb
@@ -2575,6 +2584,12 @@ a random value. /Ix
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+  
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+
+/xyz/CY
+  abcxyz 
 
 /^"((?(?=[a])[^"])|b)*"$/C
     "ab"
@@ -3170,9 +3185,9 @@ a random value. /Ix
     xxxxabcde\P
     xxxxabcde\P\P
 
-/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
-    and not behaving as specified in that it *does* bumpalong after hitting
-    (*COMMIT). --/ 
+/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+    broken and not behaving as specified in that it *does* bumpalong after
+    hitting (*COMMIT). --/
 
 /(?1)(A(*COMMIT)|B)D/
     ABD
@@ -3216,7 +3231,7 @@ a random value. /Ix
 
 /^(?&t)*(?(DEFINE)(?<t>.))$/BZ
 
-/ -- The first four of these are not in the Perl 5.10 test because Perl 
+/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
      documents that the use of \K in assertions is "not well defined". The
      last is here because Perl gives the match as "b" rather than "ab". I
      believe this to be a Perl bug. --/  
@@ -3464,22 +3479,22 @@ with \Y. ---/
     abcde
 
 /A\NB./BZ
-  ACBD
-  ** Failers
-  A\nB
-  ACB\n   
+    ACBD
+    *** Failers
+    A\nB
+    ACB\n   
 
 /A\NB./sBZ
-  ACBD
-  ACB\n 
-  ** Failers
-  A\nB  
+    ACBD
+    ACB\n 
+    *** Failers
+    A\nB  
   
 /A\NB/<crlf>
-  A\nB
-  A\rB
-  ** Failers
-  A\r\nB    
+    A\nB
+    A\rB
+    ** Failers
+    A\r\nB    
 
 /\R+b/BZ
 
@@ -3490,5 +3505,69 @@ with \Y. ---/
 /\d*\R/BZ
 
 /\s*\R/BZ
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+    *** Failers 
+    abcxy 
+
+/(?<=abc)def/
+    abc\P\P
+
+/abc$/
+    abc
+    abc\P
+    abc\P\P
+
+/abc$/m
+    abc
+    abc\n
+    abc\P\P
+    abc\n\P\P 
+    abc\P
+    abc\n\P
+
+/abc\z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\Z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\b/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\B/
+    abc
+    abc\P
+    abc\P\P
+
+/.+/
+    abc\>0
+    abc\>1
+    abc\>2
+    abc\>3
+    abc\>4
+    abc\>-4 
+
+/^\cģ/
+
+/(?P<abn>(?P=abn)xxx)/BZ
+
+/(a\1z)/BZ
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
 
 /-- End of testinput2 --/
