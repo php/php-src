@@ -25,7 +25,7 @@ Most developers should have this.
 
 Moving extensions from php-src to PECL
 - Checkout the pecl directory, most likely you want a sparse-root checkout
-  svn co --set-depth=empoty https://svn.php.net/repository/pecl
+  svn co --depth=empty https://svn.php.net/repository/pecl
 - Create an directory for the extension incl. branch and tag structure,
   no trunk at this point and commit this to svn
   cd pecl; mkdir foo foo/tags foo/branches; svn add foo; svn commit
