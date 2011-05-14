@@ -20,12 +20,18 @@ php/QA/bug websites try to have someone from the webmaster team (Bjori) on hand.
 
 5. Verify the tags to be extra sure everything was tagged properly.
 
-6. Moving extensions from/to PECL requires root level access to the CVS server.
-Contact systems@php.net to get this taken care of.
+6. Moving extensions from/to PECL requires write acces to the destination.
+Most developers should have this. 
 
 Moving extensions from php-src to PECL
-- Filesystem: cp -r php-src/ext/foo pecl/foo
-- cvs rm php-src/ext/foo
+- Checkout the pecl directory, most likely you want a sparse-root checkout
+  svn co --set-depth=empoty https://svn.php.net/repository/pecl
+- Create an directory for the extension incl. branch and tag structure,
+  no trunk at this point and commit this to svn
+  cd pecl; mkdir foo foo/tags foo/branches; svn add foo; svn commit
+- Move the extension from php-src to the new location
+  svn mv https://svn.php.net/repository/php/php-src/trunk/ext/foo \
+         https://svn.php.net/repository/pecl/foo/trunk
 
 If the extension is still usable or not dead, in cooperation with the extension
 maintainers if any:
@@ -33,10 +39,8 @@ maintainers if any:
 - create the package.xml, commit
 - release the package
 
-Moving extensions from PECL to php-src
-- Filesystem: cp -r pecl/foo php-src/ext/foo
-OR depending on the wishes from the PECL extension maintainer.
-- Filesystem: ln -s pecl/foo php-src/ext/foo
+For Moving extensions from PECL to php-src the svn mv has to be tone the other
+way round.
 
 Rolling a non stable release (alpha/beta/RC)
 --------------------------------------------
