@@ -79,7 +79,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(mt_rand(100, $input));
+	var_dump(mt_rand(-1 * mt_getrandmax(), $input));
 	$iterator++;
 };
 fclose($fp);
