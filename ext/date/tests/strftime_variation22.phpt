@@ -46,7 +46,7 @@ foreach($inputs as $key =>$value) {
 
 --Preferred date and time representation--
 string(2) "%c"
-string(24) "Fri Aug  8 08:08:08 2008"
+string(31) "Fri 08 Aug 2008 08:08:08 AM IST"
 
 --Preferred date representation--
 string(2) "%x"
@@ -54,5 +54,5 @@ string(10) "08/08/2008"
 
 --Preferred time representation--
 string(2) "%X"
-string(8) "08:08:08"
+string(11) "08:08:08 AM"
 ===DONE===
