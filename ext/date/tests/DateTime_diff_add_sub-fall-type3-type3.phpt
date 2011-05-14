@@ -12,7 +12,7 @@ PHP < 5.4 has bugs
  * in a userland package.  Please be so kind as to leave them.
  */
 
-require './examine_diff.inc';
+require 'examine_diff.inc';
 date_default_timezone_set('America/New_York');
 
 
