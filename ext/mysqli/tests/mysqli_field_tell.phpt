@@ -64,7 +64,7 @@ int(0)
 Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 int(0)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -75,6 +75,10 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>

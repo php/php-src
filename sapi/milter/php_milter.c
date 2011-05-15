@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -823,7 +823,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ milter_functions[]
 */
-static const zend_function_entry milter_functions[] = {
+const static zend_function_entry milter_functions[] = {
 	PHP_FE(smfi_setflags, 		arginfo_smfi_setflags)
 	PHP_FE(smfi_settimeout, 	arginfo_smfi_settimeout)
 	PHP_FE(smfi_getsymval, 		arginfo_smfi_getsymval)
@@ -1109,7 +1109,7 @@ int main(int argc, char *argv[])
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2010 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2011 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_output_teardown();
 				exit(1);
 				break;

@@ -194,7 +194,7 @@ dnl the path is interpreted relative to the top build-directory.
 dnl
 dnl which array to append to?
 AC_DEFUN([PHP_ADD_SOURCES],[
-  PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,cli,PHP_CLI_OBJS,ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS)))
+  PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS))
 ])
 
 dnl
@@ -711,10 +711,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_WITH($1,[$3],$5=[$]withval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
@@ -739,10 +736,7 @@ ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,
 [
   $5=ifelse($4,,no,$4)
-
-  if test "$PHP_ENABLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_ENABLE_ALL
-  fi
+  ifelse($6,yes,[test "$PHP_ENABLE_ALL" && $5=$PHP_ENABLE_ALL])
 ])
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
@@ -768,6 +762,11 @@ AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
     AC_PROG_CXX
     AC_PROG_CXXCPP
+    case $host_alias in
+      *darwin*)
+        PHP_ADD_LIBRARY(stdc++)
+      ;;
+    esac
     php_cxx_done=yes
   fi
 ])
@@ -778,7 +777,7 @@ dnl
 AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
-  php_build_target=shared
+  php_sapi_module=shared
   
   php_c_pre=$shared_c_pre
   php_c_meta=$shared_c_meta
@@ -795,7 +794,7 @@ dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
-  php_build_target=static
+  php_sapi_module=static
 ])
 
 dnl
@@ -804,14 +803,13 @@ dnl
 AC_DEFUN([PHP_BUILD_BUNDLE],[
   PHP_BUILD_PROGRAM
   OVERALL_TARGET=libs/libphp[]$PHP_MAJOR_VERSION[.bundle]
-  php_build_target=static
+  php_sapi_module=static
 ])
 
 dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  OVERALL_TARGET=[]ifelse($1,,php,$1)
   php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
@@ -832,8 +830,6 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
-
-  php_build_target=program
 ])
 
 dnl
@@ -879,21 +875,45 @@ EOF
 dnl
 dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags [, build-target]]])
 dnl
-dnl Selects the SAPI name and type (static, shared, programm)
+dnl Selects the SAPI name and type (static, shared, bundle, program)
 dnl and optionally also the source-files for the SAPI-specific
 dnl objects.
 dnl
 AC_DEFUN([PHP_SELECT_SAPI],[
-  PHP_SAPI=$1
-  
-  case "$2" in
-  static[)] PHP_BUILD_STATIC;;
-  shared[)] PHP_BUILD_SHARED;;
-  bundle[)] PHP_BUILD_BUNDLE;;
-  program[)] PHP_BUILD_PROGRAM($5);;
-  esac
-    
-  ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
+  if test "$2" = "program"; then
+    PHP_BINARIES="$PHP_BINARIES $1"
+  elif test "$PHP_SAPI" != "none"; then
+    AC_MSG_ERROR([
++--------------------------------------------------------------------+
+|                        *** ATTENTION ***                           |
+|                                                                    |
+| You've configured multiple SAPIs to be build. You can build only   |
+| one SAPI module plus CGI, CLI and FPM binaries at the same time.   |
++--------------------------------------------------------------------+
+])
+  else
+    PHP_SAPI=$1
+  fi  
+
+  PHP_ADD_BUILD_DIR([sapi/$1])
+
+  PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS $1"
+
+  ifelse($2,program,[
+    PHP_BUILD_PROGRAM
+    install_binaries="install-binaries"
+    install_binary_targets="$install_binary_targets install-$1"
+    PHP_SUBST(PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)
+    ifelse($3,,,[PHP_ADD_SOURCES_X([sapi/$1],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_)[]_OBJS)])
+  ],[
+    case "$2" in
+    static[)] PHP_BUILD_STATIC;;
+    shared[)] PHP_BUILD_SHARED;;
+    bundle[)] PHP_BUILD_BUNDLE;;
+    esac
+    install_sapi="install-sapi"
+    ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
+  ])
 ])
 
 dnl deprecated
@@ -1095,7 +1115,7 @@ ifelse([$5],[],,[else $5])
 dnl
 dnl PHP_CHECK_SIZEOF(type, cross-value, extra-headers)
 dnl
-AC_DEFUN(PHP_CHECK_SIZEOF, [
+AC_DEFUN([PHP_CHECK_SIZEOF], [
   AC_MSG_CHECKING([size of $1])
   _PHP_CHECK_SIZEOF($1, $2, $3, [
     AC_DEFINE_UNQUOTED([SIZEOF_]translit($1,a-z,A-Z_), [$]php_cv_sizeof_[]$1, [Size of $1])
@@ -2223,6 +2243,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
       AC_MSG_ERROR([ICU version 3.4 or later is required])
     fi
 
+    ICU_VERSION=$icu_version
     ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
     ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
     PHP_EVAL_INCLINE($ICU_INCS)
@@ -2391,7 +2412,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       -L$OPENSSL_LIBDIR
     ])
     LIBS=$old_LIBS
-    PHP_ADD_LIBRARY(ssl,,$1)
+    PHP_ADD_LIBRARY(crypto,,$1)
 
     PHP_ADD_LIBPATH($OPENSSL_LIBDIR, $1)
   fi
@@ -2585,7 +2606,7 @@ dnl This macro is used to get a comparable
 dnl version for apache1/2.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
-  ac_output=`$1 -v 2>&1 | grep version`
+  ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
   ac_IFS=$IFS
 IFS="- /.
 "
@@ -2659,19 +2680,19 @@ EOF
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
   fi
   for arg in $ac_configure_args; do
-     if test `expr -- $arg : "'.*"` = 0; then
-        if test `expr -- $arg : "--.*"` = 0; then
-       	  break;
-        fi
-        echo "'[$]arg' \\" >> $1
-        CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
-     else
-        if test `expr -- $arg : "'--.*"` = 0; then
-       	  break;
-        fi
-        echo "[$]arg \\" >> $1
-        CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
-     fi
+    if test `expr -- $arg : "'.*"` = 0; then
+      if test `expr -- $arg : "--.*"` = 0; then
+        break;
+      fi
+      echo "'[$]arg' \\" >> $1
+      CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
+    else
+      if test `expr -- $arg : "'--.*"` = 0; then
+        break;
+      fi
+      echo "[$]arg \\" >> $1
+      CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
+    fi
   done
   echo '"[$]@"' >> $1
   chmod +x $1
@@ -2687,19 +2708,19 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
   for arg in $ac_configure_args; do
     case $arg in
       --with-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--with-/with-/g' -e 's/=.*//g'`"
+        arg_name="`echo [$]arg | $SED -e 's/--with-/with-/g' -e 's/=.*//g'`"
         ;;
       --without-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--without-/with-/g' -e 's/=.*//g'`"
+        arg_name="`echo [$]arg | $SED -e 's/--without-/with-/g' -e 's/=.*//g'`"
         ;;
       --enable-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--enable-/enable-/g' -e 's/=.*//g'`"
+        arg_name="`echo [$]arg | $SED -e 's/--enable-/enable-/g' -e 's/=.*//g'`"
         ;;
       --disable-*[)]
-      	arg_name="`echo [$]arg | $SED -e 's/--disable-/enable-/g' -e 's/=.*//g'`"
+        arg_name="`echo [$]arg | $SED -e 's/--disable-/enable-/g' -e 's/=.*//g'`"
         ;;
       *[)]
-      	continue
+        continue
         ;;
     esac
     case $arg_name in
@@ -2877,3 +2898,67 @@ main()
   fi
 ])
 
+dnl
+dnl PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
+dnl
+AC_DEFUN([PHP_INIT_DTRACE],[
+dnl Set paths properly when called from extension
+  case "$4" in
+    ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
+    /*[)] ac_srcdir=`echo "$4"|cut -c 2-`"/"; ac_bdir=$ac_srcdir;;
+    *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$4/";;
+  esac
+
+dnl providerdesc
+  ac_provsrc=$1
+  old_IFS=[$]IFS
+  IFS=.
+  set $ac_provsrc
+  ac_provobj=[$]1
+  IFS=$old_IFS
+
+dnl header-file
+  ac_hdrobj=$2
+
+dnl Add providerdesc.o into global objects when needed
+  case $host_alias in
+  *solaris*)
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    ;;
+  esac
+
+dnl DTrace objects
+  old_IFS=[$]IFS
+  for ac_src in $3; do
+    IFS=.
+    set $ac_src
+    ac_obj=[$]1
+    IFS=$old_IFS
+
+    PHP_DTRACE_OBJS="[$]PHP_DTRACE_OBJS [$]ac_bdir[$]ac_obj.lo"
+  done;
+
+  case [$]php_sapi_module in
+  shared[)]
+    for ac_lo in $PHP_DTRACE_OBJS; do
+      dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+    done;
+    ;;
+  *[)]
+    dtrace_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
+    ;;
+  esac
+
+dnl Generate Makefile.objects entries
+  cat>>Makefile.objects<<EOF
+
+$ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
+	dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@ && \$(SED) -ibak 's,PHP_,DTRACE_,g' \$[]@
+
+\$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
+
+$ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
+	dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
+
+EOF
+])

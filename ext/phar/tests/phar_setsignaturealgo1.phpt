@@ -3,6 +3,7 @@ Phar::setSignatureAlgorithm()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if ( extension_loaded("hash")) die("skip extension hash conflicts"); ?>
+<?php if (!defined("Phar::PGP")) die("skip PGP Signature algorithm not available"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

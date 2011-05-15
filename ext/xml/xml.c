@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,6 +32,7 @@
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/standard/html.h"
 
 #if HAVE_XML
 
@@ -662,7 +663,7 @@ PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char
 /* {{{ xml_utf8_decode */
 PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_Char *encoding)
 {
-	int pos = len;
+	size_t pos = 0;
 	char *newbuf = emalloc(len + 1);
 	unsigned int c;
 	char (*decoder)(unsigned short) = NULL;
@@ -681,36 +682,15 @@ PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_
 		newbuf[*newlen] = '\0';
 		return newbuf;
 	}
-	while (pos > 0) {
-		c = (unsigned char)(*s);
-		if (c >= 0xf0) { /* four bytes encoded, 21 bits */
-			if(pos-4 >= 0) {
-				c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
-			} else {
-				c = '?';	
-			}
-			s += 4;
-			pos -= 4;
-		} else if (c >= 0xe0) { /* three bytes encoded, 16 bits */
-			if(pos-3 >= 0) {
-				c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
-			} else {
-				c = '?';
-			}
-			s += 3;
-			pos -= 3;
-		} else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-			if(pos-2 >= 0) {
-				c = ((s[0]&63)<<6) | (s[1]&63);
-			} else {
-				c = '?';
-			}
-			s += 2;
-			pos -= 2;
-		} else {
-			s++;
-			pos--;
+
+	while (pos < (size_t)len) {
+		int status = FAILURE;
+		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
+
+		if (status == FAILURE || c > 0xFFU) {
+			c = '?';
 		}
+
 		newbuf[*newlen] = decoder ? decoder(c) : c;
 		++*newlen;
 	}

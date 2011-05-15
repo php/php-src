@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,7 +120,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	handle->type = ZEND_HANDLE_FP;
 	handle->opened_path = NULL;
 	handle->handle.fp = zend_fopen(filename, &handle->opened_path TSRMLS_CC);
-	handle->filename = (char *)filename;
+	handle->filename = filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
 	
@@ -268,8 +268,9 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	if (ZEND_MMAP_AHEAD) {
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
-
+#if HAVE_MMAP
 return_mapped:
+#endif
 	file_handle->type = ZEND_HANDLE_MAPPED;
 	file_handle->handle.stream.mmap.pos        = 0;
 	file_handle->handle.stream.mmap.old_handle = file_handle->handle.stream.handle;

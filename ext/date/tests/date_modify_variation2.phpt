@@ -111,49 +111,29 @@ fclose( $file_handle );
 *** Testing date_modify() : usage variation -  unexpected values to second argument $format***
 
 -- int 0 --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (0) at position 0 (0): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- int 1 --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- int 12345 --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (12345) at position 4 (5): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- int -12345 --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (-12345) at position 5 (5): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 14:28:41"
+  string(19) "2009-01-31 10:05:00"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -161,19 +141,14 @@ object(DateTime)#%d (3) {
 }
 
 -- float -10.5 --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (-10.5) at position 4 (5): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 14:28:41"
+  string(19) "2009-01-31 00:05:00"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -182,181 +157,106 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- int indexed array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- associative array --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- nested arrays --
 
-Warning: date_modify() expects parameter 2 to be string, array given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, array given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- uppercase NULL --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- lowercase null --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- lowercase true --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- lowercase false --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- uppercase TRUE --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (1) at position 0 (1): Unexpected character in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- uppercase FALSE --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- empty string DQ --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- empty string SQ --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- string DQ --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- string SQ --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (string) at position 0 (s): The timezone could not be found in the database in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- mixed case string --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (sTrInG) at position 0 (s): The timezone could not be found in the database in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- heredoc --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (hello world) at position 0 (h): The timezone could not be found in the database in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- instance of classWithToString --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_modify() expects parameter 2 to be string, object given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, object given in %sdate_modify_variation2.php on line 99
 bool(false)
 
 -- undefined var --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- unset var --
-object(DateTime)#%d (3) {
-  ["date"]=>
-  string(19) "2009-01-31 14:28:41"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
-}
+
+Warning: date_modify(): Failed to parse time string () at position 0 ( in %sdate_modify_variation2.php on line 99
+bool(false)
 
 -- resource --
 
-Warning: date_modify() expects parameter 2 to be string, resource given in %s on line %d
+Warning: date_modify() expects parameter 2 to be string, resource given in %sdate_modify_variation2.php on line 99
 bool(false)
 ===DONE===

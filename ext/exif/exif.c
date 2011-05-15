@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,16 @@
 #include "php.h"
 #include "ext/standard/file.h"
 
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+#endif
+
 #if HAVE_EXIF
 
 /* When EXIF_DEBUG is defined the module generates a lot of debug messages
@@ -65,16 +75,6 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h" 
-
-#if defined(PHP_WIN32) || (HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING))
-#define EXIF_USE_MBSTRING 1
-#else
-#define EXIF_USE_MBSTRING 0
-#endif
-
-#if EXIF_USE_MBSTRING
-#include "ext/mbstring/mbstring.h"
-#endif
 
 /* needed for ssize_t definition */
 #include <sys/types.h>
@@ -176,23 +176,31 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 ZEND_INI_MH(OnUpdateEncode)
 {
-#if EXIF_USE_MBSTRING
-	if (new_value && strlen(new_value) && !php_mb_check_encoding_list(new_value TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
-		return FAILURE;
+	if (new_value && new_value_length) {
+		const zend_encoding **return_list;
+		size_t return_size;
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+	&return_list, &return_size, 0 TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			return FAILURE;
+		}
+		efree(return_list);
 	}
-#endif
 	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 ZEND_INI_MH(OnUpdateDecode)
 {
-#if EXIF_USE_MBSTRING
-	if (!php_mb_check_encoding_list(new_value TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
-		return FAILURE;
+	if (new_value) {
+		const zend_encoding **return_list;
+		size_t return_size;
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+	&return_list, &return_size, 0 TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			return FAILURE;
+		}
+		efree(return_list);
 	}
-#endif
 	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
@@ -224,7 +232,11 @@ static PHP_GINIT_FUNCTION(exif)
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
-	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", EXIF_USE_MBSTRING, CONST_CS | CONST_PERSISTENT); 
+	if (zend_hash_exists(&module_registry, "mbstring", sizeof("mbstring"))) {
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
+	} else {
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -241,9 +253,7 @@ PHP_MSHUTDOWN_FUNCTION(exif)
 /* {{{ exif dependencies */
 static const zend_module_dep exif_module_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
-#if EXIF_USE_MBSTRING
-	ZEND_MOD_REQUIRED("mbstring")
-#endif
+	ZEND_MOD_OPTIONAL("mbstring")
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -2588,7 +2598,6 @@ static int exif_process_undefined(char **result, char *value, size_t byte_count 
 
 /* {{{ exif_process_string_raw
  * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
-#if !EXIF_USE_MBSTRING
 static int exif_process_string_raw(char **result, char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we have to copy NUL
 	 * chars up to byte_count, we also have to add a single NUL character to
@@ -2602,7 +2611,6 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
 	}
 	return 0;
 }
-#endif
 /* }}} */
 
 /* {{{ exif_process_string
@@ -2629,11 +2637,8 @@ static int exif_process_string(char **result, char *value, size_t byte_count TSR
 static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount TSRMLS_DC)
 {
 	int   a;
-
-#if EXIF_USE_MBSTRING
 	char  *decode;
 	size_t len;;
-#endif
 
 	*pszEncoding = NULL;
 	/* Copy the comment */
@@ -2642,7 +2647,6 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-#if EXIF_USE_MBSTRING
 			/* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16) 
 			 * since we have no encoding support for the BOM yet we skip that.
 			 */
@@ -2659,34 +2663,38 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			} else {
 				decode = ImageInfo->decode_unicode_le;
 			}
-			*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, decode, &len TSRMLS_CC);
+			if (zend_multibyte_encoding_converter(
+					(unsigned char**)pszInfoPtr, 
+					&len, 
+					(unsigned char*)szValuePtr,
+					ByteCount,
+					zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
+					zend_multibyte_fetch_encoding(decode TSRMLS_CC)
+					TSRMLS_CC) < 0) {
+				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
+			}
 			return len;
-#else
-			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
-		} else
-		if (!memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
+		} else if (!memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-		} else
-		if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
+		} else if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
 			/* JIS should be tanslated to MB or we leave it to the user - leave it to the user */
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-#if EXIF_USE_MBSTRING
-			if (ImageInfo->motorola_intel) {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_jis, ImageInfo->decode_jis_be, &len TSRMLS_CC);
-			} else {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_jis, ImageInfo->decode_jis_le, &len TSRMLS_CC);
+			if (zend_multibyte_encoding_converter(
+					(unsigned char**)pszInfoPtr, 
+					&len, 
+					(unsigned char*)szValuePtr,
+					ByteCount,
+					zend_multibyte_fetch_encoding(ImageInfo->encode_jis TSRMLS_CC),
+					zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le TSRMLS_CC)
+					TSRMLS_CC) < 0) {
+				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
-#else
-			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
-		} else
-		if (!memcmp(szValuePtr, "\0\0\0\0\0\0\0\0", 8)) {
+		} else if (!memcmp(szValuePtr, "\0\0\0\0\0\0\0\0", 8)) {
 			/* 8 NULL means undefined and should be ASCII... */
 			*pszEncoding = estrdup("UNDEFINED");
 			szValuePtr = szValuePtr+8;
@@ -2714,19 +2722,17 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 	xp_field->tag = tag;	
 
 	/* Copy the comment */
-#if EXIF_USE_MBSTRING
-/*  What if MS supports big-endian with XP? */
-/*	if (ImageInfo->motorola_intel) {
-		xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_be, &xp_field->size TSRMLS_CC);
-	} else {
-		xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_le, &xp_field->size TSRMLS_CC);
-	}*/
-	xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_le, &xp_field->size TSRMLS_CC);
+	if (zend_multibyte_encoding_converter(
+			(unsigned char**)&xp_field->value, 
+			&xp_field->size, 
+			(unsigned char*)szValuePtr,
+			ByteCount,
+			zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
+			zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le TSRMLS_CC)
+			TSRMLS_CC) < 0) {
+		xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
+	}
 	return xp_field->size;
-#else
-	xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
-	return xp_field->size;
-#endif
 }
 /* }}} */
 
@@ -2821,6 +2827,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
 	size_t byte_count, offset_val, fpos, fgot;
+	int64_t byte_count_signed;
 	xp_field_type *tmp_xp;
 #ifdef EXIF_DEBUG
 	char *dump_data;
@@ -2845,12 +2852,19 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		/*return TRUE;*/
 	}
 
-	byte_count = components * php_tiff_bytes_per_format[format];
-
-	if ((ssize_t)byte_count < 0) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), byte_count);
+	if (components < 0) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal components(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), components);
 		return FALSE;
 	}
+
+	byte_count_signed = (int64_t)components * php_tiff_bytes_per_format[format];
+
+	if (byte_count_signed < 0 || (byte_count_signed > INT32_MAX)) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC));
+		return FALSE;
+	}
+
+	byte_count = (size_t)byte_count_signed;
 
 	if (byte_count > 4) {
 		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
@@ -2891,7 +2905,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			fgot = php_stream_tell(ImageInfo->infile);
 			if (fgot!=offset_val) {
 				EFREE_IF(outside);
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x08X", fgot, offset_val);
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, offset_val);
 				return FALSE;
 			}
 			fgot = php_stream_read(ImageInfo->infile, value_ptr, byte_count);
@@ -2916,6 +2930,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		efree(dump_data);
 	}
 #endif
+
 	if (section_index==SECTION_THUMBNAIL) {
 		if (!ImageInfo->Thumbnail.data) {
 			switch(tag) {
@@ -3861,7 +3876,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	ImageInfo->motorola_intel = -1; /* flag as unknown */
 
-	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH, NULL);
 	if (!ImageInfo->infile) {
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Unable to open file");
 		return FALSE;
@@ -4166,7 +4181,7 @@ PHP_FUNCTION(exif_imagetype)
 		return;
 	}
 
-	stream = php_stream_open_wrapper(imagefile, "rb", IGNORE_PATH|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(imagefile, "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
 
 	if (stream == NULL) {
 		RETURN_FALSE;

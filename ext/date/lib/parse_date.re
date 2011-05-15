@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <assert.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -89,6 +90,8 @@
 
 #define TIMELIB_ERROR          999
 
+/* Some compilers like AIX, defines uchar in sys/types.h */
+#undef uchar
 typedef unsigned char uchar;
 
 #define   BSIZE	   8192
@@ -524,7 +527,7 @@ static long timelib_parse_tz_cor(char **ptr)
 	char *begin = *ptr, *end;
 	long  tmp;
 
-	while (**ptr != '\0') {
+	while (isdigit(**ptr) || **ptr == ':') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -1796,6 +1799,10 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 #endif
 	} while(t != EOI);
 
+	/* do funky checking whether the parsed time was valid time */
+	if (in.time->have_time && !timelib_valid_time( in.time->h, in.time->i, in.time->s)) {
+		add_warning(&in, "The parsed time was invalid");
+	}
 	/* do funky checking whether the parsed date was valid date */
 	if (in.time->have_date && !timelib_valid_date( in.time->y, in.time->m, in.time->d)) {
 		add_warning(&in, "The parsed date was invalid");
@@ -1816,6 +1823,30 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 			add_pbf_error(s, "Unexpected data found.", string, begin); \
 		}
 
+static void timelib_time_reset_fields(timelib_time *time)
+{
+	assert(time != NULL);
+
+	time->y = 1970;
+	time->m = 1;
+	time->d = 1;
+	time->h = time->i = time->s = 0;
+	time->f = 0.0;
+	time->tz_info = NULL;
+}
+
+static void timelib_time_reset_unset_fields(timelib_time *time)
+{
+	assert(time != NULL);
+
+	if (time->y == TIMELIB_UNSET ) time->y = 1970;
+	if (time->m == TIMELIB_UNSET ) time->m = 1;
+	if (time->d == TIMELIB_UNSET ) time->d = 1;
+	if (time->h == TIMELIB_UNSET ) time->h = 0;
+	if (time->i == TIMELIB_UNSET ) time->i = 0;
+	if (time->s == TIMELIB_UNSET ) time->s = 0;
+	if (time->f == TIMELIB_UNSET ) time->f = 0.0;
+}
 
 timelib_time *timelib_parse_from_format(char *format, char *string, int len, timelib_error_container **errors, const timelib_tzdb *tzdb)
 {
@@ -1825,6 +1856,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 	timelib_sll tmp;
 	Scanner in;
 	Scanner *s = &in;
+	int allow_extra = 0;
 
 	memset(&in, 0, sizeof(in));
 	in.errors = malloc(sizeof(struct timelib_error_container));
@@ -1991,7 +2023,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '#': /* separation symbol */
-				if (*ptr == ';' || *ptr == ':' || *ptr == '/' || *ptr == '.' || *ptr == ',' || *ptr == '-') {
+				if (*ptr == ';' || *ptr == ':' || *ptr == '/' || *ptr == '.' || *ptr == ',' || *ptr == '-' || *ptr == '(' || *ptr == ')') {
 					++ptr;
 				} else {
 					add_pbf_error(s, "The separation symbol ([;:/.,-]) could not be found", string, begin);
@@ -2004,6 +2036,8 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 			case '.':
 			case ',':
 			case '-':
+			case '(':
+			case ')':
 				if (*ptr == *fptr) {
 					++ptr;
 				} else {
@@ -2012,23 +2046,11 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '!': /* reset all fields to default */
-				s->time->y = 1970;
-				s->time->m = 1;
-				s->time->d = 1;
-				s->time->h = s->time->i = s->time->s = 0;
-				s->time->f = 0.0;
-				s->time->tz_info = NULL;
+				timelib_time_reset_fields(s->time);
 				break; /* break intentionally not missing */
 
 			case '|': /* reset all fields to default when not set */
-				if (s->time->y == TIMELIB_UNSET ) s->time->y = 1970;
-				if (s->time->m == TIMELIB_UNSET ) s->time->m = 1;
-				if (s->time->d == TIMELIB_UNSET ) s->time->d = 1;
-				if (s->time->h == TIMELIB_UNSET ) s->time->h = 0;
-				if (s->time->i == TIMELIB_UNSET ) s->time->i = 0;
-				if (s->time->s == TIMELIB_UNSET ) s->time->s = 0;
-				if (s->time->f == TIMELIB_UNSET ) s->time->f = 0.0;
-				
+				timelib_time_reset_unset_fields(s->time);
 				break; /* break intentionally not missing */
 
 			case '?': /* random char */
@@ -2048,6 +2070,10 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				timelib_eat_until_separator((char **) &ptr);
 				break;
 
+			case '+': /* allow extra chars in the format */
+				allow_extra = 1;
+				break;
+
 			default:
 				if (*fptr != *ptr) {
 					add_pbf_error(s, "The format separator does not match", string, begin);
@@ -2057,10 +2083,32 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 		fptr++;
 	}
 	if (*ptr) {
-		add_pbf_error(s, "Trailing data", string, ptr);
+		if (allow_extra) {
+			add_pbf_warning(s, "Trailing data", string, ptr);
+		} else {
+			add_pbf_error(s, "Trailing data", string, ptr);
+		}
+	}
+	/* ignore trailing +'s */
+	while (*fptr == '+') {
+		fptr++;
 	}
 	if (*fptr) {
-		add_pbf_error(s, "Data missing", string, ptr);
+		/* Trailing | and ! specifiers are valid. */
+		while (*fptr) {
+			switch (*fptr++) {
+				case '!': /* reset all fields to default */
+					timelib_time_reset_fields(s->time);
+					break;
+
+				case '|': /* reset all fields to default when not set */
+					timelib_time_reset_unset_fields(s->time);
+					break;
+
+				default:
+					add_pbf_error(s, "Data missing", string, ptr);
+			}
+		}
 	}
 
 	/* clean up a bit */

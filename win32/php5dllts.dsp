@@ -301,10 +301,6 @@ SOURCE=..\main\php.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php3_compat.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\php_compat.h
 # End Source File
 # Begin Source File
@@ -2400,10 +2396,6 @@ SOURCE=..\win32\sendmail.c
 # Begin Source File
 
 SOURCE=..\win32\time.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\win32\wfile.c
 # End Source File
 # Begin Source File
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -30,10 +30,11 @@
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
 
-static void handle_whitespace(unsigned int *emit_whitespace) /* {{{ */
+
+static void handle_whitespace(int *emit_whitespace)
 {
 	unsigned char c;
-	unsigned int i;
+	int i;
 
 	for (c=0; c<128; c++) {
 		if (emit_whitespace[c]>0) {
@@ -44,29 +45,29 @@ static void handle_whitespace(unsigned int *emit_whitespace) /* {{{ */
 	}
 	memset(emit_whitespace, 0, sizeof(int)*256);
 }
-/* }}} */
 
-ZEND_API void zend_indent(void) /* {{{ */
+
+ZEND_API void zend_indent()
 {
 	zval token;
 	int token_type;
 	int in_string=0;
-	unsigned int nest_level=0;
-	unsigned int emit_whitespace[256];
-	unsigned int i;
+	int nest_level=0;
+	int emit_whitespace[256];
+	int i;
 	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
 	/* highlight stuff coming back from zendlex() */
-	Z_TYPE(token) = 0;
+	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
-					Z_TYPE(token) = 0;
+					token.type = 0;
 					/* eat whitespace, emit newlines */
 					for (i=0; i<LANG_SCNG(yy_leng); i++) {
 						emit_whitespace[(unsigned char) LANG_SCNG(yy_text)[i]]++;
@@ -78,7 +79,7 @@ ZEND_API void zend_indent(void) /* {{{ */
 				in_string = !in_string;
 				/* break missing intentionally */
 			default:
-				if (Z_TYPE(token)==0) {
+				if (token.type==0) {
 					/* keyword */
 					switch (token_type) {
 						case ',':
@@ -131,21 +132,20 @@ dflt_printout:
 				}
 				break;
 		}
-		if (Z_TYPE(token) == IS_STRING) {
+		if (token.type == IS_STRING) {
 			switch (token_type) {
 			case T_OPEN_TAG:
 			case T_CLOSE_TAG:
 			case T_WHITESPACE:
 				break;
 			default:
-				efree(Z_STRVAL(token));
+				efree(token.value.str.val);
 				break;
 			}
 		}
-		Z_TYPE(token) = 0;
+		token.type = 0;
 	}
 }
-/* }}} */
 
 /*
  * Local variables:

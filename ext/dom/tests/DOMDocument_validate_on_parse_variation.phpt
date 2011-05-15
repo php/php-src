@@ -8,7 +8,7 @@ Hans Zaunere
 require_once('skipif.inc');
 
 // need external DTD/XML docs
-if( @file_get_contents('http://www.php.net/') === FALSE )
+if( @file_get_contents('http://www.php.net/docs.php') === FALSE )
     exit('skip network not available');
 ?>
 --FILE--
@@ -16,7 +16,7 @@ if( @file_get_contents('http://www.php.net/') === FALSE )
 
 require_once('dom_test.inc');
 
-$XMLStringGood = file_get_contents('http://www.php.net/');
+$XMLStringGood = file_get_contents('http://www.php.net/docs.php');
 
 $dom = new DOMDocument;
 $dom->resolveExternals = TRUE;

@@ -172,15 +172,15 @@ Warning: Phar::offsetGet() expects parameter 1 to be %string, array given in %sb
 Warning: Phar::offsetSet() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
 
 Warning: PharData::offsetUnset() expects parameter 1 to be %string, array given in %sbadparameters.php on line %d
-Write operations disabled by INI setting
+Write operations disabled by the php.ini setting phar.readonly
 
 Warning: Phar::addEmptyDir() expects parameter 1 to be %string, array given in %sbadparameters.php on line %d
 
 Warning: Phar::addFile() expects parameter 1 to be %string, array given in %sbadparameters.php on line %d
 
 Warning: Phar::addFromString() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
-Write operations disabled by INI setting
+Write operations disabled by the php.ini setting phar.readonly
 
 Warning: Phar::setMetadata() expects exactly 1 parameter, 2 given in %sbadparameters.php on line %d
-Write operations disabled by INI setting
+Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

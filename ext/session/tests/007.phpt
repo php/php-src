@@ -1,13 +1,10 @@
 --TEST--
 bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include('skipif.inc'); if (PHP_VERSION_ID < 503099) { echo 'skip requires register_globals'; }  ?>
 --INI--
-register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
-session.bug_compat_42=1
 session.serialize_handler=php
 session.save_handler=files
 precision=14
@@ -21,38 +18,36 @@ session_id("abtest");
 session_start();
 session_destroy();
 
-### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
+### Phase 2 $_SESSION["c"] does not contain any value
 session_id("abtest");
 session_register("c");
 unset($c);
 $c = 3.14;
 session_write_close();
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
-### Phase 3 $HTTP_SESSION_VARS["c"] is set
+### Phase 3 $_SESSION["c"] is set
 session_start();
 var_dump($c);
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 unset($c);
 $c = 2.78;
 
 session_write_close();
-unset($HTTP_SESSION_VARS);
+unset($_SESSION);
 unset($c);
 
 ### Phase 4 final
 
 session_start();
 var_dump($c);
-var_dump($HTTP_SESSION_VARS);
+var_dump($_SESSION);
 
 session_destroy();
 ?>
 --EXPECTF--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
-
-Warning: Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Deprecated: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Deprecated: Function session_register() is deprecated in %s on line %d
 float(3.14)

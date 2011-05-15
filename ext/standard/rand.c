@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -315,8 +315,14 @@ PHP_FUNCTION(mt_rand)
 	long number;
 	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
-		return;
+	if (argc != 0) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
+			return;
+		} else if (max < min) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%ld) is smaller than min(%ld)", max, min);
+			RETURN_FALSE;
+		}
+	}
 
 	if (!BG(mt_rand_is_seeded)) {
 		php_mt_srand(GENERATE_SEED() TSRMLS_CC);

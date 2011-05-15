@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,6 @@
 #endif
 
 #include "php_globals.h"
-#include "safe_mode.h"
 
 
 /* Implementation of the language Header() function */
@@ -64,7 +63,7 @@ PHP_FUNCTION(header_remove)
 }
 /* }}} */
 
-PHPAPI int php_header(TSRMLS_D) /* {{{ */
+PHPAPI int php_header(TSRMLS_D)
 {
 	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
@@ -72,10 +71,9 @@ PHPAPI int php_header(TSRMLS_D) /* {{{ */
 		return 1; /* allow output */
 	}
 }
-/* }}} */
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC) /* {{{ */
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
@@ -116,16 +114,15 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		/* 
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
-		 * pick an expiry date 1 year and 1 second in the past
+		 * pick an expiry date in the past
 		 */
-		time_t t = time(NULL) - 31536001;
-		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0 TSRMLS_CC);
+		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
 		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s", name, dt);
 		efree(dt);
 	} else {
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
-			char *p;
+			const char *p;
 			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
@@ -168,7 +165,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	efree(cookie);
 	return result;
 }
-/* }}} */
+
 
 /* php_set_cookie(name, value, expires, path, domain, secure) */
 /* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
@@ -280,6 +277,22 @@ PHP_FUNCTION(headers_list)
 	}
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto long http_response_code()
+   Returns the current HTTP response code */
+PHP_FUNCTION(http_response_code)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (!SG(sapi_headers).http_response_code) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
 /* }}} */
 

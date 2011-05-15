@@ -245,7 +245,7 @@ static void handle_form(STD_PARA)
 static inline void handle_tag(STD_PARA) 
 {
 	int ok = 0;
-	int i;
+	unsigned int i;
 
 	ctx->tag.len = 0;
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
@@ -462,15 +462,11 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	char *encoded;
 	int encoded_len;
 	smart_str val;
-	zval *ob_name;
 	
 	if (! BG(url_adapt_state_ex).active) {
-		MAKE_STD_ZVAL(ob_name);
-		ZVAL_STRING(ob_name, "URL-Rewriter", 1);
 		php_url_scanner_ex_activate(TSRMLS_C);
-		php_output_start_internal(ob_name, php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		BG(url_adapt_state_ex).active = 1;
-		zval_ptr_dtor(&ob_name);
 	}
 
 

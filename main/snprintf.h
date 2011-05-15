@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    |         Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
@@ -157,6 +157,17 @@ extern char * ap_php_conv_10(register wide_int num, register bool_int is_unsigne
 
 extern char * ap_php_conv_p2(register u_wide_int num, register int nbits,
 		 char format, char *buf_end, register int *len);
+
+/* The maximum precision that's allowed for float conversion. Does not include
+ * decimal separator, exponent, sign, terminator. Currently does not affect
+ * the modes e/f, only g/k/H, as those have a different limit enforced at
+ * another level (see NDIG in php_conv_fp()).
+ * Applies to the formatting functions of both spprintf.c and snprintf.c, which
+ * use equally sized buffers of MAX_BUF_SIZE = 512 to hold the result of the
+ * call to php_gcvt().
+ * This should be reasonably smaller than MAX_BUF_SIZE (I think MAX_BUF_SIZE - 9
+ * should be enough, but let's give some more space) */
+#define FORMAT_CONV_MAX_PRECISION 500
 
 #endif /* SNPRINTF_H */
 

@@ -1,0 +1,9 @@
+This file is not necessary to build PHP.
+
+It's only necessary to rebuild unicode_data.h from Unicode ucd files.
+
+Example usage:
+./ucgendat UnicodeData-6.0.0d7.txt -x CompositionExclusions-6.0.0d2.txt
+
+
+

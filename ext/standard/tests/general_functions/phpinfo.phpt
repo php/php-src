@@ -37,6 +37,7 @@ Thread Safety => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
 IPv6 Support => %s
+DTrace Support => %s
 
 Registered PHP Streams => %s
 Registered Stream Socket Transports => %s

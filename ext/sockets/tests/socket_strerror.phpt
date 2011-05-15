@@ -8,6 +8,9 @@ fa@php.net
     if (!extension_loaded('sockets')) {
         die('skip sockets extension not available.');
     }
+    if (!stristr(PHP_OS, "linux") {
+        die('skip - test validtes linux error strings only.');
+    }
 ?>
 --FILE--
 <?php
@@ -151,4 +154,4 @@ string(20) "Key has been revoked"
 string(27) "Key was rejected by service"
 string(10) "Owner died"
 string(21) "State not recoverable"
-string(17) "Unknown error 132"
+string(%d) "%s"

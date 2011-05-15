@@ -11,29 +11,15 @@ var_dump($a);
 $a->b = null;
 $a = null;
 ?>
---EXPECT--
-object(stdClass)#1 (1) {
+--EXPECTF--
+object(stdClass)#%d (1) {
   ["b"]=>
   &array(3) {
     [0]=>
     int(2)
     [1]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }

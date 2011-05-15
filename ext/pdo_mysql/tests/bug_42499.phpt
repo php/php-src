@@ -27,7 +27,7 @@ $db = MySQLPDOTest::factory();
 function bug_42499($db) {
 
 	$db->exec('DROP TABLE IF EXISTS test');
-	$db->exec('CREATE TABLE test(id CHAR(1)); INSERT INTO test(id) VALUES ("a")');
+	$db->exec("CREATE TABLE test(id CHAR(1)); INSERT INTO test(id) VALUES ('a')");
 
 	$stmt = $db->query('SELECT id AS _id FROM test');
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -35,7 +35,7 @@ function bug_42499($db) {
 	// You must not use exec() to run statements that create a result set!
 	$db->exec('SELECT id FROM test');
 	// This will bail at you because you have not fetched the SELECT results: this is not a bug!
-	$db->exec('INSERT INTO test(id) VALUES ("b")');
+	$db->exec("INSERT INTO test(id) VALUES ('b')");
 
 }
 

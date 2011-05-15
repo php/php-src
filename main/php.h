@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20090626
+#define PHP_API_VERSION 20100412
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
@@ -147,7 +147,11 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
+# if PHP_WIN32
+typedef int socklen_t;
+# else
 typedef unsigned int socklen_t;
+# endif
 #endif
 
 #define CREATE_MUTEX(a, b)
@@ -182,7 +186,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include "zend_hash.h"
-#include "php3_compat.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
 
@@ -196,8 +199,6 @@ typedef unsigned int socklen_t;
 #  define memmove(d, s, n)	bcopy ((s), (d), (n))
 # endif
 #endif
-
-#include "safe_mode.h"
 
 #ifndef HAVE_STRERROR
 char *strerror(int);
@@ -332,6 +333,7 @@ PHPAPI int php_register_internal_extensions(TSRMLS_D);
 PHPAPI int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(TSRMLS_D);
+PHPAPI char *php_get_current_user(TSRMLS_D);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */

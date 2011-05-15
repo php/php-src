@@ -14,14 +14,5 @@ var_export($a, true);
 ?>
 ===DONE===
 --EXPECTF--
-array (
-  0 => 
-  array (
-    0 => 
-    array (
-      0 => 
-      array (
-        0 => 
-        array (
 
 Fatal error: Nesting level too deep - recursive dependency? in %s on line 9

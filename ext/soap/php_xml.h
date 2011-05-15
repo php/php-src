@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,13 +43,6 @@ xmlNodePtr get_node_recursive_ex(xmlNodePtr node,char *name, char *ns);
 xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 int parse_namespace(const xmlChar *inval,char **value,char **namespace);
-
-#ifndef ZEND_ENGINE_2
-int php_stream_xmlIO_match_wrapper(const char *filename);
-void *php_stream_xmlIO_open_wrapper(const char *filename);
-int php_stream_xmlIO_read(void *context, char *buffer, int len);
-int php_stream_xmlIO_close(void *context);
-#endif
 
 #define FOREACHATTRNODE(n,c,i)      FOREACHATTRNODEEX(n,c,NULL,i)
 #define FOREACHATTRNODEEX(n,c,ns,i) \

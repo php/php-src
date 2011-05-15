@@ -20,18 +20,18 @@ API adjustment to the old output control code:
 
 	Starting an internal handler whithout context:
 		// php_ob_set_internal_handler(my_php_output_handler_func_t, buffer_size, "output handler name", erase TSRMLS_CC);
-		php_output_start_internal(handler_name_zval, my_php_output_handler_func_t, chunk_size, flags TSRMLS_CC);
+		php_output_start_internal(handler_name, handler_name_len, my_php_output_handler_func_t, chunk_size, flags TSRMLS_CC);
 
 	Starting an internal handler with context:
 		// not possible with old API
 		php_output_handler *h;
-		h = php_output_handler_create_internal(handler_name_zval, my_php_output_handler_context_func_t, chunk_size, flags TSRMLS_CC);
+		h = php_output_handler_create_internal(handler_name, handler_name_len, my_php_output_handler_context_func_t, chunk_size, flags TSRMLS_CC);
 		php_output_handler_set_context(h, my_context, my_context_dtor);
 		php_output_handler_start(h TSRMLS_CC);
 
 	Testing whether a certain output handler has already been started:
 		// php_ob_handler_used("output handler name" TSRMLS_CC);
-		php_output_handler_started(handler_name_zval TSRMLS_CC);
+		php_output_handler_started(handler_name, handler_name_len TSRMLS_CC);
 
 	Flushing one output buffer:
 		// php_ob_end_buffer(1, 1 TSRMLS_CC);
@@ -79,15 +79,15 @@ API adjustment to the old output control code:
 
 	Issue a warning because of an output handler conflict:
 		// php_ob_init_conflict("to be started handler name", "to be tested if already started handler name" TSRMLS_CC);
-		php_output_handler_conflict(new_handler_name_zval, set_handler_name_zval TSRMLS_CC);
+		php_output_handler_conflict(new_handler_name, new_handler_name_len, set_handler_name, set_handler_name_len TSRMLS_CC);
 
 	Registering a conflict checking function, which will be checked prior starting the handler:
 		// not possible with old API, unless hardcoding into output.c
-		php_output_handler_conflict_register(handler_name_zval, my_php_output_handler_conflict_check_t TSRMLS_CC);
+		php_output_handler_conflict_register(handler_name, handler_name_len, my_php_output_handler_conflict_check_t TSRMLS_CC);
 
 	Registering a reverse conflict checking function, which will be checked prior starting the specified foreign handler:
 		// not possible with old API
-		php_output_handler_reverse_conflict_register(foreign_handler_name_zval, my_php_output_handler_conflict_check_t TSRMLS_CC);
+		php_output_handler_reverse_conflict_register(foreign_handler_name, foreign_handler_name_len, my_php_output_handler_conflict_check_t TSRMLS_CC);
 
 	Facilitating a context from within an output handler callable with ob_start():
 		// not possible with old API

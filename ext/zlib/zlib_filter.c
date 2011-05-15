@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -105,6 +105,9 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			} else if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket TSRMLS_CC);
+				/* reset these because despite the error the filter may be used again */
+				data->strm.next_in = data->inbuf;
+				data->strm.avail_in = 0;
 				return PSFS_ERR_FATAL;
 			}
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */

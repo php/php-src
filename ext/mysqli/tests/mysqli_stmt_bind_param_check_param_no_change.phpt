@@ -9,6 +9,7 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	require('table.inc');
+	$link->set_charset('latin1');
 
 	class foo {
 	  // @var $bar string

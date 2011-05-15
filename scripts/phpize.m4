@@ -111,7 +111,7 @@ if test "$PHP_DEBUG" = "yes"; then
   dnl add -O0 only if GCC or ICC is used
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
-    CXXFLAGS="$CXXFLAGS -O0"
+    CXXFLAGS="$CXXFLAGS -g -O0"
   fi
   if test "$SUNCC" = "yes"; then
     if test -n "$auto_cflags"; then

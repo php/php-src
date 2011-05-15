@@ -1,6 +1,51 @@
 News about PCRE releases
 ------------------------
 
+Release 8.12 15-Jan-2011
+------------------------
+
+This release fixes some bugs in pcregrep, one of which caused the tests to fail
+on 64-bit big-endian systems. There are no changes to the code of the library.
+
+
+Release 8.11 10-Dec-2010
+------------------------
+
+A number of bugs in the library and in pcregrep have been fixed. As always, see
+ChangeLog for details. The following are the non-bug-fix changes:
+
+. Added --match-limit and --recursion-limit to pcregrep.
+
+. Added an optional parentheses number to the -o and --only-matching options
+  of pcregrep.
+
+. Changed the way PCRE_PARTIAL_HARD affects the matching of $, \z, \Z, \b, and
+  \B.
+
+. Added PCRE_ERROR_SHORTUTF8 to make it possible to distinguish between a
+  bad UTF-8 sequence and one that is incomplete when using PCRE_PARTIAL_HARD.
+
+. Recognize (*NO_START_OPT) at the start of a pattern to set the PCRE_NO_
+  START_OPTIMIZE option, which is now allowed at compile time
+
+
+Release 8.10 25-Jun-2010
+------------------------
+
+There are two major additions: support for (*MARK) and friends, and the option
+PCRE_UCP, which changes the behaviour of \b, \d, \s, and \w (and their
+opposites) so that they make use of Unicode properties. There are also a number
+of lesser new features, and several bugs have been fixed. A new option,
+--line-buffered, has been added to pcregrep, for use when it is connected to
+pipes.
+
+
+Release 8.02 19-Mar-2010
+------------------------
+
+Another bug-fix release.
+
+
 Release 8.01 19-Jan-2010
 ------------------------
 

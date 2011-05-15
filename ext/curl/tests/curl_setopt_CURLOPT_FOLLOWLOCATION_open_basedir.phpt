@@ -1,5 +1,5 @@
 --TEST--
-CURLOPT_FOLLOWLOCATION case check safe_mode and open_basedir
+CURLOPT_FOLLOWLOCATION case check open_basedir
 --CREDITS--
 WHITE new media architects - Dennis
 --INI--
@@ -17,6 +17,6 @@ curl_close($ch);
 var_dump($succes);
 ?>
 --EXPECTF--
-Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when %r(in safe_mode or an )?%ropen_basedir is set in %s.php on line %d
+Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set in %s.php on line %d
 bool(false)
 

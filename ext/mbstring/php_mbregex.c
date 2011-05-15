@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -372,7 +372,7 @@ static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 	const char *p;
 	php_mb_regex_enc_name_map_t *mapping;
 
-	if (pname == NULL) {
+	if (pname == NULL || !*pname) {
 		return ONIG_ENCODING_UNDEF;
 	}
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 typedef int uid_t;
 typedef int gid_t;
 typedef char * caddr_t;
-#define lstat(x, y) stat(x, y)
+#define lstat(x, y) php_sys_lstat(x, y)
 #define		_IFIFO	0010000	/* fifo */
 #define		_IFBLK	0060000	/* block special */
 #define		_IFLNK	0120000	/* symbolic link */
@@ -47,7 +47,7 @@ typedef char * caddr_t;
 #define mkdir(a, b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)
 #define getpid		_getpid
-#define php_sleep(t)	Sleep(t*1000)
+#define php_sleep(t)	SleepEx(t*1000, TRUE)
 #ifndef getcwd
 # define getcwd(a, b)		_getcwd(a, b)
 #endif

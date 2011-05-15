@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2009 The PHP Group                                |
+  | Copyright (c) 2005-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 			entry.tmp = estrndup(filename, filename_len);
 		}
 	}
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && !is_phar && (!php_checkuid(entry.tmp, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		efree(entry.tmp);
 		efree(entry.filename);
@@ -850,7 +850,7 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 	if (phar_get_pharfp(phar TSRMLS_CC)) {
 		return SUCCESS;
 	}
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
 	}
@@ -2213,7 +2213,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
 {
-	char *s;
+	const char *s;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;

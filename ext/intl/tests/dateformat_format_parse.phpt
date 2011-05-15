@@ -187,16 +187,13 @@ Input timestamp is : 2200000000
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
 Formatted timestamp is : Monday, September 19, 2039 4:06:40 AM GMT+05:00
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : 2200000000
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
 Formatted timestamp is : September 19, 2039 4:06:40 AM GMT+05:00
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : 2200000000
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
 Formatted timestamp is : Sep 19, 2039 4:06:40 AM
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : 2200000000
 ------------
 
 Input timestamp is : -2200000000
@@ -204,16 +201,13 @@ Input timestamp is : -2200000000
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
 Formatted timestamp is : Sunday, April 15, 1900 5:53:20 AM GMT+05:00
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : -2200000000
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
 Formatted timestamp is : April 15, 1900 5:53:20 AM GMT+05:00
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : -2200000000
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
 Formatted timestamp is : Apr 15, 1900 5:53:20 AM
-Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
-The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
+Parsed timestamp is : -2200000000
 ------------
 
 Input timestamp is : 90099999

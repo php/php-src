@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -176,19 +176,27 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				}	
 			}
 		}	
-	} else if (e) { /* no scheme, look for port */
+	} else if (e) { /* no scheme; starts with colon: look for port */
 		parse_port:
 		p = e + 1;
 		pp = p;
-		
+
 		while (pp-p < 6 && isdigit(*pp)) {
 			pp++;
 		}
-		
-		if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
-			memcpy(port_buf, p, (pp-p));
-			port_buf[pp-p] = '\0';
-			ret->port = atoi(port_buf);
+
+		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
+			long port;
+			memcpy(port_buf, p, (pp - p));
+			port_buf[pp - p] = '\0';
+			port = strtol(port_buf, NULL, 10);
+			if (port > 0 && port <= 65535) {
+				ret->port = (unsigned short) port;
+			} else {
+				STR_FREE(ret->scheme);
+				efree(ret);
+				return NULL;
+			}
 		} else {
 			goto just_path;
 		}
@@ -264,9 +272,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
-				memcpy(port_buf, p, (e-p));
-				port_buf[e-p] = '\0';
-				ret->port = atoi(port_buf);
+				long port;
+				memcpy(port_buf, p, (e - p));
+				port_buf[e - p] = '\0';
+				port = strtol(port_buf, NULL, 10);
+				if (port > 0 && port <= 65535) {
+					ret->port = (unsigned short)port;
+				} else {
+					STR_FREE(ret->scheme);
+					STR_FREE(ret->user);
+					STR_FREE(ret->pass);
+					efree(ret);
+					return NULL;
+				}
 			}
 			p--;
 		}	
@@ -298,6 +316,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		pp = strchr(s, '#');
 
 		if (pp && pp < p) {
+			if (pp - s) {
+				ret->path = estrndup(s, (pp-s));
+				php_replace_controlchars_ex(ret->path, (pp - s));
+			}
 			p = pp;
 			goto label_parse;
 		}
@@ -355,7 +377,7 @@ PHP_FUNCTION(parse_url)
 
 	resource = php_url_parse_ex(str, str_len);
 	if (resource == NULL) {
-		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse URL");
+		/* @todo Find a method to determine why php_url_parse_ex() failed */
 		RETURN_FALSE;
 	}
 
@@ -585,7 +607,7 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 			str[y++] = hexchars[(unsigned char) s[x] >> 4];
 			str[y] = hexchars[(unsigned char) s[x] & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(str[y]) && strchr("_-.", str[y]) != NULL) {
+		if (!isalnum(str[y]) && strchr("_-.~", str[y]) != NULL) {
 			str[y++] = '%';
 			str[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
 			str[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
@@ -680,7 +702,7 @@ PHP_FUNCTION(get_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;

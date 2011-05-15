@@ -23,7 +23,6 @@ echo isset($simpleString[0])?"ok\n":"bug\n";
 echo isset($simpleString["0"])?"ok\n":"bug\n";
 echo isset($simpleString["16"])?"ok\n":"bug\n";
 echo isset($simpleString["17"])?"bug\n":"ok\n";
-echo isset($simpleString["wrong"][0])?"bug\n":"ok\n";
 echo $simpleString->wrong === null?"ok\n":"bug\n";
 echo $simpleString["wrong"] === "B"?"ok\n":"bug\n";
 echo $simpleString["0"] === "B"?"ok\n":"bug\n";
@@ -37,7 +36,6 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
-ok
 ok
 ok
 ok

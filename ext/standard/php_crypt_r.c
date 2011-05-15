@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,11 @@
 # include <Wincrypt.h>
 #endif
 
-#include <signal.h>
+#ifdef HAVE_ATOMIC_H /* Solaris 10 defines atomic API within */
+# include <atomic.h>
+#else
+# include <signal.h>
+#endif
 #include "php_crypt_r.h"
 #include "crypt_freesec.h"
 
@@ -75,17 +79,28 @@ void php_shutdown_crypt_r()
 
 void _crypt_extended_init_r(void)
 {
+#ifdef PHP_WIN32
+	LONG volatile initialized = 0;
+#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
+	volatile unsigned int initialized = 0;
+#else
 	static volatile sig_atomic_t initialized = 0;
+#endif
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_crypt_extended_init_lock);
 #endif
 
-	if (initialized) {
-		return;
-	} else {
+	if (!initialized) {
+#ifdef PHP_WIN32
+		InterlockedIncrement(&initialized);
+#elif (defined(__GNUC__) && (__GNUC__ >= 4 && __GNUC_MINOR__ >= 2))
+		__sync_fetch_and_add(&initialized, 1);
+#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
+		membar_producer();
+		atomic_add_int(&initialized, 1);
+#endif
 		_crypt_extended_init();
-		initialized = 1;
 	}
 #ifdef ZTS
 	tsrm_mutex_unlock(php_crypt_extended_init_lock);
@@ -204,19 +219,12 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 
 	memcpy(passwd, MD5_MAGIC, MD5_MAGIC_LEN);
 
-#if _MSC_VER >= 1500
 	if (strncpy_s(passwd + MD5_MAGIC_LEN, MD5_HASH_MAX_LEN - MD5_MAGIC_LEN, sp, sl + 1) != 0) {
 		goto _destroyCtx1;
 	}
 	passwd[MD5_MAGIC_LEN + sl] = '\0';
 	strcat_s(passwd, MD5_HASH_MAX_LEN, "$");
-#else
-	/* VC6 version doesn't have strcat_s or strncpy_s */
-	if (strncpy(passwd + MD5_MAGIC_LEN, sp, sl + 1) < sl) {
-		goto _destroyCtx1;
-	}
-	strcat(passwd, "$");
-#endif
+
 	dwHashLen = 16;
 
 	/* Fetch the ctx hash value */

@@ -22,7 +22,6 @@ require_once('skipifconnectfailure.inc');
 		'autocommit'			=> true,
 		'change_user'			=> true,
 		'character_set_name'		=> true,
-		'client_encoding'		=> true,
 		'close'				=> true,
 		'commit'	=> true,
 		'connect'			=> true,
@@ -50,6 +49,7 @@ require_once('skipifconnectfailure.inc');
 		'select_db'			=> true,
 		'set_charset'			=> true,
 		'set_opt'			=> true,
+		'ssl_set'			=> true,
 		'stat'				=> true,
 		'stmt_init'			=> true,
 		'store_result'			=> true,
@@ -58,11 +58,10 @@ require_once('skipifconnectfailure.inc');
 	);
 	if ($IS_MYSQLND) {
 		// mysqlnd only
-		/* $expected_methods['get_cache_stats']		= true; */
 		/* $expected_methods['get_client_stats']	= true; */
 		$expected_methods['get_connection_stats']	= true;
-		$expected_methods['poll']	= true;
 		$expected_methods['reap_async_query']	= true;
+		$expected_methods['poll'] = true;
 	} else {
 		// libmysql only
 		if (function_exists('mysqli_ssl_set'))

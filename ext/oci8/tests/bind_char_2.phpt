@@ -5,9 +5,17 @@ SELECT oci_bind_by_name with SQLT_AFC aka CHAR and dates
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/Release 1[12]\./', $sv, $matches);
+$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 11g+ database");
+	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+} else {
+    ob_start();
+    phpinfo(INFO_MODULES);
+    $phpinfo = ob_get_clean();
+    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
+    if ($iv != 1) {
+        die ("skip test expected to work only with Oracle 11g or greater version of client");
+    }
 }
 ?>
 --FILE--
@@ -115,7 +123,8 @@ Test 1.4: Type: AFC:  Length: strlen
     :2008-04-20:
 Test 1.5: Type: AFC.  Length: strlen-1
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
+    :1:
+    :2008-04-20:
 Test 1.6: Type: AFC.  Length: strlen+1
   Querying:
     :1:

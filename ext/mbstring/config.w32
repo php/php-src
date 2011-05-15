@@ -7,7 +7,7 @@ ARG_ENABLE("mbregex-backtrack", "check multibyte regex backtrack", "yes");
 
 if (PHP_MBSTRING != "no") {
 
-	FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.vc6",
+	FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
 	   	"ext\\mbstring\\libmbfl\\config.h", true);
 	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
 		"ext\\mbstring\\oniguruma\\config.h", true);
@@ -54,6 +54,8 @@ if (PHP_MBSTRING != "no") {
 	AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
 	AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
+	PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h oniguruma/oniguruma.h php_mbregex.h php_onig_compat.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
+
 	if (PHP_MBREGEX != "no") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		AC_DEFINE('HAVE_MBREGEX', 1);
@@ -72,5 +74,6 @@ if (PHP_MBSTRING != "no") {
 			koi8.c koi8_r.c sjis.c utf8.c unicode.c utf16_be.c utf16_le.c \
 			utf32_be.c utf32_le.c gb18030.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
+		PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
 	}
 }

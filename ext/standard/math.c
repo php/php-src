@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,8 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
+
+#include "basic_functions.h"
 
 /* {{{ php_intlog10abs
    Returns floor(log10(fabs(val))), uses fast binary search */
@@ -127,7 +129,11 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	double tmp_value;
 	int precision_places;
 
-	precision_places = 14 - php_intlog10abs(value);
+	if ((precision_places = php_intlog10abs(value)) > 0) {
+		precision_places = 14 - php_intlog10abs(value);
+	} else {
+		precision_places = 14;
+	}
 
 	f1 = php_intpow10(abs(places));
 
@@ -690,7 +696,11 @@ PHP_FUNCTION(log)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "base must be greater than 0");				
 		RETURN_FALSE;
 	}
-	RETURN_DOUBLE(log(num) / log(base));
+	if (base == 1) {
+		RETURN_DOUBLE(php_get_nan());
+	} else {
+		RETURN_DOUBLE(log(num) / log(base));
+	}
 }
 /* }}} */
 
@@ -1072,6 +1082,11 @@ PHP_FUNCTION(base_convert)
 */
 PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
+	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
+}
+
+PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+{
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
@@ -1111,7 +1126,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral += (integral-1) / 3;
+		integral += thousand_sep_len * ((integral-1) / 3);
 	}
 	
 	reslen = integral;
@@ -1120,7 +1135,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 		reslen += dec;
 
 		if (dec_point) {
-			reslen++;
+			reslen += dec_point_len;
 		}
 	}
 
@@ -1156,7 +1171,8 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 
 		/* add decimal point */
 		if (dec_point) {
-			*t-- = dec_point;
+			t -= dec_point_len;
+			memcpy(t + 1, dec_point, dec_point_len);
 		}
 	}
 
@@ -1165,7 +1181,8 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	while(s >= tmpbuf) {
 		*t-- = *s--;
 		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
-			*t-- = thousand_sep;
+			t -= thousand_sep_len;
+			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
 	}
 
@@ -1202,21 +1219,17 @@ PHP_FUNCTION(number_format)
 		RETURN_STRING(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr), 0);
 		break;
 	case 4:
-		if (dec_point != NULL) {
-			if (dec_point_len) {
-				dec_point_chr = dec_point[0];
-			} else {
-				dec_point_chr = 0;
-			}
+		if (dec_point == NULL) {
+			dec_point = &dec_point_chr;
+			dec_point_len = 1;
 		}
-		if (thousand_sep != NULL) {
-			if (thousand_sep_len) {
-				thousand_sep_chr = thousand_sep[0];
-			} else {
-				thousand_sep_chr = 0;	
-			}
+
+		if (thousand_sep == NULL) {
+			thousand_sep = &thousand_sep_chr;
+			thousand_sep_len = 1;
 		}
-		RETURN_STRING(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr), 0);
+
+		RETURN_STRING(_php_math_number_format_ex(num, dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len), 0);
 		break;
 	default:
 		WRONG_PARAM_COUNT;

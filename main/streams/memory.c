@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,6 @@ typedef struct {
 	size_t      fsize;
 	size_t      smax;
 	int			mode;
-	php_stream  **owner_ptr;
 } php_stream_memory_data;
 
 
@@ -111,9 +110,6 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 
 	if (ms->data && close_handle && ms->mode != TEMP_STREAM_READONLY) {
 		efree(ms->data);
-	}
-	if (ms->owner_ptr) {
-		*ms->owner_ptr = NULL;
 	}
 	efree(ms);
 	return 0;
@@ -301,7 +297,6 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->fsize = 0;
 	self->smax = ~0u;
 	self->mode = mode;
-	self->owner_ptr = NULL;
 	
 	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
@@ -376,8 +371,9 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		if (memsize + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_tmpfile();
 			php_stream_write(file, membuf, memsize);
-			php_stream_close(ts->innerstream);
+			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
+			php_stream_encloses(stream, ts->innerstream);
 		}
 	}
 	return php_stream_write(ts->innerstream, buf, count);
@@ -415,7 +411,7 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(ts != NULL);
 
 	if (ts->innerstream) {
-		ret = php_stream_free(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
+		ret = php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
 	} else {
 		ret = 0;
 	}
@@ -499,9 +495,10 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
-
-	php_stream_close(ts->innerstream);
+	
+	php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 	ts->innerstream = file;
+	php_stream_encloses(stream, ts->innerstream);
 	php_stream_seek(ts->innerstream, pos, SEEK_SET);
 
 	return php_stream_cast(ts->innerstream, castas, ret, 1);
@@ -563,8 +560,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
-	php_stream_auto_cleanup(self->innerstream); /* do not warn if innerstream is GC'ed before stream */
-	((php_stream_memory_data*)self->innerstream->abstract)->owner_ptr = &self->innerstream;
+	php_stream_encloses(stream, self->innerstream);
 
 	return stream;
 }

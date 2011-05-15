@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2009 The PHP Group                                |
+  | Copyright (c) 2006-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,9 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
-		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
+		if ((packet)) { \
+			((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
+		} \
 	} while (0);
 
 PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
@@ -51,7 +53,7 @@ typedef struct st_mysqlnd_packet_methods {
 	size_t				struct_size;
 	enum_func_status	(*read_from_net)(void *packet, MYSQLND *conn TSRMLS_DC);
 	size_t				(*write_to_net)(void *packet, MYSQLND *conn TSRMLS_DC);
-	void				(*free_mem)(void *packet, zend_bool alloca TSRMLS_DC);
+	void				(*free_mem)(void *packet, zend_bool stack_allocation TSRMLS_DC);
 } mysqlnd_packet_methods;
 
 
@@ -68,17 +70,20 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
-	zend_uchar	scramble_buf[SCRAMBLE_LENGTH];
+	zend_uchar	intern_auth_plugin_data[SCRAMBLE_LENGTH];
+	zend_uchar	* auth_plugin_data;
+	size_t		auth_plugin_data_len;
 	/* 1 byte pad */
-	uint16_t	server_capabilities;
+	uint32_t	server_capabilities;
 	uint8_t		charset_no;
 	uint16_t	server_status;
-	/* 13 byte pad*/
+	/* 13 byte pad, in 5.5 first 2 bytes are more capabilities followed by 1 byte scramble_length */
 	zend_bool	pre41;
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int 	error_no;
+	unsigned int	error_no;
+	char		*auth_protocol;
 } MYSQLND_PACKET_GREET;
 
 
@@ -87,19 +92,49 @@ typedef struct st_mysqlnd_packet_auth {
 	MYSQLND_PACKET_HEADER		header;
 	uint32_t	client_flags;
 	uint32_t	max_packet_size;
-	uint8_t	charset_no;
-	/* 23 byte pad */
+	uint8_t		charset_no;
 	const char	*user;
-	/* 8 byte scramble */
+	const zend_uchar	*auth_data;
+	size_t		auth_data_len;
 	const char	*db;
-	/* 12 byte scramble */
-
+	const char	*auth_plugin_name;
 	/* Here the packet ends. This is user supplied data */
-	const char	*password;
-	/* +1 for \0 because of scramble() */
-	unsigned char	*server_scramble_buf;
-	size_t			db_len;
+	size_t		db_len;
+	zend_bool	send_auth_data;
+	zend_bool	is_change_user_packet;
+	zend_bool	silent;
+
 } MYSQLND_PACKET_AUTH;
+
+/* Auth response packet */
+typedef struct st_mysqlnd_packet_auth_response {
+	MYSQLND_PACKET_HEADER		header;
+	uint8_t		response_code;
+	uint64_t	affected_rows;
+	uint64_t	last_insert_id;
+	uint16_t	server_status;
+	uint16_t	warning_count;
+	char		*message;
+	size_t		message_len;
+	/* If error packet, we use these */
+	char 		error[MYSQLND_ERRMSG_SIZE+1];
+	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	unsigned int 	error_no;
+
+	char		*new_auth_protocol;
+	size_t		new_auth_protocol_len;
+	zend_uchar	*new_auth_protocol_data;
+	size_t		new_auth_protocol_data_len;
+} MYSQLND_PACKET_AUTH_RESPONSE;
+
+
+/* Auth response packet */
+typedef struct st_mysqlnd_packet_change_auth_response {
+	MYSQLND_PACKET_HEADER		header;
+	const zend_uchar	*auth_data;
+	size_t				auth_data_len;
+} MYSQLND_PACKET_CHANGE_AUTH_RESPONSE;
+
 
 /* OK packet */
 typedef struct st_mysqlnd_packet_ok {
@@ -122,7 +157,7 @@ typedef struct st_mysqlnd_packet_ok {
 typedef struct st_mysqlnd_packet_command {
 	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
-	const char						*argument;
+	const zend_uchar				*argument;
 	size_t							arg_len;
 } MYSQLND_PACKET_COMMAND;
 
@@ -236,40 +271,44 @@ typedef struct st_mysqlnd_packet_prepare_response {
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_chg_user_resp {
 	MYSQLND_PACKET_HEADER	header;
-	uint32_t			field_count;
+	uint32_t			response_code;
 
 	/* message_len is not part of the packet*/
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
+	zend_bool			server_asked_323_auth;
+
+	char		*new_auth_protocol;
+	size_t		new_auth_protocol_len;
+	zend_uchar	*new_auth_protocol_data;
+	size_t		new_auth_protocol_data_len;
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
-PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
+PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 
-PHPAPI extern char * const mysqlnd_empty_string;
+PHPAPI const extern char * const mysqlnd_empty_string;
 
 
-void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
 
-void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
 
 PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);
-PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * net TSRMLS_DC);
-
+PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC);
+PHPAPI struct st_mysqlnd_protocol_methods * mysqlnd_protocol_get_methods();
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

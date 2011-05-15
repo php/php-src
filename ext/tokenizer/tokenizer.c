@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -151,6 +151,10 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		ZVAL_NULL(&token);
 
 		token_line = CG(zend_lineno);
+
+		if (token_type == T_HALT_COMPILER) {
+			break;
+		}
 	}
 }
 
@@ -164,15 +168,16 @@ PHP_FUNCTION(token_get_all)
 	zval source_z;
 	zend_lex_state original_lex_state;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) 
+	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
+	}
 
 	ZVAL_STRINGL(&source_z, source, source_len, 1);
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	if (zend_prepare_string_for_scanning(&source_z, "" TSRMLS_CC) == FAILURE) {
 		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-		RETURN_EMPTY_STRING();
+		RETURN_FALSE;
 	}
 
 	LANG_SCNG(yy_state) = yycINITIAL;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,13 +39,12 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "safe_mode.h"
 #include "php_link.h"
 #include "php_string.h"
 
 /*
 TODO:
-- Create php_readlink, php_link and php_symlink in win32/link.c
+- Create php_readlink (done), php_link and php_symlink in win32/link.c
 - Expose them (PHPAPI) so extensions developers can use them
 - define link/readlink/symlink to their php_ equivalent and use them in ext/standart/link.c
 - this file is then useless and we have a portable link API
@@ -63,29 +62,9 @@ TODO:
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
-	HINSTANCE kernel32;
 	char *link;
 	int link_len;
-	TCHAR Path[MAXPATHLEN];
-	char path_resolved[MAXPATHLEN];
-	HANDLE hFile;
-	DWORD dwRet;
-
-	typedef BOOL (WINAPI *gfpnh_func)(HANDLE, LPTSTR, DWORD, DWORD);
-	gfpnh_func pGetFinalPathNameByHandle;
-
-	kernel32 = LoadLibrary("kernel32.dll");
-
-	if (kernel32) {
-		pGetFinalPathNameByHandle = (gfpnh_func)GetProcAddress(kernel32, "GetFinalPathNameByHandleA");
-		if (pGetFinalPathNameByHandle == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't call GetFinalPathNameByHandleA");
-			RETURN_FALSE;
-		}
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't call get a handle on kernel32.dll");
-		RETURN_FALSE;
-	}
+	char target[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
 		return;
@@ -94,42 +73,11 @@ PHP_FUNCTION(readlink)
 	if (OPENBASEDIR_CHECKPATH(link)) {
 		RETURN_FALSE;
 	}
-	if (!expand_filepath(link, path_resolved TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
-		RETURN_FALSE;
+
+	if (php_sys_readlink(link, target, MAXPATHLEN) == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
 	}
-	hFile = CreateFile(path_resolved,                  // file to open
-				 GENERIC_READ,          // open for reading
-				 FILE_SHARE_READ,       // share for reading
-				 NULL,                  // default security
-				 OPEN_EXISTING,         // existing file only
-				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
-				 NULL);                 // no attr. template
-
-	if( hFile == INVALID_HANDLE_VALUE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open file (error %d)", GetLastError());
-			RETURN_FALSE;
-	}
-
-	dwRet = pGetFinalPathNameByHandle(hFile, Path, MAXPATHLEN, VOLUME_NAME_DOS);
-	if(dwRet >= MAXPATHLEN) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't resolve the full path, the path exceeds the MAX_PATH_LEN (%d) limit", MAXPATHLEN);
-		RETURN_FALSE;
-	}
-
-	CloseHandle(hFile);
-
-	/* Append NULL to the end of the string */
-	Path[dwRet] = '\0';
-
-	if(dwRet > 4) {
-		/* Skip first 4 characters if they are "\??\" */
-		if(Path[0] == '\\' && Path[1] == '\\' && Path[2] == '?' && Path[3] ==  '\\') {
-			RETURN_STRING(Path + 4, 1);
-		}
-	} else {
-		RETURN_STRING(Path, 1);
-	}
+	RETURN_STRING(target, 1);
 }
 /* }}} */
 

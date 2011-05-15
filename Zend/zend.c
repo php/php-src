@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -88,12 +89,25 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
+{
+	if (!CG(multibyte)) {
+		return FAILURE;
+	}
+	if (!zend_multibyte_get_functions(TSRMLS_C)) {
+		return SUCCESS;
+	}
+	return zend_multibyte_set_script_encoding_by_string(new_value, new_value_length TSRMLS_CC);
+}
+/* }}} */
+
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
-#ifdef ZEND_MULTIBYTE
- 	STD_ZEND_INI_BOOLEAN("detect_unicode", "1", ZEND_INI_ALL, OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
-#endif
+ 	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
+ 	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
+ 	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
 ZEND_INI_END()
 
 
@@ -114,7 +128,7 @@ ZEND_API zval zval_used_for_init; /* True global variable */
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2010 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2011 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object TSRMLS_DC) /* {{{ */
@@ -441,12 +455,10 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_
 #ifdef ZTS
 static zend_bool asp_tags_default		  = 0;
 static zend_bool short_tags_default		  = 1;
-static zend_bool ct_pass_ref_default	  = 1;
 static zend_uint compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define asp_tags_default			0
 # define short_tags_default			1
-# define ct_pass_ref_default		1
 # define compiler_options_default	ZEND_COMPILE_DEFAULT
 #endif
 
@@ -455,7 +467,6 @@ static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
 	/* default compile-time values */
 	CG(asp_tags) = asp_tags_default;
 	CG(short_tags) = short_tags_default;
-	CG(allow_call_time_pass_reference) = ct_pass_ref_default;
 	CG(compiler_options) = compiler_options_default;
 }
 /* }}} */
@@ -464,19 +475,19 @@ static void zend_init_exception_op(TSRMLS_D) /* {{{ */
 {
 	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
 	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[0].op1.op_type = IS_UNUSED;
-	EG(exception_op)[0].op2.op_type = IS_UNUSED;
-	EG(exception_op)[0].result.op_type = IS_UNUSED;
+	EG(exception_op)[0].op1_type = IS_UNUSED;
+	EG(exception_op)[0].op2_type = IS_UNUSED;
+	EG(exception_op)[0].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
 	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[1].op1.op_type = IS_UNUSED;
-	EG(exception_op)[1].op2.op_type = IS_UNUSED;
-	EG(exception_op)[1].result.op_type = IS_UNUSED;
+	EG(exception_op)[1].op1_type = IS_UNUSED;
+	EG(exception_op)[1].op2_type = IS_UNUSED;
+	EG(exception_op)[1].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
 	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[2].op1.op_type = IS_UNUSED;
-	EG(exception_op)[2].op2.op_type = IS_UNUSED;
-	EG(exception_op)[2].result.op_type = IS_UNUSED;
+	EG(exception_op)[2].op1_type = IS_UNUSED;
+	EG(exception_op)[2].op2_type = IS_UNUSED;
+	EG(exception_op)[2].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
 }
 /* }}} */
@@ -507,10 +518,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members = (HashTable**)calloc(compiler_globals->last_static_member, sizeof(HashTable*));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval**));
 	} else {
-		compiler_globals->static_members = NULL;
+		compiler_globals->static_members_table = NULL;
 	}
+	compiler_globals->script_encoding_list = NULL;
 }
 /* }}} */
 
@@ -528,8 +540,11 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
-	if (compiler_globals->static_members) {
-		free(compiler_globals->static_members);
+	if (compiler_globals->static_members_table) {
+		free(compiler_globals->static_members_table);
+	}
+	if (compiler_globals->script_encoding_list) {
+		pefree(compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
 }
@@ -549,7 +564,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(current_execute_data) = NULL;
 	EG(current_module) = NULL;
 	EG(exit_status) = 0;
-	EG(saved_fpu_cw) = NULL;
+#if XPFPA_HAVE_CW
+	EG(saved_fpu_cw) = 0;
+#endif
+	EG(saved_fpu_cw_ptr) = NULL;
 	EG(active) = 0;
 }
 /* }}} */
@@ -595,6 +613,20 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
+static zend_bool php_auto_globals_create_globals(char *name, uint name_len TSRMLS_DC) /* {{{ */
+{
+	zval *globals;
+
+	ALLOC_ZVAL(globals);
+	Z_SET_REFCOUNT_P(globals, 1);
+	Z_SET_ISREF_P(globals);
+	Z_TYPE_P(globals) = IS_ARRAY;
+	Z_ARRVAL_P(globals) = &EG(symbol_table);
+	zend_hash_update(&EG(symbol_table), name, name_len + 1, &globals, sizeof(zval *), NULL);
+	return 0;
+}
+/* }}} */
+
 int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC) /* {{{ */
 {
 #ifdef ZTS
@@ -636,10 +668,17 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	zend_getenv = utility_functions->getenv_function;
 	zend_resolve_path = utility_functions->resolve_path_function;
 
+#if HAVE_DTRACE
+/* build with dtrace support */
+	zend_compile_file = dtrace_compile_file;
+	zend_execute = dtrace_execute;
+	zend_execute_internal = dtrace_execute_internal;
+#else
 	zend_compile_file = compile_file;
-	zend_compile_string = compile_string;
 	zend_execute = execute;
 	zend_execute_internal = NULL;
+#endif /* HAVE_SYS_SDT_H */
+	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
 
 	zend_init_opcodes_handlers();
@@ -655,7 +694,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
+	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
 	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
 
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
@@ -693,9 +732,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	EG(user_exception_handler) = NULL;
 #endif
 
+	zend_interned_strings_init(TSRMLS_C);
 	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
-	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
+	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, 1, php_auto_globals_create_globals TSRMLS_CC);
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
@@ -735,7 +775,6 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 
 	asp_tags_default = CG(asp_tags);
 	short_tags_default = CG(short_tags);
-	ct_pass_ref_default = CG(allow_call_time_pass_reference);
 	compiler_options_default = CG(compiler_options);
 
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
@@ -756,7 +795,7 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	zend_shutdown_timeout_thread();
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
-	zend_hash_graceful_reverse_destroy(&module_registry);
+	zend_destroy_modules();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -781,6 +820,8 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 	GLOBAL_CONSTANTS_TABLE = NULL;
 #endif
 	zend_destroy_rsrc_list_dtors();
+
+	zend_interned_strings_dtor(TSRMLS_C);
 }
 /* }}} */
 
@@ -852,22 +893,6 @@ void zend_activate(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_activate_modules(TSRMLS_D) /* {{{ */
-{
-	zend_hash_apply(&module_registry, (apply_func_t) module_registry_request_startup TSRMLS_CC);
-}
-/* }}} */
-
-void zend_deactivate_modules(TSRMLS_D) /* {{{ */
-{
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
-
-	zend_try {
-		zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
-	} zend_end_try();
-}
-/* }}} */
-
 void zend_call_destructors(TSRMLS_D) /* {{{ */
 {
 	zend_try {
@@ -918,22 +943,6 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 	zend_try {
 		zend_ini_deactivate(TSRMLS_C);
 	} zend_end_try();
-}
-/* }}} */
-
-static int exec_done_cb(zend_module_entry *module TSRMLS_DC) /* {{{ */
-{
-	if (module->post_deactivate_func) {
-		module->post_deactivate_func();
-	}
-	return 0;
-}
-/* }}} */
-
-void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
-{
-	zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
-	zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_unload_temp TSRMLS_CC);
 }
 /* }}} */
 
@@ -1012,6 +1021,15 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	}
 
 	va_start(args, format);
+
+#ifdef HAVE_DTRACE
+	if(DTRACE_ERROR_ENABLED()) {
+		char *dtrace_error_buffer;
+		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
+		DTRACE_ERROR(dtrace_error_buffer, error_filename, error_lineno);
+		efree(dtrace_error_buffer);
+	}
+#endif /* HAVE_DTRACE */
 
 	/* if we don't have a user defined error handler */
 	if (!EG(user_error_handler)

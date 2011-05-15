@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,18 +95,20 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		if ((pos = php_memnstr(&argv[*optind][arg_start], "=", 1, argv[*optind]+arg_end)) != NULL) {
 			arg_end = pos-&argv[*optind][arg_start];
 			arg_start++;
+		} else {
+			arg_end--;
 		}
- 
 
 		while (1) {
 			php_optidx++;
 			if (opts[php_optidx].opt_char == '-') {
 				(*optind)++;
 				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
-			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end)) {
+			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end) && arg_end == strlen(opts[php_optidx].opt_name)) {
 				break;
 			}
 		}
+
 		optchr = 0;
 		dash = 0;
 		arg_start += strlen(opts[php_optidx].opt_name);

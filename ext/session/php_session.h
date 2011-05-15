@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,6 +95,26 @@ typedef enum {
 	php_session_active
 } php_session_status;
 
+typedef struct _php_session_rfc1867_progress {
+
+	size_t    sname_len;
+	zval      sid;
+	smart_str key;
+
+	long      update_step;
+	long      next_update;
+	double    next_update_time;
+	zend_bool cancel_upload;
+	zend_bool apply_trans_sid;
+	size_t    content_length;
+
+	zval      *data;                 /* the array exported to session data */
+	zval      *post_bytes_processed; /* data["bytes_processed"] */
+	zval      *files;                /* data["files"] array */
+	zval      *current_file;         /* array of currently uploading file */
+	zval      *current_file_bytes_processed;
+} php_session_rfc1867_progress;
+
 typedef struct _php_ps_globals {
 	char *save_path;
 	char *session_name;
@@ -127,8 +147,6 @@ typedef struct _php_ps_globals {
 			zval *ps_gc;
 		} name;
 	} mod_user_names;
-	zend_bool bug_compat; /* Whether to behave like PHP 4.2 and earlier */
-	zend_bool bug_compat_warn; /* Whether to warn about it */
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
@@ -145,6 +163,14 @@ typedef struct _php_ps_globals {
 	int send_cookie;
 	int define_sid;
 	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
+
+	php_session_rfc1867_progress *rfc1867_progress;
+	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
+	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
+	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
+	smart_str rfc1867_name;    /* session.upload_progress.name */
+	long rfc1867_freq;         /* session.upload_progress.freq */
+	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

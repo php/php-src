@@ -45,18 +45,15 @@ require_once('skipifconnectfailure.inc');
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	$stmt->prepare("SELECT * FROM test");
-	
-	mt_srand(microtime(true));
 
-	/* mysqlnd detects invalid attributes, libmysql does not AFAIK */
-	$invalid_ret = ($IS_MYSQLND) ? false : true;
+	mt_srand(microtime(true));
 
 	for ($i = -100; $i < 1000; $i++) {
 		if (in_array($i, $valid_attr))
 			continue;
 		$invalid_attr = $i;
-		if ($invalid_ret !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-			printf("[006a] Expecting boolean/%s for attribute %d, got %s/%s\n", $invalid_ret, $invalid_attr, gettype($tmp), $tmp);
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
+			printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
 		}
 	}
 
@@ -64,8 +61,8 @@ require_once('skipifconnectfailure.inc');
 		do {
 			$invalid_attr = mt_rand(-1 * (min(4294967296, PHP_INT_MAX) + 1), min(4294967296, PHP_INT_MAX));
 		} while (in_array($invalid_attr, $valid_attr));
-		if ($invalid_ret !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-			printf("[006b] Expecting boolean/%s for attribute %d, got %s/%s\n", $invalid_ret, $invalid_attr, gettype($tmp), $tmp);
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
+			printf("[006b] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
 		}
 	}
 	$stmt->close();
@@ -95,6 +92,9 @@ require_once('skipifconnectfailure.inc');
 	$stmt = mysqli_stmt_init($link);
 	$stmt->prepare("SELECT label FROM test");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
+	if ($res !== 1)
+		printf("[007.1] max_length should be 1, got %s\n", $res);
 	$stmt->execute();
 	$stmt->store_result();
 	$res = $stmt->result_metadata();
@@ -112,6 +112,9 @@ require_once('skipifconnectfailure.inc');
 	$stmt = mysqli_stmt_init($link);
 	$stmt->prepare("SELECT label FROM test");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 0);
+	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
+	if ($res !== 0)
+		printf("[008.1] max_length should be 0, got %s\n", $res);
 	$stmt->execute();
 	$stmt->store_result();
 	$res = $stmt->result_metadata();

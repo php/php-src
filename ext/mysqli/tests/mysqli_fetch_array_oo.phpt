@@ -76,23 +76,26 @@ require_once('skipifconnectfailure.inc');
 		}
 
 		if (!$mysqli->query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
-			print $sql;
-			// don't bail, engine might not support the datatype
-			return false;
+				// don't bail, engine might not support the datatype
+				return false;
 		}
 
-		if (is_null($php_value) && !$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-			printf("[%04d] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
-			return false;
-		}
-
-		if (!is_null($php_value)) {
-			if (is_int($sql_value) && !$mysqli->query(sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
+		if (is_null($php_value)) {
+			if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
 				printf("[%04d] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
 				return false;
-			} else if (!is_int($sql_value) && !$mysqli->query(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $sql_value))) {
-				printf("[%04d] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
-				return false;
+			}
+		} else {
+			if (is_string($sql_value)) {
+				if (!$mysqli->query($sql = "INSERT INTO test(id, label) VALUES (1, '" . $sql_value . "')")) {
+					printf("[%04ds] [%d] %s - %s\n", $offset + 1, $mysqli->errno, $mysqli->error, $sql);
+					return false;
+				}
+			} else {
+				if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
+					printf("[%04di] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
+					return false;
+				}
 			}
 		}
 
@@ -163,30 +166,30 @@ require_once('skipifconnectfailure.inc');
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", -2147483648, "-2147483648", 200);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", 2147483647, "2147483647", 210);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER", NULL, NULL, 220);
-	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", 4294967295, "4294967295", 230);
+	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
 	func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
 	if ($IS_MYSQLND ||
 		((mysqli_get_server_version($link) >= 51000) &&
 		 (mysqli_get_client_version($link) >= 51000))) {
-		func_mysqli_fetch_array($mysqli, $engine, "BIGINT", -9223372036854775808, "-9223372036854775808", 250);
+		func_mysqli_fetch_array($mysqli, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
 		func_mysqli_fetch_array($mysqli, $engine, "BIGINT", NULL, NULL, 260);
-		func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", 18446744073709551615, "18446744073709551615", 270);
+		func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 270);
 		func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 	}
 
-	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
+	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", (string)(-9223372036854775808 - 1.1), "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
 	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", NULL, NULL, 300);
-	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
+	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED", (string)(18446744073709551615 + 1.1), "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
 	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED ", NULL, NULL, 320);
 
-	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2)", -99999999.99, "-99999999.99", 330);
+	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2)", "-99999999.99", "-99999999.99", 330);
 	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2)", NULL, NULL, 340);
-	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2) UNSIGNED", 99999999.99, "99999999.99", 350);
+	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2) UNSIGNED", "99999999.99", "99999999.99", 350);
 	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2) UNSIGNED", NULL, NULL, 360);
-	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", -99999999.99, "-99999999.99", 370);
+	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", "-99999999.99", "-99999999.99", 370);
 	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", NULL, NULL, 380);
-	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", 99999999.99, "99999999.99", 390);
+	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", "99999999.99", "99999999.99", 390);
 	func_mysqli_fetch_array($mysqli, $engine, "DECIMAL(10,2)", NULL, NULL, 400);
 
 	// don't care about date() strict TZ warnings...
@@ -214,10 +217,10 @@ require_once('skipifconnectfailure.inc');
 	func_mysqli_fetch_array($mysqli, $engine, "CHAR(1) NOT NULL", "a", "a", 560);
 	func_mysqli_fetch_array($mysqli, $engine, "CHAR(1)", NULL, NULL, 570);
 
-	$string65k = func_mysqli_fetch_array_make_string(65535);
+	$string65k = func_mysqli_fetch_array_make_string(65400);
 	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(1)", "a", "a", 580);
 	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(255)", $string255, $string255, 590);
-	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(65635)", $string65k, $string65k, 600);
+	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(65400)", $string65k, $string65k, 600);
 	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(1) NOT NULL", "a", "a", 610);
 	func_mysqli_fetch_array($mysqli, $engine, "VARCHAR(1)", NULL, NULL, 620);
 

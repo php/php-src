@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -118,7 +118,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
 
 	stream = php_stream_xport_create(name, namelen,
-		ENFORCE_SAFE_MODE | REPORT_ERRORS,
+		REPORT_ERRORS,
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
 		timeout,
@@ -137,6 +137,13 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		smart_str_appendc(&soap_headers, ':');
 		smart_str_append_unsigned(&soap_headers, phpurl->port);
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
+		smart_str_append_const(&soap_headers, "Host: ");
+		smart_str_appends(&soap_headers, phpurl->host);
+		if (phpurl->port != 80) {
+			smart_str_appendc(&soap_headers, ':');
+			smart_str_append_unsigned(&soap_headers, phpurl->port);
+		}
+		smart_str_append_const(&soap_headers, "\r\n");
 		proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		smart_str_append_const(&soap_headers, "\r\n");
 		if (php_stream_write(stream, soap_headers.c, soap_headers.len) != soap_headers.len) {
@@ -212,6 +219,9 @@ int make_http_soap_request(zval  *this_ptr,
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
+	zend_bool has_authorization = 0;
+	zend_bool has_proxy_authorization = 0;
+	zend_bool has_cookies = 0;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -377,7 +387,7 @@ try_again:
 
 	if (stream) {
 		zval **cookies, **login, **password;
-	  int ret = zend_list_insert(phpurl, le_url);
+	  int ret = zend_list_insert(phpurl, le_url TSRMLS_CC);
 
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
@@ -480,6 +490,7 @@ try_again:
 		    Z_TYPE_PP(login) == IS_STRING) {
 			zval **digest;
 
+			has_authorization = 1;
 			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"), (void **)&digest) == SUCCESS) {
 				if (Z_TYPE_PP(digest) == IS_ARRAY) {
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
@@ -651,6 +662,7 @@ try_again:
 
 		/* Proxy HTTP Authentication */
 		if (use_proxy && !use_ssl) {
+			has_proxy_authorization = 1;
 			proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		}
 
@@ -660,6 +672,7 @@ try_again:
 			char *key;
 			int i, n;
 
+			has_cookies = 1;
 			n = zend_hash_num_elements(Z_ARRVAL_PP(cookies));
 			if (n > 0) {
 				zend_hash_internal_pointer_reset(Z_ARRVAL_PP(cookies));
@@ -734,11 +747,14 @@ try_again:
 					     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
 					    (name_len != sizeof("content-type")-1 ||
 					     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-					    (name_len != sizeof("cookie")-1 ||
+					    (!has_cookies ||
+					     name_len != sizeof("cookie")-1 ||
 					     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-					    (name_len != sizeof("authorization")-1 ||
+					    (!has_authorization ||
+					     name_len != sizeof("authorization")-1 ||
 					     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-					    (name_len != sizeof("proxy-authorization")-1 ||
+					    (!has_proxy_authorization ||
+					     name_len != sizeof("proxy-authorization")-1 ||
 					     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
 					    /* add header */
 						smart_str_appendl(&soap_headers, s, p-s);

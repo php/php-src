@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,11 +94,17 @@ static zend_class_entry *dir_class_entry_ptr;
 		if (!dirp) \
 			RETURN_FALSE; \
 	} 
+	
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
+	ZEND_ARG_INFO(0, dir_handle)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,	NULL)
-	PHP_FALIAS(rewind,	rewinddir,	NULL)
-	PHP_NAMED_FE(read,  php_if_readdir, NULL)
+	PHP_FALIAS(close,	closedir,		arginfo_dir)
+	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
+	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
 	{NULL, NULL, NULL}
 };
 
@@ -141,6 +147,10 @@ PHP_MINIT_FUNCTION(dir)
 	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_GLOB
 
@@ -215,7 +225,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 	
-	dirp = php_stream_opendir(dirname, ENFORCE_SAFE_MODE|REPORT_ERRORS, context);
+	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
 
 	if (dirp == NULL) {
 		RETURN_FALSE;
@@ -319,7 +329,7 @@ PHP_FUNCTION(chdir)
 		RETURN_FALSE;
 	}
 
-	if ((PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir(str TSRMLS_CC)) {
+	if (php_check_open_basedir(str TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ret = VCWD_CHDIR(str);
@@ -481,7 +491,7 @@ PHP_FUNCTION(glob)
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 no_results:
-		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
 			struct stat s;
 
 			if (0 != VCWD_STAT(pattern, &s) || S_IFDIR != (s.st_mode & S_IFMT)) {
@@ -494,11 +504,8 @@ no_results:
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
-			if (PG(safe_mode) && (!php_checkuid_ex(globbuf.gl_pathv[n], NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS))) {
-				basedir_limit = 1;
-				continue;
-			} else if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
+			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
 				basedir_limit = 1;
 				continue;
 			}
@@ -560,8 +567,10 @@ PHP_FUNCTION(scandir)
 		context = php_stream_context_from_zval(zcontext, 0);
 	}
 
-	if (!flags) {
+	if (flags == PHP_SCANDIR_SORT_ASCENDING) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
+	} else if (flags == PHP_SCANDIR_SORT_NONE) {
+		n = php_stream_scandir(dirn, &namelist, context, NULL);
 	} else {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
 	}

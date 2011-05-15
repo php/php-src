@@ -40,7 +40,7 @@ This is a
 This is b
 This is b/c
 
-Warning: unlink(): phar error: write operations disabled by INI setting in %sdelete_in_phar_b.php on line %d
+Warning: unlink(): phar error: write operations disabled by the php.ini setting phar.readonly in %sdelete_in_phar_b.php on line %d
 ===AFTER===
 This is a
 This is b

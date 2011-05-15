@@ -5,7 +5,6 @@ serializing references test case using globals
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -25,31 +24,28 @@ class TFoo {
 
 session_id("abtest");
 session_start();
-session_register('o1', 'o2' );
 
-$o1 = new TFoo(42);
-$o2 =& $o1;
+$_SESSION["o1"] = new TFoo(42);
+$_SESSION["o2"] =& $_SESSION["o1"];
 
 session_write_close();
 
-unset($o1);
-unset($o2);
+unset($_SESSION["o1"]);
+unset($_SESSION["o2"]);
 
 session_start();
 
 var_dump($_SESSION);
 
-$o1->inc();
-$o2->inc();
+$_SESSION["o1"]->inc();
+$_SESSION["o2"]->inc();
 
 var_dump($_SESSION);
 
 session_destroy();
 ?>
 --EXPECTF--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
-Deprecated: Function session_register() is deprecated in %s on line %d
 array(2) {
   ["o1"]=>
   &object(TFoo)#%d (1) {

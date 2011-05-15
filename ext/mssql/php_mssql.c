@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -539,7 +539,7 @@ PHP_MINFO_FUNCTION(mssql)
 static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host = NULL, *user = NULL, *passwd = NULL;
-	int host_len, user_len, passwd_len;
+	int host_len = 0, user_len = 0, passwd_len = 0;
 	zend_bool new_link = 0;
 	char *hashed_details;
 	int hashed_details_length;
@@ -1059,6 +1059,14 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		unsigned char *res_buf;
 		int res_length = dbdatlen(mssql_ptr->link, offset);
 
+		if (res_length == 0) {
+			ZVAL_NULL(result);
+			return;
+		} else if (res_length < 0) {
+			ZVAL_FALSE(result);
+			return;
+		}
+
 		res_buf = (unsigned char *) emalloc(res_length+1);
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		res_buf[res_length] = '\0';
@@ -1311,6 +1319,7 @@ PHP_FUNCTION(mssql_query)
 	mssql_result *result;
 	int id = -1;
 
+	dbsettime(MS_SQL_G(timeout));
 	batchsize = MS_SQL_G(batchsize);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|rl", &query, &query_len, &mssql_link_index, &zbatchsize) == FAILURE) {
@@ -1989,7 +1998,7 @@ PHP_FUNCTION(mssql_init)
 	statement->link = mssql_ptr;
 	statement->executed=FALSE;
 
-	statement->id = zend_list_insert(statement,le_statement);
+	statement->id = zend_list_insert(statement,le_statement TSRMLS_CC);
 	
 	RETURN_RESOURCE(statement->id);
 }

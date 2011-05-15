@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -36,7 +36,6 @@ typedef struct _zend_lex_state {
 	uint lineno;
 	char *filename;
 
-#ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;
@@ -48,9 +47,7 @@ typedef struct _zend_lex_state {
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	const zend_encoding *script_encoding;
 } zend_lex_state;
 
 
@@ -59,6 +56,8 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC);
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC);
+ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSRMLS_DC);
 
 END_EXTERN_C()
 

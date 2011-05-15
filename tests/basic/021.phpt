@@ -1,7 +1,7 @@
 --TEST--
 Bug #37276 (problems witch $_POST array)
 --INI--
-file_upload=1
+file_uploads=1
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737

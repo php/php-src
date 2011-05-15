@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -395,7 +395,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 				}
 			}
 			if (mr > 1) {
-				if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+				if (PG(open_basedir) && *PG(open_basedir)) {
 					curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 0);
 				} else {
 					curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -403,7 +403,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 				curl_easy_setopt(curlstream->curl, CURLOPT_MAXREDIRS, mr);
 			}
 		} else {
-			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
+			if (PG(open_basedir) && *PG(open_basedir)) {
 				curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 0);
 			} else {
 				curl_easy_setopt(curlstream->curl, CURLOPT_FOLLOWLOCATION, 1);

@@ -33,13 +33,13 @@ string(17) "abuse@example.com"
 bool(false)
 bool(false)
 bool(false)
-string(8) "test@com"
+bool(false)
 bool(false)
 bool(false)
 string(57) "QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET"
-string(26) "e.x.a.m.p.l.e.@example.com"
-string(42) "firstname.lastname@employee.2something.com"
 bool(false)
+string(42) "firstname.lastname@employee.2something.com"
+string(9) "-@foo.com"
 bool(false)
 bool(false)
 bool(false)

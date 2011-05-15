@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,7 @@ PHPAPI OLECHAR *php_com_string_to_olestring(char *string, uint string_len, int c
 	}
 
 	if (!ok) {
-		char *msg = php_win_err(GetLastError());
+		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string to unicode: `%s'", msg);
@@ -70,7 +70,6 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	char *string;
 	uint length = 0;
 	BOOL ok;
-	LONG err;
 
 	length = WideCharToMultiByte(codepage, 0, olestring, -1, NULL, 0, NULL, NULL);
 
@@ -79,7 +78,6 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 		length = WideCharToMultiByte(codepage, 0, olestring, -1, string, length, NULL, NULL);
 		ok = length > 0;
 	} else {
-		err = GetLastError();
 		string = (char*)emalloc(sizeof(char));
 		*string = '\0';
 		ok = FALSE;
@@ -87,7 +85,7 @@ PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, i
 	}
 
 	if (!ok) {
-		char *msg = php_win_err(err);
+		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);

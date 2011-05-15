@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,6 +43,8 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
+
+#include <errno.h>
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -134,6 +136,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
 	ZEND_ARG_INFO(0, process_identifier)
 ZEND_END_ARG_INFO()
 #endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_strerror, 0, 0, 1)
+        ZEND_ARG_INFO(0, errno)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry pcntl_functions[] = {
@@ -150,6 +156,9 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wstopsig,		arginfo_pcntl_wstopsig)
 	PHP_FE(pcntl_exec,			arginfo_pcntl_exec)
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
+	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_void)
+	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	NULL)
+	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
 #endif
@@ -407,6 +416,73 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	/* }}} */
 }
 
+static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
+{
+#ifdef EINTR
+	REGISTER_PCNTL_ERRNO_CONSTANT(EINTR);
+#endif
+#ifdef ECHILD
+	REGISTER_PCNTL_ERRNO_CONSTANT(ECHILD);
+#endif
+#ifdef EINVAL
+	REGISTER_PCNTL_ERRNO_CONSTANT(EINVAL);
+#endif
+#ifdef EAGAIN
+	REGISTER_PCNTL_ERRNO_CONSTANT(EAGAIN);
+#endif
+#ifdef ESRCH
+	REGISTER_PCNTL_ERRNO_CONSTANT(ESRCH);
+#endif
+#ifdef EACCES
+	REGISTER_PCNTL_ERRNO_CONSTANT(EACCES);
+#endif
+#ifdef EPERM
+	REGISTER_PCNTL_ERRNO_CONSTANT(EPERM);
+#endif
+#ifdef ENOMEM
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENOMEM);
+#endif
+#ifdef E2BIG
+	REGISTER_PCNTL_ERRNO_CONSTANT(E2BIG);
+#endif
+#ifdef EFAULT
+	REGISTER_PCNTL_ERRNO_CONSTANT(EFAULT);
+#endif
+#ifdef EIO
+	REGISTER_PCNTL_ERRNO_CONSTANT(EIO);
+#endif
+#ifdef EISDIR
+	REGISTER_PCNTL_ERRNO_CONSTANT(EISDIR);
+#endif
+#ifdef ELIBBAD
+	REGISTER_PCNTL_ERRNO_CONSTANT(ELIBBAD);
+#endif
+#ifdef ELOOP
+	REGISTER_PCNTL_ERRNO_CONSTANT(ELOOP);
+#endif
+#ifdef EMFILE
+	REGISTER_PCNTL_ERRNO_CONSTANT(EMFILE);
+#endif
+#ifdef ENAMETOOLONG
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENAMETOOLONG);
+#endif
+#ifdef ENFILE
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENFILE);
+#endif
+#ifdef ENOENT
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENOENT);
+#endif
+#ifdef ENOEXEC
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENOEXEC);
+#endif
+#ifdef ENOTDIR
+	REGISTER_PCNTL_ERRNO_CONSTANT(ENOTDIR);
+#endif
+#ifdef ETXTBSY
+	REGISTER_PCNTL_ERRNO_CONSTANT(ETXTBSY);
+#endif
+}
+
 static PHP_GINIT_FUNCTION(pcntl)
 { 
 	memset(pcntl_globals, 0, sizeof(*pcntl_globals));
@@ -422,6 +498,7 @@ PHP_RINIT_FUNCTION(pcntl)
 PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
+	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_add_tick_function(pcntl_signal_dispatch);
 
 	return SUCCESS;
@@ -467,6 +544,7 @@ PHP_FUNCTION(pcntl_fork)
 
 	id = fork();
 	if (id == -1) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d", errno);
 	}
 	
@@ -505,6 +583,10 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	child_id = waitpid((pid_t) pid, &status, options);
 
+	if (child_id < 0) {
+		PCNTL_G(last_error) = errno;
+	}
+
 	Z_LVAL_P(z_status) = status;
 
 	RETURN_LONG((long) child_id);
@@ -536,6 +618,10 @@ PHP_FUNCTION(pcntl_wait)
 #else
 	child_id = wait(&status);
 #endif
+	if (child_id < 0) {
+		PCNTL_G(last_error) = errno;
+	}
+
 	Z_LVAL_P(z_status) = status;
 
 	RETURN_LONG((long) child_id);
@@ -729,6 +815,7 @@ PHP_FUNCTION(pcntl_exec)
 		*(pair) = NULL;
 
 		if (execve(path, argv, envp) == -1) {
+			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
 		}
 	
@@ -738,6 +825,7 @@ PHP_FUNCTION(pcntl_exec)
 	} else {
 
 		if (execv(path, argv) == -1) {
+			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
 		}
 	}
@@ -780,6 +868,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for handle argument specified");
 		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == SIG_ERR) {
+			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
@@ -787,6 +876,7 @@ PHP_FUNCTION(pcntl_signal)
 	}
 	
 	if (!zend_is_callable(handle, 0, &func_name TSRMLS_CC)) {
+		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a callable function name error", func_name);
 		efree(func_name);
 		RETURN_FALSE;
@@ -797,7 +887,8 @@ PHP_FUNCTION(pcntl_signal)
 	zend_hash_index_update(&PCNTL_G(php_signal_table), signo, (void **) &handle, sizeof(zval *), (void **) &dest_handle);
 	if (dest_handle) zval_add_ref(dest_handle);
 	
-	if (php_signal(signo, pcntl_signal_handler, (int) restart_syscalls) == SIG_ERR) {
+	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == SIG_ERR) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
@@ -829,6 +920,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (sigemptyset(&set) != 0 || sigemptyset(&oldset) != 0) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -842,6 +934,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		}
 		signo = Z_LVAL_PP(user_signo);
 		if (sigaddset(&set, signo) != 0) {
+			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
@@ -849,6 +942,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	if (sigprocmask(how, &set, &oldset) != 0) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -895,6 +989,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	if (sigemptyset(&set) != 0) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -908,6 +1003,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		}
 		signo = Z_LVAL_PP(user_signo);
 		if (sigaddset(&set, signo) != 0) {
+			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
@@ -922,6 +1018,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		signo = sigwaitinfo(&set, &siginfo);
 	}
 	if (signo == -1 && errno != EAGAIN) {
+		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 	}
 
@@ -1015,6 +1112,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	pri = getpriority(who, pid);
 
 	if (errno) {
+		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: No process was located using the given parameters", errno);
@@ -1048,6 +1146,7 @@ PHP_FUNCTION(pcntl_setpriority)
 	}
 
 	if (setpriority(who, pid, pri)) {
+		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: No process was located using the given parameters", errno);
@@ -1072,6 +1171,28 @@ PHP_FUNCTION(pcntl_setpriority)
 }
 /* }}} */
 #endif
+
+/* {{{ proto int pcntl_get_last_error(void)
+   Retrieve the error number set by the last pcntl function which failed. */
+PHP_FUNCTION(pcntl_get_last_error)
+{
+        RETURN_LONG(PCNTL_G(last_error));
+}
+/* }}} */
+
+/* {{{ proto string pcntl_strerror(int errno)
+   Retrieve the system error message associated with the given errno. */
+PHP_FUNCTION(pcntl_strerror)
+{
+        long error;
+
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &error) == FAILURE) {
+                RETURN_FALSE;
+        }
+
+        RETURN_STRING(strerror(error), 1);
+}
+/* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
 static void pcntl_signal_handler(int signo)
@@ -1103,11 +1224,19 @@ void pcntl_signal_dispatch()
 {
 	zval *param, **handle, *retval;
 	struct php_pcntl_pending_signal *queue, *next;
+	sigset_t mask;
+	sigset_t old_mask;
 	TSRMLS_FETCH();
+		
+	/* Mask all signals */
+	sigfillset(&mask);
+	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
 	/* Bail if the queue is empty or if we are already playing the queue*/
-	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue))
+	if (! PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
+		sigprocmask(SIG_SETMASK, &old_mask, NULL);
 		return;
+	}
 
 	/* Prevent reentrant handler calls */
 	PCNTL_G(processing_signal_queue) = 1;
@@ -1139,6 +1268,9 @@ void pcntl_signal_dispatch()
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;
+	
+	/* return signal mask to previous state */
+	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
 

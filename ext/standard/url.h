@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,6 +54,9 @@ PHP_FUNCTION(get_headers);
 #define PHP_URL_PATH 5
 #define PHP_URL_QUERY 6
 #define PHP_URL_FRAGMENT 7
+
+#define PHP_QUERY_RFC1738 1
+#define PHP_QUERY_RFC3986 2
 
 #endif /* URL_H */
 

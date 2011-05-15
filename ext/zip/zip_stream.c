@@ -30,11 +30,11 @@ struct php_zip_stream_data_t {
 /* {{{ php_zip_ops_read */
 static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	int n = 0;
+	ssize_t n = 0;
 	STREAM_DATA_FROM_STREAM();
 
 	if (self->za && self->zf) {
-		n = (size_t)zip_fread(self->zf, buf, (int)count);
+		n = zip_fread(self->zf, buf, count);
 		if (n < 0) {
 			int ze, se;
 			zip_file_error_get(self->zf, &ze, &se);
@@ -42,13 +42,15 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
 			return 0;
 		}
-		if (n == 0 || n < count) {
+		/* cast count to signed value to avoid possibly negative n
+		 * being cast to unsigned value */
+		if (n == 0 || n < (ssize_t)count) {
 			stream->eof = 1;
 		} else {
 			self->cursor += n;
 		}
 	}
-	return (n < 1 ? 0 : n);
+	return (n < 1 ? 0 : (size_t)n);
 }
 /* }}} */
 
@@ -95,13 +97,90 @@ static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
 }
 /* }}} */
 
+static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+{
+	struct zip_stat sb;
+	const char *path = stream->orig_path;
+	int path_len = strlen(stream->orig_path);
+	char *file_basename;
+	size_t file_basename_len;
+	char file_dirname[MAXPATHLEN];
+	struct zip *za;
+	char *fragment;
+	int fragment_len;
+	int err;
+
+	fragment = strchr(path, '#');
+	if (!fragment) {
+		return -1;
+	}
+
+
+	if (strncasecmp("zip://", path, 6) == 0) {
+		path += 6;
+	}
+
+	fragment_len = strlen(fragment);
+
+	if (fragment_len < 1) {
+		return -1;
+	}
+	path_len = strlen(path);
+	if (path_len >= MAXPATHLEN) {
+		return -1;
+	}
+
+	memcpy(file_dirname, path, path_len - fragment_len);
+	file_dirname[path_len - fragment_len] = '\0';
+
+	php_basename((char *)path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
+	fragment++;
+
+	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
+		efree(file_basename);
+		return -1;
+	}
+
+	za = zip_open(file_dirname, ZIP_CREATE, &err);
+	if (za) {
+		memset(ssb, 0, sizeof(php_stream_statbuf));
+		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
+			efree(file_basename);
+			return -1;
+		}
+		zip_close(za);
+
+		if (path[path_len-1] != '/') {
+			ssb->sb.st_size = sb.size;
+			ssb->sb.st_mode |= S_IFREG; /* regular file */
+		} else {
+			ssb->sb.st_size = 0;
+			ssb->sb.st_mode |= S_IFDIR; /* regular directory */
+		}
+
+		ssb->sb.st_mtime = sb.mtime;
+		ssb->sb.st_atime = sb.mtime;
+		ssb->sb.st_ctime = sb.mtime;
+		ssb->sb.st_nlink = 1;
+		ssb->sb.st_rdev = -1;
+#ifndef PHP_WIN32
+		ssb->sb.st_blksize = -1;
+		ssb->sb.st_blocks = -1;
+#endif
+		ssb->sb.st_ino = -1;
+	}
+	efree(file_basename);
+	return 0;
+}
+/* }}} */
+
 php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
 	php_zip_ops_close, php_zip_ops_flush,
 	"zip",
 	NULL, /* seek */
 	NULL, /* cast */
-	NULL, /* stat */
+	php_zip_ops_stat, /* stat */
 	NULL  /* set_option */
 };
 
@@ -120,7 +199,7 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 	}
 
 	if (filename) {
-		if (OPENBASEDIR_CHECKPATH(filename)) {
+		if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 			return NULL;
 		}
 
@@ -139,6 +218,7 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
+			stream->orig_path = estrdup(path);
 		} else {
 			zip_close(stream_za);
 		}
@@ -201,7 +281,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	php_basename(path, path_len - fragment_len, NULL, 0, &file_basename, &file_basename_len TSRMLS_CC);
 	fragment++;
 
-	if (OPENBASEDIR_CHECKPATH(file_dirname)) {
+	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
 		efree(file_basename);
 		return NULL;
 	}

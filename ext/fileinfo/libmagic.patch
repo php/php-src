@@ -257,7 +257,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 +
 +	TSRMLS_FETCH();
 +
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
 +	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
@@ -490,7 +490,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		goto error2;
  
 -	if ((fd = open(dbname, O_RDONLY|O_BINARY)) == -1)
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
 +		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
@@ -647,7 +647,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
 -	if ((fd = open(dbname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0644)) == -1) {
 +/* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
 +	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS, NULL);
@@ -799,7 +799,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  			break;
  		case CDF_FILETIME:
  			tp = info[i].pi_tp;
-+#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
++#if defined(PHP_WIN32) && _MSC_VER <= 1500
 +		if (tp < 1000000000000000i64) {
 +#else
  			if (tp < 1000000000000000LL) {
@@ -822,7 +822,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  typedef struct {
  	uint64_t	h_magic;
 -#define CDF_MAGIC	0xE11AB1A1E011CFD0LL
-+#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
++#if defined(PHP_WIN32) && _MSC_VER <= 1500
 +# define CDF_MAGIC	0xE11AB1A1E011CFD0i64
 +#else
 +# define CDF_MAGIC	0xE11AB1A1E011CFD0LL
@@ -2019,7 +2019,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
 +
 +	if (!stream && inname) {
 +		no_in_stream = 1;
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
 +		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS, NULL);
@@ -2392,7 +2392,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  		case CDF_FILETIME:
  			tp = info[i].pi_tp;
  			if (tp != 0) {
-+#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
++#if defined(PHP_WIN32) && _MSC_VER <= 1500
 +				if (tp < 1000000000000000i64) {
 +#else
  				if (tp < 1000000000000000LL) {
@@ -2773,7 +2773,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +		
 +		convert_libmagic_pattern(pattern, options);
 +		
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
  #else
 -			pmatch[0].rm_so = 0;
@@ -2800,7 +2800,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +			haystack = estrndup(ms->search.s, ms->search.s_len);
 +
 +			/* match v = 0, no match v = 1 */
-+#if (PHP_MAJOR_VERSION < 6)
++#if PHP_API_VERSION < 20100412
 +			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
 +#else			
 +			php_pcre_match_impl(pce, IS_STRING, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);

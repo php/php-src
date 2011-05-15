@@ -91,11 +91,6 @@
 ; Please see the actual settings later in the document for more details as to why
 ; we recommend these changes in PHP's behavior.
 
-; allow_call_time_pass_reference
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; display_errors
 ;   Default Value: On
 ;   Development Value: On
@@ -137,11 +132,6 @@
 ;   Production Value: 4096
 
 ; register_argc_argv
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
-; register_long_arrays
 ;   Default Value: On
 ;   Development Value: Off
 ;   Production Value: Off
@@ -233,10 +223,6 @@ asp_tags = Off
 ; http://php.net/precision
 precision = 14
 
-; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
-; http://php.net/y2k-compliance
-y2k_compliance = On
-
 ; Output buffering is a mechanism for controlling how much output data
 ; (excluding headers and cookies) PHP should keep internally before pushing that
 ; data to the client. If your application's output exceeds this setting, PHP
@@ -317,59 +303,7 @@ unserialize_callback_func =
 ; When floats & doubles are serialized store serialize_precision significant
 ; digits after the floating point. The default value ensures that when floats
 ; are decoded with unserialize, the data will remain the same.
-serialize_precision = 100
-
-; This directive allows you to enable and disable warnings which PHP will issue
-; if you pass a value by reference at function call time. Passing values by
-; reference at function call time is a deprecated feature which will be removed
-; from PHP at some point in the near future. The acceptable method for passing a
-; value by reference to a function is by declaring the reference in the functions
-; definition, not at call time. This directive does not disable this feature, it
-; only determines whether PHP will warn you about it or not. These warnings
-; should enabled in development environments only.
-; Default Value: On (Suppress warnings)
-; Development Value: Off (Issue warnings)
-; Production Value: Off (Issue warnings)
-; http://php.net/allow-call-time-pass-reference
-allow_call_time_pass_reference = Off
-
-; Safe Mode
-; http://php.net/safe-mode
-safe_mode = Off
-
-; By default, Safe Mode does a UID compare check when
-; opening files. If you want to relax this to a GID compare,
-; then turn on safe_mode_gid.
-; http://php.net/safe-mode-gid
-safe_mode_gid = Off
-
-; When safe_mode is on, UID/GID checks are bypassed when
-; including files from this directory and its subdirectories.
-; (directory must also be in include_path or full path must
-; be used when including)
-; http://php.net/safe-mode-include-dir
-safe_mode_include_dir =
-
-; When safe_mode is on, only executables located in the safe_mode_exec_dir
-; will be allowed to be executed via the exec family of functions.
-; http://php.net/safe-mode-exec-dir
-safe_mode_exec_dir =
-
-; Setting certain environment variables may be a potential security breach.
-; This directive contains a comma-delimited list of prefixes.  In Safe Mode,
-; the user may only alter environment variables whose names begin with the
-; prefixes supplied here.  By default, users will only be able to set
-; environment variables that begin with PHP_ (e.g. PHP_FOO=BAR).
-; Note:  If this directive is empty, PHP will let the user modify ANY
-;   environment variable!
-; http://php.net/safe-mode-allowed-env-vars
-safe_mode_allowed_env_vars = PHP_
-
-; This directive contains a comma-delimited list of environment variables that
-; the end user won't be able to change using putenv().  These variables will be
-; protected even if safe_mode_allowed_env_vars is set to allow to change them.
-; http://php.net/safe-mode-protected-env-vars
-safe_mode_protected_env_vars = LD_LIBRARY_PATH
+serialize_precision = 17
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
@@ -396,7 +330,6 @@ disable_classes =
 ;highlight.string  = #DD0000
 ;highlight.comment = #FF9900
 ;highlight.keyword = #007700
-;highlight.bg      = #FFFFFF
 ;highlight.default = #0000BB
 ;highlight.html    = #000000
 
@@ -418,6 +351,18 @@ disable_classes =
 ; value.
 ; http://php.net/realpath-cache-ttl
 ;realpath_cache_ttl = 120
+
+; If enabled, scripts may be written in encodings that are incompatible with
+; the scanner.  CP936, Big5, CP949 and Shift_JIS are the examples of such
+; encodings.  To use this feature, mbstring extension must be enabled.
+; Default: Off
+;zend.multibyte = Off
+
+; Allows to set the default encoding for the scripts.  This value will be used
+; unless "declare(encoding=...)" directive appears at the top of the script.
+; Only affects if zend.multibyte is set.
+; Default: ""
+;zend.script_encoding =
 
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
@@ -621,13 +566,13 @@ html_errors = On
 ; this setting blank.
 ; http://php.net/error-prepend-string
 ; Example:
-;error_prepend_string = "<font color=#ff0000>"
+;error_prepend_string = "<span style='color: #ff0000'>"
 
 ; String to output after an error message. PHP's default behavior is to leave
 ; this setting blank.
 ; http://php.net/error-append-string
 ; Example:
-;error_append_string = "</font>"
+;error_append_string = "</span>"
 
 ; Log errors to specified file. PHP's default behavior is to leave this value
 ; empty.
@@ -655,13 +600,12 @@ html_errors = On
 ;arg_separator.input = ";&"
 
 ; This directive determines which super global arrays are registered when PHP
-; starts up. If the register_globals directive is enabled, it also determines
-; what order variables are populated into the global space. G,P,C,E & S are
-; abbreviations for the following respective super globals: GET, POST, COOKIE,
-; ENV and SERVER. There is a performance penalty paid for the registration of
-; these arrays and because ENV is not as commonly used as the others, ENV is
-; is not recommended on productions servers. You can still get access to
-; the environment variables through getenv() should you need to.
+; starts up. G,P,C,E & S are abbreviations for the following respective super
+; globals: GET, POST, COOKIE, ENV and SERVER. There is a performance penalty
+: paid for the registration of these arrays and because ENV is not as commonly
+; used as the others, ENV is not recommended on productions servers. You
+; can still get access to the environment variables through getenv() should you
+; need to.
 ; Default Value: "EGPCS"
 ; Development Value: "GPCS"
 ; Production Value: "GPCS";
@@ -681,25 +625,6 @@ variables_order = "GPCS"
 ; http://php.net/request-order
 request_order = "GP"
 
-; Whether or not to register the EGPCS variables as global variables.  You may
-; want to turn this off if you don't want to clutter your scripts' global scope
-; with user data.
-; You should do your best to write your scripts so that they do not require
-; register_globals to be on;  Using form variables as globals can easily lead
-; to possible security problems, if the code is not very well thought of.
-; http://php.net/register-globals
-register_globals = Off
-
-; Determines whether the deprecated long $HTTP_*_VARS type predefined variables
-; are registered by PHP or not. As they are deprecated, we obviously don't
-; recommend you use them. They are on by default for compatibility reasons but
-; they are not recommended on production servers.
-; Default Value: On
-; Development Value: Off
-; Production Value: Off
-; http://php.net/register-long-arrays
-register_long_arrays = Off
-
 ; This directive determines whether PHP registers $argv & $argc each time it
 ; runs. $argv contains an array of all the arguments passed to PHP when a script
 ; is invoked. $argc contains an integer representing the number of arguments
@@ -715,15 +640,26 @@ register_long_arrays = Off
 ; http://php.net/register-argc-argv
 register_argc_argv = Off
 
-; When enabled, the SERVER and ENV variables are created when they're first
-; used (Just In Time) instead of when the script starts. If these variables
-; are not used within a script, having this directive on will result in a
-; performance gain. The PHP directives register_globals, register_long_arrays,
-; and register_argc_argv must be disabled for this directive to have any affect.
+; When enabled, the ENV, REQUEST and SERVER variables are created when they're
+; first used (Just In Time) instead of when the script starts. If these
+; variables are not used within a script, having this directive on will result
+; in a performance gain. The PHP directive register_argc_argv must be disabled
+; for this directive to have any affect.
 ; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
+; Whether PHP will read the POST data.
+; This option is enabled by default.
+; Most likely, you won't want to disable this option globally. It causes $_POST
+; and $_FILES to always be empty; the only way you will be able to read the
+; POST data will be through the php://input stream wrapper. This can be useful
+; to proxy requests or to process the POST data in a memory efficient fashion.
+; http://php.net/enable-post-data-reading
+;enable_post_data_reading = Off
+
 ; Maximum size of POST data that PHP will accept.
+; Its value may be 0 to disable the limit. It is ignored if POST data reading
+; is disabled through enable_post_data_reading.
 ; http://php.net/post-max-size
 post_max_size = 8M
 
@@ -769,10 +705,11 @@ default_mimetype = "text/html"
 
 ; PHP's default character set is set to empty.
 ; http://php.net/default-charset
-;default_charset = "iso-8859-1"
+;default_charset = "UTF-8"
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature.
+; to disable this feature. If post reading is disabled through
+; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
 ; http://php.net/always-populate-raw-post-data
 ;always_populate_raw_post_data = On
 
@@ -947,7 +884,6 @@ default_socket_timeout = 60
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_dba.dll
-;extension=php_exif.dll
 ;extension=php_fileinfo.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
@@ -957,6 +893,7 @@ default_socket_timeout = 60
 ;extension=php_interbase.dll
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
+;extension=php_exif.dll      ; Must be after mbstring as it depends on it
 ;extension=php_ming.dll
 ;extension=php_mssql.dll
 ;extension=php_mysql.dll
@@ -975,7 +912,11 @@ default_socket_timeout = 60
 ;extension=php_phar.dll
 ;extension=php_pspell.dll
 ;extension=php_shmop.dll
+
+; The MIBS data available in the PHP distribution must be installed. 
+; See http://www.php.net/manual/en/snmp.installation.php 
 ;extension=php_snmp.dll
+
 ;extension=php_soap.dll
 ;extension=php_sockets.dll
 ;extension=php_sqlite.dll
@@ -1071,13 +1012,6 @@ pdo_mysql.default_socket=
 
 ;phar.cache_list =
 
-[Syslog]
-; Whether or not to define the various syslog variables (e.g. $LOG_PID,
-; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
-; runtime, you can define these variables by calling define_syslog_variables().
-; http://php.net/define-syslog-variables
-define_syslog_variables  = Off
-
 [mail function]
 ; For Win32 only.
 ; http://php.net/smtp
@@ -1101,7 +1035,8 @@ smtp_port = 25
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = On
 
-; Log all mail() calls including the full path of the script, line #, to address and headers
+; The path to a log file that will log all mail() calls. Log entries include
+; the full path of the script, line number, To address and headers.
 ;mail.log =
 
 [SQL]
@@ -1246,6 +1181,14 @@ mysql.trace_mode = Off
 ; http://php.net/mysqli.max-persistent
 mysqli.max_persistent = -1
 
+; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
+; http://php.net/mysqli.allow_local_infile
+;mysqli.allow_local_infile = On
+
+; Allow or prevent persistent links.
+; http://php.net/mysqli.allow-persistent
+mysqli.allow_persistent = On
+
 ; Maximum number of links.  -1 means no limit.
 ; http://php.net/mysqli.max-links
 mysqli.max_links = -1
@@ -1286,12 +1229,12 @@ mysqli.default_pw =
 mysqli.reconnect = Off
 
 [mysqlnd]
-; Enable / Disable collection of general statstics by mysqlnd which can be
+; Enable / Disable collection of general statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_statistics
 mysqlnd.collect_statistics = On
 
-; Enable / Disable collection of memory usage statstics by mysqlnd which can be
+; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = On
@@ -1358,7 +1301,7 @@ mysqlnd.collect_memory_statistics = On
 ; http://php.net/oci8.old-oci-close-semantics
 ;oci8.old_oci_close_semantics = Off
 
-[PostgresSQL]
+[PostgreSQL]
 ; Allow or prevent persistent links.
 ; http://php.net/pgsql.allow-persistent
 pgsql.allow_persistent = On
@@ -1381,7 +1324,7 @@ pgsql.max_links = -1
 ; http://php.net/pgsql.ignore-notice
 pgsql.ignore_notice = 0
 
-; Log PostgreSQL backends Noitce message or not.
+; Log PostgreSQL backends Notice message or not.
 ; Unless pgsql.ignore_notice=0, module cannot log notice message.
 ; http://php.net/pgsql.log-notice
 pgsql.log_notice = 0
@@ -1476,7 +1419,7 @@ session.use_cookies = 1
 ;session.cookie_secure =
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
-; the session id. We encourage this operation as it's very helpful in combatting
+; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
 ; not the end all be all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
@@ -1547,11 +1490,11 @@ session.gc_maxlifetime = 1440
 ;       collection through a shell script, cron entry, or some other method.
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          cd /path/to/sessions; find -cmin +24 | xargs rm
+;          find /path/to/sessions -cmin +24 | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope, even when register_globals
-; is disabled.  PHP 4.3 and later will warn you, if this feature is used.
+; to initialize a session variable in the global scope.
+; PHP 4.3 and later will warn you, if this feature is used.
 ; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled. This feature
 ; introduces some serious security problems if not handled correctly. It's
@@ -1582,15 +1525,16 @@ session.referer_check =
 
 ; How many bytes to read from the file.
 ; http://php.net/session.entropy-length
-session.entropy_length = 0
+;session.entropy_length = 32
 
 ; Specified here to create the session id.
 ; http://php.net/session.entropy-file
+; Defaults to /dev/urandom
+; On systems that don't have /dev/urandom but do have /dev/arandom, this will default to /dev/arandom
+; If neither are found at compile time, the default is no entropy file.
+; On windows, setting the entropy_length setting will activate the
+; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
-session.entropy_file =
-
-; http://php.net/session.entropy-length
-;session.entropy_length = 16
 
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
@@ -1607,7 +1551,7 @@ session.cache_expire = 180
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
 ; - URL that contains active session ID may be stored
-;   in publically accessible computer.
+;   in publicly accessible computer.
 ; - User may access your site with the same session ID
 ;   always using URL stored in browser's history or bookmarks.
 ; http://php.net/session.use-trans-sid
@@ -1618,7 +1562,7 @@ session.use_trans_sid = 0
 ;   0  (MD5 128 bits)
 ;   1  (SHA-1 160 bits)
 ; This option may also be set to the name of any hash function supported by
-; the hash extension. A list of available hashes is returned by the hash_alogs()
+; the hash extension. A list of available hashes is returned by the hash_algos()
 ; function.
 ; http://php.net/session.hash-function
 session.hash_function = 0
@@ -1801,10 +1745,6 @@ mssql.secure_connection = Off
 ; is activated.
 ; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
 ;mbstring.http_output_conv_mimetype=
-
-; Allows to set script encoding. Only affects if PHP is compiled with --enable-zend-multibyte
-; Default: ""
-;mbstring.script_encoding=
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create

@@ -37,7 +37,7 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
     OCI8_LIB_DIR=$PHP_OCI8_OH_LIBDIR
   else
     dnl This isn't an ORACLE_HOME.  Try heuristic examination of the dir to help the user
-    if test -f "$OCI8_DIR/libociei.so"; then
+    if test -f "$OCI8_DIR/libociei.$SHLIB_SUFFIX_NAME"; then
       AC_MSG_ERROR([Expected an ORACLE_HOME top level directory but ${OCI8_DIR} appears to be an Instant Client directory. Try --with-oci8=instantclient,${OCI8_DIR}])
     else
       AC_MSG_ERROR([Oracle library directory not found in ${OCI8_DIR}])
@@ -47,48 +47,37 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 ])
 
 AC_DEFUN([AC_OCI8IC_VERSION],[
-  AC_MSG_CHECKING([Oracle Instant Client version])
-  if test -f $PHP_OCI8_INSTANT_CLIENT/libnnz11.$SHLIB_SUFFIX_NAME; then
-    if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-      if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
-        AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.11.1 not found])
-      fi
-      OCI8_ORACLE_VERSION=11.1
-    else
-      AC_MSG_ERROR([Oracle Instant Client library version not supported])
+  AC_MSG_CHECKING([Oracle Instant Client library version compatibility])
+  OCI8_LCS_BASE=$PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME
+  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | tail -1`  # Oracle 10g, 11g etc
+  OCI8_NNZ=`ls $PHP_OCI8_INSTANT_CLIENT/libnnz*.$SHLIB_SUFFIX_NAME 2> /dev/null | tail -1`
+  if test -f "$OCI8_NNZ" && test -f "$OCI8_LCS"; then
+    if test ! -f "$OCI8_LCS_BASE"; then
+      AC_MSG_ERROR([Link from $OCI8_LCS_BASE to $OCI8_LCS_BASE.*.1 not found])
     fi
-  elif test -f $PHP_OCI8_INSTANT_CLIENT/libnnz10.$SHLIB_SUFFIX_NAME; then
-    if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
-      if test ! -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME; then
-        AC_MSG_ERROR([Link from $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME to libclntsh.$SHLIB_SUFFIX_NAME.10.1 not found])
-      fi
-      OCI8_ORACLE_VERSION=10.1
-    else
-      AC_MSG_ERROR([Oracle Instant Client library version not supported])
-    fi
+    OCI8_ORACLE_VERSION=`echo $OCI8_LCS | $PHP_OCI8_SED -e 's/.*\.\(.*\)\.1$/\1.1/'`
   else
-    AC_MSG_ERROR([Oracle Instant Client libraries not found])
+    AC_MSG_ERROR([Oracle Instant Client libraries libnnz.$SHLIB_SUFFIX_NAME and libclntsh.$SHLIB_SUFFIX_NAME not found])
   fi
   AC_MSG_RESULT([$OCI8_ORACLE_VERSION])
 ])
 
-
 AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
-  AC_MSG_CHECKING([Oracle version])
+  AC_MSG_CHECKING([Oracle library version compatibility])
+  OCI8_LCS_BASE=$OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME
+  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | tail -1`  # Oracle 10g, 11g etc
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
     OCI8_ORACLE_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_ORACLE_VERSION" && OCI8_ORACLE_VERSION=7.3
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    OCI8_ORACLE_VERSION=11.1
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
-    dnl There is no case for Oracle 10.2. Oracle 10.2 libraries have a 10.1 suffix for drop-in compatibility with Oracle 10.1
-    OCI8_ORACLE_VERSION=10.1
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
+  elif test -f "$OCI8_LCS"; then
+    dnl Oracle 10g, 11g etc.  The x.2 version libraries are named x.1 for drop in compatibility
+    OCI8_ORACLE_VERSION=`echo $OCI8_LCS | $PHP_OCI8_SED -e 's/.*\.\(.*\)\.1$/\1.1/'`
+  elif test -f $OCI8_LCS_BASE.9.0; then
     dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix for drop-in compatibility with Oracle 9.0
     OCI8_ORACLE_VERSION=9.0
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.8.0; then
+  elif test -f $OCI8_LCS_BASE.8.0; then
     OCI8_ORACLE_VERSION=8.1
-  elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.1.0; then
+  elif test -f $OCI8_LCS_BASE.1.0; then
     OCI8_ORACLE_VERSION=8.0
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.a; then 
     if test -f $OCI8_DIR/$OCI8_LIB_DIR/libcore4.a; then 
@@ -97,7 +86,7 @@ AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
       OCI8_ORACLE_VERSION=8.1
     fi
   else
-    AC_MSG_ERROR(Oracle client libraries not found)
+    AC_MSG_ERROR(Oracle libclntsh.$SHLIB_SUFFIX_NAME client library not found)
   fi
   AC_MSG_RESULT($OCI8_ORACLE_VERSION)
 ])
@@ -106,8 +95,8 @@ AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
 dnl --with-oci8=shared,instantclient,/path/to/client/dir/lib
 dnl or
 dnl --with-oci8=shared,/path/to/oracle/home
-PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
-[  --with-oci8[=DIR]       Include Oracle (OCI8) support. DIR defaults to \$ORACLE_HOME.
+PHP_ARG_WITH(oci8, for Oracle Database OCI8 support,
+[  --with-oci8[=DIR]       Include Oracle Database OCI8 support. DIR defaults to \$ORACLE_HOME.
                           Use --with-oci8=instantclient,/path/to/instant/client/lib 
                           to use an Oracle Instant Client installation])
 
@@ -258,12 +247,8 @@ if test "$PHP_OCI8" != "no"; then
 	])
 	;;
 
-      10.1|11.1)
-	AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
-	;;
-
       *)
-	AC_MSG_ERROR([Oracle version $OCI8_ORACLE_VERSION is not supported])
+	AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
 	;;
     esac
 
@@ -335,16 +320,8 @@ if test "$PHP_OCI8" != "no"; then
     fi
 
     AC_OCI8IC_VERSION($PHP_OCI8_INSTANT_CLIENT)
-    case $OCI8_ORACLE_VERSION in
-      10.1|11.1)
-	PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-	PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
-	;;
-
-      *)
-	AC_MSG_ERROR([Oracle Instant Client version $PHP_OCI8_INSTANT_CLIENT is not supported])
-	;;
-    esac
+    PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
 
     AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[ ])
     AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])

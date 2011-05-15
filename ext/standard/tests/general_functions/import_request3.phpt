@@ -1,5 +1,7 @@
 --TEST--
 import_request_variables() test (numeric keys, different order)
+--SKIPIF--
+<?php if(PHP_VERSION_ID >= 50399){ die('skip not needed anymore without register_globals'); } ?>
 --GET--
 1=0&2=1&3=2&4=3&5=4
 --POST--

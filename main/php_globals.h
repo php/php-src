@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,15 +58,10 @@ struct _php_core_globals {
 	zend_bool magic_quotes_runtime;
 	zend_bool magic_quotes_sybase;
 
-	zend_bool safe_mode;
-
-	zend_bool allow_call_time_pass_reference;
 	zend_bool implicit_flush;
 
 	long output_buffering;
 
-	char *safe_mode_include_dir;
-	zend_bool safe_mode_gid;
 	zend_bool sql_safe_mode;
 	zend_bool enable_dl;
 
@@ -74,8 +69,6 @@ struct _php_core_globals {
 
 	char *unserialize_callback_func;
 	long serialize_precision;
-
-	char *safe_mode_exec_dir;
 
 	long memory_limit;
 	long max_input_time;
@@ -122,12 +115,8 @@ struct _php_core_globals {
 
 	zend_bool expose_php;
 
-	zend_bool register_globals;
-	zend_bool register_long_arrays;
 	zend_bool register_argc_argv;
 	zend_bool auto_globals_jit;
-
-	zend_bool y2k_compliance;
 
 	char *docref_root;
 	char *docref_ext;
@@ -143,6 +132,7 @@ struct _php_core_globals {
 	zend_bool file_uploads;
 	zend_bool during_request_startup;
 	zend_bool allow_url_fopen;
+	zend_bool enable_post_data_reading;
 	zend_bool always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 

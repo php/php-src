@@ -10,3 +10,5 @@ ADD_FLAG('CFLAGS_DATE', "/wd4244");
 var tl_config = FSO.CreateTextFile("ext/date/lib/timelib_config.h", true);
 tl_config.WriteLine("#include \"config.w32.h\"");
 tl_config.Close();
+
+PHP_INSTALL_HEADERS("ext/date/", "php_date.h lib/timelib.h lib/timelib_structs.h lib/timelib_config.h");

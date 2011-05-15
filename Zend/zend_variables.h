@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -27,7 +27,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-static inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type <= IS_BOOL) {
 		return;
@@ -37,7 +37,7 @@ static inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-static inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
+static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type <= IS_BOOL) {
 		return;
@@ -45,6 +45,7 @@ static inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 	_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 }
 
+ZEND_API int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key);
 
 ZEND_API int zend_print_variable(zval *var);
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);

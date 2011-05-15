@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,5 +36,9 @@ PHP_NAMED_FUNCTION(php_if_readdir);
 PHP_FUNCTION(getdir);
 PHP_FUNCTION(glob);
 PHP_FUNCTION(scandir);
+
+#define PHP_SCANDIR_SORT_ASCENDING 0
+#define PHP_SCANDIR_SORT_DESCENDING 1
+#define PHP_SCANDIR_SORT_NONE 2
 
 #endif /* PHP_DIR_H */

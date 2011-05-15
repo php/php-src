@@ -17,9 +17,10 @@ if (!extension_loaded('posix')) {
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }
+if (PHP_VERSION_ID < 503099) {
+    die('SKIP Safe mode is no longer available.');
+}
 ?>
---INI--
-safe_mode = 1
 --FILE--
 <?php
 var_dump(posix_mkfifo('/tmp/foobar', 0644));
@@ -36,7 +37,7 @@ unlink($dir . '/bar');
 rmdir($dir);
 ?>
 --EXPECTF--
-Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
+Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
 
 Warning: posix_mkfifo(): SAFE MODE Restriction in effect.  The script whose uid is %d is not allowed to access /tmp owned by uid %d in %s on line %d
 bool(false)

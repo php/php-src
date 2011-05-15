@@ -38,7 +38,7 @@ $unexpected_constants = array();
 
 foreach ($constants as $group => $consts) {
 	foreach ($consts as $name => $value) {
-		if (stristr($name, 'mysql') && !stristr($name, 'mysqli')) {
+		if (stristr($name, 'mysql') && !preg_match("/^mysql([^_]+)_/iu", $name)) {
 			$name = strtoupper($name);
 			if (isset($expected_constants[$name])) {
 				unset($expected_constants[$name]);

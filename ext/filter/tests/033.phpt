@@ -4,6 +4,7 @@ Test all filters returned by filter_list()
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
 precision=14
+default_charset=UTF-8
 --FILE--
 <?php
 include dirname(__FILE__) . '/033_run.inc';
@@ -20,6 +21,7 @@ string              PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  12
 stripped            PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc()            O&#39;Henry    하퍼    
 encoded             PHP  1  foo%40bar.com  http%3A%2F%2Fa.b.c  1.2.3.4   123  123abc%3C%3E%28%29  O%27Henry      %ED%95%98%ED%8D%BC
 special_chars       PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc&#60;&#62;()  O&#39;Henry    하퍼    
+full_special_chars  PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc&lt;&gt;()    O&#039;Henry   하퍼    
 unsafe_raw          PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry        하퍼    
 email               PHP  1  foo@bar.com    httpa.b.c           1.2.3.4   123  123abc              O'Henry                  
 url                 PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry                  

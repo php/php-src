@@ -6,7 +6,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
  <summary>Extension for Oracle Database</summary>
- <description>This extension allows you to access Oracle databases using the Oracle Call Interface (OCI8). It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
+ <description>This extension allows you to access Oracle databases. It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -33,12 +33,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2010-02-11</date>
- <time>15:00:00</time>
+ <date>2010-12-09</date>
+ <time>20:00:00</time>
 
  <version>
-  <release>1.4.1</release>
-  <api>1.4.1</api>
+  <release>1.4.5</release>
+  <api>1.4.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,8 +46,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-Fixed bug #49560 (Using LOBs causes slow PHP shutdown)
-Fixed bug #47281 ($php_errormsg is limited in size of characters)
+    Protect against null bytes in LOB filenames (http://news.php.net/php.internals/50202)
  </notes>
  <contents>
   <dir name="/">
@@ -77,20 +76,27 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
+    <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_1.phpt" role="test" />
+    <file name="bind_char_2_11gR1.phpt" role="test" />
     <file name="bind_char_2.phpt" role="test" />
+    <file name="bind_char_3_11gR1.phpt" role="test" />
     <file name="bind_char_3.phpt" role="test" />
+    <file name="bind_char_4_11gR1.phpt" role="test" />
     <file name="bind_char_4.phpt" role="test" />
     <file name="bind_empty.phpt" role="test" />
-    <file name="bind_error.phpt" role="test" />
     <file name="bind_long.phpt" role="test" />
     <file name="bind_long_raw.phpt" role="test" />
     <file name="bind_raw.phpt" role="test" />
+    <file name="bind_rowid.phpt" role="test" />
     <file name="bug26133.phpt" role="test" />
+    <file name="bug27303_1_11gR1.phpt" role="test" />
+    <file name="bug27303_1.phpt" role="test" />
+    <file name="bug27303_2_11gR1.phpt" role="test" />
     <file name="bug27303_2.phpt" role="test" />
     <file name="bug27303_3.phpt" role="test" />
+    <file name="bug27303_4_11gR1.phpt" role="test" />
     <file name="bug27303_4.phpt" role="test" />
-    <file name="bug27303.phpt" role="test" />
     <file name="bug32325.phpt" role="test" />
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
@@ -119,7 +125,8 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="bug46994.phpt" role="test" />
     <file name="bug47189.phpt" role="test" />
     <file name="bug47281.phpt" role="test" />
-    <file name="bug6109.phpt" role="test" />
+    <file name="bug51253.phpt" role="test" />
+    <file name="bug51291.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
     <file name="coll_002_func.phpt" role="test" />
@@ -153,8 +160,9 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="coll_017.phpt" role="test" />
     <file name="coll_018.phpt" role="test" />
     <file name="coll_019.phpt" role="test" />
+    <file name="commit_001.phpt" role="test" />
+    <file name="commit_002.phpt" role="test" />
     <file name="commit_old.phpt" role="test" />
-    <file name="commit.phpt" role="test" />
     <file name="conn_attr_1.phpt" role="test" />
     <file name="conn_attr_2.phpt" role="test" />
     <file name="conn_attr_3.phpt" role="test" />
@@ -175,6 +183,8 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="connect_scope_try5.phpt" role="test" />
     <file name="connect_scope_try6.phpt" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
+    <file name="connect_without_oracle_home_11.phpt" role="test" />
+    <file name="connect_without_oracle_home_old_11.phpt" role="test" />
     <file name="connect_without_oracle_home_old.phpt" role="test" />
     <file name="connect_without_oracle_home.phpt" role="test" />
     <file name="create_table.inc" role="test" />
@@ -219,7 +229,9 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="edition_2.phpt" role="test" />
     <file name="error1.phpt" role="test" />
     <file name="error2.phpt" role="test" />
+    <file name="error_bind.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
+    <file name="error_parse.phpt" role="test" />
     <file name="error.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
     <file name="execute_mode.phpt" role="test" />
@@ -295,12 +307,13 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
     <file name="minfo.phpt" role="test" />
+    <file name="null_byte_1.phpt" role="test" />
+    <file name="null_byte_2.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
     <file name="old_oci_close1.phpt" role="test" />
     <file name="old_oci_close.phpt" role="test" />
-    <file name="parse_error.phpt" role="test" />
     <file name="password_2.phpt" role="test" />
     <file name="password_new.phpt" role="test" />
     <file name="password_old.phpt" role="test" />
@@ -310,6 +323,7 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="pecl_bug10194.phpt" role="test" />
     <file name="pecl_bug16035.phpt" role="test" />
     <file name="pecl_bug16842.phpt" role="test" />
+    <file name="pecl_bug6109.phpt" role="test" />
     <file name="pecl_bug8816.phpt" role="test" />
     <file name="persistent.phpt" role="test" />
     <file name="prefetch_old.phpt" role="test" />
@@ -321,7 +335,6 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
     <file name="refcur_prefetch_3.phpt" role="test" />
     <file name="reflection1.phpt" role="test" />
     <file name="reflection2.phpt" role="test" />
-    <file name="rowid_bind.phpt" role="test" />
     <file name="select_null.phpt" role="test" />
     <file name="serverversion.phpt" role="test" />
     <file name="skipif.inc" role="test" />
@@ -366,6 +379,73 @@ Fixed bug #47281 ($php_errormsg is limited in size of characters)
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.4</release>
+  <api>1.4.4</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #53284 (Valgrind warnings in oci_set_* functions)
+    Enhancement - improve startup failure error messages
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.3</release>
+  <api>1.4.3</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #51610 (Using oci_connect causes PHP to take a long time to exit). Requires Oracle 11.2.0.2 client libraries (or Oracle bug fix 9891199) for this patch to have an effect.
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.2</release>
+  <api>1.4.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #52186 (phpinfo() shows 10.1 or 11.1 when installed with ORACLE_HOME 10.2 or 11.2)
+    Fixed bug #51691 (Unnecessary realloc causes crashes in PHP trunk tests with interned strings)
+    Fixed bug #51577 (Uninitialized memory reference with oci_bind_array_by_name)
+    Fixed bug #51291 (oci_error doesn't report last error when called two times)
+
+    OCI8 1.4.2 is included in PHP 5.3.3
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.1</release>
+  <api>1.4.1</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Fixed bug #49560 (Using LOBs causes slow PHP shutdown)
+    Fixed bug #47281 ($php_errormsg is limited in size of characters)
+ </notes>
+</release>
 
 <release>
  <version>

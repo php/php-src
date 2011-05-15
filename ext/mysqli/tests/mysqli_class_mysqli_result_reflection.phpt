@@ -35,7 +35,7 @@ isInstantiable: yes
 isInterface: no
 isAbstract: no
 isFinal: no
-isIteratable: no
+isIteratable: yes
 Modifiers: '0'
 Parent Class: ''
 Extension: 'mysqli'
@@ -52,7 +52,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 8448
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -68,7 +68,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 8448
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -84,7 +84,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -100,9 +100,16 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
-Number of Parameters: 0
-Number of Required Parameters: 0
+Modifiers: 256
+Number of Parameters: 1
+Number of Required Parameters: 1
+
+Inspecting parameter 'offset' of method 'data_seek'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_all'
 isFinal: no
@@ -116,7 +123,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -132,9 +139,16 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
-Number of Parameters: 0
+Modifiers: 256
+Number of Parameters: 1
 Number of Required Parameters: 0
+
+Inspecting parameter 'result_type' of method 'fetch_array'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_assoc'
 isFinal: no
@@ -148,7 +162,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -164,7 +178,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -180,9 +194,16 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
-Number of Parameters: 0
-Number of Required Parameters: 0
+Modifiers: 256
+Number of Parameters: 1
+Number of Required Parameters: 1
+
+Inspecting parameter 'field_nr' of method 'fetch_field_direct'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_fields'
 isFinal: no
@@ -196,7 +217,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -212,7 +233,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -228,7 +249,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -244,9 +265,16 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
-Number of Parameters: 0
-Number of Required Parameters: 0
+Modifiers: 256
+Number of Parameters: 1
+Number of Required Parameters: 1
+
+Inspecting parameter 'field_nr' of method 'field_seek'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
 
 Inspecting method 'free'
 isFinal: no
@@ -260,7 +288,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -276,7 +304,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: %d
+Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 

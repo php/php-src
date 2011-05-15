@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,7 @@ PHPAPI const char php_sig_jp2[12] = {(char)0x00, (char)0x00, (char)0x00, (char)0
                                      (char)0x6a, (char)0x50, (char)0x20, (char)0x20,
                                      (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
-PHPAPI const char php_sig_ico[3] = {(char)0x00, (char)0x00, (char)0x01};
+PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -402,12 +402,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
 				last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
 			}
 		}
-		if (++a > 25)
-		{
-			/* who knows the maxim amount of 0xff? though 7 */
-			/* but found other implementations              */
-			return M_EOI;
-		}
+		a++;
 	} while (marker == 0xff);
 	if (a < 2)
 	{
@@ -1270,7 +1265,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		return IMAGE_FILETYPE_TIFF_MM;
 	} else if (!memcmp(filetype, php_sig_iff, 4)) {
 		return IMAGE_FILETYPE_IFF;
-	} else if (!memcmp(filetype, php_sig_ico, 3)) {
+	} else if (!memcmp(filetype, php_sig_ico, 4)) {
 		return IMAGE_FILETYPE_ICO;
 	}
 
@@ -1294,26 +1289,11 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array getimagesize(string imagefile [, array info])
-   Get the size of an image as 4-element array */
-PHP_FUNCTION(getimagesize)
+static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zval **info = NULL;
-	char *arg1, *temp;
-	int arg1_len, itype = 0, argc = ZEND_NUM_ARGS();
+	char *temp;
+	int itype = 0;
 	struct gfxinfo *result = NULL;
-	php_stream * stream = NULL;
-
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &arg1, &arg1_len, &info) == FAILURE) {
-		return;
-	}
-	
-	if (argc == 2) {
-		zval_dtor(*info);
-		array_init(*info);
-	}
-
-	stream = php_stream_open_wrapper(arg1, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -1379,8 +1359,6 @@ PHP_FUNCTION(getimagesize)
 			break;
 	}
 
-	php_stream_close(stream);
-
 	if (result) {
 		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
@@ -1402,6 +1380,56 @@ PHP_FUNCTION(getimagesize)
 	}
 }
 /* }}} */
+
+#define FROM_DATA 0
+#define FROM_PATH 1
+
+static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) {  /* {{{ */
+	zval **info = NULL;
+	php_stream *stream = NULL;
+	char *input;
+	int input_len;
+	const int argc = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &input, &input_len, &info) == FAILURE) {
+			return;
+	}
+
+	if (argc == 2) {
+			zval_dtor(*info);
+			array_init(*info);
+	}
+
+
+	if (mode == FROM_PATH) {
+		stream = php_stream_open_wrapper(input, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
+	} else {
+		stream = php_stream_memory_open(TEMP_STREAM_READONLY, input, input_len);
+	}
+
+	if (!stream) {
+		   RETURN_FALSE;
+	}
+
+	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_stream_close(stream);
+}
+/* }}} */
+
+/* {{{ proto array getimagesize(string imagefile [, array info])
+   Get the size of an image as 4-element array */
+PHP_FUNCTION(getimagesize)
+{
+	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_PATH);
+}
+/* }}} */
+
+/* {{{ proto array getimagesizefromstring(string data [, array info])
+   Get the size of an image as 4-element array */
+PHP_FUNCTION(getimagesizefromstring)
+{
+	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
+}
 
 /*
  * Local variables:

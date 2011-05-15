@@ -35,5 +35,5 @@ unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-Exception: Write operations disabled by INI setting
+Exception: Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

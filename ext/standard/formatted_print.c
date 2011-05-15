@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,11 +37,8 @@
 #define ADJ_WIDTH 1
 #define ADJ_PRECISION 2
 #define NUM_BUF_SIZE 500
-#define	NDIG 80
-#define FLOAT_DIGITS 6
 #define FLOAT_PRECISION 6
-#define MAX_FLOAT_DIGITS 38
-#define MAX_FLOAT_PRECISION 40
+#define MAX_FLOAT_PRECISION 53
 
 #if 0
 /* trick to control varargs functions through cpp */

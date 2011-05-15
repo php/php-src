@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,6 +92,7 @@ ZEND_API int zend_ini_startup(TSRMLS_D) /* {{{ */
 
 	EG(ini_directives) = registered_zend_ini_directives;
 	EG(modified_ini_directives) = NULL;
+	EG(error_reporting_ini_entry) = NULL;
 	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, NULL, 1, 0) == FAILURE) {
 		return FAILURE;
 	}
@@ -133,6 +134,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 	zend_ini_entry ini_entry;
 
 	EG(modified_ini_directives) = NULL;
+	EG(error_reporting_ini_entry) = NULL;
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
 	if (zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, NULL, 1, 0) == FAILURE) {
 		return FAILURE;
@@ -145,11 +147,11 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 
 static int ini_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
+	const Bucket *f;
+	const Bucket *s;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
+	f = *((const Bucket **) a);
+	s = *((const Bucket **) b);
 
 	if (f->nKeyLength == 0 && s->nKeyLength == 0) { /* both numeric */
 		return ZEND_NORMALIZE_BOOL(f->nKeyLength - s->nKeyLength);

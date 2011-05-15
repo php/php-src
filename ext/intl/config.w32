@@ -71,6 +71,22 @@ if (PHP_INTL != "no") {
 				resourcebundle_class.c \
 				resourcebundle_iterator.c",
 				"intl");
+
+		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
+			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
+					spoofchecker.c \
+					spoofchecker_class.c \
+					spoofchecker_create.c \
+					spoofchecker_main.c",
+					"intl");
+					AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
+		}
+
+		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
+				transliterator.c \
+				transliterator_class.c \
+				transliterator_methods.c",
+				"intl");
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {

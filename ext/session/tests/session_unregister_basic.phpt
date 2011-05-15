@@ -1,7 +1,7 @@
 --TEST--
 Test session_unregister() function : basic functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include('skipif.inc'); if(PHP_VERSION_ID < 503099) { die('SKIP'); } ?>
 --FILE--
 <?php
 

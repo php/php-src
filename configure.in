@@ -40,8 +40,8 @@ PHP_CANONICAL_HOST_TARGET
 AC_CONFIG_HEADER(main/php_config.h)
 
 PHP_MAJOR_VERSION=5
-PHP_MINOR_VERSION=4
-PHP_RELEASE_VERSION=0
+PHP_MINOR_VERSION=3
+PHP_RELEASE_VERSION=99
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -304,8 +304,8 @@ dnl -------------------------------------------------------------------------
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAMES
-PHP_SAPI=default
 PHP_BUILD_PROGRAM
+PHP_SAPI=none
 
 
 dnl SAPI configuration.
@@ -324,6 +324,20 @@ dnl Show which main SAPI was selected
 AC_MSG_CHECKING([for chosen SAPI module])
 AC_MSG_RESULT([$PHP_SAPI])
 
+dnl Show which binaries were selected
+AC_MSG_CHECKING([for executable SAPI binaries])
+if test "$PHP_BINARIES"; then
+  AC_MSG_RESULT([$PHP_BINARIES])
+else
+  AC_MSG_RESULT([none])
+fi
+
+dnl Exit early
+if test -z "$PHP_INSTALLED_SAPIS"; then
+  AC_MSG_ERROR([Nothing to build.])
+fi
+
+dnl force ZTS
 if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
@@ -611,7 +625,7 @@ asprintf \
 )
 
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc
-AC_CACHE_CHECK([for nanosleep], ac_cv_func_nanosleep, [PHP_CHECK_FUNC_LIB(nanosleep, rt)])
+PHP_CHECK_FUNC_LIB(nanosleep, rt)
 
 dnl Check for getaddrinfo, should be a better way, but...
 dnl Also check for working getaddrinfo
@@ -764,7 +778,7 @@ if test "$PHP_DEBUG" = "yes"; then
   changequote([,])
   dnl add -O0 only if GCC or ICC is used
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
-    CFLAGS="$CFLAGS -g -O0"
+    CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -g -O0"
   fi
   if test "$SUNCC" = "yes"; then
@@ -819,28 +833,6 @@ fi
 AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-
-PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
-[  --enable-safe-mode      Enable safe mode by default], no, no)
-
-if test "$PHP_SAFE_MODE" = "yes"; then
-  AC_DEFINE(PHP_SAFE_MODE,1,[ ])
-else
-  AC_DEFINE(PHP_SAFE_MODE,0,[ ])
-fi
-
-AC_MSG_CHECKING([for safe mode exec dir])
-PHP_ARG_WITH(exec-dir,,
-[  --with-exec-dir[=DIR]   Only allow executables in DIR under safe-mode
-                          [/usr/local/php/bin]], no, no)
-
-if test "$PHP_EXEC_DIR" != "no" && test "$PHP_EXEC_DIR" != "yes" ; then
-  AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR, "$PHP_EXEC_DIR", [ ])
-  AC_MSG_RESULT([$PHP_EXEC_DIR])
-else
-  AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR, "/usr/local/php/bin", [ ])
-  AC_MSG_RESULT([/usr/local/php/bin])
-fi
 
 PHP_ARG_ENABLE(sigchild, whether to enable PHP's own SIGCHLD handler,
 [  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
@@ -901,6 +893,25 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
 fi
 
+dnl ##
+dnl ## DTRACE CHECKS
+dnl ## Note: this has to be done after SAPI configuration!
+dnl ##
+PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
+[  --enable-dtrace         Enable DTrace support], no, no)
+
+if test "$PHP_DTRACE" = "yes"; then
+  AC_CHECK_HEADERS([sys/sdt.h], [
+    PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
+      Zend/zend_execute.c Zend/zend_exceptions.c \
+      Zend/zend_dtrace.c Zend/zend.c])
+    AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
+    PHP_SUBST(PHP_DTRACE_OBJS)
+  ], [
+    AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
+  ])
+fi
+
 AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE(fd-setsize,,
 [  --enable-fd-setsize     Set size of descriptor sets], no, no)
@@ -957,14 +968,8 @@ dnl -------------------------------------------------------------------------
 enable_shared=yes
 enable_static=yes
 
-case $php_build_target in
-  program|static)
-    standard_libtool_flag='-prefer-non-pic -static'
-    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
-        enable_shared=no
-    fi
-    ;;
-  shared)
+case $php_sapi_module in
+  shared[)]
     enable_static=no
     case $with_pic in
       yes)
@@ -975,6 +980,12 @@ case $php_build_target in
         ;;
     esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
+    ;;
+  *[)]
+    standard_libtool_flag='-prefer-non-pic -static'
+    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
+      enable_shared=no
+    fi
     ;;
 esac
 
@@ -1156,6 +1167,7 @@ EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
 EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
 EXPANDED_BINDIR=`eval echo $bindir`
 EXPANDED_SBINDIR=`eval echo $sbindir`
+EXPANDED_MANDIR=`eval echo $mandir`
 EXPANDED_LIBDIR=$libdir
 EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
 EXPANDED_DATADIR=$datadir
@@ -1172,6 +1184,7 @@ AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
 AC_SUBST(EXPANDED_EXTENSION_DIR)
 AC_SUBST(EXPANDED_BINDIR)
 AC_SUBST(EXPANDED_SBINDIR)
+AC_SUBST(EXPANDED_MANDIR)
 AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(EXPANDED_DATADIR)
 AC_SUBST(EXPANDED_SYSCONFDIR)
@@ -1211,24 +1224,15 @@ case $host_alias in
   ;;
 esac
 
-if test "$PHP_CLI" != "no"; then
-  PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
-  PHP_INSTALL_CLI_TARGET="install-cli"
-  PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c,, cli)
-  PHP_INSTALLED_SAPIS="cli $PHP_SAPI"
-  PHP_EXECUTABLE="\$(top_builddir)/\$(SAPI_CLI_PATH)"
-else
-  PHP_INSTALLED_SAPIS="$PHP_SAPI"
-fi
-
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
 PHP_SUBST(PHP_EXECUTABLE)
-PHP_SUBST(PHP_CLI_TARGET)
+
 PHP_SUBST(PHP_SAPI_OBJS)
-PHP_SUBST(PHP_CLI_OBJS)
+PHP_SUBST(PHP_BINARY_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
+PHP_SUBST(PHP_BINARIES)
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
 
@@ -1329,8 +1333,8 @@ dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
 dnl This hack works around it. Ugly.
 case $host_alias in
 *darwin9*|*darwin10*)
-	ac_cv_exeext=
-	;;
+  ac_cv_exeext=
+  ;;
 esac
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
@@ -1372,27 +1376,19 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET) $pharcmd"
-install_targets="$install_modules install-build install-headers install-programs $install_pear $pharcmd_install"
-
-case $PHP_SAPI in
-  cli)
-    install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-  *)
-    install_targets="install-sapi $PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-esac
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
+PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
-       safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c php_logos.c \
@@ -1410,21 +1406,21 @@ case $host_alias in
     PHP_ADD_BUILD_DIR(netware)
     ;;
   *)
-    PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
     ;;
 esac
 
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
+    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
     zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
     zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
-    zend_closures.c zend_float.c)
+    zend_closures.c zend_float.c zend_string.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
   PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
@@ -1441,7 +1437,6 @@ fi
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend)
 

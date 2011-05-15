@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -482,6 +482,7 @@ const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_body,								arginfo_imap_body)
 	PHP_FE(imap_bodystruct,							arginfo_imap_bodystruct)
 	PHP_FE(imap_fetchbody,							arginfo_imap_fetchbody)
+	PHP_FE(imap_fetchmime,							arginfo_imap_fetchbody)
 	PHP_FE(imap_savebody,							arginfo_imap_savebody)
 	PHP_FE(imap_fetchheader,						arginfo_imap_fetchheader)
 	PHP_FE(imap_fetchstructure,						arginfo_imap_fetchstructure)
@@ -1209,16 +1210,16 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (IMAPG(imap_user)) {
 		efree(IMAPG(imap_user));
+		IMAPG(imap_user) = 0;
 	}
 
 	if (IMAPG(imap_password)) {
 		efree(IMAPG(imap_password));
+		IMAPG(imap_password) = 0;
 	}
 
-	/* local filename, need to perform open_basedir and safe_mode checks */
-	if (mailbox[0] != '{' &&
-			(php_check_open_basedir(mailbox TSRMLS_CC) ||
-			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
+	/* local filename, need to perform open_basedir check */
+	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1292,10 +1293,8 @@ PHP_FUNCTION(imap_reopen)
 		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
 	}
 #endif
-	/* local filename, need to perform open_basedir and safe_mode checks */
-	if (mailbox[0] != '{' &&
-			(php_check_open_basedir(mailbox TSRMLS_CC) ||
-			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
+	/* local filename, need to perform open_basedir check */
+	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -2363,6 +2362,46 @@ PHP_FUNCTION(imap_fetchbody)
 
 /* }}} */
 
+
+/* {{{ proto string imap_fetchmime(resource stream_id, int msg_no, string section [, int options])
+   Get a specific body section's MIME headers */
+PHP_FUNCTION(imap_fetchmime)
+{
+	zval *streamind;
+	long msgno, flags = 0;
+	pils *imap_le_struct;
+	char *body, *sec;
+	int sec_len;
+	unsigned long len;
+	int argc = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "rls|l", &streamind, &msgno, &sec, &sec_len, &flags) == FAILURE) {
+		return;
+	}
+
+	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
+
+	if (argc < 4 || !(flags & FT_UID)) {
+		/* only perform the check if the msgno is a message number and not a UID */
+		PHP_IMAP_CHECK_MSGNO(msgno);
+	}
+
+	body = mail_fetch_mime(imap_le_struct->imap_stream, msgno, sec, &len, (argc == 4 ? flags : NIL));
+
+	if (!body) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body MIME information available");
+		RETURN_FALSE;
+	}
+	RETVAL_STRINGL(body, len, 1);
+}
+
+/* }}} */
+
 /* {{{ proto bool imap_savebody(resource stream_id, string|resource file, int msg_no[, string section = ""[, int options = 0]])
 	Save a specific body section to a file */
 PHP_FUNCTION(imap_savebody)
@@ -2394,7 +2433,7 @@ PHP_FUNCTION(imap_savebody)
 
 		default:
 			convert_to_string_ex(out);
-			writer = php_stream_open_wrapper(Z_STRVAL_PP(out), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+			writer = php_stream_open_wrapper(Z_STRVAL_PP(out), "wb", REPORT_ERRORS, NULL);
 		break;
 	}
 
@@ -3420,6 +3459,7 @@ PHP_FUNCTION(imap_fetch_overview)
 				add_property_long(myoverview, "deleted", elt->deleted);
 				add_property_long(myoverview, "seen", elt->seen);
 				add_property_long(myoverview, "draft", elt->draft);
+				add_property_long(myoverview, "udate", mail_longdate(elt));
 				add_next_index_object(return_value, myoverview TSRMLS_CC);
 			}
 		}
@@ -4236,7 +4276,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 					}
 
 					offset = end_token+2;
-					for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d); i++);
+					for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d) || (string[offset + i] == '\t'); i++);
 					if ((string[offset + i] == '=') && (string[offset + i + 1] == '?') && (offset + i < end)) {
 						offset += i;
 					}
@@ -4251,7 +4291,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 			charset_token = offset;
 		}
 		/* Return the rest of the data as unencoded, as it was either unencoded or was missing separators
-		   which rendered the the remainder of the string impossible for us to decode. */
+		   which rendered the remainder of the string impossible for us to decode. */
 		memcpy(text, &string[charset_token], end - charset_token);	/* Extract unencoded text from string */
 		text[end - charset_token] = 0x00;
 		MAKE_STD_ZVAL(myobject);

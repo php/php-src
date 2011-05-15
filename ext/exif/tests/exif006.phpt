@@ -20,7 +20,7 @@ magic_quotes_runtime=1
 var_dump(exif_read_data(dirname(__FILE__).'/test6.jpg','',true,false));
 ?>
 --EXPECTF--
-Warning: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Deprecated: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line 0
 array(5) {
   ["FILE"]=>
   array(6) {

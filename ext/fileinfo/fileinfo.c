@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -98,13 +98,12 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 {
 	zend_object_value retval;
 	struct finfo_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(struct finfo_object));
 	memset(intern, 0, sizeof(struct finfo_object));
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	intern->ptr = NULL;
 
@@ -167,7 +166,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-function_entry finfo_class_functions[] = {
+zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -201,7 +200,7 @@ void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-function_entry fileinfo_functions[] = {
+zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
@@ -291,13 +290,19 @@ PHP_FUNCTION(finfo_open)
 		RETURN_FALSE;
 	}
 
-	if (file && *file) { /* user specified file, perform open_basedir checks */
+	if (file_len == 0) {
+		file = NULL;
+	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 		if (!VCWD_REALPATH(file, resolved_path)) {
 			RETURN_FALSE;
 		}
 		file = resolved_path;
 
+#if PHP_API_VERSION < 20100412
 		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
+#else
+		if (php_check_open_basedir(file TSRMLS_CC)) {
+#endif
 			RETURN_FALSE;
 		}
 	}
@@ -469,21 +474,10 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			/* determine if the file is a local file or remote URL */
 			char *tmp2;
 			php_stream_wrapper *wrap;
-			struct stat sb;
+			php_stream_statbuf ssb;
 
 			if (buffer == NULL || !*buffer) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename or path");
-				RETVAL_FALSE;
-				goto clean;
-			}
-
-			if (php_sys_stat(buffer, &sb) == 0) {
-					  if (sb.st_mode & _S_IFDIR) {
-								 ret_val = mime_directory;
-								 goto common;
-					  }
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "File or path not found '%s'", buffer);
 				RETVAL_FALSE;
 				goto clean;
 			}
@@ -492,15 +486,25 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 			if (wrap) {
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
-
+#if PHP_API_VERSION < 20100412
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+#else
+				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
+#endif
 
 				if (!stream) {
 					RETVAL_FALSE;
 					goto clean;
 				}
 
-				ret_val = (char *)magic_stream(magic, stream);
+				if (php_stream_stat(stream, &ssb) == SUCCESS) {
+					if (ssb.sb.st_mode & S_IFDIR) {
+						ret_val = mime_directory;
+					} else {
+						ret_val = (char *)magic_stream(magic, stream);
+					}
+				}
+
 				php_stream_close(stream);
 			}
 			break;

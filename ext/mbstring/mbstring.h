@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,13 +128,10 @@ PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 PHP_FUNCTION(mb_check_encoding);
 
-MBSTRING_API int php_mb_encoding_translation(TSRMLS_D);
-
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
                                  size_t nbytes TSRMLS_DC);
-MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
 
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
                                       const char *_to_encoding,
@@ -146,45 +143,36 @@ MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC)
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
 
-MBSTRING_API size_t php_mb_gpc_mbchar_bytes(const char *s TSRMLS_DC);
-
 MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length, 
 											 char *arg_list TSRMLS_DC);
 
 MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to, 
 											  const char *encoding_from TSRMLS_DC);
-MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, const char *encoding_to, const char *encoding_from TSRMLS_DC);
-
-MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length, int num, char *arg_list TSRMLS_DC);
-
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding TSRMLS_DC);
 
 /* internal use only */
 int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
+	char *internal_encoding_name;
 	enum mbfl_no_language language;
-	enum mbfl_no_encoding internal_encoding;
-	enum mbfl_no_encoding current_internal_encoding;
-#ifdef ZEND_MULTIBYTE
-	enum mbfl_no_encoding *script_encoding_list;
-	int script_encoding_list_size;
-#endif /* ZEND_MULTIBYTE */
-	enum mbfl_no_encoding http_output_encoding;
-	enum mbfl_no_encoding current_http_output_encoding;
-	enum mbfl_no_encoding http_input_identify;
-	enum mbfl_no_encoding http_input_identify_get;
-	enum mbfl_no_encoding http_input_identify_post;
-	enum mbfl_no_encoding http_input_identify_cookie;
-	enum mbfl_no_encoding http_input_identify_string;
-	enum mbfl_no_encoding *http_input_list;
-	int http_input_list_size;
-	enum mbfl_no_encoding *detect_order_list;
-	int detect_order_list_size;
-	enum mbfl_no_encoding *current_detect_order_list;
-	int current_detect_order_list_size;
+	const mbfl_encoding *internal_encoding;
+	const mbfl_encoding *current_internal_encoding;
+	const mbfl_encoding *http_output_encoding;
+	const mbfl_encoding *current_http_output_encoding;
+	const mbfl_encoding *http_input_identify;
+	const mbfl_encoding *http_input_identify_get;
+	const mbfl_encoding *http_input_identify_post;
+	const mbfl_encoding *http_input_identify_cookie;
+	const mbfl_encoding *http_input_identify_string;
+	const mbfl_encoding **http_input_list;
+	size_t http_input_list_size;
+	const mbfl_encoding **detect_order_list;
+	size_t detect_order_list_size;
+	const mbfl_encoding **current_detect_order_list;
+	size_t current_detect_order_list_size;
 	enum mbfl_no_encoding *default_detect_order_list;
-	int default_detect_order_list_size;
+	size_t default_detect_order_list_size;
 	int filter_illegal_mode;
 	int filter_illegal_substchar;
 	int current_filter_illegal_mode;

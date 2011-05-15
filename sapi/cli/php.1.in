@@ -94,6 +94,34 @@ get executed. When readline support is enabled you can edit the lines and also
 have history support.
 .TP
 .PD 0
+.B \-\-bindpath \fIaddress:port\fP|\fIport\fP
+.TP
+.PD 1
+.B \-b \fIaddress:port\fP|\fIport\fP
+Bind Path for external FASTCGI Server mode (CGI only).
+.TP
+.PD 0
+.B \-\-no\-chdir
+.TP
+.PD 1
+.B \-C
+Do not chdir to the script's directory (CGI only).
+.TP
+.PD 0
+.B \-\-no\-header
+.TP
+.PD 1
+.B \-q
+Quiet-mode. Suppress HTTP header output (CGI only).
+.TP
+.PD 0
+.B \-\-timing \fIcount\fP
+.TP
+.PD 1
+.B \-T \fIcount\fP
+Measure execution time of script repeated count times (CGI only).
+.TP
+.PD 0
 .B \-\-php\-ini \fIpath\fP|\fIfile\fP
 .TP
 .PD 1
@@ -292,6 +320,16 @@ Shows information about class
 .B \-\-re
 .IR name
 Shows information about extension
+.B name
+.TP
+.PD 0
+.B \-\-rzendextension
+.IR name
+.TP
+.PD 1
+.B \-\-rz
+.IR name
+Shows information about Zend extension
 .B name
 .TP
 .PD 0

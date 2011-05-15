@@ -11,6 +11,7 @@ if (!@mb_internal_encoding('BIG5')) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';
@@ -27,14 +28,14 @@ if (mb_language("traditional chinese")) {
 --EXPECTF--
 To: example@example.com
 Subject: %s
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
 %s
 To: example@example.com
 Subject: =?BIG5?B?tPrF5yBUcmFkaXRpb25hbCBDaGluZXNl?=
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=BIG5
 Content-Transfer-Encoding: 8bit
 

@@ -130,9 +130,9 @@ disp_locale=fr :  display_name=i-enochian
 disp_locale=de :  display_name=i-enochian
 -----------------
 locale='zh-hakka'
-disp_locale=en :  display_name=Chinese #HAKKA#
-disp_locale=fr :  display_name=chinois #HAKKA#
-disp_locale=de :  display_name=Chinesisch #HAKKA#
+disp_locale=en :  display_name=Chinese( #HAKKA#)?
+disp_locale=fr :  display_name=chinois( #HAKKA#)?
+disp_locale=de :  display_name=Chinesisch( #HAKKA#)?
 -----------------
 locale='zh-wuu'
 disp_locale=en :  display_name=Chinese #WUU#
@@ -201,12 +201,12 @@ disp_locale=de :  display_name=i-enochian
 -----------------
 locale='zh-Hant'
 disp_locale=en :  display_name=Chinese #Traditional Han#
-disp_locale=fr :  display_name=chinois #idéogrammes han #variante traditionnelle##
+disp_locale=fr :  display_name=chinois #idéogrammes han (#variante traditionnelle#|traditionnels)#
 disp_locale=de :  display_name=Chinesisch #Traditionelle Chinesische Schrift#
 -----------------
 locale='zh-Hans'
 disp_locale=en :  display_name=Chinese #Simplified Han#
-disp_locale=fr :  display_name=chinois #idéogrammes han #variante simplifiée##
+disp_locale=fr :  display_name=chinois #idéogrammes han (#variante simplifiée#|simplifiés)#
 disp_locale=de :  display_name=Chinesisch #Vereinfachte Chinesische Schrift#
 -----------------
 locale='sr-Cyrl'
@@ -221,7 +221,7 @@ disp_locale=de :  display_name=Serbisch #Lateinisch#
 -----------------
 locale='zh-Hans-CN'
 disp_locale=en :  display_name=Chinese #Simplified Han, China#
-disp_locale=fr :  display_name=chinois #idéogrammes han #variante simplifiée#, Chine#
+disp_locale=fr :  display_name=chinois #idéogrammes han (#variante simplifiée#|simplifiés), Chine#
 disp_locale=de :  display_name=Chinesisch #Vereinfachte Chinesische Schrift, China#
 -----------------
 locale='sr-Latn-CS'
@@ -230,19 +230,19 @@ disp_locale=fr :  display_name=serbe #latin, Serbie-et-Monténégro#
 disp_locale=de :  display_name=Serbisch #Lateinisch, Serbien und Montenegro#
 -----------------
 locale='sl-rozaj'
-disp_locale=en :  display_name=Slovenian #ROZAJ#
-disp_locale=fr :  display_name=slovène #ROZAJ#
-disp_locale=de :  display_name=Slowenisch #(ROZAJ|Resianisch)#
+disp_locale=en :  display_name=Slovenian( #ROZAJ#)?
+disp_locale=fr :  display_name=slovène( #ROZAJ#)?
+disp_locale=de :  display_name=Slowenisch( #(ROZAJ|Resianisch)#)?
 -----------------
 locale='sl-nedis'
-disp_locale=en :  display_name=Slovenian #NEDIS#
-disp_locale=fr :  display_name=slovène #NEDIS#
-disp_locale=de :  display_name=Slowenisch #NEDIS#
+disp_locale=en :  display_name=Slovenian( #NEDIS#)?
+disp_locale=fr :  display_name=slovène( #NEDIS#)?
+disp_locale=de :  display_name=Slowenisch( #NEDIS#)?
 -----------------
 locale='de-CH-1901'
 disp_locale=en :  display_name=German #Switzerland, Traditional German orthography#
 disp_locale=fr :  display_name=allemand #Suisse, orthographe allemande traditionnelle#
-disp_locale=de :  display_name=Deutsch #Schweiz, (1901|alte deutsche Rechtschreibung)#
+disp_locale=de :  display_name=Deutsch #Schweiz, (1901|[aA]lte deutsche Rechtschreibung)#
 -----------------
 locale='sl-IT-nedis'
 disp_locale=en :  display_name=Slovenian #Italy, Natisone dialect#
@@ -275,9 +275,9 @@ disp_locale=fr :  display_name=allemand #Suisse, X_PHONEBK#
 disp_locale=de :  display_name=Deutsch #Schweiz, X_PHONEBK#
 -----------------
 locale='az-Arab-x-AZE-derbend'
-disp_locale=en :  display_name=Azerbaijani #Arabic, X, AZE_DERBEND#
-disp_locale=fr :  display_name=azéri #arabe, X, AZE_DERBEND#
-disp_locale=de :  display_name=Aserbaidschanisch #Arabisch, X, AZE_DERBEND#
+disp_locale=en :  display_name=Azerbaijani #Arabic(, X, AZE_DERBEND)?#
+disp_locale=fr :  display_name=azéri #arabe(, X, AZE_DERBEND)?#
+disp_locale=de :  display_name=Aserbaidschanisch #Arabisch(, X, AZE_DERBEND)?#
 -----------------
 locale='zh-min'
 disp_locale=en :  display_name=Chinese #MIN#
@@ -320,9 +320,9 @@ disp_locale=fr :  display_name=chinois #Chine, A_MYEXT_X_PRIVATE#
 disp_locale=de :  display_name=Chinesisch #China, A_MYEXT_X_PRIVATE#
 -----------------
 locale='en-a-myExt-b-another'
-disp_locale=en :  display_name=English #A, MYEXT_B_ANOTHER#
-disp_locale=fr :  display_name=anglais #A, MYEXT_B_ANOTHER#
-disp_locale=de :  display_name=Englisch #A, MYEXT_B_ANOTHER#
+disp_locale=en :  display_name=English( #A, MYEXT_B_ANOTHER#)?
+disp_locale=fr :  display_name=anglais( #A, MYEXT_B_ANOTHER#)?
+disp_locale=de :  display_name=Englisch( #A, MYEXT_B_ANOTHER#)?
 -----------------
 locale='de-419-DE'
 disp_locale=en :  display_name=German #Latin America and the Caribbean, DE#
@@ -335,7 +335,7 @@ disp_locale=fr :  display_name=a #Allemagne#
 disp_locale=de :  display_name=a #Deutschland#
 -----------------
 locale='ar-a-aaa-b-bbb-a-ccc'
-disp_locale=en :  display_name=Arabic #A, AAA_B_BBB_A_CCC#
-disp_locale=fr :  display_name=arabe #A, AAA_B_BBB_A_CCC#
-disp_locale=de :  display_name=Arabisch #A, AAA_B_BBB_A_CCC#
+disp_locale=en :  display_name=Arabic( #A, AAA_B_BBB_A_CCC#)?
+disp_locale=fr :  display_name=arabe( #A, AAA_B_BBB_A_CCC#)?
+disp_locale=de :  display_name=Arabisch( #A, AAA_B_BBB_A_CCC#)?
 -----------------

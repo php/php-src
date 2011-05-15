@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
 
@@ -434,10 +433,6 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
-		RETURN_FALSE;
-	}
-
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -535,10 +530,6 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
-		RETURN_FALSE;
-	}
-
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -603,36 +594,12 @@ PHP_FUNCTION(chmod)
 		return;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
-		RETURN_FALSE;
-	}
-
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
 	imode = (mode_t) mode;
-	/* In safe mode, do not allow to setuid files.
-	 * Setuiding files could allow users to gain privileges
-	 * that safe mode doesn't give them. */
-
-	if (PG(safe_mode)) {
-		php_stream_statbuf ssb;
-		if (php_stream_stat_path_ex(filename, 0, &ssb, NULL)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stat failed for %s", filename);
-			RETURN_FALSE;
-		}
-		if ((imode & 04000) != 0 && (ssb.sb.st_mode & 04000) == 0) {
-			imode ^= 04000;
-		}
-		if ((imode & 02000) != 0 && (ssb.sb.st_mode & 02000) == 0) {
-			imode ^= 02000;
-		}
-		if ((imode & 01000) != 0 && (ssb.sb.st_mode & 01000) == 0) {
-			imode ^= 01000;
-		}
-	}
 
 	ret = VCWD_CHMOD(filename, imode);
 	if (ret == -1) {
@@ -678,11 +645,6 @@ PHP_FUNCTION(touch)
 		default:
 			/* Never reached */
 			WRONG_PARAM_COUNT;
-	}
-
-	/* Safe-mode */
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
@@ -771,28 +733,13 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	};
 	char *local;
 	php_stream_wrapper *wrapper;
-	char safe_mode_buf[MAXPATHLEN];
 
 	if (!filename_length) {
 		RETURN_FALSE;
 	}
 
-	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper) {
-		if (php_check_open_basedir(local TSRMLS_CC)) {
-			RETURN_FALSE;
-		} else if (PG(safe_mode)) {
-			if (type == FS_IS_X) {
-				if (strstr(local, "..")) {
-					RETURN_FALSE;
-				} else {
-					char *b = strrchr(local, PHP_DIR_SEPARATOR);
-					snprintf(safe_mode_buf, MAXPATHLEN, "%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : local));
-					local = (char *)&safe_mode_buf;
-				}
-			} else if (!php_checkuid_ex(local, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS, CHECKUID_NO_ERRORS)) {
-				RETURN_FALSE;
-			}
-		}
+	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper && php_check_open_basedir(local TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
 
 	if (IS_ACCESS_CHECK(type)) {

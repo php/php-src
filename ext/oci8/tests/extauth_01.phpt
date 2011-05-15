@@ -4,6 +4,8 @@ Test External Authentication errors with oci_connect
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip feature not available on Windows platforms");
+require(dirname(__FILE__).'/details.inc');
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
 ?>
 --INI--
 oci8.privileged_connect=1

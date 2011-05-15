@@ -93,7 +93,7 @@ echo "Done";
 --> http://x:?   : NULL
 --> x:blah.com   : string(8) "blah.com"
 --> x:/blah.com   : string(9) "/blah.com"
---> x://::abc/?   : string(1) "/"
+--> x://::abc/?   : bool(false)
 --> http://::?   : NULL
 --> x://::6.5   : NULL
 --> http://?:/   : string(1) "/"
@@ -108,43 +108,17 @@ echo "Done";
 --> http://[x:80]/   : string(1) "/"
 -->    : string(0) ""
 --> /   : string(1) "/"
---> http:///blah.com   : 
-Warning: parse_url(http:///blah.com): Unable to parse URL in %s on line 15
-bool(false)
---> http://:80   : 
-Warning: parse_url(http://:80): Unable to parse URL in %s on line 15
-bool(false)
---> http://user@:80   : 
-Warning: parse_url(http://user@:80): Unable to parse URL in %s on line 15
-bool(false)
---> http://user:pass@:80   : 
-Warning: parse_url(http://user:pass@:80): Unable to parse URL in %s on line 15
-bool(false)
---> http://:   : 
-Warning: parse_url(http://:): Unable to parse URL in %s on line 15
-bool(false)
---> http://@/   : 
-Warning: parse_url(http://@/): Unable to parse URL in %s on line 15
-bool(false)
---> http://@:/   : 
-Warning: parse_url(http://@:/): Unable to parse URL in %s on line 15
-bool(false)
---> http://:/   : 
-Warning: parse_url(http://:/): Unable to parse URL in %s on line 15
-bool(false)
---> http://?   : 
-Warning: parse_url(http://?): Unable to parse URL in %s on line 15
-bool(false)
---> http://?:   : 
-Warning: parse_url(http://?:): Unable to parse URL in %s on line 15
-bool(false)
---> http://:?   : 
-Warning: parse_url(http://:?): Unable to parse URL in %s on line 15
-bool(false)
---> http://blah.com:123456   : 
-Warning: parse_url(http://blah.com:123456): Unable to parse URL in %s on line 15
-bool(false)
---> http://blah.com:abcdef   : 
-Warning: parse_url(http://blah.com:abcdef): Unable to parse URL in %s on line 15
-bool(false)
+--> http:///blah.com   : bool(false)
+--> http://:80   : bool(false)
+--> http://user@:80   : bool(false)
+--> http://user:pass@:80   : bool(false)
+--> http://:   : bool(false)
+--> http://@/   : bool(false)
+--> http://@:/   : bool(false)
+--> http://:/   : bool(false)
+--> http://?   : bool(false)
+--> http://?:   : bool(false)
+--> http://:?   : bool(false)
+--> http://blah.com:123456   : bool(false)
+--> http://blah.com:abcdef   : bool(false)
 Done

@@ -34,7 +34,6 @@ var_dump($arr_asso);
 echo "\nDone";
 ?>
 --EXPECTF--
-
 --- Testing Circular reference of an array ---
 -- Normal array --
 string(238) "a:7:{i:0;i:0;i:1;i:1;i:2;i:-2;i:3;d:3.333333000000000101437080957111902534961700439453125;i:4;s:1:"a";i:5;a:0:{}i:6;a:7:{i:0;i:0;i:1;i:1;i:2;i:-2;i:3;d:3.333333000000000101437080957111902534961700439453125;i:4;s:1:"a";i:5;a:0:{}i:6;R:8;}}"
@@ -68,23 +67,7 @@ array(7) {
     array(0) {
     }
     [6]=>
-    &array(7) {
-      [0]=>
-      int(0)
-      [1]=>
-      int(1)
-      [2]=>
-      int(-2)
-      [3]=>
-      float(3.333333)
-      [4]=>
-      string(1) "a"
-      [5]=>
-      array(0) {
-      }
-      [6]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 

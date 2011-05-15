@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,8 @@
 #include "php_pdo_oci.h"
 #include "php_pdo_oci_int.h"
 #include "Zend/zend_extensions.h"
+
+#define PDO_OCI_LOBMAXSIZE (4294967295UL) /* OCI_LOBMAXSIZE */
 
 #define STMT_CALL(name, params)											\
 	do {																\
@@ -634,11 +636,14 @@ static size_t oci_blob_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 		&amt, self->offset, buf, count,
 		NULL, NULL, 0, SQLCS_IMPLICIT);
 
-	if (r != OCI_SUCCESS) {
+	if (r != OCI_SUCCESS && r != OCI_NEED_DATA) {
 		return (size_t)-1;
 	}
 
 	self->offset += amt;
+	if (amt < count) {
+		stream->eof = 1;
+	}
 	return amt;
 }
 
@@ -664,14 +669,17 @@ static int oci_blob_flush(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-/* TODO: implement
 static int oci_blob_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
 
-	return -1;
+	if (offset >= PDO_OCI_LOBMAXSIZE) {
+		return -1;
+	} else {
+		self->offset = offset + 1;  /* Oracle LOBS are 1-based, but PHP is 0-based */
+		return 0;
+	}
 }
-*/
 
 static php_stream_ops oci_blob_stream_ops = {
 	oci_blob_write,
@@ -679,7 +687,7 @@ static php_stream_ops oci_blob_stream_ops = {
 	oci_blob_close,
 	oci_blob_flush,
 	"pdo_oci blob stream",
-	NULL, /*oci_blob_seek,*/
+	oci_blob_seek,
 	NULL,
 	NULL,
 	NULL

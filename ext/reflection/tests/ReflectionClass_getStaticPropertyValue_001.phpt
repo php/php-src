@@ -3,6 +3,8 @@ ReflectionClass::getStaticPropertyValue()
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
+--SKIPIF--
+<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 class A {

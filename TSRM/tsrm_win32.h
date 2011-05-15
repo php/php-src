@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,10 +95,10 @@ char * tsrm_win32_get_path_sid_key(const char *pathname  TSRMLS_DC);
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
-TSRM_API int tsrm_win32_access(const char *pathname, int mode);
+TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
 TSRM_API int win32_utime(const char *filename, struct utimbuf *buf);
 
 TSRM_API int shmget(int key, int size, int flags);

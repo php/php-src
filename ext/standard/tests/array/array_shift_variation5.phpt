@@ -9,7 +9,7 @@ Test array_shift() function : usage variations - call recursively
 
 /*
  * Use the result of one call to array_shift 
- * as the the $stack argument of another call to array_shift()
+ * as the $stack argument of another call to array_shift()
  * When done in one statement causes strict error messages. 
  */
 

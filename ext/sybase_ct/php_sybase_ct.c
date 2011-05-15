@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -180,31 +180,30 @@ const zend_function_entry sybase_functions[] = {
 	PHP_FE(sybase_deadlock_retry_count, arginfo_sybase_deadlock_retry_count)
 
 #if !defined(PHP_WIN32) && !defined(HAVE_MSSQL)
-	PHP_FALIAS(mssql_connect, sybase_connect, NULL)
-	PHP_FALIAS(mssql_pconnect, sybase_pconnect, NULL)
-	PHP_FALIAS(mssql_close, sybase_close, NULL)
-	PHP_FALIAS(mssql_select_db, sybase_select_db, NULL)
-	PHP_FALIAS(mssql_query, sybase_query, NULL)
-	PHP_FALIAS(mssql_unbuffered_query, sybase_unbuffered_query, NULL)
-	PHP_FALIAS(mssql_free_result, sybase_free_result, NULL)
-	PHP_FALIAS(mssql_get_last_message, sybase_get_last_message, NULL)
-	PHP_FALIAS(mssql_num_rows, sybase_num_rows, NULL)
-	PHP_FALIAS(mssql_num_fields, sybase_num_fields, NULL)
-	PHP_FALIAS(mssql_fetch_row, sybase_fetch_row, NULL)
-	PHP_FALIAS(mssql_fetch_array, sybase_fetch_array, NULL)
-	PHP_FALIAS(mssql_fetch_assoc, sybase_fetch_assoc, NULL)
-	PHP_FALIAS(mssql_fetch_object, sybase_fetch_object, NULL)
-	PHP_FALIAS(mssql_data_seek, sybase_data_seek, NULL)
-	PHP_FALIAS(mssql_fetch_field, sybase_fetch_field, NULL)
-	PHP_FALIAS(mssql_field_seek, sybase_field_seek, NULL)
-	PHP_FALIAS(mssql_result, sybase_result, NULL)
-	PHP_FALIAS(mssql_affected_rows, sybase_affected_rows, NULL)
-	PHP_FALIAS(mssql_min_client_severity,   sybase_min_client_severity, NULL)
-	PHP_FALIAS(mssql_min_server_severity, sybase_min_server_severity, NULL)
-	PHP_FALIAS(mssql_set_message_handler, sybase_set_message_handler, NULL)
-	PHP_FALIAS(mssql_deadlock_retry_count, sybase_deadlock_retry_count, NULL)
+	PHP_FALIAS(mssql_connect, 	sybase_connect, 	arginfo_sybase_connect)
+	PHP_FALIAS(mssql_pconnect, 	sybase_pconnect, 	arginfo_sybase_pconnect)
+	PHP_FALIAS(mssql_close, 	sybase_close, 		arginfo_sybase_close)
+	PHP_FALIAS(mssql_select_db, sybase_select_db, 	arginfo_sybase_select_db)
+	PHP_FALIAS(mssql_query, 	sybase_query, 		arginfo_sybase_query)
+	PHP_FALIAS(mssql_unbuffered_query, 	sybase_unbuffered_query, 	arginfo_sybase_unbuffered_query)
+	PHP_FALIAS(mssql_free_result, 		sybase_free_result, 		arginfo_sybase_free_result)
+	PHP_FALIAS(mssql_get_last_message, 	sybase_get_last_message, 	arginfo_sybase_get_last_message)
+	PHP_FALIAS(mssql_num_rows,	 	sybase_num_rows, 		arginfo_sybase_num_rows)
+	PHP_FALIAS(mssql_num_fields, 	sybase_num_fields, 		arginfo_sybase_num_fields)
+	PHP_FALIAS(mssql_fetch_row, 	sybase_fetch_row, 		arginfo_sybase_fetch_row)
+	PHP_FALIAS(mssql_fetch_array, 	sybase_fetch_array, 	arginfo_sybase_fetch_array)
+	PHP_FALIAS(mssql_fetch_assoc, 	sybase_fetch_assoc, 	arginfo_sybase_fetch_assoc)
+	PHP_FALIAS(mssql_fetch_object, 	sybase_fetch_object, 	arginfo_sybase_fetch_object)
+	PHP_FALIAS(mssql_data_seek, 	sybase_data_seek, 		arginfo_sybase_data_seek)
+	PHP_FALIAS(mssql_fetch_field, 	sybase_fetch_field, 	arginfo_sybase_fetch_field)
+	PHP_FALIAS(mssql_field_seek, 	sybase_field_seek, 		arginfo_sybase_field_seek)
+	PHP_FALIAS(mssql_result, 		sybase_result, 			arginfo_sybase_result)
+	PHP_FALIAS(mssql_affected_rows, sybase_affected_rows, 	arginfo_sybase_affected_rows)
+	PHP_FALIAS(mssql_min_client_severity,   sybase_min_client_severity, 	arginfo_sybase_min_client_severity)
+	PHP_FALIAS(mssql_min_server_severity, 	sybase_min_server_severity, 	arginfo_sybase_min_server_severity)
+	PHP_FALIAS(mssql_set_message_handler, 	sybase_set_message_handler, 	arginfo_sybase_set_message_handler)
+	PHP_FALIAS(mssql_deadlock_retry_count, 	sybase_deadlock_retry_count, 	arginfo_sybase_deadlock_retry_count)
 #endif
-
 	{NULL, NULL, NULL}
 };
 
@@ -1188,11 +1187,10 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 		ZVAL_STRINGL(&result, buf, length- 1, 1);       \
 	}
 
-static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
+static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS_DC)
 {
 	int i, j;
 	CS_INT retcode;
-	TSRMLS_FETCH();
 	
 	/* We've already fetched everything */
 	if (result->last_retcode == CS_END_DATA || result->last_retcode == CS_END_RESULTS) {
@@ -1248,8 +1246,17 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 					}
 					
 					default: {
-						/* This indicates anything else, return it as string */
-						ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1, 1);
+						/* This indicates anything else, return it as string
+						 * FreeTDS doesn't correctly set result->indicators[j] correctly
+						 * for NULL fields in some version in conjunction with ASE 12.5
+						 * but instead sets result->lengths[j] to 0, which would lead to
+						 * a negative memory allocation (and thus a segfault).
+						 */
+						if (result->lengths[j] < 1) {
+							ZVAL_NULL(&result->data[i][j]);
+						} else {
+							ZVAL_STRINGL(&result->data[i][j], result->tmp_buffer[j], result->lengths[j]- 1, 1);
+						}
 						break;
 					}
 				}
@@ -1282,7 +1289,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	return retcode;
 }
 
-static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int buffered, int store)
+static sybase_result * php_sybase_fetch_result_set(sybase_link *sybase_ptr, int buffered, int store TSRMLS_DC)
 {
 	int num_fields;
 	sybase_result *result;
@@ -1401,7 +1408,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 	if (buffered) {
 		retcode = CS_SUCCEED;
 	} else {
-		if ((retcode = php_sybase_fetch_result_row(result, -1)) == CS_FAIL) {
+		if ((retcode = php_sybase_fetch_result_row(result, -1 TSRMLS_CC)) == CS_FAIL) {
 			return NULL;
 		}
 	}
@@ -1538,7 +1545,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 			case CS_PARAM_RESULT:
 			case CS_ROW_RESULT:
 			case CS_STATUS_RESULT:
-				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
+				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store TSRMLS_CC);
 				if (result == NULL) {
 					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 					RETURN_FALSE;
@@ -1564,7 +1571,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 					case CS_PARAM_RESULT:
 					case CS_ROW_RESULT:
 						if (status != Q_RESULT) {
-							result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
+							result = php_sybase_fetch_result_set(sybase_ptr, buffered, store TSRMLS_CC);
 							if (result == NULL) {
 								ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 								sybase_ptr->dead = 1;
@@ -1756,7 +1763,7 @@ PHP_FUNCTION(sybase_fetch_row)
 
 	/* Unbuffered? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		php_sybase_fetch_result_row(result, 1);
+		php_sybase_fetch_result_row(result, 1 TSRMLS_CC);
 	}
 	
 	/* At the end? */
@@ -1792,7 +1799,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 
 	/* Unbuffered ? Fetch next row */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		php_sybase_fetch_result_row(result, 1);
+		php_sybase_fetch_result_row(result, 1 TSRMLS_CC);
 	}
 
 	/* At the end? */
@@ -1910,7 +1917,7 @@ PHP_FUNCTION(sybase_data_seek)
 
 	/* Unbuffered ? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && offset >= result->num_rows) {
-		php_sybase_fetch_result_row(result, offset+ 1);
+		php_sybase_fetch_result_row(result, offset+ 1 TSRMLS_CC);
 	}
 	
 	if (offset < 0 || offset >= result->num_rows) {
@@ -2044,7 +2051,7 @@ PHP_FUNCTION(sybase_result)
 	
 	/* Unbuffered ? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && row >= result->num_rows) {
-		php_sybase_fetch_result_row(result, row);
+		php_sybase_fetch_result_row(result, row TSRMLS_CC);
 	}
 
 	if (row < 0 || row >= result->num_rows) {

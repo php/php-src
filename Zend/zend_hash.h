@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -60,7 +60,7 @@ typedef struct bucket {
 	struct bucket *pListLast;
 	struct bucket *pNext;
 	struct bucket *pLast;
-	char arKey[1]; /* Must be last element */
+	char *arKey;
 } Bucket;
 
 typedef struct _hashtable {
@@ -304,7 +304,7 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-#define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
+#define ZEND_HANDLE_NUMERIC_EX(key, length, idx, func) do {					\
 	register const char *tmp = key;											\
 																			\
 	if (*tmp == '-') {														\
@@ -312,7 +312,6 @@ END_EXTERN_C()
 	}																		\
 	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
 		const char *end = key + length - 1;									\
-		long idx;															\
 																			\
 		if ((*end != '\0') /* not a null terminated string */				\
 		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
@@ -328,16 +327,22 @@ END_EXTERN_C()
 		}																	\
 		if (tmp == end) {													\
 			if (*key == '-') {												\
-				idx = -idx;													\
-				if (idx > 0) { /* overflow */								\
+				if (idx-1 > LONG_MAX) { /* overflow */						\
 					break;													\
 				}															\
-			} else if (idx < 0) { /* overflow */							\
+				idx = (ulong)(-(long)idx);									\
+			} else if (idx > LONG_MAX) { /* overflow */						\
 				break;														\
 			}																\
-			return func;													\
+			func;															\
 		}																	\
 	}																		\
+} while (0)
+
+#define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
+	ulong idx;																\
+																			\
+	ZEND_HANDLE_NUMERIC_EX(key, length, idx, return func);					\
 } while (0)
 
 static inline int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\

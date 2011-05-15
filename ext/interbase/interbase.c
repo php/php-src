@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -385,62 +385,62 @@ const zend_function_entry ibase_functions[] = {
 	* Firebird users should use the aliases, so future InterBase-specific changes will
 	* not affect their code
 	*/
-	PHP_FALIAS(fbird_connect,ibase_connect, NULL)
-	PHP_FALIAS(fbird_pconnect,ibase_pconnect, NULL)
-	PHP_FALIAS(fbird_close,ibase_close, NULL)
-	PHP_FALIAS(fbird_drop_db,ibase_drop_db, NULL)
-	PHP_FALIAS(fbird_query,ibase_query, NULL)
-	PHP_FALIAS(fbird_fetch_row,ibase_fetch_row, NULL)
-	PHP_FALIAS(fbird_fetch_assoc,ibase_fetch_assoc, NULL)
-	PHP_FALIAS(fbird_fetch_object,ibase_fetch_object, NULL)
-	PHP_FALIAS(fbird_free_result,ibase_free_result, NULL)
-	PHP_FALIAS(fbird_name_result,ibase_name_result, NULL)
-	PHP_FALIAS(fbird_prepare,ibase_prepare, NULL)
-	PHP_FALIAS(fbird_execute,ibase_execute, NULL)
-	PHP_FALIAS(fbird_free_query,ibase_free_query, NULL)
-	PHP_FALIAS(fbird_gen_id,ibase_gen_id, NULL)
-	PHP_FALIAS(fbird_num_fields,ibase_num_fields, NULL)
-	PHP_FALIAS(fbird_num_params,ibase_num_params, NULL)
+	PHP_FALIAS(fbird_connect,		ibase_connect, 		arginfo_ibase_connect)
+	PHP_FALIAS(fbird_pconnect,		ibase_pconnect, 	arginfo_ibase_pconnect)
+	PHP_FALIAS(fbird_close,			ibase_close, 		arginfo_ibase_close)
+	PHP_FALIAS(fbird_drop_db,		ibase_drop_db, 		arginfo_ibase_drop_db)
+	PHP_FALIAS(fbird_query,			ibase_query, 		arginfo_ibase_query)
+	PHP_FALIAS(fbird_fetch_row,		ibase_fetch_row, 	arginfo_ibase_fetch_row)
+	PHP_FALIAS(fbird_fetch_assoc,	ibase_fetch_assoc, 	arginfo_ibase_fetch_assoc)
+	PHP_FALIAS(fbird_fetch_object,	ibase_fetch_object, arginfo_ibase_fetch_object)
+	PHP_FALIAS(fbird_free_result,	ibase_free_result, 	arginfo_ibase_free_result)
+	PHP_FALIAS(fbird_name_result,	ibase_name_result, 	arginfo_ibase_name_result)
+	PHP_FALIAS(fbird_prepare,		ibase_prepare, 		arginfo_ibase_prepare)
+	PHP_FALIAS(fbird_execute,		ibase_execute, 		arginfo_ibase_execute)
+	PHP_FALIAS(fbird_free_query,	ibase_free_query, 	arginfo_ibase_free_query)
+	PHP_FALIAS(fbird_gen_id,		ibase_gen_id, 		arginfo_ibase_gen_id)
+	PHP_FALIAS(fbird_num_fields,	ibase_num_fields, 	arginfo_ibase_num_fields)
+	PHP_FALIAS(fbird_num_params,	ibase_num_params, 	arginfo_ibase_num_params)
 #if abies_0
-	PHP_FALIAS(fbird_num_rows,ibase_num_rows, NULL)
+	PHP_FALIAS(fbird_num_rows,		ibase_num_rows, 	arginfo_ibase_num_rows)
 #endif
-	PHP_FALIAS(fbird_affected_rows,ibase_affected_rows, NULL)
-	PHP_FALIAS(fbird_field_info,ibase_field_info, NULL)
-	PHP_FALIAS(fbird_param_info,ibase_param_info, NULL)
+	PHP_FALIAS(fbird_affected_rows,	ibase_affected_rows, arginfo_ibase_affected_rows)
+	PHP_FALIAS(fbird_field_info,	ibase_field_info, 	arginfo_ibase_field_info)
+	PHP_FALIAS(fbird_param_info,	ibase_param_info, 	arginfo_ibase_param_info)
 
-	PHP_FALIAS(fbird_trans,ibase_trans, NULL)
-	PHP_FALIAS(fbird_commit,ibase_commit, NULL)
-	PHP_FALIAS(fbird_rollback,ibase_rollback, NULL)
-	PHP_FALIAS(fbird_commit_ret,ibase_commit_ret, NULL)
-	PHP_FALIAS(fbird_rollback_ret,ibase_rollback_ret, NULL)
+	PHP_FALIAS(fbird_trans,			ibase_trans, 		arginfo_ibase_trans)
+	PHP_FALIAS(fbird_commit,		ibase_commit, 		arginfo_ibase_commit)
+	PHP_FALIAS(fbird_rollback,		ibase_rollback, 	arginfo_ibase_rollback)
+	PHP_FALIAS(fbird_commit_ret,	ibase_commit_ret, 	arginfo_ibase_commit_ret)
+	PHP_FALIAS(fbird_rollback_ret,	ibase_rollback_ret, arginfo_ibase_rollback_ret)
 
-	PHP_FALIAS(fbird_blob_info,ibase_blob_info, NULL)
-	PHP_FALIAS(fbird_blob_create,ibase_blob_create, NULL)
-	PHP_FALIAS(fbird_blob_add,ibase_blob_add, NULL)
-	PHP_FALIAS(fbird_blob_cancel,ibase_blob_cancel, NULL)
-	PHP_FALIAS(fbird_blob_close,ibase_blob_close, NULL)
-	PHP_FALIAS(fbird_blob_open,ibase_blob_open, NULL)
-	PHP_FALIAS(fbird_blob_get,ibase_blob_get, NULL)
-	PHP_FALIAS(fbird_blob_echo,ibase_blob_echo, NULL)
-	PHP_FALIAS(fbird_blob_import,ibase_blob_import, NULL)
-	PHP_FALIAS(fbird_errmsg,ibase_errmsg, NULL)
-	PHP_FALIAS(fbird_errcode,ibase_errcode, NULL)
+	PHP_FALIAS(fbird_blob_info,		ibase_blob_info, 	arginfo_ibase_blob_info)
+	PHP_FALIAS(fbird_blob_create,	ibase_blob_create, 	arginfo_ibase_blob_create)
+	PHP_FALIAS(fbird_blob_add,		ibase_blob_add, 	arginfo_ibase_blob_add)
+	PHP_FALIAS(fbird_blob_cancel,	ibase_blob_cancel, 	arginfo_ibase_blob_cancel)
+	PHP_FALIAS(fbird_blob_close,	ibase_blob_close, 	arginfo_ibase_blob_close)
+	PHP_FALIAS(fbird_blob_open,		ibase_blob_open, 	arginfo_ibase_blob_open)
+	PHP_FALIAS(fbird_blob_get,		ibase_blob_get, 	arginfo_ibase_blob_get)
+	PHP_FALIAS(fbird_blob_echo,		ibase_blob_echo, 	arginfo_ibase_blob_echo)
+	PHP_FALIAS(fbird_blob_import,	ibase_blob_import, 	arginfo_ibase_blob_import)
+	PHP_FALIAS(fbird_errmsg,		ibase_errmsg, 		arginfo_ibase_errmsg)
+	PHP_FALIAS(fbird_errcode,		ibase_errcode, 		arginfo_ibase_errcode)
 
-	PHP_FALIAS(fbird_add_user,ibase_add_user, NULL)
-	PHP_FALIAS(fbird_modify_user,ibase_modify_user, NULL)
-	PHP_FALIAS(fbird_delete_user,ibase_delete_user, NULL)
+	PHP_FALIAS(fbird_add_user,		ibase_add_user, 	arginfo_ibase_add_user)
+	PHP_FALIAS(fbird_modify_user,	ibase_modify_user, 	arginfo_ibase_modify_user)
+	PHP_FALIAS(fbird_delete_user,	ibase_delete_user, 	arginfo_ibase_delete_user)
 
-	PHP_FALIAS(fbird_service_attach,ibase_service_attach, NULL)
-	PHP_FALIAS(fbird_service_detach,ibase_service_detach, NULL)
-	PHP_FALIAS(fbird_backup,ibase_backup, NULL)
-	PHP_FALIAS(fbird_restore,ibase_restore, NULL)
-	PHP_FALIAS(fbird_maintain_db,ibase_maintain_db, NULL)
-	PHP_FALIAS(fbird_db_info,ibase_db_info, NULL)
-	PHP_FALIAS(fbird_server_info,ibase_server_info, NULL)
+	PHP_FALIAS(fbird_service_attach,	ibase_service_attach, arginfo_ibase_service_attach)
+	PHP_FALIAS(fbird_service_detach,	ibase_service_detach, arginfo_ibase_service_detach)
+	PHP_FALIAS(fbird_backup,		ibase_backup, 		arginfo_ibase_backup)
+	PHP_FALIAS(fbird_restore,		ibase_restore, 		arginfo_ibase_restore)
+	PHP_FALIAS(fbird_maintain_db,	ibase_maintain_db, 	arginfo_ibase_maintain_db)
+	PHP_FALIAS(fbird_db_info,		ibase_db_info, 		arginfo_ibase_db_info)
+	PHP_FALIAS(fbird_server_info,	ibase_server_info, 	arginfo_ibase_server_info)
 
-	PHP_FALIAS(fbird_wait_event,ibase_wait_event, NULL)
-	PHP_FALIAS(fbird_set_event_handler,ibase_set_event_handler, NULL)
-	PHP_FALIAS(fbird_free_event_handler,ibase_free_event_handler, NULL)
+	PHP_FALIAS(fbird_wait_event,	ibase_wait_event, 	arginfo_ibase_wait_event)
+	PHP_FALIAS(fbird_set_event_handler,	ibase_set_event_handler, 	arginfo_ibase_set_event_handler)
+	PHP_FALIAS(fbird_free_event_handler,	ibase_free_event_handler, arginfo_ibase_free_event_handler)
 	{NULL, NULL, NULL}
 };
 
@@ -1422,6 +1422,11 @@ PHP_FUNCTION(ibase_gen_id)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &generator, &gen_len,
 			&inc, &link)) {
+		RETURN_FALSE;
+	}
+	
+	if (gen_len > 31) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid generator name");
 		RETURN_FALSE;
 	}
 

@@ -41,39 +41,64 @@ static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, t
 	return 0;
 }
 
-static int do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d)
+static void inc_month(timelib_sll *y, timelib_sll *m)
+{
+	(*m)++;
+	if (*m > 12) {
+		*m -= 12;
+		(*y)++;
+	}
+}
+
+static void dec_month(timelib_sll *y, timelib_sll *m)
+{
+	(*m)--;
+	if (*m < 1) {
+		*m += 12;
+		(*y)--;
+	}
+}
+
+static void do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d, timelib_sll invert)
 {
 	timelib_sll leapyear;
-	timelib_sll days_this_month;
-	timelib_sll next_month, next_year;
-	timelib_sll days_next_month;
+	timelib_sll month, year;
+	timelib_sll days;
 
 	do_range_limit(1, 13, 12, base_m, base_y);
 
-	leapyear = timelib_is_leap(*base_y);
-	days_this_month = leapyear ? days_in_month_leap[*base_m] : days_in_month[*base_m];
-	next_month = (*base_m) + 1;
+	year = *base_y;
+	month = *base_m;
 
-	if (next_month > 12) {
-		next_month -= 12;
-		next_year = (*base_y) + 1;
+/*
+	printf( "S: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
+*/
+	if (!invert) {
+		while (*d < 0) {
+			dec_month(&year, &month);
+			leapyear = timelib_is_leap(year);
+			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
+
+			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
+
+			*d += days;
+			(*m)--;
+		}
 	} else {
-		next_year = (*base_y);
-	}
-	leapyear = timelib_is_leap(next_year);
-	days_next_month = leapyear ? days_in_month_leap[next_month] : days_in_month[next_month];
+		while (*d < 0) {
+			leapyear = timelib_is_leap(year);
+			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
 
-	if (*d < 0) {
-		*d += days_this_month;
-		(*m)--;
-		return 1;
+			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
+
+			*d += days;
+			(*m)--;
+			inc_month(&year, &month);
+		}
 	}
-	if (*d > days_next_month) {
-		*d -= days_next_month;
-		(*m)++;
-		return 1;
-	}
-	return 0;
+	/*
+	printf( "E: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
+	*/
 }
 
 static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
@@ -150,7 +175,7 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 
-	do {} while (do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d));
+	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 }
 
@@ -419,6 +444,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse = res;
 
 	time->sse_uptodate = 1;
+	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = 0;
 }
 
 #if 0

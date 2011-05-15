@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC);
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path TSRMLS_DC);
 
 /* {{{ OPENBASEDIR_CHECKPATH(filename) to ease merge between 6.x and 5.x */
-#if (PHP_MAJOR_VERSION < 6)
+#if PHP_API_VERSION < 20100412
 # define OPENBASEDIR_CHECKPATH(filename) \
 	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
 #else

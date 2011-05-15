@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-$domains = array( 'php.net', 'ez.no' );
+$domains = array( 'mx1.tests.php.net', 'mx2.tests.php.net' );
 foreach ( $domains as $domain )
 {
     if ( getmxrr( $domain, $hosts, $weights ) )
@@ -18,5 +18,5 @@ foreach ( $domains as $domain )
 }
 ?>
 --EXPECT--
-Hosts: 2, weights: 2
 Hosts: 1, weights: 1
+Hosts: 2, weights: 2

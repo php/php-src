@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -67,10 +67,25 @@ typedef struct _multipart_event_end {
 	size_t	post_bytes_processed;
 } multipart_event_end;
 
+typedef int (*php_rfc1867_encoding_translation_t)(TSRMLS_D);
+typedef void (*php_rfc1867_get_detect_order_t)(const zend_encoding ***list, size_t *list_size TSRMLS_DC);
+typedef void (*php_rfc1867_set_input_encoding_t)(const zend_encoding *encoding TSRMLS_DC);
+typedef char* (*php_rfc1867_getword_t)(const zend_encoding *encoding, char **line, char stop TSRMLS_DC);
+typedef char* (*php_rfc1867_getword_conf_t)(const zend_encoding *encoding, char *str TSRMLS_DC);
+typedef char* (*php_rfc1867_basename_t)(const zend_encoding *encoding, char *str TSRMLS_DC);
+
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
 void destroy_uploaded_files_hash(TSRMLS_D);
 void php_rfc1867_register_constants(TSRMLS_D);
 extern PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC);
+
+SAPI_API void php_rfc1867_set_multibyte_callbacks(
+					php_rfc1867_encoding_translation_t encoding_translation,
+					php_rfc1867_get_detect_order_t get_detect_order,
+					php_rfc1867_set_input_encoding_t set_input_encoding,
+					php_rfc1867_getword_t getword,
+					php_rfc1867_getword_conf_t getword_conf,
+					php_rfc1867_basename_t basename);	
 
 #endif /* RFC1867_H */

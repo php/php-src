@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -27,9 +27,8 @@
 
 ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent)
 {
-	stack->top_element = stack->elements = (void **) pemalloc(sizeof(void *)*PTR_STACK_BLOCK_SIZE, persistent);
-	stack->max = PTR_STACK_BLOCK_SIZE;
-	stack->top = 0;
+	stack->top_element = stack->elements = NULL;
+	stack->top = stack->max = 0;
 	stack->persistent = persistent;
 }
 

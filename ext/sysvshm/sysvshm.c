@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,13 +251,18 @@ PHP_FUNCTION(shm_put_var)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &shm_id, &shm_key, &arg_var)) {
 		return;
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
 	/* setup string-variable and serialize */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&shm_var, &arg_var, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	
+	shm_list_ptr = zend_fetch_resource(&shm_id TSRMLS_CC, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
+	if (!shm_list_ptr) {
+		smart_str_free(&shm_var);
+		RETURN_FALSE;
+	}
+
 	/* insert serialized variable into shared memory */
 	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.c, shm_var.len);
 

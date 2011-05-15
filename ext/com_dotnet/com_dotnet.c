@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -199,7 +199,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 		hr = dotnet_init(&where TSRMLS_CC);
 		if (FAILED(hr)) {
 			char buf[1024];
-			char *err = php_win_err(hr);
+			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] %s", where, err);
 			if (err)
 				LocalFree(err);
@@ -278,7 +278,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	if (ret == FAILURE) {
 		char buf[1024];
-		char *err = php_win_err(hr);
+		char *err = php_win32_error_to_msg(hr);
 		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
 		if (err && err[0]) {
 			LocalFree(err);

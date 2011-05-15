@@ -16,12 +16,8 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 --EXPECTF--
 Warning: finfo_open(): Failed to load magic database at ''. in %s on line %d
 bool(false)
-
-Warning: finfo_open(): Failed to load magic database at ''. in %s on line %d
-bool(false)
-
-Warning: finfo_open(): Failed to load magic database at ''. in %s on line %d
-bool(false)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
 bool(false)
 bool(false)
 bool(false)

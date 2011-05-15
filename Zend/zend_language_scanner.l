@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,6 +120,33 @@ do {																			\
 
 BEGIN_EXTERN_C()
 
+static size_t encoding_filter_script_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
+{
+	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	return zend_multibyte_encoding_converter(to, to_length, from, from_length, internal_encoding, LANG_SCNG(script_encoding) TSRMLS_CC);
+}
+
+static size_t encoding_filter_script_to_intermediate(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
+{
+	return zend_multibyte_encoding_converter(to, to_length, from, from_length, zend_multibyte_encoding_utf8, LANG_SCNG(script_encoding) TSRMLS_CC);
+}
+
+static size_t encoding_filter_intermediate_to_script(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
+{
+	return zend_multibyte_encoding_converter(to, to_length, from, from_length,
+LANG_SCNG(script_encoding), zend_multibyte_encoding_utf8 TSRMLS_CC);
+}
+
+static size_t encoding_filter_intermediate_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
+{
+	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	return zend_multibyte_encoding_converter(to, to_length, from, from_length,
+internal_encoding, zend_multibyte_encoding_utf8 TSRMLS_CC);
+}
+
+
 static void _yy_push_state(int new_state TSRMLS_DC)
 {
 	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
@@ -139,8 +166,10 @@ static void yy_pop_state(TSRMLS_D)
 static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 {
 	YYCURSOR       = (YYCTYPE*)str;
-	SCNG(yy_start) = YYCURSOR;
 	YYLIMIT        = YYCURSOR + len;
+	if (!SCNG(yy_start)) {
+		SCNG(yy_start) = YYCURSOR;
+	}
 }
 
 void startup_scanner(TSRMLS_D)
@@ -179,7 +208,6 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	lex_state->filename = zend_get_compiled_filename(TSRMLS_C);
 	lex_state->lineno = CG(zend_lineno);
 
-#ifdef ZEND_MULTIBYTE
 	lex_state->script_org = SCNG(script_org);
 	lex_state->script_org_size = SCNG(script_org_size);
 	lex_state->script_filtered = SCNG(script_filtered);
@@ -187,8 +215,6 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	lex_state->input_filter = SCNG(input_filter);
 	lex_state->output_filter = SCNG(output_filter);
 	lex_state->script_encoding = SCNG(script_encoding);
-	lex_state->internal_encoding = SCNG(internal_encoding);
-#endif /* ZEND_MULTIBYTE */
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
@@ -207,11 +233,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	YYSETCONDITION(lex_state->yy_state);
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
-#ifdef ZEND_MULTIBYTE
-	if (SCNG(script_org)) {
-		efree(SCNG(script_org));
-		SCNG(script_org) = NULL;
-	}
+
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
@@ -223,8 +245,12 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
-	SCNG(internal_encoding) = lex_state->internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+
+	if (CG(heredoc)) {
+		efree(CG(heredoc));
+		CG(heredoc) = NULL;
+		CG(heredoc_len) = 0;
+	}
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
@@ -237,11 +263,219 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
 	}
 }
 
+#define BOM_UTF32_BE	"\x00\x00\xfe\xff"
+#define	BOM_UTF32_LE	"\xff\xfe\x00\x00"
+#define	BOM_UTF16_BE	"\xfe\xff"
+#define	BOM_UTF16_LE	"\xff\xfe"
+#define	BOM_UTF8		"\xef\xbb\xbf"
+
+static const zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned char *script, size_t script_size TSRMLS_DC)
+{
+	const unsigned char *p;
+	int wchar_size = 2;
+	int le = 0;
+
+	/* utf-16 or utf-32? */
+	p = script;
+	while ((p-script) < script_size) {
+		p = memchr(p, 0, script_size-(p-script)-2);
+		if (!p) {
+			break;
+		}
+		if (*(p+1) == '\0' && *(p+2) == '\0') {
+			wchar_size = 4;
+			break;
+		}
+
+		/* searching for UTF-32 specific byte orders, so this will do */
+		p += 4;
+	}
+
+	/* BE or LE? */
+	p = script;
+	while ((p-script) < script_size) {
+		if (*p == '\0' && *(p+wchar_size-1) != '\0') {
+			/* BE */
+			le = 0;
+			break;
+		} else if (*p != '\0' && *(p+wchar_size-1) == '\0') {
+			/* LE* */
+			le = 1;
+			break;
+		}
+		p += wchar_size;
+	}
+
+	if (wchar_size == 2) {
+		return le ? zend_multibyte_encoding_utf16le : zend_multibyte_encoding_utf16be;
+	} else {
+		return le ? zend_multibyte_encoding_utf32le : zend_multibyte_encoding_utf32be;
+	}
+
+	return NULL;
+}
+
+static const zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
+{
+	const zend_encoding *script_encoding = NULL;
+	int bom_size;
+	unsigned char *pos1, *pos2;
+
+	if (LANG_SCNG(script_org_size) < sizeof(BOM_UTF32_LE)-1) {
+		return NULL;
+	}
+
+	/* check out BOM */
+	if (!memcmp(LANG_SCNG(script_org), BOM_UTF32_BE, sizeof(BOM_UTF32_BE)-1)) {
+		script_encoding = zend_multibyte_encoding_utf32be;
+		bom_size = sizeof(BOM_UTF32_BE)-1;
+	} else if (!memcmp(LANG_SCNG(script_org), BOM_UTF32_LE, sizeof(BOM_UTF32_LE)-1)) {
+		script_encoding = zend_multibyte_encoding_utf32le;
+		bom_size = sizeof(BOM_UTF32_LE)-1;
+	} else if (!memcmp(LANG_SCNG(script_org), BOM_UTF16_BE, sizeof(BOM_UTF16_BE)-1)) {
+		script_encoding = zend_multibyte_encoding_utf16be;
+		bom_size = sizeof(BOM_UTF16_BE)-1;
+	} else if (!memcmp(LANG_SCNG(script_org), BOM_UTF16_LE, sizeof(BOM_UTF16_LE)-1)) {
+		script_encoding = zend_multibyte_encoding_utf16le;
+		bom_size = sizeof(BOM_UTF16_LE)-1;
+	} else if (!memcmp(LANG_SCNG(script_org), BOM_UTF8, sizeof(BOM_UTF8)-1)) {
+		script_encoding = zend_multibyte_encoding_utf8;
+		bom_size = sizeof(BOM_UTF8)-1;
+	}
+
+	if (script_encoding) {
+		/* remove BOM */
+		LANG_SCNG(script_org) += bom_size;
+		LANG_SCNG(script_org_size) -= bom_size;
+
+		return script_encoding;
+	}
+
+	/* script contains NULL bytes -> auto-detection */
+	if ((pos1 = memchr(LANG_SCNG(script_org), 0, LANG_SCNG(script_org_size)))) {
+		/* check if the NULL byte is after the __HALT_COMPILER(); */
+		pos2 = LANG_SCNG(script_org);
+
+		while (pos1 - pos2 >= sizeof("__HALT_COMPILER();")-1) {
+			pos2 = memchr(pos2, '_', pos1 - pos2);
+			if (!pos2) break;
+			pos2++;
+			if (strncasecmp((char*)pos2, "_HALT_COMPILER", sizeof("_HALT_COMPILER")-1) == 0) {
+				pos2 += sizeof("_HALT_COMPILER")-1;
+				while (*pos2 == ' '  ||
+					   *pos2 == '\t' ||
+					   *pos2 == '\r' ||
+					   *pos2 == '\n') {
+					pos2++;
+				}
+				if (*pos2 == '(') {
+					pos2++;
+					while (*pos2 == ' '  ||
+						   *pos2 == '\t' ||
+						   *pos2 == '\r' ||
+						   *pos2 == '\n') {
+						pos2++;
+					}
+					if (*pos2 == ')') {
+						pos2++;
+						while (*pos2 == ' '  ||
+							   *pos2 == '\t' ||
+							   *pos2 == '\r' ||
+							   *pos2 == '\n') {
+							pos2++;
+						}
+						if (*pos2 == ';') {
+							return NULL;
+						}
+					}
+				}
+			}
+		}
+		/* make best effort if BOM is missing */
+		return zend_multibyte_detect_utf_encoding(LANG_SCNG(script_org), LANG_SCNG(script_org_size) TSRMLS_CC);
+	}
+
+	return NULL;
+}
+
+static const zend_encoding* zend_multibyte_find_script_encoding(TSRMLS_D)
+{
+	const zend_encoding *script_encoding;
+
+	if (CG(detect_unicode)) {
+		/* check out bom(byte order mark) and see if containing wchars */
+		script_encoding = zend_multibyte_detect_unicode(TSRMLS_C);
+		if (script_encoding != NULL) {
+			/* bom or wchar detection is prior to 'script_encoding' option */
+			return script_encoding;
+		}
+	}
+
+	/* if no script_encoding specified, just leave alone */
+	if (!CG(script_encoding_list) || !CG(script_encoding_list_size)) {
+		return NULL;
+	}
+
+	/* if multiple encodings specified, detect automagically */
+	if (CG(script_encoding_list_size) > 1) {
+		return zend_multibyte_encoding_detector(LANG_SCNG(script_org), LANG_SCNG(script_org_size), CG(script_encoding_list), CG(script_encoding_list_size) TSRMLS_CC);
+	}
+
+	return CG(script_encoding_list)[0];
+}
+
+ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSRMLS_DC)
+{
+	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
+	const zend_encoding *script_encoding = onetime_encoding ? onetime_encoding: zend_multibyte_find_script_encoding(TSRMLS_C);
+
+	if (!script_encoding) {
+		return FAILURE;
+	}
+
+	/* judge input/output filter */
+	LANG_SCNG(script_encoding) = script_encoding;
+	LANG_SCNG(input_filter) = NULL;
+	LANG_SCNG(output_filter) = NULL;
+
+	if (!internal_encoding || LANG_SCNG(script_encoding) == internal_encoding) {
+		if (!zend_multibyte_check_lexer_compatibility(LANG_SCNG(script_encoding))) {
+			/* and if not, work around w/ script_encoding -> utf-8 -> script_encoding conversion */
+			LANG_SCNG(input_filter) = encoding_filter_script_to_intermediate;
+			LANG_SCNG(output_filter) = encoding_filter_intermediate_to_script;
+		} else {
+			LANG_SCNG(input_filter) = NULL;
+			LANG_SCNG(output_filter) = NULL;
+		}
+		return SUCCESS;
+	}
+
+	if (zend_multibyte_check_lexer_compatibility(internal_encoding)) {
+		LANG_SCNG(input_filter) = encoding_filter_script_to_internal;
+		LANG_SCNG(output_filter) = NULL;
+	} else if (zend_multibyte_check_lexer_compatibility(LANG_SCNG(script_encoding))) {
+		LANG_SCNG(input_filter) = NULL;
+		LANG_SCNG(output_filter) = encoding_filter_script_to_internal;
+	} else {
+		/* both script and internal encodings are incompatible w/ flex */
+		LANG_SCNG(input_filter) = encoding_filter_script_to_intermediate;
+		LANG_SCNG(output_filter) = encoding_filter_intermediate_to_internal;
+	}
+
+	return 0;
+}
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path = NULL, *buf;
-	size_t size;
+	size_t size, offset = 0;
+
+	/* The shebang line was read, get the current position to obtain the buffer start */
+	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
+		if ((offset = ftell(file_handle->handle.fp)) == -1) {
+			offset = 0;
+		}
+	}
 
 	if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
 		return FAILURE;
@@ -257,29 +491,27 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
+	SCNG(yy_start) = NULL;
 
 	if (size != -1) {
-#ifdef ZEND_MULTIBYTE
-		if (zend_multibyte_read_script((unsigned char *)buf, size TSRMLS_CC) != 0) {
-			return FAILURE;
+		if (CG(multibyte)) {
+			SCNG(script_org) = buf;
+			SCNG(script_org_size) = size;
+			SCNG(script_filtered) = NULL;
+
+			zend_multibyte_set_filter(NULL TSRMLS_CC);
+
+			if (SCNG(input_filter)) {
+				if ((size_t)-1 == SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC)) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
+							"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
+				}
+				buf = SCNG(script_filtered);
+				size = SCNG(script_filtered_size);
+			}
 		}
-
-		SCNG(yy_in) = NULL;
-
-		zend_multibyte_set_filter(NULL TSRMLS_CC);
-
-		if (!SCNG(input_filter)) {
-			SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
-			memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
-			SCNG(script_filtered_size) = SCNG(script_org_size);
-		} else {
-			SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
-		}
-
-		yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);
-#else /* !ZEND_MULTIBYTE */
+		SCNG(yy_start) = (unsigned char *)buf - offset;
 		yy_scan_buffer(buf, size TSRMLS_CC);
-#endif /* ZEND_MULTIBYTE */
 	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
 	}
@@ -340,6 +572,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
+		zend_init_compiler_context(TSRMLS_C);
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
@@ -407,31 +640,44 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
+	char *buf;
+	size_t size;
+
 	/* enforce two trailing NULLs for flex... */
-	str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
+	if (IS_INTERNED(str->value.str.val)) {
+		char *tmp = safe_emalloc(1, str->value.str.len, ZEND_MMAP_AHEAD);
+		memcpy(tmp, str->value.str.val, str->value.str.len + ZEND_MMAP_AHEAD);
+		str->value.str.val = tmp;
+	} else {
+		str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
+	}
 
 	memset(str->value.str.val + str->value.str.len, 0, ZEND_MMAP_AHEAD);
 
-	SCNG(yy_in)=NULL;
+	SCNG(yy_in) = NULL;
+	SCNG(yy_start) = NULL;
 
-#ifdef ZEND_MULTIBYTE
-	SCNG(script_org) = (unsigned char *)estrdup(str->value.str.val);
-	SCNG(script_org_size) = str->value.str.len;
+	buf = str->value.str.val;
+	size = str->value.str.len;
 
-	zend_multibyte_set_filter(CG(internal_encoding) TSRMLS_CC);
+	if (CG(multibyte)) {
+		SCNG(script_org) = buf;
+		SCNG(script_org_size) = size;
+		SCNG(script_filtered) = NULL;
 
-	if (!SCNG(input_filter)) {
-		SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
-		memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
-		SCNG(script_filtered_size) = SCNG(script_org_size);
-	} else {
-		SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC);
+		zend_multibyte_set_filter(zend_multibyte_get_internal_encoding(TSRMLS_C) TSRMLS_CC);
+
+		if (SCNG(input_filter)) {
+			if ((size_t)-1 == SCNG(input_filter)(&SCNG(script_filtered), &SCNG(script_filtered_size), SCNG(script_org), SCNG(script_org_size) TSRMLS_CC)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
+						"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
+			}
+			buf = SCNG(script_filtered);
+			size = SCNG(script_filtered_size);
+		}
 	}
 
-	yy_scan_buffer((char *)SCNG(script_filtered), SCNG(script_filtered_size) TSRMLS_CC);	
-#else /* !ZEND_MULTIBYTE */
-	yy_scan_buffer(str->value.str.val, str->value.str.len TSRMLS_CC);
-#endif /* ZEND_MULTIBYTE */
+	yy_scan_buffer(buf, size TSRMLS_CC);
 
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
@@ -443,13 +689,12 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
 	size_t offset = SCNG(yy_cursor) - SCNG(yy_start);
-#ifdef ZEND_MULTIBYTE
 	if (SCNG(input_filter)) {
-		size_t original_offset = offset, length = 0; do {
+		size_t original_offset = offset, length = 0;
+		do {
 			unsigned char *p = NULL;
-			SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
-			if (!p) {
-				break;
+			if ((size_t)-1 == SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC)) {
+				return (size_t)-1;
 			}
 			efree(p);
 			if (length > original_offset) {
@@ -459,7 +704,6 @@ ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 			}
 		} while (original_offset != length);
 	}
-#endif
 	return offset;
 }
 
@@ -497,19 +741,14 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(interactive) = orig_interactive;
 		CG(active_op_array) = op_array;
+		zend_init_compiler_context(TSRMLS_C);
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
 
-#ifdef ZEND_MULTIBYTE
-		if (SCNG(script_org)) {
-			efree(SCNG(script_org));
-			SCNG(script_org) = NULL;
-		}
 		if (SCNG(script_filtered)) {
 			efree(SCNG(script_filtered));
 			SCNG(script_filtered) = NULL;
 		}
-#endif /* ZEND_MULTIBYTE */
 
 		if (compiler_result==1) {
 			CG(active_op_array) = original_active_op_array;
@@ -547,16 +786,10 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
-#ifdef ZEND_MULTIBYTE
-	if (SCNG(script_org)) {
-		efree(SCNG(script_org));
-		SCNG(script_org) = NULL;
-	}
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
-#endif /* ZEND_MULTIBYTE */
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	return SUCCESS;
@@ -576,122 +809,44 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	}
 	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
-#ifdef ZEND_MULTIBYTE
-	if (SCNG(script_org)) {
-		efree(SCNG(script_org));
-		SCNG(script_org) = NULL;
-	}
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
-#endif /* ZEND_MULTIBYTE */
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(str);
 	return SUCCESS;
 }
-END_EXTERN_C()
 
-#ifdef ZEND_MULTIBYTE
-
-BEGIN_EXTERN_C()
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC)
 {
-	size_t original_offset, offset, free_flag, new_len, length;
-	unsigned char *p;
-
-	/* calculate current position */
-	offset = original_offset = YYCURSOR - SCNG(yy_start);
-	if (old_input_filter && offset > 0) {
-		zend_encoding *new_encoding = SCNG(script_encoding);
-		zend_encoding_filter new_filter = SCNG(input_filter);
-		SCNG(script_encoding) = old_encoding;
-		SCNG(input_filter) = old_input_filter;
-		offset = zend_get_scanned_file_offset(TSRMLS_C);
-		SCNG(script_encoding) = new_encoding;
-		SCNG(input_filter) = new_filter;
-	}
+	size_t length;
+	unsigned char *new_yy_start;
 
 	/* convert and set */
 	if (!SCNG(input_filter)) {
-		length = SCNG(script_org_size) - offset;
-		p = SCNG(script_org) + offset;
-		free_flag = 0;
-	} else {
-		SCNG(input_filter)(&p, &length, SCNG(script_org) + offset, SCNG(script_org_size) - offset TSRMLS_CC);
-		free_flag = 1;
-	}
-
-	new_len = original_offset + length;
-
-	if (new_len > YYLIMIT - SCNG(yy_start)) {
-		unsigned char *new_yy_start = erealloc(SCNG(yy_start), new_len);
-		SCNG(yy_cursor) = new_yy_start + (SCNG(yy_cursor) - SCNG(yy_start));
-		SCNG(yy_marker) = new_yy_start + (SCNG(yy_marker) - SCNG(yy_start));
-		SCNG(yy_text) = new_yy_start + (SCNG(yy_text) - SCNG(yy_start));
-		SCNG(yy_start) = new_yy_start;
-		SCNG(script_filtered) = new_yy_start;
-		SCNG(script_filtered_size) = new_len;
-	}
-
-	SCNG(yy_limit) = SCNG(yy_start) + new_len;
-	memmove(SCNG(yy_start) + original_offset, p, length);
-
-	if (free_flag) {
-		efree(p);
-	}
-}
-
-
-ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
-{
-	size_t n;
-
-	if (CG(interactive) == 0) {
-		if (zend_stream_fixup(file_handle, &buf, &len TSRMLS_CC) == FAILURE) {
-			return FAILURE;
+		if (SCNG(script_filtered)) {
+			efree(SCNG(script_filtered));
+			SCNG(script_filtered) = NULL;
 		}
-		n = len;
-		return n;
+		SCNG(script_filtered_size) = 0;
+		length = SCNG(script_org_size);
+		new_yy_start = SCNG(script_org);
+	} else {
+		if ((size_t)-1 == SCNG(input_filter)(&new_yy_start, &length, SCNG(script_org), SCNG(script_org_size) TSRMLS_CC)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
+					"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
+		}
+		SCNG(script_filtered) = new_yy_start;
+		SCNG(script_filtered_size) = length;
 	}
 
-	/* interactive */
-	if (SCNG(script_org)) {
-		efree(SCNG(script_org));
-	}
-	if (SCNG(script_filtered)) {
-		efree(SCNG(script_filtered));
-	}
-	SCNG(script_org) = NULL;
-	SCNG(script_org_size) = 0;
+	SCNG(yy_cursor) = new_yy_start + (SCNG(yy_cursor) - SCNG(yy_start));
+	SCNG(yy_marker) = new_yy_start + (SCNG(yy_marker) - SCNG(yy_start));
+	SCNG(yy_text) = new_yy_start + (SCNG(yy_text) - SCNG(yy_start));
+	SCNG(yy_limit) = new_yy_start + (SCNG(yy_limit) - SCNG(yy_start));
 
-	/* TODO: support widechars */
-	if (zend_stream_fixup(file_handle, &buf, &len TSRMLS_CC) == FAILURE) {
-		return FAILURE;
-	}
-	n = len;
-
-	SCNG(script_org_size) = n;
-	SCNG(script_org) = (unsigned char*)emalloc(SCNG(script_org_size) + 1);
-	memcpy(SCNG(script_org), buf, n);
-
-	return n;
-}
-
-
-ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC)
-{
-	if (SCNG(script_org)) {
-		efree(SCNG(script_org));
-		SCNG(script_org) = NULL;
-	}
-	SCNG(script_org_size) = n;	
-	
-	SCNG(script_org) = (unsigned char*)emalloc(SCNG(script_org_size) + 1);
-	memcpy(SCNG(script_org), buf, n);
-	*(SCNG(script_org)+SCNG(script_org_size)) = '\0';
-
-	return 0;
+	SCNG(yy_start) = new_yy_start;
 }
 
 
@@ -704,11 +859,6 @@ ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC)
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng); \
 		zendlval->value.str.len = yyleng; \
 	}
-#else /* ZEND_MULTIBYTE */
-# define zend_copy_value(zendlval, yytext, yyleng) \
-	zendlval->value.str.val = (char *)estrndup(yytext, yyleng); \
-	zendlval->value.str.len = yyleng;
-#endif /* ZEND_MULTIBYTE */
 
 static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
 {
@@ -812,7 +962,6 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 		s++;
 	}
 	*t = 0;
-#ifdef ZEND_MULTIBYTE
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		s = zendlval->value.str.val;
@@ -820,7 +969,6 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 		zendlval->value.str.len = sz;
 		efree(s);
 	}
-#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -984,6 +1132,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_INTERFACE;
 }
 
+<ST_IN_SCRIPTING>"trait" {
+	return T_TRAIT;
+}
+
 <ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
 }
@@ -1050,12 +1202,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DOUBLE_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"string"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
 	return T_STRING_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"binary"{TABS_AND_SPACES}")" {
-	return T_STRING_CAST;
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"scalar"{TABS_AND_SPACES}")" {
+	return T_SCALAR_CAST;
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
@@ -1100,6 +1252,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"use" {
 	return T_USE;
+}
+
+<ST_IN_SCRIPTING>"insteadof" {
+        return T_INSTEADOF;
 }
 
 <ST_IN_SCRIPTING>"global" {
@@ -1416,7 +1572,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		len += strlen(func_name);
 	}
 
-	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s", 
+	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s",
 		class_name ? class_name : "",
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""
@@ -1602,7 +1758,6 @@ inline_char_handler:
 inline_html:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-#ifdef ZEND_MULTIBYTE
 	if (SCNG(output_filter)) {
 		int readsize;
 		size_t sz = 0;
@@ -1615,10 +1770,6 @@ inline_html:
 	  zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	  zendlval->value.str.len = yyleng;
 	}
-#else /* !ZEND_MULTIBYTE */
-	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
- 	zendlval->value.str.len = yyleng;
-#endif
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
@@ -1825,7 +1976,6 @@ inline_html:
 	}
 	*t = 0;
 
-#ifdef ZEND_MULTIBYTE
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		s = zendlval->value.str.val;
@@ -1833,7 +1983,6 @@ inline_html:
 		zendlval->value.str.len = sz;
 		efree(s);
 	}
-#endif /* ZEND_MULTIBYTE */
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 

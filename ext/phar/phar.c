@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2009 The PHP Group                                |
+  | Copyright (c) 2005-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -512,7 +512,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
-	var = *(php_uint32*)(buffer); \
+	memcpy(&var, buffer, sizeof(var)); \
 	buffer += 4
 # define PHAR_GET_16(buffer, var) \
 	var = *(php_uint16*)(buffer); \
@@ -1265,7 +1265,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 			if (ext_len == -2) {
 				spprintf(error, 0, "Cannot create a phar archive from a URL like \"%s\". Phar objects can only be created from local files", fname);
 			} else {
-				spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
+				spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist", fname);
 			}
 		}
 		return FAILURE;
@@ -1327,7 +1327,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	if (!pphar) {
 		pphar = &mydata;
 	}
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
 	}
@@ -1369,7 +1369,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	if (PHAR_G(readonly) && !is_data) {
 		if (options & REPORT_ERRORS) {
 			if (error) {
-				spprintf(error, 0, "creating archive \"%s\" disabled by INI setting", fname);
+				spprintf(error, 0, "creating archive \"%s\" disabled by the php.ini setting phar.readonly", fname);
 			}
 		}
 		return FAILURE;
@@ -1491,7 +1491,7 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 	} else if (error && *error) {
 		return FAILURE;
 	}
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
 	}
@@ -1736,31 +1736,30 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 static int phar_analyze_path(const char *fname, const char *ext, int ext_len, int for_create TSRMLS_DC) /* {{{ */
 {
 	php_stream_statbuf ssb;
-	char *realpath, old, *a = (char *)(ext + ext_len);
+	char *realpath;
+	char *filename = estrndup(fname, (ext - fname) + ext_len);
 
-	old = *a;
-	*a = '\0';
-
-	if ((realpath = expand_filepath(fname, NULL TSRMLS_CC))) {
+	if ((realpath = expand_filepath(filename, NULL TSRMLS_CC))) {
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_fname_map), realpath, strlen(realpath))) {
-			*a = old;
 			efree(realpath);
+			efree(filename);
 			return SUCCESS;
 		}
 
 		if (PHAR_G(manifest_cached) && zend_hash_exists(&cached_phars, realpath, strlen(realpath))) {
-			*a = old;
 			efree(realpath);
+			efree(filename);
 			return SUCCESS;
 		}
 		efree(realpath);
 	}
 
-	if (SUCCESS == php_stream_stat_path((char *) fname, &ssb)) {
-		*a = old;
+	if (SUCCESS == php_stream_stat_path((char *) filename, &ssb)) {
+
+		efree(filename);
 
 		if (ssb.sb.st_mode & S_IFDIR) {
 			return FAILURE;
@@ -1775,57 +1774,56 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 		char *slash;
 
 		if (!for_create) {
-			*a = old;
+			efree(filename);
 			return FAILURE;
 		}
 
-		slash = (char *) strrchr(fname, '/');
-		*a = old;
+		slash = (char *) strrchr(filename, '/');
 
 		if (slash) {
-			old = *slash;
 			*slash = '\0';
 		}
 
-		if (SUCCESS != php_stream_stat_path((char *) fname, &ssb)) {
-			if (slash) {
-				*slash = old;
-			} else {
-				if (!(realpath = expand_filepath(fname, NULL TSRMLS_CC))) {
+		if (SUCCESS != php_stream_stat_path((char *) filename, &ssb)) {
+			if (!slash) {
+				if (!(realpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+					efree(filename);
 					return FAILURE;
 				}
 #ifdef PHP_WIN32
 				phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
-				a = strstr(realpath, fname) + ((ext - fname) + ext_len);
-				*a = '\0';
+				slash = strstr(realpath, filename) + ((ext - fname) + ext_len);
+				*slash = '\0';
 				slash = strrchr(realpath, '/');
 
 				if (slash) {
 					*slash = '\0';
 				} else {
 					efree(realpath);
+					efree(filename);
 					return FAILURE;
 				}
 
 				if (SUCCESS != php_stream_stat_path(realpath, &ssb)) {
 					efree(realpath);
+					efree(filename);
 					return FAILURE;
 				}
 
 				efree(realpath);
 
 				if (ssb.sb.st_mode & S_IFDIR) {
+					efree(filename);
 					return SUCCESS;
 				}
 			}
 
+			efree(filename);
 			return FAILURE;
 		}
 
-		if (slash) {
-			*slash = old;
-		}
+		efree(filename);
 
 		if (ssb.sb.st_mode & S_IFDIR) {
 			return SUCCESS;
@@ -2359,7 +2357,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 
 	FREE_ZVAL(halt_constant);
 
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
 		return FAILURE;
 	}
@@ -2491,7 +2489,7 @@ static inline void phar_set_32(char *buffer, int var) /* {{{ */
 	*((buffer) + 1) = (unsigned char) (((var) >> 8) & 0xFF);
 	*((buffer) + 0) = (unsigned char) ((var) & 0xFF);
 #else
-	*(php_uint32 *)(buffer) = (php_uint32)(var);
+	 memcpy(buffer, &var, sizeof(var));
 #endif
 } /* }}} */
 
@@ -2563,8 +2561,8 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
  */
 int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, char **error TSRMLS_DC) /* {{{ */
 {
-/*	static const char newstub[] = "<?php __HALT_COMPILER(); ?>\r\n"; */
-	char *newstub;
+	char halt_stub[] = "__HALT_COMPILER();";
+	char *newstub, *tmp;
 	phar_entry_info *entry, *newentry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *pos, has_dirs = 0;
@@ -2665,8 +2663,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		} else {
 			free_user_stub = 0;
 		}
-		if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL)
-		{
+		tmp = estrndup(user_stub, len);
+		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+			efree(tmp);
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2679,6 +2678,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 			return EOF;
 		}
+		pos = user_stub + (pos - tmp);
+		efree(tmp);
 		len = pos - user_stub + 18;
 		if ((size_t)len != php_stream_write(newfile, user_stub, len)
 		||			  5 != php_stream_write(newfile, " ?>\r\n", 5)) {
@@ -3289,7 +3290,7 @@ ZEND_GET_MODULE(phar)
  *
  * Every user visible function must have an entry in phar_functions[].
  */
-function_entry phar_functions[] = {
+zend_function_entry phar_functions[] = {
 	{NULL, NULL, NULL} /* Must be the last line in phar_functions[] */
 };
 /* }}}*/

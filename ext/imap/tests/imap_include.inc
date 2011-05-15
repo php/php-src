@@ -9,10 +9,56 @@ $password = 'p4ssw0rd';
 $users = array("webmaster", "info", "admin", "foo"); // tests require 4 valid userids
 $mailbox_prefix = "phpttest"; // name used for test mailbox
 
+// record test start time (used by displayOverviewFields())
+$start_time = time();
+
+// list of fields to expect
+$mandatory_overview_fields = array(
+                    'size',
+                    'uid',
+                    'msgno',
+                    'recent',
+                    'flagged',
+                    'answered',
+                    'deleted',
+                    'seen',
+                    'draft',
+                    'udate',
+                   );
+
+/**
+ * Display all fields in an element from an imap_fetch_overview() response
+ *
+ * Special handling for 'udate', which will vary run-to-run; assumes an IMAP
+ * server with its clock synced to the current system, which is consistent with
+ * setup instructions in ext/imap/tests/README
+ *
+ * @param array resp element from the return value of imap_fetch_overview()
+ */
+function displayOverviewFields($resp, $fields=null) {
+  global $mandatory_overview_fields;
+  global $start_time;
+
+  foreach ($fields ? $fields : $mandatory_overview_fields as $mf)
+  {
+    $z = $resp->$mf;
+    if ($mf == 'udate') {
+      if (($z >= $start_time) && ($z <= time())) {
+        echo "$mf is OK\n";
+      } else {
+        echo "$mf is BAD ($z)\n";
+      }
+    } else {
+      echo "$mf is $z\n";
+    }
+  }
+}
+
+
 /**
  * Create a test mailbox and populate with msgs 
  *
- * @para, string mailbox_suffix Suffix used to uniquely identify mailboxes
+ * @param string mailbox_suffix Suffix used to uniquely identify mailboxes
  * @param int message_count number of test msgs to be written to new mailbox 
  * 
  * @return IMAP stream to new mailbox on sucesss; FALSE on failure

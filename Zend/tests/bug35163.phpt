@@ -17,22 +17,8 @@ array(1) {
     [0]=>
     int(2)
     [1]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
     [2]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }

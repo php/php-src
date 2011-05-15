@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,12 +31,12 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 
 /* Attempt to fetch context from the zval passed,
    If no context was passed, use the default context
-   The the default context has not yet been created, do it now. */
+   The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
-		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context()) : \
+		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context(TSRMLS_C)) : \
 		(nocontext) ? NULL : \
 		FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc()) )
+		(FG(default_context) = php_stream_context_alloc(TSRMLS_C)) )
 
 #define php_stream_context_to_zval(context, zval) { ZVAL_RESOURCE(zval, (context)->rsrc_id); zend_list_addref((context)->rsrc_id); }
 
@@ -59,7 +59,7 @@ struct _php_stream_context {
 
 BEGIN_EXTERN_C()
 PHPAPI void php_stream_context_free(php_stream_context *context);
-PHPAPI php_stream_context *php_stream_context_alloc(void);
+PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
 PHPAPI int php_stream_context_get_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval ***optionvalue);
 PHPAPI int php_stream_context_set_option(php_stream_context *context,

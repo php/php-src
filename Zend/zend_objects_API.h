@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,7 +68,7 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_store_del_ref(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSRMLS_DC);
 ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle, const zend_object_handlers *handlers TSRMLS_DC);
-static inline void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC) {
+static zend_always_inline void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC) {
 	zend_objects_store_del_ref_by_handle_ex(handle, NULL TSRMLS_CC);
 }
 ZEND_API zend_uint zend_objects_store_get_refcount(zval *object TSRMLS_DC);

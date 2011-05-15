@@ -77,7 +77,7 @@ if (PHP_VERSION_ID < 50300) {
 	// FILE_BINARY is available from 5.2.7
 	if (PHP_VERSION_ID < 50207) {
 		define('FILE_BINARY', 0);
-	}	
+	}
 }
 
 // (unicode) is available from 6.0.0
@@ -197,7 +197,7 @@ function verify_config()
 if (getenv('TEST_PHP_LOG_FORMAT')) {
 	$log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
 } else {
-	$log_format = 'LEOD';
+	$log_format = 'LEODS';
 }
 
 // Check whether a detailed log is wanted.
@@ -567,12 +567,12 @@ if (isset($argc) && $argc > 1) {
 				case 'm':
 					$leak_check = true;
 					$valgrind_cmd = "valgrind --version";
-					$valgrind_header = system_with_timeout($valgrind_cmd);
+					$valgrind_header = system_with_timeout($valgrind_cmd, $environment);
 					$replace_count = 0;
 					if (!$valgrind_header) {
 						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
 					} else {
-						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)([.-]\w+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
+						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)([.-\w]+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
 						if ($replace_count != 1 || !is_numeric($valgrind_version)) {
 							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
 						}
@@ -937,7 +937,7 @@ if ($html_output) {
 }
 
 save_or_mail_results();
- 
+
 if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 	exit(1);
 }
@@ -977,7 +977,7 @@ function mail_qa_team($data, $compression, $status = false)
 	fclose($fs);
 
 	return 1;
-} 
+}
 
 
 //
@@ -1001,7 +1001,7 @@ function save_text($filename, $text, $filename_copy = null)
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
-}}} 
+}}}
 ";
 }
 
@@ -1009,7 +1009,7 @@ $text
 //  Write an error in a format recognizable to Emacs or MSVC.
 //
 
-function error_report($testname, $logname, $tested) 
+function error_report($testname, $logname, $tested)
 {
 	$testname = realpath($testname);
 	$logname  = realpath($logname);
@@ -1051,7 +1051,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		fwrite($pipes[0], (binary) $stdin);
 	}
 	fclose($pipes[0]);
-	
+
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
 	while (true) {
@@ -1139,7 +1139,7 @@ function show_file_block($file, $block, $section = null)
 
 function binary_section($section)
 {
-	return PHP_MAJOR_VERSION < 6 || 
+	return PHP_MAJOR_VERSION < 6 ||
 		(
 			$section == 'FILE'			||
 	        $section == 'FILEEOF'		||
@@ -1352,6 +1352,7 @@ TEST $file
 	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
 	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
 	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
+	$sh_filename       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
 	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
 	$test_file         = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
 	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
@@ -1382,6 +1383,7 @@ TEST $file
 			'exp'  => $exp_filename,
 			'out'  => $output_filename,
 			'mem'  => $memcheck_filename,
+			'sh'   => $sh_filename,
 			'php'  => $temp_file,
 			'skip' => $temp_skipif,
 			'clean'=> $temp_clean);
@@ -1398,6 +1400,7 @@ TEST $file
 	@unlink($exp_filename);
 	@unlink($output_filename);
 	@unlink($memcheck_filename);
+	@unlink($sh_filename);
 	@unlink($temp_file);
 	@unlink($test_file);
 	@unlink($temp_skipif);
@@ -1818,7 +1821,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-		
+
 			$wanted_re = str_replace(
 				array(b'%binary_string_optional%'),
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'binary string',
@@ -1932,6 +1935,7 @@ COMMAND $cmd
 	if (!$passed) {
 		if (isset($section_text['XFAIL'])) {
 			$restype[] = 'XFAIL';
+			$info = '  XFAIL REASON: ' . $section_text['XFAIL'];
 		} else {
 			$restype[] = 'FAIL';
 		}
@@ -1958,6 +1962,15 @@ COMMAND $cmd
 		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, (binary) $diff, FILE_BINARY) === false) {
 			error("Cannot create test diff - $diff_filename");
 		}
+
+		// write .sh
+		if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, b"#!/bin/sh
+
+{$cmd}
+", FILE_BINARY) === false) {
+			error("Cannot create test shell script - $sh_filename");
+		}
+		chmod($sh_filename, 0755);
 
 		// write .log
 		if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, b"
@@ -2131,7 +2144,7 @@ function settings2array($settings, &$ini_settings)
 
 		if (strpos($setting, '=') !== false) {
 			$setting = explode("=", $setting, 2);
-			$name = trim(strtolower($setting[0]));
+			$name = trim($setting[0]);
 			$value = trim($setting[1]);
 
 			if ($name == 'extension') {
@@ -2161,7 +2174,17 @@ function settings2params(&$ini_settings)
 				$settings .= " -d \"$name=$val\"";
 			}
 		} else {
-			$value = addslashes($value);
+			if (substr(PHP_OS, 0, 3) == "WIN" && !empty($value) && $value{0} == '"') {
+				$len = strlen($value);
+
+				if ($value{$len - 1} == '"') {
+					$value{0} = "'";
+					$value{$len - 1} = "'";
+				}
+			} else {
+				$value = addslashes($value);
+			}
+
 			$settings .= " -d \"$name=$value\"";
 		}
 	}
@@ -2218,7 +2241,7 @@ function get_summary($show_ext_summary, $show_html)
 	if ($show_html) {
 		$summary .= "<pre>\n";
 	}
-	
+
 	if ($show_ext_summary) {
 		$summary .= '
 =====================================================================
@@ -2435,12 +2458,12 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 			$mem = "&nbsp;";
 		}
 
-		fwrite($html_file, 
+		fwrite($html_file,
 			"<tr>" .
 			"<td>$result</td>" .
 			"<td>$tested</td>" .
 			"<td>$extra</td>" .
-			"<td>$diff</td>" . 
+			"<td>$diff</td>" .
 			"<td>$mem</td>" .
 			"</tr>\n");
 	}

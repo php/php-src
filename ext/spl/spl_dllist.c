@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -367,7 +367,6 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 {
 	zend_object_value  retval;
 	spl_dllist_object *intern;
-	zval              *tmp;
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
@@ -376,7 +375,7 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 
 	intern->flags = 0;
 	intern->traverse_position = 0;
@@ -523,6 +522,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		INIT_PZVAL(&zrv);
 		Z_ARRVAL(zrv) = intern->debug_info;
 
+		if (!intern->std.properties) {
+			rebuild_object_properties(&intern->std);
+		}
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
@@ -1043,6 +1045,10 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* 
 SPL_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	RETURN_LONG(intern->traverse_position);
 }
@@ -1053,6 +1059,10 @@ SPL_METHOD(SplDoublyLinkedList, key)
 SPL_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO TSRMLS_CC);
 }
@@ -1063,6 +1073,10 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 SPL_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags TSRMLS_CC);
 }
@@ -1073,6 +1087,10 @@ SPL_METHOD(SplDoublyLinkedList, next)
 SPL_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
 }
@@ -1083,6 +1101,10 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 SPL_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags TSRMLS_CC);
 }
@@ -1094,6 +1116,10 @@ SPL_METHOD(SplDoublyLinkedList, current)
 {
 	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (element == NULL || element->data == NULL) {
 		RETURN_NULL();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -32,6 +32,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 		case IS_STRING:
 		case IS_CONSTANT:
+		case IS_CLASS:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			STR_FREE_REL(zvalue->value.str.val);
 			break;
@@ -77,7 +78,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			free(zvalue->value.str.val);
+			str_free(zvalue->value.str.val);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
@@ -117,7 +118,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT:
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
+			if (!IS_INTERNED(zvalue->value.str.val)) {
+				zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
+			}
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -184,6 +187,51 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zval_ptr)
 	zval_internal_ptr_dtor(zval_ptr);
 }
 #endif
+
+ZEND_API int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	HashTable *target = va_arg(args, HashTable*);
+	zend_bool is_ref;
+	zval *tmp;
+  
+	if (Z_TYPE_PP(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
+		is_ref = Z_TYPE_PP(p) & IS_LEXICAL_REF;
+    
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		if (zend_hash_quick_find(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, (void **) &p) == FAILURE) {
+			if (is_ref) {        
+				ALLOC_INIT_ZVAL(tmp);
+				Z_SET_ISREF_P(tmp);
+				zend_hash_quick_add(EG(active_symbol_table), key->arKey, key->nKeyLength, key->h, &tmp, sizeof(zval*), (void**)&p);
+			} else {
+				tmp = EG(uninitialized_zval_ptr);
+				zend_error(E_NOTICE,"Undefined variable: %s", key->arKey);
+			}
+		} else {
+			if (is_ref) {
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+				tmp = *p;
+			} else if (Z_ISREF_PP(p)) {
+				ALLOC_INIT_ZVAL(tmp);
+				ZVAL_COPY_VALUE(tmp, *p);
+				zval_copy_ctor(tmp);
+				Z_SET_REFCOUNT_P(tmp, 0);
+				Z_UNSET_ISREF_P(tmp);
+			} else {
+				tmp = *p;
+			}
+		}
+	} else {
+		tmp = *p;
+	}
+	if (zend_hash_quick_add(target, key->arKey, key->nKeyLength, key->h, &tmp, sizeof(zval*), NULL) == SUCCESS) {
+		Z_ADDREF_P(tmp);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
 
 /*
  * Local variables:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -22,52 +22,60 @@
 #ifndef ZEND_MULTIBYTE_H
 #define ZEND_MULTIBYTE_H
 
-#ifdef ZEND_MULTIBYTE
-
-#define BOM_UTF32_BE	"\x00\x00\xfe\xff"
-#define	BOM_UTF32_LE	"\xff\xfe\x00\x00"
-#define	BOM_UTF16_BE	"\xfe\xff"
-#define	BOM_UTF16_LE	"\xff\xfe"
-#define	BOM_UTF8		"\xef\xbb\xbf"
+typedef struct _zend_encoding zend_encoding;
 
 typedef size_t (*zend_encoding_filter)(unsigned char **str, size_t *str_length, const unsigned char *buf, size_t length TSRMLS_DC);
 
-typedef char* (*zend_encoding_detector)(const unsigned char *string, size_t length, char *list TSRMLS_DC);
+typedef const zend_encoding* (*zend_encoding_fetcher)(const char *encoding_name TSRMLS_DC);
+typedef const char* (*zend_encoding_name_getter)(const zend_encoding *encoding);
+typedef int (*zend_encoding_lexer_compatibility_checker)(const zend_encoding *encoding);
+typedef const zend_encoding *(*zend_encoding_detector)(const unsigned char *string, size_t length, const zend_encoding **list, size_t list_size TSRMLS_DC);
+typedef size_t (*zend_encoding_converter)(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC);
+typedef int (*zend_encoding_list_parser)(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent TSRMLS_DC);
+typedef const zend_encoding *(*zend_encoding_internal_encoding_getter)(TSRMLS_D);
+typedef int (*zend_encoding_internal_encoding_setter)(const zend_encoding *encoding TSRMLS_DC);
 
-typedef int (*zend_encoding_converter)(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC);
-
-typedef size_t (*zend_encoding_oddlen)(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC);
-
-typedef struct _zend_encoding {
-	zend_encoding_filter input_filter;		/* escape input filter */
-	zend_encoding_filter output_filter;		/* escape output filter */
-	const char *name;					/* encoding name */
-	const char *(*aliases)[];			/* encoding name aliases */
-	zend_bool compatible;						/* flex compatible or not */
-} zend_encoding;
-
+typedef struct _zend_multibyte_functions {
+    const char *provider_name;
+    zend_encoding_fetcher encoding_fetcher;
+    zend_encoding_name_getter encoding_name_getter;
+    zend_encoding_lexer_compatibility_checker lexer_compatibility_checker;
+    zend_encoding_detector encoding_detector;
+    zend_encoding_converter encoding_converter;
+    zend_encoding_list_parser encoding_list_parser;
+    zend_encoding_internal_encoding_getter internal_encoding_getter;
+    zend_encoding_internal_encoding_setter internal_encoding_setter;
+} zend_multibyte_functions;
 
 /*
  * zend multibyte APIs
  */
 BEGIN_EXTERN_C()
-ZEND_API int zend_multibyte_set_script_encoding(const char *encoding_list,
-size_t encoding_list_size TSRMLS_DC);
-ZEND_API int zend_multibyte_set_internal_encoding(const char *encoding_name TSRMLS_DC);
-ZEND_API int zend_multibyte_set_functions(zend_encoding_detector encoding_detector, zend_encoding_converter encoding_converter, zend_encoding_oddlen encoding_oddlen TSRMLS_DC);
-ZEND_API int zend_multibyte_set_filter(zend_encoding *onetime_encoding TSRMLS_DC);
-ZEND_API zend_encoding* zend_multibyte_fetch_encoding(const char *encoding_name);
-ZEND_API size_t zend_multibyte_script_encoding_filter(unsigned char **to, size_t 
-*to_length, const unsigned char *from, size_t from_length TSRMLS_DC);
-ZEND_API size_t zend_multibyte_internal_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC);
 
-/* in zend_language_scanner.l */
-ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC);
-ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
-ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC);
+ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf32be;
+ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf32le;
+ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf16be;
+ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf16le;
+ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf8;
+
+/* multibyte utility functions */
+ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functions TSRMLS_DC);
+ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(TSRMLS_D);
+
+ZEND_API const zend_encoding *zend_multibyte_fetch_encoding(const char *name TSRMLS_DC);
+ZEND_API const char *zend_multibyte_get_encoding_name(const zend_encoding *encoding);
+ZEND_API int zend_multibyte_check_lexer_compatibility(const zend_encoding *encoding);
+ZEND_API const zend_encoding *zend_multibyte_encoding_detector(const unsigned char *string, size_t length, const zend_encoding **list, size_t list_size TSRMLS_DC);
+ZEND_API size_t zend_multibyte_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC);
+ZEND_API int zend_multibyte_parse_encoding_list(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent TSRMLS_DC);
+
+ZEND_API const zend_encoding *zend_multibyte_get_internal_encoding(TSRMLS_D);
+ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(TSRMLS_D);
+ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size TSRMLS_DC);
+ZEND_API int zend_multibyte_set_internal_encoding(const zend_encoding *encoding TSRMLS_DC);
+ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length TSRMLS_DC);
+
 END_EXTERN_C()
-
-#endif /* ZEND_MULTIBYTE */
 
 #endif /* ZEND_MULTIBYTE_H */
 

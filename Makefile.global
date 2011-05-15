@@ -13,6 +13,8 @@ all: $(all_targets)
 	
 build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 
+build-binaries: $(PHP_BINARIES)
+
 libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
 	-@$(LIBTOOL) --silent --mode=install cp $@ $(phptempdir)/$@ >/dev/null 2>&1
@@ -34,6 +36,8 @@ install-sapi: $(OVERALL_TARGET)
 		done; \
 	fi
 	@$(INSTALL_IT)
+
+install-binaries: build-binaries $(install_binary_targets)
 
 install-modules: build-modules
 	@test -d modules && \
@@ -79,7 +83,7 @@ PHP_TEST_SHARED_EXTENSIONS =  ` \
 			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d $(ZEND_EXT_TYPE)=$(top_builddir)/modules/$$dlname"; \
 		done; \
 	fi`
-PHP_DEPRECATED_DIRECTIVES_REGEX = '^(define_syslog_variables|register_(globals|long_arrays)?|safe_mode|magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
+PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
 
 test: all
 	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
@@ -98,6 +102,7 @@ test: all
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
 			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
+		rm $(top_builddir)/tmp-php.ini; \
 	else \
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi

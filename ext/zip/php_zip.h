@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,12 +43,12 @@ extern zend_module_entry zip_module_entry;
 # endif
 #endif
 
-/* {{{ OPENBASEDIR_CHECKPATH(filename) */
-#if (PHP_MAJOR_VERSION < 6)
-# define OPENBASEDIR_CHECKPATH(filename) \
+/* {{{ ZIP_OPENBASEDIR_CHECKPATH(filename) */
+#if PHP_API_VERSION < 20100412
+# define ZIP_OPENBASEDIR_CHECKPATH(filename) \
 	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
 #else
-#define OPENBASEDIR_CHECKPATH(filename) \
+#define ZIP_OPENBASEDIR_CHECKPATH(filename) \
 	php_check_open_basedir(filename TSRMLS_CC)
 #endif
 /* }}} */

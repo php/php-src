@@ -3,7 +3,7 @@ dnl config.m4 for extension pdo_mysql
 dnl vim: se ts=2 sw=2 et:
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
-[  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directoy
+[  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory
                                  If mysqlnd is passed as DIR, the MySQL native
                                  native driver will be used [/usr/local]])
 
@@ -100,15 +100,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query,
+    PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit,
     [
       PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
       PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
     ],[
       if test "$PHP_ZLIB_DIR" != "no"; then
         PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, PDO_MYSQL_SHARED_LIBADD)
-        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query, [], [
-          AC_MSG_ERROR([PDO_MYSQL configure failed. Please check config.log for more information.])
+        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit, [], [
+          AC_MSG_ERROR([PDO_MYSQL configure failed, MySQL 4.1 needed. Please check config.log for more information.])
         ], [
           -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR 
         ])  
@@ -128,11 +128,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     ],[
       $PDO_MYSQL_LIBS
     ])
-
-    _SAVE_LIBS=$LIBS
-    LIBS="$LIBS $PDO_MYSQL_LIBS"
-    AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result mysql_sqlstate]) 
-    LIBS=$_SAVE_LIBS
   fi
 
   ifdef([PHP_CHECK_PDO_INCLUDES],

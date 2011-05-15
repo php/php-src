@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 {
 	int free_msg = 0;
 	if (message == NULL) {
-		message = php_win_err(code);
+		message = php_win32_error_to_msg(code);
 		free_msg = 1;
 	}
 	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);

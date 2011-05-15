@@ -32,13 +32,12 @@
 typedef struct _php_mb_encoding_handler_info_t {
 	int data_type;
 	const char *separator;
-	unsigned int force_register_globals: 1;
 	unsigned int report_errors: 1;
 	enum mbfl_no_language to_language;
-	enum mbfl_no_encoding to_encoding;
+	const mbfl_encoding *to_encoding;
 	enum mbfl_no_language from_language;
-	int num_from_encodings;
-	const enum mbfl_no_encoding *from_encodings;
+	const mbfl_encoding **from_encodings;
+	size_t num_from_encodings;
 } php_mb_encoding_handler_info_t;
 
 /* }}}*/
@@ -48,7 +47,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler);
 MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 int _php_mb_enable_encoding_translation(int flag);
-enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res TSRMLS_DC);
+const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res TSRMLS_DC);
 /* }}} */
 #endif /* HAVE_MBSTRING */
 

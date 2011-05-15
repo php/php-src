@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -32,13 +32,15 @@ void free_zend_constant(zend_constant *c)
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
-	free(c->name);
+	str_free(c->name);
 }
 
 
 void copy_zend_constant(zend_constant *c)
 {
-	c->name = zend_strndup(c->name, c->name_len - 1);
+	if (!IS_INTERNED(c->name)) {
+		c->name = zend_strndup(c->name, c->name_len - 1);
+	}
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -113,6 +115,8 @@ void zend_register_standard_constants(TSRMLS_D)
 
 	REGISTER_MAIN_LONG_CONSTANT("E_ALL", E_ALL, CONST_PERSISTENT | CONST_CS);
 
+	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_PROVIDE_OBJECT", DEBUG_BACKTRACE_PROVIDE_OBJECT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);
 	/* true/false constants */
 	{
 		zend_constant c;
@@ -220,6 +224,31 @@ ZEND_API void zend_register_string_constant(const char *name, uint name_len, cha
 	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number TSRMLS_CC);
 }
 
+static int zend_get_halt_offset_constant(const char *name, uint name_len, zend_constant **c TSRMLS_DC)
+{
+	int ret;
+	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
+
+	if (!EG(in_execution)) {
+		return 0;
+	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
+	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
+		char *cfilename, *haltname;
+		int len, clen;
+
+		cfilename = zend_get_executed_filename(TSRMLS_C);
+		clen = strlen(cfilename);
+		/* check for __COMPILER_HALT_OFFSET__ */
+		zend_mangle_property_name(&haltname, &len, haltoff,
+			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
+		ret = zend_hash_find(EG(zend_constants), haltname, len+1, (void **) c);
+		efree(haltname);
+		return (ret == SUCCESS);
+	} else {
+		return 0;
+	}
+}
+
 
 ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSRMLS_DC)
 {
@@ -235,29 +264,7 @@ ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSR
 				retval=0;
 			}
 		} else {
-			static char haltoff[] = "__COMPILER_HALT_OFFSET__";
-
-			if (!EG(in_execution)) {
-				retval = 0;
-			} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
-			          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
-				char *cfilename, *haltname;
-				int len, clen;
-
-				cfilename = zend_get_executed_filename(TSRMLS_C);
-				clen = strlen(cfilename);
-				/* check for __COMPILER_HALT_OFFSET__ */
-				zend_mangle_property_name(&haltname, &len, haltoff,
-					sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
-				if (zend_hash_find(EG(zend_constants), haltname, len+1, (void **) &c) == SUCCESS) {
-					retval = 1;
-				} else {
-					retval=0;
-				}
-				pefree(haltname, 0);
-			} else {
-				retval=0;
-			}
+			retval = zend_get_halt_offset_constant(name, name_len, &c TSRMLS_CC);
 		}
 		efree(lookup_name);
 	}
@@ -276,7 +283,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 {
 	zend_constant *c;
 	int retval = 1;
-	char *colon;
+	const char *colon;
 	zend_class_entry *ce = NULL;
 	char *class_name;
 	zval **ret_constant;
@@ -292,7 +299,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 	    colon > name && (*(colon - 1) == ':')) {
 		int class_name_len = colon - name - 1;
 		int const_name_len = name_len - class_name_len - 2;
-		char *constant_name = colon + 1;
+		const char *constant_name = colon + 1;
 		char *lcname;
 
 		class_name = estrndup(name, class_name_len);
@@ -355,7 +362,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		/* compound constant name */
 		int prefix_len = colon - name;
 		int const_name_len = name_len - prefix_len - 1;
-		char *constant_name = colon + 1;
+		const char *constant_name = colon + 1;
 		char *lcname;
 		int found_const = 0;
 
@@ -408,6 +415,38 @@ finish:
 	return zend_get_constant(name, name_len, result TSRMLS_CC);
 }
 
+zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC)
+{
+	zend_constant *c;
+
+	if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(key->constant), Z_STRLEN(key->constant) + 1, key->hash_value, (void **) &c) == FAILURE) {
+		key++;
+		if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(key->constant), Z_STRLEN(key->constant) + 1, key->hash_value, (void **) &c) == FAILURE ||
+		    (c->flags & CONST_CS) != 0) {
+			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
+				key++;
+				if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(key->constant), Z_STRLEN(key->constant) + 1, key->hash_value, (void **) &c) == FAILURE) {
+				    key++;
+					if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(key->constant), Z_STRLEN(key->constant) + 1, key->hash_value, (void **) &c) == FAILURE ||
+					    (c->flags & CONST_CS) != 0) {
+
+						key--;
+						if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
+							return NULL;
+						}
+					}
+				}
+			} else {
+				key--;
+				if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
+					return NULL;
+				}
+			}
+		}
+	}
+	return c;
+}
+
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 {
 	char *lowercase_name = NULL;
@@ -422,28 +461,38 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		/* keep in mind that c->name_len already contains the '\0' */
 		lowercase_name = estrndup(c->name, c->name_len-1);
 		zend_str_tolower(lowercase_name, c->name_len-1);
+		lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
 	} else {
 		char *slash = strrchr(c->name, '\\');
 		if(slash) {
 			lowercase_name = estrndup(c->name, c->name_len-1);
 			zend_str_tolower(lowercase_name, slash-c->name);
+			lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
 		} else {
 			name = c->name;
 		}
 	}
 
-	if ((strncmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) ||
-			zend_hash_add(EG(zend_constants), name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
+	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
+	if ((c->name_len == sizeof("__COMPILER_HALT_OFFSET__")
+		&& !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
+		|| zend_hash_add(EG(zend_constants), name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
+		
+		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
+		if (c->name[0] == '\0' && c->name_len > sizeof("\0__COMPILER_HALT_OFFSET__")
+			&& memcmp(name, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
+			name++;
+		}
 		zend_error(E_NOTICE,"Constant %s already defined", name);
-		free(c->name);
+		str_free(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);
 		}
 		ret = FAILURE;
 	}
-	if (lowercase_name) {
+	if (lowercase_name && !IS_INTERNED(lowercase_name)) {
 		efree(lowercase_name);
 	}
 	return ret;

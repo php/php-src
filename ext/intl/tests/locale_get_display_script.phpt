@@ -91,7 +91,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_script=
 disp_locale=fr :  display_script=
@@ -134,12 +134,12 @@ disp_locale=de :  display_script=
 -----------------
 locale='zh-Hant'
 disp_locale=en :  display_script=Traditional Han
-disp_locale=fr :  display_script=idéogrammes han (variante traditionnelle)
+disp_locale=fr :  display_script=idéogrammes han (\(variante traditionnelle\)|traditionnels)
 disp_locale=de :  display_script=Traditionelle Chinesische Schrift
 -----------------
 locale='zh-Hans'
 disp_locale=en :  display_script=Simplified Han
-disp_locale=fr :  display_script=idéogrammes han (variante simplifiée)
+disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
 disp_locale=de :  display_script=Vereinfachte Chinesische Schrift
 -----------------
 locale='sr-Cyrl'
@@ -154,7 +154,7 @@ disp_locale=de :  display_script=Lateinisch
 -----------------
 locale='zh-Hans-CN'
 disp_locale=en :  display_script=Simplified Han
-disp_locale=fr :  display_script=idéogrammes han (variante simplifiée)
+disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
 disp_locale=de :  display_script=Vereinfachte Chinesische Schrift
 -----------------
 locale='sr-Latn-CS'

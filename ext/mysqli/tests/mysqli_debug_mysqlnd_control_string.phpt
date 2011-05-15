@@ -223,5 +223,5 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-[083][control string 'n:O,/tmp/mysqli_debug_phpt.trace'] Trace file has not been written.
+[083][control string 'n:O,%smysqli_debug_phpt.trace'] Trace file has not been written.
 done%s

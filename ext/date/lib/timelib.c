@@ -46,6 +46,19 @@ timelib_rel_time* timelib_rel_time_ctor(void)
 	return t;
 }
 
+timelib_time* timelib_time_clone(timelib_time *orig)
+{
+	timelib_time *tmp = timelib_time_ctor();
+	memcpy(tmp, orig, sizeof(timelib_time));
+	if (orig->tz_abbr) {
+		tmp->tz_abbr = strdup(orig->tz_abbr);
+	}
+	if (orig->tz_info) {
+		tmp->tz_info = orig->tz_info;
+	}
+	return tmp;
+}
+
 timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 {
 	timelib_rel_time *tmp = timelib_rel_time_ctor();
@@ -217,8 +230,6 @@ void timelib_dump_date(timelib_time *d, int options)
 				printf(" %05d%s", d->z, d->dst == 1 ? " (DST)" : "");
 				break;
 		}
-	} else {
-		printf(" GMT 00000");
 	}
 
 	if ((options & 1) == 1) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,9 +28,6 @@
 #include <unknwn.h>
 #include <dispex.h>
 #include "win32/winutil.h"
-
-/* brain-death in winutil.h defines the macro to hide the useful function... */
-#undef php_win_err
 
 typedef struct _php_com_dotnet_object {
 	zend_object zo;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,7 @@
 
 #ifdef PHP_WIN32
 #include <string.h>
+#include "config.w32.h"
 #if HAVE_NSLDAP
 #include <winsock2.h>
 #endif
@@ -2184,6 +2185,192 @@ PHP_FUNCTION(ldap_8859_to_t61)
 /* }}} */
 #endif
 
+#ifdef LDAP_CONTROL_PAGEDRESULTS
+/* {{{ proto bool ldap_ctrl_paged_results(resource link, int pagesize [, bool iscritical [, string cookie]])
+   Inject paged results control*/
+PHP_FUNCTION(ldap_ctrl_paged_results) 
+{
+	long pagesize;
+	zend_bool iscritical;
+	zval *link, *cookie;
+	struct berval lcookie = { 0, NULL };
+	ldap_linkdata *ld;
+	LDAP *ldap;
+	BerElement *ber = NULL;
+	LDAPControl	ctrl, *ctrlsp[2];
+	int rc, myargcount = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|bz", &link, &pagesize, &iscritical, &cookie) != SUCCESS) {
+		return;
+	}
+
+	if (Z_TYPE_PP(&link) == IS_NULL) {
+		ldap = NULL;
+	} else {
+		ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+		ldap = ld->link;
+	}
+
+	ber = ber_alloc_t(LBER_USE_DER);
+	if (ber == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to alloc BER encoding resources for paged results control");
+		RETURN_FALSE;
+	}
+
+	ctrl.ldctl_iscritical = 0;
+
+	switch (myargcount) {
+		case 4:
+			convert_to_string_ex(&cookie);
+			lcookie.bv_val = Z_STRVAL_PP(&cookie);
+			lcookie.bv_len = Z_STRLEN_PP(&cookie);
+			/* fallthru */
+		case 3:
+			ctrl.ldctl_iscritical = (int)iscritical;
+			/* fallthru */
+	}
+
+	if (ber_printf(ber, "{iO}", (int)pagesize, &lcookie) == LBER_ERROR) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to BER printf paged results control");
+		RETVAL_BOOL(0);
+		goto lcpr_error_out;
+	}
+	rc = ber_flatten2(ber, &ctrl.ldctl_value, 0);
+	if (rc == LBER_ERROR) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to BER encode paged results control");
+		RETVAL_BOOL(0);
+		goto lcpr_error_out;
+	}
+
+	ctrl.ldctl_oid = LDAP_CONTROL_PAGEDRESULTS;
+
+	if (ldap) {
+		/* directly set the option */
+		ctrlsp[0] = &ctrl;
+		ctrlsp[1] = NULL;
+
+		rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
+		if (rc != LDAP_SUCCESS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set paged results control: %s (%d)", ldap_err2string(rc), rc);
+			RETVAL_BOOL(0);
+			goto lcpr_error_out;
+		}
+		RETVAL_BOOL(1);
+	} else {
+		/* return a PHP control object */
+		array_init(return_value);
+
+		add_assoc_string(return_value, "oid", ctrl.ldctl_oid, 1);
+		if ( ctrl.ldctl_value.bv_len ) {
+			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len, 1);
+		}
+		if (ctrl.ldctl_iscritical) {
+			add_assoc_bool(return_value, "iscritical", ctrl.ldctl_iscritical);
+		}
+	}
+
+lcpr_error_out:
+    if (ber != NULL) {
+		ber_free(ber, 1);
+	}
+	return;
+}
+/* }}} */
+
+/* {{{ proto bool ldap_ctrl_paged_results_resp(resource link, resource result [, string cookie [, int estimated]])
+   Extract paged results control response */
+PHP_FUNCTION(ldap_ctrl_paged_results_resp) 
+{
+	zval *link, *result, *cookie, *estimated;
+	struct berval lcookie;
+	int lestimated;
+	ldap_linkdata *ld;
+	LDAPMessage *ldap_result;
+	LDAPControl **lserverctrls, *lctrl;
+	BerElement *ber;
+	ber_tag_t tag;
+	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|zz", &link, &result, &cookie, &estimated) != SUCCESS) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+	ZEND_FETCH_RESOURCE(ldap_result, LDAPMessage *, &result, -1, "ldap result", le_result);
+
+	rc = ldap_parse_result(ld->link,
+				ldap_result,
+				&lerrcode,
+				NULL,		/* matcheddn */
+				NULL,		/* errmsg */
+				NULL,		/* referrals */
+				&lserverctrls,
+				0);
+
+	if (rc != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse result: %s (%d)", ldap_err2string(rc), rc);
+		RETURN_FALSE;
+	}
+
+	if (lerrcode != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result is: %s (%d)", ldap_err2string(lerrcode), lerrcode);
+		RETURN_FALSE;
+	}
+
+	if (lserverctrls == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No server controls in result");
+		RETURN_FALSE;
+	}
+
+	lctrl = ldap_find_control(LDAP_CONTROL_PAGEDRESULTS, lserverctrls);
+	if (lctrl == NULL) {
+		ldap_controls_free(lserverctrls);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No paged results control response in result");
+		RETURN_FALSE;
+	}
+
+	ber = ber_init(&lctrl->ldctl_value);
+	if (ber == NULL) {
+		ldap_controls_free(lserverctrls);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to alloc BER decoding resources for paged results control response");
+		RETURN_FALSE;
+	}
+
+	tag = ber_scanf(ber, "{io}", &lestimated, &lcookie);
+	(void)ber_free(ber, 1);
+
+	if (tag == LBER_ERROR) {
+		ldap_controls_free(lserverctrls);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode paged results control response");
+		RETURN_FALSE;
+	}
+
+	if (lestimated < 0) {
+		ldap_controls_free(lserverctrls);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid paged results control response value");
+		RETURN_FALSE;
+	}
+
+	ldap_controls_free(lserverctrls);
+	if (myargcount == 4) {
+		zval_dtor(estimated);
+		ZVAL_LONG(estimated, lestimated);
+	}
+	zval_dtor(cookie);
+	
+ 	if (lcookie.bv_len == 0) {
+		ZVAL_EMPTY_STRING(cookie);
+ 	} else {
+		ZVAL_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len, 1);
+ 	}
+ 	ldap_memfree(lcookie.bv_val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
@@ -2363,6 +2550,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
 	ZEND_ARG_INFO(0, sortfilter)
 ZEND_END_ARG_INFO()
 
+#ifdef LDAP_CONTROL_PAGEDRESULTS
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_ctrl_paged_results, 0, 0, 2)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, pagesize)
+	ZEND_ARG_INFO(0, iscritical)
+	ZEND_ARG_INFO(0, cookie)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_ctrl_paged_results_resp, 0, 0, 2)
+	ZEND_ARG_INFO(0, link)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(1, cookie)
+	ZEND_ARG_INFO(1, estimated)
+ZEND_END_ARG_INFO();
+#endif
+
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -2505,6 +2708,10 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_8859_to_t61,							arginfo_ldap_8859_to_t61)
 #endif
 
+#ifdef LDAP_CONTROL_PAGEDRESULTS
+	PHP_FE(ldap_ctrl_paged_results,							arginfo_ldap_ctrl_paged_results)
+	PHP_FE(ldap_ctrl_paged_results_resp,						arginfo_ldap_ctrl_paged_results_resp)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */

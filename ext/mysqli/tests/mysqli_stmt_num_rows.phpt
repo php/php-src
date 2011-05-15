@@ -27,17 +27,17 @@ require_once('skipifconnectfailure.inc');
 	function func_test_mysqli_stmt_num_rows($stmt, $query, $expected, $offset) {
 
 		if (!mysqli_stmt_prepare($stmt, $query)) {
-			printf("[%03d] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_error($stmt));
+			printf("[%03d] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 			return false;
 		}
 
 		if (!mysqli_stmt_execute($stmt)) {
-			printf("[%03d] [%d] %s\n", $offset + 1, mysqli_errno($stmt), mysqli_error($stmt));
+			printf("[%03d] [%d] %s\n", $offset + 1, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 			return false;
 		}
 
 		if (!mysqli_stmt_store_result($stmt)) {
-			printf("[%03d] [%d] %s\n", $offset + 2, mysqli_errno($stmt), mysqli_error($stmt));
+			printf("[%03d] [%d] %s\n", $offset + 2, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 			return false;
 		}
 
@@ -82,8 +82,8 @@ require_once('skipifconnectfailure.inc');
 			$i++;
 		} while (mysqli_stmt_fetch($stmt));
 
-		if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
-			printf("[54] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+		if (7 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+			printf("[54] Expecting int/7, got %s/%s\n", gettype($tmp), $tmp);
 
 	} else {
 		printf("[055] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));

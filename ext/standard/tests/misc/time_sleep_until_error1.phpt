@@ -1,5 +1,7 @@
 --TEST--
 time_sleep_until() function - error test for time_sleep_until()
+--SKIPIF--
+<?php	if (!function_exists("time_sleep_until")) die('skip time_sleep_until() not available');?>
 --CREDITS--
 Fabio Fabbrucci fabbrucci@grupporetina.com
 Danilo Sanchi sanchi@grupporetina.com

@@ -2,12 +2,12 @@
     of PCRE's API, error diagnostics, and the compiled code of some patterns.
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
-    either because PCRE can't be compatible, or there is potential Perl 
+    either because PCRE can't be compatible, or there is a possible Perl 
     bug. --/  
   
-/-- Originally, the Perl 5.10 things were in here too, but now I have separated
-    many (most?) of them out into test 11. However, there may still be some
-    that were overlooked. --/   
+/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
+    separated many (most?) of them out into test 11. However, there may still 
+    be some that were overlooked. --/   
 
 /(a)b|/I
 Capturing subpattern count = 1
@@ -102,6 +102,36 @@ Failed: missing terminating ] for character class at offset 5
 
 /(?X)[\B]/
 Failed: invalid escape sequence in character class at offset 6
+
+/(?X)[\R]/
+Failed: invalid escape sequence in character class at offset 6
+
+/(?X)[\X]/
+Failed: invalid escape sequence in character class at offset 6
+
+/[\B]/BZ
+------------------------------------------------------------------
+        Bra
+        B
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\R]/BZ
+------------------------------------------------------------------
+        Bra
+        R
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\X]/BZ
+------------------------------------------------------------------
+        Bra
+        X
+        Ket
+        End
+------------------------------------------------------------------
 
 /[z-a]/
 Failed: range out of order in character class at offset 3
@@ -3198,19 +3228,19 @@ Failed: POSIX collating elements are not supported at offset 0
 Failed: POSIX named classes are supported only within a class at offset 0
 
 /\l/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\L/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\N{name}/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\u/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\U/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /[/I
 Failed: missing terminating ] for character class at offset 1
@@ -8667,11 +8697,8 @@ No match
 +13   ^  ^      (*FAIL)
 No match
     
-/a(*PRUNE:XXX)b/
-Failed: (*VERB) with an argument is not supported at offset 8
-
 /a(*MARK)b/ 
-Failed: (*VERB) not recognized at offset 7
+Failed: (*MARK) must have an argument at offset 7
 
 /(?i:A{1,}\6666666666)/
 Failed: number is too big at offset 19
@@ -8760,6 +8787,27 @@ No match
 No match
     a\x85b 
 No match
+    
+/(*ANY).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*CRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
 
 /a\Rb/I<bsr_anycrlf>
 Capturing subpattern count = 0
@@ -9246,6 +9294,30 @@ No match
  +0        ^     x
  +0         ^    x
 No match
+  
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+--->abcxyz
++15 ^          x
++15  ^         x
++15   ^        x
++15    ^       x
++16    ^^      y
++17    ^ ^     z
++18    ^  ^    
+ 0: xyz
+
+/xyz/CY
+  abcxyz 
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
 
 /^"((?(?=[a])[^"])|b)*"$/C
     "ab"
@@ -10432,9 +10504,9 @@ Partial match: abca
     xxxxabcde\P\P
 Partial match: abcde
 
-/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
-    and not behaving as specified in that it *does* bumpalong after hitting
-    (*COMMIT). --/ 
+/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+    broken and not behaving as specified in that it *does* bumpalong after
+    hitting (*COMMIT). --/
 
 /(?1)(A(*COMMIT)|B)D/
     ABD
@@ -10596,5 +10668,641 @@ No match
  0: xabcxd
  1: abcxd
  2: cx
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Brazero
+        Once
+        Recurse
+        KetRmax
+        Cond
+        Cond def
+        CBra 1
+        Any
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+ 0: ab
+ 1: ab
+
+/----------------------/
+
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+Failed: recursive call could loop indefinitely at offset 31
+
+/abc(*MARK:)pqr/
+Failed: (*MARK) must have an argument at offset 10
+
+/abc(*:)pqr/
+Failed: (*MARK) must have an argument at offset 6
+
+/abc(*FAIL:123)xyz/
+Failed: an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT) at offset 13
+
+/--- This should, and does, fail. In Perl, it does not, which I think is a 
+     bug because replacing the B in the pattern by (B|D) does make it fail. ---/
+
+/A(*COMMIT)B/+K
+    ACABX
+No match
+
+/--- These should be different, but in Perl 5.11 are not, which I think
+     is a bug in Perl. ---/
+
+/A(*THEN)B|A(*THEN)C/K
+    AC
+ 0: AC
+
+/A(*PRUNE)B|A(*PRUNE)C/K
+    AC
+No match
+    
+/--- A whole lot of tests of verbs with arguments are here rather than in test
+     11 because Perl doesn't seem to follow its specification entirely 
+     correctly. ---/
+
+/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
+     not clear how Perl defines "involved in the failure of the match". ---/ 
+
+/^(A(*THEN:A)B|C(*THEN:B)D)/K
+    AB
+ 0: AB
+ 1: AB
+    CD
+ 0: CD
+ 1: CD
+    ** Failers
+No match
+    AC
+No match
+    CB    
+No match, mark = B
+    
+/--- Check the use of names for success and failure. PCRE doesn't show these 
+names for success, though Perl does, contrary to its spec. ---/
+
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
+    AB
+ 0: AB
+ 1: AB
+    CD
+ 0: CD
+ 1: CD
+    ** Failers
+No match
+    AC
+No match, mark = A
+    CB    
+No match, mark = B
+    
+/--- An empty name does not pass back an empty string. It is the same as if no
+name were given. ---/ 
+
+/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
+    AB
+ 0: AB
+ 1: AB
+    CD 
+ 0: CD
+ 1: CD
+
+/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
+    
+/A(*PRUNE:A)B/K
+    ACAB
+ 0: AB
+
+/(*MARK:A)(*PRUNE:B)(C|X)/K
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match, mark = B
+
+/(*MARK:A)(*THEN:B)(C|X)/K
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match, mark = B
+
+/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
+
+/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+No match
+
+/--- Same --/
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+No match
+
+/--- This should fail; the SKIP advances by one, but when we get to AC, the
+     PRUNE kills it. ---/ 
+    
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+No match
+
+/A(*:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+No match
+
+/--- This should fail, as a null name is the same as no name ---/
+
+/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
+    AAAC
+No match
+
+/--- This fails in PCRE, and I think that is in accordance with Perl's 
+     documentation, though in Perl it succeeds. ---/
+    
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
+    AAAC
+No match
+
+/--- Mark names can be duplicated ---/
+
+/A(*:A)B|X(*:A)Y/K
+    AABC
+ 0: AB
+MK: A
+    XXYZ 
+ 0: XY
+MK: A
+    
+/^A(*:A)B|^X(*:A)Y/K
+    ** Failers
+No match
+    XAQQ
+No match, mark = A
+    
+/--- A check on what happens after hitting a mark and them bumping along to
+something that does not even start. Perl reports tags after the failures here, 
+though it does not when the individual letters are made into something 
+more complicated. ---/
+
+/A(*:A)B|XX(*:B)Y/K
+    AABC
+ 0: AB
+MK: A
+    XXYZ 
+ 0: XXY
+MK: B
+    ** Failers
+No match
+    XAQQ  
+No match
+    XAQQXZZ  
+No match
+    AXQQQ 
+No match
+    AXXQQQ 
+No match
+    
+/--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
+optimizations defeat this. So does the PCRE optimization unless we disable it 
+with \Y. ---/
+
+/(*COMMIT)ABC/
+    ABCDEFG
+ 0: ABC
+    ** Failers
+No match
+    DEFGABC\Y  
+No match
+    
+/--- Repeat some tests with added studying. ---/
+
+/A(*COMMIT)B/+KS
+    ACABX
+No match
+ 
+/A(*THEN)B|A(*THEN)C/KS
+    AC
+ 0: AC
+
+/A(*PRUNE)B|A(*PRUNE)C/KS
+    AC
+No match
+
+/^(A(*THEN:A)B|C(*THEN:B)D)/KS
+    AB
+ 0: AB
+ 1: AB
+    CD
+ 0: CD
+ 1: CD
+    ** Failers
+No match
+    AC
+No match
+    CB    
+No match, mark = B
+
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
+    AB
+ 0: AB
+ 1: AB
+    CD
+ 0: CD
+ 1: CD
+    ** Failers
+No match
+    AC
+No match, mark = A
+    CB    
+No match, mark = B
+
+/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
+    AB
+ 0: AB
+ 1: AB
+    CD 
+ 0: CD
+ 1: CD
+
+/A(*PRUNE:A)B/KS
+    ACAB
+ 0: AB
+
+/(*MARK:A)(*PRUNE:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match
+
+/(*MARK:A)(*THEN:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match
+
+/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
+    AAAC
+No match
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
+    AAAC
+No match
+    
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
+    AAAC
+No match
+
+/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
+    AAAC
+No match
+
+/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
+    AAAC
+No match
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
+    AAAC
+No match
+
+/A(*:A)B|XX(*:B)Y/KS
+    AABC
+ 0: AB
+MK: A
+    XXYZ 
+ 0: XXY
+MK: B
+    ** Failers
+No match
+    XAQQ  
+No match
+    XAQQXZZ  
+No match
+    AXQQQ 
+No match
+    AXXQQQ 
+No match
+    
+/(*COMMIT)ABC/
+    ABCDEFG
+ 0: ABC
+    ** Failers
+No match
+    DEFGABC\Y  
+No match
+
+/^(ab (c+(*THEN)cd) | xyz)/x
+    abcccd  
+No match
+
+/^(ab (c+(*PRUNE)cd) | xyz)/x
+    abcccd  
+No match
+
+/^(ab (c+(*FAIL)cd) | xyz)/x
+    abcccd  
+No match
+    
+/--- Perl 5.11 gets some of these wrong ---/ 
+
+/(?>.(*ACCEPT))*?5/
+    abcde
+ 0: a
+
+/(.(*ACCEPT))*?5/
+    abcde
+ 0: a
+ 1: a
+
+/(.(*ACCEPT))5/
+    abcde
+ 0: a
+ 1: a
+
+/(.(*ACCEPT))*5/
+    abcde
+ 0: a
+ 1: a
+
+/A\NB./BZ
+------------------------------------------------------------------
+        Bra
+        A
+        Any
+        B
+        Any
+        Ket
+        End
+------------------------------------------------------------------
+    ACBD
+ 0: ACBD
+    *** Failers
+No match
+    A\nB
+No match
+    ACB\n   
+No match
+
+/A\NB./sBZ
+------------------------------------------------------------------
+        Bra
+        A
+        Any
+        B
+        AllAny
+        Ket
+        End
+------------------------------------------------------------------
+    ACBD
+ 0: ACBD
+    ACB\n 
+ 0: ACB\x0a
+    *** Failers
+No match
+    A\nB  
+No match
+  
+/A\NB/<crlf>
+    A\nB
+ 0: A\x0aB
+    A\rB
+ 0: A\x0dB
+    ** Failers
+No match
+    A\r\nB    
+No match
+
+/\R+b/BZ
+------------------------------------------------------------------
+        Bra
+        \R++
+        b
+        Ket
+        End
+------------------------------------------------------------------
+
+/\R+\n/BZ
+------------------------------------------------------------------
+        Bra
+        \R+
+        \x0a
+        Ket
+        End
+------------------------------------------------------------------
+
+/\R+\d/BZ
+------------------------------------------------------------------
+        Bra
+        \R++
+        \d
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d*\R/BZ
+------------------------------------------------------------------
+        Bra
+        \d*+
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+
+/\s*\R/BZ
+------------------------------------------------------------------
+        Bra
+        \s*+
+        \R
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+ 0: abcd
+ 1: abcd
+    *** Failers 
+No match
+    abcxy 
+No match
+
+/(?<=abc)def/
+    abc\P\P
+Partial match: abc
+
+/abc$/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc$/m
+    abc
+ 0: abc
+    abc\n
+ 0: abc
+    abc\P\P
+Partial match: abc
+    abc\n\P\P 
+ 0: abc
+    abc\P
+ 0: abc
+    abc\n\P
+ 0: abc
+
+/abc\z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\Z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\b/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\B/
+    abc
+No match
+    abc\P
+Partial match: abc
+    abc\P\P
+Partial match: abc
+
+/.+/
+    abc\>0
+ 0: abc
+    abc\>1
+ 0: bc
+    abc\>2
+ 0: c
+    abc\>3
+No match
+    abc\>4
+Error -24
+    abc\>-4 
+Error -24
+
+/^\cģ/
+Failed: \c must be followed by an ASCII character at offset 3
+
+/(?P<abn>(?P=abn)xxx)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        \1
+        xxx
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a\1z)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        a
+        \1
+        z
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+Failed: syntax error in subpattern name (missing terminator) at offset 29
+
+/(?P<abn>(?P=axn)xxx)/BZ
+Failed: reference to non-existent subpattern at offset 15
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        \2
+        xxx
+        Ket
+        CBra 2
+        yy
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
 
 /-- End of testinput2 --/

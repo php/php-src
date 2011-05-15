@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,7 +95,7 @@ static void php_save_umask(void)
 static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int ret=0;
-
+		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	}
@@ -137,7 +137,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	if (!SG(read_post_bytes) && !ap_should_client_block(r)) {
 		return total_read_bytes;
 	}
-
+ 
 	handler = signal(SIGPIPE, SIG_IGN);
 	while (total_read_bytes<count_bytes) {
 		hard_timeout("Read POST information", r); /* start timeout timer */
@@ -148,7 +148,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		}
 		total_read_bytes += read_bytes;
 	}
-	signal(SIGPIPE, handler);
+	signal(SIGPIPE, handler);	
 	return total_read_bytes;
 }
 /* }}} */
@@ -278,9 +278,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
 		symbol_table = track_vars_array->value.ht;
-	} else if (PG(register_globals)) {
-		/* should never happen nowadays */
-		symbol_table = EG(active_symbol_table);
 	} else {
 		symbol_table = NULL;
 	}
@@ -310,10 +307,8 @@ static int php_apache_startup(sapi_module_struct *sapi_module)
 
 /* {{{ php_apache_log_message
  */
-static void php_apache_log_message(char *message)
+static void php_apache_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
 		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
@@ -337,10 +332,10 @@ static void php_apache_request_shutdown(void *dummy)
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
 	}
-	SG(server_context) = NULL;
-	/*
-	* The server context (request) is NOT invalid by the time
-	* run_cleanups() is called
+	SG(server_context) = NULL; 
+	/* 
+	* The server context (request) is NOT invalid by the time 
+	* run_cleanups() is called 
 	*/
 }
 /* }}} */
@@ -349,7 +344,7 @@ static void php_apache_request_shutdown(void *dummy)
  */
 static int php_apache_sapi_activate(TSRMLS_D)
 {
-	request_rec *r = (request_rec *) SG(server_context);
+	request_rec *r = (request_rec *) SG(server_context); 
 
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
@@ -357,7 +352,7 @@ static int php_apache_sapi_activate(TSRMLS_D)
 	 * We need this because at any point in our code we can be interrupted
 	 * and that may happen before we have had time to free our memory.
 	 * The php_request_shutdown function needs to free all outstanding allocated
-	 * memory.
+	 * memory.  
 	 */
 	block_alarms();
 	register_cleanup(r->pool, NULL, php_apache_request_shutdown, php_request_shutdown_for_exec);
@@ -401,7 +396,7 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 	int fd;
 
 	fd = r->connection->client->fd;
-
+	
 	if (fd >= 0) {
 		if (nfd) *nfd = fd;
 		return SUCCESS;
@@ -416,9 +411,9 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 static int sapi_apache_force_http_10(TSRMLS_D)
 {
 	request_rec *r = SG(server_context);
-
+	
 	r->proto_num = HTTP_VERSION(1,0);
-
+	
 	return SUCCESS;
 }
 /* }}} */
@@ -443,9 +438,9 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 
 /* {{{ php_apache_get_request_time
  */
-static time_t php_apache_get_request_time(TSRMLS_D)
+static double php_apache_get_request_time(TSRMLS_D)
 {
-	return ((request_rec *)SG(server_context))->request_time;
+	return (double) ((request_rec *)SG(server_context))->request_time;
 }
 /* }}} */
 
@@ -464,7 +459,7 @@ static void sapi_apache_child_terminate(TSRMLS_D)
 static sapi_module_struct apache_sapi_module = {
 	"apache",						/* name */
 	"Apache",						/* pretty name */
-
+									
 	php_apache_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -545,7 +540,7 @@ static void init_request_info(TSRMLS_D)
 	SG(request_info).auth_password = NULL;
 	SG(request_info).auth_digest = NULL;
 
-	if (authorization && (!PG(safe_mode) || (PG(safe_mode) && !auth_type(r)))) {
+	if (authorization) {
 		char *p = getword(r->pool, &authorization, ' ');
 		if (!strcasecmp(p, "Basic")) {
 			tmp = uudecode(r->pool, authorization);
@@ -579,8 +574,8 @@ static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_
  */
 static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 {
+	
 	char *mimetype;
-
 	if (SG(default_mimetype) || SG(default_charset)) {
 		/* Assume output will be of the default MIME type.  Individual
 		   scripts may change this later. */
@@ -628,7 +623,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
-
+		
 		/* If PHP parser engine has been turned off with an "engine off"
 		 * directive, then decline to handle this request
 		 */
@@ -696,8 +691,9 @@ static int send_parsed_php(request_rec * r)
 {
 	int result = send_php(r, 0, NULL);
 	TSRMLS_FETCH();
-
-	ap_table_setn(r->notes, "mod_php_memory_usage", ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1 TSRMLS_CC)));
+ 
+	ap_table_setn(r->notes, "mod_php_memory_usage",
+		ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1 TSRMLS_CC)));
 
 	return result;
 }
@@ -859,7 +855,7 @@ static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *
 		bool_val[0] = '0';
 	}
 	bool_val[1] = 0;
-
+	
 	return php_apache_value_handler_ex(cmd, conf, arg1, bool_val, mode);
 }
 /* }}} */
@@ -925,7 +921,7 @@ static void apache_php_module_shutdown_wrapper(void)
 
 #if MODULE_MAGIC_NUMBER >= 19970728
 	/* This function is only called on server exit if the apache API
-	 * child_exit handler exists, so shutdown globally
+	 * child_exit handler exists, so shutdown globally 
 	 */
 	sapi_shutdown();
 #endif

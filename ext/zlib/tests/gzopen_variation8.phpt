@@ -16,7 +16,7 @@ if (!extension_loaded("zlib")) {
 
 echo "*** Testing gzopen() : variation ***\n";
 
-$data = b<<<EOT
+$data = <<<EOT
 Here is some plain
 text to be read
 and displayed.

@@ -5,9 +5,6 @@ registering $_SESSION should not segfault
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
-session.bug_compat_42=1
-session.bug_compat_warn=0
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -18,7 +15,7 @@ error_reporting(E_ALL);
 
 session_id("abtest");
 session_start();
-session_register("_SESSION");
+$_SESSION["_SESSION"] = Array();
 $_SESSION = "kk";
 
 session_write_close();
@@ -31,8 +28,5 @@ session_destroy();
 
 print "I live\n";
 ?>
---EXPECTF--
-Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
-
-Deprecated: Function session_register() is deprecated in %s on line %d
+--EXPECT--
 I live

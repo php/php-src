@@ -32,5 +32,6 @@ y=$y
 ";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Creating default object from empty value in %s on line %d
 success

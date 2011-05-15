@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,7 @@
 
 #include "php_mail.h"
 #include "php_ini.h"
-#include "safe_mode.h"
+#include "php_string.h"
 #include "exec.h"
 
 #ifdef PHP_WIN32
@@ -69,7 +69,7 @@
 		*p = ' ';								\
 	}											\
 
-extern long php_getuid(void);
+extern long php_getuid(TSRMLS_D);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -97,7 +97,7 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL, *headers=NULL;
+	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL, *extra_cmd=NULL;
 	int to_len, message_len, headers_len = 0;
 	int subject_len, extra_cmd_len = 0, i;
@@ -105,14 +105,7 @@ PHP_FUNCTION(mail)
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len,
-																	&headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE
-	) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
 		return;
 	}
 
@@ -122,6 +115,7 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
 		MAIL_ASCIIZ_CHECK(headers, headers_len);
+		headers_trimmed = php_trim(headers, headers_len, NULL, 0, NULL, 2 TSRMLS_CC);
 	}
 	if (extra_cmd) {
 		MAIL_ASCIIZ_CHECK(extra_cmd, extra_cmd_len);
@@ -173,10 +167,14 @@ PHP_FUNCTION(mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	if (php_mail(to_r, subject_r, message, headers, extra_cmd TSRMLS_CC)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
+	}
+
+	if (headers_trimmed) {
+		efree(headers_trimmed);
 	}
 
 	if (extra_cmd) {
@@ -215,7 +213,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}	\
 	return val;	\
 
-	if (mail_log) {
+	if (mail_log && *mail_log) {
 		char *tmp;
 		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
 		php_stream *stream = php_stream_open_wrapper(mail_log, "a", IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR, NULL);
@@ -241,9 +239,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f);
 		}
 		efree(f);
 	}
@@ -282,7 +280,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 
 #ifdef PHP_WIN32
-	sendmail = popen(sendmail_cmd, "wb");
+	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL TSRMLS_CC);
 #else
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
 	 * (e.g. the shell can't be executed) we explicitely set it to 0 to be

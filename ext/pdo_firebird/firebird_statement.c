@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -90,6 +90,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
+	unsigned long affected_rows = 0;
+	static char info_count[] = {isc_info_sql_records};
+	char result[64];
 
 	do {
 		/* named or open cursors should be closed first */
@@ -103,6 +106,35 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			break;
 		}
 		
+		/* Determine how many rows have changed. In this case we are
+		 * only interested in rows changed, not rows retrieved. That
+		 * should be handled by the client when fetching. */
+		stmt->row_count = affected_rows;
+		
+		switch (S->statement_type) {
+			case isc_info_sql_stmt_insert:
+			case isc_info_sql_stmt_update:
+			case isc_info_sql_stmt_delete:
+			case isc_info_sql_stmt_exec_procedure:
+				if (isc_dsql_sql_info(H->isc_status, &S->stmt, sizeof ( info_count),
+					info_count, sizeof(result), result)) {
+					break;
+				}
+				if (result[0] == isc_info_sql_records) {
+					unsigned i = 3, result_size = isc_vax_integer(&result[1], 2);
+					while (result[i] != isc_info_end && i < result_size) {
+						short len = (short) isc_vax_integer(&result[i + 1], 2);
+						if (result[i] != isc_info_req_select_count) {
+							affected_rows += isc_vax_integer(&result[i + 3], len);
+						}
+						i += len + 3;
+					}
+					stmt->row_count = affected_rows;
+				}
+			default:
+				;
+		}
+
 		/* commit? */
 		if (stmt->dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
 			break;
@@ -142,6 +174,7 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
  		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
  			S->exhausted = 1;
  		}
+		stmt->row_count++;
 		return 1;
 	}
 	return 0;

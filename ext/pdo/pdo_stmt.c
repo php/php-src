@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1624,18 +1624,20 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 static PHP_METHOD(PDOStatement, bindValue)
 {
 	struct pdo_bound_param_data param = {0};
+	long param_type = PDO_PARAM_STR;
 	PHP_STMT_GET_OBJ;
 
 	param.paramno = -1;
-	param.param_type = PDO_PARAM_STR;
 	
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-			"lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
+			"lz/|l", &param.paramno, &param.parameter, &param_type)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
-				&param.namelen, &param.parameter, &param.param_type)) {
+				&param.namelen, &param.parameter, &param_type)) {
 			RETURN_FALSE;
 		}
 	}
+
+	param.param_type = (int) param_type;
 	
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
@@ -1887,7 +1889,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_INTO:
 			if (stmt->fetch.into) {
-				Z_DELREF_P(stmt->fetch.into);
+				zval_ptr_dtor(&stmt->fetch.into);
 				stmt->fetch.into = NULL;
 			}
 			break;
@@ -2080,6 +2082,8 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		/* Set the executed flag to 0 to reallocate columns on next execute */
+		stmt->executed = 0;
 		return 0;
 	}
 
@@ -2179,7 +2183,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, str);
 			}
 
-			php_stream_printf(out TSRMLS_CC, "paramno=%d\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
 				param->paramno, param->namelen, param->namelen, param->name ? param->name : "",
 				param->is_param,
 				param->param_type);
@@ -2234,7 +2238,7 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void dbstmt_prop_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -2243,11 +2247,11 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
-		std_object_handlers.write_property(object, member, value TSRMLS_CC);
+		std_object_handlers.write_property(object, member, value, key TSRMLS_CC);
 	}
 }
 
-static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
+static void dbstmt_prop_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -2256,7 +2260,7 @@ static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
-		std_object_handlers.unset_property(object, member TSRMLS_CC);
+		std_object_handlers.unset_property(object, member, key TSRMLS_CC);
 	}
 }
 
@@ -2266,7 +2270,7 @@ static union _zend_function *dbstmt_method_get(
 #else
 	zval *object,
 #endif
-   	char *method_name, int method_len TSRMLS_DC)
+   	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
@@ -2280,6 +2284,10 @@ static union _zend_function *dbstmt_method_get(
 	if (zend_hash_find(&Z_OBJCE_P(object)->function_table, lc_method_name, 
 			method_len+1, (void**)&fbc) == FAILURE) {
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
+		/* instance not created by PDO object */
+		if (!stmt->dbh) {
+			goto out;
+		}
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
@@ -2311,17 +2319,14 @@ static int dbstmt_compare(zval *object1, zval *object2 TSRMLS_DC)
 static zend_object_value dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value retval;
-	zval *tmp;
 	pdo_stmt_t *stmt;
 	pdo_stmt_t *old_stmt;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
 	stmt = ecalloc(1, sizeof(*stmt));
-	stmt->ce = Z_OBJCE_P(zobject);
+	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject) TSRMLS_CC);
+	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
 	stmt->refcount = 1;
-	ALLOC_HASHTABLE(stmt->properties);
-	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(stmt->properties, &stmt->ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	old_stmt = (pdo_stmt_t *)zend_object_store_get_object(zobject TSRMLS_CC);
 	
@@ -2364,12 +2369,6 @@ void pdo_stmt_init(TSRMLS_D)
 
 static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	if (stmt->properties) {
-		zend_hash_destroy(stmt->properties);
-		efree(stmt->properties);
-		stmt->properties = NULL;
-	}
-
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
 		FREE_HASHTABLE(stmt->bound_params);
@@ -2418,6 +2417,7 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	if (stmt->dbh) {
 		php_pdo_dbh_delref(stmt->dbh TSRMLS_CC);
 	}
+	zend_object_std_dtor(&stmt->std TSRMLS_CC);
 	efree(stmt);
 }
 
@@ -2441,16 +2441,13 @@ void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
-	zval *tmp;
 
 	pdo_stmt_t *stmt;
 	stmt = emalloc(sizeof(*stmt));
 	memset(stmt, 0, sizeof(*stmt));
-	stmt->ce = ce;
+	zend_object_std_init(&stmt->std, ce TSRMLS_CC);
+	object_properties_init(&stmt->std, ce);
 	stmt->refcount = 1;
-	ALLOC_HASHTABLE(stmt->properties);
-	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(stmt->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbstmt_free_storage, (zend_objects_store_clone_t)dbstmt_clone_obj TSRMLS_CC);
 	retval.handlers = &pdo_dbstmt_object_handlers;
@@ -2585,7 +2582,7 @@ const zend_function_entry pdo_row_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval *row_prop_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval *return_value;
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
@@ -2613,7 +2610,7 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 			}
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 				zval_ptr_dtor(&return_value);
-				return std_object_handlers.read_property(object, member, IS_STRING TSRMLS_CC);
+				return std_object_handlers.read_property(object, member, type, key TSRMLS_CC);
 			}
 		}
 	}
@@ -2624,12 +2621,22 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 	return return_value;
 }
 
-static void row_prop_or_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static zval *row_dim_read(zval *object, zval *member, int type TSRMLS_DC)
+{
+	return row_prop_read(object, member, type, NULL TSRMLS_CC);
+}
+
+static void row_prop_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
 }
 
-static int row_prop_or_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static void row_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
+}
+
+static int row_prop_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	int colno = -1;
@@ -2653,7 +2660,17 @@ static int row_prop_or_dim_exists(zval *object, zval *member, int check_empty TS
 	return 0;
 }
 
-static void row_prop_or_dim_delete(zval *object, zval *offset TSRMLS_DC)
+static int row_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	return row_prop_exists(object, member, check_empty, NULL TSRMLS_CC);
+}
+
+static void row_prop_delete(zval *object, zval *offset, const zend_literal *key TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDORow");
+}
+
+static void row_dim_delete(zval *object, zval *offset TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDORow");
 }
@@ -2667,15 +2684,18 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 		return NULL;
 	}
 	
+	if (!stmt->std.properties) {
+		rebuild_object_properties(&stmt->std);
+	}
 	for (i = 0; i < stmt->column_count; i++) {
 		zval *val;
 		MAKE_STD_ZVAL(val);
 		fetch_value(stmt, val, i, NULL TSRMLS_CC);
 
-		zend_hash_update(stmt->properties, stmt->columns[i].name, stmt->columns[i].namelen + 1, (void *)&val, sizeof(zval *), NULL);
+		zend_hash_update(stmt->std.properties, stmt->columns[i].name, stmt->columns[i].namelen + 1, (void *)&val, sizeof(zval *), NULL);
 	}
 
-	return stmt->properties;
+	return stmt->std.properties;
 }
 
 static union _zend_function *row_method_get(
@@ -2684,7 +2704,7 @@ static union _zend_function *row_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, int method_len TSRMLS_DC)
+	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
@@ -2740,18 +2760,20 @@ static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
 }
 
 zend_object_handlers pdo_row_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-	row_prop_or_dim_read,
-	row_prop_or_dim_write,
-	row_prop_or_dim_read,
-	row_prop_or_dim_write,
+	zend_objects_store_add_ref,
+	zend_objects_store_del_ref,
+	NULL,
+	row_prop_read,
+	row_prop_write,
+	row_dim_read,
+	row_dim_write,
 	NULL,
 	NULL,
 	NULL,
-	row_prop_or_dim_exists,
-	row_prop_or_dim_delete,
-	row_prop_or_dim_exists,
-	row_prop_or_dim_delete,
+	row_prop_exists,
+	row_prop_delete,
+	row_dim_exists,
+	row_dim_delete,
 	row_get_properties,
 	row_method_get,
 	row_call_method,

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,8 @@ PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
 PHP_FUNCTION(pcntl_signal_dispatch);
+PHP_FUNCTION(pcntl_get_last_error);
+PHP_FUNCTION(pcntl_strerror);
 #ifdef HAVE_SIGPROCMASK
 PHP_FUNCTION(pcntl_sigprocmask);
 #endif
@@ -66,6 +68,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
 	int processing_signal_queue;
 	struct php_pcntl_pending_signal *head, *tail, *spares;
+	int last_error;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS
@@ -73,6 +76,8 @@ ZEND_END_MODULE_GLOBALS(pcntl)
 #else
 #define PCNTL_G(v)	(pcntl_globals.v)
 #endif
+
+#define REGISTER_PCNTL_ERRNO_CONSTANT(name) REGISTER_LONG_CONSTANT("PCNTL_" #name, name, CONST_CS | CONST_PERSISTENT)
 
 #endif	/* PHP_PCNTL_H */
 

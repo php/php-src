@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -188,7 +188,7 @@ enum pdo_case_conversion {
 enum pdo_null_handling {
 	PDO_NULL_NATURAL = 0,
 	PDO_NULL_EMPTY_STRING = 1,
-	PDO_NULL_TO_STRING = 2,
+	PDO_NULL_TO_STRING = 2
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -310,6 +310,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
+	pdo_dbh_txn_func		in_transaction;
 };
 
 /* }}} */
@@ -348,7 +349,7 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
 	PDO_PARAM_EVT_FETCH_POST,
-	PDO_PARAM_EVT_NORMALIZE,
+	PDO_PARAM_EVT_NORMALIZE
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
@@ -430,10 +431,7 @@ struct _pdo_dbh_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
@@ -548,10 +546,7 @@ struct _pdo_stmt_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specifics */
 	struct pdo_stmt_methods *methods;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -224,7 +224,7 @@ PHP_FUNCTION(com_create_instance)
 	if (FAILED(res)) {
 		char *werr, *msg;
 
-		werr = php_win_err(res);
+		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Failed to create COM object `%s': %s", module_name, werr);
 		LocalFree(werr);
 
@@ -383,7 +383,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
-				desc = php_win_err(hr);
+				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
 				LocalFree(desc);
 				break;
@@ -399,7 +399,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 				/* else fall through */
 				
 			default:
-				desc = php_win_err(hr);
+				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
 				LocalFree(desc);
 				break;
@@ -481,7 +481,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	if (FAILED(hr)) {
 		char *winerr = NULL;
 		char *msg = NULL;
-		winerr = php_win_err(hr);
+		winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
 		LocalFree(winerr);
 		php_com_throw_exception(hr, msg TSRMLS_CC);
@@ -640,7 +640,7 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
 	hr = php_com_get_id_of_name(obj, name, namelen, &dispid TSRMLS_CC);
 
 	if (FAILED(hr)) {
-		winerr = php_win_err(hr);
+		winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
 		LocalFree(winerr);
 		php_com_throw_exception(hr, msg TSRMLS_CC);

@@ -26,7 +26,7 @@ $db = MySQLPDOTest::factory();
 		var_dump($known[$default]);
 
 	// lets see what the default is...
-	if (!is_object($stmt = $db->query('SELECT id, id AS "ID_UPPER", label FROM test ORDER BY id ASC LIMIT 2')))
+	if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label FROM test ORDER BY id ASC LIMIT 2")))
 		printf("[002] %s - %s\n",
 			var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -48,7 +48,7 @@ $db = MySQLPDOTest::factory();
 		printf("[006] Cannot add column %s - %s\n",
 			var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
-	if (!is_object($stmt = $db->query('SELECT id, id AS "ID_UPPER", label, MiXeD, MYUPPER FROM test ORDER BY id ASC LIMIT 2')))
+	if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label, MiXeD, MYUPPER FROM test ORDER BY id ASC LIMIT 2")))
 		printf("[007] %s - %s\n",
 			var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -62,7 +62,7 @@ $db = MySQLPDOTest::factory();
 		printf("[009] getAttribute(PDO::ATTR_CASE) returns wrong value '%s'\n",
 			var_export($tmp, true));
 
-	if (!is_object($stmt = $db->query('SELECT id, label, MiXeD, MYUPPER, MYUPPER AS "lower" FROM test ORDER BY id ASC LIMIT 1')))
+	if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, MYUPPER AS 'lower' FROM test ORDER BY id ASC LIMIT 1")))
 		printf("[010] %s - %s\n",
 			var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -76,12 +76,12 @@ $db = MySQLPDOTest::factory();
 		printf("[012] getAttribute(PDO::ATTR_CASE) returns wrong value '%s'\n",
 			var_export($tmp, true));
 
-	if (!is_object($stmt = $db->query('SELECT id, label, MiXeD, MYUPPER, id AS "ID" FROM test ORDER BY id ASC LIMIT 1')))
+	if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, id AS 'ID' FROM test ORDER BY id ASC LIMIT 1")))
 		printf("[013] %s - %s\n",
 			var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
 	var_dump($stmt->fetchAll(PDO::FETCH_BOTH));
-	
+
 	print "done!";
 ?>
 --CLEAN--

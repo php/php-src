@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -120,7 +120,7 @@
 { \
 	register php_hash_uint64 a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7; \
 	php_hash_uint64 aa, bb, cc; \
-	int pass_no; \
+	unsigned int pass_no; \
 	\
 	a = state[0]; \
 	b = state[1]; \

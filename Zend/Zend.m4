@@ -176,13 +176,6 @@ AC_ARG_ENABLE(inline-optimization,
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
-AC_ARG_ENABLE(zend-multibyte,
-[  --enable-zend-multibyte Compile with zend multibyte support], [
-  ZEND_MULTIBYTE=$enableval
-],[
-  ZEND_MULTIBYTE=no
-])
-
 AC_MSG_CHECKING([virtual machine dispatch method])
 AC_MSG_RESULT($PHP_ZEND_VM)
 
@@ -194,9 +187,6 @@ AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
-
-AC_MSG_CHECKING(whether to enable Zend multibyte)
-AC_MSG_RESULT($ZEND_MULTIBYTE)
 
 case $PHP_ZEND_VM in
   SWITCH)
@@ -231,10 +221,6 @@ if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
 fi  
-
-if test "$ZEND_MULTIBYTE" = "yes"; then
-  AC_DEFINE(ZEND_MULTIBYTE, 1, [ ])
-fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
@@ -419,4 +405,11 @@ if test -r "/dev/urandom" && test -c "/dev/urandom"; then
   AC_MSG_RESULT(yes) 
 else 
   AC_MSG_RESULT(no) 
+  AC_MSG_CHECKING(whether /dev/arandom exists) 
+  if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
+    AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
+    AC_MSG_RESULT(yes) 
+  else 
+    AC_MSG_RESULT(no) 
+  fi 
 fi 

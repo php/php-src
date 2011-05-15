@@ -28,6 +28,10 @@ array(),
 'news:news.php.net',
 'file://foo/bar',
 "http://\r\n/bar",
+"http://example.com:qq",
+"http://example.com:-2",
+"http://example.com:65536",
+"http://example.com:65537",
 );
 foreach ($values as $value) {
 	var_dump(filter_var($value, FILTER_VALIDATE_URL));
@@ -68,6 +72,10 @@ bool(false)
 string(18) "mailto:foo@bar.com"
 string(17) "news:news.php.net"
 string(14) "file://foo/bar"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(false)
 string(10) "http://qwe"

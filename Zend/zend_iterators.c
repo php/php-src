@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -51,7 +51,9 @@ static zend_object_handlers iterator_object_handlers = {
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
-	free(zend_iterator_class_entry.name);
+	if (!IS_INTERNED(zend_iterator_class_entry.name)) {
+		free(zend_iterator_class_entry.name);
+	}
 	zend_iterator_class_entry.name = "__iterator_wrapper";
 }
 
@@ -82,13 +84,13 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 				*iter = (zend_object_iterator *)zend_object_store_get_object(array_ptr TSRMLS_CC);
 				return ZEND_ITER_OBJECT;
 			}
-			if (HASH_OF(array_ptr)) {
+			if (Z_OBJPROP_P(array_ptr)) {
 				return ZEND_ITER_PLAIN_OBJECT;
 			}
 			return ZEND_ITER_INVALID;
 
 		case IS_ARRAY:
-			if (HASH_OF(array_ptr)) {
+			if (Z_ARRVAL_P(array_ptr)) {
 				return ZEND_ITER_PLAIN_ARRAY;
 			}
 			return ZEND_ITER_INVALID;

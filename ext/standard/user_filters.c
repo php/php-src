@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -259,7 +259,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * from being destroyed properly */
 	INIT_ZVAL(zpropname);
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1, 0);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname TSRMLS_CC);
+	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, 0 TSRMLS_CC);
 
 	zval_ptr_dtor(&zclosing);
 	zval_ptr_dtor(&zconsumed);

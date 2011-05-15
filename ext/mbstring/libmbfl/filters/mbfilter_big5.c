@@ -65,7 +65,7 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	"BIG5",
 	(const char *(*)[])&mbfl_encoding_big5_aliases,
 	mblen_table_big5,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_big5 = {

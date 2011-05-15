@@ -33,7 +33,7 @@ new mysqli()
 			$tmp = $res->fetch_assoc();
 			$res->free_result();
 
-			if (!isset($tmp['testing']) || $tmp['testing'] != $socket) {
+			if (!isset($tmp['testing']) || $tmp['testing'] != 'mysqli.default_socket') {
 				printf("[002] mysqli.default_socket not properly set?\n");
 				var_dump($tmp);
 			}

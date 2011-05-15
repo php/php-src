@@ -183,15 +183,16 @@ array(1) {
   %unicode|string%(1) "1"
 }
 
-Warning: mysqli_reap_async_query(): GREET %s
+Warning: mysqli_reap_async_query(): Premature end of data (mysqlnd_wireprotocol.c:%d) in %s on line %d
 
-Warning: mysqli_reap_async_query(): MySQL server has gone away in %s on line %d
-[014] 2014/%s
-
-Warning: Error while sending QUERY packet. PID=%d in %s on line %d
-
-Warning: mysqli_reap_async_query(): MySQL server has gone away in %s on line %d
+Warning: mysqli_reap_async_query(): RSET_HEADER %s
 
 Warning: mysqli_reap_async_query(): Error reading result set's header in %s on line %d
-[018] Error: 2006/%s
+
+Warning: Error while sending QUERY packet. %s
+
+Warning: mysqli_reap_async_query(): %s
+
+Warning: mysqli_reap_async_query(): Error reading result set's header in %s on line %d
+[018] Error: %d/%s
 done!

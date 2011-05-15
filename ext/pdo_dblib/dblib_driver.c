@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -166,19 +166,97 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	RETCODE ret;
+	
+	if (FAIL == dbcmd(H->link, cmd)) {
+		return 0;
+	}
+	
+	if (FAIL == dbsqlexec(H->link)) {
+		return 0;
+	}
+	
+	return 1;
+}
+
+static int dblib_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("BEGIN TRANSACTION", dbh TSRMLS_CC);
+}
+
+static int dblib_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("COMMIT TRANSACTION", dbh TSRMLS_CC);
+}
+
+static int dblib_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh TSRMLS_CC);
+}
+
+char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC) 
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	RETCODE ret;
+	char *id = NULL;
+
+	/* 
+	 * Would use scope_identity() but it's not implemented on Sybase
+	 */
+	
+	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
+		return NULL;
+	}
+	
+	if (FAIL == dbsqlexec(H->link)) {
+		return NULL;
+	}
+	
+	ret = dbresults(H->link);
+	if (ret == FAIL || ret == NO_MORE_RESULTS) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	ret = dbnextrow(H->link);
+	
+	if (ret == FAIL || ret == NO_MORE_ROWS) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	if (dbdatlen(H->link, 1) == 0) {
+		dbcancel(H->link);
+		return NULL;
+	}
+
+	id = emalloc(32);
+	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, id, (DBINT)-1);
+		
+	dbcancel(H->link);
+	return id;
+}
+
 static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
 	dblib_handle_doer,
 	dblib_handle_quoter,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* last insert */
+	dblib_handle_begin, /* begin */
+	dblib_handle_commit, /* commit */
+	dblib_handle_rollback, /* rollback */
+	NULL, /*set attr */
+	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
 	NULL, /* get attr */
 	NULL, /* check liveness */
+	NULL, /* get driver methods */
+	NULL, /* request shutdown */
+	NULL  /* in transaction */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
@@ -232,9 +310,12 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
-	
+
 	/* limit text/image from network */
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
+
+	/* allow double quoted indentifiers */
+	DBSETOPT(H->link, DBQUOTEDIDENT, 1);
 
 	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
 		goto cleanup;
@@ -269,6 +350,7 @@ pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)
+#define PDO_DBLIB_IS_SYBASE
 	PDO_DRIVER_HEADER(sybase),
 #else
 	PDO_DRIVER_HEADER(dblib),

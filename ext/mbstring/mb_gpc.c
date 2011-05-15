@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
+#include "libmbfl/mbfl/mbfilter_pass.h"
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
@@ -56,11 +57,11 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	const char *c_var;
 	zval *array_ptr;
 	int free_buffer=0;
-	enum mbfl_no_encoding detected;
+	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
 
 	if (arg != PARSE_STRING) {
-		char *value = zend_ini_string("mbstring.internal_encoding", sizeof("mbstring.internal_encoding"), 0);
+		char *value = MBSTRG(internal_encoding_name);
 		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0 TSRMLS_CC);
 	}
 
@@ -136,22 +137,21 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	
 	switch(arg) {
 	case PARSE_POST:
-		MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
+		MBSTRG(http_input_identify_post) = NULL;
 		break;
 	case PARSE_GET:
-		MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
+		MBSTRG(http_input_identify_get) = NULL;
 		break;
 	case PARSE_COOKIE:
-		MBSTRG(http_input_identify_cookie) = mbfl_no_encoding_invalid;
+		MBSTRG(http_input_identify_cookie) = NULL;
 		break;
 	case PARSE_STRING:
-		MBSTRG(http_input_identify_string) = mbfl_no_encoding_invalid;
+		MBSTRG(http_input_identify_string) = NULL;
 		break;
 	}
 
 	info.data_type              = arg;
 	info.separator              = separator; 
-	info.force_register_globals = 0;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
@@ -164,7 +164,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	detected = _php_mb_encoding_handler_ex(&info, array_ptr, res TSRMLS_CC);
 	MBSTRG(http_input_identify) = detected;
 
-	if (detected != mbfl_no_encoding_invalid) {
+	if (detected) {
 		switch(arg){
 		case PARSE_POST:
 			MBSTRG(http_input_identify_post) = detected;
@@ -192,7 +192,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 /* }}} */
 
 /* {{{ mbfl_no_encoding _php_mb_encoding_handler_ex() */
-enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res TSRMLS_DC)
+const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res TSRMLS_DC)
 {
 	char *var, *val;
 	const char *s1, *s2;
@@ -201,21 +201,13 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	int n, num, *len_list = NULL;
 	unsigned int val_len, new_val_len;
 	mbfl_string string, resvar, resval;
-	enum mbfl_no_encoding from_encoding = mbfl_no_encoding_invalid;
+	const mbfl_encoding *from_encoding = NULL;
 	mbfl_encoding_detector *identd = NULL; 
 	mbfl_buffer_converter *convd = NULL;
-	int prev_rg_state = 0;
 
-	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
-	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
-	mbfl_string_init_set(&resval, info->to_language, info->to_encoding);
-
-	/* register_globals stuff
-	 * XXX: this feature is going to be deprecated? */
-
-	if (info->force_register_globals && !(prev_rg_state = PG(register_globals))) {
-		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "1", sizeof("1")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
-	}
+	mbfl_string_init_set(&string, info->to_language, info->to_encoding->no_encoding);
+	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding->no_encoding);
+	mbfl_string_init_set(&resval, info->to_language, info->to_encoding->no_encoding);
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -266,12 +258,12 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	
 	/* initialize converter */
 	if (info->num_from_encodings <= 0) {
-		from_encoding = mbfl_no_encoding_pass;
+		from_encoding = &mbfl_encoding_pass;
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
 	} else {
 		/* auto detect */
-		from_encoding = mbfl_no_encoding_invalid;
+		from_encoding = NULL;
 		identd = mbfl_encoding_detector_new((enum mbfl_no_encoding *)info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
 		if (identd) {
 			n = 0;
@@ -283,20 +275,20 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 				}
 				n++;
 			}
-			from_encoding = mbfl_encoding_detector_judge(identd);
+			from_encoding = mbfl_encoding_detector_judge2(identd);
 			mbfl_encoding_detector_delete(identd);
 		}
-		if (from_encoding == mbfl_no_encoding_invalid) {
+		if (!from_encoding) {
 			if (info->report_errors) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
 			}
-			from_encoding = mbfl_no_encoding_pass;
+			from_encoding = &mbfl_encoding_pass;
 		}
 	}
 
 	convd = NULL;
-	if (from_encoding != mbfl_no_encoding_pass) {
-		convd = mbfl_buffer_converter_new(from_encoding, info->to_encoding, 0);
+	if (from_encoding != &mbfl_encoding_pass) {
+		convd = mbfl_buffer_converter_new2(from_encoding, info->to_encoding, 0);
 		if (convd != NULL) {
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
@@ -309,7 +301,7 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	}
 
 	/* convert encoding */
-	string.no_encoding = from_encoding;
+	string.no_encoding = from_encoding->no_encoding;
 
 	n = 0;
 	while (n < num) {
@@ -321,10 +313,10 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 			var = val_list[n];
 		}
 		n++;
-		string.val = val_list[n];
+		string.val = (unsigned char *)val_list[n];
 		string.len = len_list[n];
 		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resval) != NULL) {
-			val = resval.val;
+			val = (char *)resval.val;
 			val_len = resval.len;
 		} else {
 			val = val_list[n];
@@ -346,11 +338,6 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	}
 
 out:
-	/* register_global stuff */
-	if (info->force_register_globals && !prev_rg_state) {
-		zend_alter_ini_entry("register_globals", sizeof("register_globals"), "0", sizeof("0")-1, PHP_INI_PERDIR, PHP_INI_STAGE_RUNTIME);
-	}
-
 	if (convd != NULL) {
 		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
 		mbfl_buffer_converter_delete(convd);
@@ -369,14 +356,13 @@ out:
 /* {{{ SAPI_POST_HANDLER_FUNC(php_mb_post_handler) */
 SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
-	enum mbfl_no_encoding detected;
+	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
 
-	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
+	MBSTRG(http_input_identify_post) = NULL;
 
 	info.data_type              = PARSE_POST;
 	info.separator              = "&";
-	info.force_register_globals = 0;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
@@ -387,7 +373,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	detected = _php_mb_encoding_handler_ex(&info, arg, SG(request_info).post_data TSRMLS_CC);
 
 	MBSTRG(http_input_identify) = detected;
-	if (detected != mbfl_no_encoding_invalid) {
+	if (detected) {
 		MBSTRG(http_input_identify_post) = detected;
 	}
 }

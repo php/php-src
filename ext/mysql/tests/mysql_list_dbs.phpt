@@ -20,7 +20,7 @@ if (NULL !== ($tmp = @mysql_list_dbs($link, $link)))
 
 require('table.inc');
 
-if (!$res = mysql_list_dbs($link))
+if (!$res = @mysql_list_dbs($link))
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (!$num = mysql_num_rows($res))
@@ -34,7 +34,7 @@ if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row[0])) {
 
 mysql_free_result($res);
 
-if (!$res2 = mysql_list_dbs())
+if (!$res2 = @mysql_list_dbs())
 	printf("[006] [%d] %s\n", mysql_errno(), mysql_error());
 
 $row2 = mysql_fetch_array($res2, MYSQL_NUM);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +78,9 @@ extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
 #  define HAVE__CONTROLFP
 # endif /* MSC_VER >= 1500 */
   /* Tell MSVC optimizer that we access FP environment */
-# pragma fenv_access (on)
+# if _MSC_VER >= 1500
+#  pragma fenv_access (on)
+# endif
 #endif /* _MSC_VER */
 
 #ifdef HAVE__CONTROLFP_S

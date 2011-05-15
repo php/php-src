@@ -53,6 +53,11 @@ extern char * __php_stpncpy(char *dst, const char *src, size_t len);
 # define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+/* See #51582 */
+#ifndef UINT64_C
+# define UINT64_C(value) __CONCAT(value, ULL)
+#endif
+
 /* Structure to save state of computation between the single steps.  */
 struct sha512_ctx
 {
@@ -501,7 +506,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	sha512_init_ctx(&alt_ctx);
 
 	/* For every character in the password add the entire password.  */
-	for (cnt = 0; cnt < 16 + alt_result[0]; ++cnt) {
+	for (cnt = 0; cnt < (size_t) (16 + alt_result[0]); ++cnt) {
 		sha512_process_bytes(salt, salt_len, &alt_ctx);
 	}
 

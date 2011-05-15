@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -225,9 +225,11 @@ struct _php_stream  {
 	int eof;
 
 #if ZEND_DEBUG
-	char *open_filename;
+	const char *open_filename;
 	uint open_lineno;
 #endif
+
+	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 }; /* php_stream */
 
 /* state definitions when closing down; these are private to streams.c */
@@ -259,6 +261,10 @@ END_EXTERN_C()
 #define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
+PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
+#define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options) TSRMLS_CC)
+PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options TSRMLS_DC);
+
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
 #define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
 #define PHP_STREAM_PERSISTENT_FAILURE	1 /* id exists but is not a stream! */
@@ -269,6 +275,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
+#define PHP_STREAM_FREE_IGNORE_ENCLOSING	32 /* don't close the enclosing stream instead */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 #define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
@@ -292,7 +299,12 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
 
-PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...);
+#ifdef ZTS
+PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+#else
+PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+#endif
+
 /* php_stream_printf macro & function require TSRMLS_CC */
 #define php_stream_printf _php_stream_printf
 
@@ -416,8 +428,8 @@ END_EXTERN_C()
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
 
-/* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
- * Uses mmap if the src is a plain file and at offset 0 */
+/* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL,
+ * copy until eof(src). */
 #define PHP_STREAM_COPY_ALL		((size_t)-1)
 
 BEGIN_EXTERN_C()
@@ -428,8 +440,8 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 #define php_stream_copy_to_stream_ex(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
 
 
-/* read all data from stream and put into a buffer. Caller must free buffer when done.
- * The copy will use mmap if available. */
+/* read all data from stream and put into a buffer. Caller must free buffer
+ * when done. */
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 		int persistent STREAMS_DC TSRMLS_DC);
 #define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
@@ -479,8 +491,8 @@ END_EXTERN_C()
 #define IGNORE_PATH                     0x00000000
 #define USE_PATH                        0x00000001
 #define IGNORE_URL                      0x00000002
-#define ENFORCE_SAFE_MODE               0x00000004
 #define REPORT_ERRORS                   0x00000008
+#define ENFORCE_SAFE_MODE               0 /* for BC only */
 
 /* If you don't need to write to the stream, but really need to
  * be able to seek, use this flag in your options. */
@@ -548,8 +560,11 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 			php_stream_open_wrapper_ex(Z_STRVAL_PP((zstream)), (mode), (options), (opened), (context)) : NULL
 
 /* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
-
+#ifdef ZTS
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+#else
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+#endif
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */

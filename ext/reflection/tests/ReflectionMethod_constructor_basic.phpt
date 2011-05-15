@@ -86,8 +86,6 @@ var_dump($methodInfo->isConstructor());
 ?>
 --EXPECTF--
 Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line %d
-
-Strict Standards: %s for class NewAndOldCtor in %s on line %d
 New-style constructor:
 bool(true)
 

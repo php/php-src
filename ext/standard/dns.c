@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -403,7 +403,7 @@ PHP_FUNCTION(dns_check_record)
 #if HAVE_FULL_DNS_FUNCS
 
 /* {{{ php_parserr */
-static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
+static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, int raw, zval **subarray)
 {
 	u_short type, class, dlen;
 	u_long ttl;
@@ -439,6 +439,16 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	array_init(*subarray);
 
 	add_assoc_string(*subarray, "host", name, 1);
+	add_assoc_string(*subarray, "class", "IN", 1);
+	add_assoc_long(*subarray, "ttl", ttl);
+
+	if (raw) {
+		add_assoc_long(*subarray, "type", type);
+		add_assoc_stringl(*subarray, "data", (char*) cp, (uint) dlen, 1);
+		cp += dlen;
+		return cp;
+	}
+
 	switch (type) {
 		case DNS_T_A:
 			add_assoc_string(*subarray, "type", "A", 1);
@@ -679,11 +689,11 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_string(*subarray, "replacement", name, 1);
 			break;
 		default:
+			zval_ptr_dtor(subarray);
+			*subarray = NULL;
 			cp += dlen;
+			break;
 	}
-
-	add_assoc_string(*subarray, "class", "IN", 1);
-	add_assoc_long(*subarray, "ttl", ttl);
 
 	return cp;
 }
@@ -697,7 +707,6 @@ PHP_FUNCTION(dns_get_record)
 	int hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
-	int addtl_recs = 0;
 	int type_to_fetch;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -712,8 +721,10 @@ PHP_FUNCTION(dns_get_record)
 	u_char *cp = NULL, *end = NULL;
 	int n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
+	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!b",
+			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}
 
@@ -724,12 +735,19 @@ PHP_FUNCTION(dns_get_record)
 	if (addtl) {
 		zval_dtor(addtl);
 		array_init(addtl);
-		addtl_recs = 1;
 	}
 
-	if (type_param & ~PHP_DNS_ALL && type_param != PHP_DNS_ANY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
-		RETURN_FALSE;
+	if (!raw) {
+		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
+			RETURN_FALSE;
+		}
+	} else {
+		if ((type_param < 1) || (type_param > 0xFFFF)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
+			RETURN_FALSE;
+		}
 	}
 
 	/* Initialize the return array */
@@ -740,13 +758,29 @@ PHP_FUNCTION(dns_get_record)
 	 *   store_results is used to skip storing the results retrieved in step
 	 *   NUMTYPES+1 when results were already fetched.
 	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
+	 * - In case of raw mode, we query only the requestd type instead of looping type by type
+	 *   before going with the additional info stuff.
 	 */
-	for (type = (type_param == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
-		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
+
+	if (raw) {
+		type = -1;
+	} else if (type_param == PHP_DNS_ANY) {
+		type = PHP_DNS_NUM_TYPES + 1;
+	} else {
+		type = 0;
+	}
+
+	for ( ;
+		type < (addtl ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
 		type++
 	) {
 		first_query = 0;
 		switch (type) {
+			case -1: /* raw */
+				type_to_fetch = type_param;
+				/* skip over the rest and go directly to additional records */
+				type = PHP_DNS_NUM_TYPES - 1;
+				break;
 			case 0:
 				type_to_fetch = type_param&PHP_DNS_A     ? DNS_T_A     : 0;
 				break;
@@ -838,7 +872,7 @@ PHP_FUNCTION(dns_get_record)
 			while (an-- && cp && cp < end) {
 				zval *retval;
 
-				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &retval);
+				cp = php_parserr(cp, &answer, type_to_fetch, store_results, raw, &retval);
 				if (retval != NULL && store_results) {
 					add_next_index_zval(return_value, retval);
 				}
@@ -851,19 +885,19 @@ PHP_FUNCTION(dns_get_record)
 				while (ns-- > 0 && cp && cp < end) {
 					zval *retval = NULL;
 
-					cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval);
+					cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, raw, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(authns, retval);
 					}
 				}
 			}
 
-			if (addtl_recs && addtl) {
+			if (addtl) {
 				/* Additional records associated with authoritative name servers */
 				while (ar-- > 0 && cp && cp < end) {
 					zval *retval = NULL;
 
-					cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval);
+					cp = php_parserr(cp, &answer, DNS_T_ANY, 1, raw, &retval);
 					if (retval != NULL) {
 						add_next_index_zval(addtl, retval);
 					}

@@ -55,15 +55,9 @@ if (!$IS_MYSQLND)
 
 	function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
-		if ($use_oo_syntax) {
-			if ($exp_ready !== ($tmp = $link->poll($links, $errors, $reject, 0, 1000)))
-				printf("[%03d + 1] There should be %d links ready to read from, %d ready\n",
-					$exp_ready, $tmp);
-		} else {
-			if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 1000)))
-				printf("[%03d + 1] There should be %d links ready to read from, %d ready\n",
-					$exp_ready, $tmp);
-		}
+		if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 1000)))
+			printf("[%03d + 1] There should be %d links ready to read from, %d ready\n",
+				$exp_ready, $tmp);
 
 		foreach ($links as $mysqli) {
 			if ($use_oo_syntax) {

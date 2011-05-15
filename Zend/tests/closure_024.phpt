@@ -1,16 +1,26 @@
 --TEST--
-Closure 024: Trying to clone the Closure object
+Closure 024: Clone the Closure object
 --FILE--
 <?php
 
-$a = function () { 
-	return clone function () {
-		return 1;
-	};
-};
+$a = 1;
+$c = function($add) use(&$a) { return $a+$add; };
 
-$a();
+$cc = clone $c;
 
+echo $c(10)."\n";
+echo $cc(10)."\n";
+
+$a++;
+
+echo $c(10)."\n";
+echo $cc(10)."\n";
+
+echo "Done.\n";
 ?>
 --EXPECTF--
-Fatal error: Trying to clone an uncloneable object of class Closure in %s on line %d
+11
+11
+12
+12
+Done.

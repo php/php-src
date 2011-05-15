@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,24 +45,23 @@ typedef struct {
 } php_istream;
 
 static int le_istream;
-static void istream_destructor(php_istream *stm);
+static void istream_destructor(php_istream *stm TSRMLS_DC);
 
 static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
+	istream_destructor(stm TSRMLS_CC);
 }
 
-#ifdef ZTS
-# define TSRMLS_FIXED()	TSRMLS_FETCH();
-#else
-# define TSRMLS_FIXED()
-#endif
-
 #define FETCH_STM()	\
-	TSRMLS_FIXED() \
 	php_istream *stm = (php_istream*)This; \
+	TSRMLS_FETCH(); \
 	if (GetCurrentThreadId() != stm->engine_thread) \
+		return RPC_E_WRONG_THREAD;
+		
+#define FETCH_STM_EX()	\
+	php_istream *stm = (php_istream*)This;	\
+	if (GetCurrentThreadId() != stm->engine_thread)	\
 		return RPC_E_WRONG_THREAD;
 
 static HRESULT STDMETHODCALLTYPE stm_queryinterface(
@@ -70,7 +69,7 @@ static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 	/* [in] */ REFIID riid,
 	/* [iid_is][out] */ void **ppvObject)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	if (IsEqualGUID(&IID_IUnknown, riid) ||
 			IsEqualGUID(&IID_IStream, riid)) {
@@ -85,7 +84,7 @@ static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 
 static ULONG STDMETHODCALLTYPE stm_addref(IStream *This)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return InterlockedIncrement(&stm->refcount);
 }
@@ -190,7 +189,7 @@ static HRESULT STDMETHODCALLTYPE stm_set_size(IStream *This, ULARGE_INTEGER libN
 static HRESULT STDMETHODCALLTYPE stm_copy_to(IStream *This, IStream *pstm, ULARGE_INTEGER cb,
 		ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return E_NOTIMPL;
 }
@@ -250,10 +249,8 @@ static struct IStreamVtbl php_istream_vtbl = {
 	stm_clone
 };
 
-static void istream_destructor(php_istream *stm)
+static void istream_destructor(php_istream *stm TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (stm->id) {
 		int id = stm->id;
 		stm->id = 0;
@@ -285,7 +282,7 @@ PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 	stm->stream = stream;
 
 	zend_list_addref(stream->rsrc_id);
-	stm->id = zend_list_insert(stm, le_istream);
+	stm->id = zend_list_insert(stm, le_istream TSRMLS_CC);
 
 	return (IStream*)stm;
 }
@@ -394,8 +391,7 @@ CPH_METHOD(SaveToFile)
 				RETURN_FALSE;
 			}
 	
-			if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || 
-					php_check_open_basedir(fullpath TSRMLS_CC)) {
+			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 				efree(fullpath);
 				RETURN_FALSE;
 			}
@@ -457,8 +453,7 @@ CPH_METHOD(LoadFromFile)
 			RETURN_FALSE;
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			RETURN_FALSE;
 		}

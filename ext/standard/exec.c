@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 #include "php.h"
 #include <ctype.h>
 #include "php_string.h"
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "basic_functions.h"
@@ -63,51 +62,21 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 	FILE *fp;
 	char *buf, *tmp=NULL;
 	int l = 0, pclose_return;
-	char *cmd_p, *b, *c, *d=NULL;
+	char *b, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
 
-	if (PG(safe_mode)) {
-		if ((c = strchr(cmd, ' '))) {
-			*c = '\0';
-			c++;
-		}
-		if (strstr(cmd, "..")) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-			goto err;
-		}
-		
-		b = strrchr(cmd, PHP_DIR_SEPARATOR);
-
-#ifdef PHP_WIN32
-		if (b && *b == '\\' && b == cmd) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid absolute path.");
-			goto err;
-		}
-#endif
-
-		spprintf(&d, 0, "%s%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
-		if (c) {
-			*(c - 1) = ' ';
-		}
-		cmd_p = php_escape_shell_cmd(d);
-		efree(d);
-		d = cmd_p;
-	} else {
-		cmd_p = cmd;
-	}
-
 #if PHP_SIGCHILD
 	sig_handler = signal (SIGCHLD, SIG_DFL);
 #endif
 
 #ifdef PHP_WIN32
-	fp = VCWD_POPEN(cmd_p, "rb");
+	fp = VCWD_POPEN(cmd, "rb");
 #else
-	fp = VCWD_POPEN(cmd_p, "r");
+	fp = VCWD_POPEN(cmd, "r");
 #endif
 	if (!fp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", cmd);
@@ -139,10 +108,8 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			if (type == 1) {
-				int ob_level;
-
 				PHPWRITE(buf, bufl);
-				if ((php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL, &ob_level TSRMLS_CC) == SUCCESS) && ob_level < 1) {
+				if (php_output_get_level(TSRMLS_C) < 1) {
 					sapi_flush(TSRMLS_C);
 				}
 			} else if (type == 2) {
@@ -484,11 +451,6 @@ PHP_FUNCTION(shell_exec)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
 		return;
-	}
-
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
-		RETURN_FALSE;
 	}
 
 #ifdef PHP_WIN32

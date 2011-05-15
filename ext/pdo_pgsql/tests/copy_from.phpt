@@ -1,0 +1,386 @@
+--TEST--
+PDO PgSQL pgsqlCopyFromArray and pgsqlCopyFromFile
+--SKIPIF--
+<?php # vim:se ft=php:
+if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+PDOTest::skip();
+?>
+--FILE--
+<?php
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+
+$db->exec('CREATE TABLE test (a integer not null primary key, b text, c integer)');
+
+try {
+
+echo "Preparing test file and array for CopyFrom tests\n";
+
+$tableRows = array();
+$tableRowsWithDifferentNullValues = array();
+
+for($i=0;$i<3;$i++) {
+	$firstParameter = $i;
+	$secondParameter = "test insert {$i}";
+	$tableRows[] = "{$firstParameter}\t{$secondParameter}\t\\N";
+	$tableRowsWithDifferentNullValues[] = "{$firstParameter};{$secondParameter};NULL";
+	$tableRowsWithDifferentNullValuesAndSelectedFields[] = "{$firstParameter};NULL";
+}
+$filename = 'test_pgsqlCopyFromFile.csv';
+$filenameWithDifferentNullValues = 'test_pgsqlCopyFromFileWithDifferentNullValues.csv';
+$filenameWithDifferentNullValuesAndSelectedFields = 'test_pgsqlCopyFromFileWithDifferentNullValuesAndSelectedFields.csv';
+
+file_put_contents($filename, implode("\n",$tableRows));
+file_put_contents($filenameWithDifferentNullValues, implode("\n",$tableRowsWithDifferentNullValues));
+file_put_contents($filenameWithDifferentNullValuesAndSelectedFields, implode("\n",$tableRowsWithDifferentNullValuesAndSelectedFields));
+
+echo "Testing pgsqlCopyFromArray() with default parameters\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromArray('test',$tableRows));
+
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromArray() with different field separator and not null indicator\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValues,";","NULL"));
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromArray() with only selected fields\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromArray() with error\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromArray('test_error',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$db->rollback();
+
+
+echo "Testing pgsqlCopyFromFile() with default parameters\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromFile('test',$filename));
+
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromFile() with different field separator and not null indicator\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValues,";","NULL"));
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromFile() with only selected fields\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$stmt = $db->query("select * from test");
+foreach($stmt as $r) {
+	var_dump($r);
+}
+$db->rollback();
+
+echo "Testing pgsqlCopyFromFile() with error\n";
+$db->beginTransaction();
+var_dump($db->pgsqlCopyFromFile('test_error',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$db->rollback();
+
+} catch (Exception $e) {
+	/* catch exceptions so that we can show the relative error */
+	echo "Exception! at line ", $e->getLine(), "\n";
+	var_dump($e->getMessage());
+}
+if(isset($filename)) {
+	@unlink($filename);
+}
+?>
+--EXPECT--
+Preparing test file and array for CopyFrom tests
+Testing pgsqlCopyFromArray() with default parameters
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  string(13) "test insert 0"
+  [1]=>
+  string(13) "test insert 0"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  string(13) "test insert 1"
+  [1]=>
+  string(13) "test insert 1"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  string(13) "test insert 2"
+  [1]=>
+  string(13) "test insert 2"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromArray() with different field separator and not null indicator
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  string(13) "test insert 0"
+  [1]=>
+  string(13) "test insert 0"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  string(13) "test insert 1"
+  [1]=>
+  string(13) "test insert 1"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  string(13) "test insert 2"
+  [1]=>
+  string(13) "test insert 2"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromArray() with only selected fields
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromArray() with error
+bool(false)
+Testing pgsqlCopyFromFile() with default parameters
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  string(13) "test insert 0"
+  [1]=>
+  string(13) "test insert 0"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  string(13) "test insert 1"
+  [1]=>
+  string(13) "test insert 1"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  string(13) "test insert 2"
+  [1]=>
+  string(13) "test insert 2"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromFile() with different field separator and not null indicator
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  string(13) "test insert 0"
+  [1]=>
+  string(13) "test insert 0"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  string(13) "test insert 1"
+  [1]=>
+  string(13) "test insert 1"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  string(13) "test insert 2"
+  [1]=>
+  string(13) "test insert 2"
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromFile() with only selected fields
+bool(true)
+array(6) {
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(1)
+  [0]=>
+  int(1)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+array(6) {
+  ["a"]=>
+  int(2)
+  [0]=>
+  int(2)
+  ["b"]=>
+  NULL
+  [1]=>
+  NULL
+  ["c"]=>
+  NULL
+  [2]=>
+  NULL
+}
+Testing pgsqlCopyFromFile() with error
+bool(false)

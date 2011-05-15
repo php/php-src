@@ -8,6 +8,7 @@ if (!function_exists("mb_send_mail") || !mb_language("neutral")) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';
@@ -24,14 +25,14 @@ if (mb_language("neutral")) {
 --EXPECTF--
 To: example@example.com
 Subject: %s
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
 %s
 To: example@example.com
 Subject: test neutral
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: BASE64
 

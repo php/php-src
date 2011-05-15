@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -295,7 +295,7 @@ const zend_function_entry posix_functions[] = {
 #endif
 
 	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
-	PHP_FALIAS(posix_errno, posix_get_last_error,	NULL)
+	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_get_last_error)
 	PHP_FE(posix_strerror,							arginfo_posix_strerror)
 #ifdef HAVE_INITGROUPS
 	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
@@ -703,7 +703,9 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 1 to be a valid stream resource");
 		return 0;
 	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)fd, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not use stream of type '%s'", 
@@ -840,8 +842,7 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -875,8 +876,7 @@ PHP_FUNCTION(posix_mknod)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -961,8 +961,7 @@ PHP_FUNCTION(posix_access)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;

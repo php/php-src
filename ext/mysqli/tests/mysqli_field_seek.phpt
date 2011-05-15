@@ -66,6 +66,8 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
+	$charsets = my_get_charsets($link);
+
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
@@ -75,7 +77,21 @@ require_once('skipifconnectfailure.inc');
 	var_dump(mysqli_field_seek($res, 0));
 	var_dump(mysqli_fetch_field($res));
 	var_dump(mysqli_field_seek($res, 1));
-	var_dump(mysqli_fetch_field($res));
+
+	$field = mysqli_fetch_field($res);
+	var_dump($field);
+	/* label column, result set charset */
+	if ($field->charsetnr != $charsets['results']['nr']) {
+		printf("[004] Expecting charset %s/%d got %d\n",
+			$charsets['results']['charset'],
+			$charsets['results']['nr'], $field->charsetnr);
+	}
+	if ($field->length != (1 * $charsets['results']['maxlen'])) {
+		printf("[005] Expecting length %d got %d\n",
+			$charsets['results']['maxlen'],
+			$field->max_length);
+	}
+
 	var_dump(mysqli_field_tell($res));
 	var_dump(mysqli_field_seek($res, 2));
 	var_dump(mysqli_fetch_field($res));
@@ -96,8 +112,6 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump(mysqli_field_seek($res, 0));
 
-
-
 	mysqli_close($link);
 	print "done!";
 ?>
@@ -108,7 +122,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -119,6 +133,10 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -133,7 +151,7 @@ object(stdClass)#%d (11) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -144,6 +162,10 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>
@@ -158,7 +180,7 @@ object(stdClass)#%d (11) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(5) "label"
   [%u|b%"orgname"]=>
@@ -169,12 +191,16 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
-  int(0)
+  int(%d)
   [%u|b%"length"]=>
-  int(1)
+  int(%d)
   [%u|b%"charsetnr"]=>
-  int(8)
+  int(%d)
   [%u|b%"flags"]=>
   int(0)
   [%u|b%"type"]=>
@@ -191,7 +217,7 @@ bool(false)
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
 bool(true)
-object(stdClass)#3 (11) {
+object(stdClass)#3 (13) {
   [%u|b%"name"]=>
   %unicode|string%(5) "_null"
   [%u|b%"orgname"]=>
@@ -202,6 +228,10 @@ object(stdClass)#3 (11) {
   %unicode|string%(0) ""
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(0) ""
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>

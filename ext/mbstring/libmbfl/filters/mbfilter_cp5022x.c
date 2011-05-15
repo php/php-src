@@ -54,7 +54,7 @@ const mbfl_encoding mbfl_encoding_jis_ms = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50220 = {
@@ -63,7 +63,7 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50220raw = {
@@ -72,7 +72,7 @@ const mbfl_encoding mbfl_encoding_cp50220raw = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50221 = {
@@ -81,7 +81,7 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50222 = {
@@ -90,7 +90,7 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
@@ -462,7 +462,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -693,7 +693,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -841,7 +841,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 

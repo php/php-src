@@ -98,6 +98,6 @@ fi
 
 if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
   AC_CHECK_FUNCS([rl_completion_matches])
-  PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
+  PHP_NEW_EXTENSION(readline, readline.c readline_cli.c, $ext_shared, cli)
   PHP_SUBST(READLINE_SHARED_LIBADD)
 fi

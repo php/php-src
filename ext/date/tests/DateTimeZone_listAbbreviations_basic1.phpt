@@ -23,10 +23,10 @@ var_dump( $abbr["acst"] );
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing DateTimeZone::listAbbreviations() : basic functionality ***
 string(5) "array"
-int(338)
+int(%d)
 
 -- Format a sample entry --
 array(4) {

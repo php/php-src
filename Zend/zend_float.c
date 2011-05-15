@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -27,16 +27,13 @@ ZEND_API void zend_init_fpu(TSRMLS_D) /* {{{ */
 #if XPFPA_HAVE_CW
 	XPFPA_DECLARE
 	
-	if (!EG(saved_fpu_cw)) {
-		EG(saved_fpu_cw) = emalloc(sizeof(XPFPA_CW_DATATYPE));
+	if (!EG(saved_fpu_cw_ptr)) {
+		EG(saved_fpu_cw_ptr) = (void*)&EG(saved_fpu_cw);
 	}
-	XPFPA_STORE_CW(EG(saved_fpu_cw));
+	XPFPA_STORE_CW(EG(saved_fpu_cw_ptr));
 	XPFPA_SWITCH_DOUBLE();
 #else
-	if (EG(saved_fpu_cw)) {
-		efree(EG(saved_fpu_cw));
-	}
-	EG(saved_fpu_cw) = NULL;
+	EG(saved_fpu_cw_ptr) = NULL;
 #endif
 }
 /* }}} */
@@ -44,14 +41,11 @@ ZEND_API void zend_init_fpu(TSRMLS_D) /* {{{ */
 ZEND_API void zend_shutdown_fpu(TSRMLS_D) /* {{{ */
 {
 #if XPFPA_HAVE_CW
-	if (EG(saved_fpu_cw)) {
-		XPFPA_RESTORE_CW(EG(saved_fpu_cw));
+	if (EG(saved_fpu_cw_ptr)) {
+		XPFPA_RESTORE_CW(EG(saved_fpu_cw_ptr));
 	}
 #endif
-	if (EG(saved_fpu_cw)) {
-		efree(EG(saved_fpu_cw));
-		EG(saved_fpu_cw) = NULL;
-	}
+	EG(saved_fpu_cw_ptr) = NULL;
 }
 /* }}} */
 

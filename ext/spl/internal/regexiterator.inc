@@ -19,7 +19,7 @@
  */
 class RegexIterator extends FilterIterator
 {
-	const USE_KEY     = 0x00000001; /**< If present in $flags the the key is 
+	const USE_KEY     = 0x00000001; /**< If present in $flags the key is 
 	                                     used rather then the current value. */
 
 	const MATCH       = 0; /**< Mode: Executed a plain match only      */
@@ -157,6 +157,13 @@ class RegexIterator extends FilterIterator
 	function setPregFlags($preg_flags)
 	{
 		$this->preg_flags = $preg_flags;
+	}
+
+	/** @return current regular expression
+	*/
+	function getRegex()
+	{
+		return $this->regex;
 	}
 }
 

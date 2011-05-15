@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,7 +71,7 @@ static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, in
 	}
 }
 
-static zval *saproxy_property_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval *saproxy_property_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval *return_value;
 	
@@ -83,7 +83,7 @@ static zval *saproxy_property_read(zval *object, zval *member, int type TSRMLS_D
 	return return_value;
 }
 
-static void saproxy_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void saproxy_property_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_com_throw_exception(E_INVALIDARG, "safearray has no properties" TSRMLS_CC);
 }
@@ -293,7 +293,7 @@ static zval *saproxy_object_get(zval *property TSRMLS_DC)
 }
 #endif
 
-static int saproxy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int saproxy_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	/* no properties */
 	return 0;
@@ -305,7 +305,7 @@ static int saproxy_dimension_exists(zval *object, zval *member, int check_empty 
 	return 0;
 }
 
-static void saproxy_property_delete(zval *object, zval *member TSRMLS_DC)
+static void saproxy_property_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
 }
@@ -321,7 +321,7 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, char *name, int len, const zend_literal *key TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;

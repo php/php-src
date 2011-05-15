@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,6 +61,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
+#include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
@@ -74,16 +75,6 @@
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
-
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-#if HAVE_LIBEDIT
-#include <editline/readline.h>
-#else
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-#include "php_cli_readline.h"
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -100,6 +91,7 @@
 #endif
 
 PHPAPI extern char *php_ini_opened_path;
+PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
 #ifndef O_BINARY
@@ -117,7 +109,14 @@ PHPAPI extern char *php_ini_scanned_files;
 #define PHP_MODE_REFLECTION_CLASS       9
 #define PHP_MODE_REFLECTION_EXTENSION   10
 #define PHP_MODE_REFLECTION_EXT_INFO    11
-#define PHP_MODE_SHOW_INI_CONFIG        12
+#define PHP_MODE_REFLECTION_ZEND_EXTENSION 12
+#define PHP_MODE_SHOW_INI_CONFIG        13
+
+cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
+PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks()
+{
+	return &cli_shell_callbacks;
+}
 
 const char HARDCODED_INI[] =
 	"html_errors=0\n"
@@ -129,9 +128,6 @@ const char HARDCODED_INI[] =
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-static char php_last_char = '\0';
-#endif
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -165,10 +161,12 @@ static const opt_struct OPTIONS[] = {
 	{11,  1, "rclass"},
 	{12,  1, "re"},
 	{12,  1, "rextension"},
+	{13,  1, "rz"},
+	{13,  1, "rzendextension"},
 #endif
-	{13,  1, "ri"},
-	{13,  1, "rextinfo"},
-	{14,  0, "ini"},
+	{14,  1, "ri"},
+	{14,  1, "rextinfo"},
+	{15,  0, "ini"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -251,11 +249,23 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-static inline size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
+#else
+	size_t ret;
+#endif
 
+	if (cli_shell_callbacks.cli_shell_write) {
+		size_t shell_wrote;
+		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length TSRMLS_CC);
+		if (shell_wrote > -1) {
+			return shell_wrote;
+		}
+	}
+
+#ifdef PHP_WRITE_STDOUT
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
 	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO TSRMLS_CC));
@@ -266,8 +276,6 @@ static inline size_t sapi_cli_single_write(const char *str, uint str_length TSRM
 
 	return ret;
 #else
-	size_t ret;
-
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
 	return ret;
 #endif
@@ -280,12 +288,17 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	uint remaining = str_length;
 	size_t ret;
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 	if (!str_length) {
 		return 0;
 	}
-	php_last_char = str[str_length-1];
-#endif
+
+	if (cli_shell_callbacks.cli_shell_ub_write) {
+		int ub_wrote;
+		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
+		if (ub_wrote > -1) {
+			return ub_wrote;
+		}
+	}
 
 	while (remaining > 0)
 	{
@@ -354,7 +367,7 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static void sapi_cli_log_message(char *message) /* {{{ */
+static void sapi_cli_log_message(char *message TSRMLS_DC) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
 }
@@ -452,7 +465,7 @@ static sapi_module_struct cli_sapi_module = {
 	sapi_cli_log_message,			/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
-
+	
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
@@ -522,6 +535,7 @@ static void php_cli_usage(char *argv0)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
+				"  --rz <name>      Show information about Zend extension <name>.\n"
 #endif
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
@@ -708,6 +722,7 @@ int main(int argc, char *argv[])
 	cli_sapi_module.ini_defaults = sapi_cli_ini_defaults;
 	cli_sapi_module.php_ini_path_override = NULL;
 	cli_sapi_module.phpinfo_as_text = 1;
+	cli_sapi_module.php_ini_ignore_cwd = 1;
 	sapi_startup(&cli_sapi_module);
 
 #ifdef PHP_WIN32
@@ -831,7 +846,7 @@ int main(int argc, char *argv[])
 				}
 
 				request_started = 1;
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2010 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2011 The PHP Group\n%s",
 					PHP_VERSION, sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",
@@ -1018,12 +1033,16 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
-#endif
 			case 13:
+				behavior=PHP_MODE_REFLECTION_ZEND_EXTENSION;
+				reflection_what = php_optarg;
+				break;
+#endif
+			case 14:
 				behavior=PHP_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
-			case 14:
+			case 15:
 				behavior = PHP_MODE_SHOW_INI_CONFIG;
 				break;
 			default:
@@ -1111,86 +1130,13 @@ int main(int argc, char *argv[])
 				cli_register_file_handles(TSRMLS_C);
 			}
 
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
-			if (interactive) {
-				char *line;
-				size_t size = 4096, pos = 0, len;
-				char *code = emalloc(size);
-				char *prompt = "php > ";
-				char *history_file;
-
-				if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
-					zend_file_handle *prepend_file_p;
-					zend_file_handle prepend_file = {0};
-
-					prepend_file.filename = PG(auto_prepend_file);
-					prepend_file.opened_path = NULL;
-					prepend_file.free_filename = 0;
-					prepend_file.type = ZEND_HANDLE_FILENAME;
-					prepend_file_p = &prepend_file;
-
-					zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
-				}
-
-				history_file = tilde_expand("~/.php_history");
-				rl_attempted_completion_function = cli_code_completion;
-				rl_special_prefixes = "$";
-				read_history(history_file);
-
-				EG(exit_status) = 0;
-				while ((line = readline(prompt)) != NULL) {
-					if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
-						free(line);
-						break;
-					}
-
-					if (!pos && !*line) {
-						free(line);
-						continue;
-					}
-
-					len = strlen(line);
-					if (pos + len + 2 > size) {
-						size = pos + len + 2;
-						code = erealloc(code, size);
-					}
-					memcpy(&code[pos], line, len);
-					pos += len;
-					code[pos] = '\n';
-					code[++pos] = '\0';
-
-					if (*line) {
-						add_history(line);
-					}
-
-					free(line);
-
-					if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
-						continue;
-					}
-
-					zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
-					pos = 0;
-					
-					if (php_last_char != '\0' && php_last_char != '\n') {
-						sapi_cli_single_write("\n", 1 TSRMLS_CC);
-					}
-
-					if (EG(exception)) {
-						zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
-					}
-
-					php_last_char = '\0';
-				}
-				write_history(history_file);
-				free(history_file);
-				efree(code);
+			if (interactive && cli_shell_callbacks.cli_shell_run) {
+				exit_status = cli_shell_callbacks.cli_shell_run(TSRMLS_C);
+			} else {
+				php_execute_script(&file_handle TSRMLS_CC);
 				exit_status = EG(exit_status);
-				break;
 			}
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
-			php_execute_script(&file_handle TSRMLS_CC);
-			exit_status = EG(exit_status);
+
 			break;
 		case PHP_MODE_LINT:
 			exit_status = php_lint_script(&file_handle TSRMLS_CC);
@@ -1288,6 +1234,7 @@ int main(int argc, char *argv[])
 			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
+			case PHP_MODE_REFLECTION_ZEND_EXTENSION:
 				{
 					zend_class_entry *pce = NULL;
 					zval *arg, *ref;
@@ -1308,6 +1255,9 @@ int main(int argc, char *argv[])
 							break;
 						case PHP_MODE_REFLECTION_EXTENSION:
 							pce = reflection_extension_ptr;
+							break;
+						case PHP_MODE_REFLECTION_ZEND_EXTENSION:
+							pce = reflection_zend_extension_ptr;
 							break;
 					}
 					
@@ -1360,7 +1310,7 @@ int main(int argc, char *argv[])
 				{
 					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
 					zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
-					zend_printf("Scan for additional .ini files in: %s\n", *PHP_CONFIG_FILE_SCAN_DIR ? PHP_CONFIG_FILE_SCAN_DIR : "(none)");
+					zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
 					zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
 					break;
 				}

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -157,18 +157,18 @@ PHP_FUNCTION(msg_set_queue)
 	zval *queue, *data;
 	sysvmsg_queue_t *mq = NULL;
 	struct msqid_ds stat;
-			
+
 	RETVAL_FALSE;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &queue, &data) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
 		zval **item;
-		
+
 		/* now pull out members of data and set them in the stat buffer */
 		if (zend_hash_find(Z_ARRVAL_P(data), "msg_perm.uid", sizeof("msg_perm.uid"), (void **) &item) == SUCCESS) {
 			convert_to_long_ex(item);
@@ -200,18 +200,18 @@ PHP_FUNCTION(msg_stat_queue)
 	zval *queue;
 	sysvmsg_queue_t *mq = NULL;
 	struct msqid_ds stat;
-	
+
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
 		array_init(return_value);
-		
+
 		add_assoc_long(return_value, "msg_perm.uid", stat.msg_perm.uid);
 		add_assoc_long(return_value, "msg_perm.gid", stat.msg_perm.gid);
 		add_assoc_long(return_value, "msg_perm.mode", stat.msg_perm.mode);
@@ -253,7 +253,7 @@ PHP_FUNCTION(msg_get_queue)
 	long key;
 	long perms = 0666;
 	sysvmsg_queue_t *mq;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &key, &perms) == FAILURE)	{
 		return;
 	}
@@ -271,7 +271,7 @@ PHP_FUNCTION(msg_get_queue)
 			RETURN_FALSE;
 		}
 	}
-	RETVAL_RESOURCE(zend_list_insert(mq, le_sysvmsg));	
+	RETVAL_RESOURCE(zend_list_insert(mq, le_sysvmsg TSRMLS_CC));
 }
 /* }}} */
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(msg_remove_queue)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_RMID, NULL) == 0) {
@@ -307,10 +307,10 @@ PHP_FUNCTION(msg_receive)
 	sysvmsg_queue_t *mq = NULL;
 	struct php_msgbuf *messagebuffer = NULL; /* buffer to transmit */
 	int result;
-	
+
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzlz|blz", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzlz|blz",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
 		return;
@@ -337,23 +337,23 @@ PHP_FUNCTION(msg_receive)
 			realflags |= IPC_NOWAIT;
 		}
 	}
-	
+
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	messagebuffer = (struct php_msgbuf *) safe_emalloc(maxsize, 1, sizeof(struct php_msgbuf));
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
-		
+
 	zval_dtor(out_msgtype);
-	zval_dtor(out_message);	
+	zval_dtor(out_message);
 	ZVAL_LONG(out_msgtype, 0);
 	ZVAL_FALSE(out_message);
-	
+
 	if (zerrcode) {
 		zval_dtor(zerrcode);
 		ZVAL_LONG(zerrcode, 0);
 	}
-	
+
 	if (result >= 0) {
 		/* got it! */
 		ZVAL_LONG(out_msgtype, messagebuffer->mtype);
@@ -395,14 +395,14 @@ PHP_FUNCTION(msg_send)
 	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;
 	int message_len = 0;
-	
+
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t*, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (do_serialize) {
@@ -412,7 +412,7 @@ PHP_FUNCTION(msg_send)
 		PHP_VAR_SERIALIZE_INIT(var_hash);
 		php_var_serialize(&msg_var, &message, &var_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
-		
+
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
 		messagebuffer = safe_emalloc(msg_var.len, 1, sizeof(struct php_msgbuf));
@@ -448,12 +448,12 @@ PHP_FUNCTION(msg_send)
 			efree(p);
 		}
 	}
-	
+
 	/* set the message type */
 	messagebuffer->mtype = msgtype;
 
 	result = msgsnd(mq->id, messagebuffer, message_len, blocking ? 0 : IPC_NOWAIT);
-	
+
 	efree(messagebuffer);
 
 	if (result == -1) {

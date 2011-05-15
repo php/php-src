@@ -306,6 +306,15 @@ else
   fi
   AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
 
+  if test "$ac_cv_crypt_md5" = "yes"; then
+    ac_result=1
+    ac_crypt_md5=1
+  else
+    ac_result=0
+    ac_crypt_md5=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])  
+  
   if test "$ac_cv_crypt_sha512" = "yes"; then
     ac_result=1
     ac_crypt_sha512=1
@@ -313,7 +322,7 @@ else
     ac_result=0
     ac_crypt_sha512=0
   fi
-  AC_DEFINE_UNQUOTED(PHP_EXT_SHA512_CRYPT, $ac_result, [Whether the system supports SHA512 salt])
+  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, $ac_result, [Whether the system supports SHA512 salt])
 
   if test "$ac_cv_crypt_sha256" = "yes"; then
     ac_result=1
@@ -322,7 +331,7 @@ else
     ac_result=0
     ac_crypt_sha256=0
   fi
-  AC_DEFINE_UNQUOTED(PHP_EXT_SHA256_CRYPT, $ac_result, [Whether the system supports SHA256 salt])
+  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, $ac_result, [Whether the system supports SHA256 salt])
 
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
@@ -556,6 +565,11 @@ int __tmp__() { mbstate_t a; }
 if test "$ac_cv_type_mbstate_t" = "yes"; then
   AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
 fi
+
+dnl
+dnl Check for atomic operation API availability in Solaris
+dnl
+AC_CHECK_HEADERS([atomic.h])
 
 dnl
 dnl Setup extension sources

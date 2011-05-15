@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -139,6 +139,7 @@ struct _php_interval_obj {
 struct _php_period_obj {
 	zend_object       std;
 	timelib_time     *start;
+	timelib_time     *current;
 	timelib_time     *end;
 	timelib_rel_time *interval;
 	int               recurrences;
@@ -162,7 +163,7 @@ ZEND_END_MODULE_GLOBALS(date)
 /* Backwards compability wrapper */
 PHPAPI signed long php_parse_date(char *string, signed long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime);
+PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
@@ -176,5 +177,10 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
 /* Grabbing CE's so that other exts can use the date objects too */
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
+
+/* Functions for creating DateTime objects, and initializing them from a string */
+PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+
 
 #endif /* PHP_DATE_H */

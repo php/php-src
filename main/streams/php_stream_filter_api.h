@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
  *
  * Each stream can have a chain of filters for reading and another for writing.
  * 
- * When data is written to the stream, is is placed into a bucket and placed at
+ * When data is written to the stream, it is placed into a bucket and placed at
  * the start of the input brigade.
  *
  * The first filter in the chain is invoked on the brigade and (depending on

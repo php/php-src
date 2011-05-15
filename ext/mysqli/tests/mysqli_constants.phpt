@@ -84,6 +84,7 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_REPORT_ERROR"				=> true,
 		"MYSQLI_REPORT_OFF"					=> true,
 		"MYSQLI_SET_CHARSET_NAME"			=> true,
+		"MYSQLI_SET_CHARSET_DIR"			=> true,
 		"MYSQLI_REFRESH_GRANT"				=> true,
 		"MYSQLI_REFRESH_LOG"					=> true,
 		"MYSQLI_REFRESH_TABLES"				=> true,
@@ -110,6 +111,7 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_ASYNC'] = true;
 
+		$expected_constants['MYSQLI_SERVER_PS_OUT_PARAMS'] = true;
 	} else {
 		$version = mysqli_get_client_version();
 	}
@@ -150,14 +152,15 @@ require_once('skipifconnectfailure.inc');
 		));
 	}
 
+	if ($version > 50110 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
+	}
+
 	/* pretty dump test, but that is the best way to mimic mysql.c */
 	if (defined('MYSQLI_DATA_TRUNCATED'))
 		$expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
-	if ($IS_MYSQLND && $php_version >= 600) {
-		/* mysqlnd only */
-		$expected_constants["MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE"] = true;
-	} else if (!$IS_MYSQLND) {
+	if (!$IS_MYSQLND) {
 		/* libmysql only */
 
 		/* are they available in all versions of ext/mysqli ?

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,9 +34,16 @@ PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned cha
 	s[0] = context->state & 0xffff;
 	s[1] = (context->state >> 16) & 0xffff;
 	for (i = 0; i < len; ++i) {
-		s[0] = (s[0] + input[i]) % 65521;
-		s[1] = (s[1] + s[0]) % 65521;
+		s[0] += input[i];
+		s[1] += s[0];
+		if (s[1]>=0x7fffffff)
+		{
+			s[0] = s[0] % 65521;
+			s[1] = s[1] % 65521;
+		}
 	}
+	s[0] = s[0] % 65521;
+	s[1] = s[1] % 65521;
 	context->state = s[0] + (s[1] << 16);
 }
 

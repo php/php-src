@@ -105,6 +105,12 @@ Error -10
 Error -10
     รรร\?
 No match
+    \xe1\x88 
+Error -10
+    \P\xe1\x88 
+Error -10
+    \P\P\xe1\x88 
+Error -25
 
 /a.b/8
     acb
@@ -1319,5 +1325,27 @@ Partial match: abc1
  2: abc
     xxxxabcde\P\P
 Partial match: abcde
+
+/\bthe cat\b/8
+    the cat\P
+ 0: the cat
+    the cat\P\P
+Partial match: the cat
+
+/a+/8
+    a\x{123}aa\>1
+ 0: aa
+ 1: a
+    a\x{123}aa\>2
+Error -11
+    a\x{123}aa\>3
+ 0: aa
+ 1: a
+    a\x{123}aa\>4
+ 0: a
+    a\x{123}aa\>5
+No match
+    a\x{123}aa\>6
+Error -24
 
 /-- End of testinput8 --/ 

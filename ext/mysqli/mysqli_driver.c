@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -124,9 +124,9 @@ static int driver_driver_version_read(mysqli_object *obj, zval **retval TSRMLS_D
 }
 /* }}} */
 
-MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect);
-MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect);
-MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode);
+MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect)
+MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect)
+MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode)
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {

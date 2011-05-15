@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
 zend_class_entry *default_exception_ce;
 zend_class_entry *error_exception_ce;
@@ -82,6 +83,20 @@ void zend_exception_restore(TSRMLS_D) /* {{{ */
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
+#ifdef HAVE_DTRACE
+	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
+		char *classname;
+		int name_len;
+
+		if (exception != NULL) {
+			zend_get_object_classname(exception, &classname, &name_len);
+			DTRACE_EXCEPTION_THROWN(classname);
+		} else {
+			DTRACE_EXCEPTION_THROWN(NULL);
+		}
+	}
+#endif /* HAVE_DTRACE */
+
 	if (exception != NULL) {
 		zval *previous = EG(exception);
 		zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
@@ -91,6 +106,9 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		}
 	}
 	if (!EG(current_execute_data)) {
+		if(EG(exception)) {
+			zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
+		}
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
 	}
 
@@ -128,21 +146,19 @@ ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 
 static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces TSRMLS_DC) /* {{{ */
 {
-	zval tmp, obj;
+	zval obj;
 	zend_object *object;
 	zval *trace;
 
 	Z_OBJVAL(obj) = zend_objects_new(&object, class_type TSRMLS_CC);
 	Z_OBJ_HT(obj) = &default_exception_handlers;
 
-	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object_properties_init(object, class_type);
 
 	ALLOC_ZVAL(trace);
 	Z_UNSET_ISREF_P(trace);
 	Z_SET_REFCOUNT_P(trace, 0);
-	zend_fetch_debug_backtrace(trace, skip_top_traces, 0 TSRMLS_CC);
+	zend_fetch_debug_backtrace(trace, skip_top_traces, 0, 0 TSRMLS_CC);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
@@ -572,6 +588,7 @@ ZEND_METHOD(exception, __toString)
 		zend_call_function(&fci, NULL TSRMLS_CC);
 
 		if (Z_TYPE_P(trace) != IS_STRING) {
+			zval_ptr_dtor(&trace);
 			trace = NULL;
 		}
 
@@ -592,16 +609,17 @@ ZEND_METHOD(exception, __toString)
 		zval_dtor(&line);
 
 		exception = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 0 TSRMLS_CC);
+
+		if (trace) {
+			zval_ptr_dtor(&trace);
+		}
+
 	}
 	zval_dtor(&fname);
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
 	zend_update_property_string(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
-
-	if (trace) {
-		zval_ptr_dtor(&trace);
-	}
 
 	RETURN_STRINGL(str, len, 0);
 }

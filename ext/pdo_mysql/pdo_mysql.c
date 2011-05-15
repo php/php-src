@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,11 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (long)PDO_MYSQL_ATTR_DIRECT_QUERY);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (long)PDO_MYSQL_ATTR_FOUND_ROWS);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (long)PDO_MYSQL_ATTR_IGNORE_SPACE);
-
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_KEY", (long)PDO_MYSQL_ATTR_SSL_KEY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CERT", (long)PDO_MYSQL_ATTR_SSL_CERT);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (long)PDO_MYSQL_ATTR_SSL_CA);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (long)PDO_MYSQL_ATTR_SSL_CAPATH);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (long)PDO_MYSQL_ATTR_SSL_CIPHER);
 	return php_pdo_register_driver(&pdo_mysql_driver);
 }
 /* }}} */

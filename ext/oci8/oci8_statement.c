@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -336,9 +336,9 @@ php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, l
 sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcpp)
 {
 	php_oci_out_column *outcol = (php_oci_out_column *)ctx;
+	TSRMLS_FETCH();
 
 	if (!outcol) {
-		TSRMLS_FETCH();
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid context pointer value");
 		return OCI_ERROR;
@@ -347,7 +347,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 	switch(outcol->data_type) {
 		case SQLT_RSET: {
 				php_oci_statement *nested_stmt;
-				TSRMLS_FETCH();
 
 				nested_stmt = php_oci_statement_create(outcol->statement->connection, NULL, 0 TSRMLS_CC);
 				if (!nested_stmt) {
@@ -372,7 +371,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 		case SQLT_BFILE: {
 				php_oci_descriptor *descr;
 				int dtype;
-				TSRMLS_FETCH();
 
 				if (outcol->data_type == SQLT_BFILE) {
 					dtype = OCI_DTYPE_FILE;
@@ -811,8 +809,16 @@ void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 {
 	php_oci_bind *bind = (php_oci_bind *) data;
+
 	*(int *)result = 0;
 
+	if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
+		/* These checks are currently valid for oci_bind_by_name, not
+		 * oci_bind_array_by_name.  Also bind->type and
+		 * bind->indicator are not used for oci_bind_array_by_name.
+		 */
+		return 0;
+	}	
 	switch (bind->type) {
 		case SQLT_NTY:
 		case SQLT_BFILEE:
@@ -852,9 +858,8 @@ int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 			}
 			break;
 	}
-	
-	/* reset all bind stuff to a normal state..-. */
 
+	/* reset all bind stuff to a normal state..-. */
 	bind->indicator = 0;
 
 	return 0;
@@ -875,7 +880,15 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 		}
 		zval_dtor(val);
 		ZVAL_NULL(val);
-	} else if (Z_TYPE_P(bind->zval) == IS_STRING && Z_STRLEN_P(bind->zval) > 0) {
+	} else if (Z_TYPE_P(bind->zval) == IS_STRING
+			   && Z_STRLEN_P(bind->zval) > 0
+			   && Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] != '\0') {
+		/* The post- PHP 5.3 feature for "interned" strings disallows
+		 * their reallocation but (i) any IN binds either interned or
+		 * not should already be null terminated and (ii) for OUT
+		 * binds, php_oci_bind_out_callback() should have allocated a
+		 * new string that we can modify here.
+		 */
 		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRLEN_P(bind->zval)+1);
 		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
 	} else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
@@ -1452,6 +1465,9 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->bind = NULL;
 	bindp->zval = var;
 	bindp->array.type = type;
+	bindp->indicator = 0;  		/* not used for array binds */
+	bindp->type = 0; 			/* not used for array binds */
+
 	zval_add_ref(&var);
 
 	PHP_OCI_CALL_RETURN(statement->errcode,

@@ -48,7 +48,7 @@ string(1) "%"
 -- Testing for precision value more than maximum --
 
 Notice: sprintf(): Requested precision of 988 digits was truncated to PHP maximum of %d digits in %s on line %d
-string(52) "12345678900.0000000000000000000000000000000000000000"
+string(65) "12345678900.00000000000000000000000000000000000000000000000000000"
 
 -- Testing for invalid width(-15) specifier --
 string(3) "15s"

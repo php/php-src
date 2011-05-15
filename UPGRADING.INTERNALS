@@ -1,0 +1,203 @@
+$Id$
+
+UPGRADE NOTES - PHP X.Y
+
+1. Internal API changes
+  a. virtual_file_ex
+  b. stat/lstat support
+  c. readlink support
+  d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
+  e. Zend\zend_fast_cache.h has been removed
+  f. streams that enclose private streams
+  g. leak_variable
+  h. API Signature changes
+
+2. Build system changes
+  a. Unix build system changes
+  b. Windows build system changes
+
+
+========================
+1. Internal API changes
+========================
+
+	a. virtual_file_ex
+
+virtual_file_ex takes now a TSRM context as last parameter:
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, 
+ verify_path_func verify_path, int use_realpath TSRLS_DC);
+
+
+	b. stat/lstat support
+
+lstat is now available on all platforms. On unix-like platform
+php_sys_lstat is an alias to lstat (when avaible). On Windows it is now 
+available using php_sys_lstat. php_sys_stat and php_sys_lstat usage is recommended 
+instead of calling lstat directly, to ensure portability.
+
+
+	c. readlink support
+
+readlink is now available on all platforms. On unix-like platform
+php_sys_readlink is an alias to readlink (when avaible). On Windows it is now 
+available using php_sys_readlink. php_sys_readlink usage is recommended 
+instead of calling readlink directly, to ensure portability.
+
+
+	d. layout of some core ZE structures (zend_op_array, zend_class_entry, ...)
+
+. zend_function.pass_rest_by_reference is replaced by
+  ZEND_ACC_PASS_REST_BY_REFERENCE in zend_function.fn_flags
+. zend_function.return_reference is replaced by ZEND_ACC_RETURN_REFERENCE
+  in zend_function.fn_flags
+. zend_arg_info.required_num_args removed. it was needed only for internal
+  functions. Now the first arg_info for internal function (which has special
+  meaning) is represented by zend_internal_function_info structure.
+. zend_op_array.size, size_var, size_literal, current_brk_cont,
+  backpatch_count moved into CG(context), because they are used only during
+  compilation.
+. zend_op_array.start_op is moved into EG(start_op), because it's used
+  only for 'interactive' execution of single top-level op-array.
+. zend_op_array.done_pass_two is replaced by ZEND_ACC_DONE_PASS_TWO in
+  zend_op_array.fn_flags.
+. op_array.vars array is trimmed (reallocated) during pass_two.
+. zend_class_entry.constants_updated is replaced by
+  ZEND_ACC_CONSTANTS_UPDATED in zend_class_entry.ce_flags
+. the size of zend_class_entry is reduced by sharing the same memory space
+  by different information for internal and user classes.
+  See zend_class_inttry.info union. 
+  
+
+	e. Zend\zend_fast_cache.h 
+
+It should not have been used anymore since php5, but now this header has
+been removed. The following macros are not available anymore:
+
+ZEND_FAST_ALLOC(p, type, fc_type)
+ZEND_FAST_FREE(p, fc_type)
+ZEND_FAST_ALLOC_REL(p, type, fc_type)
+ZEND_FAST_FREE_REL(p, fc_type)
+
+Use emalloc, emalloc_rel, efree or efree_rel instead.
+
+
+	f. Streams that enclose private streams
+
+Some streams, like the temp:// stream, may enclose private streams. If the
+outer stream leaks due to a programming error or is not exposed through a
+zval (and therefore is not deleted when all the zvals are gone), it will
+be destroyed on shutdown.
+The problem is that the outer usually wants itself to close the inner stream,
+so that it may do any other shutdown action that requires the inner stream to
+be live (e.g. commit data to it). If the outer stream is exposed through a
+zval and the inner one isn't, this is not a problem because the outer stream
+will be freed when the zval is destroyed, which happens before the resources
+are destroyed on shutdown.
+On resource list shutdown, the cleanup happens in reverse order of resource
+creation, so if the inner stream was created in the opener of the outer stream,
+it will be destroyed first.
+The following functions were added to the streams API to force a predictable
+destruction order:
+
+PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
+#define php_stream_free_enclosed(stream_enclosed, close_options)
+PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options TSRMLS_DC);
+
+Additionally, the following member was added to php_stream:
+
+	struct _php_stream *enclosing_stream;
+    
+and the following macro was added:
+
+#define PHP_STREAM_FREE_IGNORE_ENCLOSING	32
+
+The function php_stream_encloses declares the first stream encloses the second.
+This has the effect that, when the inner stream is closed from a resource
+destructor it will abort and try to free its enclosing stream instead.
+To prevent this from happening when the inner stream is freed from the outer
+stream, the macro php_stream_free_enclosed should be used instead of
+php_stream_free/php_stream_close/php_stream_pclose, or the flag
+PHP_STREAM_FREE_IGNORE_ENCLOSING should be directly passed to php_stream_free.
+The outer stream cannot abstain, in its close callback, from closing the inner
+stream or clear the enclosing_stream pointer in its enclosed stream by calling
+php_stream_encloses with the 2nd argument NULL. If this is not done, there will
+be problems, so observe this requirement when using php_stream_encloses.
+
+
+	g. leak_variable
+
+The function leak_variable(variable [, leak_data]) was added. It is only
+available on debug builds. It increments the refcount of a zval or, if the
+second argument is true and the variable is either an object or a resource
+it increments the refcounts of those objects instead.
+
+
+	h. API Signature changes
+
+. zend_list_insert
+  ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
+  call: zend_list_insert(a, SOMETYPE TSRMLS_CC);
+  NB: If zend_list_insert is used to register a resource, 
+  ZEND_REGISTER_RESOURCE could be used instead.
+
+. php_le_stream_context(TSRMLS_C)
+  PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D)
+  call: context  = php_stream_context_alloc(TSRMLS_C);
+
+. php_stream_context_alloc
+  PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
+  call: context  = php_stream_context_alloc(TSRMLS_C);
+
+. sapi_get_request_time(TSRMLS_D);
+  SAPI_API double sapi_get_request_time(TSRMLS_D);
+
+. sapi_register_default_post_reader
+  SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
+
+. sapi_register_treat_data
+  SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC);
+
+. sapi_register_input_filter
+  SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
+ 
+. tsrm_win32_access
+  TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
+
+. popen_ex (win32)
+  TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
+
+. php_get_current_user
+  PHPAPI php_get_current_user(TSRMLS_D)
+  Call: char *user = php_get_current_user(TSRMLS_C);
+
+. php_idate
+  PHPAPI php_idate(char format, time_t ts, int localtime TSRMLS_DC)
+  Call: int ret = php_idate(format, ts, localtime TSRMLS_CC)
+
+. php_escape_html_entities
+  (size_t parameters were ints, previous "quote_style" (now flags) has expanded meaning)
+  PHPAPI char *php_escape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
+
+. php_escape_html_entities_ex
+  PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset, zend_bool double_encode TSRMLS_DC);
+
+. php_unescape_html_entities
+  PHPAPI char *php_unescape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
+
+
+========================
+2. Build system changes
+========================
+
+  a. Unix build system changes
+
+    - Changes in SAPI module build:
+      . When adding new binary SAPI (executable, like CLI/CGI/FPM) use CLI config.m4 and Makefile.frag files as templates and replace CLI/cli with your SAPI name.
+
+    - New macros:
+      . PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
+
+
+  b. Windows build system changes
+    -
+  

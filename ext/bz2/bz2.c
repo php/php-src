@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -85,14 +85,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bzdecompress, 0, 0, 1)
 	ZEND_ARG_INFO(0, small)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bzwrite, 0, 0, 2)
+	ZEND_ARG_INFO(0, fp)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_bzflush, 0)
+	ZEND_ARG_INFO(0, fp)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       arginfo_bzopen)
 	PHP_FE(bzread,       arginfo_bzread)
-	PHP_FALIAS(bzwrite,   fwrite,		NULL)
-	PHP_FALIAS(bzflush,   fflush,		NULL)
-	PHP_FALIAS(bzclose,   fclose,		NULL)
+	PHP_FALIAS(bzwrite,   fwrite,		arginfo_bzwrite)
+	PHP_FALIAS(bzflush,   fflush,		arginfo_bzflush)
+	PHP_FALIAS(bzclose,   fclose,		arginfo_bzflush)
 	PHP_FE(bzerrno,      arginfo_bzerrno)
 	PHP_FE(bzerrstr,     arginfo_bzerrstr)
 	PHP_FE(bzerror,      arginfo_bzerror)
@@ -219,7 +228,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	path_copy = path;
 #endif  
 
-	if ((PG(safe_mode) && (!php_checkuid(path_copy, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(path_copy TSRMLS_CC)) {
+	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
 		return NULL;
 	}
 	
@@ -233,7 +242,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
-		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST | ENFORCE_SAFE_MODE, opened_path);
+		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
 	
 		if (stream) {
 			int fd;
@@ -308,7 +317,7 @@ static PHP_MINFO_FUNCTION(bz2)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "BZip2 Support", "Enabled");
-	php_info_print_table_row(2, "Stream Wrapper support", "compress.bz2://");
+	php_info_print_table_row(2, "Stream Wrapper support", "compress.bzip2://");
 	php_info_print_table_row(2, "Stream Filter support", "bzip2.decompress, bzip2.compress");
 	php_info_print_table_row(2, "BZip2 Version", (char *) BZ2_bzlibVersion());
 	php_info_print_table_end();
@@ -386,7 +395,7 @@ static PHP_FUNCTION(bzopen)
 		stream = php_stream_bz2open(NULL,
 									Z_STRVAL_PP(file), 
 									mode, 
-									ENFORCE_SAFE_MODE | REPORT_ERRORS, 
+									REPORT_ERRORS, 
 									NULL);
 	} else if (Z_TYPE_PP(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */

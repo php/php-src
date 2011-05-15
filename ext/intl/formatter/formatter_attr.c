@@ -250,7 +250,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	long symbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
-	int length = USIZE(value);
+	int length = USIZE(value_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -262,12 +262,17 @@ PHP_FUNCTION( numfmt_get_symbol )
 
 		RETURN_FALSE;
 	}
+	
+	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_get_symbol: invalid symbol value", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	length = unum_getSymbol(FORMATTER_OBJECT(nfo), symbol, value_buf, length, &INTL_DATA_ERROR_CODE(nfo));
-	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value )) {
+	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value_buf )) {
 		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
@@ -304,6 +309,11 @@ PHP_FUNCTION( numfmt_set_symbol )
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"numfmt_set_symbol: unable to parse input params", 0 TSRMLS_CC );
 
+		RETURN_FALSE;
+	}
+	
+	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_set_symbol: invalid symbol value", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
 

@@ -1,5 +1,7 @@
 --TEST--
 time_sleep_until() function - basic test for time_sleep_until()
+--SKIPIF--
+<?php	if (!function_exists("time_sleep_until")) die('skip time_sleep_until() not available');?>
 --CREDITS--
 Manuel Baldassarri mb@ideato.it
 Michele Orselli mo@ideato.it

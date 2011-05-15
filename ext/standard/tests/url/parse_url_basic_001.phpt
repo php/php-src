@@ -734,14 +734,7 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: array(3) {
-  ["scheme"]=>
-  string(1) "x"
-  ["host"]=>
-  string(1) ":"
-  ["path"]=>
-  string(1) "/"
-}
+--> x://::abc/?: bool(false)
 
 --> http://::?: array(2) {
   ["scheme"]=>
@@ -845,55 +838,29 @@ echo "Done";
   string(1) "/"
 }
 
---> http:///blah.com: 
-Warning: parse_url(http:///blah.com): Unable to parse URL in %s on line 15
-bool(false)
+--> http:///blah.com: bool(false)
 
---> http://:80: 
-Warning: parse_url(http://:80): Unable to parse URL in %s on line 15
-bool(false)
+--> http://:80: bool(false)
 
---> http://user@:80: 
-Warning: parse_url(http://user@:80): Unable to parse URL in %s on line 15
-bool(false)
+--> http://user@:80: bool(false)
 
---> http://user:pass@:80: 
-Warning: parse_url(http://user:pass@:80): Unable to parse URL in %s on line 15
-bool(false)
+--> http://user:pass@:80: bool(false)
 
---> http://:: 
-Warning: parse_url(http://:): Unable to parse URL in %s on line 15
-bool(false)
+--> http://:: bool(false)
 
---> http://@/: 
-Warning: parse_url(http://@/): Unable to parse URL in %s on line 15
-bool(false)
+--> http://@/: bool(false)
 
---> http://@:/: 
-Warning: parse_url(http://@:/): Unable to parse URL in %s on line 15
-bool(false)
+--> http://@:/: bool(false)
 
---> http://:/: 
-Warning: parse_url(http://:/): Unable to parse URL in %s on line 15
-bool(false)
+--> http://:/: bool(false)
 
---> http://?: 
-Warning: parse_url(http://?): Unable to parse URL in %s on line 15
-bool(false)
+--> http://?: bool(false)
 
---> http://?:: 
-Warning: parse_url(http://?:): Unable to parse URL in %s on line 15
-bool(false)
+--> http://?:: bool(false)
 
---> http://:?: 
-Warning: parse_url(http://:?): Unable to parse URL in %s on line 15
-bool(false)
+--> http://:?: bool(false)
 
---> http://blah.com:123456: 
-Warning: parse_url(http://blah.com:123456): Unable to parse URL in %s on line 15
-bool(false)
+--> http://blah.com:123456: bool(false)
 
---> http://blah.com:abcdef: 
-Warning: parse_url(http://blah.com:abcdef): Unable to parse URL in %s on line 15
-bool(false)
+--> http://blah.com:abcdef: bool(false)
 Done

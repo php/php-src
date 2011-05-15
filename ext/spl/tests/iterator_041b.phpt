@@ -82,6 +82,10 @@ class MyArrayIterator extends ArrayIterator
 			{
 				self::$fail++;
 			}
+			try {
+				$e = null;
+			} catch (Exception $e) {
+			}
 		}
 	}
 }
@@ -101,10 +105,19 @@ State 3: valid()
 State 4: current()
 State 5: key()
 State 6: next()
+State 7: __destruct()
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
 ===iterator_count===
 State 0: __construct()
 State 1: __construct()
 State 2: rewind()
 State 3: valid()
 State 6: next()
+State 7: __destruct()
+int(2)
 ===DONE===

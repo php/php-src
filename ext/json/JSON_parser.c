@@ -291,12 +291,14 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval **z, smart_str *buf, int type)
+static void json_create_zval(zval **z, smart_str *buf, int type, int options)
 {
     ALLOC_INIT_ZVAL(*z);
 
     if (type == IS_LONG)
     {
+		zend_bool bigint = 0;
+
 		if (buf->c[0] == '-') {
 			buf->len--;
 		}
@@ -306,8 +308,21 @@ static void json_create_zval(zval **z, smart_str *buf, int type)
 				int cmp = strcmp(buf->c + (buf->c[0] == '-'), long_min_digits);
 
 				if (!(cmp < 0 || (cmp == 0 && buf->c[0] == '-'))) {
-					goto use_double;
+					bigint = 1;
 				}
+			} else {
+				bigint = 1;
+			}
+		}
+
+		if (bigint) {
+			/* value too large to represent as a long */
+			if (options & PHP_JSON_BIGINT_AS_STRING) {
+				if (buf->c[0] == '-') {
+					/* Restore last char consumed above */
+					buf->len++;
+				}
+				goto use_string;
 			} else {
 				goto use_double;
 			}
@@ -322,6 +337,7 @@ use_double:
     }
     else if (type == IS_STRING)
     {
+use_string:
         ZVAL_STRINGL(*z, buf->c, buf->len, 1);
     }
     else if (type == IS_BOOL)
@@ -420,12 +436,13 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     machine with a stack.
 */
 int
-parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc TSRMLS_DC)
+parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options TSRMLS_DC)
 {
     int next_char;  /* the next character */
     int next_class;  /* the next character class */
     int next_state;  /* the next state */
     int the_index;
+    int assoc = options & PHP_JSON_OBJECT_AS_ARRAY;
 
     smart_str buf = {0};
     smart_str key = {0};
@@ -530,7 +547,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type, options);
 
                     if (!assoc) {
                         add_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
@@ -558,7 +575,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                     zval *mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type, options);
                     add_next_index_zval(jp->the_zstack[jp->top], mval);
                     buf.len = 0;
                     JSON_RESET_TYPE();
@@ -656,6 +673,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 					/* fall through if not IS_STRING */
                 default:
                     FREE_BUFFERS();
+                    jp->error_code = PHP_JSON_ERROR_SYNTAX;
                     return false;
                 }
                 break;
@@ -669,7 +687,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                      jp->stack[jp->top] == MODE_ARRAY))
                 {
                     smart_str_0(&buf);
-                    json_create_zval(&mval, &buf, type);
+                    json_create_zval(&mval, &buf, type, options);
                 }
 
                 switch (jp->stack[jp->top]) {
@@ -695,6 +713,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                         break;
                     default:
                         FREE_BUFFERS();
+                        jp->error_code = PHP_JSON_ERROR_SYNTAX;
                         return false;
                 }
                 buf.len = 0;

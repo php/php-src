@@ -70,6 +70,20 @@ Arguments:
 
 Returns:       < 0    if the string is a valid UTF-8 string
                >= 0   otherwise; the value is the offset of the bad byte
+
+Bad bytes can be:
+
+  . An isolated byte whose most significant bits are 0x80, because this
+    can only correctly appear within a UTF-8 character;
+
+  . A byte whose most significant bits are 0xc0, but whose other bits indicate
+    that there are more than 3 additional bytes (i.e. an RFC 2279 starting
+    byte, which is no longer valid under RFC 3629);
+
+  .
+
+The returned offset may also be equal to the length of the string; this means
+that one or more bytes is missing from the final UTF-8 character.
 */
 
 int
@@ -91,7 +105,8 @@ for (p = string; length-- > 0; p++)
   if (c < 128) continue;
   if (c < 0xc0) return p - string;
   ab = _pcre_utf8_table4[c & 0x3f];     /* Number of additional bytes */
-  if (length < ab || ab > 3) return p - string;
+  if (ab > 3) return p - string;        /* Too many for RFC 3629 */
+  if (length < ab) return p + 1 + length - string;   /* Missing bytes */
   length -= ab;
 
   /* Check top bits in the second byte */

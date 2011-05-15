@@ -28,7 +28,7 @@ array(7) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -37,7 +37,7 @@ array(7) {
   [1]=>
   array(3) {
     [0]=>
-    int(316)
+    int(%d)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -46,7 +46,7 @@ array(7) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -55,7 +55,7 @@ array(7) {
   [3]=>
   array(3) {
     [0]=>
-    int(315)
+    int(%d)
     [1]=>
     string(13) ""Hello World""
     [2]=>
@@ -66,7 +66,7 @@ array(7) {
   [5]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -75,7 +75,7 @@ array(7) {
   [6]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -87,7 +87,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(19) "echo 'Hello World';"
     [2]=>

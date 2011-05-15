@@ -22,7 +22,7 @@ var_dump(preg_last_error() == PREG_NO_ERROR);
 echo "Done\n";
 ?>
 --EXPECT--
-int(0)
+bool(false)
 array(0) {
 }
 bool(true)

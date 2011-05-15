@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,8 +72,8 @@ PHP_FUNCTION(gettype)
 
 		case IS_RESOURCE:
 			{
-				char *type_name;
-				type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+
 				if (type_name) {
 					RETVAL_STRING("resource", 1);
 					break;
@@ -219,8 +219,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 			}
 		}
 		if (type == IS_RESOURCE) {
-			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}

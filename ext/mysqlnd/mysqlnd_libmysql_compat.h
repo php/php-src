@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2009 The PHP Group                                |
+  | Copyright (c) 2006-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -79,6 +79,7 @@
 #define mysql_set_server_option(r,o)	mysqlnd_set_server_option((r), (o))
 #define mysql_set_character_set(r,a)	mysqlnd_set_character_set((r), (a))
 #define mysql_sqlstate(r)				mysqlnd_sqlstate((r))
+#define mysql_ssl_set(c,key,cert,ca,capath,cipher)	mysqlnd_ssl_set((c), (key), (cert), (ca), (capath), (cipher))
 #define mysql_stmt_affected_rows(s)		mysqlnd_stmt_affected_rows((s))
 #define mysql_stmt_field_count(s)		mysqlnd_stmt_field_count((s))
 #define mysql_stmt_param_count(s)		mysqlnd_stmt_param_count((s))
@@ -121,14 +122,14 @@
 #define mysql_warning_count(r)			mysqlnd_warning_count((r))
 #define mysql_eof(r)					(((r)->unbuf && (r)->unbuf->eof_reached) || (r)->stored_data)
 
-#define REFRESH_GRANT      MYSQLND_REFRESH_GRANT
-#define REFRESH_LOG        MYSQLND_REFRESH_LOG
-#define REFRESH_TABLES     MYSQLND_REFRESH_TABLES
-#define REFRESH_HOSTS      MYSQLND_REFRESH_HOSTS
-#define REFRESH_STATUS     MYSQLND_REFRESH_STATUS
-#define REFRESH_THREADS    MYSQLND_REFRESH_THREADS
-#define REFRESH_SLAVE      MYSQLND_REFRESH_SLAVE
-#define REFRESH_MASTER     MYSQLND_REFRESH_MASTER
-#define REFRESH_BACKUP_LOG MYSQLND_REFRESH_BACKUP_LOG
+#define REFRESH_GRANT		MYSQLND_REFRESH_GRANT
+#define REFRESH_LOG			MYSQLND_REFRESH_LOG
+#define REFRESH_TABLES		MYSQLND_REFRESH_TABLES
+#define REFRESH_HOSTS		MYSQLND_REFRESH_HOSTS
+#define REFRESH_STATUS		MYSQLND_REFRESH_STATUS
+#define REFRESH_THREADS		MYSQLND_REFRESH_THREADS
+#define REFRESH_SLAVE		MYSQLND_REFRESH_SLAVE
+#define REFRESH_MASTER		MYSQLND_REFRESH_MASTER
+#define REFRESH_BACKUP_LOG	MYSQLND_REFRESH_BACKUP_LOG
 
 #endif /* MYSQLND_LIBMYSQL_COMPAT_H */

@@ -6,7 +6,7 @@ if (!extension_loaded("phar")) die("skip");
 if (version_compare(PHP_VERSION, "6.0", "<")) die("skip Unicode support required");
 ?>
 --INI--
-phar.cache_list={$cwd}/files/nophar.phar
+phar.cache_list={PWD}/files/nophar.phar
 --FILE--
 <?php
 $pname = 'phar://' . dirname(__FILE__) . '/files/nophar.phar';

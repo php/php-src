@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -114,28 +114,7 @@ typedef struct {
 } pdo_dblib_db_handle;
 
 typedef struct {
-	int coltype;
-	char *name;
-	int maxlen;
-	char *source;
-} pdo_dblib_col;
-
-typedef struct {
-	unsigned long len;
-	char *data;
-} pdo_dblib_colval;
-
-typedef struct {
 	pdo_dblib_db_handle *H;
-
-	int ncols;
-	pdo_dblib_col *cols;
-
-	pdo_dblib_colval *rows;
-	int nrows;
-
-	int current;
-	
 	pdo_dblib_err err;
 } pdo_dblib_stmt;
 

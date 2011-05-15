@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -42,17 +42,6 @@
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
 #endif
 
-#if !HAVE_MYSQL_SQLSTATE && !PDO_USE_MYSQLND
-static const char *pdo_mysql_get_sqlstate(unsigned int my_errno) { /* {{{ */
-	switch (my_errno) {
-		/* import auto-generated case: code */
-#include "php_pdo_mysql_sqlstate.h"
-	default: return "HY000";
-	}
-}
-/* }}} */
-#endif
-
 /* {{{ _pdo_mysql_error */
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
@@ -72,13 +61,9 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		einfo   = &H->einfo;
 	}
 
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (S && S->stmt) {
 		einfo->errcode = mysql_stmt_errno(S->stmt);
-	}
-	else
-#endif
-	{
+	} else {
 		einfo->errcode = mysql_errno(H->server);
 	}
 
@@ -112,18 +97,11 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		PDO_DBG_RETURN(0);
 	}
 
-#if HAVE_MYSQL_SQLSTATE || PDO_USE_MYSQLND
-# if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (S && S->stmt) {
 		strcpy(*pdo_err, mysql_stmt_sqlstate(S->stmt));
-	} else
-# endif
-	{
+	} else {
 		strcpy(*pdo_err, mysql_sqlstate(H->server));
 	}
-#else
-	strcpy(*pdo_err, pdo_mysql_get_sqlstate(einfo->errcode));
-#endif
 
 	if (!dbh->methods) {
 		PDO_DBG_INF("Throwing exception");
@@ -187,12 +165,10 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	char *nsql = NULL;
 	int nsql_len = 0;
 	int ret;
 	int server_version;
-#endif
 	
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
@@ -206,7 +182,6 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		goto end;
 	}
 
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	server_version = mysql_get_server_version(H->server);
 	if (server_version < 40100) {
 		goto fallback;
@@ -270,7 +245,6 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	PDO_DBG_RETURN(1);
 
 fallback:
-#endif
 end:
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	
@@ -296,7 +270,6 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 			PDO_DBG_RETURN(H->einfo.errcode ? -1 : 0);
 		} else {
 
-#if HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND
 			/* MULTI_QUERY support - eat up all unfetched result sets */
 			MYSQL_RES* result;
 			while (mysql_more_results(H->server)) {
@@ -308,7 +281,6 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 					mysql_free_result(result);
 				}
 			}
-#endif
 			PDO_DBG_RETURN((int)c);
 		}
 	}
@@ -625,6 +597,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		char *default_file = NULL, *default_group = NULL;
 		long compress = 0;
 #endif
+		char *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
 
 		H->emulate_prepare = pdo_attr_lval(driver_options,
@@ -649,7 +622,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			goto cleanup;
 		}
 
-#if PHP_MAJOR_VERSION < 6
+#if PHP_API_VERSION < 20100412
 		if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode))
 #else
 		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') 
@@ -709,7 +682,38 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			}
 		}
 #endif
+		ssl_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_KEY, NULL TSRMLS_CC);
+		ssl_cert = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CERT, NULL TSRMLS_CC);
+		ssl_ca = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CA, NULL TSRMLS_CC);
+		ssl_capath = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CAPATH, NULL TSRMLS_CC);
+		ssl_cipher = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CIPHER, NULL TSRMLS_CC);
+		
+		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
+			mysql_ssl_set(H->server, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
+			if (ssl_key) {
+				efree(ssl_key);
+			}
+			if (ssl_cert) {
+				efree(ssl_cert);
+			}
+			if (ssl_ca) {
+				efree(ssl_ca);
+			}
+			if (ssl_capath) {
+				efree(ssl_capath);
+			}
+			if (ssl_cipher) {
+				efree(ssl_cipher);
+			}
+		}
 	}
+
+#ifdef PDO_MYSQL_HAS_CHARSET
+	if (vars[0].optval && mysql_options(H->server, MYSQL_SET_CHARSET_NAME, vars[0].optval)) {
+		pdo_mysql_error(dbh);
+		goto cleanup;
+	}
+#endif
 
 	dbname = vars[1].optval;
 	host = vars[2].optval;	

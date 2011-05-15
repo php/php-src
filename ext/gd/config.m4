@@ -10,6 +10,11 @@ PHP_ARG_WITH(gd, for GD support,
 [  --with-gd[=DIR]         Include GD support.  DIR is the GD library base
                           install directory [BUNDLED]])
 
+if test -z "$PHP_VPX_DIR"; then
+  PHP_ARG_WITH(vpx-dir, for the location of libvpx,
+  [  --with-vpx-dir[=DIR]     GD: Set the path to libvpx install prefix], no, no)
+fi
+
 if test -z "$PHP_JPEG_DIR"; then
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
   [  --with-jpeg-dir[=DIR]     GD: Set the path to libjpeg install prefix], no, no)
@@ -68,15 +73,41 @@ AC_DEFUN([PHP_GD_ZLIB],[
 	fi
 ])
 
+AC_DEFUN([PHP_GD_VPX],[
+  if test "$PHP_VPX_DIR" != "no"; then
+
+    for i in $PHP_VPX_DIR /usr/local /usr; do
+      test -f $i/include/vpx_codec.h || test -f $i/include/vpx/vpx_codec.h && GD_VPX_DIR=$i && break
+    done
+
+    if test -z "$GD_VPX_DIR"; then
+      AC_MSG_ERROR([vpx_codec.h not found.])
+    fi
+
+    PHP_CHECK_LIBRARY(vpx,vpx_codec_destroy,
+    [
+      PHP_ADD_INCLUDE($GD_VPX_DIR/include)
+      PHP_ADD_LIBRARY(pthread)
+      PHP_ADD_LIBRARY_WITH_PATH(vpx, $GD_VPX_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
+    ],[
+      AC_MSG_ERROR([Problem with libvpx.(a|so). Please check config.log for more information.])
+    ],[
+      -L$GD_VPX_DIR/$PHP_LIBDIR
+    ])
+  else
+    AC_MSG_RESULT([If configure fails try --with-vpx-dir=<DIR>])
+  fi
+])
+
 AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in $PHP_JPEG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libjpeg.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libjpeg.a && GD_JPEG_DIR=$i && break
+      test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
-      AC_MSG_ERROR([libjpeg.(a|so) not found.])
+      AC_MSG_ERROR([jpeglib.h not found.])
     fi
 
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
@@ -97,19 +128,15 @@ AC_DEFUN([PHP_GD_PNG],[
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
-      test -f $i/$PHP_LIBDIR/libpng.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libpng.a && GD_PNG_DIR=$i && break
+      test -f $i/include/png.h && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
-      AC_MSG_ERROR([libpng.(a|so) not found.])
+      AC_MSG_ERROR([png.h not found.])
     fi
 
     if test "$PHP_ZLIB_DIR" = "no"; then
       AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib-dir=<DIR>])
-    fi
-
-    if test ! -f $GD_PNG_DIR/include/png.h; then
-      AC_MSG_ERROR([png.h not found.])
     fi
 
     PHP_CHECK_LIBRARY(png,png_write_image,
@@ -265,12 +292,12 @@ dnl
 if test "$PHP_GD" = "yes"; then
   GD_MODULE_TYPE=builtin
   extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-                 libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_png.c libgd/gd_jpeg.c \
-                 libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
-                 libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
-                 libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c libgd/gd_gif_in.c \
-                 libgd/xbm.c libgd/gd_gif_out.c libgd/gd_security.c libgd/gd_filter.c \
-                 libgd/gd_pixelate.c libgd/gd_arc.c libgd/gd_rotate.c libgd/gd_color.c"
+                 libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/webpimg.c libgd/gd_webp.c \
+                 libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
+                 libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
+                 libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
+                 libgd/gd_topal.c libgd/gd_gif_in.c libgd/xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
+                 libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c libgd/gd_rotate.c libgd/gd_color.c"
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
@@ -283,6 +310,7 @@ dnl Various checks for GD features
   PHP_GD_TTSTR
   PHP_GD_JISX0208
   PHP_GD_JPEG
+  PHP_GD_VPX
   PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
@@ -317,6 +345,11 @@ dnl Make sure the libgd/ is first in the include path
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
 
+  if test -n "$GD_VPX_DIR"; then
+    AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBVPX"
+  fi
+
   if test -n "$GD_JPEG_DIR"; then
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
@@ -349,6 +382,7 @@ else
 dnl Various checks for GD features
   PHP_GD_ZLIB
   PHP_GD_TTSTR
+  PHP_GD_VPX
   PHP_GD_JPEG
   PHP_GD_PNG
   PHP_GD_XPM

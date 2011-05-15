@@ -6,8 +6,6 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
-if (!$IS_MYSQLND)
-	die("skip mysqlnd test only");
 ?>
 --INI--
 mysqli.allow_persistent=1

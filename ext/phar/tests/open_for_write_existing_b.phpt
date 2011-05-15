@@ -36,7 +36,7 @@ include $pname . '/b/c.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 
-Warning: fopen(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_b.php on line %d
+Warning: fopen(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b.php on line %d
 
 Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_existing_b.php on line %d
 

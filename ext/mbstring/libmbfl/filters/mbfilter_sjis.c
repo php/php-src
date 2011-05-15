@@ -66,7 +66,7 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	"Shift_JIS",
 	(const char *(*)[])&mbfl_encoding_sjis_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis = {

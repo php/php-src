@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#include <stddef.h>
 
 static int le_protocols;
 
@@ -77,7 +78,6 @@ PHP_MINIT_FUNCTION(user_streams)
 
 	REGISTER_LONG_CONSTANT("STREAM_USE_PATH", 			USE_PATH, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_IGNORE_URL", 		IGNORE_URL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_ENFORCE_SAFE_MODE",	ENFORCE_SAFE_MODE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_REPORT_ERRORS", 		REPORT_ERRORS, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_MUST_SEEK", 			STREAM_MUST_SEEK, CONST_CS|CONST_PERSISTENT);
 
@@ -130,6 +130,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_LOCK     "stream_lock"
 #define USERSTREAM_CAST		"stream_cast"
 #define USERSTREAM_SET_OPTION	"stream_set_option"
+#define USERSTREAM_TRUNCATE	"stream_truncate"
 
 /* {{{ class should have methods like these:
  
@@ -252,6 +253,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	}
 
 	function stream_lock($operation)
+	{
+		return true / false;
+	}
+
+ 	function stream_truncate($new_size)
 	{
 		return true / false;
 	}
@@ -856,6 +862,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
+		SEPARATE_ZVAL(elem);																	 \
 		convert_to_long(*elem);                                                                   \
 		ssb->sb.st_##name2 = Z_LVAL_PP(elem);                                                      \
 	}
@@ -931,7 +938,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 	zval *retval = NULL;
 	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
-	int ret = -1;
+	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	zval *zvalue = NULL;
 	zval **args[3];
 
@@ -984,13 +991,59 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		} else if (call_result == FAILURE) {
 			if (value == 0) { 
 			   	/* lock support test (TODO: more check) */
-				ret = 0;
+				ret = PHP_STREAM_OPTION_RETURN_OK;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_LOCK " is not implemented!", 
 								 us->wrapper->classname);
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
 			}
 		}
 
+		break;
+		
+	case PHP_STREAM_OPTION_TRUNCATE_API:
+		ZVAL_STRINGL(&func_name, USERSTREAM_TRUNCATE, sizeof(USERSTREAM_TRUNCATE)-1, 0);
+		
+		switch (value) {
+		case PHP_STREAM_TRUNCATE_SUPPORTED:
+			if (zend_is_callable_ex(&func_name, us->object, IS_CALLABLE_CHECK_SILENT,
+					NULL, NULL, NULL, NULL TSRMLS_CC))
+				ret = PHP_STREAM_OPTION_RETURN_OK;
+			else
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+			break;
+			
+		case PHP_STREAM_TRUNCATE_SET_SIZE: {
+			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;
+			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
+				MAKE_STD_ZVAL(zvalue);
+				ZVAL_LONG(zvalue, (long)new_size);
+				args[0] = &zvalue;
+				call_result = call_user_function_ex(NULL,
+													&us->object,
+													&func_name,
+													&retval,
+													1, args, 0, NULL TSRMLS_CC);
+				if (call_result == SUCCESS && retval != NULL) {
+					if (Z_TYPE_P(retval) == IS_BOOL) {
+						ret = Z_LVAL_P(retval) ? PHP_STREAM_OPTION_RETURN_OK :
+												 PHP_STREAM_OPTION_RETURN_ERR;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,
+								"%s::" USERSTREAM_TRUNCATE " did not return a boolean!",
+								us->wrapper->classname);
+					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"%s::" USERSTREAM_TRUNCATE " is not implemented!",
+							us->wrapper->classname);
+				}
+			} else { /* bad new size */
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			break;
+		}
+		}
 		break;
 	
 	case PHP_STREAM_OPTION_READ_BUFFER:
@@ -1041,16 +1094,15 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			&retval,
 			3, args, 0, NULL TSRMLS_CC);
 	
-		do {
-			if (call_result == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
-						us->wrapper->classname);
-				break;
-			}
-			if (retval && zend_is_true(retval)) {
-				ret = PHP_STREAM_OPTION_RETURN_OK;
-			}
-		} while (0);
+		if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
+					us->wrapper->classname);
+			ret = PHP_STREAM_OPTION_RETURN_ERR;
+		} else if (retval && zend_is_true(retval)) {
+			ret = PHP_STREAM_OPTION_RETURN_OK;
+		} else {
+			ret = PHP_STREAM_OPTION_RETURN_ERR;
+		}
 
 		if (zoption) {
 			zval_ptr_dtor(&zoption);

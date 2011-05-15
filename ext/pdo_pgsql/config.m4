@@ -69,7 +69,8 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   AC_DEFINE(HAVE_PDO_PGSQL,1,[Whether to build PostgreSQL for PDO support or not])
 
   AC_MSG_CHECKING([for openssl dependencies])
-  if grep -q openssl $PGSQL_INCLUDE/libpq-fe.h ; then
+  grep openssl $PGSQL_INCLUDE/libpq-fe.h >/dev/null 2>&1
+  if test $? -eq 0 ; then
     AC_MSG_RESULT([yes])
     dnl First try to find pkg-config
     AC_PATH_PROG(PKG_CONFIG, pkg-config, no)

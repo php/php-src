@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -161,45 +161,31 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 
 END_EXTERN_C()
 
-/* Macroses for zend_fast_cache.h compatibility */
-
-#define ZEND_FAST_ALLOC(p, type, fc_type)	\
-	(p) = (type *) emalloc(sizeof(type))
-
-#define ZEND_FAST_FREE(p, fc_type)	\
-	efree(p)
-
-#define ZEND_FAST_ALLOC_REL(p, type, fc_type)	\
-	(p) = (type *) emalloc_rel(sizeof(type))
-
-#define ZEND_FAST_FREE_REL(p, fc_type)	\
-	efree_rel(p)
-
 /* fast cache for zval's */
 #define ALLOC_ZVAL(z)	\
-	ZEND_FAST_ALLOC(z, zval, ZVAL_CACHE_LIST)
+	(z) = (zval *) emalloc(sizeof(zval))
 
 #define FREE_ZVAL(z)	\
-	ZEND_FAST_FREE(z, ZVAL_CACHE_LIST)
+	efree_rel(z)
 
 #define ALLOC_ZVAL_REL(z)	\
-	ZEND_FAST_ALLOC_REL(z, zval, ZVAL_CACHE_LIST)
+	(z) = (zval *) emalloc_rel(sizeof(zval))
 
 #define FREE_ZVAL_REL(z)	\
-	ZEND_FAST_FREE_REL(z, ZVAL_CACHE_LIST)
+	efree_rel(z)
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
-	ZEND_FAST_ALLOC(ht, HashTable, HASHTABLE_CACHE_LIST)
+	(ht) = (HashTable *) emalloc(sizeof(HashTable))
 
 #define FREE_HASHTABLE(ht)	\
-	ZEND_FAST_FREE(ht, HASHTABLE_CACHE_LIST)
+	efree(ht)
 
 #define ALLOC_HASHTABLE_REL(ht)	\
-	ZEND_FAST_ALLOC_REL(ht, HashTable, HASHTABLE_CACHE_LIST)
+	(ht) = (HashTable *) emalloc_rel(sizeof(HashTable))
 
 #define FREE_HASHTABLE_REL(ht)	\
-	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
+	efree_rel(ht)
 
 /* Heap functions */
 typedef struct _zend_mm_heap zend_mm_heap;

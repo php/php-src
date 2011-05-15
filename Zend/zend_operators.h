@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -167,7 +167,7 @@ check_digits:
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (dval) {
-				local_dval = zend_hex_strtod(str, (char **)&ptr);
+				local_dval = zend_hex_strtod(str, &ptr);
 			}
 			type = IS_DOUBLE;
 		}
@@ -178,7 +178,7 @@ process_double:
 		/* If there's a dval, do the conversion; else continue checking
 		 * the digits if we need to check for a full match */
 		if (dval) {
-			local_dval = zend_strtod(str, (char **)&ptr);
+			local_dval = zend_strtod(str, &ptr);
 		} else if (allow_errors != 1 && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
 			goto check_digits;
@@ -256,17 +256,17 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
-static inline void *zend_memrchr(const void *s, int c, size_t n)
+static inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-	register unsigned char *e;
+	register const unsigned char *e;
 
 	if (n <= 0) {
 		return NULL;
 	}
 
-	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-		if (*e == (unsigned char)c) {
-			return (void *)e;
+	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
+		if (*e == (const unsigned char)c) {
+			return (const void *)e;
 		}
 	}
 

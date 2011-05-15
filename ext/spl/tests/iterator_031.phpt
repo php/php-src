@@ -19,10 +19,19 @@ foreach($it as $k=>$v)
 	echo "$k=>$v\n";
 }
 
+class MyAppendIterator2 extends AppendIterator
+{
+	function __construct()
+	{
+		echo __METHOD__ . "\n";
+	}
+}
+
 class MyAppendIterator extends AppendIterator
 {
 	function __construct()
 	{
+		parent::__construct();
 		echo __METHOD__ . "\n";
 	}
 
@@ -50,24 +59,23 @@ class MyAppendIterator extends AppendIterator
 	}
 }
 
-$ap = new MyAppendIterator;
-
 try
 {
-	$ap->append($it);
+	$aperr = new MyAppendIterator2;
+
 }
-catch(BadMethodCallException $e)
+catch(Exception $e)
 {
 	echo $e->getMessage() . "\n";
 }
 
-$ap->parent__construct();
+$ap = new MyAppendIterator;
 
 try
 {
 	$ap->parent__construct($it);
 }
-catch(BadMethodCallException $e)
+catch(Exception $e)
 {
 	echo $e->getMessage() . "\n";
 }
@@ -88,9 +96,9 @@ foreach($ap as $k=>$v)
 MyArrayIterator::rewind
 0=>1
 1=>2
+MyAppendIterator2::__construct
+In the constructor of MyAppendIterator2, parent::__construct() must be called and its exceptions cannot be cleared
 MyAppendIterator::__construct
-MyAppendIterator::append
-Classes derived from AppendIterator must call AppendIterator::__construct()
 AppendIterator::getIterator() must be called exactly once per instance
 MyAppendIterator::append
 MyArrayIterator::rewind

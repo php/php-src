@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -69,6 +69,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
+zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant

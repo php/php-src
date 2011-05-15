@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #endif
 
 #include "php.h"
+#include "SAPI.h"
 
 #define PHP_XML_INTERNAL
 #include "zend_variables.h"
@@ -53,6 +54,7 @@
 
 /* a true global for initialization */
 static int _php_libxml_initialized = 0;
+static int _php_libxml_per_request_initialization = 1;
 
 typedef struct _php_libxml_func_handler {
 	php_libxml_export_node export_func;
@@ -300,7 +302,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	   that the streams layer puts out at times, but for libxml we
 	   may try to open files that don't exist, but it is not a failure
 	   in xml processing (eg. DTD files)  */
-	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0 TSRMLS_CC);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL TSRMLS_CC) == -1) {
 			if (isescaped) {
@@ -310,11 +312,9 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	if (LIBXML(stream_context)) {
-		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
-
-	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+	context = php_stream_context_from_zval(LIBXML(stream_context), 0);
+	
+	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (isescaped) {
 		xmlFree(resolved_path);
 	}
@@ -636,22 +636,55 @@ static PHP_MINIT_FUNCTION(libxml)
 	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
 	libxmlerror_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
+	if (sapi_module.name) {
+		static const char * const supported_sapis[] = {
+			"cgi-fcgi",
+			"fpm-fcgi",
+			"litespeed",
+			NULL
+		};
+		const char * const *sapi_name;
+
+		for (sapi_name = supported_sapis; *sapi_name; sapi_name++) {
+			if (strcmp(sapi_module.name, *sapi_name) == 0) {
+				_php_libxml_per_request_initialization = 0;
+				break;
+			}
+		}
+	}
+
+	if (!_php_libxml_per_request_initialization) {
+		/* report errors via handler rather than stderr */
+		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
+		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
+	}
+
 	return SUCCESS;
 }
 
 
 static PHP_RINIT_FUNCTION(libxml)
 {
-	/* report errors via handler rather than stderr */
-	xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
-	xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
-	xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
+	if (_php_libxml_per_request_initialization) {
+		/* report errors via handler rather than stderr */
+		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
+		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
+	}
 	return SUCCESS;
 }
 
 
 static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
+	if (!_php_libxml_per_request_initialization) {
+		xmlSetGenericErrorFunc(NULL, NULL);
+		xmlSetStructuredErrorFunc(NULL, NULL);
+
+		xmlParserInputBufferCreateFilenameDefault(NULL);
+		xmlOutputBufferCreateFilenameDefault(NULL);
+	}
 	php_libxml_shutdown();
 
 	return SUCCESS;
@@ -661,11 +694,13 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 static PHP_RSHUTDOWN_FUNCTION(libxml)
 {
 	/* reset libxml generic error handling */
-	xmlSetGenericErrorFunc(NULL, NULL);
-	xmlSetStructuredErrorFunc(NULL, NULL);
+	if (_php_libxml_per_request_initialization) {
+		xmlSetGenericErrorFunc(NULL, NULL);
+		xmlSetStructuredErrorFunc(NULL, NULL);
 
-	xmlParserInputBufferCreateFilenameDefault(NULL);
-	xmlOutputBufferCreateFilenameDefault(NULL);
+		xmlParserInputBufferCreateFilenameDefault(NULL);
+		xmlOutputBufferCreateFilenameDefault(NULL);
+	}
 
 	if (LIBXML(stream_context)) {
 		zval_ptr_dtor(&LIBXML(stream_context));

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -241,6 +241,10 @@ static zend_mm_storage* zend_mm_mem_win32_init(void *params)
 		return NULL;
 	}
 	storage = (zend_mm_storage*)malloc(sizeof(zend_mm_storage));
+	if (storage == NULL) {
+		HeapDestroy(heap);
+		return NULL;
+	}
 	storage->data = (void*) heap;
 	return storage;
 }
@@ -435,6 +439,7 @@ struct _zend_mm_heap {
 	zend_mm_free_block *free_buckets[ZEND_MM_NUM_BUCKETS*2];
 	zend_mm_free_block *large_free_buckets[ZEND_MM_NUM_BUCKETS];
 	zend_mm_free_block *rest_buckets[2];
+	int                 rest_count;
 #if ZEND_MM_CACHE_STAT
 	struct {
 		int count;
@@ -454,6 +459,10 @@ struct _zend_mm_heap {
 	(zend_mm_free_block*)((char*)&heap->rest_buckets[0] + \
 		sizeof(zend_mm_free_block*) * 2 - \
 		sizeof(zend_mm_small_free_block))
+
+#define ZEND_MM_REST_BLOCK ((zend_mm_free_block*)(zend_uintptr_t)(1))
+
+#define ZEND_MM_MAX_REST_BLOCKS 16
 
 #if ZEND_MM_COOKIES
 
@@ -711,23 +720,6 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 #endif
 }
 
-static inline void zend_mm_add_to_rest_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
-{
-	zend_mm_free_block *prev, *next;
-
-	ZEND_MM_SET_MAGIC(mm_block, MEM_BLOCK_FREED);
-
-	if (!ZEND_MM_SMALL_SIZE(ZEND_MM_FREE_BLOCK_SIZE(mm_block))) {
-		mm_block->parent = NULL;
-	}
-
-	prev = heap->rest_buckets[0];
-	next = prev->next_free_block;
-	mm_block->prev_free_block = prev;
-	mm_block->next_free_block = next;
-	prev->next_free_block = next->prev_free_block = mm_block;
-}
-
 static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	size_t size;
@@ -854,10 +846,43 @@ subst_block:
 					heap->free_bitmap &= ~(ZEND_MM_LONG_CONST(1) << index);
 				}
 			}
+		} else if (UNEXPECTED(mm_block->parent == ZEND_MM_REST_BLOCK)) {
+			heap->rest_count--;
 		} else if (UNEXPECTED(mm_block->parent != NULL)) {
 			goto subst_block;
 		}
 	}
+}
+
+static inline void zend_mm_add_to_rest_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
+{
+	zend_mm_free_block *prev, *next;
+
+	while (heap->rest_count >= ZEND_MM_MAX_REST_BLOCKS) {
+		zend_mm_free_block *p = heap->rest_buckets[1];
+
+		if (!ZEND_MM_SMALL_SIZE(ZEND_MM_FREE_BLOCK_SIZE(p))) {
+			heap->rest_count--;
+		}
+		prev = p->prev_free_block;
+		next = p->next_free_block;
+		prev->next_free_block = next;
+		next->prev_free_block = prev;
+		zend_mm_add_to_free_list(heap, p);
+	}
+
+	if (!ZEND_MM_SMALL_SIZE(ZEND_MM_FREE_BLOCK_SIZE(mm_block))) {
+		mm_block->parent = ZEND_MM_REST_BLOCK;
+		heap->rest_count++;
+	}
+
+	ZEND_MM_SET_MAGIC(mm_block, MEM_BLOCK_FREED);
+
+	prev = heap->rest_buckets[0];
+	next = prev->next_free_block;
+	mm_block->prev_free_block = prev;
+	mm_block->next_free_block = next;
+	prev->next_free_block = next->prev_free_block = mm_block;
 }
 
 static inline void zend_mm_init(zend_mm_heap *heap)
@@ -884,6 +909,7 @@ static inline void zend_mm_init(zend_mm_heap *heap)
 		heap->large_free_buckets[i] = NULL;
 	}
 	heap->rest_buckets[0] = heap->rest_buckets[1] = ZEND_MM_REST_BUCKET(heap);
+	heap->rest_count = 0;
 }
 
 static void zend_mm_del_segment(zend_mm_heap *heap, zend_mm_segment *segment)
@@ -1066,7 +1092,13 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	storage->handlers = handlers;
 
 	heap = malloc(sizeof(struct _zend_mm_heap));
-
+	if (heap == NULL) {
+		fprintf(stderr, "Cannot allocate heap for zend_mm storage [%s]\n", handlers->name);
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		exit(255);
+	}
 	heap->storage = storage;
 	heap->block_size = block_size;
 	heap->compact_size = 0;
@@ -1115,7 +1147,8 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 				mm_heap->large_free_buckets[i]->parent = &mm_heap->large_free_buckets[i];
 			}
 		}
-		mm_heap->rest_buckets[0]->next_free_block = mm_heap->rest_buckets[1]->prev_free_block = ZEND_MM_REST_BUCKET(mm_heap);
+		mm_heap->rest_buckets[0] = mm_heap->rest_buckets[1] = ZEND_MM_REST_BUCKET(mm_heap);
+		mm_heap->rest_count = 0;
 
 		free(heap);
 		heap = mm_heap;
@@ -1568,6 +1601,10 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 	zend_mm_segment *prev;
 	int internal;
 
+	if (!heap->use_zend_alloc) {
+		return;
+	}
+
 	if (heap->reserve) {
 #if ZEND_DEBUG
 		if (!silent) {
@@ -1632,27 +1669,63 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 	internal = heap->internal;
 	storage = heap->storage;
 	segment = heap->segments_list;
-	while (segment) {
-		prev = segment;
-		segment = segment->next_segment;
-		ZEND_MM_STORAGE_FREE(prev);
-	}
 	if (full_shutdown) {
+		while (segment) {
+			prev = segment;
+			segment = segment->next_segment;
+			ZEND_MM_STORAGE_FREE(prev);
+		}
+		heap->segments_list = NULL;
 		storage->handlers->dtor(storage);
 		if (!internal) {
 			free(heap);
 		}
 	} else {
+		if (segment) {
+#ifndef ZEND_WIN32
+			if (heap->reserve_size) {
+				while (segment->next_segment) {
+					prev = segment;
+					segment = segment->next_segment;
+					ZEND_MM_STORAGE_FREE(prev);
+				}
+				heap->segments_list = segment;
+			} else {
+#endif
+				do {
+					prev = segment;
+					segment = segment->next_segment;
+					ZEND_MM_STORAGE_FREE(prev);
+				} while (segment);
+				heap->segments_list = NULL;
+#ifndef ZEND_WIN32
+			}
+#endif
+		}
 		if (heap->compact_size &&
 		    heap->real_peak > heap->compact_size) {
 			storage->handlers->compact(storage);
 		}
-		heap->segments_list = NULL;
 		zend_mm_init(heap);
-		heap->real_size = 0;
-		heap->real_peak = 0;
+		if (heap->segments_list) {
+			heap->real_size = heap->segments_list->size;
+			heap->real_peak = heap->segments_list->size;
+		} else {
+			heap->real_size = 0;
+			heap->real_peak = 0;
+		}
 		heap->size = 0;
 		heap->peak = 0;
+		if (heap->segments_list) {
+			/* mark segment as a free block */
+			zend_mm_free_block *b = (zend_mm_free_block*)((char*)heap->segments_list + ZEND_MM_ALIGNED_SEGMENT_SIZE);
+			size_t block_size = heap->segments_list->size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_HEADER_SIZE;
+
+			ZEND_MM_MARK_FIRST_BLOCK(b);
+			ZEND_MM_LAST_BLOCK(ZEND_MM_BLOCK_AT(b, block_size));
+			ZEND_MM_BLOCK(b, ZEND_MM_FREE_BLOCK, block_size);
+			zend_mm_add_to_free_list(heap, b);
+		}
 		if (heap->reserve_size) {
 			heap->reserve = _zend_mm_alloc_int(heap, heap->reserve_size  ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 		}
@@ -2554,17 +2627,17 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
-	char *tmp;
-	alloc_globals->mm_heap = zend_mm_startup();
+	char *tmp = getenv("USE_ZEND_ALLOC");
 
-	tmp = getenv("USE_ZEND_ALLOC");
-	if (tmp) {
-		alloc_globals->mm_heap->use_zend_alloc = zend_atoi(tmp, 0);
-		if (!alloc_globals->mm_heap->use_zend_alloc) {
-			alloc_globals->mm_heap->_malloc = malloc;
-			alloc_globals->mm_heap->_free = free;
-			alloc_globals->mm_heap->_realloc = realloc;
-		}
+	if (tmp && !zend_atoi(tmp, 0)) {
+		alloc_globals->mm_heap = malloc(sizeof(struct _zend_mm_heap));
+		memset(alloc_globals->mm_heap, 0, sizeof(struct _zend_mm_heap));
+		alloc_globals->mm_heap->use_zend_alloc = 0;
+		alloc_globals->mm_heap->_malloc = malloc;
+		alloc_globals->mm_heap->_free = free;
+		alloc_globals->mm_heap->_realloc = realloc;
+	} else {
+		alloc_globals->mm_heap = zend_mm_startup();
 	}
 }
 

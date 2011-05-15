@@ -8,7 +8,7 @@ numfmt_format_currency()
 /*
  * Format a number using misc currencies/locales.
  */
-/* 
+/*
  * TODO: doesn't pass on ICU 3.6 because 'ru' and 'uk' locales changed
  * currency formatting.
  */
@@ -41,9 +41,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECTREGEX--
+--EXPECT--
 en_UK: '£1,234,567.89'
-en_US: '\$1,234,567.89'
-ru: '1 234 567,89 ?р.'
-uk: '(грн. )?1 234 567,89( грн.)?'
-en: 'UAH1,234,567.89'
+en_US: '$1,234,567.89'
+ru: '1 234 567,89 р.'
+uk: '1 234 567,89 ₴'
+en: '₴1,234,567.89'

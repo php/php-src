@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -677,10 +677,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 				/*
 				 * Check if a precision was specified
-				 *
-				 * XXX: an unreasonable amount of precision may be specified
-				 * resulting in overflow of num_buf. Currently we
-				 * ignore this possibility.
 				 */
 				if (*fmt == '.') {
 					adjust_precision = YES;
@@ -694,6 +690,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							precision = 0;
 					} else
 						precision = 0;
+					
+					if (precision > FORMAT_CONV_MAX_PRECISION) {
+						precision = FORMAT_CONV_MAX_PRECISION;
+					}
 				} else
 					adjust_precision = NO;
 			} else
@@ -1220,7 +1220,7 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 	va_list ap;
 
 	va_start(ap, format);
@@ -1236,7 +1236,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {

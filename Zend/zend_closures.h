@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -30,9 +30,10 @@ void zend_register_closure_ce(TSRMLS_D);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 
-ZEND_API void zend_create_closure(zval *res, zend_function *op_array TSRMLS_DC);
+ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zval *this_ptr TSRMLS_DC);
 ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC);
 ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC);
+ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC);
 
 END_EXTERN_C()
 

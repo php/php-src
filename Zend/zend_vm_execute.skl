@@ -2,6 +2,7 @@
 
 ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
+	DCL_OPLINE
 	zend_execute_data *execute_data;
 	zend_bool nested = 0;
 	zend_bool original_in_execution = EG(in_execution);
@@ -36,29 +37,31 @@ zend_vm_enter:
 	EX(nested) = nested;
 	nested = 1;
 
-	if (op_array->start_op) {
-		ZEND_VM_SET_OPCODE(op_array->start_op);
-	} else {
-		ZEND_VM_SET_OPCODE(op_array->opcodes);
+	LOAD_REGS();
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
 
 	if (op_array->this_var != -1 && EG(This)) {
  		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (!EG(active_symbol_table)) {
-			EX(CVs)[op_array->this_var] = (zval**)EX(CVs) + (op_array->last_var + op_array->this_var);
-			*EX(CVs)[op_array->this_var] = EG(This);
+			EX_CV(op_array->this_var) = (zval**)EX_CVs() + (op_array->last_var + op_array->this_var);
+			*EX_CV(op_array->this_var) = EG(This);
 		} else {
-			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX(CVs)[op_array->this_var])==FAILURE) {
+			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX_CV(op_array->this_var))==FAILURE) {
 				Z_DELREF_P(EG(This));
 			}
 		}
 	}
 
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
 	EG(opline_ptr) = &EX(opline);
+	LOAD_OPLINE();
 
 	EX(function_state).function = (zend_function *) op_array;
 	EX(function_state).arguments = NULL;
-	
+
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}
 #ifdef ZEND_WIN32

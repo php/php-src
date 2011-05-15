@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -171,20 +171,14 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
 			/* check to make sure that the opened file is not a symlink, linking to data outside of allowable dirs */
-			if (PG(safe_mode) || PG(open_basedir)) {
+			if (PG(open_basedir)) {
 				struct stat sbuf;
 
 				if (fstat(data->fd, &sbuf)) {
 					close(data->fd);
 					return;
 				}
-				if (
-					S_ISLNK(sbuf.st_mode) &&
-					(
-						php_check_open_basedir(buf TSRMLS_CC) ||
-						(PG(safe_mode) && !php_checkuid(buf, NULL, CHECKUID_CHECK_FILE_AND_DIR))
-					)
-				) {
+				if (S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
 					close(data->fd);
 					return;
 				}
@@ -274,9 +268,6 @@ PS_OPEN_FUNC(files)
 		/* if save path is an empty string, determine the temporary dir */
 		save_path = php_get_temporary_directory();
 
-		if (PG(safe_mode) && (!php_checkuid(save_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
-		}
 		if (php_check_open_basedir(save_path TSRMLS_CC)) {
 			return FAILURE;
 		}

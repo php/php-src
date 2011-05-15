@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,12 @@
 #include "ap_mpm.h"
 
 #include "php_apache.h"
+
+#ifdef PHP_WIN32
+# if _MSC_VER <= 1300
+#  include "win32/php_strtoi64.h"
+# endif
+#endif
 
 /* UnixWare and Netware define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
@@ -119,8 +125,16 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_e
 					efree(ctx->content_type);
 				}
 				ctx->content_type = estrdup(val);
-                       } else if (!strcasecmp(sapi_header->header, "content-length")) {
-                               ap_set_content_length(ctx->r, strtol(val, (char **)NULL, 10));
+			} else if (!strcasecmp(sapi_header->header, "content-length")) {
+#ifdef PHP_WIN32
+# ifdef APR_HAS_LARGE_FILES
+				ap_set_content_length(ctx->r, (apr_off_t) _strtoui64(val, (char **)NULL, 10));
+# else
+				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
+# endif
+#else
+				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
+#endif
 			} else if (op == SAPI_HEADER_REPLACE) {
 				apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 			} else {
@@ -299,10 +313,9 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg)
+static void php_apache_sapi_log_message(char *msg TSRMLS_DC)
 {
 	php_struct *ctx;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
 
@@ -313,19 +326,19 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(char *msg, request_rec *r TSRMLS_DC)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
 	} else {
-		php_apache_sapi_log_message(msg);
+		php_apache_sapi_log_message(msg TSRMLS_CC);
 	}
 }
 
-static time_t php_apache_sapi_get_request_time(TSRMLS_D)
+static double php_apache_sapi_get_request_time(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
-	return apr_time_sec(ctx->r->request_time);
+	return apr_time_as_msec(ctx->r->request_time);
 }
 
 extern zend_module_entry php_apache_module;
@@ -476,17 +489,16 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(r->headers_out, "Last-Modified");
 	apr_table_unset(r->headers_out, "Expires");
 	apr_table_unset(r->headers_out, "ETag");
-	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(r))) {
-		auth = apr_table_get(r->headers_in, "Authorization");
-		php_handle_auth_data(auth TSRMLS_CC);
-		if (SG(request_info).auth_user == NULL && r->user) {
-			SG(request_info).auth_user = estrdup(r->user);
-		}
-		ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
-	} else {
-		SG(request_info).auth_user = NULL;
-		SG(request_info).auth_password = NULL;
+
+	auth = apr_table_get(r->headers_in, "Authorization");
+	php_handle_auth_data(auth TSRMLS_CC);
+
+	if (SG(request_info).auth_user == NULL && r->user) {
+		SG(request_info).auth_user = estrdup(r->user);
 	}
+
+	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
+
 	return php_request_startup(TSRMLS_C);
 }
 
@@ -576,12 +588,12 @@ normal:
 	}
 
 	if (r->finfo.filetype == 0) {
-		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r);
+		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
-		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r);
+		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_FORBIDDEN;
 	}

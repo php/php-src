@@ -1,7 +1,8 @@
 /-- These are a few representative patterns whose lengths and offsets are to be 
 shown when the link size is 2. This is just a doublecheck test to ensure the 
 sizes don't go horribly wrong when something is changed. The pattern contents 
-are all themselves checked in other tests. --/
+are all themselves checked in other tests. Unicode, including property support, 
+is required for these tests. --/
 
 /((?i)b)/BM
 Memory allocation (code space): 21
@@ -664,6 +665,75 @@ Memory allocation (code space): 40
   3     [\x00-\xa9\xab-\xff] (neg)
  36  36 Ket
  39     End
+------------------------------------------------------------------
+
+/[^\d]/8WB
+------------------------------------------------------------------
+  0  11 Bra
+  3     [^\p{Nd}]
+ 11  11 Ket
+ 14     End
+------------------------------------------------------------------
+
+/[[:^alpha:][:^cntrl:]]+/8WB
+------------------------------------------------------------------
+  0  44 Bra
+  3     [ -~\x80-\xff\P{L}]+
+ 44  44 Ket
+ 47     End
+------------------------------------------------------------------
+
+/[[:^cntrl:][:^alpha:]]+/8WB
+------------------------------------------------------------------
+  0  44 Bra
+  3     [ -~\x80-\xff\P{L}]+
+ 44  44 Ket
+ 47     End
+------------------------------------------------------------------
+
+/[[:alpha:]]+/8WB
+------------------------------------------------------------------
+  0  12 Bra
+  3     [\p{L}]+
+ 12  12 Ket
+ 15     End
+------------------------------------------------------------------
+
+/[[:^alpha:]\S]+/8WB
+------------------------------------------------------------------
+  0  15 Bra
+  3     [\P{L}\P{Xsp}]+
+ 15  15 Ket
+ 18     End
+------------------------------------------------------------------
+
+/abc(d|e)(*THEN)x(123(*THEN)4|567(b|q)(*THEN)xx)/B
+------------------------------------------------------------------
+  0  79 Bra
+  3     abc
+  9   7 CBra 1
+ 14     d
+ 16   5 Alt
+ 19     e
+ 21  12 Ket
+ 24     *THEN 24
+ 27     x
+ 29  16 CBra 2
+ 34     123
+ 40     *THEN 11
+ 43     4
+ 45  31 Alt
+ 48     567
+ 54   7 CBra 3
+ 59     b
+ 61   5 Alt
+ 64     q
+ 66  12 Ket
+ 69     *THEN 24
+ 72     xx
+ 76  47 Ket
+ 79  79 Ket
+ 82     End
 ------------------------------------------------------------------
 
 /-- End of testinput10 --/

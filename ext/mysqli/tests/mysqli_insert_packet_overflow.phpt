@@ -38,8 +38,15 @@ memory_limit=256M
 
 	$max_len = pow(2, 24);
 	if ($org_max_allowed_packet < $max_len) {
-		if (!mysqli_query($link, "SET GLOBAL max_allowed_packet = " . ($max_len + 100)))
-			printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		if (!mysqli_query($link, "SET GLOBAL max_allowed_packet = " . ($max_len + 100))) {
+			if (1227 == mysqli_errno($link)) {
+				/* [1227] Access denied; you need the SUPER privilege for this operation */
+				print "done!";
+				exit(0);
+			} else {
+				printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			}
+		}
 	}
 	mysqli_close($link);
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
@@ -67,8 +74,8 @@ memory_limit=256M
 	if (!mysqli_query($link, "CREATE TABLE test(col_blob LONGBLOB) ENGINE=" . $engine))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$query_prefix = 'INSERT INTO test(col_blob) VALUES ("';
-	$query_postfix = '")';
+	$query_prefix = "INSERT INTO test(col_blob) VALUES ('";
+	$query_postfix = "')";
 	$query_len = strlen($query_prefix) + strlen($query_postfix);
 	$com_query_len = 2;
 
@@ -94,7 +101,8 @@ memory_limit=256M
 	}
 
 	if (!mysqli_query($link, "SET GLOBAL max_allowed_packet = " . $org_max_allowed_packet))
-		printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		if (1227 != mysqli_errno($link))
+			printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	mysqli_close($link);
 

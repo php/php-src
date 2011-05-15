@@ -10,6 +10,7 @@ includes="-I$include_dir -I$include_dir/main -I$include_dir/TSRM -I$include_dir/
 ldflags="@PHP_LDFLAGS@"
 libs="@EXTRA_LIBS@"
 extension_dir='@EXTENSION_DIR@'
+man_dir=`eval echo @mandir@`
 program_prefix="@program_prefix@"
 program_suffix="@program_suffix@"
 exe_extension="@EXEEXT@"
@@ -59,6 +60,8 @@ case "$1" in
   echo $php_sapis;;
 --configure-options)
   echo $configure_options;;
+--man-dir)
+  echo $man_dir;;
 --version)
   echo $version;;
 --vernum)
@@ -73,6 +76,7 @@ Options:
   --libs              [$libs]
   --extension-dir     [$extension_dir]
   --include-dir       [$include_dir]
+  --man-dir           [$man_dir]
   --php-binary        [$php_binary]
   --php-sapis         [$php_sapis]
   --configure-options [$configure_options]

@@ -27,7 +27,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "safe_mode.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,24 +53,24 @@ int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode T
 			return 1;
 		}
 		php_stream_seek(dba->fp, 0L, SEEK_END);
-		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", key_datum.dsize);
+		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
 		}
-		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", value_datum.dsize);
+		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", value_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
 		}
 	} else { /* FLATFILE_REPLACE */
 		flatfile_delete(dba, key_datum TSRMLS_CC);
-		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", key_datum.dsize);
+		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
 		}
-		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", value_datum.dsize);
+		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", value_datum.dsize);
 		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
 		}

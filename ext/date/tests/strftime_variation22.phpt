@@ -35,24 +35,24 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-	  var_dump( strftime($value) );
+	  var_dump( $value );
 	  var_dump( strftime($value, $timestamp) );
 }	  
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strftime() : usage variation ***
 
 --Preferred date and time representation--
-string(%d) "%s %d %s %d %d:%d:%d %s %s"
+string(2) "%c"
 string(31) "Fri 08 Aug 2008 08:08:08 AM IST"
 
 --Preferred date representation--
-string(%d) "%d/%d/%d"
+string(2) "%x"
 string(10) "08/08/2008"
 
 --Preferred time representation--
-string(%d) "%d:%d:%d %s"
+string(2) "%X"
 string(11) "08:08:08 AM"
 ===DONE===

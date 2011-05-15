@@ -1,5 +1,7 @@
 --TEST--
 Testing isset accessing undefined array itens and properties
+--SKIPIF--
+<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 

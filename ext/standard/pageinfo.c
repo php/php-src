@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,19 +79,15 @@ PHPAPI void php_statpage(TSRMLS_D)
 
 /* {{{ php_getuid
  */
-long php_getuid(void)
+long php_getuid(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	php_statpage(TSRMLS_C);
 	return (BG(page_uid));
 }
 /* }}} */
 
-long php_getgid(void)
+long php_getgid(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
 }
@@ -101,8 +97,12 @@ long php_getgid(void)
 PHP_FUNCTION(getmyuid)
 {
 	long uid;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
-	uid = php_getuid();
+	uid = php_getuid(TSRMLS_C);
 	if (uid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -116,8 +116,12 @@ PHP_FUNCTION(getmyuid)
 PHP_FUNCTION(getmygid)
 {
 	long gid;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
-	gid = php_getgid();
+	gid = php_getgid(TSRMLS_C);
 	if (gid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -131,6 +135,10 @@ PHP_FUNCTION(getmygid)
 PHP_FUNCTION(getmypid)
 {
 	int pid;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	
 	pid = getpid();
 	if (pid < 0) {
@@ -145,6 +153,10 @@ PHP_FUNCTION(getmypid)
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	php_statpage(TSRMLS_C);
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
@@ -164,7 +176,13 @@ PHPAPI long php_getlastmod(TSRMLS_D)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	long lm = php_getlastmod(TSRMLS_C);
+	long lm;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	lm = php_getlastmod(TSRMLS_C);
 	if (lm < 0) {
 		RETURN_FALSE;
 	} else {
@@ -173,7 +191,7 @@ PHP_FUNCTION(getlastmod)
 }
 /* }}} */
 
-/*
+/*nma
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4

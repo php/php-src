@@ -31,7 +31,7 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 		if (3 !== ($tmp = strlen($mysql->real_escape_string($esc_str))))
 			printf("[003] Expecting 3/int got %s/%s\n", gettype($tmp), $tmp);
 
-		if ('latin1' !== ($tmp = $mysql->client_encoding()))
+		if ('latin1' !== ($tmp = $mysql->character_set_name()))
 			printf("[004] Expecting latin1/string got %s/%s\n", gettype($tmp), $tmp);
 	}
 
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 			if (2 !== ($tmp = strlen($mysql->real_escape_string($esc_str))))
 					printf("[005] Expecting 2/int got %s/%s\n", gettype($tmp), $tmp);
 
-			if ('gbk' !== ($tmp = $mysql->client_encoding()))
+			if ('gbk' !== ($tmp = $mysql->character_set_name()))
 					printf("[005] Expecting gbk/string got %s/%s\n", gettype($tmp), $tmp);;
 		}
 	}

@@ -6,6 +6,16 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
+
+try {
+	$query = "SELECT '', NULL, \"\" FROM DUAL";
+	$stmt = $db->prepare($query);
+	$ok = @$stmt->execute();
+} catch (PDOException $e) {
+	die("skip: Test cannot be run with SQL mode ANSI");
+}
+if (!$ok)
+	die("skip: Test cannot be run with SQL mode ANSI");
 ?>
 --FILE--
 <?php
@@ -15,7 +25,6 @@ MySQLPDOTest::createTestTable($db);
 
 try {
 
-	// default settings
 	$query = "SELECT id, '', NULL, \"\" FROM test ORDER BY id ASC LIMIT 3";
 	$stmt = $db->prepare($query);
 
@@ -39,7 +48,8 @@ try {
 			$this->not_a_magic_one();
 			printf("myclass::__set(%s, -%s-) %d\n",
 				$prop, var_export($value, true), $this->set_calls, self::$static_set_calls);
-			$this->{$prop} = $value;
+			if ("" != $prop)
+				$this->{$prop} = $value;
 		}
 
 		// NOTE: PDO can call regular methods prior to calling __construct()

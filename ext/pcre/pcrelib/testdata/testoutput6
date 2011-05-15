@@ -1,5 +1,5 @@
 /-- This set of tests is for Unicode property support. It is compatible with
-    Perl 5.10, but not 5.8 because it tests some extra properties that are
+    Perl >= 5.10, but not 5.8 because it tests some extra properties that are
     not in the earlier release. --/ 
 
 /^\pC\pL\pM\pN\pP\pS\pZ</8
@@ -618,18 +618,6 @@ No match
     \x{ff5a}   
  0: \x{ff5a}
     
-/^\X/8
-    A
- 0: A
-    A\x{300}BC 
- 0: A\x{300}
-    A\x{300}\x{301}\x{302}BC 
- 0: A\x{300}\x{301}\x{302}
-    *** Failers
- 0: *
-    \x{300}  
-No match
-
 /^[\X]/8
     X123
  0: X
@@ -1292,5 +1280,77 @@ No match
 /[\p{Lu}\x20]+/
     \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
  0: A P\xc2T\xc9 TODAY
+
+/\p{Avestan}\p{Bamum}\p{Egyptian_Hieroglyphs}\p{Imperial_Aramaic}\p{Inscriptional_Pahlavi}\p{Inscriptional_Parthian}\p{Javanese}\p{Kaithi}\p{Lisu}\p{Meetei_Mayek}\p{Old_South_Arabian}\p{Old_Turkic}\p{Samaritan}\p{Tai_Tham}\p{Tai_Viet}/8
+    \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{0800}\x{1aad}\x{aac0}
+ 0: \x{10b00}\x{a6ef}\x{13007}\x{10857}\x{10b78}\x{10b58}\x{a980}\x{110c1}\x{a4ff}\x{abc0}\x{10a7d}\x{10c48}\x{800}\x{1aad}\x{aac0}
+
+/^\w+/8W
+    Az_\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}1\x{660}\x{bef}\x{16ee}
+ 0: Az_\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}1\x{660}\x{bef}\x{16ee}
+
+/^[[:xdigit:]]*/8W
+    1a\x{660}\x{bef}\x{16ee}
+ 0: 1a
+  
+/^\d+/8W
+    1\x{660}\x{bef}\x{16ee}
+ 0: 1\x{660}\x{bef}
+  
+/^[[:digit:]]+/8W
+    1\x{660}\x{bef}\x{16ee}
+ 0: 1\x{660}\x{bef}
+
+/^>\s+/8W
+    >\x{20}\x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{9}\x{b} 
+ 0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{09}
+  
+/^>\pZ+/8W
+    >\x{20}\x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{9}\x{b} 
+ 0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}
+  
+/^>[[:space:]]*/8W
+    >\x{20}\x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{9}\x{b} 
+ 0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{09}\x{0b}
+
+/^>[[:blank:]]*/8W
+    >\x{20}\x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{9}\x{b}\x{2028} 
+ 0: > \x{a0}\x{1680}\x{180e}\x{2000}\x{202f}\x{09}
+
+/^[[:alpha:]]*/8W
+    Az\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}
+ 0: Az\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}
+
+/^[[:alnum:]]*/8W
+    Az\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}1\x{660}\x{bef}\x{16ee}
+ 0: Az\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}1\x{660}\x{bef}\x{16ee}
+
+/^[[:cntrl:]]*/8W
+    \x{0}\x{09}\x{1f}\x{7f}\x{9f} 
+ 0: \x{00}\x{09}\x{1f}\x{7f}
+
+/^[[:graph:]]*/8W
+    A\x{a1}\x{a0}
+ 0: A
+
+/^[[:print:]]*/8W
+    A z\x{a0}\x{a1}
+ 0: A z
+
+/^[[:punct:]]*/8W
+    .+\x{a1}\x{a0}
+ 0: .+
+
+/\p{Zs}*?\R/
+    ** Failers
+No match
+    a\xFCb   
+No match
+
+/\p{Zs}*\R/                                                                    
+    ** Failers 
+No match
+    a\xFCb   
+No match
 
 /-- End of testinput6 --/

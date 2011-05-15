@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,14 +37,14 @@
 #endif
 
 static void php_dba_db4_errcall_fcn(
-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3)
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3))
 	const DB_ENV *dbenv, 
 #endif
 	const char *errpfx, const char *msg)
 {
 	TSRMLS_FETCH();
 
-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8 && DB_VERSION_PATCH <= 26) 
+#if (DB_VERSION_MAJOR == 5 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8))
 /* Bug 51086, Berkeley DB 4.8.26 */
 /* This code suppresses a BDB 4.8 error message that BDB incorrectly emits */
 	{
@@ -124,7 +124,7 @@ DBA_OPEN_FUNC(db4)
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
 	    dbp->set_errcall(dbp, php_dba_db4_errcall_fcn);
 	    if (
-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1))
 			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
 #else
 			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {

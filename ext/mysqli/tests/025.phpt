@@ -25,7 +25,7 @@ require_once('skipifconnectfailure.inc');
 		c7 tinyint)");
 
 	$stmt = mysqli_prepare ($link, "INSERT INTO test_bind_fetch VALUES(?,?,?,?,?,?,?)");
-	mysqli_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);
+	mysqli_stmt_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);
 
 	$c1 = -23;
 	$c2 = 300;
@@ -35,7 +35,7 @@ require_once('skipifconnectfailure.inc');
 	$c6 = 30;
 	$c7 = 0;
 
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	mysqli_query($link, "INSERT INTO test_bind_fetch VALUES (-23,300,0,-100,-127,+30,0)");
@@ -43,9 +43,9 @@ require_once('skipifconnectfailure.inc');
 	$c1 = $c2 = $c3 = $c4 = $c5 = $c6 = $c7 = NULL;
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
-	mysqli_execute($stmt);
-	mysqli_fetch($stmt);
+	mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
+	mysqli_stmt_execute($stmt);
+	mysqli_stmt_fetch($stmt);
 
 	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7);
 

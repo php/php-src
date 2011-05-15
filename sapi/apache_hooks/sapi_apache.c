@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 	}
 	/* sending a file handle to another dll is not working
 	   so let zend open it. */
-
+	
 	if (display_source_mode) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -53,7 +53,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		(void) php_execute_script(&file_handle TSRMLS_CC);
 	}
 	AP(in_request) = 0;
-
+	
 	return (OK);
 }
 /* }}} */
@@ -64,58 +64,55 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
 {
 	zend_file_handle file_handle;
 	zval *req;
-	char *tmp;
+    char *tmp;
 
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
-	if (AP(current_hook) == AP_RESPONSE) {
-		if (php_request_startup_for_hook(TSRMLS_C) == FAILURE) {
-			return FAILURE;
-		}
-	} else {
-		if (php_request_startup_for_hook(TSRMLS_C) == FAILURE) {
-			return FAILURE;
-		}
-	}
+    if(AP(current_hook) == AP_RESPONSE) {
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+    }
+    else {
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+    }
 
-	req = php_apache_request_new(r);
-	if (PG(register_globals)) {
-		php_register_variable_ex("request", req, NULL TSRMLS_CC);
-	} else {
-		php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-	}
-	switch(handler->type) {
-		case AP_HANDLER_TYPE_FILE:
-			php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-			memset(&file_handle, 0, sizeof(file_handle));
-			file_handle.type = ZEND_HANDLE_FILENAME;
-			file_handle.filename = handler->name;
-			(void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
-			break;
-		case AP_HANDLER_TYPE_METHOD:
-			if ( (tmp = strstr(handler->name, "::")) != NULL &&  *(tmp+2) != '\0' ) {
-				zval *class;
-				zval *method;
-				*tmp = '\0';
-				ALLOC_ZVAL(class);
-				ZVAL_STRING(class, handler->name, 1);
-				ALLOC_ZVAL(method);
-				ZVAL_STRING(method, tmp +2, 1);
-				*tmp = ':';
-				call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
-				zval_dtor(class);
-				zval_dtor(method);
-			} else {
-				php_error(E_ERROR, "Unable to call %s - not a Class::Method\n", handler->name);
-				/* not a class::method */
-			}
-			break;
-		default:
-			/* not a valid type */
-			assert(0);
-			break;
-	}
+    req = php_apache_request_new(r);
+    php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+
+    switch(handler->type) {
+        case AP_HANDLER_TYPE_FILE:
+            php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+	        memset(&file_handle, 0, sizeof(file_handle));
+	        file_handle.type = ZEND_HANDLE_FILENAME;
+	        file_handle.filename = handler->name;
+	        (void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
+            break;
+        case AP_HANDLER_TYPE_METHOD:
+            if( (tmp = strstr(handler->name, "::")) != NULL &&  *(tmp+2) != '\0' ) {
+                zval *class;
+                zval *method;
+                *tmp = '\0';
+                ALLOC_ZVAL(class);
+                ZVAL_STRING(class, handler->name, 1);
+                ALLOC_ZVAL(method);
+                ZVAL_STRING(method, tmp +2, 1);
+                *tmp = ':';
+                call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
+                zval_dtor(class);
+                zval_dtor(method);
+            }
+            else {
+                php_error(E_ERROR, "Unable to call %s - not a Class::Method\n", handler->name);
+                /* not a class::method */
+            }
+            break;
+        default:
+            /* not a valid type */
+            assert(0);
+            break;
+    }
 	zval_dtor(req);
 	AP(in_request) = 0;
 

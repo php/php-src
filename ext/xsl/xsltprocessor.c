@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -427,7 +427,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	std_hnd = zend_get_std_object_handlers();
 	MAKE_STD_ZVAL(member);
 	ZVAL_STRING(member, "cloneDocument", 0);
-	cloneDocu = std_hnd->read_property(id, member, BP_VAR_IS TSRMLS_CC);
+	cloneDocu = std_hnd->read_property(id, member, BP_VAR_IS, NULL TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
 		convert_to_long(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
@@ -524,7 +524,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 	MAKE_STD_ZVAL(member);
 	ZVAL_STRING(member, "doXInclude", 0);
-	doXInclude = std_hnd->read_property(id, member, BP_VAR_IS TSRMLS_CC);
+	doXInclude = std_hnd->read_property(id, member, BP_VAR_IS, NULL TSRMLS_CC);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
 		convert_to_long(doXInclude);
 		ctxt->xinclude = Z_LVAL_P(doXInclude);

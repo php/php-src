@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -46,15 +46,16 @@ END_EXTERN_C()
 #define ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, count)		\
 	if (stack->top+count > stack->max) {					\
 		/* we need to allocate more memory */				\
-		stack->max *= 2;									\
-		stack->max += count;								\
+		do {												\
+			stack->max += PTR_STACK_BLOCK_SIZE;				\
+		} while (stack->top+count > stack->max);			\
 		stack->elements = (void **) perealloc(stack->elements, (sizeof(void *) * (stack->max)), stack->persistent);	\
 		stack->top_element = stack->elements+stack->top;	\
 	}
 
 /*	Not doing this with a macro because of the loop unrolling in the element assignment.
 	Just using a macro for 3 in the body for readability sake. */
-static inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b, void *c)
+static zend_always_inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b, void *c)
 {
 #define ZEND_PTR_STACK_NUM_ARGS 3
 
@@ -68,7 +69,7 @@ static inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b
 #undef ZEND_PTR_STACK_NUM_ARGS
 }
 
-static inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b)
+static zend_always_inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b)
 {
 #define ZEND_PTR_STACK_NUM_ARGS 2
 
@@ -81,7 +82,7 @@ static inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b
 #undef ZEND_PTR_STACK_NUM_ARGS
 }
 
-static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **b, void **c)
+static zend_always_inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **b, void **c)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
@@ -89,14 +90,14 @@ static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **
 	stack->top -= 3;
 }
 
-static inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
+static zend_always_inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
 	stack->top -= 2;
 }
 
-static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
+static zend_always_inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 {
 	ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, 1)
 
@@ -104,7 +105,7 @@ static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 	*(stack->top_element++) = ptr;
 }
 
-static inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
+static zend_always_inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
 {
 	stack->top--;
 	return *(--stack->top_element);

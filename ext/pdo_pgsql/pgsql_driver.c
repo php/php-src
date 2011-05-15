@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
+#include "ext/standard/file.h"
 
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_NAME
@@ -496,6 +497,377 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
 }
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	return PQtransactionStatus(H->server);
+}
+
+/* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])
+   Returns true if the copy worked fine or false if error */
+static PHP_METHOD(PDO, pgsqlCopyFromArray)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	zval *pg_rows;
+
+	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
+	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	char *query;
+
+	PGresult *pgsql_result;
+	ExecStatusType status;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s/a|sss",
+					&table_name, &table_name_len, &pg_rows,
+					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		return;
+	}
+
+	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot copy from an empty array");
+		RETURN_FALSE;
+	}
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	if (pg_fields) {
+		spprintf(&query, 0, "COPY %s (%s) FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	} else {
+		spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	}
+
+	// Obtain db Handle
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	while ((pgsql_result = PQgetResult(H->server))) {
+		PQclear(pgsql_result);
+	}
+	pgsql_result = PQexec(H->server, query);
+
+	efree(query);
+	query = NULL;
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(H->server);
+	}
+
+	if (status == PGRES_COPY_IN && pgsql_result) {
+		int command_failed = 0;
+		int buffer_len = 0;
+		zval **tmp;
+		HashPosition pos;
+
+		PQclear(pgsql_result);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
+			int query_len;
+			convert_to_string_ex(tmp);
+		
+			if (buffer_len < Z_STRLEN_PP(tmp)) {
+				buffer_len = Z_STRLEN_PP(tmp);
+				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
+			}
+			memcpy(query, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+			query_len = Z_STRLEN_PP(tmp);
+			if (query[query_len - 1] != '\n') {
+				query[query_len++] = '\n';
+			}
+			query[query_len] = '\0';
+			if (PQputCopyData(H->server, query, query_len) != 1) {
+                        	efree(query);
+	                        pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "copy failed");
+        	                RETURN_FALSE;
+                	}
+			zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
+                }
+		if (query) {
+			efree(query);
+		}
+
+		if (PQputCopyEnd(H->server, NULL) != 1) {
+			pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "putcopyend failed");
+			RETURN_FALSE;
+		}
+
+		while ((pgsql_result = PQgetResult(H->server))) {
+			if (PGRES_COMMAND_OK != PQresultStatus(pgsql_result)) {
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+				command_failed = 1;
+			}
+			PQclear(pgsql_result);
+		}
+
+		RETURN_BOOL(!command_failed);
+	} else {
+		PQclear(pgsql_result);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string PDO::pgsqlCopyFromFile(string $table_name , string $filename [, string $delimiter [, string $null_as ] [, string $fields])
+   Returns true if the copy worked fine or false if error */
+static PHP_METHOD(PDO, pgsqlCopyFromFile)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	char *table_name, *filename, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
+	int  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	char *query;
+	PGresult *pgsql_result;
+	ExecStatusType status;
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|sss",
+				&table_name, &table_name_len, &filename, &filename_len,
+				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		return;
+	}
+
+	// Obtain db Handler
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	stream = php_stream_open_wrapper_ex(filename, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, FG(default_context));
+	if (!stream) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Unable to open the file");
+		RETURN_FALSE;
+	}
+
+	if (pg_fields) {
+		spprintf(&query, 0, "COPY %s (%s) FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	} else {
+		spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	}
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	while ((pgsql_result = PQgetResult(H->server))) {
+		PQclear(pgsql_result);
+	}
+	pgsql_result = PQexec(H->server, query);
+
+	efree(query);
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(H->server);
+	}
+
+	if (status == PGRES_COPY_IN && pgsql_result) {
+		char *buf;
+		int command_failed = 0;
+		size_t line_len = 0;
+
+		PQclear(pgsql_result);
+		while ((buf = php_stream_get_line(stream, NULL, 0, &line_len)) != NULL) {
+			if (PQputCopyData(H->server, buf, line_len) != 1) {
+	                        efree(buf);
+        	                pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "copy failed");
+				php_stream_close(stream);
+				RETURN_FALSE;
+			}
+			efree(buf);
+		}
+		php_stream_close(stream);
+
+		if (PQputCopyEnd(H->server, NULL) != 1) {
+			pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "putcopyend failed");
+			RETURN_FALSE;
+		}
+
+		while ((pgsql_result = PQgetResult(H->server))) {
+			if (PGRES_COMMAND_OK != PQresultStatus(pgsql_result)) {
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+				command_failed = 1;
+			}
+			PQclear(pgsql_result);
+		}
+
+		RETURN_BOOL(!command_failed);
+	} else {
+		PQclear(pgsql_result);
+		php_stream_close(stream);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto string PDO::pgsqlCopyToFile(string $table_name , $filename, [string $delimiter [, string $null_as [, string $fields]]])
+   Returns true if the copy worked fine or false if error */
+static PHP_METHOD(PDO, pgsqlCopyToFile)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL, *filename = NULL;
+	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
+	char *query;
+
+	PGresult *pgsql_result;
+	ExecStatusType status;
+
+	php_stream *stream;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|sss",
+					&table_name, &table_name_len, &filename, &filename_len,
+					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		return;
+	}
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	stream = php_stream_open_wrapper_ex(filename, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, FG(default_context));
+	if (!stream) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Unable to open the file for writing");
+		RETURN_FALSE;
+	}
+
+	while ((pgsql_result = PQgetResult(H->server))) {
+		PQclear(pgsql_result);
+	}
+
+	if (pg_fields) {
+		spprintf(&query, 0, "COPY %s (%s) TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	} else {
+		spprintf(&query, 0, "COPY %s TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	}
+	pgsql_result = PQexec(H->server, query);
+	efree(query);
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(H->server);
+	}
+
+	if (status == PGRES_COPY_OUT && pgsql_result) {
+		PQclear(pgsql_result);
+		while (1) {
+			char *csv = NULL;
+			int ret = PQgetCopyData(H->server, &csv, 0);
+
+			if (ret == -1) {
+				break; /* done */
+			} else if (ret > 0) {
+				if (php_stream_write(stream, csv, ret) != ret) {
+					pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Unable to write to file");
+					PQfreemem(csv);
+					php_stream_close(stream);
+					RETURN_FALSE;
+				} else {
+					PQfreemem(csv);
+				}
+			} else {
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed: getline failed");
+				php_stream_close(stream);
+				RETURN_FALSE;
+			}
+		}
+		php_stream_close(stream);
+
+		while ((pgsql_result = PQgetResult(H->server))) {
+			PQclear(pgsql_result);
+		}
+		RETURN_TRUE;
+	} else {
+		php_stream_close(stream);
+		PQclear(pgsql_result);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string PDO::pgsqlCopyToArray(string $table_name , [string $delimiter [, string $null_as [, string $fields]]])
+   Returns true if the copy worked fine or false if error */
+static PHP_METHOD(PDO, pgsqlCopyToArray)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
+	int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	char *query;
+
+	PGresult *pgsql_result;
+	ExecStatusType status;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss",
+		&table_name, &table_name_len,
+		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		return;
+	}
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	while ((pgsql_result = PQgetResult(H->server))) {
+		PQclear(pgsql_result);
+	}
+
+	if (pg_fields) {
+		spprintf(&query, 0, "COPY %s (%s) TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	} else {
+		spprintf(&query, 0, "COPY %s TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+	}
+	pgsql_result = PQexec(H->server, query);
+	efree(query);
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(H->server);
+	}
+
+	if (status == PGRES_COPY_OUT && pgsql_result) {
+		PQclear(pgsql_result);
+                array_init(return_value);
+
+		while (1) {
+			char *csv = NULL;
+			int ret = PQgetCopyData(H->server, &csv, 0);
+			if (ret == -1) {
+				break; /* copy done */
+			} else if (ret > 0) { 
+				add_next_index_stringl(return_value, csv, ret, 1);
+				PQfreemem(csv);
+			} else {
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed: getline failed");
+				RETURN_FALSE;
+			}
+		}
+
+		while ((pgsql_result = PQgetResult(H->server))) {
+			PQclear(pgsql_result);
+		}
+	} else {
+		PQclear(pgsql_result);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, "Copy command failed");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 /* {{{ proto string PDO::pgsqlLOBCreate()
    Creates a new large object, returning its identifier.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBCreate)
@@ -608,6 +980,10 @@ static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlLOBOpen, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlLOBUnlink, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlCopyFromArray, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlCopyFromFile, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlCopyToArray, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, pgsqlCopyToFile, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -653,7 +1029,9 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_fetch_error_func,
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
-	pdo_pgsql_get_driver_methods  /* get_driver_methods */
+	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
+	NULL,
+	pgsql_handle_in_transaction,
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */

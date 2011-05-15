@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ static const char *php_gai_strerror(int code)
                 {EAI_MEMORY, "Memory allocation failure"},
 #  ifdef EAI_NODATA
                 {EAI_NODATA, "No address associated with hostname"},
-#  endif    
+#  endif
                 {EAI_NONAME, "Name or service not known"},
                 {EAI_SERVICE, "Servname not supported for ai_socktype"},
                 {EAI_SOCKTYPE, "ai_socktype not supported"},
@@ -139,7 +139,7 @@ static const char *php_gai_strerror(int code)
                         return (char *)values[i].msg;
                 }
         }
-        
+
         return "Unknown error";
 }
 /* }}} */
@@ -182,10 +182,10 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	}
 #if HAVE_GETADDRINFO
 	memset(&hints, '\0', sizeof(hints));
-		
+
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
 	hints.ai_socktype = socktype;
-		
+
 # if HAVE_IPV6
 	/* probe for a working IPv6 stack; even if detected as having v6 at compile
 	 * time, at runtime some stacks are slow to resolve or have other issues
@@ -206,7 +206,7 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	}
 	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
 # endif
-		
+
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 		if (error_string) {
 			spprintf(error_string, 0, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
@@ -228,17 +228,17 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	sai = res;
 	for (n = 1; (sai = sai->ai_next) != NULL; n++)
 		;
-	
+
 	*sal = safe_emalloc((n + 1), sizeof(*sal), 0);
 	sai = res;
 	sap = *sal;
-	
+
 	do {
 		*sap = emalloc(sai->ai_addrlen);
 		memcpy(*sap, sai->ai_addr, sai->ai_addrlen);
 		sap++;
 	} while ((sai = sai->ai_next) != NULL);
-	
+
 	freeaddrinfo(res);
 #else
 	if (!inet_aton(host, &in)) {
@@ -313,7 +313,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	int ret = 0;
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
-	
+
 	if ((n = connect(sockfd, addr, addrlen)) != 0) {
 		error = php_socket_errno();
 
@@ -337,8 +337,18 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	if (n == 0) {
 		goto ok;
 	}
-
+# ifdef PHP_WIN32
+	/* The documentation for connect() says in case of non-blocking connections
+	 * the select function reports success in the writefds set and failure in
+	 * the exceptfds set. Indeed, using PHP_POLLREADABLE results in select
+	 * failing only due to the timeout and not immediately as would be
+	 * expected when a connection is actively refused. This way,
+	 * php_pollfd_for will return a mask with POLLOUT if the connection
+	 * is successful and with POLLPRI otherwise. */
+	if ((n = php_pollfd_for(sockfd, POLLOUT|POLLPRI, timeout)) == 0) {
+#else
 	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
+#endif
 		error = PHP_TIMEOUT_ERROR_VALUE;
 	}
 
@@ -366,9 +376,11 @@ ok:
 		*error_code = error;
 	}
 
-	if (error && error_string) {
-		*error_string = php_socket_strerror(error, NULL, 0);
+	if (error) {
 		ret = -1;
+		if (error_string) {
+			*error_string = php_socket_strerror(error, NULL, 0);
+		}
 	}
 	return ret;
 #else
@@ -447,14 +459,14 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 
 		if (sa) {
 			/* attempt to bind */
-		
+
 #ifdef SO_REUSEADDR
 			{
 				int val = 1;
 				setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 			}
 #endif
-			
+
 			n = bind(sock, sa, socklen);
 
 			if (n != SOCK_CONN_ERR) {
@@ -474,13 +486,13 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 	if (error_string) {
 		*error_string = php_socket_strerror(err, NULL, 0);
 	}
-	
+
 bound:
 
 	php_network_freeaddresses(psal);
-	
+
 	return sock;
-	
+
 }
 /* }}} */
 
@@ -598,7 +610,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 				/* generally not thread safe, but it *is* thread safe under win32 */
 				buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
 				if (buf) {
-					*textaddrlen = spprintf(textaddr, 0, "%s:%d", 
+					*textaddrlen = spprintf(textaddr, 0, "%s:%d",
 						buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
 				}
 
@@ -608,7 +620,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
-					*textaddrlen = spprintf(textaddr, 0, "%s:%d", 
+					*textaddrlen = spprintf(textaddr, 0, "%s:%d",
 						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
 				}
 
@@ -639,7 +651,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 	}
 }
 
-PHPAPI int php_network_get_peer_name(php_socket_t sock, 
+PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -648,7 +660,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 	php_sockaddr_storage sa;
 	socklen_t sl = sizeof(sa);
 	memset(&sa, 0, sizeof(sa));
-	
+
 	if (getpeername(sock, (struct sockaddr*)&sa, &sl) == 0) {
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr, textaddrlen,
@@ -659,7 +671,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 	return -1;
 }
 
-PHPAPI int php_network_get_sock_name(php_socket_t sock, 
+PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -668,7 +680,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 	php_sockaddr_storage sa;
 	socklen_t sl = sizeof(sa);
 	memset(&sa, 0, sizeof(sa));
-	
+
 	if (getsockname(sock, (struct sockaddr*)&sa, &sl) == 0) {
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr, textaddrlen,
@@ -703,7 +715,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	int error = 0, n;
 	php_sockaddr_storage sa;
 	socklen_t sl;
-		
+
 	n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
 
 	if (n == 0) {
@@ -724,18 +736,18 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 			error = php_socket_errno();
 		}
 	}
-	
+
 	if (error_code) {
 		*error_code = error;
 	}
 	if (error_string) {
 		*error_string = php_socket_strerror(error, NULL, 0);
 	}
-	
+
 	return clisock;
 }
 /* }}} */
-	
+
 
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
@@ -747,7 +759,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 /* {{{ php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code, char *bindto, unsigned short bindport 
+		int *error_code, char *bindto, unsigned short bindport
 		TSRMLS_DC)
 {
 	int num_addrs, n, fatal = 0;
@@ -825,7 +837,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 					local_address = (struct sockaddr*)in4;
 					local_address_len = sizeof(struct sockaddr_in);
-				
+
 					in4->sin_family = sa->sa_family;
 					in4->sin_port = htons(bindport);
 					if (!inet_aton(bindto, &in4->sin_addr)) {
@@ -840,7 +852,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 					local_address = (struct sockaddr*)in6;
 					local_address_len = sizeof(struct sockaddr_in6);
-				
+
 					in6->sin6_family = sa->sa_family;
 					in6->sin6_port = htons(bindport);
 					if (inet_pton(AF_INET6, bindto, &in6->sin6_addr) < 1) {
@@ -862,7 +874,7 @@ skip_bind:
 				efree(*error_string);
 				*error_string = NULL;
 			}
-			
+
 			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
@@ -907,7 +919,7 @@ skip_bind:
 connected:
 
 	php_network_freeaddresses(psal);
-	
+
 	return sock;
 }
 /* }}} */
@@ -984,7 +996,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 	int free_it = 1;
 
 	if (!FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
 				FORMAT_MESSAGE_FROM_SYSTEM |
 				FORMAT_MESSAGE_IGNORE_INSERTS,
 				NULL,
@@ -1046,7 +1058,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
 
-	stream = php_stream_xport_create(res, reslen, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+	stream = php_stream_xport_create(res, reslen, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, persistent_id, timeout, NULL, NULL, NULL);
 
 	efree(res);
@@ -1065,7 +1077,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 	flags = !block;
 	if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
 		char *error_string;
-		
+
 		error_string = php_socket_strerror(WSAGetLastError(), NULL, 0);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", error_string);
 		efree(error_string);
@@ -1083,7 +1095,9 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 	} else {
 		flags &= ~myflag;
 	}
-	fcntl(socketd, F_SETFL, flags);
+	if (fcntl(socketd, F_SETFL, flags) == -1) {
+		ret = FAILURE;
+	}
 #endif
 	return ret;
 }
@@ -1121,7 +1135,8 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 {
 	fd_set rset, wset, eset;
 	php_socket_t max_fd = SOCK_ERR;
-	unsigned int i, n;
+	unsigned int i;
+	int n;
 	struct timeval tv;
 
 	/* check the highest numbered descriptor */

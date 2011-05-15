@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2009 The PHP Group                                |
+  | Copyright (c) 2005-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -360,7 +360,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
 			efree(error);
 		} else {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar file \"%s\" is unknown", resource->host);

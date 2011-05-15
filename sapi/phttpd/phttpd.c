@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,7 +71,6 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 {
     char *header_name, *header_content;
     char *p;
-    TSRMLS_FETCH();
  
 	http_sendheaders(PHG(cip)->fd, PHG(cip), SG(sapi_headers).http_response_code, NULL);
 
@@ -97,8 +96,6 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 static int
 php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-    TSRMLS_FETCH();
- 
     if (SG(sapi_headers).send_default_content_type) {
 		fd_printf(PHG(cip)->fd,"Content-Type: text/html\n");
     }
@@ -115,7 +112,6 @@ php_phttpd_sapi_read_cookies(TSRMLS_D)
 /*
     int i;
     char *http_cookie = NULL;
-    NTSRMLS_FETCH();
  
     i = Ns_SetIFind(NSG(conn->headers), "cookie");
     if(i != -1) {
@@ -135,7 +131,6 @@ php_phttpd_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 /*
     uint max_read;
     uint total_read = 0;
-    NTSRMLS_FETCH();
  
     max_read = MIN(NSG(data_avail), count_bytes);
  
@@ -243,12 +238,11 @@ php_phttpd_request_dtor(TSRMLS_D TSRMLS_DC)
 }
 
 
-int php_doit(TSRMLS_D TSRMLS_DC)
+int php_doit(TSRMLS_D)
 {
 	struct stat sb;
 	zend_file_handle file_handle;
 	struct httpinfo *hip = PHG(cip)->hip;
-	TSRMLS_FETCH();
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
         return -1;

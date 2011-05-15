@@ -11,7 +11,7 @@ var_dump(filter_list(array()));
 echo "Done\n";
 ?>
 --EXPECTF--	
-array(18) {
+array(19) {
   [0]=>
   string(3) "int"
   [1]=>
@@ -35,18 +35,20 @@ array(18) {
   [10]=>
   string(13) "special_chars"
   [11]=>
-  string(10) "unsafe_raw"
+  string(18) "full_special_chars"
   [12]=>
-  string(5) "email"
+  string(10) "unsafe_raw"
   [13]=>
-  string(3) "url"
+  string(5) "email"
   [14]=>
-  string(10) "number_int"
+  string(3) "url"
   [15]=>
-  string(12) "number_float"
+  string(10) "number_int"
   [16]=>
-  string(12) "magic_quotes"
+  string(12) "number_float"
   [17]=>
+  string(12) "magic_quotes"
+  [18]=>
   string(8) "callback"
 }
 

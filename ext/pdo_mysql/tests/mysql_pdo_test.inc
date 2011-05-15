@@ -4,9 +4,9 @@ require_once(dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc');
 
 class MySQLPDOTest extends PDOTest {
 
-	static function factory($classname = 'PDO', $drop_test_tables = false, $myattr = null) {
+	static function factory($classname = 'PDO', $drop_test_tables = false, $myattr = null, $mydsn = null) {
 
-		$dsn 	= self::getDSN();
+		$dsn 	= self::getDSN($mydsn);
 		$user	= PDO_MYSQL_TEST_USER;
 		$pass	= PDO_MYSQL_TEST_PASS;
 		$attr	= getenv('PDOTEST_ATTR');
@@ -38,7 +38,7 @@ class MySQLPDOTest extends PDOTest {
 
 		$db->exec('DROP TABLE IF EXISTS test');
 		$db->exec('CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=' . $engine);
-		$db->exec('INSERT INTO test(id, label) VALUES (1, "a"), (2, "b"), (3, "c"), (4, "d"), (5, "e"), (6, "f")');
+		$db->exec("INSERT INTO test(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')");
 	}
 
 	static function getTableEngine() {
@@ -159,7 +159,7 @@ class MySQLPDOTest extends PDOTest {
 	}
 
 	static function dropTestTable($db = NULL) {
-		if (is_null($db)) 
+		if (is_null($db))
 			$db = self::factory();
 
 		$db->exec('DROP TABLE IF EXISTS test');

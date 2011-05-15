@@ -5,7 +5,10 @@ bind LONG field
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require(dirname(__FILE__)."/connect.inc");
+
+$stmt = oci_parse($c, "drop table phptestlng");
+@oci_execute($stmt);
 
 $stmt = oci_parse($c, "create table phptestlng( id number(10), filetxt long)");
 oci_execute($stmt);

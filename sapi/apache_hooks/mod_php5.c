@@ -1,20 +1,20 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5													      |
+   | PHP Version 5							  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group								  |
+   | Copyright (c) 1997-2011 The PHP Group				  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
-   | that is bundled with this package in the file LICENSE, and is		  |
-   | available at through the world-wide-web at						      |
-   | http://www.php.net/license/3_01.txt 							      |
+   | that is bundled with this package in the file LICENSE, and is	  |
+   | available at through the world-wide-web at			          |
+   | http://www.php.net/license/3_01.txt 				  |
    | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to		  |
-   | license@php.net so we can mail you a copy immediately.			      |
+   | obtain it through the world-wide-web, please send a note to	  |
+   | license@php.net so we can mail you a copy immediately.		  |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@php.net>							  |
-   | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>			  |
-   | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>					  |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>	          |
+   | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>			  |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -53,9 +53,10 @@ static void php_child_exit_handler(server_rec *s, pool *p);
 #define CONST_PREFIX
 #endif
 
+
 typedef struct _sapi_stack {
-	int top, max, persistent;
-	void **elements;
+		int top, max, persistent;
+		void **elements;
 } sapi_stack;
 
 typedef struct _php_per_dir_config {
@@ -74,6 +75,7 @@ typedef struct _php_per_server_config {
 	sapi_stack uri_handlers;
 	sapi_stack requires;
 } php_per_server_config;
+
 
 static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
 static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
@@ -106,67 +108,67 @@ typedef struct _php_per_dir_entry {
  */
 
 /* This code is ripped part and parcel from zend_stack.[ch].  Assuming that the
-   patch supporting zend_stack_init_ex is applied, all but the bottom two
+   patch supporting zend_stack_init_ex is applied, all but the bottom two 
    module-specific iterators will be removed
  */
 
 int sapi_stack_init_ex(sapi_stack *stack, int persistent)
 {
-	stack->top = 0;
-	stack->persistent = persistent;
-	stack->elements = (void **) pemalloc(sizeof(void **) * STACK_BLOCK_SIZE,  persistent);
-	if (!stack->elements) {
-		return FAILURE;
-	} else {
-		stack->max = STACK_BLOCK_SIZE;
-		return SUCCESS;
-	}
+		stack->top = 0;
+		stack->persistent = persistent;
+		stack->elements = (void **) pemalloc(sizeof(void **) * STACK_BLOCK_SIZE,  persistent);
+		if (!stack->elements) {
+				return FAILURE;
+		} else {
+				stack->max = STACK_BLOCK_SIZE;
+				return SUCCESS;
+		}
 }
-
 int sapi_stack_push(sapi_stack *stack, void *element)
 {
-	if (stack->top >= stack->max) { /* we need to allocate more memory */
-		stack->elements = (void **) perealloc(stack->elements, (sizeof(void **) * (stack->max += STACK_BLOCK_SIZE)), stack->persistent);
-		if (!stack->elements) {
-			return FAILURE;
+		if (stack->top >= stack->max) {		 /* we need to allocate more memory */
+				stack->elements = (void **) perealloc(stack->elements,
+								   (sizeof(void **) * (stack->max += STACK_BLOCK_SIZE)), stack->persistent);
+				if (!stack->elements) {
+						return FAILURE;
+				}
 		}
-	}
-	stack->elements[stack->top] = (void *) element;
-	return stack->top++;
+		stack->elements[stack->top] = (void *) element;
+		return stack->top++;
 }
-
-void* sapi_stack_pop(sapi_stack *stack)
-{
-	if (stack->top == 0) {
+void* sapi_stack_pop(sapi_stack *stack) {
+	if(stack->top == 0) {
 		return NULL;
-	} else {
+	}
+	else {
 		return stack->elements[--stack->top];
 	}
 }
 
 int sapi_stack_destroy(sapi_stack *stack)
 {
-	return SUCCESS;
+		return SUCCESS;
 }
 
 int sapi_stack_apply_with_argument_all(sapi_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
 {
-	int i, retval;
+		int i, retval;   
 
-	switch (type) {
-		case ZEND_STACK_APPLY_TOPDOWN:
-			for (i=stack->top-1; i>=0; i--) {
-				retval = apply_function(stack->elements[i], arg);
-			}
-			break;
-		case ZEND_STACK_APPLY_BOTTOMUP:
-			for (i=0; i<stack->top; i++) {
-				retval = apply_function(stack->elements[i], arg);
-			}
-			break;
-	}
-	return retval;
+		switch (type) {				
+				case ZEND_STACK_APPLY_TOPDOWN:
+						for (i=stack->top-1; i>=0; i--) {
+								retval = apply_function(stack->elements[i], arg); 
+						}
+						break;
+				case ZEND_STACK_APPLY_BOTTOMUP:
+						for (i=0; i<stack->top; i++) {		
+								retval = apply_function(stack->elements[i], arg);
+						}	  
+						break;
+		}
+		return retval;
 }
+
 
 int sapi_stack_apply_with_argument_stop_if_equals(sapi_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg, int stopval)
 {
@@ -222,7 +224,7 @@ void php_handler_stack_destroy(sapi_stack *stack)
 		free(ph);
 	}
 }
-/* }}} */
+/* }}} */ 
 
 /* {{{ php_save_umask
  */
@@ -238,7 +240,7 @@ static void php_save_umask(void)
 static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int ret=0;
-
+		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	}
@@ -280,7 +282,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	if (!SG(read_post_bytes) && !ap_should_client_block(r)) {
 		return total_read_bytes;
 	}
-
+ 
 	handler = signal(SIGPIPE, SIG_IGN);
 	while (total_read_bytes<count_bytes) {
 		hard_timeout("Read POST information", r); /* start timeout timer */
@@ -291,7 +293,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		}
 		total_read_bytes += read_bytes;
 	}
-	signal(SIGPIPE, handler);
+	signal(SIGPIPE, handler);	
 	return total_read_bytes;
 }
 /* }}} */
@@ -310,8 +312,7 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
-
-	if (!r) {
+	if(!r) {
 		return 0;
 	}
 
@@ -362,15 +363,15 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
  */
 static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-	if (SG(server_context) == NULL) { /* server_context is not here anymore */
+	if(SG(server_context) == NULL) { /* server_context is not here anymore */
 		return SAPI_HEADER_SEND_FAILED;
 	}
 
 	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
 	/* check that we haven't sent headers already, we use our own
-	 * headers_sent since we may send headers at anytime
+	 * headers_sent since we may send headers at anytime 
 	 */
-	if (!AP(headers_sent)) {
+	if(!AP(headers_sent)) {
 		send_http_header((request_rec *) SG(server_context));
 		AP(headers_sent) = 1;
 	}
@@ -402,9 +403,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
 		symbol_table = track_vars_array->value.ht;
-	} else if (PG(register_globals)) {
-		/* should never happen nowadays */
-		symbol_table = EG(active_symbol_table);
 	} else {
 		symbol_table = NULL;
 	}
@@ -432,10 +430,8 @@ static int php_apache_startup(sapi_module_struct *sapi_module)
 
 /* {{{ php_apache_log_message
  */
-static void php_apache_log_message(char *message)
+static void php_apache_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
 		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
@@ -454,16 +450,15 @@ static void php_apache_log_message(char *message)
 static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_CLEANUP;
 	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
-	if (SG(sapi_started)) {
+	if(SG(sapi_started)) {
 		php_request_shutdown(dummy);
 		SG(sapi_started) = 0;
 	}
 	AP(in_request) = 0;
-	if (AP(setup_env)) {
+	if(AP(setup_env)) {
 		AP(setup_env) = 0;
 	}
 	AP(current_hook) = AP_WAITING_FOR_REQUEST;
@@ -475,7 +470,7 @@ static void php_apache_request_shutdown(void *dummy)
  */
 static int php_apache_sapi_activate(TSRMLS_D)
 {
-	request_rec *r = (request_rec *) SG(server_context);
+	request_rec *r = (request_rec *) SG(server_context); 
 
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
@@ -483,7 +478,7 @@ static int php_apache_sapi_activate(TSRMLS_D)
 	 * We need this because at any point in our code we can be interrupted
 	 * and that may happen before we have had time to free our memory.
 	 * The php_request_shutdown function needs to free all outstanding allocated
-	 * memory.
+	 * memory.  
 	 */
 	block_alarms();
 	register_cleanup(r->pool, NULL, php_apache_request_shutdown, php_request_shutdown_for_exec);
@@ -519,7 +514,7 @@ static char *php_apache_getenv(char *name, size_t name_len TSRMLS_DC)
 static sapi_module_struct apache_sapi_module = {
 	"apache",						/* name */
 	"Apache",						/* pretty name */
-
+									
 	php_apache_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -560,6 +555,7 @@ static sapi_module_struct apache_sapi_module = {
 	NULL,                           /* exe location */
 	0,                              /* ini ignore */
 	NULL
+	
 };
 /* }}} */
 
@@ -597,20 +593,20 @@ static void init_request_info(TSRMLS_D)
 	SG(request_info).auth_password = NULL;
 
 	if (authorization && !auth_type(r)) {
-		if (!strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
-			tmp = uudecode(r->pool, authorization);
-			tmp_user = getword_nulls_nc(r->pool, &tmp, ':');
-			if (tmp_user) {
-				r->connection->user = pstrdup(r->connection->pool, tmp_user);
-				r->connection->ap_auth_type = "Basic";
-				SG(request_info).auth_user = estrdup(tmp_user);
-			}
-			if (tmp) {
-				SG(request_info).auth_password = estrdup(tmp);
-			}
-		} else if (!strcasecmp(getword(r->pool, &authorization, ' '), "Digest")) {
-			r->connection->ap_auth_type = "Digest";
-			SG(request_info).auth_digest = estrdup(authorization);
+        if (!strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
+            tmp = uudecode(r->pool, authorization);
+            tmp_user = getword_nulls_nc(r->pool, &tmp, ':');
+            if (tmp_user) {
+                r->connection->user = pstrdup(r->connection->pool, tmp_user);
+                r->connection->ap_auth_type = "Basic";
+                SG(request_info).auth_user = estrdup(tmp_user);
+            }
+            if (tmp) {
+                SG(request_info).auth_password = estrdup(tmp);
+            }
+		} else if  (!strcasecmp(getword(r->pool, &authorization, ' '), "Digest")) {
+            r->connection->ap_auth_type = "Digest";
+            SG(request_info).auth_digest = estrdup(authorization);
 		}
 	}
 }
@@ -629,8 +625,8 @@ static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_
  */
 static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 {
+	
 	char *mimetype;
-
 	if (SG(default_mimetype) || SG(default_charset)) {
 		/* Assume output will be of the default MIME type.  Individual
 		   scripts may change this later. */
@@ -652,7 +648,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	int retval;
 	php_per_dir_config *per_dir_conf;
 	TSRMLS_FETCH();
-
 	if (AP(in_request)) {
 		zend_file_handle fh;
 
@@ -724,16 +719,16 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		hard_timeout("send", r);
 
 		SG(server_context) = r;
-
+		
 		php_save_umask();
-		if (!AP(setup_env)) {
+		if(!AP(setup_env)) {
 			AP(setup_env) = 1;
 			add_common_vars(r);
 			add_cgi_vars(r);
 		}
 		init_request_info(TSRMLS_C);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
-
+		
 		/* Done, restore umask, turn off timeout, close file and return */
 		php_restore_umask();
 		kill_timeout(r);
@@ -749,8 +744,9 @@ static int send_parsed_php(request_rec * r)
 {
 	int result = send_php(r, 0, NULL);
 	TSRMLS_FETCH();
-
-	ap_table_setn(r->notes, "mod_php_memory_usage", ap_psprintf(r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
+ 
+	ap_table_setn(r->notes, "mod_php_memory_usage",
+		ap_psprintf(r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
 
 	return result;
 }
@@ -763,6 +759,7 @@ static int send_parsed_php_source(request_rec * r)
 	return send_php(r, 1, NULL);
 }
 /* }}} */
+
 
 /* {{{ destroy_per_dir_entry
  */
@@ -819,7 +816,7 @@ static void php_destroy_per_server_info(php_per_server_config *conf)
 
 /* {{{ php_destroy_per_dir_info
  */
-static void php_destroy_per_dir_info(php_per_dir_config *conf)
+static void php_destroy_per_dir_info(php_per_dir_config *conf) 
 {
 	zend_hash_destroy(conf->ini_settings);
 	php_handler_stack_destroy(&conf->response_handlers);
@@ -841,19 +838,20 @@ static void *php_create_server(pool *p, char *dummy)
 	php_per_server_config *conf;
 	conf = (php_per_server_config *) malloc(sizeof(php_per_server_config));
 	register_cleanup(p, (void *) conf, (void (*)(void *)) php_destroy_per_server_info, (void (*)(void *)) php_destroy_per_server_info);
-
+	
 	sapi_stack_init_ex(&conf->requires, 1);
 	sapi_stack_init_ex(&conf->uri_handlers, 1);
 	return conf;
 }
+	
 /* }}} */
+
 
 /* {{{ php_create_dir
  */
 static void *php_create_dir(pool *p, char *dummy)
 {
 	php_per_dir_config *conf;
-
 	conf = (php_per_dir_config *) malloc(sizeof(php_per_dir_config));
 	conf->ini_settings = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(conf->ini_settings, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
@@ -866,9 +864,10 @@ static void *php_create_dir(pool *p, char *dummy)
 	sapi_stack_init_ex(&conf->logger_handlers, 1);
 	sapi_stack_init_ex(&conf->post_read_handlers, 1);
 	register_cleanup(p, (void *) conf, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) php_destroy_per_dir_info);
-
+	
 	return conf;
 }
+
 /* }}} */
 
 /* {{{ php_merge_dir
@@ -987,7 +986,7 @@ static CONST_PREFIX char *php_set_dir_handler(php_per_dir_config *conf, char *ar
 	return NULL;
 }
 
-/* {{{ php_set_uri_handler
+/* {{{ php_set_uri_handler 
  */
 static CONST_PREFIX char *php_set_uri_handler(cmd_parms *cmd, void *dummy, char *arg1)
 {
@@ -1014,7 +1013,7 @@ static CONST_PREFIX char *php_set_header_handler_code(cmd_parms *cmd, php_per_di
 }
 /* }}} */
 
-/* {{{ php_set_auth_handler
+/* {{{ php_set_auth_handler 
  */
 static CONST_PREFIX char *php_set_auth_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
 {
@@ -1024,6 +1023,7 @@ static CONST_PREFIX char *php_set_auth_handler_code(cmd_parms *cmd, php_per_dir_
 {
 	return php_set_dir_handler(conf, arg1, AP_AUTHENTICATION, AP_HANDLER_TYPE_METHOD);
 }
+
 /* }}} */
 
 /* {{{ php_set_access_handler
@@ -1036,6 +1036,7 @@ static CONST_PREFIX char *php_set_access_handler_code(cmd_parms *cmd, php_per_di
 {
 	return php_set_dir_handler(conf, arg1, AP_ACCESS_CONTROL, AP_HANDLER_TYPE_METHOD);
 }
+
 /* }}} */
 
 /* {{{ php_set_type_handler
@@ -1048,6 +1049,7 @@ static CONST_PREFIX char *php_set_type_handler_code(cmd_parms *cmd, php_per_dir_
 {
 	return php_set_dir_handler(conf, arg1, AP_TYPE_CHECKING, AP_HANDLER_TYPE_METHOD);
 }
+
 /* }}} */
 
 /* {{{ php_set_fixup_handler
@@ -1072,7 +1074,8 @@ static CONST_PREFIX char *php_set_logger_handler_code(cmd_parms *cmd, php_per_di
 {
 	return php_set_dir_handler(conf, arg1, AP_LOGGING, AP_HANDLER_TYPE_METHOD);
 }
-/* }}} */
+
+/* }}} */ 
 
 /* {{{ php_set_post_read_handler
  */
@@ -1084,10 +1087,13 @@ static CONST_PREFIX char *php_set_post_read_handler_code(cmd_parms *cmd, php_per
 {
 	return php_set_dir_handler(conf, arg1, AP_POST_READ, AP_HANDLER_TYPE_METHOD);
 }
+
+
 /* }}} */
 
 /* {{{ php_set_require
  */
+
 static CONST_PREFIX char *php_set_require(cmd_parms *cmd, void *dummy, char *arg1)
 {
 	return php_set_server_handler(cmd->server, arg1, 0, AP_HANDLER_TYPE_FILE);
@@ -1105,7 +1111,7 @@ static CONST_PREFIX char *php_set_response_handler_code(cmd_parms *cmd, php_per_
 	return php_set_dir_handler(conf, arg1, AP_RESPONSE, AP_HANDLER_TYPE_METHOD);
 }
 /* }}} */
-
+	
 /* {{{ php_apache_value_handler
  */
 static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2)
@@ -1134,7 +1140,7 @@ static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *
 		bool_val[0] = '0';
 	}
 	bool_val[1] = 0;
-
+	
 	return php_apache_value_handler_ex(cmd, conf, arg1, bool_val, mode);
 }
 /* }}} */
@@ -1182,7 +1188,7 @@ static int php_xbithack_handler(request_rec * r)
 	if (conf) {
 		zend_hash_apply((HashTable *) conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 	}
-	if (!AP(xbithack)) {
+	if(!AP(xbithack)) {
 		r->allowed |= (1 << METHODS) - 1;
 		zend_try {
 			zend_ini_deactivate(TSRMLS_C);
@@ -1202,7 +1208,7 @@ static void apache_php_module_shutdown_wrapper(void)
 
 #if MODULE_MAGIC_NUMBER >= 19970728
 	/* This function is only called on server exit if the apache API
-	 * child_exit handler exists, so shutdown globally
+	 * child_exit handler exists, so shutdown globally 
 	 */
 	sapi_shutdown();
 #endif
@@ -1256,9 +1262,10 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 {
 	zval *ret = NULL;
 	php_per_dir_config *conf;
+
 	TSRMLS_FETCH();
 
-	if (!AP(apache_config_loaded)) {
+	if(!AP(apache_config_loaded)) {
 		conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 		if (conf)
 			   zend_hash_apply((HashTable *)conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
@@ -1284,16 +1291,16 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 	}
 	return HTTP_INTERNAL_SERVER_ERROR;
 }
+ 
 
 static int php_uri_translation(request_rec *r)
-{
+{	
 	php_per_server_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_URI_TRANS;
 	conf = (php_per_server_config *) get_module_config(r->server->module_config, &php5_module);
-	return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers,
-			ZEND_STACK_APPLY_BOTTOMUP,
+	return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, 
+			ZEND_STACK_APPLY_BOTTOMUP, 
 			(int (*)(void *element, void *)) php_run_hook, r, OK);
 }
 
@@ -1301,7 +1308,6 @@ static int php_header_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_HEADER_PARSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->headers_handlers,
@@ -1313,11 +1319,10 @@ static int php_auth_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_AUTHENTICATION;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
-	return sapi_stack_apply_with_argument_stop_if_equals(&conf->auth_handlers,
-			ZEND_STACK_APPLY_BOTTOMUP,
+	return sapi_stack_apply_with_argument_stop_if_equals(&conf->auth_handlers, 
+			ZEND_STACK_APPLY_BOTTOMUP, 
 			(int (*)(void *element, void *)) php_run_hook, r, OK);
 }
 
@@ -1326,7 +1331,6 @@ static int php_access_hook(request_rec *r)
 	php_per_dir_config *conf;
 	int status = DECLINED;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_ACCESS_CONTROL;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	status =  sapi_stack_apply_with_argument_stop_if_http_error(&conf->access_handlers,
@@ -1340,7 +1344,6 @@ static int php_type_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_TYPE_CHECKING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->type_handlers,
@@ -1353,7 +1356,6 @@ static int php_fixup_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_FIXUP;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->fixup_handlers,
@@ -1366,7 +1368,6 @@ static int php_logger_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_LOGGING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->logger_handlers,
@@ -1374,16 +1375,15 @@ static int php_logger_hook(request_rec *r)
 			(int (*)(void *element, void *)) php_run_hook,
 			r);
 }
-
+ 
 static int php_post_read_hook(request_rec *r)
 {
 	php_per_dir_config *conf;
 	php_per_server_config *svr;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_POST_READ;
 	svr = get_module_config(r->server->module_config, &php5_module);
-	if (ap_is_initial_req(r)) {
+	if(ap_is_initial_req(r)) {
 		sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
 	}
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
@@ -1396,7 +1396,6 @@ static int php_response_handler(request_rec *r)
 {
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	AP(current_hook) = AP_RESPONSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
@@ -1409,7 +1408,7 @@ handler_rec php_handlers[] =
 	{"application/x-httpd-php", send_parsed_php},
 	{"application/x-httpd-php-source", send_parsed_php_source},
 	{"text/html", php_xbithack_handler},
-	{"php-script", php_response_handler},
+		{"php-script", php_response_handler},
 	{NULL}
 };
 /* }}} */

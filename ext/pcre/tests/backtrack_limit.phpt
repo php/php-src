@@ -19,7 +19,7 @@ var_dump(preg_last_error() === PREG_NO_ERROR);
 
 ?>
 --EXPECT--
-int(0)
+bool(false)
 bool(true)
 int(10)
 bool(true)

@@ -191,15 +191,37 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 	return filter;
 }
 
+mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
+{
+	mbfl_identify_filter *filter;
+
+	/* allocate */
+	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
+	if (filter == NULL) {
+		return NULL;
+	}
+
+	if (mbfl_identify_filter_init2(filter, encoding)) {
+		mbfl_free(filter);
+		return NULL;
+	}
+
+	return filter;
+}
+
+
 int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
+{
+	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
+	return mbfl_identify_filter_init2(filter, enc ? enc: &mbfl_encoding_pass);
+}
+
+int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
 {
 	const struct mbfl_identify_vtbl *vtbl;
 
 	/* encoding structure */
-	filter->encoding = mbfl_no2encoding(encoding);
-	if (filter->encoding == NULL) {
-		filter->encoding = &mbfl_encoding_pass;
-	}
+	filter->encoding = encoding;
 
 	filter->status = 0;
 	filter->flag = 0;

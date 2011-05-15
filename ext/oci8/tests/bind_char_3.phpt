@@ -5,9 +5,17 @@ PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to CHAR parameter
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/Release 1[12]\./', $sv, $matches);
+$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 11g+ database");
+	die ("skip expected output only valid when using Oracle 10gR2 11gR2 databases");
+} else {
+    ob_start();
+    phpinfo(INFO_MODULES);
+    $phpinfo = ob_get_clean();
+    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
+    if ($iv != 1) {
+        die ("skip test expected to work only with Oracle 11g or greater version of client");
+    }
 }
 ?>
 --FILE--
@@ -254,9 +262,8 @@ echo "Done\n";
 --EXPECTF--
 Test 1.1 In Length: default.  In Type: default.  Out Length: default.          Out Type: default
   Executing:
-    Oci_execute error ORA-6502
 string(3) "abc"
-NULL
+string(3) "abc"
 Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default
   Executing:
 string(3) "abc"
@@ -268,20 +275,19 @@ string(3) "abc"
 Test 1.4 In Length: -1.       In Type: AFC.      Out Length: 10.               Out Type: AFC
   Executing:
 string(3) "abc"
-string(10) "abc       "
+string(30) "abc                           "
 Test 1.5 In Length: strlen.   In Type: AFC.      Out Length: strlen(input).    Out Type: AFC
   Executing:
 string(3) "abc"
-string(3) "abc"
+string(9) "abc      "
 Test 1.6 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)-1.  Out Type: AFC
   Executing:
-    Oci_execute error ORA-6502
 string(3) "abc"
-string(3) "abc"
+string(6) "abc   "
 Test 1.7 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)+1.  Out Type: AFC
   Executing:
 string(3) "abc"
-string(4) "abc "
+string(12) "abc         "
 
 
 Tests with ''

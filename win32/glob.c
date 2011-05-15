@@ -146,12 +146,11 @@ static int	 g_stat(Char *, struct stat *, glob_t *);
 static int	 glob0(const Char *, glob_t *);
 static int	 glob1(Char *, Char *, glob_t *, size_t *);
 static int	 glob2(Char *, Char *, Char *, Char *, Char *, Char *,
-		    glob_t *, size_t *);
+				glob_t *, size_t *);
 static int	 glob3(Char *, Char *, Char *, Char *, Char *, Char *,
-		    Char *, Char *, glob_t *, size_t *);
+				Char *, Char *, glob_t *, size_t *);
 static int	 globextend(const Char *, glob_t *, size_t *);
-static const Char *
-		 globtilde(const Char *, Char *, size_t, glob_t *);
+static const Char *globtilde(const Char *, Char *, size_t, glob_t *);
 static int	 globexp1(const Char *, glob_t *);
 static int	 globexp2(const Char *, const Char *, glob_t *, int *);
 static int	 match(Char *, Char *, Char *);
@@ -370,7 +369,7 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 	/* Copy up to the end of the string or / */
 	eb = &patbuf[patbuf_len - 1];
 	for (p = pattern + 1, h = (char *) patbuf;
-	    h < (char *)eb && *p && *p != SLASH; *h++ = (char) *p++)
+		h < (char *)eb && *p && *p != SLASH; *h++ = (char) *p++)
 		;
 
 	*h = EOS;
@@ -451,7 +450,7 @@ glob0(pattern, pglob)
 			if (c == NOT)
 				++qpatnext;
 			if (*qpatnext == EOS ||
-			    g_strchr((Char *) qpatnext+1, RBRACKET) == NULL) {
+				g_strchr((Char *) qpatnext+1, RBRACKET) == NULL) {
 				*bufnext++ = LBRACKET;
 				if (c == NOT)
 					--qpatnext;
@@ -464,7 +463,7 @@ glob0(pattern, pglob)
 			do {
 				*bufnext++ = CHAR(c);
 				if (*qpatnext == RANGE &&
-				    (c = qpatnext[1]) != RBRACKET) {
+					(c = qpatnext[1]) != RBRACKET) {
 					*bufnext++ = M_RNG;
 					*bufnext++ = CHAR(c);
 					qpatnext += 2;
@@ -506,21 +505,20 @@ glob0(pattern, pglob)
 	 */
 	if (pglob->gl_pathc == oldpathc) {
 		if ((pglob->gl_flags & GLOB_NOCHECK) ||
-		    ((pglob->gl_flags & GLOB_NOMAGIC) &&
-		    !(pglob->gl_flags & GLOB_MAGCHAR)))
+			((pglob->gl_flags & GLOB_NOMAGIC) &&
+			!(pglob->gl_flags & GLOB_MAGCHAR)))
 			return(globextend(pattern, pglob, &limit));
 		else
 			return(GLOB_NOMATCH);
 	}
 	if (!(pglob->gl_flags & GLOB_NOSORT))
 		qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
-			pglob->gl_pathc - oldpathc, sizeof(char *), (const void *) compare);
+			pglob->gl_pathc - oldpathc, sizeof(char *), compare);
 	return(0);
 }
 
 static int
-compare(p, q)
-	const void *p, *q;
+compare(const void *p, const void *q)
 {
 	return(strcmp(*(char **)p, *(char **)q));
 }
@@ -537,8 +535,8 @@ glob1(pattern, pattern_last, pglob, limitp)
 	if (*pattern == EOS)
 		return(0);
 	return(glob2(pathbuf, pathbuf+MAXPATHLEN-1,
-	    pathbuf, pathbuf+MAXPATHLEN-1,
-	    pattern, pattern_last, pglob, limitp));
+		pathbuf, pathbuf+MAXPATHLEN-1,
+		pattern, pattern_last, pglob, limitp));
 }
 
 /*
@@ -548,7 +546,7 @@ glob1(pattern, pattern_last, pglob, limitp)
  */
 static int
 glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
-    pattern_last, pglob, limitp)
+		pattern_last, pglob, limitp)
 	Char *pathbuf, *pathbuf_last, *pathend, *pathend_last;
 	Char *pattern, *pattern_last;
 	glob_t *pglob;
@@ -569,10 +567,10 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 				return(0);
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
-			    !IS_SLASH(pathend[-1])) && (S_ISDIR(sb.st_mode) ||
-			    (S_ISLNK(sb.st_mode) &&
-			    (g_stat(pathbuf, &sb, pglob) == 0) &&
-			    S_ISDIR(sb.st_mode)))) {
+				!IS_SLASH(pathend[-1])) && (S_ISDIR(sb.st_mode) ||
+				(S_ISLNK(sb.st_mode) &&
+				(g_stat(pathbuf, &sb, pglob) == 0) &&
+				S_ISDIR(sb.st_mode)))) {
 				if (pathend+1 > pathend_last)
 					return (1);
 				*pathend++ = SEP;
@@ -604,15 +602,15 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 		} else
 			/* Need expansion, recurse. */
 			return(glob3(pathbuf, pathbuf_last, pathend,
-			    pathend_last, pattern, pattern_last,
-			    p, pattern_last, pglob, limitp));
+				pathend_last, pattern, pattern_last,
+				p, pattern_last, pglob, limitp));
 	}
 	/* NOTREACHED */
 }
 
 static int
 glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
-    restpattern, restpattern_last, pglob, limitp)
+	restpattern, restpattern_last, pglob, limitp)
 	Char *pathbuf, *pathbuf_last, *pathend, *pathend_last;
 	Char *pattern, *pattern_last, *restpattern, *restpattern_last;
 	glob_t *pglob;
@@ -642,7 +640,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 			if (g_Ctoc(pathbuf, buf, sizeof(buf)))
 				return(GLOB_ABORTED);
 			if (pglob->gl_errfunc(buf, errno) ||
-			    pglob->gl_flags & GLOB_ERR)
+				pglob->gl_flags & GLOB_ERR)
 				return(GLOB_ABORTED);
 		}
 		return(0);
@@ -677,7 +675,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 			continue;
 		}
 		err = glob2(pathbuf, pathbuf_last, --dc, pathend_last,
-		    restpattern, restpattern_last, pglob, limitp);
+			restpattern, restpattern_last, pglob, limitp);
 		if (err)
 			break;
 	}
@@ -718,7 +716,7 @@ globextend(path, pglob, limitp)
 
 	newsize = sizeof(*pathv) * (2 + pglob->gl_pathc + pglob->gl_offs);
 	pathv = pglob->gl_pathv ? realloc((char *)pglob->gl_pathv, newsize) :
-	    malloc(newsize);
+		malloc(newsize);
 	if (pathv == NULL) {
 		if (pglob->gl_pathv) {
 			free(pglob->gl_pathv);
@@ -749,7 +747,7 @@ globextend(path, pglob, limitp)
 	pathv[pglob->gl_offs + pglob->gl_pathc] = NULL;
 
 	if ((pglob->gl_flags & GLOB_LIMIT) &&
-	    newsize + *limitp >= ARG_MAX) {
+		newsize + *limitp >= ARG_MAX) {
 		errno = 0;
 		return(GLOB_NOSPACE);
 	}
@@ -776,8 +774,8 @@ match(name, pat, patend)
 			if (pat == patend)
 				return(1);
 			do
-			    if (match(name, pat, patend))
-				    return(1);
+				if (match(name, pat, patend))
+					return(1);
 			while (*name++ != EOS)
 				;
 			return(0);
@@ -860,7 +858,7 @@ g_lstat(fn, sb, pglob)
 		return(-1);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_lstat)(buf, sb));
-	return(lstat(buf, sb));
+	return(php_sys_lstat(buf, sb));
 }
 
 static int
@@ -875,7 +873,7 @@ g_stat(fn, sb, pglob)
 		return(-1);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_stat)(buf, sb));
-	return(stat(buf, sb));
+	return(php_sys_stat(buf, sb));
 }
 
 static Char *

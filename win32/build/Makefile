@@ -17,7 +17,7 @@
 # $Id$
 # This is the makefile template for the win32 build
 
-CC="$(CL)"
+CC="$(PHP_CL)"
 LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
@@ -25,10 +25,12 @@ RE2C="$(RE2C)"
 PHP_BUILD=$(PHP_BUILD)
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
+BUILD_DIR_DEV_NAME=php-$(PHP_VERSION_STRING)-devel-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)
+BUILD_DIR_DEV=$(BUILD_DIR)\$(BUILD_DIR_DEV_NAME)
 
 all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
-build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
+build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 
 !if $(RE2C) == ""
 generated_files: build_dirs Zend\zend_ini_parser.c \
@@ -85,10 +87,14 @@ $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EX
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 
-$(BUILD_DIR) $(BUILD_DIRS_SUB):
+$(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
 	@echo Recreating build dirs
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@cd $(BUILD_DIR)
 	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
+	@if not exist $(BUILD_DIR_DEV) @mkdir $(BUILD_DIR_DEV) > NUL
+	@cd "$(PHP_SRC_DIR)"
+	
 
 clean-sapi:
 	@echo Cleaning SAPI
@@ -99,7 +105,9 @@ clean-sapi:
 
 clean: clean-sapi
 	@echo Cleaning distribution build dirs
+	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
+	@cd "$(PHP_SRC_DIR)"
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
@@ -109,7 +117,9 @@ clean-pecl:
 
 clean-all:
 	@echo Cleaning standard build dirs
+	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
+	@cd "$(PHP_SRC_DIR)"
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
@@ -140,19 +150,42 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	cd ..\..
 	cd $(BUILD_DIR)
 	-$(ZIP) -9 -q php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip *.pdb
+	cd
+	cd
+	-$(ZIP) -9 -q -r php-devel-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip $(BUILD_DIR_DEV_NAME)
 	cd ..\..
 
 dist: all build-dist
-snap: build-snap build-dist
+snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
-	$(CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
 # need to redirect, since INSTALL is a file in the root...
-install: really-install
+install: really-install install-sdk
+
+build-lib:
+	@if not exist $(BUILD_DIR_DEV)\lib mkdir $(BUILD_DIR_DEV)\lib >nul
+	@copy $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR_DEV)\lib /y >nul
+
+build-devel: build-headers build-lib
+	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
+	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
+	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy win32\build\Makefile.phpize $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy win32\build\phpize.bat $(BUILD_DIR_DEV)\ /y >nul
+	@copy win32\build\template.rc $(BUILD_DIR_DEV)\build\ /y >nul
+	@copy $(BUILD_DIR)\devel\config.phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy $(BUILD_DIR)\devel\phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
+
+install-sdk: build-devel
+	@xcopy /Q /Y /E /I $(BUILD_DIR_DEV)\* $(PHP_PREFIX)\SDK
 
 really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
@@ -162,5 +195,4 @@ really-install:
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
-
 

@@ -32,5 +32,5 @@ include $fname2;
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.php'); ?>
 --EXPECT--
 bool(false)
-Write operations disabled by INI setting
+Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

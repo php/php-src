@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,14 +120,14 @@ PHPAPI ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_D
 								if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen)) {
 									if (0 == stricmp(libname, search_string)) {
 										char *str = NULL;
-										int major, minor;
+										int major_tmp, minor_tmp;
 
 										/* fetch the GUID and add the version numbers */
-										if (2 != sscanf(version, "%d.%d", &major, &minor)) {
-											major = 1;
-											minor = 0;
+										if (2 != sscanf(version, "%d.%d", &major_tmp, &minor_tmp)) {
+											major_tmp = 1;
+											minor_tmp = 0;
 										}
-										spprintf(&str, 0, "%s,%d,%d", keyname, major, minor);
+										spprintf(&str, 0, "%s,%d,%d", keyname, major_tmp, minor_tmp);
 										/* recurse */
 										TL = php_com_load_typelib(str, codepage TSRMLS_CC);
 

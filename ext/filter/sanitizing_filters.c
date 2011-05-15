@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	}
 
 	smart_str_0(&str);
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = str.c;
 	Z_STRLEN_P(value) = str.len;
 }
@@ -102,7 +102,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		s++;	
 	}
 	*p = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)str;
 	Z_STRLEN_P(value) = p - str;
 }
@@ -131,7 +131,7 @@ static void php_filter_strip(zval *value, long flags)
 	}
 	/* update zval string data */
 	buf[c] = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
@@ -169,7 +169,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	}
 	/* update zval string data */
 	buf[c] = '\0';
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
 	Z_STRLEN_P(value) = c;
 }
@@ -205,7 +205,11 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 
 	if (new_len == 0) {
 		zval_dtor(value);
-		ZVAL_EMPTY_STRING(value);
+		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
+			ZVAL_NULL(value);
+		} else {
+			ZVAL_EMPTY_STRING(value);			
+		}
 		return;
 	}
 }
@@ -242,6 +246,24 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 }
 /* }}} */
 
+/* {{{ php_filter_full_special_chars */
+void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
+{
+	char *buf;
+	int   len, quotes;
+	
+	if (!(flags & FILTER_FLAG_NO_ENCODE_QUOTES)) {
+		quotes = ENT_QUOTES;
+	} else {
+		quotes = ENT_NOQUOTES;
+	}
+	buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
+	str_efree(Z_STRVAL_P(value));
+	Z_STRVAL_P(value) = buf;
+	Z_STRLEN_P(value) = len;
+}
+/* }}} */
+
 /* {{{ php_filter_unsafe_raw */
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
@@ -262,9 +284,14 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 		}
 
 		php_filter_encode_html(value, enc);	
+	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
+		zval_dtor(value);
+		ZVAL_NULL(value);
 	}
 }
 /* }}} */
+
+
 
 /* {{{ php_filter_email */
 #define SAFE        "$-_.+"
@@ -345,7 +372,7 @@ void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 	/* just call php_addslashes quotes */
 	buf = php_addslashes(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 0 TSRMLS_CC);
 
-	efree(Z_STRVAL_P(value));
+	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = buf;
 	Z_STRLEN_P(value) = len;
 }

@@ -24,6 +24,7 @@
 #include "dateformat_attr.h"
 
 zend_class_entry *IntlDateFormatter_ce_ptr = NULL;
+static zend_object_handlers IntlDateFormatter_handlers;
 
 /*
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
@@ -73,9 +74,33 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 		(zend_objects_free_object_storage_t)IntlDateFormatter_object_free,
 		NULL TSRMLS_CC );
 
-	retval.handlers = zend_get_std_object_handlers();
+	retval.handlers = &IntlDateFormatter_handlers;
 
 	return retval;
+}
+/* }}} */
+
+/* {{{ IntlDateFormatter_object_clone */
+zend_object_value IntlDateFormatter_object_clone(zval *object TSRMLS_DC)
+{
+	zend_object_value new_obj_val;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
+	IntlDateFormatter_object *dfo, *new_dfo;
+
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
+	new_obj_val = IntlDateFormatter_ce_ptr->create_object(IntlDateFormatter_ce_ptr TSRMLS_CC);
+	new_dfo = (IntlDateFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
+	/* clone standard parts */	
+	zend_objects_clone_members(&new_dfo->zo, new_obj_val, &dfo->zo, handle TSRMLS_CC);
+	/* clone formatter object */
+	DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(new_dfo));
+	if(U_FAILURE(INTL_DATA_ERROR_CODE(new_dfo))) {
+		/* set up error in case error handler is interested */
+		intl_error_set( NULL, INTL_DATA_ERROR_CODE(new_dfo), "Failed to clone IntlDateFormatter object", 0 TSRMLS_CC );
+		IntlDateFormatter_object_dtor(new_dfo, new_obj_val.handle TSRMLS_CC); /* free new object */
+		zend_error(E_ERROR, "Failed to clone IntlDateFormatter object");
+	}
+	return new_obj_val;
 }
 /* }}} */
 
@@ -126,7 +151,7 @@ ZEND_END_ARG_INFO()
 /* {{{ IntlDateFormatter_class_functions
  * Every 'IntlDateFormatter' class method has an entry in this table
  */
-static function_entry IntlDateFormatter_class_functions[] = {
+static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY(  create, ZEND_FN( datefmt_create ), arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )
@@ -160,6 +185,10 @@ void dateformat_register_IntlDateFormatter_class( TSRMLS_D )
 	INIT_CLASS_ENTRY( ce, "IntlDateFormatter", IntlDateFormatter_class_functions );
 	ce.create_object = IntlDateFormatter_object_create;
 	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+
+	memcpy(&IntlDateFormatter_handlers, zend_get_std_object_handlers(),
+		sizeof IntlDateFormatter_handlers);
+	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
 
 	/* Declare 'IntlDateFormatter' class properties. */
 	if( !IntlDateFormatter_ce_ptr )

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,6 @@
 #include <sys/param.h>
 #endif
 #include "ext/standard/head.h"
-#include "safe_mode.h"
 #include "php_string.h"
 #include "pack.h"
 #if HAVE_PWD_H
@@ -121,6 +120,9 @@ PHP_FUNCTION(pack)
 		return;
 	}
 
+	if (Z_ISREF_PP(argv[0])) {
+		SEPARATE_ZVAL(argv[0]);
+	}
 	convert_to_string_ex(argv[0]);
 
 	format = Z_STRVAL_PP(argv[0]);
@@ -179,6 +181,9 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
+					if (Z_ISREF_PP(argv[currentarg])) {
+						SEPARATE_ZVAL(argv[currentarg]);
+					}
 					convert_to_string_ex(argv[currentarg]);
 					arg = Z_STRLEN_PP(argv[currentarg]);
 				}
@@ -312,6 +317,9 @@ PHP_FUNCTION(pack)
 			case 'A': 
 				memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
+				if (Z_ISREF_PP(val)) {
+					SEPARATE_ZVAL(val);
+				}
 				convert_to_string_ex(val);
 				memcpy(&output[outputpos], Z_STRVAL_PP(val),
 					   (Z_STRLEN_PP(val) < arg) ? Z_STRLEN_PP(val) : arg);
@@ -325,6 +333,9 @@ PHP_FUNCTION(pack)
 				char *v;
 
 				val = argv[currentarg++];
+				if (Z_ISREF_PP(val)) {
+					SEPARATE_ZVAL(val);
+				}
 				convert_to_string_ex(val);
 				v = Z_STRVAL_PP(val);
 				outputpos--;

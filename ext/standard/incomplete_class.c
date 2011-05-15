@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,7 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 }
 /* }}} */
 
-static zval *incomplete_class_get_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
+static zval *incomplete_class_get_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	
@@ -66,33 +66,33 @@ static zval *incomplete_class_get_property(zval *object, zval *member, int type 
 }
 /* }}} */
 
-static void incomplete_class_write_property(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
+static void incomplete_class_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 	
-static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return &EG(error_zval_ptr);
 }
 /* }}} */
 
-static void incomplete_class_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static void incomplete_class_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 
-static int incomplete_class_has_property(zval *object, zval *member, int check_empty TSRMLS_DC) /* {{{ */
+static int incomplete_class_has_property(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
@@ -109,8 +109,6 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	value = zend_objects_new(&object, class_type TSRMLS_CC);
 	value.handlers = &php_incomplete_object_handlers;
 	
-	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	return value;
 }
 

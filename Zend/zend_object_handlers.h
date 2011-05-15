@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,14 @@
 
 union _zend_function;
 struct _zend_property_info;
+struct _zend_literal;
 
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
    symbol table, its reference count should be 0.
 */
 /* Used to fetch property from the object, read-only */
-typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, int type TSRMLS_DC);
+typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, int type, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to fetch dimension from the object, read-only */
 typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int type TSRMLS_DC);
@@ -42,14 +43,14 @@ typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int ty
    any changes.  You should NOT modify the reference count of the value passed to you.
 */
 /* Used to set property of the object */
-typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value TSRMLS_DC);
+typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value TSRMLS_DC);
 
 
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member TSRMLS_DC);
+typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to set object value. Can be used to override assignments and scalar
    write ops (like ++, +=) on the object */
@@ -66,13 +67,13 @@ typedef zval* (*zend_object_get_t)(zval *object TSRMLS_DC);
  * 1 (set) whether property exists and is true
  * 2 (exists) whether property exists
  */
-typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists TSRMLS_DC);
+typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to check if a dimension of the object exists */
 typedef int (*zend_object_has_dimension_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
 
 /* Used to remove a property of the object */
-typedef void (*zend_object_unset_property_t)(zval *object, zval *member TSRMLS_DC);
+typedef void (*zend_object_unset_property_t)(zval *object, zval *member, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to remove a dimension of the object */
 typedef void (*zend_object_unset_dimension_t)(zval *object, zval *offset TSRMLS_DC);
@@ -87,7 +88,7 @@ typedef HashTable *(*zend_object_get_debug_info_t)(zval *object, int *is_temp TS
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
 typedef int (*zend_object_call_method_t)(char *method, INTERNAL_FUNCTION_PARAMETERS);
-typedef union _zend_function *(*zend_object_get_method_t)(zval **object_ptr, char *method, int method_len TSRMLS_DC);
+typedef union _zend_function *(*zend_object_get_method_t)(zval **object_ptr, char *method, int method_len, const struct _zend_literal *key TSRMLS_DC);
 typedef union _zend_function *(*zend_object_get_constructor_t)(zval *object TSRMLS_DC);
 
 /* Object maintenance/destruction */
@@ -143,14 +144,16 @@ struct _zend_object_handlers {
 extern ZEND_API zend_object_handlers std_object_handlers;
 
 BEGIN_EXTERN_C()
-ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC);
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC);
+ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len, const struct _zend_literal *key TSRMLS_DC);
 ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 
 #define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))

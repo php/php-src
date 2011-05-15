@@ -24,22 +24,40 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);
-	}
-
 	if (!is_null($tmp = @$res->fetch_field($link)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	while ($tmp = $res->fetch_field()) {
-		var_dump($tmp);
+	$charsets = my_get_charsets($link);
+
+	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
+
+	var_dump($res->fetch_field());
+
+	$tmp = $res->fetch_field();
 	var_dump($tmp);
+	if ($tmp->charsetnr != $charsets['results']['nr']) {
+		printf("[005] Expecting charset %s/%d got %d\n",
+			$charsets['results']['charset'],
+			$charsets['results']['nr'], $tmp->charsetnr);
+	}
+	if ($tmp->length != (1 * $charsets['results']['maxlen'])) {
+		printf("[006] Expecting length %d got %d\n",
+			$charsets['results']['maxlen'],
+			$tmp->max_length);
+	}
+	if ($tmp->db != $db) {
+		printf("008] Expecting database '%s' got '%s'\n",
+		  $db, $tmp->db);
+	}
+
+	var_dump($res->fetch_field());
 
 	$res->free_result();
 
 	if (NULL !== ($tmp = $res->fetch_field()))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	$mysqli->close();
 	print "done!";
@@ -49,7 +67,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "ID"
   [%u|b%"orgname"]=>
@@ -60,6 +78,10 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(1)
   [%u|b%"length"]=>
@@ -73,7 +95,7 @@ object(stdClass)#%d (11) {
   [%u|b%"decimals"]=>
   int(0)
 }
-object(stdClass)#%d (11) {
+object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(5) "label"
   [%u|b%"orgname"]=>
@@ -84,12 +106,16 @@ object(stdClass)#%d (11) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
-  int(1)
+  int(%d)
   [%u|b%"length"]=>
-  int(1)
+  int(%d)
   [%u|b%"charsetnr"]=>
-  int(8)
+  int(%d)
   [%u|b%"flags"]=>
   int(0)
   [%u|b%"type"]=>

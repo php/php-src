@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,9 +73,9 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
  */
 int php_startup_sapi_content_types(TSRMLS_D)
 {
-	sapi_register_default_post_reader(php_default_post_reader);
-	sapi_register_treat_data(php_default_treat_data);
-	sapi_register_input_filter(php_default_input_filter, NULL);
+	sapi_register_default_post_reader(php_default_post_reader TSRMLS_CC);
+	sapi_register_treat_data(php_default_treat_data TSRMLS_CC);
+	sapi_register_input_filter(php_default_input_filter, NULL TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */

@@ -47,7 +47,7 @@ include $alias . '/b/c.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 
-Warning: fopen(phar://%sopen_for_write_existing_b_5_2.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_b_5_2.php on line %d
+Warning: fopen(phar://%sopen_for_write_existing_b_5_2.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b_5_2.php on line %d
 
 Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_existing_b_5_2.php on line %d
 

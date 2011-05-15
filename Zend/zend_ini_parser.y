@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -304,7 +304,7 @@ statement:
 ;
 
 section_string_or_value:
-		var_string_list					{ $$ = $1; }
+		var_string_list_section			{ $$ = $1; }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
@@ -324,6 +324,15 @@ encapsed_list:
 		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
 	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
+;
+
+var_string_list_section:
+		cfg_var_ref						{ $$ = $1; }
+	|	constant_literal				{ $$ = $1; }
+	|	'"' encapsed_list '"'			{ $$ = $2; }
+	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
 ;
 
 var_string_list:
@@ -346,6 +355,14 @@ expr:
 
 cfg_var_ref:
 		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); free(Z_STRVAL($2)); }
+;
+
+constant_literal:
+		TC_CONSTANT						{ $$ = $1; }
+	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
 ;
 
 constant_string:

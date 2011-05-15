@@ -87,7 +87,7 @@ require_once('skipifconnectfailure.inc');
 
 	/* Check that the function alias exists. It's a deprecated function,
 	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_get_metadata()))
+	if (!is_null($tmp = @mysqli_stmt_result_metadata()))
 		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
@@ -101,7 +101,7 @@ require_once('skipifconnectfailure.inc');
 
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
  in %s on line %d
-object(stdClass)#5 (%d) {
+object(stdClass)#5 (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"
   [%u|b%"orgname"]=>
@@ -112,6 +112,10 @@ object(stdClass)#5 (%d) {
   %unicode|string%(4) "test"
   [%u|b%"def"]=>
   %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
   [%u|b%"max_length"]=>
   int(0)
   [%u|b%"length"]=>

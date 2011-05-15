@@ -11,14 +11,15 @@ if (!extension_loaded('posix')) {
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }
---INI--
-safe_mode = 1
+if (PHP_VERSION_ID < 503099) {
+    die('SKIP Safe mode is no longer available.');
+}
 --FILE--
 <?php
 var_dump(posix_access('/tmp', POSIX_W_OK));
 ?>
 ===DONE===
 --EXPECTF--
-Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
+Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
 bool(false)
 ===DONE===

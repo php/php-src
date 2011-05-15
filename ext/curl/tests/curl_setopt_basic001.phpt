@@ -6,7 +6,7 @@ Paul Sohier
 --INI--
 safe_mode=On
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
+<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER') || PHP_VERSION_ID < 503099) print "skip"; ?>
 --FILE--
 <?php
 
@@ -27,9 +27,9 @@ curl_close($ch);
 var_dump( $curl_content );
 ?>
 --EXPECTF--
-Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing curl_setopt with CURLOPT_FOLLOWLOCATION in safemode
 
-Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set in %s on line %d
+Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when safe_mode is enabled or an open_basedir is set in %s on line %d
 bool(false)
 

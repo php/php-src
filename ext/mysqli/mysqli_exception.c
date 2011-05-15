@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "mysqli_priv.h"
 #include "zend_exceptions.h"
 
 /* {{{ mysqli_exception_methods[]
@@ -35,13 +36,13 @@ const zend_function_entry mysqli_exception_methods[] = {
 };
 /* }}} */
 
-void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...) 
+void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...)
 {
 	zval	*sql_ex;
 	va_list arg;
 	char 	*message;
 
-	va_start(arg, format); 
+	va_start(arg, format);
 	vspprintf(&message, 0, format, arg);
 	va_end(arg);;
 

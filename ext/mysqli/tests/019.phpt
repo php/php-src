@@ -28,23 +28,23 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_prepare($link, "INSERT INTO insert_read(col1,col10, col11, col6) VALUES (?,?,?,?)"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_bind_param($stmt, "issd", $c1, $c2, $c3, $c4);
+	mysqli_stmt_bind_param($stmt, "issd", $c1, $c2, $c3, $c4);
 
 	$c1 = 1;
 	$c2 = "foo";
 	$c3 = "foobar";
 	$c4 = 3.14;
 
-	mysqli_execute($stmt);
+	mysqli_stmt_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	if (!$stmt = mysqli_prepare($link, "SELECT col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 FROM insert_read"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11);
-	mysqli_execute($stmt);
+	mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11);
+	mysqli_stmt_execute($stmt);
 
-	mysqli_fetch($stmt);
+	mysqli_stmt_fetch($stmt);
 
 	$test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7,$c8,$c9,$c10,$c11);
 

@@ -2,12 +2,12 @@
     of PCRE's API, error diagnostics, and the compiled code of some patterns.
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
-    either because PCRE can't be compatible, or there is potential Perl 
+    either because PCRE can't be compatible, or there is a possible Perl 
     bug. --/  
   
-/-- Originally, the Perl 5.10 things were in here too, but now I have separated
-    many (most?) of them out into test 11. However, there may still be some
-    that were overlooked. --/   
+/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
+    separated many (most?) of them out into test 11. However, there may still 
+    be some that were overlooked. --/   
 
 /(a)b|/I
 
@@ -50,6 +50,16 @@
 /[abcd/
 
 /(?X)[\B]/
+
+/(?X)[\R]/
+
+/(?X)[\X]/
+
+/[\B]/BZ
+
+/[\R]/BZ
+
+/[\X]/BZ
 
 /[z-a]/
 
@@ -2279,8 +2289,6 @@ a random value. /Ix
 /a+b?(*THEN)c+(*FAIL)/C
     aaabccc
     
-/a(*PRUNE:XXX)b/
-
 /a(*MARK)b/ 
 
 /(?i:A{1,}\6666666666)/
@@ -2338,6 +2346,15 @@ a random value. /Ix
     a\nb  
     a\r\nb  
     a\x85b 
+    
+/(*ANY).*/g
+    abc\r\ndef
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+
+/(*CRLF).*/g
+    abc\r\ndef
 
 /a\Rb/I<bsr_anycrlf>
     a\rb
@@ -2567,6 +2584,12 @@ a random value. /Ix
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+  
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+
+/xyz/CY
+  abcxyz 
 
 /^"((?(?=[a])[^"])|b)*"$/C
     "ab"
@@ -3162,9 +3185,9 @@ a random value. /Ix
     xxxxabcde\P
     xxxxabcde\P\P
 
-/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
-    and not behaving as specified in that it *does* bumpalong after hitting
-    (*COMMIT). --/ 
+/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+    broken and not behaving as specified in that it *does* bumpalong after
+    hitting (*COMMIT). --/
 
 /(?1)(A(*COMMIT)|B)D/
     ABD
@@ -3203,5 +3226,348 @@ a random value. /Ix
 
 /^(ab(c\1)d|x){2}$/BZ
     xabcxd
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
+
+/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+
+/(?!a\Kb)ac/
+    ac 
+    
+/^abc(?<=b\Kc)d/
+    abcd
+
+/^abc(?<!b\Kq)d/
+    abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+
+/----------------------/
+
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+
+/abc(*MARK:)pqr/
+
+/abc(*:)pqr/
+
+/abc(*FAIL:123)xyz/
+
+/--- This should, and does, fail. In Perl, it does not, which I think is a 
+     bug because replacing the B in the pattern by (B|D) does make it fail. ---/
+
+/A(*COMMIT)B/+K
+    ACABX
+
+/--- These should be different, but in Perl 5.11 are not, which I think
+     is a bug in Perl. ---/
+
+/A(*THEN)B|A(*THEN)C/K
+    AC
+
+/A(*PRUNE)B|A(*PRUNE)C/K
+    AC
+    
+/--- A whole lot of tests of verbs with arguments are here rather than in test
+     11 because Perl doesn't seem to follow its specification entirely 
+     correctly. ---/
+
+/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
+     not clear how Perl defines "involved in the failure of the match". ---/ 
+
+/^(A(*THEN:A)B|C(*THEN:B)D)/K
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+    
+/--- Check the use of names for success and failure. PCRE doesn't show these 
+names for success, though Perl does, contrary to its spec. ---/
+
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+    
+/--- An empty name does not pass back an empty string. It is the same as if no
+name were given. ---/ 
+
+/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
+    AB
+    CD 
+
+/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
+    
+/A(*PRUNE:A)B/K
+    ACAB
+
+/(*MARK:A)(*PRUNE:B)(C|X)/K
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/K
+    C
+    D 
+
+/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
+
+/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+
+/--- Same --/
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+
+/--- This should fail; the SKIP advances by one, but when we get to AC, the
+     PRUNE kills it. ---/ 
+    
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+
+/A(*:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+
+/--- This should fail, as a null name is the same as no name ---/
+
+/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
+    AAAC
+
+/--- This fails in PCRE, and I think that is in accordance with Perl's 
+     documentation, though in Perl it succeeds. ---/
+    
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
+    AAAC
+
+/--- Mark names can be duplicated ---/
+
+/A(*:A)B|X(*:A)Y/K
+    AABC
+    XXYZ 
+    
+/^A(*:A)B|^X(*:A)Y/K
+    ** Failers
+    XAQQ
+    
+/--- A check on what happens after hitting a mark and them bumping along to
+something that does not even start. Perl reports tags after the failures here, 
+though it does not when the individual letters are made into something 
+more complicated. ---/
+
+/A(*:A)B|XX(*:B)Y/K
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+    
+/--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
+optimizations defeat this. So does the PCRE optimization unless we disable it 
+with \Y. ---/
+
+/(*COMMIT)ABC/
+    ABCDEFG
+    ** Failers
+    DEFGABC\Y  
+    
+/--- Repeat some tests with added studying. ---/
+
+/A(*COMMIT)B/+KS
+    ACABX
+ 
+/A(*THEN)B|A(*THEN)C/KS
+    AC
+
+/A(*PRUNE)B|A(*PRUNE)C/KS
+    AC
+
+/^(A(*THEN:A)B|C(*THEN:B)D)/KS
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+
+/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
+    AB
+    CD 
+
+/A(*PRUNE:A)B/KS
+    ACAB
+
+/(*MARK:A)(*PRUNE:B)(C|X)/KS
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KS
+    C
+    D 
+
+/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
+    AAAC
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
+    AAAC
+    
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
+    AAAC
+
+/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
+    AAAC
+
+/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
+    AAAC
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
+    AAAC
+
+/A(*:A)B|XX(*:B)Y/KS
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+    
+/(*COMMIT)ABC/
+    ABCDEFG
+    ** Failers
+    DEFGABC\Y  
+
+/^(ab (c+(*THEN)cd) | xyz)/x
+    abcccd  
+
+/^(ab (c+(*PRUNE)cd) | xyz)/x
+    abcccd  
+
+/^(ab (c+(*FAIL)cd) | xyz)/x
+    abcccd  
+    
+/--- Perl 5.11 gets some of these wrong ---/ 
+
+/(?>.(*ACCEPT))*?5/
+    abcde
+
+/(.(*ACCEPT))*?5/
+    abcde
+
+/(.(*ACCEPT))5/
+    abcde
+
+/(.(*ACCEPT))*5/
+    abcde
+
+/A\NB./BZ
+    ACBD
+    *** Failers
+    A\nB
+    ACB\n   
+
+/A\NB./sBZ
+    ACBD
+    ACB\n 
+    *** Failers
+    A\nB  
+  
+/A\NB/<crlf>
+    A\nB
+    A\rB
+    ** Failers
+    A\r\nB    
+
+/\R+b/BZ
+
+/\R+\n/BZ
+
+/\R+\d/BZ
+
+/\d*\R/BZ
+
+/\s*\R/BZ
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+    *** Failers 
+    abcxy 
+
+/(?<=abc)def/
+    abc\P\P
+
+/abc$/
+    abc
+    abc\P
+    abc\P\P
+
+/abc$/m
+    abc
+    abc\n
+    abc\P\P
+    abc\n\P\P 
+    abc\P
+    abc\n\P
+
+/abc\z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\Z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\b/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\B/
+    abc
+    abc\P
+    abc\P\P
+
+/.+/
+    abc\>0
+    abc\>1
+    abc\>2
+    abc\>3
+    abc\>4
+    abc\>-4 
+
+/^\cģ/
+
+/(?P<abn>(?P=abn)xxx)/BZ
+
+/(a\1z)/BZ
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
 
 /-- End of testinput2 --/

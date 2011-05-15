@@ -3,7 +3,7 @@ Test preg_match_all() function : basic functionality
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
+* proto int preg_match_all(string pattern, string subject, [array subpatterns [, int flags [, int offset]]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $string = 'Hello, world! This is a test. This is another test. \[4]. 34534 string.';
@@ -17,6 +17,12 @@ var_dump(preg_match_all('/\d{2}$/', $string, $match4)); //tries to find 2 digits
 var_dump($match4);
 var_dump(preg_match_all('/(This is a ){2}(.*)\stest/', $string, $match5)); //tries to find "This is aThis is a [...] test" (0 matches)
 var_dump($match5);
+
+// Test not passing in a subpatterns array.
+var_dump(preg_match_all('/test/', $string));
+var_dump(preg_match_all('/this isn\'t in the string/', $string));
+var_dump(preg_match_all('/world/', $string));
+var_dump(preg_match_all('/[0-9]/', $string));
 ?>
 --EXPECTF--
 int(1)
@@ -80,3 +86,7 @@ array(3) {
   array(0) {
   }
 }
+int(2)
+int(0)
+int(1)
+int(6)

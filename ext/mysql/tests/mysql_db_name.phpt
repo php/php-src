@@ -20,7 +20,7 @@ if (NULL !== ($tmp = @mysql_db_name($link, $link)))
 
 require('table.inc');
 
-if (!$res = mysql_list_dbs($link))
+if (!$res = @mysql_list_dbs($link))
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (!$num = mysql_num_rows($res))

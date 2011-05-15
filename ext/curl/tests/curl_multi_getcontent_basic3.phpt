@@ -17,7 +17,7 @@ if (!extension_loaded('curl')) print 'skip';
 
 	//SET URL AND OTHER OPTIONS
 	curl_setopt($ch1, CURLOPT_URL, "http://php.net/robots.txt");
-	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__)."/curl_testdata2.txt");
+	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
 	
@@ -55,5 +55,10 @@ Disallow: /source.php
 Disallow: /search.php
 Disallow: /mod.php
 Disallow: /manual/add-note.php
+
+Disallow: /harming/humans
+Disallow: /ignoring/human/orders
+Disallow: /harm/to/self
+
 CURL2
 

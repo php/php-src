@@ -1,6 +1,15 @@
 #ifndef _PHP_WINVER_H
 #define _PHP_WINVER_H
 
+#ifndef SM_TABLETPC
+#define SM_TABLETPC 86
+#endif
+#ifndef SM_MEDIACENTER
+#define SM_MEDIACENTER 87
+#endif
+#ifndef SM_STARTER
+#define SM_STARTER 88
+#endif
 #ifndef SM_SERVERR2
 #define SM_SERVERR2 89
 #endif

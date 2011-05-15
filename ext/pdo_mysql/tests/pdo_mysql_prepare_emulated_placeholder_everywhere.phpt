@@ -20,7 +20,7 @@ MySQLPDOTest::skip();
 
 		$db->exec('DROP TABLE IF EXISTS test');
 		$db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-		$db->exec('INSERT INTO test(id, label) VALUES (1, "row1")');
+		$db->exec("INSERT INTO test(id, label) VALUES (1, 'row1')");
 
 		// So, what will happen? More placeholder but values and
 		// placeholders in interesting places...

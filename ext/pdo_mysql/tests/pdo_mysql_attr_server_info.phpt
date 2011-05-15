@@ -27,7 +27,7 @@ $db = MySQLPDOTest::factory();
 		printf("[003] Did we change it from '%s' to '%s'?\n", $info, $info);
 
 	// lets hope we always run this in the same second as we did run the server info request...
-	if (!$stmt = $db->query('SHOW STATUS LIKE "%uptime%"'))
+	if (!$stmt = $db->query("SHOW STATUS LIKE '%uptime%'"))
 		printf("[004] Cannot run SHOW STATUS, [%s]\n", $db->errorCode());
 	else {
 		if (!$row = $stmt->fetch(PDO::FETCH_NUM))

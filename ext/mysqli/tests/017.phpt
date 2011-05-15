@@ -16,10 +16,10 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_prepare($link, "SELECT md5('bar'), database(), 'foo'"))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_bind_result($stmt, $c0, $c1, $c2);
-	mysqli_execute($stmt);
+	mysqli_stmt_bind_result($stmt, $c0, $c1, $c2);
+	mysqli_stmt_execute($stmt);
 
-	mysqli_fetch($stmt);
+	mysqli_stmt_fetch($stmt);
 	mysqli_stmt_close($stmt);
 
 	$test = array($c0, $c1, $c2);

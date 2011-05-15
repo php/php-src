@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -446,7 +446,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			if (FAILED(res)) {
 				char *werr, *msg;
 
-				werr = php_win_err(res);
+				werr = php_win32_error_to_msg(res);
 				spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 				LocalFree(werr);
 
@@ -593,6 +593,9 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 		case VOP_XOR:
 			result = VarXor(vleft, vright, &vres);
 			break;
+		/*Let say it fails as no valid op has been given */
+		default:
+			result = E_INVALIDARG;
 	}
 
 	if (SUCCEEDED(result)) {
@@ -752,6 +755,8 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 		case VOP_NOT:
 			result = VarNot(vleft, &vres);
 			break;
+		default:
+			result = E_INVALIDARG;
 	}
 
 	if (SUCCEEDED(result)) {
@@ -1022,7 +1027,7 @@ PHP_FUNCTION(variant_set_type)
 	} else {
 		char *werr, *msg;
 
-		werr = php_win_err(res);
+		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 
@@ -1056,7 +1061,7 @@ PHP_FUNCTION(variant_cast)
 	} else {
 		char *werr, *msg;
 
-		werr = php_win_err(res);
+		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 

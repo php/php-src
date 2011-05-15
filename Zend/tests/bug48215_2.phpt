@@ -16,7 +16,4 @@ $c = new c();
 ?>
 ===DONE===
 --EXPECTF--
-
-Strict Standards: Redefining already defined constructor for class a in %s on line %d
-
 Fatal error: Call to undefined method b::b() in %s on line %d

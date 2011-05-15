@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -581,7 +581,8 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				int varStart, zval **return_value TSRMLS_DC)
 {
 	int  numVars, nconversions, totalVars = -1;
-	int  i, value, result;
+	int  i, result;
+	long value;
 	int  objIndex;
 	char *end, *baseString;
 	zval **current;
@@ -1059,9 +1060,9 @@ addToInt:
 				 */
 				if (!(flags & SCAN_SUPPRESS)) {
 					*end = '\0';
-					value = (int) (*fn)(buf, NULL, base);
+					value = (long) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), "%u", value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), "%lu", value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {

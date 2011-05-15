@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -347,7 +347,7 @@ static PHP_FUNCTION(pspell_new)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -402,11 +402,6 @@ static PHP_FUNCTION(pspell_new_personal)
 	}
 #endif
 
-	if (PG(safe_mode) && (!php_checkuid(personal, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		delete_pspell_config(config);
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(personal TSRMLS_CC)) {
 		delete_pspell_config(config);
 		RETURN_FALSE;
@@ -457,7 +452,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -487,7 +482,7 @@ static PHP_FUNCTION(pspell_new_config)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -747,7 +742,7 @@ static PHP_FUNCTION(pspell_config_create)
 	which is not what we want */
 	pspell_config_replace(config, "save-repl", "false");
 
-	ind = zend_list_insert(config, le_pspell_config);
+	ind = zend_list_insert(config, le_pspell_config TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -836,10 +831,6 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 
 	PSPELL_FETCH_CONFIG;
 
-	if (PG(safe_mode) && (!php_checkuid(value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(value TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -890,10 +881,6 @@ static PHP_FUNCTION(pspell_config_repl)
 	PSPELL_FETCH_CONFIG;
 
 	pspell_config_replace(config, "save-repl", "true");
-
-	if (PG(safe_mode) && (!php_checkuid(repl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
 
 	if (php_check_open_basedir(repl TSRMLS_CC)) {
 		RETURN_FALSE;

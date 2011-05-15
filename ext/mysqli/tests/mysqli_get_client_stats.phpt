@@ -63,14 +63,14 @@ mysqlnd.collect_memory_statistics=1
 		$test_counter++;
 		if (is_array($current) && is_array($expected)) {
 			if ($current[$field] <= $expected[$field]) {
-				printf("[%03d] %s Expecting %s = %s/%s, got %s/%s\n",
+				printf("[%03d] %s Expecting %s > %s/%s, got %s/%s\n",
 					$test_counter, $desc,
 					$field, $expected[$field], gettype($expected[$field]),
 					$current[$field], gettype($current[$field]));
 				}
 		} else {
 			if ($current <= $expected) {
-				printf("[%03d] %s Expecting %s = %s/%s, got %s/%s\n",
+				printf("[%03d] %s Expecting %s > %s/%s, got %s/%s\n",
 					$test_counter, $desc, $field,
 					$expected, gettype($expected),
 					$current, gettype($current));
@@ -107,6 +107,7 @@ mysqlnd.collect_memory_statistics=1
 	}
 
 	$test_counter = 6;
+
 	mysqli_get_client_stats_assert_gt('bytes_sent', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_gt('bytes_received', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_gt('packets_sent', $new_info, $info, $test_counter);
@@ -135,6 +136,10 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('connect_failure', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('connection_reused', $new_info, $info, $test_counter);
 
+	// No data fetched so far
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $new_info, "0", $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $new_info, "0", $test_counter);
+
 	require('table.inc');
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
@@ -154,10 +159,16 @@ mysqlnd.collect_memory_statistics=1
 	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
 	$expected['rows_buffered_from_client_normal'] = (string)($expected['rows_buffered_from_client_normal'] + 1);
 
-
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_gt('bytes_sent', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_gt('bytes_received', $info, $expected, $test_counter);
+
+	// real_data_* get incremeneted after mysqli_*fetch*()
+    mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, "0", $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, "0", $test_counter);
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
@@ -176,6 +187,11 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+	// fetch will increment
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_normal'] = $info['bytes_received_real_data_normal'];
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, "0", $test_counter);
+
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_normal', $info, $expected, $test_counter);
@@ -188,16 +204,20 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] SELECT id, label FROM test failed, [%d] %s\n",
 			++$test_counter, mysqli_errno($link), mysqli_error($link));
 
+
 	assert(mysqli_num_rows($res) == $num_rows);
 
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+
 	$expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + $num_rows);
 	$expected['rows_buffered_from_client_normal'] = (string)($expected['rows_buffered_from_client_normal'] + $num_rows);
 	$expected['buffered_sets'] = (string)($expected['buffered_sets'] + 1);
 	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
@@ -213,6 +233,8 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_buffered', $info, $expected, $test_counter);
 
@@ -221,9 +243,13 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] SELECT id, label FROM test failed, [%d] %s\n",
 			++$test_counter, mysqli_errno($link), mysqli_error($link));
 
+	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
+		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+			++$test_counter, gettype($info), $info);
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
 
 	while ($row = mysqli_fetch_assoc($res))
 		;
@@ -237,6 +263,9 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_normal'] = $info['bytes_received_real_data_normal'];
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
@@ -260,6 +289,9 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_normal'] = $info['bytes_received_real_data_normal'];
+
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('unbuffered_sets', $info, $expected, $test_counter);
@@ -277,6 +309,8 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_normal', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
@@ -302,6 +336,9 @@ mysqlnd.collect_memory_statistics=1
 			++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	mysqli_stmt_free_result($stmt);
 
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, "0", $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
+
 	$expected['rows_fetched_from_server_ps'] = (string)($expected['rows_fetched_from_server_ps'] + $num_rows);
 	$expected['result_set_queries'] = (string)($expected['result_set_queries'] + 1);
 	$expected['ps_buffered_sets'] = (string)($expected['ps_buffered_sets'] + 1);
@@ -317,6 +354,8 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('ps_buffered_sets', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_buffered_from_client_ps', $info, $expected, $test_counter);
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, "0", $test_counter);
 
 	print "Testing buffered Prepared Statements... - fetching all\n";
 
@@ -346,6 +385,10 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_ps', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_ps'] = $info['bytes_received_real_data_ps'];
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
@@ -383,6 +426,9 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_ps', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_ps'] = $info['bytes_received_real_data_ps'];
 
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_buffered', $info, $expected, $test_counter);
@@ -426,6 +472,9 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_ps', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_ps'] = $info['bytes_received_real_data_ps'];
+
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_unbuffered', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
@@ -458,6 +507,9 @@ mysqlnd.collect_memory_statistics=1
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
 
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_ps', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_ps'] = $info['bytes_received_real_data_ps'];
+
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_server_ps', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('rows_fetched_from_client_ps_unbuffered', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('result_set_queries', $info, $expected, $test_counter);
@@ -472,6 +524,8 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, $expected, $test_counter);
 
 	mysqli_get_client_stats_assert_eq('rows_skipped_ps', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_eq('flushed_ps_sets', $info, $expected, $test_counter);
@@ -488,6 +542,9 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 			++$test_counter, gettype($info), $info);
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, $expected, $test_counter);
 
 	//
 	// result_set_queries statistics
@@ -517,6 +574,9 @@ mysqlnd.collect_memory_statistics=1
 
 	mysqli_get_client_stats_assert_eq('result_set_queries', $new_info, (string)($info['result_set_queries'] + 1), $test_counter);
 	$info = $new_info;
+
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_normal'] = $info['bytes_received_real_data_normal'];
 
 	//
 	// non_result_set_queries - DDL
@@ -673,6 +733,7 @@ mysqlnd.collect_memory_statistics=1
 		if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
 			printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
 				++$test_counter, gettype($new_info), $new_info);
+
 		mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'CREATE SERVER');
 		$info = $new_info;
 
@@ -696,6 +757,9 @@ mysqlnd.collect_memory_statistics=1
 		mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'DROP SERVER');
 		$info = $new_info;
 	}
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, $expected, $test_counter);
 
 	/*
 	We don't test the NDB ones.
@@ -778,6 +842,7 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'TRUNCATE');
 	$info = $new_info;
 
+
 	$file = tempnam(sys_get_temp_dir(), 'mysqli_test');
 	if ($fp = fopen($file, 'w')) {
 		@fwrite($fp, '1;"a"');
@@ -793,6 +858,9 @@ mysqlnd.collect_memory_statistics=1
 		}
 		unlink($file);
 	}
+
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, $expected, $test_counter);
 
 	/*
 	We skip those:
@@ -842,6 +910,9 @@ mysqlnd.collect_memory_statistics=1
 
 	mysqli_close($link);
 
+	mysqli_get_client_stats_assert_gt('bytes_received_real_data_normal', $info, $expected, $test_counter);
+	$expected['bytes_received_real_data_normal'] = $info['bytes_received_real_data_normal'];
+	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, $expected, $test_counter);
 
 	/*
 	no_index_used
@@ -887,7 +958,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(152) {
+array(160) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1020,31 +1091,43 @@ array(152) {
   %unicode|string%(1) "0"
   [%u|b%"mem_emalloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_emalloc_ammount"]=>
+  [%u|b%"mem_emalloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_ecalloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_ecalloc_ammount"]=>
+  [%u|b%"mem_ecalloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_erealloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_erealloc_ammount"]=>
+  [%u|b%"mem_erealloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_efree_count"]=>
   %unicode|string%(1) "0"
+  [%u|b%"mem_efree_amount"]=>
+  %unicode|string%(1) "0"
   [%u|b%"mem_malloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_malloc_ammount"]=>
+  [%u|b%"mem_malloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_calloc_count"]=>
   %unicode|string%(%d) "%d"
-  [%u|b%"mem_calloc_ammount"]=>
+  [%u|b%"mem_calloc_amount"]=>
   %unicode|string%(%d) "%d"
   [%u|b%"mem_realloc_count"]=>
   %unicode|string%(1) "0"
-  [%u|b%"mem_realloc_ammount"]=>
+  [%u|b%"mem_realloc_amount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_free_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_free_amount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_estrndup_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_strndup_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_estndup_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_strdup_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_text_fetched_null"]=>
   %unicode|string%(1) "0"
@@ -1191,6 +1274,10 @@ array(152) {
   [%u|b%"com_stmt_fetch"]=>
   %unicode|string%(1) "0"
   [%u|b%"com_deamon"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_real_data_normal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_real_data_ps"]=>
   %unicode|string%(1) "0"
 }
 Testing buffered normal...

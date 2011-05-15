@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,6 +50,7 @@
 #include "php_flatfile.h"
 #include "php_inifile.h"
 #include "php_qdbm.h"
+#include "php_tcadb.h"
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
@@ -337,6 +338,9 @@ static dba_handler handler[] = {
 #if DBA_QDBM
 	DBA_HND(qdbm, DBA_LOCK_EXT)
 #endif
+#if DBA_TCADB
+	DBA_HND(tcadb, DBA_LOCK_ALL)
+#endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -358,6 +362,8 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "dbm"
 #elif DBA_QDBM
 #define DBA_DEFAULT "qdbm"
+#elif DBA_TCADB
+#define DBA_DEFAULT "tcadb"
 #else
 #define DBA_DEFAULT ""
 #endif
@@ -832,7 +838,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read ony mode on .lck file */
 				lock_file_mode = "rb";
-				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, &opened_path);
+				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
 			}
 			if (!info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
@@ -847,7 +853,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (!info->lock.fp) {
-			info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, &opened_path);
+			info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &opened_path);
 			if (info->lock.fp) {
 				if (lock_dbf) {
 					/* replace the path info with the real path of the opened file */
@@ -885,7 +891,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (info->lock.fp && lock_dbf) {
 			info->fp = info->lock.fp; /* use the same stream for locking and database access */
 		} else {
-			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
+			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
 		}
 		if (!info->fp) {
 			dba_close(info TSRMLS_CC);

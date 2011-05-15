@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1914,7 +1914,7 @@ typedef enum _php_chunked_filter_state {
 
 typedef struct _php_chunked_filter_data {
 	php_chunked_filter_state state;
-	int chunk_size;
+	size_t chunk_size;
 	int persistent;
 } php_chunked_filter_data;
 
@@ -1991,7 +1991,7 @@ static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
 					continue;
 				}
 			case CHUNK_BODY:
-				if (end - p >= data->chunk_size) {
+				if ((size_t) (end - p) >= data->chunk_size) {
 					if (p != out) {
 						memmove(out, p, data->chunk_size);
 					}

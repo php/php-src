@@ -105,7 +105,7 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
                     dt = (double)timer/PW32G(freq);
                     time_Info->tv_sec = PW32G(starttime).tv_sec + (int)dt;
                     time_Info->tv_usec = PW32G(starttime).tv_usec + (int)((dt-(int)dt)*1000000);
-                    if (time_Info->tv_usec > 1000000) {
+                    if (time_Info->tv_usec >= 1000000) {
                         time_Info->tv_usec -= 1000000;
                         ++time_Info->tv_sec;
                     }

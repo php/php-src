@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval *com_property_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval *return_value;
 	php_com_dotnet_object *obj;
@@ -64,7 +64,7 @@ static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 	return return_value;
 }
 
-static void com_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void com_property_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -196,7 +196,7 @@ static zval *com_object_get(zval *property TSRMLS_DC)
 }
 #endif
 
-static int com_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int com_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	DISPID dispid;
 	php_com_dotnet_object *obj;
@@ -222,7 +222,7 @@ static int com_dimension_exists(zval *object, zval *member, int check_empty TSRM
 	return 0;
 }
 
-static void com_property_delete(zval *object, zval *member TSRMLS_DC)
+static void com_property_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
 }
@@ -259,7 +259,7 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zval **object_ptr, char *name, int len TSRMLS_DC)
+static union _zend_function *com_method_get(zval **object_ptr, char *name, int len, const zend_literal *key TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
@@ -409,7 +409,7 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 
 #define POPULATE_CTOR(f, fn)	\
 	f.type = ZEND_INTERNAL_FUNCTION; \
-	f.function_name = obj->ce->name; \
+	f.function_name = (char *) obj->ce->name; \
 	f.scope = obj->ce; \
 	f.arg_info = NULL; \
 	f.num_args = 0; \

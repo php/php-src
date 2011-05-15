@@ -10,4 +10,4 @@ Class constant whose initial value refereces a non-existent class
   $a = new C();
 ?>
 --EXPECTF--
-Fatal error: Undefined class constant 'D::hello' in %s on line %d
+Fatal error: Class 'D' not found in %s on line %d

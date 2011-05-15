@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
-function_entry enchant_functions[] = {
+zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
 	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
@@ -433,6 +433,8 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	if (!value_len) {
 		RETURN_FALSE;
 	}
+	
+	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
@@ -466,6 +468,8 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &broker, &dict_type) == FAILURE) {
 		RETURN_FALSE;
 	}
+	
+	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
@@ -587,7 +591,11 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
+#if PHP_API_VERSION < 20100412
 	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl TSRMLS_CC)) {
+#else
+	if (php_check_open_basedir(pwl TSRMLS_CC)) {
+#endif
 		RETURN_FALSE;
 	}
 
@@ -724,6 +732,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 	if (enchant_dict_check(pdict->pdict, word, wordlen) > 0) {
 		int n_sugg;
+		size_t n_sugg_st;
 		char **suggs;
 
 		if (!sugg && ZEND_NUM_ARGS() == 2) {
@@ -732,7 +741,8 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 		array_init(sugg);
 
-		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, (size_t *) &n_sugg);
+		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
+		memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));
 		if (suggs && n_sugg) {
 			int i;
 			for (i = 0; i < n_sugg; i++) {
@@ -777,6 +787,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 	char **suggs;
 	enchant_dict *pdict;
 	int n_sugg;
+	size_t n_sugg_st;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &dict, &word, &wordlen) == FAILURE) {
 		RETURN_FALSE;
@@ -784,7 +795,8 @@ PHP_FUNCTION(enchant_dict_suggest)
 
 	PHP_ENCHANT_GET_DICT;
 
-	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, (size_t *)&n_sugg);
+	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
+	memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));
 	if (suggs && n_sugg) {
 		int i;
 

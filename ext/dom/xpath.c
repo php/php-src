@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,12 +48,14 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, expr)
-	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 1)
+	ZEND_ARG_INFO(0, registerNodeNS)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_evaluate, 0, 0, 1)
 	ZEND_ARG_INFO(0, expr)
-	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 1)
+	ZEND_ARG_INFO(0, registerNodeNS)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_php_functions, 0, 0, 0)
@@ -385,9 +387,10 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	dom_object *nodeobj;
 	char *expr;
 	xmlDoc *docp = NULL;
-	xmlNsPtr *ns;
+	xmlNsPtr *ns = NULL;
+	zend_bool register_node_ns = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O!b", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
 		return;
 	}
 
@@ -420,13 +423,15 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	ctxp->node = nodep;
 
-	/* Register namespaces in the node */
-	ns = xmlGetNsList(docp, nodep);
+	if (register_node_ns) {
+		/* Register namespaces in the node */
+		ns = xmlGetNsList(docp, nodep);
 
-    if (ns != NULL) {
-        while (ns[nsnbr] != NULL)
-	    nsnbr++;
-    }
+		if (ns != NULL) {
+			while (ns[nsnbr] != NULL)
+			nsnbr++;
+		}
+	}
 
 
     ctxp->namespaces = ns;
@@ -518,14 +523,14 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]); */
+/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, boolean registerNodeNS]]); */
 PHP_FUNCTION(dom_xpath_query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
-/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context]); */
+/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, boolean registerNodeNS]]); */
 PHP_FUNCTION(dom_xpath_evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);

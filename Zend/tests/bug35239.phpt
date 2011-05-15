@@ -12,30 +12,16 @@ var_dump($a);
 $a->x0->y1 = "ok\n";
 echo $a->x0;
 ?>
---EXPECT--
-object(stdClass)#1 (1) {
+--EXPECTF--
+object(stdClass)#%d (1) {
   ["x0"]=>
-  &object(stdClass)#2 (3) {
+  &object(stdClass)#%d (3) {
     ["y0"]=>
     string(1) "b"
     ["y1"]=>
-    &object(stdClass)#2 (3) {
-      ["y0"]=>
-      string(1) "b"
-      ["y1"]=>
-      *RECURSION*
-      ["y2"]=>
-      *RECURSION*
-    }
+    *RECURSION*
     ["y2"]=>
-    &object(stdClass)#2 (3) {
-      ["y0"]=>
-      string(1) "b"
-      ["y1"]=>
-      *RECURSION*
-      ["y2"]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 ok

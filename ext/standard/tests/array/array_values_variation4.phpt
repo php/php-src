@@ -93,23 +93,7 @@ array(4) {
       int(3)
     }
     [0]=>
-    &array(4) {
-      ["zero"]=>
-      string(4) "zero"
-      ["un"]=>
-      string(3) "one"
-      ["sub"]=>
-      array(3) {
-        [0]=>
-        int(1)
-        [1]=>
-        int(2)
-        [2]=>
-        int(3)
-      }
-      [0]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 Done

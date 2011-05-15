@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -785,6 +785,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		ALLOC_ZVAL(ent.data);
 		INIT_PZVAL(ent.data);
 		Z_TYPE_P(ent.data) = IS_LONG;
+		Z_LVAL_P(ent.data) = 0;
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_BOOLEAN)) {
 		int i;

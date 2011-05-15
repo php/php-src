@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,23 @@
 #define FCGI_MAX_LENGTH 0xffff
 
 #define FCGI_KEEP_CONN  1
+
+/* this is near the perfect hash function for most useful FastCGI variables
+ * which combines efficiency and minimal hash collisions
+ */
+
+#define FCGI_HASH_FUNC(var, var_len) \
+	(UNEXPECTED(var_len < 3) ? var_len : \
+		(((unsigned int)var[3]) << 2) + \
+		(((unsigned int)var[var_len-2]) << 4) + \
+		(((unsigned int)var[var_len-1]) << 2) + \
+		var_len)
+
+#define FCGI_GETENV(request, name) \
+	fcgi_quick_getenv(request, name, sizeof(name)-1, FCGI_HASH_FUNC(name, sizeof(name)-1))
+
+#define FCGI_PUTENV(request, name, value) \
+	fcgi_quick_putenv(request, name, sizeof(name)-1, FCGI_HASH_FUNC(name, sizeof(name)-1), value)
 
 typedef enum _fcgi_role {
 	FCGI_RESPONDER	= 1,
@@ -91,38 +108,26 @@ typedef struct _fcgi_end_request_rec {
 
 /* FastCGI client API */
 
-typedef struct _fcgi_request {
-	int            listen_socket;
-#ifdef _WIN32
-	int            tcp;
-#endif
-	int            fd;
-	int            id;
-	int            keep;
-	int            closed;
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
 
-	int            in_len;
-	int            in_pad;
-
-	fcgi_header   *out_hdr;
-	unsigned char *out_pos;
-	unsigned char  out_buf[1024*8];
-	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
-
-	HashTable     *env;
-} fcgi_request;
+typedef struct _fcgi_request fcgi_request;
 
 int fcgi_init(void);
 void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_in_shutdown(void);
+void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
-void fcgi_init_request(fcgi_request *req, int listen_socket);
+fcgi_request* fcgi_init_request(int listen_socket);
+void fcgi_destroy_request(fcgi_request *req);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
+char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
+char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
+void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
 
 int fcgi_read(fcgi_request *req, char *str, int len);
 

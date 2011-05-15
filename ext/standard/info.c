@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,16 +49,6 @@ typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # endif
 #endif
 
-#if HAVE_MBSTRING
-#include "ext/mbstring/mbstring.h"
-ZEND_EXTERN_MODULE_GLOBALS(mbstring)
-#endif
-
-#if HAVE_ICONV
-#include "ext/iconv/php_iconv.h"
-ZEND_EXTERN_MODULE_GLOBALS(iconv)
-#endif
-
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
 							php_info_print("<h2>" name "</h2>\n"); \
 						} else { \
@@ -73,11 +63,12 @@ PHPAPI extern char *php_ini_scanned_files;
 
 static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 {
-	int new_len, written;
+	size_t new_len;
+	int written;
 	char *new_str;
 	TSRMLS_FETCH();
 	
-	new_str = php_escape_html_entities((char *) str, len, &new_len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
+	new_str = php_escape_html_entities((unsigned char *) str, len, &new_len, 0, ENT_QUOTES, "utf-8" TSRMLS_CC);
 	written = php_output_write(new_str, new_len TSRMLS_CC);
 	efree(new_str);
 	return written;
@@ -120,7 +111,6 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 {
 	char *key;
 	uint len;
-	int type;
 	
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
@@ -300,7 +290,7 @@ void php_info_print_style(TSRMLS_D)
  */
 PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 {
-	int new_len;
+	size_t new_len;
 	return php_escape_html_entities(string, strlen(string), &new_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 }
 /* }}} */
@@ -334,11 +324,22 @@ char* php_get_windows_name()
 	}
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
-		if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 )	{
-			if (osvi.wProductType == VER_NT_WORKSTATION) {
-				major = "Windows Vista";
+		if (osvi.dwMajorVersion == 6)	{
+			if( osvi.dwMinorVersion == 0 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION ) {
+					major = "Windows Vista";
+				} else {
+					major = "Windows Server 2008";
+				}
+			} else
+			if ( osvi.dwMinorVersion == 1 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					major = "Windows 7";
+				} else {
+					major = "Windows Server 2008 R2";
+				}
 			} else {
-				major = "Windows Server 2008";
+				major = "Unknown Windows version";
 			}
 
 			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
@@ -399,7 +400,7 @@ char* php_get_windows_name()
 			}
 		}
 
-		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 )	{
+		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 ) {
 			if (GetSystemMetrics(SM_SERVERR2))
 				major = "Windows Server 2003 R2";
 			else if (osvi.wSuiteMask==VER_SUITE_STORAGE_SERVER)
@@ -444,9 +445,17 @@ char* php_get_windows_name()
 
 		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )	{
 			major = "Windows XP";
-			if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
+			if( osvi.wSuiteMask & VER_SUITE_PERSONAL ) {
 				sub = "Home Edition";
-			else sub = "Professional";
+			} else if (GetSystemMetrics(SM_MEDIACENTER)) {
+				sub = "Media Center Edition";
+			} else if (GetSystemMetrics(SM_STARTER)) {
+				sub = "Starter Edition";
+			} else if (GetSystemMetrics(SM_TABLETPC)) {
+				sub = "Tablet PC Edition";
+			} else {
+				sub = "Professional";
+			}
 		}
 
 		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) {
@@ -528,11 +537,7 @@ PHPAPI char *php_get_uname(char mode)
 	GetComputerName(ComputerName, &dwSize);
 
 	if (mode == 's') {
-		if (dwVersion < 0x80000000) {
-			php_uname = "Windows NT";
-		} else {
-			php_uname = "Windows 9x";
-		}
+		php_uname = "Windows NT";
 	} else if (mode == 'r') {
 		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
 		php_uname = tmp_uname;
@@ -554,23 +559,16 @@ PHPAPI char *php_get_uname(char mode)
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
 		php_uname = tmp_uname;
 	} else { /* assume mode == 'a' */
-		/* Get build numbers for Windows NT or Win95 */
-		if (dwVersion < 0x80000000){
-			char *winver = php_get_windows_name();
-			char wincpu[20];
+		char *winver = php_get_windows_name();
+		char wincpu[20];
 
-			php_get_windows_cpu(wincpu, sizeof(wincpu));
-			dwBuild = (DWORD)(HIWORD(dwVersion));
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
-					 "Windows NT", ComputerName,
-					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
-			if(winver) {
-				efree(winver);
-			}
-		} else {
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
-					 "Windows 9x", ComputerName,
-					 dwWindowsMajorVersion, dwWindowsMinorVersion);
+		php_get_windows_cpu(wincpu, sizeof(wincpu));
+		dwBuild = (DWORD)(HIWORD(dwVersion));
+		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
+				 "Windows NT", ComputerName,
+				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
+		if(winver) {
+			efree(winver);
 		}
 		php_uname = tmp_uname;
 	}
@@ -751,16 +749,28 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_row(2, "Zend Memory Manager", is_zend_mm(TSRMLS_C) ? "enabled" : "disabled" );
 
-#ifdef ZEND_MULTIBYTE
-		php_info_print_table_row(2, "Zend Multibyte Support", "enabled");
-#else
-		php_info_print_table_row(2, "Zend Multibyte Support", "disabled");
-#endif
+		{
+			const zend_multibyte_functions *functions = zend_multibyte_get_functions(TSRMLS_C);
+			char *descr;
+			if (functions) {
+				spprintf(&descr, 0, "provided by %s", functions->provider_name);
+			} else {
+				descr = estrdup("disabled");
+			}
+            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			efree(descr);
+		}
 
 #if HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else
 		php_info_print_table_row(2, "IPv6 Support", "disabled" );
+#endif
+
+#if HAVE_DTRACE
+		php_info_print_table_row(2, "DTrace Support", "enabled" );
+#else
+		php_info_print_table_row(2, "DTrace Support", "disabled" );
 #endif
 		
 		php_info_print_stream_hash("PHP Streams",  php_stream_get_url_stream_wrappers_hash() TSRMLS_CC);
@@ -867,13 +877,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_PP(data));
 		}
-		php_print_gpcse_array("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
-		php_print_gpcse_array("_GET", sizeof("_GET")-1 TSRMLS_CC);
-		php_print_gpcse_array("_POST", sizeof("_POST")-1 TSRMLS_CC);
-		php_print_gpcse_array("_FILES", sizeof("_FILES")-1 TSRMLS_CC);
-		php_print_gpcse_array("_COOKIE", sizeof("_COOKIE")-1 TSRMLS_CC);
-		php_print_gpcse_array("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
-		php_print_gpcse_array("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_REQUEST") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_GET") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_POST") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_FILES") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_COOKIE") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_SERVER") TSRMLS_CC);
+		php_print_gpcse_array(ZEND_STRL("_ENV") TSRMLS_CC);
 		php_info_print_table_end();
 	}
 

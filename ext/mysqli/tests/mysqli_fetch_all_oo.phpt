@@ -100,23 +100,26 @@ if (!function_exists('mysqli_fetch_all'))
 		}
 
 		if (!$link->query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
-			print $sql;
-			// don't bail, engine might not support the datatype
-			return false;
+				// don't bail, engine might not support the datatype
+				return false;
 		}
 
-		if (is_null($php_value) && !$link->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-			printf("[%04d] [%d] %s\n", $offset + 1, $link->errno, $link->error);
-			return false;
-		}
-
-		if (!is_null($php_value)) {
-			if (is_int($sql_value) && !$link->query(sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
+		if (is_null($php_value)) {
+			if (!$link->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
 				printf("[%04d] [%d] %s\n", $offset + 1, $link->errno, $link->error);
 				return false;
-			} else if (!is_int($sql_value) && !$link->query(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $sql_value))) {
-				printf("[%04d] [%d] %s\n", $offset + 1, $link->errno, $link->error);
-				return false;
+			}
+		} else {
+			if (is_string($sql_value)) {
+				if (!$link->query($sql = "INSERT INTO test(id, label) VALUES (1, '" . $sql_value . "')")) {
+					printf("[%04ds] [%d] %s - %s\n", $offset + 1, $link->errno, $link->error, $sql);
+					return false;
+				}
+			} else {
+				if (!$link->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
+					printf("[%04di] [%d] %s\n", $offset + 1, $link->errno, $link->error);
+					return false;
+				}
 			}
 		}
 
@@ -178,7 +181,7 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT", -32768, "-32768", 100);
 	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT", 32767, "32767", 110);
 	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT", NULL, NULL, 120);
-	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT UNSIGNED", 65535, "65535", 130);
+	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT UNSIGNED", 65400, "65400", 130);
 	func_mysqli_fetch_all_oo($link, $engine, "SMALLINT UNSIGNED", NULL, NULL, 140);
 
 	func_mysqli_fetch_all_oo($link, $engine, "MEDIUMINT", -8388608, "-8388608", 150);
@@ -190,27 +193,27 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", -2147483648, "-2147483648", 200);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", 2147483647, "2147483647", 210);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER", NULL, NULL, 220);
-	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", 4294967295, "4294967295", 230);
+	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
 	func_mysqli_fetch_all_oo($link, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
-	func_mysqli_fetch_all_oo($link, $engine, "BIGINT", -9223372036854775808, "-9223372036854775808", 250);
+	func_mysqli_fetch_all_oo($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
 	func_mysqli_fetch_all_oo($link, $engine, "BIGINT", NULL, NULL, 260);
-	func_mysqli_fetch_all_oo($link, $engine, "BIGINT UNSIGNED", 18446744073709551615, "18446744073709551615", 270);
+	func_mysqli_fetch_all_oo($link, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 270);
 	func_mysqli_fetch_all_oo($link, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 
-	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
+	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", (string)(-9223372036854775808 - 1.1), "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
 	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", NULL, NULL, 300);
-	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
+	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED", (string)(18446744073709551615 + 1.1), "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
 	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED ", NULL, NULL, 320);
 
-	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2)", -99999999.99, "-99999999.99", 330);
+	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2)", "-99999999.99", "-99999999.99", 330);
 	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2)", NULL, NULL, 340);
-	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2) UNSIGNED", 99999999.99, "99999999.99", 350);
+	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2) UNSIGNED", "99999999.99", "99999999.99", 350);
 	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2) UNSIGNED", NULL, NULL, 360);
 
-	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", -99999999.99, "-99999999.99", 370);
+	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", "-99999999.99", "-99999999.99", 370);
 	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", NULL, NULL, 380);
-	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", 99999999.99, "99999999.99", 390);
+	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", "99999999.99", "99999999.99", 390);
 	func_mysqli_fetch_all_oo($link, $engine, "DECIMAL(10,2)", NULL, NULL, 400);
 
 	// don't care about date() strict TZ warnings...
@@ -241,10 +244,10 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "CHAR(1) NOT NULL", "a", "a", 560);
 	func_mysqli_fetch_all_oo($link, $engine, "CHAR(1)", NULL, NULL, 570);
 
-	$string65k = func_mysqli_fetch_array_oo_make_string(65535);
+	$string65k = func_mysqli_fetch_array_oo_make_string(65400);
 	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(1)", "a", "a", 580);
 	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(255)", $string255, $string255, 590);
-	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(65635)", $string65k, $string65k, 600);
+	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(65400)", $string65k, $string65k, 600);
 	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(1) NOT NULL", "a", "a", 610);
 	func_mysqli_fetch_all_oo($link, $engine, "VARCHAR(1)", NULL, NULL, 620);
 

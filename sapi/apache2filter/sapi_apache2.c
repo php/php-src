@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -282,10 +282,9 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg)
+static void php_apache_sapi_log_message(char *msg TSRMLS_DC)
 {
 	php_struct *ctx;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
    
@@ -309,10 +308,10 @@ php_apache_disable_caching(ap_filter_t *f)
 	return OK;
 }
 
-static time_t php_apache_sapi_get_request_time(TSRMLS_D)
+static double php_apache_sapi_get_request_time(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
-	return apr_time_sec(ctx->r->request_time);
+	return apr_time_as_msec(ctx->r->request_time);
 }
 
 extern zend_module_entry php_apache_module;
@@ -426,17 +425,16 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(f->r->headers_out, "Last-Modified");
 	apr_table_unset(f->r->headers_out, "Expires");
 	apr_table_unset(f->r->headers_out, "ETag");
-	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(f->r))) {
-		auth = apr_table_get(f->r->headers_in, "Authorization");
-		php_handle_auth_data(auth TSRMLS_CC);
-		if (SG(request_info).auth_user == NULL && f->r->user) {
-			SG(request_info).auth_user = estrdup(f->r->user);
-		}
-		ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
-	} else {
-		SG(request_info).auth_user = NULL;
-		SG(request_info).auth_password = NULL;
+
+	auth = apr_table_get(f->r->headers_in, "Authorization");
+	php_handle_auth_data(auth TSRMLS_CC);
+
+	if (SG(request_info).auth_user == NULL && f->r->user) {
+		SG(request_info).auth_user = estrdup(f->r->user);
 	}
+
+	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
+
 	php_request_startup(TSRMLS_C);
 }
 

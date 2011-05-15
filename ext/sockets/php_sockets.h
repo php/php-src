@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,6 +70,7 @@ PHP_FUNCTION(socket_shutdown);
 #endif
 PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
+PHP_FUNCTION(socket_import_stream);
 
 #ifndef PHP_WIN32
 typedef int PHP_SOCKET;
@@ -80,10 +81,11 @@ typedef SOCKET PHP_SOCKET;
 #endif
 
 typedef struct {
-	PHP_SOCKET bsd_socket;
-	int		type;
-	int		error;
-	int		blocking;
+	PHP_SOCKET	bsd_socket;
+	int			type;
+	int			error;
+	int			blocking;
+	zval		*zstream;
 } php_socket;
 
 #ifdef PHP_WIN32

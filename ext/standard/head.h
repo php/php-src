@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,7 @@ PHP_FUNCTION(setcookie);
 PHP_FUNCTION(setrawcookie);
 PHP_FUNCTION(headers_sent);
 PHP_FUNCTION(headers_list);
+PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(TSRMLS_D);
 PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);

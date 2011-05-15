@@ -102,14 +102,18 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 
-	rb->me = ures_open(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	if (fallback) {
+		rb->me = ures_open(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	} else {
+		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
+	}
 
 	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		intl_errors_set_code( NULL, INTL_DATA_ERROR_CODE(rb) TSRMLS_CC );
 		spprintf( &pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource '%s' without fallback from %s to %s",
-				bundlename, locale, ures_getLocale( rb->me, &INTL_DATA_ERROR_CODE(rb)) );
+				bundlename, locale, ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)) );
 		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC );
 		efree(pbuf);
 		zval_dtor( return_value );
@@ -126,7 +130,7 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle___construct, 0, 0, 2 )
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ proto void ResourceBundle::__construct( string $bundlename [, string $locale [, bool $fallback = true ]] )
+/* {{{ proto void ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
  * ResourceBundle object constructor
  */
 PHP_METHOD( ResourceBundle, __construct )
@@ -136,8 +140,9 @@ PHP_METHOD( ResourceBundle, __construct )
 }
 /* }}} */
 
-/* {{{ proto ResourceBundle ResourceBundle::create( string $bundlename [, string $locale [, bool $fallback = true ]] )
-proto ResourceBundle resourcebundle_create( string $bundlename [, string $locale [, bool $fallback = true ]] ) */
+/* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )
+proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )
+*/
 PHP_FUNCTION( resourcebundle_create ) 
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
@@ -186,7 +191,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		UErrorCode icuerror;
-		const char * locale = ures_getLocale( rb->me, &icuerror );
+		const char * locale = ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &icuerror );
 		if (is_numeric) {
 			spprintf( &pbuf, 0, "Cannot load element %d without fallback from to %s", meindex, locale );
 		} else {
@@ -386,7 +391,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 /* {{{ ResourceBundle_class_functions
  * Every 'ResourceBundle' class method has an entry in this table
  */
-static function_entry ResourceBundle_class_functions[] = {
+static zend_function_entry ResourceBundle_class_functions[] = {
 	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
@@ -419,6 +424,7 @@ void resourcebundle_register_class( TSRMLS_D )
 	}
 
 	ResourceBundle_object_handlers = std_object_handlers;
+	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 }

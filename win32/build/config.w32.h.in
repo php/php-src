@@ -6,7 +6,7 @@
 /* Define the minimum supported version */
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
-#define _WIN32_WINNT 0x500
+#define _WIN32_WINNT 0x502
 #define NTDDI_VERSION  _WIN32_WIN2K
 
 /* Default PHP / PEAR directories */
@@ -33,7 +33,6 @@
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
-#define PHP_SAFE_MODE 0
 #define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
@@ -58,6 +57,7 @@
 /* its in win32/time.c */
 #define HAVE_USLEEP 1
 #define HAVE_NANOSLEEP 1
+#define PHP_SLEEP_NON_VOID 1
 
 #define HAVE_GETHOSTNAME 1
 #define HAVE_GETCWD 1

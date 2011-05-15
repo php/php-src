@@ -11,6 +11,7 @@ if (!@mb_internal_encoding('ISO-2022-KR')) {
 ?>
 --INI--
 sendmail_path=/bin/cat
+mail.add_x_header=off
 --FILE--
 <?php
 $to = 'example@example.com';
@@ -27,14 +28,14 @@ if (mb_language("korean")) {
 --EXPECTF--
 To: example@example.com
 Subject: %s
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
 %s
 To: example@example.com
 Subject: =?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg8=?=
-Mime-Version: 1.0
+MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-KR
 Content-Transfer-Encoding: 7bit
 

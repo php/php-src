@@ -38,7 +38,7 @@ $inputs = array(
        // float data
 /*6*/  10.5,
        -10.5,
-       12.3456789000e10,
+       12.3456789000E8,
        12.3456789000E-10,
        .5,
 
@@ -79,7 +79,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(mt_rand($input, 100));
+	var_dump(mt_rand($input, mt_getrandmax()));
 	$iterator++;
 };
 fclose($fp);

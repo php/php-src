@@ -17,3 +17,4 @@ echo "hi\n";
 ?>
 --EXPECTF--
 ‹%s
+

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -152,7 +152,7 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
 		if (ch == base64_pad) {
-			if (*current != '=' && (i % 4) == 1) {
+			if (*current != '=' && ((i % 4) == 1 || (strict && length > 0))) {
 				efree(result);
 				return NULL;
 			}

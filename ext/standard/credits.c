@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -96,7 +96,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		php_info_print_table_colspan_header(2, "PHP Documentation");
 		CREDIT_LINE("Authors", "Mehdi Achour, Friedhelm Betz, Antony Dovgal, Nuno Lopes, Hannes Magnusson, Georg Richter, Damien Seguy, Jakub Vrana");
 		CREDIT_LINE("Editor", "Philip Olson");
-		CREDIT_LINE("User Note Maintainers", "Friedhelm Betz, Etienne Kneuss, Nuno Lopes, Hannes Magnusson, Felipe Pena, Maciek Sokolewicz");
+		CREDIT_LINE("User Note Maintainers", "Friedhelm Betz, Etienne Kneuss, Nuno Lopes, Hannes Magnusson, Felipe Pena, Maciek Sokolewicz, Daniel P. Brown");
 		CREDIT_LINE("Other Contributors", "Previously active authors, editors and other contributors are listed in the manual.");
 		php_info_print_table_end();
 	}
@@ -104,7 +104,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 	if (flag & PHP_CREDITS_QA) {
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Quality Assurance Team");
-		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Antony Dovgal, Stefan Esser, Moriyoshi Koizumi, Magnus Maatta, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Jani Taskinen");
+		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Antony Dovgal, Stefan Esser, Moriyoshi Koizumi, Magnus Maatta, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Jani Taskinen, Pierre-Alain Joye, Dmitry Stogov, Felipe Pena");
 		php_info_print_table_end();
 	}
 

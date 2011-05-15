@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,8 @@
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#elif defined(PHP_WIN32)
+#include "win32/time.h"
 #endif
 
 #include "rfc1867.h"
@@ -78,6 +80,9 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 
 #ifdef ZTS
 	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
+# ifdef PHP_WIN32
+	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+# endif
 #else
 	sapi_globals_ctor(&sapi_globals);
 #endif
@@ -114,6 +119,58 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 	efree(sapi_header->header);
 }
 
+/* {{{ proto bool header_register_callback(mixed callback)
+   call a header function */
+PHP_FUNCTION(header_register_callback)
+{
+	zval *callback_func;
+	char *callback_name;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &callback_func) == FAILURE) {
+		return;
+	}
+	
+	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
+		efree(callback_name);
+		RETURN_FALSE;
+	}
+	efree(callback_name);
+
+	if (SG(callback_func)) {
+		zval_ptr_dtor(&SG(callback_func));
+		SG(fci_cache) = empty_fcall_info_cache;
+	}
+
+	Z_ADDREF_P(callback_func);
+
+	SG(callback_func) = callback_func;
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+static void sapi_run_header_callback(TSRMLS_D)
+{
+	int   error;
+	zend_fcall_info fci;
+	zval *retval_ptr = NULL;
+
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.object_ptr = NULL;
+	fci.function_name = SG(callback_func);
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.no_separation = 0;
+	fci.symbol_table = NULL;
+
+	error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
+	if (error == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
+	} else if (retval_ptr) {
+		zval_ptr_dtor(&retval_ptr);
+	}
+}
 
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
@@ -194,7 +251,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 	int read_bytes;
 	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
 
-	if (SG(request_info).content_length > SG(post_max_size)) {
+	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
@@ -207,7 +264,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			break;
 		}
 		SG(read_post_bytes) += read_bytes;
-		if (SG(read_post_bytes) > SG(post_max_size)) {
+		if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
 			break;
 		}
@@ -224,35 +281,61 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
+static inline char *get_default_content_type(uint prefix_len, uint *len TSRMLS_DC)
 {
 	char *mimetype, *charset, *content_type;
+	uint mimetype_len, charset_len;
 
-	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
-	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
-
-	if (strncasecmp(mimetype, "text/", 5) == 0 && *charset) {
-		int len = strlen(mimetype) + sizeof("; charset=") + strlen(charset); /* sizeof() includes \0 */
-		content_type = emalloc(len);
-		snprintf(content_type, len, "%s; charset=%s", mimetype, charset);
+	if (SG(default_mimetype)) {
+		mimetype = SG(default_mimetype);
+		mimetype_len = strlen(SG(default_mimetype));
 	} else {
-		content_type = estrdup(mimetype);
+		mimetype = SAPI_DEFAULT_MIMETYPE;
+		mimetype_len = sizeof(SAPI_DEFAULT_MIMETYPE) - 1;
+	}
+	if (SG(default_charset)) {
+		charset = SG(default_charset);
+		charset_len = strlen(SG(default_charset));
+	} else {
+		charset = SAPI_DEFAULT_CHARSET;
+		charset_len = sizeof(SAPI_DEFAULT_CHARSET) - 1;
+	}
+
+	if (*charset && strncasecmp(mimetype, "text/", 5) == 0) {
+		char *p;
+
+		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
+		content_type = (char*)emalloc(*len + 1);
+		p = content_type + prefix_len;
+		memcpy(p, mimetype, mimetype_len);
+		p += mimetype_len;
+		memcpy(p, "; charset=", sizeof("; charset=") - 1);
+		p += sizeof("; charset=") - 1;
+		memcpy(p, charset, charset_len + 1);
+	} else {
+		*len = prefix_len + mimetype_len;
+		content_type = (char*)emalloc(*len + 1);
+		memcpy(content_type + prefix_len, mimetype, mimetype_len + 1);
 	}
 	return content_type;
 }
 
 
+SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
+{
+	uint len;
+
+	return get_default_content_type(0, &len TSRMLS_CC);
+}
+
+
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC)
 {
-	char *default_content_type = sapi_get_default_content_type(TSRMLS_C);
-	int default_content_type_len = strlen(default_content_type);
+    uint len;
 
-	default_header->header_len = (sizeof("Content-type: ")-1) + default_content_type_len;
-	default_header->header = emalloc(default_header->header_len+1);
-	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: "));
-	memcpy(default_header->header+sizeof("Content-type: ")-1, default_content_type, default_content_type_len);
-	default_header->header[default_header->header_len] = 0;
-	efree(default_content_type);
+	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len TSRMLS_CC);
+	default_header->header_len = len;
+	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: ") - 1);
 }
 
 /*
@@ -353,9 +436,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
 
-	/* It's possible to override this general case in the activate() callback, if
-	 * necessary.
-	 */
+	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
 	} else {
@@ -363,22 +444,19 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	}
 	SG(rfc1867_uploaded_files) = NULL;
 
-	/* handle request mehtod */
+	/* Handle request method */
 	if (SG(server_context)) {
-		if ( SG(request_info).request_method) {
-			if(!strcmp(SG(request_info).request_method, "POST")
-			   && (SG(request_info).content_type)) {
-				/* HTTP POST -> may contain form data to be read into variables
-				   depending on content type given
-				*/
+		if (PG(enable_post_data_reading) && SG(request_info).request_method) {
+			if (SG(request_info).content_type && !strcmp(SG(request_info).request_method, "POST")) {
+				/* HTTP POST may contain form data to be processed into variables
+				 * depending on given content type */
 				sapi_read_post_data(TSRMLS_C);
 			} else {
-				/* any other method with content payload will fill 
-				   $HTTP_RAW_POST_DATA if enabled by always_populate_raw_post_data 
-				   it is up to the webserver to decide whether to allow a method or not
-				*/
+				/* Any other method with content payload will fill $HTTP_RAW_POST_DATA 
+				 * if it is enabled by always_populate_raw_post_data. 
+				 * It's up to the webserver to decide whether to allow a method or not. */
 				SG(request_info).content_type_dup = NULL;
-				if(sapi_module.default_post_reader) {
+				if (sapi_module.default_post_reader) {
 					sapi_module.default_post_reader(TSRMLS_C);
 				}
 			}
@@ -388,11 +466,12 @@ SAPI_API void sapi_activate(TSRMLS_D)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies(TSRMLS_C);
+
 		if (sapi_module.activate) {
 			sapi_module.activate(TSRMLS_C);
 		}
 	}
-	if (sapi_module.input_filter_init ) {
+	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init(TSRMLS_C);
 	}
 }
@@ -409,6 +488,9 @@ static void sapi_send_headers_free(TSRMLS_D)
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
+	if (SG(callback_func)) {
+		zval_ptr_dtor(&SG(callback_func));
+	}
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
 	}  else 	if (SG(server_context)) {
@@ -521,16 +603,36 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	return r;
 }
 
+static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_header TSRMLS_DC)
+{
+	if (!sapi_module.header_handler ||
+		(SAPI_HEADER_ADD & sapi_module.header_handler(sapi_header, op, &SG(sapi_headers) TSRMLS_CC))) {
+		if (op == SAPI_HEADER_REPLACE) {
+			char *colon_offset = strchr(sapi_header->header, ':');
+
+			if (colon_offset) {
+				char sav = *colon_offset;
+
+				*colon_offset = 0;
+				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header->header, (int(*)(void*, void*))sapi_find_matching_header);
+				*colon_offset = sav;
+			}
+		}
+		zend_llist_add_element(&SG(sapi_headers).headers, (void *) sapi_header);
+	} else {
+		sapi_free_header(sapi_header);
+	}
+}
+
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 {
-	int retval;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	long myuid = 0L;
 	char *header_line;
 	uint header_line_len;
 	int http_response_code;
-	
+
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
 		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
@@ -577,8 +679,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	header_line = estrndup(header_line, header_line_len);
 
 	/* cut of trailing spaces, linefeeds and carriage-returns */
-	while(header_line_len && isspace(header_line[header_line_len-1])) 
-		  header_line[--header_line_len]='\0';
+	if (header_line_len && isspace(header_line[header_line_len-1])) {
+		do {
+			header_line_len--;
+		} while(header_line_len && isspace(header_line[header_line_len-1]));
+		header_line[header_line_len]='\0';
+	}
 	
 	if (op == SAPI_HEADER_DELETE) {
 		if (strchr(header_line, ':')) {
@@ -586,6 +692,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
 			return FAILURE;
 		}
+		if (sapi_module.header_handler) {
+			sapi_header.header = header_line;
+			sapi_header.header_len = header_line_len;
+			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
+		}
+		zend_llist_del_element(&SG(sapi_headers).headers, header_line, (int(*)(void*, void*))sapi_find_matching_header);
+		efree(header_line);
+		return SUCCESS;
 	} else {
 		/* new line safety check */
 		char *s = header_line, *e = header_line + header_line_len, *p;
@@ -602,15 +716,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
-
-	if (op == SAPI_HEADER_DELETE) {
-		if (sapi_module.header_handler) {
-			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
-		}
-		zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
-		sapi_free_header(&sapi_header);
-		return SUCCESS;
-	}
 
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
@@ -657,6 +762,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
+			} else if (!STRCASECMP(header_line, "Content-Length")) {
+				/* Script is setting Content-length. The script cannot reasonably
+				 * know the size of the message body after compression, so it's best
+				 * do disable compression altogether. This contributes to making scripts
+				 * portable between setups that have and don't have zlib compression
+				 * enabled globally. See req #44164 */
+				zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"),
+					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 307) &&
@@ -674,75 +787,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					}
 				}
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
-
 				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
 
-				if(PG(safe_mode)) 
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
-				{
-					zval *repl_temp;
-					char *ptr = colon_offset+1, *result, *newheader;
-					int ptr_len=0, result_len = 0, newlen = 0;
+				myuid = php_getuid(TSRMLS_C);
+				efree(header_line);
 
-					/* skip white space */
-					while (isspace(*ptr)) {
-						ptr++;
-					}
-
-					myuid = php_getuid();
-
-					ptr_len = strlen(ptr);
-					MAKE_STD_ZVAL(repl_temp);
-					Z_TYPE_P(repl_temp) = IS_STRING;
-					Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\"\\1-%ld\"", myuid);
-					/* Modify quoted realm value */
-					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
-											 ptr, ptr_len,
-											 repl_temp,
-											 0, &result_len, -1, NULL TSRMLS_CC);
-					if(result_len==ptr_len) {
-						efree(result);
-						efree(Z_STRVAL_P(repl_temp));
-						Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\\1-%ld\\2", myuid);
-						/* modify unquoted realm value */
-						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
-											 	ptr, ptr_len,
-											 	repl_temp,
-											 	0, &result_len, -1, NULL TSRMLS_CC);
-						if(result_len==ptr_len) {
-							char *lower_temp = estrdup(ptr);	
-							char conv_temp[32];
-							int conv_len;
-
-							php_strtolower(lower_temp,strlen(lower_temp));
-							/* If there is no realm string at all, append one */
-							if(!strstr(lower_temp,"realm")) {
-								efree(result);
-								conv_len = slprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
-								result = emalloc(ptr_len+conv_len+1);
-								result_len = ptr_len+conv_len;
-								memcpy(result, ptr, ptr_len);	
-								memcpy(result+ptr_len, conv_temp, conv_len);
-								*(result+ptr_len+conv_len) = '\0';
-							}
-							efree(lower_temp);
-						}
-					}
-					newlen = spprintf(&newheader, 0, "WWW-Authenticate: %s", result);
-					efree(header_line);
-					sapi_header.header = newheader;
-					sapi_header.header_len = newlen;
-					efree(result);
-					efree(Z_STRVAL_P(repl_temp));
-					efree(repl_temp);
-				} 
-#else
-				{
-					myuid = php_getuid();
-					efree(header_line);
-					sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
-				}
-#endif
+				sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
 			}
 			if (sapi_header.header==header_line) {
 				*colon_offset = ':';
@@ -752,28 +802,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	if (http_response_code) {
 		sapi_update_response_code(http_response_code TSRMLS_CC);
 	}
-	if (sapi_module.header_handler) {
-		retval = sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
-	} else {
-		retval = SAPI_HEADER_ADD;
-	}
-	if (retval & SAPI_HEADER_ADD) {
-		/* in replace mode first remove the header if it already exists in the headers llist */
-		if (op == SAPI_HEADER_REPLACE) {
-			colon_offset = strchr(sapi_header.header, ':');
-			if (colon_offset) {
-				char sav;
-				sav = *colon_offset;
-				*colon_offset = 0;
-				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
-				*colon_offset = sav;
-			}
-		}
-
-		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
-	} else {
-		sapi_free_header(&sapi_header);
-	}
+	sapi_header_add_op(op, &sapi_header TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -792,8 +821,20 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
 		sapi_header_struct default_header;
-		sapi_get_default_content_type_header(&default_header TSRMLS_CC);
-		sapi_add_header_ex(default_header.header, default_header.header_len, 0, 0 TSRMLS_CC);
+	    uint len;
+
+		SG(sapi_headers).mimetype = get_default_content_type(0, &len TSRMLS_CC);
+		default_header.header_len = sizeof("Content-type: ") - 1 + len;
+		default_header.header = emalloc(default_header.header_len + 1);
+		memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
+		memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+		sapi_header_add_op(SAPI_HEADER_ADD, &default_header TSRMLS_CC);
+		SG(sapi_headers).send_default_content_type = 0;
+	}
+
+	if (SG(callback_func) && !SG(callback_run)) {
+		SG(callback_run) = 1;
+		sapi_run_header_callback(TSRMLS_C);
 	}
 
 	SG(headers_sent) = 1;
@@ -878,9 +919,8 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 }
 
 
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D))
+SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
@@ -889,9 +929,8 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 }
 
 
-SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC))
+SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
@@ -899,9 +938,8 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D))
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
@@ -984,14 +1022,19 @@ SAPI_API int sapi_get_target_gid(gid_t *obj TSRMLS_DC)
 	}
 }
 
-SAPI_API time_t sapi_get_request_time(TSRMLS_D)
+SAPI_API double sapi_get_request_time(TSRMLS_D)
 {
 	if(SG(global_request_time)) return SG(global_request_time);
 
 	if (sapi_module.get_request_time && SG(server_context)) {
 		SG(global_request_time) = sapi_module.get_request_time(TSRMLS_C);
 	} else {
-		SG(global_request_time) = time(0);
+		struct timeval tp = {0};
+		if (!gettimeofday(&tp, NULL)) {
+			SG(global_request_time) = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+		} else {
+			SG(global_request_time) = (double)time(0);
+		}
 	}
 	return SG(global_request_time);
 }

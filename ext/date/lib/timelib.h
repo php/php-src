@@ -26,6 +26,8 @@
 #include <limits.h>
 #endif
 
+#define TIMELIB_VERSION 201101
+
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
 #define TIMELIB_NO_CLONE         0x02
@@ -109,6 +111,7 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *tz);
 timelib_time* timelib_time_ctor(void);
 void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
 void timelib_time_dtor(timelib_time* t);
+timelib_time* timelib_time_clone(timelib_time* orig);
 
 timelib_time_offset* timelib_time_offset_ctor(void);
 void timelib_time_offset_dtor(timelib_time_offset* t);

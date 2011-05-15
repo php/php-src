@@ -1,5 +1,8 @@
 --TEST--
 SPL: Problem with casting to string
+--SKIPIF--
+<?php
+if (!defined('GLOB_ERR')) print "skip";
 --FILE--
 <?php
 $d = new DirectoryIterator('.');

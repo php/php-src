@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -27,13 +27,15 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
+extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
+
 /* {{{ proto bool mysqli_report(int flags)
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {
-	long		flags;
+	long flags;
 
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
 		return;
 	}
@@ -44,14 +46,14 @@ PHP_FUNCTION(mysqli_report)
 }
 /* }}} */
 
-/* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */ 
+/* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */
 void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC)
 {
 	php_mysqli_throw_sql_exception((char *)sqlstate, errorno TSRMLS_CC, "%s", error);
 }
 /* }}} */
 
-/* {{{ void php_mysqli_report_index() */ 
+/* {{{ void php_mysqli_report_index() */
 void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC) {
 	char index[15];
 

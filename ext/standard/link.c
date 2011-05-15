@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "safe_mode.h"
 #include "php_link.h"
 #include "php_string.h"
 
@@ -64,15 +63,11 @@ PHP_FUNCTION(readlink)
 		return;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(link, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(link TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = readlink(link, buff, MAXPATHLEN-1);
+	ret = php_sys_readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
@@ -144,14 +139,6 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
 	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -197,14 +184,6 @@ PHP_FUNCTION(link)
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 

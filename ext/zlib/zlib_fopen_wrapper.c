@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 		path += 5;
 	}
 	
-	innerstream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK | options | STREAM_WILL_CAST, opened_path);
+	innerstream = php_stream_open_wrapper_ex(path, mode, STREAM_MUST_SEEK | options | STREAM_WILL_CAST, opened_path, context);
 	
 	if (innerstream) {
 		int fd;

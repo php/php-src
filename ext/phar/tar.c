@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2009 The PHP Group                                |
+  | Copyright (c) 2005-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -911,7 +911,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	php_stream *oldfile, *newfile, *stubfile;
 	int closeoldfile, free_user_stub, signature_length;
 	struct _phar_pass_tar_info pass;
-	char *buf, *signature, sigbuf[8];
+	char *buf, *signature, *tmp, sigbuf[8];
+	char halt_stub[] = "__HALT_COMPILER();";
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
@@ -990,7 +991,9 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 			free_user_stub = 0;
 		}
 
-		if ((pos = strstr(user_stub, "__HALT_COMPILER();")) == NULL) {
+		tmp = estrndup(user_stub, len);
+		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+			efree(tmp);
 			if (error) {
 				spprintf(error, 0, "illegal stub for tar-based phar \"%s\"", phar->fname);
 			}
@@ -999,6 +1002,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 			}
 			return EOF;
 		}
+		pos = user_stub + (pos - tmp);
+		efree(tmp);
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();

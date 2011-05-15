@@ -36,7 +36,7 @@ rmdir($thisTestDir);
 function runtest() {
 	$tmpfile = 'gzopen_variation5.tmp';
 	$h = gzopen($tmpfile, "w", true);
-	fwrite($h, b"This is the test file");
+	fwrite($h, "This is the test file");
 	fclose($h);
 	
 	

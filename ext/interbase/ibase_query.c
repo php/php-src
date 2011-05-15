@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1857,7 +1857,7 @@ PHP_FUNCTION(ibase_execute)
 			if (ib_query->statement_type == isc_info_sql_stmt_exec_procedure) {
 				result->stmt = NULL;
 			}
-			ib_query->result_res_id = zend_list_insert(result, le_result);
+			ib_query->result_res_id = zend_list_insert(result, le_result TSRMLS_CC);
 			RETVAL_RESOURCE(ib_query->result_res_id);
 		}
 	} while (0);

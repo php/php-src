@@ -1,0 +1,199 @@
+.TH PHP-FPM 8 "2009" "The PHP Group" "Scripting Language"
+.SH NAME
+.TP 15
+php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
+.SH SYNOPSIS
+.B php-fpm
+[options]
+.LP
+.SH DESCRIPTION
+\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
+Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_localstatedir@/log/php-fpm.log.
+.LP
+Most options are set in the configuration file. The configuration file is @php_fpm_sysconfdir@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
+.SH OPTIONS
+.TP 15
+.B \-C
+Do not chdir to the script's directory
+.TP
+.PD 0
+.B \-\-php\-ini \fIpath\fP|\fIfile\fP
+.TP
+.PD 1
+.B \-c \fIpath\fP|\fIfile\fP
+Look for 
+.B php.ini 
+file in the directory
+.IR path
+or use the specified
+.IR file
+.TP
+.PD 0
+.B \-\-no\-php\-ini
+.TP
+.PD 1
+.B \-n
+No 
+.B php.ini 
+file will be used
+.TP
+.PD 0
+.B \-\-define \fIfoo\fP[=\fIbar\fP]
+.TP
+.PD 1
+.B \-d \fIfoo\fP[=\fIbar\fP]
+Define INI entry 
+.IR foo 
+with value
+.IR bar
+.TP
+.B \-e
+Generate extended information for debugger/profiler
+.TP
+.PD 0
+.B \-\-help
+.TP
+.PD 1
+.B \-h
+This help
+.TP
+.PD 0
+.B \-\-info
+.TP
+.PD 1
+.B \-i
+PHP information and configuration
+.TP
+.PD 0
+.B \-\-modules
+.TP
+.PD 1
+.B \-m
+Show compiled in modules
+.TP
+.PD 0
+.B \-\-version
+.TP
+.PD 1
+.B \-v
+Version number
+.B \-\-prefix \fIpath\fP
+.TP
+.PD 1
+.B \-p
+Specify alternative prefix path (the default is @php_fpm_prefix@)
+.TP
+.PD 0
+.B \-\-fpm\-config \fIfile\fP
+.TP
+.PD 1
+.B \-y
+Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_sysconfdir@/php-fpm.conf)
+.TP
+.PD 0
+.B \-\-test
+.TP
+.PD 1
+.B \-t
+Test FPM configuration file and exit
+If called twice (-tt), the configuration is dumped before exiting.
+.TP
+.PD 0
+.B \-\-zend\-extension \fIfile\fP
+.TP
+.PD 1
+.B \-z \fIfile\fP
+Load Zend extension 
+.IR file
+.SH FILES
+.TP 15
+.B php-fpm.conf
+The configuration file for the php-fpm daemon.
+.TP
+.B php.ini
+The standard php configuration file.
+.SH EXAMPLES
+You should use the init script provided to start and stop the php-fpm daemon. This situation applies for any unix systems which use init.d for their main process manager.
+.P
+.PD 1
+.RS
+sudo /etc/init.d/php-fpm start
+.RE
+.TP
+If your installation has no appropriate init script, launch php-fpm with no arguments. It will launch as a daemon (background process) by default. The file @php_fpm_localstatedir@/run/php-fpm.pid determines whether php-fpm is already up and running. Once started, php-fpm then responds to several POSIX signals:
+.P
+.PD 0
+.RS
+.B SIGINT,SIGTERM 	\fPimmediate termination
+.TP
+.B SIGQUIT 			\fPgraceful stop
+.TP
+.B SIGUSR1 			\fPre-open log file
+.TP
+.B SIGUSR2 			\fPgraceful reload of all workers + reload of fpm conf/binary
+.RE
+.PD 1
+.P
+.SH TIPS
+The PHP-FPM CGI daemon will work well with most popular webservers, including Apache2, lighttpd and nginx.
+.PD 1
+.P
+.SH SEE ALSO
+The PHP-FPM website:
+.PD 0
+.P
+.B http://php-fpm.org
+.PD 1
+.P
+For a more or less complete description of PHP look here:
+.PD 0
+.P
+.B http://www.php.net/manual/
+.PD 1
+.P
+A nice introduction to PHP by Stig Bakken can be found here:
+.PD 0
+.P
+.B http://www.zend.com/zend/art/intro.php
+.PD 1
+.SH BUGS
+You can view the list of known bugs or report any new bug you
+found at:
+.PD 0
+.P
+.B http://bugs.php.net
+.PD 1
+.SH AUTHORS
+PHP-FPM SAPI was written by Andrei Nigmatulin. The mailing-lists are highload-php-en (English) and highload-php-ru (Russian).
+.P
+The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.
+.P
+A List of active developers can be found here:
+.PD 0
+.P
+.B http://www.php.net/credits.php
+.PD 1
+.P
+And last but not least PHP was developed with the help of a huge amount of 
+contributors all around the world.
+.SH VERSION INFORMATION
+This manpage describes \fBphp-fpm\fP, version @PHP_VERSION@.
+.SH COPYRIGHT
+Copyright \(co 1997\-2009 The PHP Group
+.PD 0
+.P
+Copyright (c) 2007-2009, Andrei Nigmatulin
+.PD 1
+.LP
+This source file is subject to version 3.01 of the PHP license,
+that is bundled with this package in the file LICENSE, and is
+available through the world-wide-web at the following url:
+.PD 0
+.P
+.B http://www.php.net/license/3_01.txt
+.PD 1
+.P
+If you did not receive a copy of the PHP license and are unable to
+obtain it through the world-wide-web, please send a note to
+.B license@php.net
+so we can mail you a copy immediately.

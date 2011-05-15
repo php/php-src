@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -69,12 +69,12 @@ PHP_FUNCTION(getopt);
 PHP_FUNCTION(get_current_user);
 PHP_FUNCTION(set_time_limit);
 
+PHP_FUNCTION(header_register_callback);
+
 PHP_FUNCTION(get_cfg_var);
 PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
-
-PHP_FUNCTION(import_request_variables);
 
 PHP_FUNCTION(error_log);
 PHP_FUNCTION(error_get_last);
@@ -140,6 +140,7 @@ PHP_FUNCTION(stream_bucket_append);
 PHP_FUNCTION(stream_bucket_new);
 PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
+PHP_RSHUTDOWN_FUNCTION(browscap);
 
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
@@ -177,9 +178,6 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval *active_ini_file_section;
-
-	HashTable sm_protected_env_vars;
-	char *sm_allowed_env_vars;
 	
 	/* pageinfo.c */
 	long page_uid;
@@ -202,11 +200,18 @@ typedef struct _php_basic_globals {
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
     
 	/* syslog.c */
-	int syslog_started;
 	char *syslog_device;
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
+	struct {
+		void *var_hash;
+		unsigned level;
+	} serialize;
+	struct {
+		void *var_hash;
+		unsigned level;
+	} unserialize;
 
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;
@@ -242,11 +247,6 @@ typedef struct {
 	int key_len;
 } putenv_entry;
 #endif
-
-/* Values are comma-delimited
- */
-#define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
-#define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);

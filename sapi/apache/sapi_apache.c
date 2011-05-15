@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2011 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
  */
 int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 {
-	int retval = OK;
+	int retval = OK;	
 	zend_file_handle file_handle;
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
@@ -35,7 +35,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 	}
 	/* sending a file handle to another dll is not working
 	   so let zend open it. */
-
+	
 	if (display_source_mode) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -54,11 +54,11 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 	}
 
 	AP(in_request) = 0;
-
+	
 	zend_try {
 		php_request_shutdown(NULL);
 	} zend_end_try();
-
+	
 	return retval;
 }
 /* }}} */

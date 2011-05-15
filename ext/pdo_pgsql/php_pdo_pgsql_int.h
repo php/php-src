@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -102,6 +102,13 @@ struct pdo_pgsql_lob_self {
 	Oid oid;
 };
 
+enum pdo_pgsql_specific_constants {
+	PGSQL_TRANSACTION_IDLE = PQTRANS_IDLE,
+	PGSQL_TRANSACTION_ACTIVE = PQTRANS_ACTIVE,
+	PGSQL_TRANSACTION_INTRANS = PQTRANS_INTRANS,
+	PGSQL_TRANSACTION_INERROR = PQTRANS_INERROR,
+	PGSQL_TRANSACTION_UNKNOWN = PQTRANS_UNKNOWN
+};
 
 php_stream *pdo_pgsql_create_lob_stream(pdo_dbh_t *stmt, int lfd, Oid oid TSRMLS_DC);
 extern php_stream_ops pdo_pgsql_lob_stream_ops;

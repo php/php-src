@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2011 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -25,13 +25,9 @@
 ZEND_API int zend_stack_init(zend_stack *stack)
 {
 	stack->top = 0;
-	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
-	if (!stack->elements) {
-		return FAILURE;
-	} else {
-		stack->max = STACK_BLOCK_SIZE;
-		return SUCCESS;
-	}
+	stack->max = 0;
+	stack->elements = NULL;
+	return SUCCESS;
 }
 
 ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size)
@@ -100,8 +96,8 @@ ZEND_API int zend_stack_destroy(zend_stack *stack)
 		for (i = 0; i < stack->top; i++) {
 			efree(stack->elements[i]);
 		}
-
 		efree(stack->elements);
+		stack->elements = NULL;
 	}
 
 	return SUCCESS;

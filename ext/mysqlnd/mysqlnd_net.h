@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2009 The PHP Group                                |
+  | Copyright (c) 2006-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,8 @@
 
 PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
 PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC);
+
+PHPAPI struct st_mysqlnd_net_methods * mysqlnd_net_get_methods();
 
 #endif /* MYSQLND_NET_H */
 
