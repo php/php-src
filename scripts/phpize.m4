@@ -1,9 +1,8 @@
 dnl This file becomes configure.in for self-contained extensions.
 
-divert(1)
-
-AC_PREREQ(2.13)
+AC_PREREQ(2.60)
 AC_INIT(config.m4)
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
