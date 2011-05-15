@@ -110,18 +110,18 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   ],[
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+      pdo_inc_path=$prefix/include/php/ext
     else
       AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
+    AC_MSG_RESULT($pdo_inc_path)
   ])
 
-  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_PGSQL_CFLAGS)
+  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_PGSQL_CFLAGS)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo) 
