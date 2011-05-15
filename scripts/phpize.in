@@ -2,6 +2,7 @@
 
 # Variable declaration
 prefix='@prefix@'
+datarootdir='@datarootdir@'
 exec_prefix="`eval echo @exec_prefix@`"
 phpdir="`eval echo @libdir@`/build"
 includedir="`eval echo @includedir@`/php"
