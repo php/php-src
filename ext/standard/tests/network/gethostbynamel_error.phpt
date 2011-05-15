@@ -20,10 +20,6 @@ $hostname = 'string_val';
 $extra_arg = 10;
 var_dump( gethostbynamel($hostname, $extra_arg) );
 
-echo "\n-- Testing gethostbynamel() with an unknown host --\n";
-$hostname = 'unknownhost_zzz_xxx_yyy.';
-var_dump( gethostbynamel($hostname) );
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -39,6 +35,4 @@ NULL
 Warning: gethostbynamel() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
--- Testing gethostbynamel() with an unknown host --
-bool(false)
 Done
