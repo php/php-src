@@ -469,7 +469,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path = NULL, *buf;
 	size_t size, offset = 0;
-	
+
 	/* The shebang line was read, get the current position to obtain the buffer start */
 	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
 		if ((offset = ftell(file_handle->handle.fp)) == -1) {
@@ -496,7 +496,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	if (size != -1) {
 		if (CG(multibyte)) {
 			SCNG(script_org) = buf;
-			SCNG(script_org_size) = size;	
+			SCNG(script_org_size) = size;
 			SCNG(script_filtered) = NULL;
 
 			zend_multibyte_set_filter(NULL TSRMLS_CC);
@@ -1314,62 +1314,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ARRAY;
 }
 
-<ST_IN_SCRIPTING>("bool"|"boolean"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	if (yytext[4] == 'e') {
-		yyless((sizeof("boolean") - 1));
-	} else {
-		yyless((sizeof("bool") - 1));
-	}
-	return T_BOOL_HINT;
-}
-
-<ST_IN_SCRIPTING>("string"|"binary"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	yyless(6);
-	return T_STRING_HINT;
-}
-
-<ST_IN_SCRIPTING>"scalar"{TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	yyless(6);
-	return T_SCALAR_HINT;
-}
-
-<ST_IN_SCRIPTING>"numeric"{TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	yyless(7);
-	return T_NUMERIC_HINT;
-}
-
-<ST_IN_SCRIPTING>("int"|"integer"|"long"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	if (yytext[3] == 'e') {
-		yyless((sizeof("integer") - 1));
-	} else 	if (yytext[3] == 'g') {
-		yyless((sizeof("long") - 1));
-	} else {
-		yyless(3);
-	}
-	return T_INT_HINT;
-}
-
-<ST_IN_SCRIPTING>("real"|"double"|"float"){TABS_AND_SPACES}[ \r\n\t&]*"$" {
-	if (yytext[4] == 'l') {
-		yyless((sizeof("double") - 1));
-	} else 	if (yytext[4] == 't') {
-		yyless((sizeof("float") - 1));
-	} else {
-		yyless(4);
-	}
-	return T_DOUBLE_HINT;
-}
-
-<ST_IN_SCRIPTING>"resource"{TABS_AND_SPACES}[ \t\r\n&]*"$" {
-	yyless((sizeof("resource") - 1));
-	return T_RESOURCE_HINT;
-}
-
-<ST_IN_SCRIPTING>"object"{TABS_AND_SPACES}[ \t\r\n&]*"$" {
-	yyless((sizeof("object") - 1));
-	return T_OBJECT_HINT;
-}
-
 <ST_IN_SCRIPTING>"++" {
 	return T_INC;
 }
@@ -1628,7 +1572,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		len += strlen(func_name);
 	}
 
-	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s", 
+	zendlval->value.str.len = zend_spprintf(&zendlval->value.str.val, 0, "%s%s%s",
 		class_name ? class_name : "",
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""

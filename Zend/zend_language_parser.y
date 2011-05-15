@@ -130,14 +130,6 @@
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
-%token T_BOOL_HINT
-%token T_STRING_HINT
-%token T_INT_HINT
-%token T_DOUBLE_HINT
-%token T_RESOURCE_HINT
-%token T_OBJECT_HINT
-%token T_SCALAR_HINT
-%token T_NUMERIC_HINT
 %token T_CLASS_C
 %token T_METHOD_C
 %token T_FUNC_C
@@ -475,14 +467,6 @@ non_empty_parameter_list:
 optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
 	|	T_ARRAY						{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
-	|	T_BOOL_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_BOOL; }
-	|	T_STRING_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_STRING; }
-	|	T_INT_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_LONG; }
-	|	T_DOUBLE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_DOUBLE; }
-	|	T_RESOURCE_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_RESOURCE; }
-	|	T_OBJECT_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_OBJECT; }
-	|	T_SCALAR_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_SCALAR; }
-	|	T_NUMERIC_HINT					{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NUMERIC; }
 	|	fully_qualified_class_name			{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CLASS; }
 ;
 
@@ -941,7 +925,7 @@ method:
 			{ zend_do_end_function_call(&$1, &$$, &$3, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
 ;
 
-method_or_not:			
+method_or_not:
 		method						{ $$ = $1; $$.EA = ZEND_PARSED_METHOD_CALL; zend_do_push_object(&$$ TSRMLS_CC); }
 	|	array_method_dereference	{ $$ = $1; zend_do_push_object(&$$ TSRMLS_CC); }
 	|	/* empty */ { $$.EA = ZEND_PARSED_MEMBER; }
@@ -964,7 +948,7 @@ variable_class_name:
 
 array_function_dereference:
 		array_function_dereference '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
-	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $1.EA = ZEND_PARSED_FUNCTION_CALL; } 
+	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $1.EA = ZEND_PARSED_FUNCTION_CALL; }
 		'[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 TSRMLS_CC); }
 ;
 
