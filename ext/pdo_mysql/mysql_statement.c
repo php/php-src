@@ -640,7 +640,11 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 #endif /* PDO_USE_MYSQLND */
 
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
-		if (mysql_errno(S->H->server)) {
+#if PDO_USE_MYSQLND
+		if (S->result->unbuf && !S->result->unbuf->eof_reached && mysql_errno(S->H->server)) {
+#else
+		if (!S->result->eof && mysql_errno(S->H->server)) {
+#endif
 			pdo_mysql_error_stmt(stmt);
 		}
 		PDO_DBG_RETURN(0);
