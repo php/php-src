@@ -3,8 +3,13 @@ DateInterval::format(), %a
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2010 BKTK
+--INI--
+date.timezone=UTC
 --SKIPIF--
-<?php if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); ?>
+<?php 
+if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); 
+if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
+?>
 --XFAIL--
 Windows VC6 libs' floor()/ceil() choke on floats
 --FILE--
