@@ -843,7 +843,7 @@ PHP_FUNCTION(proc_open)
 #endif
 
 		if (cwd) {
-			chdir(cwd);
+			php_ignore_value(chdir(cwd));
 		}
 
 		if (env.envarray) {

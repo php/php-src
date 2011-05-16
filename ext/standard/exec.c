@@ -484,7 +484,7 @@ PHP_FUNCTION(proc_nice)
 	}
 
 	errno = 0;
-	nice(pri);
+	php_ignore_value(nice(pri));
 	if (errno) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 		RETURN_FALSE;
