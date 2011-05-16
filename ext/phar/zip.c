@@ -411,6 +411,9 @@ foundit:
 			now = php_stream_tell(fp);
 			pefree(entry.filename, entry.is_persistent);
 			sigfile = php_stream_fopen_tmpfile();
+			if (!sigfile) {
+				PHAR_ZIP_FAIL("couldn't open temporary file");
+			}
 
 			php_stream_seek(fp, 0, SEEK_SET);
 			/* copy file contents + local headers and zip comment, if any, to be hashed for signature */
