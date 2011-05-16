@@ -1067,6 +1067,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				}
 				if (is_dir && !directory) {
 					/* not a directory */
+					tsrm_free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
