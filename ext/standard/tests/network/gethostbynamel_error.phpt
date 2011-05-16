@@ -19,7 +19,6 @@ echo "\n-- Testing gethostbynamel() function with more than expected no. of argu
 $hostname = 'string_val';
 $extra_arg = 10;
 var_dump( gethostbynamel($hostname, $extra_arg) );
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -34,5 +33,4 @@ NULL
 
 Warning: gethostbynamel() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-
 Done
