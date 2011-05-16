@@ -7,6 +7,10 @@ AC_INIT(TSRM.c)
 AM_INIT_AUTOMAKE(TSRM, 1.0, nodefine)
 AM_CONFIG_HEADER(tsrm_config.h)
 
+AH_TOP([
+#undef PTHREADS
+])
+
 sinclude(tsrm.m4)
 	
 TSRM_BASIC_CHECKS
