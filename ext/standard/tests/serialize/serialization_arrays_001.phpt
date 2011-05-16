@@ -1,7 +1,5 @@
 --TEST--
 Test serialize() & unserialize() functions: arrays (circular references)
---INI--
-serialize_precision=100
 --FILE--
 <?php 
 /* Prototype  : proto string serialize(mixed variable)

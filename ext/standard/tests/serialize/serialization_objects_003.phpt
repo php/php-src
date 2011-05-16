@@ -1,7 +1,5 @@
 --TEST--
 Test serialize() & unserialize() functions: objects (abstract classes)
---INI--
-serialize_precision=100
 --FILE--
 <?php 
 /* Prototype  : proto string serialize(mixed variable)

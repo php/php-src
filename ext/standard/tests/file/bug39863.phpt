@@ -16,6 +16,8 @@ else {
 ?>
 ===DONE===
 <?php exit(0); ?>
+--XFAIL--
+Needs bug #39863 fixed
 --EXPECT--
 PASS
 ===DONE===

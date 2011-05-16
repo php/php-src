@@ -1,7 +1,5 @@
 --TEST--
 serialize()/unserialize()/var_dump()
---INI--
-serialize_precision=100
 --FILE--
 <?php 
 class t
