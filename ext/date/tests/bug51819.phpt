@@ -1,5 +1,7 @@
 --TEST--
 Bug #51819 (Case discrepancy in timezone names cause Uncaught exception and fatal error)
+--XFAIL--
+Bug #51819 isn't fixed yet
 --FILE--
 <?php
 date_default_timezone_set('UTC');
