@@ -906,11 +906,11 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 PHPAPI void
 mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 {
-	zend_bool pers = net->persistent;
-
 	DBG_ENTER("mysqlnd_net_free");
 
 	if (net) {
+		zend_bool pers = net->persistent;
+
 		net->m.free_contents(net TSRMLS_CC);
 		if (net->cmd_buffer.buffer) {
 			DBG_INF("Freeing cmd buffer");
