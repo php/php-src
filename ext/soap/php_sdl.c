@@ -2339,7 +2339,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		}
 	}
 
-	write(f, buf.c, buf.len);
+	php_ignore_value(write(f, buf.c, buf.len));
 	close(f);
 	smart_str_free(&buf);
 	zend_hash_destroy(&tmp_functions);

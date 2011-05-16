@@ -561,7 +561,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
 #endif
-			write(fd, tmp, len);
+			php_ignore_value(write(fd, tmp, len));
 			efree(tmp);
 			efree(error_time_str);
 			close(fd);
@@ -2301,7 +2301,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			/* this looks nasty to me */
 			old_cwd_fd = open(".", 0);
 #else
-			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 #endif
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
@@ -2360,7 +2360,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	}
 #else
 	if (old_cwd[0] != '\0') {
-		VCWD_CHDIR(old_cwd);
+		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
 	free_alloca(old_cwd, use_heap);
 #endif
@@ -2390,14 +2390,14 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 		PG(during_request_startup) = 0;
 
 		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
-			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, ret, 1, primary_file);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {
-		VCWD_CHDIR(old_cwd);
+		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
 
 	free_alloca(old_cwd, use_heap);
