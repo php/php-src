@@ -100,6 +100,7 @@ static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 
 		cbuffer = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
 		if (!cbuffer) {
+			free(buffer);
 			return;
 		}
 		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->timecnt);
@@ -125,6 +126,7 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 
 	tz->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
 	if (!tz->type) {
+		free(buffer);
 		return;
 	}
 
@@ -153,6 +155,7 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 
 		tz->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
 		if (!tz->leap_times) {
+			free(leap_buffer);
 			return;
 		}
 		for (i = 0; i < tz->leapcnt; i++) {
