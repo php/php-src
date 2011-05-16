@@ -390,7 +390,7 @@ PS_WRITE_FUNC(files)
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
 
 	if (vallen < (int)data->st_size) {
-		ftruncate(data->fd, 0);
+		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
 #if defined(HAVE_PWRITE)
