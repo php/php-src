@@ -1614,9 +1614,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (strcmp(dirname, ".") == 0) {
 		dirname = erealloc(dirname, MAXPATHLEN);
 #if HAVE_GETCWD
-		VCWD_GETCWD(dirname, MAXPATHLEN);
+		php_ignore_value(VCWD_GETCWD(dirname, MAXPATHLEN));
 #elif HAVE_GETWD
-		VCWD_GETWD(dirname);
+		php_ignore_value(VCWD_GETWD(dirname));
 #endif
 	}
 

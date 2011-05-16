@@ -1354,7 +1354,7 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 			case -2:
 			case -1:
 				inc_len = 1;
-				php_mblen(NULL, 0);
+				php_ignore_value(php_mblen(NULL, 0));
 				break;
 			case 0:
 				goto quit_loop;
