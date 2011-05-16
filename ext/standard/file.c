@@ -1808,7 +1808,7 @@ static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t le
 			case -2:
 			case -1:
 				inc_len = 1;
-				php_mblen(NULL, 0);
+				php_ignore_value(php_mblen(NULL, 0));
 				break;
 			case 0:
 				goto quit_loop;
@@ -2072,7 +2072,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 	zend_bool first_field = 1;
 
 	/* initialize internal state */
-	php_mblen(NULL, 0);
+	php_ignore_value(php_mblen(NULL, 0));
 
 	/* Now into new section that parses buf for delimiter/enclosure fields */
 
@@ -2105,7 +2105,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 				case -2:
 				case -1:
 					inc_len = 1;
-					php_mblen(NULL, 0);
+					php_ignore_value(php_mblen(NULL, 0));
 					break;
 				case 0:
 					goto quit_loop_1;
@@ -2199,7 +2199,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 					case -2:
 					case -1:
-						php_mblen(NULL, 0);
+						php_ignore_value(php_mblen(NULL, 0));
 						/* break is omitted intentionally */
 					case 1:
 						/* we need to determine if the enclosure is
@@ -2267,7 +2267,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 					case -2:
 					case -1:
 						inc_len = 1;
-						php_mblen(NULL, 0);
+						php_ignore_value(php_mblen(NULL, 0));
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
@@ -2298,7 +2298,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 					case -2:
 					case -1:
 						inc_len = 1;
-						php_mblen(NULL, 0);
+						php_ignore_value(php_mblen(NULL, 0));
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
