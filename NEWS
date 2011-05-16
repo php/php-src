@@ -85,6 +85,7 @@ PHP                                                                        NEWS
 
 - PDO MySQL driver:
   . Fixed bug #54644 (wrong pathes in php_pdo_mysql_int.h). (Tony, Johannes)
+  . Fixed bug #53782 (foreach throws irrelevant exception). (Johannes, Andrey)
   . Implemented FR #48587 (MySQL PDO driver doesn't support SSL connections).
     (Rob)
 
