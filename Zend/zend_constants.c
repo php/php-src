@@ -141,7 +141,7 @@ void zend_register_standard_constants(TSRMLS_D)
 		c.value.type = IS_NULL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.flags = CONST_PERSISTENT;
+		c.flags = CONST_PERSISTENT | CONST_CS;
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
