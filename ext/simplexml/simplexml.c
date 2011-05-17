@@ -1069,6 +1069,10 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 	xmlAttrPtr       attr;
 	int              namelen;
 	int              test;
+	char 		 use_iter;
+	zval            *iter_data;
+
+	use_iter = 0;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -1122,6 +1126,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			MAKE_STD_ZVAL(value);
@@ -1129,7 +1134,17 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 			zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-			node = node->children;
+
+			if ( !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+				node = node->children;
+			} else {
+				iter_data = sxe->iter.data;
+				sxe->iter.data = NULL;
+
+				node = php_sxe_reset_iterator(sxe, 0 TSRMLS_CC);
+
+				use_iter = 1;
+			}
 		}
 
 		while (node) {
@@ -1161,10 +1176,25 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 
 			_get_base_node_value(sxe, node, &value, sxe->iter.nsprefix, sxe->iter.isprefix TSRMLS_CC);
 
-			sxe_properties_add(rv, name, namelen, value TSRMLS_CC);
+			if ( use_iter ) {
+				zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+			} else {
+				sxe_properties_add(rv, name, namelen, value TSRMLS_CC);
+			}
 next_iter:
-			node = node->next;
+			if ( use_iter ) {
+				node = php_sxe_iterator_fetch(sxe, node->next, 0 TSRMLS_CC);
+			} else {
+				node = node->next;
+			}
 		}
+	}
+
+	if ( use_iter ) {
+		if (sxe->iter.data) {
+			zval_ptr_dtor(&sxe->iter.data);
+		}
+		sxe->iter.data = iter_data;
 	}
 
 	return rv;
