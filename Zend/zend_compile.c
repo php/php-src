@@ -2256,7 +2256,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = opline->lineno;
-		zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+			zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
 		} else {
 			/* Label is not defined. Delay to pass 2. */
 			INC_BPC(op_array);
