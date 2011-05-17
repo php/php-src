@@ -1583,7 +1583,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result TSRMLS_DC)
 		} else if (result->m.fetch_row == result->m.fetch_row_normal_unbuffered) {
 			DBG_RETURN(mysqlnd_fetch_row_unbuffered_c(result TSRMLS_CC));
 		} else {
-			*((int*)NULL) = 1;
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "result->m.fetch_row has invalid value. Report to the developers");
 		}
 	}
 	DBG_RETURN(ret);
