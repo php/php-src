@@ -29,10 +29,10 @@ print "datestr  " . date ("H:i:s A F j Y T", $tStamp) . "\n";
 TZ has NOT been set
 Should strftime==datestr? Strftime seems to assume GMT tStamp.
 input    10:00:00 AM July 1 2005
-strftime 10:00:00 AM July 1 2005 UTC +0000
+strftime 10:00:00 AM July 1 2005 UTC -0500
 datestr  10:00:00 AM July 1 2005 UTC
 
 Setting TZ
 input    10:00:00 AM July 1 2005
-strftime 10:00:00 AM July 1 2005 EST +1000
+strftime 10:00:00 AM July 1 2005 EST -0500
 datestr  10:00:00 AM July 1 2005 EST
