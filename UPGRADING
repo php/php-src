@@ -170,6 +170,10 @@ UPGRADE NOTES - PHP X.Y
 - fclose() closes streams with resource refcount > 1; it doesn't merely
   decrement the resource refcount.
 - socket_set_options() and socket_get_options() now support multicast options.
+- Arrays cast from SimpleXMLElement now always contain all nodes instead of
+  just the first matching node.
+- All SimpleXMLElement children are now always printed when using var_dump(),
+  var_export(), and print_r().
 
 ===================================
 5. Changes made to existing methods
