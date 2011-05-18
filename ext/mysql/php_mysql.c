@@ -830,6 +830,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			/* create the link */
 			mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
+			if (!mysql) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Out of memory while allocating memory for a persistent link");
+			}
 			mysql->active_result_id = 0;
 #ifdef CLIENT_MULTI_STATEMENTS
 			mysql->multi_query = client_flags & CLIENT_MULTI_STATEMENTS? 1:0;
