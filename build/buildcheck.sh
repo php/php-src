@@ -50,7 +50,7 @@ if test "$1" = "2" -a "$2" -gt "59"; then
   echo "           Most distros have separate autoconf 2.13 or 2.59 packages."
   echo "           On Debian/Ubuntu both autoconf2.13 and autoconf2.59 packages exist."
   echo "           Install autoconf2.13 and set the PHP_AUTOCONF env var to "
-  echo "           autoconf2.13and try again."
+  echo "           autoconf2.13 and try again."
   exit 1
 else
   echo "buildconf: autoconf version $ac_version (ok)"
