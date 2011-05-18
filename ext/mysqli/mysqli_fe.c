@@ -33,7 +33,7 @@
 #include "mysqli_fe.h"
 #include "mysqli_priv.h"
 
-#if PHP_VERSION_ID >= 50400
+#ifdef MYSQLI_USE_FULL_TYPED_ARGINFO_0
 #define MYSQLI_ZEND_ARG_OBJ_INFO_LINK() ZEND_ARG_OBJ_INFO(0, link, mysqli, 0)
 #define MYSQLI_ZEND_ARG_OBJ_INFO_RESULT() ZEND_ARG_OBJ_INFO(0, result, mysqli_result, 0)
 #define MYSQLI_ZEND_ARG_OBJ_INFO_STMT() ZEND_ARG_OBJ_INFO(0, stmt, mysqli_stmt, 0)
