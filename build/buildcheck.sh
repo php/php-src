@@ -42,14 +42,21 @@ echo "buildconf: autoconf version $ac_version found."
 echo "           You need autoconf version 2.13 or newer installed"
 echo "           to build PHP from SVN."
 exit 1
-else
-echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
-if test "$1" = "2" && test "$2" -ge "50"; then
-  echo "buildconf: Your version of autoconf likely contains buggy cache code."
-  echo "           Running vcsclean for you."
-  echo "           To avoid this, install autoconf-2.13."
+if test "$1" = "2" -a "$2" -gt "59"; then
+  echo "buildconf: You need autoconf 2.59 or lower to build this version of PHP."
+  echo "           You are currently trying to use $ac_version"
+  echo "           Most distros have separate autoconf 2.13 or 2.59 packages."
+  echo "           On Debian/Ubuntu both autoconf2.13 and autoconf2.59 packages exist."
+  echo "           Install autoconf2.13 and set the PHP_AUTOCONF env var to "
+  echo "           autoconf2.13and try again."
+  exit 1
+else
+  echo "buildconf: autoconf version $ac_version (ok)"
+fi
+
+if test "$1" = "2" -a "$2" -ge "50"; then
   ./vcsclean
   stamp=
 fi
