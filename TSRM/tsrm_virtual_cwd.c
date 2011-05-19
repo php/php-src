@@ -619,10 +619,11 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{
 			*bucket = (*bucket)->next;
 		   
 			/* if the pointers match then only subtract the length of the path */
-		   	if(r->path == r->realpath) 
-                            CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
-                        else
-                            CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+		   	if(r->path == r->realpath) {
+				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
+			} else {
+				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+			}
 		   
 			free(r);
 			return;
@@ -700,11 +701,12 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 			*bucket = (*bucket)->next;
 
 			/* if the pointers match then only subtract the length of the path */		   
-		   	if(r->path == r->realpath) 
-                            CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
-                        else
-                            CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
-		   
+		   	if(r->path == r->realpath) {
+				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
+			} else {
+				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
+		  	} 
+
 			free(r);
 		} else if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
 					memcmp(path, (*bucket)->path, path_len) == 0) {
