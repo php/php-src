@@ -357,6 +357,8 @@ UPGRADE NOTES - PHP X.Y
        - Core:
          - get_declared_traits()
          - http_response_code()
+         - ldap_control_paged_results()
+         - ldap_control_paged_results_response()
          - trait_exists()
          - stream_set_chunk_size()
          - socket_import_stream()
