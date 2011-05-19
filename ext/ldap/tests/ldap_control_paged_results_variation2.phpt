@@ -1,5 +1,5 @@
 --TEST--
-ldap_ldap_ctrl_paged_results() test (fetching the first page then the next final page)
+ldap_ldap_control_paged_results() test (fetching the first page with a pagesize=2)
 --CREDITS--
 Jean-Sebastien Hedde <jeanseb@au-fil-du.net>
 --SKIPIF--
@@ -16,13 +16,8 @@ insert_dummy_data($link);
 
 $dn = "dc=my-domain,dc=com";
 $filter = "(cn=*)";
-$cookie = '';
 var_dump(
-	ldap_ctrl_paged_results($link, 2, true, $cookie),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_get_entries($link, $result),
-	ldap_ctrl_paged_results_resp($link, $result, $cookie),
-	ldap_ctrl_paged_results($link, 20, true, $cookie),
+	ldap_control_paged_results($link, 2),
 	$result = ldap_search($link, $dn, $filter, array('cn')),
 	ldap_get_entries($link, $result)
 );
@@ -37,7 +32,7 @@ remove_dummy_data($link);
 ?>
 --EXPECTF--
 bool(true)
-resource(%d) of type (ldap result)
+resource(6) of type (ldap result)
 array(3) {
   ["count"]=>
   int(2)
@@ -72,29 +67,6 @@ array(3) {
     int(1)
     ["dn"]=>
     string(28) "cn=userB,dc=my-domain,dc=com"
-  }
-}
-bool(true)
-bool(true)
-resource(%d) of type (ldap result)
-array(2) {
-  ["count"]=>
-  int(1)
-  [0]=>
-  array(4) {
-    ["cn"]=>
-    array(2) {
-      ["count"]=>
-      int(1)
-      [0]=>
-      string(5) "userC"
-    }
-    [0]=>
-    string(2) "cn"
-    ["count"]=>
-    int(1)
-    ["dn"]=>
-    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
   }
 }
 ===DONE===
