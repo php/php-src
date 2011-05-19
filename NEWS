@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.4.0
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
+- autoconf 2.60+ is now supported (and required) for generating the configure
+  script with ./buildconf (Rasmus)
 
 - Removed legacy features:
   . break/continue $var syntax. (Dmitry)
