@@ -2186,13 +2186,15 @@ PHP_FUNCTION(ldap_8859_to_t61)
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-/* {{{ proto bool ldap_ctrl_paged_results(resource link, int pagesize [, bool iscritical [, string cookie]])
+/* {{{ proto bool ldap_control_paged_result(resource link, int pagesize [, bool iscritical [, string cookie]])
    Inject paged results control*/
-PHP_FUNCTION(ldap_ctrl_paged_results) 
+PHP_FUNCTION(ldap_control_paged_result) 
 {
 	long pagesize;
 	zend_bool iscritical;
-	zval *link, *cookie;
+	zval *link;
+	char *cookie = NULL;
+	int cookie_len = 0;
 	struct berval lcookie = { 0, NULL };
 	ldap_linkdata *ld;
 	LDAP *ldap;
@@ -2200,11 +2202,11 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 	LDAPControl	ctrl, *ctrlsp[2];
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|bz", &link, &pagesize, &iscritical, &cookie) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|bs", &link, &pagesize, &iscritical, &cookie, &cookie_len) != SUCCESS) {
 		return;
 	}
 
-	if (Z_TYPE_PP(&link) == IS_NULL) {
+	if (Z_TYPE_P(link) == IS_NULL) {
 		ldap = NULL;
 	} else {
 		ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
@@ -2221,9 +2223,8 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 
 	switch (myargcount) {
 		case 4:
-			convert_to_string_ex(&cookie);
-			lcookie.bv_val = Z_STRVAL_PP(&cookie);
-			lcookie.bv_len = Z_STRLEN_PP(&cookie);
+			lcookie.bv_val = cookie;
+			lcookie.bv_len = cookie_len;
 			/* fallthru */
 		case 3:
 			ctrl.ldctl_iscritical = (int)iscritical;
@@ -2232,13 +2233,13 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 
 	if (ber_printf(ber, "{iO}", (int)pagesize, &lcookie) == LBER_ERROR) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to BER printf paged results control");
-		RETVAL_BOOL(0);
+		RETVAL_FALSE;
 		goto lcpr_error_out;
 	}
 	rc = ber_flatten2(ber, &ctrl.ldctl_value, 0);
 	if (rc == LBER_ERROR) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to BER encode paged results control");
-		RETVAL_BOOL(0);
+		RETVAL_FALSE;
 		goto lcpr_error_out;
 	}
 
@@ -2252,16 +2253,16 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 		rc = ldap_set_option(ldap, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
 		if (rc != LDAP_SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set paged results control: %s (%d)", ldap_err2string(rc), rc);
-			RETVAL_BOOL(0);
+			RETVAL_FALSE;
 			goto lcpr_error_out;
 		}
-		RETVAL_BOOL(1);
+		RETVAL_TRUE;
 	} else {
 		/* return a PHP control object */
 		array_init(return_value);
 
 		add_assoc_string(return_value, "oid", ctrl.ldctl_oid, 1);
-		if ( ctrl.ldctl_value.bv_len ) {
+		if (ctrl.ldctl_value.bv_len) {
 			add_assoc_stringl(return_value, "value", ctrl.ldctl_value.bv_val, ctrl.ldctl_value.bv_len, 1);
 		}
 		if (ctrl.ldctl_iscritical) {
@@ -2270,16 +2271,16 @@ PHP_FUNCTION(ldap_ctrl_paged_results)
 	}
 
 lcpr_error_out:
-    if (ber != NULL) {
+	if (ber != NULL) {
 		ber_free(ber, 1);
 	}
 	return;
 }
 /* }}} */
 
-/* {{{ proto bool ldap_ctrl_paged_results_resp(resource link, resource result [, string cookie [, int estimated]])
+/* {{{ proto bool ldap_control_paged_result_response(resource link, resource result [, string cookie [, int estimated]])
    Extract paged results control response */
-PHP_FUNCTION(ldap_ctrl_paged_results_resp) 
+PHP_FUNCTION(ldap_control_paged_result_response) 
 {
 	zval *link, *result, *cookie, *estimated;
 	struct berval lcookie;
@@ -2357,8 +2358,8 @@ PHP_FUNCTION(ldap_ctrl_paged_results_resp)
 		zval_dtor(estimated);
 		ZVAL_LONG(estimated, lestimated);
 	}
+
 	zval_dtor(cookie);
-	
  	if (lcookie.bv_len == 0) {
 		ZVAL_EMPTY_STRING(cookie);
  	} else {
@@ -2551,14 +2552,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_ctrl_paged_results, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, pagesize)
 	ZEND_ARG_INFO(0, iscritical)
 	ZEND_ARG_INFO(0, cookie)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_ctrl_paged_results_resp, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result_response, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(1, cookie)
@@ -2709,8 +2710,8 @@ const zend_function_entry ldap_functions[] = {
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-	PHP_FE(ldap_ctrl_paged_results,							arginfo_ldap_ctrl_paged_results)
-	PHP_FE(ldap_ctrl_paged_results_resp,						arginfo_ldap_ctrl_paged_results_resp)
+	PHP_FE(ldap_control_paged_result,							arginfo_ldap_control_paged_result)
+	PHP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
 #endif
 	{NULL, NULL, NULL}
 };
