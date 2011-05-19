@@ -32,8 +32,9 @@ PHP                                                                        NEWS
     (tomas dot brastavicius at quantum dot lt, Pierrick)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
     TMPDIR on Windows). (Pierre)
+  . Fixed bug 54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
 
-- cURL
+- cURL:
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and 
     CURLOPT_MAX_SEND_SPEED_LARGE. FR #51815. (Pierrick)
