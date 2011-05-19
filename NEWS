@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.3.99
+?? ??? 201?, PHP 5.4.0
 - Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
 - Upgraded bundled PCRE to version 8.10. (Ilia)
 
@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Changed third parameter of preg_match_all() to optional. FR #53238. (Adam)
 - Changed silent casting of null/''/false into an Object when adding
   a property into a warning. (Scott)
+- <?= is now always available regardless of the short_tags setting (Rasmus)
 
 - General improvements:
   . Added multibyte support by default. Previously php had to be compiled
