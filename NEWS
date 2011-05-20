@@ -178,6 +178,7 @@ PHP                                                                        NEWS
   . Added AES support. FR #48632. (yonas dot y at gmail dot com, Pierre)
   . Added a "no_ticket" SSL context option to disable the SessionTicket TLS
     extension. FR #53447. (Adam)
+  . Added no padding option to openssl_encrypt()/openssl_decrypt(). (Scott)
 
 - Improved PDO DB-LIB: (Stanley)
   . Added nextRowset support.
