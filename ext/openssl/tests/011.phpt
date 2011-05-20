@@ -13,14 +13,19 @@ $iv    = '';
 srand(time() + ((microtime(true) * 1000000) % 1000000));
 while(strlen($iv) < $ivlen) $iv .= chr(rand(0,255));
 
-$encrypted = openssl_encrypt($data, $method, $password, false, $iv);
-$output = openssl_decrypt($encrypted, $method, $password, false, $iv);
+$encrypted = openssl_encrypt($data, $method, $password, 0, $iv);
+$output = openssl_decrypt($encrypted, $method, $password, 0, $iv);
 var_dump($output);
-$encrypted = openssl_encrypt($data, $method, $password, true, $iv);
-$output = openssl_decrypt($encrypted, $method, $password, true, $iv);
+$encrypted = openssl_encrypt($data, $method, $password, OPENSSL_RAW_DATA, $iv);
+$output = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA, $iv);
 var_dump($output);
+// if we want to manage our own padding
+$padded_data = $data . str_repeat(' ', 16 - (strlen($data) % 16));
+$encrypted = openssl_encrypt($padded_data, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
+$output = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
+var_dump(rtrim($output));
 ?>
 --EXPECT--
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
-
+string(45) "openssl_encrypt() and openssl_decrypt() tests"

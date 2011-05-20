@@ -26,6 +26,9 @@
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 
+#define OPENSSL_RAW_DATA 1
+#define OPENSSL_ZERO_PADDING 2
+
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 PHP_MINIT_FUNCTION(openssl);
