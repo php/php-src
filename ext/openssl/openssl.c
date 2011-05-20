@@ -350,7 +350,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, method)
     ZEND_ARG_INFO(0, password)
-    ZEND_ARG_INFO(0, raw_output)
+    ZEND_ARG_INFO(0, options)
     ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
@@ -358,7 +358,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, method)
     ZEND_ARG_INFO(0, password)
-    ZEND_ARG_INFO(0, raw_input)
+    ZEND_ARG_INFO(0, options)
     ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
@@ -1088,6 +1088,9 @@ PHP_MINIT_FUNCTION(openssl)
 #ifdef EVP_PKEY_EC
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
+
+	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
 	/* SNI support included in OpenSSL >= 0.9.8j */
@@ -4679,11 +4682,11 @@ static zend_bool php_openssl_validate_iv(char **piv, int *piv_len, int iv_requir
 
 }
 
-/* {{{ proto string openssl_encrypt(string data, string method, string password [, bool raw_output=false [, string $iv='']])
+/* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv='']])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
 {
-	zend_bool raw_output = 0;
+	long options = 0;
 	char *data, *method, *password, *iv = "";
 	int data_len, method_len, password_len, iv_len = 0, max_iv_len;
 	const EVP_CIPHER *cipher_type;
@@ -4692,7 +4695,7 @@ PHP_FUNCTION(openssl_encrypt)
 	unsigned char *outbuf, *key;
 	zend_bool free_iv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|bs", &data, &data_len, &method, &method_len, &password, &password_len, &raw_output, &iv, &iv_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
 	}
 	cipher_type = EVP_get_cipherbyname(method);
@@ -4720,11 +4723,14 @@ PHP_FUNCTION(openssl_encrypt)
 	outbuf = emalloc(outlen + 1);
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	if (options & OPENSSL_ZERO_PADDING) {
+		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+	}
 	EVP_EncryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
 	outlen = i;
 	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
 		outlen += i;
-		if (raw_output) {
+		if (options & OPENSSL_RAW_DATA) {
 			outbuf[outlen] = '\0';
 			RETVAL_STRINGL((char *)outbuf, outlen, 0);
 		} else {
@@ -4749,11 +4755,11 @@ PHP_FUNCTION(openssl_encrypt)
 }
 /* }}} */
 
-/* {{{ proto string openssl_decrypt(string data, string method, string password [, bool raw_input=false [, string $iv = '']])
+/* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = '']])
    Takes raw or base64 encoded string and dectupt it using given method and key */
 PHP_FUNCTION(openssl_decrypt)
 {
-	zend_bool raw_input = 0;
+	long options = 0;
 	char *data, *method, *password, *iv = "";
 	int data_len, method_len, password_len, iv_len = 0;
 	const EVP_CIPHER *cipher_type;
@@ -4764,7 +4770,7 @@ PHP_FUNCTION(openssl_decrypt)
 	char *base64_str = NULL;
 	zend_bool free_iv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|bs", &data, &data_len, &method, &method_len, &password, &password_len, &raw_input, &iv, &iv_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
 	}
 
@@ -4779,7 +4785,7 @@ PHP_FUNCTION(openssl_decrypt)
 		RETURN_FALSE;
 	}
 
-	if (!raw_input) {
+	if (!(options & OPENSSL_RAW_DATA)) {
 		base64_str = (char*)php_base64_decode((unsigned char*)data, data_len, &base64_str_len);
 		data_len = base64_str_len;
 		data = base64_str;
@@ -4800,6 +4806,9 @@ PHP_FUNCTION(openssl_decrypt)
 	outbuf = emalloc(outlen + 1);
 
 	EVP_DecryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	if (options & OPENSSL_ZERO_PADDING) {
+		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+	}
 	EVP_DecryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
 	outlen = i;
 	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
