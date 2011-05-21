@@ -1,7 +1,7 @@
 --TEST--
 ini_get_all() tests
 --INI--
-pcre.backtrack_limit=100000
+pcre.backtrack_limit=1000000
 pcre.recursion_limit=100000
 --SKIPIF--
 <?php if (!extension_loaded("reflection")) die("skip"); ?>
@@ -34,9 +34,9 @@ array(2) {
   ["pcre.backtrack_limit"]=>
   array(3) {
     ["global_value"]=>
-    string(6) "100000"
+    string(6) "1000000"
     ["local_value"]=>
-    string(6) "100000"
+    string(6) "1000000"
     ["access"]=>
     int(7)
   }
@@ -52,7 +52,7 @@ array(2) {
 }
 array(2) {
   ["pcre.backtrack_limit"]=>
-  string(6) "100000"
+  string(6) "1000000"
   ["pcre.recursion_limit"]=>
   string(6) "100000"
 }
