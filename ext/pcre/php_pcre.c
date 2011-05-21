@@ -115,7 +115,7 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 /* }}} */
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "100000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
 PHP_INI_END()
 
