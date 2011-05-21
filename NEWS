@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.3.7
 - Upgraded bundled SQLite to version 3.7.6.2. (Scott)
 - Upgraded bundled PCRE to version 8.12. (Scott)
+- Increased the backtrack limit from 100000 to 1000000 (Rasmus)
 
 - Zend Engine:
   . Fixed bug #54804 (__halt_compiler and imported namespaces).
