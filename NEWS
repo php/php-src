@@ -61,6 +61,9 @@ PHP                                                                        NEWS
     functions that allows disabling addition of empty elements. (Ilia)
   . Fixed bug #53037 (FILTER_FLAG_EMPTY_STRING_NULL is not implemented). (Ilia)
   
+- Interbase extension:
+  . Fixed bug #54269 (Short exception message buffer causes crash). (Felipe)
+  
 - intl extension:
   . Implemented FR #54540 (Allow loading of arbitrary resource bundles when
     fallback is disabled). (David Zuelke, Stas)
