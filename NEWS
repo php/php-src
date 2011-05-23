@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
     TMPDIR on Windows). (Pierre)
   . Fixed bug 54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
+  
+- Apache2 Handler SAPI:
+  . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
+    (hebergement at riastudio dot fr)
 
 - cURL:
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
