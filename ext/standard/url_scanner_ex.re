@@ -450,7 +450,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 			ctx->result.len = 0;
 			smart_str_free(&ctx->buf);
 		} else {
-			*handled_output = NULL;
+			*handled_output = estrndup(output, *handled_output_len = output_len);
 		}
 	} else {
 		*handled_output = NULL;
