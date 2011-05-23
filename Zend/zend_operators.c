@@ -27,12 +27,9 @@
 #include "zend_globals.h"
 #include "zend_list.h"
 #include "zend_API.h"
-#include "zend_multiply.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
-
-#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
