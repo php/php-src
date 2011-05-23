@@ -11,9 +11,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : int umask([int mask])
- * Description: Return or change the umask 
+ * Description: Return or change the umask
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing umask() : usage variation ***\n";
@@ -110,7 +110,7 @@ foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       umask(0);
       var_dump(umask($value));
-      var_dump( umask());
+      var_dump( umask() & 0777);
 };
 
 ?>
