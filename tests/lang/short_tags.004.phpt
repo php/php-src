@@ -4,8 +4,6 @@ short_open_tag: Off, asp_tags: Off
 short_open_tag=off
 asp_tags=off
 --FILE--
-<?='this should get echoed'?>
-
 <%= 'so should this' %>
 
 <?php
@@ -21,9 +19,8 @@ $a = 'This gets echoed twice';
 <?php
    echo "{$b}";
 ?>
+<?= "{$b}"?>
 --EXPECTF--
-<?='this should get echoed'?>
-
 <%= 'so should this' %>
 
 
@@ -33,5 +30,7 @@ $a = 'This gets echoed twice';
 
 <? $b=3; ?>
 
+
+Notice: Undefined variable: b in %s on line %d
 
 Notice: Undefined variable: b in %s on line %d
