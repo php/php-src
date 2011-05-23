@@ -71,14 +71,8 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing touch ***
-
-Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
-
-Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
-
-Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
 bool(true)
 bool(true)
