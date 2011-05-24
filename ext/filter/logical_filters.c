@@ -682,7 +682,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (flags & (FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+	if ((flags & FILTER_FLAG_IPV4) && (flags & FILTER_FLAG_IPV6)) {
 		/* Both formats are cool */
 	} else if ((flags & FILTER_FLAG_IPV4) && mode == FORMAT_IPV6) {
 		RETURN_VALIDATION_FAILED
