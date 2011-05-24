@@ -197,7 +197,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 		goto _destroyCtx1;
 	}
 
-	dwHashLen = pwl + sl + pwl;
+	dwHashLen = 16;
 	CryptGetHashParam(ctx1, HP_HASHVAL, final, &dwHashLen, 0);
 	/*  MD5(pw,salt,pw). Valid. */
 

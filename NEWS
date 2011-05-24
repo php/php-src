@@ -37,8 +37,10 @@ PHP                                                                        NEWS
     (tomas dot brastavicius at quantum dot lt, Pierrick)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
     TMPDIR on Windows). (Pierre)
-  . Fixed bug 54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
-  
+  . Fixed bug #54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
+  . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size) 
+    (Pierre, os at irj dot ru)
+
 - Apache2 Handler SAPI:
   . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
     (hebergement at riastudio dot fr)
