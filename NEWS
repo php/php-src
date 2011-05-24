@@ -118,7 +118,7 @@ PHP                                                                        NEWS
   . Fixed bug #54312 (soap_version logic bug). (tom at samplonius dot org)
 
 - Sockets extension:
-  . Fixed stack buffer overflow in socket_connect().
+  . Fixed stack buffer overflow in socket_connect(). (CVE-2011-1938)
     Found by Mateusz Kocielski, Marek Kroemeke and Filip Palian. (Felipe)
   . Changed socket_set_block() and socket_set_nonblock() so they emit warnings
     on error. (Gustavo)
