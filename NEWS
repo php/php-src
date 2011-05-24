@@ -40,6 +40,8 @@ PHP                                                                        NEWS
   . Fixed bug #54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
   . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size) 
     (Pierre, os at irj dot ru)
+  . Fixed bug #50363 (Invalid parsing in convert.quoted-printable-decode filter).
+    (slusarz at curecanti dot org)
 
 - Apache2 Handler SAPI:
   . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
