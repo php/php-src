@@ -1337,7 +1337,7 @@ PHP_FUNCTION(socket_connect)
 
 		case AF_UNIX:
 			if (addr_len >= sizeof(s_un.sun_path)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Path too long", php_sock->type);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Path too long");
 				RETURN_FALSE;
 			}
 				
