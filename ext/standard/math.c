@@ -608,7 +608,7 @@ PHP_FUNCTION(pow)
 
 		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
 		while (i >= 1) {
-			int overflow;
+			long overflow;
 			double dval = 0.0;
 
 			if (i % 2) {
