@@ -1,5 +1,5 @@
 --TEST--
-Persistent case insensetive and user defined constants
+Persistent case insensitive and user defined constants
 --FILE--
 <?php
 var_dump(ZEND_THREAD_safe);
