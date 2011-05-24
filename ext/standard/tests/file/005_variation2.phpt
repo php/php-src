@@ -49,11 +49,17 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 echo "\n*** testing touch ***\n";
-var_dump(touch(NULL));
-var_dump(touch(false));
-var_dump(touch(''));
-var_dump(touch(' '));
-var_dump(touch('|'));
+$a = touch(NULL);
+$b = touch(false);
+$c = touch('');
+$d = touch(' ');
+$e = touch('|');
+
+var_dump($a);
+var_dump($b);
+var_dump($c);
+var_dump($d);
+var_dump($e);
 
 echo "\n*** testing file info ***";
 stat_fn(NULL);
@@ -71,6 +77,12 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing touch ***
+
+Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
+
+Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
+
+Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
 bool(false)
 bool(false)
 bool(false)
