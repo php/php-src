@@ -34,9 +34,9 @@ array(2) {
   ["pcre.backtrack_limit"]=>
   array(3) {
     ["global_value"]=>
-    string(6) "1000000"
+    string(7) "1000000"
     ["local_value"]=>
-    string(6) "1000000"
+    string(7) "1000000"
     ["access"]=>
     int(7)
   }
@@ -52,9 +52,9 @@ array(2) {
 }
 array(2) {
   ["pcre.backtrack_limit"]=>
-  string(6) "1000000"
+  string(7) "1000000"
   ["pcre.recursion_limit"]=>
-  string(6) "1000000"
+  string(6) "100000"
 }
 array(0) {
 }
