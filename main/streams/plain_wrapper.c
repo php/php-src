@@ -48,6 +48,11 @@
 #define php_stream_fopen_from_file_int(file, mode)	_php_stream_fopen_from_file_int((file), (mode) STREAMS_CC TSRMLS_CC)
 #define php_stream_fopen_from_file_int_rel(file, mode)	 _php_stream_fopen_from_file_int((file), (mode) STREAMS_REL_CC TSRMLS_CC)
 
+#if !defined(WINDOWS) && !defined(NETWARE)
+extern int php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC);
+extern int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC);
+#endif
+
 /* parse standard "fopen" modes into open() flags */
 PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
@@ -1249,6 +1254,92 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 	return 1;
 }
 
+static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
+{
+	struct utimbuf *newtime;
+	char *p;
+#if !defined(WINDOWS) && !defined(NETWARE)
+	uid_t uid;
+	gid_t gid;
+#endif
+	mode_t mode;
+	int ret = 0;
+#if PHP_WIN32
+	int url_len = strlen(url);
+#endif
+
+#if PHP_WIN32
+	if (!php_win32_check_trailing_space(url, url_len)) {
+		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(ENOENT));
+		return 0;
+	}
+#endif
+
+	if ((p = strstr(url, "://")) != NULL) {
+		url = p + 3;
+	}
+
+	if (php_check_open_basedir(url TSRMLS_CC)) {
+		return 0;
+	}
+
+	switch(option) {
+		case PHP_STREAM_META_TOUCH:
+			newtime = (struct utimbuf *)value;
+			if (VCWD_ACCESS(url, F_OK) != 0) {
+				FILE *file = VCWD_FOPEN(url, "w");
+				if (file == NULL) {
+					php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Unable to create file %s because %s", url, strerror(errno));
+					return 0;
+				}
+				fclose(file);
+			}
+
+			ret = VCWD_UTIME(url, newtime);
+			break;
+#if !defined(WINDOWS) && !defined(NETWARE)
+		case PHP_STREAM_META_OWNER_NAME:
+		case PHP_STREAM_META_OWNER:
+			if(option == PHP_STREAM_META_OWNER_NAME) {
+				if(php_get_uid_by_name((char *)value, &uid TSRMLS_CC) != SUCCESS) {
+					php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Unable to find uid for %s", (char *)value);
+					return 0;
+				}
+			} else {
+				uid = (uid_t)*(long *)value;
+			}
+			ret = VCWD_CHOWN(url, uid, -1);
+			break;
+		case PHP_STREAM_META_GROUP:
+		case PHP_STREAM_META_GROUP_NAME:
+			if(option == PHP_STREAM_META_OWNER_NAME) {
+				if(php_get_gid_by_name((char *)value, &gid TSRMLS_CC) != SUCCESS) {
+					php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Unable to find gid for %s", (char *)value);
+					return 0;
+				}
+			} else {
+				gid = (gid_t)*(long *)value;
+			}
+			ret = VCWD_CHOWN(url, -1, gid);
+			break;
+#endif
+		case PHP_STREAM_META_ACCESS:
+			mode = (mode_t)*(long *)value;
+			ret = VCWD_CHMOD(url, mode);
+			break;
+		default:
+			php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Unknown option %d for stream_metadata", option);
+			return 0;
+	}
+	if (ret == -1) {
+		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Operation failed: %s", strerror(errno));
+		return 0;
+	}
+	php_clear_stat_cache(0, NULL, 0 TSRMLS_CC);
+	return 1;
+}
+
+
 static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
@@ -1259,7 +1350,8 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_unlink,
 	php_plain_files_rename,
 	php_plain_files_mkdir,
-	php_plain_files_rmdir
+	php_plain_files_rmdir,
+	php_plain_files_metadata
 };
 
 php_stream_wrapper php_plain_files_wrapper = {

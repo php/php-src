@@ -154,6 +154,8 @@ typedef struct _php_stream_wrapper_ops {
 	/* Create/Remove directory */
 	int (*stream_mkdir)(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
 	int (*stream_rmdir)(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
+	/* Metadata handling */
+	int (*stream_metadata)(php_stream_wrapper *wrapper, char *url, int options, void *value, php_stream_context *context TSRMLS_DC);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -590,6 +592,15 @@ END_EXTERN_C()
 
 /* Definitions for user streams */
 #define PHP_STREAM_IS_URL		1
+
+/* Stream metadata definitions */
+/* Create if referred resource does not exist */
+#define PHP_STREAM_META_TOUCH		1
+#define PHP_STREAM_META_OWNER_NAME	2
+#define PHP_STREAM_META_OWNER		3
+#define PHP_STREAM_META_GROUP_NAME	4
+#define PHP_STREAM_META_GROUP		5
+#define PHP_STREAM_META_ACCESS		6
 /*
  * Local variables:
  * tab-width: 4
