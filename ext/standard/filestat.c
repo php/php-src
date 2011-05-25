@@ -526,7 +526,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 		char *pwbuf;
 
 		if (pwbuflen < 1) {
-			RETURN_FALSE;
+			return FAILURE;
 		}
 
 		pwbuf = emalloc(pwbuflen);
@@ -666,8 +666,6 @@ PHP_FUNCTION(chmod)
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
 		if(wrapper && wrapper->wops->stream_metadata) {
-			int option;
-			void *value;
 			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_ACCESS, &mode, NULL TSRMLS_CC)) {
 				RETURN_TRUE;
 			} else {
