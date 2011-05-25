@@ -386,21 +386,8 @@ PHP_FUNCTION(disk_free_space)
 /* }}} */
 
 #if !defined(WINDOWS) && !defined(NETWARE)
-static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
+PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 {
-	char *filename;
-	int filename_len;
-	zval *group;
-	gid_t gid;
-	int ret;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
-	} else if (Z_TYPE_P(group) == IS_STRING) {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
@@ -408,26 +395,73 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		char *grbuf;
 
 		if (grbuflen < 1) {
-			RETURN_FALSE;
+			return FAILURE;
 		}
 
 		grbuf = emalloc(grbuflen);
-		if (getgrnam_r(Z_STRVAL_P(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+		if (getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
 			efree(grbuf);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 		efree(grbuf);
-		gid = gr.gr_gid;
+		*gid = gr.gr_gid;
 #else
-		struct group *gr = getgrnam(Z_STRVAL_P(group));
+		struct group *gr = getgrnam(name);
 
 		if (!gr) {
+			return FAILURE;
+		}
+		*gid = gr->gr_gid;
+#endif
+		return SUCCESS;
+}
+
+static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	zval *group;
+	gid_t gid;
+	int ret;
+	php_stream_wrapper *wrapper;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			int option;
+			void *value;
+			if (Z_TYPE_P(group) == IS_LONG) {
+				option = PHP_STREAM_META_GROUP;
+				value = &Z_LVAL_P(group);
+			} else if (Z_TYPE_P(group) == IS_STRING) {
+				option = PHP_STREAM_META_GROUP_NAME;
+				value = Z_STRVAL_P(group);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
+				RETURN_FALSE;
+			}
+			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chgrp() for a non-standard stream");
+			RETURN_FALSE;
+		}
+	}
+
+	if (Z_TYPE_P(group) == IS_LONG) {
+		gid = (gid_t)Z_LVAL_P(group);
+	} else if (Z_TYPE_P(group) == IS_STRING) {
+		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			RETURN_FALSE;
 		}
-		gid = gr->gr_gid;
-#endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
 		RETURN_FALSE;
@@ -483,21 +517,8 @@ PHP_FUNCTION(lchgrp)
 #endif /* !NETWARE */
 
 #if !defined(WINDOWS) && !defined(NETWARE)
-static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
+PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 {
-	char *filename;
-	int filename_len;
-	zval *user;
-	uid_t uid;
-	int ret;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
-		return;
-	}
-
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
-	} else if (Z_TYPE_P(user) == IS_STRING) {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
@@ -509,22 +530,69 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		}
 
 		pwbuf = emalloc(pwbuflen);
-		if (getpwnam_r(Z_STRVAL_P(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
+		if (getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
 			efree(pwbuf);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 		efree(pwbuf);
-		uid = pw.pw_uid;
+		*uid = pw.pw_uid;
 #else
-		struct passwd *pw = getpwnam(Z_STRVAL_P(user));
+		struct passwd *pw = getpwnam(name);
 
 		if (!pw) {
+			return FAILURE;
+		}
+		*uid = pw->pw_uid;
+#endif
+		return SUCCESS;
+}
+
+static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	zval *user;
+	uid_t uid;
+	int ret;
+	php_stream_wrapper *wrapper;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
+		return;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			int option;
+			void *value;
+			if (Z_TYPE_P(user) == IS_LONG) {
+				option = PHP_STREAM_META_OWNER;
+				value = &Z_LVAL_P(user);
+			} else if (Z_TYPE_P(user) == IS_STRING) {
+				option = PHP_STREAM_META_OWNER_NAME;
+				value = Z_STRVAL_P(user);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+				RETURN_FALSE;
+			}
+			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chown() for a non-standard stream");
+			RETURN_FALSE;
+		}
+	}
+
+	if (Z_TYPE_P(user) == IS_LONG) {
+		uid = (uid_t)Z_LVAL_P(user);
+	} else if (Z_TYPE_P(user) == IS_STRING) {
+		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			RETURN_FALSE;
 		}
-		uid = pw->pw_uid;
-#endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
 		RETURN_FALSE;
@@ -589,9 +657,26 @@ PHP_FUNCTION(chmod)
 	long mode;
 	int ret;
 	mode_t imode;
+	php_stream_wrapper *wrapper;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &filename, &filename_len, &mode) == FAILURE) {
 		return;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			int option;
+			void *value;
+			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_ACCESS, &mode, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chmod() for a non-standard stream");
+			RETURN_FALSE;
+		}
 	}
 
 	/* Check the basedir */
@@ -622,9 +707,14 @@ PHP_FUNCTION(touch)
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
+	php_stream_wrapper *wrapper;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
+	}
+
+	if (!filename_len) {
+		RETURN_FALSE;
 	}
 
 	switch (argc) {
@@ -645,6 +735,30 @@ PHP_FUNCTION(touch)
 		default:
 			/* Never reached */
 			WRONG_PARAM_COUNT;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_stream *stream;
+			if(argc > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call touch() for a non-standard stream");
+				RETURN_FALSE;
+			}
+			stream = php_stream_open_wrapper_ex(filename, "c", REPORT_ERRORS, NULL, NULL);
+			if(stream != NULL) {
+				php_stream_pclose(stream);
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		}
 	}
 
 	/* Check the basedir */
