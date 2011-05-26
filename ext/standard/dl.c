@@ -145,7 +145,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	if (!handle) {
 #if PHP_WIN32
 		char *err = GET_DL_ERROR();
-		if (err) {
+		if (err && (*err != "")) {
 			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
 			LocalFree(err);
 		} else {
