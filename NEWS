@@ -21,10 +21,13 @@ PHP                                                                        NEWS
     (Dmitry)
 
 - Core:
-  . Fixed a crash inside dtor for error handling. (Ilia)
   . Implemented FR #54459 (Range function accuracy). (Adam)
   . Added PHP_MANDIR constant telling where the manpages were installed into,
     and an --man-dir argument to php-config. (Hannes)
+
+  . Fixed a crash inside dtor for error handling. (Ilia)
+
+  . Fixed bug #54935 php_win_err can lead to crash. (Pierre)
   . Fixed bug #54895 (Fix compiling with older gcc version without need for
     membar_producer macro). (mhei at heimpold dot de)
   . Fixed bug #54723 (getimagesize() doesn't check the full ico signature).
@@ -35,13 +38,13 @@ PHP                                                                        NEWS
     (CVE-2011-1148)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
     (tomas dot brastavicius at quantum dot lt, Pierrick)
-  . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
-    TMPDIR on Windows). (Pierre)
   . Fixed bug #54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
   . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size) 
     (Pierre, os at irj dot ru)
   . Fixed bug #50363 (Invalid parsing in convert.quoted-printable-decode filter).
     (slusarz at curecanti dot org)
+  . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
+    TMPDIR on Windows). (Pierre)
 
 - Apache2 Handler SAPI:
   . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
