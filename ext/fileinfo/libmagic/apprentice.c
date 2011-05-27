@@ -41,6 +41,14 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.151 2009/03/18 15:19:23 christos Exp $")
 #include "patchlevel.h"
 #include <stdlib.h>
 
+#if defined(__hpux) && !defined(HAVE_STRTOULL)
+#if SIZEOF_LONG == 8
+# define strtoull strtoul
+#else
+# define strtoull __strtoull
+#endif
+#endif
+
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
 #if _MSC_VER <= 1300
