@@ -67,6 +67,9 @@ PHP                                                                        NEWS
 - Exif extesion:
   . Fixed bug #54121 (error message format string typo). (Ilia)
 
+- Fileinfo extension:
+  . Fixed bug #54934 (Unresolved symbol strtoull in HP-UX 11.11). (Felipe)
+
 - Filter extension:
   . Added 3rd parameter to filter_var_array() and filter_input_array()
     functions that allows disabling addition of empty elements. (Ilia)
