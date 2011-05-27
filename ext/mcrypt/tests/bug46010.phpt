@@ -1,5 +1,7 @@
 --TEST--
 Bug #46010 (warnings incorrectly generated for iv in ecb mode)
+--SKIPIF--
+<?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
 
