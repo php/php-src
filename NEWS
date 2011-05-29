@@ -151,6 +151,7 @@ PHP                                                                        NEWS
     (Felipe)
 
 - Streams:
+  . Fixed bug #54946 (stream_get_contents infinite loop). (Hannes)
   . Fixed bug #54623 (Segfault when when writing to a persistent socket after
     closing a copy of the socket). (Gustavo)
     

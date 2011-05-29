@@ -1291,6 +1291,9 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		ptr = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
+			if (!ret) {
+				break;
+			}
 			len += ret;
 			ptr += ret;
 		}
