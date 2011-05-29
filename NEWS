@@ -91,6 +91,7 @@ PHP                                                                        NEWS
     libraries). (Clint Byrum, Raphael)
 
 - libxml extension:
+  . Fixed bug #54601 (Removing the doctype node segfaults). (Hannes)
   . Fixed bug #54440 (libxml extension ignores default context). (Gustavo)
 
 - mbstring extension:
