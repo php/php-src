@@ -44,6 +44,7 @@ PHP                                                                        NEWS
   . Fixed bug #54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
   . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size) 
     (Pierre, os at irj dot ru)
+  . Fixed bug #53848 (fgetcsv() ignores spaces at beginnings of fields). (Ilia)
   . Fixed bug #50363 (Invalid parsing in convert.quoted-printable-decode filter).
     (slusarz at curecanti dot org)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
