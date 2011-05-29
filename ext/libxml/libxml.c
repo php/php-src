@@ -224,6 +224,7 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 			switch (node->type) {
 				/* Skip property freeing for the following types */
 				case XML_NOTATION_NODE:
+				case XML_ENTITY_DECL:
 					break;
 				case XML_ENTITY_REF_NODE:
 					php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
@@ -235,7 +236,6 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
-				case XML_ENTITY_DECL:
 				case XML_NAMESPACE_DECL:
 				case XML_TEXT_NODE:
 					php_libxml_node_free_list(node->children TSRMLS_CC);
