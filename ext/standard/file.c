@@ -2098,29 +2098,17 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 		tptr = temp;
 
-		/* 1. Strip any leading space */
-		for (;;) {
-			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
-			switch (inc_len) {
-				case -2:
-				case -1:
-					inc_len = 1;
-					php_ignore_value(php_mblen(NULL, 0));
-					break;
-				case 0:
-					goto quit_loop_1;
-				case 1:
-					if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter) {
-						goto quit_loop_1;
-					}
-					break;
-				default:
-					goto quit_loop_1;
+		inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
+		if (inc_len == 1) {
+			char *tmp = bptr;
+			while (isspace((int)*(unsigned char *)tmp)) {
+				tmp++;
 			}
-			bptr += inc_len;
+			if (*tmp == enclosure) {
+				bptr = tmp;
+			}
 		}
 
-	quit_loop_1:
 		if (first_field && bptr == line_end) {
 			add_next_index_null(return_value);
 			break;
