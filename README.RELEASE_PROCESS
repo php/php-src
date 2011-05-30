@@ -104,16 +104,14 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-3. Update the MD5 sums in ``web/qa/trunk/include/rc-md5sums.txt`` (no empty lines, ordered by filename, odler version number first, .bz2 before .gz).
+3. Update ``web/qa/trunk/include/release-qa.php`` with the appropriate information.
+   See the documentation within release-qa.php for more information, but all releases
+   and RCs are configured here. Only $QA_RELEASES needs to be edited.
 
-4. Update in ``web/qa/trunk/include/release-qa.php`` constants with the new RC and
-commit this.
+   Example: When rolling an RC, set the 'rc' with appropriate information for the
+   given version.
 
- a. ``$BUILD_TEST_RELEASES`` = array("4.4.7RC1", "5.2.2RC1")
-
- b. ``$CURRENT_QA_RELEASE_4`` = "4.4.7RC1" (``$CURRENT_QA_RELEASE_5`` for PHP5)
-
- c. ``$RELEASE_PROCESS`` = array(4 => true, 5 => true)
+   Note: Remember to update the MD5 checksum information.
 
 1. Update in ``web/php-bugs/trunk/include/php_versions.php`` to include the new RC and commit.
 
@@ -247,13 +245,11 @@ number, and remove the RC from there.
 
 11. Update ``qaweb/include/release-qa.php``
 
- a. Update the $BUILD_TEST_RELEASES array with the release name
+ - Update $QA_RELEASES with the appropriate information, which means bumping
+   the version number to an upcoming version. 
 
- b. Update $RELEASE_PROCESS array (set to false)
-
-  I. For PHP4: Set $CURRENT_QA_RELEASE_4 to false
-
-  II. For PHP5: Set $CURRENT_QA_RELEASE_5 to false
+   Example: If PHP 5.3.7 is being released, then PHP 5.3.8 is the next QA version,
+   so replace 5.3.7 with 5.3.8 within $QA_RELEASES.
 
 Re-releasing the same version (or -pl)
 --------------------------------------
