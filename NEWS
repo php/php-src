@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
     (hebergement at riastudio dot fr)
 
+- CLI SAPI:
+  . Fixed bug #52496 (Zero exit code on option parsing failure). (Ilia)
+
 - cURL:
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and 

@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
 				request_started = 1;
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=0;
+				exit_status = (c == '?' && argc > 1 && !strchr(argv[1],  c));
 				goto out;
 
 			case 'i': /* php info & quit */
