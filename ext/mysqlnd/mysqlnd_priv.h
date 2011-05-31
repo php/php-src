@@ -114,7 +114,7 @@
 		if ((message)) { \
 			(buf) = mnd_pestrndup((message), (len), (persistent)); \
 		} else { \
-			buf = NULL; \
+			(buf) = NULL; \
 		} \
 		(buf_len) = (len); \
 	}
@@ -131,22 +131,22 @@
 
 #define SET_EMPTY_ERROR(error_info) \
 	{ \
-		error_info.error_no = 0; \
-		error_info.error[0] = '\0'; \
-		strlcpy(error_info.sqlstate, "00000", sizeof(error_info.sqlstate)); \
+		(error_info).error_no = 0; \
+		(error_info).error[0] = '\0'; \
+		strlcpy((error_info).sqlstate, "00000", sizeof((error_info).sqlstate)); \
 	}
 
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
 	{ \
-		error_info.error_no = (a); \
-		strlcpy(error_info.sqlstate, (b), sizeof(error_info.sqlstate)); \
-		strlcpy(error_info.error, (c), sizeof(error_info.error)); \
+		(error_info).error_no = (a); \
+		strlcpy((error_info).sqlstate, (b), sizeof((error_info).sqlstate)); \
+		strlcpy((error_info).error, (c), sizeof((error_info).error)); \
 	}
 
-#define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR(error_info, CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
+#define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR((error_info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 
 
-#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(stmt->error_info, a, b, c)
+#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR((stmt)->error_info, a, b, c)
 
 
 #ifdef ZTS
@@ -154,7 +154,7 @@
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
 #else
 #define CONN_GET_STATE(c)		((c)->state)
-#define CONN_SET_STATE(c, s)	((c)->state = s)
+#define CONN_SET_STATE(c, s)	((c)->state = (s))
 #endif
 
 
