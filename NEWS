@@ -84,6 +84,8 @@ PHP                                                                        NEWS
   opcode operands into a separate literal table. (Dmitry)
 
 - Improved Zend Engine, performance tweaks and optimizations: (Dmitry)
+  . Inlined most probable code-paths for arithmetic operations directly into
+    executor
   . Eliminated unnecessary iterations during request startup/shutdown.
   . Changed $GLOBALS into a JIT autoglobal, so it's initialized only if used.
     (this may affect opcode caches!)
