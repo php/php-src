@@ -2773,6 +2773,11 @@ get_function_via_handler:
 			if (fcc->function_handler) {
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
+				if (call_via_handler && !fcc->object_ptr && EG(This) &&
+				    Z_OBJ_HT_P(EG(This))->get_class_entry &&
+				    instanceof_function(Z_OBJCE_P(EG(This)), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object_ptr = EG(This);
+				}
 			}
 		}
 	}
