@@ -896,25 +896,18 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND * conn, const char * query, unsigned int query_len TSRMLS_DC)
 {
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn::query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 
-	if (PASS != conn->m->simple_command(conn, COM_QUERY, query, query_len,
-									   PROT_LAST /* we will handle the OK packet*/,
-									   FALSE, FALSE TSRMLS_CC)) {
-		DBG_RETURN(FAIL);
+	if (PASS == conn->m->send_query(conn, query, query_len TSRMLS_CC) &&
+		PASS == conn->m->reap_query(conn TSRMLS_CC))
+	{
+		ret = PASS;
+		if (conn->last_query_type == QUERY_UPSERT && conn->upsert_status.affected_rows) {
+			MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
+		}
 	}
-	CONN_SET_STATE(conn, CONN_QUERY_SENT);
-	/*
-	  Here read the result set. We don't do it in simple_command because it need
-	  information from the ok packet. We will fetch it ourselves.
-	*/
-	ret = conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC);
-	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && conn->upsert_status.affected_rows) {
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
-	}
-
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -931,7 +924,9 @@ MYSQLND_METHOD(mysqlnd_conn, send_query)(MYSQLND * conn, const char * query, uns
 	ret = conn->m->simple_command(conn, COM_QUERY, query, query_len,
 								 PROT_LAST /* we will handle the OK packet*/,
 								 FALSE, FALSE TSRMLS_CC);
-	CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	if (PASS == ret) {
+		CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	}
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -950,6 +945,10 @@ MYSQLND_METHOD(mysqlnd_conn, reap_query)(MYSQLND * conn TSRMLS_DC)
 		DBG_ERR_FMT("Connection not opened, clear or has been closed. State=%u", state);
 		DBG_RETURN(FAIL);
 	}
+	/*
+	  Here read the result set. We don't do it in simple_command because it need
+	  information from the ok packet. We will fetch it ourselves.
+	*/
 	DBG_RETURN(conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC));
 }
 /* }}} */
