@@ -18,7 +18,7 @@ $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 if(!empty($host)) {
 
     // Use the set Environment variable
-    $url = "$host/get.php";
+    $url = "$host/get.php?test=1";
 
 } else {
 
