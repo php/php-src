@@ -67,8 +67,8 @@ zend_module_entry pdo_pgsql_module_entry = {
 	pdo_pgsql_functions,
 	PHP_MINIT(pdo_pgsql),
 	PHP_MSHUTDOWN(pdo_pgsql),
-	PHP_RINIT(pdo_pgsql),
-	PHP_RSHUTDOWN(pdo_pgsql),
+	NULL,
+	NULL,
 	PHP_MINFO(pdo_pgsql),
 	"1.0.2",
 	STANDARD_MODULE_PROPERTIES
@@ -102,24 +102,6 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
 {
 	php_pdo_unregister_driver(&pdo_pgsql_driver);
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(pdo_pgsql)
-{
-	/*	php_pdo_register_driver(&pdo_pgsql_driver); */
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(pdo_pgsql)
-{
-	/*	php_pdo_unregister_driver(&pdo_pgsql_driver); */
 	return SUCCESS;
 }
 /* }}} */

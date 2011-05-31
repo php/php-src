@@ -32,8 +32,6 @@ extern zend_module_entry pdo_pgsql_module_entry;
 
 PHP_MINIT_FUNCTION(pdo_pgsql);
 PHP_MSHUTDOWN_FUNCTION(pdo_pgsql);
-PHP_RINIT_FUNCTION(pdo_pgsql);
-PHP_RSHUTDOWN_FUNCTION(pdo_pgsql);
 PHP_MINFO_FUNCTION(pdo_pgsql);
 
 #endif	/* PHP_PDO_PGSQL_H */
