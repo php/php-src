@@ -1602,6 +1602,9 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 	int internal;
 
 	if (!heap->use_zend_alloc) {
+		if (full_shutdown) {
+			free(heap);
+		}
 		return;
 	}
 
