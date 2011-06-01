@@ -1,7 +1,7 @@
 --TEST--
 Test ResourceBundle::__construct() with internal ICU bundles
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) || !defined('INTL_ICU_DATA_VERSION') || version_compare(INTL_ICU_DATA_VERSION, '4.4', '<') ) print 'skip'; ?>
 --FILE--
 <?php
 $b = new ResourceBundle('de_DE', 'ICUDATA-region');
