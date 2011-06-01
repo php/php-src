@@ -349,7 +349,10 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Did not found column name '%s' in the defined columns; it will not be bound", param->name);
+			char *tmp;
+			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", param->name);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp TSRMLS_CC);
+			efree(tmp);
 		}
 	}
 

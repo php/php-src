@@ -115,6 +115,10 @@ PHP                                                                        NEWS
     set mysqlnd.net_cmd_buffer_size to at least 9000. (Andrey)
   . Fixed bug #54674 mysqlnd valid_sjis_(head|tail) is using invalid operator
     and range). (nihen at megabbs dot com, Andrey)
+
+- PDO extension:
+  . Fixed bug #52104 (bindColumn creates Warning regardless of ATTR_ERRMODE 
+    settings). (Ilia)
     
 - PDO DBlib driver:
   . Fixed bug #54167 (PDO_DBLIB returns null on SQLUNIQUE field).
