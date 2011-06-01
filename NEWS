@@ -90,6 +90,7 @@ PHP                                                                        NEWS
 - intl extension:
   . Implemented FR #54540 (Allow loading of arbitrary resource bundles when
     fallback is disabled). (David Zuelke, Stas)
+  . Implemented FR #54561 (Expose ICU version info). (David Zuelke, Ilia)
 
 - json extension:
   . Fixed bug #54484 (Empty string in json_decode doesn't reset 
