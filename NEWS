@@ -91,6 +91,10 @@ PHP                                                                        NEWS
   . Implemented FR #54540 (Allow loading of arbitrary resource bundles when
     fallback is disabled). (David Zuelke, Stas)
 
+- json extension:
+  . Fixed bug #54484 (Empty string in json_decode doesn't reset 
+    json_last_error()). (Ilia)
+
 - LDAP extension:
   . Fixed bug #53339 (Fails to build when compilng with gcc 4.5 and DSO
     libraries). (Clint Byrum, Raphael)

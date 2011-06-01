@@ -589,6 +589,8 @@ static PHP_FUNCTION(json_decode)
 		return;
 	}
 
+	JSON_G(error_code) = 0;
+
 	if (!str_len) {
 		RETURN_NULL();
 	}
