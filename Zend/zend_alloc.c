@@ -2123,8 +2123,9 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 	size_t true_size;
 	size_t orig_size;
 	void *ptr;
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
-
+#endif
 	if (UNEXPECTED(!p) || !ZEND_MM_VALID_PTR(p)) {
 		return _zend_mm_alloc_int(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
