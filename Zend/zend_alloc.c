@@ -1882,6 +1882,11 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	size_t segment_size;
 	zend_mm_segment *segment;
 	int keep_rest = 0;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	if (EXPECTED(ZEND_MM_SMALL_SIZE(true_size))) {
 		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
@@ -1902,6 +1907,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 			heap->cached -= true_size;
 			ZEND_MM_CHECK_MAGIC(best_fit, MEM_BLOCK_CACHED);
 			ZEND_MM_SET_DEBUG_INFO(best_fit, size, 1, 0);
+			HANDLE_UNBLOCK_INTERRUPTIONS();
 			return ZEND_MM_DATA_OF(best_fit);
  		}
 #if ZEND_MM_CACHE_STAT
@@ -1955,8 +1961,6 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 			segment_size = heap->block_size;
 		}
 
-		HANDLE_BLOCK_INTERRUPTIONS();
-
 		if (segment_size < true_size ||
 		    heap->real_size + segment_size > heap->limit) {
 			/* Memory limit overflow */
@@ -1978,8 +1982,8 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #if ZEND_MM_CACHE
 			zend_mm_free_cache(heap);
 #endif
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 out_of_memory:
+			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
 			zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
@@ -2007,7 +2011,6 @@ out_of_memory:
 	} else {
 zend_mm_finished_searching_for_block:
 		/* remove from free list */
-		HANDLE_BLOCK_INTERRUPTIONS();
 		ZEND_MM_CHECK_MAGIC(best_fit, MEM_BLOCK_FREED);
 		ZEND_MM_CHECK_COOKIE(best_fit);
 		ZEND_MM_CHECK_BLOCK_LINKAGE(best_fit);
@@ -2055,10 +2058,14 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 	zend_mm_block *mm_block;
 	zend_mm_block *next_block;
 	size_t size;
-
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 	if (!ZEND_MM_VALID_PTR(p)) {
 		return;
 	}
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	mm_block = ZEND_MM_HEADER_OF(p);
 	size = ZEND_MM_BLOCK_SIZE(mm_block);
@@ -2082,11 +2089,10 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 			heap->cache_stat[index].max_count = heap->cache_stat[index].count;
 		}
 #endif
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return;
 	}
 #endif
-
-	HANDLE_BLOCK_INTERRUPTIONS();
 
 	heap->size -= size;
 
@@ -2117,10 +2123,14 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 	size_t true_size;
 	size_t orig_size;
 	void *ptr;
+	TSRMLS_FETCH();
 
 	if (UNEXPECTED(!p) || !ZEND_MM_VALID_PTR(p)) {
 		return _zend_mm_alloc_int(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+
+	HANDLE_BLOCK_INTERRUPTIONS();
+
 	mm_block = ZEND_MM_HEADER_OF(p);
 	true_size = ZEND_MM_TRUE_SIZE(size);
 	orig_size = ZEND_MM_BLOCK_SIZE(mm_block);
@@ -2136,7 +2146,6 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 		if (remaining_size >= ZEND_MM_ALIGNED_MIN_HEADER_SIZE) {
 			zend_mm_free_block *new_free_block;
 
-			HANDLE_BLOCK_INTERRUPTIONS();
 			next_block = ZEND_MM_BLOCK_AT(mm_block, orig_size);
 			if (ZEND_MM_IS_FREE_BLOCK(next_block)) {
 				remaining_size += ZEND_MM_FREE_BLOCK_SIZE(next_block);
@@ -2152,9 +2161,9 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 			/* add the new free block to the free list */
 			zend_mm_add_to_free_list(heap, new_free_block);
 			heap->size += (true_size - orig_size);
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 		}
 		ZEND_MM_SET_DEBUG_INFO(mm_block, size, 0, 0);
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
 
@@ -2197,6 +2206,7 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 			}
 #endif
 
+			HANDLE_UNBLOCK_INTERRUPTIONS();
 			return ptr;
 		}
 	}
@@ -2211,7 +2221,6 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 			size_t block_size = orig_size + ZEND_MM_FREE_BLOCK_SIZE(next_block);
 			size_t remaining_size = block_size - true_size;
 
-			HANDLE_BLOCK_INTERRUPTIONS();
 			zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
 
 			if (remaining_size < ZEND_MM_ALIGNED_MIN_HEADER_SIZE) {
@@ -2242,7 +2251,6 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 			return p;
 		} else if (ZEND_MM_IS_FIRST_BLOCK(mm_block) &&
 				   ZEND_MM_IS_GUARD_BLOCK(ZEND_MM_BLOCK_AT(next_block, ZEND_MM_FREE_BLOCK_SIZE(next_block)))) {
-			HANDLE_BLOCK_INTERRUPTIONS();
 			zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
 			goto realloc_segment;
 		}
@@ -2253,7 +2261,6 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 		size_t block_size;
 		size_t remaining_size;
 
-		HANDLE_BLOCK_INTERRUPTIONS();
 realloc_segment:
 		/* segment size, size of block and size of guard block */
 		if (true_size > heap->block_size - (ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE)) {
@@ -2286,8 +2293,8 @@ realloc_segment:
 #if ZEND_MM_CACHE
 			zend_mm_free_cache(heap);
 #endif
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 out_of_memory:
+			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
 			zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %ld bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
@@ -2351,6 +2358,7 @@ out_of_memory:
 	memcpy(ptr, p, orig_size - ZEND_MM_ALIGNED_HEADER_SIZE);
 #endif
 	_zend_mm_free_int(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return ptr;
 }
 
@@ -2539,12 +2547,18 @@ ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	p = _safe_emalloc(nmemb, size, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
 	memset(p, 0, size * nmemb);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
 
@@ -2552,26 +2566,40 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	int length;
 	char *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	length = strlen(s)+1;
 	p = (char *) _emalloc(length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
 	memcpy(p, s, length);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
 
 ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	p = (char *) _emalloc(length+1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
 	memcpy(p, s, length);
 	p[length] = 0;
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
 
@@ -2579,15 +2607,22 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 ZEND_API char *zend_strndup(const char *s, uint length)
 {
 	char *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	p = (char *) malloc(length+1);
 	if (UNEXPECTED(p == NULL)) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
 	if (length) {
 		memcpy(p, s, length);
 	}
 	p[length] = 0;
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
 

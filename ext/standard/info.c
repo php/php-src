@@ -747,6 +747,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
 
+#ifdef ZEND_SIGNALS
+		php_info_print_table_row(2, "Zend Signal Handling", "enabled" );
+#else
+		php_info_print_table_row(2, "Zend Signal Handling", "disabled" );
+#endif
+
 		php_info_print_table_row(2, "Zend Memory Manager", is_zend_mm(TSRMLS_C) ? "enabled" : "disabled" );
 
 		{

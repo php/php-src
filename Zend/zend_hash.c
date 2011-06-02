@@ -197,6 +197,9 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 	ulong h;
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -276,6 +279,9 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -431,6 +437,9 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 static int zend_hash_do_resize(HashTable *ht)
 {
 	Bucket **t;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -475,6 +484,9 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -595,6 +607,9 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 {
 	Bucket *retval;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	if (p->pLast) {
@@ -1194,6 +1209,9 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos)
 {
 	Bucket *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	p = pos ? (*pos) : ht->pInternalPointer;
 

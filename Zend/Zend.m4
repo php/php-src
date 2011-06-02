@@ -392,8 +392,22 @@ int main()
 
 AC_CHECK_FUNCS(mremap)
 
-])
 
+AC_CHECK_FUNC(sigaction, [
+	ZEND_SIGNALS=yes
+	AC_DEFINE(ZEND_SIGNALS, 1, [Use zend signal handling])
+	AC_DEFINE(HAVE_SIGACTION, 1, [Whether sigaction() is available])
+], [
+	ZEND_SIGNALS=no
+])
+if test "$ZEND_SIGNALS" = "yes"; then
+	CFLAGS="$CFLAGS -DZEND_SIGNALS"
+fi
+
+AC_MSG_CHECKING(whether to enable zend signal handling)
+AC_MSG_RESULT($ZEND_SIGNALS)
+
+])
 
 AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
 
