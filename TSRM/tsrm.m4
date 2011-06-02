@@ -30,6 +30,8 @@ AC_REQUIRE([AC_PROG_RANLIB])dnl
 
 AC_CHECK_HEADERS(stdarg.h)
 
+AC_CHECK_FUNCS(sigprocmask)
+
 ])
 
 

@@ -1371,8 +1371,12 @@ void php_on_timeout(int seconds TSRMLS_DC)
  */
 static void sigchld_handler(int apar)
 {
+	int errno_save = errno;
+
 	while (waitpid(-1, NULL, WNOHANG) > 0);
 	signal(SIGCHLD, sigchld_handler);
+
+	errno = errno_save;
 }
 /* }}} */
 #endif
@@ -1440,6 +1444,10 @@ int php_request_startup(TSRMLS_D)
 
 		zend_activate(TSRMLS_C);
 		sapi_activate(TSRMLS_C);
+
+#ifdef ZEND_SIGNALS
+		zend_signal_activate(TSRMLS_C);
+#endif
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
@@ -1565,6 +1573,10 @@ void php_request_shutdown_for_hook(void *dummy)
 	}
 
 	zend_try {
+		zend_unset_timeout(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try {
 		int i;
 
 		for (i = 0; i < NUM_TRACK_VARS; i++) {
@@ -1590,9 +1602,11 @@ void php_request_shutdown_for_hook(void *dummy)
 
 	zend_interned_strings_restore(TSRMLS_C);
 
+#ifdef ZEND_SIGNALS
 	zend_try {
-		zend_unset_timeout(TSRMLS_C);
+		zend_signal_deactivate(TSRMLS_C);
 	} zend_end_try();
+#endif
 }
 
 /* }}} */
@@ -1647,13 +1661,18 @@ void php_request_shutdown(void *dummy)
 		sapi_send_headers(TSRMLS_C);
 	} zend_end_try();
 
-	/* 5. Call all extensions RSHUTDOWN functions */
+	/* 5. Reset max_execution_time (no longer executing php code after response sent) */
+	zend_try {
+		zend_unset_timeout(TSRMLS_C);
+	} zend_end_try();
+
+	/* 6. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules(TSRMLS_C);
 		php_free_shutdown_functions(TSRMLS_C);
 	}
 
-	/* 6. Destroy super-globals */
+	/* 7. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1664,7 +1683,7 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 6.5 free last error information */
+	/* 7.5 free last error information */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1889,8 +1908,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.write_function = php_output_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
+#ifndef ZEND_SIGNALS
 	zuf.block_interruptions = sapi_module.block_interruptions;
 	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
+#endif
 	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
 	zuf.ticks_function = php_run_ticks;
 	zuf.on_timeout = php_on_timeout;

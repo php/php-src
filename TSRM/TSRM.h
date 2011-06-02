@@ -90,6 +90,10 @@ typedef struct {
 # define MUTEX_T beos_ben * 
 #endif
 
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 typedef void (*ts_allocate_ctor)(void *, void ***);
 typedef void (*ts_allocate_dtor)(void *, void ***);
 
@@ -138,6 +142,9 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void);
 TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
+#ifdef HAVE_SIGPROCMASK
+TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
+#endif
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
