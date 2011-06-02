@@ -330,16 +330,10 @@ PHP_INI_MH(OnChangeBrowscap)
 }
 /* }}} */
 
-PHP_INI_BEGIN()
-	PHP_INI_ENTRY("browscap",	NULL,	PHP_INI_SYSTEM,	OnChangeBrowscap)
-PHP_INI_END()
-
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
 	char *browscap = INI_STR("browscap");
 	
-	REGISTER_INI_ENTRIES();
-
 	if (browscap && browscap[0]) {
 		if (browscap_read_file(browscap, &global_bdata, 1 TSRMLS_CC) == FAILURE) {
 			return FAILURE;
