@@ -368,6 +368,9 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS	
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 	CHECK_INIT(ht);
