@@ -154,6 +154,7 @@ PHP                                                                        NEWS
   . Fixed bug #51958 (socket_accept() fails on IPv6 server sockets). (Gustavo)
 
 - SPL extension:
+  . Fixed bug #54970 (SplFixedArray::setSize() isn't resizing). (Felipe)
   . Fixed bug #54384 (Dual iterators, GlobIterator, SplFileObject and
     SplTempFileObject crash when user-space classes don't call the paren
     constructor). (Gustavo)
