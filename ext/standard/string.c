@@ -146,6 +146,46 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 }
 /* }}} */
 
+/* {{{ php_hex2bin
+ */
+static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen)
+{
+	size_t target_length = oldlen >> 1;
+	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
+	size_t i, j;
+	for (i = j = 0; i < target_length; i++) {
+		char c = old[j++];
+		if (c >= '0' && c <= '9') {
+			str[i] = (c - '0') << 4;
+		} else if (c >= 'a' && c <= 'f') {
+			str[i] = (c - 'a' + 10) << 4;
+		} else if (c >= 'A' && c <= 'F') {
+			str[i] = (c - 'A' + 10) << 4;
+		} else {
+			efree(str);
+			return NULL;
+		}
+		c = old[j++];
+		if (c >= '0' && c <= '9') {
+			str[i] |= c - '0';
+		} else if (c >= 'a' && c <= 'f') {
+			str[i] |= c - 'a' + 10;
+		} else if (c >= 'A' && c <= 'F') {
+			str[i] |= c - 'A' + 10;
+		} else {
+			efree(str);
+			return NULL;
+		}
+	}
+	str[target_length] = '\0';
+	
+	if (newlen) 
+		*newlen = target_length;
+
+	return (char *)str;
+}
+/* }}} */
+
 #ifdef HAVE_LOCALECONV
 /* {{{ localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
@@ -205,6 +245,28 @@ PHP_FUNCTION(bin2hex)
 	}
 
 	result = php_bin2hex((unsigned char *)data, datalen, &newlen);
+	
+	if (!result) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(result, newlen, 0);
+}
+/* }}} */
+
+/* {{{ proto string hex2bin(string data)
+   Converts the hex representation of data to binary */
+PHP_FUNCTION(hex2bin)
+{
+	char *result, *data;
+	size_t newlen;
+	int datalen;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
+		return;
+	}
+
+	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 	
 	if (!result) {
 		RETURN_FALSE;
