@@ -651,6 +651,9 @@ PHP_MINFO_FUNCTION( intl )
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
+#ifdef U_ICU_DATA_VERSION
+	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
+#endif
 	php_info_print_table_end();
 
     /* For the default locale php.ini setting */
