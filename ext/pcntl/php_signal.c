@@ -20,6 +20,8 @@
 
 #include "TSRM.h"
 #include "php_signal.h"
+#include "Zend/zend.h"
+#include "Zend/zend_signal.h"
 
 /* php_signal using sigaction is derrived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
