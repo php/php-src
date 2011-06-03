@@ -333,18 +333,18 @@ PHP_INI_MH(OnChangeBrowscap)
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
 	char *browscap = INI_STR("browscap");
-	
-	if (browscap && browscap[0]) {
-		if (browscap_read_file(browscap, &global_bdata, 1 TSRMLS_CC) == FAILURE) {
-			return FAILURE;
-		}
-	}
-	
+
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data),
 		browscap_globals_ctor, NULL);
 #endif
 	/* ctor call not really needed for non-ZTS */
+
+	if (browscap && browscap[0]) {
+		if (browscap_read_file(browscap, &global_bdata, 1 TSRMLS_CC) == FAILURE) {
+			return FAILURE;
+		}
+	}
 
 	return SUCCESS;
 }
