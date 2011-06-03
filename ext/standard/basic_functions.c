@@ -2142,6 +2142,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_bin2hex, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_hex2bin, 0)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strspn, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, mask)
@@ -2682,6 +2686,7 @@ ZEND_END_ARG_INFO()
 const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
+	PHP_FE(hex2bin,															arginfo_hex2bin)
 	PHP_FE(sleep,															arginfo_sleep)
 	PHP_FE(usleep,															arginfo_usleep)
 #if HAVE_NANOSLEEP
