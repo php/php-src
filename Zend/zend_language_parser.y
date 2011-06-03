@@ -69,7 +69,7 @@
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_NUMERIC_CAST T_SCALAR_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
 %nonassoc T_NEW T_CLONE
 %token T_EXIT
@@ -466,8 +466,8 @@ non_empty_parameter_list:
 
 optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	T_ARRAY						{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
-	|	fully_qualified_class_name			{ $$ = $1; $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CLASS; }
+	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NULL; }
+	|	fully_qualified_class_name			{ $$ = $1; }
 ;
 
 
@@ -700,8 +700,6 @@ expr_without_variable:
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
-	|	T_SCALAR_CAST expr 	{ zend_do_cast(&$$, &$2, IS_SCALAR TSRMLS_CC); }
-	|	T_NUMERIC_CAST expr 	{ zend_do_cast(&$$, &$2, IS_NUMERIC TSRMLS_CC); }
 	|	T_UNSET_CAST expr	{ zend_do_cast(&$$, &$2, IS_NULL TSRMLS_CC); }
 	|	T_EXIT exit_expr	{ zend_do_exit(&$$, &$2 TSRMLS_CC); }
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
