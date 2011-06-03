@@ -1206,10 +1206,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STRING_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"scalar"{TABS_AND_SPACES}")" {
-	return T_SCALAR_CAST;
-}
-
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
 	return T_ARRAY_CAST;
 }

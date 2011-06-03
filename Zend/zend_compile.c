@@ -1847,10 +1847,9 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
-		cur_arg_info->type_hint = class_type->u.constant.type;
 
-		switch (class_type->u.constant.type) {
-		case IS_CLASS:
+		if (class_type->u.constant.type != IS_NULL) {
+			cur_arg_info->type_hint = IS_OBJECT;
 			if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
 				zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
 			}
@@ -1864,9 +1863,8 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 					zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
 				}
 			}
-			break;
-
-		case IS_ARRAY:
+		} else {
+			cur_arg_info->type_hint = IS_ARRAY;
 			if (op == ZEND_RECV_INIT) {
 				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
 					cur_arg_info->allow_null = 1;
@@ -1874,39 +1872,6 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 					zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 				}
 			}
-			break;
-
-		/* scalar type hinting */
-		case IS_SCALAR:
-			if (op == ZEND_RECV_INIT && Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
-				break;
-			}
-			/* fall through */
-
-		/* scalar type hinting */
-		case IS_NUMERIC:
-			if (op == ZEND_RECV_INIT && (Z_TYPE(initialization->u.constant) == IS_LONG || Z_TYPE(initialization->u.constant) == IS_DOUBLE)) {
-				break;
-			}
-			/* fall through */
-
-		case IS_BOOL:
-		case IS_STRING:
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_RESOURCE:
-		case IS_OBJECT:
-			if (op == ZEND_RECV_INIT) {
-				if (Z_TYPE(initialization->u.constant) != class_type->u.constant.type && Z_TYPE(initialization->u.constant) != IS_NULL && (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT) {
-					zend_error(E_COMPILE_ERROR, "Default value for parameters with %s type hint can only be %s or NULL", zend_get_type_by_const(class_type->u.constant.type), zend_get_type_by_const(class_type->u.constant.type));
-				} else if (Z_TYPE(initialization->u.constant) == IS_NULL) {
-					cur_arg_info->allow_null = 1;
-				}
-			}
-			break;
-
-		default:
-			zend_error(E_COMPILE_ERROR, "Unknown type hint");
 		}
 	}
 }
