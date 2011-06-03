@@ -130,6 +130,7 @@ PHP                                                                        NEWS
 - Improved core functions:
   . number_format() no longer truncates multibyte decimal points and thousand
     separators to the first byte. FR #53457. (Adam)
+  . Added hex2bin() function. (Scott)
 
 - Improved CURL extension:
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and

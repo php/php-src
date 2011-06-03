@@ -358,10 +358,11 @@ UPGRADE NOTES - PHP X.Y
 
        - Core:
          - get_declared_traits()
+         - hex2bin()
          - http_response_code()
-         - trait_exists()
          - stream_set_chunk_size()
          - socket_import_stream()
+         - trait_exists()
 
        - LDAP:
          - ldap_control_paged_results()
