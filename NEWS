@@ -118,6 +118,7 @@ PHP                                                                        NEWS
     and range). (nihen at megabbs dot com, Andrey)
 
 - PDO extension:
+  . Fixed bug #54929 (Parse error with single quote in sql comment). (Felipe)
   . Fixed bug #52104 (bindColumn creates Warning regardless of ATTR_ERRMODE 
     settings). (Ilia)
     
