@@ -28,7 +28,7 @@
 #define PDO_PARSER_EOI 4
 
 #define RET(i) {s->cur = cursor; return i; }
-#define SKIP_ONE(i) {s->cur = s->tok + 1; return 1; }
+#define SKIP_ONE(i) {s->cur = s->tok + 1; return i; }
 
 #define YYCTYPE         unsigned char
 #define YYCURSOR        cursor
@@ -48,6 +48,7 @@ static int scan(Scanner *s)
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
+	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
 	SPECIALS	= [:?"'];
 	MULTICHAR	= [:?];
 	EOF			= [\000];
@@ -61,6 +62,7 @@ static int scan(Scanner *s)
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
+		COMMENTS								{ RET(PDO_PARSER_TEXT); }
 		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
 		EOF										{ RET(PDO_PARSER_EOI); }
 	*/	
