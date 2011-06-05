@@ -5,6 +5,9 @@ Testing declare statement with several type values
 if (!ini_get("zend.multibyte")) {
   die("skip Requires zend.multibyte=1");
 }
+if (!extension_loaded("mbstring")) {
+  die("skip Requires ext/mbstring");
+}
 ?>
 --FILE--
 <?php
