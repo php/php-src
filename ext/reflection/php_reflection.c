@@ -2378,26 +2378,6 @@ ZEND_METHOD(reflection_parameter, isArray)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionParameter::getTypeHint()
-   Returns what type hint is defined for this parameter */
-ZEND_METHOD(reflection_parameter, getTypeHint)
-{
-	reflection_object *intern;
-	parameter_reference *param;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	GET_REFLECTION_OBJECT_PTR(param);
-
-	if (!param->arg_info->type_hint) {
-		RETURN_FALSE;
-	}
-
-	RETURN_STRING(zend_get_type_by_const(param->arg_info->type_hint), 1);
-}
-/* }}} */
-
 /* {{{ proto public bool ReflectionParameter::allowsNull()
    Returns whether NULL is allowed as this parameters's value */
 ZEND_METHOD(reflection_parameter, allowsNull)
@@ -5837,7 +5817,6 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_parameter, getTypeHint, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getPosition, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)
