@@ -47,7 +47,7 @@ clearstatcache();
 
 var_dump( touch($link_name) );
 
-$new_stat = lstat($link_name);
+$new_stat = stat($file_name);
 
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
