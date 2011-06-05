@@ -1184,7 +1184,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	}
 
 	/* emulate forward moving seeks with reads */
-	if (whence == SEEK_CUR && offset > 0) {
+	if (whence == SEEK_CUR && offset >= 0) {
 		char tmp[1024];
 		size_t didread;
 		while(offset > 0) {
