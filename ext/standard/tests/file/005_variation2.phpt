@@ -77,12 +77,6 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing touch ***
-
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
-
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
-
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
 bool(false)
 bool(false)
 bool(false)
