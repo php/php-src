@@ -2,8 +2,6 @@
 DateTime::diff() add() sub() -- spring type2 type2
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-PHP < 5.4 has bugs
 --FILE--
 <?php
 
