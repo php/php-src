@@ -1744,7 +1744,7 @@ int main(int argc, char *argv[])
 
 	int max_requests = 500;
 	int requests = 0;
-	int fastcgi = fcgi_is_fastcgi();
+	int fastcgi;
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request *request = NULL;
@@ -1786,6 +1786,7 @@ int main(int argc, char *argv[])
 #endif
 
 	sapi_startup(&cgi_sapi_module);
+	fastcgi = fcgi_is_fastcgi();
 	cgi_sapi_module.php_ini_path_override = NULL;
 
 #ifdef PHP_WIN32
