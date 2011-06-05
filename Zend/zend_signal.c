@@ -377,7 +377,7 @@ void zend_signal_startup()
 
 	/* Save previously registered signal handlers into orig_handlers */
 	memset(&global_orig_handlers, 0, sizeof(global_orig_handlers));
-	for (signo = 1; signo <= NSIG; ++signo) {
+	for (signo = 1; signo < NSIG; ++signo) {
 		if (sigaction(signo, NULL, &sa) == 0) {
 			global_orig_handlers[signo-1].flags = sa.sa_flags;
 			if (sa.sa_flags & SA_SIGINFO) {
