@@ -152,7 +152,7 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	int  i = 0;
 
-	if (intern->array) {
+	if (intern->array && !GC_G(gc_active)) {
 		int j = zend_hash_num_elements(intern->std.properties);
 
 		for (i = 0; i < intern->array->size; i++) {
@@ -160,9 +160,6 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 				zend_hash_index_update(intern->std.properties, i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
 				Z_ADDREF_P(intern->array->elements[i]);
 			} else {
-				if (GC_G(gc_active)) {
-					return NULL;
-				}
 				zend_hash_index_update(intern->std.properties, i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
 				Z_ADDREF_P(EG(uninitialized_zval_ptr));
 			}
