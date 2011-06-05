@@ -96,7 +96,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		php_info_print_table_colspan_header(2, "PHP Documentation");
 		CREDIT_LINE("Authors", "Mehdi Achour, Friedhelm Betz, Antony Dovgal, Nuno Lopes, Hannes Magnusson, Georg Richter, Damien Seguy, Jakub Vrana");
 		CREDIT_LINE("Editor", "Philip Olson");
-		CREDIT_LINE("User Note Maintainers", "Friedhelm Betz, Etienne Kneuss, Nuno Lopes, Hannes Magnusson, Felipe Pena, Maciek Sokolewicz, Daniel P. Brown");
+		CREDIT_LINE("User Note Maintainers", "Daniel P. Brown, Thiago Henrique Pojda");
 		CREDIT_LINE("Other Contributors", "Previously active authors, editors and other contributors are listed in the manual.");
 		php_info_print_table_end();
 	}
