@@ -719,6 +719,25 @@ const static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffs
 		return first_found_elem;
 	}
 
+	for (tp = timelib_timezone_lookup; tp->name; tp++) {
+		if (tp->full_tz_name && strcasecmp(word, tp->full_tz_name) == 0) {
+			if (!first_found) {
+				first_found = 1;
+				first_found_elem = tp;
+				if (gmtoffset == -1) {
+					return tp;
+				}
+			}
+			if (tp->gmtoffset == gmtoffset) {
+				return tp;
+			}
+		}
+	}
+	if (first_found) {
+		return first_found_elem;
+	}
+
+
 	/* Still didn't find anything, let's find the zone solely based on
 	 * offset/isdst then */
 	for (fmp = timelib_timezone_fallbackmap; fmp->name; fmp++) {

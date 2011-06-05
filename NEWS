@@ -69,6 +69,8 @@ PHP                                                                        NEWS
   . Fixed bug #54316 (DateTime::createFromFormat does not handle trailing '|'
     correctly). (Adam)
   . Fixed bug #54283 (new DatePeriod(NULL) causes crash). (Felipe)
+  . Fixed bug #51819 (Case discrepancy in timezone names cause Uncaught
+    exception and fatal error). (Hannes)
 
 - DBA extension:
   . Fixed bug #54242 (dba_insert returns true if key already exists). (Felipe)
