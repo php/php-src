@@ -2382,6 +2382,67 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			}
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
+		} else if (OP2_TYPE != IS_CONST &&
+			EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) && 
+			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
+			zend_class_entry *ce;
+			zval **method = NULL;
+			zval **obj = NULL;
+
+			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
+			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
+			
+			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
+				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
+			}
+			
+			if (Z_TYPE_PP(method) != IS_STRING) {
+				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
+			}
+			
+			if (Z_TYPE_PP(obj) == IS_STRING) {
+				ce = zend_fetch_class_by_name(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), NULL, 0 TSRMLS_CC);
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(obj));
+				}
+				EX(called_scope) = ce;
+				EX(object) = NULL;
+				
+				if (ce->get_static_method) {
+					EX(fbc) = ce->get_static_method(ce, Z_STRVAL_PP(method), Z_STRLEN_PP(method) TSRMLS_CC);
+				} else {
+					EX(fbc) = zend_std_get_static_method(ce, Z_STRVAL_PP(method), Z_STRLEN_PP(method), NULL TSRMLS_CC);
+				}
+			} else {
+				EX(object) = *obj;
+				ce = EX(called_scope) = Z_OBJCE_PP(obj);
+
+				EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(&EX(object), Z_STRVAL_PP(method), Z_STRLEN_PP(method), NULL TSRMLS_CC);
+				if (UNEXPECTED(EX(fbc) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), Z_STRVAL_PP(method));
+				}
+				
+				if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+					EX(object) = NULL;
+				} else {
+					if (!PZVAL_IS_REF(EX(object))) {
+						Z_ADDREF_P(EX(object)); /* For $this pointer */
+					} else {
+						zval *this_ptr;
+						ALLOC_ZVAL(this_ptr);
+						INIT_PZVAL_COPY(this_ptr, EX(object));
+						zval_copy_ctor(this_ptr);
+						EX(object) = this_ptr;
+					}
+				}
+			}
+
+			if (UNEXPECTED(EX(fbc) == NULL)) {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, Z_STRVAL_PP(method));
+			}
+			FREE_OP2();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
