@@ -74,8 +74,12 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-int(%d)
+
+Warning: fileperms() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 - Iteration 8 -
-int(%d)
+
+Warning: fileperms() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 
 *** Done ***

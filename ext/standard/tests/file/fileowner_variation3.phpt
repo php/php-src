@@ -75,8 +75,12 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-int(%d)
+
+Warning: fileowner() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 - Iteration 8 -
-int(%d)
+
+Warning: fileowner() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 
 *** Done ***
