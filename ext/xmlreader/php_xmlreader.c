@@ -495,7 +495,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	xmlRelaxNGPtr schema = NULL;
 	char *source;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -872,7 +872,7 @@ PHP_METHOD(xmlreader, open)
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -958,7 +958,7 @@ PHP_METHOD(xmlreader, setSchema)
 	xmlreader_object *intern;
 	char *source;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!", &source, &source_len) == FAILURE) {
 		return;
 	}
 

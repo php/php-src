@@ -628,7 +628,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	ExecStatusType status;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|sss",
 				&table_name, &table_name_len, &filename, &filename_len,
 				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
@@ -722,7 +722,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|sss",
 					&table_name, &table_name_len, &filename, &filename_len,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;

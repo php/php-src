@@ -431,7 +431,7 @@ static PHP_FUNCTION(gzfile)
 	long use_include_path = 0;
 	php_stream *stream;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &use_include_path)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &filename, &filename_len, &use_include_path)) {
 		return;
 	}
 

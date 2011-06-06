@@ -187,7 +187,7 @@ PHP_FUNCTION(iptcembed)
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 

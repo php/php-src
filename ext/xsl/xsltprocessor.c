@@ -634,7 +634,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os", &docp, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "op", &docp, &uri, &uri_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -840,7 +840,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 	int filename_len;
 	DOM_GET_THIS(id);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s!", &filename, &filename_len) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p!", &filename, &filename_len) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		if (intern->profiling) {
 			efree(intern->profiling);

@@ -477,7 +477,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 	char *actual_path;
 	php_stream_wrapper *wrapper;
 
-	if (!filename) {
+	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
 		return NULL;
 	}
 

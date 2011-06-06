@@ -235,7 +235,7 @@ PHP_FUNCTION(disk_total_space)
 	char *path;
 	int path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
 	}
 
@@ -370,7 +370,7 @@ PHP_FUNCTION(disk_free_space)
 	char *path;
 	int path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
 	}
 
@@ -425,7 +425,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	int ret;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &group) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -556,7 +556,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	int ret;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &user) == FAILURE) {
 		return;
 	}
 
@@ -659,7 +659,7 @@ PHP_FUNCTION(chmod)
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
@@ -707,7 +707,7 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 
@@ -817,7 +817,7 @@ PHP_FUNCTION(clearstatcache)
 	char      *filename             = NULL;
 	int        filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bs", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -1068,7 +1068,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
 	int filename_len; \
 	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) { \
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
 		return; \
 	} \
 	\

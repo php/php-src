@@ -141,6 +141,9 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 		RETURN_FALSE;
 	}
 	if (isfilename) {
+		if (CHECK_NULL_PATH(data, data_len)) {
+			RETURN_FALSE;
+		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
 		if (!stream) {
 			/* Stream will report errors opening file */

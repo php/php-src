@@ -103,7 +103,7 @@ PHP_METHOD(sqlite3, open)
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}

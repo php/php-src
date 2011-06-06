@@ -587,7 +587,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	int pwllen;
 	int pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &broker, &pwl, &pwllen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &broker, &pwl, &pwllen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
