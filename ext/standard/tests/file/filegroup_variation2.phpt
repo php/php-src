@@ -58,7 +58,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: filegroup() expects parameter 1 to be string, resource given in %s on line %d
+Warning: filegroup() expects parameter 1 to be valid path, resource given in %s on line %d
 NULL
 
 Warning: filegroup(): stat failed for 1234 in %s on line %d
