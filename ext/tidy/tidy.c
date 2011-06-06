@@ -558,7 +558,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TidyBuffer *errbuf;
 	zval **config = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -1272,7 +1272,7 @@ static PHP_FUNCTION(tidy_parse_file)
 	
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|Zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1586,7 +1586,7 @@ static TIDY_DOC_METHOD(__construct)
 	PHPTidyObj *obj;
 	TIDY_SET_CONTEXT;	
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sZsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|pZsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1620,7 +1620,7 @@ static TIDY_DOC_METHOD(parseFile)
 
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &inputfile, &input_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|Zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}

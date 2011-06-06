@@ -385,10 +385,12 @@ static PHP_FUNCTION(bzopen)
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_PP(file) == IS_STRING) {
-		convert_to_string_ex(file);
-
 		if (Z_STRLEN_PP(file) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
+			RETURN_FALSE;
+		}
+		
+		if (CHECK_ZVAL_NULL_PATH(*file)) {
 			RETURN_FALSE;
 		}
 

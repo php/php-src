@@ -378,7 +378,7 @@ PHP_FUNCTION(readline_read_history)
 	char *arg = NULL;
 	int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -398,7 +398,7 @@ PHP_FUNCTION(readline_write_history)
 	char *arg = NULL;
 	int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 

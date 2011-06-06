@@ -93,7 +93,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	 * from imagey<type>().
 	 */
 	if (image_type == PHP_GDIMG_TYPE_XBM) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
 			return;
 		}
 	} else {

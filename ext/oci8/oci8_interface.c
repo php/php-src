@@ -233,19 +233,14 @@ PHP_FUNCTION(oci_lob_import)
 	int filename_len;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
 			return;
 		}	
-	}
-
-	if (strlen(filename) != filename_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
-		RETURN_FALSE;  
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
@@ -872,7 +867,7 @@ PHP_FUNCTION(oci_lob_export)
 	ub4 lob_length;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ll", &filename, &filename_len, &start, &length) == FAILURE) {
 			return;
 		}
 	
@@ -886,7 +881,7 @@ PHP_FUNCTION(oci_lob_export)
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
 			return;
 		}
 			
@@ -898,11 +893,6 @@ PHP_FUNCTION(oci_lob_export)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than or equal to 0");
 			RETURN_FALSE;
 		}
-	}
-
-	if (strlen(filename) != filename_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
-		RETURN_FALSE;  
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {

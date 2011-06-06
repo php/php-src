@@ -1153,7 +1153,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval *params = NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "sss|lla", &mailbox, &mailbox_len, &user, &user_len,
+	if (zend_parse_parameters(argc TSRMLS_CC, "pss|lla", &mailbox, &mailbox_len, &user, &user_len,
 		&passwd, &passwd_len, &flags, &retries, &params) == FAILURE) {
 		return;
 	}

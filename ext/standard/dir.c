@@ -325,7 +325,7 @@ PHP_FUNCTION(chdir)
 	char *str;
 	int ret, str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -436,7 +436,7 @@ PHP_FUNCTION(glob)
 	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -554,7 +554,7 @@ PHP_FUNCTION(scandir)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 

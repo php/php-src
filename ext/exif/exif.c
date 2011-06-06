@@ -3938,7 +3938,7 @@ PHP_FUNCTION(exif_read_data)
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str, *s;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
 		return;
 	}
 
@@ -4119,7 +4119,7 @@ PHP_FUNCTION(exif_thumbnail)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(arg_c TSRMLS_CC, "s|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
+	if (zend_parse_parameters(arg_c TSRMLS_CC, "p|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
 		return;
 	}
 

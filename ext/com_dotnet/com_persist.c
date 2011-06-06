@@ -379,7 +379,7 @@ CPH_METHOD(SaveToFile)
 
 	res = get_persist_file(helper);
 	if (helper->ipf) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!|b",
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!|b",
 					&filename, &filename_len, &remember)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
@@ -443,7 +443,7 @@ CPH_METHOD(LoadFromFile)
 	res = get_persist_file(helper);
 	if (helper->ipf) {
 
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l",
 					&filename, &filename_len, &flags)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
