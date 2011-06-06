@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   . Added support for Traits. (Stefan)
   . Added closure $this support back. (Stas)
   . Added array dereferencing support. (Felipe)
+  . Added indirect method call through array. FR #47160. (Felipe)
   . Added support for object references in recursive serialize() calls.
     FR #36424. (Mike)
   . Added http_response_code() function. FR #52555. (Paul Dragoonis, Kalle)
