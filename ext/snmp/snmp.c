@@ -1682,7 +1682,7 @@ PHP_FUNCTION(snmp_read_mib)
 	char *filename;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 

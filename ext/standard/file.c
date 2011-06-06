@@ -831,7 +831,7 @@ PHP_FUNCTION(tempnam)
 	char *p;
 	int fd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
@@ -885,7 +885,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -939,7 +939,7 @@ PHP_FUNCTION(popen)
 	php_stream *stream;
 	char *posix_mode;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &command, &command_len, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &command, &command_len, &mode, &mode_len) == FAILURE) {
 		return;
 	}
 
@@ -1636,7 +1636,7 @@ PHP_FUNCTION(copy)
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &source, &source_len, &target, &target_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|r", &source, &source_len, &target, &target_len, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -2331,7 +2331,7 @@ PHP_FUNCTION(realpath)
 	int filename_len;
 	char resolved_path_buff[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

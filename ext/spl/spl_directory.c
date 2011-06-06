@@ -2238,7 +2238,7 @@ SPL_METHOD(SplFileObject, __construct)
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbr", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|sbr", 
 			&intern->file_name, &intern->file_name_len,
 			&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {		

@@ -2673,7 +2673,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|sll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|pll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
 		return;
 	}
 
@@ -4592,7 +4592,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
     long ignore_warning;
 #endif
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sslll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}
 

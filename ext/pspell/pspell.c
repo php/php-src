@@ -374,7 +374,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	PspellManager *manager;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|sssl", &personal, &personal_len, &language, &language_len, 
+	if (zend_parse_parameters(argc TSRMLS_CC, "ps|sssl", &personal, &personal_len, &language, &language_len, 
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
 		return;
 	}
@@ -825,7 +825,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	int value_len;
 	PspellConfig *config;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &conf, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -874,7 +874,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	int repl_len;
 	PspellConfig *config;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &conf, &repl, &repl_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &repl, &repl_len) == FAILURE) {
 		return;
 	}
 

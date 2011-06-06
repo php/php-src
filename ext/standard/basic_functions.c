@@ -5093,7 +5093,7 @@ PHP_FUNCTION(highlight_file)
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &filename, &filename_len, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &filename, &filename_len, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5134,7 +5134,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5864,7 +5864,7 @@ PHP_FUNCTION(parse_ini_file)
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|bl", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 

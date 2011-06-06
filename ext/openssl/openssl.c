@@ -1259,7 +1259,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	char * filename;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|b", &zcert, &filename, &filename_len, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zp|b", &zcert, &filename, &filename_len, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	zval ** item;
 	STACK_OF(X509) *ca = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zszs|a", &zcert, &filename, &filename_len, &zpkey, &pass, &pass_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zpzs|a", &zcert, &filename, &filename_len, &zpkey, &pass, &pass_len, &args) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -2255,7 +2255,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	BIO * bio_out;
 	long csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &zcsr, &filename, &filename_len, &notext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp|b", &zcsr, &filename, &filename_len, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -3039,7 +3039,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zṕ|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -3327,7 +3327,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	
 	RETVAL_LONG(-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|sass", &filename, &filename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl|papp", &filename, &filename_len,
 				&flags, &signersfilename, &signersfilename_len, &cainfo,
 				&extracerts, &extracerts_len, &datafilename, &datafilename_len) == FAILURE) {
 		return;
@@ -3440,7 +3440,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZa!|ll", &infilename, &infilename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ppZa!|ll", &infilename, &infilename_len,
 				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
 		return;
 
@@ -3576,7 +3576,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * outfilename;	int outfilename_len;
 	char * extracertsfilename = NULL; int extracertsfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZZa!|ls",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ppZZa!|lp",
 				&infilename, &infilename_len, &outfilename, &outfilename_len,
 				&zcert, &zprivkey, &zheaders, &flags, &extracertsfilename,
 				&extracertsfilename_len) == FAILURE) {
@@ -3680,7 +3680,7 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	char * infilename;	int infilename_len;
 	char * outfilename;	int outfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssZ|Z", &infilename, &infilename_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ppZ|Z", &infilename, &infilename_len,
 				&outfilename, &outfilename_len, &recipcert, &recipkey) == FAILURE) {
 		return;
 	}
