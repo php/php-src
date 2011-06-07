@@ -233,21 +233,37 @@ PHP_FUNCTION(oci_lob_import)
 	int filename_len;
 
 	if (getThis()) {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+#else
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+#endif
 			return;
 		}
 	}
 	else {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+#else
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+#endif
 			return;
 		}	
 	}
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
+	/* The "p" parsing parameter handles this case in PHP 5.4+ */
+	if (strlen(filename) != filename_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
+		RETURN_FALSE;  
+	}
+#endif
 
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
-	
+
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 
 	if (php_oci_lob_import(descriptor, filename TSRMLS_CC)) {
@@ -636,12 +652,12 @@ PHP_FUNCTION(oci_lob_erase)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &offset, &length) == FAILURE) {
 			return;
 		}
-	
+
 		if (ZEND_NUM_ARGS() > 0 && offset < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be greater than or equal to 0");
 			RETURN_FALSE;
 		}
-		
+
 		if (ZEND_NUM_ARGS() > 1 && length < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0");
 			RETURN_FALSE;
@@ -651,7 +667,7 @@ PHP_FUNCTION(oci_lob_erase)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ll", &z_descriptor, oci_lob_class_entry_ptr, &offset, &length) == FAILURE) {
 			return;
 		}
-			
+
 		if (ZEND_NUM_ARGS() > 1 && offset < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be greater than or equal to 0");
 			RETURN_FALSE;
@@ -662,14 +678,14 @@ PHP_FUNCTION(oci_lob_erase)
 			RETURN_FALSE;
 		}
 	}
-	
+
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
-	
+
 	if (php_oci_lob_erase(descriptor, offset, length, &bytes_erased TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -867,7 +883,11 @@ PHP_FUNCTION(oci_lob_export)
 	ub4 lob_length;
 
 	if (getThis()) {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ll", &filename, &filename_len, &start, &length) == FAILURE) {
+#else
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &filename, &filename_len, &start, &length) == FAILURE) {
+#endif
 			return;
 		}
 	
@@ -881,7 +901,11 @@ PHP_FUNCTION(oci_lob_export)
 		}
 	}
 	else {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+#else
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+#endif
 			return;
 		}
 			
@@ -894,6 +918,14 @@ PHP_FUNCTION(oci_lob_export)
 			RETURN_FALSE;
 		}
 	}
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
+	/* The "p" parsing parameter handles this case in PHP 5.4+ */
+	if (strlen(filename) != filename_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot contain null bytes");
+		RETURN_FALSE;  
+	}
+#endif
 
 	if (zend_hash_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find descriptor property");
@@ -919,11 +951,22 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_FALSE;
 	}
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
+	/* Safe mode has been removed in PHP 5.4 */
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+#endif
+
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 	stream = php_stream_open_wrapper_ex(filename, "w", REPORT_ERRORS, NULL, NULL);
+#else
+	stream = php_stream_open_wrapper_ex(filename, "w", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL);
+#endif
 
 	block_length = PHP_OCI_LOB_BUFFER_SIZE;
 	if (block_length > length) {
@@ -1866,6 +1909,14 @@ PHP_FUNCTION(oci_password_change)
 	char *user, *pass_old, *pass_new, *dbname;
 	int user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
+	/* Safe mode has been removed in PHP 5.4 */
+	if (PG(safe_mode)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "is disabled in Safe Mode");
+		RETURN_FALSE;
+	}
+#endif
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &z_connection, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
