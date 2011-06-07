@@ -325,20 +325,24 @@ array(0) {
 }
 
 -- Iteration 8 --
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  string(%d) "%s/glob_variation/WONDER5"
-}
-array(0) {
-}
-array(0) {
-}
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 
 -- Iteration 9 --
 array(0) {
@@ -441,8 +445,9 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-array(0) {
-}
+
+Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 -- Iteration 9 --
 array(0) {
 }
