@@ -145,19 +145,19 @@ Error: 2 - parse_ini_file(0.5): failed to open stream: No such file or directory
 bool(false)
 
 --empty array--
-Error: 2 - parse_ini_file() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be valid path, array given, %s(%d)
 bool(false)
 
 --int indexed array--
-Error: 2 - parse_ini_file() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be valid path, array given, %s(%d)
 bool(false)
 
 --associative array--
-Error: 2 - parse_ini_file() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be valid path, array given, %s(%d)
 bool(false)
 
 --nested arrays--
-Error: 2 - parse_ini_file() expects parameter 1 to be string, array given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be valid path, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
@@ -197,7 +197,7 @@ Error: 2 - parse_ini_file(Class A object): failed to open stream: No such file o
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - parse_ini_file() expects parameter 1 to be string, object given, %s(%d)
+Error: 2 - parse_ini_file() expects parameter 1 to be valid path, object given, %s(%d)
 bool(false)
 
 --undefined var--

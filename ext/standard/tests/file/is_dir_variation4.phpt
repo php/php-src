@@ -77,9 +77,13 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-bool(true)
+
+Warning: is_dir() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 
 -- Iteration 10 --
-bool(true)
+
+Warning: is_dir() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 
 *** Done ***
