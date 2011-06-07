@@ -3736,7 +3736,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 #endif
 	BG(user_shutdown_function_names) = NULL;
 
-	BASIC_RINIT_SUBMODULE(filestat)
+	PHP_RINIT(filestat)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 	BASIC_RINIT_SUBMODULE(syslog)
 #endif
@@ -3784,7 +3784,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	/* FG(stream_wrappers) and FG(stream_filters) are destroyed
 	 * during php_request_shutdown() */
 
-	BASIC_RSHUTDOWN_SUBMODULE(filestat)
+	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 #ifdef PHP_WIN32
 	BASIC_RSHUTDOWN_SUBMODULE(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
