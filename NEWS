@@ -159,6 +159,8 @@ PHP                                                                        NEWS
 
 - SPL extension:
   . Fixed bug #54970 (SplFixedArray::setSize() isn't resizing). (Felipe)
+  . Fixed bug #54609 (Certain implementation(s) of SplFixedArray cause hard
+    crash). (Felipe)
   . Fixed bug #54384 (Dual iterators, GlobIterator, SplFileObject and
     SplTempFileObject crash when user-space classes don't call the paren
     constructor). (Gustavo)
