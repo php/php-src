@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Increased the backtrack limit from 100000 to 1000000 (Rasmus)
 
 - Zend Engine:
+  . Fixed bug #55007 (compiler fail after previous fail). (Felipe)
   . Fixed bug #54910 (Crash when calling call_user_func with unknown function
     name). (Dmitry)
   . Fixed bug #54804 (__halt_compiler and imported namespaces).
