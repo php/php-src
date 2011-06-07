@@ -1042,7 +1042,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 #endif
 		if (OCI_G(env)
 			&& OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
-  			&& *tmp_buf) {
+			&& *tmp_buf) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tmp_buf);
 		}
 		
@@ -1754,13 +1754,13 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Privileged connect is disabled. Enable oci8.privileged_connect to be able to connect as SYSOPER or SYSDBA");
 				return NULL;
 			}
-			/*	Disable privileged connections in Safe Mode (N.b. safe mode has been removed in PHP
-			 *	6 anyway)
-			 */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
+			/* Safe mode has been removed in PHP 5.4 */
 			if (PG(safe_mode)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Privileged connect is disabled in Safe Mode");
 				return NULL;
 			}
+#endif
 		}
 	}
 
@@ -1922,7 +1922,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								memcmp(tmp->hash_key, hashed_details.c, hashed_details.len) == 0 && zend_list_addref(connection->rsrc_id) == SUCCESS) {
 								/* do nothing */
 							} else {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
+								connection->rsrc_id = zend_list_insert(connection, le_pconnection TSRMLS_CC);
+#else
 								connection->rsrc_id = zend_list_insert(connection, le_pconnection);
+#endif
 								/* Persistent connections: For old close semantics we artificially
 								 * bump up the refcount to prevent the non-persistent destructor
 								 * from getting called until request shutdown. The refcount is
@@ -2066,7 +2070,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		new_le.ptr = connection;
 		new_le.type = le_pconnection;
 		connection->used_this_request = 1;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
+		connection->rsrc_id = zend_list_insert(connection, le_pconnection TSRMLS_CC);
+#else
 		connection->rsrc_id = zend_list_insert(connection, le_pconnection);
+#endif
 
 		/* Persistent connections: For old close semantics we artificially bump up the refcount to
 		 * prevent the non-persistent destructor from getting called until request shutdown. The
@@ -2079,13 +2087,21 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		OCI_G(num_persistent)++;
 		OCI_G(num_links)++;
 	} else if (!exclusive) {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
+		connection->rsrc_id = zend_list_insert(connection, le_connection TSRMLS_CC);
+#else
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
+#endif
 		new_le.ptr = (void *)connection->rsrc_id;
 		new_le.type = le_index_ptr;
 		zend_hash_update(&EG(regular_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
 		OCI_G(num_links)++;
 	} else {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
+		connection->rsrc_id = zend_list_insert(connection, le_connection TSRMLS_CC);
+#else
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
+#endif
 		OCI_G(num_links)++;
 	}
 
@@ -2778,7 +2794,11 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 		}
 		spool_le.ptr  = session_pool;
 		spool_le.type = le_psessionpool;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
+		zend_list_insert(session_pool, le_psessionpool TSRMLS_CC);
+#else
 		zend_list_insert(session_pool, le_psessionpool);
+#endif
 		zend_hash_update(&EG(persistent_list), session_pool->spool_hash_key, strlen(session_pool->spool_hash_key)+1,(void *)&spool_le, sizeof(zend_rsrc_list_entry),NULL);
 	} else if (spool_out_le->type == le_psessionpool &&
 		strlen(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == spool_hashed_details.len &&
