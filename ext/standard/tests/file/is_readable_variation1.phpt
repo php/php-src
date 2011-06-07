@@ -87,11 +87,17 @@ bool(false)
 -- Iteration 6 --
 bool(false)
 -- Iteration 7 --
-bool(true)
+
+Warning: is_readable() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 -- Iteration 8 --
-bool(true)
+
+Warning: is_readable() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 -- Iteration 9 --
-bool(true)
+
+Warning: is_readable() expects parameter 1 to be valid path, string given in %s on line %d
+NULL
 -- Iteration 10 --
 bool(true)
 -- Iteration 11 --
