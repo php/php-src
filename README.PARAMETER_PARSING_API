@@ -51,6 +51,7 @@ Type specifiers
  L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (long)
  o  - object of any type (zval*)
  O  - object of specific type given by class entry (zval*, zend_class_entry)
+ p  - valid path (string without null bytes in the middle) and its length (char*, int)
  r  - resource (zval*)
  s  - string (with possible null bytes) and its length (char*, int)
  z  - the actual zval (zval*)
