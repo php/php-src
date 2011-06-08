@@ -121,6 +121,10 @@ PHP                                                                        NEWS
   . Fixed bug #54674 mysqlnd valid_sjis_(head|tail) is using invalid operator
     and range). (nihen at megabbs dot com, Andrey)
 
+- OpenSSL extension
+  . Fixed bug #54992 (Stream not closed and error not returned when SSL
+    CN_match fails). (Gustavo, laird_ngrps at dodo dot com dot au)
+
 - PDO extension:
   . Fixed bug #54929 (Parse error with single quote in sql comment). (Felipe)
   . Fixed bug #52104 (bindColumn creates Warning regardless of ATTR_ERRMODE 
