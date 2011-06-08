@@ -77,11 +77,11 @@ bool(false)
 bool(false)
 -- Iteration 6 --
 
-Warning: is_executable() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: is_executable() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: is_executable() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: is_executable() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 -- Iteration 8 --
 bool(false)

@@ -75,11 +75,11 @@ Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in 
 bool(false)
 - Iteration 7 -
 
-Warning: filegroup() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: filegroup() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 - Iteration 8 -
 
-Warning: filegroup() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: filegroup() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
 *** Done ***

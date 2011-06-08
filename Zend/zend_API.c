@@ -434,14 +434,14 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const cha
 						*p = Z_STRVAL_PP(arg);
 						*pl = Z_STRLEN_PP(arg);
 						if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
-							return "valid path";
+							return "a valid path";
 						}
 						break;
 
 					case IS_OBJECT:
 						if (parse_arg_object_to_string(arg, p, pl, IS_STRING TSRMLS_CC) == SUCCESS) {
 							if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
-								return "valid path";
+								return "a valid path";
 							}
 							break;
 						}

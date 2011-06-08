@@ -68,11 +68,11 @@ bool(false)
 bool(false)
 - Iteration 7 -
 
-Warning: is_file() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: is_file() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 - Iteration 8 -
 
-Warning: is_file() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: is_file() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
 *** Done ***
