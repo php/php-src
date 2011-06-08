@@ -515,6 +515,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 			if (FAILURE == php_openssl_apply_verification_policy(sslsock->ssl_handle, peer_cert, stream TSRMLS_CC)) {
 				SSL_shutdown(sslsock->ssl_handle);
+				n = -1;
 			} else {	
 				sslsock->ssl_active = 1;
 
