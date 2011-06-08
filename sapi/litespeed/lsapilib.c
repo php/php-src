@@ -1453,7 +1453,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
         return -1;
     }
 
-    while( isspace( *p ) ) {
+    while( isspace( *pBind ) ) {
         ++pBind;
     }
 
@@ -1509,7 +1509,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     }
         
     port = atoi( pEnd );
-    if (( port <= 0 )||( port > 655535 )) {
+    if (( port <= 0 )||( port > 65535 )) {
         return -1;
     }
     if ( doAddrInfo ) {
