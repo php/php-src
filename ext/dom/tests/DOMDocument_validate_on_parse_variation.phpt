@@ -39,6 +39,10 @@ validateOnParse set to FALSE:
 No Error Report Above
 validateOnParse set to TRUE: 
 
+Warning: DOMDocument::loadXML(): Entity 'nbsp' not defined in Entity, line: %d in %s on line %d
+
+Warning: DOMDocument::loadXML(): Entity 'copy' not defined in Entity, line: %d in %s on line %d
+
 Warning: DOMDocument::loadXML(): No declaration for element NYPHP in Entity, line: %d in %s on line %d
 
 Warning: DOMDocument::loadXML(): Element from was declared #PCDATA but contains non text nodes in Entity, line: %d in %s on line %d
