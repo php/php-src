@@ -326,22 +326,22 @@ array(0) {
 
 -- Iteration 8 --
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 
 -- Iteration 9 --
@@ -446,7 +446,7 @@ array(0) {
 }
 -- Iteration 8 --
 
-Warning: glob() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: glob() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 -- Iteration 9 --
 array(0) {

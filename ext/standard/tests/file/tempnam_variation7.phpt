@@ -95,13 +95,13 @@ File permissions are => 100600
 File created in => temp dir
 -- Iteration 6 --
 
-Warning: tempnam() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: tempnam() expects parameter 1 to be a valid path, string given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): Invalid argument in %s on line %d
 -- Iteration 7 --
 
-Warning: tempnam() expects parameter 1 to be valid path, array given in %s on line %d
+Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): Invalid argument in %s on line %d

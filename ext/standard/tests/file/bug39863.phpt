@@ -17,7 +17,7 @@ else {
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Warning: file_exists() expects parameter 1 to be valid path, string given in %s on line %d
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %s on line %d
 PASS
 ===DONE===
 

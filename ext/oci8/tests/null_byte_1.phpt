@@ -32,10 +32,10 @@ var_dump($r);
 --EXPECTF--
 Test 1: Import
 
-Warning: OCI-Lob::savefile() expects parameter 1 to be valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI-Lob::savefile() expects parameter 1 to be a valid path, string given in %snull_byte_1.php on line %d
 NULL
 Test 2: Export
 
-Warning: OCI-Lob::export() expects parameter 1 to be valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI-Lob::export() expects parameter 1 to be a valid path, string given in %snull_byte_1.php on line %d
 NULL
 ===DONE===
