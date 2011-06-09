@@ -59,7 +59,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: fileinode() expects parameter 1 to be valid path, resource given in %s on line %d
+Warning: fileinode() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 
 Warning: fileinode(): stat failed for 1234 in %s on line %d

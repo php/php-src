@@ -145,7 +145,7 @@ Warning: feof() expects parameter 1 to be resource, boolean given in %s on line 
 bool(false)
 -- Iteration 5 --
 
-Warning: fopen() expects parameter 1 to be valid path, array given in %s on line %d
+Warning: fopen() expects parameter 1 to be a valid path, array given in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, array given in %s on line %d
@@ -155,7 +155,7 @@ Warning: feof() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fopen() expects parameter 1 to be valid path, object given in %s on line %d
+Warning: fopen() expects parameter 1 to be a valid path, object given in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, object given in %s on line %d

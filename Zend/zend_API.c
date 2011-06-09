@@ -449,7 +449,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const cha
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return c == 's' ? "string" : "valid path";
+						return c == 's' ? "string" : "a valid path";
 				}
 			}
 			break;
