@@ -1111,13 +1111,18 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 		/* Is there a better way of doing this? */
 		while (func->fname) {
-			if (zend_hash_find(EG(function_table), func->fname, strlen(func->fname) + 1, (void**) &fptr) == FAILURE) {
+			int fname_len = strlen(func->fname);
+			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
+		
+			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
 				func++;
+				efree(lc_name);
 				continue;
 			}
 
 			_function_string(str, fptr, NULL, "    " TSRMLS_CC);
+			efree(lc_name);
 			func++;
 		}
 		string_printf(str, "%s  }\n", indent);
