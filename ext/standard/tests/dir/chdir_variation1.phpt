@@ -201,7 +201,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: chdir() expects parameter 1 to be valid path, array given in %s on line %d
+Warning: chdir() expects parameter 1 to be a valid path, array given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -230,6 +230,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: chdir() expects parameter 1 to be valid path, resource given in %s on line %d
+Warning: chdir() expects parameter 1 to be a valid path, resource given in %s on line %d
 bool(false)
 ===DONE===

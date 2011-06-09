@@ -36,7 +36,7 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: fopen() expects parameter 1 to be string, array given in %sfopen_edgecases2.php on line %d
+Warning: fopen() expects parameter 1 to be a valid path, array given in %sfopen_edgecases2.php on line %d
 blah
 test
 
