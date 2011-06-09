@@ -3,7 +3,7 @@ Test curl_opt() function with COOKIE
 --CREDITS--
 TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>      
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv(b'PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
+<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
@@ -35,4 +35,3 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 *** Testing curl with cookie ***
 string(3) "bar"
 ===DONE===
-                     
