@@ -15,7 +15,6 @@ track_errors=1
 log_errors=0
 html_errors=0
 display_errors=1
-error_reporting=2039;
 session.serialize_handler=php
 session.save_handler=files
 precision=14
@@ -59,12 +58,18 @@ session_destroy();
 ?>
 --EXPECTF--
 Deprecated: Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Notice: Undefined variable: c in %s on line %d
 NULL
 session_write_close(): Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively
 array(1) {
   ["c"]=>
   float(3.14)
 }
+
+Notice: Undefined variable: c in %s on line %d
 NULL
 array(1) {
   ["c"]=>
