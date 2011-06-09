@@ -18,7 +18,7 @@ if ($save_path) {
 			$save_path = substr($save_path, ++$p);
 		}
 		if (!@is_writable($save_path)) {
-			die("skip\n");
+			die("skip session.save_path $save_path is not writable\n");
 		}
 	}
 }
