@@ -58,7 +58,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: fileperms() expects parameter 1 to be valid path, resource given in %s on line %d
+Warning: fileperms() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 
 Warning: fileperms(): stat failed for 1234 in %s on line %d

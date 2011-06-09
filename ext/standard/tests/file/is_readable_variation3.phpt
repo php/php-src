@@ -61,7 +61,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: is_readable() expects parameter 1 to be valid path, array given in %s on line %d
+Warning: is_readable() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 bool(false)
 Done

@@ -205,7 +205,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: scandir() expects parameter 1 to be valid path, array given in %s on line %d
+Warning: scandir() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -248,6 +248,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: scandir() expects parameter 1 to be valid path, resource given in %s on line %d
+Warning: scandir() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 ===DONE===
