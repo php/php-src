@@ -145,7 +145,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 
 				default:
 					do {
-						// NULL is automatically added
+						/* NULL is automatically added */
 						ERR_error_string_n(ecode, esbuf, sizeof(esbuf));
 						if (ebuf.c) {
 							smart_str_appendc(&ebuf, '\n');
