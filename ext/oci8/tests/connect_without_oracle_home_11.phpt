@@ -10,9 +10,8 @@ $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov != 1) {
 	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
-$iv = preg_match('/Oracle .*Version => (11\.2|12)/', $phpinfo);
-if ($iv != 1) {
-        die ("skip tests a feature that works only with Oracle 11gR2 or greater version of client");
+if (preg_match('/^11\.2|12\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 ?>
 --ENV--

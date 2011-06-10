@@ -1,29 +1,25 @@
 --TEST--
 Set and get of connection attributes with errors.
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-require(dirname(__FILE__)."/connect.inc");
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
 if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
 
-$sv = oci_server_version($c);
-$sv = preg_match('/Release 1[012]\./', $sv, $matches);
-if ($sv == 1) {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => 1[012]\./', $phpinfo);
-    if ($iv != 1) {
-        die ("skip test expected to work only with Oracle 10g or greater version of client");
-    }
-}
-else {
-    die ("skip test expected to work only with Oracle 10g or greater version of server");
+if (preg_match('/Release (11\.2|12)\./', oci_server_version($c), $matches) !== 1) {
+    // Bug fixed in 11.2 prevents client_info being rest
+	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+} else if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 10g or greater version of client");
 }
 ?>
 --FILE--
 <?php
+
+
 require(dirname(__FILE__)."/conn_attr.inc");
 
 $user='testuser';
@@ -56,6 +52,7 @@ var_dump(oci_set_action($c1,'ACTION1'));
 get_attr($c1,'ACTION');
 
 // Testing with different types of values
+// NB.  This may diff in 11.1.0.6 due to a bug causing CLIENT_INFO of NULL to be ignored.
 echo "\nSetting to different values \n";
 $values_array = array(1000,NULL,'this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!');
 

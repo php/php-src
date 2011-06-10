@@ -5,7 +5,10 @@ DRCP: privileged connect
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 require(dirname(__FILE__)."/details.inc");
-if (empty($oracle_on_localhost)) die("skip this test is unlikely to work with remote Oracle - unless an Oracle password file has been created");
+if (preg_match('/Compile-time ORACLE_HOME/', $phpinfo) !== 1) {
+    // Assume building PHP with an ORACLE_HOME means the tested DB is on the same machine as PHP
+    die("skip this test is unlikely to work with remote Oracle - unless an Oracle password file has been created");
+}
 ?>
 --INI--
 oci8.privileged_connect=1
@@ -26,22 +29,22 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: oci_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_connect(): ORA-01031: %s in %s on line %d
 bool(false)
 
-Warning: oci_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_connect(): ORA-01031: %s in %s on line %d
 bool(false)
 
-Warning: oci_new_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_new_connect(): ORA-01031: %s in %s on line %d
 bool(false)
 
-Warning: oci_new_connect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_new_connect(): ORA-01031: %s in %s on line %d
 bool(false)
 
-Warning: oci_pconnect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_pconnect(): ORA-01031: %s in %s on line %d
 bool(false)
 
-Warning: oci_pconnect(): ORA-01031: insufficient privileges in %s on line %d
+Warning: oci_pconnect(): ORA-01031: %s in %s on line %d
 bool(false)
 Done
 

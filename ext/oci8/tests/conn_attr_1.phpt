@@ -2,24 +2,17 @@
 Set and get of connection attributes with all types of connections.
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-require(dirname(__FILE__)."/connect.inc");
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+
 if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
 
-$sv = oci_server_version($c);
-$sv = preg_match('/Release 1[012]\./', $sv, $matches);
-if ($sv == 1) {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => 1[012]\./', $phpinfo);
-    if ($iv != 1) {
-        die ("skip test expected to work only with Oracle 10g or greater client ");
-    }
-}
-else {
-    die ("skip test expected to work only with Oracle 10g or greater server");
+if (preg_match('/Release 1[01]\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10g or greater database server");
+} else if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 10g or greater version of client");
 }
 
 ?>

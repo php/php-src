@@ -1,21 +1,27 @@
 --TEST--
 fetching the same lob several times
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 	
-require dirname(__FILE__).'/connect.inc';
+require(dirname(__FILE__).'/connect.inc');
 
-$drop = "DROP table lob_test";
-$statement = oci_parse($c, $drop);
-@oci_execute($statement);
+// Initialization
 
-$create = "CREATE table lob_test(mykey NUMBER, lob_1 CLOB)";
-$statement = oci_parse($c, $create);
-oci_execute($statement);
+$stmtarray = array(
+	"drop table lob_018_tab",
+	"create table lob_018_tab (mykey number, lob_1 clob)",
+);
 
-$init = "INSERT INTO lob_test (mykey, lob_1) VALUES(1, EMPTY_CLOB()) RETURNING lob_1 INTO :mylob";
+oci8_test_sql_execute($c, $stmtarray);
+
+echo "Test 1\n";
+
+$init = "insert into lob_018_tab (mykey, lob_1) values(1, empty_clob()) returning lob_1 into :mylob";
 $statement = oci_parse($c, $init);
 $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($statement, ":mylob", $clob, -1, OCI_B_CLOB);
@@ -24,7 +30,7 @@ $clob->save("data");
 
 oci_commit($c);
 
-$init = "INSERT INTO lob_test (mykey, lob_1) VALUES(2, EMPTY_CLOB()) RETURNING lob_1 INTO :mylob";
+$init = "insert into lob_018_tab (mykey, lob_1) values(2, empty_clob()) returning lob_1 into :mylob";
 $statement = oci_parse($c, $init);
 $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($statement, ":mylob", $clob, -1, OCI_B_CLOB);
@@ -34,7 +40,7 @@ $clob->save("long data");
 oci_commit($c);
 
 
-$query = 'SELECT * FROM lob_test ORDER BY mykey ASC';
+$query = 'select * from lob_018_tab order by mykey asc';
 $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
@@ -43,7 +49,9 @@ while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
 	var_dump($result);
 }
 
-$query = 'SELECT * FROM lob_test ORDER BY mykey DESC';
+echo "Test 2\n";
+
+$query = 'select * from lob_018_tab order by mykey desc';
 $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
@@ -52,16 +60,44 @@ while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
 	var_dump($result);
 }
 
-$drop = "DROP table lob_test";
-$statement = oci_parse($c, $drop);
-@oci_execute($statement);
+echo "Test 3 - bind with SQLT_CLOB (an alias for OCI_B_CLOB)\n";
 
-echo "Done\n";
+$init = "insert into lob_018_tab (mykey, lob_1) values(3, empty_clob()) returning lob_1 into :mylob";
+$statement = oci_parse($c, $init);
+$clob = oci_new_descriptor($c, OCI_D_LOB);
+oci_bind_by_name($statement, ":mylob", $clob, -1, SQLT_CLOB);
+oci_execute($statement, OCI_DEFAULT);
+$clob->save("more stuff");
+
+oci_commit($c);
+
+$query = 'select * from lob_018_tab where mykey = 3';
+$statement = oci_parse ($c, $query);
+oci_execute($statement, OCI_DEFAULT);
+
+while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
+	$result = $row['LOB_1']->load();
+	var_dump($result);
+}
+
+// Cleanup
+
+$stmtarray = array(
+    "drop table lob_018_tab"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
+===DONE===
+<?php exit(0); ?>
 --EXPECTF--
+Test 1
 string(4) "data"
 string(9) "long data"
+Test 2
 string(9) "long data"
 string(4) "data"
-Done
+Test 3 - bind with SQLT_CLOB (an alias for OCI_B_CLOB)
+string(10) "more stuff"
+===DONE===

@@ -17,17 +17,14 @@ function do_query($c)
 	}
 }
 
-$stmts = array(
+$stmtarray = array(
 	"drop table rid_tab",
 	"create table rid_tab (id number, address varchar2(40))",
 	"insert into rid_tab (id, address) values (1, 'original text #1')",
 	"insert into rid_tab (id, address) values (2, 'original text #2')"
 );
 
-foreach ($stmts as $q) {
-	$s = oci_parse($c, $q);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Initial Data\n";
 do_query($c);
@@ -54,12 +51,11 @@ do_query($c);
 
 // Cleanup
 
-$stmts = array("drop table rid_tab");
+$stmtarray = array(
+    "drop table rid_tab"
+);
 
-foreach ($stmts as $q) {
-	$s = oci_parse($c, $q);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

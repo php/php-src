@@ -104,7 +104,7 @@ array(4) {
   ["code"]=>
   int(1756)
   ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
+  string(48) "ORA-01756: %s"
   ["offset"]=>
   int(0)
   ["sqltext"]=>
@@ -115,7 +115,7 @@ array(4) {
   ["code"]=>
   int(1756)
   ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
+  string(48) "ORA-01756: %s"
   ["offset"]=>
   int(0)
   ["sqltext"]=>
@@ -126,17 +126,17 @@ array(4) {
   ["code"]=>
   int(1756)
   ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
+  string(48) "ORA-01756: %s"
   ["offset"]=>
   int(0)
   ["sqltext"]=>
   string(0) ""
 }
 No connection: error: bool(false)
-Normal connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
-New connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
-Persistent connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
+Normal connection (take #2): Parse error: ORA-01756: %s
+New connection (take #2): Parse error: ORA-01756: %s
+Persistent connection (take #2): Parse error: ORA-01756: %s
 Normal connection: New Collection error: OCI-22303: type ""."ABC" not found
-New connection (take #3): Parse error: ORA-01756: quoted string not properly terminated
-Persistent connection (take #3): Parse error: ORA-01756: quoted string not properly terminated
+New connection (take #3): Parse error: ORA-01756: %s
+Persistent connection (take #3): Parse error: ORA-01756: %s
 Done

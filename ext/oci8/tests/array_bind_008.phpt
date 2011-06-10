@@ -1,7 +1,10 @@
 --TEST--
 oci_bind_array_by_name() and invalid values 8
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -60,9 +63,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 Warning: oci_execute(): ORA-06550: line %d, column %d:
-PLS-00418: array bind type must match PL/SQL table row type
-ORA-06550: line %d, column %d:
-PL/SQL: Statement ignored in %s on line %d
+PLS-00418: %s
+ORA-06550: %s
+PL/SQL: %s
 array(5) {
   [0]=>
   string(1) "1"

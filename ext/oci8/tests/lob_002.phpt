@@ -1,21 +1,25 @@
 --TEST--
 oci_lob_write() and friends (with errors)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
 
-$ora_sql = "INSERT INTO
-                       ".$schema.$table_name." (blob)
-                      VALUES (empty_blob())
-                      RETURNING
-                               blob
-                      INTO :v_blob ";
+require(dirname(__FILE__).'/connect.inc');
 
-$statement = oci_parse($c,$ora_sql);
+// Initialization
+
+$stmtarray = array(
+	"drop table lob_002_tab",
+	"create table lob_002_tab (id number, b1 BLOB)",
+);
+
+oci8_test_sql_execute($c, $stmtarray);
+
+$statement = oci_parse($c, "insert into lob_002_tab (id, b1) values (1, empty_blob()) returning b1 INTO :v_blob ");
 $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
@@ -32,7 +36,7 @@ var_dump($blob->flush());
 
 oci_commit($c);
 
-$select_sql = "SELECT blob FROM ".$schema.$table_name."";
+$select_sql = "select b1 from lob_002_tab where id = 1";
 $s = oci_parse($c, $select_sql);
 oci_execute($s);
 
@@ -40,12 +44,17 @@ $row = oci_fetch_array($s, OCI_RETURN_LOBS);
 
 var_dump(strlen($row[0]));
 
+// Cleanup
 
-require dirname(__FILE__).'/drop_table.inc';
+$stmtarray = array(
+	"drop table lob_002_tab"
+);
 
-echo "Done\n";
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
+===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
@@ -63,4 +72,4 @@ Warning: OCI-Lob::seek() expects parameter 1 to be long, string given in %slob_0
 NULL
 bool(false)
 int(40004)
-Done
+===DONE===

@@ -4,18 +4,10 @@ SELECT oci_bind_by_name with SQLT_AFC aka CHAR and dates
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-$sv = oci_server_version($c);
-$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
-if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
-} else {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
-    if ($iv != 1) {
-        die ("skip test expected to work only with Oracle 11g or greater version of client");
-    }
+if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+} else if (preg_match('/^11\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
 --FILE--
@@ -32,10 +24,7 @@ $stmtarray = array(
 	"insert into bind_char_tab values (1, '2008-04-20')",
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -95,12 +84,7 @@ $stmtarray = array(
 	"drop table bind_char_tab"
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 
