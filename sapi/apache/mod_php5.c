@@ -499,6 +499,7 @@ static sapi_module_struct apache_sapi_module = {
 	NULL,							/* treat data */
 	NULL,							/* exe location */
 	0,								/* ini ignore */
+	0,								/* ini ignore cwd */
 	sapi_apache_get_fd,
 	sapi_apache_force_http_10,
 	sapi_apache_get_target_uid,
