@@ -385,6 +385,7 @@ int php_oci_connection_commit(php_oci_connection * TSRMLS_DC);
 int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC);
 
 int php_oci_password_change(php_oci_connection *, char *, int, char *, int, char *, int TSRMLS_DC);
+void php_oci_client_get_version(char ** TSRMLS_DC);
 int php_oci_server_get_version(php_oci_connection *, char ** TSRMLS_DC);
 
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int, int);
