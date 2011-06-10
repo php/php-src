@@ -887,7 +887,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 		 * their reallocation but (i) any IN binds either interned or
 		 * not should already be null terminated and (ii) for OUT
 		 * binds, php_oci_bind_out_callback() should have allocated a
-		 * new string that can be realloced.
+		 * new string that we can modify here.
 		 */
 		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRLEN_P(bind->zval)+1);
 		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
