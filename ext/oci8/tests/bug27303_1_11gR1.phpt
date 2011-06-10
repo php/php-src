@@ -13,18 +13,16 @@ if ($sv !== 1) {
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-	
-$create_st = array();
-$create_st[] = "drop sequence myseq";
-$create_st[] = "drop table mytab";
-$create_st[] = "create sequence myseq";
-$create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
+require(dirname(__FILE__).'/connect.inc');
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	@oci_execute($stmt);
-}
+$stmtarray = array(
+    "drop sequence myseq",
+    "drop table mytab",
+    "create sequence myseq",
+    "create table mytab (mydata varchar2(20), seqcol number)"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
 
 define('MYLIMIT', 200);
 
@@ -44,14 +42,12 @@ for ($i = 1; $i < MYLIMIT; $i++) {
 
 OCICommit($c);
 
-$drop_st = array();
-$drop_st[] = "drop sequence myseq";
-$drop_st[] = "drop table mytab";
+$stmtarray = array(
+    "drop sequence myseq",
+    "drop table mytab"
+);
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>

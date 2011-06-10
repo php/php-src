@@ -1,7 +1,10 @@
 --TEST--
 Bug #46994 (CLOB size does not update when using CLOB IN OUT param in stored procedure)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -22,10 +25,7 @@ $stmtarray = array(
          end bug46994_proc2;"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -64,10 +64,7 @@ $stmtarray = array(
 	"drop procedure bug46994_proc2"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 oci_close($c);
 

@@ -1,7 +1,10 @@
 --TEST--
 PECL Bug #16842 (NO_DATA_FOUND exception is a warning)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --INI--
 error_reporting = E_WARNING
 --FILE--
@@ -39,15 +42,15 @@ Raises NO_DATA_FOUND
 Warning: oci_execute(): OCI_NO_DATA in %s on line 11
 bool(false)
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(1403)
-  [%u|b%"message"]=>
-  %unicode|string%(45) "ORA-01403: %s
+  ["message"]=>
+  string(%d) "ORA-01403: %s
 ORA-06512: at line 1"
-  [%u|b%"offset"]=>
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(31) "begin raise NO_DATA_FOUND; end;"
+  ["sqltext"]=>
+  string(31) "begin raise NO_DATA_FOUND; end;"
 }
 Test 2
 Raises ZERO_DIVIDE
@@ -56,14 +59,14 @@ Warning: oci_execute(): ORA-01476: %s
 ORA-06512: at line 1 in %s on line 19
 bool(false)
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(1476)
-  [%u|b%"message"]=>
-  %unicode|string%(56) "ORA-01476: %s
+  ["message"]=>
+  string(%d) "ORA-01476: %s
 ORA-06512: at line 1"
-  [%u|b%"offset"]=>
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(29) "begin raise ZERO_DIVIDE; end;"
+  ["sqltext"]=>
+  string(29) "begin raise ZERO_DIVIDE; end;"
 }
 ===DONE===

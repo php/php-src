@@ -21,10 +21,7 @@ if (!empty($dbase))
 else
 	$c1 = oci_new_connect($user,$password);
 						 
-foreach ($stmtarray as $stmt) {
-	$s1 = oci_parse($c1, $stmt);
-	@oci_execute($s1);
-}
+oci8_test_sql_execute($c1, $stmtarray);
 
 // Run Test
 
@@ -73,17 +70,14 @@ $stmtarray = array(
 	"drop table scope_try6_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s1 = oci_parse($c1, $stmt);
-	oci_execute($s1);
-}
+oci8_test_sql_execute($c1, $stmtarray);
 
 echo "Done\n";
 
 ?>
 --EXPECTF--
 Test 1
-Caught Exception: oci_execute(): ORA-00984: %s
+Caught Exception: oci_execute(): ORA-%r(00984|57000: TT2957)%r: %s
 resource(%d) of type (oci8 persistent connection)
 array(1) {
   ["C1"]=>

@@ -2,7 +2,8 @@
 PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback) 
 --SKIPIF--
 <?php 
-if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
+require(dirname(__FILE__).'/skipif.inc');
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 ?>
 --INI--

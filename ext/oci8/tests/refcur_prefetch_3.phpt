@@ -6,19 +6,10 @@ oci8.default_prefetch=5
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-ob_start();
-phpinfo(INFO_MODULES);
-$phpinfo = ob_get_clean();
-$iv = preg_match('/Oracle .*Version => (11\.2|12\.)/', $phpinfo);
-if ($iv == 1) {
-    $sv = oci_server_version($c);
-    $sv = preg_match('/Release (11\.2|12\.)/', $sv, $matches);
-    if ($sv != 1) {
-        die ("skip expected output only valid when using Oracle 11.2 or greater server");
-    }
-}
-else {
-    die ("skip expected output only valid when using Oracle 11.2 or greater client");
+if (preg_match('/Release (11\.2|12)\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 11gR2 or greater databases");
+} else if (preg_match('/^(11\.2|12)\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 
 ?>
@@ -32,16 +23,8 @@ $stmtarray = array(
     "create table nescurtest(c1 varchar2(10))"
 );
 
-foreach($stmtarray as $stmt) {
-    $s = oci_parse($c,$stmt);
-    $r = @oci_execute($s);
-    if (!$r) {
-        $msg = oci_error($s);
-		if ($msg['code'] !=942) {
-            echo $msg['message'],"\n";
-		}
-    }
-}
+oci8_test_sql_execute($c, $stmtarray);
+
 // Insert 500 rows into the table.
 $insert_sql = "INSERT INTO nescurtest (c1) VALUES (:c1)";
 if (!($s = oci_parse($c, $insert_sql))) {
@@ -92,15 +75,8 @@ $stmtarray = array(
     "drop table nescurtest"
 );
 
-foreach($stmtarray as $stmt) {
-    $s = oci_parse($c,$stmt);
-    $r = @oci_execute($s);
-    if (!$r) {
-        $msg = oci_error($s);
-        echo $msg['message'],"\n";
-    }
-}
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
+
 echo "Done\n";
 ?>
 --EXPECTF--

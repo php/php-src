@@ -1,30 +1,23 @@
 --TEST--
 oci_fetch_assoc()
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
 --FILE--
 <?php
 
 require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
 
-$insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
+$stmtarray = array(
+	"drop table fetch_assoc_tab",
+	"create table fetch_assoc_tab (id number, value number, dummy varchar2(20))",
+	"insert into fetch_assoc_tab values (1,1,null)",
+	"insert into fetch_assoc_tab values (1,1,null)",
+	"insert into fetch_assoc_tab values (1,1,null)"
+);
 
-if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
-}
+oci8_test_sql_execute($c, $stmtarray);
 
-for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
-	}
-}
-
-if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
-}
-
-$select_sql = "SELECT * FROM ".$schema."".$table_name."";
+$select_sql = "select * from fetch_assoc_tab";
 
 if (!($s = oci_parse($c, $select_sql))) {
 	die("oci_parse(select) failed!\n");
@@ -37,46 +30,40 @@ while ($row = oci_fetch_assoc($s)) {
 	var_dump($row);
 }
 
-require dirname(__FILE__).'/drop_table.inc';
+// Clean up
+
+$stmtarray = array(
+	"drop table fetch_assoc_tab"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 
 ?>
 --EXPECT--
-array(5) {
+array(3) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
+  ["DUMMY"]=>
   NULL
 }
-array(5) {
+array(3) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
+  ["DUMMY"]=>
   NULL
 }
-array(5) {
+array(3) {
   ["ID"]=>
   string(1) "1"
   ["VALUE"]=>
   string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
+  ["DUMMY"]=>
   NULL
 }
 Done

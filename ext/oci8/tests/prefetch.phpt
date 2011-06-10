@@ -17,23 +17,7 @@ $stmtarray = array(
     "insert into prefetch_tab (id, value) values (1,1)",
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-                        942 // table or view does not exist
-                ))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
-
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -58,10 +42,7 @@ $stmtarray = array(
     "drop table prefetch_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>

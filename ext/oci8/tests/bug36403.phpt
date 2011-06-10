@@ -1,7 +1,12 @@
 --TEST--
 Bug #36403 (oci_execute no longer supports OCI_DESCRIBE_ONLY)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
+    die("skip expected output only valid with Oracle 10g or greater version of client");
+}
+?>
 --FILE--
 <?php
 
@@ -14,21 +19,7 @@ $stmtarray = array(
 	"create table bug36403_tab (c1 number, col2 number, column3 number, col4 number)"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-				942 // table or view does not exist
-			,  2289 // sequence does not exist
-			,  4080 // trigger does not exist
-			, 38802 // edition does not exist
-				))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -48,18 +39,11 @@ $row = oci_fetch_array($s);
 
 // Clean up
 
-//require(dirname(__FILE__).'/drop_table.inc');
-
 $stmtarray = array(
 	"drop table bug36403_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
@@ -72,5 +56,5 @@ COL2
 C1
 Test 2
 
-Warning: oci_fetch_array(): ORA-24338: %sbug36403.php on line %d
+Warning: oci_fetch_array(): ORA-%r(24338|01002)%r: %sbug36403.php on line %d
 ===DONE===

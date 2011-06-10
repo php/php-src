@@ -1,7 +1,10 @@
 --TEST--
 Bug #37581 (oci_bind_array_by_name clobbers input array when using SQLT_AFC, AVC)
 --SKIPIF--
-<?php if (!extension_loaded("oci8")) print "skip"; ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 

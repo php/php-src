@@ -4,26 +4,17 @@ Basic test for setting Oracle 11gR2 "edition" attribute
 <?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
 require(dirname(__FILE__)."/connect.inc");
-if (strcasecmp($user, "system") && strcasecmp($user, "sys")) 
+if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
-if ($test_drcp) 
+}
+if ($test_drcp) {
     die("skip as Output might vary with DRCP");
-
-$sv = oci_server_version($c);
-$sv = preg_match('/Release (11\.2|12)/', $sv, $matches);
-if ($sv == 1) {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => (11\.2|12)/', $phpinfo);
-    if ($iv != 1) {
-        die ("skip tests a feature that works only with Oracle 11gR2 or greater version of client");
-    }
 }
-else {
-    die ("skip tests a feature that works only with Oracle 11gR2 or greater version of server");
+if (preg_match('/Release (1[1]\.2|12)\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 11gR2 or greater databases");
+} else if (preg_match('/^(11\.2|12)\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
-
 ?>
 --FILE--
 <?php
@@ -62,10 +53,7 @@ $stmtarray = array(
     "create or replace editioning view view_ed as select name,age,job from edit_tab",
 );
 
-foreach ($stmtarray as $stmt) {
-    $s = oci_parse($conn, $stmt);
-    @oci_execute($s);
-}
+oci8_test_sql_execute($conn, $stmtarray);
 
 // Check the current edition of the DB and the contents of view_ed.
 get_edit_attr($conn);

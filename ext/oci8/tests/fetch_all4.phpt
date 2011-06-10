@@ -15,21 +15,7 @@ $stmtarray = array(
 	"insert into fetch_all4_tab values (1, 'abc')"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-			    942 // table or view does not exist
-			,  2289 // sequence does not exist
-			,  4080 // trigger does not exist
-                        , 38802 // edition does not exist
-                ))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -56,12 +42,7 @@ $stmtarray = array(
 	"drop table fetch_all4_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===

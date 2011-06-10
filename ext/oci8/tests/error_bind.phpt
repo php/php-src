@@ -65,6 +65,6 @@ Test 3 - Resource mismatch !!
 
 Warning: oci_bind_by_name(): Invalid variable used for bind in %s on line %d
 
-Warning: oci_execute(): ORA-01008: %s on line %d
+Warning: oci_execute(): ORA-%r(01008|57000)%r: %s on line %d
 bool(false)
 Done

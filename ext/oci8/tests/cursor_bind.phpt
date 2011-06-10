@@ -1,54 +1,34 @@
 --TEST--
 bind and fetch cursor from a statement
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$drop_table = "DROP TABLE ".$schema.$table_name."";
+// Initialization
 
-if (!($s = oci_parse($c, $drop_table))) {
-	die("oci_parse(drop) failed!\n");
-}
+$stmtarray = array(
+    "drop table cursor_bind_tab",
+    "create table cursor_bind_tab (id NUMBER, value VARCHAR(20))",
+    "insert into cursor_bind_tab values (1, '1')",
+    "insert into cursor_bind_tab values (1, '1')",
+    "insert into cursor_bind_tab values (1, '1')"
+);
 
-@oci_execute($s);
-
-$create_table = "CREATE TABLE ".$schema.$table_name." (id NUMBER, value VARCHAR(20))";
-
-if (!($s = oci_parse($c, $create_table))) {
-	die("oci_parse(create) failed!\n");
-}
-
-if (!oci_execute($s)) {
-	die("oci_execute(create) failed!\n");
-}
-
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
-
-if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
-}
-
-for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
-	}
-}
-
-if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
-}
-
+oci8_test_sql_execute($c, $stmtarray);
 
 $sql = "
 DECLARE
 TYPE curtype IS REF CURSOR;
 cursor_var curtype;
 BEGIN
-	OPEN cursor_var FOR SELECT id, value FROM ".$schema.$table_name.";
-	:curs := cursor_var;
+    OPEN cursor_var FOR SELECT id, value FROM cursor_bind_tab;
+    :curs := cursor_var;
 END;
 ";
 
@@ -65,18 +45,18 @@ var_dump(oci_fetch_row($cursor));
 var_dump(oci_fetch_row($cursor));
 var_dump(oci_fetch_row($cursor));
 
-echo "Done\n";
+// Clean up
 
-$drop_table = "DROP TABLE ".$schema.$table_name."";
+$stmtarray = array(
+    "drop table cursor_bind_tab"
+);
 
-if (!($s = oci_parse($c, $drop_table))) {
-	die("oci_parse(drop) failed!\n");
-}
-
-@oci_execute($s);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
---EXPECT--	
+===DONE===
+<?php exit(0); ?>
+--EXPECT--  
 array(2) {
   [0]=>
   string(1) "1"
@@ -96,4 +76,4 @@ array(2) {
   string(1) "1"
 }
 bool(false)
-Done
+===DONE===

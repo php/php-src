@@ -20,9 +20,9 @@ if(oci_execute($stmt, OCI_COMMIT_ON_SUCCESS)){
 echo "Done\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
-string(5) "'ABC'"
+string(%r[53]%r) "%r('ABC'|EXP)%r"
 string(4) "CHAR"
 Done
