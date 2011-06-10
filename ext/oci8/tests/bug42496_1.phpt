@@ -1,7 +1,11 @@
 --TEST--
 Bug #42496 (LOB fetch leaks cursors, eventually failing with ORA-1000 maximum open cursors reached)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
+?> 
 --FILE--
 <?php
 
@@ -17,10 +21,7 @@ $stmtarray = array(
 	"INSERT INTO bug42496_tab VALUES('test3', 'test3')"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -48,12 +49,7 @@ $stmtarray = array(
 	"DROP table bug42496_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 --EXPECTF--

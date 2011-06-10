@@ -7,7 +7,7 @@ oci_bind_array_by_name(), SQLT_CHR, default max_length and empty array
 
 require dirname(__FILE__).'/connect.inc';
 
-$statement = oci_parse($c, 'SELECT user FROM v$session');
+$statement = oci_parse($c, 'SELECT user FROM all_objects');
 
 $array = array();
 

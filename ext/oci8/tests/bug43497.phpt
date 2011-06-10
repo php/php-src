@@ -2,13 +2,11 @@
 Bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
 --SKIPIF--
 <?php 
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
-ob_start();
-phpinfo(INFO_MODULES);
-$phpinfo = ob_get_clean();
-$ov = preg_match('/Oracle Version => 9/', $phpinfo);
-if ($ov === 1) {
-	die ("skip expected output only valid for Oracle clients from 10g onwards");
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
+if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
+    die("skip expected output only valid with Oracle 10g or greater version of client");
 }
 ?>
 --FILE--

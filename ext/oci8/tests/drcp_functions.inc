@@ -14,7 +14,7 @@ function drcp_create_table($conn)
 	$dept_values = array("ACCOUNTS","HR","HR","ADMIN","ACCOUNTS","HR",
 						 "ACCOUNTS","HR","ACCOUNTS");
 	for($i=0; $i<8; $i++) {
-		$insert = "INSERT INTO DRCPTEST VALUES('".$id_values[$i]."','". $name_values[$i]."','".$dept_values[$i]."')";
+		$insert = "INSERT INTO DRCPTEST VALUES(".$id_values[$i].",'". $name_values[$i]."','".$dept_values[$i]."')";
 		$s = oci_parse($conn, $insert);
 		oci_execute($s);
 	}	

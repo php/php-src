@@ -4,35 +4,25 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-$sv = oci_server_version($c);
-$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
-if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 19gR2 or 11gR2 databases");
-} else {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
-    if ($iv != 1) {
-        die ("skip test expected to work only with Oracle 11g or greater version of client");
-    }
+if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+} else if (preg_match('/^11\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require(dirname(__FILE__).'/connect.inc');
 	
-$create_st = array();
-$create_st[] = "drop sequence myseq";
-$create_st[] = "drop table mytab";
-$create_st[] = "create sequence myseq";
-$create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
+$stmtarray = array(
+    "drop sequence myseq",
+    "drop table mytab",
+    "create sequence myseq",
+    "create table mytab (mydata varchar2(20), seqcol number)"
+);
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	@oci_execute($stmt);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 define('MYLIMIT', 200);
 
@@ -52,14 +42,12 @@ for ($i = 1; $i < MYLIMIT; $i++) {
 
 OCICommit($c);
 
-$drop_st = array();
-$drop_st[] = "drop sequence myseq";
-$drop_st[] = "drop table mytab";
+$stmtarray = array(
+    "drop sequence myseq",
+    "drop table mytab"
+);
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>

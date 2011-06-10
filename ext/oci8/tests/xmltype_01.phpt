@@ -1,8 +1,10 @@
 --TEST--
 Basic XMLType test
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
-<?php if (!extension_loaded("simplexml")) die("skip no simplexml extension"); ?>
+<?php 
+if (!extension_loaded("simplexml")) die("skip no simplexml extension");
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
 --FILE--
 <?php
 
@@ -10,7 +12,7 @@ require(dirname(__FILE__)."/connect.inc");
 
 // Initialization
 
-$stmts = array(
+$stmtarray = array(
 	"drop table xtt",
 	"create table xtt
 		   (xt_id number, xt_spec xmltype)
@@ -31,16 +33,7 @@ $stmts = array(
 		</Xt>'))"
 );
 
-foreach ($stmts as $q) {
-	$s = oci_parse($c, $q);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if ($m['code'] != 942) {  // table or view doesn't exist
-			echo $m['message'], "\n";
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 function do_query($c)
 {
@@ -78,14 +71,11 @@ $data = do_query($c);
 
 // Cleanup
 
-$stmts = array(
+$stmtarray = array(
 	"drop table xtt",
 );
 
-foreach ($stmts as $q) {
-	$s = oci_parse($c, $q);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

@@ -21,10 +21,7 @@ $stmtarray = array(
 	"create or replace function bind_char_3_fn(p1 char) return char as begin return p1; end;",
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -235,18 +232,11 @@ function do_e($s)
 
 // Cleanup
 
-//require(dirname(__FILE__).'/drop_table.inc');
-
 $stmtarray = array(
 	"drop function bind_char_3_fn"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

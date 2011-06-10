@@ -15,11 +15,11 @@ var_dump(oci_fetch_array($stmt, OCI_RETURN_NULLS));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--	
 array(2) {
   [0]=>
   NULL
-  ["NULL"]=>
+  ["%r(NULL|EXP)%r"]=>
   NULL
 }
 Done

@@ -19,10 +19,7 @@ if (!empty($dbase))
 else
 	$c1 = oci_new_connect($user,$password);
 						 						 
-foreach ($stmtarray as $stmt) {
-	$s1 = oci_parse($c1, $stmt);
-	@oci_execute($s1);
-}
+oci8_test_sql_execute($c1, $stmtarray);
 
 // Run Test
 
@@ -66,10 +63,7 @@ $stmtarray = array(
 	"drop table connect_scope1_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s1 = oci_parse($c1, $stmt);
-	oci_execute($s1);
-}
+oci8_test_sql_execute($c1, $stmtarray);
 
 echo "Done\n";
 

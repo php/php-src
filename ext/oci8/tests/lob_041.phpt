@@ -1,7 +1,10 @@
 --TEST--
 Check LOBS are valid after statement free
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -15,10 +18,7 @@ $stmtarray = array(
 	"INSERT INTO lob_041_tab VALUES('test data')"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Test 1 - explicit statement close\n";
 
@@ -60,12 +60,7 @@ $stmtarray = array(
 	"DROP table lob_041_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 

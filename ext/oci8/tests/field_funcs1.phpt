@@ -1,5 +1,5 @@
 --TEST--
-oci_field_*() family
+oci_field_*() family: error cases
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--
@@ -14,40 +14,25 @@ $stmtarray = array(
     "create table field_funcs1_tab (id number, value number)",
     "insert into field_funcs1_tab (id, value) values (1,1)",
     "insert into field_funcs1_tab (id, value) values (1,1)",
-    "insert into field_funcs1_tab (id, value) values (1,1)",
+    "insert into field_funcs1_tab (id, value) values (1,1)"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-                        942 // table or view does not exist
-                ))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
-
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
 if (!($s = oci_parse($c, "select * from field_funcs1_tab"))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 
 $row = oci_fetch_array($s, OCI_NUM + OCI_RETURN_NULLS + OCI_RETURN_LOBS);
 var_dump($row);
 
+echo "Test 1\n";
 var_dump(oci_field_is_null($s, -1));
 var_dump(oci_field_name($s, -1));
 var_dump(oci_field_type($s, -1));
@@ -56,6 +41,7 @@ var_dump(oci_field_scale($s, -1));
 var_dump(oci_field_precision($s, -1));
 var_dump(oci_field_size($s, -1));
 
+echo "Test 2\n";
 var_dump(oci_field_is_null($s, "none"));
 var_dump(oci_field_name($s, "none"));
 var_dump(oci_field_type($s, "none"));
@@ -64,6 +50,7 @@ var_dump(oci_field_scale($s, "none"));
 var_dump(oci_field_precision($s, "none"));
 var_dump(oci_field_size($s, "none"));
 
+echo "Test 3\n";
 var_dump(oci_field_is_null($c, -1));
 var_dump(oci_field_name($c, -1));
 var_dump(oci_field_type($c, -1));
@@ -72,6 +59,7 @@ var_dump(oci_field_scale($c, -1));
 var_dump(oci_field_precision($c, -1));
 var_dump(oci_field_size($c, -1));
 
+echo "Test 4\n";
 var_dump(oci_field_is_null($s, array()));
 var_dump(oci_field_name($s, array()));
 var_dump(oci_field_type($s, array()));
@@ -89,10 +77,7 @@ $stmtarray = array(
     "drop table field_funcs1_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 
@@ -104,6 +89,7 @@ array(2) {
   [1]=>
   %unicode|string%(1) "1"
 }
+Test 1
 
 Warning: oci_field_is_null(): Invalid column index "-1" in %s on line %d
 bool(false)
@@ -125,6 +111,7 @@ bool(false)
 
 Warning: oci_field_size(): Invalid column index "-1" in %s on line %d
 bool(false)
+Test 2
 
 Warning: oci_field_is_null(): Invalid column name "none" in %s on line %d
 bool(false)
@@ -146,6 +133,7 @@ bool(false)
 
 Warning: oci_field_size(): Invalid column name "none" in %s on line %d
 bool(false)
+Test 3
 
 Warning: oci_field_is_null(): supplied resource is not a valid oci8 statement resource in %s on line %d
 bool(false)
@@ -167,6 +155,7 @@ bool(false)
 
 Warning: oci_field_size(): supplied resource is not a valid oci8 statement resource in %s on line %d
 bool(false)
+Test 4
 
 Warning: oci_field_is_null(): Invalid column index "0" in %s on line %d
 bool(false)
