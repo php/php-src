@@ -61,7 +61,7 @@ echo "Done\n";
 --EXPECTF--	
 Warning: oci_bind_array_by_name(): Unknown or unsupported datatype given: -1 in %s on line %d
 
-Warning: oci_execute(): ORA-01008: not all variables bound in %s on line %d
+Warning: oci_execute(): ORA-%r(01008|57000)%r: %s in %s on line %d
 array(5) {
   [0]=>
   int(1)

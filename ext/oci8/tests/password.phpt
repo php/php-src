@@ -11,20 +11,16 @@ if ($test_drcp) die("skip password change not supported in DRCP Mode");
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/details.inc");
+require(dirname(__FILE__)."/connect.inc");
 
-// Create a user we can stuff around with and not affect subsequent tests
-$c0 = oci_connect($user, $password, $dbase);
-$stmts = array(
-	"drop user testuser",
-	"begin
-	 execute immediate 'create user testuser identified by testuserpwd';
-	 execute immediate 'grant connect, create session to testuser';
-	end;");
-foreach ($stmts as $sql) {
-	$s = oci_parse($c0, $sql);
-	@oci_execute($s);
-}
+$stmtarray = array(
+	"drop user testuser cascade",
+	"create user testuser identified by testuserpwd",
+    "grant connect, create session to testuser"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
+
 
 // Connect and change the password
 $c1 = oci_connect("testuser", "testuserpwd", $dbase);
@@ -62,16 +58,19 @@ else {
 	var_dump($c2);
 }
 
-// Clean up
-oci_close($c1);
-oci_close($c2);
-oci_close($c3);
-
-// Clean up
-$s = oci_parse($c0, "drop user cascade testuser");
-@oci_execute($s);
-
 echo "Done\n";
+
+?>
+--CLEAN--
+<?php
+
+require(dirname(__FILE__)."/connect.inc");
+
+$stmtarray = array(
+    "drop user testuser cascade"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 --EXPECTF--

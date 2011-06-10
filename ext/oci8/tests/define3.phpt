@@ -1,7 +1,10 @@
 --TEST--
 Test oci_define_by_name() LOB descriptor
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -12,10 +15,7 @@ $stmtarray = array(
 	"create table phpdefblobtable (id number(10), fileimage blob)"
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Load data
 $stmt = oci_parse ($c, "insert into phpdefblobtable (id, fileimage) values (:id, empty_blob()) returning fileimage into :fileimage");
@@ -75,8 +75,11 @@ while (oci_fetch($stmt)) {
    echo "file md5:" . md5($fid->load()) . "\n";
 }
 
-$stmt = oci_parse($c, "drop table phpdefblobtable");
-oci_execute($stmt);
+$stmtarray = array(
+	"drop table phpdefblobtable"
+);
+						 
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

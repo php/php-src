@@ -4,19 +4,10 @@ Prefetch with REF cursor. Test No 2
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-ob_start();
-phpinfo(INFO_MODULES);
-$phpinfo = ob_get_clean();
-$iv = preg_match('/Oracle .*Version => (11\.2|12\.)/', $phpinfo);
-if ($iv == 1) {
-    $sv = oci_server_version($c);
-    $sv = preg_match('/Release 1[012]\./', $sv, $matches);
-    if ($sv != 1) {
-        die ("skip expected output only valid when using Oracle 10g or greater server");
-    }
-}
-else {
-    die ("skip expected output only valid when using  Oracle 11.1 or greater client");
+if (preg_match('/Release 1[012]\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10g or greater databases");
+} else if (preg_match('/^(11\.2|12)\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 ?>
 --FILE--
@@ -45,16 +36,7 @@ $stmtarray = array(
          end refcurpkg;"
 	);
 
-foreach($stmtarray as $stmt) {
-	$s = oci_parse($c,$stmt);
-	$r = @oci_execute($s);
-    if (!$r) {
-		$msg = oci_error($s);
-		if ($msg['code'] != 942) {
-            echo $msg['message'],"\n";
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Insert 500 rows into the table.
 $insert_sql = "INSERT INTO refcurtest (c1, c2) VALUES (:c1,:c2)";
@@ -85,13 +67,13 @@ if (!oci_bind_by_name($s1,":cur1",$cur1,-1,SQLT_RSET)) {
 
 $sql2 = "begin refcurpkg.fetch_ref_cur(:curs1,:c1,:c2); end;";
 $s2 = oci_parse($c,$sql2);
-if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
+if (!oci_bind_by_name($s2, ":curs1", $cur1, -1, SQLT_RSET)) {
     die("oci_bind_by_name(sql2) failed!\n");
 }
-if (!oci_bind_by_name($s2,":c1",$c1,SQLT_INT)) {
+if (!oci_bind_by_name($s2, ":c1", $c1, -1, SQLT_INT)) {
     die("oci_bind_by_name(sql2) failed!\n");
 }
-if (!oci_bind_by_name($s2,":c2",$c2,SQLT_AFC)) {
+if (!oci_bind_by_name($s2, ":c2", $c2, 20, SQLT_CHR)) {
     die("oci_bind_by_name(sql2) failed!\n");
 }
 
@@ -124,7 +106,7 @@ if (!oci_bind_by_name($s1,":cur1",$cur1,-1,SQLT_RSET)) {
     die("oci_bind_by_name(sql1) failed!\n");
 }
 
-echo "Fetch Row  from PHP\n";
+echo "Fetch Row from PHP\n";
 oci_execute($s1);
 oci_execute($cur1);
 var_dump(oci_fetch_row($cur1));
@@ -135,54 +117,9 @@ if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
     die("oci_bind_by_name(sql2) failed!\n");
 }
 oci_execute($s2);
-echo "Fetch Row  from PL/SQL\n";
+echo "Fetch Row from PL/SQL\n";
 var_dump($c1);
 var_dump($c2);
-
-echo "------Test 3 - Set Prefetch after PL/SQL fetch ----------\n";
-$cur1 = oci_new_cursor($c);
-// Fetch from PL/SQL 
-if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
-    die("oci_bind_by_name(sql2) failed!\n");
-}
-oci_execute($s2);
-echo "Fetch Row  from PL/SQL\n";
-var_dump($c1);
-var_dump($c2);
-
-// Fetch from PHP
-echo "Fetch Row  from PHP\n";
-if (!oci_bind_by_name($s1,":cur1",$cur1,-1,SQLT_RSET)) {
-    die("oci_bind_by_name(sql1) failed!\n");
-}
-oci_set_prefetch($cur1,5);
-oci_execute($s1);
-oci_execute($cur1);
-var_dump(oci_fetch_row($cur1));
-
-echo "------Test 4- Overwrite prefetch-----------\n";
-// Fetch from PHP
-$cur1 = oci_new_cursor($c);
-if (!oci_bind_by_name($s1,":cur1",$cur1,-1,SQLT_RSET)) {
-    die("oci_bind_by_name(sql1) failed!\n");
-}
-echo "Fetch Row  from PHP\n";
-oci_execute($s1);
-oci_execute($cur1);
-var_dump(oci_fetch_row($cur1));
-oci_set_prefetch($cur1,5);
-oci_set_prefetch($cur1,0);
-oci_set_prefetch($cur1,100);
-
-// Fetch from PL/SQL
-if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
-    die("oci_bind_by_name(sql2) failed!\n");
-}
-oci_execute($s2);
-echo "Fetch Row  from PL/SQL\n";
-var_dump($c1);
-var_dump($c2);
-
 
 function  print_roundtrips($c) {
     $sql_stmt = "select value from v\$mystat a,v\$statname c where
@@ -201,117 +138,83 @@ $stmtarray = array(
     "drop table refcurtest"
 );
 
-foreach($stmtarray as $stmt) {
-    $s = oci_parse($c,$stmt);
-    $r = @oci_execute($s);
-    if (!$r) {
-        $msg = oci_error($s);
-        echo $msg['message'],"\n";
-    }
-}
+oci8_test_sql_execute($c, $stmtarray);
 
-oci_close($c);
 echo "Done\n";
 ?>
 --EXPECTF--
 ------Test 1- Check Roundtrips with  prefetch 0 and 5 -----------
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(1) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(5) "test0"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(%d) "test1"
+  string(5) "test1"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "2"
+  string(1) "2"
   [1]=>
-  %unicode|string%(%d) "test2"
+  string(5) "test2"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "3"
+  string(1) "3"
   [1]=>
-  %unicode|string%(%d) "test3"
+  string(5) "test3"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "4"
+  string(1) "4"
   [1]=>
-  %unicode|string%(%d) "test4"
+  string(5) "test4"
 }
 Number of roundtrips made with prefetch count 0 for 5 rows is  6
 array(2) {
   [0]=>
-  %unicode|string%(%d) "5"
+  string(1) "5"
   [1]=>
-  %unicode|string%(%d) "test5"
+  string(5) "test5"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "6"
+  string(1) "6"
   [1]=>
-  %unicode|string%(%d) "test6"
+  string(5) "test6"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "7"
+  string(1) "7"
   [1]=>
-  %unicode|string%(%d) "test7"
+  string(5) "test7"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "8"
+  string(1) "8"
   [1]=>
-  %unicode|string%(%d) "test8"
+  string(5) "test8"
 }
 array(2) {
   [0]=>
-  %unicode|string%(%d) "9"
+  string(1) "9"
   [1]=>
-  %unicode|string%(%d) "test9"
+  string(5) "test9"
 }
 Number of roundtrips made with prefetch count 5 for 5 rows is  2
 ------Test 2 - Set Prefetch before PL/SQL fetch ----------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(1) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(5) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "101"
-%unicode|string%(%d) "test101"
-------Test 3 - Set Prefetch after PL/SQL fetch ----------
-
-Warning: oci_execute(): ORA-01001: %s
-ORA-06512: at "%s.REFCURPKG", line %d
-ORA-06512: at line %d in %s on line %d
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "101"
-%unicode|string%(%d) "test101"
-Fetch Row  from PHP
-array(2) {
-  [0]=>
-  %unicode|string%(%d) "0"
-  [1]=>
-  %unicode|string%(%d) "test0"
-}
-------Test 4- Overwrite prefetch-----------
-Fetch Row  from PHP
-array(2) {
-  [0]=>
-  %unicode|string%(%d) "0"
-  [1]=>
-  %unicode|string%(%d) "test0"
-}
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "101"
-%unicode|string%(%d) "test101"
+Fetch Row from PL/SQL
+int(101)
+string(%d) "test101"
 Done

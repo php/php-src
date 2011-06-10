@@ -1,7 +1,10 @@
 --TEST--
 Basic XMLType test #2
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -14,20 +17,7 @@ $stmtarray = array(
 	"create table xmltype_02_tab (warehouse_id number, warehouse_spec xmltype)",
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-			   942 // table or view does not exist
-			, 2289 // sequence does not exist
-			, 4080 // trigger does not exist
-                ))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -109,18 +99,11 @@ $row[0]->free();
 
 // Clean up
 
-//require(dirname(__FILE__).'/drop_table.inc');
-
 $stmtarray = array(
 	"drop table xmltype_02_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
@@ -130,57 +113,57 @@ Test 1 Insert new XML data using a temporary CLOB
 array(1) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    [%u|b%"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }
 Test 2 Manipulate the data using SimpleXML
 object(SimpleXMLElement)#%d (10) {
-  [%u|b%"WarehouseId"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"WarehouseName"]=>
-  %unicode|string%(16) "Southlake, Texas"
-  [%u|b%"Building"]=>
-  %unicode|string%(5) "Owned"
-  [%u|b%"Area"]=>
-  %unicode|string%(5) "25000"
-  [%u|b%"Docks"]=>
-  %unicode|string%(1) "2"
-  [%u|b%"DockType"]=>
-  %unicode|string%(9) "Rear load"
-  [%u|b%"WaterAccess"]=>
-  %unicode|string%(4) "true"
-  [%u|b%"RailAccess"]=>
-  %unicode|string%(1) "N"
-  [%u|b%"Parking"]=>
-  %unicode|string%(6) "Street"
-  [%u|b%"VClearance"]=>
-  %unicode|string%(2) "10"
+  ["WarehouseId"]=>
+  string(1) "1"
+  ["WarehouseName"]=>
+  string(16) "Southlake, Texas"
+  ["Building"]=>
+  string(5) "Owned"
+  ["Area"]=>
+  string(5) "25000"
+  ["Docks"]=>
+  string(1) "2"
+  ["DockType"]=>
+  string(9) "Rear load"
+  ["WaterAccess"]=>
+  string(4) "true"
+  ["RailAccess"]=>
+  string(1) "N"
+  ["Parking"]=>
+  string(6) "Street"
+  ["VClearance"]=>
+  string(2) "10"
 }
 object(SimpleXMLElement)#%d (10) {
-  [%u|b%"WarehouseId"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"WarehouseName"]=>
-  %unicode|string%(16) "Southlake, Texas"
-  [%u|b%"Building"]=>
-  %unicode|string%(5) "Owned"
-  [%u|b%"Area"]=>
-  %unicode|string%(5) "25000"
-  [%u|b%"Docks"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"DockType"]=>
-  %unicode|string%(9) "Rear load"
-  [%u|b%"WaterAccess"]=>
-  %unicode|string%(4) "true"
-  [%u|b%"RailAccess"]=>
-  %unicode|string%(1) "N"
-  [%u|b%"Parking"]=>
-  %unicode|string%(6) "Street"
-  [%u|b%"VClearance"]=>
-  %unicode|string%(2) "10"
+  ["WarehouseId"]=>
+  string(1) "1"
+  ["WarehouseName"]=>
+  string(16) "Southlake, Texas"
+  ["Building"]=>
+  string(5) "Owned"
+  ["Area"]=>
+  string(5) "25000"
+  ["Docks"]=>
+  string(1) "1"
+  ["DockType"]=>
+  string(9) "Rear load"
+  ["WaterAccess"]=>
+  string(4) "true"
+  ["RailAccess"]=>
+  string(1) "N"
+  ["Parking"]=>
+  string(6) "Street"
+  ["VClearance"]=>
+  string(2) "10"
 }
 Test 3: Update changes using a temporary CLOB
-%unicode|string%(331) "<?xml version="1.0"?>
+string(331) "<?xml version="1.0"?>
 <Warehouse>
 <WarehouseId>1</WarehouseId>
 <WarehouseName>Southlake, Texas</WarehouseName>

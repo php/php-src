@@ -4,19 +4,10 @@ Prefetch with REF cursor. Test different values for prefetch with oci_set_prefet
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-ob_start();
-phpinfo(INFO_MODULES);
-$phpinfo = ob_get_clean();
-$iv = preg_match('/Oracle .*Version => (11\.2|12\.)/', $phpinfo);
-if ($iv == 1) {
-	$sv = oci_server_version($c);
-	$sv = preg_match('/Release 1[012]\./', $sv, $matches);
-	if ($sv != 1) {
-        die ("skip expected output only valid when using Oracle 10g or greater server");
-	}
-}
-else {
-    die ("skip expected output only valid when using Oracle 11.2 or greater client");
+if (preg_match('/Release 1[012]\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10g or greater databases");
+} else if (preg_match('/^(11\.2|12)\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 ?>
 --FILE--
@@ -45,16 +36,7 @@ $stmtarray = array(
          end refcurpkg;"
 	);
 
-foreach($stmtarray as $stmt) {
-	$s = oci_parse($c,$stmt);
-	$r = @oci_execute($s);
-    if (!$r) {
-		$msg = oci_error($s);
-		if ($msg['code'] != 942) {
-            echo $msg['message'],"\n";
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Insert 500 rows into the table.
 $insert_sql = "INSERT INTO refcurtest (c1, c2) VALUES (:c1,:c2)";
@@ -94,7 +76,7 @@ function fetch_frm_php($c,$cur1,$value) {
     oci_execute($s1);
     oci_set_prefetch($cur1,$value);
     oci_execute($cur1);
-    echo "Fetch Row  from PHP\n";
+    echo "Fetch Row from PHP\n";
     var_dump(oci_fetch_row($cur1));
 }
  
@@ -106,14 +88,14 @@ function fetch_frm_plsql($c,$cur1) {
     if (!oci_bind_by_name($s2,":curs1",$cur1,-1,SQLT_RSET)) {
         die("oci_bind_by_name(sql2) failed!\n");
     }
-    if (!oci_bind_by_name($s2,":c1",$c1,SQLT_INT)) {
+    if (!oci_bind_by_name($s2,":c1",$c1,-1,SQLT_INT)) {
         die("oci_bind_by_name(sql2) failed!\n");
     }
-    if (!oci_bind_by_name($s2,":c2",$c2,SQLT_AFC)) {
+    if (!oci_bind_by_name($s2,":c2",$c2,20,SQLT_CHR)) {
         die("oci_bind_by_name(sql2) failed!\n");
     }
     oci_execute($s2);
-    echo "Fetch Row  from PL/SQL\n";
+    echo "Fetch Row from PL/SQL\n";
     var_dump($c1);
     var_dump($c2);
 }
@@ -125,132 +107,125 @@ $stmtarray = array(
     "drop table refcurtest"
 );
 
-foreach($stmtarray as $stmt) {
-    $s = oci_parse($c,$stmt);
-    $r = @oci_execute($s);
-    if (!$r) {
-        $msg = oci_error($s);
-        echo $msg['message'],"\n";
-    }
-}
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
+
 echo "Done\n";
 ?>
 --EXPECTF--
 -----------------------------------------------
 Test with Prefetch value set to 0 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "1"
-%unicode|string%(%d) "test1"
+Fetch Row from PL/SQL
+int(1)
+string(%d) "test1"
 -----------------------------------------------
 Test with Prefetch value set to 1 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "2"
-%unicode|string%(%d) "test2"
+Fetch Row from PL/SQL
+int(2)
+string(%d) "test2"
 -----------------------------------------------
 Test with Prefetch value set to 501 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
 
 Warning: oci_execute(): ORA-01002: %s
-ORA-06512: at "SYSTEM.REFCURPKG", line %d
+ORA-06512: at "%s.REFCURPKG", line %d
 ORA-06512: at line %d in %s on line %d
-Fetch Row  from PL/SQL
-NULL
+Fetch Row from PL/SQL
+int(0)
 NULL
 -----------------------------------------------
 Test with Prefetch value set to 499 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "500"
-%unicode|string%(%d) "test500"
+Fetch Row from PL/SQL
+int(500)
+string(%d) "test500"
 -----------------------------------------------
 Test with Prefetch value set to 250 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "251"
-%unicode|string%(%d) "test251"
+Fetch Row from PL/SQL
+int(251)
+string(%d) "test251"
 -----------------------------------------------
 Test with Prefetch value set to 12345 
 -----------------------------------------------
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
 
 Warning: oci_execute(): ORA-01002: %s
-ORA-06512: at "SYSTEM.REFCURPKG", line %d
+ORA-06512: at "%s.REFCURPKG", line %d
 ORA-06512: at line %d in %s on line %d
-Fetch Row  from PL/SQL
-NULL
+Fetch Row from PL/SQL
+int(0)
 NULL
 -----------------------------------------------
 Test with Prefetch value set to -12345 
 -----------------------------------------------
 
 Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "101"
-%unicode|string%(%d) "test101"
+Fetch Row from PL/SQL
+int(101)
+string(%d) "test101"
 -----------------------------------------------
 Test with Prefetch value set to -1 
 -----------------------------------------------
 
 Warning: oci_set_prefetch(): Number of rows to be prefetched has to be greater than or equal to 0 in %s on line %d
-Fetch Row  from PHP
+Fetch Row from PHP
 array(2) {
   [0]=>
-  %unicode|string%(%d) "0"
+  string(%d) "0"
   [1]=>
-  %unicode|string%(%d) "test0"
+  string(%d) "test0"
 }
-Fetch Row  from PL/SQL
-%unicode|string%(%d) "101"
-%unicode|string%(%d) "test101"
+Fetch Row from PL/SQL
+int(101)
+string(%d) "test101"
 Done

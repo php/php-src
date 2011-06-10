@@ -1,7 +1,10 @@
 --TEST--
 Test oci_define_by_name types
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -12,10 +15,7 @@ $stmtarray = array(
 	"create table phptestrawtable( id number(10), fileimage raw(1000))"
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");
 $i=1;
@@ -68,8 +68,13 @@ while (oci_fetch($stmt)) {
 	echo "file md5:" . md5($fi) . "\n";
 }
 
-$stmt = oci_parse($c, "drop table phptestrawtable");
-oci_execute($stmt);
+// Cleanup
+
+$stmtarray = array(
+    "drop table phptestrawtable"
+);
+
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>

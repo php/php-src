@@ -1,7 +1,10 @@
 --TEST--
 various tests with wrong param count
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 	
@@ -45,7 +48,7 @@ Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %s on line
 
 Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line %d
 
-Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %s on line %d
+Warning: oci_execute(): ORA-00932: %s NUMBER %s BLOB in %s on line %d
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)

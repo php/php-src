@@ -10,9 +10,8 @@ else {
 }
 
 if (!$c) {
-    echo "connect.inc: Failed to connect as '$user' to '$dbase'\n";
-    $e = oci_error();
-    echo $e['message']."\n";
+    $m = oci_error();
+    trigger_error("connect.inc: Failed to connect as '$user' to '$dbase': ". $m['message'], E_USER_ERROR);
 }
 
 ?>

@@ -1,7 +1,10 @@
 --TEST--
 Bug #43492 (Nested cursor leaks after related bug #44206 fixed)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -26,10 +29,7 @@ $stmtarray = array(
     "INSERT INTO bug43492_tab VALUES ('J')"
 );
 
-foreach ($stmtarray as $stmt) {
-    $s = oci_parse($c, $stmt);
-    @oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 function fetch($c, $i) {
     $s = ociparse($c, 'select cursor(select * from bug43492_tab) c from bug43492_tab');
@@ -57,12 +57,7 @@ $stmtarray = array(
     "DROP table bug43492_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-    $s = oci_parse($c, $stmt);
-    @oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 --EXPECT--

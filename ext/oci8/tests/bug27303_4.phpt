@@ -4,18 +4,10 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-$sv = oci_server_version($c);
-$sv = preg_match('/Release 1[01]\.2\./', $sv, $matches);
-if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
-} else {
-    ob_start();
-    phpinfo(INFO_MODULES);
-    $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => 1[1]\./', $phpinfo);
-    if ($iv != 1) {
-        die ("skip test expected to work only with Oracle 11g or greater version of client");
-    }
+if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) {
+	die("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
+} else if (preg_match('/^11\./', oci_client_version()) != 1) {
+    die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
 --FILE--

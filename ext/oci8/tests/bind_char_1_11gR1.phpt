@@ -27,10 +27,7 @@ $stmtarray = array(
 	"insert into bind_char_tab values (3, NULL, 'abc       ')"
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -200,12 +197,7 @@ $stmtarray = array(
 	"drop table bind_char_tab"
 );
 						 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
-
-oci_close($c);
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

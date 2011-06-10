@@ -1,7 +1,10 @@
 --TEST--
 Bug #37220 (LOB Type mismatch when using windows & oci8.dll)
 --SKIPIF--
-<?php if (!extension_loaded("oci8")) print "skip"; ?>
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+?> 
 --FILE--
 <?php
 
@@ -14,10 +17,7 @@ $stmtarray = array(
 	"insert into bug37220_tab values(xmltype('<THETAG myID=\"1234\"></THETAG>'))"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	@oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Now let's update the row where myId = 1234 and change the tag
 // 'THETAG' to 'MYTAG' (mycolumn is an XMLTYPE datatype and
@@ -54,10 +54,7 @@ $stmtarray = array(
 	"drop table bug37220_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 

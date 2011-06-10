@@ -1,8 +1,9 @@
 --TEST--
 Bug #49560 (LOB resource destructor and refcount test)
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
-require(dirname(__FILE__).'/details.inc');
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
 if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
 ?>
 --FILE--
@@ -22,21 +23,7 @@ $stmtarray = array(
      end;",
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		if (!in_array($m['code'], array(   // ignore expected errors
-			    942 // table or view does not exist
-			,  2289 // sequence does not exist
-			,  4080 // trigger does not exist
-                        , 38802 // edition does not exist
-                ))) {
-			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
-		}
-	}
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 
@@ -86,10 +73,7 @@ $stmtarray = array(
 	"drop table lob_043_tab"
 );
 
-foreach ($stmtarray as $stmt) {
-	$s = oci_parse($c, $stmt);
-	oci_execute($s);
-}
+oci8_test_sql_execute($c, $stmtarray);
 
 oci_close($c);
 

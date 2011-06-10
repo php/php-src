@@ -1,14 +1,21 @@
 --TEST--
 reading/writing BFILE LOBs
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
-include "details.inc";
-if (empty($oracle_on_localhost)) die("skip this test won't work with remote Oracle");
+<?php
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
+require(dirname(__FILE__).'/skipif.inc');
+ob_start();
+phpinfo(INFO_MODULES);
+$phpinfo = ob_get_clean();
+if (preg_match('/Compile-time ORACLE_HOME/', $phpinfo) !== 1) {
+    // Assume building PHP with an ORACLE_HOME means the tested DB is on the same machine as PHP
+    die("skip this test won't work with remote Oracle");
+}
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require(dirname(__FILE__).'/connect.inc');
 
 $realdirname = dirname(__FILE__);
 $realfilename1 = "oci8bfiletest1.txt";
