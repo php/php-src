@@ -33,12 +33,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2010-12-09</date>
- <time>20:00:00</time>
+ <date>2011-06-10</date>
+ <time>12:00:00</time>
 
  <version>
-  <release>1.4.5</release>
-  <api>1.4.5</api>
+  <release>1.4.6</release>
+  <api>1.4.6</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,7 +46,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-    Protect against null bytes in LOB filenames (http://news.php.net/php.internals/50202)
+   Added oci_client_version() returning the runtime Oracle client library version
+   Made OCI8 extension buildable with PHP 5.4-development code
  </notes>
  <contents>
   <dir name="/">
@@ -87,8 +88,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bind_empty.phpt" role="test" />
     <file name="bind_long.phpt" role="test" />
     <file name="bind_long_raw.phpt" role="test" />
+    <file name="bind_misccoltypes_errs.phpt" role="test" />
+    <file name="bind_misccoltypes.phpt" role="test" />
+    <file name="bind_number.phpt" role="test" />
+    <file name="bind_query.phpt" role="test" />
     <file name="bind_raw.phpt" role="test" />
     <file name="bind_rowid.phpt" role="test" />
+    <file name="bind_sqltafc.phpt" role="test" />
+    <file name="bind_sqltchr_1.phpt" role="test" />
+    <file name="bind_sqltchr_2.phpt" role="test" />
+    <file name="bind_sqltint.phpt" role="test" />
+    <file name="bind_sqltnum.phpt" role="test" />
+    <file name="bind_unsupported_1.phpt" role="test" />
+    <file name="bind_unsupported_2.phpt" role="test" />
+    <file name="bind_unsupported_3.phpt" role="test" />
     <file name="bug26133.phpt" role="test" />
     <file name="bug27303_1_11gR1.phpt" role="test" />
     <file name="bug27303_1.phpt" role="test" />
@@ -125,8 +138,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bug46994.phpt" role="test" />
     <file name="bug47189.phpt" role="test" />
     <file name="bug47281.phpt" role="test" />
+    <file name="bug47281_tt.phpt" role="test" />
     <file name="bug51253.phpt" role="test" />
-    <file name="bug51291.phpt" role="test" />
+    <file name="bug51291_1.phpt" role="test" />
+    <file name="bug51291_2.phpt" role="test" />
+    <file name="clientversion_92.phpt" role="test" />
+    <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
     <file name="coll_002_func.phpt" role="test" />
@@ -193,15 +210,19 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="cursor_bind.phpt" role="test" />
     <file name="cursors_old.phpt" role="test" />
     <file name="cursors.phpt" role="test" />
+    <file name="dbmsoutput.phpt" role="test" />
     <file name="debug.phpt" role="test" />
+    <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
     <file name="default_prefetch.phpt" role="test" />
+    <file name="define0.phpt" role="test" />
     <file name="define1.phpt" role="test" />
     <file name="define2.phpt" role="test" />
     <file name="define3.phpt" role="test" />
     <file name="define4.phpt" role="test" />
     <file name="define5.phpt" role="test" />
+    <file name="define6.phpt" role="test" />
     <file name="define_old.phpt" role="test" />
     <file name="define.phpt" role="test" />
     <file name="descriptors.phpt" role="test" />
@@ -225,6 +246,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="driver_name.phpt" role="test" />
     <file name="drop_table.inc" role="test" />
     <file name="drop_type.inc" role="test" />
+    <file name="dupcolnames.phpt" role="test" />
     <file name="edition_1.phpt" role="test" />
     <file name="edition_2.phpt" role="test" />
     <file name="error1.phpt" role="test" />
@@ -239,6 +261,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="extauth_02.phpt" role="test" />
     <file name="extauth_03.phpt" role="test" />
     <file name="extauth_04.phpt" role="test" />
+    <file name="fetch_all1.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
     <file name="fetch_all4.phpt" role="test" />
@@ -249,12 +272,15 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="fetch_into1.phpt" role="test" />
     <file name="fetch_into2.phpt" role="test" />
     <file name="fetch_into.phpt" role="test" />
+    <file name="fetch_object_1.phpt" role="test" />
     <file name="fetch_object_2.phpt" role="test" />
     <file name="fetch_object.phpt" role="test" />
     <file name="fetch.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
+    <file name="field_funcs0.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
     <file name="field_funcs2.phpt" role="test" />
+    <file name="field_funcs3.phpt" role="test" />
     <file name="field_funcs_old.phpt" role="test" />
     <file name="field_funcs.phpt" role="test" />
     <file name="function_aliases.phpt" role="test" />
@@ -302,6 +328,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="lob_041.phpt" role="test" />
     <file name="lob_042.phpt" role="test" />
     <file name="lob_043.phpt" role="test" />
+    <file name="lob_044.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
@@ -309,6 +336,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="minfo.phpt" role="test" />
     <file name="null_byte_1.phpt" role="test" />
     <file name="null_byte_2.phpt" role="test" />
+    <file name="null_byte_3.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
@@ -333,6 +361,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="refcur_prefetch_1.phpt" role="test" />
     <file name="refcur_prefetch_2.phpt" role="test" />
     <file name="refcur_prefetch_3.phpt" role="test" />
+    <file name="refcur_prefetch_4.phpt" role="test" />
     <file name="reflection1.phpt" role="test" />
     <file name="reflection2.phpt" role="test" />
     <file name="select_null.phpt" role="test" />
@@ -366,8 +395,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <required>
    <php>
     <min>4.3.9</min>
-    <max>6.0.0</max>
-    <exclude>6.0.0</exclude>
+    <max>5.4.99</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -379,6 +407,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.5</release>
+  <api>1.4.5</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    Protect against null bytes in LOB filenames (http://news.php.net/php.internals/50202)
+ </notes>
+</release>
 
 <release>
  <version>
@@ -464,7 +507,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
          oci_set_action
          oci_set_client_info
          oci_set_client_identifier
-      
+
        These set values that are visible/used by the database.  They
        are useful for tracing, authentication and auditing.
 
@@ -493,7 +536,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
        oci_bind_by_name
 
     7. Bug fixes:
-       PECL bug #16842 (oci_error returns false when NO_DATA_FOUND is raised) 
+       PECL bug #16842 (oci_error returns false when NO_DATA_FOUND is raised)
  </notes>
 </release>
 
