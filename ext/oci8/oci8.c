@@ -447,6 +447,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_oci_client_version, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_server_version, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
@@ -681,6 +684,7 @@ static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_N
 #define arginfo_oci_password_change						NULL
 #define arginfo_oci_new_cursor							NULL
 #define arginfo_oci_result								NULL
+#define arginfo_oci_client_version						NULL
 #define arginfo_oci_server_version						NULL
 #define arginfo_oci_statement_type						NULL
 #define arginfo_oci_num_rows							NULL
@@ -761,6 +765,7 @@ PHP_FUNCTION(oci_num_fields);
 PHP_FUNCTION(oci_parse);
 PHP_FUNCTION(oci_new_cursor);
 PHP_FUNCTION(oci_result);
+PHP_FUNCTION(oci_client_version);
 PHP_FUNCTION(oci_server_version);
 PHP_FUNCTION(oci_statement_type);
 PHP_FUNCTION(oci_num_rows);
@@ -836,6 +841,7 @@ zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_parse,					arginfo_oci_parse)
 	PHP_FE(oci_new_cursor,				arginfo_oci_new_cursor)
 	PHP_FE(oci_result,					arginfo_oci_result)
+	PHP_FE(oci_client_version,			arginfo_oci_client_version)
 	PHP_FE(oci_server_version,			arginfo_oci_server_version)
 	PHP_FE(oci_statement_type,			arginfo_oci_statement_type)
 	PHP_FE(oci_num_rows,				arginfo_oci_num_rows)
@@ -1295,6 +1301,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 PHP_MINFO_FUNCTION(oci)
 {
 	char buf[32];
+	char *ver;
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
@@ -1306,6 +1313,11 @@ PHP_MINFO_FUNCTION(oci)
 	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_links));
 	php_info_print_table_row(2, "Active Connections", buf);
 
+#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
+	php_oci_client_get_version(&ver TSRMLS_DC);
+	php_info_print_table_row(2, "Oracle Run-time Client Library Version", ver);
+	efree(ver);
+#endif
 #if	defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
 	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
 #elif defined(PHP_OCI8_ORACLE_VERSION)
@@ -2383,6 +2395,30 @@ int php_oci_password_change(php_oci_connection *connection, char *user, int user
 	connection->passwd_changed = 1;
 	return 0;
 } /* }}} */
+
+
+/* {{{ php_oci_client_get_version()
+ *
+ * Get Oracle client library version
+ */
+void php_oci_client_get_version(char **version TSRMLS_DC)
+{
+	char  version_buff[256];
+	sword major_version = 0;
+	sword minor_version = 0; 
+	sword update_num = 0;
+	sword patch_num = 0;
+	sword port_update_num = 0;
+
+#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIClientVersion only available 10.2 onwards */
+	PHP_OCI_CALL(OCIClientVersion, (&major_version, &minor_version, &update_num, &patch_num, &port_update_num));
+	snprintf(version_buff, sizeof(version_buff), "%d.%d.%d.%d.%d", major_version, minor_version, update_num, patch_num, port_update_num);
+#else
+	memcpy(version_buff, "Unknown", sizeof("Unknown"));
+#endif
+	*version = estrdup(version_buff);
+} /* }}} */
+
 
 /* {{{ php_oci_server_get_version()
  *
