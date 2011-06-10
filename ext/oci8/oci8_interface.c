@@ -2002,6 +2002,17 @@ PHP_FUNCTION(oci_result)
 }
 /* }}} */
 
+/* {{{ proto string oci_client_version()
+   Return a string containing runtime client library version information */
+PHP_FUNCTION(oci_client_version)
+{
+	char *version = NULL;
+
+	php_oci_client_get_version(&version TSRMLS_CC);
+	RETURN_STRING(version, 0);
+}
+/* }}} */
+
 /* {{{ proto string oci_server_version(resource connection)
    Return a string containing server version information */
 PHP_FUNCTION(oci_server_version)
