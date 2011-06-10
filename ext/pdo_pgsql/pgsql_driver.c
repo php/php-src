@@ -533,7 +533,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	}
 
-	// Obtain db Handle
+	/* Obtain db Handle */
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	while ((pgsql_result = PQgetResult(H->server))) {
@@ -625,7 +625,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 		return;
 	}
 
-	// Obtain db Handler
+	/* Obtain db Handler */
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	PDO_CONSTRUCT_CHECK;
 
