@@ -156,6 +156,10 @@ PHP                                                                        NEWS
 - Phar extension:
   . Fixed bug #54395 (Phar::mount() crashes when calling with wrong parameters).
     (Felipe)
+    
+- Reflection extension:
+  . Fixed bug #54347 (reflection_extension does not lowercase module function
+    name). (Felipe, laruence at yahoo dot com dot cn)
 
 - SOAP extension:
   . Fixed bug #54312 (soap_version logic bug). (tom at samplonius dot org)
