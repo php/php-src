@@ -1314,7 +1314,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Active Connections", buf);
 
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
-	php_oci_client_get_version(&ver TSRMLS_DC);
+	php_oci_client_get_version(&ver TSRMLS_CC);
 	php_info_print_table_row(2, "Oracle Run-time Client Library Version", ver);
 	efree(ver);
 #endif
