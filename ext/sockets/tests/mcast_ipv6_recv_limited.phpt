@@ -28,17 +28,20 @@ $so = socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
 ));
-$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
-	"group"	=> 'ff01::114',
-	"interface" => 0,
-	"source" => '2001::dead:beef',
-));
-if ($so !== false) {
-    die('skip protocol independent multicast API is available.');
+if (defined("MCAST_JOIN_SOURCE_GROUP")) {
+	$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
+		"group"	=> 'ff01::114',
+		"interface" => 0,
+		"source" => '2001::dead:beef',
+	));
+	if ($so !== false) {
+	    die('skip protocol independent multicast API is available.');
+	}
 }
 
 --FILE--
 <?php
+include __DIR__."/mcast_helpers.php.inc";
 $domain = AF_INET6;
 $level = IPPROTO_IPV6;
 $interface = 0;
@@ -63,6 +66,7 @@ var_dump($so);
 
 $r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $mcastaddr, 3000);
 var_dump($r);
+checktimeout($s, 500);
 $r = socket_recvfrom($s, $str, 2000, 0, $from, $fromPort);
 var_dump($r, $str, $from);
 $sblock = $from;
@@ -71,7 +75,8 @@ $r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, 30
 var_dump($r);
 
 $i = 0;
-while (($str = socket_read($s, 3000)) !== FALSE) {
+checktimeout($s, 500);
+while (($str = socket_read($s, 3000, 500)) !== FALSE) {
 	$i++;
 	echo "$i> ", $str, "\n";
 
@@ -104,9 +109,9 @@ if ($i == 3) {
 }
 --EXPECTF--
 creating send socket
-resource(4) of type (Socket)
+resource(%d) of type (Socket)
 creating receive socket
-resource(5) of type (Socket)
+resource(%d) of type (Socket)
 bool(true)
 bool(true)
 int(14)

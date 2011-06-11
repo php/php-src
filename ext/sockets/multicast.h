@@ -18,6 +18,16 @@
 
 /* $Id$ */
 
+#if defined(MCAST_JOIN_GROUP) && \
+	(!defined(PHP_WIN32) || (_WIN32_WINNT >= 0x600 && SOCKETS_ENABLE_VISTA_API))
+#define RFC3678_API 1
+/* has block/unblock and source membership, in this case for both IPv4 and IPv6 */
+#define HAS_MCAST_EXT 1
+#elif defined(IP_ADD_SOURCE_MEMBERSHIP)
+/* has block/unblock and source membership, but only for IPv4 */
+#define HAS_MCAST_EXT 1
+#endif
+
 int php_if_index_to_addr4(
         unsigned if_index,
         php_socket *php_sock,
@@ -42,6 +52,7 @@ int php_mcast_leave(
 	socklen_t group_len,
 	unsigned int if_index TSRMLS_DC);
 
+#ifdef HAS_MCAST_EXT
 int php_mcast_join_source(
 	php_socket *sock,
 	int level,
@@ -77,3 +88,4 @@ int php_mcast_unblock_source(
 	struct sockaddr *source,
 	socklen_t source_len,
 	unsigned int if_index TSRMLS_DC);
+#endif

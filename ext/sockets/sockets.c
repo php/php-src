@@ -806,21 +806,25 @@ PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_CS | CONST_PERSISTENT);
 
-#ifndef MCAST_JOIN_GROUP
+#ifndef RFC3678_API
 #define MCAST_JOIN_GROUP			IP_ADD_MEMBERSHIP
 #define MCAST_LEAVE_GROUP			IP_DROP_MEMBERSHIP
+#ifdef HAS_MCAST_EXT
 #define MCAST_BLOCK_SOURCE			IP_BLOCK_SOURCE
 #define MCAST_UNBLOCK_SOURCE		IP_UNBLOCK_SOURCE
 #define MCAST_JOIN_SOURCE_GROUP		IP_ADD_SOURCE_MEMBERSHIP
 #define MCAST_LEAVE_SOURCE_GROUP	IP_DROP_SOURCE_MEMBERSHIP
 #endif
+#endif
 	
 	REGISTER_LONG_CONSTANT("MCAST_JOIN_GROUP",			MCAST_JOIN_GROUP,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCAST_LEAVE_GROUP",			MCAST_LEAVE_GROUP,			CONST_CS | CONST_PERSISTENT);
+#ifdef HAS_MCAST_EXT
 	REGISTER_LONG_CONSTANT("MCAST_BLOCK_SOURCE",		MCAST_BLOCK_SOURCE,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCAST_UNBLOCK_SOURCE",		MCAST_UNBLOCK_SOURCE,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCAST_JOIN_SOURCE_GROUP",	MCAST_JOIN_SOURCE_GROUP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCAST_LEAVE_SOURCE_GROUP",	MCAST_LEAVE_SOURCE_GROUP,	CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("IP_MULTICAST_IF",			IP_MULTICAST_IF,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IP_MULTICAST_TTL",			IP_MULTICAST_TTL,		CONST_CS | CONST_PERSISTENT);
@@ -1485,11 +1489,6 @@ PHP_FUNCTION(socket_connect)
 {
 	zval				*arg1;
 	php_socket			*php_sock;
-	struct sockaddr_in	sin;
-#if HAVE_IPV6
-	struct sockaddr_in6	sin6;
-#endif
-	struct sockaddr_un	s_un;
 	char				*addr;
 	int					retval, addr_len;
 	long				port = 0;
@@ -1503,7 +1502,9 @@ PHP_FUNCTION(socket_connect)
 
 	switch(php_sock->type) {
 #if HAVE_IPV6
-		case AF_INET6:
+		case AF_INET6: {
+			struct sockaddr_in6 sin6 = {0};
+			
 			if (argc != 3) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET6 requires 3 arguments");
 				RETURN_FALSE;
@@ -1520,14 +1521,15 @@ PHP_FUNCTION(socket_connect)
 
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin6, sizeof(struct sockaddr_in6));
 			break;
+		}
 #endif
-		case AF_INET:
+		case AF_INET: {
+			struct sockaddr_in sin = {0};
+			
 			if (argc != 3) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET requires 3 arguments");
 				RETURN_FALSE;
 			}
-
-			memset(&sin, 0, sizeof(struct sockaddr_in));
 
 			sin.sin_family = AF_INET;
 			sin.sin_port   = htons((unsigned short int)port);
@@ -1538,19 +1540,22 @@ PHP_FUNCTION(socket_connect)
 
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
 			break;
+		}
 
-		case AF_UNIX:
+		case AF_UNIX: {
+			struct sockaddr_un s_un = {0};
+			
 			if (addr_len >= sizeof(s_un.sun_path)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Path too long");
 				RETURN_FALSE;
 			}
-				
-			memset(&s_un, 0, sizeof(struct sockaddr_un));
 
 			s_un.sun_family = AF_UNIX;
 			memcpy(&s_un.sun_path, addr, addr_len);
-			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un, (socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + addr_len);
+			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
+				(socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + addr_len));
 			break;
+		}
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
@@ -2034,8 +2039,10 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 	int						retval;
 	int (*mcast_req_fun)(php_socket *, int, struct sockaddr *, socklen_t,
 		unsigned TSRMLS_DC);
+#ifdef HAS_MCAST_EXT
 	int (*mcast_sreq_fun)(php_socket *, int, struct sockaddr *, socklen_t,
 		struct sockaddr *, socklen_t, unsigned TSRMLS_DC);
+#endif
 
 	switch (optname) {
 	case MCAST_JOIN_GROUP:
@@ -2065,6 +2072,7 @@ mcast_req_fun:
 			break;
 		}
 
+#ifdef HAS_MCAST_EXT
 	case MCAST_BLOCK_SOURCE:
 		mcast_sreq_fun = &php_mcast_block_source;
 		goto mcast_sreq_fun;
@@ -2103,6 +2111,7 @@ mcast_req_fun:
 					glen, (struct sockaddr*)&source, slen, if_index TSRMLS_CC);
 			break;
 		}
+#endif
 	default:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"unexpected option in php_do_mcast_opt (level %d, option %d). "
@@ -2154,11 +2163,13 @@ PHP_FUNCTION(socket_set_option)
 	if (level == IPPROTO_IP) {
 		switch (optname) {
 		case MCAST_JOIN_GROUP:
-		case MCAST_LEAVE_GROUP:		
+		case MCAST_LEAVE_GROUP:
+#ifdef HAS_MCAST_EXT
 		case MCAST_BLOCK_SOURCE:
 		case MCAST_UNBLOCK_SOURCE:
 		case MCAST_JOIN_SOURCE_GROUP:
 		case MCAST_LEAVE_SOURCE_GROUP:
+#endif
 			if (php_do_mcast_opt(php_sock, level, optname, arg4 TSRMLS_CC) == FAILURE) {
 				RETURN_FALSE;
 			} else {
