@@ -14,8 +14,12 @@ $so = socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
 if ($so === false) {
     die('skip interface \'lo\' is unavailable.');
 }
+if (!defined("MCAST_BLOCK_SOURCE")) {
+    die('skip source operations are unavailable');
+}
 --FILE--
 <?php
+include __DIR__."/mcast_helpers.php.inc";
 $domain = AF_INET;
 $level = IPPROTO_IP;
 $interface = "lo";
@@ -47,6 +51,7 @@ $r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, 30
 var_dump($r);
 
 $i = 0;
+checktimeout($s, 500);
 while (($str = socket_read($s, 3000)) !== FALSE) {
 	$i++;
 	echo "$i> ", $str, "\n";
@@ -146,13 +151,13 @@ if ($i == 8) {
 }
 
 }
---EXPECT--
+--EXPECTF--
 creating send socket bound to 127.0.0.1
 bool(true)
 creating unbound socket and hoping the routing table causes an interface other than lo to be used for sending messages to 224.0.0.23
 bool(true)
 creating receive socket
-resource(6) of type (Socket)
+resource(%d) of type (Socket)
 bool(true)
 bool(true)
 int(14)

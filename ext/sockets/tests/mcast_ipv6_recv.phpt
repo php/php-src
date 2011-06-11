@@ -24,6 +24,10 @@ $r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', 3000);
 if ($r === false) {
 	die('skip unable to send multicast packet.');
 }
+
+if (!defined("MCAST_JOIN_SOURCE_GROUP"))
+    die('skip source operations are unavailable');
+
 $so = socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
@@ -39,6 +43,7 @@ if ($so === false) {
 
 --FILE--
 <?php
+include __DIR__."/mcast_helpers.php.inc";
 $domain = AF_INET6;
 $level = IPPROTO_IPV6;
 $interface = 0;
@@ -63,6 +68,7 @@ var_dump($so);
 
 $r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $mcastaddr, 3000);
 var_dump($r);
+checktimeout($s, 500);
 $r = socket_recvfrom($s, $str, 2000, 0, $from, $fromPort);
 var_dump($r, $str, $from);
 $sblock = $from;
@@ -71,6 +77,7 @@ $r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, 30
 var_dump($r);
 
 $i = 0;
+checktimeout($s, 500);
 while (($str = socket_read($s, 3000)) !== FALSE) {
 	$i++;
 	echo "$i> ", $str, "\n";
@@ -171,9 +178,9 @@ if ($i == 8) {
 }
 --EXPECTF--
 creating send socket
-resource(4) of type (Socket)
+resource(%d) of type (Socket)
 creating receive socket
-resource(5) of type (Socket)
+resource(%d) of type (Socket)
 bool(true)
 bool(true)
 int(14)
