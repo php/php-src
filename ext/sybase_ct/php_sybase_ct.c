@@ -728,7 +728,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 
 static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *user, *passwd, *host, *charset, *appname;
+	char *user = NULL, *passwd = NULL, *host = NULL, *charset = NULL, *appname = NULL;
 	char *hashed_details;
 	int hashed_details_length, len;
 	zend_bool new = 0;
