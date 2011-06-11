@@ -62,6 +62,7 @@ PHP                                                                        NEWS
   . Fixed bug #52496 (Zero exit code on option parsing failure). (Ilia)
 
 - cURL:
+  . Added ini option curl.cainfo (support for custom cert db). (Pierre)
   . Added CURLINFO_REDIRECT_URL support. (Daniel Stenberg, Pierre)
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and 
     CURLOPT_MAX_SEND_SPEED_LARGE. FR #51815. (Pierrick)
