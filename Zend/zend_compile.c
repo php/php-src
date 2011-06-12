@@ -6170,14 +6170,12 @@ void zend_do_extended_fcall_end(TSRMLS_D) /* {{{ */
 
 void zend_do_ticks(TSRMLS_D) /* {{{ */
 {
-	if (Z_LVAL(CG(declarables).ticks)) {
-		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-		opline->opcode = ZEND_TICKS;
-		SET_UNUSED(opline->op1);
-		SET_UNUSED(opline->op2);
-		opline->extended_value = Z_LVAL(CG(declarables).ticks);
-	}
+	opline->opcode = ZEND_TICKS;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+	opline->extended_value = Z_LVAL(CG(declarables).ticks);
 }
 /* }}} */
 
