@@ -558,15 +558,17 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TidyBuffer *errbuf;
 	zval **config = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
-	}
-	
 	if (is_file) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
+			RETURN_FALSE;
+		}
 		if (!(data = php_tidy_file_to_mem(arg1, use_include_path, &data_len TSRMLS_CC))) {
 			RETURN_FALSE;
 		}
 	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
+			RETURN_FALSE;
+		}
 		data = arg1;
 		data_len = arg1_len;
 	}
