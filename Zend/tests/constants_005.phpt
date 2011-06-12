@@ -7,5 +7,5 @@ define("ZEND_THREAD_safe", 123);
 var_dump(ZEND_THREAD_safe);
 ?>
 --EXPECTF--
-bool(false)
+bool(%s)
 int(123)
