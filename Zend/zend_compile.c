@@ -2572,11 +2572,23 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			&& strcasecmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
 			char *colon;
 
-			if (fe->common.type != ZEND_USER_FUNCTION ||
-					strchr(proto->common.arg_info[i].class_name, '\\') != NULL ||
-					(colon = zend_memrchr(fe->common.arg_info[i].class_name, '\\', fe->common.arg_info[i].class_name_len)) == NULL ||
-					strcasecmp(colon+1, proto->common.arg_info[i].class_name) != 0) {
+			if (fe->common.type != ZEND_USER_FUNCTION) {
 				return 0;
+			} else if (strchr(proto->common.arg_info[i].class_name, '\\') != NULL ||
+			    (colon = zend_memrchr(fe->common.arg_info[i].class_name, '\\', fe->common.arg_info[i].class_name_len)) == NULL ||
+			    strcasecmp(colon+1, proto->common.arg_info[i].class_name) != 0) {
+				zend_class_entry **fe_ce, **proto_ce;
+				TSRMLS_FETCH();
+				int found = zend_lookup_class(fe->common.arg_info[i].class_name, fe->common.arg_info[i].class_name_len, &fe_ce TSRMLS_CC);
+				int found2 = zend_lookup_class(proto->common.arg_info[i].class_name, proto->common.arg_info[i].class_name_len, &proto_ce TSRMLS_CC);
+				
+				/* Check for class alias */
+				if (found != SUCCESS || found2 != SUCCESS ||
+					(*fe_ce)->type == ZEND_INTERNAL_CLASS ||
+					(*proto_ce)->type == ZEND_INTERNAL_CLASS ||
+					*fe_ce != *proto_ce) {
+					return 0;
+				}
 			}
 		}
 		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {

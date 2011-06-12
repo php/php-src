@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     name). (Dmitry)
   . Fixed bug #54804 (__halt_compiler and imported namespaces).
     (Pierrick, Felipe)
+  . Fixed bug #54624 (class_alias and type hint). (Felipe)
   . Fixed bug #54585 (track_errors causes segfault). (Dmitry)
   . Fixed bug #54423 (classes from dl()'ed extensions are not destroyed). 
     (Tony, Dmitry)
