@@ -15,17 +15,17 @@ snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 try {
-var_dump(new SNMP(SNMP_VERSION_1, $hostname));
+var_dump(new SNMP(SNMP::VERSION_1, $hostname));
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
 }
 try {
-var_dump(new SNMP(SNMP_VERSION_1, $hostname, $community, ''));
+var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
 }
 try {
-var_dump(new SNMP(SNMP_VERSION_1, $hostname, $community, $timeout, ''));
+var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
 }
@@ -36,7 +36,7 @@ var_dump(new SNMP(7, $hostname, $community));
 }
 
 echo "Open normal session\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 $session->valueretrieval = 67;
 var_dump($session->valueretrieval);
 echo "Closing session\n";
@@ -45,7 +45,7 @@ var_dump($session->close());
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, ''));
 var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, 0, ''));
 var_dump($session->get());

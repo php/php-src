@@ -18,7 +18,7 @@ snmp_set_oid_output_format(SNMP_OID_OUTPUT_FULL);
 
 echo "Check working\n";
 
-$session = new SNMP(SNMP_VERSION_1, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, $retries);
 var_dump($session);
 
 $session->max_oids = 40;
