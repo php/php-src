@@ -555,17 +555,21 @@ static char *php_ap_getword_conf(const zend_encoding *encoding, char *str TSRMLS
 static char *php_ap_basename(const zend_encoding *encoding, char *path TSRMLS_DC)
 {
 	char *s = strrchr(path, '\\');
-	if (s) {
-		char *tmp = strrchr(path, '/');
-		if (tmp && tmp > s) {
-			s = tmp + 1;
+	char *s2 = strrchr(path, '/');
+	
+	if (s && s2) {
+		if (s > s2) {
+			++s;
 		} else {
-			s++;
+			s = ++s2;
 		}
-	} else {
-		s = path;
+		return s;
+	} else if (s) {
+		return ++s;
+	} else if (s2) {
+		return ++s2;
 	}
-	return s;
+	return path;
 }
 
 /*
