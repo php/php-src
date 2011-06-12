@@ -75,15 +75,14 @@ PHP_FUNCTION(snmp_get_valueretrieval);
 
 PHP_FUNCTION(snmp_read_mib);
 
-PHP_METHOD(SNMP, open);
 PHP_METHOD(SNMP, setSecurity);
 PHP_METHOD(SNMP, close);
 PHP_METHOD(SNMP, get);
 PHP_METHOD(SNMP, getnext);
 PHP_METHOD(SNMP, walk);
 PHP_METHOD(SNMP, set);
-PHP_METHOD(SNMP, get_errno);
-PHP_METHOD(SNMP, get_error);
+PHP_METHOD(SNMP, getErrno);
+PHP_METHOD(SNMP, getError);
 
 typedef struct _php_snmp_object {
 	zend_object zo;

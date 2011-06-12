@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/snmp_include.inc');
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
-$session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 $session->setSecurity('noAuthNoPriv');
 
 #echo "Checking error handling\n";

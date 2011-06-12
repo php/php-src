@@ -17,7 +17,7 @@ snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 snmp_set_oid_output_format(SNMP_OID_OUTPUT_FULL);
 
 echo "SNMPv1\n";
-$session = new SNMP(SNMP_VERSION_1, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, $retries);
 $session->valueretrieval = SNMP_VALUE_LIBRARY;
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->get(array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.3.0')));
@@ -25,13 +25,13 @@ var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SNMPv2\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "GET with preserving original OID names\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $orig = array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.5.0');
 $result = $session->get($orig, TRUE);
 foreach($orig as $oid){
@@ -40,7 +40,7 @@ foreach($orig as $oid){
 var_dump($session->close());
 
 echo "WALK multiple on single OID\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $z = $session->walk('.1.3.6.1.2.1.1');
 var_dump(gettype($z));
 var_dump(count($z));
@@ -49,7 +49,7 @@ var_dump(array_shift($z));
 var_dump($session->close());
 
 echo "WALK multiple on single OID, non_repeaters set to 0\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $z = $session->walk('.1.3.6.1.2.1.1', 0);
 var_dump(gettype($z));
 var_dump(count($z));
@@ -58,7 +58,7 @@ var_dump(array_shift($z));
 var_dump($session->close());
 
 echo "WALK multiple on single OID, non_repeaters set to 0, max_repetitions set to 30\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $z = $session->walk('.1.3.6.1.2.1.1', 0, 30);
 var_dump(gettype($z));
 var_dump(count($z));
@@ -67,7 +67,7 @@ var_dump(array_shift($z));
 var_dump($session->close());
 
 echo "WALK multiple on single OID, max_oids set to 30\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $session->max_oids = 30;
 $z = $session->walk('.1.3.6.1.2.1.1');
 var_dump(gettype($z));
@@ -77,7 +77,7 @@ var_dump(array_shift($z));
 var_dump($session->close());
 
 echo "WALK multiple on single OID with OID suffix as keys\n";
-$session = new SNMP(SNMP_VERSION_2c, $hostname, $community, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $z = $session->walk('.1.3.6.1.2.1.1', TRUE);
 var_dump(gettype($z));
 var_dump(count($z));
@@ -86,21 +86,21 @@ var_dump(array_shift($z));
 var_dump($session->close());
 
 echo "SNMPv3 (default security settings)\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 #$session->setSecurity($user_noauth, 'noAuthNoPriv', '', '', '', '', '', '');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SNMPv3 (noAuthNoPriv)\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $user_noauth, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 $session->setSecurity('noAuthNoPriv');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SNMPv3 (authPriv)\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
 $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getnext('.1.3.6.1.2.1.1.1.0'));
@@ -108,7 +108,7 @@ var_dump($session->walk('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 echo "SET single OID\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
 $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 $oid1 = 'SNMPv2-MIB::sysContact.0';
 $oldvalue1 = $session->get($oid1);
@@ -123,7 +123,7 @@ var_dump(($session->get($oid1) === $oldvalue1));
 var_dump($session->close());
 
 echo "SNMPv3, setting contextEngineID (authPriv)\n";
-$session = new SNMP(SNMP_VERSION_3, $hostname, $rwuser, $timeout, $retries);
+$session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
 $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '', 'aeeeff');
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
