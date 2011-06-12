@@ -39,6 +39,7 @@
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
 #define DEC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count--); }
 #define HANDLE_INTERACTIVE()  if (CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) { execute_new_code(TSRMLS_C); }
+#define DO_TICKS()            if (Z_LVAL(CG(declarables).ticks)) { zend_do_ticks(TSRMLS_C); }
 
 #define RESET_DOC_COMMENT()        \
     {                              \
