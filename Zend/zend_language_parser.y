@@ -211,7 +211,7 @@ inner_statement:
 
 
 statement:
-		unticked_statement { zend_do_ticks(TSRMLS_C); }
+		unticked_statement { DO_TICKS(); }
 	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
 ;
 
@@ -291,11 +291,11 @@ unset_variable:
 ;
 
 function_declaration_statement:
-		unticked_function_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
+		unticked_function_declaration_statement	{ DO_TICKS(); }
 ;
 
 class_declaration_statement:
-		unticked_class_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
+		unticked_class_declaration_statement	{ DO_TICKS(); }
 ;
 
 
