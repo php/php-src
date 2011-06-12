@@ -1146,7 +1146,7 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 
 static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filename TSRMLS_DC) /* {{{ */
 {
-	char *s, *tmp;
+	char *s, *s2, *tmp;
 	const size_t filename_len = strlen(filename);
 
 	/* The \ check should technically be needed for win32 systems only where
@@ -1155,11 +1155,18 @@ static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filena
 	 * the user does basename() they get a bogus file name. Until IE's user base drops
 	 * to nill or problem is fixed this code must remain enabled for all systems. */
 	s = php_mb_safe_strrchr_ex(filename, '\\', filename_len, (const mbfl_encoding *)encoding);
-	if ((tmp = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding)) > s) {
-		s = tmp;
-	}
-	if (s) {
-		return s + 1;
+	s2 = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding);
+	
+	if (s && s2) {
+		if (s > s2) {
+			return ++s;
+		} else {
+			return ++s2;
+		}
+	} else if (s) {
+		return ++s;
+	} else if (s2) {
+		return ++s2;
 	} else {
 		return filename;
 	}
