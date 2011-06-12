@@ -1809,7 +1809,7 @@ PHP_METHOD(snmp, set)
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, (-1));
 }
 
-/* {{{ proto bool SNMP::setSecurity(resource session, string sec_level, [ string auth_protocol, string auth_passphrase [, string priv_protocol, string priv_passphrase [, string contextName [, string contextEngineID]]]])
+/* {{{ proto bool SNMP::setSecurity(string sec_level, [ string auth_protocol, string auth_passphrase [, string priv_protocol, string priv_passphrase [, string contextName [, string contextEngineID]]]])
 	Set SNMPv3 security-related session parameters */
 PHP_METHOD(snmp, setSecurity)
 {
