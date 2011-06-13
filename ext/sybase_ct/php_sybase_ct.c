@@ -388,7 +388,7 @@ static CS_RETCODE CS_PUBLIC _client_message_handler(CS_CONTEXT *context, CS_CONN
 	TSRMLS_FETCH();
 
 	if (CS_SEVERITY(errmsg->msgnumber) >= SybCtG(min_client_severity)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %d)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %ld)", errmsg->msgstring, (long)CS_SEVERITY(errmsg->msgnumber));
 	}
 	STR_FREE(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(errmsg->msgstring);
