@@ -31,7 +31,7 @@ PHP                                                                        NEWS
 
   . Fixed a crash inside dtor for error handling. (Ilia)
   . Fixed bug #54939 (File path injection vulnerability in RFC1867 File upload
-    filename). (Felipe) Reported by Krzysztof Kotowicz.
+    filename). (Felipe) Reported by Krzysztof Kotowicz. (CVE-2011-2202)
 
   . Fixed bug #54935 php_win_err can lead to crash. (Pierre)
   . Fixed bug #54924 (assert.* is not being reset upon request shutdown). (Ilia)
