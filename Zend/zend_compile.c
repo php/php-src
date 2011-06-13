@@ -2870,7 +2870,7 @@ static void do_inherit_method(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto) /* {{{ */
+static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
 	zend_uint i;
 
@@ -2924,9 +2924,10 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			    (colon = zend_memrchr(fe->common.arg_info[i].class_name, '\\', fe->common.arg_info[i].class_name_len)) == NULL ||
 			    strcasecmp(colon+1, proto->common.arg_info[i].class_name) != 0) {
 				zend_class_entry **fe_ce, **proto_ce;
-				TSRMLS_FETCH();
-				int found = zend_lookup_class(fe->common.arg_info[i].class_name, fe->common.arg_info[i].class_name_len, &fe_ce TSRMLS_CC);
-				int found2 = zend_lookup_class(proto->common.arg_info[i].class_name, proto->common.arg_info[i].class_name_len, &proto_ce TSRMLS_CC);
+				int found, found2;
+				
+				found = zend_lookup_class(fe->common.arg_info[i].class_name, fe->common.arg_info[i].class_name_len, &fe_ce TSRMLS_CC);
+				found2 = zend_lookup_class(proto->common.arg_info[i].class_name, proto->common.arg_info[i].class_name_len, &proto_ce TSRMLS_CC);
 				
 				/* Check for class alias */
 				if (found != SUCCESS || found2 != SUCCESS ||
@@ -3017,11 +3018,11 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	}
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-		if (!zend_do_perform_implementation_check(child, child->common.prototype)) {
+		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
 			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
-		if (!zend_do_perform_implementation_check(child, parent)) {
+		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
 			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(parent), parent->common.function_name);
 		}
 	}
