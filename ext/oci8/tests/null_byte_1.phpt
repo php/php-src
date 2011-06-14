@@ -1,7 +1,12 @@
 --TEST--
 Protect against null bytes in LOB filenames
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+if (!extension_loaded('oci8'))
+    die ("skip no oci8 extension");
+if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4))
+    die ("skip Test only valid for PHP 5.4 onwards");
+?>
 --INI--
 display_errors = On
 error_reporting = E_WARNING
