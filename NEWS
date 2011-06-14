@@ -45,15 +45,19 @@ PHP                                                                        NEWS
     (CVE-2011-1148)
   . Fixed bug #54180 (parse_url() incorrectly parses path when ? in fragment).
     (tomas dot brastavicius at quantum dot lt, Pierrick)
-  . Fixed bug #54137 (file_get_contents POST request sends additional line break).
-    (maurice-php at mertinkat dot net, Ilia)
-  . Fixed bug #54866 (incorrect accounting for realpath_cache_size) (Dustin Ward)
-  . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size) 
-    (Pierre, os at irj dot ru)
+  . Fixed bug #54137 (file_get_contents POST request sends additional line
+    break). (maurice-php at mertinkat dot net, Ilia)
+  . Fixed bug #54866 (incorrect accounting for realpath_cache_size).
+    (Dustin Ward)
+  . Fixed bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt
+    size). (Pierre, os at irj dot ru)
   . Fixed bug #53848 (fgetcsv() ignores spaces at beginnings of fields). (Ilia)
+  . Alternative fix for bug #52550, as applied to the round() function (signed
+    overflow), as the old fix impacted the algorithm for numbers with magnitude
+    smaller than 0. (Gustavo)
   . Fixed bug #51997 (SEEK_CUR with 0 value, returns a warning). (Ilia)
-  . Fixed bug #50363 (Invalid parsing in convert.quoted-printable-decode filter).
-    (slusarz at curecanti dot org)
+  . Fixed bug #50363 (Invalid parsing in convert.quoted-printable-decode
+    filter). (slusarz at curecanti dot org)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
     TMPDIR on Windows). (Pierre)
 
@@ -190,8 +194,7 @@ PHP                                                                        NEWS
 
 - Streams:
   . Fixed bug #54946 (stream_get_contents infinite loop). (Hannes)
-  . Fixed bug #54623 (Segfault when when writing to a persistent socket after
-    closing a copy of the socket). (Gustavo)
+  . Fixed bug #54623 (Segfault when writing to a persistent socket after closing    a copy of the socket). (Gustavo)
     
 . Zip extension:
   . Fixed bug #54681 (addGlob() crashes on invalid flags). (Felipe)
