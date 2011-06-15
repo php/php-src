@@ -43,13 +43,17 @@ Having said that, here are the organizational rules::
 
 Currently we have the following branches in use::
 
-  trunk             Will become PHP 6.0. This CVS branch is for active development.
+  trunk             The active development branch. 
 
-  branches/PHP_5_3  Is used to release the PHP 5.3.x series. It still allows for
+  branches/PHP_5_4  Is used to release the PHP 5.4.x series. It still allows for
                     larger enhancements.
 
-  branches/PHP_5_2  Is used to release the PHP 5.2.x series. Only bugfixes are permitted
-                    on this branch (Consult the releasemaster prior to commit).
+  branches/PHP_5_3  Is used to release the PHP 5.3.x series. This is current 
+                    stable version and is open for bugfixes and small
+                    improvements (check with RMs if in doubt).
+
+  branches/PHP_5_2  Is used to release the PHP 5.2.x series. It is closed for 
+                    changes now.
 
   branches/PHP_5_1  This branch is closed.
 
