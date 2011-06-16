@@ -1885,9 +1885,19 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #else
 	php_os=PHP_OS;
 #endif
-
+	{
+		char dll_dir[MAX_PATH];
+		sprintf(dll_dir, "%s\\%s", module_path, "..\\..\\deps\\bin");
+		SetDllDirectory(dll_dir);
+	}
+//	GetModuleFileName (NULL, module_path, MAX_PATH);
+//__debugbreak();
 #ifdef ZTS
 	tsrm_ls = ts_resource(0);
+#endif
+
+#ifdef PHP_WIN32
+	php_win32_init_rng_lock();
 #endif
 
 	module_shutdown = 0;
@@ -2239,6 +2249,10 @@ void php_module_shutdown(TSRMLS_D)
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/*close winsock */
 	WSACleanup();
+#endif
+
+#ifdef PHP_WIN32
+	php_win32_free_rng_lock();
 #endif
 
 	sapi_flush(TSRMLS_C);
