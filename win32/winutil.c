@@ -82,7 +82,10 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 	BOOL ret;
 	size_t i = 0;
 
+#ifdef ZTS
 	tsrm_mutex_lock(php_lock_win32_cryptoctx);
+#endif
+
 	if (has_crypto_ctx == 0) {
 		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET)) {
 			/* Could mean that the key container does not exist, let try 
@@ -96,7 +99,10 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 			}
 		}
 	}
+
+#ifdef ZTS
 	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
+#endif
 
 	if (has_crypto_ctx == 0) {
 		return FAILURE;
