@@ -4920,10 +4920,6 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 
 	buffer = emalloc(buffer_length + 1);
 
-#ifdef WINDOWS
-        RAND_screen();
-#endif
-
 	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
 		efree(buffer);
 		RETURN_FALSE;
