@@ -21,3 +21,11 @@ PHPAPI char *php_win32_error_to_msg(int error);
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
 int php_win32_check_trailing_space(const char * path, const int path_len);
 PHPAPI php_win32_get_random_bytes(unsigned char *buf, size_t size);
+
+#ifdef ZTS
+void php_win32_init_rng_lock();
+void php_win32_free_rng_lock();
+#else
+#define php_win32_init_rng_lock();
+#define php_win32_free_rng_lock();
+#endif

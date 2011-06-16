@@ -1871,6 +1871,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	tsrm_ls = ts_resource(0);
 #endif
 
+#ifdef PHP_WIN32
+	php_win32_init_rng_lock();
+#endif
+
 	module_shutdown = 0;
 	module_startup = 1;
 	sapi_initialize_empty_request(TSRMLS_C);
@@ -2218,6 +2222,10 @@ void php_module_shutdown(TSRMLS_D)
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/*close winsock */
 	WSACleanup();
+#endif
+
+#ifdef PHP_WIN32
+	php_win32_free_rng_lock();
 #endif
 
 	sapi_flush(TSRMLS_C);
