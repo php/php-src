@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.7
+16 Jun 2011, PHP 5.3.7 RC1
 - Upgraded bundled SQLite to version 3.7.6.3. (Scott)
 - Upgraded bundled PCRE to version 8.12. (Scott)
 - Increased the backtrack limit from 100000 to 1000000 (Rasmus)
