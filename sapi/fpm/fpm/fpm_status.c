@@ -3,6 +3,7 @@
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"
+#include "SAPI.h"
 #include <stdio.h>
 
 #include "fpm_config.h"
@@ -13,8 +14,8 @@
 struct fpm_shm_s *fpm_status_shm = NULL;
 static char *fpm_status_pool = NULL;
 static char *fpm_status_uri = NULL;
-static char *fpm_status_ping= NULL;
-static char *fpm_status_pong= NULL;
+static char *fpm_status_ping_uri = NULL;
+static char *fpm_status_ping_response = NULL;
 
 
 int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
@@ -40,8 +41,8 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 				zlog(ZLOG_ERROR, "[pool %s] ping is set (%s) but pong is not set.", wp->config->name, wp->config->ping_path);
 				return -1;
 			}
-			fpm_status_ping = strdup(wp->config->ping_path);
-			fpm_status_pong = strdup(wp->config->ping_response);
+			fpm_status_ping_uri = strdup(wp->config->ping_path);
+			fpm_status_ping_response = strdup(wp->config->ping_response);
 		}
 	}
 	return 0;
@@ -159,174 +160,139 @@ void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int
 }
 /* }}} */
 
-static void fpm_status_handle_status_txt(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
-{
-	if (!status || !output || !content_type) {
-		return;
-	}
-
-	spprintf(output, 0, 
-		"pool:                 %s\n"
-		"process manager:      %s\n"
-		"accepted conn:        %lu\n"
-#if HAVE_FPM_LQ
-		"listen queue len:     %u\n"
-		"max listen queue len: %d\n"
-#endif
-		"idle processes:       %d\n"
-		"active processes:     %d\n"
-		"total processes:      %d\n"
-		"max children reached: %u\n",
-		fpm_status_pool,
-		status->pm == PM_STYLE_STATIC ? "static" : "dynamic",
-		status->accepted_conn,
-#if HAVE_FPM_LQ
-		status->cur_lq,
-		status->max_lq,
-#endif
-		status->idle,
-		status->active,
-		status->total,
-		status->max_children_reached);
-
-	spprintf(content_type, 0, "Content-Type: text/plain");
-}
-/* }}} */
-
-static void fpm_status_handle_status_html(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
-{
-	if (!status || !output || !content_type) {
-		return;
-	}
-
-	spprintf(output, 0, 
-		"<table>\n"
-		"<tr><th>pool</th><td>%s</td></tr>\n"
-		"<tr><th>process manager</th><td>%s</td></tr>\n"
-		"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
-#if HAVE_FPM_LQ
-		"<tr><th>listen queue len</th><td>%u</td></tr>\n"
-		"<tr><th>max listen queue len</th><td>%d</td></tr>\n"
-#endif
-		"<tr><th>idle processes</th><td>%d</td></tr>\n"
-		"<tr><th>active processes</th><td>%d</td></tr>\n"
-		"<tr><th>total processes</th><td>%d</td></tr>\n"
-		"<tr><th>max children reached</th><td>%u</td></tr>\n"
-		"</table>",
-		fpm_status_pool,
-		status->pm == PM_STYLE_STATIC ? "static" : "dynamic",
-		status->accepted_conn,
-#if HAVE_FPM_LQ
-		status->cur_lq,
-		status->max_lq,
-#endif
-		status->idle,
-		status->active,
-		status->total,
-		status->max_children_reached);
-
-	spprintf(content_type, 0, "Content-Type: text/html");
-}
-/* }}} */
-
-static void fpm_status_handle_status_json(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
-{
-	if (!status || !output || !content_type) {
-		return;
-	}
-
-	spprintf(output, 0, 
-		"{"
-		"\"pool\":\"%s\","
-		"\"process manager\":\"%s\","
-		"\"accepted conn\":%lu,"
-#if HAVE_FPM_LQ
-		"\"listen queue len\":%u,"
-		"\"max listen queue len\":%d,"
-#endif
-		"\"idle processes\":%d,"
-		"\"active processes\":%d,"
-		"\"total processes\":%d,"
-		"\"max children reached\":%u"
-		"}",
-		fpm_status_pool,
-		status->pm == PM_STYLE_STATIC ? "static" : "dynamic",
-		status->accepted_conn,
-#if HAVE_FPM_LQ
-		status->cur_lq,
-		status->max_lq,
-#endif
-		status->idle,
-		status->active,
-		status->total,
-		status->max_children_reached);
-
-	spprintf(content_type, 0, "Content-Type: application/json");
-}
-/* }}} */
-
-/* return 0 if it's not the request page
- * return 1 if ouput has been set)
- * *output unchanged: error (return 500)
- * *output changed: no error (return 200)
- */
-int fpm_status_handle_status(char *uri, char *query_string, char **output, char **content_type) /* {{{ */
+int fpm_status_handle_request() /* {{{ */
 {
 	struct fpm_status_s status;
+	char *buffer, *syntax;
 
-	if (!fpm_status_uri || !uri) {
+	if (!SG(request_info).request_uri) {
 		return 0;
 	}
 
-	/* It's not the status page */
-	if (strcmp(fpm_status_uri, uri)) {
-		return 0;
-	}
-
-	if (!output || !content_type || !fpm_status_shm) {
+	/* PING */
+	if (fpm_status_ping_uri && fpm_status_ping_response && !strcmp(fpm_status_ping_uri, SG(request_info).request_uri)) {
+		sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+		SG(sapi_headers).http_response_code = 200;
+		PUTS(fpm_status_ping_response);
 		return 1;
 	}
 
-	if (!fpm_status_shm->mem) {
+	/* STATUS */
+	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
+
+		if (!fpm_status_shm || !fpm_status_shm->mem) {
+			zlog(ZLOG_ERROR, "[pool %s] unable to find or access status shared memory", fpm_status_pool);
+			SG(sapi_headers).http_response_code = 500;
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			PUTS("Internal error. Please review log file for errors.");
+			return 1;
+		}
+
+		/* one shot operation */
+		status = *(struct fpm_status_s *)fpm_status_shm->mem;
+
+		if (status.idle < 0 || status.active < 0 || status.total < 0) {
+			zlog(ZLOG_ERROR, "[pool %s] invalid status values", fpm_status_pool);
+			SG(sapi_headers).http_response_code = 500;
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			PUTS("Internal error. Please review log file for errors.");
+			return 1;
+		}
+
+		/* HTML */
+		if (SG(request_info).query_string && strstr(SG(request_info).query_string, "html")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
+			syntax =
+				"<table>\n"
+				"<tr><th>pool</th><td>%s</td></tr>\n"
+				"<tr><th>process manager</th><td>%s</td></tr>\n"
+				"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
+#if HAVE_FPM_LQ
+				"<tr><th>listen queue len</th><td>%u</td></tr>\n"
+				"<tr><th>max listen queue len</th><td>%d</td></tr>\n"
+#endif
+				"<tr><th>idle processes</th><td>%d</td></tr>\n"
+				"<tr><th>active processes</th><td>%d</td></tr>\n"
+				"<tr><th>total processes</th><td>%d</td></tr>\n"
+				"<tr><th>max children reached</th><td>%u</td></tr>\n"
+				"</table>";
+
+		/* XML */
+		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "xml")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
+			syntax =
+				"<?xml version=\"1.0\" ?>\n"
+				"<status>\n"
+				"<pool>%s</pool>\n"
+				"<process-manager>%s</process-manager>\n"
+				"<accepted-conn>%lu</accepted-conn>\n"
+#if HAVE_FPM_LQ
+				"<listen-queue-len>%u</listen-queue-len>\n"
+				"<max-listen-queue-len>%d</max-listen-queue-len>\n"
+#endif
+				"<idle-processes>%d</idle-processes>\n"
+				"<active-processes>%d</active-processes>\n"
+				"<total-processes>%d</total-processes>\n"
+				"<max-children-reached>%u</max-children-reached>\n"
+				"</status>";
+
+			/* JSON */
+		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "json")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
+
+			syntax =
+				"{"
+				"\"pool\":\"%s\","
+				"\"process manager\":\"%s\","
+				"\"accepted conn\":%lu,"
+#if HAVE_FPM_LQ
+				"\"listen queue len\":%u,"
+				"\"max listen queue len\":%d,"
+#endif
+				"\"idle processes\":%d,"
+				"\"active processes\":%d,"
+				"\"total processes\":%d,"
+				"\"max children reached\":%u"
+				"}";
+
+		/* TEXT */
+		} else {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			syntax =
+				"pool:                 %s\n"
+				"process manager:      %s\n"
+				"accepted conn:        %lu\n"
+#if HAVE_FPM_LQ
+				"listen queue len:     %u\n"
+				"max listen queue len: %d\n"
+#endif
+				"idle processes:       %d\n"
+				"active processes:     %d\n"
+				"total processes:      %d\n"
+				"max children reached: %u\n";
+		}
+
+		spprintf(&buffer, 0, syntax,
+				fpm_status_pool,
+				status.pm == PM_STYLE_STATIC ? "static" : "dynamic",
+				status.accepted_conn,
+#if HAVE_FPM_LQ
+				status.cur_lq,
+				status.max_lq,
+#endif
+				status.idle,
+				status.active,
+				status.total,
+				status.max_children_reached);
+
+		SG(sapi_headers).http_response_code = 200;
+		PUTS(buffer);
+		efree(buffer);
+
 		return 1;
 	}
 
-	/* one shot operation */
-	status = *(struct fpm_status_s *)fpm_status_shm->mem;
-
-	if (status.idle < 0 || status.active < 0 || status.total < 0) {
-		return 1;
-	}
-
-	if (query_string && strstr(query_string, "html")) {
-		fpm_status_handle_status_html(&status, output, content_type);
-	} else if (query_string && strstr(query_string, "json")) {
-		fpm_status_handle_status_json(&status, output, content_type);
-	} else {
-		fpm_status_handle_status_txt(&status, output, content_type);
-	}
-
-	if (!*output || !content_type) {
-		zlog(ZLOG_ERROR, "[pool %s] unable to allocate status ouput buffer", fpm_status_pool);
-		return 1;
-	}
-
-	return 1;
-}
-/* }}} */
-
-char *fpm_status_handle_ping(char *uri) /* {{{ */
-{
-	if (!fpm_status_ping || !fpm_status_pong || !uri) {
-		return NULL;
-	}
-
-	/* It's not the status page */
-	if (strcmp(fpm_status_ping, uri)) {
-		return NULL;
-	}
-
-	return fpm_status_pong;
+	return 0;
 }
 /* }}} */
 
