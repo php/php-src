@@ -191,7 +191,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 	char *cp;
 	
 	/* allocate storage for the column */
-	var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
+	var->sqlind = (void*)ecalloc(1, var->sqllen + 2*sizeof(short));
 	var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 
 	colname_len = (S->H->fetch_table_names && var->relname_length)
