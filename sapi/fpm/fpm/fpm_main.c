@@ -1831,7 +1831,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 	zend_first_try {
 		while (fcgi_accept_request(&request) >= 0) {
-			char *status_buffer, *status_content_type;
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
@@ -1854,32 +1853,7 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
-			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, SG(request_info).query_string, &status_buffer, &status_content_type)) {
-				if (status_buffer) {
-					if (status_content_type) {
-						sapi_add_header_ex(status_content_type, strlen(status_content_type), 1, 1 TSRMLS_CC);
-					} else {
-						sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-					}
-
-					SG(sapi_headers).http_response_code = 200;
-					PUTS(status_buffer);
-					efree(status_buffer);
-					if (status_content_type) {
-						efree(status_content_type);
-					}
-				} else {
-					sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-					SG(sapi_headers).http_response_code = 500;
-					PUTS("Unable to retrieve status\n");
-				}
-				goto fastcgi_request_done;
-			}
-
-			if (!strcasecmp(SG(request_info).request_method, "GET") && (status_buffer = fpm_status_handle_ping(SG(request_info).request_uri))) {
-				sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-				SG(sapi_headers).http_response_code = 200;
-				PUTS(status_buffer);
+			if (fpm_status_handle_request()) {
 				goto fastcgi_request_done;
 			}
 
