@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.4.0
-- Upgraded bundled Sqlite3 to version 3.7.4. (Ilia)
-- Upgraded bundled PCRE to version 8.10. (Ilia)
 - autoconf 2.59+ is now supported (and required) for generating the
   configure script with ./buildconf. Autoconf 2.60+ is desirable
   otherwise the configure help order may be incorrect.  (Rasmus, Chris Jones)
@@ -37,7 +35,7 @@ PHP                                                                        NEWS
 - General improvements:
   . Added multibyte support by default. Previously php had to be compiled
     with --enable-zend-multibyte. Now it can be enabled or disabled through
-    zend.multibyte directive in php.ini (Dmitry)
+    zend.multibyte directive in php.ini. (Dmitry)
   . Removed compile time dependency from ext/mbstring (Dmitry)
   . Added support for Traits. (Stefan)
   . Added closure $this support back. (Stas)
@@ -87,7 +85,7 @@ PHP                                                                        NEWS
 
 - Improved Zend Engine, performance tweaks and optimizations: (Dmitry)
   . Inlined most probable code-paths for arithmetic operations directly into
-    executor
+    executor.
   . Eliminated unnecessary iterations during request startup/shutdown.
   . Changed $GLOBALS into a JIT autoglobal, so it's initialized only if used.
     (this may affect opcode caches!)
@@ -209,7 +207,7 @@ PHP                                                                        NEWS
   . Added RegexIterator::getRegex() method. (Joshua Thijssen)
   . Added SplObjectStorage::getHash() hook. (Etienne)
   . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
-  . Added CallbackFilterIterator and RecursiveCallbackFilterIterator (Arnaud)
+  . Added CallbackFilterIterator and RecursiveCallbackFilterIterator. (Arnaud)
 
 - Improved ZLIB extension:
   . Re-implemented non-file related functionality. (Mike)
