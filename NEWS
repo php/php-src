@@ -170,6 +170,9 @@ PHP                                                                        NEWS
 - Phar extension:
   . Fixed bug #54395 (Phar::mount() crashes when calling with wrong parameters).
     (Felipe)
+
+- PHP-FPM SAPI:
+  . Added xml format to the status page. (fat)
     
 - Reflection extension:
   . Fixed bug #54347 (reflection_extension does not lowercase module function
