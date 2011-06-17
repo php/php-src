@@ -195,11 +195,12 @@ pm.max_children = 50
 ;   total processes:      100
 ;   max children reached: 1
 ; By default the status page output is formatted as text/plain. Passing either
-; 'html' or 'json' as a query string will return the corresponding output
+; 'html', 'xml' or 'json' as a query string will return the corresponding output
 ; syntax. Example:
 ;   http://www.foo.bar/status
 ;   http://www.foo.bar/status?json
 ;   http://www.foo.bar/status?html
+;   http://www.foo.bar/status?xml
 ; Note: The value must start with a leading slash (/). The value can be
 ;       anything, but it may not be a good idea to use the .php extension or it
 ;       may conflict with a real PHP file.
