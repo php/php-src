@@ -206,14 +206,19 @@ PHP                                                                        NEWS
 - Improved ZLIB extension:
   . Re-implemented non-file related functionality. (Mike)
 
-- Improved SNMP extension:
-  . Added OO API. FR #53594. 
+- Improved SNMP extension (Boris Lytochkin):
+  . Added OO API. FR #53594 (php-snmp rewrite). 
   . Sanitized return values of existing functions. Now it returns FALSE on
     failure.
   . Allow ~infinite OIDs in GET/GETNEXT/SET queries. Autochunk them to max_oids
     upon request.
   . Introducing unit tests for extension with ~full coverage.
-  . Fixed bugs #44193, #44193, #45893, #46065, #51336, #53862.
+  . Fixed bugs
+    . #44193 (snmp v3 noAuthNoPriv doesn't work)
+    . #45893 (Snmp buffer limited to 2048 char)
+    . #46065 (snmp_set_quick_print() persists between requests)
+    . #51336 (snmprealwalk (snmp v1) does not handle end of OID tree correctly)
+    . #53862 (snmp_set_oid_output_format does not allow returning to default)
 
 ## UNSORTED ##
 
