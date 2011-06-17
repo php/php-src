@@ -232,6 +232,7 @@ static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len T
 	/* TODO no placeholders in exec() for now */
 	in_sqlda.version = out_sqlda.version = PDO_FB_SQLDA_VERSION;
 	in_sqlda.sqld = out_sqlda.sqld = 0;
+	out_sqlda.sqln = 1;
 	
 	/* allocate and prepare statement */
 	if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &out_sqlda, &stmt, 0 TSRMLS_CC)) {
