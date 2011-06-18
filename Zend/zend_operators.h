@@ -451,8 +451,10 @@ ZEND_API void zend_update_current_locale(void);
 #define zend_update_current_locale()
 #endif
 
+#ifndef offsetof
 #define offsetof(t,f) \
 	((int)(&((t*)0)->f))
+#endif
 
 static zend_always_inline int fast_increment_function(zval *op1)
 {
