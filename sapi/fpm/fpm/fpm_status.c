@@ -160,7 +160,7 @@ void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int
 }
 /* }}} */
 
-int fpm_status_handle_request() /* {{{ */
+int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 {
 	struct fpm_status_s status;
 	char *buffer, *syntax;
