@@ -32,6 +32,7 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include "win32/php_win32_globals.h"
+#include "win32/winutil.h"
 #include <process.h>
 #elif defined(NETWARE)
 #include <sys/timeval.h>
