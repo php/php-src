@@ -235,7 +235,7 @@ int fpm_event_init_main() /* {{{ */
 }
 /* }}} */
 
-void fpm_event_loop() /* {{{ */
+void fpm_event_loop(int err) /* {{{ */
 {
 	static struct fpm_event_s signal_fd_event;
 
@@ -249,9 +249,12 @@ void fpm_event_loop() /* {{{ */
 
 	/* add timers */
 	fpm_pctl_heartbeat(NULL, 0, NULL);
-	fpm_pctl_perform_idle_server_maintenance_heartbeat(NULL, 0, NULL);
 
-	zlog(ZLOG_NOTICE, "ready to handle connections");
+	if (!err) {
+		fpm_pctl_perform_idle_server_maintenance_heartbeat(NULL, 0, NULL);
+
+		zlog(ZLOG_NOTICE, "ready to handle connections");
+	}
 
 	while (1) {
 		struct fpm_event_queue_s *q, *q2;

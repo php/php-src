@@ -350,7 +350,6 @@ static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 
 int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn, int is_debug) /* {{{ */
 {
-	int enough = 0;
 	pid_t pid;
 	struct fpm_child_s *child;
 	int max;
@@ -365,12 +364,11 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		max = wp->config->pm_max_children;
 	}
 
-	while (!enough && fpm_pctl_can_spawn_children() && wp->running_children < max) {
+	while (fpm_pctl_can_spawn_children() && wp->running_children < max) {
 		child = fpm_resources_prepare(wp);
 
 		if (!child) {
-			enough = 1;
-			break;
+			return 2;
 		}
 
 		pid = fork();
@@ -385,11 +383,9 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 
 			case -1 :
 				zlog(ZLOG_SYSERROR, "fork() failed");
-				enough = 1;
 
 				fpm_resources_discard(child);
-
-				break; /* dont try any more on error */
+				return 2;
 
 			default :
 				child->pid = pid;
