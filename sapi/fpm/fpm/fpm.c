@@ -90,10 +90,16 @@ int fpm_run(int *max_requests) /* {{{ */
 		if (!is_parent) {
 			goto run_child;
 		}
+
+		/* handle error */
+		if (is_parent == 2) {
+			fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET);
+			fpm_event_loop(1);
+		}
 	}
 
 	/* run event loop forever */
-	fpm_event_loop();
+	fpm_event_loop(0);
 
 run_child: /* only workers reach this point */
 
