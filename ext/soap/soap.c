@@ -233,6 +233,9 @@ PHP_METHOD(SoapHeader, SoapHeader);
 #define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
 
 /* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO(arginfo_soap__void, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_soapparam_soapparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, name)
@@ -379,7 +382,7 @@ static const zend_function_entry soap_functions[] = {
 
 static const zend_function_entry soap_fault_functions[] = {
 	SOAP_CTOR(SoapFault, SoapFault, arginfo_soapfault_soapfault, 0)
-	PHP_ME(SoapFault, __toString, NULL, 0)
+	PHP_ME(SoapFault, __toString, arginfo_soap__void, 0)
 	{NULL, NULL, NULL}
 };
 
