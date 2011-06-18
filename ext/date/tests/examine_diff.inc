@@ -1,16 +1,22 @@
 <?php
 
 /**
- * Helper for the DateTime_diff_add_sub* tests
+ * Helper for the DateTime diff/days/math tests
  *
  * @author Daniel Convissor <danielc@analysisandsolutions.com>
  */
 
+/**#@+
+ * Which test segments should be displayed?
+ */
+define('PHPT_DATETIME_SHOW_DIFF', 1);
+define('PHPT_DATETIME_SHOW_DAYS', 2);
+define('PHPT_DATETIME_SHOW_ADD', 3);
+define('PHPT_DATETIME_SHOW_SUB', 4);
+/**#@-*/
+
 /**
- * Provides a consistent interface for executing date diff tests
- *
- * Tests the diff() method then passes the resulting
- * interval to the add()/sub() method as a double check
+ * Provides a consistent interface for executing date diff/add/sub tests
  *
  * @param string|DateTime $end_date  the end date in YYYY-MM-DD format
  *                        (can include time HH:MM:SS) or a DateTime object
@@ -41,38 +47,33 @@ function examine_diff($end_date, $start_date, $expect_spec, $expect_days, $absol
 	}
 	$end_date = $end->format('Y-m-d H:i:s T');
 
-	$force_sub = false;
-	if ($absolute) {
-		$tmp_interval = $start->diff($end);
-		if ($tmp_interval->format('%r')) {
-			$force_sub = true;
-		}
+	$expect_interval = new DateInterval('P' . substr($expect_spec, 2));
+	if (substr($expect_spec, 1, 1) == '-') {
+		$expect_interval->invert = true;
 	}
 
-	$result_interval = $start->diff($end, $absolute);
-	$result_spec = $result_interval->format('P%R%yY%mM%dDT%hH%iM%sS');
-	$result_days = $result_interval->format('%a');
-
-	// Also make sure add()/sub() works the same way as diff().
-	if ($force_sub) {
-		$start->sub($result_interval);
-		$sign = '-';
-	} else {
-		$start->add($result_interval);
-		$sign = '+';
+	if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_DIFF) {
+		$result_interval = $start->diff($end, $absolute);
+		$result_spec = $result_interval->format('P%R%yY%mM%dDT%hH%iM%sS');
+		echo "DIFF: $end_date - $start_date = **$result_spec**\n";
+		// echo "DIFF: $end_date - $start_date = **$expect_spec**\n";
 	}
-
-	$result_end_date = $start->format('Y-m-d H:i:s T');
-
-	// Leaving this here for making adjustments later.
-	$expect_full = "FWD: $end_date - $start_date = **$expect_spec** | "
-		. "BACK: $start_date $sign $expect_spec = **$end_date** | "
-		. "DAYS: **$expect_days**";
-	// echo "$expect_full\n";
-	// return;
-
-	$result_full = "FWD: $end_date - $start_date = **$result_spec** | "
-		. "BACK: $start_date $sign $result_spec = **$result_end_date** | "
-		. "DAYS: **$result_days**";
-	echo "$result_full\n";
+	if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_DAYS) {
+		$result_interval = $start->diff($end, $absolute);
+		$result_days = $result_interval->format('%a');
+		echo "DAYS: **$result_days**\n";
+		// echo "DAYS: **$expect_days**\n";
+	}
+	if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_ADD) {
+		$start->add($expect_interval);
+		$result_end_date = $start->format('Y-m-d H:i:s T');
+		echo "ADD: $start_date + $expect_spec = **$result_end_date**\n";
+		// echo "ADD: $start_date + $expect_spec = **$end_date**\n";
+	}
+	if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_SUB) {
+		$end->sub($expect_interval);
+		$result_start_date = $end->format('Y-m-d H:i:s T');
+		echo "SUB: $end_date - $expect_spec = **$result_start_date**\n";
+		// echo "SUB: $end_date - $expect_spec = **$start_date**\n";
+	}
 }
