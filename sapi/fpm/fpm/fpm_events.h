@@ -22,7 +22,7 @@ struct fpm_event_s {
 	short which;              /* type of event */
 };
 
-void fpm_event_loop();
+void fpm_event_loop(int err);
 void fpm_event_fire(struct fpm_event_s *ev);
 int fpm_event_init_main();
 int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
