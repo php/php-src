@@ -29,6 +29,8 @@ struct fpm_global_config_s {
 	int daemonize;
 	char *pid_file;
 	char *error_log;
+	int rlimit_files;
+	int rlimit_core;
 };
 
 extern struct fpm_global_config_s fpm_global_config;

@@ -57,6 +57,15 @@
 ; Send FPM to background. Set to 'no' to keep FPM in foreground for debugging.
 ; Default Value: yes
 ;daemonize = yes
+ 
+; Set open file descriptor rlimit for the master process.
+; Default Value: system defined value
+;rlimit_files = 1024
+ 
+; Set max core size rlimit for the master process.
+; Possible Values: 'unlimited' or an integer greater or equal to 0
+; Default Value: system defined value
+;rlimit_core = 0
 
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ; 

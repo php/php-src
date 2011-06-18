@@ -153,7 +153,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) wp->config->rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_NOFILE, %d) failed (%d)", wp->config->name, wp->config->rlimit_files, errno);
+			zlog(ZLOG_SYSERROR, "[pool %s] unable to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d) failed (%d)", wp->config->name, wp->config->rlimit_files, errno);
 		}
 	}
 
@@ -163,7 +163,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		r.rlim_max = r.rlim_cur = wp->config->rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_core;
 
 		if (0 > setrlimit(RLIMIT_CORE, &r)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] setrlimit(RLIMIT_CORE, %d) failed (%d)", wp->config->name, wp->config->rlimit_core, errno);
+			zlog(ZLOG_SYSERROR, "[pool %s] unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d) failed (%d)", wp->config->name, wp->config->rlimit_core, errno);
 		}
 	}
 
@@ -219,6 +219,28 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_unix_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
+
+	if (fpm_global_config.rlimit_files) {
+		struct rlimit r;
+
+		r.rlim_max = r.rlim_cur = (rlim_t) fpm_global_config.rlimit_files;
+
+		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
+			zlog(ZLOG_SYSERROR, "unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d) failed (%d)", fpm_global_config.rlimit_files, errno);
+			return -1;
+		}
+	}
+
+	if (fpm_global_config.rlimit_core) {
+		struct rlimit r;
+
+		r.rlim_max = r.rlim_cur = fpm_global_config.rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) fpm_global_config.rlimit_core;
+
+		if (0 > setrlimit(RLIMIT_CORE, &r)) {
+			zlog(ZLOG_SYSERROR, "unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d) failed (%d)", fpm_global_config.rlimit_core, errno);
+			return -1;
+		}
+	}
 
 	fpm_pagesize = getpagesize();
 	if (fpm_global_config.daemonize) {

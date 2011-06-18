@@ -63,13 +63,15 @@ static char *ini_include = NULL;
 #define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
 
 static struct ini_value_parser_s ini_fpm_global_options[] = {
-	{ "emergency_restart_threshold", 	&fpm_conf_set_integer, 	GO(emergency_restart_threshold) },
-	{ "emergency_restart_interval",		&fpm_conf_set_time,			GO(emergency_restart_interval) },
-	{ "process_control_timeout",			&fpm_conf_set_time,			GO(process_control_timeout) },
-	{ "daemonize",										&fpm_conf_set_boolean,	GO(daemonize) },
-	{ "pid",													&fpm_conf_set_string,		GO(pid_file) },
-	{ "error_log",										&fpm_conf_set_string,		GO(error_log) },
+	{ "emergency_restart_threshold", 	&fpm_conf_set_integer, 		GO(emergency_restart_threshold) },
+	{ "emergency_restart_interval",		&fpm_conf_set_time,				GO(emergency_restart_interval) },
+	{ "process_control_timeout",			&fpm_conf_set_time,				GO(process_control_timeout) },
+	{ "daemonize",										&fpm_conf_set_boolean,		GO(daemonize) },
+	{ "pid",													&fpm_conf_set_string,			GO(pid_file) },
+	{ "error_log",										&fpm_conf_set_string,			GO(error_log) },
 	{ "log_level",										&fpm_conf_set_log_level,	0 },
+	{ "rlimit_files",									&fpm_conf_set_integer,		GO(rlimit_files) },
+	{ "rlimit_core",									&fpm_conf_set_rlimit_core,GO(rlimit_core) },
 	{ 0, 0, 0 }
 };
 
@@ -255,10 +257,10 @@ static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
-	struct fpm_worker_pool_config_s *c = *config;
+	int *ptr = (int *) ((char *) *config + offset);
 
 	if (!strcasecmp(val, "unlimited")) {
-		c->rlimit_core = -1;
+		*ptr = -1;
 	} else {
 		int int_value;
 		void *subconf = &int_value;
@@ -274,7 +276,7 @@ static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offse
 			return "must be greater than zero or 'unlimited'";
 		}
 
-		c->rlimit_core = int_value;
+		*ptr = int_value;
 	}
 
 	return NULL;
@@ -1117,6 +1119,8 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds", fpm_global_config.process_control_timeout);
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
+	zlog(ZLOG_NOTICE, "\trlimit_files = %d", fpm_global_config.rlimit_files);
+	zlog(ZLOG_NOTICE, "\trlimit_core = %d", fpm_global_config.rlimit_core);
 	zlog(ZLOG_NOTICE, " ");
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {

@@ -175,6 +175,8 @@ PHP                                                                        NEWS
   . Added xml format to the status page. (fat)
   . Remove timestamp in logs written by children processes. (fat)
   . Fixed exit at FPM startup on fpm_resources_prepare() errors. (fat)
+  . Added master rlimit_files and rlimit_core in the global configuration
+    settings. (fat)
 
 - Reflection extension:
   . Fixed bug #54347 (reflection_extension does not lowercase module function
