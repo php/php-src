@@ -13,6 +13,7 @@
 #include <errno.h>
 
 #include "zlog.h"
+#include "fpm.h"
 
 #define MAX_LINE_LENGTH 1024
 
@@ -47,7 +48,7 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /*
 	if (zlog_level == ZLOG_DEBUG) {
 		len += snprintf(timebuf + len, timebuf_len - len, ".%06d", (int) tv->tv_usec);
 	}
-	len += snprintf(timebuf + len, timebuf_len - len, "]");
+	len += snprintf(timebuf + len, timebuf_len - len, "] ");
 	return len;
 }
 /* }}} */
@@ -78,7 +79,7 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	char buf[MAX_LINE_LENGTH];
 	const size_t buf_size = MAX_LINE_LENGTH;
 	va_list args;
-	size_t len;
+	size_t len = 0;
 	int truncated = 0;
 	int saved_errno;
 
@@ -87,12 +88,14 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	}
 
 	saved_errno = errno;
-	gettimeofday(&tv, 0);
-	len = zlog_print_time(&tv, buf, buf_size);
+	if (!fpm_globals.is_child) {
+		gettimeofday(&tv, 0);
+		len = zlog_print_time(&tv, buf, buf_size);
+	}
 	if (zlog_level == ZLOG_DEBUG) {
-		len += snprintf(buf + len, buf_size - len, " %s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+		len += snprintf(buf + len, buf_size - len, "%s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
 	} else {
-		len += snprintf(buf + len, buf_size - len, " %s: ", level_names[flags & ZLOG_LEVEL_MASK]);
+		len += snprintf(buf + len, buf_size - len, "%s: ", level_names[flags & ZLOG_LEVEL_MASK]);
 	}
 
 	if (len > buf_size - 1) {
