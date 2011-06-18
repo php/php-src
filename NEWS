@@ -173,8 +173,8 @@ PHP                                                                        NEWS
 
 - PHP-FPM SAPI:
   . Added xml format to the status page. (fat)
-	. Remove timestamp in logs written by children processes. (fat)
-    
+  . Remove timestamp in logs written by children processes. (fat)
+
 - Reflection extension:
   . Fixed bug #54347 (reflection_extension does not lowercase module function
     name). (Felipe, laruence at yahoo dot com dot cn)
