@@ -1499,14 +1499,14 @@ PHP_FUNCTION(umask)
 	long arg1 = 0;
 	int oldumask;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
-
 	oldumask = umask(077);
 
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
+	}
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
