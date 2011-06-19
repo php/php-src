@@ -340,7 +340,6 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ *
 	}
 	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		zval *z = (zval*)zv;
-		TSRMLS_FETCH();
 
 		Z_STRVAL_P(z) =
 			zend_new_interned_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv) + 1, 1 TSRMLS_CC);
