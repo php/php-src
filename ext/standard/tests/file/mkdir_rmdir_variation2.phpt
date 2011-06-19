@@ -64,13 +64,17 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-bool(true)
-bool(true)
+
+Warning: mkdir() expects parameter 1 to be a valid path, string given in %s on line %d
+bool(false)
+
+Warning: rmdir(%s): No such file or directory in %s on line %d
+bool(false)
 
 *** Testing mkdir() with miscelleneous input ***
 bool(true)
 
-Warning: mkdir(): Permission denied in %sfile/mkdir_rmdir_variation2.php on line %d
+Warning: mkdir(): Permission denied in %s on line %d
 bool(false)
 bool(true)
 Done
