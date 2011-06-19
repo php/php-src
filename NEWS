@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-20 Jun 2011, PHP 5.4.0 Alpha 1
+?? ??? 2011, PHP 5.4.0
 - autoconf 2.59+ is now supported (and required) for generating the
   configure script with ./buildconf. Autoconf 2.60+ is desirable
   otherwise the configure help order may be incorrect.  (Rasmus, Chris Jones)
