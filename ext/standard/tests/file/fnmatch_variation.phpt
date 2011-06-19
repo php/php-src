@@ -134,7 +134,7 @@ match($null_arr, $null_arr);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fnmatch() with file and various patterns ***
 -- Iteration 0 --
 bool(true)
@@ -183,9 +183,13 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
-bool(false)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 24 --
-bool(false)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -259,44 +263,84 @@ bool(true)
 --- With Strings ---
 -- Iteration 0 --
 bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(true)
-bool(true)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(true)
 -- Iteration 1 --
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 2 --
 bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(true)
-bool(true)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(true)
 -- Iteration 3 --
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-bool(false)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 4 --
 bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
-bool(false)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(true)
-bool(true)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(true)
 
@@ -397,42 +441,64 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(false)
 -- Iteration 1 --
 bool(true)
 bool(true)
 bool(true)
-bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(false)
 -- Iteration 2 --
 bool(true)
 bool(true)
 bool(true)
-bool(true)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(false)
 -- Iteration 3 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 4 --
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+
+Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
+NULL
 bool(false)
 bool(true)
 
