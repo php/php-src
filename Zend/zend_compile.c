@@ -291,10 +291,10 @@ static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 }
 /* }}} */
 
-static int lookup_cv(zend_op_array *op_array, char* name, int name_len TSRMLS_DC) /* {{{ */
+static int lookup_cv(zend_op_array *op_array, char* name, int name_len, ulong hash TSRMLS_DC) /* {{{ */
 {
 	int i = 0;
-	ulong hash_value = zend_inline_hash_func(name, name_len+1);
+	ulong hash_value = hash ? hash : zend_inline_hash_func(name, name_len+1);
 
 	while (i < op_array->last_var) {
 		if (op_array->vars[i].name == name ||
@@ -642,7 +642,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		    (CG(active_op_array)->last == 0 ||
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
-			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC);
+			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, 0 TSRMLS_CC);
 			varname->u.constant.value.str.val = CG(active_op_array)->vars[result->u.op.var].name;
 			result->EA = 0;
 			return;
@@ -882,6 +882,7 @@ static zend_bool opline_is_fetch_this(const zend_op *opline TSRMLS_DC) /* {{{ */
 {
 	if ((opline->opcode == ZEND_FETCH_W) && (opline->op1_type == IS_CONST)
 		&& (Z_TYPE(CONSTANT(opline->op1.constant)) == IS_STRING)
+		&& (Z_HASH_P(&CONSTANT(opline->op1.constant)) == THIS_HASHVAL)
 		&& (Z_STRLEN(CONSTANT(opline->op1.constant)) == (sizeof("this")-1))
 		&& !memcmp(Z_STRVAL(CONSTANT(opline->op1.constant)), "this", sizeof("this"))) {
 		return 1;
@@ -1290,7 +1291,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 
 				this_var = opline_ptr->result.var;
 				if (CG(active_op_array)->this_var == -1) {
-					CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), Z_STRVAL(CONSTANT(opline_ptr->op1.constant)), Z_STRLEN(CONSTANT(opline_ptr->op1.constant)) TSRMLS_CC);
+					CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), Z_STRVAL(CONSTANT(opline_ptr->op1.constant)), Z_STRLEN(CONSTANT(opline_ptr->op1.constant)), Z_HASH_P(&CONSTANT(opline_ptr->op1.constant)) TSRMLS_CC);
 					Z_TYPE(CONSTANT(opline_ptr->op1.constant)) = IS_NULL;
 				} else {
 					zend_del_literal(CG(active_op_array), opline_ptr->op1.constant);
@@ -1302,7 +1303,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 					variable->u.op.var = CG(active_op_array)->this_var;
 				}
 			} else if (CG(active_op_array)->this_var == -1) {
-				CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1 TSRMLS_CC);
+				CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1, THIS_HASHVAL TSRMLS_CC);
 			}
 		}
 
@@ -1810,10 +1811,11 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 		zend_error(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
 	} else {
 		var.op_type = IS_CV;
-		var.u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC);
+		var.u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, 0 TSRMLS_CC);
 		varname->u.constant.value.str.val = CG(active_op_array)->vars[var.u.op.var].name;
 		var.EA = 0;
-		if (Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
+		if (CG(active_op_array)->vars[var.u.op.var].hash_value == THIS_HASHVAL &&
+			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
 		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
 			if (CG(active_op_array)->scope &&
 			    (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) {
@@ -2699,7 +2701,7 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	opline->op1_type = IS_CONST;
 	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
-	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len TSRMLS_CC);
+	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len, 0 TSRMLS_CC);
 	catch_var->u.constant.value.str.val = CG(active_op_array)->vars[opline->op2.var].name;
 	opline->result.num = 0; /* 1 means it's the last catch in the block */
 
@@ -5642,7 +5644,7 @@ void zend_do_indirect_references(znode *result, const znode *num_references, zno
 	fetch_simple_variable(result, variable, 1 TSRMLS_CC);
 	/* there is a chance someone is accessing $this */
 	if (CG(active_op_array)->scope && CG(active_op_array)->this_var == -1) {
-		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1 TSRMLS_CC);
+		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), estrndup("this", sizeof("this")-1), sizeof("this")-1, THIS_HASHVAL TSRMLS_CC);
 	}
 }
 /* }}} */

@@ -134,6 +134,7 @@ typedef struct _zend_try_catch_element {
 	zend_uint catch_op;  /* ketchup! */
 } zend_try_catch_element;
 
+#define THIS_HASHVAL 275574653UL
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
