@@ -1498,7 +1498,10 @@ PHP_FUNCTION(umask)
 {
 	long arg1 = 0;
 	int oldumask;
-	int arg_count = ZEND_NUM_ARGS();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	oldumask = umask(077);
 
@@ -1506,12 +1509,9 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (arg_count == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		umask(oldumask);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
-			RETURN_FALSE;
-		}
 		umask(arg1);
 	}
 
@@ -2605,6 +2605,9 @@ PHP_FUNCTION(fnmatch)
    Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	RETURN_STRING((char *)php_get_temporary_directory(), 1);
 }
 /* }}} */
