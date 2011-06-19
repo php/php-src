@@ -3,7 +3,7 @@ DateTime::add() -- spring type2 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --XFAIL--
-PHP < 5.4 has bugs
+Various bugs exist
 --FILE--
 <?php
 

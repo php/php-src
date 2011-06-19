@@ -3,7 +3,7 @@ DateTime::sub() -- fall type2 type2
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --XFAIL--
-PHP < 5.4 has bugs
+Various bugs exist
 --FILE--
 <?php
 
