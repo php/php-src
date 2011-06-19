@@ -2113,8 +2113,9 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 		fptr++;
 	}
 	if (*fptr) {
+		int done = 0;
 		/* Trailing | and ! specifiers are valid. */
-		while (*fptr) {
+		while (*fptr && !done) {
 			switch (*fptr++) {
 				case '!': /* reset all fields to default */
 					timelib_time_reset_fields(s->time);
@@ -2126,6 +2127,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 
 				default:
 					add_pbf_error(s, "Data missing", string, ptr);
+					done = 1;
 			}
 		}
 	}
