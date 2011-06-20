@@ -3769,27 +3769,28 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 /* }}} */
 
 static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) {
-	size_t i, j;
-	if (precedences) {
-		i = 0;
-		while (precedences[i]) {
-			if (precedences[i]->exclude_from_classes) {
-				j = 0;
-				while (precedences[i]->exclude_from_classes[j]) {
-					if (precedences[i]->exclude_from_classes[j] == trait) {
-						zend_uint lcname_len = precedences[i]->trait_method->mname_len;
-						char* lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name,
-																								lcname_len);
-						if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL)==FAILURE) {
-							zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
-						}
+	size_t i = 0, j;
+	
+	if (!precedences) {
+		return;
+	}
+	while (precedences[i]) {
+		if (precedences[i]->exclude_from_classes) {
+			j = 0;
+			while (precedences[i]->exclude_from_classes[j]) {
+				if (precedences[i]->exclude_from_classes[j] == trait) {
+					zend_uint lcname_len = precedences[i]->trait_method->mname_len;
+					char *lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name, lcname_len);
+					if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL) == FAILURE) {
 						efree(lcname);
+						zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
 					}
-					j++;
+					efree(lcname);
 				}
+				++j;
 			}
-			i++;
 		}
+		++i;
 	}
 }
 
