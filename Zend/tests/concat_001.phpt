@@ -1,5 +1,5 @@
 --TEST--
-concat difffent types
+concat different types
 --INI--
 precision=14
 --FILE--
