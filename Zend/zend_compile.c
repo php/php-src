@@ -633,8 +633,12 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_llist *fetch_list_ptr;
 
 	if (varname->op_type == IS_CONST) {
+		ulong hash = 0;
+
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
 			convert_to_string(&varname->u.constant);
+		} else if (IS_INTERNED(Z_STRVAL(varname->u.constant))) {
+			hash = INTERNED_HASH(Z_STRVAL(varname->u.constant));
 		}
 		if (!zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
 		    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
@@ -642,7 +646,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		    (CG(active_op_array)->last == 0 ||
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
-			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, 0 TSRMLS_CC);
+			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, hash TSRMLS_CC);
 			varname->u.constant.value.str.val = CG(active_op_array)->vars[result->u.op.var].name;
 			result->EA = 0;
 			return;
