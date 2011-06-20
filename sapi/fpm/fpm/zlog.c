@@ -93,7 +93,11 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 		len = zlog_print_time(&tv, buf, buf_size);
 	}
 	if (zlog_level == ZLOG_DEBUG) {
-		len += snprintf(buf + len, buf_size - len, "%s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+		if (!fpm_globals.is_child) {
+			len += snprintf(buf + len, buf_size - len, "%s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+		} else {
+			len += snprintf(buf + len, buf_size - len, "%s: %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], function, line);
+		}
 	} else {
 		len += snprintf(buf + len, buf_size - len, "%s: ", level_names[flags & ZLOG_LEVEL_MASK]);
 	}
