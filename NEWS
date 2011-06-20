@@ -112,15 +112,17 @@ PHP                                                                        NEWS
     instruction without previous ZEND_FETCH_CLASS.
   . zend_stack and zend_ptr_stack allocation is delayed until actual usage.
 
-- Improved CLI SAPI: (Johannes)
+- Improved CLI SAPI: (Johannes, Moriyoshi)
   . Added command line option --rz <name> which shows information of the
-    named Zend extension.
-  . Interactive readline shell improvements:
+    named Zend extension. (Johannes)
+  . Interactive readline shell improvements: (Johannes)
     . Added "cli.pager" php.ini setting to set a pager for output.
     . Added "cli.prompt" php.ini setting to configure the shell prompt.
     . Added shortcut #inisetting=value to change ini settings at run-time.
     . Changed shell not to terminate on fatal errors.
     . Interactive shell works with shared readline extension. FR #53878.
+  . Added built-in web server that is intended for testing purpose.
+    (Moriyoshi)
 
 - Improved FastCGI SAPI: (Dmitry)
   . Added apache compatible functions: apache_child_terminate(),

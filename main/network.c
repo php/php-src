@@ -148,7 +148,7 @@ static const char *php_gai_strerror(int code)
 
 /* {{{ php_network_freeaddresses
  */
-static void php_network_freeaddresses(struct sockaddr **sal)
+PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 {
 	struct sockaddr **sap;
 
@@ -163,7 +163,7 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
-static int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, char **error_string TSRMLS_DC)
+PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, char **error_string TSRMLS_DC)
 {
 	struct sockaddr **sap;
 	int n;
