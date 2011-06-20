@@ -1327,7 +1327,7 @@ exit_loop:
 	if (sapi_module == &cli_sapi_module) {
 		if (ini_entries) {
 			ini_entries = realloc(ini_entries, ini_entries_len + sizeof(HARDCODED_INI));
-			memmove(ini_entries, ini_entries + sizeof(HARDCODED_INI) - 2, ini_entries_len + 1);
+			memmove(ini_entries + sizeof(HARDCODED_INI) - 2, ini_entries, ini_entries_len + 1);
 			memcpy(ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI) - 2);
 		} else {
 			ini_entries = malloc(sizeof(HARDCODED_INI));
