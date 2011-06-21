@@ -704,6 +704,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 #endif
 				get_zend_version()
 			);
+			sapi_deactivate(TSRMLS_C);
 			goto out;
 
 		case 'm': /* list compiled in modules */
