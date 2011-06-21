@@ -18,8 +18,6 @@
 
 /* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
 
-#include "php_config.h"
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -30,6 +28,8 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include "win32/php_registry.h"
+#else
+# include "php_config.h"
 #endif
 
 #ifdef __riscos__
