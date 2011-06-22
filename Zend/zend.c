@@ -108,6 +108,9 @@ ZEND_INI_BEGIN()
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
  	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
+#ifdef ZEND_SIGNALS
+	STD_ZEND_INI_BOOLEAN("zend.signal_check", "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
+#endif
 ZEND_INI_END()
 
 
@@ -659,8 +662,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	}
 	zend_stream_open_function = utility_functions->stream_open_function;
 	zend_message_dispatcher_p = utility_functions->message_handler;
+#ifndef ZEND_SIGNALS
 	zend_block_interruptions = utility_functions->block_interruptions;
 	zend_unblock_interruptions = utility_functions->unblock_interruptions;
+#endif
 	zend_get_configuration_directive_p = utility_functions->get_configuration_directive;
 	zend_ticks_function = utility_functions->ticks_function;
 	zend_on_timeout = utility_functions->on_timeout;
@@ -791,6 +796,9 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 
 void zend_shutdown(TSRMLS_D) /* {{{ */
 {
+#ifdef ZEND_SIGNALS
+	zend_signal_shutdown(TSRMLS_C);
+#endif
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
 #endif

@@ -28,12 +28,10 @@ Warning: pcntl_signal() expects at least 2 parameters, 0 given in %s
 NULL
 bool(true)
 
-Warning: pcntl_signal(): Invalid value for handle argument specified in %s
-
-Warning: pcntl_signal(): Error assigning signal %s
+Warning: pcntl_signal(): Invalid signal %s
 bool(false)
 
-Warning: pcntl_signal(): Error assigning signal %s
+Warning: pcntl_signal(): Invalid signal %s
 bool(false)
 
 Warning: pcntl_signal(): not callable is not a callable function name error in %s

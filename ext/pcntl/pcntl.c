@@ -849,6 +849,11 @@ PHP_FUNCTION(pcntl_signal)
 		return;
 	}
 
+	if (signo < 1 || signo > 32) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid signal");
+		RETURN_FALSE;
+	}
+
 	if (!PCNTL_G(spares)) {
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
@@ -864,8 +869,9 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle)==IS_LONG) {
-		if (Z_LVAL_P(handle)!= (long) SIG_DFL && Z_LVAL_P(handle) != (long) SIG_IGN) {
+		if (Z_LVAL_P(handle) != (long) SIG_DFL && Z_LVAL_P(handle) != (long) SIG_IGN) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for handle argument specified");
+			RETURN_FALSE;
 		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == SIG_ERR) {
 			PCNTL_G(last_error) = errno;

@@ -1469,7 +1469,7 @@ void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 #	ifdef HAVE_SETITIMER
 	{
 		struct itimerval t_r;		/* timeout requested */
-		sigset_t sigset;
+		int signo;
 
 		if(seconds) {
 			t_r.it_value.tv_sec = seconds;
@@ -1478,25 +1478,27 @@ void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 #	ifdef __CYGWIN__
 			setitimer(ITIMER_REAL, &t_r, NULL);
 		}
-		if(reset_signals) {
-			signal(SIGALRM, zend_timeout);
-			sigemptyset(&sigset);
-			sigaddset(&sigset, SIGALRM);
-		}
+		signo = SIGALRM;
 #	else
 			setitimer(ITIMER_PROF, &t_r, NULL);
 		}
-		if(reset_signals) {
-			signal(SIGPROF, zend_timeout);
-			sigemptyset(&sigset);
-			sigaddset(&sigset, SIGPROF);
-		}
+		signo = SIGPROF;
 #	endif
-		if(reset_signals) {
+
+		if (reset_signals) {
+#	ifdef ZEND_SIGNALS
+			zend_signal(signo, zend_timeout TSRMLS_CC);
+#	else
+			sigset_t sigset;
+
+			signal(signo, zend_timeout);
+			sigemptyset(&sigset);
+			sigaddset(&sigset, signo);
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+#	endif
 		}
 	}
-#	endif
+#	endif /* HAVE_SETITIMER */
 #endif
 }
 /* }}} */

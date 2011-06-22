@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - <?= is now always available regardless of the short_tags setting (Rasmus)
 
 - General improvements:
+  . Zend Signal Handling. (Lucas Nealan,Arnaud Le Blanc,Brian Shire, Ilia)
   . Added multibyte support by default. Previously php had to be compiled
     with --enable-zend-multibyte. Now it can be enabled or disabled through
     zend.multibyte directive in php.ini. (Dmitry)

@@ -18,6 +18,7 @@
 
 /* $Id$ */
 
+#include "TSRM.h"
 #include "php_signal.h"
 
 /* php_signal using sigaction is derrived from Advanced Programing
@@ -26,6 +27,10 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
 	act.sa_handler = func;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
+
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
 	} else {
@@ -41,9 +46,15 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
+#ifdef ZEND_SIGNALS
+	if (zend_sigaction(signo, &act, &oact TSRMLS_CC) < 0)
+#else
 	if (sigaction(signo, &act, &oact) < 0)
+#endif
+	{
 		return SIG_ERR;
- 
+	}
+
 	return oact.sa_handler;
 }
 
