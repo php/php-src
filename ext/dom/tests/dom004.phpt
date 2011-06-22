@@ -3,7 +3,7 @@ Test 4: Streams Test
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-array_search('compress.zlib', stream_get_wrappers()) or die('skip compress.zlib wrapper is not available');
+in_array('compress.zlib', stream_get_wrappers()) or die('skip compress.zlib wrapper is not available');
 ?>
 --FILE--
 <?php
