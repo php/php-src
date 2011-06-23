@@ -143,7 +143,7 @@ int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_kill_all(int signo) /* {{{ */
+void fpm_pctl_kill_all(int signo) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	int alive_children = 0;

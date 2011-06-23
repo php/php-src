@@ -19,6 +19,7 @@
 #include "fpm_conf.h"
 #include "fpm_worker_pool.h"
 #include "fpm_stdio.h"
+#include "fpm_log.h"
 #include "zlog.h"
 
 struct fpm_globals_s fpm_globals = {
@@ -45,8 +46,9 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 	}
 	fpm_globals.prefix = prefix;
 
-	if (0 > fpm_php_init_main()              ||
+	if (0 > fpm_php_init_main()            ||
 		0 > fpm_stdio_init_main()            ||
+		0 > fpm_log_init_main()              ||
 		0 > fpm_conf_init_main(test_conf)    ||
 		0 > fpm_unix_init_main()             ||
 		0 > fpm_pctl_init_main()             ||
