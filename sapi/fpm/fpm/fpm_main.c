@@ -1587,8 +1587,6 @@ int main(int argc, char *argv[])
 	char *fpm_prefix = NULL;
 	int test_conf = 0;
 
-	fcgi_init();
-
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
@@ -1604,6 +1602,8 @@ int main(int argc, char *argv[])
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
 #endif
+
+	fcgi_init();
 
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
