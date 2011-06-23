@@ -1,5 +1,9 @@
 --TEST--
 Extensive test for date_diff().
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --INI--
 date.timezone=UTC
 --FILE--

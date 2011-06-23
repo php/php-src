@@ -5,6 +5,9 @@ Test fileatime(), filemtime(), filectime() & touch() functions : usage variation
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+if (getenv("SKIP_SLOW_TESTS")) {
+    die("skip slow test");
+}
 ?>
 --FILE--
 <?php

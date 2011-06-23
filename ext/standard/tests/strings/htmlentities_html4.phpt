@@ -1,5 +1,9 @@
 --TEST--
 htmlentities() conformance check (HTML 4)
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 function utf32_utf8($k) {

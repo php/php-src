@@ -1,5 +1,9 @@
 --TEST--
 Testing register_shutdown_function() with timeout. (Bug: #21513)
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 
