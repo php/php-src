@@ -174,6 +174,7 @@ static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 
 void startup_scanner(TSRMLS_D)
 {
+	CG(parse_error) = 0;
 	CG(heredoc) = NULL;
 	CG(heredoc_len) = 0;
 	CG(doc_comment) = NULL;
@@ -187,6 +188,7 @@ void shutdown_scanner(TSRMLS_D)
 		efree(CG(heredoc));
 		CG(heredoc_len)=0;
 	}
+	CG(parse_error) = 0;
 	zend_stack_destroy(&SCNG(state_stack));
 	RESET_DOC_COMMENT();
 }
