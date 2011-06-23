@@ -338,7 +338,7 @@ static void php_apache_sapi_log_message_ex(char *msg, request_rec *r TSRMLS_DC)
 static double php_apache_sapi_get_request_time(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
-	return apr_time_as_msec(ctx->r->request_time);
+	return ((double) apr_time_as_msec(ctx->r->request_time)) / 1000.0;
 }
 
 extern zend_module_entry php_apache_module;
