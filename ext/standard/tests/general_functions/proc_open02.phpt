@@ -4,6 +4,7 @@ proc_open
 <?php
 if (!is_executable('/bin/sleep')) echo 'skip no sleep';
 if (!is_executable('/usr/bin/nohup')) echo 'skip no nohup';
+if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 ?>
 --FILE--
 <?php
