@@ -27,6 +27,7 @@
 #include "fpm_env.h"
 #include "fpm_shm_slots.h"
 #include "fpm_status.h"
+#include "fpm_log.h"
 
 #include "zlog.h"
 
@@ -146,6 +147,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_globals.max_requests = wp->config->pm_max_requests;
 
 	if (0 > fpm_stdio_init_child(wp) ||
+		0 > fpm_log_init_child(wp) ||
 		0 > fpm_status_init_child(wp) ||
 		0 > fpm_unix_init_child(wp) ||
 		0 > fpm_signals_init_child() ||

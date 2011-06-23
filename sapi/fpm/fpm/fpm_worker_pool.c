@@ -55,6 +55,7 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
 	fpm_array_init(&ret->slots_used, sizeof(struct fpm_shm_slot_ptr_s), 50);
 	fpm_array_init(&ret->slots_free, sizeof(struct fpm_shm_slot_ptr_s), 50);
 	ret->idle_spawn_rate = 1;
+	ret->log_fd = -1;
 	return ret;
 }
 /* }}} */

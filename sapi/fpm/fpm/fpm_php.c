@@ -172,6 +172,18 @@ char *fpm_php_request_method(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+char *fpm_php_query_string(TSRMLS_D) /* {{{ */
+{
+	return SG(request_info).query_string;
+}
+/* }}} */
+
+char *fpm_php_auth_user(TSRMLS_D) /* {{{ */
+{
+	return SG(request_info).auth_user;
+}
+/* }}} */
+
 size_t fpm_php_content_length(TSRMLS_D) /* {{{ */
 {
 	return SG(request_info).content_length;

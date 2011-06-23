@@ -9,7 +9,8 @@ void fpm_request_accepting();				/* hanging in accept() */
 void fpm_request_reading_headers();			/* start reading fastcgi request from very first byte */
 void fpm_request_info();					/* not a stage really but a point in the php code, where all request params have become known to sapi */
 void fpm_request_executing();				/* the script is executing */
-void fpm_request_finished();				/* request processed: script response have been sent to web server */
+void fpm_request_end(TSRMLS_D);				/* request ended: script response have been sent to web server */
+void fpm_request_finished();				/* request processed: cleaning current request */
 
 struct fpm_child_s;
 struct timeval;
@@ -22,6 +23,7 @@ enum fpm_request_stage_e {
 	FPM_REQUEST_READING_HEADERS,
 	FPM_REQUEST_INFO,
 	FPM_REQUEST_EXECUTING,
+	FPM_REQUEST_END,
 	FPM_REQUEST_FINISHED
 };
 

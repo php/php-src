@@ -21,6 +21,7 @@
 #include "fpm_children.h"
 #include "zlog.h"
 #include "fpm_clock.h"
+#include "fpm_log.h"
 
 #define fpm_event_set_timeout(ev, now) timeradd(&(now), &(ev)->frequency, &(ev)->timeout);
 
@@ -55,8 +56,8 @@ static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
 	char c;
-	int res;
-	int fd = ev->fd;;
+	int res, ret;
+	int fd = ev->fd;
 
 	do {
 		do {
@@ -93,10 +94,19 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 			case '1' :                  /* SIGUSR1 */
 				zlog(ZLOG_DEBUG, "received SIGUSR1");
 				if (0 == fpm_stdio_open_error_log(1)) {
-					zlog(ZLOG_NOTICE, "log file re-opened");
+					zlog(ZLOG_NOTICE, "error log file re-opened");
 				} else {
-					zlog(ZLOG_ERROR, "unable to re-opened log file");
+					zlog(ZLOG_ERROR, "unable to re-opened error log file");
 				}
+
+				ret = fpm_log_open(1);
+				if (ret == 0) {
+					zlog(ZLOG_NOTICE, "access log file re-opened");
+				} else if (ret == -1) {
+					zlog(ZLOG_ERROR, "unable to re-opened access log file");
+				}
+				/* else no access log are set */
+
 				break;
 			case '2' :                  /* SIGUSR2 */
 				zlog(ZLOG_DEBUG, "received SIGUSR2");
