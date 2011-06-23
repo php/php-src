@@ -990,7 +990,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				char *append_string = INI_STR("error_append_string");
 
 				if (PG(html_errors)) {
-					if (type == E_ERROR) {
+					if (type == E_ERROR || type == E_PARSE) {
 						size_t len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
@@ -1061,7 +1061,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
-				if (type != E_PARSE) {
+				if (type == E_PARSE) {
+					CG(parse_error) = 0;
+				} else {
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					efree(buffer);
