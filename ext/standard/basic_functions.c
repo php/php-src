@@ -4640,7 +4640,7 @@ PHP_FUNCTION(error_log)
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
 	long erropt = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|lss", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
