@@ -37,6 +37,8 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp);
 char *fpm_php_script_filename(TSRMLS_D);
 char *fpm_php_request_uri(TSRMLS_D);
 char *fpm_php_request_method(TSRMLS_D);
+char *fpm_php_query_string(TSRMLS_D);
+char *fpm_php_auth_user(TSRMLS_D);
 size_t fpm_php_content_length(TSRMLS_D);
 void fpm_php_soft_quit();
 int fpm_php_init_main();

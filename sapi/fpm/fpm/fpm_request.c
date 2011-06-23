@@ -1,6 +1,9 @@
 
 	/* $Id: fpm_request.c,v 1.9.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
+#ifdef HAVE_TIMES
+#include <sys/times.h>
+#endif
 
 #include "fpm_config.h"
 
@@ -16,6 +19,7 @@
 #include "fpm_shm_slots.h"
 #include "fpm_status.h"
 #include "fpm_request.h"
+#include "fpm_log.h"
 
 #include "zlog.h"
 
@@ -42,6 +46,10 @@ void fpm_request_reading_headers() /* {{{ */
 	slot->request_stage = FPM_REQUEST_READING_HEADERS;
 	fpm_clock_get(&slot->tv);
 	slot->accepted = slot->tv;
+	slot->accepted_epoch = time(NULL);
+#ifdef HAVE_TIMES
+	times(&slot->cpu_accepted);
+#endif
 	fpm_shm_slots_release(slot);
 
 	fpm_status_increment_accepted_conn(fpm_status_shm);
@@ -55,6 +63,8 @@ void fpm_request_info() /* {{{ */
 	char *request_uri = fpm_php_request_uri(TSRMLS_C);
 	char *request_method = fpm_php_request_method(TSRMLS_C);
 	char *script_filename = fpm_php_script_filename(TSRMLS_C);
+	char *query_string = fpm_php_query_string(TSRMLS_C);
+	char *auth_user = fpm_php_auth_user(TSRMLS_C);
 
 	slot = fpm_shm_slots_acquire(0, 0);
 	slot->request_stage = FPM_REQUEST_INFO;
@@ -66,6 +76,14 @@ void fpm_request_info() /* {{{ */
 
 	if (request_method) {
 		strlcpy(slot->request_method, request_method, sizeof(slot->request_method));
+	}
+
+	if (query_string) {
+		strlcpy(slot->query_string, query_string, sizeof(slot->query_string));
+	}
+
+	if (auth_user) {
+		strlcpy(slot->auth_user, auth_user, sizeof(slot->auth_user));
 	}
 
 	slot->content_length = fpm_php_content_length(TSRMLS_C);
@@ -91,6 +109,22 @@ void fpm_request_executing() /* {{{ */
 }
 /* }}} */
 
+void fpm_request_end(TSRMLS_D) /* {{{ */
+{
+	struct fpm_shm_slot_s *slot;
+
+	slot = fpm_shm_slots_acquire(0, 0);
+	slot->request_stage = FPM_REQUEST_FINISHED;
+	fpm_clock_get(&slot->tv);
+#ifdef HAVE_TIMES
+	times(&slot->cpu_finished);
+	timersub(&slot->tv, &slot->accepted, &slot->cpu_duration);
+#endif
+	slot->memory = zend_memory_peak_usage(1 TSRMLS_CC);
+	fpm_shm_slots_release(slot);
+}
+/* }}} */
+
 void fpm_request_finished() /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
@@ -99,6 +133,7 @@ void fpm_request_finished() /* {{{ */
 	slot->request_stage = FPM_REQUEST_FINISHED;
 	fpm_clock_get(&slot->tv);
 	memset(&slot->accepted, 0, sizeof(slot->accepted));
+	slot->accepted_epoch = 0;
 	fpm_shm_slots_release(slot);
 }
 /* }}} */
@@ -125,7 +160,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 	}
 #endif
 
-	if (slot_c.request_stage > FPM_REQUEST_ACCEPTING && slot_c.request_stage < FPM_REQUEST_FINISHED) {
+	if (slot_c.request_stage > FPM_REQUEST_ACCEPTING && slot_c.request_stage < FPM_REQUEST_END) {
 		char purified_script_filename[sizeof(slot_c.script_filename)];
 		struct timeval tv;
 

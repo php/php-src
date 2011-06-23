@@ -5,6 +5,10 @@
 #ifndef FPM_SHM_SLOTS_H
 #define FPM_SHM_SLOTS_H 1
 
+#ifdef HAVE_TIMES
+#include <sys/times.h>
+#endif
+
 #include "fpm_atomic.h"
 #include "fpm_worker_pool.h"
 #include "fpm_request.h"
@@ -18,11 +22,20 @@ struct fpm_shm_slot_s {
 	};
 	enum fpm_request_stage_e request_stage;
 	struct timeval accepted;
+	time_t accepted_epoch;
 	struct timeval tv;
 	char request_uri[128];
+	char query_string[512];
 	char request_method[16];
 	size_t content_length; /* used with POST only */
 	char script_filename[256];
+	char auth_user[32];
+#ifdef HAVE_TIMES
+	struct tms cpu_accepted;
+	struct tms cpu_finished;
+	struct timeval cpu_duration;
+#endif
+	size_t memory;
 };
 
 struct fpm_shm_slot_ptr_s {

@@ -57,6 +57,8 @@ struct fpm_worker_pool_config_s {
 	int pm_max_spare_servers;
 	char *ping_path;
 	char *ping_response;
+	char *access_log;
+	char *access_format;
 	char *listen_address;
 	int listen_backlog;
 	char *listen_owner;
