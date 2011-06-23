@@ -1,5 +1,9 @@
 --TEST--
 Testing fread() on a TCP server socket
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 

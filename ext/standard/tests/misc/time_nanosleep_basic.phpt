@@ -1,7 +1,9 @@
 --TEST--
 time_nanosleep — Delay for a number of seconds and nanoseconds
 --SKIPIF--
-<?php if (!function_exists('time_nanosleep')) die("skip"); ?>
+<?php if (!function_exists('time_nanosleep')) die("skip");
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --CREDITS--
 Àlex Corretgé - alex@corretge.cat
 --FILE--
