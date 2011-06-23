@@ -5,5 +5,5 @@ Argument parsing error #001
 function foo($arg1 string) {}
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected T_STRING, expecting ')' in %sfunction_arguments_001.php on line %d
+Parse error: syntax error, unexpected 'string' (T_STRING), expecting ')' in %sfunction_arguments_001.php on line %d
 

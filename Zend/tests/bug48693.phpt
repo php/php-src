@@ -20,7 +20,7 @@ var_dump(
 --EXPECTF--
 Parse error: syntax error, unexpected '}' in %s(%d) : runtime-created function on line 1
 
-Parse error: syntax error, unexpected $end in %s(%d) : runtime-created function on line 1
+Parse error: syntax error, unexpected end of file in %s(%d) : runtime-created function on line 1
 bool(false)
 int(2)
 bool(false)

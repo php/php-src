@@ -91,6 +91,7 @@ PHP                                                                        NEWS
   . Changed $GLOBALS into a JIT autoglobal, so it's initialized only if used.
     (this may affect opcode caches!)
   . Improved performance of @ (silence) operator.
+  . Improved parse error messages. (Felipe)
   . Simplified string offset reading. $str[1][0] is now a legal construct.
   . Added caches to eliminate repeatable run-time bindings of functions,
     classes, constants, methods and properties.
