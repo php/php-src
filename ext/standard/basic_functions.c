@@ -4678,7 +4678,7 @@ PHP_FUNCTION(error_log)
 		opt_err = erropt;
 	}
 
-	if (opt_err == 3) {
+	if (opt_err == 3 && opt) {
 		if (strlen(opt) != opt_len) {
 			RETURN_FALSE;
 		}
