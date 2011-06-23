@@ -41,6 +41,7 @@
 #include "fpm_sockets.h"
 #include "fpm_shm.h"
 #include "fpm_status.h"
+#include "fpm_log.h"
 #include "zlog.h"
 
 static int fpm_conf_load_ini_file(char *filename TSRMLS_DC);
@@ -102,6 +103,8 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "pm.status_path", &fpm_conf_set_string, WPO(pm_status_path) },
 	{ "ping.path", &fpm_conf_set_string, WPO(ping_path) },
 	{ "ping.response", &fpm_conf_set_string, WPO(ping_response) },
+	{ "access.log", &fpm_conf_set_string, WPO(access_log) },
+	{ "access.format", &fpm_conf_set_string, WPO(access_format) },
 	{ 0, 0, 0 }
 };
 
@@ -414,6 +417,8 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->chdir);
 	free(wpc->slowlog);
 	free(wpc->prefix);
+	free(wpc->access_log);
+	free(wpc->access_format);
 
 	return 0;
 }
@@ -663,6 +668,13 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			/* memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update)); */
 		}
 
+		if (wp->config->access_log && *wp->config->access_log) {
+			fpm_evaluate_full_path(&wp->config->access_log, wp, NULL, 0);
+			if (!wp->config->access_format) {
+				wp->config->access_format = strdup("%R - %u %t \"%m %r\" %s");
+			}
+		}
+
 		if (wp->config->chroot && *wp->config->chroot) {
 
 			fpm_evaluate_full_path(&wp->config->chroot, wp, NULL, 1);
@@ -770,8 +782,10 @@ int fpm_conf_write_pid() /* {{{ */
 }
 /* }}} */
 
-static int fpm_conf_post_process() /* {{{ */
+static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 {
+	struct fpm_worker_pool_s *wp;
+
 	if (fpm_global_config.pid_file) {
 		fpm_evaluate_full_path(&fpm_global_config.pid_file, NULL, PHP_LOCALSTATEDIR, 0);
 	}
@@ -786,7 +800,25 @@ static int fpm_conf_post_process() /* {{{ */
 		return -1;
 	}
 
-	return fpm_conf_process_all_pools();
+	if (0 > fpm_log_open(0)) {
+		return -1;
+	}
+
+	if (0 > fpm_conf_process_all_pools()) {
+		return -1;
+	}
+
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		if (!wp->config->access_log || !*wp->config->access_log) {
+			continue;
+		}
+		if (0 > fpm_log_write(wp->config->access_format TSRMLS_CC)) {
+			zlog(ZLOG_ERROR, "[pool %s] wrong format for access.format '%s'", wp->config->name, wp->config->access_format);
+			return -1;
+		}
+	}
+
+	return 0;
 }
 /* }}} */
 
@@ -1147,6 +1179,8 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tpm.status_path = %s", STR2STR(wp->config->pm_status_path));
 		zlog(ZLOG_NOTICE, "\tping.path = %s", STR2STR(wp->config->ping_path));
 		zlog(ZLOG_NOTICE, "\tping.response = %s", STR2STR(wp->config->ping_response));
+		zlog(ZLOG_NOTICE, "\taccess.log = %s", STR2STR(wp->config->access_log));
+		zlog(ZLOG_NOTICE, "\taccess.format = %s", STR2STR(wp->config->access_format));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s", BOOL2STR(wp->config->catch_workers_output));
 		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds", wp->config->request_slowlog_timeout);
@@ -1212,7 +1246,7 @@ int fpm_conf_init_main(int test_conf) /* {{{ */
 		return -1;
 	}
 
-	if (0 > fpm_conf_post_process()) {
+	if (0 > fpm_conf_post_process(TSRMLS_C)) {
 		zlog(ZLOG_ERROR, "failed to post process the configuration");
 		return -1;
 	}

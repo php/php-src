@@ -19,6 +19,7 @@ struct fpm_child_s;
 void fpm_pctl(int new_state, int action);
 int fpm_pctl_can_spawn_children();
 int fpm_pctl_kill(pid_t pid, int how);
+void fpm_pctl_kill_all(int signo);
 void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg);
 void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, short which, void *arg);
 int fpm_pctl_child_exited();

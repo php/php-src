@@ -178,6 +178,8 @@ PHP                                                                        NEWS
   . Added master rlimit_files and rlimit_core in the global configuration
     settings. (fat)
   . Removed pid in debug logs written by chrildren processes. (fat)
+  . Added custom access log (also added per request %CPU and memory
+    mesurement). (fat)
 
 - Reflection extension:
   . Fixed bug #54347 (reflection_extension does not lowercase module function

@@ -340,6 +340,33 @@ AC_DEFUN([AC_FPM_LQ],
 ])
 dnl }}}
 
+AC_DEFUN([AC_FPM_SYSCONF],
+[
+	AC_MSG_CHECKING([for sysconf])
+
+	AC_TRY_COMPILE([ #include <unistd.h> ], [sysconf(_SC_CLK_TCK);], [
+		AC_DEFINE([HAVE_SYSCONF], 1, [do we have sysconf?])
+		AC_MSG_RESULT([yes])
+	], [
+		AC_MSG_RESULT([no])
+	])
+])
+dnl }}}
+
+AC_DEFUN([AC_FPM_TIMES],
+[
+	AC_MSG_CHECKING([for times])
+
+	AC_TRY_COMPILE([ #include <sys/times.h> ], [struct tms t; times(&t);], [
+		AC_DEFINE([HAVE_TIMES], 1, [do we have times?])
+		AC_MSG_RESULT([yes])
+	], [
+		AC_MSG_RESULT([no])
+	])
+])
+dnl }}}
+
+
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
@@ -350,6 +377,8 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
+	AC_FPM_SYSCONF
+	AC_FPM_TIMES
 
   PHP_ARG_WITH(fpm-user,,
   [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
@@ -403,6 +432,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_conf.c \
     fpm/fpm_env.c \
     fpm/fpm_events.c \
+		fpm/fpm_log.c \
     fpm/fpm_main.c \
     fpm/fpm_php.c \
     fpm/fpm_php_trace.c \

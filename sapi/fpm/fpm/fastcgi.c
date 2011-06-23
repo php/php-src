@@ -149,6 +149,8 @@ static int is_fastcgi = 0;
 static int in_shutdown = 0;
 static in_addr_t *allowed_clients = NULL;
 
+static sa_t client_sa;
+
 #ifdef _WIN32
 
 static DWORD WINAPI fcgi_shutdown_thread(LPVOID arg)
@@ -833,7 +835,9 @@ int fcgi_accept_request(fcgi_request *req)
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
 					FCGI_UNLOCK(req->listen_socket);
-					if (req->fd >= 0 && allowed_clients) {
+
+					client_sa = sa;
+					if (sa.sa.sa_family == AF_INET && req->fd >= 0 && allowed_clients) {
 						int n = 0;
 						int allowed = 0;
 
@@ -1118,6 +1122,14 @@ void fcgi_free_mgmt_var_cb(void * ptr)
 	pefree(*var, 1);
 }
 
+char *fcgi_get_last_client_ip() /* {{{ */
+{
+	if (client_sa.sa.sa_family == AF_UNIX) {
+		return NULL;
+	}
+	return inet_ntoa(client_sa.sa_inet.sin_addr);
+}
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4

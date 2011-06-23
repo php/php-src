@@ -9,6 +9,7 @@
 #include "fpm_config.h"
 #include "fpm_status.h"
 #include "fpm_clock.h"
+#include "fpm_shm_slots.h"
 #include "zlog.h"
 
 struct fpm_shm_s *fpm_status_shm = NULL;

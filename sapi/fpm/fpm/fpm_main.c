@@ -109,6 +109,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include <fpm/fpm_status.h>
 #include <fpm/fpm_conf.h>
 #include <fpm/fpm_php.h>
+#include <fpm/fpm_log.h>
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
@@ -1905,6 +1906,9 @@ fastcgi_request_done:
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 				}
 			}
+
+			fpm_request_end(TSRMLS_C);
+			fpm_log_write(NULL TSRMLS_CC);
 
 			STR_FREE(SG(request_info).path_translated);
 			SG(request_info).path_translated = NULL;
