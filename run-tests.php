@@ -312,6 +312,7 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 
 define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
+define('QA_REPORTS_PAGE', 'http://qa.php.net/reports');
 
 function save_or_mail_results()
 {
@@ -324,9 +325,13 @@ function save_or_mail_results()
 		if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) {
 			echo "\nYou may have found a problem in PHP.";
 		}
-		echo "\nWe would like to send this report automatically to the\n";
-		echo "PHP QA team, to give us a better understanding of how\nthe test cases are doing. If you don't want to send it\n";
-		echo "immediately, you can choose \"s\" to save the report to\na file that you can send us later.\n";
+		echo "\nThis report can be automatically sent to the PHP QA team at\n";
+		echo QA_REPORTS_PAGE . "\n";
+		echo "Reports for current versions of PHP will also appear on\n";
+		echo "http://news.php.net/php.qa.reports\n";
+		echo "This gives us a better understanding of PHP's behavior.\n";
+		echo "If you don't want to send the report immediately you can choose\n";
+		echo "option \"s\" to save it.	You can then email this report to ". PHP_QA_EMAIL . " later.\n";
 		echo "Do you want to send this report now? [Yns]: ";
 		flush();
 
@@ -951,14 +956,24 @@ function mail_qa_team($data, $compression, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
-	if (empty($url_bits['port'])) {
-		$url_bits['port'] = 80;
-	}
+    if (($proxy = getenv('http_proxy'))) {
+        $proxy = parse_url($proxy);
+        $path = $url_bits['host'].$url_bits['path'];
+        $host = $proxy['host'];
+        if (empty($proxy['port'])) {
+            $proxy['port'] = 80;
+        }
+        $port = $proxy['port'];
+    } else {
+        $path = $url_bits['path'];
+        $host = $url_bits['host'];
+        $port = empty($url_bits['port']) ? 80 : $port = $url_bits['port'];
+    }
 
 	$data = "php_test_data=" . urlencode(base64_encode(str_replace("\00", '[0x0]', $data)));
 	$data_length = strlen($data);
 
-	$fs = fsockopen($url_bits['host'], $url_bits['port'], $errno, $errstr, 10);
+	$fs = fsockopen($host, $port, $errno, $errstr, 10);
 
 	if (!$fs) {
 		return false;
@@ -966,9 +981,9 @@ function mail_qa_team($data, $compression, $status = false)
 
 	$php_version = urlencode(TESTED_PHP_VERSION);
 
-	echo "\nPosting to {$url_bits['host']} {$url_bits['path']}\n";
-	fwrite($fs, "POST " . $url_bits['path'] . "?status=$status&version=$php_version HTTP/1.1\r\n");
-	fwrite($fs, "Host: " . $url_bits['host'] . "\r\n");
+	echo "\nPosting to ". QA_SUBMISSION_PAGE . "\n";
+	fwrite($fs, "POST " . $path . "?status=$status&version=$php_version HTTP/1.1\r\n");
+	fwrite($fs, "Host: " . $host . "\r\n");
 	fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
 	fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
 	fwrite($fs, "Content-Length: " . $data_length . "\r\n\r\n");
