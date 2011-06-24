@@ -1,5 +1,7 @@
 --TEST--
 pcntl_exec() 3
+--SKIPIF--
+<?php if (!extension_loaded("pcntl")) print "skip"; ?>
 --FILE--
 <?php
 var_dump(pcntl_exec());
