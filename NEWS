@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+- Core:
+  . Fixed crash in error_log(). (Felipe) Reported by Mateusz Kocielski.
 
 - DateTime extension:
   . Fixed bug where the DateTime object got changed while using date_diff().
