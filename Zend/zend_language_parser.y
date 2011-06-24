@@ -1150,7 +1150,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 	{
 		TSRMLS_FETCH();
 		if (CG(parse_error) == 0) {
-			char buffer[120], *end, *str, *tok1 = NULL, *tok2 = NULL;
+			char buffer[120];
+			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;
 			
 			CG(parse_error) = 1;
@@ -1158,7 +1159,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			if (LANG_SCNG(yy_text)[0] == 0 &&
 				LANG_SCNG(yy_leng) == 1 &&
 				memcmp(yystr, ZEND_STRL("\"end of file\"")) == 0) {
-				return yystpcpy(yyres, "end of file") - yyres;
+				yystpcpy(yyres, "end of file");
+				return sizeof("end of file")-1;
 			}
 			
 			str = LANG_SCNG(yy_text);
@@ -1183,7 +1185,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			} else {
 				snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
 			}
-			return yystpcpy(yyres, buffer) - yyres;
+			yystpcpy(yyres, buffer);
+			return len + (toklen ? toklen + 1 : 0) + 2;
 		}		
 	}	
 	if (*yystr == '"') {
@@ -1196,7 +1199,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		yyres[yyn] = '\0';
 		return yyn;
 	}
-	return yystpcpy(yyres, yystr) - yyres;
+	yystpcpy(yyres, yystr);
+	return strlen(yystr);
 }
 
 /*
