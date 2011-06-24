@@ -528,6 +528,13 @@ static int php_during_module_shutdown(void)
 }
 /* }}} */
 
+/* {{{ php_get_module_initialized
+ */
+PHPAPI int php_get_module_initialized(void)
+{
+	return module_initialized;
+}
+
 /* {{{ php_log_err
  */
 PHPAPI void php_log_err(char *log_message TSRMLS_DC)
