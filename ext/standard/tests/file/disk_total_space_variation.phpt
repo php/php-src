@@ -118,6 +118,6 @@ NULL
 Warning: disk_total_space() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 *** Testing with Binary Input ***
-float(64246190080)
+float(%d)
 
 --- Done ---
