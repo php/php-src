@@ -10,7 +10,7 @@ Jacopo Romei <jacopo@sviluppoagile.it>
 #Test Fest Cesena (Italy) on 2009-06-20
 --FILE--
 <?php
-$dirname = basename(__FILE__, '.phpt');
+$dirname = 'DirectoryIterator_getOwner_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);
 $expected = fileowner($dirname);
@@ -19,7 +19,7 @@ var_dump($expected == $actual);
 ?>
 --CLEAN--
 <?php
-$dirname = basename(__FILE__, '.phpt');
+$dirname = 'DirectoryIterator_getOwner_basic';
 rmdir($dirname);
 ?>
 --EXPECTF--
