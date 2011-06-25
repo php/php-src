@@ -1196,7 +1196,7 @@ int main(int argc, char *argv[])
 	int exit_status = SUCCESS;
 	int module_started = 0, sapi_started = 0;
 	char *php_optarg = NULL;
-	int php_optind = 1;
+	int php_optind = 1, use_extended_info = 0;
 	char *ini_path_override = NULL;
 	char *ini_entries = NULL;
 	int ini_entries_len = 0;
@@ -1301,7 +1301,7 @@ int main(int argc, char *argv[])
 				sapi_module = &cli_sapi_module;
 				goto exit_loop;
 			case 'e': /* enable extended info output */
-				CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+				use_extended_info = 1;
 				break;
 		}
 	}
@@ -1343,6 +1343,11 @@ exit_loop:
 		goto out;
 	}
 	module_started = 1;
+	
+	/* -e option */
+	if (use_extended_info) {
+		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+	}
 
 	zend_first_try {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
