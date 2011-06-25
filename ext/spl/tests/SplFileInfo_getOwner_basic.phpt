@@ -1,5 +1,5 @@
 --TEST--
-SPL: Spl File Info test getOwner
+SPL: SplFileInfo test getOwner
 --CREDITS--
 Cesare D'Amico <cesare.damico@gruppovolta.it>
 Andrea Giorgini <agiorg@gmail.com>
@@ -8,23 +8,19 @@ Daniel Londero <daniel.londero@gmail.com>
 Francesco Trucchia <ft@ideato.it>
 Jacopo Romei <jacopo@sviluppoagile.it>
 #Test Fest Cesena (Italy) on 2009-06-20
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms");
-?>
 --FILE--
 <?php
-
-//file
-touch ('test_file_ptfi');
-$fileInfo = new SplFileInfo('test_file_ptfi');
-$result = shell_exec('ls -ln test_file_ptfi | cut -d" " -f 3');
-var_dump($fileInfo->getOwner() == $result);
-
+$filename = basename(__FILE__, 'phpt').'tmp';
+touch($filename);
+$fileInfo = new SplFileInfo($filename);
+$expected = fileowner($filename);
+$actual = $fileInfo->getOwner();
+var_dump($expected == $actual);
 ?>
 --CLEAN--
 <?php
-unlink('test_file_ptfi');
+$filename = basename(__FILE__, 'phpt').'tmp';
+unlink($filename);
 ?>
 --EXPECTF--
 bool(true)
