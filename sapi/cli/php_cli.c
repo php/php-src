@@ -29,9 +29,7 @@
 #include "zend_modules.h"
 #include "zend_interfaces.h"
 
-#ifdef HAVE_REFLECTION
 #include "ext/reflection/php_reflection.h"
-#endif
 
 #include "SAPI.h"
 
@@ -158,7 +156,6 @@ const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
-#ifdef HAVE_REFLECTION
 	{10,  1, "rf"},
 	{10,  1, "rfunction"},
 	{11,  1, "rc"},
@@ -167,7 +164,6 @@ const opt_struct OPTIONS[] = {
 	{12,  1, "rextension"},
 	{13,  1, "rz"},
 	{13,  1, "rzendextension"},
-#endif
 	{14,  1, "ri"},
 	{14,  1, "rextinfo"},
 	{15,  0, "ini"},
@@ -537,12 +533,10 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				"  --ini            Show configuration file names\n"
 				"\n"
-#if (HAVE_REFLECTION)
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
 				"  --rz <name>      Show information about Zend extension <name>.\n"
-#endif
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
 				, prog, prog, prog, prog, prog, prog);
@@ -873,8 +867,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 		case 'H':
 			hide_argv = 1;
 			break;
-
-#ifdef HAVE_REFLECTION
 		case 10:
 			behavior=PHP_MODE_REFLECTION_FUNCTION;
 			reflection_what = php_optarg;
@@ -891,7 +883,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			behavior=PHP_MODE_REFLECTION_ZEND_EXTENSION;
 			reflection_what = php_optarg;
 			break;
-#endif
 		case 14:
 			behavior=PHP_MODE_REFLECTION_EXT_INFO;
 			reflection_what = php_optarg;
@@ -1083,7 +1074,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 			break;
 		}
-#ifdef HAVE_REFLECTION
 		case PHP_MODE_REFLECTION_FUNCTION:
 		case PHP_MODE_REFLECTION_CLASS:
 		case PHP_MODE_REFLECTION_EXTENSION:
@@ -1138,7 +1128,6 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 				break;
 			}
-#endif /* reflection */
 		case PHP_MODE_REFLECTION_EXT_INFO:
 			{
 				int len = strlen(reflection_what);
