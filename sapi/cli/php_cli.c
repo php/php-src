@@ -1194,7 +1194,7 @@ int main(int argc, char *argv[])
 #endif
 	int c;
 	int exit_status = SUCCESS;
-	int module_started = 0;
+	int module_started = 0, sapi_started = 0;
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	char *ini_path_override = NULL;
@@ -1312,6 +1312,7 @@ exit_loop:
 	sapi_module->phpinfo_as_text = 1;
 	sapi_module->php_ini_ignore_cwd = 1;
 	sapi_startup(sapi_module);
+	sapi_started = 1;
 
 	sapi_module->php_ini_ignore = ini_ignore;
 
@@ -1364,7 +1365,9 @@ out:
 	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
 	}
-	sapi_shutdown();
+	if (sapi_started) {
+		sapi_shutdown();
+	}
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
