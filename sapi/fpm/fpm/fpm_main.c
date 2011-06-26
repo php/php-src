@@ -1567,7 +1567,6 @@ static zend_module_entry cgi_module_entry = {
  */
 int main(int argc, char *argv[])
 {
-	int free_query_string = 0;
 	int exit_status = SUCCESS;
 	int cgi = 0, c;
 	zend_file_handle file_handle;
@@ -1917,11 +1916,6 @@ fastcgi_request_done:
 
 			if (exit_status == 0) {
 				exit_status = EG(exit_status);
-			}
-
-			if (free_query_string && SG(request_info).query_string) {
-				free(SG(request_info).query_string);
-				SG(request_info).query_string = NULL;
 			}
 
 			requests++;

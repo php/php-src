@@ -18,7 +18,7 @@
 #include "fpm_cleanup.h"
 #include "fpm_request.h"
 #include "fpm_worker_pool.h"
-#include "fpm_status.h"
+#include "fpm_scoreboard.h"
 #include "fpm_sockets.h"
 #include "zlog.h"
 
@@ -337,10 +337,24 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		}
 
 		/* update status structure for all PMs */
-		if (0 > fpm_socket_get_listening_queue(wp, &cur_lq, NULL)) {
-			cur_lq = 0;
+		if (wp->listen_address_domain == FPM_AF_INET) {
+			if (0 > fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
+				cur_lq = 0;
+#if 0
+			} else {
+				if (cur_lq > 0) {
+					if (!wp->warn_lq) {
+						zlog(ZLOG_WARNING, "[pool %s] listening queue is not empty, #%d requests are waiting to be served, consider raising pm.max_children setting (%d)", wp->config->name, cur_lq, wp->config->pm_max_children);
+						wp->warn_lq = 1;
+					}
+				} else {
+					wp->warn_lq = 0;
+				}
+#endif
+			}
+			fpm_scoreboard_update(-1, -1, cur_lq, -1, -1, -1, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 		}
-		fpm_status_update_activity(wp->shm_status, idle, active, idle + active, cur_lq, wp->listening_queue_len, 0);
+
 
 		/* the rest is only used by PM_STYLE_DYNAMIC */
 		if (wp->config->pm != PM_STYLE_DYNAMIC) continue;
@@ -357,8 +371,8 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		if (idle < wp->config->pm_min_spare_servers) {
 			if (wp->running_children >= wp->config->pm_max_children) {
 				if (!wp->warn_max_children) {
-					fpm_status_increment_max_children_reached(wp->shm_status);
-					zlog(ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
+					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
 				wp->idle_spawn_rate = 1;
@@ -366,7 +380,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			}
 
 			if (wp->idle_spawn_rate >= 8) {
-				zlog(ZLOG_WARNING, "[pool %s] seems busy (you may need to increase start_servers, or min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
+				zlog(ZLOG_WARNING, "[pool %s] seems busy (you may need to increase pm.start_servers, or pm.min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
 			}
 
 			/* compute the number of idle process to spawn */
@@ -376,8 +390,8 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			children_to_fork = MIN(children_to_fork, wp->config->pm_max_children - wp->running_children);
 			if (children_to_fork <= 0) {
 				if (!wp->warn_max_children) {
-					fpm_status_increment_max_children_reached(wp->shm_status);
-					zlog(ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
+					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
 				wp->idle_spawn_rate = 1;

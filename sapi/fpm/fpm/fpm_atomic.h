@@ -146,7 +146,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 {
 	if (try_once) {
-		return atomic_cmp_set(lock, 0, 1) ? 0 : -1;
+		return atomic_cmp_set(lock, 0, 1) ? 1 : 0;
 	}
 
 	for (;;) {
@@ -158,9 +158,11 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 		sched_yield();
 	}
 
-	return 0;
+	return 1;
 }
 /* }}} */
+
+#define fpm_unlock(lock) lock = 0
 
 #endif
 

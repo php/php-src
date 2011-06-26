@@ -18,6 +18,7 @@
 #include "fpm_process_ctl.h"
 #include "fpm_conf.h"
 #include "fpm_worker_pool.h"
+#include "fpm_scoreboard.h"
 #include "fpm_stdio.h"
 #include "fpm_log.h"
 #include "zlog.h"
@@ -51,6 +52,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 		0 > fpm_log_init_main()              ||
 		0 > fpm_conf_init_main(test_conf)    ||
 		0 > fpm_unix_init_main()             ||
+		0 > fpm_scoreboard_init_main()       ||
 		0 > fpm_pctl_init_main()             ||
 		0 > fpm_env_init_main()              ||
 		0 > fpm_signals_init_main()          ||

@@ -182,6 +182,7 @@ PHP                                                                        NEWS
   . Removed pid in debug logs written by chrildren processes. (fat)
   . Added custom access log (also added per request %CPU and memory
     mesurement). (fat)
+  . Added a real scoreboard and several improvements to the status page. (fat)
 
 - Reflection extension:
   . Fixed bug #54347 (reflection_extension does not lowercase module function
