@@ -135,6 +135,7 @@ PHP                                                                        NEWS
   . number_format() no longer truncates multibyte decimal points and thousand
     separators to the first byte. FR #53457. (Adam)
   . Added hex2bin() function. (Scott)
+  . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
 
 - Improved CURL extension:
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and
