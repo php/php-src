@@ -30,6 +30,7 @@ struct fpm_child_s {
 	struct timeval slow_logged;
 	int idle_kill;
 	pid_t pid;
+	int scoreboard_i;
 };
 
 #endif

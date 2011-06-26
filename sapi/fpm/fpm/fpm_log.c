@@ -17,7 +17,7 @@
 #include "fpm_clock.h"
 #include "fpm_process_ctl.h"
 #include "fpm_signals.h"
-#include "fpm_shm_slots.h"
+#include "fpm_scoreboard.h"
 #include "fastcgi.h"
 #include "zlog.h"
 
@@ -28,7 +28,6 @@
 #endif
 
 static char *fpm_log_format = NULL;
-static char *fpm_log_pool = NULL;
 static int fpm_log_fd = -1;
 #ifdef HAVE_TIMES
 static float tick;
@@ -99,10 +98,6 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		}
 	}
 
-	if (wp->config->name) {
-		fpm_log_pool = strdup(wp->config->name);
-	}
-
 	if (fpm_log_fd == -1) {
 		fpm_log_fd = wp->log_fd;
 	}
@@ -125,8 +120,8 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 	char buffer[FPM_LOG_BUFFER];
 	int token, test;
 	size_t len, len2;
-//	fcgi_request *request = (fcgi_request*) SG(server_context);
-	struct fpm_shm_slot_s slot, *slot_p;
+	struct fpm_scoreboard_proc_s proc, *proc_p;
+	struct fpm_scoreboard_s *scoreboard;
 	struct timeval uptime, now;
 	char tmp[129];
 	char format[129];
@@ -148,16 +143,22 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 	fpm_clock_get(&now);
 	now_epoch = time(NULL);
+
 	if (!test) {
-		slot_p = fpm_shm_slots_acquire(0, 0);
-		if (!slot_p) {
-			zlog(ZLOG_WARNING, "Unable to acquire shm slot");
+		scoreboard = fpm_scoreboard_get();
+		if (!scoreboard) {
+			zlog(ZLOG_WARNING, "unable to get scoreboard");
 			return -1;
 		}
-		slot = *slot_p;
-		fpm_shm_slots_release(slot_p);
+		proc_p = fpm_scoreboard_proc_acquire(NULL, -1, 0);
+		if (!proc_p) {
+			zlog(ZLOG_WARNING, "[pool %s] Unable to acquire shm slot", scoreboard->pool);
+			return -1;
+		}
+		proc = *proc_p;
+		fpm_scoreboard_proc_release(proc_p);
 
-		timersub(&now, &slot.accepted, &uptime);
+		timersub(&now, &proc.accepted, &uptime);
 	}
 
 	token = 0;
@@ -198,18 +199,18 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					if (format[0] == '\0' || !strcasecmp(format, "total")) {
 						if (!test) {
 							tms_total = 
-								(slot.cpu_finished.tms_utime + slot.cpu_finished.tms_stime + slot.cpu_finished.tms_cutime + slot.cpu_finished.tms_cstime)
+								(proc.cpu_finished.tms_utime + proc.cpu_finished.tms_stime + proc.cpu_finished.tms_cutime + proc.cpu_finished.tms_cstime)
 								- 
-								(slot.cpu_accepted.tms_utime + slot.cpu_accepted.tms_stime + slot.cpu_accepted.tms_cutime + slot.cpu_accepted.tms_cstime)
+								(proc.cpu_accepted.tms_utime + proc.cpu_accepted.tms_stime + proc.cpu_accepted.tms_cutime + proc.cpu_accepted.tms_cstime)
 								;
 						}
 					} else if (!strcasecmp(format, "user")) {
 						if (!test) {
-							tms_total = (slot.cpu_finished.tms_utime + slot.cpu_finished.tms_cutime) - (slot.cpu_accepted.tms_utime + slot.cpu_accepted.tms_cutime);
+							tms_total = (proc.cpu_finished.tms_utime + proc.cpu_finished.tms_cutime) - (proc.cpu_accepted.tms_utime + proc.cpu_accepted.tms_cutime);
 						}
 					} else if (!strcasecmp(format, "system")) {
 						if (!test) {
-							tms_total = (slot.cpu_finished.tms_stime + slot.cpu_finished.tms_cstime) - (slot.cpu_accepted.tms_stime + slot.cpu_accepted.tms_cstime);
+							tms_total = (proc.cpu_finished.tms_stime + proc.cpu_finished.tms_cstime) - (proc.cpu_accepted.tms_stime + proc.cpu_accepted.tms_cstime);
 						}
 					} else {
 						zlog(ZLOG_WARNING, "only 'total', 'user' or 'system' are allowed as a modifier for %%%c ('%s')", *s, format);
@@ -218,7 +219,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 					format[0] = '\0';
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.2f", tms_total / tick / (slot.cpu_duration.tv_sec + slot.cpu_duration.tv_usec / 1000000.) * 100.);
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.2f", tms_total / tick / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.);
 					}
 					break;
 #endif
@@ -264,19 +265,19 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'f': /* script */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s",  slot.script_filename && *slot.script_filename ? slot.script_filename : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s",  proc.script_filename && *proc.script_filename ? proc.script_filename : "-");
 					}
 					break;
 
 				case 'l': /* content length */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", slot.content_length);
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.content_length);
 					}
 					break;
 
 				case 'm': /* method */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", slot.request_method && *slot.request_method ? slot.request_method : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_method && *proc.request_method ? proc.request_method : "-");
 					}
 					break;
 
@@ -284,19 +285,19 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					/* seconds */
 					if (format[0] == '\0' || !strcasecmp(format, "bytes")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", slot.memory);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory);
 						}
 
 					/* kilobytes */
 					} else if (!strcasecmp(format, "kilobytes") || !strcasecmp(format, "kilo")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", slot.memory / 1024);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", proc.memory / 1024);
 						}
 
 					/* megabytes */
 					} else if (!strcasecmp(format, "megabytes") || !strcasecmp(format, "mega")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", slot.memory / 1024 / 1024);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", proc.memory / 1024 / 1024);
 						}
 
 					} else {
@@ -308,7 +309,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'n': /* pool name */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", fpm_log_pool ? fpm_log_pool : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", scoreboard->pool[0] ? scoreboard->pool : "-");
 					}
 					break;
 
@@ -374,19 +375,19 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'q': /* query_string */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", slot.query_string ? slot.query_string : "");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string ? proc.query_string : "");
 					}
 					break;
 
 				case 'Q': /* '?' */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", slot.query_string && *slot.query_string  ? "?" : "");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string && *proc.query_string  ? "?" : "");
 					}
 					break;
 
 				case 'r': /* request URI */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", slot.request_uri ? slot.request_uri : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_uri ? proc.request_uri : "-");
 					}
 					break;
 
@@ -408,7 +409,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 					if (!test) {
 						time_t *t;
 						if (*s == 't') {
-							t = &slot.accepted_epoch;
+							t = &proc.accepted_epoch;
 						} else {
 							t = &now_epoch;
 						}
@@ -424,7 +425,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'u': /* remote user */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", slot.auth_user ? slot.auth_user : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.auth_user ? proc.auth_user : "-");
 					}
 					break;
 

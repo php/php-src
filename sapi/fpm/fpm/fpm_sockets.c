@@ -28,6 +28,7 @@
 #include "fpm_str.h"
 #include "fpm_env.h"
 #include "fpm_cleanup.h"
+#include "fpm_scoreboard.h"
 
 struct listening_socket_s {
 	int refcount;
@@ -207,6 +208,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		zlog(ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
 		return -1;
 	}
+
 	return sock;
 }
 /* }}} */
@@ -222,6 +224,7 @@ static int fpm_sockets_get_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	sock = fpm_sockets_new_listening_socket(wp, sa, socklen);
 	fpm_sockets_hash_op(sock, sa, 0, wp->listen_address_domain, FPM_STORE_USE_SOCKET);
+
 	return sock;
 }
 /* }}} */
@@ -294,7 +297,7 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 
 int fpm_sockets_init_main() /* {{{ */
 {
-	unsigned i;
+	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
 	char *inherited = getenv("FPM_SOCKETS");
 	struct listening_socket_s *ls;
@@ -344,12 +347,12 @@ int fpm_sockets_init_main() /* {{{ */
 				break;
 		}
 
-		if (0 > fpm_socket_get_listening_queue(wp, NULL, (unsigned *) &wp->listening_queue_len)) {
-			wp->listening_queue_len = -1;
-		}
-
 		if (wp->listening_socket == -1) {
 			return -1;
+		}
+
+	if (wp->listen_address_domain == FPM_AF_INET && fpm_socket_get_listening_queue(wp->listening_socket, NULL, &lq_len) >= 0) {
+			fpm_scoreboard_update(-1, -1, -1, (int)lq_len, -1, -1, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 		}
 	}
 
@@ -383,16 +386,13 @@ int fpm_sockets_init_main() /* {{{ */
 
 #include <netinet/tcp.h>
 
-int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
-	if (wp->listen_address_domain != FPM_AF_INET) {
-		return -1;
-	}
-
 	struct tcp_info info;
 	socklen_t len = sizeof(info);
 
-	if (0 > getsockopt(wp->listening_socket, IPPROTO_TCP, TCP_INFO, &info, &len)) {
+	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_INFO, &info, &len)) {
+		zlog(ZLOG_SYSERROR, "unable to retrieve TCP_INFO for socket");
 		return -1;
 	}
 
@@ -416,13 +416,13 @@ int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_l
 
 #ifdef HAVE_LQ_SO_LISTENQ
 
-int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
 	int val;
 	socklen_t len = sizeof(val);
 
 	if (cur_lq) {
-		if (0 > getsockopt(wp->listening_socket, SOL_SOCKET, SO_LISTENQLEN, &val, &len)) {
+		if (0 > getsockopt(sock, SOL_SOCKET, SO_LISTENQLEN, &val, &len)) {
 			return -1;
 		}
 
@@ -430,7 +430,7 @@ int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_l
 	}
 
 	if (max_lq) {
-		if (0 > getsockopt(wp->listening_socket, SOL_SOCKET, SO_LISTENQLIMIT, &val, &len)) {
+		if (0 > getsockopt(sock, SOL_SOCKET, SO_LISTENQLIMIT, &val, &len)) {
 			return -1;
 		}
 
@@ -444,7 +444,7 @@ int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_l
 
 #else
 
-int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq)
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
 	return -1;
 }

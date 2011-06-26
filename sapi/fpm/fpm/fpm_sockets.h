@@ -21,7 +21,7 @@
 
 enum fpm_address_domain fpm_sockets_domain_from_address(char *addr);
 int fpm_sockets_init_main();
-int fpm_socket_get_listening_queue(struct fpm_worker_pool_s *wp, unsigned *cur_lq, unsigned *max_lq);
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq);
 
 
 static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
