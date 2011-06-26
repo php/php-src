@@ -6,7 +6,6 @@
 #define FPM_WORKER_POOL_H 1
 
 #include "fpm_conf.h"
-#include "fpm_arrays.h"
 #include "fpm_shm.h"
 
 struct fpm_worker_pool_s;
@@ -25,20 +24,18 @@ struct fpm_worker_pool_s {
 	char *user, *home;									/* for setting env USER and HOME */
 	enum fpm_address_domain listen_address_domain;
 	int listening_socket;
-	int listening_queue_len;
 	int set_uid, set_gid;								/* config uid and gid */
 	int socket_uid, socket_gid, socket_mode;
-
-	struct fpm_shm_s *shm_list;
-	struct fpm_array_s slots_used;
-	struct fpm_array_s slots_free;
 
 	/* runtime */
 	struct fpm_child_s *children;
 	int running_children;
 	int idle_spawn_rate;
 	int warn_max_children;
-	struct fpm_shm_s *shm_status;
+#if 0
+	int warn_lq;
+#endif
+	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 };
 

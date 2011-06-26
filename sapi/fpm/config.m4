@@ -438,7 +438,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_process_ctl.c \
     fpm/fpm_request.c \
     fpm/fpm_shm.c \
-    fpm/fpm_shm_slots.c \
+    fpm/fpm_scoreboard.c \
     fpm/fpm_signals.c \
     fpm/fpm_sockets.c \
     fpm/fpm_status.c \

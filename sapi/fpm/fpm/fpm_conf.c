@@ -656,16 +656,6 @@ static int fpm_conf_process_all_pools() /* {{{ */
 					return -1;
 				}
 			}
-			wp->shm_status = fpm_shm_alloc(sizeof(struct fpm_status_s));
-			if (!wp->shm_status) {
-				zlog(ZLOG_ERROR, "[pool %s] unable to allocate shared memory for status page '%s'", wp->config->name, status);
-				return -1;
-			}
-			fpm_status_update_accepted_conn(wp->shm_status, 0);
-			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 0, -1, 1);
-			fpm_status_update_max_children_reached(wp->shm_status, 0);
-			fpm_status_set_pm(wp->shm_status, wp->config->pm);
-			/* memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update)); */
 		}
 
 		if (wp->config->access_log && *wp->config->access_log) {

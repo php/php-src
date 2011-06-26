@@ -25,7 +25,7 @@
 #include "fpm_stdio.h"
 #include "fpm_unix.h"
 #include "fpm_env.h"
-#include "fpm_shm_slots.h"
+#include "fpm_scoreboard.h"
 #include "fpm_status.h"
 #include "fpm_log.h"
 
@@ -51,6 +51,7 @@ static struct fpm_child_s *fpm_child_alloc() /* {{{ */
 	}
 
 	memset(ret, 0, sizeof(*ret));
+	ret->scoreboard_i = -1;
 	return ret;
 }
 /* }}} */
@@ -238,7 +239,7 @@ void fpm_children_bury() /* {{{ */
 
 			fpm_child_unlink(child);
 
-			fpm_shm_slots_discard_slot(child);
+			fpm_scoreboard_proc_free(wp->scoreboard, child->scoreboard_i);
 
 			fpm_clock_get(&tv1);
 
@@ -316,7 +317,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 		return 0;
 	}
 
-	if (0 > fpm_shm_slots_prepare_slot(c)) {
+	if (0 > fpm_scoreboard_proc_alloc(wp->scoreboard, &c->scoreboard_i)) {
 		fpm_stdio_discard_pipes(c);
 		fpm_child_free(c);
 		return 0;
@@ -328,7 +329,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 
 static void fpm_resources_discard(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_shm_slots_discard_slot(child);
+	fpm_scoreboard_proc_free(child->wp->scoreboard, child->scoreboard_i);
 	fpm_stdio_discard_pipes(child);
 	fpm_child_free(child);
 }
@@ -336,7 +337,14 @@ static void fpm_resources_discard(struct fpm_child_s *child) /* {{{ */
 
 static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_shm_slots_child_use_slot(child);
+	struct fpm_worker_pool_s *wp;
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		if (wp == child->wp) {
+			continue;
+		}
+		fpm_scoreboard_free(wp->scoreboard);
+	}
+	fpm_scoreboard_child_use(child->wp->scoreboard, child->scoreboard_i, child->pid);
 	fpm_stdio_child_use_pipes(child);
 	fpm_child_free(child);
 }
@@ -344,7 +352,6 @@ static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 
 static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_shm_slots_parent_use_slot(child);
 	fpm_stdio_parent_use_pipes(child);
 	fpm_child_link(child);
 }
