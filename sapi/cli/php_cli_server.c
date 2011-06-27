@@ -360,6 +360,9 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
+	if (!client) {
+		return 0;
+	}
 	if (client->capturing) {
 		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(str_length);
 		if (!chunk) {
@@ -400,7 +403,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 	sapi_header_struct *h;
 	zend_llist_position pos;
 
-	if (client->capturing || SG(request_info).no_headers) {
+	if (client == NULL || client->capturing || SG(request_info).no_headers) {
 		return SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
 
@@ -1506,7 +1509,9 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		php_cli_server_client_begin_capture(client);
 		zend_try {
 			php_info_print_style(TSRMLS_C);
-			php_cli_server_buffer_append(&client->content_sender.buffer, client->capture_buffer.first);
+			if (client->capture_buffer.first) {
+				php_cli_server_buffer_append(&client->content_sender.buffer, client->capture_buffer.first);
+			}
 			client->capture_buffer.first = client->capture_buffer.last = NULL;
 		} zend_catch {
 			err = 1;
@@ -1785,7 +1790,11 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	php_socket_t server_sock = SOCK_ERR;
 
 	host = pestrdup(addr, 1);
-	if (!host) {
+	if (!host || *host == ':' ) {
+		if (host) {
+			pefree(host, 1);
+		}
+		fprintf(stderr, "Invalid built-in web-server addr:port argument\n");
 		return FAILURE;
 	}
 
