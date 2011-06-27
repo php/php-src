@@ -7,8 +7,11 @@ PHP                                                                        NEWS
 - DateTime extension:
   . Fixed bug where the DateTime object got changed while using date_diff().
     (Derick)
+
+- DBA extension:
+  . Supress warning on non-existent file open with Berkeley DB 5.2 (Chris Jones)
     
-- PDO ODBC:
+- PDO ODBC driver:
   . Fixed data type usage in 64bit. (leocsilva at gmail dot com)
 
 
