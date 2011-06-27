@@ -352,7 +352,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 				}
 #endif
 			}
-			fpm_scoreboard_update(-1, -1, cur_lq, -1, -1, -1, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
+			fpm_scoreboard_update(idle, active, cur_lq, -1, -1, -1, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 		}
 
 

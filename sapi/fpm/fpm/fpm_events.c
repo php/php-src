@@ -263,6 +263,7 @@ void fpm_event_loop(int err) /* {{{ */
 	if (!err) {
 		fpm_pctl_perform_idle_server_maintenance_heartbeat(NULL, 0, NULL);
 
+		zlog(ZLOG_DEBUG, "%zu bytes have been reserved in SHM", fpm_shm_get_size_allocated());
 		zlog(ZLOG_NOTICE, "ready to handle connections");
 	}
 

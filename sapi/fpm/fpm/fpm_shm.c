@@ -15,6 +15,8 @@
 #define MAP_ANONYMOUS MAP_ANON
 #endif
 
+static size_t fpm_shm_size = 0;
+
 void *fpm_shm_alloc(size_t size) /* {{{ */
 {
 	void *mem;
@@ -34,6 +36,7 @@ void *fpm_shm_alloc(size_t size) /* {{{ */
 	}
 
 	memset(mem, size, 0);
+	fpm_shm_size += size;
 	return mem;
 }
 /* }}} */
@@ -50,8 +53,18 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 		return 0;
 	}
 
+	if (fpm_shm_size - size > 0) {
+		fpm_shm_size -= size;
+	} else {
+		fpm_shm_size = 0;
+	}
 
 	return 1;
 }
 /* }}} */
 
+size_t fpm_shm_get_size_allocated() /* {{{*/
+{
+	return fpm_shm_size;
+}
+/* }}} */
