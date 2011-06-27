@@ -46,11 +46,12 @@ static void php_dba_db4_errcall_fcn(
 
 #if (DB_VERSION_MAJOR == 5 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8))
 /* Bug 51086, Berkeley DB 4.8.26 */
-/* This code suppresses a BDB 4.8 error message that BDB incorrectly emits */
+/* This code suppresses a BDB 4.8+ error message, thus keeping PHP test compatibility */
 	{
 		char *function = get_active_function_name(TSRMLS_C);
 		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
-			&& !strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)) {
+			&& (!strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)
+				|| !strncmp(msg, "BDB0004 fop_read_meta", sizeof("BDB0004 fop_read_meta")-1))) {
 			return;
 		}
 	}
