@@ -7,6 +7,9 @@ PHP                                                                        NEWS
 - DateTime extension:
   . Fixed bug where the DateTime object got changed while using date_diff().
     (Derick)
+    
+- PDO ODBC:
+  . Fixed data type usage in 64bit. (leocsilva at gmail dot com)
 
 
 16 Jun 2011, PHP 5.3.7 RC1
