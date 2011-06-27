@@ -276,7 +276,7 @@ if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
   dbdp5="/usr/local/BerkeleyDB.5."
-  for i in $PHP_DB4 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
+  for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
     if test -f "$i/db5/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db5/db.h
@@ -284,6 +284,10 @@ if test "$PHP_DB4" != "no"; then
     elif test -f "$i/db4/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db4/db.h
+      break
+    elif test -f "$i/include/db5.1/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db5.1/db.h
       break
     elif test -f "$i/include/db5.0/db.h"; then
       THIS_PREFIX=$i
@@ -323,7 +327,7 @@ if test "$PHP_DB4" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(4, db-5.0 db-4.8 db-4.7 db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK(4, db-5.1 db-5.0 db-4.8 db-4.7 db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
 PHP_DBA_STD_RESULT(db4,Berkeley DB4)
 
