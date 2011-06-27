@@ -224,7 +224,7 @@ static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRML
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
-	long row_count = -1;
+	SQLLEN row_count = -1;
 	PDO_ODBC_HSTMT	stmt;
 	
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &stmt);
