@@ -2520,6 +2520,7 @@ PHP_FUNCTION(socket_import_stream)
 error:
 	if (retsock != NULL)
 		efree(retsock);
+	RETURN_FALSE;
 }
 /* }}} */
 
