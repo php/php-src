@@ -19,7 +19,8 @@ PHP                                                                        NEWS
   . y2k_compliance ini option. (Kalle)
 
 - Moved extensions to PECL: (Johannes)
-  . ext/sqlite.
+  . ext/sqlite.  (Note: the ext/sqlite3 and ext/pdo_sqlite extensions are
+    not affected)
 
 - Changed $_SERVER['REQUEST_TIME'] to include microsecond precision. (Ilia)
 - Changed default value of "default_charset" php.ini option from ISO-8859-1 to
