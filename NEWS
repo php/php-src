@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - PDO ODBC driver:
   . Fixed data type usage in 64bit. (leocsilva at gmail dot com)
 
+- SPL extension:
+  . Fixed bug #54971 (Wrong result when using iterator_to_array with use_keys
+    on true). (Pierrick)
 
 16 Jun 2011, PHP 5.3.7 RC1
 - Upgraded bundled SQLite to version 3.7.6.3. (Scott)
