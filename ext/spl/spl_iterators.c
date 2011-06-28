@@ -3446,6 +3446,7 @@ PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, v
 		goto done;
 	}
 
+	iter->index = 0;
 	if (iter->funcs->rewind) {
 		iter->funcs->rewind(iter TSRMLS_CC);
 		if (EG(exception)) {
@@ -3460,6 +3461,7 @@ PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, v
 		if (apply_func(iter, puser TSRMLS_CC) == ZEND_HASH_APPLY_STOP || EG(exception)) {
 			goto done;
 		}
+		iter->index++;
 		iter->funcs->move_forward(iter TSRMLS_CC);
 		if (EG(exception)) {
 			goto done;
