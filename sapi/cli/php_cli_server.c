@@ -88,6 +88,10 @@
 # define SOCK_EADDRINUSE WSAEADDRINUSE
 #endif
 
+#ifndef S_ISDIR
+#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
+#endif
+
 #include "ext/standard/file.h" /* for php_set_sock_blocking() :-( */
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/html.h"
@@ -2058,6 +2062,10 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 		struct stat sb;
 		if (stat(document_root, &sb)) {
 			fprintf(stderr, "Directory or script %s does not exist.\n", document_root);
+			return 1;
+		}
+		if (!S_ISDIR(sb.st_mode)) {
+			fprintf(stderr, "%s is not a directory.\n", document_root);
 			return 1;
 		}
 	} else {
