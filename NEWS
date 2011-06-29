@@ -201,7 +201,6 @@ PHP                                                                        NEWS
 - Improved SPL extension:
   . Added RegexIterator::getRegex() method. (Joshua Thijssen)
   . Added SplObjectStorage::getHash() hook. (Etienne)
-  . Added SplFileInfo::getExtension(). FR #48767. (Peter Cowburn)
   . Added CallbackFilterIterator and RecursiveCallbackFilterIterator (Arnaud)
 
 - Improved ZLIB extension:
