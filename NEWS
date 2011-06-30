@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.7
+30 Jun 2011, PHP 5.3.7 RC2
 - Core:
   . Fixed crash in error_log(). (Felipe) Reported by Mateusz Kocielski.
   . Fixed bug #55082 (var_export() doesn't escape properties properly).
