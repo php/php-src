@@ -2081,7 +2081,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 	sapi_module.phpinfo_as_text = 0;
 
-	printf("Server is listening on %s:%d in %s ... Press CTRL-C to quit.\n", server.host, server.port, document_root);
+	printf("PHP Development Server is listening on %s:%d in %s ... Press Ctrl-C to quit.\n", server.host, server.port, document_root);
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
