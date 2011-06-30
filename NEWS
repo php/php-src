@@ -430,7 +430,8 @@ PHP                                                                        NEWS
 
 - Streams:
   . Fixed bug #54946 (stream_get_contents infinite loop). (Hannes)
-  . Fixed bug #54623 (Segfault when writing to a persistent socket after closing    a copy of the socket). (Gustavo)
+  . Fixed bug #54623 (Segfault when writing to a persistent socket after
+    closing a copy of the socket). (Gustavo)
     
 . Zip extension:
   . Fixed bug #54681 (addGlob() crashes on invalid flags). (Felipe)
