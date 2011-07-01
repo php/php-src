@@ -172,7 +172,7 @@ const opt_struct OPTIONS[] = {
 
 static int print_module_info(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	printf("%s\n", module->name);
+	php_printf("%s\n", module->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -202,7 +202,7 @@ static void print_modules(TSRMLS_D) /* {{{ */
 
 static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC) /* {{{ */
 {
-	printf("%s\n", ext->name);
+	php_printf("%s\n", ext->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
