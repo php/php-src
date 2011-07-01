@@ -489,7 +489,7 @@ if (getenv('TEST_PHP_ARGS')) {
 		$argv = array(__FILE__);
 	}
 
-	$argv = array_merge($argv, split(' ', getenv('TEST_PHP_ARGS')));
+	$argv = array_merge($argv, explode(' ', getenv('TEST_PHP_ARGS')));
 	$argc = count($argv);
 }
 
