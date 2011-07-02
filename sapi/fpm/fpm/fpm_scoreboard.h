@@ -22,9 +22,13 @@ struct fpm_scoreboard_proc_s {
 		atomic_t lock;
 		char dummy[16];
 	};
+	int used;
+	time_t start_epoch;
 	pid_t pid;
+	unsigned long requests;
 	enum fpm_request_stage_e request_stage;
 	struct timeval accepted;
+	struct timeval duration;
 	time_t accepted_epoch;
 	struct timeval tv;
 	char request_uri[128];
@@ -35,8 +39,9 @@ struct fpm_scoreboard_proc_s {
 	char auth_user[32];
 #ifdef HAVE_TIMES
 	struct tms cpu_accepted;
-	struct tms cpu_finished;
 	struct timeval cpu_duration;
+	struct tms last_request_cpu;
+	struct timeval last_request_cpu_duration;
 #endif
 	size_t memory;
 };
@@ -80,5 +85,9 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 
 void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_index);
 int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_index);
+
+#ifdef HAVE_TIMES
+float fpm_scoreboard_get_tick();
+#endif
 
 #endif

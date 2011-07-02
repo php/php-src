@@ -23,6 +23,19 @@
 
 #include "zlog.h"
 
+static const char *requests_stages[] = {
+	[FPM_REQUEST_ACCEPTING]       = "Idle",
+	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
+	[FPM_REQUEST_INFO]            = "Getting request informations",
+	[FPM_REQUEST_EXECUTING]       = "Running",
+	[FPM_REQUEST_END]             = "Ending",
+	[FPM_REQUEST_FINISHED]        = "Finishing",
+};
+
+const char *fpm_request_get_stage_name(int stage) {
+	return requests_stages[stage];
+}
+
 void fpm_request_accepting() /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;
@@ -38,10 +51,6 @@ void fpm_request_accepting() /* {{{ */
 
 	proc->request_stage = FPM_REQUEST_ACCEPTING;
 	proc->tv = now;
-	proc->request_uri[0] = '\0';
-	proc->request_method[0] = '\0';
-	proc->script_filename[0] = '\0';
-	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
@@ -78,6 +87,12 @@ void fpm_request_reading_headers() /* {{{ */
 #ifdef HAVE_TIMES
 	proc->cpu_accepted = cpu;
 #endif
+	proc->requests++;
+	proc->request_uri[0] = '\0';
+	proc->request_method[0] = '\0';
+	proc->script_filename[0] = '\0';
+	proc->query_string[0] = '\0';
+	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle--, active++, request++ */
@@ -176,9 +191,13 @@ void fpm_request_end(TSRMLS_D) /* {{{ */
 	}
 	proc->request_stage = FPM_REQUEST_FINISHED;
 	proc->tv = now;
+	timersub(&now, &proc->accepted, &proc->duration);
 #ifdef HAVE_TIMES
-	proc->cpu_finished = cpu;
 	timersub(&proc->tv, &proc->accepted, &proc->cpu_duration);
+	proc->last_request_cpu.tms_utime = cpu.tms_utime - proc->cpu_accepted.tms_utime;
+	proc->last_request_cpu.tms_stime = cpu.tms_stime - proc->cpu_accepted.tms_stime;
+	proc->last_request_cpu.tms_cutime = cpu.tms_cutime - proc->cpu_accepted.tms_cutime;
+	proc->last_request_cpu.tms_cstime = cpu.tms_cstime - proc->cpu_accepted.tms_cstime;
 #endif
 	proc->memory = memory;
 	fpm_scoreboard_proc_release(proc);
