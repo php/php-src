@@ -29,6 +29,7 @@ struct fpm_globals_s fpm_globals = {
 		.argv = NULL,
 		.config = NULL,
 		.prefix = NULL,
+		.pid = NULL,
 		.running_children = 0,
 		.error_log_fd = 0,
 		.log_level = 0,
@@ -38,7 +39,7 @@ struct fpm_globals_s fpm_globals = {
 		.test_successful = 0
 	};
 
-int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /* {{{ */
+int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -46,6 +47,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 		fpm_globals.config = strdup(config);
 	}
 	fpm_globals.prefix = prefix;
+	fpm_globals.pid = pid;
 
 	if (0 > fpm_php_init_main()            ||
 		0 > fpm_stdio_init_main()            ||

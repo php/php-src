@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 int fpm_run(int *max_requests);
-int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf);
+int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
@@ -16,6 +16,7 @@ struct fpm_globals_s {
 	char **argv;
 	char *config;
 	char *prefix;
+	char *pid;
 	int running_children;
 	int error_log_fd;
 	int log_level;
