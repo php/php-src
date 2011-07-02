@@ -13,6 +13,7 @@
 #include "fpm_scoreboard.h"
 #include "zlog.h"
 #include "fpm_atomic.h"
+#include <ext/standard/html.h>
 
 static char *fpm_status_uri = NULL;
 static char *fpm_status_ping_uri = NULL;
@@ -46,9 +47,12 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
-//	struct fpm_scoreboard_proc_s proc;
-	char *buffer, *syntax, *time_format, time_buffer[64];
+	struct fpm_scoreboard_proc_s proc;
+	char *buffer, *time_format, time_buffer[64];
 	time_t now_epoch;
+	int full, encode;
+	char *short_syntax, *short_post;
+	char *full_pre, *full_syntax, *full_post, *full_separator;
 
 	if (!SG(request_info).request_uri) {
 		return 0;
@@ -56,7 +60,10 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 	/* PING */
 	if (fpm_status_ping_uri && fpm_status_ping_response && !strcmp(fpm_status_ping_uri, SG(request_info).request_uri)) {
+		fpm_request_executing();
 		sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 		SG(sapi_headers).http_response_code = 200;
 		PUTS(fpm_status_ping_response);
 		return 1;
@@ -64,12 +71,15 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 	/* STATUS */
 	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
+		fpm_request_executing();
 
 		scoreboard_p = fpm_scoreboard_get();
 		if (!scoreboard_p) {
 			zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
 			SG(sapi_headers).http_response_code = 500;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 			PUTS("Internal error. Please review log file for errors.");
 			return 1;
 		}
@@ -78,6 +88,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
 			SG(sapi_headers).http_response_code = 503;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 			PUTS("Server busy. Please try again later.");
 			return 1;
 		}
@@ -89,38 +101,99 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard.pool);
 			SG(sapi_headers).http_response_code = 500;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 			PUTS("Internal error. Please review log file for errors.");
 			return 1;
 		}
+
+		/* full status ? */
+		full = SG(request_info).request_uri && strstr(SG(request_info).query_string, "full");
+		short_syntax = short_post = NULL;
+		full_separator = full_pre = full_syntax = full_post = NULL;
+		encode = 0;
 
 		/* HTML */
 		if (SG(request_info).query_string && strstr(SG(request_info).query_string, "html")) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
-			syntax =
+			encode = 1;
+
+			short_syntax =
+				"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
+				"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n"
+				"<head><title>PHP-FPM Status Page</title></head>\n"
+				"<body>\n"
 				"<table>\n"
-				"<tr><th>pool</th><td>%s</td></tr>\n"
-				"<tr><th>process manager</th><td>%s</td></tr>\n"
-				"<tr><th>start time</th><td>%s</td></tr>\n"
-				"<tr><th>start since</th><td>%lu</td></tr>\n"
-				"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
+					"<tr><th>pool</th><td>%s</td></tr>\n"
+					"<tr><th>process manager</th><td>%s</td></tr>\n"
+					"<tr><th>start time</th><td>%s</td></tr>\n"
+					"<tr><th>start since</th><td>%lu</td></tr>\n"
+					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
 #if HAVE_FPM_LQ
-				"<tr><th>listen queue</th><td>%u</td></tr>\n"
-				"<tr><th>max listen queue</th><td>%u</td></tr>\n"
-				"<tr><th>listen queue len</th><td>%d</td></tr>\n"
+					"<tr><th>listen queue</th><td>%u</td></tr>\n"
+					"<tr><th>max listen queue</th><td>%u</td></tr>\n"
+					"<tr><th>listen queue len</th><td>%d</td></tr>\n"
 #endif
-				"<tr><th>idle processes</th><td>%d</td></tr>\n"
-				"<tr><th>active processes</th><td>%d</td></tr>\n"
-				"<tr><th>total processes</th><td>%d</td></tr>\n"
-				"<tr><th>max active processes</th><td>%d</td></tr>\n"
-				"<tr><th>max children reached</th><td>%u</td></tr>\n"
-				"</table>";
+					"<tr><th>idle processes</th><td>%d</td></tr>\n"
+					"<tr><th>active processes</th><td>%d</td></tr>\n"
+					"<tr><th>total processes</th><td>%d</td></tr>\n"
+					"<tr><th>max active processes</th><td>%d</td></tr>\n"
+					"<tr><th>max children reached</th><td>%u</td></tr>\n"
+				"</table>\n";
+
+			if (!full) {
+				short_post = "</body></html>";
+			} else {
+				full_pre =
+					"<table border=\"1\">\n"
+					"<tr>"
+						"<th>pid</th>"
+						"<th>state</th>"
+						"<th>start time</th>"
+						"<th>start since</th>"
+						"<th>requests</th>"
+						"<th>request duration</th>"
+						"<th>request method</th>"
+						"<th>request uri</th>"
+						"<th>content length</th>"
+						"<th>user</th>"
+						"<th>script</th>"
+#if HAVE_FPM_LQ
+						"<th>last request cpu</th>"
+#endif
+						"<th>last request memory</th>"
+					"</tr>\n";
+
+				full_syntax =
+					"<tr>"
+						"<td>%d</td>"
+						"<td>%s</td>"
+						"<td>%s</td>"
+						"<td>%lu</td>"
+						"<td>%lu</td>"
+						"<td>%lu</td>"
+						"<td>%s</td>"
+						"<td>%s%s%s</td>"
+						"<td>%zu</td>"
+						"<td>%s</td>"
+						"<td>%s</td>"
+#if HAVE_FPM_LQ
+						"<td>%.2f</td>"
+#endif
+						"<td>%zu</td>"
+					"</tr>\n";
+
+				full_post = "</table></body></html>";
+			}
 
 		/* XML */
 		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "xml")) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
-			syntax =
+			encode = 1;
+
+			short_syntax =
 				"<?xml version=\"1.0\" ?>\n"
 				"<status>\n"
 				"<pool>%s</pool>\n"
@@ -137,14 +210,40 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"<active-processes>%d</active-processes>\n"
 				"<total-processes>%d</total-processes>\n"
 				"<max-active-processes>%d</max-active-processes>\n"
-				"<max-children-reached>%u</max-children-reached>\n"
-				"</status>";
+				"<max-children-reached>%u</max-children-reached>\n";
+
+				if (!full) {
+					short_post = "</status>";
+				} else {
+					full_pre = "<processes>\n";
+					full_syntax = 
+						"<process>"
+							"<pid>%d</pid>"
+							"<state>%s</state>"
+							"<start-time>%s</start-time>"
+							"<start-since>%lu</start-since>"
+							"<requests>%lu</requests>"
+							"<request-duration>%lu</request-duration>"
+							"<request-method>%s</request-method>"
+							"<request-uri>%s%s%s</request-uri>"
+							"<content-length>%zu</content-length>"
+							"<user>%s</user>"
+							"<script>%s</script>"
+#if HAVE_FPM_LQ
+							"<last-request-cpu>%.2f</last-request-cpu>"
+#endif
+							"<last-request-memory>%zu</last-request-memory>"
+						"</process>\n"
+					;
+					full_post = "</processes>\n</status>";
+				}
 
 			/* JSON */
 		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "json")) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
-			syntax =
+
+			short_syntax =
 				"{"
 				"\"pool\":\"%s\","
 				"\"process manager\":\"%s\","
@@ -160,14 +259,41 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"\"active processes\":%d,"
 				"\"total processes\":%d,"
 				"\"max active processes\":%d,"
-				"\"max children reached\":%u"
-				"}";
+				"\"max children reached\":%u";
+
+			if (!full) {
+				short_post = "}";
+			} else {
+				full_separator = ",";
+				full_pre = ", \"processes\":[";
+
+				full_syntax = "{"
+					"\"pid\":%d,"
+					"\"state\":\"%s\","
+					"\"start time\":%s,"
+					"\"start since\":%lu,"
+					"\"requests\":%lu,"
+					"\"request duration\":%lu,"
+					"\"request method\":\"%s\","
+					"\"request uri\":\"%s%s%s\","
+					"\"content length\":%zu,"
+					"\"user\":\"%s\","
+					"\"script\":\"%s\","
+#if HAVE_FPM_LQ
+					"\"last request cpu\":%.2f,"
+#endif
+					"\"last request memory\":%zu"
+					"}";
+
+				full_post = "]}";
+			}
 
 		/* TEXT */
 		} else {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
-			syntax =
+
+			short_syntax =
 				"pool:                 %s\n"
 				"process manager:      %s\n"
 				"start time:           %s\n"
@@ -183,11 +309,35 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"total processes:      %d\n"
 				"max active processes: %d\n"
 				"max children reached: %u\n";
+
+				if (full) {
+					full_syntax =
+						"\n"
+						"************************\n"
+						"pid:                  %d\n"
+						"state:                %s\n"
+						"start time:           %s\n"
+						"start since:          %lu\n"
+						"requests:             %lu\n"
+						"request duration:     %lu\n"
+						"request method:       %s\n"
+						"request URI:          %s%s%s\n"
+						"content length:       %zu\n"
+						"user:                 %s\n"
+						"script:               %s\n"
+#ifdef HAVE_FPM_LQ
+						"last request cpu:     %.2f\n"
+#endif
+						"last request memory:  %zu\n";
+				}
 		}
+
+		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
 		now_epoch = time(NULL);
-		spprintf(&buffer, 0, syntax,
+		spprintf(&buffer, 0, short_syntax,
 				scoreboard.pool,
 				scoreboard.pm == PM_STYLE_STATIC ? "static" : "dynamic",
 				time_buffer,
@@ -207,6 +357,96 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		SG(sapi_headers).http_response_code = 200;
 		PUTS(buffer);
 		efree(buffer);
+
+		if (short_post) {
+			PUTS(short_post);
+		}
+
+		/* no need to test the var 'full' */
+		if (full_syntax) {
+			int i, len, first;
+			char *query_string;
+			struct timeval duration, now;
+#ifdef HAVE_FPM_LQ
+			float cpu;
+#endif
+
+			fpm_clock_get(&now);
+
+			if (full_pre) {
+				PUTS(full_pre);
+			}
+
+			first = 1;
+			for (i=0; i<scoreboard_p->nprocs; i++) {
+				if (!scoreboard_p->procs[i] || !scoreboard_p->procs[i]->used) {
+					continue;
+				}
+				proc = *scoreboard_p->procs[i];
+
+				if (first) {
+					first = 0;
+				} else {
+					if (full_separator) {
+						PUTS(full_separator);
+					}
+				}
+
+				query_string = NULL;
+				len = 0;
+				if (proc.query_string[0] != '\0') {
+					if (!encode) {
+						query_string = proc.query_string;
+					} else {
+						query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), &len, 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1 TSRMLS_CC);
+					}
+				}
+
+#ifdef HAVE_FPM_LQ
+				/* prevent NaN */
+				if (proc.cpu_duration.tv_sec == 0 && proc.cpu_duration.tv_usec == 0) {
+					cpu = 0.;
+				} else {
+					cpu = (proc.last_request_cpu.tms_utime + proc.last_request_cpu.tms_stime + proc.last_request_cpu.tms_cutime + proc.last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.;
+				}
+#endif
+
+				if (proc.request_stage == FPM_REQUEST_ACCEPTING) {
+					duration = proc.duration;
+				} else {
+					timersub(&now, &proc.accepted, &duration);
+				}
+				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
+				spprintf(&buffer, 0, full_syntax,
+					proc.pid,
+					fpm_request_get_stage_name(proc.request_stage),
+					time_buffer,
+					now_epoch - proc.start_epoch,
+					proc.requests,
+					duration.tv_sec * 1000000UL + duration.tv_usec,
+					proc.request_method[0] != '\0' ? proc.request_method : "-",
+					proc.request_uri[0] != '\0' ? proc.request_uri : "-",
+					query_string ? "?" : "",
+					query_string ? query_string : "",
+					proc.content_length,
+					proc.auth_user[0] != '\0' ? proc.auth_user : "-",
+					proc.script_filename[0] != '\0' ? proc.script_filename : "-",
+#ifdef HAVE_FPM_LQ
+					proc.request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
+#endif
+					proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
+				PUTS(buffer);
+				efree(buffer);
+
+				if (len > 0 && query_string) {
+					efree(query_string);
+				}
+			}
+
+			if (full_post) {
+				PUTS(full_post);
+			}
+		}
 
 		return 1;
 	}
