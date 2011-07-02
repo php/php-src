@@ -376,7 +376,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 		/* no need to test the var 'full' */
 		if (full_syntax) {
-			int i, len, first;
+			int i, first;
+			size_t len;
 			char *query_string;
 			struct timeval duration, now;
 #ifdef HAVE_FPM_LQ
