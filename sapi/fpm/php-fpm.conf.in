@@ -182,34 +182,98 @@ pm.max_children = 50
 ;pm.max_requests = 500
 
 ; The URI to view the FPM status page. If this value is not set, no URI will be
-; recognized as a status page. By default, the status page shows the following
-; information:
-;   accepted conn        - the number of request accepted by the pool;
+; recognized as a status page. It shows the following informations:
 ;   pool                 - the name of the pool;
 ;   process manager      - static or dynamic;
+;   start time           - the date and time FPM has started;
+;   start since          - number of seconds since FPM has started;
+;   accepted conn        - the number of request accepted by the pool;
+;   listen queue         - the number of request in the queue of pending
+;                          connections (see backlog in listen(2));
+;   max listen queue     - the maximum number of requests in the queue
+;                          of pending connections since FPM has started;
+;   listen queue len     - the size of the socket queue of pending connections;
 ;   idle processes       - the number of idle processes;
 ;   active processes     - the number of active processes;
-;   total processes      - the number of idle + active processes.
+;   total processes      - the number of idle + active processes;
+;   max active processes - the maximum number of active processes since FPM
+;                          has started;
 ;   max children reached - number of times, the process limit has been reached,
 ;                          when pm tries to start more children (works only for
-;                          pm 'dynamic')
-; The values of 'idle processes', 'active processes' and 'total processes' are
-; updated each second. The value of 'accepted conn' is updated in real time.
+;                          pm 'dynamic');
+; Value are updated in real time.
 ; Example output:
-;   accepted conn:        12073
 ;   pool:                 www
 ;   process manager:      static
-;   idle processes:       35
-;   active processes:     65
-;   total processes:      100
-;   max children reached: 1
+;   start time:           01/Jul/2011:17:53:49 +0200
+;   start since:          62636
+;   accepted conn:        190460
+;   listen queue:         0
+;   max listen queue:     1
+;   listen queue len:     42
+;   idle processes:       4
+;   active processes:     11
+;   total processes:      15
+;   max active processes: 12
+;   max children reached: 0
+;
 ; By default the status page output is formatted as text/plain. Passing either
-; 'html', 'xml' or 'json' as a query string will return the corresponding output
-; syntax. Example:
+; 'html', 'xml' or 'json' in the query string will return the corresponding
+; output syntax. Example:
 ;   http://www.foo.bar/status
 ;   http://www.foo.bar/status?json
 ;   http://www.foo.bar/status?html
 ;   http://www.foo.bar/status?xml
+;
+; By default the status page only outputs short status. Passing 'full' in the
+; query string will also return status for each pool process.
+; Example: 
+;   http://www.foo.bar/status?full
+;   http://www.foo.bar/status?json&full
+;   http://www.foo.bar/status?html&full
+;   http://www.foo.bar/status?xml&full
+; The Full status returns for each process:
+;   pid                  - the PID of the process;
+;   state                - the state of the process (Idle, Running, ...);
+;   start time           - the date and time the process has started;
+;   start since          - the number of seconds since the process has started;
+;   requests             - the number of requests the process has served;
+;   request duration     - the duration in µs of the requests;
+;   request method       - the request method (GET, POST, ...);
+;   request URI          - the request URI with the query string;
+;   content length       - the content length of the request (only with POST);
+;   user                 - the user (PHP_AUTH_USER) (or '-' if not set);
+;   script               - the main script called (or '-' if not set);
+;   last request cpu     - the %cpu the last request consumed
+;                          it's always 0 if the process is not in Idle state
+;                          because CPU calculation is done when the request
+;                          processing has terminated;
+;   last request memory  - the max amount of memory the last request consumed
+;                          it's always 0 if the process is not in Idle state
+;                          because memory calculation is done when the request
+;                          processing has terminated;
+; If the process is in Idle state, then informations are related to the
+; last request the process has served. Otherwise informations are related to
+; the current request being served.
+; Example output:
+;   ************************
+;   pid:                  31330
+;   state:                Running
+;   start time:           01/Jul/2011:17:53:49 +0200
+;   start since:          63087
+;   requests:             12808
+;   request duration:     1250261
+;   request method:       GET
+;   request URI:          /test_mem.php?N=10000
+;   content length:       0
+;   user:                 -
+;   script:               /home/fat/web/docs/php/test_mem.php
+;   last request cpu:     0.00
+;   last request memory:  0
+;
+; Note: There is a real-time FPM status monitoring sample web page available
+;       It's available in: @EXPANDED_DATADIR@/fpm/status.html
+;
 ; Note: The value must start with a leading slash (/). The value can be
 ;       anything, but it may not be a good idea to use the .php extension or it
 ;       may conflict with a real PHP file.

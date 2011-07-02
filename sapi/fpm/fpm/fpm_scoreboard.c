@@ -17,11 +17,29 @@
 
 static struct fpm_scoreboard_s *fpm_scoreboard = NULL;
 static int fpm_scoreboard_i = -1;
+#ifdef HAVE_TIMES
+static float fpm_scoreboard_tick;
+#endif
+
 
 int fpm_scoreboard_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	int i;
+
+#ifdef HAVE_TIMES
+#if (defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK))
+	fpm_scoreboard_tick = sysconf(_SC_CLK_TCK);
+#else /* _SC_CLK_TCK */
+#ifdef HZ
+	fpm_scoreboard_tick = HZ;
+#else /* HZ */
+	fpm_scoreboard_tick = 100;
+#endif /* HZ */
+#endif /* _SC_CLK_TCK */
+	zlog(ZLOG_DEBUG, "got clock tick '%.0f'", fpm_scoreboard_tick);
+#endif /* HAVE_TIMES */
+
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (wp->config->pm_max_children < 1) {
@@ -40,7 +58,11 @@ int fpm_scoreboard_init_main() /* {{{ */
 		}
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
 		for (i=0; i<wp->scoreboard->nprocs; i++) {
-			wp->scoreboard->procs[i] = NULL;
+			wp->scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
+			if (!wp->scoreboard->procs[i]) {
+				return -1;
+			}
+			memset(wp->scoreboard->procs[i], 0, sizeof(struct fpm_scoreboard_proc_s));
 		}
 
 		wp->scoreboard->pm = wp->config->pm;
@@ -229,6 +251,7 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 		return;
 	}
 	proc->pid = pid;
+	proc->start_epoch = time(NULL);
 }
 /* }}} */
 
@@ -242,9 +265,8 @@ void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_ind
 		return;
 	}
 
-	if (scoreboard->procs[child_index]) {
-		fpm_shm_free(scoreboard->procs[child_index], sizeof(struct fpm_scoreboard_proc_s));
-		scoreboard->procs[child_index] = NULL;
+	if (scoreboard->procs[child_index] && scoreboard->procs[child_index]->used > 0) {
+		memset(scoreboard->procs[child_index], 0, sizeof(struct fpm_scoreboard_proc_s));
 	}
 
 	/* set this slot as free to avoid search on next alloc */
@@ -262,7 +284,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 
 	/* first try the slot which is supposed to be free */
 	if (scoreboard->free_proc >= 0 && scoreboard->free_proc < scoreboard->nprocs) {
-		if (!scoreboard->procs[scoreboard->free_proc]) {
+		if (scoreboard->procs[scoreboard->free_proc] && !scoreboard->procs[scoreboard->free_proc]->used) {
 			i = scoreboard->free_proc;
 		}
 	}
@@ -270,7 +292,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	if (i < 0) { /* the supposed free slot is not, let's search for a free slot */
 		zlog(ZLOG_DEBUG, "[pool %s] the proc->free_slot was not free. Let's search", scoreboard->pool);
 		for (i=0; i<scoreboard->nprocs; i++) {
-			if (!scoreboard->procs[i]) { /* found */
+			if (scoreboard->procs[i] && !scoreboard->procs[i]->used) { /* found */
 				break;
 			}
 		}
@@ -282,10 +304,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 		return -1;
 	}
 
-	scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
-	if (!scoreboard->procs[i]) {
-		return -1;
-	}
+	scoreboard->procs[i]->used = 1;
 	*child_index = i;
 
 	/* supposed next slot is free */
@@ -298,4 +317,12 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	return 0;
 }
 /* }}} */
+
+#ifdef HAVE_TIMES
+float fpm_scoreboard_get_tick() /* {{{ */
+{
+	return fpm_scoreboard_tick;
+}
+/* }}} */
+#endif
 

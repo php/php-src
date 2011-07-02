@@ -49,7 +49,6 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, int test_conf) /
 
 	if (0 > fpm_php_init_main()            ||
 		0 > fpm_stdio_init_main()            ||
-		0 > fpm_log_init_main()              ||
 		0 > fpm_conf_init_main(test_conf)    ||
 		0 > fpm_unix_init_main()             ||
 		0 > fpm_scoreboard_init_main()       ||

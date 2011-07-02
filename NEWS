@@ -18,6 +18,13 @@ PHP                                                                        NEWS
 - PDO ODBC driver:
   . Fixed data type usage in 64bit. (leocsilva at gmail dot com)
 
+- PHP-FPM SAPI:
+  . Implemented FR #54577 (Enhanced status page with full status and details
+    about each processes. Also provide a web page (status.html) for
+    real-time FPM status. (fat)
+  . Fixed missing Expires and Cache-Control headers for ping and status pages.
+    (fat)
+
 - SPL extension:
   . Fixed bug #54971 (Wrong result when using iterator_to_array with use_keys
     on true). (Pierrick)
