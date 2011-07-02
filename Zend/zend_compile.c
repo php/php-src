@@ -4052,6 +4052,8 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	/* REM: There should not be a need for copying, 
 	   zend_do_begin_class_declaration is also just using that string */
 	if (class_name) {
+		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
+		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
 		method_ref->class_name = Z_STRVAL(class_name->u.constant);
 		method_ref->cname_len  = Z_STRLEN(class_name->u.constant);
 	} else {
