@@ -1206,6 +1206,10 @@ int fpm_conf_init_main(int test_conf) /* {{{ */
 		}
 	}
 
+	if (fpm_globals.pid && *fpm_globals.pid) {
+		fpm_global_config.pid_file = strdup(fpm_globals.pid);
+	}
+
 	if (fpm_globals.config == NULL) {
 		char *tmp;
 
