@@ -65,6 +65,12 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
 		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 		SG(sapi_headers).http_response_code = 200;
+
+		/* handle HEAD */
+		if (SG(request_info).headers_only) {
+			return 1;
+		}
+
 		PUTS(fpm_status_ping_response);
 		return 1;
 	}
@@ -104,6 +110,16 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
 			PUTS("Internal error. Please review log file for errors.");
+			return 1;
+		}
+
+		/* send common headers */
+		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+		SG(sapi_headers).http_response_code = 200;
+
+		/* handle HEAD */
+		if (SG(request_info).headers_only) {
 			return 1;
 		}
 
@@ -332,9 +348,6 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 		}
 
-		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
-
 		strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
 		now_epoch = time(NULL);
 		spprintf(&buffer, 0, short_syntax,
@@ -354,7 +367,6 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				scoreboard.active_max,
 				scoreboard.max_children_reached);
 
-		SG(sapi_headers).http_response_code = 200;
 		PUTS(buffer);
 		efree(buffer);
 
