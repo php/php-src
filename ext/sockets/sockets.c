@@ -2202,11 +2202,13 @@ PHP_FUNCTION(socket_set_option)
 	else if (level == IPPROTO_IPV6) {
 		switch (optname) {
 		case MCAST_JOIN_GROUP:
-		case MCAST_LEAVE_GROUP:		
+		case MCAST_LEAVE_GROUP:
+#ifdef HAS_MCAST_EXT
 		case MCAST_BLOCK_SOURCE:
 		case MCAST_UNBLOCK_SOURCE:
 		case MCAST_JOIN_SOURCE_GROUP:
 		case MCAST_LEAVE_SOURCE_GROUP:
+#endif
 			if (php_do_mcast_opt(php_sock, level, optname, arg4 TSRMLS_CC) == FAILURE) {
 				RETURN_FALSE;
 			} else {
