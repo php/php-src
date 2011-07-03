@@ -2069,7 +2069,15 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 			return 1;
 		}
 	} else {
-		document_root = ".";
+		char path[MAXPATHLEN];
+		char *ret = NULL;
+
+#if HAVE_GETCWD
+		ret = VCWD_GETCWD(path, MAXPATHLEN);
+#elif HAVE_GETWD
+		ret = VCWD_GETWD(path);
+#endif
+		document_root = ret ? path : ".";
 	}
 
 	if (argc > php_optind) {
