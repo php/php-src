@@ -1569,7 +1569,7 @@ static zend_module_entry cgi_module_entry = {
 int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
-	int cgi = 0, c;
+	int cgi = 0, c, use_extended_info = 0;
 	zend_file_handle file_handle;
 
 	/* temporary locals */
@@ -1678,7 +1678,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'e': /* enable extended info output */
-				CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+				use_extended_info = 1;
 				break;
 
 			case 't': 
@@ -1780,6 +1780,10 @@ int main(int argc, char *argv[])
 		tsrm_shutdown();
 #endif
 		return FAILURE;
+	}
+	
+	if (use_extended_info) {
+		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
 	}
 
 	/* check force_cgi after startup, so we have proper output */
