@@ -39,7 +39,7 @@ static void free_rows(pdo_dblib_stmt *S TSRMLS_DC)
 	
 	for (i = 0; i < S->nrows; i++) {
 		for (j = 0; j < S->ncols; j++) {
-			pdo_dblib_colval *val = &S->rows[i] + j;
+			pdo_dblib_colval *val = &S->rows[i*S->ncols] + j;
 			if (val->data) {
 				efree(val->data);
 				val->data = NULL;

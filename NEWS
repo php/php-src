@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+- PDO DBlib:
+  . Fixed bug #54329 (MSSql extension memory leak).
+    (dotslashpok at gmail dot com)
 
 30 Jun 2011, PHP 5.3.7 RC2
 - Core:
