@@ -22,6 +22,7 @@ struct fpm_scoreboard_proc_s {
 		atomic_t lock;
 		char dummy[16];
 	};
+	int used;
 	pid_t pid;
 	enum fpm_request_stage_e request_stage;
 	struct timeval accepted;

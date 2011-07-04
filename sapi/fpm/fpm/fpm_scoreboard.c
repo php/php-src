@@ -40,7 +40,11 @@ int fpm_scoreboard_init_main() /* {{{ */
 		}
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
 		for (i=0; i<wp->scoreboard->nprocs; i++) {
-			wp->scoreboard->procs[i] = NULL;
+			wp->scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
+			if (!wp->scoreboard->procs[i]) {
+				return -1;
+			}
+			memset(wp->scoreboard->procs[i], 0, sizeof(struct fpm_scoreboard_proc_s));
 		}
 
 		wp->scoreboard->pm = wp->config->pm;
@@ -242,9 +246,8 @@ void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_ind
 		return;
 	}
 
-	if (scoreboard->procs[child_index]) {
-		fpm_shm_free(scoreboard->procs[child_index], sizeof(struct fpm_scoreboard_proc_s));
-		scoreboard->procs[child_index] = NULL;
+	if (scoreboard->procs[child_index] && scoreboard->procs[child_index]->used > 0) {
+		memset(scoreboard->procs[child_index], 0, sizeof(struct fpm_scoreboard_proc_s));
 	}
 
 	/* set this slot as free to avoid search on next alloc */
@@ -262,7 +265,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 
 	/* first try the slot which is supposed to be free */
 	if (scoreboard->free_proc >= 0 && scoreboard->free_proc < scoreboard->nprocs) {
-		if (!scoreboard->procs[scoreboard->free_proc]) {
+		if (scoreboard->procs[scoreboard->free_proc] && !scoreboard->procs[scoreboard->free_proc]->used) {
 			i = scoreboard->free_proc;
 		}
 	}
@@ -270,7 +273,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	if (i < 0) { /* the supposed free slot is not, let's search for a free slot */
 		zlog(ZLOG_DEBUG, "[pool %s] the proc->free_slot was not free. Let's search", scoreboard->pool);
 		for (i=0; i<scoreboard->nprocs; i++) {
-			if (!scoreboard->procs[i]) { /* found */
+			if (scoreboard->procs[i] && !scoreboard->procs[i]->used) { /* found */
 				break;
 			}
 		}
@@ -282,10 +285,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 		return -1;
 	}
 
-	scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
-	if (!scoreboard->procs[i]) {
-		return -1;
-	}
+	scoreboard->procs[i]->used = 1;
 	*child_index = i;
 
 	/* supposed next slot is free */
