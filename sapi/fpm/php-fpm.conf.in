@@ -322,7 +322,7 @@ pm.max_children = 50
 ;      - server specifics like: %{REQUEST_METHOD}e or %{SERVER_PROTOCOL}e
 ;      - HTTP headers like: %{HTTP_HOST}e or %{HTTP_USER_AGENT}e
 ;  %f: script filename
-:  %l: content-length of the request (for POST request only)
+;  %l: content-length of the request (for POST request only)
 ;  %m: request method
 ;  %M: peak of memory allocated by PHP
 ;      it can accept the following format:
