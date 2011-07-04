@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+- Core
+  . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
+    (Ralph Schindler, Dmitry)
+
 - PDO DBlib:
   . Fixed bug #54329 (MSSql extension memory leak).
     (dotslashpok at gmail dot com)

@@ -822,45 +822,26 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		return;
 	}
 	
-	if (only_subclass && Z_TYPE_P(obj) == IS_STRING) {
+	if (Z_TYPE_P(obj) == IS_STRING) {
 		zend_class_entry **the_ce;
 		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
 			zend_error(E_WARNING, "Unknown class passed as parameter");
 			RETURN_FALSE;
 		}
 		instance_ce = *the_ce;
-	} else if (Z_TYPE_P(obj) != IS_OBJECT) {
-		RETURN_FALSE;
+	} else if (Z_TYPE_P(obj) == IS_OBJECT && HAS_CLASS_ENTRY(*obj)) {
+		instance_ce = Z_OBJCE_P(obj);
 	} else {
-		instance_ce = NULL;
-	}
-
-	/* TBI!! new object handlers */
-	if (Z_TYPE_P(obj) == IS_OBJECT && !HAS_CLASS_ENTRY(*obj)) {
 		RETURN_FALSE;
 	}
 
 	if (zend_lookup_class_ex(class_name, class_name_len, 0, &ce TSRMLS_CC) == FAILURE) {
 		retval = 0;
 	} else {
-		if (only_subclass) {
-			if (!instance_ce) {
-				instance_ce = Z_OBJCE_P(obj)->parent;
-			} else {
-				instance_ce = instance_ce->parent;
-			}
-		} else {
-			instance_ce = Z_OBJCE_P(obj);
-		}
-
-		if (!instance_ce) {
-			RETURN_FALSE;
- 		}
-
-		if (instanceof_function(instance_ce, *ce TSRMLS_CC)) {
-			retval = 1;
-		} else {
+		if (only_subclass && instance_ce == *ce) {
 			retval = 0;
+		} else {
+			retval = instanceof_function(instance_ce, *ce TSRMLS_CC);
 		}
 	}
 
