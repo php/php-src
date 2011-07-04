@@ -179,6 +179,8 @@ PHP_FUNCTION(crypt)
 		salt[2] = '\0';
 #endif
 		salt_in_len = strlen(salt);
+	} else {
+		salt_in_len = MIN(PHP_MAX_SALT_LEN, salt_in_len);
 	}
 
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and 
