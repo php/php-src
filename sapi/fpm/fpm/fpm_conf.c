@@ -44,6 +44,12 @@
 #include "fpm_log.h"
 #include "zlog.h"
 
+#define STR2STR(a) (a ? a : "undefined")
+#define BOOL2STR(a) (a ? "yes" : "no")
+#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : "dynamic")
+#define GO(field) offsetof(struct fpm_global_config_s, field)
+#define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
+
 static int fpm_conf_load_ini_file(char *filename TSRMLS_DC);
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset);
@@ -59,9 +65,6 @@ static int ini_recursion = 0;
 static char *ini_filename = NULL;
 static int ini_lineno = 0;
 static char *ini_include = NULL;
-
-#define GO(field) offsetof(struct fpm_global_config_s, field)
-#define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
 
 static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "emergency_restart_threshold", 	&fpm_conf_set_integer, 		GO(emergency_restart_threshold) },
