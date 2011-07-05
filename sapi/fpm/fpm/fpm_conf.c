@@ -1151,7 +1151,7 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tpid = %s",                         STR2STR(fpm_global_config.pid_file));
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
-	zlog(ZLOG_NOTICE, "\tlog_level = %s",                   zlog_get_level_name());
+	zlog(ZLOG_NOTICE, "\tlog_level = %s",                   zlog_get_level_name(fpm_globals.log_level));
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
