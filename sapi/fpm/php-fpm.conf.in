@@ -25,9 +25,24 @@
 ;pid = run/php-fpm.pid
 
 ; Error log file
+; If it's set to "syslog", log is sent to syslogd instead of being written
+; in a local file.
 ; Note: the default prefix is @EXPANDED_LOCALSTATEDIR@
 ; Default Value: log/php-fpm.log
 ;error_log = log/php-fpm.log
+
+; syslog_facility is used to specify what type of program is logging the
+; message. This lets syslogd specify that messages from different facilities
+; will be handled differently.
+; See syslog(3) for possible values (ex daemon equiv LOG_DAEMON)
+; Default Value: daemon
+;syslog.facility = daemon
+
+; syslog_ident is prepended to every message. If you have multiple FPM
+; instances running on the same server, you can change the default value
+; which must suit common needs.
+; Default Value: php-fpm
+;syslog.ident = php-fpm
 
 ; Log level
 ; Possible Values: alert, error, warning, notice, debug

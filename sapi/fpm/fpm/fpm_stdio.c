@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "php_syslog.h"
+
 #include "fpm.h"
 #include "fpm_children.h"
 #include "fpm_events.h"
@@ -42,8 +44,10 @@ int fpm_stdio_init_main() /* {{{ */
 int fpm_stdio_init_final() /* {{{ */
 {
 	if (fpm_global_config.daemonize) {
-		if (fpm_globals.error_log_fd != STDERR_FILENO) {
-			/* there might be messages to stderr from libevent, we need to log them all */
+		/* prevent duping if logging to syslog */
+		if (fpm_globals.error_log_fd > 0 && fpm_globals.error_log_fd != STDERR_FILENO) {
+
+			/* there might be messages to stderr from other parts of the code, we need to log them all */
 			if (0 > dup2(fpm_globals.error_log_fd, STDERR_FILENO)) {
 				zlog(ZLOG_SYSERROR, "dup2() failed");
 				return -1;
@@ -57,7 +61,14 @@ int fpm_stdio_init_final() /* {{{ */
 
 int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	close(fpm_globals.error_log_fd);
+#ifdef HAVE_SYSLOG_H
+	if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
+		closelog(); /* ensure to close syslog not to interrupt with PHP syslog code */
+	} else
+#endif
+	if (fpm_globals.error_log_fd > 0) {
+		close(fpm_globals.error_log_fd);
+	}
 	fpm_globals.error_log_fd = -1;
 	zlog_set_fd(-1);
 
@@ -248,6 +259,17 @@ void fpm_stdio_child_use_pipes(struct fpm_child_s *child) /* {{{ */
 int fpm_stdio_open_error_log(int reopen) /* {{{ */
 {
 	int fd;
+
+#ifdef HAVE_SYSLOG_H
+	if (!strcasecmp(fpm_global_config.error_log, "syslog")) {
+		openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
+		fpm_globals.error_log_fd = ZLOG_SYSLOG;
+		if (fpm_global_config.daemonize) {
+			zlog_set_fd(fpm_globals.error_log_fd);
+		}
+		return 0;
+	}
+#endif
 
 	fd = open(fpm_global_config.error_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 	if (0 > fd) {
