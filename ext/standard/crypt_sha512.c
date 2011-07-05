@@ -430,8 +430,8 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	}
 
 	if ((salt - (char *) 0) % __alignof__ (uint64_t) != 0) {
-		char *tmp = (char *) alloca(salt_len + __alignof__(uint64_t));
-
+		char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint64_t));
+		tmp[salt_len] = 0;
 		salt = copied_salt = memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
 	}
 
