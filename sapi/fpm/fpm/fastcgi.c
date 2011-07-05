@@ -194,7 +194,7 @@ int fcgi_init(void)
 		socklen_t len = sizeof(sa);
 #endif
 		zend_hash_init(&fcgi_mgmt_vars, 0, NULL, fcgi_free_mgmt_var_cb, 1);
-		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
+		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS") - 1, "0", sizeof("0")-1);
 
 		is_initialized = 1;
 #ifdef _WIN32
