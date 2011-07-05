@@ -141,7 +141,7 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	struct key_value_s *kv;
 	char *title;
 	spprintf(&title, 0, "pool %s", wp->config->name);
-	fpm_env_setproctitle(title); 
+	fpm_env_setproctitle(title);
 	efree(title);
 
 	clearenv();
