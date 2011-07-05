@@ -201,11 +201,11 @@ int fpm_signals_init_main() /* {{{ */
 	sigfillset(&act.sa_mask);
 
 	if (0 > sigaction(SIGTERM,  &act, 0) ||
-		0 > sigaction(SIGINT,   &act, 0) ||
-		0 > sigaction(SIGUSR1,  &act, 0) ||
-		0 > sigaction(SIGUSR2,  &act, 0) ||
-		0 > sigaction(SIGCHLD,  &act, 0) ||
-		0 > sigaction(SIGQUIT,  &act, 0)) {
+	    0 > sigaction(SIGINT,   &act, 0) ||
+	    0 > sigaction(SIGUSR1,  &act, 0) ||
+	    0 > sigaction(SIGUSR2,  &act, 0) ||
+	    0 > sigaction(SIGCHLD,  &act, 0) ||
+	    0 > sigaction(SIGQUIT,  &act, 0)) {
 
 		zlog(ZLOG_SYSERROR, "sigaction() failed");
 		return -1;
@@ -230,11 +230,11 @@ int fpm_signals_init_child() /* {{{ */
 	close(sp[1]);
 
 	if (0 > sigaction(SIGTERM,  &act_dfl,  0) ||
-		0 > sigaction(SIGINT,   &act_dfl,  0) ||
-		0 > sigaction(SIGUSR1,  &act_dfl,  0) ||
-		0 > sigaction(SIGUSR2,  &act_dfl,  0) ||
-		0 > sigaction(SIGCHLD,  &act_dfl,  0) ||
-		0 > sigaction(SIGQUIT,  &act,      0)) {
+	    0 > sigaction(SIGINT,   &act_dfl,  0) ||
+	    0 > sigaction(SIGUSR1,  &act_dfl,  0) ||
+	    0 > sigaction(SIGUSR2,  &act_dfl,  0) ||
+	    0 > sigaction(SIGCHLD,  &act_dfl,  0) ||
+	    0 > sigaction(SIGQUIT,  &act,      0)) {
 
 		zlog(ZLOG_SYSERROR, "sigaction() failed");
 		return -1;

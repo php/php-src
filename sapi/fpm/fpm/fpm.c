@@ -24,20 +24,20 @@
 #include "zlog.h"
 
 struct fpm_globals_s fpm_globals = {
-		.parent_pid = 0, 
-		.argc = 0,
-		.argv = NULL,
-		.config = NULL,
-		.prefix = NULL,
-		.pid = NULL,
-		.running_children = 0,
-		.error_log_fd = 0,
-		.log_level = 0,
-		.listening_socket = 0,
-		.max_requests = 0,
-		.is_child = 0,
-		.test_successful = 0
-	};
+	.parent_pid = 0, 
+	.argc = 0,
+	.argv = NULL,
+	.config = NULL,
+	.prefix = NULL,
+	.pid = NULL,
+	.running_children = 0,
+	.error_log_fd = 0,
+	.log_level = 0,
+	.listening_socket = 0,
+	.max_requests = 0,
+	.is_child = 0,
+	.test_successful = 0
+};
 
 int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf) /* {{{ */
 {
@@ -49,20 +49,20 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	fpm_globals.prefix = prefix;
 	fpm_globals.pid = pid;
 
-	if (0 > fpm_php_init_main()            ||
-		0 > fpm_stdio_init_main()            ||
-		0 > fpm_log_init_main()              ||
-		0 > fpm_conf_init_main(test_conf)    ||
-		0 > fpm_unix_init_main()             ||
-		0 > fpm_scoreboard_init_main()       ||
-		0 > fpm_pctl_init_main()             ||
-		0 > fpm_env_init_main()              ||
-		0 > fpm_signals_init_main()          ||
-		0 > fpm_children_init_main()         ||
-		0 > fpm_sockets_init_main()          ||
-		0 > fpm_worker_pool_init_main()      ||
-		0 > fpm_event_init_main()) {
-		
+	if (0 > fpm_php_init_main()           ||
+	    0 > fpm_stdio_init_main()         ||
+	    0 > fpm_log_init_main()           ||
+	    0 > fpm_conf_init_main(test_conf) ||
+	    0 > fpm_unix_init_main()          ||
+	    0 > fpm_scoreboard_init_main()    ||
+	    0 > fpm_pctl_init_main()          ||
+	    0 > fpm_env_init_main()           ||
+	    0 > fpm_signals_init_main()       ||
+	    0 > fpm_children_init_main()      ||
+	    0 > fpm_sockets_init_main()       ||
+	    0 > fpm_worker_pool_init_main()   ||
+	    0 > fpm_event_init_main()) {
+
 		if (fpm_globals.test_successful) {
 			exit(0);
 		} else {

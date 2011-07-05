@@ -72,7 +72,10 @@ struct ini_value_parser_s {
 	intptr_t offset;
 };
 
-enum { PM_STYLE_STATIC = 1, PM_STYLE_DYNAMIC = 2 };
+enum {
+	PM_STYLE_STATIC = 1,
+	PM_STYLE_DYNAMIC = 2
+};
 
 int fpm_conf_init_main(int test_conf);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);

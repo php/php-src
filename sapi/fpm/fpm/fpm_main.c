@@ -422,8 +422,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 				while (h) {
-					if (h->header_len > sizeof("Status:")-1 &&
-						strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+					if (h->header_len > sizeof("Status:") - 1 &&
+						strncasecmp(h->header, "Status:", sizeof("Status:") - 1) == 0
 					) {
 						has_status = 1;
 						break;
@@ -458,16 +458,16 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:")-1 && 
-				strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+			if (h->header_len > sizeof("Status:") - 1 && 
+				strncasecmp(h->header, "Status:", sizeof("Status:") - 1) == 0
 			) {
 				if (!ignore_status) {
 					ignore_status = 1;
 					PHPWRITE_H(h->header, h->header_len);
 					PHPWRITE_H("\r\n", 2);
 				}
-			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 &&
-				strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0
+			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:") - 1 &&
+				strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:") - 1) == 0
 			) {
 				h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				continue;
@@ -498,7 +498,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 			fcgi_request *request = (fcgi_request*) SG(server_context);
 			if (request_body_fd == -1) {
 				char *request_body_filename = sapi_cgibin_getenv((char *) "REQUEST_BODY_FILE",
-						sizeof("REQUEST_BODY_FILE")-1 TSRMLS_CC);
+						sizeof("REQUEST_BODY_FILE") - 1 TSRMLS_CC);
 
 				if (request_body_filename && *request_body_filename) {
 					request_body_fd = open(request_body_filename, O_RDONLY);
@@ -605,7 +605,7 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 
 static char *sapi_cgi_read_cookies(TSRMLS_D)
 {
-	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", sizeof("HTTP_COOKIE")-1 TSRMLS_CC);
+	return sapi_cgibin_getenv((char *) "HTTP_COOKIE", sizeof("HTTP_COOKIE") - 1 TSRMLS_CC);
 }
 
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
@@ -674,12 +674,13 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
+		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1 TSRMLS_CC);
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
 		php_self = emalloc(php_self_len + 1);
 
+		/* Concat script_name and path_info into php_self */
 		if (script_name) {
 			memcpy(php_self, script_name, script_name_len + 1);
 		}
@@ -1085,8 +1086,8 @@ static int is_valid_path(const char *path)
  */
 static void init_request_info(TSRMLS_D)
 {
-	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1 TSRMLS_CC);
-	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1 TSRMLS_CC);
+	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME") - 1 TSRMLS_CC);
+	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED", sizeof("PATH_TRANSLATED") - 1 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
 	char *ini;
 	int apache_was_here = 0;
@@ -1114,17 +1115,17 @@ static void init_request_info(TSRMLS_D)
 	 * of the script will be retreived later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
-		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1 TSRMLS_CC);
-		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE", sizeof("CONTENT_TYPE")-1 TSRMLS_CC);
-		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
-		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
+		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH", sizeof("CONTENT_LENGTH") - 1 TSRMLS_CC);
+		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE", sizeof("CONTENT_TYPE") - 1 TSRMLS_CC);
+		char *env_path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1 TSRMLS_CC);
+		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME") - 1 TSRMLS_CC);
 
 		/* Hack for buggy IIS that sets incorrect PATH_INFO */
-		char *env_server_software = sapi_cgibin_getenv("SERVER_SOFTWARE", sizeof("SERVER_SOFTWARE")-1 TSRMLS_CC);
+		char *env_server_software = sapi_cgibin_getenv("SERVER_SOFTWARE", sizeof("SERVER_SOFTWARE") - 1 TSRMLS_CC);
 		if (env_server_software &&
 			env_script_name &&
 			env_path_info &&
-			strncmp(env_server_software, "Microsoft-IIS", sizeof("Microsoft-IIS")-1) == 0 &&
+			strncmp(env_server_software, "Microsoft-IIS", sizeof("Microsoft-IIS") - 1) == 0 &&
 			strncmp(env_path_info, env_script_name, strlen(env_script_name)) == 0
 		) {
 			env_path_info = _sapi_cgibin_putenv("ORIG_PATH_INFO", env_path_info TSRMLS_CC);
@@ -1162,8 +1163,8 @@ static void init_request_info(TSRMLS_D)
 		if (CGIG(fix_pathinfo)) {
 			struct stat st;
 			char *real_path = NULL;
-			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL")-1 TSRMLS_CC);
-			char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT")-1 TSRMLS_CC);
+			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL", sizeof("REDIRECT_URL") - 1 TSRMLS_CC);
+			char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1 TSRMLS_CC);
 			char *orig_path_translated = env_path_translated;
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
@@ -1398,19 +1399,19 @@ static void init_request_info(TSRMLS_D)
 			SG(request_info).path_translated = estrdup(script_path_translated);
 		}
 
-		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", sizeof("REQUEST_METHOD")-1 TSRMLS_CC);
+		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", sizeof("REQUEST_METHOD") - 1 TSRMLS_CC);
 		/* FIXME - Work out proto_num here */
-		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", sizeof("QUERY_STRING")-1 TSRMLS_CC);
+		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING", sizeof("QUERY_STRING") - 1 TSRMLS_CC);
 		SG(request_info).content_type = (content_type ? content_type : "" );
 		SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
-		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION", sizeof("HTTP_AUTHORIZATION")-1 TSRMLS_CC);
+		auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION", sizeof("HTTP_AUTHORIZATION") - 1 TSRMLS_CC);
 		php_handle_auth_data(auth TSRMLS_CC);
 	}
 
 	/* INI stuff */
-	ini = sapi_cgibin_getenv("PHP_VALUE", sizeof("PHP_VALUE")-1 TSRMLS_CC);
+	ini = sapi_cgibin_getenv("PHP_VALUE", sizeof("PHP_VALUE") - 1 TSRMLS_CC);
 	if (ini) {
 		int mode = ZEND_INI_USER;
 		char *tmp;
@@ -1419,7 +1420,7 @@ static void init_request_info(TSRMLS_D)
 		efree(tmp);
 	}
 
-	ini = sapi_cgibin_getenv("PHP_ADMIN_VALUE", sizeof("PHP_ADMIN_VALUE")-1 TSRMLS_CC);
+	ini = sapi_cgibin_getenv("PHP_ADMIN_VALUE", sizeof("PHP_ADMIN_VALUE") - 1 TSRMLS_CC);
 	if (ini) {
 		int mode = ZEND_INI_SYSTEM;
 		char *tmp;
