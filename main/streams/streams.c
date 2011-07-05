@@ -163,6 +163,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	char *tmp = estrdup(path);
 	char *msg;
 	int free_msg = 0;
+	php_stream_wrapper orig_wrapper;
 
 	if (wrapper) {
 		if (wrapper->err_count > 0) {
@@ -207,7 +208,16 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	}
 
 	php_strip_url_passwd(tmp);
+	if (wrapper) {
+		/* see bug #52935 */
+		orig_wrapper = *wrapper;
+		wrapper->err_stack = NULL;
+		wrapper->err_count = 0;
+	}
 	php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s: %s", caption, msg);
+	if (wrapper) {
+		*wrapper = orig_wrapper;
+	}
 	efree(tmp);
 	if (free_msg) {
 		efree(msg);
