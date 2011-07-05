@@ -123,6 +123,9 @@ static int fpm_conf_is_dir(char *path) /* {{{ */
 }
 /* }}} */
 
+/*
+ * Expands the '$pool' token in a dynamically allocated string
+ */
 static int fpm_conf_expand_pool_name(char **value) {
 	char *token;
 
@@ -130,15 +133,23 @@ static int fpm_conf_expand_pool_name(char **value) {
 		return 0;
 	}
 
-	while ((token = strstr(*value, "$pool"))) {
+	while (*value && (token = strstr(*value, "$pool"))) {
 		char *buf;
-		char *p1 = *value;
 		char *p2 = token + strlen("$pool");
+
+		/* If we are not in a pool, we cannot expand this name now */
 		if (!current_wp || !current_wp->config  || !current_wp->config->name) {
 			return -1;
 		}
+
+		/* "aaa$poolbbb" becomes "aaa\0oolbbb" */
 		token[0] = '\0';
-		spprintf(&buf, 0, "%s%s%s", p1, current_wp->config->name, p2);
+
+		/* Build a brand new string with the expanded token */
+		spprintf(&buf, 0, "%s%s%s", *value, current_wp->config->name, p2);
+
+		/* Free the previous value and save the new one */
+		free(*value);
 		*value = strdup(buf);
 		efree(buf);
 	}

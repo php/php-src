@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . Implemented FR #54172 (Overriding the pid file location of php-fpm). (fat)
   . Fixed missing Expires and Cache-Control headers for ping and status pages.
     (fat)
+  . Fixed memory leak. (fat) Reported and fixed by Giovanni Giacobbi.
 
 - SPL extension:
   . Fixed bug #54971 (Wrong result when using iterator_to_array with use_keys
