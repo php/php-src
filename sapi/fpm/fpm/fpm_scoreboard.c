@@ -57,7 +57,7 @@ int fpm_scoreboard_init_main() /* {{{ */
 			return -1;
 		}
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
-		for (i=0; i<wp->scoreboard->nprocs; i++) {
+		for (i = 0; i < wp->scoreboard->nprocs; i++) {
 			wp->scoreboard->procs[i] = fpm_shm_alloc(sizeof(struct fpm_scoreboard_proc_s));
 			if (!wp->scoreboard->procs[i]) {
 				return -1;
@@ -231,7 +231,7 @@ void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 		return;
 	}
 
-	for (i=0; i<scoreboard->nprocs; i++) {
+	for (i = 0; i < scoreboard->nprocs; i++) {
 		if (!scoreboard->procs[i]) {
 			continue;
 		}
@@ -291,7 +291,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 
 	if (i < 0) { /* the supposed free slot is not, let's search for a free slot */
 		zlog(ZLOG_DEBUG, "[pool %s] the proc->free_slot was not free. Let's search", scoreboard->pool);
-		for (i=0; i<scoreboard->nprocs; i++) {
+		for (i = 0; i < scoreboard->nprocs; i++) {
 			if (scoreboard->procs[i] && !scoreboard->procs[i]->used) { /* found */
 				break;
 			}
