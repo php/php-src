@@ -132,6 +132,9 @@ PHP                                                                        NEWS
     getallheaders(), apache_request_headers() and apache_response_headers()
   . Improved performance of FastCGI request parsing.
 
+- Improved PHP-FPM SAPI:
+  . Added partial syslog support (on error_log only). FR #52052. (fat)
+
 - Improved core functions:
   . number_format() no longer truncates multibyte decimal points and thousand
     separators to the first byte. FR #53457. (Adam)

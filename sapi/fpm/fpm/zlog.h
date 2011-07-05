@@ -19,6 +19,10 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len);
 void zlog_ex(const char *function, int line, int flags, const char *fmt, ...)
 		__attribute__ ((format(printf,4,5)));
 
+#ifdef HAVE_SYSLOG_H
+extern const int syslog_priorities[];
+#endif
+
 enum {
 	ZLOG_DEBUG			= 1,
 	ZLOG_NOTICE			= 2,
@@ -32,5 +36,9 @@ enum {
 #define ZLOG_HAVE_ERRNO 0x100
 
 #define ZLOG_SYSERROR (ZLOG_ERROR | ZLOG_HAVE_ERRNO)
+
+#ifdef HAVE_SYSLOG_H
+#define ZLOG_SYSLOG -2
+#endif
 
 #endif

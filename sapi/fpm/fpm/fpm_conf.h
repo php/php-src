@@ -25,6 +25,11 @@ struct fpm_global_config_s {
 	int daemonize;
 	char *pid_file;
 	char *error_log;
+	int log_level;
+#ifdef HAVE_SYSLOG_H
+	char *syslog_ident;
+	int syslog_facility;
+#endif
 	int rlimit_files;
 	int rlimit_core;
 };
