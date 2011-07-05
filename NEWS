@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
     (Ralph Schindler, Dmitry)
   . Fixed buffer overflow on overlog salt in crypt(). (Clément LECIGNE, Stas)
+  . Fixed bug #52935 (call exit in user_error_handler cause stream relate
+    core). (Gustavo)
 
 - PDO DBlib:
   . Fixed bug #54329 (MSSql extension memory leak).
