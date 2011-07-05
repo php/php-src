@@ -134,6 +134,7 @@ PHP                                                                        NEWS
 
 - Improved PHP-FPM SAPI:
   . Added partial syslog support (on error_log only). FR #52052. (fat)
+  . Lowered default value for Process Manager. FR #54098. (fat)
 
 - Improved core functions:
   . number_format() no longer truncates multibyte decimal points and thousand
