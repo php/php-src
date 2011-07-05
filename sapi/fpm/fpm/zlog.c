@@ -29,9 +29,15 @@ static const char *level_names[] = {
 	[ZLOG_ALERT]		= "ALERT",
 };
 
-const char *zlog_get_level_name() /* {{{ */
+const char *zlog_get_level_name(int log_level) /* {{{ */
 {
-	return level_names[zlog_level];
+	if (log_level < 0) {
+		log_level = zlog_level;
+	} else if (log_level < ZLOG_DEBUG || log_level > ZLOG_ALERT) {
+		return "unknown value";
+	}
+
+	return level_names[log_level];
 }
 /* }}} */
 

@@ -11,7 +11,7 @@ struct timeval;
 
 int zlog_set_fd(int new_fd);
 int zlog_set_level(int new_value);
-const char *zlog_get_level_name();
+const char *zlog_get_level_name(int log_level);
 void zlog_set_launched(void);
 
 size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len);

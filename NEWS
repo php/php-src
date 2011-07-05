@@ -34,6 +34,7 @@ PHP                                                                        NEWS
   . Fixed missing Expires and Cache-Control headers for ping and status pages.
     (fat)
   . Fixed memory leak. (fat) Reported and fixed by Giovanni Giacobbi.
+  . Fixed wrong value of log_level when invoking fpm with -tt. (fat)
 
 - SPL extension:
   . Fixed bug #54971 (Wrong result when using iterator_to_array with use_keys
