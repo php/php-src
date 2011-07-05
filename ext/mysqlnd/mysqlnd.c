@@ -156,6 +156,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND * conn TSRMLS_DC)
 		mnd_pefree(conn->unix_socket, pers);
 		conn->unix_socket = NULL;
 	}
+	DBG_INF_FMT("scheme=%s", conn->scheme);
 	if (conn->scheme) {
 		DBG_INF("Freeing scheme");
 		mnd_pefree(conn->scheme, pers);
@@ -635,7 +636,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
-		DBG_INF_FMT("transport=%s", transport);
+		DBG_INF_FMT("transport=%s conn->scheme=%s", transport, conn->scheme);
 		conn->scheme = mnd_pestrndup(transport, transport_len, conn->persistent);
 		conn->scheme_len = transport_len;
 		efree(transport); /* allocated by spprintf */
@@ -836,7 +837,7 @@ err:
 		/* no mnd_ since we don't allocate it */
 		efree(errstr);
 	}
-
+	conn->m->free_contents(conn TSRMLS_CC);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_FAILURE);
 
 	DBG_RETURN(FAIL);
@@ -877,9 +878,6 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 			  object - we are free to kill it!
 			*/
 			conn->m->dtor(conn TSRMLS_CC);
-		} else {
-			/* This will also close conn->net->stream if it has been opened */
-			conn->m->free_contents(conn TSRMLS_CC);
 		}
 		DBG_RETURN(NULL);
 	}
