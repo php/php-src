@@ -31,6 +31,7 @@
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 #include "zend_stream.h"
+#include "php_syslog.h"
 
 #include "fpm.h"
 #include "fpm_conf.h"
@@ -58,8 +59,16 @@ static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset);
+#ifdef HAVE_SYSLOG_H
+static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t offset);
+#endif
 
-struct fpm_global_config_s fpm_global_config = { .daemonize = 1 };
+struct fpm_global_config_s fpm_global_config = {
+	.daemonize = 1,
+#ifdef HAVE_SYSLOG_H
+	.syslog_facility = -1
+#endif
+};
 static struct fpm_worker_pool_s *current_wp = NULL;
 static int ini_recursion = 0;
 static char *ini_filename = NULL;
@@ -67,15 +76,19 @@ static int ini_lineno = 0;
 static char *ini_include = NULL;
 
 static struct ini_value_parser_s ini_fpm_global_options[] = {
-	{ "emergency_restart_threshold", &fpm_conf_set_integer,     GO(emergency_restart_threshold) },
-	{ "emergency_restart_interval",  &fpm_conf_set_time,        GO(emergency_restart_interval) },
-	{ "process_control_timeout",     &fpm_conf_set_time,        GO(process_control_timeout) },
-	{ "daemonize",                   &fpm_conf_set_boolean,     GO(daemonize) },
-	{ "pid",                         &fpm_conf_set_string,      GO(pid_file) },
-	{ "error_log",                   &fpm_conf_set_string,      GO(error_log) },
-	{ "log_level",                   &fpm_conf_set_log_level,   0 },
-	{ "rlimit_files",                &fpm_conf_set_integer,     GO(rlimit_files) },
-	{ "rlimit_core",                 &fpm_conf_set_rlimit_core, GO(rlimit_core) },
+	{ "emergency_restart_threshold", &fpm_conf_set_integer,         GO(emergency_restart_threshold) },
+	{ "emergency_restart_interval",  &fpm_conf_set_time,            GO(emergency_restart_interval) },
+	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
+	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
+	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
+	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
+	{ "log_level",                   &fpm_conf_set_log_level,       GO(log_level) },
+#ifdef HAVE_SYSLOG_H
+	{ "syslog.ident",                &fpm_conf_set_string,          GO(syslog_ident) },
+	{ "syslog.facility",             &fpm_conf_set_syslog_facility, GO(syslog_facility) },
+#endif
+	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
+	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
 	{ 0, 0, 0 }
 };
 
@@ -252,24 +265,177 @@ static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {
 static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
+	int log_level;
 
 	if (!strcasecmp(val, "debug")) {
-		fpm_globals.log_level = ZLOG_DEBUG;
+		log_level = ZLOG_DEBUG;
 	} else if (!strcasecmp(val, "notice")) {
-		fpm_globals.log_level = ZLOG_NOTICE;
+		log_level = ZLOG_NOTICE;
 	} else if (!strcasecmp(val, "warning") || !strcasecmp(val, "warn")) {
-		fpm_globals.log_level = ZLOG_WARNING;
+		log_level = ZLOG_WARNING;
 	} else if (!strcasecmp(val, "error")) {
-		fpm_globals.log_level = ZLOG_ERROR;
+		log_level = ZLOG_ERROR;
 	} else if (!strcasecmp(val, "alert")) {
-		fpm_globals.log_level = ZLOG_ALERT;
+		log_level = ZLOG_ALERT;
 	} else {
 		return "invalid value for 'log_level'";
 	}
 
+	* (int *) ((char *) *config + offset) = log_level;
 	return NULL;
 }
 /* }}} */
+
+#ifdef HAVE_SYSLOG_H
+static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t offset) /* {{{ */
+{
+	char *val = Z_STRVAL_P(value);
+	int *conf = (int *) ((char *) *config + offset);
+
+#ifdef LOG_AUTH
+	if (!strcasecmp(val, "AUTH")) {
+		*conf = LOG_AUTH;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_AUTHPRIV
+	if (!strcasecmp(val, "AUTHPRIV")) {
+		*conf = LOG_AUTHPRIV;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_CRON
+	if (!strcasecmp(val, "CRON")) {
+		*conf = LOG_CRON;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_DAEMON
+	if (!strcasecmp(val, "DAEMON")) {
+		*conf = LOG_DAEMON;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_FTP
+	if (!strcasecmp(val, "FTP")) {
+		*conf = LOG_FTP;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_KERN
+	if (!strcasecmp(val, "KERN")) {
+		*conf = LOG_KERN;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LPR
+	if (!strcasecmp(val, "LPR")) {
+		*conf = LOG_LPR;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_MAIL
+	if (!strcasecmp(val, "MAIL")) {
+		*conf = LOG_MAIL;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_NEWS
+	if (!strcasecmp(val, "NEWS")) {
+		*conf = LOG_NEWS;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_SYSLOG
+	if (!strcasecmp(val, "SYSLOG")) {
+		*conf = LOG_SYSLOG;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_USER
+	if (!strcasecmp(val, "USER")) {
+		*conf = LOG_USER;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_UUCP
+	if (!strcasecmp(val, "UUCP")) {
+		*conf = LOG_UUCP;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL0
+	if (!strcasecmp(val, "LOCAL0")) {
+		*conf = LOG_LOCAL0;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL1
+	if (!strcasecmp(val, "LOCAL1")) {
+		*conf = LOG_LOCAL1;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL2
+	if (!strcasecmp(val, "LOCAL2")) {
+		*conf = LOG_LOCAL2;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL3
+	if (!strcasecmp(val, "LOCAL3")) {
+		*conf = LOG_LOCAL3;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL4
+	if (!strcasecmp(val, "LOCAL4")) {
+		*conf = LOG_LOCAL4;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL5
+	if (!strcasecmp(val, "LOCAL5")) {
+		*conf = LOG_LOCAL5;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL6
+	if (!strcasecmp(val, "LOCAL6")) {
+		*conf = LOG_LOCAL6;
+		return NULL;
+	}
+#endif
+
+#ifdef LOG_LOCAL7
+	if (!strcasecmp(val, "LOCAL7")) {
+		*conf = LOG_LOCAL7;
+		return NULL;
+	}
+#endif
+
+	return "invalid value";
+}
+/* }}} */
+#endif
 
 static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset) /* {{{ */
 {
@@ -794,11 +960,26 @@ static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 		fpm_evaluate_full_path(&fpm_global_config.pid_file, NULL, PHP_LOCALSTATEDIR, 0);
 	}
 
+	fpm_globals.log_level = fpm_global_config.log_level;
+
 	if (!fpm_global_config.error_log) {
 		fpm_global_config.error_log = strdup("log/php-fpm.log");
 	}
 
-	fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
+#ifdef HAVE_SYSLOG_H
+	if (!fpm_global_config.syslog_ident) {
+		fpm_global_config.syslog_ident = strdup("php-fpm");
+	}
+
+	if (fpm_global_config.syslog_facility < 0) {
+		fpm_global_config.syslog_facility = LOG_DAEMON;
+	}
+
+	if (strcasecmp(fpm_global_config.error_log, "syslog") != 0)
+#endif
+	{
+		fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
+	}
 
 	if (0 > fpm_stdio_open_error_log(0)) {
 		return -1;
@@ -832,6 +1013,10 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 	free(fpm_global_config.error_log);
 	fpm_global_config.pid_file = 0;
 	fpm_global_config.error_log = 0;
+#ifdef HAVE_SYSLOG_H
+	free(fpm_global_config.syslog_ident);
+	fpm_global_config.syslog_ident = 0;
+#endif
 	free(fpm_globals.config);
 }
 /* }}} */
@@ -1152,6 +1337,10 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
 	zlog(ZLOG_NOTICE, "\tlog_level = %s",                   zlog_get_level_name(fpm_globals.log_level));
+#ifdef HAVE_SYSLOG_H
+	zlog(ZLOG_NOTICE, "\tsyslog.ident = %s",                STR2STR(fpm_global_config.syslog_ident));
+	zlog(ZLOG_NOTICE, "\tsyslog.facility = %d",             fpm_global_config.syslog_facility); /* FIXME: convert to string */
+#endif
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
