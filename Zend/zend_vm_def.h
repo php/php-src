@@ -3917,7 +3917,6 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-ZEND_VM_C_LABEL(num_index_dim):
 						hval = Z_LVAL_P(offset);
 						zend_hash_index_del(ht, hval);
 						break;
@@ -3940,6 +3939,12 @@ ZEND_VM_C_LABEL(num_index_dim):
 						} else {
 							zend_hash_quick_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval);
 						}
+						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
+							zval_ptr_dtor(&offset);
+						}
+						break;
+ZEND_VM_C_LABEL(num_index_dim):
+						zend_hash_index_del(ht, hval);
 						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
 							zval_ptr_dtor(&offset);
 						}
