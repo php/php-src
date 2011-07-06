@@ -2060,6 +2060,8 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 	if (document_root) {
 		struct stat sb;
+		char resolved_path[MAXPATHLEN];
+
 		if (stat(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
 			return 1;
@@ -2067,6 +2069,9 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 		if (!S_ISDIR(sb.st_mode)) {
 			fprintf(stderr, "%s is not a directory.\n", document_root);
 			return 1;
+		}
+		if (VCWD_REALPATH(document_root, resolved_path)) {
+			document_root = resolved_path;
 		}
 	} else {
 		char path[MAXPATHLEN];
