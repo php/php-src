@@ -141,6 +141,8 @@ PHP                                                                        NEWS
     separators to the first byte. FR #53457. (Adam)
   . Added hex2bin() function. (Scott)
   . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
+  . Fixed bug#55084 (Function registered by header_register_callback is
+    called only once per process). (Hannes)
 
 - Improved CURL extension:
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and

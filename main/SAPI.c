@@ -430,6 +430,8 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
+	SG(callback_run) = 0;
+	SG(callback_func) = NULL;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
 	SG(request_info).raw_post_data = NULL;
@@ -539,6 +541,10 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	sapi_send_headers_free(TSRMLS_C);
 	SG(sapi_started) = 0;
 	SG(headers_sent) = 0;
+	SG(callback_run) = 0;
+	if (SG(callback_func)) {
+		zval_ptr_dtor(&SG(callback_func));
+	}
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -816,7 +822,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	int retval;
 	int ret = FAILURE;
 
-	if (SG(headers_sent) || SG(request_info).no_headers) {
+	if (SG(headers_sent) || SG(request_info).no_headers || SG(callback_run)) {
 		return SUCCESS;
 	}
 
