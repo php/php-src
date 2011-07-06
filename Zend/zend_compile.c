@@ -3661,6 +3661,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 						}
+						fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
 					}
 
 					lcname_len = aliases[i]->alias_len;
@@ -3700,6 +3701,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 						}
+						fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
 					}
 				}
 				i++;
