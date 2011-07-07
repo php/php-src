@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.7
+- Zend Engine:
+  . Fixed bug #55156 (ReflectionClass::getDocComment() returns comment even
+    though the class has none). (Felipe)
+
 - Core
   . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
     (Ralph Schindler, Dmitry)
