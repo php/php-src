@@ -3524,8 +3524,7 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRM
 	fe->op_array.function_name = newname;
 
 	/* was setting it to fe which does not work since fe is stack allocated and not a stable address */
-	/* fe->op_array.prototype = fe->op_array.prototype;   */
-
+	/* fe->op_array.prototype = fe->op_array.prototype; */
 	if (fe->op_array.arg_info) {
 		zend_arg_info *tmpArginfo;
 
@@ -3557,13 +3556,13 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRM
 }
 /* }}}} */
 
-static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
 	zend_function* existing_fn;
 	zend_function fn_copy, *fn_copy_p;
-	zend_function* prototype = NULL;		/* is used to determine the prototype according to the inheritance chain */
+	zend_function* prototype = NULL;  /* is used to determine the prototype according to the inheritance chain */
 
 	if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &existing_fn) == FAILURE) {
 		add = 1; /* not found */
@@ -3623,8 +3622,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 
 	return ZEND_HASH_APPLY_REMOVE;
 }
+/* }}} */
 
-static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	HashTable* target;
 	zend_trait_alias** aliases;
@@ -3645,18 +3645,15 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (aliases) {
 		while (aliases[i]) {
-      
-			if (/* Scope unset or equal to the function we compare to */
-          (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
-          && /* and, the alias applies to fn */
-          (zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
-																 aliases[i]->trait_method->mname_len,
-																 fn->common.function_name, fnname_len) == 0)) {
+			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
+			if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
 				if (aliases[i]->alias) {
 					fn_copy = *fn;
 					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
-
-					if (aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
+					
+					/* if it is 0, no modifieres has been changed */
+					if (aliases[i]->modifiers) { 
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
@@ -3686,17 +3683,15 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len) TSRMLS_CC);
 
 		/* apply aliases which are not qualified by a class name, or which have not
-     alias name, just setting visibility */
+		 * alias name, just setting visibility */
 		if (aliases) {
 			i = 0;
 			while (aliases[i]) {
-				if (/* Scope unset or equal to the function we compare to */
-            (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
-            && /* and, the alias applies to fn */
-					  (zend_binary_strcasecmp(aliases[i]->trait_method->method_name,
-                                    aliases[i]->trait_method->mname_len,
-																	  fn->common.function_name, fnname_len) == 0)) {
-					if (!aliases[i]->alias && aliases[i]->modifiers) { /* if it is 0, no modifieres has been changed */
+				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
+				if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+					&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
+					/* if it is 0, no modifieres has been changed */
+					if (!aliases[i]->alias && aliases[i]->modifiers) {
 						fn_copy.common.fn_flags = aliases[i]->modifiers;
 						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
@@ -3717,14 +3712,14 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-/**
-* Copies function table entries to target function table with applied aliasing
-*/
-static void zend_traits_copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table TSRMLS_DC) {
-	zend_hash_apply_with_arguments(source TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, /* 3 is number of args for apply_func */
-			target, aliases, exclude_table);
+/* Copies function table entries to target function table with applied aliasing */
+static void zend_traits_copy_trait_function_table(HashTable *target, HashTable *source, zend_trait_alias** aliases, HashTable* exclude_table TSRMLS_DC) /* {{{ */
+{
+	zend_hash_apply_with_arguments(source TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, target, aliases, exclude_table);
 }
+/* }}} */
 
 static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
@@ -3734,7 +3729,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	zend_class_entry *cur_ce;
 
 	/* resolve class references */
-
 	if (ce->trait_precedences) {
 		i = 0;
 		while ((cur_precedence = ce->trait_precedences[i])) {
@@ -3770,7 +3764,8 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 }
 /* }}} */
 
-static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) {
+static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_trait_precedence **precedences, zend_class_entry *trait) /* {{{ */
+{
 	size_t i = 0, j;
 	
 	if (!precedences) {
@@ -3795,6 +3790,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 		++i;
 	}
 }
+/* }}} */
 
 static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
@@ -3806,18 +3802,16 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	/* prepare copies of trait function tables for combination */
 	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
 	resulting_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(resulting_table, 10, /* TODO: revisit this start size, may be its not optimal */
-					  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
-					  NULL, NULL, 0, 0);
+	
+	/* TODO: revisit this start size, may be its not optimal */
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
   
 	for (i = 0; i < ce->num_traits; i++) {
 		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
-		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements,
-						  /* NULL, ZEND_FUNCTION_DTOR, 0, 0); */
-						  NULL, NULL, 0, 0);
+		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 0, 0);
 
-		zend_hash_init_ex(&exclude_table, 2, /* TODO: revisit this start size, may be its not optimal */
-						  NULL, NULL, 0, 0);
+		/* TODO: revisit this start size, may be its not optimal */
+		zend_hash_init_ex(&exclude_table, 2, NULL, NULL, 0, 0);
 		zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
 		/* copies functions, applies defined aliasing, and excludes unused trait methods */
@@ -3827,16 +3821,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
   
 	/* now merge trait methods */
 	for (i = 0; i < ce->num_traits; i++) {
-		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions, 5, /* 5 is number of args for apply_func */
-									   i, ce->num_traits, resulting_table, function_tables, ce);
+		zend_hash_apply_with_arguments(function_tables[i] TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions, 5, i, ce->num_traits, resulting_table, function_tables, ce);
 	}
   
-	/*  now the resulting_table contains all trait methods we would have to
-		add to the class
-		in the following step the methods are inserted into the method table
-		if there is already a method with the same name it is replaced iff ce != fn.scope
-		--> all inherited methods are overridden, methods defined in the class are left
-		untouched */
+	/* Now the resulting_table contains all trait methods we would have to
+	 * add to the class in the following step the methods are inserted into the method table
+	 * if there is already a method with the same name it is replaced iff ce != fn.scope
+	 * --> all inherited methods are overridden, methods defined in the class are left untouched
+	 */
 	zend_hash_apply_with_arguments(resulting_table TSRMLS_CC, (apply_func_args_t)zend_traits_merge_functions_to_class, 1, ce);
   
 	/* free temporary function tables */
@@ -3865,6 +3857,7 @@ static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t curr
 
 	return coliding_ce;
 }
+/* }}} */
 
 static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
@@ -3881,21 +3874,18 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zval* prop_value;
   
   
-	/*  in the following steps the properties are inserted into the property table
-		for that, a very strict approach is applied:
-		 - check for compatibility, if not compatible with any property in class -> fatal
-		 - if compatible, then strict notice
-	*/
-  
-  
+	/* In the following steps the properties are inserted into the property table
+	 * for that, a very strict approach is applied:
+	 * - check for compatibility, if not compatible with any property in class -> fatal
+	 * - if compatible, then strict notice
+	 */
 	for (i = 0; i < ce->num_traits; i++) {
 		for (zend_hash_internal_pointer_reset(&ce->traits[i]->properties_info);
 			 zend_hash_get_current_data(&ce->traits[i]->properties_info, (void *) &property_info) == SUCCESS;
 			 zend_hash_move_forward(&ce->traits[i]->properties_info)) {
-			/* property_info now contains the property */
-
 			/* first get the unmangeld name if necessary,
-			   then check whether the property is already there */
+			 * then check whether the property is already there
+			 */
 			if ((property_info->flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 				prop_hash = property_info->h;
 				prop_name = property_info->name;
@@ -3965,7 +3955,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 		}
 	}
 }
-
+/* }}} */
 
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
@@ -4094,26 +4084,6 @@ void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *mod
 
 	result->u.op.ptr = trait_alias;
 }
-/* }}} */
-
-/*void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC)*/ /* {{{ */
-/*{
-	zend_trait_alias* trait_alias = emalloc(sizeof(zend_trait_alias));
-	trait_alias->method_name = Z_UNIVAL(method_name->u.constant);
-
-	// may be method is only excluded, then the alias node is NULL
-	if (alias) {
-		trait_alias->alias = Z_UNIVAL(alias->u.constant);
-		trait_alias->modifiers = Z_LVAL(modifiers->u.constant);
-	} else {
-
-	}
-	trait_alias->function = NULL;
-
-
-	result->u.var = trait_alias;
-}
-*/
 /* }}} */
 
 void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC) /* {{{ */
