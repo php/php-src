@@ -5320,6 +5320,12 @@ void zend_do_end_namespace(TSRMLS_D) /* {{{ */
 		efree(CG(current_import));
 		CG(current_import) = NULL;
 	}
+	
+	if (CG(doc_comment)) {
+		efree(CG(doc_comment));
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
+	}
 }
 /* }}} */
 
