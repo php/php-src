@@ -699,9 +699,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
-
-		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
 		class_node = *class_name;
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
@@ -1856,7 +1854,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 		if (class_type->u.constant.type != IS_NULL) {
 			cur_arg_info->type_hint = IS_OBJECT;
 			if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
-				zend_resolve_class_name(class_type, &opline->extended_value, 1 TSRMLS_CC);
+				zend_resolve_class_name(class_type, opline->extended_value, 1 TSRMLS_CC);
 			}
 			class_type->u.constant.value.str.val = zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
 			cur_arg_info->class_name = class_type->u.constant.value.str.val;
@@ -2063,7 +2061,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 }
 /* }}} */
 
-void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC) /* {{{ */
+void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC) /* {{{ */
 {
 	char *compound;
 	char *lcname;
@@ -2171,7 +2169,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 				zval_dtor(&class_name->u.constant);
 				break;
 			default:
-				zend_resolve_class_name(class_name, &opline->extended_value, 0 TSRMLS_CC);
+				zend_resolve_class_name(class_name, opline->extended_value, 0 TSRMLS_CC);
 				opline->op2_type = IS_CONST;
 				opline->op2.constant =
 					zend_add_class_name_literal(CG(active_op_array), &class_name->u.constant TSRMLS_CC);
@@ -2329,7 +2327,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	znode class_node;
 	unsigned char *ptr = NULL;
 	zend_op *opline;
-	ulong fetch_type = 0;
 
 	if (method_name->op_type == IS_CONST) {
 		char *lcname = zend_str_tolower_dup(Z_STRVAL(method_name->u.constant), Z_STRLEN(method_name->u.constant));
@@ -2343,8 +2340,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		fetch_type = ZEND_FETCH_CLASS_GLOBAL;
-		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
 		class_node = *class_name;
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	} else {
@@ -2687,9 +2683,7 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
-
-		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
 		catch_class = *class_name;
 	} else {
 		zend_error(E_COMPILE_ERROR, "Bad class name in the catch statement");
@@ -4042,8 +4036,7 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	/* REM: There should not be a need for copying, 
 	   zend_do_begin_class_declaration is also just using that string */
 	if (class_name) {
-		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
-		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
 		method_ref->class_name = Z_STRVAL(class_name->u.constant);
 		method_ref->cname_len  = Z_STRLEN(class_name->u.constant);
 	} else {
@@ -4735,7 +4728,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_INTERFACE;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(interface_name, &opline->extended_value, 0 TSRMLS_CC);
+	zend_resolve_class_name(interface_name, opline->extended_value, 0 TSRMLS_CC);
 	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant TSRMLS_CC);
@@ -4760,7 +4753,7 @@ void zend_do_implements_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_TRAIT;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(trait_name, &opline->extended_value, 0 TSRMLS_CC);
+	zend_resolve_class_name(trait_name, opline->extended_value, 0 TSRMLS_CC);
 	opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &trait_name->u.constant TSRMLS_CC);
@@ -5109,7 +5102,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				if (ZEND_FETCH_CLASS_STATIC == type) {
 					zend_error(E_ERROR, "\"static::\" is not allowed in compile-time constants");
 				} else if (ZEND_FETCH_CLASS_DEFAULT == type) {
-					zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
+					zend_resolve_class_name(constant_container, fetch_type, 1 TSRMLS_CC);
 				}
 				zend_do_build_full_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
@@ -5118,7 +5111,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			case ZEND_RT:
 				if (constant_container->op_type == IS_CONST &&
 				ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(constant_container->u.constant), Z_STRLEN(constant_container->u.constant))) {
-					zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
+					zend_resolve_class_name(constant_container, fetch_type, 1 TSRMLS_CC);
 				} else {
 					zend_do_fetch_class(&tmp, constant_container TSRMLS_CC);
 					constant_container = &tmp;
