@@ -3394,7 +3394,6 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	zend_class_entry *ce;
 	size_t collision = 0;
 	size_t abstract_solved = 0;
-	/* unsigned int name_len; */
 	zend_function* other_trait_fn;
 
 	current			= va_arg(args, size_t);  /* index of current trait */
@@ -3432,11 +3431,11 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 
 	if (collision) {
 		zend_function* class_fn;
-		/* make sure method is not already overridden in class */
 
+		/* make sure method is not already overridden in class */
 		if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&class_fn) == FAILURE
 			|| class_fn->common.scope != ce) {
-				zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s", fn->common.function_name, ce->name);
 		}
 
 		zend_function_dtor(fn);
@@ -3630,11 +3629,9 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	zend_trait_alias** aliases;
 	HashTable* exclude_table;
 	char* lcname;
-	unsigned int lcname_len;
 	unsigned int fnname_len;
 	zend_function fn_copy;
 	void* dummy;
-
 	size_t i = 0;
 	target = va_arg(args, HashTable*);
 	aliases = va_arg(args, zend_trait_alias**);
@@ -3646,30 +3643,28 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	if (aliases) {
 		while (aliases[i]) {
 			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
-			if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+			if (aliases[i]->alias != NULL
+				&& (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+				&& aliases[i]->trait_method->mname_len == fnname_len
 				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
-				if (aliases[i]->alias) {
-					fn_copy = *fn;
-					zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
+				fn_copy = *fn;
+				zend_traits_duplicate_function(&fn_copy, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
 					
-					/* if it is 0, no modifieres has been changed */
-					if (aliases[i]->modifiers) { 
-						fn_copy.common.fn_flags = aliases[i]->modifiers;
-						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
-							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
-						}
-						fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
+				/* if it is 0, no modifieres has been changed */
+				if (aliases[i]->modifiers) { 
+					fn_copy.common.fn_flags = aliases[i]->modifiers;
+					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
+						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 					}
-
-					lcname_len = aliases[i]->alias_len;
-					lcname = zend_str_tolower_dup(aliases[i]->alias, lcname_len);
-
-					if (zend_hash_add(target, lcname, lcname_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
-						zend_error(E_COMPILE_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
-					}
-					/* aliases[i]->function = fn_copy; */
-					efree(lcname);
+					fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
 				}
+
+				lcname = zend_str_tolower_dup(aliases[i]->alias, aliases[i]->alias_len);
+
+				if (zend_hash_add(target, lcname, aliases[i]->alias_len+1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
+					zend_error(E_COMPILE_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
+				}
+				efree(lcname);
 			}
 			i++;
 		}
@@ -3677,7 +3672,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 
 	lcname = zend_str_tolower_dup(fn->common.function_name, fnname_len);
 
-	if (zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
+	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 		zend_traits_duplicate_function(&fn_copy, estrndup(fn->common.function_name, fnname_len) TSRMLS_CC);
@@ -3688,16 +3683,16 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 			i = 0;
 			while (aliases[i]) {
 				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
-				if ((!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+				if (aliases[i]->alias == NULL && aliases[i]->modifiers != 0
+					&& (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
+					&& (aliases[i]->trait_method->mname_len == fnname_len)
 					&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
-					/* if it is 0, no modifieres has been changed */
-					if (!aliases[i]->alias && aliases[i]->modifiers) {
-						fn_copy.common.fn_flags = aliases[i]->modifiers;
-						if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
-							fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
-						}
-						fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
+					fn_copy.common.fn_flags = aliases[i]->modifiers;
+
+					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
+						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 					}
+					fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
 				}
 				i++;
 			}
@@ -3726,24 +3721,21 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	size_t i, j = 0;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
-	zend_class_entry *cur_ce;
 
 	/* resolve class references */
 	if (ce->trait_precedences) {
 		i = 0;
 		while ((cur_precedence = ce->trait_precedences[i])) {
-			cur_ce = zend_fetch_class(cur_precedence->trait_method->class_name, cur_precedence->trait_method->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
-			cur_precedence->trait_method->ce = cur_ce;
-
 			if (cur_precedence->exclude_from_classes) {
+				cur_precedence->trait_method->ce = zend_fetch_class(cur_precedence->trait_method->class_name, cur_precedence->trait_method->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+			
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j]) {
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
 					zend_uint name_length = strlen(class_name);
 
-					cur_ce = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+					cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
 					efree(class_name);
-					cur_precedence->exclude_from_classes[j] = cur_ce;
 					j++;
 				}
 			}
@@ -3754,8 +3746,8 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	if (ce->trait_aliases) {
 		i = 0;
 		while (ce->trait_aliases[i]) {
-			cur_method_ref = ce->trait_aliases[i]->trait_method;
-			if (cur_method_ref->class_name) {
+			if (ce->trait_aliases[i]->trait_method->class_name) {
+				cur_method_ref = ce->trait_aliases[i]->trait_method;
 				cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
 			}
 			i++;
@@ -3778,6 +3770,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 				if (precedences[i]->exclude_from_classes[j] == trait) {
 					zend_uint lcname_len = precedences[i]->trait_method->mname_len;
 					char *lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name, lcname_len);
+					
 					if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL) == FAILURE) {
 						efree(lcname);
 						zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
@@ -3804,19 +3797,24 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	resulting_table = (HashTable *) malloc(sizeof(HashTable));
 	
 	/* TODO: revisit this start size, may be its not optimal */
-	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 1, 0);
   
 	for (i = 0; i < ce->num_traits; i++) {
 		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
-		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 0, 0);
+		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 1, 0);
 
-		/* TODO: revisit this start size, may be its not optimal */
-		zend_hash_init_ex(&exclude_table, 2, NULL, NULL, 0, 0);
-		zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+		if (ce->trait_precedences) {
+			/* TODO: revisit this start size, may be its not optimal */
+			zend_hash_init_ex(&exclude_table, 2, NULL, NULL, 0, 0);
 
-		/* copies functions, applies defined aliasing, and excludes unused trait methods */
-		zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
-		zend_hash_graceful_destroy(&exclude_table);
+			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+
+			/* copies functions, applies defined aliasing, and excludes unused trait methods */
+			zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, &exclude_table TSRMLS_CC);
+			zend_hash_graceful_destroy(&exclude_table);
+		} else {
+			zend_traits_copy_trait_function_table(function_tables[i], &ce->traits[i]->function_table, ce->trait_aliases, NULL TSRMLS_CC);
+		}
 	}
   
 	/* now merge trait methods */
