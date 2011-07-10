@@ -452,6 +452,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	char *lowercase_name = NULL;
 	char *name;
 	int ret = SUCCESS;
+	ulong chash = 0;
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
@@ -463,6 +464,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		zend_str_tolower(lowercase_name, c->name_len-1);
 		lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
+		chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 	} else {
 		char *slash = strrchr(c->name, '\\');
 		if(slash) {
@@ -470,15 +472,20 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 			zend_str_tolower(lowercase_name, slash-c->name);
 			lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
+			
+			chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 		} else {
 			name = c->name;
 		}
+	}
+	if (chash == 0) {
+		chash = zend_hash_func(name, c->name_len);
 	}
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
 	if ((c->name_len == sizeof("__COMPILER_HALT_OFFSET__")
 		&& !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
-		|| zend_hash_add(EG(zend_constants), name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
+		|| zend_hash_quick_add(EG(zend_constants), name, c->name_len, chash, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
 		if (c->name[0] == '\0' && c->name_len > sizeof("\0__COMPILER_HALT_OFFSET__")
