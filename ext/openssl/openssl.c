@@ -36,6 +36,10 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/base64.h"
 
+#if PHP_WIN32
+# include "win32/winutil.h"
+#endif
+
 /* OpenSSL includes */
 #include <openssl/evp.h>
 #include <openssl/x509.h>
@@ -4920,10 +4924,19 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 
 	buffer = emalloc(buffer_length + 1);
 
+#ifdef PHP_WIN32
+	strong_result = 1;
+	/* random/urandom equivalent on Windows */
+	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE){
+		efree(buffer);
+		RETURN_FALSE;
+	}
+#else
 	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
 		efree(buffer);
 		RETURN_FALSE;
 	}
+#endif
 
 	buffer[buffer_length] = 0;
 	RETVAL_STRINGL((char *)buffer, buffer_length, 0);
