@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - MCrypt
   . Change E_ERROR to E_WARNING in mcrypt_create_iv when not enough data
     has been fetched (Windows). (Pierre)
+  . Fixed bug #55169 (mcrypt_create_iv always fails to gather sufficient random 
+    data on Windows). (Pierre)
 
 - PDO DBlib:
   . Fixed bug #54329 (MSSql extension memory leak).

@@ -87,7 +87,7 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 #endif
 
 	if (has_crypto_ctx == 0) {
-		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET)) {
+		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
 			/* Could mean that the key container does not exist, let try 
 				 again by asking for a new one */
 			if (GetLastError() == NTE_BAD_KEYSET) {
@@ -97,6 +97,8 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 					has_crypto_ctx = 0;
 				}
 			}
+		} else {
+			has_crypto_ctx = 1;
 		}
 	}
 
