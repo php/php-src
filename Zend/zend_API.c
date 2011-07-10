@@ -1917,7 +1917,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	const zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
-	int count=0, unload=0;
+	int count=0, unload=0, result=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
@@ -2024,24 +2024,21 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		fname_len = strlen(ptr->fname);
 		lowercase_name = zend_new_interned_string(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
 		if (IS_INTERNED(lowercase_name)) {
-			if (zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, INTERNED_HASH(lowercase_name), &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
-				unload=1;
-				str_efree(lowercase_name);
-				break;
-			}
-		} else {		
-			if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
-				unload=1;
-				str_efree(lowercase_name);
-				break;
-			}
+			result = zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, INTERNED_HASH(lowercase_name), &function, sizeof(zend_function), (void**)&reg_function);
+		} else {
+			result = zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function);
+		}
+		if (result == FAILURE) {
+			unload=1;
+			str_efree(lowercase_name);
+			break;
 		}
 		if (scope) {
 			/* Look for ctor, dtor, clone
 			 * If it's an old-style constructor, store it only if we don't have
 			 * a constructor already.
 			 */
-			if ((fname_len == class_name_len) && !memcmp(lowercase_name, lc_class_name, class_name_len+1) && !ctor) {
+			if ((fname_len == class_name_len) && !ctor && !memcmp(lowercase_name, lc_class_name, class_name_len+1)) {
 				ctor = reg_function;
 			} else if ((fname_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
 				ctor = reg_function;
@@ -2395,7 +2392,11 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
 	lowercase_name = zend_new_interned_string(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
-	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
+	if (IS_INTERNED(lowercase_name)) {
+		zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, INTERNED_HASH(lowercase_name), &class_entry, sizeof(zend_class_entry *), NULL);
+	} else {
+		zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
+	}
 	str_efree(lowercase_name);
 	return class_entry;
 }
