@@ -640,7 +640,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		} else if (IS_INTERNED(Z_STRVAL(varname->u.constant))) {
 			hash = INTERNED_HASH(Z_STRVAL(varname->u.constant));
 		}
-		if (!zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
+		if (!zend_is_auto_global_quick(varname->u.constant.value.str.val, varname->u.constant.value.str.len, hash TSRMLS_CC) &&
 		    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
 		      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
 		    (CG(active_op_array)->last == 0 ||
@@ -670,7 +670,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	if (varname->op_type == IS_CONST) {
 		CALCULATE_LITERAL_HASH(opline_ptr->op1.constant);
-		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC)) {
+		if (zend_is_auto_global_quick(varname->u.constant.value.str.val, varname->u.constant.value.str.len, Z_HASH_P(&CONSTANT(opline_ptr->op1.constant)) TSRMLS_CC)) {
 			opline_ptr->extended_value = ZEND_FETCH_GLOBAL;
 		}
 	}
@@ -1816,7 +1816,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 		return;
 	}
 
-	if (zend_is_auto_global(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant) TSRMLS_CC)) {
+	if (zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 0 TSRMLS_CC)) {
 		zend_error(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
 	} else {
 		var.op_type = IS_CV;
@@ -6182,17 +6182,24 @@ void zend_do_ticks(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC) /* {{{ */
+zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashval TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
+	ulong hash = hashval ? hashval : zend_hash_func(name, name_len+1);
 
-	if (zend_hash_find(CG(auto_globals), name, name_len+1, (void **) &auto_global)==SUCCESS) {
+	if (zend_hash_quick_find(CG(auto_globals), name, name_len+1, hash, (void **) &auto_global)==SUCCESS) {
 		if (auto_global->armed) {
 			auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
 		}
 		return 1;
 	}
 	return 0;
+}
+/* }}} */
+
+zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC) /* {{{ */
+{
+	return zend_is_auto_global_quick(name, name_len, 0 TSRMLS_CC);
 }
 /* }}} */
 
