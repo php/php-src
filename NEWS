@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #52935 (call exit in user_error_handler cause stream relate
     core). (Gustavo)
 
+- MCrypt
+  . Change E_ERROR to E_WARNING in mcrypt_create_iv when not enough data
+    has been fetched (Windows). (Pierre)
+
 - PDO DBlib:
   . Fixed bug #54329 (MSSql extension memory leak).
     (dotslashpok at gmail dot com)
