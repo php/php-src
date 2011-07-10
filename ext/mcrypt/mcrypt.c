@@ -1394,7 +1394,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		BYTE *iv_b = (BYTE *) iv;
 		if (php_win32_get_random_bytes(iv_b, (size_t) size) == FAILURE){
 			efree(iv);
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not gather sufficient random data");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");
 			RETURN_FALSE;
 		}
 		n = size;
