@@ -682,6 +682,7 @@ typedef struct _zend_auto_global {
 ZEND_API int zend_register_auto_global(const char *name, uint name_len, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC);
 ZEND_API void zend_activate_auto_globals(TSRMLS_D);
 ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC);
+ZEND_API zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashval TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
