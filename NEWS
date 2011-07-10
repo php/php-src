@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0
 - autoconf 2.59+ is now supported (and required) for generating the
@@ -195,6 +195,8 @@ PHP                                                                        NEWS
   . Added a "no_ticket" SSL context option to disable the SessionTicket TLS
     extension. FR #53447. (Adam)
   . Added no padding option to openssl_encrypt()/openssl_decrypt(). (Scott)
+  . Use php's implementation for Windows Crypto API in 
+    openssl_random_pseudo_bytes. (Pierre)
 
 - Improved PDO DB-LIB: (Stanley)
   . Added nextRowset support.
