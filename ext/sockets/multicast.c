@@ -423,8 +423,8 @@ int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_add
 #define ifr_ifindex ifr_index
 #endif
 	
-	if_req.ifr_ifindex = if_index;
 #if defined(SIOCGIFNAME)
+	if_req.ifr_ifindex = if_index;
 	if (ioctl(php_sock->bsd_socket, SIOCGIFNAME, &if_req) == -1) {
 #elif defined(HAVE_IF_INDEXTONAME)
 	if (if_indextoname(if_index, if_req.ifr_name) == NULL) {
@@ -503,14 +503,25 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 		if ((((struct sockaddr*)&cur_req->ifr_addr)->sa_family == AF_INET) &&
 				(((struct sockaddr_in*)&cur_req->ifr_addr)->sin_addr.s_addr ==
 					addr->s_addr)) {
+#if defined(SIOCGIFINDEX)
 			if (ioctl(php_sock->bsd_socket, SIOCGIFINDEX, (char*)cur_req)
 					== -1) {
+#elif defined(HAVE_IF_NAMETOINDEX)
+			unsigned index_tmp;
+			if ((index_tmp = if_nametoindex(cur_req->ifr_name)) == 0) {
+#else
+#error Neither SIOCGIFINDEX nor if_nametoindex are available
+#endif
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Error converting interface name to index: error %d",
 					errno);
 				goto err;
 			} else {
+#if defined(SIOCGIFINDEX)
 				*if_index = cur_req->ifr_ifindex;
+#else
+				*if_index = index_tmp;
+#endif
 				efree(buf);
 				return SUCCESS;
 			}
