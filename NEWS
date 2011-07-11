@@ -1,6 +1,33 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.4.0
+?? ??? 2011, PHP 5.4.0 Alpha 2
+- General improvements:
+  . Zend Signal Handling. (Lucas Nealan,Arnaud Le Blanc,Brian Shire, Ilia)
+
+- Improved Zend Engine
+  . Improved parse error messages. (Felipe)
+
+- Improved CLI SAPI:
+  . Added built-in web server that is intended for testing purpose.
+    (Moriyoshi)
+
+- Improved PHP-FPM SAPI:
+  . Added partial syslog support (on error_log only). FR #52052. (fat)
+  . Lowered default value for Process Manager. FR #54098. (fat)
+
+- Improved core functions:
+  . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
+  . Fixed bug#55084 (Function registered by header_register_callback is
+    called only once per process). (Hannes)
+
+- Improved DOM extension:
+  . Added the ability to pass options to loadHTML (Chregu, fxmulder at gmail dot com)
+
+- OpenSSL extension:
+  . Use php's implementation for Windows Crypto API in 
+    openssl_random_pseudo_bytes. (Pierre)
+
+20 Jun 2011, PHP 5.4.0 Alpha 1
 - autoconf 2.59+ is now supported (and required) for generating the
   configure script with ./buildconf. Autoconf 2.60+ is desirable
   otherwise the configure help order may be incorrect.  (Rasmus, Chris Jones)
@@ -34,7 +61,6 @@
 - <?= is now always available regardless of the short_tags setting (Rasmus)
 
 - General improvements:
-  . Zend Signal Handling. (Lucas Nealan,Arnaud Le Blanc,Brian Shire, Ilia)
   . Added multibyte support by default. Previously php had to be compiled
     with --enable-zend-multibyte. Now it can be enabled or disabled through
     zend.multibyte directive in php.ini. (Dmitry)
@@ -92,7 +118,6 @@
   . Changed $GLOBALS into a JIT autoglobal, so it's initialized only if used.
     (this may affect opcode caches!)
   . Improved performance of @ (silence) operator.
-  . Improved parse error messages. (Felipe)
   . Simplified string offset reading. $str[1][0] is now a legal construct.
   . Added caches to eliminate repeatable run-time bindings of functions,
     classes, constants, methods and properties.
@@ -124,25 +149,16 @@
     . Added shortcut #inisetting=value to change ini settings at run-time.
     . Changed shell not to terminate on fatal errors.
     . Interactive shell works with shared readline extension. FR #53878.
-  . Added built-in web server that is intended for testing purpose.
-    (Moriyoshi)
 
 - Improved FastCGI SAPI: (Dmitry)
   . Added apache compatible functions: apache_child_terminate(),
     getallheaders(), apache_request_headers() and apache_response_headers()
   . Improved performance of FastCGI request parsing.
 
-- Improved PHP-FPM SAPI:
-  . Added partial syslog support (on error_log only). FR #52052. (fat)
-  . Lowered default value for Process Manager. FR #54098. (fat)
-
 - Improved core functions:
   . number_format() no longer truncates multibyte decimal points and thousand
     separators to the first byte. FR #53457. (Adam)
   . Added hex2bin() function. (Scott)
-  . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
-  . Fixed bug#55084 (Function registered by header_register_callback is
-    called only once per process). (Hannes)
 
 - Improved CURL extension:
   . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and
@@ -155,9 +171,6 @@
 - Improved DBA extension:
   . Added Tokyo Cabinet abstract DB support. (Michael Maclean)
   . Added Berkeley DB 5 support. (Johannes, Chris Jones)
-
-- Improved DOM extension:
-  . Added the ability to pass options to loadHTML (Chregu, fxmulder at gmail dot com)
 
 - Improved filesystem functions:
   . scandir() now accepts SCANDIR_SORT_NONE as a possible sorting_order value.
@@ -198,8 +211,6 @@
   . Added a "no_ticket" SSL context option to disable the SessionTicket TLS
     extension. FR #53447. (Adam)
   . Added no padding option to openssl_encrypt()/openssl_decrypt(). (Scott)
-  . Use php's implementation for Windows Crypto API in 
-    openssl_random_pseudo_bytes. (Pierre)
 
 - Improved PDO DB-LIB: (Stanley)
   . Added nextRowset support.
