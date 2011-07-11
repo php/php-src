@@ -2012,10 +2012,16 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (IS_CONST != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-		zend_print_variable(&z_copy);
-		zval_dtor(&z_copy);
+	    Z_OBJ_HT_P(z)->get_method != NULL) {
+	    if (IS_CONST == IS_TMP_VAR) {
+	    	INIT_PZVAL(z);
+	    }
+		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zend_print_variable(&z_copy);
+			zval_dtor(&z_copy);
+		} else {
+			zend_print_variable(z);
+		}
 	} else {
 		zend_print_variable(z);
 	}
@@ -6278,10 +6284,16 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (IS_TMP_VAR != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-		zend_print_variable(&z_copy);
-		zval_dtor(&z_copy);
+	    Z_OBJ_HT_P(z)->get_method != NULL) {
+	    if (IS_TMP_VAR == IS_TMP_VAR) {
+	    	INIT_PZVAL(z);
+	    }
+		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zend_print_variable(&z_copy);
+			zval_dtor(&z_copy);
+		} else {
+			zend_print_variable(z);
+		}
 	} else {
 		zend_print_variable(z);
 	}
@@ -10455,10 +10467,16 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (IS_VAR != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-		zend_print_variable(&z_copy);
-		zval_dtor(&z_copy);
+	    Z_OBJ_HT_P(z)->get_method != NULL) {
+	    if (IS_VAR == IS_TMP_VAR) {
+	    	INIT_PZVAL(z);
+	    }
+		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zend_print_variable(&z_copy);
+			zval_dtor(&z_copy);
+		} else {
+			zend_print_variable(z);
+		}
 	} else {
 		zend_print_variable(z);
 	}
@@ -26192,10 +26210,16 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (IS_CV != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-		zend_print_variable(&z_copy);
-		zval_dtor(&z_copy);
+	    Z_OBJ_HT_P(z)->get_method != NULL) {
+	    if (IS_CV == IS_TMP_VAR) {
+	    	INIT_PZVAL(z);
+	    }
+		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zend_print_variable(&z_copy);
+			zval_dtor(&z_copy);
+		} else {
+			zend_print_variable(z);
+		}
 	} else {
 		zend_print_variable(z);
 	}
