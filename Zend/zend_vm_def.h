@@ -982,10 +982,16 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 
 	if (OP1_TYPE != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-		zend_print_variable(&z_copy);
-		zval_dtor(&z_copy);
+	    Z_OBJ_HT_P(z)->get_method != NULL) {
+	    if (OP1_TYPE == IS_TMP_VAR) {
+	    	INIT_PZVAL(z);
+	    }
+		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zend_print_variable(&z_copy);
+			zval_dtor(&z_copy);
+		} else {
+			zend_print_variable(z);
+		}
 	} else {
 		zend_print_variable(z);
 	}
