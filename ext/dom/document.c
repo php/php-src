@@ -149,10 +149,12 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadhtml, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadhtmlfile, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savehtml, 0, 0, 0)
@@ -2155,12 +2157,12 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	dom_object *intern;
 	dom_doc_propsptr doc_prop;
 	char *source;
-	int source_len, refcount, ret;
+	int source_len, refcount, ret, options = 0;
 	htmlParserCtxtPtr ctxt;
 	
 	id = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -2178,6 +2180,10 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	if (!ctxt) {
 		RETURN_FALSE;
+	}
+
+	if (options) {
+		htmlCtxtUseOptions(ctxt, options);
 	}
 
 	ctxt->vctxt.error = php_libxml_ctx_error;

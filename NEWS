@@ -140,6 +140,9 @@ PHP                                                                        NEWS
   . Added Tokyo Cabinet abstract DB support. (Michael Maclean)
   . Added Berkeley DB 5 support. (Johannes, Chris Jones)
 
+- Improved DOM extension:
+  . Added the ability to pass options to loadHTML (Chregu, fxmulder at gmail dot com)
+
 - Improved filesystem functions:
   . scandir() now accepts SCANDIR_SORT_NONE as a possible sorting_order value.
     FR #53407. (Adam)
