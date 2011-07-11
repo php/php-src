@@ -6,6 +6,7 @@ PHP                                                                        NEWS
     though the class has none). (Felipe)
 
 - Core
+  . Fixed bug #54332 (Crash in zend_mm_check_ptr // Heap corruption). (Dmitry)
   . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
     (Ralph Schindler, Dmitry)
   . Fixed buffer overflow on overlog salt in crypt(). (Clément LECIGNE, Stas)
