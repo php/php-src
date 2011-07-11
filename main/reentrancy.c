@@ -60,14 +60,14 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 
 PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 {
-	if (ctime_r(clock, buf, 26) == buf)
+	if (ctime_r(clock, buf) == buf)
 		return (buf);
 	return (NULL);
 }
 
 PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 {
-	if (asctime_r(tm, buf, 26) == buf)
+	if (asctime_r(tm, buf) == buf)
 		return (buf);
 	return (NULL);
 }

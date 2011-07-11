@@ -6,6 +6,7 @@ PHP                                                                        NEWS
     though the class has none). (Felipe)
 
 - Core
+  . Fixed bug #55014 (Compile failure due to improper use of ctime_r()). (Ilia)
   . Fixed bug #54332 (Crash in zend_mm_check_ptr // Heap corruption). (Dmitry)
   . Fixed bug #54305 (Crash in gc_remove_zval_from_buffer). (Dmitry)
   . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
