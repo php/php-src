@@ -70,6 +70,10 @@
 
 #define GET_CACHE_SLOT(literal) do { \
 		CG(active_op_array)->literals[literal].cache_slot = CG(active_op_array)->last_cache_slot++; \
+		if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) && CG(active_op_array)->run_time_cache) { \
+			CG(active_op_array)->run_time_cache = erealloc(CG(active_op_array)->run_time_cache, CG(active_op_array)->last_cache_slot * sizeof(void*)); \
+			CG(active_op_array)->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL; \
+		} \
 	} while (0)
 
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
@@ -77,6 +81,11 @@
 #define GET_POLYMORPHIC_CACHE_SLOT(literal) do { \
 		CG(active_op_array)->literals[literal].cache_slot = CG(active_op_array)->last_cache_slot; \
 		CG(active_op_array)->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE; \
+		if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) && CG(active_op_array)->run_time_cache) { \
+			CG(active_op_array)->run_time_cache = erealloc(CG(active_op_array)->run_time_cache, CG(active_op_array)->last_cache_slot * sizeof(void*)); \
+			CG(active_op_array)->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL; \
+			CG(active_op_array)->run_time_cache[CG(active_op_array)->last_cache_slot - 2] = NULL; \
+		} \
 	} while (0)
 
 #define FREE_POLYMORPHIC_CACHE_SLOT(literal) do { \
