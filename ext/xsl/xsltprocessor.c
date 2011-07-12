@@ -484,6 +484,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zval *doXInclude, *member;
 	zend_object_handlers *std_hnd;
 	FILE *f;
+	int secPrefsError = 0;
+	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
 	
@@ -540,46 +542,54 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 	efree(member);
 
-	/* Add security checks */
-	/* XSLT_SECPREF_READ_FILE and XSLT_SECPREF_READ_NETWORK aren't needed */
-
-	xsltSecurityPrefsPtr secPrefs = xsltNewSecurityPrefs(); 
-
-	if (intern->securityPrefs & XSL_SECPREF_READ_FILE ) { 
-		if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid)) { 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties");
+	
+	//if securityPrefs is set to NONE, we don't have to do any checks, but otherwise...
+	if (intern->securityPrefs != XSL_SECPREF_NONE) {
+		secPrefs = xsltNewSecurityPrefs(); 
+		if (intern->securityPrefs & XSL_SECPREF_READ_FILE ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (intern->securityPrefs & XSL_SECPREF_WRITE_FILE ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (intern->securityPrefs & XSL_SECPREF_CREATE_DIRECTORY ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (intern->securityPrefs & XSL_SECPREF_READ_NETWORK) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (intern->securityPrefs & XSL_SECPREF_WRITE_NETWORK) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+	
+		if (0 != xsltSetCtxtSecurityPrefs(secPrefs, ctxt)) { 
+			secPrefsError = 1;
 		}
 	}
-	if (intern->securityPrefs & XSL_SECPREF_WRITE_FILE ) { 
-		if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid)) { 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties");
-		}
+	
+	if (secPrefsError == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
+	} else {
+		newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
 	}
-	if (intern->securityPrefs & XSL_SECPREF_CREATE_DIRECTORY ) { 
-		if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid)) { 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties");
-		}
-	}
-	if (intern->securityPrefs & XSL_SECPREF_READ_NETWORK) { 
-		if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid)) { 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties");
-		}
-	}
-	if (intern->securityPrefs & XSL_SECPREF_WRITE_NETWORK) { 
-		if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid)) { 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties");
-		}
-	}
-
-	if (0 != xsltSetCtxtSecurityPrefs(secPrefs, ctxt)) 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security handler");
-
-	newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
 	if (f) {
 		fclose(f);
 	}
+	
 	xsltFreeTransformContext(ctxt);
-	xsltFreeSecurityPrefs(secPrefs);
+	if (secPrefs) {
+		xsltFreeSecurityPrefs(secPrefs);
+	}
 
 	if (intern->node_list != NULL) {
 		zend_hash_destroy(intern->node_list);
@@ -908,15 +918,13 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 	xsl_object *intern;
 	DOM_GET_THIS(id);
 	long securityPrefs, oldSecurityPrefs;
-
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == SUCCESS) {
-		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
-		oldSecurityPrefs = intern->securityPrefs; 
-		intern->securityPrefs = securityPrefs;
-		RETURN_LONG(oldSecurityPrefs);
-	} else {
-		WRONG_PARAM_COUNT;
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == FAILURE) {
+		return;
 	}
+	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	oldSecurityPrefs = intern->securityPrefs; 
+	intern->securityPrefs = securityPrefs;
+	RETURN_LONG(oldSecurityPrefs);
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
 
