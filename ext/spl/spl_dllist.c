@@ -1202,11 +1202,11 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 	/* flags */
 	ALLOC_INIT_ZVAL(flags);
-	if (!php_var_unserialize(&elem, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(elem) != IS_LONG) {
+	if (!php_var_unserialize(&flags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(flags) != IS_LONG) {
 		zval_ptr_dtor(&flags);
 		goto error;
 	}
-	intern->flags = Z_LVAL_P(elem);
+	intern->flags = Z_LVAL_P(flags);
 	zval_ptr_dtor(&flags);
 
 	/* elements */
