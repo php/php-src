@@ -209,7 +209,7 @@ PHP                                                                        NEWS
 - Improved XSL extension:
   . Added XsltProcessor::setSecurityPrefs($options) and getSecurityPrefs() to 
     define forbidden operations within XSLT stylesheets, default is not to 
-    enable any write operations from XSLT anymore. Bug #54446
+    enable write operations from XSLT. Bug #54446 (Chregu, Nicolas Gregoire)
 
 - Improved ZLIB extension:
   . Re-implemented non-file related functionality. (Mike)
