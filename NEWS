@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 Alpha 2
 - General improvements:
@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Lowered default value for Process Manager. FR #54098. (fat)
 
 - Improved core functions:
+  . Changed http_response_code() to be able to set a response code. (Kalle)
   . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
   . Fixed bug#55084 (Function registered by header_register_callback is
     called only once per process). (Hannes)
