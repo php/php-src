@@ -280,12 +280,28 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto long http_response_code()
-   Returns the current HTTP response code */
+/* {{{ proto long http_response_code([int response_code])
+   Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
+	long response_code = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &response_code) == FAILURE) {
 		return;
+	}
+
+	if (response_code)
+	{
+		long old_response_code;
+
+		old_response_code = SG(sapi_headers).http_response_code;
+		SG(sapi_headers).http_response_code = response_code;
+
+		if (old_response_code) {
+			RETURN_LONG(old_response_code);
+		}
+
+		RETURN_TRUE;
 	}
 
 	if (!SG(sapi_headers).http_response_code) {

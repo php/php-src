@@ -1483,7 +1483,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_headers_list, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_http_response_code, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
+	ZEND_ARG_INFO(0, response_code)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ html.c */
