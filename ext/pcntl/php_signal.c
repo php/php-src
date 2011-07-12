@@ -20,16 +20,18 @@
 
 #include "TSRM.h"
 #include "php_signal.h"
+#include "Zend/zend.h"
+#include "Zend/zend_signal.h"
 
 /* php_signal using sigaction is derrived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
-	act.sa_handler = func;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
+	act.sa_handler = func;
 
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
