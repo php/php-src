@@ -69,6 +69,7 @@ PHP_FUNCTION(readlink)
 
 	if (php_sys_readlink(link, target, MAXPATHLEN) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+		RETURN_FALSE;
 	}
 	RETURN_STRING(target, 1);
 }
