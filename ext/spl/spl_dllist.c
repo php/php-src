@@ -27,6 +27,9 @@
 #include "zend_hash.h"
 
 #include "php_spl.h"
+#include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
+#include "ext/standard/php_smart_str.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
@@ -1129,6 +1132,108 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	}
 }
 /* }}} */
+/* {{{ proto string SplDoublyLinkedList::serialize()
+ Serializes storage */
+SPL_METHOD(SplDoublyLinkedList, serialize)
+{
+	spl_dllist_object     *intern   = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	smart_str              buf      = {0};
+	spl_ptr_llist_element *current  = intern->llist->head, *next;
+    zval                   *flags;
+	php_serialize_data_t   var_hash;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+
+	/* flags */
+	MAKE_STD_ZVAL(flags);
+	ZVAL_LONG(flags, intern->flags);
+	php_var_serialize(&buf, &flags, &var_hash TSRMLS_CC);
+	zval_ptr_dtor(&flags);
+
+	/* elements */
+	while (current) {
+		smart_str_appendc(&buf, ':');
+		next = current->next;
+
+		php_var_serialize(&buf, (zval **)&current->data, &var_hash TSRMLS_CC);
+
+		current = next;
+	}
+
+	smart_str_0(&buf);
+
+	/* done */
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
+	if (buf.c) {
+		RETURN_STRINGL(buf.c, buf.len, 0);
+	} else {
+		RETURN_NULL();
+	}
+	
+} /* }}} */
+
+/* {{{ proto void SplDoublyLinkedList::unserialize(string serialized)
+ Unserializes storage */
+SPL_METHOD(SplDoublyLinkedList, unserialize)
+{
+	spl_dllist_object     *intern   = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval                  *flags, *elem;
+	char *buf;
+	int buf_len;
+	const unsigned char *p, *s;
+	php_unserialize_data_t var_hash;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+		return;
+	}
+
+	if (buf_len == 0) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialized string cannot be empty");
+		return;
+	}
+
+	s = p = (const unsigned char*)buf;
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+
+	/* flags */
+	ALLOC_INIT_ZVAL(flags);
+	if (!php_var_unserialize(&elem, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(elem) != IS_LONG) {
+		zval_ptr_dtor(&flags);
+		goto error;
+	}
+	intern->flags = Z_LVAL_P(elem);
+	zval_ptr_dtor(&flags);
+
+	/* elements */
+	while(*p == ':') {
+		++p;
+		ALLOC_INIT_ZVAL(elem);
+		if (!php_var_unserialize(&elem, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+			zval_ptr_dtor(&elem);
+			goto error;
+		}
+
+		spl_ptr_llist_push(intern->llist, elem TSRMLS_CC);
+	}
+
+	if (*p != '\0') {
+		goto error;
+	}
+
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	return;
+
+error:
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	return;
+
+} /* }}} */
 
 /* iterator handler table */
 zend_object_iterator_funcs spl_dllist_it_funcs = {
@@ -1190,6 +1295,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_dllist_void, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_dllist_serialized, 0)
+	ZEND_ARG_INFO(0, serialized)
+ZEND_END_ARG_INFO();
+
 static const zend_function_entry spl_funcs_SplQueue[] = {
 	SPL_MA(SplQueue, enqueue, SplDoublyLinkedList, push,  arginfo_dllist_push, ZEND_ACC_PUBLIC)
 	SPL_MA(SplQueue, dequeue, SplDoublyLinkedList, shift, arginfo_dllist_void, ZEND_ACC_PUBLIC)
@@ -1203,20 +1312,26 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	SPL_ME(SplDoublyLinkedList, unshift,         arginfo_dllist_push,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, top,             arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, bottom,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, count,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, isEmpty,         arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, setIteratorMode, arginfo_dllist_setiteratormode, ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, getIteratorMode, arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	/* Countable */
+	SPL_ME(SplDoublyLinkedList, count,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	/* ArrayAccess */
 	SPL_ME(SplDoublyLinkedList, offsetExists,    arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetGet,       arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
+	/* Iterator */
 	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, current,         arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, key,             arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, next,            arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, prev,            arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, valid,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	/* Serializable */
+	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_dllist_serialized,      ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -1238,6 +1353,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, ArrayAccess);
+	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Serializable);
 
 	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;
 
