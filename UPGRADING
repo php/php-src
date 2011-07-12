@@ -176,6 +176,9 @@ UPGRADE NOTES - PHP X.Y
   var_export(), and print_r().
 - The raw data parameter in openssl_encrypt()/openssl_decrypt() is now an options
   integer rather than a boolean. A value of true produces the same behaviour.
+- Write operations within XSLT (for example with the extension sax:output) are
+  disabled by default. You can define what is forbidden with the method
+  XsltProcess::setSecurityPrefs($options)
 
 ===================================
 5. Changes made to existing methods
