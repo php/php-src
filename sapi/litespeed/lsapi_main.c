@@ -495,6 +495,7 @@ static int cli_main( int argc, char * argv[] )
 		"implicit_flush",       "1",
 		"output_buffering",     "0",
 		"max_execution_time",   "0",
+		"max_input_time",       "-1",
 		NULL
 	};
 
