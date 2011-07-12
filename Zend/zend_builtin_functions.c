@@ -848,7 +848,6 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	if (Z_TYPE_P(obj) == IS_STRING) {
 		zend_class_entry **the_ce;
 		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
-			zend_error(E_WARNING, "Unknown class passed as parameter");
 			RETURN_FALSE;
 		}
 		instance_ce = *the_ce;
