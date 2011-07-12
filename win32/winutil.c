@@ -87,11 +87,14 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 #endif
 
 	if (has_crypto_ctx == 0) {
-		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+		/* CRYPT_VERIFYCONTEXT > only hashing&co-like use, no need to acces prv keys */
+		if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT )) {
 			/* Could mean that the key container does not exist, let try 
-				 again by asking for a new one */
+			   again by asking for a new one. If it fails here, it surely means that the user running 
+               this process does not have the permission(s) to use this container.
+             */
 			if (GetLastError() == NTE_BAD_KEYSET) {
-				if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
+				if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_MACHINE_KEYSET | CRYPT_VERIFYCONTEXT )) {
 					has_crypto_ctx = 1;
 				} else {
 					has_crypto_ctx = 0;
