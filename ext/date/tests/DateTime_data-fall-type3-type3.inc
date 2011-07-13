@@ -17,6 +17,8 @@ date_default_timezone_set('America/New_York');
  * + redost: standard time in the redo period 2010-11-07 01:14:44 EST, + TZ
  * + st: standard time on the transition day  2010-11-07 03:16:55
  * + post: the day after the transition day   2010-11-08 19:59:59
+ * + dtsec: daylight time 1 sec before change 2010-11-07 01:59:59 EDT, + TZ
+ * + stsec: standard time first secodn        2010-11-07 01:00:00 EST, + TZ
  */
 echo "test_time_fall_type3_prev_type3_prev: ";
 $end   = new DateTime('2010-11-06 18:38:28');  // prev, zt3
@@ -221,3 +223,17 @@ echo "test_time_fall_type3_post_type3_post: ";
 $end   = new DateTime('2010-11-08 19:59:59');  // post, zt3
 $start = new DateTime('2010-11-08 18:57:55');  // sp post, zt3
 examine_diff($end, $start, 'P+0Y0M0DT1H2M4S', 0);
+
+echo "test_time_fall_type3_dtsec_type3_stsec: ";
+$end   = new DateTime('2010-11-07 01:00:00 EST');  // stsec, zt2
+$end->setTimezone(new DateTimeZone('America/New_York'));  // zt2 -> zt3
+$start = new DateTime('2010-11-07 01:59:59 EDT');  // dtsec, zt2
+$start->setTimezone(new DateTimeZone('America/New_York'));  // zt2 -> zt3
+examine_diff($end, $start, 'P+0Y0M0DT0H0M1S', 0);
+
+echo "test_time_fall_type3_stsec_type3_dtsec: ";
+$end   = new DateTime('2010-11-07 01:59:59 EDT');  // dtsec, zt2
+$end->setTimezone(new DateTimeZone('America/New_York'));  // zt2 -> zt3
+$start = new DateTime('2010-11-07 01:00:00 EST');  // stsec, zt2
+$start->setTimezone(new DateTimeZone('America/New_York'));  // zt2 -> zt3
+examine_diff($end, $start, 'P-0Y0M0DT0H0M1S', 0);

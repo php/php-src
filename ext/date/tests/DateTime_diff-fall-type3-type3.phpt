@@ -49,3 +49,5 @@ test_time_fall_type3_post_type3_redodt: DIFF: 2010-11-07 01:12:33 EDT - 2010-11-
 test_time_fall_type3_post_type3_redost: DIFF: 2010-11-07 01:14:44 EST - 2010-11-08 19:59:59 EST = **P-0Y0M1DT18H45M15S**
 test_time_fall_type3_post_type3_st: DIFF: 2010-11-07 03:16:55 EST - 2010-11-08 19:59:59 EST = **P-0Y0M1DT16H43M4S**
 test_time_fall_type3_post_type3_post: DIFF: 2010-11-08 19:59:59 EST - 2010-11-08 18:57:55 EST = **P+0Y0M0DT1H2M4S**
+test_time_fall_type3_dtsec_type3_stsec: DIFF: 2010-11-07 01:00:00 EST - 2010-11-07 01:59:59 EDT = **P+0Y0M0DT0H0M1S**
+test_time_fall_type3_stsec_type3_dtsec: DIFF: 2010-11-07 01:59:59 EDT - 2010-11-07 01:00:00 EST = **P-0Y0M0DT0H0M1S**
