@@ -47,3 +47,5 @@ test_time_fall_type2_post_type2_redodt: DAYS: **1**
 test_time_fall_type2_post_type2_redost: DAYS: **1**
 test_time_fall_type2_post_type2_st: DAYS: **1**
 test_time_fall_type2_post_type2_post: DAYS: **0**
+test_time_fall_type2_dtsec_type2_stsec: DAYS: **0**
+test_time_fall_type2_stsec_type2_dtsec: DAYS: **0**
