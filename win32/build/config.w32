@@ -151,6 +151,7 @@ if (VCVERS >= 1400) {
 		// Set some debug/release specific options
 		ADD_FLAG('CFLAGS', ' /RTC1 ');
 	}
+	ADD_FLAG('CFLAGS', ' /D_BIND_TO_CURRENT_CRT_VERSION =1 ');
 }
 
 ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
