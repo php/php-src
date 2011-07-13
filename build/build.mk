@@ -68,7 +68,7 @@ cvsclean-work:
 	done
 
 svnclean-work:
-	@for i in `find . -type d -not -path '*/.svn/*' | grep -v '.svn'`; do \
+	@for i in `find . -type d ! -path '*/.svn/*' | grep -v '.svn'`; do \
 		(cd $$i 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a *.lo *.la *.gcno *.gcda .libs || true); \
 	done
 
