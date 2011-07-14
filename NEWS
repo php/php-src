@@ -1,5 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2011, PHP 5.4.0 Alpha 3
+
 14 Jul 2011, PHP 5.4.0 Alpha 2
 - General improvements:
   . Zend Signal Handling. (Lucas Nealan,Arnaud Le Blanc,Brian Shire, Ilia)
