@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 5.3.7
+
 14 Jul 2011, PHP 5.3.7 RC3
 - Zend Engine:
   . Fixed bug #55156 (ReflectionClass::getDocComment() returns comment even
