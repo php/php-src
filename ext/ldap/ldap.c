@@ -2186,7 +2186,7 @@ PHP_FUNCTION(ldap_8859_to_t61)
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-/* {{{ proto bool ldap_control_paged_result(resource link, int pagesize [, bool iscritical [, string cookie]])
+/* {{{ proto mixed ldap_control_paged_result(resource link, int pagesize [, bool iscritical [, string cookie]])
    Inject paged results control*/
 PHP_FUNCTION(ldap_control_paged_result) 
 {
@@ -2278,7 +2278,7 @@ lcpr_error_out:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_control_paged_result_response(resource link, resource result [, string cookie [, int estimated]])
+/* {{{ proto bool ldap_control_paged_result_response(resource link, resource result [, string &cookie [, int &estimated]])
    Extract paged results control response */
 PHP_FUNCTION(ldap_control_paged_result_response) 
 {
@@ -2291,7 +2291,6 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 	BerElement *ber;
 	ber_tag_t tag;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
-
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|zz", &link, &result, &cookie, &estimated) != SUCCESS) {
 		return;
