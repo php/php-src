@@ -1,5 +1,5 @@
 --TEST--
-ldap_ldap_control_paged_results() test (fetching the first page then the next final page)
+ldap_ldap_control_paged_result() test (fetching the first page then the next final page)
 --CREDITS--
 Jean-Sebastien Hedde <jeanseb@au-fil-du.net>
 --SKIPIF--
@@ -18,11 +18,11 @@ $dn = "dc=my-domain,dc=com";
 $filter = "(cn=*)";
 $cookie = '';
 var_dump(
-	ldap_control_paged_results($link, 2, true, $cookie),
+	ldap_control_paged_result($link, 2, true, $cookie),
 	$result = ldap_search($link, $dn, $filter, array('cn')),
 	ldap_get_entries($link, $result),
-	ldap_control_paged_results_response($link, $result, $cookie),
-	ldap_control_paged_results($link, 20, true, $cookie),
+	ldap_control_paged_result_response($link, $result, $cookie),
+	ldap_control_paged_result($link, 20, true, $cookie),
 	$result = ldap_search($link, $dn, $filter, array('cn')),
 	ldap_get_entries($link, $result)
 );
