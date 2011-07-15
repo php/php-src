@@ -144,23 +144,15 @@ Arg value
 bool(false)
 
 Arg value  
-
-Warning: Unknown class passed as parameter in %sis_a_variation_001.php on line %d
 bool(false)
 
 Arg value  
-
-Warning: Unknown class passed as parameter in %sis_a_variation_001.php on line %d
 bool(false)
 
 Arg value string 
-
-Warning: Unknown class passed as parameter in %sis_a_variation_001.php on line %d
 bool(false)
 
 Arg value String 
-
-Warning: Unknown class passed as parameter in %sis_a_variation_001.php on line %d
 bool(false)
 
 Arg value  
