@@ -150,21 +150,17 @@ Arg value
 bool(false)
 
 Arg value  
-Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value  
-Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value string 
 In __autoload(string)
-Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value String 
 In __autoload(String)
-Error: 2 - Unknown class passed as parameter, %s(79)
 bool(false)
 
 Arg value  
