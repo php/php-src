@@ -3,10 +3,6 @@
 
 #include <php_config.h>
 
-#ifdef FPM_AUTOCONFIG_H
-# include <fpm_autoconfig.h>
-#endif
-
 /* Solaris does not have it */
 #ifndef INADDR_NONE
 # define INADDR_NONE (-1)
