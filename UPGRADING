@@ -285,6 +285,13 @@ UPGRADE NOTES - PHP X.Y
              - Multi OID get/getnext/set queries are now supported.
              - New constants added for use in snmp_set_oid_output_format()
                function.
+             - Function snmp_set_valueretrieval() changed it's behaviour:
+                    SNMP_VALUE_OBJECT can be combined with one of 
+                    SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY resulting OID value
+                    changes. When no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
+                    is supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_LIBRARY is used.
+                    Prior to 5.4.0 when no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
+                    was supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_PLAIN was used.
              - Added feature-rich OO API (SNMP class)
              - Dropped UCD-SNMP compatibility code. Consider upgrading to
                net-snmp v5.3+. Net-SNMP v5.4+ is required for Windows version.

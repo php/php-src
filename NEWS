@@ -259,6 +259,9 @@
   . Allow ~infinite OIDs in GET/GETNEXT/SET queries. Autochunk them to max_oids
     upon request.
   . Introducing unit tests for extension with ~full coverage.
+  . Way of representing OID value can now be changed when SNMP_VALUE_OBJECT
+    is used for value output mode. Use or'ed SNMP_VALUE_LIBRARY(default if
+    not specified) or SNMP_VALUE_PLAIN. (FR #54502)
   . Fixed bugs
     . #44193 (snmp v3 noAuthNoPriv doesn't work)
     . #45893 (Snmp buffer limited to 2048 char)

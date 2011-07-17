@@ -86,9 +86,9 @@ extern netsnmp_log_handler *logh_head;
 	}
 #endif
 
-#define SNMP_VALUE_LIBRARY	0
-#define SNMP_VALUE_PLAIN	1
-#define SNMP_VALUE_OBJECT	2
+#define SNMP_VALUE_LIBRARY	(0 << 0)
+#define SNMP_VALUE_PLAIN	(1 << 0)
+#define SNMP_VALUE_OBJECT	(1 << 1)
 
 typedef struct snmp_session php_snmp_session;
 #define PHP_SNMP_SESSION_RES_NAME "SNMP session"
@@ -544,7 +544,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	int buflen = sizeof(sbuf) - 1;
 	int val_len = vars->val_len;
 	
-	if (valueretrieval == SNMP_VALUE_LIBRARY) {
+	if ((valueretrieval & SNMP_VALUE_PLAIN) == 0) {
 		val_len += 32; /* snprint_value will add type info into value, make some space for it */
 	}
 
@@ -560,96 +560,92 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 
 	*buf = 0;
 
-	if (valueretrieval == SNMP_VALUE_LIBRARY) {
-		snprint_value(buf, buflen, vars->name, vars->name_length, vars);
-		ZVAL_STRING(snmpval, buf, 1);
-		if(dbuf){ /* malloc was used to store value */
-			efree(dbuf);
-		}
-		return;
-	}
-
 	MAKE_STD_ZVAL(val);
 
-	switch (vars->type) {
-	case ASN_BIT_STR:		/* 0x03, asn1.h */
-		ZVAL_STRINGL(val, (char *)vars->val.bitstring, vars->val_len, 1);
-		break;
+	if (valueretrieval & SNMP_VALUE_PLAIN) {
+		switch (vars->type) {
+		case ASN_BIT_STR:		/* 0x03, asn1.h */
+			ZVAL_STRINGL(val, (char *)vars->val.bitstring, vars->val_len, 1);
+			break;
 
-	case ASN_OCTET_STR:		/* 0x04, asn1.h */
-	case ASN_OPAQUE:		/* 0x44, snmp_impl.h */
-		ZVAL_STRINGL(val, (char *)vars->val.string, vars->val_len, 1);
-		break;
+		case ASN_OCTET_STR:		/* 0x04, asn1.h */
+		case ASN_OPAQUE:		/* 0x44, snmp_impl.h */
+			ZVAL_STRINGL(val, (char *)vars->val.string, vars->val_len, 1);
+			break;
 
-	case ASN_NULL:			/* 0x05, asn1.h */
-		ZVAL_NULL(val);
-		break;
+		case ASN_NULL:			/* 0x05, asn1.h */
+			ZVAL_NULL(val);
+			break;
 
-	case ASN_OBJECT_ID:		/* 0x06, asn1.h */
-		snprint_objid(buf, buflen, vars->val.objid, vars->val_len / sizeof(oid));
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_OBJECT_ID:		/* 0x06, asn1.h */
+			snprint_objid(buf, buflen, vars->val.objid, vars->val_len / sizeof(oid));
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_IPADDRESS:		/* 0x40, snmp_impl.h */
-		snprintf(buf, buflen, "%d.%d.%d.%d",
-			 (vars->val.string)[0], (vars->val.string)[1],
-			 (vars->val.string)[2], (vars->val.string)[3]);
-		buf[buflen]=0;
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_IPADDRESS:		/* 0x40, snmp_impl.h */
+			snprintf(buf, buflen, "%d.%d.%d.%d",
+				 (vars->val.string)[0], (vars->val.string)[1],
+				 (vars->val.string)[2], (vars->val.string)[3]);
+			buf[buflen]=0;
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_COUNTER:		/* 0x41, snmp_impl.h */
-	case ASN_GAUGE:			/* 0x42, snmp_impl.h */
-	/* ASN_UNSIGNED is the same as ASN_GAUGE */
-	case ASN_TIMETICKS:		/* 0x43, snmp_impl.h */
-	case ASN_UINTEGER:		/* 0x47, snmp_impl.h */
-		snprintf(buf, buflen, "%lu", *vars->val.integer);
-		buf[buflen]=0;
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_COUNTER:		/* 0x41, snmp_impl.h */
+		case ASN_GAUGE:			/* 0x42, snmp_impl.h */
+		/* ASN_UNSIGNED is the same as ASN_GAUGE */
+		case ASN_TIMETICKS:		/* 0x43, snmp_impl.h */
+		case ASN_UINTEGER:		/* 0x47, snmp_impl.h */
+			snprintf(buf, buflen, "%lu", *vars->val.integer);
+			buf[buflen]=0;
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_INTEGER:		/* 0x02, asn1.h */
-		snprintf(buf, buflen, "%ld", *vars->val.integer);
-		buf[buflen]=0;
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_INTEGER:		/* 0x02, asn1.h */
+			snprintf(buf, buflen, "%ld", *vars->val.integer);
+			buf[buflen]=0;
+			ZVAL_STRING(val, buf, 1);
+			break;
 
 #if defined(NETSNMP_WITH_OPAQUE_SPECIAL_TYPES) || defined(OPAQUE_SPECIAL_TYPES)
-	case ASN_OPAQUE_FLOAT:		/* 0x78, asn1.h */
-		snprintf(buf, buflen, "%f", *vars->val.floatVal);
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_OPAQUE_FLOAT:		/* 0x78, asn1.h */
+			snprintf(buf, buflen, "%f", *vars->val.floatVal);
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_OPAQUE_DOUBLE:		/* 0x79, asn1.h */
-		snprintf(buf, buflen, "%Lf", *vars->val.doubleVal);
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_OPAQUE_DOUBLE:		/* 0x79, asn1.h */
+			snprintf(buf, buflen, "%Lf", *vars->val.doubleVal);
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_OPAQUE_I64:		/* 0x80, asn1.h */
-		printI64(buf, vars->val.counter64);
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_OPAQUE_I64:		/* 0x80, asn1.h */
+			printI64(buf, vars->val.counter64);
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	case ASN_OPAQUE_U64:		/* 0x81, asn1.h */
+		case ASN_OPAQUE_U64:		/* 0x81, asn1.h */
 #endif
-	case ASN_COUNTER64:		/* 0x46, snmp_impl.h */
-		printU64(buf, vars->val.counter64);
-		ZVAL_STRING(val, buf, 1);
-		break;
+		case ASN_COUNTER64:		/* 0x46, snmp_impl.h */
+			printU64(buf, vars->val.counter64);
+			ZVAL_STRING(val, buf, 1);
+			break;
 
-	default:
-		ZVAL_STRING(val, "Unknown value type", 1);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value type: %u", vars->type);
-		break;
+		default:
+			ZVAL_STRING(val, "Unknown value type", 1);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value type: %u", vars->type);
+			break;
+		}
+	} else /* use Net-SNMP value translation */ {
+		snprint_value(buf, buflen, vars->name, vars->name_length, vars);
+		ZVAL_STRING(val, buf, 1);
 	}
 
-	if (valueretrieval == SNMP_VALUE_PLAIN) {
-		*snmpval = *val;
-		zval_copy_ctor(snmpval);
-	} else {
+	if (valueretrieval & SNMP_VALUE_OBJECT) {
 		object_init(snmpval);
 		add_property_long(snmpval, "type", vars->type);
 		add_property_zval(snmpval, "value", val);
+	} else  {
+		*snmpval = *val;
+		zval_copy_ctor(snmpval);
 	}
 	zval_ptr_dtor(&val);
 
@@ -1640,16 +1636,12 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 		RETURN_FALSE;
 	}
 
-	switch(method) {
-		case SNMP_VALUE_LIBRARY:
-		case SNMP_VALUE_PLAIN:
-		case SNMP_VALUE_OBJECT:
+	if (method >= 0 && method <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
 			SNMP_G(valueretrieval) = method;
 			RETURN_TRUE;
-			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", method);
-			RETURN_FALSE;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", method);
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -1658,6 +1650,10 @@ PHP_FUNCTION(snmp_set_valueretrieval)
    Return the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_get_valueretrieval)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	RETURN_LONG(SNMP_G(valueretrieval));
 }
 /* }}} */
@@ -2135,16 +2131,11 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 		newval = &ztmp;
 	}
 
-	switch(Z_LVAL_P(newval)) {
-		case SNMP_VALUE_LIBRARY:
-		case SNMP_VALUE_PLAIN:
-		case SNMP_VALUE_OBJECT:
-			snmp_object->valueretrieval = Z_LVAL_P(newval);
-			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
-			ret = FAILURE;
-			break;
+	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
+		snmp_object->valueretrieval = Z_LVAL_P(newval);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
+		ret = FAILURE;
 	}
 	
 	if (newval == &ztmp) {
