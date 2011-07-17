@@ -353,8 +353,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_walk, 0, 0, 4)
 	ZEND_ARG_INFO(0, object_id)
 	ZEND_ARG_INFO(0, suffix_keys)
-	ZEND_ARG_INFO(0, non_repeaters)
 	ZEND_ARG_INFO(0, max_repetitions)
+	ZEND_ARG_INFO(0, non_repeaters)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set, 0, 0, 3)
@@ -1370,7 +1370,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				RETURN_FALSE;
 			}
 		} else if (st & SNMP_CMD_WALK) {
-			if (zend_parse_parameters(argc TSRMLS_CC, "Z|bll", &oid, &suffix_keys, &(objid_query.non_repeaters), &(objid_query.max_repetitions)) == FAILURE) {
+			if (zend_parse_parameters(argc TSRMLS_CC, "Z|bll", &oid, &suffix_keys, &(objid_query.max_repetitions), &(objid_query.non_repeaters)) == FAILURE) {
 				RETURN_FALSE;
 			}
 			if (suffix_keys) {
@@ -1792,7 +1792,7 @@ PHP_METHOD(snmp, getnext)
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::walk(mixed object_id [, bool $suffix_as_key = FALSE [, int $non_repeaters [, int $max_repetitions ]]])
+/* {{{ proto mixed SNMP::walk(mixed object_id [, bool $suffix_as_key = FALSE [, int $max_repetitions [, int $non_repeaters]])
    Return all objects including their respective object id withing the specified one as array of oid->value pairs */
 PHP_METHOD(snmp, walk)
 {
