@@ -67,6 +67,7 @@ struct fpm_worker_pool_config_s {
 	char *listen_group;
 	char *listen_mode;
 	char *listen_allowed_clients;
+	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;
 	struct key_value_s *php_values;

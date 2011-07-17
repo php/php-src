@@ -37,6 +37,7 @@ struct fpm_worker_pool_s {
 #endif
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
+	char **limit_extensions;
 };
 
 struct fpm_worker_pool_s *fpm_worker_pool_alloc();

@@ -19,6 +19,9 @@
 #include "fpm_php.h"
 #include "fpm_cleanup.h"
 #include "fpm_worker_pool.h"
+#include "zlog.h"
+
+static char **limit_extensions = NULL;
 
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
@@ -219,7 +222,38 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		0 > fpm_php_set_allowed_clients(wp)) {
 		return -1;
 	}
+
+	if (wp->limit_extensions) {
+		limit_extensions = wp->limit_extensions;
+	}
 	return 0;
 }
 /* }}} */
 
+int fpm_php_limit_extensions(char *path) /* {{{ */
+{
+	char **p;
+	size_t path_len;
+
+	if (!path || !limit_extensions) {
+		return 0; /* allowed by default */
+	}
+
+	p = limit_extensions;
+	path_len = strlen(path);
+	while (p && *p) {
+		size_t ext_len = strlen(*p);
+		if (path_len > ext_len) {
+			char *path_ext = path + path_len - ext_len;
+			if (strcmp(*p, path_ext) == 0) {
+				return 0; /* allow as the extension has been found */
+			}
+		}
+		p++;
+	}
+
+
+	zlog(ZLOG_NOTICE, "Access to the file '%s' has been denied (see security.limit_extensions)", path);
+	return 1; /* extension not found: not allowed  */
+}
+/* }}} */
