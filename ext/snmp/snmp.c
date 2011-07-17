@@ -347,10 +347,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, object_id)
+	ZEND_ARG_INFO(0, use_orignames)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_walk, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_walk, 0, 0, 4)
 	ZEND_ARG_INFO(0, object_id)
+	ZEND_ARG_INFO(0, suffix_keys)
 	ZEND_ARG_INFO(0, non_repeaters)
 	ZEND_ARG_INFO(0, max_repetitions)
 ZEND_END_ARG_INFO()
@@ -1778,7 +1780,7 @@ PHP_METHOD(snmp, close)
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::get_assoc(mixed object_id) 
+/* {{{ proto mixed SNMP::get(mixed object_id [, bool preserve_keys])
    Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, get)
 {
@@ -1786,7 +1788,7 @@ PHP_METHOD(snmp, get)
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::getnext(mixed object_id) 
+/* {{{ proto mixed SNMP::getnext(mixed object_id)
    Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, getnext)
 {
@@ -1794,7 +1796,7 @@ PHP_METHOD(snmp, getnext)
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::walk(mixed object_id)
+/* {{{ proto mixed SNMP::walk(mixed object_id [, bool $suffix_as_key = FALSE [, int $non_repeaters [, int $max_repetitions ]]])
    Return all objects including their respective object id withing the specified one as array of oid->value pairs */
 PHP_METHOD(snmp, walk)
 {
