@@ -93,6 +93,7 @@ typedef struct _php_snmp_object {
 	int enum_print;
 	int oid_output_format;
 	int snmp_errno;
+	int noOIDIncreasingCheck;
 	char snmp_errstr[128];
 } php_snmp_object;
 
