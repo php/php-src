@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     though the class has none). (Felipe)
 
 - Core
+  . Removed warning when argument of is_a() or is_subclass_of() is not 
+    a known class. (Stas) 
   . Fixed bug #55187 (readlink returns weird characters when false result).
    (Pierre)
   . Fixed bug #55014 (Compile failure due to improper use of ctime_r()). (Ilia)
