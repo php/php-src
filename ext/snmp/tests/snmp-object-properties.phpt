@@ -26,6 +26,7 @@ $session->enum_print = TRUE;
 $session->quick_print = TRUE;
 $session->valueretrieval = SNMP_VALUE_LIBRARY;
 $session->oid_output_format = SNMP_OID_OUTPUT_NUMERIC;
+$session->noOIDIncreasingCheck = TRUE;
 
 var_dump($session);
 
@@ -34,6 +35,7 @@ $session->enum_print = "1";
 $session->quick_print = "1";
 $session->valueretrieval = "1";
 $session->oid_output_format = "3";
+$session->noOIDIncreasingCheck = "45";
 
 var_dump($session);
 
@@ -87,6 +89,8 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["oid_output_format"]=>
   int(3)
+  ["noOIDIncreasingCheck"]=>
+  bool(false)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -110,6 +114,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["oid_output_format"]=>
   int(4)
+  ["noOIDIncreasingCheck"]=>
+  bool(true)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -133,6 +139,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["oid_output_format"]=>
   int(3)
+  ["noOIDIncreasingCheck"]=>
+  bool(true)
 }
 bool(true)
 bool(true)
@@ -159,6 +167,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["oid_output_format"]=>
   int(3)
+  ["noOIDIncreasingCheck"]=>
+  bool(true)
   ["123"]=>
   string(11) "param_value"
 }
