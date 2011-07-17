@@ -66,8 +66,9 @@ static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t o
 struct fpm_global_config_s fpm_global_config = {
 	.daemonize = 1,
 #ifdef HAVE_SYSLOG_H
-	.syslog_facility = -1
+	.syslog_facility = -1,
 #endif
+	.process_max = 0,
 };
 static struct fpm_worker_pool_s *current_wp = NULL;
 static int ini_recursion = 0;
@@ -79,6 +80,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "emergency_restart_threshold", &fpm_conf_set_integer,         GO(emergency_restart_threshold) },
 	{ "emergency_restart_interval",  &fpm_conf_set_time,            GO(emergency_restart_interval) },
 	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
+	{ "process.max",                 &fpm_conf_set_integer,         GO(process_max) },
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
 	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
 	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
@@ -962,6 +964,11 @@ static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 
 	fpm_globals.log_level = fpm_global_config.log_level;
 
+	if (fpm_global_config.process_max < 0) {
+		zlog(ZLOG_ERROR, "process_max can't be negative");
+		return -1;
+	}
+
 	if (!fpm_global_config.error_log) {
 		fpm_global_config.error_log = strdup("log/php-fpm.log");
 	}
@@ -1342,6 +1349,7 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tsyslog.facility = %d",             fpm_global_config.syslog_facility); /* FIXME: convert to string */
 #endif
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
+	zlog(ZLOG_NOTICE, "\tprocess.max = %d",                 fpm_global_config.process_max);
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
