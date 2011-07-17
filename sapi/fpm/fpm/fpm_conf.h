@@ -32,6 +32,7 @@ struct fpm_global_config_s {
 #endif
 	int rlimit_files;
 	int rlimit_core;
+	int process_max;
 };
 
 extern struct fpm_global_config_s fpm_global_config;

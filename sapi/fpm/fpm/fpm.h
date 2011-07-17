@@ -24,6 +24,7 @@ struct fpm_globals_s {
 	int max_requests; /* for this child */
 	int is_child;
 	int test_successful;
+	int process_max; /* global */
 };
 
 extern struct fpm_globals_s fpm_globals;

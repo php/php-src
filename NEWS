@@ -1,6 +1,9 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 Alpha 3
+- Improved PHP-FPM SAPI:
+  . Added process.max to control the number of process FPM can fork. FR #55166.
+    (fat)
 
 14 Jul 2011, PHP 5.4.0 Alpha 2
 - General improvements:
