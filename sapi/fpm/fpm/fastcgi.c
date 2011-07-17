@@ -28,13 +28,10 @@
 #include <errno.h>
 #include <limits.h>
 
-#ifdef FPM_AUTOCONFIG_H
-#include <fpm_autoconfig.h>
-#else
 #include <php_config.h>
-#endif
 #include <fpm/fpm.h>
 #include <fpm/fpm_request.h>
+#include <fpm/zlog.h>
 
 #ifdef _WIN32
 
@@ -511,6 +508,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			ret = 0;
 			break;
 		}
+		zlog(ZLOG_DEBUG, "%s=%s", tmp, s);
 		zend_hash_update(req->env, tmp, eff_name_len+1, &s, sizeof(char*), NULL);
 		p += name_len + val_len;
 	}
