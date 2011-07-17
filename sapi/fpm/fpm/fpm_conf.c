@@ -1020,7 +1020,6 @@ static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 		zlog(ZLOG_ERROR, "process_max can't be negative");
 		return -1;
 	}
-	fpm_globals.process_max = fpm_global_config.process_max;
 
 	if (!fpm_global_config.error_log) {
 		fpm_global_config.error_log = strdup("log/php-fpm.log");
