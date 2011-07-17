@@ -47,7 +47,7 @@ var_dump($session->close());
 
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, ''));
-var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, 0, ''));
+var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, 30, ''));
 var_dump($session->get());
 var_dump($session->getnext());
 var_dump($session->set());

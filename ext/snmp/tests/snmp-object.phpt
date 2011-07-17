@@ -48,18 +48,18 @@ var_dump(key($z));
 var_dump(array_shift($z));
 var_dump($session->close());
 
-echo "WALK multiple on single OID, non_repeaters set to 0\n";
+echo "WALK multiple on single OID, max_repetitions set to 30\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-$z = $session->walk('.1.3.6.1.2.1.1', 0);
+$z = $session->walk('.1.3.6.1.2.1.1', FALSE, 30);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
 var_dump(array_shift($z));
 var_dump($session->close());
 
-echo "WALK multiple on single OID, non_repeaters set to 0, max_repetitions set to 30\n";
+echo "WALK multiple on single OID, max_repetitions set to 30, non_repeaters set to 0\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-$z = $session->walk('.1.3.6.1.2.1.1', 0, 30);
+$z = $session->walk('.1.3.6.1.2.1.1', FALSE, 30, 0);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
@@ -154,13 +154,13 @@ int(%d)
 string(%d) "%S"
 string(%d) "%S"
 bool(true)
-WALK multiple on single OID, non_repeaters set to 0
+WALK multiple on single OID, max_repetitions set to 30
 string(5) "array"
 int(%d)
 string(%d) "%S"
 string(%d) "%S"
 bool(true)
-WALK multiple on single OID, non_repeaters set to 0, max_repetitions set to 30
+WALK multiple on single OID, max_repetitions set to 30, non_repeaters set to 0
 string(5) "array"
 int(%d)
 string(%d) "%S"
