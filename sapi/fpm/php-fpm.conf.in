@@ -116,6 +116,12 @@
 ; Default Value: none
 ;prefix = /path/to/pools/$pool
 
+; Unix user/group of processes
+; Note: The user is mandatory. If the group is not set, the default user's group
+;       will be used.
+user = @php_fpm_user@
+group = @php_fpm_group@
+
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
@@ -129,14 +135,6 @@ listen = 127.0.0.1:9000
 ; Set listen(2) backlog.
 ; Default Value: 128 (-1 on FreeBSD and OpenBSD)
 ;listen.backlog = 128
- 
-; List of ipv4 addresses of FastCGI clients which are allowed to connect.
-; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
-; PHP FCGI (5.2.2+). Makes sense only with a tcp listening socket. Each address
-; must be separated by a comma. If this value is left blank, connections will be
-; accepted from any ip address.
-; Default Value: any
-;listen.allowed_clients = 127.0.0.1
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
@@ -146,12 +144,14 @@ listen = 127.0.0.1:9000
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0666
-
-; Unix user/group of processes
-; Note: The user is mandatory. If the group is not set, the default user's group
-;       will be used.
-user = @php_fpm_user@
-group = @php_fpm_group@
+ 
+; List of ipv4 addresses of FastCGI clients which are allowed to connect.
+; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
+; PHP FCGI (5.2.2+). Makes sense only with a tcp listening socket. Each address
+; must be separated by a comma. If this value is left blank, connections will be
+; accepted from any ip address.
+; Default Value: any
+;listen.allowed_clients = 127.0.0.1
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
@@ -379,12 +379,10 @@ pm.max_spare_servers = 3
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
  
-; The timeout for serving a single request after which the worker process will
-; be killed. This option should be used when the 'max_execution_time' ini option
-; does not stop script execution for some reason. A value of '0' means 'off'.
-; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
-; Default Value: 0
-;request_terminate_timeout = 0
+; The log file for slow requests
+; Default Value: not set
+; Note: slowlog is mandatory if request_slowlog_timeout is set
+;slowlog = log/$pool.log.slow
  
 ; The timeout for serving a single request after which a PHP backtrace will be
 ; dumped to the 'slowlog' file. A value of '0s' means 'off'.
@@ -392,10 +390,12 @@ pm.max_spare_servers = 3
 ; Default Value: 0
 ;request_slowlog_timeout = 0
  
-; The log file for slow requests
-; Default Value: not set
-; Note: slowlog is mandatory if request_slowlog_timeout is set
-;slowlog = log/$pool.log.slow
+; The timeout for serving a single request after which the worker process will
+; be killed. This option should be used when the 'max_execution_time' ini option
+; does not stop script execution for some reason. A value of '0' means 'off'.
+; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
+; Default Value: 0
+;request_terminate_timeout = 0
  
 ; Set open file descriptor rlimit.
 ; Default Value: system defined value
