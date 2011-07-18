@@ -51,27 +51,40 @@ SUCH DAMAGE.
 
 6. ext/standard crypt's blowfish implementation
 
+The crypt_blowfish homepage is:
+
+http://www.openwall.com/crypt/
+
 This code comes from John the Ripper password cracker, with reentrant
 and crypt(3) interfaces added, but optimizations specific to password
 cracking removed.
 
-Written by Solar Designer <solar at openwall.com> in 1998-2002 and
-placed in the public domain.
+Written by Solar Designer <solar at openwall.com> in 1998-2011.
+No copyright is claimed, and the software is hereby placed in the public
+domain. In case this attempt to disclaim copyright and place the software
+in the public domain is deemed null and void, then the software is
+Copyright (c) 1998-2011 Solar Designer and it is hereby released to the
+general public under the following terms:
 
-There's absolutely no warranty.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted.
+
+There's ABSOLUTELY NO WARRANTY, express or implied.
 
 It is my intent that you should be able to use this on your system,
-as a part of a software package, or anywhere else to improve security,
+as part of a software package, or anywhere else to improve security,
 ensure compatibility, or for any other purpose. I would appreciate
 it if you give credit where it is due and keep your modifications in
 the public domain as well, but I don't require that in order to let
 you place this code and any modifications you make under a license
 of your choice.
 
-This implementation is compatible with OpenBSD bcrypt.c (version 2a)
-by Niels Provos <provos at citi.umich.edu>, and uses some of his
+This implementation is mostly compatible with OpenBSD's bcrypt.c (prefix
+"$2a$") by Niels Provos <provos at citi.umich.edu>, and uses some of his
 ideas. The password hashing algorithm was designed by David Mazieres
-<dm at lcs.mit.edu>.
+<dm at lcs.mit.edu>. For more information on the level of compatibility,
+please refer to the comments in BF_set_key() and to the crypt(3) man page
+included in the crypt_blowfish tarball.
 
 There's a paper on the algorithm that explains its design decisions:
 
