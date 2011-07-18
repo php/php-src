@@ -76,53 +76,59 @@ static char *ini_filename = NULL;
 static int ini_lineno = 0;
 static char *ini_include = NULL;
 
+/* 
+ * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
+ */
 static struct ini_value_parser_s ini_fpm_global_options[] = {
+	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
+	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
+#ifdef HAVE_SYSLOG_H
+	{ "syslog.ident",                &fpm_conf_set_string,          GO(syslog_ident) },
+	{ "syslog.facility",             &fpm_conf_set_syslog_facility, GO(syslog_facility) },
+#endif
+	{ "log_level",                   &fpm_conf_set_log_level,       GO(log_level) },
 	{ "emergency_restart_threshold", &fpm_conf_set_integer,         GO(emergency_restart_threshold) },
 	{ "emergency_restart_interval",  &fpm_conf_set_time,            GO(emergency_restart_interval) },
 	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
 	{ "process.max",                 &fpm_conf_set_integer,         GO(process_max) },
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
-	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
-	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
-	{ "log_level",                   &fpm_conf_set_log_level,       GO(log_level) },
-#ifdef HAVE_SYSLOG_H
-	{ "syslog.ident",                &fpm_conf_set_string,          GO(syslog_ident) },
-	{ "syslog.facility",             &fpm_conf_set_syslog_facility, GO(syslog_facility) },
-#endif
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
 	{ 0, 0, 0 }
 };
 
+/* 
+ * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
+ */
 static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "prefix",                    &fpm_conf_set_string,      WPO(prefix) },
 	{ "user",                      &fpm_conf_set_string,      WPO(user) },
 	{ "group",                     &fpm_conf_set_string,      WPO(group) },
-	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
-	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
-	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
-	{ "request_slowlog_timeout",   &fpm_conf_set_time,        WPO(request_slowlog_timeout) },
-	{ "slowlog",                   &fpm_conf_set_string,      WPO(slowlog) },
-	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
-	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
-	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
 	{ "listen",                    &fpm_conf_set_string,      WPO(listen_address) },
+	{ "listen.backlog",            &fpm_conf_set_integer,     WPO(listen_backlog) },
 	{ "listen.owner",              &fpm_conf_set_string,      WPO(listen_owner) },
 	{ "listen.group",              &fpm_conf_set_string,      WPO(listen_group) },
 	{ "listen.mode",               &fpm_conf_set_string,      WPO(listen_mode) },
-	{ "listen.backlog",            &fpm_conf_set_integer,     WPO(listen_backlog) },
 	{ "listen.allowed_clients",    &fpm_conf_set_string,      WPO(listen_allowed_clients) },
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
-	{ "pm.max_requests",           &fpm_conf_set_integer,     WPO(pm_max_requests) },
 	{ "pm.max_children",           &fpm_conf_set_integer,     WPO(pm_max_children) },
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
 	{ "pm.min_spare_servers",      &fpm_conf_set_integer,     WPO(pm_min_spare_servers) },
 	{ "pm.max_spare_servers",      &fpm_conf_set_integer,     WPO(pm_max_spare_servers) },
+	{ "pm.max_requests",           &fpm_conf_set_integer,     WPO(pm_max_requests) },
 	{ "pm.status_path",            &fpm_conf_set_string,      WPO(pm_status_path) },
 	{ "ping.path",                 &fpm_conf_set_string,      WPO(ping_path) },
 	{ "ping.response",             &fpm_conf_set_string,      WPO(ping_response) },
 	{ "access.log",                &fpm_conf_set_string,      WPO(access_log) },
 	{ "access.format",             &fpm_conf_set_string,      WPO(access_format) },
+	{ "slowlog",                   &fpm_conf_set_string,      WPO(slowlog) },
+	{ "request_slowlog_timeout",   &fpm_conf_set_time,        WPO(request_slowlog_timeout) },
+	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
+	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
+	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
+	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
+	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
+	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
 	{ 0, 0, 0 }
 };
@@ -568,13 +574,24 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	struct key_value_s *kv, *kv_next;
 
 	free(wpc->name);
-	free(wpc->pm_status_path);
-	free(wpc->ping_path);
-	free(wpc->ping_response);
+	free(wpc->prefix);
+	free(wpc->user);
+	free(wpc->group);
 	free(wpc->listen_address);
 	free(wpc->listen_owner);
 	free(wpc->listen_group);
 	free(wpc->listen_mode);
+	free(wpc->listen_allowed_clients);
+	free(wpc->pm_status_path);
+	free(wpc->ping_path);
+	free(wpc->ping_response);
+	free(wpc->access_log);
+	free(wpc->access_format);
+	free(wpc->slowlog);
+	free(wpc->chroot);
+	free(wpc->chdir);
+	free(wpc->security_limit_extensions);
+
 	for (kv = wpc->php_values; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
@@ -593,16 +610,6 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 		free(kv->value);
 		free(kv);
 	}
-	free(wpc->listen_allowed_clients);
-	free(wpc->user);
-	free(wpc->group);
-	free(wpc->chroot);
-	free(wpc->chdir);
-	free(wpc->slowlog);
-	free(wpc->prefix);
-	free(wpc->access_log);
-	free(wpc->access_format);
-	free(wpc->security_limit_extensions);
 
 	return 0;
 }
@@ -679,6 +686,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 
+		/* prefix */
 		if (wp->config->prefix && *wp->config->prefix) {
 			fpm_evaluate_full_path(&wp->config->prefix, NULL, NULL, 0);
 
@@ -688,6 +696,13 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
+		/* user */
+		if (!wp->config->user) {
+			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
+			return -1;
+		}
+
+		/* listen */
 		if (wp->config->listen_address && *wp->config->listen_address) {
 			wp->listen_address_domain = fpm_sockets_domain_from_address(wp->config->listen_address);
 
@@ -699,21 +714,19 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			return -1;
 		}
 
-		if (!wp->config->user) {
-			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
-			return -1;
-		}
-
+		/* pm */
 		if (wp->config->pm != PM_STYLE_STATIC && wp->config->pm != PM_STYLE_DYNAMIC) {
 			zlog(ZLOG_ALERT, "[pool %s] the process manager is missing (static or dynamic)", wp->config->name);
 			return -1;
 		}
 
+		/* pm.max_children */
 		if (wp->config->pm_max_children < 1) {
 			zlog(ZLOG_ALERT, "[pool %s] pm.max_children must be a positive value", wp->config->name);
 			return -1;
 		}
 
+		/* pm.start_servers, pm.min_spare_servers, pm.max_spare_servers */
 		if (wp->config->pm == PM_STYLE_DYNAMIC) {
 			struct fpm_worker_pool_config_s *config = wp->config;
 
@@ -749,40 +762,31 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		}
 
-		if (wp->config->slowlog && *wp->config->slowlog) {
-			fpm_evaluate_full_path(&wp->config->slowlog, wp, NULL, 0);
-		}
+		/* status */
+		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
+			int i;
+			char *status = wp->config->pm_status_path;
+			/* struct fpm_status_s fpm_status; */
 
-		if (wp->config->request_slowlog_timeout) {
-#if HAVE_FPM_TRACE
-			if (! (wp->config->slowlog && *wp->config->slowlog)) {
-				zlog(ZLOG_ERROR, "[pool %s] 'slowlog' must be specified for use with 'request_slowlog_timeout'", wp->config->name);
+			if (*status != '/') {
+				zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must start with a '/'", wp->config->name, status);
 				return -1;
 			}
-#else
-			static int warned = 0;
 
-			if (!warned) {
-				zlog(ZLOG_WARNING, "[pool %s] 'request_slowlog_timeout' is not supported on your system",	wp->config->name);
-				warned = 1;
+			if (strlen(status) < 2) {
+				zlog(ZLOG_ERROR, "[pool %s] the status path '%s' is not long enough", wp->config->name, status);
+				return -1;
 			}
 
-			wp->config->request_slowlog_timeout = 0;
-#endif
-
-			if (wp->config->slowlog && *wp->config->slowlog) {
-				int fd;
-
-				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
-
-				if (0 > fd) {
-					zlog(ZLOG_SYSERROR, "open(%s) failed", wp->config->slowlog);
+			for (i = 0; i < strlen(status); i++) {
+				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.') {
+					zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must contain only the following characters '[alphanum]/_-.'", wp->config->name, status);
 					return -1;
 				}
-				close(fd);
 			}
 		}
 
+		/* ping */
 		if (wp->config->ping_path && *wp->config->ping_path) {
 			char *ping = wp->config->ping_path;
 			int i;
@@ -819,29 +823,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
-			int i;
-			char *status = wp->config->pm_status_path;
-			/* struct fpm_status_s fpm_status; */
-
-			if (*status != '/') {
-				zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must start with a '/'", wp->config->name, status);
-				return -1;
-			}
-
-			if (strlen(status) < 2) {
-				zlog(ZLOG_ERROR, "[pool %s] the status path '%s' is not long enough", wp->config->name, status);
-				return -1;
-			}
-
-			for (i = 0; i < strlen(status); i++) {
-				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.') {
-					zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must contain only the following characters '[alphanum]/_-.'", wp->config->name, status);
-					return -1;
-				}
-			}
-		}
-
+		/* access.log, access.format */
 		if (wp->config->access_log && *wp->config->access_log) {
 			fpm_evaluate_full_path(&wp->config->access_log, wp, NULL, 0);
 			if (!wp->config->access_format) {
@@ -849,6 +831,88 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
+		/* slowlog */
+		if (wp->config->slowlog && *wp->config->slowlog) {
+			fpm_evaluate_full_path(&wp->config->slowlog, wp, NULL, 0);
+		}
+
+		/* request_slowlog_timeout */
+		if (wp->config->request_slowlog_timeout) {
+#if HAVE_FPM_TRACE
+			if (! (wp->config->slowlog && *wp->config->slowlog)) {
+				zlog(ZLOG_ERROR, "[pool %s] 'slowlog' must be specified for use with 'request_slowlog_timeout'", wp->config->name);
+				return -1;
+			}
+#else
+			static int warned = 0;
+
+			if (!warned) {
+				zlog(ZLOG_WARNING, "[pool %s] 'request_slowlog_timeout' is not supported on your system",	wp->config->name);
+				warned = 1;
+			}
+
+			wp->config->request_slowlog_timeout = 0;
+#endif
+
+			if (wp->config->slowlog && *wp->config->slowlog) {
+				int fd;
+
+				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+
+				if (0 > fd) {
+					zlog(ZLOG_SYSERROR, "open(%s) failed", wp->config->slowlog);
+					return -1;
+				}
+				close(fd);
+			}
+		}
+
+		/* chroot */
+		if (wp->config->chroot && *wp->config->chroot) {
+
+			fpm_evaluate_full_path(&wp->config->chroot, wp, NULL, 1);
+
+			if (*wp->config->chroot != '/') {
+				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' must start with a '/'", wp->config->name, wp->config->chroot);
+				return -1;
+			}
+			if (!fpm_conf_is_dir(wp->config->chroot)) {
+				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' does not exist or is not a directory", wp->config->name, wp->config->chroot);
+				return -1;
+			}
+		}
+
+		/* chdir */
+		if (wp->config->chdir && *wp->config->chdir) {
+
+			fpm_evaluate_full_path(&wp->config->chdir, wp, NULL, 0);
+
+			if (*wp->config->chdir != '/') {
+				zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' must start with a '/'", wp->config->name, wp->config->chdir);
+				return -1;
+			}
+
+			if (wp->config->chroot) {
+				char *buf;
+
+				spprintf(&buf, 0, "%s/%s", wp->config->chroot, wp->config->chdir);
+
+				if (!fpm_conf_is_dir(buf)) {
+					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' within the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
+					efree(buf);
+					return -1;
+				}
+
+				efree(buf);
+			} else {
+				if (!fpm_conf_is_dir(wp->config->chdir)) {
+					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' does not exist or is not a directory", wp->config->name, wp->config->chdir);
+					return -1;
+				}
+			}
+		}
+
+		/* security.limit_extensions */
 		if (!wp->config->security_limit_extensions) {
 			wp->config->security_limit_extensions = strdup(".php");
 		}
@@ -899,48 +963,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		if (wp->config->chroot && *wp->config->chroot) {
-
-			fpm_evaluate_full_path(&wp->config->chroot, wp, NULL, 1);
-
-			if (*wp->config->chroot != '/') {
-				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' must start with a '/'", wp->config->name, wp->config->chroot);
-				return -1;
-			}
-			if (!fpm_conf_is_dir(wp->config->chroot)) {
-				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' does not exist or is not a directory", wp->config->name, wp->config->chroot);
-				return -1;
-			}
-		}
-
-		if (wp->config->chdir && *wp->config->chdir) {
-
-			fpm_evaluate_full_path(&wp->config->chdir, wp, NULL, 0);
-
-			if (*wp->config->chdir != '/') {
-				zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' must start with a '/'", wp->config->name, wp->config->chdir);
-				return -1;
-			}
-
-			if (wp->config->chroot) {
-				char *buf;
-
-				spprintf(&buf, 0, "%s/%s", wp->config->chroot, wp->config->chdir);
-
-				if (!fpm_conf_is_dir(buf)) {
-					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' within the chroot path '%s' ('%s') does not exist or is not a directory", wp->config->name, wp->config->chdir, wp->config->chroot, buf);
-					efree(buf);
-					return -1;
-				}
-
-				efree(buf);
-			} else {
-				if (!fpm_conf_is_dir(wp->config->chdir)) {
-					zlog(ZLOG_ERROR, "[pool %s] the chdir path '%s' does not exist or is not a directory", wp->config->name, wp->config->chdir);
-					return -1;
-				}
-			}
-		}
+		/* env[], php_value[], php_admin_values[] */
 		if (!wp->config->chroot) {
 			struct key_value_s *kv;
 			char *options[] = FPM_PHP_INI_TO_EXPAND;
@@ -1391,19 +1414,22 @@ static void fpm_conf_dump() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
+	/*
+	 * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
+	 */
 	zlog(ZLOG_NOTICE, "[General]");
 	zlog(ZLOG_NOTICE, "\tpid = %s",                         STR2STR(fpm_global_config.pid_file));
-	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
-	zlog(ZLOG_NOTICE, "\tlog_level = %s",                   zlog_get_level_name(fpm_globals.log_level));
 #ifdef HAVE_SYSLOG_H
 	zlog(ZLOG_NOTICE, "\tsyslog.ident = %s",                STR2STR(fpm_global_config.syslog_ident));
 	zlog(ZLOG_NOTICE, "\tsyslog.facility = %d",             fpm_global_config.syslog_facility); /* FIXME: convert to string */
 #endif
-	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
-	zlog(ZLOG_NOTICE, "\tprocess.max = %d",                 fpm_global_config.process_max);
+	zlog(ZLOG_NOTICE, "\tlog_level = %s",                   zlog_get_level_name(fpm_globals.log_level));
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
+	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
+	zlog(ZLOG_NOTICE, "\tprocess.max = %d",                 fpm_global_config.process_max);
+	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
 	zlog(ZLOG_NOTICE, " ");
@@ -1415,8 +1441,6 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tprefix = %s",                     STR2STR(wp->config->prefix));
 		zlog(ZLOG_NOTICE, "\tuser = %s",                       STR2STR(wp->config->user));
 		zlog(ZLOG_NOTICE, "\tgroup = %s",                      STR2STR(wp->config->group));
-		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
-		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tlisten = %s",                     STR2STR(wp->config->listen_address));
 		zlog(ZLOG_NOTICE, "\tlisten.backlog = %d",             wp->config->listen_backlog);
 		zlog(ZLOG_NOTICE, "\tlisten.owner = %s",               STR2STR(wp->config->listen_owner));
@@ -1425,21 +1449,23 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tlisten.allowed_clients = %s",     STR2STR(wp->config->listen_allowed_clients));
 		zlog(ZLOG_NOTICE, "\tpm = %s",                         PM2STR(wp->config->pm));
 		zlog(ZLOG_NOTICE, "\tpm.max_children = %d",            wp->config->pm_max_children);
-		zlog(ZLOG_NOTICE, "\tpm.max_requests = %d",            wp->config->pm_max_requests);
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);
 		zlog(ZLOG_NOTICE, "\tpm.min_spare_servers = %d",       wp->config->pm_min_spare_servers);
 		zlog(ZLOG_NOTICE, "\tpm.max_spare_servers = %d",       wp->config->pm_max_spare_servers);
+		zlog(ZLOG_NOTICE, "\tpm.max_requests = %d",            wp->config->pm_max_requests);
 		zlog(ZLOG_NOTICE, "\tpm.status_path = %s",             STR2STR(wp->config->pm_status_path));
 		zlog(ZLOG_NOTICE, "\tping.path = %s",                  STR2STR(wp->config->ping_path));
 		zlog(ZLOG_NOTICE, "\tping.response = %s",              STR2STR(wp->config->ping_response));
 		zlog(ZLOG_NOTICE, "\taccess.log = %s",                 STR2STR(wp->config->access_log));
 		zlog(ZLOG_NOTICE, "\taccess.format = %s",              STR2STR(wp->config->access_format));
-		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
-		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
-		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));
+		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
+		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);
+		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
+		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
+		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {
