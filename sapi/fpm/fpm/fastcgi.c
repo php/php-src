@@ -508,7 +508,6 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			ret = 0;
 			break;
 		}
-		zlog(ZLOG_DEBUG, "%s=%s", tmp, s);
 		zend_hash_update(req->env, tmp, eff_name_len+1, &s, sizeof(char*), NULL);
 		p += name_len + val_len;
 	}
