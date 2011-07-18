@@ -832,7 +832,7 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 
 #if PHP_WIN32
 	memcpy(path_bak, path, path_len);
-	path_bak[path_len - 1] = 0;
+	path_bak[path_len] = 0;
 	TRANSLATE_SLASHES_LOWER(path_bak);
 	path = path_bak;
 #endif
