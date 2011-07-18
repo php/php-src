@@ -1430,20 +1430,26 @@ static void init_request_info(TSRMLS_D)
 static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC) /* {{{ */
 {
 	int *mode = (int *)arg;
-	char *key = Z_STRVAL_P(arg1);
-	char *value = Z_STRVAL_P(arg2);
+	char *key;
+	char *value = NULL;
 	struct key_value_s kv;
 
-	if (!mode) return;
+	if (!mode || !arg1) return;
 
 	if (callback_type != ZEND_INI_PARSER_ENTRY) {
 		fprintf(stderr, "Passing INI directive through FastCGI: only classic entries are allowed\n");
 		return;
 	}
 
+	key = Z_STRVAL_P(arg1);
+
 	if (!key || strlen(key) < 1) {
 		fprintf(stderr, "Passing INI directive through FastCGI: empty key\n");
 		return;
+	}
+
+	if (arg2) {
+		value = Z_STRVAL_P(arg2);
 	}
 
 	if (!value) {
