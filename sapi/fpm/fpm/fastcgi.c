@@ -141,7 +141,6 @@ typedef union _sa_t {
 static HashTable fcgi_mgmt_vars;
 
 static int is_initialized = 0;
-static int is_fastcgi = 0;
 static int in_shutdown = 0;
 static in_addr_t *allowed_clients = NULL;
 
@@ -203,9 +202,7 @@ int fcgi_init(void)
 			return 0;
 		}
 # endif
-		if ((GetStdHandle(STD_OUTPUT_HANDLE) == INVALID_HANDLE_VALUE) &&
-		    (GetStdHandle(STD_ERROR_HANDLE)  == INVALID_HANDLE_VALUE) &&
-		    (GetStdHandle(STD_INPUT_HANDLE)  != INVALID_HANDLE_VALUE)) {
+		{
 			char *str;
 			DWORD pipe_mode = PIPE_READMODE_BYTE | PIPE_WAIT;
 			HANDLE pipe = GetStdHandle(STD_INPUT_HANDLE);
@@ -224,36 +221,14 @@ int fcgi_init(void)
 			if (str != NULL) {
 				fcgi_accept_mutex = (HANDLE) atoi(str);
 			}
-			return is_fastcgi = 1;
-		} else {
-			return is_fastcgi = 0;
+			return 1;
 		}
 #else
-		errno = 0;
-		if (getpeername(0, (struct sockaddr *)&sa, &len) != 0 && errno == ENOTCONN) {
-			fcgi_setup_signals();
-			return is_fastcgi = 1;
-		} else {
-			return is_fastcgi = 0;
-		}
+		fcgi_setup_signals();
+		return 1;
 #endif
 	}
-	return is_fastcgi;
-}
-
-
-int fcgi_is_fastcgi(void)
-{
-	if (!is_initialized) {
-		return fcgi_init();
-	} else {
-		return is_fastcgi;
-	}
-}
-
-void fcgi_set_is_fastcgi(int new_value)
-{
-	    is_fastcgi = new_value;
+	return 1;
 }
 
 void fcgi_set_in_shutdown(int new_value)
@@ -266,7 +241,6 @@ void fcgi_shutdown(void)
 	if (is_initialized) {
 		zend_hash_destroy(&fcgi_mgmt_vars);
 	}
-	is_fastcgi = 0;
 	if (allowed_clients) {
 		free(allowed_clients);
 	}
