@@ -412,6 +412,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, convmap)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, is_hex)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_numericentity, 0, 0, 2)
@@ -3682,10 +3683,11 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	HashTable *target_hash;
 	size_t argc = ZEND_NUM_ARGS();
 	int i, *convmap, *mapelm, mapsize=0;
+	zend_bool is_hex = 0;
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding no_encoding;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "szs", &str, &str_len, &zconvmap, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "sz|sb", &str, &str_len, &zconvmap, &encoding, &encoding_len, &is_hex) == FAILURE) {
 		return;
 	}
 
@@ -3696,13 +3698,19 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	string.len = str_len;
 
 	/* encoding */
-	if (argc == 3) {
+	if ((argc == 3 || argc == 4) && encoding_len > 0) {
 		no_encoding = mbfl_name2no_encoding(encoding);
 		if (no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", encoding);
 			RETURN_FALSE;
 		} else {
 			string.no_encoding = no_encoding;
+		}
+	}
+
+	if (argc == 4) {
+		if (type == 0 && is_hex) {
+			type = 2; /* output in hex format */
 		}
 	}
 
@@ -3743,7 +3751,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
-/* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding])
+/* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding [, bool is_hex]])
    Converts specified characters to HTML numeric entities */
 PHP_FUNCTION(mb_encode_numericentity)
 {
