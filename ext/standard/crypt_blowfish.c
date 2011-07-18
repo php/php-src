@@ -1,29 +1,39 @@
+/* $Id$ */
 /*
-  $Id$
-*/
-/*
+ * The crypt_blowfish homepage is:
+ *
+ *	http://www.openwall.com/crypt/
+ *
  * This code comes from John the Ripper password cracker, with reentrant
  * and crypt(3) interfaces added, but optimizations specific to password
  * cracking removed.
  *
- * Written by Solar Designer <solar at openwall.com> in 1998-2002 and
- * placed in the public domain.  Quick self-test added in 2011 and also
- * placed in the public domain.
+ * Written by Solar Designer <solar at openwall.com> in 1998-2011.
+ * No copyright is claimed, and the software is hereby placed in the public
+ * domain. In case this attempt to disclaim copyright and place the software
+ * in the public domain is deemed null and void, then the software is
+ * Copyright (c) 1998-2011 Solar Designer and it is hereby released to the
+ * general public under the following terms:
  *
- * There's absolutely no warranty.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted.
+ *
+ * There's ABSOLUTELY NO WARRANTY, express or implied.
  *
  * It is my intent that you should be able to use this on your system,
- * as a part of a software package, or anywhere else to improve security,
+ * as part of a software package, or anywhere else to improve security,
  * ensure compatibility, or for any other purpose. I would appreciate
  * it if you give credit where it is due and keep your modifications in
  * the public domain as well, but I don't require that in order to let
  * you place this code and any modifications you make under a license
  * of your choice.
  *
- * This implementation is compatible with OpenBSD bcrypt.c (version 2a)
- * by Niels Provos <provos at citi.umich.edu>, and uses some of his
+ * This implementation is mostly compatible with OpenBSD's bcrypt.c (prefix
+ * "$2a$") by Niels Provos <provos at citi.umich.edu>, and uses some of his
  * ideas. The password hashing algorithm was designed by David Mazieres
- * <dm at lcs.mit.edu>.
+ * <dm at lcs.mit.edu>. For more information on the level of compatibility,
+ * please refer to the comments in BF_set_key() below and to the crypt(3)
+ * man page included in the crypt_blowfish tarball.
  *
  * There's a paper on the algorithm that explains its design decisions:
  *
@@ -41,23 +51,8 @@
 #define __set_errno(val) errno = (val)
 #endif
 
-
-#ifndef __const
-#ifdef __GNUC__
-#define __CONST __const
-#else
-#define __CONST
-#endif
-#else
-#define __CONST __const
-#endif
-
-/*
- * Please keep this enabled.  We really don't want incompatible hashes to be
- * produced.  The performance cost of this quick self-test is around 0.6% at
- * the "$2a$08" setting.
- */
-#define BF_SELF_TEST
+/* Just to make sure the prototypes match the actual definitions */
+#include "crypt_blowfish.h"
 
 #ifdef __i386__
 #define BF_ASM				0
@@ -379,35 +374,21 @@ static unsigned char BF_atoi64[0x60] = {
 	43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 64, 64, 64, 64, 64
 };
 
-/*
- * This may be optimized out if built with function inlining and no BF_ASM.
- */
-static void clean(void *data, int size)
-{
-#if BF_ASM
-	extern void _BF_clean(void *data);
-#endif
-	memset(data, 0, size);
-#if BF_ASM
-	_BF_clean(data);
-#endif
-}
-
 #define BF_safe_atoi64(dst, src) \
 { \
 	tmp = (unsigned char)(src); \
-	if (tmp == '$') break; \
+	if (tmp == '$') break; /* PHP hack */ \
 	if ((unsigned int)(tmp -= 0x20) >= 0x60) return -1; \
 	tmp = BF_atoi64[tmp]; \
 	if (tmp > 63) return -1; \
 	(dst) = tmp; \
 }
 
-static int BF_decode(BF_word *dst, __CONST char *src, int size)
+static int BF_decode(BF_word *dst, const char *src, int size)
 {
 	unsigned char *dptr = (unsigned char *)dst;
 	unsigned char *end = dptr + size;
-	unsigned char *sptr = (unsigned char *)src;
+	const unsigned char *sptr = (const unsigned char *)src;
 	unsigned int tmp, c1, c2, c3, c4;
 
 	do {
@@ -424,16 +405,16 @@ static int BF_decode(BF_word *dst, __CONST char *src, int size)
 		*dptr++ = ((c3 & 0x03) << 6) | c4;
 	} while (dptr < end);
 
-	while (dptr < end)
+	while (dptr < end) /* PHP hack */
 		*dptr++ = 0;
 
 	return 0;
 }
 
-static void BF_encode(char *dst, __CONST BF_word *src, int size)
+static void BF_encode(char *dst, const BF_word *src, int size)
 {
-	unsigned char *sptr = (unsigned char *)src;
-	unsigned char *end = sptr + size;
+	const unsigned char *sptr = (const unsigned char *)src;
+	const unsigned char *end = sptr + size;
 	unsigned char *dptr = (unsigned char *)dst;
 	unsigned int c1, c2;
 
@@ -564,36 +545,117 @@ static void BF_swap(BF_word *x, int count)
 	} while (ptr < &data.ctx.S[3][0xFF]);
 #endif
 
-static void BF_set_key(__CONST char *key, BF_key expanded, BF_key initial, int sign_extension_bug)
+static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
+    unsigned char flags)
 {
-	__CONST char *ptr = key;
-	int i, j;
-	BF_word tmp;
+	const char *ptr = key;
+	unsigned int bug, i, j;
+	BF_word safety, sign, diff, tmp[2];
+
+/*
+ * There was a sign extension bug in older revisions of this function. While
+ * we would have liked to simply fix the bug and move on, we have to provide
+ * a backwards compatibility feature (essentially the bug) for some systems and
+ * a safety measure for some others. The latter is needed because for certain
+ * multiple inputs to the buggy algorithm there exist easily found inputs to
+ * the correct algorithm that produce the same hash. Thus, we optionally
+ * deviate from the correct algorithm just enough to avoid such collisions.
+ * While the bug itself affected the majority of passwords containing
+ * characters with the 8th bit set (although only a percentage of those in a
+ * collision-producing way), the anti-collision safety measure affects
+ * only a subset of passwords containing the '\xff' character (not even all of
+ * those passwords, just some of them). This character is not found in valid
+ * UTF-8 sequences and is rarely used in popular 8-bit character encodings.
+ * Thus, the safety measure is unlikely to cause much annoyance, and is a
+ * reasonable tradeoff to use when authenticating against existing hashes that
+ * are not reliably known to have been computed with the correct algorithm.
+ *
+ * We use an approach that tries to minimize side-channel leaks of password
+ * information - that is, we mostly use fixed-cost bitwise operations instead
+ * of branches or table lookups. (One conditional branch based on password
+ * length remains. It is not part of the bug aftermath, though, and is
+ * difficult and possibly unreasonable to avoid given the use of C strings by
+ * the caller, which results in similar timing leaks anyway.)
+ *
+ * For actual implementation, we set an array index in the variable "bug"
+ * (0 means no bug, 1 means sign extension bug emulation) and a flag in the
+ * variable "safety" (bit 16 is set when the safety measure is requested).
+ * Valid combinations of settings are:
+ *
+ * Prefix "$2a$": bug = 0, safety = 0x10000
+ * Prefix "$2x$": bug = 1, safety = 0
+ * Prefix "$2y$": bug = 0, safety = 0
+ */
+	bug = (unsigned int)flags & 1;
+	safety = ((BF_word)flags & 2) << 15;
+
+	sign = diff = 0;
 
 	for (i = 0; i < BF_N + 2; i++) {
-		tmp = 0;
+		tmp[0] = tmp[1] = 0;
 		for (j = 0; j < 4; j++) {
-			tmp <<= 8;
-			if (sign_extension_bug)
-				tmp |= (BF_word_signed)(signed char)*ptr;
+			tmp[0] <<= 8;
+			tmp[0] |= (unsigned char)*ptr; /* correct */
+			tmp[1] <<= 8;
+			tmp[1] |= (BF_word_signed)(signed char)*ptr; /* bug */
+/*
+ * Sign extension in the first char has no effect - nothing to overwrite yet,
+ * and those extra 24 bits will be fully shifted out of the 32-bit word. For
+ * chars 2, 3, 4 in each four-char block, we set bit 7 of "sign" if sign
+ * extension in tmp[1] occurs. Once this flag is set, it remains set.
+ */
+			if (j)
+				sign |= tmp[1] & 0x80;
+			if (!*ptr)
+				ptr = key;
 			else
-				tmp |= (unsigned char)*ptr;
-
-			if (!*ptr) ptr = key; else ptr++;
+				ptr++;
 		}
+		diff |= tmp[0] ^ tmp[1]; /* Non-zero on any differences */
 
-		expanded[i] = tmp;
-		initial[i] = BF_init_state.P[i] ^ tmp;
+		expanded[i] = tmp[bug];
+		initial[i] = BF_init_state.P[i] ^ tmp[bug];
 	}
+
+/*
+ * At this point, "diff" is zero iff the correct and buggy algorithms produced
+ * exactly the same result. If so and if "sign" is non-zero, which indicates
+ * that there was a non-benign sign extension, this means that we have a
+ * collision between the correctly computed hash for this password and a set of
+ * passwords that could be supplied to the buggy algorithm. Our safety measure
+ * is meant to protect from such many-buggy to one-correct collisions, by
+ * deviating from the correct algorithm in such cases. Let's check for this.
+ */
+	diff |= diff >> 16; /* still zero iff exact match */
+	diff &= 0xffff; /* ditto */
+	diff += 0xffff; /* bit 16 set iff "diff" was non-zero (on non-match) */
+	sign <<= 9; /* move the non-benign sign extension flag to bit 16 */
+	sign &= ~diff & safety; /* action needed? */
+
+/*
+ * If we have determined that we need to deviate from the correct algorithm,
+ * flip bit 16 in initial expanded key. (The choice of 16 is arbitrary, but
+ * let's stick to it now. It came out of the approach we used above, and it's
+ * not any worse than any other choice we could make.)
+ *
+ * It is crucial that we don't do the same to the expanded key used in the main
+ * Eksblowfish loop. By doing it to only one of these two, we deviate from a
+ * state that could be directly specified by a password to the buggy algorithm
+ * (and to the fully correct one as well, but that's a side-effect).
+ */
+	initial[0] ^= sign;
 }
 
-static char *BF_crypt(__CONST char *key, __CONST char *setting,
-       char *output, int size,
-       BF_word min)
+static char *BF_crypt(const char *key, const char *setting,
+	char *output, int size,
+	BF_word min)
 {
 #if BF_ASM
 	extern void _BF_body_r(BF_ctx *ctx);
 #endif
+	static const unsigned char flags_by_subtype[26] =
+		{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0};
 	struct {
 		BF_ctx ctx;
 		BF_key expanded_key;
@@ -615,7 +677,8 @@ static char *BF_crypt(__CONST char *key, __CONST char *setting,
 
 	if (setting[0] != '$' ||
 	    setting[1] != '2' ||
-	    (setting[2] != 'a' && setting[2] != 'x') ||
+	    setting[2] < 'a' || setting[2] > 'z' ||
+	    !flags_by_subtype[(unsigned int)(unsigned char)setting[2] - 'a'] ||
 	    setting[3] != '$' ||
 	    setting[4] < '0' || setting[4] > '3' ||
 	    setting[5] < '0' || setting[5] > '9' ||
@@ -627,14 +690,13 @@ static char *BF_crypt(__CONST char *key, __CONST char *setting,
 
 	count = (BF_word)1 << ((setting[4] - '0') * 10 + (setting[5] - '0'));
 	if (count < min || BF_decode(data.binary.salt, &setting[7], 16)) {
-		clean(data.binary.salt, sizeof(data.binary.salt));
 		__set_errno(EINVAL);
 		return NULL;
 	}
-
 	BF_swap(data.binary.salt, 4);
 
-	BF_set_key(key, data.expanded_key, data.ctx.P, setting[2] == 'x');
+	BF_set_key(key, data.expanded_key, data.ctx.P,
+	    flags_by_subtype[(unsigned int)(unsigned char)setting[2] - 'a']);
 
 	memcpy(data.ctx.S, BF_init_state.S, sizeof(data.ctx.S));
 
@@ -664,51 +726,33 @@ static char *BF_crypt(__CONST char *key, __CONST char *setting,
 	} while (ptr < &data.ctx.S[3][0xFF]);
 
 	do {
-		data.ctx.P[0] ^= data.expanded_key[0];
-		data.ctx.P[1] ^= data.expanded_key[1];
-		data.ctx.P[2] ^= data.expanded_key[2];
-		data.ctx.P[3] ^= data.expanded_key[3];
-		data.ctx.P[4] ^= data.expanded_key[4];
-		data.ctx.P[5] ^= data.expanded_key[5];
-		data.ctx.P[6] ^= data.expanded_key[6];
-		data.ctx.P[7] ^= data.expanded_key[7];
-		data.ctx.P[8] ^= data.expanded_key[8];
-		data.ctx.P[9] ^= data.expanded_key[9];
-		data.ctx.P[10] ^= data.expanded_key[10];
-		data.ctx.P[11] ^= data.expanded_key[11];
-		data.ctx.P[12] ^= data.expanded_key[12];
-		data.ctx.P[13] ^= data.expanded_key[13];
-		data.ctx.P[14] ^= data.expanded_key[14];
-		data.ctx.P[15] ^= data.expanded_key[15];
-		data.ctx.P[16] ^= data.expanded_key[16];
-		data.ctx.P[17] ^= data.expanded_key[17];
+		int done;
 
-		BF_body();
+		for (i = 0; i < BF_N + 2; i += 2) {
+			data.ctx.P[i] ^= data.expanded_key[i];
+			data.ctx.P[i + 1] ^= data.expanded_key[i + 1];
+		}
 
-		tmp1 = data.binary.salt[0];
-		tmp2 = data.binary.salt[1];
-		tmp3 = data.binary.salt[2];
-		tmp4 = data.binary.salt[3];
-		data.ctx.P[0] ^= tmp1;
-		data.ctx.P[1] ^= tmp2;
-		data.ctx.P[2] ^= tmp3;
-		data.ctx.P[3] ^= tmp4;
-		data.ctx.P[4] ^= tmp1;
-		data.ctx.P[5] ^= tmp2;
-		data.ctx.P[6] ^= tmp3;
-		data.ctx.P[7] ^= tmp4;
-		data.ctx.P[8] ^= tmp1;
-		data.ctx.P[9] ^= tmp2;
-		data.ctx.P[10] ^= tmp3;
-		data.ctx.P[11] ^= tmp4;
-		data.ctx.P[12] ^= tmp1;
-		data.ctx.P[13] ^= tmp2;
-		data.ctx.P[14] ^= tmp3;
-		data.ctx.P[15] ^= tmp4;
-		data.ctx.P[16] ^= tmp1;
-		data.ctx.P[17] ^= tmp2;
+		done = 0;
+		do {
+			BF_body();
+			if (done)
+				break;
+			done = 1;
 
-		BF_body();
+			tmp1 = data.binary.salt[0];
+			tmp2 = data.binary.salt[1];
+			tmp3 = data.binary.salt[2];
+			tmp4 = data.binary.salt[3];
+			for (i = 0; i < BF_N; i += 4) {
+				data.ctx.P[i] ^= tmp1;
+				data.ctx.P[i + 1] ^= tmp2;
+				data.ctx.P[i + 2] ^= tmp3;
+				data.ctx.P[i + 3] ^= tmp4;
+			}
+			data.ctx.P[16] ^= tmp1;
+			data.ctx.P[17] ^= tmp2;
+		} while (1);
 	} while (--count);
 
 	for (i = 0; i < 6; i += 2) {
@@ -734,64 +778,114 @@ static char *BF_crypt(__CONST char *key, __CONST char *setting,
 	BF_encode(&output[7 + 22], data.binary.output, 23);
 	output[7 + 22 + 31] = '\0';
 
- #ifndef BF_SELF_TEST
-/* Overwrite the most obvious sensitive data we have on the stack. Note
- * that this does not guarantee there's no sensitive data left on the
- * stack and/or in registers; I'm not aware of portable code that does. */
-	clean(&data, sizeof(data));
-#endif
-
 	return output;
 }
 
-char *php_crypt_blowfish_rn(__CONST char *key, __CONST char *setting,
-	char *output, int size)
+static int _crypt_output_magic(const char *setting, char *output, int size)
 {
-#ifdef BF_SELF_TEST
-	__CONST char *test_key = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
-	__CONST char *test_2a =
-	    "$2a$00$abcdefghijklmnopqrstuui1D709vfamulimlGcq0qq3UvuUasvEa"
-	    "\0"
-	    "canary";
-	__CONST char *test_2x =
-	    "$2x$00$abcdefghijklmnopqrstuuVUrPmXD6q/nVSSp7pNDhCR9071IfIRe"
-	    "\0"
-	    "canary";
-	__CONST char *test_hash, *p;
-	int ok;
-	char buf[7 + 22 + 31 + 1 + 6 + 1];
+	if (size < 3)
+		return -1;
 
-	output = BF_crypt(key, setting, output, size, 16);
+	output[0] = '*';
+	output[1] = '0';
+	output[2] = '\0';
 
-/* Do a quick self-test.  This also happens to overwrite BF_crypt()'s data. */
-	test_hash = (setting[2] == 'x') ? test_2x : test_2a;
-	memcpy(buf, test_hash, sizeof(buf));
-	memset(buf, -1, sizeof(buf) - (6 + 1)); /* keep "canary" only */
-	p = BF_crypt(test_key, test_hash, buf, sizeof(buf) - 6, 1);
+	if (setting[0] == '*' && setting[1] == '0')
+		output[1] = '1';
 
-	ok = (p == buf && !memcmp(p, test_hash, sizeof(buf)));
-
-/* This could reveal what hash type we were using last.  Unfortunately, we
- * can't reliably clean the test_hash pointer. */
-	clean(&buf, sizeof(buf));
-
-	if (ok)
-		return output;
-
-/* Should not happen */
-	__set_errno(EINVAL); /* pretend we don't support this hash type */
-	return NULL;
-#else
-#warning Self-test is disabled, please enable
-	return BF_crypt(key, setting, output, size, 16);
-#endif
+	return 0;
 }
 
-char *php_crypt_gensalt_blowfish_rn(unsigned long count,
-	__CONST char *input, int size, char *output, int output_size)
+/*
+ * Please preserve the runtime self-test. It serves two purposes at once:
+ *
+ * 1. We really can't afford the risk of producing incompatible hashes e.g.
+ * when there's something like gcc bug 26587 again, whereas an application or
+ * library integrating this code might not also integrate our external tests or
+ * it might not run them after every build. Even if it does, the miscompile
+ * might only occur on the production build, but not on a testing build (such
+ * as because of different optimization settings). It is painful to recover
+ * from incorrectly-computed hashes - merely fixing whatever broke is not
+ * enough. Thus, a proactive measure like this self-test is needed.
+ *
+ * 2. We don't want to leave sensitive data from our actual password hash
+ * computation on the stack or in registers. Previous revisions of the code
+ * would do explicit cleanups, but simply running the self-test after hash
+ * computation is more reliable.
+ *
+ * The performance cost of this quick self-test is around 0.6% at the "$2a$08"
+ * setting.
+ */
+char *php_crypt_blowfish_rn(const char *key, const char *setting,
+	char *output, int size)
+{
+	const char *test_key = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
+	const char *test_setting = "$2a$00$abcdefghijklmnopqrstuu";
+	static const char * const test_hash[2] =
+		{"VUrPmXD6q/nVSSp7pNDhCR9071IfIRe\0\x55", /* $2x$ */
+		"i1D709vfamulimlGcq0qq3UvuUasvEa\0\x55"}; /* $2a$, $2y$ */
+	char *retval;
+	const char *p;
+	int save_errno, ok;
+	struct {
+		char s[7 + 22 + 1];
+		char o[7 + 22 + 31 + 1 + 1 + 1];
+	} buf;
+
+/* Hash the supplied password */
+	_crypt_output_magic(setting, output, size);
+	retval = BF_crypt(key, setting, output, size, 16);
+	save_errno = errno;
+
+/*
+ * Do a quick self-test. It is important that we make both calls to BF_crypt()
+ * from the same scope such that they likely use the same stack locations,
+ * which makes the second call overwrite the first call's sensitive data on the
+ * stack and makes it more likely that any alignment related issues would be
+ * detected by the self-test.
+ */
+	memcpy(buf.s, test_setting, sizeof(buf.s));
+	if (retval)
+		buf.s[2] = setting[2];
+	memset(buf.o, 0x55, sizeof(buf.o));
+	buf.o[sizeof(buf.o) - 1] = 0;
+	p = BF_crypt(test_key, buf.s, buf.o, sizeof(buf.o) - (1 + 1), 1);
+
+	ok = (p == buf.o &&
+	    !memcmp(p, buf.s, 7 + 22) &&
+	    !memcmp(p + (7 + 22),
+	    test_hash[(unsigned int)(unsigned char)buf.s[2] & 1],
+	    31 + 1 + 1 + 1));
+
+	{
+		const char *k = "\xff\xa3" "34" "\xff\xff\xff\xa3" "345";
+		BF_key ae, ai, ye, yi;
+		BF_set_key(k, ae, ai, 2); /* $2a$ */
+		BF_set_key(k, ye, yi, 4); /* $2y$ */
+		ai[0] ^= 0x10000; /* undo the safety (for comparison) */
+		ok = ok && ai[0] == 0xdb9c59bc && ye[17] == 0x33343500 &&
+		    !memcmp(ae, ye, sizeof(ae)) &&
+		    !memcmp(ai, yi, sizeof(ai));
+	}
+
+	__set_errno(save_errno);
+	if (ok)
+		return retval;
+
+/* Should not happen */
+	_crypt_output_magic(setting, output, size);
+	__set_errno(EINVAL); /* pretend we don't support this hash type */
+	return NULL;
+}
+
+#if 0
+char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
+	const char *input, int size, char *output, int output_size)
 {
 	if (size < 16 || output_size < 7 + 22 + 1 ||
-	    (count && (count < 4 || count > 31))) {
+	    (count && (count < 4 || count > 31)) ||
+	    prefix[0] != '$' || prefix[1] != '2' ||
+	    (prefix[2] != 'a' && prefix[2] != 'y')) {
 		if (output_size > 0) output[0] = '\0';
 		__set_errno((output_size < 7 + 22 + 1) ? ERANGE : EINVAL);
 		return NULL;
@@ -801,14 +895,15 @@ char *php_crypt_gensalt_blowfish_rn(unsigned long count,
 
 	output[0] = '$';
 	output[1] = '2';
-	output[2] = 'a';
+	output[2] = prefix[2];
 	output[3] = '$';
-	output[4] = (char) ('0' + count / 10);
+	output[4] = '0' + count / 10;
 	output[5] = '0' + count % 10;
 	output[6] = '$';
 
-	BF_encode(&output[7], (BF_word *)input, 16);
+	BF_encode(&output[7], (const BF_word *)input, 16);
 	output[7 + 22] = '\0';
 
 	return output;
 }
+#endif
