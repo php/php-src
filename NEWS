@@ -4,6 +4,8 @@
 - Improved PHP-FPM SAPI:
   . Added process.max to control the number of process FPM can fork. FR #55166.
     (fat)
+  . Dropped restriction of not setting the same value multiple times, the last
+    one holds. (giovanni at giacobbi dot net, fat)
 
 14 Jul 2011, PHP 5.4.0 Alpha 2
 - General improvements:
