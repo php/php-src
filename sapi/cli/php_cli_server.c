@@ -1479,7 +1479,7 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 static void php_cli_server_close_connection(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
 {
 #ifdef DEBUG
-	php_cli_server_logf("%s: Closing" TSRMLS_CC, client->addr_str);
+	php_cli_server_logf("%s Closing" TSRMLS_CC, client->addr_str);
 #endif
 	zend_hash_index_del(&server->clients, client->sock);
 } /* }}} */
@@ -1575,7 +1575,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		php_cli_server_buffer_prepend(&client->content_sender.buffer, chunk);
 	}
 
-	php_cli_server_logf("%s: %s - Sending error page (%d)" TSRMLS_CC, client->addr_str, client->request.request_uri, status);
+	php_cli_server_logf("%s %s %s - Sending error page (%d)" TSRMLS_CC, client->addr_str, php_http_method_str(client->request.request_method), client->request.request_uri, status);
 	php_cli_server_poller_add(&server->poller, POLLOUT, client->sock);
 	efree(escaped_request_uri);
 	return SUCCESS;
@@ -1612,6 +1612,8 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 		} zend_end_try();
 	}
 
+	php_cli_server_logf("%s %s %s - Response sent successfully (%d)" TSRMLS_CC, client->addr_str, php_http_method_str(client->request.request_method), client->request.request_uri, SG(sapi_headers).http_response_code);
+
 	php_request_shutdown(0);
 	php_cli_server_close_connection(server, client TSRMLS_CC);
 	destroy_request_info(&SG(request_info));
@@ -1627,10 +1629,10 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	if (fd < 0) {
 		char *errstr = get_last_error();
 		if (errstr) {
-			php_cli_server_logf("%s: %s - %s" TSRMLS_CC, client->addr_str, client->request.request_uri, errstr);
+			php_cli_server_logf("%s %s %s - %s" TSRMLS_CC, client->addr_str, php_http_method_str(client->request.request_method), client->request.request_uri, errstr);
 			pefree(errstr, 1);
 		} else {
-			php_cli_server_logf("%s: %s - ?" TSRMLS_CC, client->addr_str, client->request.request_uri);
+			php_cli_server_logf("%s %s %s - ?" TSRMLS_CC, client->addr_str, php_http_method_str(client->request.request_method), client->request.request_uri);
 		}
 		return php_cli_server_send_error_page(server, client, 404 TSRMLS_CC);
 	}
@@ -1880,12 +1882,12 @@ static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cl
 	char *errstr = NULL;
 	int status = php_cli_server_client_read_request(client, &errstr TSRMLS_CC);
 	if (status < 0) {
-		php_cli_server_logf("%s: Invalid request (%s)" TSRMLS_CC, client->addr_str, errstr);
+		php_cli_server_logf("%s Invalid request (%s)" TSRMLS_CC, client->addr_str, errstr);
 		efree(errstr);
 		php_cli_server_close_connection(server, client TSRMLS_CC);
 		return FAILURE;
 	} else if (status == 1) {
-		php_cli_server_logf("%s: %s" TSRMLS_CC, client->addr_str, client->request.request_uri);
+		php_cli_server_logf("%s %s %s - Request read" TSRMLS_CC, client->addr_str, php_http_method_str(client->request.request_method), client->request.request_uri);
 		php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
 		php_cli_server_dispatch(server, client TSRMLS_CC);
 	} else {
@@ -1970,7 +1972,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, int fd, i
 			return SUCCESS;
 		}
 #ifdef DEBUG
-		php_cli_server_logf("%s: Accepted" TSRMLS_CC, client->addr_str);
+		php_cli_server_logf("%s Accepted" TSRMLS_CC, client->addr_str);
 #endif
 		zend_hash_index_update(&server->clients, client_sock, &client, sizeof(client), NULL);
 		php_cli_server_recv_event_read_request(server, client TSRMLS_CC);
