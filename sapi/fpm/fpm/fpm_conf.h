@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include "php.h"
 
+#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : "dynamic")
+
 #define FPM_CONF_MAX_PONG_LENGTH 64
 
 struct key_value_s;

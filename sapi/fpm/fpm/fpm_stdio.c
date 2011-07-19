@@ -28,12 +28,12 @@ int fpm_stdio_init_main() /* {{{ */
 	int fd = open("/dev/null", O_RDWR);
 
 	if (0 > fd) {
-		zlog(ZLOG_SYSERROR, "open(\"/dev/null\") failed");
+		zlog(ZLOG_SYSERROR, "failed to init stdio: open(\"/dev/null\")");
 		return -1;
 	}
 
 	if (0 > dup2(fd, STDIN_FILENO) || 0 > dup2(fd, STDOUT_FILENO)) {
-		zlog(ZLOG_SYSERROR, "dup2() failed");
+		zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
 		return -1;
 	}
 	close(fd);
@@ -49,7 +49,7 @@ int fpm_stdio_init_final() /* {{{ */
 
 			/* there might be messages to stderr from other parts of the code, we need to log them all */
 			if (0 > dup2(fpm_globals.error_log_fd, STDERR_FILENO)) {
-				zlog(ZLOG_SYSERROR, "dup2() failed");
+				zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
 				return -1;
 			}
 		}
@@ -74,7 +74,7 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (wp->listening_socket != STDIN_FILENO) {
 		if (0 > dup2(wp->listening_socket, STDIN_FILENO)) {
-			zlog(ZLOG_SYSERROR, "dup2() failed");
+			zlog(ZLOG_SYSERROR, "failed to init child stdio: dup2()");
 			return -1;
 		}
 	}
@@ -116,7 +116,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 				} else { /* error or pipe is closed */
 
 					if (res < 0) { /* error */
-						zlog(ZLOG_SYSERROR, "read() failed");
+						zlog(ZLOG_SYSERROR, "unable to read what child say");
 					}
 
 					fpm_event_del(event);
@@ -186,20 +186,23 @@ int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 	}
 
 	if (0 > pipe(fd_stdout)) {
-		zlog(ZLOG_SYSERROR, "pipe() failed");
+		zlog(ZLOG_SYSERROR, "failed to prepare the stdout pipe");
 		return -1;
 	}
 
 	if (0 > pipe(fd_stderr)) {
-		zlog(ZLOG_SYSERROR, "pipe() failed");
-		close(fd_stdout[0]); close(fd_stdout[1]);
+		zlog(ZLOG_SYSERROR, "failed to prepare the stderr pipe");
+		close(fd_stdout[0]);
+		close(fd_stdout[1]);
 		return -1;
 	}
 
 	if (0 > fd_set_blocked(fd_stdout[0], 0) || 0 > fd_set_blocked(fd_stderr[0], 0)) {
-		zlog(ZLOG_SYSERROR, "fd_set_blocked() failed");
-		close(fd_stdout[0]); close(fd_stdout[1]);
-		close(fd_stderr[0]); close(fd_stderr[1]);
+		zlog(ZLOG_SYSERROR, "failed to unblock pipes");
+		close(fd_stdout[0]);
+		close(fd_stdout[1]);
+		close(fd_stderr[0]);
+		close(fd_stderr[1]);
 		return -1;
 	}
 	return 0;
@@ -273,7 +276,7 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 
 	fd = open(fpm_global_config.error_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 	if (0 > fd) {
-		zlog(ZLOG_SYSERROR, "open(\"%s\") failed", fpm_global_config.error_log);
+		zlog(ZLOG_SYSERROR, "failed to open error_log (%s)", fpm_global_config.error_log);
 		return -1;
 	}
 

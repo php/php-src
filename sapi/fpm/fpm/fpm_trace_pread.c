@@ -26,7 +26,7 @@ static int mem_file = -1;
 int fpm_trace_signal(pid_t pid) /* {{{ */
 {
 	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
-		zlog(ZLOG_SYSERROR, "kill(SIGSTOP) failed");
+		zlog(ZLOG_SYSERROR, "failed to send SIGSTOP to %d", pid);
 		return -1;
 	}
 	return 0;
@@ -40,7 +40,7 @@ int fpm_trace_ready(pid_t pid) /* {{{ */
 	sprintf(buf, "/proc/%d/" PROC_MEM_FILE, (int) pid);
 	mem_file = open(buf, O_RDONLY);
 	if (0 > mem_file) {
-		zlog(ZLOG_SYSERROR, "open(%s) failed", buf);
+		zlog(ZLOG_SYSERROR, "failed to open %s", buf);
 		return -1;
 	}
 	return 0;

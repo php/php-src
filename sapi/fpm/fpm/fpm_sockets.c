@@ -172,7 +172,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	sock = socket(sa->sa_family, SOCK_STREAM, 0);
 
 	if (0 > sock) {
-		zlog(ZLOG_SYSERROR, "socket() failed");
+		zlog(ZLOG_SYSERROR, "failed to create new listening socket: socket()");
 		return -1;
 	}
 
@@ -184,7 +184,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	}
 
 	if (0 > bind(sock, sa, socklen)) {
-		zlog(ZLOG_SYSERROR, "bind() for address '%s' failed", wp->config->listen_address);
+		zlog(ZLOG_SYSERROR, "unable to bind listening socket for address '%s'", wp->config->listen_address);
 		if (wp->listen_address_domain == FPM_AF_UNIX) {
 			umask(saved_umask);
 		}
@@ -198,14 +198,14 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
 			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
-				zlog(ZLOG_SYSERROR, "chown() for address '%s' failed", wp->config->listen_address);
+				zlog(ZLOG_SYSERROR, "failed to chown() the socket '%s'", wp->config->listen_address);
 				return -1;
 			}
 		}
 	}
 
 	if (0 > listen(sock, wp->config->listen_backlog)) {
-		zlog(ZLOG_SYSERROR, "listen() for address '%s' failed", wp->config->listen_address);
+		zlog(ZLOG_SYSERROR, "failed to listen to address '%s'", wp->config->listen_address);
 		return -1;
 	}
 
@@ -392,7 +392,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	socklen_t len = sizeof(info);
 
 	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_INFO, &info, &len)) {
-		zlog(ZLOG_SYSERROR, "unable to retrieve TCP_INFO for socket");
+		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
 
