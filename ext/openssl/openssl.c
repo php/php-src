@@ -1016,9 +1016,7 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_algorithms();
 
-	ERR_load_ERR_strings();
-	ERR_load_crypto_strings();
-	ERR_load_EVP_strings();
+	SSL_load_error_strings();
 
 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
 	 * OpenSSL callbacks */
@@ -3039,7 +3037,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zṕ|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zp|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -4722,7 +4720,11 @@ PHP_FUNCTION(openssl_encrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
 
-	EVP_EncryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	if (password_len > keylen) {
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+	}
+	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
@@ -4805,7 +4807,11 @@ PHP_FUNCTION(openssl_decrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
 
-	EVP_DecryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	if (password_len > keylen) {
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+	}
+	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
