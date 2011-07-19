@@ -883,7 +883,6 @@ default_socket_timeout = 60
 ;
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
-;extension=php_dba.dll
 ;extension=php_fileinfo.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
@@ -894,8 +893,6 @@ default_socket_timeout = 60
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
-;extension=php_ming.dll
-;extension=php_mssql.dll
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
