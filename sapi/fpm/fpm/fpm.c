@@ -65,11 +65,13 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 		if (fpm_globals.test_successful) {
 			exit(0);
 		} else {
+			zlog(ZLOG_ERROR, "FPM initialization failed");
 			return -1;
 		}
 	}
 
 	if (0 > fpm_conf_write_pid()) {
+		zlog(ZLOG_ERROR, "FPM initialization failed");
 		return -1;
 	}
 

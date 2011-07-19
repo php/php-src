@@ -37,7 +37,7 @@ static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 
 	kr = mach_vm_read(target, page, fpm_pagesize, &local_page, &local_size);
 	if (kr != KERN_SUCCESS) {
-		zlog(ZLOG_ERROR, "mach_vm_read() failed: %s (%d)", mach_error_string(kr), kr);
+		zlog(ZLOG_ERROR, "failed to read vm page: mach_vm_read(): %s (%d)", mach_error_string(kr), kr);
 		return -1;
 	}
 	return 0;
@@ -47,7 +47,7 @@ static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 int fpm_trace_signal(pid_t pid) /* {{{ */
 {
 	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
-		zlog(ZLOG_SYSERROR, "kill(SIGSTOP) failed");
+		zlog(ZLOG_SYSERROR, "failed to send SIGSTOP to %d", pid);
 		return -1;
 	}
 	return 0;

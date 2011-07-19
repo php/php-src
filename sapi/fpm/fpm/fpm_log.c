@@ -44,7 +44,7 @@ int fpm_log_open(int reopen) /* {{{ */
 		
 		fd = open(wp->config->access_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 		if (0 > fd) {
-			zlog(ZLOG_SYSERROR, "open(\"%s\") failed", wp->config->access_log);
+			zlog(ZLOG_SYSERROR, "failed to open access log (%s)", wp->config->access_log);
 			return -1;
 		}
 
@@ -124,12 +124,12 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 	if (!test) {
 		scoreboard = fpm_scoreboard_get();
 		if (!scoreboard) {
-			zlog(ZLOG_WARNING, "unable to get scoreboard");
+			zlog(ZLOG_WARNING, "unable to get scoreboard while preparing the access log");
 			return -1;
 		}
 		proc_p = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 		if (!proc_p) {
-			zlog(ZLOG_WARNING, "[pool %s] Unable to acquire shm slot", scoreboard->pool);
+			zlog(ZLOG_WARNING, "[pool %s] Unable to acquire shm slot while preparing the access log", scoreboard->pool);
 			return -1;
 		}
 		proc = *proc_p;
@@ -147,7 +147,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 	while (*s != '\0') {
 		if (len > FPM_LOG_BUFFER) {
-			zlog(ZLOG_NOTICE, "the log buffer is full (%d). The log request has been truncated.", FPM_LOG_BUFFER);
+			zlog(ZLOG_NOTICE, "the log buffer is full (%d). The access log request has been truncated.", FPM_LOG_BUFFER);
 			len = FPM_LOG_BUFFER - 1;
 			break;
 		}

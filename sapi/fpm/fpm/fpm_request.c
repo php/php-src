@@ -45,7 +45,7 @@ void fpm_request_accepting() /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 
@@ -76,7 +76,7 @@ void fpm_request_reading_headers() /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 
@@ -116,7 +116,7 @@ void fpm_request_info() /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 
@@ -160,7 +160,7 @@ void fpm_request_executing() /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 
@@ -186,7 +186,7 @@ void fpm_request_end(TSRMLS_D) /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 	proc->request_stage = FPM_REQUEST_FINISHED;
@@ -213,7 +213,7 @@ void fpm_request_finished() /* {{{ */
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
-		zlog(ZLOG_WARNING, "unable to acquire proc scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
 		return;
 	}
 
@@ -231,7 +231,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 	proc_p = fpm_scoreboard_proc_acquire(child->wp->scoreboard, child->scoreboard_i, 1);
 	if (!proc_p) {
-		zlog(ZLOG_WARNING, "unable to acquire scoreboard");
+		zlog(ZLOG_WARNING, "failed to acquire scoreboard");
 		return;
 	}
 

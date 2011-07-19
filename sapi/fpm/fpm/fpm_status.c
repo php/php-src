@@ -13,6 +13,7 @@
 #include "fpm_scoreboard.h"
 #include "zlog.h"
 #include "fpm_atomic.h"
+#include "fpm_conf.h"
 #include <ext/standard/html.h>
 
 static char *fpm_status_uri = NULL;
@@ -33,7 +34,7 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (wp->config->ping_path) {
 		if (!wp->config->ping_response) {
-			zlog(ZLOG_ERROR, "[pool %s] ping is set (%s) but pong is not set.", wp->config->name, wp->config->ping_path);
+			zlog(ZLOG_ERROR, "[pool %s] ping is set (%s) but ping.response is not set.", wp->config->name, wp->config->ping_path);
 			return -1;
 		}
 		fpm_status_ping_uri = strdup(wp->config->ping_path);
@@ -352,7 +353,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		now_epoch = time(NULL);
 		spprintf(&buffer, 0, short_syntax,
 				scoreboard.pool,
-				scoreboard.pm == PM_STYLE_STATIC ? "static" : "dynamic",
+				PM2STR(scoreboard.pm),
 				time_buffer,
 				now_epoch - scoreboard.start_epoch,
 				scoreboard.requests,

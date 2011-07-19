@@ -8,7 +8,6 @@
 
 #include "fpm_arrays.h"
 #include "fpm_cleanup.h"
-#include "zlog.h"
 
 struct cleanup_s {
 	int type;

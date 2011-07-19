@@ -13,7 +13,6 @@
 
 #include "fpm_env.h"
 #include "fpm.h"
-#include "zlog.h"
 
 #ifndef HAVE_SETPROCTITLE
 #ifdef __linux__

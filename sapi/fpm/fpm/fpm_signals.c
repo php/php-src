@@ -182,17 +182,17 @@ int fpm_signals_init_main() /* {{{ */
 	struct sigaction act;
 
 	if (0 > socketpair(AF_UNIX, SOCK_STREAM, 0, sp)) {
-		zlog(ZLOG_SYSERROR, "socketpair() failed");
+		zlog(ZLOG_SYSERROR, "failed to init signals: socketpair()");
 		return -1;
 	}
 
 	if (0 > fd_set_blocked(sp[0], 0) || 0 > fd_set_blocked(sp[1], 0)) {
-		zlog(ZLOG_SYSERROR, "fd_set_blocked() failed");
+		zlog(ZLOG_SYSERROR, "failed to init signals: fd_set_blocked()");
 		return -1;
 	}
 
 	if (0 > fcntl(sp[0], F_SETFD, FD_CLOEXEC) || 0 > fcntl(sp[1], F_SETFD, FD_CLOEXEC)) {
-		zlog(ZLOG_SYSERROR, "fcntl(F_SETFD, FD_CLOEXEC) failed");
+		zlog(ZLOG_SYSERROR, "falied to init signals: fcntl(F_SETFD, FD_CLOEXEC)");
 		return -1;
 	}
 
@@ -207,7 +207,7 @@ int fpm_signals_init_main() /* {{{ */
 	    0 > sigaction(SIGCHLD,  &act, 0) ||
 	    0 > sigaction(SIGQUIT,  &act, 0)) {
 
-		zlog(ZLOG_SYSERROR, "sigaction() failed");
+		zlog(ZLOG_SYSERROR, "failed to init signals: sigaction()");
 		return -1;
 	}
 	return 0;
@@ -236,7 +236,7 @@ int fpm_signals_init_child() /* {{{ */
 	    0 > sigaction(SIGCHLD,  &act_dfl,  0) ||
 	    0 > sigaction(SIGQUIT,  &act,      0)) {
 
-		zlog(ZLOG_SYSERROR, "sigaction() failed");
+		zlog(ZLOG_SYSERROR, "failed to init child signals: sigaction()");
 		return -1;
 	}
 	return 0;

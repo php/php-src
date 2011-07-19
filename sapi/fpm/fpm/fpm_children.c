@@ -147,13 +147,13 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
 
-	if (0 > fpm_stdio_init_child(wp) ||
-		0 > fpm_log_init_child(wp) ||
-		0 > fpm_status_init_child(wp) ||
-		0 > fpm_unix_init_child(wp) ||
-		0 > fpm_signals_init_child() ||
-		0 > fpm_env_init_child(wp) ||
-		0 > fpm_php_init_child(wp)) {
+	if (0 > fpm_stdio_init_child(wp)  ||
+	    0 > fpm_log_init_child(wp)    ||
+	    0 > fpm_status_init_child(wp) ||
+	    0 > fpm_unix_init_child(wp)   ||
+	    0 > fpm_signals_init_child()  ||
+	    0 > fpm_env_init_child(wp)    ||
+	    0 > fpm_php_init_child(wp)) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(255);
@@ -292,7 +292,7 @@ void fpm_children_bury() /* {{{ */
 				}
 			}
 		} else {
-			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s", pid, buf);
+			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s. Please open a bug report (https://bugs.php.net).", pid, buf);
 		}
 	}
 }
@@ -305,7 +305,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 	c = fpm_child_alloc();
 
 	if (!c) {
-		zlog(ZLOG_ERROR, "[pool %s] malloc failed", wp->config->name);
+		zlog(ZLOG_ERROR, "[pool %s] unable to malloc new child", wp->config->name);
 		return 0;
 	}
 
