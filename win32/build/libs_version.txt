@@ -1,1 +1,2 @@
 libcurl-7.21.6
+libpng-1.2.46
