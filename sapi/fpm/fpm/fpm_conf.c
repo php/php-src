@@ -195,21 +195,25 @@ static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /
 
 static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset) /* {{{ */
 {
-	char *new;
-	char **old = (char **) ((char *) *config + offset);
-	if (*old) {
-		return "it's already been defined. Can't do that twice.";
+	char **config_val = (char **) ((char *) *config + offset);
+
+	if (!config_val) {
+		return "internal error: NULL value";
 	}
 
-	new = strdup(Z_STRVAL_P(value));
-	if (!new) {
+	/* Check if there is a previous value to deallocate */
+	if (*config_val) {
+		free(*config_val);
+	}
+
+	*config_val = strdup(Z_STRVAL_P(value));
+	if (!*config_val) {
 		return "fpm_conf_set_string(): strdup() failed";
 	}
-	if (fpm_conf_expand_pool_name(&new) == -1) {
+	if (fpm_conf_expand_pool_name(config_val) == -1) {
 		return "Can't use '$pool' when the pool is not defined";
 	}
 
-	*old = new;
 	return NULL;
 }
 /* }}} */
@@ -219,8 +223,9 @@ static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /
 	char *val = Z_STRVAL_P(value);
 	char *p;
 
+	/* we don't use strtol because we don't want to allow negative values */
 	for (p = val; *p; p++) {
-		if ( p == val && *p == '-' ) continue;
+		if (p == val && *p == '-') continue;
 		if (*p < '0' || *p > '9') {
 			return "is not a valid number (greater or equal than zero)";
 		}
