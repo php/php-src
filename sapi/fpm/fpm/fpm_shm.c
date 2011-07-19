@@ -49,7 +49,7 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 	}
 
 	if (munmap(mem, size) == -1) {
-		zlog(ZLOG_SYSERROR, "Unable to free shm: %s", strerror(errno));
+		zlog(ZLOG_SYSERROR, "Unable to free shm");
 		return 0;
 	}
 

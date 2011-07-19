@@ -15,7 +15,6 @@
 #include "fpm_shm.h"
 #include "fpm_scoreboard.h"
 #include "fpm_conf.h"
-#include "zlog.h"
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
 

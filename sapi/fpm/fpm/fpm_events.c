@@ -66,7 +66,7 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 
 		if (res <= 0) {
 			if (res < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
-				zlog(ZLOG_SYSERROR, "read() failed");
+				zlog(ZLOG_SYSERROR, "unable to read from the signal pipe");
 			}
 			return;
 		}
@@ -153,7 +153,7 @@ static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_even
 	}
 
 	if (!(elt = malloc(sizeof(struct fpm_event_queue_s)))) {
-		zlog(ZLOG_SYSERROR, "malloc() failed");
+		zlog(ZLOG_SYSERROR, "Unable to add the event to queue: malloc() failed");
 		return -1;
 	}
 	elt->prev = NULL;
@@ -232,7 +232,7 @@ int fpm_event_init_main() /* {{{ */
 	/* malloc the max number of necessary fds for polling */
 	fpm_event_ufds = malloc(sizeof(php_pollfd) * fpm_event_nfds_max);
 	if (!fpm_event_ufds) {
-		zlog(ZLOG_SYSERROR, "malloc() failed");
+		zlog(ZLOG_SYSERROR, "Error while initializing events: malloc() failed");
 		return -1;
 	}
 
@@ -318,7 +318,7 @@ void fpm_event_loop(int err) /* {{{ */
 		/* wait for inconming event or timeout */
 		if ((ret = php_poll2(fpm_event_ufds, i, timeout)) == -1) {
 			if (errno != EINTR) {
-				zlog(ZLOG_WARNING, "php_poll2() returns %d", errno);
+				zlog(ZLOG_SYSERROR, "failed to wait for events: php_poll2()");
 			}
 		} else if (ret > 0) {
 

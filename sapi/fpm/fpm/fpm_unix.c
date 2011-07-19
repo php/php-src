@@ -73,6 +73,7 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 
 static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
+	struct passwd *pwd;
 	int is_root = !geteuid();
 
 	if (is_root) {
@@ -119,23 +120,20 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 #endif
 	} else { /* not root */
 		if (wp->config->user && *wp->config->user) {
-			zlog(ZLOG_WARNING, "[pool %s] 'user' directive is ignored", wp->config->name);
+			zlog(ZLOG_WARNING, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->group && *wp->config->group) {
-			zlog(ZLOG_WARNING, "[pool %s] 'group' directive is ignored", wp->config->name);
+			zlog(ZLOG_WARNING, "[pool %s] 'group' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->chroot && *wp->config->chroot) {
-			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored", wp->config->name);
+			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 
-		{ /* set up HOME and USER anyway */
-			struct passwd *pwd;
-
-			pwd = getpwuid(getuid());
-			if (pwd) {
-				wp->user = strdup(pwd->pw_name);
-				wp->home = strdup(pwd->pw_dir);
-			}
+		/* set up HOME and USER anyway */
+		pwd = getpwuid(getuid());
+		if (pwd) {
+			wp->user = strdup(pwd->pw_name);
+			wp->home = strdup(pwd->pw_dir);
 		}
 	}
 	return 0;
@@ -153,7 +151,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) wp->config->rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] unable to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d) failed (%d)", wp->config->name, wp->config->rlimit_files, errno);
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", wp->config->name, wp->config->rlimit_files);
 		}
 	}
 
@@ -163,13 +161,13 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		r.rlim_max = r.rlim_cur = wp->config->rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_core;
 
 		if (0 > setrlimit(RLIMIT_CORE, &r)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d) failed (%d)", wp->config->name, wp->config->rlimit_core, errno);
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d)", wp->config->name, wp->config->rlimit_core);
 		}
 	}
 
 	if (is_root && wp->config->chroot && *wp->config->chroot) {
 		if (0 > chroot(wp->config->chroot)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] chroot(%s) failed",  wp->config->name, wp->config->chroot);
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to chroot(%s)",  wp->config->name, wp->config->chroot);
 			return -1;
 		}
 		made_chroot = 1;
@@ -177,7 +175,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (wp->config->chdir && *wp->config->chdir) {
 		if (0 > chdir(wp->config->chdir)) {
-			zlog(ZLOG_SYSERROR, "[pool %s] chdir(%s) failed", wp->config->name, wp->config->chdir);
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to chdir(%s)", wp->config->name, wp->config->chdir);
 			return -1;
 		}
 	} else if (made_chroot) {
@@ -187,17 +185,17 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (is_root) {
 		if (wp->set_gid) {
 			if (0 > setgid(wp->set_gid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] setgid(%d) failed", wp->config->name, wp->set_gid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%d)", wp->config->name, wp->set_gid);
 				return -1;
 			}
 		}
 		if (wp->set_uid) {
 			if (0 > initgroups(wp->config->user, wp->set_gid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] initgroups(%s, %d) failed", wp->config->name, wp->config->user, wp->set_gid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to initgroups(%s, %d)", wp->config->name, wp->config->user, wp->set_gid);
 				return -1;
 			}
 			if (0 > setuid(wp->set_uid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] setuid(%d) failed", wp->config->name, wp->set_uid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to setuid(%d)", wp->config->name, wp->set_uid);
 				return -1;
 			}
 		}
@@ -205,7 +203,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 #ifdef HAVE_PRCTL
 	if (0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
-		zlog(ZLOG_SYSERROR, "[pool %s] prctl(PR_SET_DUMPABLE) failed", wp->config->name);
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to prctl(PR_SET_DUMPABLE)", wp->config->name);
 	}
 #endif
 
@@ -226,7 +224,7 @@ int fpm_unix_init_main() /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) fpm_global_config.rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d) failed (%d)", fpm_global_config.rlimit_files, errno);
+			zlog(ZLOG_SYSERROR, "failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
 			return -1;
 		}
 	}
@@ -237,7 +235,7 @@ int fpm_unix_init_main() /* {{{ */
 		r.rlim_max = r.rlim_cur = fpm_global_config.rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) fpm_global_config.rlimit_core;
 
 		if (0 > setrlimit(RLIMIT_CORE, &r)) {
-			zlog(ZLOG_SYSERROR, "unable to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d) failed (%d)", fpm_global_config.rlimit_core, errno);
+			zlog(ZLOG_SYSERROR, "failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d)", fpm_global_config.rlimit_core);
 			return -1;
 		}
 	}
@@ -246,7 +244,7 @@ int fpm_unix_init_main() /* {{{ */
 	if (fpm_global_config.daemonize) {
 		switch (fork()) {
 			case -1 :
-				zlog(ZLOG_SYSERROR, "daemonized fork() failed");
+				zlog(ZLOG_SYSERROR, "failed to daemonize");
 				return -1;
 			case 0 :
 				break;

@@ -47,7 +47,6 @@
 
 #define STR2STR(a) (a ? a : "undefined")
 #define BOOL2STR(a) (a ? "yes" : "no")
-#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : "dynamic")
 #define GO(field) offsetof(struct fpm_global_config_s, field)
 #define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
 
@@ -680,7 +679,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 	struct fpm_worker_pool_s *wp;
 
 	if (!fpm_worker_all_pools) {
-		zlog(ZLOG_ERROR, "at least one pool section must be specified in config file");
+		zlog(ZLOG_ERROR, "No pool defined. at least one pool section must be specified in config file");
 		return -1;
 	}
 
@@ -742,8 +741,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			if (config->pm_min_spare_servers > config->pm_max_children ||
 					config->pm_max_spare_servers > config->pm_max_children) {
-				zlog(ZLOG_ALERT, "[pool %s] pm.min_spare_servers(%d) and pm.max_spare_servers(%d) cannot be greater than pm.max_children(%d)",
-						wp->config->name, config->pm_min_spare_servers, config->pm_max_spare_servers, config->pm_max_children);
+				zlog(ZLOG_ALERT, "[pool %s] pm.min_spare_servers(%d) and pm.max_spare_servers(%d) cannot be greater than pm.max_children(%d)", wp->config->name, config->pm_min_spare_servers, config->pm_max_spare_servers, config->pm_max_children);
 				return -1;
 			}
 
@@ -755,6 +753,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			if (config->pm_start_servers <= 0) {
 				config->pm_start_servers = config->pm_min_spare_servers + ((config->pm_max_spare_servers - config->pm_min_spare_servers) / 2);
 				zlog(ZLOG_WARNING, "[pool %s] pm.start_servers is not set. It's been set to %d.", wp->config->name, config->pm_start_servers);
+
 			} else if (config->pm_start_servers < config->pm_min_spare_servers || config->pm_start_servers > config->pm_max_spare_servers) {
 				zlog(ZLOG_ALERT, "[pool %s] pm.start_servers(%d) must not be less than pm.min_spare_servers(%d) and not greater than pm.max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
 				return -1;
@@ -766,7 +765,6 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		if (wp->config->pm_status_path && *wp->config->pm_status_path) {
 			int i;
 			char *status = wp->config->pm_status_path;
-			/* struct fpm_status_s fpm_status; */
 
 			if (*status != '/') {
 				zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must start with a '/'", wp->config->name, status);
@@ -860,7 +858,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 
 				if (0 > fd) {
-					zlog(ZLOG_SYSERROR, "open(%s) failed", wp->config->slowlog);
+					zlog(ZLOG_SYSERROR, "Unable to create or open slowlog(%s)", wp->config->slowlog);
 					return -1;
 				}
 				close(fd);
@@ -876,6 +874,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' must start with a '/'", wp->config->name, wp->config->chroot);
 				return -1;
 			}
+
 			if (!fpm_conf_is_dir(wp->config->chroot)) {
 				zlog(ZLOG_ERROR, "[pool %s] the chroot path '%s' does not exist or is not a directory", wp->config->name, wp->config->chroot);
 				return -1;
@@ -993,7 +992,7 @@ int fpm_conf_unlink_pid() /* {{{ */
 {
 	if (fpm_global_config.pid_file) {
 		if (0 > unlink(fpm_global_config.pid_file)) {
-			zlog(ZLOG_SYSERROR, "unlink(\"%s\") failed", fpm_global_config.pid_file);
+			zlog(ZLOG_SYSERROR, "Unable to remove the PID file (%s).", fpm_global_config.pid_file);
 			return -1;
 		}
 	}
@@ -1013,14 +1012,14 @@ int fpm_conf_write_pid() /* {{{ */
 		fd = creat(fpm_global_config.pid_file, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 		if (fd < 0) {
-			zlog(ZLOG_SYSERROR, "creat(\"%s\") failed", fpm_global_config.pid_file);
+			zlog(ZLOG_SYSERROR, "Unable to create the PID file (%s).", fpm_global_config.pid_file);
 			return -1;
 		}
 
 		len = sprintf(buf, "%d", (int) fpm_globals.parent_pid);
 
 		if (len != write(fd, buf, len)) {
-			zlog(ZLOG_SYSERROR, "write() failed");
+			zlog(ZLOG_SYSERROR, "Unable to write to the PID file.");
 			return -1;
 		}
 		close(fd);
@@ -1355,18 +1354,18 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 	int ret = 1;
 
 	if (!filename || !filename[0]) {
-		zlog(ZLOG_ERROR, "Configuration file is empty");
+		zlog(ZLOG_ERROR, "configuration filename is empty");
 		return -1;
 	}
 
 	fd = open(filename, O_RDONLY, 0);
 	if (fd < 0) {
-		zlog(ZLOG_ERROR, "Unable to open file '%s', errno=%d", filename, errno);
+		zlog(ZLOG_SYSERROR, "failed to open configuration file '%s'", filename);
 		return -1;
 	}
 
 	if (ini_recursion++ > 4) {
-		zlog(ZLOG_ERROR, "You can include more than 5 files recusively");
+		zlog(ZLOG_ERROR, "failed to include more than 5 files recusively");
 		return -1;
 	}
 
