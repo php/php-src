@@ -242,6 +242,7 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 };
 
 static php_cli_server_http_reponse_status_code_pair template_map[] = {
+	{ 400, "<h1 class=\"h\">%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1 class=\"h\">%s</h1><p>The requested resource %s was not found on this server.</p>" },
 	{ 500, "<h1 class=\"h\">%s</h1><p>The server is temporality unavaiable.</p>" }
 };
@@ -1600,6 +1601,11 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
+	if (strlen(client->request.path_translated) != client->request.path_translated_len) {
+		/* can't handle paths that contain nul bytes */
+		destroy_request_info(&SG(request_info));
+		return php_cli_server_send_error_page(server, client, 400 TSRMLS_CC);
+	}
 	{
 		zend_file_handle zfd;
 		zfd.type = ZEND_HANDLE_FILENAME;
@@ -1624,6 +1630,11 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 {
 	int fd;
 	int status = 200;
+
+	if (client->request.path_translated && strlen(client->request.path_translated) != client->request.path_translated_len) {
+		/* can't handle paths that contain nul bytes */
+		return php_cli_server_send_error_page(server, client, 400 TSRMLS_CC);
+	}
 
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
 	if (fd < 0) {
