@@ -2048,6 +2048,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
 	const char *router = NULL;
+	char document_root_buf[MAXPATHLEN];
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2))!=-1) {
 		switch (c) {
@@ -2062,7 +2063,6 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 	if (document_root) {
 		struct stat sb;
-		char resolved_path[MAXPATHLEN];
 
 		if (stat(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
@@ -2072,19 +2072,18 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 			fprintf(stderr, "%s is not a directory.\n", document_root);
 			return 1;
 		}
-		if (VCWD_REALPATH(document_root, resolved_path)) {
-			document_root = resolved_path;
+		if (VCWD_REALPATH(document_root, document_root_buf)) {
+			document_root = document_root_buf;
 		}
 	} else {
-		char path[MAXPATHLEN];
 		char *ret = NULL;
 
 #if HAVE_GETCWD
-		ret = VCWD_GETCWD(path, MAXPATHLEN);
+		ret = VCWD_GETCWD(document_root_buf, MAXPATHLEN);
 #elif HAVE_GETWD
-		ret = VCWD_GETWD(path);
+		ret = VCWD_GETWD(document_root_buf);
 #endif
-		document_root = ret ? path : ".";
+		document_root = ret ? document_root_buf: ".";
 	}
 
 	if (argc > php_optind) {
