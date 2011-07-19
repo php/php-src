@@ -672,14 +672,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 				if (! force_null) break;
 
 			case IS_NULL:
-
-				/* complain if this field doesn't allow NULL values */
-				if (! (var->sqltype & 1)) {
-					_php_ibase_module_error("Parameter %d: non-empty value required" TSRMLS_CC, i+1);
-					rv = FAILURE;
-				} else {
 					buf[i].sqlind = -1;
-				}
 
 				if (var->sqltype & SQL_ARRAY) ++array_cnt;
 
