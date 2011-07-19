@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 - Improved core functions:
   . Updated crypt_blowfish to 1.2. ((CVE-2011-2483) (Solar Designer)
 
+- OpenSSL
+  . openssl_encrypt()/openssl_decrypt() truncated keys of variable length
+    ciphers to the OpenSSL default for the algorithm. (Scott)
+
 14 Jul 2011, PHP 5.3.7 RC3
 - Zend Engine:
   . Fixed bug #55156 (ReflectionClass::getDocComment() returns comment even

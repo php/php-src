@@ -4708,7 +4708,11 @@ PHP_FUNCTION(openssl_encrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
 
-	EVP_EncryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	if (password_len > keylen) {
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+	}
+	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	EVP_EncryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
 	outlen = i;
 	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
@@ -4788,7 +4792,11 @@ PHP_FUNCTION(openssl_decrypt)
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = emalloc(outlen + 1);
 
-	EVP_DecryptInit(&cipher_ctx, cipher_type, key, (unsigned char *)iv);
+	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	if (password_len > keylen) {
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+	}
+	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	EVP_DecryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
 	outlen = i;
 	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
