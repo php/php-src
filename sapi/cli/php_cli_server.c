@@ -1805,9 +1805,9 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	int err = 0;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
+	char *p = NULL;
 
 	if (addr[0] == '[') {
-		char *p;
 		host = pestrdup(addr + 1, 1);
 		if (!host) {
 			return FAILURE;
@@ -1817,26 +1817,31 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 			*p++ = '\0';
 			if (*p == ':') {
 				port = strtol(p + 1, &p, 10);
+				if (port <= 0) {
+					p = NULL;
+				}
 			} else if (*p != '\0') {
 				p = NULL;
 			}
 		}
-		if (!p) {
-			fprintf(stderr, "Invalid IPv6 address: %s\n", host);
-			retval = FAILURE;
-			goto out;
-		}
 	} else {
-		char *p;
 		host = pestrdup(addr, 1);
 		if (!host) {
 			return FAILURE;
 		}
-		p = strrchr(host, ':');
+		p = strchr(host, ':');
 		if (p) {
 			*p++ = '\0';
 			port = strtol(p, &p, 10);
+			if (port <= 0) {
+				p = NULL;
+			}
 		}
+	}
+	if (!p) {
+		fprintf(stderr, "Invalid address: %s\n", addr);
+		retval = FAILURE;
+		goto out;
 	}
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr TSRMLS_CC);
