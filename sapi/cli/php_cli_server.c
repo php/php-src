@@ -2127,7 +2127,19 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 	sapi_module.phpinfo_as_text = 0;
 
-	printf("PHP Development Server is listening on %s in %s ... Press Ctrl-C to quit.\n", server_bind_address, document_root);
+	{
+		struct timeval tv;
+		struct tm tm;
+		char buf[52];
+		gettimeofday(&tv, NULL);
+		php_localtime_r(&tv.tv_sec, &tm);
+		php_asctime_r(&tm, buf);
+		printf("PHP Development Server started at %s"
+				"Listening on %s\n"
+				"Document root is %s\n"
+				"Press Ctrl-C to quit.\n",
+				buf, server_bind_address, document_root);
+	}
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
