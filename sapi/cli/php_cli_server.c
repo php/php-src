@@ -1806,17 +1806,33 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
 
-	host = pestrdup(addr, 1);
-	if (!host || *host == ':' ) {
-		if (host) {
-			pefree(host, 1);
+	if (addr[0] == '[') {
+		char *p;
+		host = pestrdup(addr + 1, 1);
+		if (!host) {
+			return FAILURE;
 		}
-		fprintf(stderr, "Invalid built-in web-server addr:port argument\n");
-		return FAILURE;
-	}
-
-	{
-		char *p = strchr(host, ':');
+		p = strchr(host, ']');
+		if (p) {
+			*p++ = '\0';
+			if (*p == ':') {
+				port = strtol(p + 1, &p, 10);
+			} else if (*p != '\0') {
+				p = NULL;
+			}
+		}
+		if (!p) {
+			fprintf(stderr, "Invalid IPv6 address: %s\n", host);
+			retval = FAILURE;
+			goto out;
+		}
+	} else {
+		char *p;
+		host = pestrdup(addr, 1);
+		if (!host) {
+			return FAILURE;
+		}
+		p = strrchr(host, ':');
 		if (p) {
 			*p++ = '\0';
 			port = strtol(p, &p, 10);
@@ -2106,7 +2122,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 	sapi_module.phpinfo_as_text = 0;
 
-	printf("PHP Development Server is listening on %s:%d in %s ... Press Ctrl-C to quit.\n", server.host, server.port, document_root);
+	printf("PHP Development Server is listening on %s in %s ... Press Ctrl-C to quit.\n", server_bind_address, document_root);
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
