@@ -2,7 +2,9 @@
 openssl_random_pseudo_bytes test
 https://bugs.php.net/bug.php?id=55169
 --SKIPIF--
-if(!extension_loaded('openssl')) echo 'skip - requires openssl extension'
+<?php
+if(!extension_loaded('openssl')) echo 'skip - requires openssl extension';
+?>
 --FILE--
 <?php
 for ($i = -1; $i <= 4; $i++) {
