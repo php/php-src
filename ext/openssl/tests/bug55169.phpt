@@ -1,8 +1,6 @@
 --TEST--
 openssl_random_pseudo_bytes test
 https://bugs.php.net/bug.php?id=55169
---INI--
-extension=php_openssl.dll
 --SKIPIF--
 if(!extension_loaded('openssl')) echo 'skip - requires openssl extension'
 --FILE--
