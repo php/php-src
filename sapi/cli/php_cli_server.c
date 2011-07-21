@@ -2134,11 +2134,11 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 		gettimeofday(&tv, NULL);
 		php_localtime_r(&tv.tv_sec, &tm);
 		php_asctime_r(&tm, buf);
-		printf("PHP Development Server started at %s"
+		printf("PHP %s Development Server started at %s"
 				"Listening on %s\n"
 				"Document root is %s\n"
 				"Press Ctrl-C to quit.\n",
-				buf, server_bind_address, document_root);
+				PHP_VERSION, buf, server_bind_address, document_root);
 	}
 
 #if defined(HAVE_SIGNAL_H) && defined(SIGINT)
