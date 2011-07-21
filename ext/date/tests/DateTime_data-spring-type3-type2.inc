@@ -15,6 +15,8 @@ date_default_timezone_set('America/New_York');
  * + st: standard time on transition day      2010-03-14 00:10:20 EST
  * + dt: daylight time on the transition day  2010-03-14 03:16:55 EDT
  * + post: the day after the transition day   2010-03-15 19:59:59 EDT
+ * + stsec: standard time 1 sec before change 2010-03-14 01:59:59 EST
+ * + dtsec: daylight time first second        2010-03-14 03:00:00 EDT
  */
 echo "test_time_spring_type3_prev_type2_prev: ";
 $end   = new DateTime('2010-03-13 18:38:28 EST');  // prev, zt2
@@ -95,3 +97,13 @@ echo "test_time_spring_type3_post_type2_post: ";
 $end   = new DateTime('2010-03-15 19:59:59 EDT');  // post, zt2
 $start = new DateTime('2010-03-15 18:57:55');  // sp post, zt3
 examine_diff($end, $start, 'P+0Y0M0DT1H2M4S', 0);
+
+echo "test_time_spring_type3_stsec_type2_dtsec: ";
+$end   = new DateTime('2010-03-15 03:00:00 EDT');  // dtsec, zt2
+$start = new DateTime('2010-03-13 01:59:59');  // stsec, zt3
+examine_diff($end, $start, 'P+0Y0M0DT0H0M1S', 0);
+
+echo "test_time_spring_type3_dtsec_type2_stsec: ";
+$end   = new DateTime('2010-03-15 01:59:59 EST');  // stsec, zt2
+$start = new DateTime('2010-03-13 03:00:00');  // dtsec, zt3
+examine_diff($end, $start, 'P-0Y0M0DT0H0M1S', 0);
