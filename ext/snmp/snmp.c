@@ -376,7 +376,7 @@ struct objid_query {
 	long max_repetitions;
 	int valueretrieval;
 	int array_output;
-	int noOIDIncreasingCheck;
+	int oid_increasing_check;
 	snmpobjarg *vars;
 };
 
@@ -879,7 +879,7 @@ retry:
 
 					/* OID increase check */
 					if (st & SNMP_CMD_WALK) {
-						if (objid_query->noOIDIncreasingCheck == FALSE && snmp_oid_compare(name, name_length, vars->name, vars->name_length) >= 0) {
+						if (objid_query->oid_increasing_check == TRUE && snmp_oid_compare(name, name_length, vars->name, vars->name_length) >= 0) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = 0;
@@ -1332,7 +1332,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	objid_query.max_repetitions = -1;
 	objid_query.non_repeaters = 0;
 	objid_query.valueretrieval = SNMP_G(valueretrieval);
-	objid_query.noOIDIncreasingCheck = FALSE;
+	objid_query.oid_increasing_check = TRUE;
 
 	if (session_less_mode) {
 		if (version == SNMP_VERSION_3) {
@@ -1426,7 +1426,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				objid_query.max_repetitions = snmp_object->max_oids;
 			}
 		}
-		objid_query.noOIDIncreasingCheck = snmp_object->noOIDIncreasingCheck;
+		objid_query.oid_increasing_check = snmp_object->oid_increasing_check;
 		objid_query.valueretrieval = snmp_object->valueretrieval;
 		glob_snmp_object.enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, snmp_object->enum_print);
@@ -1757,6 +1757,7 @@ PHP_METHOD(snmp, __construct)
 	snmp_object->enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 	snmp_object->oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 	snmp_object->quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
+	snmp_object->oid_increasing_check = TRUE;
 }
 /* }}} */
 
@@ -2118,7 +2119,7 @@ static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval **retval TS
 		return SUCCESS; \
 	}
 
-PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(noOIDIncreasingCheck)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(oid_increasing_check)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 
@@ -2222,7 +2223,7 @@ static int php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval TSRM
 
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
-PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(noOIDIncreasingCheck)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(oid_increasing_check)
 
 /* {{{ */
 static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2284,7 +2285,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(enum_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_output_format),
-	PHP_SNMP_PROPERTY_ENTRY_RECORD(noOIDIncreasingCheck),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_increasing_check),
 	{ NULL, 0, NULL, NULL}
 };
 /* }}} */
