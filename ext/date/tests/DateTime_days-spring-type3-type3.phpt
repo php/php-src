@@ -27,3 +27,5 @@ test_time_spring_type3_post_type3_prev: DAYS: **2**
 test_time_spring_type3_post_type3_st: DAYS: **1**
 test_time_spring_type3_post_type3_dt: DAYS: **1**
 test_time_spring_type3_post_type3_post: DAYS: **0**
+test_time_spring_type3_stsec_type3_dtsec: DAYS: **0** 
+test_time_spring_type3_dtsec_type3_stsec: DAYS: **0**

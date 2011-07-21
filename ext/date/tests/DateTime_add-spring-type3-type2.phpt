@@ -29,3 +29,5 @@ test_time_spring_type3_post_type2_prev: ADD: 2010-03-15 19:59:59 EDT + P-0Y0M2DT
 test_time_spring_type3_post_type2_st: ADD: 2010-03-15 19:59:59 EDT + P-0Y0M1DT18H49M39S = **2010-03-14 00:10:20 EST**
 test_time_spring_type3_post_type2_dt: ADD: 2010-03-15 19:59:59 EDT + P-0Y0M1DT16H43M4S = **2010-03-14 03:16:55 EDT**
 test_time_spring_type3_post_type2_post: ADD: 2010-03-15 18:57:55 EDT + P+0Y0M0DT1H2M4S = **2010-03-15 19:59:59 EDT**
+test_time_spring_type3_stsec_type2_dtsec: ADD: 2010-03-13 01:59:59 EST + P+0Y0M0DT0H0M1S = **2010-03-15 03:00:00 EDT**
+test_time_spring_type3_dtsec_type2_stsec: ADD: 2010-03-15 03:00:00 EDT + P-0Y0M0DT0H0M1S = **2010-03-15 01:59:59 EST**
