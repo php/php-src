@@ -18,7 +18,7 @@ date_default_timezone_set('America/New_York');
  * + st: standard time on the transition day  2010-11-07 03:16:55
  * + post: the day after the transition day   2010-11-08 19:59:59
  * + dtsec: daylight time 1 sec before change 2010-11-07 01:59:59 EDT, + TZ
- * + stsec: standard time first secodn        2010-11-07 01:00:00 EST, + TZ
+ * + stsec: standard time first second        2010-11-07 01:00:00 EST, + TZ
  */
 echo "test_time_fall_type3_prev_type3_prev: ";
 $end   = new DateTime('2010-11-06 18:38:28');  // prev, zt3
