@@ -289,7 +289,7 @@ char* php_get_windows_name()
 					major = "Windows Server 2008";
 				}
 			} else
-			if ( osvi.dwMinorVersion == 2 ) {
+			if ( osvi.dwMinorVersion == 1 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION )  {
 					major = "Windows 7";
 				} else {
