@@ -6,8 +6,6 @@ if(!extension_loaded('sysvsem') || !extension_loaded('sysvshm')) {
 	die("skip Both sysvsem and sysvshm required");
 }
 ?>
---INI--
-magic_quotes_runtime=0
 --FILE--
 <?php
 $MEMSIZE = 512;  //  size of shared memory to allocate

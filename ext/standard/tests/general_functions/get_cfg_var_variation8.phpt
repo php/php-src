@@ -14,7 +14,4 @@ var_dump(get_cfg_var( 'magic_quotes_gpc' ) );
 
 ?>
 --EXPECTF--
-Deprecated: Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in %s on line 0
-*** Test by calling method or function with deprecated option ***
-string(1) "1"
-
+Fatal error: Directive 'magic_quotes_gpc' is no longer available in PHP in Unknown on line 0
