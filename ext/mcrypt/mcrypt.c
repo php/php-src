@@ -1387,7 +1387,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	}
 	
 	iv = ecalloc(size + 1, 1);
-	
+
 	if (source == RANDOM || source == URANDOM) {
 #if PHP_WIN32
 		/* random/urandom equivalent on Windows */

@@ -51,9 +51,6 @@ class DbaArray extends DbaReader implements ArrayAccess
 	{
 		$data = dba_fetch($name, $this->db); 
 		if($data) {
-			if (ini_get('magic_quotes_runtime')) {
-				$data = stripslashes($data);
-			}
 			//return unserialize($data);
 			return $data;
 		}

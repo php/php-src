@@ -1,6 +1,11 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 Alpha 3
+- Removed features:
+  . Removed magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini options.
+    get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
+    false, set_magic_quotes_runtime raises an E_CORE_ERROR. (Pierrick, Pierre)
+
 - Improved PHP-FPM SAPI:
   . Added process.max to control the number of process FPM can fork. FR #55166.
     (fat)

@@ -898,7 +898,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 					match = subject + offsets[backref<<1];
 					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					if (match_len) {
-						esc_match = php_addslashes_ex(match, match_len, &esc_match_len, 0, 1 TSRMLS_CC);
+						esc_match = php_addslashes(match, match_len, &esc_match_len, 0 TSRMLS_CC);
 					} else {
 						esc_match = match;
 						esc_match_len = 0;

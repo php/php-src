@@ -33,7 +33,6 @@
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
-#define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
 

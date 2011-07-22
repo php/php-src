@@ -440,9 +440,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("report_zend_debug",	"1",		PHP_INI_ALL,		OnUpdateBool,			report_zend_debug,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	magic_quotes_gpc,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
@@ -1872,9 +1869,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	void ***tsrm_ls;
 	php_core_globals *core_globals;
 #endif
-#ifdef PHP_WIN32
-	char module_path[MAX_PATH];
-#endif
 
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	WORD wVersionRequested = MAKEWORD(2, 0);
@@ -2153,15 +2147,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[13]; /* Remember to change this if the number of directives change */
+			const char *directives[16]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED, 
 				"Directive '%s' is deprecated in PHP 5.3 and greater", 
 				{
-					"magic_quotes_gpc", 
-					"magic_quotes_runtime", 
-					"magic_quotes_sybase", 
 					NULL
 				}
 			}, 
@@ -2172,6 +2163,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 					"allow_call_time_pass_reference",
 					"define_syslog_variables", 
 					"highlight.bg", 
+					"magic_quotes_gpc", 
+					"magic_quotes_runtime", 
+					"magic_quotes_sybase", 
 					"register_globals", 
 					"register_long_arrays", 
 					"safe_mode", 

@@ -423,13 +423,7 @@ PHP_FUNCTION(get_meta_tags)
 					have_name = 1;
 				} else if (saw_content) {
 					STR_FREE(value);
-					/* Get the CONTENT attr (Single word attr, non-quoted) */
-					if (PG(magic_quotes_runtime)) {
-						value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
-					} else {
-						value = estrndup(md.token_data, md.token_len);
-					}
-
+					value = estrndup(md.token_data, md.token_len);
 					have_content = 1;
 				}
 
@@ -463,13 +457,7 @@ PHP_FUNCTION(get_meta_tags)
 				have_name = 1;
 			} else if (saw_content) {
 				STR_FREE(value);
-				/* Get the CONTENT attr (Single word attr, non-quoted) */
-				if (PG(magic_quotes_runtime)) {
-					value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
-				} else {
-					value = estrndup(md.token_data, md.token_len);
-				}
-
+				value = estrndup(md.token_data, md.token_len);
 				have_content = 1;
 			}
 
@@ -561,11 +549,6 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-
-		if (PG(magic_quotes_runtime)) {
-			contents = php_addslashes(contents, len, &len, 1 TSRMLS_CC); /* 1 = free source string */
-		}
-
 		RETVAL_STRINGL(contents, len, 0);
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
@@ -724,9 +707,9 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *slashed, *target_buf=NULL, *p, *s, *e;
+	char *target_buf=NULL, *p, *s, *e;
 	register int i = 0;
-	int target_len, len;
+	int target_len;
 	char eol_marker = '\n';
 	long flags = 0;
 	zend_bool use_include_path;
@@ -778,13 +761,7 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
-				if (PG(magic_quotes_runtime)) {
-					/* s is in target_buf which is freed at the end of the function */
-					slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
-					add_index_stringl(return_value, i++, slashed, len, 0);
-				} else {
-					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
-				}
+				add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		} else {
@@ -797,13 +774,7 @@ parse_eol:
 					s = ++p;
 					continue;
 				}
-				if (PG(magic_quotes_runtime)) {
-					/* s is in target_buf which is freed at the end of the function */
-					slashed = php_addslashes(s, (p-s-windows_eol), &len, 0 TSRMLS_CC);
-					add_index_stringl(return_value, i++, slashed, len, 0);
-				} else {
-					add_index_stringl(return_value, i++, estrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
-				}
+				add_index_stringl(return_value, i++, estrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
 				s = ++p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		}
@@ -1049,16 +1020,11 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 	}
 
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(buf, line_len, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
-		Z_TYPE_P(return_value) = IS_STRING;
-	} else {
-		ZVAL_STRINGL(return_value, buf, line_len, 0);
-		/* resize buffer if it's much larger than the result.
-		 * Only needed if the user requested a buffer size. */
-		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
-			Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
-		}
+	ZVAL_STRINGL(return_value, buf, line_len, 0);
+	/* resize buffer if it's much larger than the result.
+	 * Only needed if the user requested a buffer size. */
+	if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
+		Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
 	}
 	return;
 
@@ -1218,11 +1184,6 @@ PHPAPI PHP_FUNCTION(fwrite)
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
-
-	if (PG(magic_quotes_runtime)) {
-		buffer = estrndup(arg2, num_bytes);
-		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
-	}
 
 	ret = php_stream_write(stream, buffer ? buffer : arg2, num_bytes);
 	if (buffer) {
@@ -1790,11 +1751,6 @@ PHPAPI PHP_FUNCTION(fread)
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
-				Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
-	}
 	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
@@ -1950,15 +1906,7 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);
 
-	if (!PG(magic_quotes_runtime)) {
-		ret = php_stream_write(stream, csvline.c, csvline.len);
-	} else {
-		char *buffer = estrndup(csvline.c, csvline.len);
-		int len = csvline.len;
-		php_stripslashes(buffer, &len TSRMLS_CC);
-		ret = php_stream_write(stream, buffer, len);
-		efree(buffer);
-	}
+	ret = php_stream_write(stream, csvline.c, csvline.len);
 
 	smart_str_free(&csvline);
 

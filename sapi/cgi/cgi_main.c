@@ -648,12 +648,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
-		int magic_quotes_gpc = PG(magic_quotes_gpc);
-
-		/* turn off magic_quotes while importing environment variables */
-		PG(magic_quotes_gpc) = 0;
 		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr TSRMLS_CC);
-		PG(magic_quotes_gpc) = magic_quotes_gpc;
 	}
 }
 
@@ -880,6 +875,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 			} else {
 				doc_root = getenv("DOCUMENT_ROOT");
 			}
+
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);

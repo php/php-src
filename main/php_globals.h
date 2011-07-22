@@ -54,10 +54,6 @@ typedef struct _arg_separators {
 } arg_separators;
 
 struct _php_core_globals {
-	zend_bool magic_quotes_gpc;
-	zend_bool magic_quotes_runtime;
-	zend_bool magic_quotes_sybase;
-
 	zend_bool implicit_flush;
 
 	long output_buffering;

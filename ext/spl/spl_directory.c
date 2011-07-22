@@ -1993,7 +1993,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 {
 	char *buf;
 	size_t line_len = 0;
-	int len;
 	long line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
@@ -2024,11 +2023,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
 			line_len = strcspn(buf, "\r\n");
 			buf[line_len] = '\0';
-		}
-	
-		if (PG(magic_quotes_runtime)) {
-			buf = php_addslashes(buf, line_len, &len, 1 TSRMLS_CC);
-			line_len = len;
 		}
 	
 		intern->u.file.current_line = buf;
@@ -2778,7 +2772,6 @@ SPL_METHOD(SplFileObject, fwrite)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *str;
 	int str_len;
-	int ret;
 	long length = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &length) == FAILURE) {
@@ -2790,14 +2783,6 @@ SPL_METHOD(SplFileObject, fwrite)
 	}
 	if (!str_len) {
 		RETURN_LONG(0);
-	}
-
-	if (PG(magic_quotes_runtime)) {
-		str = estrndup(str, str_len);
-		php_stripslashes(str, &str_len TSRMLS_CC);
-		ret = php_stream_write(intern->u.file.stream, str, str_len);
-		efree(str);
-		RETURN_LONG(ret);
 	}
 
 	RETURN_LONG(php_stream_write(intern->u.file.stream, str, str_len));
