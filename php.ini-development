@@ -116,11 +116,6 @@
 ;   Development Value: On
 ;   Production Value: On
 
-; magic_quotes_gpc
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; max_input_time
 ;   Default Value: -1 (Unlimited)
 ;   Development Value: 60 (60 seconds)
@@ -662,30 +657,6 @@ auto_globals_jit = On
 ; is disabled through enable_post_data_reading.
 ; http://php.net/post-max-size
 post_max_size = 8M
-
-; Magic quotes are a preprocessing feature of PHP where PHP will attempt to
-; escape any character sequences in GET, POST, COOKIE and ENV data which might
-; otherwise corrupt data being placed in resources such as databases before
-; making that data available to you. Because of character encoding issues and
-; non-standard SQL implementations across many databases, it's not currently
-; possible for this feature to be 100% accurate. PHP's default behavior is to
-; enable the feature. We strongly recommend you use the escaping mechanisms
-; designed specifically for the database your using instead of relying on this
-; feature. Also note, this feature has been deprecated as of PHP 5.3.0 and is
-; scheduled for removal in PHP 6.
-; Default Value: On
-; Development Value: Off
-; Production Value: Off
-; http://php.net/magic-quotes-gpc
-magic_quotes_gpc = Off
-
-; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-; http://php.net/magic-quotes-runtime
-magic_quotes_runtime = Off
-
-; Use Sybase-style magic quotes (escape ' with '' instead of \').
-; http://php.net/magic-quotes-sybase
-magic_quotes_sybase = Off
 
 ; Automatically add files before PHP document.
 ; http://php.net/auto-prepend-file

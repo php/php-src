@@ -1119,15 +1119,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			 * the user does basename() they get a bogus file name. Until IE's user base drops
 			 * to nill or problem is fixed this code must remain enabled for all systems. */
 			s = _basename(internal_encoding, filename TSRMLS_CC);
-#ifdef PHP_WIN32
-			if (PG(magic_quotes_gpc)) {
-				s = s ? s : filename;
-				tmp = strrchr(s, '\'');
-				s = tmp >= s ? tmp + 1: s;
-				tmp = strrchr(s, '"');
-				s = tmp >= s ? tmp + 1: s;
-			}
-#endif
 			if (!s) {
 				s = filename;
 			}
@@ -1182,7 +1173,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			s = "";
 
 			{
-				/* store temp_filename as-is (without magic_quotes_gpc-ing it, in case upload_tmp_dir
+				/* store temp_filename as-is (in case upload_tmp_dir
 				 * contains escapeable characters. escape only the variable name.) */
 				zval zfilename;
 

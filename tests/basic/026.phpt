@@ -1,7 +1,6 @@
 --TEST--
 Registration of HTTP_RAW_POST_DATA due to unknown content-type
 --INI--
-magic_quotes_gpc=0
 always_populate_raw_post_data=0
 --POST_RAW--
 Content-Type: unknown/type

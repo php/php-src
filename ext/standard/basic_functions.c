@@ -2966,8 +2966,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		arginfo_set_magic_quotes_runtime)
 	PHP_DEP_FE(set_magic_quotes_runtime,									arginfo_set_magic_quotes_runtime)
-	PHP_FE(get_magic_quotes_gpc,											arginfo_get_magic_quotes_gpc)
-	PHP_FE(get_magic_quotes_runtime,										arginfo_get_magic_quotes_runtime)
+	PHP_DEP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
+	PHP_DEP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
@@ -4586,7 +4586,7 @@ PHP_FUNCTION(get_cfg_var)
 /* }}} */
 
 /* {{{ proto bool set_magic_quotes_runtime(int new_setting)
-   Set the current active configuration setting of magic_quotes_runtime and return previous */
+   magic_quotes_runtime is not supported anymore */
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
 	zend_bool new_setting;
@@ -4594,11 +4594,11 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &new_setting) == FAILURE) {
 		return;
 	}
-
-	if (zend_alter_ini_entry_ex("magic_quotes_runtime", sizeof("magic_quotes_runtime"), new_setting ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
-		RETURN_FALSE;
+	
+	if (new_setting) {
+		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
 	}
-	RETURN_TRUE;
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -4606,7 +4606,10 @@ PHP_FUNCTION(set_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
-	RETURN_LONG(PG(magic_quotes_runtime));
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -4614,7 +4617,10 @@ PHP_FUNCTION(get_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
-	RETURN_LONG(PG(magic_quotes_gpc));
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 

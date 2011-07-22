@@ -1137,13 +1137,17 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long
 #endif
 			{
 
+#if PHP_API_VERSION < 20100412
 				/* check if we need magic quotes */
 				if (PG(magic_quotes_runtime)) {
 					Z_TYPE_P(res) = IS_STRING;
 					Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRLEN_P(res), 0 TSRMLS_CC);
 				} else {
+#endif					
 					ZVAL_STRINGL(res, row[i], field_len[i], 1);
+#if PHP_API_VERSION < 20100412
 				}
+#endif				
 			}
 
 			if (fetchtype & MYSQLI_NUM) {

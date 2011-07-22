@@ -1,32 +1,14 @@
 --TEST--
 Test get_magic_quotes_runtime() function
---INI--
-magic_quotes_runtime = 0
 --FILE--
 <?php
 /* Prototype: int get_magic_quotes_runtime  ( void  )
- * Description: Gets the current active configuration setting of magic_quotes_runtime
-*/
+ * This function is not supported anymore and will always return false
+ */
 
 echo "Simple testcase for get_magic_quotes_runtime() function\n";
 
-$g = get_magic_quotes_runtime();
-echo "\n-- magic quotes runtime set in INI file: " . $g . " --\n";
-
-echo "\n-- Set magic quotes runtime to 1:  --\n";
-var_dump(set_magic_quotes_runtime(1));
-$g = get_magic_quotes_runtime();
-echo "\n-- magic quotes runtime after set: " . $g . " --\n";
-
-echo "\n-- Set magic quotes runtime to 0:  --\n";
-var_dump(set_magic_quotes_runtime(0));
-$g = get_magic_quotes_runtime();
-echo "\n-- magic quotes runtime after set: " . $g . " --\n";
-
-echo "\n-- Set magic quotes runtime to 1:  --\n";
-var_dump(set_magic_quotes_runtime(1));
-$g = get_magic_quotes_runtime();
-echo "\n-- magic quotes runtime after set: " . $g . " --\n";
+var_dump(get_magic_quotes_runtime());
 
 echo "\n-- Error cases --\n"; 
 // no checks on number of args
@@ -37,29 +19,13 @@ var_dump(get_magic_quotes_runtime(true));
 --EXPECTF--
 Simple testcase for get_magic_quotes_runtime() function
 
--- magic quotes runtime set in INI file: 0 --
-
--- Set magic quotes runtime to 1:  --
-
-Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
-
--- magic quotes runtime after set: 1 --
-
--- Set magic quotes runtime to 0:  --
-
-Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
-
--- magic quotes runtime after set: 0 --
-
--- Set magic quotes runtime to 1:  --
-
-Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
-
--- magic quotes runtime after set: 1 --
+Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
+bool(false)
 
 -- Error cases --
-int(1)
+
+Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
+
+Warning: get_magic_quotes_runtime() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 ===DONE===

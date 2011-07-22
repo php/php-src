@@ -31,7 +31,7 @@ ZEND_API void zend_init_fpu(TSRMLS_D) /* {{{ */
 		EG(saved_fpu_cw_ptr) = (void*)&EG(saved_fpu_cw);
 	}
 	XPFPA_STORE_CW(EG(saved_fpu_cw_ptr));
-	XPFPA_SWITCH_DOUBLE();
+//	XPFPA_SWITCH_DOUBLE();
 #else
 	EG(saved_fpu_cw_ptr) = NULL;
 #endif
