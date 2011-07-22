@@ -474,6 +474,7 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			"0:"
 			:
 			: "r"(op1));
+#else
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
 			/* switch to double */
 			Z_DVAL_P(op1) = (double)LONG_MAX + 1.0;
