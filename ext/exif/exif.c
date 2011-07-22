@@ -1697,11 +1697,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_STRING:
 			if (value) {
 				length = php_strnlen(value, length);
-				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
-				} else {
-					info_value->s = estrndup(value, length);
-				}
+				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
 				info_data->length = 0;
@@ -1724,11 +1720,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_UNDEFINED:
 			if (value) {
 				/* do not recompute length here */
-				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
-				} else {
-					info_value->s = estrndup(value, length);
-				}
+				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
 				info_data->length = 0;
@@ -1850,11 +1842,7 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 		info_data->format = TAG_FMT_STRING;
 		info_data->length = 1;
 		info_data->name   = estrdup(name);
-		if (PG(magic_quotes_runtime)) {
-			info_data->value.s = php_addslashes(value, strlen(value), NULL, 0 TSRMLS_CC);
-		} else {
-			info_data->value.s = estrdup(value);
-		}
+		info_data->value.s = estrdup(value);
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
 	}
@@ -1895,17 +1883,9 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 		info_data->format = TAG_FMT_UNDEFINED;
 		info_data->length = length;
 		info_data->name   = estrdup(name);
-		if (PG(magic_quotes_runtime)) {
-#ifdef EXIF_DEBUG
-			exif_error_docref(NULL EXIFERR_CC, image_info, E_NOTICE, "Adding %s as buffer%s", name, exif_char_dump(value, length, 0));
-#endif
-			info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
-			info_data->length = length;
-		} else {
-			info_data->value.s = safe_emalloc(length, 1, 1);
-			memcpy(info_data->value.s, value, length);
-			info_data->value.s[length] = 0;
-		}
+		info_data->value.s = safe_emalloc(length, 1, 1);
+		memcpy(info_data->value.s, value, length);
+		info_data->value.s[length] = 0;
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
 	}

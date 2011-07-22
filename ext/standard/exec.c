@@ -60,7 +60,7 @@
 PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
-	char *buf, *tmp=NULL;
+	char *buf;
 	int l = 0, pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
@@ -139,14 +139,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			/* Return last line from the shell command */
-			if (PG(magic_quotes_runtime)) {
-				int len;
-
-				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
-				RETVAL_STRINGL(tmp, len, 0);
-			} else {
-				RETVAL_STRINGL(buf, bufl, 1);
-			}
+			RETVAL_STRINGL(buf, bufl, 1);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}

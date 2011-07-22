@@ -560,20 +560,9 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	DBA_WRITE_CHECK;
 
-	if (PG(magic_quotes_runtime)) {
-		v = estrndup(val, val_len);
-		php_stripslashes(v, &val_len TSRMLS_CC);
-		if (info->hnd->update(info, key_str, key_len, v, val_len, mode TSRMLS_CC) == SUCCESS) {
-			efree(v);
-			DBA_ID_DONE;
-			RETURN_TRUE;
-		}
-		efree(v);
-	} else {
-		if (info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS) {
-			DBA_ID_DONE;
-			RETURN_TRUE;
-		}
+	if (info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS) {
+		DBA_ID_DONE;
+		RETURN_TRUE;
 	}
 
 	DBA_ID_DONE;
@@ -1029,9 +1018,6 @@ PHP_FUNCTION(dba_fetch)
 		skip = 0; 
 	}
 	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len TSRMLS_CC)) != NULL) {
-		if (val && PG(magic_quotes_runtime)) {
-			val = php_addslashes(val, len, &len, 1 TSRMLS_CC);
-		}
 		DBA_ID_DONE;
 		RETURN_STRINGL(val, len, 0);
 	} 

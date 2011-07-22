@@ -352,13 +352,6 @@ static PHP_FUNCTION(bzread)
 	}
 	
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(	Z_STRVAL_P(return_value),
-													Z_STRLEN_P(return_value),
-													&Z_STRLEN_P(return_value), 1 TSRMLS_CC);
-	}
-
 	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */

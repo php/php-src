@@ -2,8 +2,6 @@
 XML parser case folding test
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---INI--
-magic_quotes_runtime=0
 --FILE--
 <?php
 chdir(dirname(__FILE__));

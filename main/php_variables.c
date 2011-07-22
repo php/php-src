@@ -47,11 +47,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 	
 	/* Prepare value */
 	Z_STRLEN(new_entry) = str_len;
-	if (PG(magic_quotes_gpc)) {
-		Z_STRVAL(new_entry) = php_addslashes(strval, Z_STRLEN(new_entry), &Z_STRLEN(new_entry), 0 TSRMLS_CC);
-	} else {
-		Z_STRVAL(new_entry) = estrndup(strval, Z_STRLEN(new_entry));
-	}
+	Z_STRVAL(new_entry) = estrndup(strval, Z_STRLEN(new_entry));
 	Z_TYPE(new_entry) = IS_STRING;
 
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
@@ -180,11 +176,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				array_init(gpc_element);
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				if (PG(magic_quotes_gpc)) {
-					escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
-				} else {
-					escaped_index = index;
-				}
+				escaped_index = index;
 				if (zend_symtable_find(symtable1, escaped_index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
@@ -216,11 +208,7 @@ plain_var:
 		if (!index) {
 			zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 		} else {
-			if (PG(magic_quotes_gpc)) { 
-				escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
-			} else {
-				escaped_index = index;
-			}
+			escaped_index = index;
 			/* 
 			 * According to rfc2965, more specific paths are listed above the less specific ones.
 			 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
@@ -425,10 +413,6 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	size_t alloc_size = sizeof(buf);
 	unsigned long nlen; /* ptrdiff_t is not portable */
 
-	/* turn off magic_quotes while importing environment variables */
-	int magic_quotes_gpc = PG(magic_quotes_gpc);
-	PG(magic_quotes_gpc) = 0;
-
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
 		if (!p) {				/* malformed entry? */
@@ -446,7 +430,6 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	if (t != buf && t != NULL) {
 		efree(t);
 	}
-	PG(magic_quotes_gpc) = magic_quotes_gpc;
 }
 
 zend_bool php_std_auto_global_callback(char *name, uint name_len TSRMLS_DC)
@@ -560,8 +543,6 @@ PHPAPI int php_handle_special_queries(TSRMLS_D)
 static inline void php_register_server_variables(TSRMLS_D)
 {
 	zval *array_ptr = NULL;
-	/* turn off magic_quotes while importing server variables */
-	int magic_quotes_gpc = PG(magic_quotes_gpc);
 
 	ALLOC_ZVAL(array_ptr);
 	array_init(array_ptr);
@@ -570,7 +551,6 @@ static inline void php_register_server_variables(TSRMLS_D)
 		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
 	}
 	PG(http_globals)[TRACK_VARS_SERVER] = array_ptr;
-	PG(magic_quotes_gpc) = 0;
 
 	/* Server variables */
 	if (sapi_module.register_server_variables) {
@@ -595,7 +575,6 @@ static inline void php_register_server_variables(TSRMLS_D)
 		php_register_variable_ex("REQUEST_TIME", &new_entry, array_ptr TSRMLS_CC);
 	}
 
-	PG(magic_quotes_gpc) = magic_quotes_gpc;
 }
 /* }}} */
 

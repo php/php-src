@@ -1,7 +1,6 @@
 --TEST--
 Handling of max_input_nesting_level being reached
 --INI--
-magic_quotes_gpc=0
 always_populate_raw_post_data=0
 display_errors=0
 max_input_nesting_level=10

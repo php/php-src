@@ -901,15 +901,6 @@ else
   AC_DEFINE(PHP_SIGCHILD, 0, [ ])
 fi
 
-PHP_ARG_ENABLE(magic-quotes, whether to enable magic quotes by default,
-[  --enable-magic-quotes   Enable magic quotes by default.], no, no)
-
-if test "$PHP_MAGIC_QUOTES" = "yes"; then
-  AC_DEFINE(MAGIC_QUOTES, 1, [ ])
-else
-  AC_DEFINE(MAGIC_QUOTES, 0, [ ])
-fi
-
 PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
 [  --enable-libgcc         Enable explicitly linking against libgcc], no, no)
 
