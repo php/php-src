@@ -12,6 +12,10 @@
   . Dropped restriction of not setting the same value multiple times, the last
     one holds. (giovanni at giacobbi dot net, fat)
 
+- SPL extension:
+  . Added missing class_uses(..) as pointed out by #55266 (Stefan)
+
+
 14 Jul 2011, PHP 5.4.0 Alpha 2
 - General improvements:
   . Zend Signal Handling. (Lucas Nealan,Arnaud Le Blanc,Brian Shire, Ilia)
