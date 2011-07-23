@@ -448,4 +448,8 @@ UPGRADE NOTES - PHP X.Y
        - fnv164
        - joaat
 
-
+     k. New Syntax
+       - Short array syntax
+         $a = [1, 2, 3, 4];
+         $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
+         $a = ['one' => 1, 2, 'three' => 3, 4];
