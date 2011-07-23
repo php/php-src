@@ -1683,7 +1683,11 @@ PHP_FUNCTION(snmp_read_mib)
 	char *filename;
 	int filename_len;
 
+#if PHP_VERSION_ID < 50399
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
