@@ -10,6 +10,8 @@
     get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
     false, set_magic_quotes_runtime raises an E_CORE_ERROR. (Pierrick, Pierre)
 
+- Changed E_ALL to include E_STRICT. (Stas)
+
 - Improved PHP-FPM SAPI:
   . Added process.max to control the number of process FPM can fork. FR #55166.
     (fat)

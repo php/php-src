@@ -1501,7 +1501,7 @@ ZEND_FUNCTION(set_error_handler)
 	zval *error_handler;
 	zend_bool had_orig_error_handler=0;
 	char *error_handler_name = NULL;
-	long error_type = E_ALL | E_STRICT;
+	long error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
 		return;
