@@ -3502,15 +3502,20 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname TSRM
 	fe->op_array.refcount = emalloc(sizeof(zend_uint));
 	*(fe->op_array.refcount) = 1;
 
-	i = fe->op_array.last_var;
-	dupvars = safe_emalloc(fe->op_array.last_var, sizeof(zend_compiled_variable), 0);
-	while (i > 0) {
-		i--;
-		dupvars[i].name = estrndup(fe->op_array.vars[i].name, fe->op_array.vars[i].name_len);
-		dupvars[i].name_len = fe->op_array.vars[i].name_len;
-		dupvars[i].hash_value = fe->op_array.vars[i].hash_value;
-	}
-	fe->op_array.vars = dupvars;
+  if (fe->op_array.vars) {
+    i = fe->op_array.last_var;
+    dupvars = safe_emalloc(fe->op_array.last_var, sizeof(zend_compiled_variable), 0);
+    while (i > 0) {
+      i--;
+      dupvars[i].name = estrndup(fe->op_array.vars[i].name, fe->op_array.vars[i].name_len);
+      dupvars[i].name_len = fe->op_array.vars[i].name_len;
+      dupvars[i].hash_value = fe->op_array.vars[i].hash_value;
+    }
+    fe->op_array.vars = dupvars;
+  }
+	else {
+    fe->op_array.vars = NULL;
+  }
 
 	opcode_copy = safe_emalloc(sizeof(zend_op), fe->op_array.last, 0);
 	for(i = 0; i < fe->op_array.last; i++) {
