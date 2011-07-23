@@ -205,6 +205,7 @@ PHP                                                                        NEWS
   . Added RegexIterator::getRegex() method. (Joshua Thijssen)
   . Added SplObjectStorage::getHash() hook. (Etienne)
   . Added CallbackFilterIterator and RecursiveCallbackFilterIterator (Arnaud)
+  . Added missing class_uses(..) as pointed out by #55266 (Stefan)
 
 - Improved XSL extension:
   . Added XsltProcessor::setSecurityPrefs($options) and getSecurityPrefs() to 

@@ -103,6 +103,18 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 }
 /* }}} */
 
+/* {{{ spl_add_traits */
+void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
+{
+	zend_uint num_traits;
+  
+	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
+		spl_add_class_name(list, pce->traits[num_traits], allow, ce_flags TSRMLS_CC);
+	}
+}
+/* }}} */
+
+
 /* {{{ spl_add_classes */
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)
 {
