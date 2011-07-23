@@ -3919,13 +3919,15 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				if ((coliding_prop->flags & ZEND_ACC_PPP_MASK) == (property_info->flags & ZEND_ACC_PPP_MASK)) {
 					/* flags are identical, now the value needs to be checked */
 					if (property_info->flags & ZEND_ACC_STATIC) {
-						not_compatible = compare_function(&compare_result,
-														  ce->default_static_members_table[coliding_prop->offset],
-														  ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC) == FAILURE;
+            not_compatible = (FAILURE == compare_function(&compare_result,
+                                          ce->default_static_members_table[coliding_prop->offset],
+                                          ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC))
+                              || (Z_LVAL(compare_result) != 0);
 					} else {
-						not_compatible = compare_function(&compare_result,
-															ce->default_properties_table[coliding_prop->offset],
-															ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC) == FAILURE;
+						not_compatible = (FAILURE == compare_function(&compare_result,
+                                          ce->default_properties_table[coliding_prop->offset],
+                                          ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC))
+                              || (Z_LVAL(compare_result) != 0);
 					}
 				} else {
 					/* the flags are not identical, thus, we assume properties are not compatible */
