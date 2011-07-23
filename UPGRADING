@@ -30,6 +30,7 @@ UPGRADE NOTES - PHP X.Y
      h. New methods
      i. New class constants
      j. New hash algorithms
+     k. New Syntax
 
 ========================================
 1. Changes made to default configuration
@@ -449,7 +450,7 @@ UPGRADE NOTES - PHP X.Y
        - joaat
 
      k. New Syntax
-       - Short array syntax
+       - Short array syntax in 5.4.0
          $a = [1, 2, 3, 4];
          $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
          $a = ['one' => 1, 2, 'three' => 3, 4];
