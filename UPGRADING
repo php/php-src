@@ -218,6 +218,14 @@ UPGRADE NOTES - PHP X.Y
 
     a. removed features
 
+       - magic quotes
+         . remove magic_quotes_gpc, magic_quotes_runtime, 
+           magic_quotes_sybase (calling ini_set('magic_....') 
+           returns 0|false
+         . get_magic_quotes_gpc, get_magic_quotes_runtime are kept but
+           always return false
+         . set_magic_quotes_runtime raises an E_CORE_ERROR
+
        - register_globals
        - register_long_arrays
        - Safe mode
