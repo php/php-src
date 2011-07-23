@@ -1,6 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 Alpha 3
+- Added features:
+ . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
+   . com, sebastian.deutsch at 9elements . com, Pierre)
+ 
 - Removed features:
   . Removed magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini options.
     get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
