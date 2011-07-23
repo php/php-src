@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - OpenSSL
   . openssl_encrypt()/openssl_decrypt() truncated keys of variable length
     ciphers to the OpenSSL default for the algorithm. (Scott)
+  . On blocking SSL sockets respect the timeout option where possible.
+    (Scott)
 
 14 Jul 2011, PHP 5.3.7 RC3
 - Zend Engine:

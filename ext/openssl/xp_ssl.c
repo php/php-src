@@ -204,6 +204,36 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 	return didwrite;
 }
 
+static void php_openssl_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
+{
+	int retval;
+	struct timeval *ptimeout;
+
+	if (sock->socket == -1) {
+		return;
+	}
+	
+	sock->timeout_event = 0;
+
+	if (sock->timeout.tv_sec == -1)
+		ptimeout = NULL;
+	else
+		ptimeout = &sock->timeout;
+
+	while(1) {
+		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
+
+		if (retval == 0)
+			sock->timeout_event = 1;
+
+		if (retval >= 0)
+			break;
+
+		if (php_socket_errno() != EINTR)
+			break;
+	}
+}
+
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -213,6 +243,13 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		int retry = 1;
 
 		do {
+			if (sslsock->s.is_blocked) {
+				php_openssl_stream_wait_for_data(stream, &(sslsock->s) TSRMLS_CC);
+				if (sslsock->s.timeout_event) {
+					break;
+				}
+				/* there is no guarantee that there is application data available but something is there */
+			}
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
 
 			if (nr_bytes <= 0) {
