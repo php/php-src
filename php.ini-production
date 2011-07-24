@@ -104,7 +104,7 @@
 ; error_reporting
 ;   Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
 ;   Development Value: E_ALL
-;   Production Value: E_ALL & ~E_DEPRECATED
+;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 
 ; html_errors
 ;   Default Value: On
@@ -449,9 +449,9 @@ memory_limit = 128M
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
 ; Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
 ; Development Value: E_ALL
-; Production Value: E_ALL & ~E_DEPRECATED
+; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; http://php.net/error-reporting
-error_reporting = E_ALL & ~E_DEPRECATED
+error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 
 ; This directive controls whether or not and where PHP will output errors,
 ; notices and warnings too. Error output is very useful during development, but
