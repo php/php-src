@@ -336,6 +336,8 @@ UPGRADE NOTES - PHP X.Y
   raw POST data in multipart requests and read/process the POST data in a
   stream fashion (through php://input), without having it copied in memory two/
   three times.
+- Changed E_ALL to include E_STRICT. Recommended production value changed to 
+  E_ALL & ~E_DEPRECATED & ~E_STRICT.
 
 ====================
 12. Syntax additions
