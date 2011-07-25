@@ -559,7 +559,7 @@ const zend_function_entry mbstring_functions[] = {
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

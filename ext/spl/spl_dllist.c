@@ -1302,7 +1302,7 @@ ZEND_END_ARG_INFO();
 static const zend_function_entry spl_funcs_SplQueue[] = {
 	SPL_MA(SplQueue, enqueue, SplDoublyLinkedList, push,  arginfo_dllist_push, ZEND_ACC_PUBLIC)
 	SPL_MA(SplQueue, dequeue, SplDoublyLinkedList, shift, arginfo_dllist_void, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
@@ -1332,7 +1332,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	/* Serializable */
 	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_dllist_serialized,      ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

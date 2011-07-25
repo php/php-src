@@ -425,7 +425,7 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(date_sunrise, arginfo_date_sunrise)
 	PHP_FE(date_sunset, arginfo_date_sunset)
 	PHP_FE(date_sun_info, arginfo_date_sun_info)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry date_funcs_date[] = {
@@ -447,7 +447,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME_MAPPING(setTimestamp,	date_timestamp_set, arginfo_date_method_timestamp_set, 0)
 	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_date_method_timestamp_get, 0)
 	PHP_ME_MAPPING(diff,			date_diff, arginfo_date_method_diff, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry date_funcs_timezone[] = {
@@ -458,19 +458,19 @@ const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME_MAPPING(getLocation,       timezone_location_get,       arginfo_timezone_method_location_get, 0)
 	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, arginfo_timezone_abbreviations_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   arginfo_timezone_identifiers_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __construct,                 arginfo_date_interval_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(format,            date_interval_format,        arginfo_date_method_interval_format, 0)
 	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	arginfo_date_interval_create_from_date_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);

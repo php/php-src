@@ -551,7 +551,7 @@ const zend_function_entry imap_functions[] = {
 	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_listscan)
 	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_createmailbox)
 	PHP_FALIAS(imap_rename,			imap_renamemailbox,	arginfo_imap_renamemailbox)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

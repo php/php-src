@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO();
 const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FALIAS(isId, dom_attr_is_id, arginfo_dom_attr_is_id)
 	PHP_ME(domattr, __construct, arginfo_dom_attr_construct, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ proto void DOMAttr::__construct(string name, [string value]); */

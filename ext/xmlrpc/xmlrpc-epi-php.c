@@ -158,7 +158,7 @@ const zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_parse_method_descriptions,				arginfo_xmlrpc_parse_method_descriptions)
 	PHP_FE(xmlrpc_server_add_introspection_data,			arginfo_xmlrpc_server_add_introspection_data)
 	PHP_FE(xmlrpc_server_register_introspection_callback,	arginfo_xmlrpc_server_register_introspection_callback)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry xmlrpc_module_entry = {

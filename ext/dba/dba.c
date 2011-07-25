@@ -146,7 +146,7 @@ const zend_function_entry dba_functions[] = {
 	PHP_FE(dba_handlers, arginfo_dba_handlers)
 	PHP_FE(dba_list, arginfo_dba_list)
 	PHP_FE(dba_key_split, arginfo_dba_key_split)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

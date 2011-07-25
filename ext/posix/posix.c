@@ -301,7 +301,7 @@ const zend_function_entry posix_functions[] = {
 	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
 #endif
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

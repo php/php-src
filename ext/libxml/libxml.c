@@ -121,7 +121,7 @@ static const zend_function_entry libxml_functions[] = {
 	PHP_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
 	PHP_FE(libxml_get_errors, arginfo_libxml_get_errors)
 	PHP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry libxml_module_entry = {

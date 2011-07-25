@@ -3375,7 +3375,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

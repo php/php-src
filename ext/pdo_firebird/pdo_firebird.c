@@ -31,7 +31,7 @@
 #include "php_pdo_firebird_int.h"
 
 const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

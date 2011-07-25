@@ -172,7 +172,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
 	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
 #endif
-	{NULL, NULL, NULL}	
+	PHP_FE_END
 };
 
 zend_module_entry pcntl_module_entry = {

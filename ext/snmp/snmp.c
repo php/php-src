@@ -402,7 +402,7 @@ const zend_function_entry snmp_functions[] = {
 	PHP_FE(snmp_get_valueretrieval,			arginfo_snmp_get_valueretrieval)
 
 	PHP_FE(snmp_read_mib, 				arginfo_snmp_read_mib)
-	{NULL,NULL,NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -2207,7 +2207,7 @@ static zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 getError,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 #define PHP_SNMP_PROPERTY_ENTRY_RECORD(name) \

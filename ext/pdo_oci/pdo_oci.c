@@ -32,7 +32,7 @@
 
 /* {{{ pdo_oci_functions[] */
 const zend_function_entry pdo_oci_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
