@@ -306,7 +306,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 			arginfo_zend__void)
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
-	{ NULL, NULL, NULL }
+	ZEND_FE_END
 };
 /* }}} */
 
