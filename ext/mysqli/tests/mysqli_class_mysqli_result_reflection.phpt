@@ -234,8 +234,22 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 0
+Number of Parameters: 2
 Number of Required Parameters: 0
+
+Inspecting parameter 'class_name' of method 'fetch_object'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
+
+Inspecting parameter 'params' of method 'fetch_object'
+isArray: yes
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_row'
 isFinal: no
