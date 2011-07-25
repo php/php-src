@@ -1215,7 +1215,7 @@ ZEND_FUNCTION(class_exists)
 	
 		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
 		free_alloca(lc_name, use_heap);
-		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+		RETURN_BOOL(found == SUCCESS && !(((*ce)->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
 
  	if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == SUCCESS) {
