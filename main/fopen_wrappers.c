@@ -741,6 +741,14 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
  */
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len TSRMLS_DC)
 {
+	return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ expand_filepath_use_realpath
+ */
+PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode TSRMLS_DC)
+{
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	int copy_len;
@@ -785,7 +793,7 @@ PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const cha
 	new_state.cwd = strdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
-	if (virtual_file_ex(&new_state, filepath, NULL, CWD_FILEPATH TSRMLS_CC)) {
+	if (virtual_file_ex(&new_state, filepath, NULL, realpath_mode TSRMLS_CC)) {
 		free(new_state.cwd);
 		return NULL;
 	}

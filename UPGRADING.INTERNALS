@@ -11,6 +11,7 @@ UPGRADE NOTES - PHP X.Y
   f. streams that enclose private streams
   g. leak_variable
   h. API Signature changes
+  i. new TSRM function expand_filepath_with_mode
 
 2. Build system changes
   a. Unix build system changes
@@ -184,6 +185,9 @@ it increments the refcounts of those objects instead.
 . php_unescape_html_entities
   PHPAPI char *php_unescape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC);
 
+  i. 
+  PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode TSRMLS_DC);
+  expand_filepath_with_mode lets define how realpath will behave, using one of the existing mode: CWD_EXPAND , CWD_FILEPATH or CWD_REALPATH.
 
 ========================
 2. Build system changes
