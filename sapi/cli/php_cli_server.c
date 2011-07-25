@@ -1409,8 +1409,9 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->content_length = request_info->post_data_length = client->request.content_len;
 	{
 		char **val;
+		const char delimiter[] = ";";
 		if (SUCCESS == zend_hash_find(&client->request.headers, "Content-Type", sizeof("Content-Type"), (void**)&val)) {
-			request_info->content_type = *val;
+			request_info->content_type = strtok(*val, delimiter);
 		}
 	}
 } /* }}} */
