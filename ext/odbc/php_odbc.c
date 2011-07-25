@@ -383,7 +383,7 @@ const zend_function_entry odbc_functions[] = {
 #endif
 	PHP_FALIAS(odbc_do, odbc_exec, arginfo_odbc_exec)
 	PHP_FALIAS(odbc_field_precision, odbc_field_len, arginfo_odbc_field_len)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

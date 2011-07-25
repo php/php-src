@@ -198,7 +198,7 @@ static const zend_function_entry pspell_functions[] = {
 	PHP_FE(pspell_config_data_dir,		arginfo_pspell_config_data_dir)
 	PHP_FE(pspell_config_repl,			arginfo_pspell_config_repl)
 	PHP_FE(pspell_config_save_repl,		arginfo_pspell_config_save_repl)
-	{NULL, NULL, NULL} 
+	PHP_FE_END
 };
 /* }}} */
 

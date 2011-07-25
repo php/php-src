@@ -37,7 +37,7 @@
 extern zend_class_entry *dom_domexception_class_entry;
 
 const zend_function_entry php_dom_domexception_class_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error TSRMLS_DC) /* {{{ */

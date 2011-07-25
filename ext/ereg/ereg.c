@@ -59,7 +59,7 @@ const zend_function_entry ereg_functions[] = {
 	PHP_DEP_FE(split,			arginfo_split)
 	PHP_DEP_FE(spliti,			arginfo_split)
 	PHP_DEP_FE(sql_regcase,		arginfo_sql_regcase)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

@@ -35,7 +35,7 @@
 */
 
 const zend_function_entry php_dom_documenttype_class_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ name	string	

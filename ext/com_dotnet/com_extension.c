@@ -228,7 +228,7 @@ const zend_function_entry com_dotnet_functions[] = {
 	PHP_FE(com_message_pump, arginfo_com_message_pump)
 	PHP_FE(com_load_typelib, arginfo_com_load_typelib)
 	PHP_FE(com_get_active_object, arginfo_com_get_active_object)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 
 /* {{{ com_dotnet_module_entry

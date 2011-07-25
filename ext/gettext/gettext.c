@@ -112,7 +112,7 @@ const zend_function_entry php_gettext_functions[] = {
 #if HAVE_BIND_TEXTDOMAIN_CODESET
 	PHP_NAMED_FE(bind_textdomain_codeset,	zif_bind_textdomain_codeset,	arginfo_bind_textdomain_codeset)
 #endif
-    {NULL, NULL, NULL}
+    PHP_FE_END
 };
 /* }}} */
 

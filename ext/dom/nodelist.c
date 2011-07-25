@@ -43,7 +43,7 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_nodelist_class_functions[] = {
 	PHP_FALIAS(item, dom_nodelist_item, arginfo_dom_nodelist_item)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ length	int	

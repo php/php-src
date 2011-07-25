@@ -146,7 +146,7 @@ static const zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_redisplay, arginfo_readline_redisplay)
 	PHP_FE(readline_on_new_line, arginfo_readline_on_new_line)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry readline_module_entry = { 

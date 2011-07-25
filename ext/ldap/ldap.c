@@ -2712,7 +2712,7 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_control_paged_result,							arginfo_ldap_control_paged_result)
 	PHP_FE(ldap_control_paged_result_response,		arginfo_ldap_control_paged_result_response)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

@@ -128,7 +128,7 @@ static const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_list,		arginfo_filter_list)
 	PHP_FE(filter_has_var,		arginfo_filter_has_var)
 	PHP_FE(filter_id,		arginfo_filter_id)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

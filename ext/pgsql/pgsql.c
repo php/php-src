@@ -697,7 +697,7 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,		arginfo_pg_client_encoding)
 	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	arginfo_pg_set_client_encoding)
 #endif
-	{NULL, NULL, NULL} 
+	PHP_FE_END
 };
 /* }}} */
 

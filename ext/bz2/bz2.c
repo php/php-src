@@ -107,7 +107,7 @@ static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzerror,      arginfo_bzerror)
 	PHP_FE(bzcompress,   arginfo_bzcompress)
 	PHP_FE(bzdecompress, arginfo_bzdecompress)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry bz2_module_entry = {

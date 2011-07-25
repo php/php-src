@@ -231,7 +231,7 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(relaxNGValidateSource, dom_document_relaxNG_validate_xml, arginfo_dom_document_relaxNG_validate_xml)
 #endif
 	PHP_ME(domdocument, registerNodeClass, arginfo_dom_document_registernodeclass, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

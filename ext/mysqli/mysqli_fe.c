@@ -460,7 +460,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FALIAS(mysqli_escape_string,	mysqli_real_escape_string,	arginfo_mysqli_query)
 	PHP_FALIAS(mysqli_set_opt,			mysqli_options,				NULL)
 
-	{NULL, NULL, NULL}	/* Must be the last line in mysqli_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

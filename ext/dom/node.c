@@ -155,7 +155,7 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 	PHP_ME(domnode, getLineNo, arginfo_dom_node_getLineNo, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

@@ -737,7 +737,7 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(zlib_encode,						arginfo_zlib_encode)
 	PHP_FE(zlib_decode,						arginfo_zlib_decode)
 	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

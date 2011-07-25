@@ -84,7 +84,7 @@ static const zend_function_entry php_recode_functions[] = {
 	PHP_FE(recode_string, 	arginfo_recode_string)
 	PHP_FE(recode_file, 	arginfo_recode_file)
 	PHP_FALIAS(recode, recode_string, arginfo_recode_string)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry recode_module_entry = {

@@ -1813,7 +1813,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		enableExceptions,	argingo_sqlite3_enableexceptions, ZEND_ACC_PUBLIC)
 	/* Aliases */
 	PHP_MALIAS(sqlite3,	__construct, open, arginfo_sqlite3_open, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -1828,7 +1828,7 @@ static zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, bindValue,	arginfo_sqlite3stmt_bindvalue, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, readOnly,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE|ZEND_ACC_CTOR)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -1841,7 +1841,7 @@ static zend_function_entry php_sqlite3_result_class_methods[] = {
 	PHP_ME(sqlite3result, reset,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, finalize,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, __construct, 		arginfo_sqlite3_void, ZEND_ACC_PRIVATE|ZEND_ACC_CTOR)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

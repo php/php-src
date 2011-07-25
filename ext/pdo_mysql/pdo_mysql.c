@@ -170,7 +170,7 @@ static PHP_GINIT_FUNCTION(pdo_mysql)
 
 /* {{{ pdo_mysql_functions[] */
 const zend_function_entry pdo_mysql_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

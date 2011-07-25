@@ -86,7 +86,7 @@ const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_has_var,		arginfo_shm_has_var)
 	PHP_FE(shm_get_var,		arginfo_shm_get_var)
 	PHP_FE(shm_remove_var,	arginfo_shm_remove_var)
-	{NULL, NULL, NULL}	
+	PHP_FE_END
 };
 /* }}} */
 

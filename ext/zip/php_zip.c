@@ -781,8 +781,7 @@ static const zend_function_entry zip_functions[] = {
 	PHP_FE(zip_entry_name,		arginfo_zip_entry_name)
 	PHP_FE(zip_entry_compressedsize,		arginfo_zip_entry_compressedsize)
 	PHP_FE(zip_entry_compressionmethod,		arginfo_zip_entry_compressionmethod)
-
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
