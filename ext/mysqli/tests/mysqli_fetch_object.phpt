@@ -10,6 +10,8 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include_once("connect.inc");
 
+	set_error_handler('handle_catchable_fatal');
+
 	$tmp    = NULL;
 	$link   = NULL;
 
@@ -57,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 
 	}
 
-	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', null);
+	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array());
 
 	if (($obj->ID !== "3") || ($obj->label !== "c") || ($obj->a !== NULL) || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
 		printf("[006] Object seems wrong. [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -97,7 +99,7 @@ require_once('skipifconnectfailure.inc');
 	Also, I did not ask to get exceptions using the mysqli_options()
 	*/
 	try {
-		if (false !== ($obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
+		if (false !== ($obj = @mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
 			printf("[011] Should have failed\n");
 	} catch (Exception $e) {
 		printf("%s\n", $e->getMessage());
@@ -136,22 +138,19 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Warning: Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: a in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
-
-Warning: Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
+[E_WARNING] mysqli_fetch_object() expects at least 1 parameter, 0 given in %s on line %d
+[E_WARNING] mysqli_fetch_object() expects parameter 1 to be mysqli_result, null given in %s on line %d
+[E_WARNING] Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: a in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
 NULL
 NULL
-
-Warning: mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
+[E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
+[E_RECOVERABLE_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
 Parameter ctor_params must be an array
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d
