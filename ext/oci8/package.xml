@@ -33,7 +33,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2011-06-10</date>
+ <date>2011-07-25</date>
  <time>12:00:00</time>
 
  <version>
@@ -338,7 +338,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="null_byte_2.phpt" role="test" />
     <file name="null_byte_3.phpt" role="test" />
     <file name="num.phpt" role="test" />
-    <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
     <file name="old_oci_close1.phpt" role="test" />
     <file name="old_oci_close.phpt" role="test" />
