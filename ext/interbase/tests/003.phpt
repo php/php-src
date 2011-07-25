@@ -21,7 +21,7 @@ InterBase: misc sql types (may take a while)
    	 		v_numeric15_0  	numeric(15,0),
             v_double  	double precision,
             v_float     float,
-    		v_integer   integer,
+            v_integer   integer,
             v_smallint  smallint,
             v_varchar   varchar(10000)
             )");
