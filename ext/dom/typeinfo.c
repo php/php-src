@@ -36,7 +36,7 @@
 */
 
 const zend_function_entry php_dom_typeinfo_class_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ attribute protos, not implemented yet */

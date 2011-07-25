@@ -3291,7 +3291,7 @@ ZEND_GET_MODULE(phar)
  * Every user visible function must have an entry in phar_functions[].
  */
 zend_function_entry phar_functions[] = {
-	{NULL, NULL, NULL} /* Must be the last line in phar_functions[] */
+	PHP_FE_END
 };
 /* }}}*/
 

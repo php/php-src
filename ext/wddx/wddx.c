@@ -141,7 +141,7 @@ const zend_function_entry wddx_functions[] = {
 	PHP_FE(wddx_packet_end,		arginfo_wddx_packet_end)
 	PHP_FE(wddx_add_vars,		arginfo_wddx_add_vars)
 	PHP_FE(wddx_deserialize,	arginfo_wddx_deserialize)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

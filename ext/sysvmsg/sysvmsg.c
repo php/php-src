@@ -95,7 +95,7 @@ const zend_function_entry sysvmsg_functions[] = {
 	PHP_FE(msg_stat_queue,				arginfo_msg_stat_queue)
 	PHP_FE(msg_set_queue,				arginfo_msg_set_queue)
 	PHP_FE(msg_queue_exists,			arginfo_msg_queue_exists)
-	{NULL, NULL, NULL}	/* Must be the last line in sysvmsg_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

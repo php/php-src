@@ -106,7 +106,7 @@ const zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcscale,									arginfo_bcscale)
 	PHP_FE(bccomp,									arginfo_bccomp)
 	PHP_FE(bcpowmod,								arginfo_bcpowmod)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry bcmath_module_entry = {

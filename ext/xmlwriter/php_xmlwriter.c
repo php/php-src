@@ -526,7 +526,7 @@ static const zend_function_entry xmlwriter_functions[] = {
 #endif
 	PHP_FE(xmlwriter_output_memory,		arginfo_xmlwriter_output_memory)
 	PHP_FE(xmlwriter_flush,				arginfo_xmlwriter_flush)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

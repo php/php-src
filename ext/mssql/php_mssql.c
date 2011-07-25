@@ -178,7 +178,7 @@ const zend_function_entry mssql_functions[] = {
  	PHP_FE(mssql_execute,				arginfo_mssql_execute)
 	PHP_FE(mssql_free_statement,		arginfo_mssql_free_statement)
  	PHP_FE(mssql_guid_string,			arginfo_mssql_guid_string)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

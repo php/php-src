@@ -23,7 +23,7 @@ static int le_extname;
 const zend_function_entry extname_functions[] = {
 	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
 	/* __function_entries_here__ */
-	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
+	PHP_FE_END	/* Must be the last line in extname_functions[] */
 };
 /* }}} */
 

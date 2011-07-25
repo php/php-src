@@ -125,7 +125,7 @@ ZEND_END_ARG_INFO()
 /* {{{ pdo_functions[] */
 const zend_function_entry pdo_functions[] = {
 	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

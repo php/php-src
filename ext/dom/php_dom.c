@@ -543,7 +543,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {

@@ -1904,7 +1904,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_get_cookie_params, arginfo_session_void)
 	PHP_FE(session_write_close,       arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

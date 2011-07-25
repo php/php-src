@@ -136,7 +136,7 @@ const zend_function_entry iconv_functions[] = {
 	PHP_FE(iconv_mime_encode,						arginfo_iconv_mime_encode)
 	PHP_FE(iconv_mime_decode,						arginfo_iconv_mime_decode)
 	PHP_FE(iconv_mime_decode_headers,				arginfo_iconv_mime_decode_headers)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

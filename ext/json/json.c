@@ -64,7 +64,7 @@ static const zend_function_entry json_functions[] = {
 	PHP_FE(json_encode, arginfo_json_encode)
 	PHP_FE(json_decode, arginfo_json_decode)
 	PHP_FE(json_last_error, arginfo_json_last_error)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

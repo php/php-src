@@ -1012,14 +1012,14 @@ const zend_function_entry spl_functions[] = {
 	PHP_FE(spl_autoload_call,       arginfo_spl_autoload_call)
 	PHP_FE(class_parents,           arginfo_class_parents)
 	PHP_FE(class_implements,        arginfo_class_implements)
-  PHP_FE(class_uses,              arginfo_class_uses)
+	PHP_FE(class_uses,              arginfo_class_uses)
 	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)
 	PHP_FE(iterator_apply,          arginfo_iterator_apply)
 #endif /* SPL_ITERATORS_H */
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
