@@ -37,6 +37,13 @@
 #include "php_ini.h"
 #include "ext/standard/php_smart_str.h"
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
+#endif
+
 #if HAVE_OCI8
 
 #if PHP_MAJOR_VERSION > 5
@@ -50,6 +57,14 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 #include "zend_hash.h"
+
+#if defined(HAVE_STDINT_H) || defined(PHP_WIN32)
+#define OCI8_INT_TO_PTR(I)  ((void *)(intptr_t)(I))
+#define OCI8_PTR_TO_INT(P)  ((int)(intptr_t)(P))
+#else
+#define OCI8_INT_TO_PTR(I)  ((void *)(I))
+#define OCI8_PTR_TO_INT(P)  ((int)(P))
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(oci)
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
@@ -1877,7 +1892,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				int type, link;
 				void *ptr;
 
-				link = (int) le->ptr;
+				link = OCI8_PTR_TO_INT(le->ptr);
 				ptr = zend_list_find(link,&type);
 				if (ptr && (type == le_connection)) {
 					connection = (php_oci_connection *)ptr;
@@ -2116,7 +2131,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 #else
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
 #endif
-		new_le.ptr = (void *)connection->rsrc_id;
+		new_le.ptr = OCI8_INT_TO_PTR(connection->rsrc_id);
 		new_le.type = le_index_ptr;
 		zend_hash_update(&EG(regular_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
 		OCI_G(num_links)++;
