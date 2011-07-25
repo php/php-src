@@ -439,7 +439,7 @@ const zend_function_entry openssl_functions[] = {
 
 	PHP_FE(openssl_random_pseudo_bytes,    arginfo_openssl_random_pseudo_bytes)
 	PHP_FE(openssl_error_string, arginfo_openssl_error_string)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

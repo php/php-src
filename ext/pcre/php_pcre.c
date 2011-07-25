@@ -1894,7 +1894,7 @@ static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_quote,				arginfo_preg_quote)
 	PHP_FE(preg_grep,				arginfo_preg_grep)
 	PHP_FE(preg_last_error,			arginfo_preg_last_error)
-	{NULL, 		NULL,				NULL}
+	PHP_FE_END
 };
 
 zend_module_entry pcre_module_entry = {

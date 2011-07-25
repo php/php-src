@@ -2506,7 +2506,7 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_8859_to_t61,							arginfo_ldap_8859_to_t61)
 #endif
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

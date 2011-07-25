@@ -460,7 +460,7 @@ unsigned char arginfo_soapclient___soapcall[] = { 5, BYREF_NONE, BYREF_NONE, BYR
 static const zend_function_entry soap_functions[] = {
 	PHP_FE(use_soap_error_handler, 	arginfo_soap_use_soap_error_handler)
 	PHP_FE(is_soap_fault, 			arginfo_soap_is_soap_fault)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_fault_functions[] = {
@@ -468,7 +468,7 @@ static const zend_function_entry soap_fault_functions[] = {
 #ifdef ZEND_ENGINE_2
 	PHP_ME(SoapFault, __toString, arginfo_soap__void, 0)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_server_functions[] = {
@@ -481,7 +481,7 @@ static const zend_function_entry soap_server_functions[] = {
 	PHP_ME(SoapServer, handle, 			arginfo_soapserver_handle, 0)
 	PHP_ME(SoapServer, fault, 			arginfo_soapserver_fault, 0)
 	PHP_ME(SoapServer, addSoapHeader, 	arginfo_soapserver_addsoapheader, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_client_functions[] = {
@@ -498,22 +498,22 @@ static const zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __setCookie, 				arginfo_soapclient___setcookie, 0)
 	PHP_ME(SoapClient, __setLocation, 				arginfo_soapclient___setlocation, 0)
 	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_soapclient___setsoapheaders, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_var_functions[] = {
 	SOAP_CTOR(SoapVar, SoapVar, arginfo_soapvar_soapvar, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_param_functions[] = {
 	SOAP_CTOR(SoapParam, SoapParam, arginfo_soapparam_soapparam, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry soap_header_functions[] = {
 	SOAP_CTOR(SoapHeader, SoapHeader, arginfo_soapheader_soapheader, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry soap_module_entry = {

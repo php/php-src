@@ -320,7 +320,7 @@ static const zend_function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_dbname,		mysql_result,		arginfo_mysql_result)
 	PHP_FALIAS(mysql_tablename,		mysql_result,		arginfo_mysql_result)
 	PHP_FALIAS(mysql_table_name,	mysql_result,		arginfo_mysql_result)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

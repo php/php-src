@@ -487,7 +487,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intl_is_failure, intl_1_arg )
 	PHP_FE( intl_error_name, intl_1_arg )
 
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

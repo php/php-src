@@ -31,7 +31,7 @@
  * Every user visible function must have an entry in mysqlnd_functions[].
  */
 static zend_function_entry mysqlnd_functions[] = {
-	{NULL, NULL, NULL}	/* Must be the last line in mysqlnd_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

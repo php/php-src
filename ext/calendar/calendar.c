@@ -148,7 +148,7 @@ const zend_function_entry calendar_functions[] = {
 	PHP_FE(cal_from_jd, arginfo_cal_from_jd)
 	PHP_FE(cal_days_in_month, arginfo_cal_days_in_month)
 	PHP_FE(cal_info, arginfo_cal_info)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 

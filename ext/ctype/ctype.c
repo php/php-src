@@ -106,7 +106,7 @@ static const zend_function_entry ctype_functions[] = {
 	PHP_FE(ctype_space,	arginfo_ctype_space)
 	PHP_FE(ctype_upper,	arginfo_ctype_upper)
 	PHP_FE(ctype_xdigit,	arginfo_ctype_xdigit)
-	{NULL, NULL, NULL}	/* Must be the last line in ctype_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

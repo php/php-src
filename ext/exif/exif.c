@@ -144,7 +144,7 @@ const zend_function_entry exif_functions[] = {
 	PHP_FE(exif_tagname, arginfo_exif_tagname)
 	PHP_FE(exif_thumbnail, arginfo_exif_thumbnail)
 	PHP_FE(exif_imagetype, arginfo_exif_imagetype)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

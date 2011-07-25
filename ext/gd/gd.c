@@ -1045,7 +1045,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagefilter,     						arginfo_imagefilter)
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

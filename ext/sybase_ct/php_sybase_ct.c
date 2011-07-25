@@ -204,7 +204,7 @@ const zend_function_entry sybase_functions[] = {
 	PHP_FALIAS(mssql_set_message_handler, 	sybase_set_message_handler, 	arginfo_sybase_set_message_handler)
 	PHP_FALIAS(mssql_deadlock_retry_count, 	sybase_deadlock_retry_count, 	arginfo_sybase_deadlock_retry_count)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry sybase_module_entry = {

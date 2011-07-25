@@ -87,7 +87,7 @@ const zend_function_entry shmop_functions[] = {
 	PHP_FE(shmop_size, 		arginfo_shmop_size)
 	PHP_FE(shmop_write, 	arginfo_shmop_write)
 	PHP_FE(shmop_delete, 	arginfo_shmop_delete)
-	{NULL, NULL, NULL}	/* Must be the last line in shmop_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

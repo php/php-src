@@ -441,7 +441,7 @@ const zend_function_entry ibase_functions[] = {
 	PHP_FALIAS(fbird_wait_event,	ibase_wait_event, 	arginfo_ibase_wait_event)
 	PHP_FALIAS(fbird_set_event_handler,	ibase_set_event_handler, 	arginfo_ibase_set_event_handler)
 	PHP_FALIAS(fbird_free_event_handler,	ibase_free_event_handler, arginfo_ibase_free_event_handler)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 zend_module_entry ibase_module_entry = {

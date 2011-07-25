@@ -237,7 +237,7 @@ const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_get_option,				arginfo_xml_parser_get_option)
 	PHP_FE(utf8_encode, 						arginfo_utf8_encode)
 	PHP_FE(utf8_decode, 						arginfo_utf8_decode)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 #ifdef LIBXML_EXPAT_COMPAT

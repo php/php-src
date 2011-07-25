@@ -44,7 +44,7 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_processinginstruction_class_functions[] = {
 	PHP_ME(domprocessinginstruction, __construct, arginfo_dom_processinginstruction_construct, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]); */

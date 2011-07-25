@@ -404,7 +404,7 @@ static const zend_function_entry tidy_functions[] = {
 	PHP_FE(tidy_get_html,		arginfo_tidy_get_html)
 	PHP_FE(tidy_get_body,		arginfo_tidy_get_body)
 	PHP_FE(ob_tidyhandler,		arginfo_ob_tidyhandler)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry tidy_funcs_doc[] = {
@@ -429,7 +429,7 @@ static const zend_function_entry tidy_funcs_doc[] = {
 	TIDY_METHOD_MAP(html, tidy_get_html, NULL)
 	TIDY_METHOD_MAP(body, tidy_get_body, NULL)
 	TIDY_DOC_ME(__construct, NULL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry tidy_funcs_node[] = {
@@ -443,7 +443,7 @@ static const zend_function_entry tidy_funcs_node[] = {
 	TIDY_NODE_ME(isPhp, NULL)
 	TIDY_NODE_ME(getParent, NULL)
 	TIDY_NODE_PRIVATE_ME(__construct, NULL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zend_class_entry *tidy_ce_doc, *tidy_ce_node;

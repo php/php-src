@@ -35,7 +35,7 @@ static zend_object_handlers xsl_object_handlers;
  * Every user visible function must have an entry in xsl_functions[].
  */
 const zend_function_entry xsl_functions[] = {
-	{NULL, NULL, NULL}  /* Must be the last line in xsl_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

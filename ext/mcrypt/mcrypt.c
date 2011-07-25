@@ -280,7 +280,7 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 	PHP_FE(mcrypt_module_get_supported_key_sizes, 	arginfo_mcrypt_module_get_supported_key_sizes)
 
 	PHP_FE(mcrypt_module_close, 					arginfo_mcrypt_module_close)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

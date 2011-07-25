@@ -68,7 +68,7 @@ const zend_function_entry php_dom_xpath_class_functions[] = {
 	PHP_FALIAS(query, dom_xpath_query, arginfo_dom_xpath_query)
 	PHP_FALIAS(evaluate, dom_xpath_evaluate, arginfo_dom_xpath_evaluate)
 	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, arginfo_dom_xpath_register_php_functions)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 

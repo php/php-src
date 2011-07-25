@@ -1306,7 +1306,7 @@ static const zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, setRelaxNGSchemaSource, arginfo_xmlreader_setRelaxNGSchemaSource, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, XML, arginfo_xmlreader_XML, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, expand, arginfo_xmlreader_expand, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ PHP_MINIT_FUNCTION

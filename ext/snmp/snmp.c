@@ -331,7 +331,7 @@ const zend_function_entry snmp_functions[] = {
 	PHP_FE(snmp_get_valueretrieval, arginfo_snmp_get_valueretrieval)
 
 	PHP_FE(snmp_read_mib, 			arginfo_snmp_read_mib)
-	{NULL,NULL,NULL}
+	PHP_FE_END
 };
 /* }}} */
 

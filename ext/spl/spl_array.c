@@ -1929,7 +1929,7 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setIteratorClass, arginfo_array_setIteratorClass, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getIteratorClass, arginfo_array_void,             ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_ArrayIterator[] = {
@@ -1958,13 +1958,13 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, next,             arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, valid,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, seek,             arginfo_array_seek,             ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_RecursiveArrayIterator[] = {
 	SPL_ME(Array, hasChildren,   arginfo_array_void, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getChildren,   arginfo_array_void, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

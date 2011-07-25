@@ -36,7 +36,7 @@
 */
 
 const zend_function_entry php_dom_entity_class_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ publicId	string	

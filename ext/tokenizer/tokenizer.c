@@ -52,7 +52,7 @@ ZEND_END_ARG_INFO()
 const zend_function_entry tokenizer_functions[] = {
 	PHP_FE(token_get_all,	arginfo_token_get_all)
 	PHP_FE(token_name,		arginfo_token_name)
-	{NULL, NULL, NULL}	/* Must be the last line in tokenizer_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

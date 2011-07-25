@@ -46,7 +46,7 @@ ZEND_END_ARG_INFO();
 const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_ME(domdocumentfragment, __construct, arginfo_dom_documentfragement_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(domdocumentfragment, appendXML, arginfo_dom_documentfragement_appendXML, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ proto void DOMDocumentFragment::__construct(); */

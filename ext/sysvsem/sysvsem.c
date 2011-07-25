@@ -84,7 +84,7 @@ const zend_function_entry sysvsem_functions[] = {
 	PHP_FE(sem_acquire,		arginfo_sem_acquire)
 	PHP_FE(sem_release,		arginfo_sem_release)
 	PHP_FE(sem_remove,		arginfo_sem_remove)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

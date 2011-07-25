@@ -35,7 +35,7 @@
 
 /* {{{ pdo_sqlite_functions[] */
 const zend_function_entry pdo_sqlite_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

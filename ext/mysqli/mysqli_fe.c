@@ -468,7 +468,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FALIAS(mysqli_send_long_data,	mysqli_stmt_send_long_data,	NULL)
 	PHP_FALIAS(mysqli_set_opt,			mysqli_options,				NULL)
 
-	{NULL, NULL, NULL}	/* Must be the last line in mysqli_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

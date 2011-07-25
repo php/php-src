@@ -1060,7 +1060,7 @@ const zend_function_entry hash_functions[] = {
 	PHP_FE(mhash, arginfo_mhash)
 #endif
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

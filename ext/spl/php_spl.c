@@ -877,7 +877,7 @@ const zend_function_entry spl_functions[] = {
 	PHP_FE(iterator_count,          arginfo_iterator)
 	PHP_FE(iterator_apply,          arginfo_iterator_apply)
 #endif /* SPL_ITERATORS_H */
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

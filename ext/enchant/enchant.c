@@ -146,8 +146,7 @@ function_entry enchant_functions[] = {
 	PHP_FE(enchant_dict_get_error, 			arginfo_enchant_broker_free_dict)
 	PHP_FE(enchant_dict_describe, 			arginfo_enchant_broker_free_dict)
 	PHP_FE(enchant_dict_quick_check, 		arginfo_enchant_dict_quick_check)
-
-	{NULL, NULL, NULL}	/* Must be the last line in enchant_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 

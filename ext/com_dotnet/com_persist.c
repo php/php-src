@@ -697,7 +697,7 @@ static const zend_function_entry com_persist_helper_methods[] = {
 	CPH_ME(InitNew, NULL)
 	CPH_ME(LoadFromStream, NULL)
 	CPH_ME(SaveToStream, NULL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static void helper_free_storage(void *obj TSRMLS_DC)

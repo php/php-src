@@ -300,7 +300,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
 	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

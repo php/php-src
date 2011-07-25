@@ -42,7 +42,7 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_domstringlist_class_functions[] = {
 	PHP_FALIAS(item, dom_domstringlist_item, arginfo_dom_stringlist_item)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ attribute protos, not implemented yet */

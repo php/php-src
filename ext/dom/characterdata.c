@@ -68,7 +68,7 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_dom_characterdata_insert_data)
 	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_dom_characterdata_delete_data)
 	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_dom_characterdata_replace_data)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ data	string	

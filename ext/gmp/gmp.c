@@ -280,7 +280,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
 	ZEND_FE(gmp_hamdist, arginfo_gmp_hamdist)
 	ZEND_FE(gmp_nextprime, arginfo_gmp_nextprime)
-	{NULL, NULL, NULL}	/* Must be the last line in gmp_functions[] */
+	PHP_FE_END
 };
 /* }}} */
 
