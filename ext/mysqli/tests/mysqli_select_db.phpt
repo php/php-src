@@ -55,15 +55,33 @@ require_once('skipifconnectfailure.inc');
 		mysqli_free_result($res);
 	}
 
-	mysqli_report(MYSQLI_REPORT_OFF);
+	if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
+		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$row = mysqli_fetch_assoc($res))
+		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	$current_db = $row['dbname'];
+
+	mysqli_report(MYSQLI_REPORT_OFF);	  
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 	mysqli_report(MYSQLI_REPORT_ERROR);
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 
+	if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
+		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!$row = mysqli_fetch_assoc($res))
+		printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (strtolower($row['dbname']) != strtolower($current_db))
+		printf("[016] Current DB should not change if set fails\n");
+
+
 	mysqli_close($link);
 
 	if (NULL !== ($tmp = mysqli_select_db($link, $db)))
-		printf("[012] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!\n";
 ?>
