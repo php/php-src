@@ -1219,10 +1219,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 #if defined(PHP_WIN32) || HAVE_SYMLINK
 	if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
 		char expanded_path[MAXPATHLEN];
-
-		/* TODO: Fix expand_filepath to do not resolve links but only expand the path 
-		   (Pierre) */
-		if (!expand_filepath(intern->file_name, expanded_path TSRMLS_CC)) {
+		if (!expand_filepath_with_mode(intern->file_name, expanded_path, NULL, 0, CWD_EXPAND  TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 			RETURN_FALSE;
 		}
