@@ -15,13 +15,18 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		'MYSQL_ATTR_FOUND_ROWS'						=> true,
 		'MYSQL_ATTR_IGNORE_SPACE'					=> true,
 		'MYSQL_ATTR_INIT_COMMAND'					=> true,
+		"MYSQL_ATTR_SSL_KEY"						=> true,
+		"MYSQL_ATTR_SSL_CERT"						=> true,
+		"MYSQL_ATTR_SSL_CA"							=> true,
+		"MYSQL_ATTR_SSL_CAPATH"						=> true,
+		"MYSQL_ATTR_SSL_CIPHER"						=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {
-		$expected['MYSQL_ATTR_MAX_BUFFER_SIZE'] 		= true;
-		$expected['MYSQL_ATTR_READ_DEFAULT_FILE'] 	= true;
-		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP'] 	= true;
-		$expected['MYSQL_ATTR_COMPRESS']						= true;
+		$expected['MYSQL_ATTR_MAX_BUFFER_SIZE']			= true;
+		$expected['MYSQL_ATTR_READ_DEFAULT_FILE']		= true;
+		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP']		= true;
+		$expected['MYSQL_ATTR_COMPRESS']				= true;
 	}
 
 	/*
