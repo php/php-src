@@ -1147,24 +1147,18 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 		ret = php_mkdir(dir, mode TSRMLS_CC);
 	} else {
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
-		char *e, *buf;
+		char *e;
 		struct stat sb;
 		int dir_len = strlen(dir);
 		int offset = 0;
+		char buf[MAXPATHLEN];
 
-		buf = estrndup(dir, dir_len);
-
-#ifdef PHP_WIN32
-		e = buf;
-		while (*e) {
-			if (*e == '/') {
-				*e = DEFAULT_SLASH;
-			}
-			e++;
+		if (!expand_filepath_with_mode(dir, buf, NULL, 0, CWD_EXPAND  TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path");
+			return 0;
 		}
-#else
-		e = buf + dir_len;
-#endif
+
+		e = buf +  strlen(buf);
 
 		if ((p = memchr(buf, DEFAULT_SLASH, dir_len))) {
 			offset = p - buf + 1;
@@ -1216,7 +1210,6 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 				}
 			}
 		}
-		efree(buf);
 	}
 	if (ret < 0) {
 		/* Failure */
