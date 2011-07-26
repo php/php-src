@@ -628,16 +628,11 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	filename_length = strlen(filename);
 
 	/* Relative path open */
-	if (*filename == '.') {
-		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
-	}
-
+	if ((*filename == '.')
 	/* Absolute path open */
-	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
-		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
-	}
-
-	if (!path || (path && !*path)) {
+	 || IS_ABSOLUTE_PATH(filename, filename_length)
+	 || (!path || (path && !*path))
+	) {
 		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 
