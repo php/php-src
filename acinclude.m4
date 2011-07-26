@@ -2923,6 +2923,10 @@ dnl header-file
 
 dnl Add providerdesc.o into global objects when needed
   case $host_alias in
+  *freebsd*)
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    PHP_LDFLAGS="$PHP_LDFLAGS -lelf"
+    ;;
   *solaris*)
     PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
     ;;
