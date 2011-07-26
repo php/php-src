@@ -12,6 +12,10 @@
 
 - Changed E_ALL to include E_STRICT. (Stas)
 
+- Improved core functions
+  . Fixed bug #55124 (recursive mkdir fails with current (dot) directory in path).
+    (Pierre)
+
 - Improved PHP-FPM SAPI:
   . Added process.max to control the number of process FPM can fork. FR #55166.
     (fat)
