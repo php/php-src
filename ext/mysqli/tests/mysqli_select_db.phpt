@@ -9,6 +9,7 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	require_once("connect.inc");
+	require_once("table.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;
@@ -55,11 +56,14 @@ require_once('skipifconnectfailure.inc');
 		mysqli_free_result($res);
 	}
 
+	if (!$link->select_db($db))
+		printf("[012] Failed to set '%s' as current DB; [%d] %s\n", $link->errno, $link->error);
+
 	if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
-		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_assoc($res))
-		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$current_db = $row['dbname'];
 
@@ -69,14 +73,20 @@ require_once('skipifconnectfailure.inc');
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 
 	if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
-		printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!$row = mysqli_fetch_assoc($res))
 		printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (strtolower($row['dbname']) != strtolower($current_db))
-		printf("[016] Current DB should not change if set fails\n");
+	if (!$row = mysqli_fetch_assoc($res))
+		printf("[016] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
+	if (strtolower($row['dbname']) != strtolower($current_db))
+		printf("[017] Current DB should not change if set fails\n");
+
+	
+	if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
+		printf("[018] [%d] %s\n");
+
+	$row = $res->fetch_assoc();
+	$res->free();
 
 	mysqli_close($link);
 
@@ -85,6 +95,8 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!\n";
 ?>
+--CLEAN--
+<?php require_once("clean_table.inc"); ?>
 --EXPECTF--
 Warning: mysqli_select_db(): (%d/%d): Unknown database '%s' in %s on line %d
 
