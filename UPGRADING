@@ -474,3 +474,5 @@ UPGRADE NOTES - PHP X.Y
          $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
          $a = ['one' => 1, 2, 'three' => 3, 4];
 
+       - Binary number format
+         0b00100 0b010101
