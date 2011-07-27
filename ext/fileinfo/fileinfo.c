@@ -293,10 +293,6 @@ PHP_FUNCTION(finfo_open)
 	if (file_len == 0) {
 		file = NULL;
 	} else if (file && *file) { /* user specified file, perform open_basedir checks */
-		if (!VCWD_REALPATH(file, resolved_path)) {
-			RETURN_FALSE;
-		}
-		file = resolved_path;
 
 #if PHP_API_VERSION < 20100412
 		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
@@ -305,6 +301,10 @@ PHP_FUNCTION(finfo_open)
 #endif
 			RETURN_FALSE;
 		}
+		if (!expand_filepath_with_mode(file, resolved_path, NULL, 0, CWD_EXPAND TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+		file = resolved_path;
 	}
 
 	finfo = emalloc(sizeof(struct php_fileinfo));
