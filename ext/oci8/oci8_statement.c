@@ -1480,7 +1480,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 								name_len,
 								(dvoid *) bindp->array.elements,
 								(sb4) bind->array.max_length,
-								type,
+								(ub2)type,
 								(dvoid *)bindp->array.indicators,
 								(ub2 *)bind->array.element_lengths,
 								(ub2 *)0, /* bindp->array.retcodes, */

@@ -405,7 +405,7 @@ int php_oci_lob_get_buffering (php_oci_descriptor *);
 int php_oci_lob_copy (php_oci_descriptor *, php_oci_descriptor *, long TSRMLS_DC);
 int php_oci_lob_close (php_oci_descriptor * TSRMLS_DC);
 int php_oci_temp_lob_close (php_oci_descriptor * TSRMLS_DC);
-int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, char *, int TSRMLS_DC);
+int php_oci_lob_write_tmp (php_oci_descriptor *, long, char *, int TSRMLS_DC);
 void php_oci_lob_free(php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_import(php_oci_descriptor *descriptor, char * TSRMLS_DC);
 int php_oci_lob_append (php_oci_descriptor *, php_oci_descriptor * TSRMLS_DC);
