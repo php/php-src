@@ -25,6 +25,8 @@
 
 - SPL extension:
   . Added missing class_uses(..) as pointed out by #55266 (Stefan)
+  . Fixed bug #55287 (spl_classes() not includes CallbackFilter classes)
+    (sasezaki at gmail dot com, salathe)
 
 
 14 Jul 2011, PHP 5.4.0 Alpha 2
