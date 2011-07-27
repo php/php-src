@@ -348,7 +348,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, c
 	}
 	fp = VCWD_FOPEN(path, mode);
 	if (fp && opened_path) {
-		*opened_path = expand_filepath(path, NULL TSRMLS_CC);
+		*opened_path = expand_filepath_with_mode(path, NULL, NULL, 0, CWD_EXPAND TSRMLS_CC);
 	}
 	return fp;
 }
