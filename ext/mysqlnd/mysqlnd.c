@@ -931,9 +931,9 @@ err:
 	PACKET_FREE(greet_packet);
 
 	if (errstr) {
-		DBG_ERR_FMT("[%u] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
+		DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", errcode, errstr, conn->scheme);
 		SET_CLIENT_ERROR(conn->error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%u] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%u] %.128s (trying to connect via %s)", errcode, errstr, conn->scheme);
 		/* no mnd_ since we don't allocate it */
 		efree(errstr);
 	}
