@@ -530,6 +530,10 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	if (!cmd) {
+		return NULL;
+	}
+
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 	if (asuser) {
 		res = CreateProcessAsUser(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
