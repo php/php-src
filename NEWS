@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . On blocking SSL sockets respect the timeout option where possible.
     (Scott)
 
+- Core
+  . Fix bug #55295 [NEW]: popen_ex on windows, fixed possible heap overflow
+    (Pierre)
+
 14 Jul 2011, PHP 5.3.7 RC3
 - Zend Engine:
   . Fixed bug #55156 (ReflectionClass::getDocComment() returns comment even
