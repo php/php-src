@@ -24,6 +24,7 @@
 #include "zend.h"
 
 ZEND_API extern const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
+ZEND_API extern zend_bool (*zend_is_interned_string)(const char *str TSRMLS_DC);
 ZEND_API extern void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API extern void (*zend_interned_strings_restore)(TSRMLS_D);
 
@@ -33,7 +34,7 @@ void zend_interned_strings_dtor(TSRMLS_D);
 #ifndef ZTS
 
 #define IS_INTERNED(s) \
-	(((s) >= CG(interned_strings_start)) && ((s) < CG(interned_strings_end)))
+	(zend_is_interned_string ? zend_is_interned_string((s) TSRMLS_CC) : 0)
 
 #else
 
