@@ -987,6 +987,7 @@ LNUM	[0-9]+
 DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+
+BNUM	"0b"[01]+
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
@@ -1458,6 +1459,26 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	goto restart;
 }
 
+<ST_IN_SCRIPTING>{BNUM} {
+	char *bin = yytext + 2; /* Skip "0b" */
+	int len = yyleng - 2;
+
+	/* Skip any leading 0s */
+	while (*bin == '0') {
+		++bin;
+		--len;
+	}
+
+	if (len < SIZEOF_LONG * 2) {
+		zendlval->value.lval = strtol(bin, NULL, 2);
+		zendlval->type = IS_LONG;
+		return T_LNUMBER;
+	} else {
+		zendlval->value.dval = zend_bin_strtod(bin, NULL);
+		zendlval->type = IS_DOUBLE;
+		return T_DNUMBER;
+	}
+}
 
 <ST_IN_SCRIPTING>{LNUM} {
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
@@ -1513,7 +1534,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_NUM_STRING;
 }
 
-<ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
+<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;

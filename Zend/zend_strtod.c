@@ -2639,6 +2639,44 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 	return value;
 }
 
+ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
+{
+	const char *s = str;
+	char 		c;
+	double 		value = 0;
+	int 		any = 0;
+
+	if ('0' == *s && ('b' == s[1] || 'B' == s[1])) {
+		s += 2;
+	}
+
+	while ((c = *s++)) {
+		/*
+		 * Verify the validity of the current character as a base-2 digit.  In
+		 * the event that an invalid digit is found, halt the conversion and
+		 * return the portion which has been converted thus far.
+		 */
+		if ('0' == c || '1' == c)
+			value = value * 2 + c - '0';
+		else
+			break;
+
+		any = 1;
+	}
+
+	/*
+	 * As with many strtoX implementations, should the subject sequence be
+	 * empty or not well-formed, no conversion is performed and the original
+	 * value of str is stored in *endptr, provided that endptr is not a null
+	 * pointer.
+	 */
+	if (NULL != endptr) {
+		*endptr = (char *)(any ? s - 1 : str);
+	}
+
+	return value;
+}
+
 /*
  * Local variables:
  * tab-width: 4
