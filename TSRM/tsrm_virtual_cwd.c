@@ -705,8 +705,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1;
 			} else {
 				CWDG(realpath_cache_size) -= sizeof(realpath_cache_bucket) + r->path_len + 1 + r->realpath_len + 1;
-		  	} 
-
+			}
 			free(r);
 		} else if (key == (*bucket)->key && path_len == (*bucket)->path_len &&
 					memcmp(path, (*bucket)->path, path_len) == 0) {
