@@ -777,6 +777,10 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			sybase_ptr = (sybase_link *) malloc(sizeof(sybase_link));
+			if (sybase_ptr) {
+				efree(hashed_details);
+				RETURN_FALSE;
+			}
 			if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset, appname TSRMLS_CC)) {
 				free(sybase_ptr);
 				efree(hashed_details);
