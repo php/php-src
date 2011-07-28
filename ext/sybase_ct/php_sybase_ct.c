@@ -777,7 +777,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			sybase_ptr = (sybase_link *) malloc(sizeof(sybase_link));
-			if (sybase_ptr) {
+			if (!sybase_ptr) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
