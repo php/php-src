@@ -821,6 +821,9 @@ PHP_MINIT_FUNCTION(curl)
 		int i, c = CRYPTO_num_locks();
 
 		php_curl_openssl_tsl = malloc(c * sizeof(MUTEX_T));
+		if (!php_curl_openssl_tsl) {
+			return FAILURE;
+		}
 
 		for (i = 0; i < c; ++i) {
 			php_curl_openssl_tsl[i] = tsrm_mutex_alloc();
