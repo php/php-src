@@ -57,9 +57,12 @@ static PHP_INI_MH(OnUpdateTags)
 	
 	if (ctx->tags)
 		zend_hash_destroy(ctx->tags);
-	else
+	else {
 		ctx->tags = malloc(sizeof(HashTable));
-	
+		if (!ctx->tags) {
+			return FAILURE;
+		}
+	}
 	zend_hash_init(ctx->tags, 0, NULL, NULL, 1);
 	
 	for (key = php_strtok_r(tmp, ",", &lasts);
