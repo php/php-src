@@ -129,6 +129,9 @@ static HRESULT dotnet_init(char **p_where TSRMLS_DC)
 	char *where = "";
 
 	stuff = malloc(sizeof(*stuff));
+	if (!stuff) {
+		return S_FALSE;
+	}
 	memset(stuff, 0, sizeof(*stuff));
 
 	where = "CoCreateInstance";
