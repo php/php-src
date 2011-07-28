@@ -685,6 +685,13 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			/* hash it up */
 			mssql_ptr = (mssql_link *) malloc(sizeof(mssql_link));
+			if (!mssql_ptr) {
+				efree(hashed_details);
+				dbfreelogin(mssql.login);
+				dbclose(mssql.link);
+				RETURN_FALSE;
+			}
+
 			memcpy(mssql_ptr, &mssql, sizeof(mssql_link));
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = mssql_ptr;
