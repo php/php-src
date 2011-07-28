@@ -30,12 +30,10 @@
 #endif
 
 ZEND_API const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
-ZEND_API zend_bool (*zend_is_interned_string)(const char *str TSRMLS_DC);
 ZEND_API void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API void (*zend_interned_strings_restore)(TSRMLS_D);
 
 static const char *zend_new_interned_string_int(const char *str, int len, int free_src TSRMLS_DC);
-static zend_bool zend_is_interned_string_int(const char *str TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
 
@@ -66,7 +64,6 @@ void zend_interned_strings_init(TSRMLS_D)
 #endif
 
 	zend_new_interned_string = zend_new_interned_string_int;
-	zend_is_interned_string = zend_is_interned_string_int;
 	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
 	zend_interned_strings_restore = zend_interned_strings_restore_int;
 }
@@ -178,11 +175,6 @@ static const char *zend_new_interned_string_int(const char *arKey, int nKeyLengt
 #else
 	return arKey;
 #endif
-}
-
-static zend_bool zend_is_interned_string_int(const char *s TSRMLS_DC)
-{
-	return (((s) >= CG(interned_strings_start)) && ((s) < CG(interned_strings_end)));
 }
 
 static void zend_interned_strings_snapshot_int(TSRMLS_D)
