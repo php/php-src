@@ -465,6 +465,9 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {
 				matches = malloc(sizeof(char *) * 2);
+				if (!matches) {
+					return NULL;
+				}
 				matches[0] = strdup("");
 				matches[1] = '\0';
 			}
@@ -505,7 +508,10 @@ PHP_FUNCTION(readline_completion_function)
 	zval_copy_ctor(_readline_completion);
 
 	rl_attempted_completion_function = _readline_completion_cb;
-
+	if (rl_attempted_completion_function == NULL) {
+		efree(name);
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 
