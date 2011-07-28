@@ -98,6 +98,9 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		char *instance = INI_STR("pdo_odbc.db2_instance_name");
 		if (instance) {
 			char *env = malloc(sizeof("DB2INSTANCE=") + strlen(instance));
+			if (!env) {
+				return FAILURE;
+			}
 			strcpy(env, "DB2INSTANCE=");
 			strcat(env, instance);
 			putenv(env);
