@@ -998,9 +998,12 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
 		} else {
 			zend_rsrc_list_entry new_le;
-			
+
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
-	
+			if (!ib_link) {
+				RETURN_FALSE;
+			}
+
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = ib_link;
