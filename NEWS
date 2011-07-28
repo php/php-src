@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 5.3.7
+28 Jul 2011, PHP 5.3.7 RC4
 - Improved core functions:
   . Updated crypt_blowfish to 1.2. ((CVE-2011-2483) (Solar Designer)
 
