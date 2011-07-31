@@ -1035,6 +1035,10 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		url = p + 3;
 	}
 
+	if (php_check_open_basedir(url TSRMLS_CC)) {
+		return 0;
+	}
+
 	ret = VCWD_UNLINK(url);
 	if (ret == -1) {
 		if (options & REPORT_ERRORS) {
