@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with different types of comments
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
