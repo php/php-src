@@ -3476,8 +3476,6 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	else if (!IS_EQUAL(mname, mname_len, "__isset"))		(ce)->__isset		= (fe); \
 	else if (!IS_EQUAL(mname, mname_len, "__callstatic"))(ce)->__callstatic	= (fe); \
 	else if (!IS_EQUAL(mname, mname_len, "__tostring"))	(ce)->__tostring	= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "serialize_func"))	(ce)->serialize_func	= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "unserialize_func"))(ce)->unserialize_func	= (fe); \
 }
 
 /* {{{ Originates from php_runkit_function_copy_ctor
