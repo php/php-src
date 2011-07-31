@@ -13,6 +13,7 @@ trait THello2 {
 }
 
 echo "PRE-CLASS-GUARD-TraitsTest\n";
+error_reporting(E_ALL & ~E_STRICT); // ensuring that it is only for E_STRICT
 
 class TraitsTest {
 	use THello1;
