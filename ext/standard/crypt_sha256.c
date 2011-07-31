@@ -398,7 +398,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 		char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint32_t));
 		salt = copied_salt =
 		memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
-		tmp[salt_len] = 0;
+		copied_salt[salt_len] = 0;
 	}
 
 	/* Prepare for the real work.  */
