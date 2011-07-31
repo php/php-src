@@ -5,17 +5,18 @@ Test token_get_all() function : usage variations - with predefined language cons
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
 /*
  * Testing token_get_all() with following predefined language constants:
- *   __FILE__ - T_FILE(364)
- *   __CLASS__ - T_CLASS_C(360)
- *   __FUNCTION__ - T_FUNC_C(362)
- *   __LINE__ - T_LINE(363)
- *   __METHOD__ - T_METHOD_C(361)
+ *   __FILE__     - T_FILE
+ *   __CLASS__    - T_CLASS_C
+ *   __TRAIT__    - T_TRAIT_C
+ *   __FUNCTION__ - T_FUNC_C
+ *   __LINE__     - T_LINE
+ *   __METHOD__   - T_METHOD_C
 */
 
 echo "*** Testing token_get_all() : with language constants ***\n";
@@ -27,12 +28,13 @@ $source = "<?php
 ?>";
 var_dump( token_get_all($source));
 
-// parsing __CLASS__ and __FUNCTION__ tokens
-echo "-- with CLASS and FUNCTION --\n";
+// parsing __CLASS__, __TRAIT__ and __FUNCTION__ tokens
+echo "-- with CLASS, TRAIT and FUNCTION --\n";
 $source = '<?php
 class MyClass
 {
   echo  __CLASS__;
+  echo  __TRAIT__;
   function myFunction()
   {  echo  __FUNCTION__; }
 }
@@ -165,8 +167,8 @@ array(16) {
     int(%d)
   }
 }
--- with CLASS and FUNCTION --
-array(30) {
+-- with CLASS, TRAIT and FUNCTION --
+array(35) {
   [0]=>
   array(3) {
     [0]=>
@@ -263,14 +265,14 @@ array(30) {
     string(3) "
   "
     [2]=>
-    int(4)
+    int(%d)
   }
   [12]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(8) "function"
+    string(4) "echo"
     [2]=>
     int(5)
   }
@@ -279,7 +281,7 @@ array(30) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) " "
+    string(2) "  "
     [2]=>
     int(5)
   }
@@ -288,15 +290,13 @@ array(30) {
     [0]=>
     int(%d)
     [1]=>
-    string(10) "myFunction"
+    string(9) "__TRAIT__"
     [2]=>
     int(5)
   }
   [15]=>
-  string(1) "("
+  string(1) ";"
   [16]=>
-  string(1) ")"
-  [17]=>
   array(3) {
     [0]=>
     int(%d)
@@ -306,47 +306,16 @@ array(30) {
     [2]=>
     int(5)
   }
+  [17]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(8) "function"
+    [2]=>
+    int(6)
+  }
   [18]=>
-  string(1) "{"
-  [19]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(2) "  "
-    [2]=>
-    int(6)
-  }
-  [20]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(4) "echo"
-    [2]=>
-    int(6)
-  }
-  [21]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(2) "  "
-    [2]=>
-    int(6)
-  }
-  [22]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(12) "__FUNCTION__"
-    [2]=>
-    int(6)
-  }
-  [23]=>
-  string(1) ";"
-  [24]=>
   array(3) {
     [0]=>
     int(%d)
@@ -355,21 +324,81 @@ array(30) {
     [2]=>
     int(6)
   }
+  [19]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(10) "myFunction"
+    [2]=>
+    int(6)
+  }
+  [20]=>
+  string(1) "("
+  [21]=>
+  string(1) ")"
+  [22]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(3) "
+  "
+    [2]=>
+    int(6)
+  }
+  [23]=>
+  string(1) "{"
+  [24]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "  "
+    [2]=>
+    int(7)
+  }
   [25]=>
-  string(1) "}"
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(4) "echo"
+    [2]=>
+    int(7)
+  }
   [26]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
-"
+    string(2) "  "
     [2]=>
-    int(6)
+    int(7)
   }
   [27]=>
-  string(1) "}"
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(12) "__FUNCTION__"
+    [2]=>
+    int(7)
+  }
   [28]=>
+  string(1) ";"
+  [29]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(7)
+  }
+  [30]=>
+  string(1) "}"
+  [31]=>
   array(3) {
     [0]=>
     int(%d)
@@ -379,14 +408,26 @@ array(30) {
     [2]=>
     int(7)
   }
-  [29]=>
+  [32]=>
+  string(1) "}"
+  [33]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(8)
+  }
+  [34]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
-    int(8)
+    int(9)
   }
 }
 -- with LINE and METHOD --

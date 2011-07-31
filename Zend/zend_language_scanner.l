@@ -1563,6 +1563,26 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_CLASS_C;
 }
 
+<ST_IN_SCRIPTING>"__TRAIT__" {
+	char *trait_name = NULL;
+	
+	if (CG(active_class_entry)
+		&& (ZEND_ACC_TRAIT == 
+			(CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT))) {
+		trait_name = CG(active_class_entry)->name;
+	}
+	
+	if (!trait_name) {
+		trait_name = "";
+	}
+	
+	zendlval->value.str.len = strlen(trait_name);
+	zendlval->value.str.val = estrndup(trait_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
+	
+	return T_TRAIT_C;
+}
+
 <ST_IN_SCRIPTING>"__FUNCTION__" {
 	char *func_name = NULL;
 
