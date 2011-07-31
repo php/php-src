@@ -1549,17 +1549,28 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"__CLASS__" {
 	char *class_name = NULL;
-
-	if (CG(active_class_entry)) {
-		class_name = CG(active_class_entry)->name;
+	
+	if (CG(active_class_entry)
+		&& (ZEND_ACC_TRAIT ==
+			(CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT))) {
+		// This is a hack, we abuse IS_NULL to indicate an invalid value
+		// if __CLASS__ is encountered in a trait, however, we also not that we
+		// should fix it up when we copy the method into an actual class
+		zendlval->value.lval = ZEND_ACC_TRAIT;
+		zendlval->type = IS_NULL;
+	} else {
+		if (CG(active_class_entry)) {
+			class_name = CG(active_class_entry)->name;
+		}
+		
+		if (!class_name) {
+			class_name = "";
+		}
+		
+		zendlval->value.str.len = strlen(class_name);
+		zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
+		zendlval->type = IS_STRING;
 	}
-
-	if (!class_name) {
-		class_name = "";
-	}
-	zendlval->value.str.len = strlen(class_name);
-	zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
 	return T_CLASS_C;
 }
 
