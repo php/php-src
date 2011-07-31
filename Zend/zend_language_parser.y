@@ -187,6 +187,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
+%token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
 %token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
 %token T_LINE            "__LINE__ (T_LINE)"
@@ -879,6 +880,7 @@ common_scalar:
 	|	T_FILE 						{ $$ = $1; }
 	|	T_DIR   					{ $$ = $1; }
 	|	T_CLASS_C					{ $$ = $1; }
+	|	T_TRAIT_C					{ $$ = $1; }
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 	|	T_NS_C						{ $$ = $1; }
