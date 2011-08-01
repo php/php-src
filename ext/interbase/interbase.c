@@ -1125,7 +1125,8 @@ PHP_FUNCTION(ibase_drop_db)
 
 PHP_FUNCTION(ibase_trans)
 {
-	unsigned short i, argn, link_cnt = 0, tpb_len = 0;
+	unsigned short i, link_cnt = 0, tpb_len = 0;
+	int argn;
 	char last_tpb[TPB_MAX_SIZE];
 	ibase_db_link **ib_link = NULL;
 	ibase_trans *ib_trans;
