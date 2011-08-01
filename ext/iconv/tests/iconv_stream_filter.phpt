@@ -34,6 +34,8 @@ string(2) "42"
 string(20) "a4b3a4f3a4cba4c1a4cf"
 string(10) "69636f6e76"
 string(2) "0a"
+
+Warning: fread(): iconv stream filter ("ISO-2022-JP"=>"EUC-JP"): invalid multibyte sequence in %s on line %d
 bool(true)
 bool(true)
 bool(true)
