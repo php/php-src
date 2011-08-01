@@ -13,11 +13,6 @@ echo "Simple testcase for set_magic_quotes_runtime() function - basic test\n";
 $g = get_magic_quotes_runtime();
 echo "\n-- magic quotes runtime set in INI file: " . $g . "--\n";
 
-echo "\n-- Set magic quotes runtime to 1:  --\n";
-var_dump(set_magic_quotes_runtime(1));
-$g = get_magic_quotes_runtime();
-echo "\n-- magic quotes runtime after set: " . $g . " --\n";
-
 echo "\n-- Set magic quotes runtime to 0:  --\n";
 var_dump(set_magic_quotes_runtime(0));
 $g = get_magic_quotes_runtime();
@@ -33,26 +28,23 @@ echo "\n-- magic quotes runtime after set: " . $g . " --\n";
 --EXPECTF--
 Simple testcase for set_magic_quotes_runtime() function - basic test
 
--- magic quotes runtime set in INI file: 0--
+Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 
--- Set magic quotes runtime to 1:  --
-
-Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
-
--- magic quotes runtime after set: 1 --
+-- magic quotes runtime set in INI file: --
 
 -- Set magic quotes runtime to 0:  --
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
+bool(false)
 
--- magic quotes runtime after set: 0 --
+Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
+
+-- magic quotes runtime after set:  --
 
 -- Set magic quotes runtime to 1:  --
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(true)
 
--- magic quotes runtime after set: 1 --
-===DONE===
+Fatal error: set_magic_quotes_runtime(): magic_quotes_runtime is not supported anymore in Unknown on line 0
+
+

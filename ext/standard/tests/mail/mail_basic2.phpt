@@ -6,7 +6,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Won't run on Windows");
 ?>
 --INI--
-sendmail_path="sed > /tmp/php_test_mailBasic2.out"
+sendmail_path="cat > /tmp/php_test_mailBasic2.out"
 mail.add_x_header = Off
 --FILE--
 <?php
@@ -24,7 +24,7 @@ $to = 'user@company.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = 'KHeaders';
-$additional_parameters = "-e '5 a--- Extras'";
+$additional_parameters = "-n";
 $outFile = "/tmp/php_test_mailBasic2.out";
 @unlink($outFile);
 
@@ -36,14 +36,13 @@ echo file_get_contents($outFile);
 unlink($outFile);
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing mail() : basic functionality ***
 -- extra parameters --
 bool(true)
-To: user@company.com
-Subject: Test Subject
-KHeaders
-
-A Message
---- Extras
+%w1%wTo: user@company.com
+%w2%wSubject: Test Subject
+%w3%wKHeaders
+%w4%w
+%w5%wA Message
 ===DONE===
