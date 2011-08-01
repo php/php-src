@@ -797,13 +797,13 @@ function_call:
 	|	T_NS_SEPARATOR namespace_name '(' { $3.u.op.opline_num = zend_do_begin_function_call(&$2, 0 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$2, &$$, &$5, 0, $3.u.op.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { $4.u.op.opline_num = zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM variable_name '(' { $4.u.op.opline_num = zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
 			function_call_parameter_list
 			')' { zend_do_end_function_call($4.u.op.opline_num?NULL:&$3, &$$, &$6, $4.u.op.opline_num, $4.u.op.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects '(' { zend_do_end_variable_parse(&$3, BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
 			function_call_parameter_list
 			')' { zend_do_end_function_call(NULL, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM variable_name '(' { zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
 			function_call_parameter_list
 			')' { zend_do_end_function_call(NULL, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects '(' { zend_do_end_variable_parse(&$3, BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); }
