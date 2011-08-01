@@ -2157,7 +2157,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	dom_object *intern;
 	dom_doc_propsptr doc_prop;
 	char *source;
-	int source_len, refcount, ret, options = 0;
+	int source_len, refcount, ret;
+	long options = 0;
 	htmlParserCtxtPtr ctxt;
 	
 	id = getThis();
