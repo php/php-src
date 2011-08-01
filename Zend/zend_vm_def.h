@@ -1417,6 +1417,8 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
