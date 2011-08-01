@@ -12736,6 +12736,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -14875,6 +14877,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -16935,6 +16939,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -19999,6 +20005,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -21596,6 +21604,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -22835,6 +22845,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -23983,6 +23995,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -25399,6 +25413,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -28303,6 +28319,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -30225,6 +30243,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -32159,6 +32179,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
@@ -34960,6 +34982,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 		Z_DELREF_PP(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
 		Z_ADDREF_PP(retval_ptr);
+		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	}
 
 	CHECK_EXCEPTION();
