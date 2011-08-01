@@ -23,3 +23,9 @@ var_dump($result);
 ?>
 --EXPECTF--
 
+Warning: DOMDocument::relaxNGValidate(): I/O warning : failed to load external entity "%s/foo.rng" in %s on line %d
+
+Warning: DOMDocument::relaxNGValidate(): xmlRelaxNGParse: could not load %s/foo.rng in %s on line %d
+
+Warning: DOMDocument::relaxNGValidate(): Invalid RelaxNG in %s on line %d
+bool(false)

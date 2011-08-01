@@ -69,7 +69,7 @@ testname
 <?php
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(15) {
   ["name1"]=>
   string(8) "testname"
@@ -77,28 +77,28 @@ array(15) {
   string(8) "testname"
   ["name3"]=>
   string(8) "testname"
-  ["name\\4"]=>
+  ["name\4"]=>
   string(8) "testname"
-  ["name\\5"]=>
+  ["name\5"]=>
   string(8) "testname"
-  ["name\\\'6"]=>
+  ["name\'6"]=>
   string(8) "testname"
-  ["name\\\"7"]=>
+  ["name\"7"]=>
   string(8) "testname"
-  ["name\\8"]=>
+  ["name\8"]=>
   string(8) "testname"
-  ["name\\9"]=>
+  ["name\9"]=>
   string(8) "testname"
-  ["name\'10"]=>
+  ["name'10"]=>
   string(8) "testname"
-  ["name\\\"11"]=>
+  ["name\"11"]=>
   string(8) "testname"
-  ["name\\12"]=>
+  ["name\12"]=>
   string(8) "testname"
-  ["name\\13"]=>
+  ["name\13"]=>
   string(8) "testname"
-  ["name\\\'14"]=>
+  ["name\'14"]=>
   string(8) "testname"
-  ["name\"15"]=>
+  ["name"15"]=>
   string(8) "testname"
 }

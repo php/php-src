@@ -4,10 +4,12 @@ Test for blowfish compatibility
 <?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
-function hex2bin($data) {
-    $len = strlen($data);
-    return pack("H" . $len, $data);
-}   
+if(!function_exists("hex2bin")) {
+    function hex2bin($data) {
+       $len = strlen($data);
+       return pack("H" . $len, $data);
+    }   
+}
 
 print "key               plain             crypt             guess             stat\n";
 $null = "\0\0\0\0\0\0\0\0";
