@@ -98,19 +98,19 @@ File created in => temp dir
 Warning: tempnam() expects parameter 1 to be a valid path, string given in %s on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 -- Iteration 8 --
-File name is => /tmp/tempnam_variation3.tmp%s
+File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 9 --
-File name is => /tmp/tempnam_variation3.tmp%s
+File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 

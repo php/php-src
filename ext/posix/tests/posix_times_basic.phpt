@@ -24,14 +24,14 @@ Test posix_times() function : basic functionality
 Basic test of POSIX times function
 array(5) {
   ["ticks"]=>
-  int(%d)
+  int(%i)
   ["utime"]=>
-  int(%d)
+  int(%i)
   ["stime"]=>
-  int(%d)
+  int(%i)
   ["cutime"]=>
-  int(%d)
+  int(%i)
   ["cstime"]=>
-  int(%d)
+  int(%i)
 }
 ===DONE====
