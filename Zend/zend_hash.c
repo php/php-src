@@ -1211,8 +1211,9 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
  */
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos)
 {
-	Bucket *p;
-#ifdef ZEND_SIGNALS	
+	Bucket *p, *q;
+	ulong h;
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -1227,105 +1228,142 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 				return SUCCESS;
 			}
 
-			if (mode != HASH_UPDATE_KEY_ANYWAY) {
-				Bucket *q = ht->arBuckets[num_index & ht->nTableMask];
-				int found = 0;
-
-				while (q != NULL) {
-					if (q == p) {
-						found = 1;
-					} else if (!q->nKeyLength && q->h == num_index) {
-						if (found) {
-							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-								break;
-							} else {
-								if (p->nKeyLength) {
-									zend_hash_del(ht, p->arKey, p->nKeyLength);
-								} else {
-									zend_hash_index_del(ht, p->h);
-								}
-								return FAILURE;
-							}
-						} else {
-							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-								break;
-							} else {
-								if (p->nKeyLength) {
-									zend_hash_del(ht, p->arKey, p->nKeyLength);
-								} else {
-									zend_hash_index_del(ht, p->h);
-								}
-								return FAILURE;
-							}
-						}
-					}
-					q = q->pNext;
+			q = ht->arBuckets[num_index & ht->nTableMask];
+			while (q != NULL) {
+				if (!q->nKeyLength && q->h == num_index) {
+					break;
 				}
+				q = q->pNext;
+			}
+		} else if (key_type == HASH_KEY_IS_STRING) {
+			if (IS_INTERNED(str_index)) {
+				h = INTERNED_HASH(str_index);
+			} else {
+				h = zend_inline_hash_func(str_index, str_length);
 			}
 
-			zend_hash_index_del(ht, num_index);
-		} else if (key_type == HASH_KEY_IS_STRING) {
-			if (p->nKeyLength == str_length &&
-			    memcmp(p->arKey, str_index, str_length) == 0) {
+			if (p->arKey == str_index ||
+			    (p->nKeyLength == str_length &&
+			     p->h == h &&
+			     memcmp(p->arKey, str_index, str_length) == 0)) {
 				return SUCCESS;
 			}
 
-			if (mode != HASH_UPDATE_KEY_ANYWAY) {
-				ulong h = zend_inline_hash_func(str_index, str_length);
-				Bucket *q = ht->arBuckets[h & ht->nTableMask];
-				int found = 0;
+			q = ht->arBuckets[h & ht->nTableMask];
 
-				while (q != NULL) {
-					if (q == p) {
-						found = 1;
-					} else if (q->h == h && q->nKeyLength == str_length && 
-					           memcmp(q->arKey, str_index, str_length) == 0) {
-					    if (found) {
-							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-								break;
-							} else {
-								if (p->nKeyLength) {
-									zend_hash_del(ht, p->arKey, p->nKeyLength);
-								} else {
-									zend_hash_index_del(ht, p->h);
-								}
-								return FAILURE;
-							}
-						} else {
-							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-								break;
-							} else {
-								if (p->nKeyLength) {
-									zend_hash_del(ht, p->arKey, p->nKeyLength);
-								} else {
-									zend_hash_index_del(ht, p->h);
-								}
-								return FAILURE;
-							}
-						}
-					}
-					q = q->pNext;
+			while (q != NULL) {
+				if (q->arKey == str_index ||
+				    (q->h == h && q->nKeyLength == str_length &&
+				     memcmp(q->arKey, str_index, str_length) == 0)) {
+					break;
 				}
+				q = q->pNext;
 			}
-
-			zend_hash_del(ht, str_index, str_length);
 		} else {
 			return FAILURE;
 		}
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 
+		if (q) {
+			if (mode != HASH_UPDATE_KEY_ANYWAY) {
+				Bucket *r = p->pListLast;
+				int found = HASH_UPDATE_KEY_IF_BEFORE;
+
+				while (r) {
+					if (r == q) {
+						found = HASH_UPDATE_KEY_IF_AFTER;
+						break;
+					}
+					r = r->pListLast;
+				}
+				if (mode & found) {
+					/* delete current bucket */
+					if (p == ht->arBuckets[p->h & ht->nTableMask]) {
+						ht->arBuckets[p->h & ht->nTableMask] = p->pNext;
+					} else {
+						p->pLast->pNext = p->pNext;
+					}
+					if (p->pNext) {
+						p->pNext->pLast = p->pLast;
+					}
+					if (p->pListLast != NULL) {
+						p->pListLast->pListNext = p->pListNext;
+					} else {
+						/* Deleting the head of the list */
+						ht->pListHead = p->pListNext;
+					}
+					if (p->pListNext != NULL) {
+						p->pListNext->pListLast = p->pListLast;
+					} else {
+						ht->pListTail = p->pListLast;
+					}
+					if (ht->pInternalPointer == p) {
+						ht->pInternalPointer = p->pListNext;
+					}
+					if (ht->pDestructor) {
+						ht->pDestructor(p->pData);
+					}
+					if (p->pData != &p->pDataPtr) {
+						pefree(p->pData, ht->persistent);
+					}
+					pefree(p, ht->persistent);
+					ht->nNumOfElements--;
+					HANDLE_UNBLOCK_INTERRUPTIONS();
+					return FAILURE;
+				}
+			}
+			/* delete another bucket with the same key */
+			if (q == ht->arBuckets[q->h & ht->nTableMask]) {
+				ht->arBuckets[q->h & ht->nTableMask] = q->pNext;
+			} else {
+				q->pLast->pNext = q->pNext;
+			}
+			if (q->pNext) {
+				q->pNext->pLast = q->pLast;
+			}
+			if (q->pListLast != NULL) {
+				q->pListLast->pListNext = q->pListNext;
+			} else {
+				/* Deleting the head of the list */
+				ht->pListHead = q->pListNext;
+			}
+			if (q->pListNext != NULL) {
+				q->pListNext->pListLast = q->pListLast;
+			} else {
+				ht->pListTail = q->pListLast;
+			}
+			if (ht->pInternalPointer == q) {
+				ht->pInternalPointer = q->pListNext;
+			}
+			if (ht->pDestructor) {
+				ht->pDestructor(q->pData);
+			}
+			if (q->pData != &q->pDataPtr) {
+				pefree(q->pData, ht->persistent);
+			}
+			pefree(q, ht->persistent);
+			ht->nNumOfElements--;
+		}
+
 		if (p->pNext) {
 			p->pNext->pLast = p->pLast;
 		}
 		if (p->pLast) {
 			p->pLast->pNext = p->pNext;
-		} else{
+		} else {
 			ht->arBuckets[p->h & ht->nTableMask] = p->pNext;
 		}
 
-		if (p->nKeyLength != str_length) {
-			Bucket *q = (Bucket *) pemalloc(sizeof(Bucket) + str_length, ht->persistent);
+		if ((IS_INTERNED(p->arKey) != IS_INTERNED(str_index)) ||
+		    (!IS_INTERNED(p->arKey) && p->nKeyLength != str_length)) {
+			Bucket *q;
+
+			if (IS_INTERNED(str_index)) {
+				q = (Bucket *) pemalloc(sizeof(Bucket), ht->persistent);
+			} else {
+				q = (Bucket *) pemalloc(sizeof(Bucket) + str_length, ht->persistent);
+			}
 
 			q->nKeyLength = str_length;
 			if (p->pData == &p->pDataPtr) {
@@ -1359,9 +1397,13 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 		if (key_type == HASH_KEY_IS_LONG) {
 			p->h = num_index;
 		} else {
-			p->arKey = (char*)(p+1);
-			memcpy(p->arKey, str_index, str_length);
-			p->h = zend_inline_hash_func(str_index, str_length);
+			p->h = h;
+			if (IS_INTERNED(str_index)) {
+				p->arKey = str_index;
+			} else {
+				p->arKey = (char*)(p+1);
+				memcpy(p->arKey, str_index, str_length);
+			}
 		}
 
 		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[p->h & ht->nTableMask]);
