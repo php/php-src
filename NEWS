@@ -5,6 +5,7 @@
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
    . com, sebastian.deutsch at 9elements . com, Pierre)
  . Binary numbers format (0b001010). (Jonah dot Harris at gmail dot com)
+ . Support for Class::{expr}() syntax (Pierrick)
 
 - Removed features:
   . Removed magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini options.
