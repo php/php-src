@@ -20,5 +20,5 @@ var_dump( ArrayProperty::$array );
 --EXPECT--
 array(1) {
   [1]=>
-  int(23)
+  int(42)
 }
