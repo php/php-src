@@ -336,26 +336,26 @@ const mysqli_property_entry mysqli_link_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 
-/* should not be const, as it is patched during runtime */
-zend_property_info mysqli_link_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "affected_rows",	sizeof("affected_rows") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "connect_errno",	sizeof("connect_errno") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "connect_error",	sizeof("connect_error") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "errno",			sizeof("errno") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "error",			sizeof("error") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "field_count",	sizeof("field_count") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "host_info",		sizeof("host_info") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "info",			sizeof("info") - 1,				0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "insert_id",		sizeof("insert_id") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "server_info",	sizeof("server_info") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "server_version",	sizeof("server_version") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "sqlstate",		sizeof("sqlstate") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "protocol_version", sizeof("protocol_version")-1, 0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "thread_id", 		sizeof("thread_id") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "warning_count",	sizeof("warning_count") - 1,	0, NULL, 0, NULL},
-	{0,					NULL, 			0,								0, NULL, 0, NULL}
+
+const zend_property_info mysqli_link_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, "affected_rows",	sizeof("affected_rows") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "connect_errno",	sizeof("connect_errno") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "connect_error",	sizeof("connect_error") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "errno",			sizeof("errno") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "error",			sizeof("error") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "field_count",	sizeof("field_count") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "host_info",		sizeof("host_info") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "info",			sizeof("info") - 1,				-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "insert_id",		sizeof("insert_id") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "server_info",	sizeof("server_info") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "server_version",	sizeof("server_version") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "sqlstate",		sizeof("sqlstate") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "protocol_version", sizeof("protocol_version")-1, -1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "thread_id", 		sizeof("thread_id") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "warning_count",	sizeof("warning_count") - 1,	-1, 0, NULL, 0, NULL},
+	{0,					NULL, 			0,								-1, 0, NULL, 0, NULL}
 };
 
 
@@ -368,13 +368,13 @@ const mysqli_property_entry mysqli_result_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 
-zend_property_info mysqli_result_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "current_field",	sizeof("current_field")-1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "field_count",	sizeof("field_count") - 1, 	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "lengths",		sizeof("lengths") - 1, 		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "num_rows",		sizeof("num_rows") - 1, 	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "type",			sizeof("type") - 1, 		0, NULL, 0, NULL},
-	{0,					NULL, 			0,							0, NULL, 0, NULL}
+const zend_property_info mysqli_result_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, "current_field",	sizeof("current_field")-1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "field_count",	sizeof("field_count") - 1, 	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "lengths",		sizeof("lengths") - 1, 		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "num_rows",		sizeof("num_rows") - 1, 	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "type",			sizeof("type") - 1, 		-1, 0, NULL, 0, NULL},
+	{0,					NULL, 			0,							-1, 0, NULL, 0, NULL}
 };
 
 const mysqli_property_entry mysqli_stmt_property_entries[] = {
@@ -391,17 +391,17 @@ const mysqli_property_entry mysqli_stmt_property_entries[] = {
 };
 
 
-zend_property_info mysqli_stmt_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "affected_rows", sizeof("affected_rows") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "insert_id",	sizeof("insert_id") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "num_rows",	sizeof("num_rows") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "param_count",sizeof("param_count") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "field_count",sizeof("field_count") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "error",		sizeof("error") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "id",			sizeof("id") - 1,				0, NULL, 0, NULL},
-	{0,					NULL, 			0,							0, NULL, 0, NULL}
+const zend_property_info mysqli_stmt_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, "affected_rows", sizeof("affected_rows") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "insert_id",	sizeof("insert_id") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "num_rows",	sizeof("num_rows") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "param_count",sizeof("param_count") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "field_count",sizeof("field_count") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "error",		sizeof("error") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "id",			sizeof("id") - 1,				-1, 0, NULL, 0, NULL},
+	{0,					NULL, 			0,							-1, 0, NULL, 0, NULL}
 };
 
 /*
