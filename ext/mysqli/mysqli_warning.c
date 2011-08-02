@@ -330,11 +330,11 @@ const mysqli_property_entry mysqli_warning_property_entries[] = {
 /* }}} */
 
 /* {{{ mysqli_warning_property_info_entries */
-zend_property_info mysqli_warning_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "message", 	sizeof("message") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1, 	0, NULL, 0, NULL},
-	{0,					NULL, 			0,					0, NULL, 0, NULL}
+const zend_property_info mysqli_warning_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, "message", 	sizeof("message") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "sqlstate",	sizeof("sqlstate") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "errno",		sizeof("errno") - 1, 	-1, 0, NULL, 0, NULL},
+	{0,					NULL, 			0,					-1, 0, NULL, 0, NULL}
 };
 /* }}} */
 

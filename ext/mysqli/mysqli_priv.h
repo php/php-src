@@ -52,11 +52,11 @@ extern const mysqli_property_entry mysqli_stmt_property_entries[];
 extern const mysqli_property_entry mysqli_driver_property_entries[];
 extern const mysqli_property_entry mysqli_warning_property_entries[];
 
-extern zend_property_info mysqli_link_property_info_entries[];
-extern zend_property_info mysqli_result_property_info_entries[];
-extern zend_property_info mysqli_stmt_property_info_entries[];
-extern zend_property_info mysqli_driver_property_info_entries[];
-extern zend_property_info mysqli_warning_property_info_entries[];
+extern const zend_property_info mysqli_link_property_info_entries[];
+extern const zend_property_info mysqli_result_property_info_entries[];
+extern const zend_property_info mysqli_stmt_property_info_entries[];
+extern const zend_property_info mysqli_driver_property_info_entries[];
+extern const zend_property_info mysqli_warning_property_info_entries[];
 
 extern int php_le_pmysqli(void);
 extern void php_mysqli_dtor_p_elements(void *data);
