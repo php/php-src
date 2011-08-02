@@ -608,7 +608,7 @@ PHP_RINIT_FUNCTION(mysql)
 /* }}} */
 
 
-#ifdef MYSQL_USE_MYSQLND
+#if defined(A0) && defined(MYSQL_USE_MYSQLND)
 static int php_mysql_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 {
 	if (le->type == le_plink) {
@@ -637,7 +637,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 		efree(MySG(connect_error));
 	}
 
-#if defined(A0) && MYSQL_USE_MYSQLND
+#if defined(A0) && defined(MYSQL_USE_MYSQLND)
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysql_persistent_helper TSRMLS_CC);
 #endif
 
