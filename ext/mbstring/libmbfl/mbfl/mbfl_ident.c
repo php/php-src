@@ -51,6 +51,7 @@
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
 #include "filters/mbfilter_sjis_open.h"
+#include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_euc_jp.h"
