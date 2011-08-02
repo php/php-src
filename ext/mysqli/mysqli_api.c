@@ -2237,7 +2237,9 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	long	mode_in;
+#if MYSQL_VERSION_ID >= 50107
 	my_bool	mode_b;
+#endif
 	ulong	mode;
 	ulong	attr;
 	void	*mode_p;
