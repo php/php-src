@@ -125,6 +125,7 @@ static int parent = 1;
 #endif
 
 static int request_body_fd;
+static int fpm_is_running = 0;
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC);
 static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC);
@@ -261,16 +262,34 @@ static void print_extensions(TSRMLS_D)
 	zend_llist_destroy(&sorted_exts);
 }
 
+#ifndef STDOUT_FILENO	 
+#define STDOUT_FILENO 1	 
+#endif
+
 static inline size_t sapi_cgibin_single_write(const char *str, uint str_length TSRMLS_DC)
 {
-	long ret;
+	size_t ret;
 
-	fcgi_request *request = (fcgi_request*) SG(server_context);
-	ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
+	/* sapi has started which means everyhting must be send through fcgi */
+	if (fpm_is_running) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
+		if (ret <= 0) {
+			return 0;
+		}
+		return ret;
+	}
+
+	/* sapi has not started, output to stdout instead of fcgi */
+#ifdef PHP_WRITE_STDOUT	 
+	ret = write(STDOUT_FILENO, str, str_length);	 
 	if (ret <= 0) {
 		return 0;
 	}
 	return ret;
+#else
+	return fwrite(str, 1, MIN(str_length, 16384), stdout);
+#endif
 }
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
@@ -295,12 +314,21 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cgibin_flush(void *server_context)
 {
-	fcgi_request *request = (fcgi_request*) server_context;
-	if (
+	/* fpm has started, let use fcgi instead of stdout */
+	if (fpm_is_running) {
+		fcgi_request *request = (fcgi_request*) server_context;
+		if (
 #ifndef PHP_WIN32
-	    !parent &&
+	      !parent &&
 #endif
-	    request && !fcgi_flush(request, 0)) {
+	      request && !fcgi_flush(request, 0)) {
+			php_handle_aborted_connection();
+		}
+		return;
+	}
+
+	/* fpm has not started yet, let use stdout instead of fcgi */
+	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
@@ -498,8 +526,14 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-	fcgi_request *request = (fcgi_request*) SG(server_context);
-	return fcgi_getenv(request, name, name_len);
+	/* if fpm has started, use fcgi env */
+	if (fpm_is_running) {
+		fcgi_request *request = (fcgi_request*) SG(server_context);
+		return fcgi_getenv(request, name, name_len);
+	}
+
+	/* if fpm has not started yet, use std env */
+	return getenv(name);
 }
 
 static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
@@ -1726,6 +1760,8 @@ consult the installation file that came with this distribution, or visit \n\
 	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf)) {
 		return FAILURE;
 	}
+
+	fpm_is_running = 1;
 
 	fcgi_fd = fpm_run(&max_requests);
 	parent = 0;
