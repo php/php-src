@@ -1682,6 +1682,11 @@ PHP_MINFO_FUNCTION(mbstring)
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
 	php_info_print_table_row(2, "Multibyte string engine", "libmbfl");
 	php_info_print_table_row(2, "HTTP input encoding translation", MBSTRG(encoding_translation) ? "enabled": "disabled");	
+	{
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "%d.%d.%d", MBFL_VERSION_MAJOR, MBFL_VERSION_MINOR, MBFL_VERSION_TEENY);
+		php_info_print_table_row(2, "libmbfl version", tmp);
+	}
 	php_info_print_table_end();
 
 	php_info_print_table_start();
