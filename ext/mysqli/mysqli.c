@@ -867,7 +867,7 @@ PHP_RINIT_FUNCTION(mysqli)
 }
 /* }}} */
 
-#ifdef MYSQLI_USE_MYSQLND
+#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
 static void php_mysqli_persistent_helper_for_every(void *p)
 {
 	TSRMLS_FETCH();
@@ -898,7 +898,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
-#if defined(A0) && MYSQLI_USE_MYSQLND
+#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
 	/* psession is being called when the connection is freed - explicitly or implicitly */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_helper_once TSRMLS_CC);
 #endif
