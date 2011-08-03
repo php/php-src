@@ -157,7 +157,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_sjis_mobile_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
@@ -175,7 +175,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_sjis_mobile_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_docomo_pua_wchar = {
