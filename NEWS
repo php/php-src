@@ -1,6 +1,6 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.4.0 Alpha 3
+4 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
    . com, sebastian.deutsch at 9elements . com, Pierre)
@@ -299,20 +299,47 @@
 - Fixed PDO objects binary incompatibility. (Dmitry)
 - Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
 
-?? ??? 2011, PHP 5.3.7
+28 Jul 2011, PHP 5.3.7 RC4
+- Improved core functions:
+  . Updated crypt_blowfish to 1.2. ((CVE-2011-2483) (Solar Designer)
+
+- OpenSSL
+  . openssl_encrypt()/openssl_decrypt() truncated keys of variable length
+    ciphers to the OpenSSL default for the algorithm. (Scott)
+  . On blocking SSL sockets respect the timeout option where possible.
+    (Scott)
+
+- Core
+  . Fixed bug #55339 (Segfault with allow_call_time_pass_reference = Off).
+    (Dmitry)
+  . Fix bug #55295 [NEW]: popen_ex on windows, fixed possible heap overflow
+    (Pierre)
+  . Fixed bug #50816 (Using class constants in array definition fails).
+    (Pierrick, Dmitry)
+
+14 Jul 2011, PHP 5.3.7 RC3
 - Zend Engine:
   . Fixed bug #55156 (ReflectionClass::getDocComment() returns comment even
     though the class has none). (Felipe)
 
 - Core
+  . Removed warning when argument of is_a() or is_subclass_of() is not 
+    a known class. (Stas) 
+  . Fixed bug #55258 (Windows Version Detecting Error). 
+    ( xiaomao5 at live dot com, Pierre)
+  . Fixed bug #55187 (readlink returns weird characters when false result).
+   (Pierre)
   . Fixed bug #55014 (Compile failure due to improper use of ctime_r()). (Ilia)
   . Fixed bug #54332 (Crash in zend_mm_check_ptr // Heap corruption). (Dmitry)
+  . Fixed bug #54204 (Can't set a value with a PATH section in php.ini).
+    (Pierre)
   . Fixed bug #54305 (Crash in gc_remove_zval_from_buffer). (Dmitry)
   . Fixed bug #53727 (Inconsistent behavior of is_subclass_of with interfaces)
     (Ralph Schindler, Dmitry)
   . Fixed buffer overflow on overlog salt in crypt(). (Clément LECIGNE, Stas)
   . Fixed bug #52935 (call exit in user_error_handler cause stream relate
     core). (Gustavo)
+
 
 - MCrypt
   . Change E_ERROR to E_WARNING in mcrypt_create_iv when not enough data
