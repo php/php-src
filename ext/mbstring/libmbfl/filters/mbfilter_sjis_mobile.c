@@ -139,7 +139,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_sjis_mobile_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
@@ -1078,6 +1078,23 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+int
+mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
+{
+	int c1 = filter->cache;
+	if (filter->status == 1 && (c1 == 0x0023 || (c1 >= 0x0030 && c1<=0x0039))) {
+		CK((*filter->output_function)(c1, filter->data));
+	}
+	filter->status = 0;
+	filter->cache = 0;
+
+	if (filter->flush_function != NULL) {
+		return (*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 static int mbfl_filt_ident_sjis_mobile(int c, mbfl_identify_filter *filter)
