@@ -1,5 +1,7 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2011, PHP 5.4.0 Beta
+
 4 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
