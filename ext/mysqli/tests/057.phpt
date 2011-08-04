@@ -91,6 +91,9 @@ object(mysqli_stmt)#%d (%d) {
   int(0)
   [%u|b%"error"]=>
   %unicode|string%(0) ""
+  [%u|b%"error_list"]=>
+  array(0) {
+  }
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "00000"
   [%u|b%"id"]=>

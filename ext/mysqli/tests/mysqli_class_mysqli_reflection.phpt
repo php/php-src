@@ -1129,6 +1129,14 @@ isStatic: no
 isDefault: yes
 Modifiers: 256
 
+Inspecting property 'error_list'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
 Inspecting property 'field_count'
 isPublic: yes
 isPrivate: no
@@ -1215,6 +1223,7 @@ Default property 'connect_errno'
 Default property 'connect_error'
 Default property 'errno'
 Default property 'error'
+Default property 'error_list'
 Default property 'field_count'
 Default property 'host_info'
 Default property 'info'

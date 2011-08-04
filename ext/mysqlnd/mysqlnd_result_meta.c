@@ -170,7 +170,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			DBG_RETURN(FAIL);
 		}
 		if (field_packet->error_info.error_no) {
-			conn->error_info = field_packet->error_info;
+			COPY_CLIENT_ERROR(conn->error_info, field_packet->error_info);
 			/* Return back from CONN_QUERY_SENT */
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);

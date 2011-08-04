@@ -400,7 +400,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 			  This will copy the error code and the messages, as they
 			  are buffers in the struct
 			*/
-			conn->error_info = rset_header->error_info;
+			COPY_CLIENT_ERROR(conn->error_info, rset_header->error_info);
 			ret = FAIL;
 			DBG_ERR_FMT("error=%s", rset_header->error_info.error);
 			/* Return back from CONN_QUERY_SENT */
@@ -705,7 +705,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 		}
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
-			result->conn->error_info = row_packet->error_info;
+			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
@@ -840,7 +840,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 		result->unbuf->row_count++;
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
-			result->conn->error_info = row_packet->error_info;
+			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
@@ -1228,7 +1228,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 	}
 
 	if (ret == FAIL) {
-		set->error_info = row_packet->error_info;
+		COPY_CLIENT_ERROR(set->error_info, row_packet->error_info);
 	} else {
 		/* Position at the first row */
 		set->data_cursor = set->data;
@@ -1277,7 +1277,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol TSRMLS_CC);
 	if (FAIL == ret) {
 		if (result->stored_data) {
-			conn->error_info = result->stored_data->error_info;
+			COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		} else {
 			SET_OOM_ERROR(conn->error_info);
 		}

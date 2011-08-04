@@ -131,6 +131,11 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->error, gettype($mysqli->error),
 		mysqli_error($link), gettype(mysqli_error($link)));
 
+	assert(mysqli_error_list($link) === $mysqli->error_list);
+	printf("mysqli->error_list = '%s'/%s ('%s'/%s)\n",
+		$mysqli->error_list, gettype($mysqli->error_list),
+		mysqli_error_list($link), gettype(mysqli_error_list($link)));
+
 	assert(mysqli_field_count($link) === $mysqli->field_count);
 	printf("mysqli->field_count = '%s'/%s ('%s'/%s)\n",
 		$mysqli->field_count, gettype($mysqli->field_count),
@@ -222,6 +227,7 @@ connect_errno
 connect_error
 errno
 error
+error_list
 field_count
 host_info
 info
@@ -241,6 +247,7 @@ connect_errno
 connect_error
 errno
 error
+error_list
 field_count
 host_info
 info
@@ -258,6 +265,7 @@ mysqli->client_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
 mysqli->client_version =  '%d'/integer ('%d'/integer)
 mysqli->errno = '0'/integer ('0'/integer)
 mysqli->error = ''/%unicode|string% (''/%unicode|string%)
+mysqli->error_list = 'Array'/array ('Array'/array)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
