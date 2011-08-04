@@ -60,7 +60,9 @@ static int create_transliterator( char *str_id, int str_id_len, long direction, 
 	/* Open ICU Transliterator. */
 	utrans = utrans_openU( ustr_id, ustr_id_len, (UTransDirection ) direction,
 		NULL, -1, &parse_error, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	efree( ustr_id );
+	if (ustr_id) {
+		efree( ustr_id );
+	}
 	
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
@@ -172,7 +174,9 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	/* Open ICU Transliterator. */
 	utrans = utrans_openU( id, ( sizeof( id ) - 1 ) / ( sizeof( *id ) ), (UTransDirection ) direction,
 		ustr_rules, ustr_rules_len, &parse_error, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	efree( ustr_rules );
+	if (ustr_rules) {
+		efree( ustr_rules );
+	}
 	
 	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to ) TSRMLS_CC );
 	if( U_FAILURE( INTL_DATA_ERROR_CODE( to ) ) )

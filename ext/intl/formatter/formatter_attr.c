@@ -233,7 +233,9 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 
 	/* Actually set new attribute value. */
 	unum_setTextAttribute(FORMATTER_OBJECT(nfo), attribute, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	efree(svalue);
+	if (svalue) {
+		efree(svalue);
+	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
 	RETURN_TRUE;
@@ -326,7 +328,9 @@ PHP_FUNCTION( numfmt_set_symbol )
 
 	/* Actually set the symbol. */
 	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	efree(svalue);
+	if (svalue) {
+		efree(svalue);
+	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
 	RETURN_TRUE;
@@ -406,7 +410,9 @@ PHP_FUNCTION( numfmt_set_pattern )
 
 	/* TODO: add parse error information */
 	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, svalue, slength, NULL, &INTL_DATA_ERROR_CODE(nfo));
-	efree(svalue);
+	if (svalue) {
+		efree(svalue);
+	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting pattern value" );
 
 	RETURN_TRUE;

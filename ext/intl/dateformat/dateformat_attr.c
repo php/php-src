@@ -276,7 +276,9 @@ PHP_FUNCTION( datefmt_set_pattern )
 
 	udat_applyPattern(DATE_FORMAT_OBJECT(dfo), (UBool)is_pattern_localized, svalue, slength);
 
-	efree(svalue);
+	if (svalue) {
+		efree(svalue);
+	}
 	INTL_METHOD_CHECK_STATUS(dfo, "Error setting symbol value");
 
 	RETURN_TRUE;
