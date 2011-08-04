@@ -519,8 +519,9 @@ PHP_FUNCTION(grapheme_substr)
 			/* Set error messages. */
 			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
 
-			
-			efree( sub_str );
+			if (sub_str) {
+				efree( sub_str );
+			}
 
 			RETURN_FALSE;
 		}
