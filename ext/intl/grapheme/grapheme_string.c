@@ -84,13 +84,17 @@ PHP_FUNCTION(grapheme_strlen)
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree( ustring );
+		if (ustring) {
+			efree( ustring );
+		}
 		RETURN_NULL();
 	}
 
 	ret_len = grapheme_split_string(ustring, ustring_len, NULL, 0 TSRMLS_CC );
 
-	efree( ustring );
+	if (ustring) {
+		efree( ustring );
+	}
 
 	if (ret_len >= 0) {
 		RETVAL_LONG(ret_len);
@@ -447,7 +451,9 @@ PHP_FUNCTION(grapheme_substr)
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree( ustr );
+		if (ustr) {
+			efree( ustr );
+		}
 		RETURN_FALSE;
 	}
 
@@ -485,7 +491,9 @@ PHP_FUNCTION(grapheme_substr)
 
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 TSRMLS_CC );
 
-		efree(ustr);
+		if (ustr) {
+			efree(ustr);
+		}
 		ubrk_close(bi);
 		RETURN_FALSE;
 	}
@@ -499,7 +507,9 @@ PHP_FUNCTION(grapheme_substr)
 		status = U_ZERO_ERROR;
 		intl_convert_utf16_to_utf8((char **)&sub_str, &sub_str_len, ustr + sub_str_start_pos, ustr_len - sub_str_start_pos, &status);
 
-		efree( ustr );
+		if (ustr) {
+			efree( ustr );
+		}
 		ubrk_close( bi );
 
 		if ( U_FAILURE( status ) ) {
@@ -509,6 +519,7 @@ PHP_FUNCTION(grapheme_substr)
 			/* Set error messages. */
 			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
 
+			
 			efree( sub_str );
 
 			RETURN_FALSE;
@@ -897,7 +908,9 @@ PHP_FUNCTION(grapheme_extract)
 
 	ret_pos = (*grapheme_extract_iters[extract_type])(bi, size, pstr, str_len);
 
-	efree(ustr);
+	if (ustr) {
+		efree(ustr);
+	}
 	ubrk_close(bi);
 
 	if ( NULL != next ) {

@@ -96,7 +96,9 @@ PHP_FUNCTION( normalizer_normalize )
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree( uinput );
+		if (uinput) {
+			efree( uinput );
+		}
 		RETURN_FALSE;
 	}
 
@@ -220,7 +222,9 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting string to UTF-16.", 0 TSRMLS_CC );
-		efree( uinput );
+		if (uinput) {
+			efree( uinput );
+		}
 		RETURN_FALSE;
 	}
 

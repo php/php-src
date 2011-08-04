@@ -85,7 +85,9 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree(ustring);
+		if (ustring) {
+			efree(ustring);
+		}
 		RETURN_FALSE;
 	} else {
 		UParseError parse_error;
