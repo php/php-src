@@ -146,7 +146,7 @@ mysqli_connect()
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 array(1) {
   [%u|b%"testing"]=>
   %unicode|string%(21) "mysqli.default_socket"

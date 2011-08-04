@@ -96,6 +96,18 @@ object(mysqli)#%d (%d) {
   int(2006)
   [%u|b%"error"]=>
   %unicode|string%(%d) "%s"
+  [%u|b%"error_list"]=>
+  array(1) {
+    [0]=>
+    array(3) {
+      [%u|b%"errno"]=>
+      int(2006)
+      [%u|b%"sqlstate"]=>
+      %unicode|string%(5) "%s"
+      [%u|b%"error"]=>
+      %unicode|string%(%d) "%s"
+    }
+  }
   [%u|b%"field_count"]=>
   int(0)
   [%u|b%"host_info"]=>

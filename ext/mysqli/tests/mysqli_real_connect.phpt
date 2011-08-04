@@ -175,7 +175,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_real_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
   [%u|b%"affected_rows"]=>
   NULL
@@ -191,6 +191,8 @@ object(mysqli)#%d (%d) {
   %s
   [%u|b%"error"]=>
   %s
+  [%u|b%"error_list"]=>
+  NULL
   [%u|b%"field_count"]=>
   NULL
   [%u|b%"host_info"]=>

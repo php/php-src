@@ -77,6 +77,9 @@ object(mysqli)#%d (%d) {
   int(0)
   [%u|b%"error"]=>
   %unicode|string%(0) ""
+  [%u|b%"error_list"]=>
+  array(0) {
+  }
   [%u|b%"field_count"]=>
   int(0)
   [%u|b%"host_info"]=>
@@ -113,6 +116,8 @@ object(mysqli)#%d (%d) {
   int(0)
   [%u|b%"error"]=>
   %unicode|string%(0) ""
+  [%u|b%"error_list"]=>
+  NULL
   [%u|b%"field_count"]=>
   NULL
   [%u|b%"host_info"]=>
