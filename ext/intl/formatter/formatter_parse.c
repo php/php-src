@@ -107,7 +107,9 @@ PHP_FUNCTION( numfmt_parse )
 		ZVAL_LONG(zposition, position);
 	}
 
-	efree(sstr);
+	if (sstr) {
+		efree(sstr);
+	}
 
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 }
@@ -161,7 +163,9 @@ PHP_FUNCTION( numfmt_parse_currency )
 		zval_dtor(zposition);
 		ZVAL_LONG(zposition, position);
 	}
-	efree(sstr);
+	if (sstr) {
+		efree(sstr);
+	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */

@@ -40,7 +40,9 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_
 	INTL_METHOD_CHECK_STATUS(mfo, "Converting parse string failed");
 
 	umsg_parse_helper(MSG_FORMAT_OBJECT(mfo), &count, &fargs, usource, usrc_len, &INTL_DATA_ERROR_CODE(mfo));
-	efree(usource);
+	if (usource) {
+		efree(usource);
+	}
 	INTL_METHOD_CHECK_STATUS(mfo, "Parsing failed");
 
 	array_init(return_value);

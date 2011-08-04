@@ -90,7 +90,9 @@ PHP_FUNCTION( msgfmt_set_pattern )
 
 	/* TODO: add parse error information */
 	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, NULL, &INTL_DATA_ERROR_CODE(mfo));
-	efree(spattern);
+	if (spattern) {
+		efree(spattern);
+	}
 	INTL_METHOD_CHECK_STATUS(mfo, "Error setting symbol value");
 
 	if(mfo->mf_data.orig_format) {
