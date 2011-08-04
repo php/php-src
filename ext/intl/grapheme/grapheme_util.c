@@ -170,7 +170,9 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
 
         /* Set error messages. */
         intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-        efree( uhaystack );
+        if (uhaystack) {
+			efree( uhaystack );
+		}
         return -1;
     }
 
@@ -187,7 +189,9 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
 
     if ( NULL == puhaystack ) {
         intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 TSRMLS_CC );
-        efree( uhaystack );
+        if (uhaystack) {
+			efree( uhaystack );
+		}
         ubrk_close (bi);
         return -1;
     }
@@ -203,8 +207,12 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
 
         /* Set error messages. */
         intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-        efree( uhaystack );
-        efree( uneedle );
+        if (uhaystack) {
+			efree( uhaystack );
+		}
+		if (uneedle) {
+			efree( uneedle );
+		}
         ubrk_close (bi);
         return -1;
     }
@@ -260,8 +268,12 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
     }
 
 exit:
-    efree( uhaystack );
-    efree( uneedle );
+	if (uhaystack) {
+		efree( uhaystack );
+	}
+	if (uneedle) {
+		efree( uneedle );
+	}
     ubrk_close (bi);
 
     return ret_pos;
@@ -295,7 +307,9 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree( uhaystack );
+		if (uhaystack) {
+			efree( uhaystack );
+		}
 		return -1;
 	}
 
@@ -310,8 +324,9 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 	if ( NULL == puhaystack ) {
 	
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 TSRMLS_CC );
-		
-		efree( uhaystack );
+		if (uhaystack) {
+			efree( uhaystack );
+		}
 		ubrk_close (bi);
 					
 		return -1;
@@ -332,8 +347,12 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
-		efree( uhaystack );
-		efree( uneedle );
+		if (uhaystack) {
+			efree( uhaystack );
+		}
+		if (uneedle) {
+			efree( uneedle );
+		}
 		ubrk_close (bi);
 		
 		return -1;
@@ -347,8 +366,12 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 	
 	*puchar_pos = ubrk_current(bi);
 
-	efree( uhaystack );
-	efree( uneedle );
+	if (uhaystack) {
+		efree( uhaystack );
+	}
+	if (uneedle) {
+		efree( uneedle );
+	}
 	ubrk_close (bi);
 
 	return ret_pos;
