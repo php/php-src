@@ -137,8 +137,7 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 				strlcpy(conn->error_info.sqlstate, auth_resp_packet->sqlstate, sizeof(conn->error_info.sqlstate));
 				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", auth_resp_packet->error_no, auth_resp_packet->sqlstate, auth_resp_packet->error);
 			}
-			conn->error_info.error_no = auth_resp_packet->error_no;
-			strlcpy(conn->error_info.error, auth_resp_packet->error, sizeof(conn->error_info.error));
+			SET_CLIENT_ERROR(conn->error_info, auth_resp_packet->error_no, UNKNOWN_SQLSTATE, auth_resp_packet->error);
 		}
 		goto end;
 	}
@@ -235,7 +234,7 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 	}
 
 	ret = PACKET_READ(chg_user_resp, conn);
-	conn->error_info = chg_user_resp->error_info;
+	COPY_CLIENT_ERROR(conn->error_info, chg_user_resp->error_info);
 
 	if (0xFE == chg_user_resp->response_code) {
 		ret = FAIL;

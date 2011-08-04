@@ -102,7 +102,16 @@ typedef struct st_mysqlnd_error_info
 	char error[MYSQLND_ERRMSG_SIZE+1];
 	char sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int error_no;
+	zend_llist * error_list;
 } MYSQLND_ERROR_INFO;
+
+
+typedef struct st_mysqlnd_error_list_element
+{
+	char * error;
+	char sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	unsigned int error_no;
+} MYSQLND_ERROR_LIST_ELEMENT;
 
 
 typedef struct st_mysqlnd_infile_info

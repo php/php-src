@@ -352,6 +352,7 @@ const zend_function_entry mysqli_functions[] = {
 #endif
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
+	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_stmt_execute,							arginfo_mysqli_only_statement)
 	PHP_FALIAS(mysqli_execute, mysqli_stmt_execute,		arginfo_mysqli_only_statement)
 	PHP_FE(mysqli_fetch_field,							arginfo_mysqli_only_result)
@@ -424,6 +425,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_data_seek,						arginfo_mysqli_stmt_data_seek)
 	PHP_FE(mysqli_stmt_errno,							arginfo_mysqli_only_statement)
 	PHP_FE(mysqli_stmt_error,							arginfo_mysqli_only_statement)
+	PHP_FE(mysqli_stmt_error_list,						arginfo_mysqli_only_statement)
 	PHP_FE(mysqli_stmt_fetch,							arginfo_mysqli_only_statement)
 	PHP_FE(mysqli_stmt_field_count,						arginfo_mysqli_only_statement)
 	PHP_FE(mysqli_stmt_free_result,						arginfo_mysqli_only_statement)

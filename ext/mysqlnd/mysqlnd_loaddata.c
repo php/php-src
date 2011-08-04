@@ -181,11 +181,12 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	/* init handler: allocate read buffer and open file */
 	if (infile.local_infile_init(&info, (char *)filename, conn->infile.userdata TSRMLS_CC)) {
+		char tmp_buf[sizeof(conn->error_info.error)];
+		int tmp_error_no;
 		*is_warning = TRUE;
 		/* error occured */
-		strcpy(conn->error_info.sqlstate, UNKNOWN_SQLSTATE);
-		conn->error_info.error_no =
-				infile.local_infile_error(info, conn->error_info.error, sizeof(conn->error_info.error) TSRMLS_CC);
+		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
+		SET_CLIENT_ERROR(conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		/* write empty packet to server */
 		ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC);
 		goto infile_error;
@@ -208,11 +209,12 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	/* error during read occured */
 	if (bufsize < 0) {
+		char tmp_buf[sizeof(conn->error_info.error)];
+		int tmp_error_no;
 		*is_warning = TRUE;
 		DBG_ERR_FMT("Bufsize < 0, warning,  %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
-		strcpy(conn->error_info.sqlstate, UNKNOWN_SQLSTATE);
-		conn->error_info.error_no =
-				infile.local_infile_error(info, conn->error_info.error, sizeof(conn->error_info.error) TSRMLS_CC);
+		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
+		SET_CLIENT_ERROR(conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		goto infile_error;
 	}
 

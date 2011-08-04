@@ -134,14 +134,40 @@
 		(error_info).error_no = 0; \
 		(error_info).error[0] = '\0'; \
 		strlcpy((error_info).sqlstate, "00000", sizeof((error_info).sqlstate)); \
+		if ((error_info).error_list) { \
+			zend_llist_clean((error_info).error_list); \
+		} \
 	}
 
+
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
-	{ \
+{ \
+	if (0 == (a)) { \
+		SET_EMPTY_ERROR((error_info)); \
+	} else { \
 		(error_info).error_no = (a); \
 		strlcpy((error_info).sqlstate, (b), sizeof((error_info).sqlstate)); \
 		strlcpy((error_info).error, (c), sizeof((error_info).error)); \
+		if ((error_info).error_list) {\
+			MYSQLND_ERROR_LIST_ELEMENT error_for_the_list = {0}; \
+																	\
+			error_for_the_list.error_no = (a); \
+			strlcpy(error_for_the_list.sqlstate, (b), sizeof(error_for_the_list.sqlstate)); \
+			error_for_the_list.error = mnd_pestrdup((c), TRUE); \
+			if (error_for_the_list.error) { \
+				DBG_INF_FMT("adding error [%s] to the list", error_for_the_list.error); \
+				zend_llist_add_element((error_info).error_list, &error_for_the_list); \
+			} \
+		} \
+	} \
+}
+
+
+#define COPY_CLIENT_ERROR(error_info_to, error_info_from) \
+	{ \
+		SET_CLIENT_ERROR((error_info_to), (error_info_from).error_no, (error_info_from).sqlstate, (error_info_from).error); \
 	}
+
 
 #define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR((error_info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 

@@ -69,6 +69,21 @@ static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 static struct st_mysqlnd_plugin_core mysqlnd_plugin_core;
 
 
+/* {{{ mysqlnd_error_list_pdtor */
+static void
+mysqlnd_error_list_pdtor(void * pDest)
+{
+	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
+	TSRMLS_FETCH();
+	DBG_ENTER("mysqlnd_error_list_pdtor");
+	if (element->error) {
+		mnd_pefree(element->error, TRUE);
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_library_end */
 PHPAPI void mysqlnd_library_end(TSRMLS_D)
 {
@@ -177,6 +192,11 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND * conn TSRMLS_DC)
 	if (conn->last_message) {
 		mnd_pefree(conn->last_message, pers);
 		conn->last_message = NULL;
+	}
+	if (conn->error_info.error_list) {
+		zend_llist_clean(conn->error_info.error_list);
+		mnd_pefree(conn->error_info.error_list, pers);
+		conn->error_info.error_list = NULL;
 	}
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
@@ -2490,6 +2510,14 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	if (PASS != ret->m->init(ret TSRMLS_CC)) {
 		ret->m->dtor(ret TSRMLS_CC);
 		ret = NULL;
+	}
+
+	ret->error_info.error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
+	if (!ret->error_info.error_list) {
+		ret->m->dtor(ret TSRMLS_CC);
+		ret = NULL;
+	} else {
+		zend_llist_init(ret->error_info.error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 	}
 
 	DBG_RETURN(ret);
