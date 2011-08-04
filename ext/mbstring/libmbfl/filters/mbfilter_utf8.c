@@ -52,7 +52,7 @@ static const unsigned char mblen_table_utf8[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
+  4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 static const char *mbfl_encoding_utf8_aliases[] = {"utf8", NULL};
@@ -111,38 +111,21 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 		case 0x10: /* 2byte code 2nd char */
 		case 0x21: /* 3byte code 3rd char */
 		case 0x32: /* 4byte code 4th char */
-		case 0x43: /* 5byte code 5th char */
-		case 0x54: /* 6byte code 6th char */
 			filter->status = 0;
 			s = filter->cache | (c & 0x3f);
 			if ((status == 0x10 && s >= 0x80) ||
 			    (status == 0x21 && s >= 0x800 && (s < 0xd800 || s > 0xdfff)) ||
-			    (status == 0x32 && s >= 0x10000) ||
-			    (status == 0x43 && s >= 0x200000) ||
-			    (status == 0x54 && s >= 0x4000000 && s < MBFL_WCSGROUP_UCS4MAX)) {
+			    (status == 0x32 && s >= 0x10000 && s < 0x200000)) {
 				CK((*filter->output_function)(s, filter->data));
 			}
 			break;
 		case 0x20: /* 3byte code 2nd char */
 		case 0x31: /* 4byte code 3rd char */
-		case 0x42: /* 5byte code 4th char */
-		case 0x53: /* 6byte code 5th char */
 			filter->cache |= ((c & 0x3f) << 6);
 			filter->status++;
 			break;
 		case 0x30: /* 4byte code 2nd char */
-		case 0x41: /* 5byte code 3rd char */
-		case 0x52: /* 6byte code 4th char */
 			filter->cache |= ((c & 0x3f) << 12);
-			filter->status++;
-			break;
-		case 0x40: /* 5byte code 2nd char */
-		case 0x51: /* 6byte code 3rd char */
-			filter->cache |= ((c & 0x3f) << 18);
-			filter->status++;
-			break;
-		case 0x50: /* 6byte code 2nd char */
-			filter->cache |= ((c & 0x3f) << 24);
 			filter->status++;
 			break;
 		default:
@@ -158,12 +141,6 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 	} else if (c < 0xf8) { /* 4byte code first char */
 		filter->status = 0x30;
 		filter->cache = (c & 0x7) << 18;
-	} else if (c < 0xfc) { /* 5byte code first char */
-		filter->status = 0x40;
-		filter->cache = (c & 0x3) << 24;
-	} else if (c < 0xfe)  { /* 6 byte code first char */
-		filter->status = 0x50;
-		filter->cache = (c & 0x1) << 30;
 	} else {
 		filter->status = 0;
 		filter->cache = 0;
@@ -177,7 +154,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
  */
 int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 {
-	if (c >= 0 && c < MBFL_WCSGROUP_UCS4MAX) {
+	if (c >= 0 && c < 0x200000) {
 		if (c < 0x80) {
 			CK((*filter->output_function)(c, filter->data));
 		} else if (c < 0x800) {
@@ -187,21 +164,8 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(((c >> 12) & 0x0f) | 0xe0, filter->data));
 			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
 			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
-		} else if (c < 0x200000) {
-			CK((*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data));
-			CK((*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
-		} else if (c < 0x4000000) {
-			CK((*filter->output_function)(((c >> 24) & 0x03) | 0xf8, filter->data));
-			CK((*filter->output_function)(((c >> 18) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
 		} else {
-			CK((*filter->output_function)(((c >> 30) & 0x01) | 0xfc, filter->data));
-			CK((*filter->output_function)(((c >> 24) & 0x3f) | 0x80, filter->data));
-			CK((*filter->output_function)(((c >> 18) & 0x3f) | 0x80, filter->data));
+			CK((*filter->output_function)(((c >> 18) & 0x07) | 0xf0, filter->data));
 			CK((*filter->output_function)(((c >> 12) & 0x3f) | 0x80, filter->data));
 			CK((*filter->output_function)(((c >> 6) & 0x3f) | 0x80, filter->data));
 			CK((*filter->output_function)((c & 0x3f) | 0x80, filter->data));
@@ -229,20 +193,11 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 		case 0x20: /* 3 byte code 2nd char */
 		case 0x30: /* 4 byte code 2nd char */
 		case 0x31: /* 4 byte code 3rd char */
-		case 0x40: /* 5 byte code 2nd char */
-		case 0x41: /* 5 byte code 3rd char */
-		case 0x42: /* 5 byte code 4th char */
-		case 0x50: /* 6 byte code 2nd char */
-		case 0x51: /* 6 byte code 3rd char */
-		case 0x52: /* 6 byte code 4th char */
-		case 0x53: /* 6 byte code 5th char */
 			filter->status++;
 			break;
 		case 0x10: /* 2 byte code 2nd char */
 		case 0x21: /* 3 byte code 3rd char */
 		case 0x32: /* 4 byte code 4th char */
-		case 0x43: /* 5 byte code 5th char */
-		case 0x54: /* 6 byte code 6th char */
 			filter->status = 0;
 			break;
 		default:
@@ -261,10 +216,6 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 			filter->status = 0x20;
 		} else if (c < 0xf8) {		/* 4 byte code 1st char */
 			filter->status = 0x30;
-		} else if (c < 0xfc) {		/* 5 byte code 1st char */
-			filter->status = 0x40;
-		} else if (c < 0xfe) {		/* 6 byte code 1st char */
-			filter->status = 0x50;
 		} else {
 			filter->flag = 1;	/* bad */
 		}
