@@ -164,18 +164,18 @@ object(SimpleXMLElement)#%d (10) {
   string(2) "10"
 }
 Test 3: Update changes using a temporary CLOB
-string(331) "<?xml version="1.0"?>
+string(%d) "<?xml version="1.0"?>
 <Warehouse>
-<WarehouseId>1</WarehouseId>
-<WarehouseName>Southlake, Texas</WarehouseName>
-<Building>Owned</Building>
-<Area>25000</Area>
-<Docks>1</Docks>
-<DockType>Rear load</DockType>
-<WaterAccess>true</WaterAccess>
-<RailAccess>N</RailAccess>
-<Parking>Street</Parking>
-<VClearance>10</VClearance>
+%sWarehouseId>1</WarehouseId>
+%sWarehouseName>Southlake, Texas</WarehouseName>
+%sBuilding>Owned</Building>
+%sArea>25000</Area>
+%sDocks>1</Docks>
+%sDockType>Rear load</DockType>
+%sWaterAccess>true</WaterAccess>
+%sRailAccess>N</RailAccess>
+%sParking>Street</Parking>
+%sVClearance>10</VClearance>
 </Warehouse>
 "
 ===DONE===
