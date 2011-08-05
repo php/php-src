@@ -777,6 +777,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
 			p = p->pListNext;
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
+			va_end(args);
 			break;
 		}
 		va_end(args);
