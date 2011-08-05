@@ -98,7 +98,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
  */
 int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 {
-	int s;
+	int s, c1, w = 0;
 
 	if (c < 0x80) {
 		if (c >= 0) {
@@ -108,40 +108,79 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 	} else if (c < 0xc0) {
 		int status = filter->status & 0xff;
 		switch (status) {
-		case 0x10: /* 2byte code 2nd char */
-		case 0x21: /* 3byte code 3rd char */
-		case 0x32: /* 4byte code 4th char */
+		case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
+		case 0x21: /* 3byte code 3rd char: 0x80-0xbf */
+		case 0x32: /* 4byte code 4th char: 0x80-0xbf */
 			filter->status = 0;
 			s = filter->cache | (c & 0x3f);
+			filter->cache = 0;
 			if ((status == 0x10 && s >= 0x80) ||
 			    (status == 0x21 && s >= 0x800 && (s < 0xd800 || s > 0xdfff)) ||
 			    (status == 0x32 && s >= 0x10000 && s < 0x200000)) {
 				CK((*filter->output_function)(s, filter->data));
+			} else {
+				w = s & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
 			}
 			break;
-		case 0x20: /* 3byte code 2nd char */
-		case 0x31: /* 4byte code 3rd char */
+		case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,1-F:0x80-0x9f */
+			s = filter->cache | ((c & 0x3f) << 6);
+			c1 = (s >> 12) & 0xf;
+			if ((c1 == 0x0 && c >= 0xa0) || c1 > 0) {
+				filter->cache = s;
+				filter->status++;
+			} else {
+				w = s & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+				filter->status = 0;
+				filter->cache = 0;
+			}
+			break;
+		case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
 			filter->cache |= ((c & 0x3f) << 6);
 			filter->status++;
 			break;
-		case 0x30: /* 4byte code 2nd char */
-			filter->cache |= ((c & 0x3f) << 12);
-			filter->status++;
+		case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
+			s = filter->cache | ((c & 0x3f) << 12);
+			c1 = (s >> 18) & 0x7;
+			if ((c1 == 0x0 && c >= 0x90) ||
+				(c1 > 0x0 && c1 < 0x4) ||
+				(c1 == 0x4 && c < 0x90)) {
+				filter->cache = s;
+				filter->status++;
+			} else {
+				w = s & MBFL_WCSGROUP_MASK;
+				w |= MBFL_WCSGROUP_THROUGH;
+				CK((*filter->output_function)(w, filter->data));
+				filter->status = 0;
+				filter->cache = 0;
+			}
 			break;
 		default:
 			filter->status = 0;
 			break;
 		}
-	} else if (c < 0xe0) { /* 2byte code first char */
+	} else if (c < 0xc2) { /* invalid: 0xc0,0xc1 */
+		w = c & MBFL_WCSGROUP_MASK;
+		w |= MBFL_WCSGROUP_THROUGH;
+		CK((*filter->output_function)(w, filter->data));
+		filter->status = 0;
+		filter->cache = 0;
+	} else if (c < 0xe0) { /* 2byte code first char: 0xc2-0xdf */
 		filter->status = 0x10;
 		filter->cache = (c & 0x1f) << 6;
-	} else if (c < 0xf0) { /* 3byte code first char */
+	} else if (c < 0xf0) { /* 3byte code first char: 0xe0-0xef */
 		filter->status = 0x20;
 		filter->cache = (c & 0xf) << 12;
-	} else if (c < 0xf8) { /* 4byte code first char */
+	} else if (c < 0xf5) { /* 4byte code first char: 0xf0-0xf4 */
 		filter->status = 0x30;
 		filter->cache = (c & 0x7) << 18;
 	} else {
+		w = c & MBFL_WCSGROUP_MASK;
+		w |= MBFL_WCSGROUP_THROUGH;
+		CK((*filter->output_function)(w, filter->data));
 		filter->status = 0;
 		filter->cache = 0;
 	}
@@ -154,7 +193,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
  */
 int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 {
-	if (c >= 0 && c < 0x200000) {
+	if (c >= 0 && c < 0x110000) {
 		if (c < 0x80) {
 			CK((*filter->output_function)(c, filter->data));
 		} else if (c < 0x800) {
@@ -181,6 +220,11 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 {
+	int c1;
+
+	c1 = (filter->status >> 8) & 0xff;
+	filter->status &= 0xff;
+
 	if (c < 0x80) {
 		if (c < 0) { 
 			filter->flag = 1;	/* bad */
@@ -191,7 +235,23 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	} else if (c < 0xc0) {
 		switch (filter->status) {
 		case 0x20: /* 3 byte code 2nd char */
+			if ((c1 == 0x0 && c >= 0xa0) || c1 > 0x0) {
+				filter->status++;
+			} else {
+				filter->flag = 1;	/* bad */
+				filter->status = 0;				
+			}
+			break;
 		case 0x30: /* 4 byte code 2nd char */
+			if ((c1 == 0x0 && c >= 0x90) || 
+				(c1 > 0x0 && c1 < 0x4) || 
+				(c1 == 0x4 && c < 0x90)) {
+				filter->status++;
+			} else {
+				filter->flag = 1;	/* bad */
+				filter->status = 0;				
+			}
+			break;
 		case 0x31: /* 4 byte code 3rd char */
 			filter->status++;
 			break;
@@ -205,6 +265,9 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 			filter->status = 0;
 			break;
 		}
+	} else if (c < 0xc2) { /* 0xc0,0xc1 */
+		filter->flag = 1;	/* bad */
+		filter->status = 0;
 	} else {
 		if (filter->status) {
 			filter->flag = 1;	/* bad */
@@ -214,8 +277,10 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 			filter->status = 0x10;
 		} else if (c < 0xf0) {		/* 3 byte code 1st char */
 			filter->status = 0x20;
-		} else if (c < 0xf8) {		/* 4 byte code 1st char */
+			filter->status |= (c & 0xf) << 8;
+		} else if (c < 0xf5) {		/* 4 byte code 1st char */
 			filter->status = 0x30;
+			filter->status |= (c & 0x7) << 8;
 		} else {
 			filter->flag = 1;	/* bad */
 		}
