@@ -644,6 +644,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 				if (pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
 					efree(subpat_names);
 					efree(offsets);
+					if (match_sets) efree(match_sets);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Get subpatterns list failed");
 					RETURN_FALSE;
 				}
