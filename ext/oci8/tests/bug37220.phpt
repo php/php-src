@@ -43,7 +43,7 @@ oci_execute($stmt);
 
 while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) {
 	foreach ($row as $item) {
-		echo $item."\n";
+		echo trim($item)."\n";
 	}
 	echo "\n";
 }
