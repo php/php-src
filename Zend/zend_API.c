@@ -941,6 +941,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 				zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
 					ce->name, get_active_function_name(TSRMLS_C), Z_OBJCE_P(this_ptr)->name, get_active_function_name(TSRMLS_C));
 			}
+			va_end(va);
 			return FAILURE;
 		}
 
