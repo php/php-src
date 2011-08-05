@@ -141,10 +141,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		hostname = MyG(default_host);
 	}
 
-       if (mysql->mysql && mysqli_resource && (mysqli_resource->status > MYSQLI_STATUS_INITIALIZED || (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)))) {
-                /* already connected, we should close the connection */
-                php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status TSRMLS_CC);
-        }
+	if (mysql->mysql && mysqli_resource &&
+		(mysqli_resource->status > MYSQLI_STATUS_INITIALIZED))
+	{
+		/* already connected, we should close the connection */
+		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status TSRMLS_CC);
+	}
 
 	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
 		hostname += 2;
