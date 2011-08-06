@@ -1227,7 +1227,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	IMAPG(imap_password) = estrndup(passwd, passwd_len);
 
 #ifdef SET_MAXLOGINTRIALS
-	if (argc == 5) {
+	if (argc >= 5) {
 		if (retries < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING ,"Retries must be greater or equal to 0");
 		} else {
