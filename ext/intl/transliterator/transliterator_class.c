@@ -386,7 +386,7 @@ zend_function_entry Transliterator_class_functions[] = {
 	PHP_ME_MAPPING( transliterate,	transliterator_transliterate,		ainfo_trans_me_transliterate,	ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( getErrorCode,	transliterator_get_error_code,		ainfo_trans_void,				ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( getErrorMessage,transliterator_get_error_message,	ainfo_trans_void,				ZEND_ACC_PUBLIC )
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

@@ -170,7 +170,7 @@ static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( localtime, ZEND_FN( datefmt_localtime ), datefmt_parse_args )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( datefmt_get_error_code ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( datefmt_get_error_message ), arginfo_intldateformatter_getdatetype )
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
