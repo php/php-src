@@ -833,7 +833,7 @@ const static zend_function_entry milter_functions[] = {
 	PHP_FE(smfi_addrcpt, 		arginfo_smfi_addrcpt)
 	PHP_FE(smfi_delrcpt, 		arginfo_smfi_delrcpt)
 	PHP_FE(smfi_replacebody, 	arginfo_smfi_replacebody)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

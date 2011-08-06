@@ -144,7 +144,7 @@ static function_entry MessageFormatter_class_functions[] = {
 	PHP_NAMED_FE( getLocale, ZEND_FN( msgfmt_get_locale ), arginfo_messageformatter_geterrormessage )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( msgfmt_get_error_code ), arginfo_messageformatter_geterrormessage )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( msgfmt_get_error_message ), arginfo_messageformatter_geterrormessage )
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

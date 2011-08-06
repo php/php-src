@@ -2308,7 +2308,7 @@ ZEND_API ZEND_FUNCTION(display_disabled_function)
 
 static zend_function_entry disabled_function[] = {
 	ZEND_FE(display_disabled_function,			NULL)
-	{ NULL, NULL, NULL }
+	ZEND_FE_END
 };
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC) /* {{{ */
@@ -2334,7 +2334,7 @@ static zend_object_value display_disabled_class(zend_class_entry *class_type TSR
 /* }}} */
 
 static const zend_function_entry disabled_class_new[] = {
-	{ NULL, NULL, NULL }
+	ZEND_FE_END
 };
 
 ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC) /* {{{ */

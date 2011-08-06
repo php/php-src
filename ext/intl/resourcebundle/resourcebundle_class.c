@@ -399,7 +399,7 @@ static function_entry ResourceBundle_class_functions[] = {
 	ZEND_NAMED_ME( getLocales, ZEND_FN(resourcebundle_locales), arginfo_resourcebundle_getlocales, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
 	ZEND_NAMED_ME( getErrorCode, ZEND_FN(resourcebundle_get_error_code), arginfo_resourcebundle_get_error_code, ZEND_ACC_PUBLIC )
 	ZEND_NAMED_ME( getErrorMessage, ZEND_FN(resourcebundle_get_error_message), arginfo_resourcebundle_get_error_message, ZEND_ACC_PUBLIC )
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 

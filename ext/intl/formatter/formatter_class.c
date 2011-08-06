@@ -179,7 +179,7 @@ static function_entry NumberFormatter_class_functions[] = {
 	PHP_NAMED_FE( getLocale, ZEND_FN( numfmt_get_locale ), arginfo_numberformatter_getlocale )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( numfmt_get_error_code ), arginfo_numberformatter_getpattern )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( numfmt_get_error_message ), arginfo_numberformatter_getpattern )
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
