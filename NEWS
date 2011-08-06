@@ -1,7 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.3.7
-- mysqli
+- Imap extension:
+  . Fixed bug #55313 (Number of retries not set when params specified).
+    (kevin at kevinlocke dot name)
+
+- MySQLi extension:
   . Fixed bug #55238 (SSL options set by mysqli_ssl_set ignored for MySQLi
     persistent connections). (Andrey)
   
