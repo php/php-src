@@ -910,6 +910,7 @@ static int php_network_listen_socket(const char *host, int *port, int socktype, 
 	for (p = sal; *p; p++) {
 		if (sa) {
 			pefree(sa, 1);
+			sa = NULL;
 		}
 
 		retval = socket((*p)->sa_family, socktype, 0);
