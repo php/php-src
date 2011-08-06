@@ -103,7 +103,7 @@
  */
 #define MBFL_VERSION_MAJOR 1
 #define MBFL_VERSION_MINOR 3
-#define MBFL_VERSION_TEENY 0
+#define MBFL_VERSION_TEENY 1
 
 /*
  * convert filter
