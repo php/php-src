@@ -553,7 +553,7 @@ static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_CONFLICTS("domxml")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 zend_module_entry dom_module_entry = { /* {{{ */

@@ -329,7 +329,7 @@ static const zend_module_dep mysql_deps[] = {
 #if defined(MYSQL_USE_MYSQLND)
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 /* {{{ mysql_module_entry

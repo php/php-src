@@ -941,7 +941,7 @@ static const  zend_module_dep mysqli_deps[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 /* {{{ mysqli_module_entry

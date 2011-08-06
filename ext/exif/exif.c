@@ -254,7 +254,7 @@ PHP_MSHUTDOWN_FUNCTION(exif)
 static const zend_module_dep exif_module_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
 	ZEND_MOD_OPTIONAL("mbstring")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 /* }}} */
 

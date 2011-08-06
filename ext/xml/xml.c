@@ -244,7 +244,7 @@ const zend_function_entry xml_functions[] = {
 #ifdef LIBXML_EXPAT_COMPAT
 static const zend_module_dep xml_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 #endif
 

@@ -41,7 +41,7 @@ const zend_function_entry xsl_functions[] = {
 
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 /* {{{ xsl_module_entry
