@@ -558,7 +558,7 @@ const zend_function_entry imap_functions[] = {
 /* {{{ imap dependencies */
 static const zend_module_dep imap_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 /* }}} */
 
