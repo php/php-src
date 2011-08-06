@@ -3381,7 +3381,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
 	ZEND_MOD_OPTIONAL("session")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 /* }}} */
 
