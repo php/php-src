@@ -101,6 +101,20 @@ UPGRADE NOTES - PHP X.Y
   To create a generic object you can use StdClass:
   $test = new StdClass;
   $text->baz = 1;
+  
+- It's now possible to enforce the class' __construct arguments in an abstract
+  constructor in the base class.
+
+  abstract class Base
+  {
+    abstract public function __construct();
+  }
+  class Foo extends Base
+  {
+    public function __construct($bar) {}
+  }
+  
+  Now emits a Fatal error due the incompatible declaration.
 
 =====================================
 4. Changes made to existing functions
