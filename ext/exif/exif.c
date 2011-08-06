@@ -254,7 +254,7 @@ static const zend_module_dep exif_module_deps[] = {
 #if EXIF_USE_MBSTRING
 	ZEND_MOD_REQUIRED("mbstring")
 #endif
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 /* }}} */
 

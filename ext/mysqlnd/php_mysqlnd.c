@@ -266,7 +266,7 @@ static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 
 static const zend_module_dep mysqlnd_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 /* {{{ mysqlnd_module_entry

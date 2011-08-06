@@ -113,6 +113,8 @@ struct _zend_module_entry {
 #define ZEND_MOD_CONFLICTS(name)	ZEND_MOD_CONFLICTS_EX(name, NULL, NULL)
 #define ZEND_MOD_OPTIONAL(name)		ZEND_MOD_OPTIONAL_EX(name, NULL, NULL)
 
+#define ZEND_MOD_END { NULL, NULL, NULL, 0 }
+
 struct _zend_module_dep {
 	const char *name;		/* module name */
 	const char *rel;		/* version relationship: NULL (exists), lt|le|eq|ge|gt (to given version) */

@@ -3721,7 +3721,7 @@ static const zend_module_dep phar_deps[] = {
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 zend_module_entry phar_module_entry = {

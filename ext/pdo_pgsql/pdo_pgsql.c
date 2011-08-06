@@ -50,7 +50,7 @@ const zend_function_entry pdo_pgsql_functions[] = {
 #if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 #endif
 /* }}} */

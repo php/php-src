@@ -320,7 +320,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int ty
 
 static const zend_module_dep xmlreader_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
-	{NULL, NULL, NULL}
+	ZEND_MOD_END
 };
 
 /* {{{ xmlreader_module_entry
