@@ -75,7 +75,7 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry json_serializable_interface[] = {
 	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, json_serialize_arginfo)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
