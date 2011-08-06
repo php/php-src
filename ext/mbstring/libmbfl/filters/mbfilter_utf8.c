@@ -124,10 +124,12 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(w, filter->data));
 			}
 			break;
-		case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,1-F:0x80-0x9f */
+		case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
 			s = filter->cache | ((c & 0x3f) << 6);
 			c1 = (s >> 12) & 0xf;
-			if ((c1 == 0x0 && c >= 0xa0) || c1 > 0) {
+			if ((c1 == 0x0 && c >= 0xa0) || 
+				(c1 == 0xd && c < 0xa0) || 
+				(c1 > 0x0 && c1 != 0xd)) {
 				filter->cache = s;
 				filter->status++;
 			} else {
@@ -235,7 +237,9 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	} else if (c < 0xc0) {
 		switch (filter->status) {
 		case 0x20: /* 3 byte code 2nd char */
-			if ((c1 == 0x0 && c >= 0xa0) || c1 > 0x0) {
+			if ((c1 == 0x0 && c >= 0xa0) || 
+				(c1 == 0xd && c < 0xa0) || 
+				(c1 > 0x0 && c1 != 0xd)) {
 				filter->status++;
 			} else {
 				filter->flag = 1;	/* bad */
