@@ -264,8 +264,8 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else {
 		/* auto detect */
 		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new((enum mbfl_no_encoding *)info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
-		if (identd) {
+		identd = mbfl_encoding_detector_new2(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
+		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
 				string.val = (unsigned char *)val_list[n];
