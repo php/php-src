@@ -98,7 +98,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
  */
 int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 {
-	int s, c1, w = 0;
+	int s, c1, w = 0, flag = 0;
 
 	if (c < 0x80) {
 		if (c >= 0) {
@@ -120,8 +120,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s, filter->data));
 			} else {
 				w = s & MBFL_WCSGROUP_MASK;
-				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
+				flag = 1;
 			}
 			break;
 		case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
@@ -134,10 +133,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 				filter->status++;
 			} else {
 				w = s & MBFL_WCSGROUP_MASK;
-				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
-				filter->status = 0;
-				filter->cache = 0;
+				flag = 1;
 			}
 			break;
 		case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -154,33 +150,47 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 				filter->status++;
 			} else {
 				w = s & MBFL_WCSGROUP_MASK;
-				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
-				filter->status = 0;
-				filter->cache = 0;
+				flag = 1;
 			}
 			break;
 		default:
-			filter->status = 0;
+			w = c & MBFL_WCSGROUP_MASK;
+			flag = 1;
 			break;
 		}
 	} else if (c < 0xc2) { /* invalid: 0xc0,0xc1 */
 		w = c & MBFL_WCSGROUP_MASK;
-		w |= MBFL_WCSGROUP_THROUGH;
-		CK((*filter->output_function)(w, filter->data));
-		filter->status = 0;
-		filter->cache = 0;
+		flag = 1;
 	} else if (c < 0xe0) { /* 2byte code first char: 0xc2-0xdf */
-		filter->status = 0x10;
-		filter->cache = (c & 0x1f) << 6;
+		if (filter->status == 0x0) {
+			filter->status = 0x10;
+			filter->cache = (c & 0x1f) << 6;
+		} else {
+			w = c & MBFL_WCSGROUP_MASK;
+			flag = 1;
+		}
 	} else if (c < 0xf0) { /* 3byte code first char: 0xe0-0xef */
-		filter->status = 0x20;
-		filter->cache = (c & 0xf) << 12;
+		if (filter->status == 0x0) {
+			filter->status = 0x20;
+			filter->cache = (c & 0xf) << 12;
+		} else {
+			w = c & MBFL_WCSGROUP_MASK;
+			flag = 1;
+		}
 	} else if (c < 0xf5) { /* 4byte code first char: 0xf0-0xf4 */
-		filter->status = 0x30;
-		filter->cache = (c & 0x7) << 18;
+		if (filter->status == 0x0) {
+			filter->status = 0x30;
+			filter->cache = (c & 0x7) << 18;
+		} else {
+			w = c & MBFL_WCSGROUP_MASK;
+			flag = 1;
+		}
 	} else {
 		w = c & MBFL_WCSGROUP_MASK;
+		flag = 1;
+	}
+
+	if (flag) {
 		w |= MBFL_WCSGROUP_THROUGH;
 		CK((*filter->output_function)(w, filter->data));
 		filter->status = 0;
