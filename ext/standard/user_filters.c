@@ -71,7 +71,7 @@ static const zend_function_entry user_filter_class_funcs[] = {
 	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_filter)
 	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onCreate)
 	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onClose)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 
 static zend_class_entry user_filter_class_entry;

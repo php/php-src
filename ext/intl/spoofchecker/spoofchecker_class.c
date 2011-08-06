@@ -113,7 +113,7 @@ zend_function_entry Spoofchecker_class_functions[] = {
 	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, setAllowedLocales, spoofchecker_set_allowed_locales, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, setChecks, spoofchecker_set_checks, ZEND_ACC_PUBLIC)
-	{ NULL, NULL, NULL }
+	PHP_FE_END
 };
 /* }}} */
 
