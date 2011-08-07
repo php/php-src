@@ -169,7 +169,7 @@ typedef struct php_cli_server_client {
 	int content_sender_initialized:1;
 	php_cli_server_content_sender content_sender;
 	php_cli_server_buffer capture_buffer;
-	int capturing:1;
+	unsigned int capturing:1;
 	int file_fd;
 } php_cli_server_client;
 
