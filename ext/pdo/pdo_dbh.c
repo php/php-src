@@ -57,7 +57,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		pdo_err = &stmt->error_code;
 	}
 
-	strcpy(*pdo_err, sqlstate);
+	strncpy(*pdo_err, sqlstate, 6);
 
 	/* hash sqlstate to error messages */
 	msg = pdo_sqlstate_state_to_description(*pdo_err);

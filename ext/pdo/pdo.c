@@ -191,7 +191,7 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 	}
 
 	return zend_hash_add(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len,
-			(void**)&driver, sizeof(driver), NULL);
+			(void**)&driver, sizeof(pdo_driver_t *), NULL);
 }
 
 PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)

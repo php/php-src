@@ -58,7 +58,7 @@ extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
 
 #define PDO_DBH_CLEAR_ERR()		do { \
-	strlcpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
+	strncpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
 	if (dbh->query_stmt) { \
 		dbh->query_stmt = NULL; \
 		zend_objects_store_del_ref(&dbh->query_stmt_zval TSRMLS_CC); \
