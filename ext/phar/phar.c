@@ -667,7 +667,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
 	long offset;
-	int register_alias, sig_len, temp_alias = 0;
+	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
 
 	if (pphar) {
@@ -3391,6 +3391,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	} zend_catch {
 		failed = 1;
+		res = NULL;
 	} zend_end_try();
 
 	if (name) {

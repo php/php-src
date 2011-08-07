@@ -124,7 +124,7 @@ php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC) /* 
 int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC) /* {{{ */
 {
 	php_stream *fp = phar_get_efp(entry, follow_links TSRMLS_CC);
-	off_t temp = 0, eoffset = 0;
+	off_t temp, eoffset;
 
 	if (!fp) {
 		return -1;
@@ -154,6 +154,8 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 		case SEEK_SET:
 			temp = eoffset + offset;
 			break;
+		default:
+			temp = 0;
 	}
 
 	if (temp > eoffset + (off_t) entry->uncompressed_filesize) {
@@ -1203,7 +1205,7 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 	phar_archive_data *fd, **fd_ptr;
 	char *my_realpath, *save;
 	int save_len;
-	ulong fhash, ahash;
+	ulong fhash, ahash = 0;
 
 	phar_request_initialize(TSRMLS_C);
 
