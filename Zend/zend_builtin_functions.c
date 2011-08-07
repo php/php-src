@@ -2047,7 +2047,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			ZEND_PUTS(class_name);
 			ZEND_PUTS(call_type);
 		}
-		zend_printf("%s(", function_name?function_name:"main");
+		zend_printf("%s(", function_name);
 		if (arg_array) {
 			debug_print_backtrace_args(arg_array TSRMLS_CC);
 			zval_ptr_dtor(&arg_array);
