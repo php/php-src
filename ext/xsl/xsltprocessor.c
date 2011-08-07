@@ -934,7 +934,6 @@ PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 {
 	zval *id;
 	xsl_object *intern;
-	long securityPrefs;
 
 	DOM_GET_THIS(id);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "") == SUCCESS) {
