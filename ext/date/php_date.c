@@ -2378,7 +2378,7 @@ static void update_errors_warnings(timelib_error_container *last_errors TSRMLS_D
 PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC)
 {
 	timelib_time   *now;
-	timelib_tzinfo *tzi;
+	timelib_tzinfo *tzi = NULL;
 	timelib_error_container *err = NULL;
 	int type = TIMELIB_ZONETYPE_ID, new_dst;
 	char *new_abbr;
