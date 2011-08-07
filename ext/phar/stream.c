@@ -403,7 +403,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	off_t temp;
+	off_t temp = 0;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
