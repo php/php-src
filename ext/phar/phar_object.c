@@ -663,7 +663,7 @@ PHP_METHOD(Phar, webPhar)
 	const char *basename;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
 	phar_archive_data *phar = NULL;
-	phar_entry_info *info;
+	phar_entry_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saz", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite) == FAILURE) {
 		return;
@@ -890,7 +890,7 @@ PHP_METHOD(Phar, webPhar)
 
 			zend_bailout();
 		} else {
-			char *tmp, sa;
+			char *tmp = NULL, sa = '\0';
 			sapi_header_line ctr = {0};
 			ctr.response_code = 301;
 			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
