@@ -20,6 +20,7 @@
 #include <unicode/ures.h>
 
 #include <zend.h>
+#include "php.h"
 
 #include "intl_error.h"
 
