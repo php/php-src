@@ -4252,14 +4252,14 @@ PHP_FUNCTION(getopt)
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
 		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
+		if (!opts) {
+			RETURN_FALSE;
+		}
+
 		orig_opts = opts;
 		opts += len;
 
 		memset(opts, 0, count * sizeof(opt_struct));
-
-		if (!opts) {
-			RETURN_FALSE;
-		}
 
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
@@ -4297,6 +4297,10 @@ PHP_FUNCTION(getopt)
 		}
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
+		if (!opts) {
+			RETURN_FALSE;
+		}
+
 		orig_opts = opts;
 		opts += len;
 	}
