@@ -615,7 +615,11 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"0:\n\t"
 			"fildl	(%2)\n\t"
 			"fildl	(%1)\n\t"
+#if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
+			"fsubp  %%st(1), %%st\n\t"  // LLVM bug #9164
+#else
 			"fsubp	%%st, %%st(1)\n\t"
+#endif
 			"movb   $0x2,0xc(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
@@ -635,7 +639,11 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"0:\n\t"
 			"fildq	(%2)\n\t"
 			"fildq	(%1)\n\t"
+#if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
+			"fsubp  %%st(1), %%st\n\t"  // LLVM bug #9164
+#else
 			"fsubp	%%st, %%st(1)\n\t"
+#endif
 			"movb   $0x2,0x14(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
