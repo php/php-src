@@ -36,10 +36,10 @@ int grapheme_ascii_check(const unsigned char *day, int32_t len);
 
 int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len TSRMLS_DC );
 
-inline int32_t
+int32_t
 grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len);
 
-inline int32_t
+int32_t
 grapheme_memnstr_grapheme(UBreakIterator *bi, UChar *haystack, UChar *needle, int32_t needle_len, UChar *end);
 
 inline void *grapheme_memrchr_grapheme(const void *s, int c, int32_t n);
