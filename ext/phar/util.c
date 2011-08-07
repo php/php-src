@@ -154,6 +154,9 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 		case SEEK_SET:
 			temp = eoffset + offset;
 			break;
+		default:
+			temp = 0;
+			break;
 	}
 
 	if (temp > eoffset + (off_t) entry->uncompressed_filesize) {
@@ -1203,7 +1206,7 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 	phar_archive_data *fd, **fd_ptr;
 	char *my_realpath, *save;
 	int save_len;
-	ulong fhash, ahash;
+	ulong fhash, ahash = 0;
 
 	phar_request_initialize(TSRMLS_C);
 

@@ -421,6 +421,8 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 		case SEEK_SET :
 			temp = data->zero + offset;
 			break;
+		default :
+			temp = 0;
 	}
 	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
