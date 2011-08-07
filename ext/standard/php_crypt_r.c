@@ -382,7 +382,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 	/* Now make the output string */
 	memcpy(passwd, MD5_MAGIC, MD5_MAGIC_LEN);
 	strlcpy(passwd + MD5_MAGIC_LEN, sp, sl + 1);
-	strncat(passwd, "$", 1);
+	strlcat(passwd, "$", 1);
 
 	PHP_MD5Final(final, &ctx);
 
