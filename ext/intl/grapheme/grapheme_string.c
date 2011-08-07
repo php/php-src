@@ -677,7 +677,7 @@ PHP_FUNCTION(grapheme_stristr)
 /* }}} */
 
 /* {{{ grapheme_extract_charcount_iter - grapheme iterator for grapheme_extract MAXCHARS */
-inline int32_t
+static inline int32_t
 grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char *pstr, int32_t str_len)
 {
 	int pos = 0, prev_pos = 0;
@@ -714,7 +714,7 @@ grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char
 /* }}} */
 
 /* {{{ grapheme_extract_bytecount_iter - grapheme iterator for grapheme_extract MAXBYTES */
-inline int32_t
+static inline int32_t
 grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char *pstr, int32_t str_len)
 {
 	int pos = 0, prev_pos = 0;
@@ -748,7 +748,7 @@ grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char
 /* }}} */
 
 /* {{{ grapheme_extract_count_iter - grapheme iterator for grapheme_extract COUNT */
-inline int32_t
+static inline int32_t
 grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pstr, int32_t str_len)
 {
 	int pos = 0, next_pos = 0;
