@@ -244,7 +244,6 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 	HashTable *myht = NULL;
 	char *class_name;
 	zend_uint class_name_len;
-	zend_class_entry *ce;
 	int (*zval_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp = 0;
 
@@ -285,7 +284,6 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		ce = Z_OBJCE_PP(struc);
 		Z_OBJ_HANDLER_PP(struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
 		efree(class_name);
