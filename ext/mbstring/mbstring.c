@@ -1147,7 +1147,7 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 
 static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filename TSRMLS_DC) /* {{{ */
 {
-	char *s, *s2, *tmp;
+	char *s, *s2;
 	const size_t filename_len = strlen(filename);
 
 	/* The \ check should technically be needed for win32 systems only where
