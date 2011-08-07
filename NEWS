@@ -1,8 +1,14 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 Beta
+- General improvements:
+  . Turn on html_errors by default again in php.ini-production like it was in
+    PHP 5.3, but only generate docref links when the docref_root INI setting is
+    not empty.
+- Fixed bug #55378: Binary number literal returns float number though its value
+  is small enough. (Derick)
 
-4 Aug 2011, PHP 5.4.0 Alpha 3
+04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
    . com, sebastian.deutsch at 9elements . com, Pierre)
