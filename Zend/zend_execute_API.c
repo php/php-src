@@ -763,6 +763,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_class_entry *called_scope = NULL;
 	zval *current_this;
 	zend_execute_data execute_data;
+	zend_fcall_info_cache fci_cache_local;
 
 	*fci->retval_ptr_ptr = NULL;
 
@@ -797,7 +798,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		zend_fcall_info_cache fci_cache_local;
 		char *callable_name;
 		char *error = NULL;
 
