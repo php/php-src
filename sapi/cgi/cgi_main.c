@@ -689,6 +689,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 				free_php_self = 1;
 			}  else {
 				php_self = path_info;
+				php_self_len = path_info_len;
 				free_php_self = 0;
 			}
 		} else if (script_name) {
