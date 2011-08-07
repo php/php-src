@@ -160,13 +160,13 @@ typedef struct php_cli_server_client {
 	char *addr_str;
 	size_t addr_str_len;
 	php_http_parser parser;
-	int request_read:1;
+	unsigned int request_read:1;
 	char *current_header_name;
 	size_t current_header_name_len;
-	int current_header_name_allocated:1;
+	unsigned int current_header_name_allocated:1;
 	size_t post_read_offset;
 	php_cli_server_request request;
-	int content_sender_initialized:1;
+	unsigned int content_sender_initialized:1;
 	php_cli_server_content_sender content_sender;
 	php_cli_server_buffer capture_buffer;
 	unsigned int capturing:1;
