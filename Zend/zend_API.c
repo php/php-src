@@ -3378,7 +3378,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 
 	property_info.ce = ce;
 
-	zend_hash_quick_update(&ce->properties_info, name, name_length + 1, h, &property_info, sizeof(zend_property_info), NULL);
+	zend_hash_quick_update(&ce->properties_info, property_info.name, property_info.name_length+1, h, &property_info, sizeof(zend_property_info), NULL);
 
 	return SUCCESS;
 }
