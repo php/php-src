@@ -474,7 +474,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			if (new_l + 1 > buf_len) {
 				buf_len = 1 + buf_len + 2 * new_l;
 				nbuf = emalloc(buf_len);
-				strcpy(nbuf, buf);
+				strncpy(nbuf, buf, buf_len-1);
 				efree(buf);
 				buf = nbuf;
 			}
@@ -511,7 +511,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 				if (new_l + 1 > buf_len) {
 					buf_len = 1 + buf_len + 2 * new_l;
 					nbuf = safe_emalloc(buf_len, sizeof(char), 0);
-					strcpy(nbuf, buf);
+					strncpy(nbuf, buf, buf_len-1);
 					efree(buf);
 					buf = nbuf;
 				}
@@ -526,7 +526,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			if (new_l + 1 > buf_len) {
 				buf_len = new_l + 1; /* now we know exactly how long it is */
 				nbuf = safe_emalloc(buf_len, sizeof(char), 0);
-				strcpy(nbuf, buf);
+				strncpy(nbuf, buf, buf_len-1);
 				efree(buf);
 				buf = nbuf;
 			}
