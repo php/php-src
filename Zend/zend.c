@@ -247,7 +247,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			break;
 		case IS_RESOURCE:
 			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG);
-			Z_STRLEN_P(expr_copy) = sprintf(Z_STRVAL_P(expr_copy), "Resource id #%ld", Z_LVAL_P(expr));
+			Z_STRLEN_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #%ld", Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
 			Z_STRLEN_P(expr_copy) = sizeof("Array") - 1;
