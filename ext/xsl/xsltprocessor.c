@@ -620,7 +620,7 @@ Since:
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 {
-	zval *id, *rv = NULL, *docp = NULL;
+	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
 	int ret, ret_class_len=0;
@@ -664,7 +664,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 			php_libxml_increment_doc_ref(interndoc, newdocp TSRMLS_CC);
 			php_libxml_increment_node_ptr(interndoc, (xmlNodePtr)newdocp, (void *)interndoc TSRMLS_CC);
 		} else {
-			DOM_RET_OBJ(rv, (xmlNodePtr) newdocp, &ret, NULL);
+			DOM_RET_OBJ((xmlNodePtr) newdocp, &ret, NULL);
 		}
 	} else {
 		RETURN_FALSE;
