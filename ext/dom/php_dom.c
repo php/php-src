@@ -212,7 +212,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 			zend_hash_init(doc_props->classmap, 0, NULL, NULL, 0);
 		}
 		if (ce) {
-			return zend_hash_update(doc_props->classmap, basece->name, basece->name_length + 1, &ce, sizeof(ce), NULL);
+			return zend_hash_update(doc_props->classmap, basece->name, basece->name_length + 1, &ce, sizeof(zend_class_entry *), NULL);
 		} else {
 			zend_hash_del(doc_props->classmap, basece->name, basece->name_length + 1);
 		}
@@ -484,7 +484,6 @@ void *php_dom_export_node(zval *object TSRMLS_DC) /* {{{ */
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(dom_import_simplexml)
 {
-	zval *rv = NULL;
 	zval *node;
 	xmlNodePtr nodep = NULL;
 	php_libxml_node_object *nodeobj;
@@ -498,7 +497,7 @@ PHP_FUNCTION(dom_import_simplexml)
 	nodep = php_libxml_import_node(node TSRMLS_CC);
 
 	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
-		DOM_RET_OBJ(rv, (xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
+		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");
 		RETURN_NULL();
@@ -1233,7 +1232,7 @@ void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC) /* {{{ 
 /* }}} */
 
 /* {{{ php_dom_create_object */
-PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
+PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
 	zend_class_entry *ce;

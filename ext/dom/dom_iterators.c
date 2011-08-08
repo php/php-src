@@ -251,7 +251,7 @@ err:
 	zval_ptr_dtor((zval**)&curobj);
 	if (curnode) {
 		MAKE_STD_ZVAL(curattr);
-		curattr = php_dom_create_object(curnode, &ret, NULL, curattr, objmap->baseobj TSRMLS_CC);
+		curattr = php_dom_create_object(curnode, &ret, curattr, objmap->baseobj TSRMLS_CC);
 	}
 
 	iterator->curobj = curattr;
@@ -330,7 +330,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 err:
 	if (curnode) {
 		MAKE_STD_ZVAL(curattr);
-		curattr = php_dom_create_object(curnode, &ret, NULL, curattr, objmap->baseobj TSRMLS_CC);
+		curattr = php_dom_create_object(curnode, &ret, curattr, objmap->baseobj TSRMLS_CC);
 	}
 
 	iterator->curobj = curattr;

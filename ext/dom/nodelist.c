@@ -104,7 +104,7 @@ Since:
 */
 PHP_FUNCTION(dom_nodelist_item)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	long index;
 	int ret;
 	dom_object *intern;
@@ -163,7 +163,7 @@ PHP_FUNCTION(dom_nodelist_item)
 		}
 
 		if (itemnode) {
-			DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
 			return;
 		}
 	}

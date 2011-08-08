@@ -196,7 +196,7 @@ PHP_FUNCTION(dom_text_split_text)
 		nnode->type = XML_TEXT_NODE;
 	}
 	
-	return_value = php_dom_create_object(nnode, &ret, NULL, return_value, intern TSRMLS_CC);
+	return_value = php_dom_create_object(nnode, &ret, return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_text_split_text */
 
