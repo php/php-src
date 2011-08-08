@@ -28,8 +28,9 @@
 /*
  * Unicode table
  */
+#ifdef UNICODE_TABLE_CP936_DEF
 
-static const unsigned short cp936_ucs_table[] = {
+const unsigned short cp936_ucs_table[] = {
 /* 0x8100 */
 0x4e02,0x4e04,0x4e05,0x4e06,0x4e0f,0x4e12,0x4e17,0x4e1f,
 0x4e20,0x4e21,0x4e23,0x4e26,0x4e29,0x4e2e,0x4e2f,0x4e31,
@@ -3159,11 +3160,11 @@ static const unsigned short cp936_ucs_table[] = {
 0xfa0c,0xfa0d,0xfa0e,0xfa0f,0xfa11,0xfa13,0xfa14,0xfa18,
 0xfa1f,0xfa20,0xfa21,0xfa23,0xfa24,0xfa27,0xfa28,0xfa29};
 
-static const int cp936_ucs_table_size = (sizeof(cp936_ucs_table)/sizeof(unsigned short));
+const int cp936_ucs_table_size = (sizeof(cp936_ucs_table)/sizeof(unsigned short));
 
 
 /* UCS -> CP936 */
-static const unsigned short ucs_a1_cp936_table[] = { 
+const unsigned short ucs_a1_cp936_table[] = { 
 0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,
 0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,
@@ -3308,11 +3309,11 @@ static const unsigned short ucs_a1_cp936_table[] = {
 0xa7ea,0xa7eb,0xa7ec,0xa7ed,0xa7ee,0xa7ef,0xa7f0,0xa7f1,
 0x0000,0xa7d7};
 
-static const int ucs_a1_cp936_table_min = 0x0000;
-static const int ucs_a1_cp936_table_max = 0x0000 + (sizeof (ucs_a1_cp936_table) / sizeof (unsigned short));
+const int ucs_a1_cp936_table_min = 0x0000;
+const int ucs_a1_cp936_table_max = 0x0000 + (sizeof (ucs_a1_cp936_table) / sizeof (unsigned short));
 
 /* 0x2000 */
-static const unsigned short ucs_a2_cp936_table[] = {
+const unsigned short ucs_a2_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0xa95c,0x0000,0x0000,0xa843,0xa1aa,0xa844,0xa1ac,0x0000,
@@ -3544,10 +3545,10 @@ static const unsigned short ucs_a2_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
-static const int ucs_a2_cp936_table_min = 0x2000;
-static const int ucs_a2_cp936_table_max = 0x2000 + (sizeof (ucs_a2_cp936_table) / sizeof (unsigned short));
+const int ucs_a2_cp936_table_min = 0x2000;
+const int ucs_a2_cp936_table_max = 0x2000 + (sizeof (ucs_a2_cp936_table) / sizeof (unsigned short));
 
-static const unsigned short ucs_a3_cp936_table[] = {
+const unsigned short ucs_a3_cp936_table[] = {
 /* 0x2f00 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -3714,11 +3715,11 @@ static const unsigned short ucs_a3_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
 
-static const int ucs_a3_cp936_table_min = 0x2f00;
-static const int ucs_a3_cp936_table_max = 0x2f00 + (sizeof (ucs_a3_cp936_table) / sizeof (unsigned short));
+const int ucs_a3_cp936_table_min = 0x2f00;
+const int ucs_a3_cp936_table_max = 0x2f00 + (sizeof (ucs_a3_cp936_table) / sizeof (unsigned short));
 
 /* 4d00h CJK Unified Ideographs (+ Extension A) */
-static const unsigned short ucs_i_cp936_table[] = {
+const unsigned short ucs_i_cp936_table[] = {
 /* 0x4d00 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -6377,13 +6378,13 @@ static const unsigned short ucs_i_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 }; /* 9fffh */
-static const int ucs_i_cp936_table_min = 0x4d00;
-static const int ucs_i_cp936_table_max = 0x4d00 + (sizeof (ucs_i_cp936_table) / sizeof (unsigned short));
+const int ucs_i_cp936_table_min = 0x4d00;
+const int ucs_i_cp936_table_max = 0x4d00 + (sizeof (ucs_i_cp936_table) / sizeof (unsigned short));
 
 
 
 /* 0xf900 CJK Compatibility Ideographs */
-static const unsigned short ucs_ci_cp936_table[] = {
+const unsigned short ucs_ci_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -6423,33 +6424,33 @@ static const unsigned short ucs_ci_cp936_table[] = {
 0xfe47,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0xfe48,
 0xfe49,0xfe4a,0x0000,0xfe4b,0xfe4c,0x0000,0x0000,0xfe4d,
 0xfe4e,0xfe4f,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
-static const int ucs_ci_cp936_table_min = 0xf900;
-static const int ucs_ci_cp936_table_max = 0xf900 + (sizeof (ucs_ci_cp936_table) / sizeof (unsigned short));
+const int ucs_ci_cp936_table_min = 0xf900;
+const int ucs_ci_cp936_table_max = 0xf900 + (sizeof (ucs_ci_cp936_table) / sizeof (unsigned short));
 
 
  /* FE30h CJK Compatibility Forms  */
-static const unsigned short ucs_cf_cp936_table[] = {
+const unsigned short ucs_cf_cp936_table[] = {
 0xa955,0xa6f2,0x0000,0xa6f4,0xa6f5,0xa6e0,0xa6e1,0xa6f0,
 0xa6f1,0xa6e2,0xa6e3,0xa6ee,0xa6ef,0xa6e6,0xa6e7,0xa6e4,
 0xa6e5,0xa6e8,0xa6e9,0xa6ea,0xa6eb,0x0000,0x0000,0x0000,
 0x0000,0xa968,0xa969,0xa96a,0xa96b,0xa96c,0xa96d,0xa96e};
 
-static const int ucs_cf_cp936_table_min = 0xfe30;
-static const int ucs_cf_cp936_table_max = 0xfe30 + (sizeof (ucs_cf_cp936_table) / sizeof (unsigned short));
+const int ucs_cf_cp936_table_min = 0xfe30;
+const int ucs_cf_cp936_table_max = 0xfe30 + (sizeof (ucs_cf_cp936_table) / sizeof (unsigned short));
 
 
  /* FE50h Small Form Variants  */
-static const unsigned short ucs_sfv_cp936_table[] = {
+const unsigned short ucs_sfv_cp936_table[] = {
 0xa96f,0xa970,0xa971,0x0000,0xa972,0xa973,0xa974,0xa975,
 0x0000,0xa976,0xa977,0xa978,0xa979,0xa97a,0xa97b,0xa97c,
 0xa97d,0xa97e,0xa980,0xa981,0xa982,0xa983,0xa984,0x0000,
 0xa985,0xa986,0xa987,0xa988,0x0000,0x0000,0x0000,0x0000};
 
-static const int ucs_sfv_cp936_table_min = 0xfe50;
-static const int ucs_sfv_cp936_table_max = 0xfe50 + (sizeof (ucs_sfv_cp936_table) / sizeof (unsigned short));
+const int ucs_sfv_cp936_table_min = 0xfe50;
+const int ucs_sfv_cp936_table_max = 0xfe50 + (sizeof (ucs_sfv_cp936_table) / sizeof (unsigned short));
 
  /* FF00h Halfwidth and Fullwidth Forms */
-static const unsigned short ucs_hff_cp936_table[] = {
+const unsigned short ucs_hff_cp936_table[] = {
 0x0000,0xa3a1,0xa3a2,0xa3a3,0xa1e7,0xa3a5,0xa3a6,0xa3a7,
 0xa3a8,0xa3a9,0xa3aa,0xa3ab,0xa3ac,0xa3ad,0xa3ae,0xa3af,
 0xa3b0,0xa3b1,0xa3b2,0xa3b3,0xa3b4,0xa3b5,0xa3b6,0xa3b7,
@@ -6483,7 +6484,39 @@ static const unsigned short ucs_hff_cp936_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
-static const int ucs_hff_cp936_table_min = 0xff00;
-static const int ucs_hff_cp936_table_max = 0xff00 + (sizeof (ucs_hff_cp936_table) / sizeof (unsigned short));
+const int ucs_hff_cp936_table_min = 0xff00;
+const int ucs_hff_cp936_table_max = 0xff00 + (sizeof (ucs_hff_cp936_table) / sizeof (unsigned short));
+
+#else
+
+extern const unsigned short cp936_ucs_table[];
+extern const unsigned short ucs_a1_cp936_table[];
+extern const unsigned short ucs_a2_cp936_table[];
+extern const unsigned short ucs_a3_cp936_table[];
+extern const unsigned short ucs_i_cp936_table[];
+extern const unsigned short ucs_ci_cp936_table[];
+extern const unsigned short ucs_cf_cp936_table[];
+extern const unsigned short ucs_sfv_cp936_table[];
+extern const unsigned short ucs_hff_cp936_table[];
+
+extern const int cp936_ucs_table_size;
+extern const int ucs_a1_cp936_table_min;
+extern const int ucs_a1_cp936_table_max;
+extern const int ucs_a2_cp936_table_min;
+extern const int ucs_a2_cp936_table_max;
+extern const int ucs_a3_cp936_table_min;
+extern const int ucs_a3_cp936_table_max;
+extern const int ucs_i_cp936_table_min;
+extern const int ucs_i_cp936_table_max;
+extern const int ucs_ci_cp936_table_min;
+extern const int ucs_ci_cp936_table_max;
+extern const int ucs_cf_cp936_table_min;
+extern const int ucs_cf_cp936_table_max;
+extern const int ucs_sfv_cp936_table_min;
+extern const int ucs_sfv_cp936_table_max;
+extern const int ucs_hff_cp936_table_min;
+extern const int ucs_hff_cp936_table_max;
+
+#endif
 
 #endif /* UNICODE_TABLE_CP936_H */

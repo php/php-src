@@ -34,6 +34,9 @@
 #include "mbfilter.h"
 #include "mbfilter_sjis.h"
 
+#define UNICODE_TABLE_CP932_DEF
+#define UNICODE_TABLE_JIS_DEF
+
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
