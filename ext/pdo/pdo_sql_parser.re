@@ -213,7 +213,7 @@ safe:
 								param->param_type TSRMLS_CC)) {
 							/* bork */
 							ret = -1;
-							strcpy(stmt->error_code, stmt->dbh->error_code);
+							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
 								efree(buf);
 							}
@@ -254,7 +254,7 @@ safe:
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
-								strcpy(stmt->error_code, stmt->dbh->error_code);
+								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 								goto clean_up;
 							}
 							plc->freeq = 1;
