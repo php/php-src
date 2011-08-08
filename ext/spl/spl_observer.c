@@ -146,7 +146,7 @@ static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *thi
 
 		return (char*)&Z_OBJVAL_P(obj);
 #else
-		char *hash = emalloc((hash_len+1)*sizeof(char *));
+		char *hash = emalloc((hash_len+1)*sizeof(char));
 
 		zend_object_value zvalue;
 		memset(&zvalue, 0, sizeof(zend_object_value));
