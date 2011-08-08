@@ -127,7 +127,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(dt, '-', strlen(dt));
-			if (*(p + 5) != ' ') {
+			if (!p || *(p + 5) != ' ') {
 				efree(dt);
 				efree(cookie);
 				efree(encoded_value);
