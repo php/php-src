@@ -4318,10 +4318,6 @@ PHP_FUNCTION(getopt)
 
 		memset(opts, 0, count * sizeof(opt_struct));
 
-		if (!opts) {
-			RETURN_FALSE;
-		}
-
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
 
