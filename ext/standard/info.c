@@ -245,22 +245,22 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				}
 			} else {
 				tmp2 = **tmp;
-				switch (Z_TYPE_PP(tmp)) {
-					default:
-						tmp = NULL;
-						zval_copy_ctor(&tmp2);
-						convert_to_string(&tmp2);
-					case IS_STRING:
-						if (!sapi_module.phpinfo_as_text) {
-							if (Z_STRLEN(tmp2) == 0) {
-								php_info_print("<i>no value</i>");
-							} else {
-								php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
-							}
-						} else {
-							php_info_print(Z_STRVAL(tmp2));
-						}
+				if (Z_TYPE_PP(tmp) != IS_STRING) {
+					tmp = NULL;
+					zval_copy_ctor(&tmp2);
+					convert_to_string(&tmp2);
 				}
+
+				if (!sapi_module.phpinfo_as_text) {
+					if (Z_STRLEN(tmp2) == 0) {
+						php_info_print("<i>no value</i>");
+					} else {
+						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+					}
+				} else {
+					php_info_print(Z_STRVAL(tmp2));
+				}
+
 				if (!tmp) {
 					zval_dtor(&tmp2);
 				}
