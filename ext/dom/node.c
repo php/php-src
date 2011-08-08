@@ -998,7 +998,7 @@ Since:
 */
 PHP_FUNCTION(dom_node_insert_before)
 {
-	zval *id, *node, *ref = NULL, *rv = NULL;
+	zval *id, *node, *ref = NULL;
 	xmlNodePtr child, new_child, parentp, refp;
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
@@ -1087,7 +1087,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
-					DOM_RET_OBJ(rv, child, &ret, intern);
+					DOM_RET_OBJ_EX(child, &ret, intern);
 					return;
 				}
 			}
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
-					DOM_RET_OBJ(rv, child, &ret, intern);
+					DOM_RET_OBJ_EX(child, &ret, intern);
 					return;
 				}
 			}
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(dom_node_insert_before)
 
 	dom_reconcile_ns(parentp->doc, new_child);
 
-	DOM_RET_OBJ(rv, new_child, &ret, intern);
+	DOM_RET_OBJ_EX(new_child, &ret, intern);
 
 }
 /* }}} end dom_node_insert_before */
@@ -1212,9 +1212,6 @@ PHP_FUNCTION(dom_node_replace_child)
 	}
 
 	if (foundoldchild) {
-		xmlNodePtr node;
-		zval *rv = NULL;
-
 		if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr prevsib, nextsib;
 			prevsib = oldchild->prev;
@@ -1232,10 +1229,10 @@ PHP_FUNCTION(dom_node_replace_child)
 				newchildobj->document = intern->document;
 				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL TSRMLS_CC);
 			}
-			node = xmlReplaceNode(oldchild, newchild);
+			xmlReplaceNode(oldchild, newchild);
 			dom_reconcile_ns(nodep->doc, newchild);
 		}
-		DOM_RET_OBJ(rv, oldchild, &ret, intern);
+		DOM_RET_OBJ_EX(oldchild, &ret, intern);
 		return;
 	} else {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
@@ -1283,9 +1280,8 @@ PHP_FUNCTION(dom_node_remove_child)
 
 	while (children) {
 		if (children == child) {
-			zval *rv = NULL;
 			xmlUnlinkNode(child);
-			DOM_RET_OBJ(rv, child, &ret, intern);
+			DOM_RET_OBJ_EX(child, &ret, intern);
 			return;
 		}
 		children = children->next;
@@ -1302,7 +1298,7 @@ Since:
 */
 PHP_FUNCTION(dom_node_append_child)
 {
-	zval *id, *node, *rv = NULL;
+	zval *id, *node;
 	xmlNodePtr child, nodep, new_child = NULL;
 	dom_object *intern, *childobj;
 	int ret, stricterror;
@@ -1393,7 +1389,7 @@ PHP_FUNCTION(dom_node_append_child)
 
 	dom_reconcile_ns(nodep->doc, new_child);
 
-	DOM_RET_OBJ(rv, new_child, &ret, intern);
+	DOM_RET_OBJ_EX(new_child, &ret, intern);
 }
 /* }}} end dom_node_append_child */
 
@@ -1431,7 +1427,6 @@ Since:
 */
 PHP_FUNCTION(dom_node_clone_node)
 {
-	zval *rv = NULL;
 	zval *id;
 	xmlNode *n, *node;
 	int ret;
@@ -1483,7 +1478,7 @@ PHP_FUNCTION(dom_node_clone_node)
 		intern = NULL;
 	}
 
-	DOM_RET_OBJ(rv, node, &ret, intern);
+	DOM_RET_OBJ_EX(node, &ret, intern);
 }
 /* }}} end dom_node_clone_node */
 

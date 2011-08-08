@@ -78,11 +78,13 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	} \
 }
 
-#define DOM_RET_OBJ(zval, obj, ret, domobject) \
-	if (NULL == (zval = php_dom_create_object(obj, ret, zval, return_value, domobject TSRMLS_CC))) { \
+#define DOM_RET_OBJ_EX(obj, ret, domobject) \
+	if (!php_dom_create_object(obj, ret, NULL, return_value, domobject TSRMLS_CC)) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
 		RETURN_FALSE; \
 	}
+
+#define DOM_RET_OBJ(zval, obj, ret, domobject) DOM_RET_OBJ_EX(obj, ret, domobject)
 
 #define DOM_GET_THIS(zval) \
 	if (NULL == (zval = getThis())) { \

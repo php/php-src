@@ -212,7 +212,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 			zend_hash_init(doc_props->classmap, 0, NULL, NULL, 0);
 		}
 		if (ce) {
-			return zend_hash_update(doc_props->classmap, basece->name, basece->name_length + 1, &ce, sizeof(ce), NULL);
+			return zend_hash_update(doc_props->classmap, basece->name, basece->name_length + 1, &ce, sizeof(zend_class_entry *), NULL);
 		} else {
 			zend_hash_del(doc_props->classmap, basece->name, basece->name_length + 1);
 		}
