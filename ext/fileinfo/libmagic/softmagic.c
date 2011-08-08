@@ -1652,7 +1652,6 @@ convert_libmagic_pattern(zval *pattern, int options)
 		char *t;
 
 		t = (char *) safe_emalloc(Z_STRLEN_P(pattern), 2, 5);
-		memset(t, '\0', sizeof(t));
 		
 		t[j++] = '~';
 		
