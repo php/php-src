@@ -117,7 +117,7 @@ static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *thi
 		if (rv) {
 			if (Z_TYPE_P(rv) == IS_STRING) {
 				int hash_len = Z_STRLEN_P(rv);
-				char *hash = emalloc((hash_len+1)*sizeof(char *));
+				char *hash = emalloc((hash_len+1)*sizeof(char));
 				strncpy(hash, Z_STRVAL_P(rv), hash_len);
 				hash[hash_len] = 0;
 
