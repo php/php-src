@@ -1133,7 +1133,7 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {
 #ifdef HAVE_DOM
-	zval *id, *rv = NULL, *basenode = NULL;
+	zval *id, *basenode = NULL;
 	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
@@ -1163,7 +1163,7 @@ PHP_METHOD(xmlreader, expand)
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(rv, nodec, &ret, (dom_object *)domobj);
+				DOM_RET_OBJ(nodec, &ret, (dom_object *)domobj);
 			}
 		}
 	} else {

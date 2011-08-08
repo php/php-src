@@ -54,7 +54,7 @@ typedef struct _dom_object {
 
 PHP_DOM_EXPORT extern zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
-PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *in, zval* return_value, dom_object *domobj TSRMLS_DC);
+PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval* return_value, dom_object *domobj TSRMLS_DC);
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
 #define DOM_XMLNS_NAMESPACE \
@@ -78,8 +78,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	} \
 }
 
-#define DOM_RET_OBJ(zval, obj, ret, domobject) \
-	if (NULL == (zval = php_dom_create_object(obj, ret, zval, return_value, domobject TSRMLS_CC))) { \
+#define DOM_RET_OBJ(obj, ret, domobject) \
+	if (!php_dom_create_object(obj, ret, return_value, domobject TSRMLS_CC)) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
 		RETURN_FALSE; \
 	}
