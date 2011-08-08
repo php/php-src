@@ -1207,7 +1207,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 	}
 }
 
-/* This function changes key of currevt element without changing elements'
+/* This function changes key of current element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos)
