@@ -34,6 +34,7 @@
 #include "mbfilter.h"
 #include "mbfilter_hz.h"
 
+#define UNICODE_TABLE_CP936_DEF
 #include "unicode_table_cp936.h"
 
 static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter);
