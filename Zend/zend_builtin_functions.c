@@ -1821,7 +1821,7 @@ ZEND_FUNCTION(create_function)
 		function_name[0] = '\0';
 
 		do {
-			function_name_length = 1 + snprintf(function_name + 1, sizeof("0lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count));
+			function_name_length = 1 + snprintf(function_name + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count));
 		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_STRINGL(function_name, function_name_length, 0);
