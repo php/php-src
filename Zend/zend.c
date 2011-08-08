@@ -870,7 +870,7 @@ void zend_append_version_info(const zend_extension *extension) /* {{{ */
 	char *new_info;
 	uint new_info_length;
 
-	new_info_length = sizeof("    with  v,  by \n")
+	new_info_length = sizeof("    with  v, , by \n")
 						+ strlen(extension->name)
 						+ strlen(extension->version)
 						+ strlen(extension->copyright)
@@ -878,10 +878,10 @@ void zend_append_version_info(const zend_extension *extension) /* {{{ */
 
 	new_info = (char *) malloc(new_info_length + 1);
 
-	sprintf(new_info, "    with %s v%s, %s, by %s\n", extension->name, extension->version, extension->copyright, extension->author);
+	snprintf(new_info, new_info_length, "    with %s v%s, %s, by %s\n", extension->name, extension->version, extension->copyright, extension->author);
 
 	zend_version_info = (char *) realloc(zend_version_info, zend_version_info_length+new_info_length + 1);
-	strcat(zend_version_info, new_info);
+	strncat(zend_version_info, new_info, new_info_length);
 	zend_version_info_length += new_info_length;
 	free(new_info);
 }
