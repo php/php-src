@@ -280,7 +280,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								node->parent = nsparent;
 								node->ns = curns;
 							}
-							child = php_dom_create_object(node, &ret, NULL, child, domintern TSRMLS_CC);
+							child = php_dom_create_object(node, &ret, child, domintern TSRMLS_CC);
 							add_next_index_zval(args[i], child);
 						}
 					}
