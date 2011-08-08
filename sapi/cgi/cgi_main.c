@@ -1533,9 +1533,6 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 	    var[4] == '_') {
 
 		var_len -= 5;
-		if (var_len == 0) {
-			return;
-		}
 		p = var + 5;
 		var = str = do_alloca(var_len + 1, use_heap);
 		*str++ = *p++;
@@ -1604,9 +1601,6 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 			    var[4] == '_') {
 
 				var_len -= 5;
-				if (var_len == 0) {
-					continue;
-				}
 
 				if (var_len >= alloc_size) {
 					alloc_size = var_len + 64;
