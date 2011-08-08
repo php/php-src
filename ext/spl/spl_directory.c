@@ -633,6 +633,7 @@ static int spl_filesystem_object_constructor_validator(void *object_data TSRMLS_
 	 * constructor or cleared its exception */
 	
 	return (fsobj->u.dir.entry.d_name[0] != '\0' /* GlobIterator */ ||
+			fsobj->_path != NULL /* SplFileInfo */ ||
 			fsobj->orig_path != NULL /* Spl[Temp]FileObject */);
 }
 /* }}} */
@@ -2431,7 +2432,9 @@ SPL_METHOD(SplFileObject, setFlags)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
+		return;
+	}
 } /* }}} */
 
 /* {{{ proto int SplFileObject::getFlags()
