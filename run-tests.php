@@ -1082,7 +1082,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		} else if ($n === 0) {
 			/* timed out */
 			$data .= b"\n ** ERROR: process timed out **\n";
-			proc_terminate($proc);
+			proc_terminate($proc, 9);
 			return $data;
 		} else if ($n > 0) {
 			$line = (binary) fread($pipes[1], 8192);
