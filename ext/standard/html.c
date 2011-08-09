@@ -1520,7 +1520,6 @@ PHP_FUNCTION(htmlentities)
 static inline void write_s3row_data(
 	const entity_stage3_row *r,
 	unsigned orig_cp,
-	unsigned uni_cp,
 	enum entity_charset charset,
 	zval *arr)
 {
@@ -1636,7 +1635,7 @@ PHP_FUNCTION(get_html_translation_table)
 						if (((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
 								(code == '"' && !(flags & ENT_HTML_QUOTE_DOUBLE))))
 							continue;
-						write_s3row_data(r, code, code, charset, return_value);
+						write_s3row_data(r, code, charset, return_value);
 					}
 				}
 			}
@@ -1658,7 +1657,7 @@ PHP_FUNCTION(get_html_translation_table)
 				if (r->data.ent.entity == NULL)
 					continue;
 
-				write_s3row_data(r, i, uni_cp, charset, return_value);
+				write_s3row_data(r, i, charset, return_value);
 			}
 		}
 	} else {
@@ -1677,7 +1676,7 @@ PHP_FUNCTION(get_html_translation_table)
 				continue;
 
 			/* charset is indifferent, used cs_8859_1 for efficiency */
-			write_s3row_data(r, j, j, cs_8859_1, return_value);
+			write_s3row_data(r, j, cs_8859_1, return_value);
 		}
 	}
 }
