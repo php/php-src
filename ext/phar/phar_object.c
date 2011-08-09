@@ -1666,11 +1666,14 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						}
 
 						test = expand_filepath(fname, NULL TSRMLS_CC);
+						efree(fname);
 
 						if (test) {
-							efree(fname);
 							fname = test;
 							fname_len = strlen(fname);
+						} else {
+							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Could not resolve file path");
+							return ZEND_HASH_APPLY_STOP;
 						}
 
 						save = fname;
@@ -1696,6 +1699,11 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 #else
 						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
 #endif
+						if (!fname) {
+							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Could not resolve file path");
+							return ZEND_HASH_APPLY_STOP;
+						}
+
 						fname_len = strlen(fname);
 						save = fname;
 						goto phar_spl_fileinfo;
@@ -1713,6 +1721,14 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 phar_spl_fileinfo:
 	if (base_len) {
 		temp = expand_filepath(base, NULL TSRMLS_CC);
+		if (!temp) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Could not resolve file path");
+			if (save) {
+				efree(save);
+			}
+			return ZEND_HASH_APPLY_STOP;
+		}
+		
 		base = temp;
 		base_len = strlen(base);
 
@@ -4086,7 +4102,10 @@ PHP_METHOD(Phar, getStub)
 			if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew && !(stub->flags & PHAR_ENT_COMPRESSION_MASK)) {
 				fp = phar_obj->arc.archive->fp;
 			} else {
-				fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
+				if (!(fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL))) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "phar error: unable to open phar \"%s\"", phar_obj->arc.archive->fname);
+					return;
+				}
 				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
 					char *filter_name;
 
