@@ -392,7 +392,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 	long options = 0;
 	char *ret_val = NULL, *buffer = NULL;
 	int buffer_len;
-	struct php_fileinfo *finfo;
+	struct php_fileinfo *finfo = NULL;
 	zval *zfinfo, *zcontext = NULL;
 	zval *what;
 	char mime_directory[] = "directory";
