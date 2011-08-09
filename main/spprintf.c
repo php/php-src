@@ -198,7 +198,6 @@ static size_t strnlen(const char *s, size_t maxlen) {
 static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
-	char *q;
 	int s_len, free_zcopy;
 	zval *zvp, zcopy;
 
@@ -679,7 +678,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 
 					s_len = strlen(s);
 
-					if (alternate_form && (q = strchr(s, '.')) == NULL)
+					if (alternate_form && (strchr(s, '.')) == NULL)
 						s[s_len++] = '.';
 					break;
 
