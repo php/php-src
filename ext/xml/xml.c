@@ -950,7 +950,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					if (zend_hash_find(Z_ARRVAL_PP(parser->ctag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
 						int newlen = Z_STRLEN_PP(myval) + decoded_len;
 						Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
-						strcpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval),decoded_value);
+						strncpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval), decoded_value, decoded_len + 1);
 						Z_STRLEN_PP(myval) += decoded_len;
 						efree(decoded_value);
 					} else {
@@ -970,7 +970,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 								if (zend_hash_find(Z_ARRVAL_PP(curtag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
 									int newlen = Z_STRLEN_PP(myval) + decoded_len;
 									Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
-									strcpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval),decoded_value);
+									strncpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval), decoded_value, decoded_len + 1);
 									Z_STRLEN_PP(myval) += decoded_len;
 									efree(decoded_value);
 									return;

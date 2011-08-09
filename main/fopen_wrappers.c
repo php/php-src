@@ -410,7 +410,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 #endif
 	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
-		filename = emalloc(length + strlen(path_info) + 2);
+		int path_len = strlen(path_info);
+		filename = emalloc(length + path_len + 2);
 		if (filename) {
 			memcpy(filename, PG(doc_root), length);
 			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
@@ -419,7 +420,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 			if (IS_SLASH(path_info[0])) {
 				length--;
 			}
-			strcpy(filename + length, path_info);
+			strncpy(filename + length, path_info, path_len + 1);
 		}
 	} else {
 		filename = SG(request_info).path_translated;
