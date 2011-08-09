@@ -169,6 +169,10 @@ PHP                                                                        NEWS
   . Added paged results support. FR #42060. (ando@OpenLDAP.org,
     iarenuno@eteo.mondragon.edu, jeanseb@au-fil-du.net, remy.saissy@gmail.com)
 
+- Improved mbstring extension:
+  . Added Shift_JIS Emoji (pictograms) support. (rui)
+  . Ill-formed UTF-8 check for security enhancements. (rui)
+
 - Improved MySQL extensions:
   . MySQL: Deprecated mysql_list_dbs(). FR #50667. (Andrey)
   . mysqlnd: Added named pipes support. FR #48082. (Andrey)
