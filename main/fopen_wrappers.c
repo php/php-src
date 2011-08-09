@@ -473,7 +473,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 			if (IS_SLASH(path_info[0])) {
 				length--;
 			}
-			strncpy(filename + length, path_len + 1);
+			strncpy(filename + length, path_info, path_len + 1);
 		}
 	} else {
 		filename = SG(request_info).path_translated;
