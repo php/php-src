@@ -100,7 +100,7 @@ UPGRADE NOTES - PHP X.Y
   
   To create a generic object you can use StdClass:
   $test = new StdClass;
-  $text->baz = 1;
+  $test->baz = 1;
   
 - It's now possible to enforce the class' __construct arguments in an abstract
   constructor in the base class.
@@ -344,7 +344,7 @@ UPGRADE NOTES - PHP X.Y
   multibyte support, but may enable or disable it by zend.multibyte. It doesn't
   make a lot of sense to enable this option without ext/mbstring, because the
   most functionality is implemented by mbstrings callbacks.
-- Added enable_post_data_reading, which is enable by default. When it's
+- Added enable_post_data_reading, which is enabled by default. When it's
   disabled, the POST data is not read (and processed); the behavior is similar
   to that of other request methods with body, like PUT. This allows reading the
   raw POST data in multipart requests and read/process the POST data in a
