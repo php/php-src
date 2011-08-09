@@ -118,7 +118,7 @@ static char *php_gethostbyname(char *name);
    Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
-	char buf[4096];
+	char buf[MAXHOSTNAMELEN];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -794,12 +794,14 @@ PHP_FUNCTION(dns_get_record)
 #if defined(HAVE_DNS_SEARCH)
 			handle = dns_open(NULL);
 			if (handle == NULL) {
+				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 #elif defined(HAVE_RES_NSEARCH)
 		    memset(&state, 0, sizeof(state));
 		    if (res_ninit(handle)) {
-					RETURN_FALSE;
+		    	zval_dtor(return_value);
+				RETURN_FALSE;
 			}
 #else
 			res_init();
