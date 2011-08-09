@@ -170,10 +170,10 @@ PHP_FUNCTION(crypt)
 	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */
 	if (!*salt) {
 #if PHP_MD5_CRYPT
-		strcpy(salt, "$1$");
+		strncpy(salt, "$1$", PHP_MAX_SALT_LEN);
 		php_to64(&salt[3], PHP_CRYPT_RAND, 4);
 		php_to64(&salt[7], PHP_CRYPT_RAND, 4);
-		strcpy(&salt[11], "$");
+		strncpy(&salt[11], "$", PHP_MAX_SALT_LEN - 11);
 #elif PHP_STD_DES_CRYPT
 		php_to64(&salt[0], PHP_CRYPT_RAND, 2);
 		salt[2] = '\0';
