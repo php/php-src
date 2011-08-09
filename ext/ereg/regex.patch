@@ -1,0 +1,12 @@
+diff -u regex.orig/regerror.c regex/regerror.c
+--- regex.orig/regerror.c	2011-08-09 17:31:11.000000000 +0800
++++ regex/regerror.c	2011-08-09 17:29:53.000000000 +0800
+@@ -82,7 +82,7 @@
+ 	
+ 		if (errcode&REG_ITOA) {
+ 			if (r->code >= 0)
+-				(void) strcpy(convbuf, r->name);
++				(void) strncpy(convbuf, r->name, 50);
+ 			else
+ 				sprintf(convbuf, "REG_0x%x", target);
+ 			assert(strlen(convbuf) < sizeof(convbuf));
