@@ -330,7 +330,7 @@ finish:
 				scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
 				scratch = emalloc(scratch_len);
 				strlcpy(scratch, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) + 1);
-				strcat(scratch, " ");
+				strncat(scratch, " ", 1);
 			}
 		}
 	}
@@ -344,7 +344,7 @@ finish:
 	if (!scratch) {
 		scratch_len = strlen(path) + 29 + protocol_version_len;
 		scratch = emalloc(scratch_len);
-		strcpy(scratch, "GET ");
+		strncpy(scratch, "GET ", scratch_len);
 	}
 
 	/* Should we send the entire path in the request line, default to no. */

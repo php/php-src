@@ -270,7 +270,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		period = wildname + (period - filtername);
 		while (period && !filter) {
 			*period = '\0';
-			strcat(wildname, ".*");
+			strncat(wildname, ".*", 2);
 			if (SUCCESS == zend_hash_find(filter_hash, wildname, strlen(wildname) + 1, (void**)&factory)) {
 				filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
 			}
