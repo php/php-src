@@ -587,7 +587,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	int i;
 
 	char *s = NULL;
-	char *q;
 	int s_len, free_zcopy;
 	zval *zvp, zcopy;
 
@@ -1071,7 +1070,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 					s_len = strlen(s);
 
-					if (alternate_form && (q = strchr(s, '.')) == NULL) {
+					if (alternate_form && (strchr(s, '.')) == NULL) {
 						s[s_len++] = '.';
 					}
 					break;
