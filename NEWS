@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.3.7
+- Upgraded bundled SQLite to version 3.7.7.1. (Scott)
+
 - Imap extension:
   . Fixed bug #55313 (Number of retries not set when params specified).
     (kevin at kevinlocke dot name)
