@@ -291,9 +291,9 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	if (!stream && inname) {
 		no_in_stream = 1;
 #if PHP_API_VERSION < 20100412
-		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
-		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS, NULL);
+		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS, NULL);
 #endif
 	}
 
