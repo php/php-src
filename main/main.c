@@ -721,10 +721,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	/* we have a docref for a function AND
-	 * - we show erroes in html mode OR
-	 * - the user wants to see the links anyway
+	 * - we show errors in html mode AND
+	 * - the user wants to see the links
 	 */
-	if (docref && is_function && (PG(html_errors) || strlen(PG(docref_root)))) {
+	if (docref && is_function && PG(html_errors) && strlen(PG(docref_root))) {
 		if (strncmp(docref, "http://", 7)) {
 			/* We don't have 'http://' so we use docref_root */
 
