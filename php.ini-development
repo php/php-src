@@ -109,7 +109,7 @@
 ; html_errors
 ;   Default Value: On
 ;   Development Value: On
-;   Production value: Off
+;   Production value: On
 
 ; log_errors
 ;   Default Value: Off
@@ -532,23 +532,24 @@ track_errors = On
 ; An XML-RPC faultCode
 ;xmlrpc_error_number = 0
 
-; When PHP displays or logs an error, it has the capability of inserting html
-; links to documentation related to that error. This directive controls whether
-; those HTML links appear in error messages or not. For performance and security
-; reasons, it's recommended you disable this on production servers.
+; When PHP displays or logs an error, it has the capability of formatting the
+; error message as HTML for easier reading. This directive controls whether
+; the error message is formatted as HTML or not.
 ; Note: This directive is hardcoded to Off for the CLI SAPI
 ; Default Value: On
 ; Development Value: On
-; Production value: Off
+; Production value: On
 ; http://php.net/html-errors
 html_errors = On
 
-; If html_errors is set On PHP produces clickable error messages that direct
-; to a page describing the error or function causing the error in detail.
+; If html_errors is set to On *and* docref_root is not empty, then PHP
+; produces clickable error messages that direct to a page describing the error
+; or function causing the error in detail.
 ; You can download a copy of the PHP manual from http://php.net/docs
 ; and change docref_root to the base URL of your local copy including the
 ; leading '/'. You must also specify the file extension being used including
-; the dot. PHP's default behavior is to leave these settings empty.
+; the dot. PHP's default behavior is to leave these settings empty, in which
+; case no links to documentation are generated.
 ; Note: Never use this feature for production boxes.
 ; http://php.net/docref-root
 ; Examples
