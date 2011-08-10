@@ -62,6 +62,10 @@
 #define AF_INET 2   /* internetwork: UDP, TCP, etc. */
 #endif
 
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 255
+#endif
+
 #include "php_dns.h"
 
 /* type compat */
