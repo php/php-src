@@ -66,6 +66,12 @@
 #define MAXHOSTNAMELEN 255
 #endif
 
+/* For the local hostname obtained via gethostname which is different from the
+   dns-related MAXHOSTNAMELEN constant above */
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 255
+#endif
+
 #include "php_dns.h"
 
 /* type compat */
@@ -122,7 +128,7 @@ static char *php_gethostbyname(char *name);
    Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
-	char buf[MAXHOSTNAMELEN];
+	char buf[HOST_NAME_MAX];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
