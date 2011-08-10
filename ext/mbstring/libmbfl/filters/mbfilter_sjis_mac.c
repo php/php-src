@@ -423,7 +423,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 int
 mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 {
-	int i, j;
+	int i;
 	int c1, c2, s1, s2, mode;
 
 	s1 = 0;
