@@ -378,7 +378,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 
 	zenc = zend_multibyte_get_internal_encoding(TSRMLS_C);
 	if (zenc != NULL) {
-		charset_hint = zend_multibyte_get_encoding_name(zenc);
+		charset_hint = (char *)zend_multibyte_get_encoding_name(zenc);
 		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
 			if ((len == 4) /* sizeof (none|auto|pass) */ &&
 					(!memcmp("pass", charset_hint, 4) ||
@@ -1371,7 +1371,7 @@ encode_amp:
 					unsigned code_point;
 					int valid;
 					char *pos = (char*)&old[cursor+1];
-					valid = process_numeric_entity(&pos, &code_point);
+					valid = process_numeric_entity((const char **)&pos, &code_point);
 					if (valid == FAILURE)
 						goto encode_amp;
 					if (flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) {
