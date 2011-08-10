@@ -10,7 +10,12 @@ PHP                                                                        NEWS
 - MySQLi extension:
   . Fixed bug #55238 (SSL options set by mysqli_ssl_set ignored for MySQLi
     persistent connections). (Andrey)
-  
+
+- SOAP
+  . Fixed bug #55323 (SoapClient segmentation fault when XSD_TYPEKIND_EXTENSION
+    contains itself). (Dmitry)
+
+    
 28 Jul 2011, PHP 5.3.7 RC4
 - Improved core functions:
   . Updated crypt_blowfish to 1.2. ((CVE-2011-2483) (Solar Designer)
