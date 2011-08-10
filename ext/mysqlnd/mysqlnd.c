@@ -1404,7 +1404,7 @@ MYSQLND_METHOD(mysqlnd_conn, ssl_set)(MYSQLND * const conn, const char * key, co
 
 /* {{{ mysqlnd_conn::escape_string */
 static ulong
-MYSQLND_METHOD(mysqlnd_conn, escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, escape_string)(MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
