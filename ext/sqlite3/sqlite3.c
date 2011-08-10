@@ -2006,7 +2006,7 @@ static zend_object_value php_sqlite3_object_new(zend_class_entry *class_type TSR
 
 	/* Allocate memory for it */
 	intern = emalloc(sizeof(php_sqlite3_db_object));
-	memset(&intern->zo, 0, sizeof(php_sqlite3_db_object));
+	memset(intern, 0, sizeof(php_sqlite3_db_object));
 	intern->exception = 0;
 
 	/* Need to keep track of things to free */
@@ -2030,7 +2030,7 @@ static zend_object_value php_sqlite3_stmt_object_new(zend_class_entry *class_typ
 
 	/* Allocate memory for it */
 	intern = emalloc(sizeof(php_sqlite3_stmt));
-	memset(&intern->zo, 0, sizeof(php_sqlite3_stmt));
+	memset(intern, 0, sizeof(php_sqlite3_stmt));
 
 	intern->db_obj_zval = NULL;
 
@@ -2052,7 +2052,7 @@ static zend_object_value php_sqlite3_result_object_new(zend_class_entry *class_t
 
 	/* Allocate memory for it */
 	intern = emalloc(sizeof(php_sqlite3_result));
-	memset(&intern->zo, 0, sizeof(php_sqlite3_result));
+	memset(intern, 0, sizeof(php_sqlite3_result));
 
 	intern->complete = 0;
 	intern->is_prepared_statement = 0;
