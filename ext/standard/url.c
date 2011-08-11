@@ -197,6 +197,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				efree(ret);
 				return NULL;
 			}
+		} else if (p == pp && *pp == '\0') {
+			STR_FREE(ret->scheme);
+			efree(ret);
+			return NULL;
 		} else {
 			goto just_path;
 		}
