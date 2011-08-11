@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Aug 2011, PHP 5.3.7
+
 11 Aug 2011, PHP 5.3.7 RC5
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
 
