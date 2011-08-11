@@ -1,7 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 5.3.7
+11 Aug 2011, PHP 5.3.7 RC5
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
+
+- Core
+  . Fixed bug #55399 (parse_url() incorrectly treats ':' as a valid path).
+    (Ilia)
 
 - Imap extension:
   . Fixed bug #55313 (Number of retries not set when params specified).
