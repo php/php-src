@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     (kevin at kevinlocke dot name)
 
 - MySQLi extension:
-  . Fixed bug #55238 (SSL options set by mysqli_ssl_set ignored for MySQLi
+  . Fixed bug #55283 (SSL options set by mysqli_ssl_set ignored for MySQLi
     persistent connections). (Andrey)
 
 - SOAP
