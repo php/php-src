@@ -8,6 +8,7 @@
 #include "regex.h"
 #include "utils.h"
 #include "regerror.ih"
+#include "php.h"
 
 /*
  = #define	REG_OKAY	 0
