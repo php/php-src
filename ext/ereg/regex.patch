@@ -1,9 +1,15 @@
-Only in regex: regcomp.lo
-Only in regex: regcomp.o
 diff -u regex.orig/regerror.c regex/regerror.c
 --- regex.orig/regerror.c	2011-08-09 19:49:30.000000000 +0800
-+++ regex/regerror.c	2011-08-09 19:46:15.000000000 +0800
-@@ -74,7 +74,7 @@
++++ regex/regerror.c	2011-08-11 15:13:42.000000000 +0800
+@@ -8,6 +8,7 @@
+ #include "regex.h"
+ #include "utils.h"
+ #include "regerror.ih"
++#include "php.h"
+ 
+ /*
+  = #define	REG_OKAY	 0
+@@ -74,7 +75,7 @@
  	char convbuf[50];
  
  	if (errcode == REG_ATOI)
@@ -12,7 +18,7 @@ diff -u regex.orig/regerror.c regex/regerror.c
  	else {
  		for (r = rerrs; r->code >= 0; r++)
  			if (r->code == target)
-@@ -82,9 +82,9 @@
+@@ -82,9 +83,9 @@
  	
  		if (errcode&REG_ITOA) {
  			if (r->code >= 0)
@@ -24,7 +30,7 @@ diff -u regex.orig/regerror.c regex/regerror.c
  			assert(strlen(convbuf) < sizeof(convbuf));
  			s = convbuf;
  		} else
-@@ -106,12 +106,13 @@
+@@ -106,12 +107,13 @@
  
  /*
   - regatoi - internal routine to implement REG_ATOI
@@ -40,7 +46,7 @@ diff -u regex.orig/regerror.c regex/regerror.c
  {
  	register const struct rerr *r;
  
-@@ -121,6 +122,6 @@
+@@ -121,6 +123,6 @@
  	if (r->code < 0)
  		return("0");
  
