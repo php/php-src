@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Added Shift_JIS Emoji (pictograms) support. (rui)
   . Ill-formed UTF-8 check for security enhancements. (rui)
 
+- Improved NSAPI SAPI: (Uwe Schindler)
+  . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403).
+
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
