@@ -474,7 +474,8 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			if (new_l + 1 > buf_len) {
 				buf_len = 1 + buf_len + 2 * new_l;
 				nbuf = emalloc(buf_len);
-				strncpy(nbuf, buf, buf_len-1);
+				strncpy(nbuf, buf, buf_len - 1);
+				nbuf[buf_len - 1] = '\0';
 				efree(buf);
 				buf = nbuf;
 			}
@@ -486,7 +487,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			walkbuf = &buf[tmp + subs[0].rm_so];
 			walk = replace;
 			while (*walk) {
-				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= (int)re.re_nsub) {
+				if ('\\' == *walk && isdigit((unsigned char)walk[1]) && (unsigned char)walk[1] - '0' <= (int)re.re_nsub) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
 						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
