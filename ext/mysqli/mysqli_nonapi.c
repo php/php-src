@@ -992,7 +992,6 @@ PHP_FUNCTION(mysqli_get_charset)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
-	object_init(return_value);
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	mysql_get_character_set_info(mysql->mysql, &cs);
@@ -1006,6 +1005,10 @@ PHP_FUNCTION(mysqli_get_charset)
 	comment = cs.comment;
 #else
 	cs = mysql->mysql->charset;
+	if (!cs) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The connection has no charset associated");
+		RETURN_NULL();
+	}
 	name = cs->name;
 	collation = cs->collation;
 	minlength = cs->char_minlen;
@@ -1014,6 +1017,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	comment = cs->comment;
 	state = 1;	/* all charsets are compiled in */
 #endif
+	object_init(return_value);
 
 	add_property_string(return_value, "charset", (name) ? (char *)name : "", 1);
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "", 1);
