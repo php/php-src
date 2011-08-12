@@ -601,7 +601,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	smart_str_appendl(buf, "O:", 2);
-	smart_str_append_long(buf, (long)name_len);
+	smart_str_append_long(buf, (int)name_len);
 	smart_str_appendl(buf, ":\"", 2);
 	smart_str_appendl(buf, class_name, name_len);
 	smart_str_appendl(buf, "\":", 2);
@@ -767,12 +767,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
-						smart_str_append_long(buf, (long)Z_OBJCE_P(struc)->name_length);
+						smart_str_append_long(buf, (int)Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
 						smart_str_appendl(buf, Z_OBJCE_P(struc)->name, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, "\":", 2);
 
-						smart_str_append_long(buf, (long)serialized_length);
+						smart_str_append_long(buf, (int)serialized_length);
 						smart_str_appendl(buf, ":{", 2);
 						smart_str_appendl(buf, serialized_data, serialized_length);
 						smart_str_appendc(buf, '}');
