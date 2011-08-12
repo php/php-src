@@ -304,6 +304,8 @@ require_once('skipifconnectfailure.inc');
 	func_mysqli_stmt_bind_datatype($link, $engine, "s", "SET('a', 'b')", "a", 870);
 	func_mysqli_stmt_bind_datatype($link, $engine, "s", "SET('a', 'b')", NULL, 880);
 
+	if (mysqli_get_server_version($link) >= 50600)
+		func_mysqli_stmt_bind_datatype($link, $engine, "s", "TIME", "13:27:34.123456", 890, "13:27:34");
 
 	$stmt = mysqli_stmt_init($link);
 	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
