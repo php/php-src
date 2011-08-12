@@ -322,8 +322,11 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 				zval *value;
 				ALLOC_INIT_ZVAL(value);
 				zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
-				zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval);
-				return retval;
+				if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) != FAILURE) {
+					return retval;
+				} else {
+					return &EG(uninitialized_zval_ptr);
+				}
 			} else {
 				zend_error(E_NOTICE, "Undefined index:  %s", Z_STRVAL_P(offset));
 				return &EG(uninitialized_zval_ptr);
@@ -345,8 +348,11 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 				zval *value;
 				ALLOC_INIT_ZVAL(value);
 				zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), NULL);
-				zend_hash_index_find(ht, index, (void **) &retval);
-				return retval;
+				if (zend_hash_index_find(ht, index, (void **) &retval) != FAILURE) {
+					return retval;
+				} else {
+					return &EG(uninitialized_zval_ptr);
+				}
 			} else {
 				zend_error(E_NOTICE, "Undefined offset:  %ld", index);
 				return &EG(uninitialized_zval_ptr);
