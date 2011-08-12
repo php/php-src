@@ -602,15 +602,12 @@ SPL_METHOD(SplFixedArray, count)
 */
 SPL_METHOD(SplFixedArray, toArray)
 {
-	spl_fixedarray_object *intern;
 	zval *ret, *tmp;
 	HashTable *ret_ht, *obj_ht;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
 		return;
 	}
-
-	intern = (spl_fixedarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	ALLOC_HASHTABLE(ret_ht);
 	zend_hash_init(ret_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
