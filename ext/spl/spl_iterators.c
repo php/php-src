@@ -214,11 +214,12 @@ next_step:
 						zend_clear_exception(TSRMLS_C);
 					}
 				}
+				/* fall through */
 			case RS_START:
 				if (iterator->funcs->valid(iterator TSRMLS_CC) == FAILURE) {
 					break;
 				}
-				object->iterators[object->level].state = RS_TEST;					
+				object->iterators[object->level].state = RS_TEST;
 				/* break; */
 			case RS_TEST:
 				ce = object->iterators[object->level].ce;
