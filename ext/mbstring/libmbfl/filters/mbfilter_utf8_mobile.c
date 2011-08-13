@@ -193,8 +193,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s, w = 0, flag = 0;
-	int s1 = 0, s2 = 0, c1 = 0, c2 = 0, snd = 0;
-	int sjis_encoded = 0;
+	int s1 = 0, c1 = 0, snd = 0;
 
 	if (c < 0x80) {
 		if (c >= 0) {
@@ -320,7 +319,7 @@ int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
-		int s1, s2, c1, c2;
+		int s1, c1;
 
 		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo &&
 			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 &&

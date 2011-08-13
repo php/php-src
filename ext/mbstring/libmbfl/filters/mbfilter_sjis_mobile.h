@@ -64,11 +64,11 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter);
 
-int mbfiler_sjis_emoji_docomo2unicode(int s, int *snd);
+int mbfilter_sjis_emoji_docomo2unicode(int s, int *snd);
 int mbfilter_sjis_emoji_kddi2unicode(int s, int *snd);
 int mbfilter_sjis_emoji_sb2unicode(int s, int *snd);
 
-int mbfiler_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter);
+int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter);
 int mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter);
 int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter);
 
