@@ -89,6 +89,7 @@
 #include "filters/mbfilter_utf7.h"
 #include "filters/mbfilter_utf7imap.h"
 #include "filters/mbfilter_utf8.h"
+#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
 #include "filters/mbfilter_byte2.h"
@@ -143,6 +144,14 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
  	&vtbl_wchar_sjis_sb_pua,
  	&vtbl_sjis_mac_wchar,
  	&vtbl_wchar_sjis_mac,
+	&vtbl_utf8_docomo_wchar,
+	&vtbl_wchar_utf8_docomo,
+	&vtbl_utf8_kddi_wchar,
+	&vtbl_wchar_utf8_kddi,
+	&vtbl_utf8_kddi_b_wchar,
+	&vtbl_wchar_utf8_kddi_b,
+	&vtbl_utf8_sb_wchar,
+	&vtbl_wchar_utf8_sb,
 	&vtbl_euccn_wchar,
 	&vtbl_wchar_euccn,
 	&vtbl_cp936_wchar,

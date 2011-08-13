@@ -96,6 +96,7 @@
 #include "filters/mbfilter_utf7.h"
 #include "filters/mbfilter_utf7imap.h"
 #include "filters/mbfilter_utf8.h"
+#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
 #include "filters/mbfilter_byte2.h"
@@ -166,6 +167,10 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
  	&mbfl_encoding_sjis_kddi_pua_b,
  	&mbfl_encoding_sjis_sb_pua,
  	&mbfl_encoding_sjis_mac,
+	&mbfl_encoding_utf8_docomo,
+	&mbfl_encoding_utf8_kddi,
+	&mbfl_encoding_utf8_kddi_b,
+	&mbfl_encoding_utf8_sb,
 	&mbfl_encoding_cp932,
 	&mbfl_encoding_cp51932,
 	&mbfl_encoding_jis,
