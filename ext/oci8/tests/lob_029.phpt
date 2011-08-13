@@ -11,13 +11,14 @@ if (preg_match('/Compile-time ORACLE_HOME/', $phpinfo) !== 1) {
     // Assume building PHP with an ORACLE_HOME means the tested DB is on the same machine as PHP
     die("skip this test won't work with remote Oracle");
 }
+if (substr(PHP_OS, 0, 3) == 'WIN') die("skip Test script not ported to Windows");
 ?>
 --FILE--
 <?php
 
 require(dirname(__FILE__).'/connect.inc');
 
-$realdirname = dirname(__FILE__);
+$realdirname = "/tmp";  // Use /tmp because a local dir can give ORA-22288 depending on perms
 $realfilename1 = "oci8bfiletest1.txt";
 $fullname1 = $realdirname."/".$realfilename1;
 $realfilename2 = "oci8bfiletest2.txt";
