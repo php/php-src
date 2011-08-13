@@ -43,6 +43,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf32.c \
 	mbfilter_utf16.c \
 	mbfilter_utf8.c \
+	mbfilter_utf8_mobile.c \
 	mbfilter_utf7.c \
 	mbfilter_utf7imap.c \
 	mbfilter_euc_jp_win.c \
@@ -115,6 +116,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf7.h \
 	mbfilter_utf7imap.h \
 	mbfilter_utf8.h \
+	mbfilter_utf8_mobile.h \
 	mbfilter_uuencode.h \
 	mbfilter_cp5022x.h \
 	mbfilter_cp51932.h \

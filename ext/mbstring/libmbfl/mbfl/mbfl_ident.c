@@ -56,6 +56,7 @@
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
+#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_koi8r.h"
 #include "filters/mbfilter_koi8u.h"
@@ -117,6 +118,13 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_2022jp,
 	&vtbl_identify_2022jpms,
 	&vtbl_identify_cp51932,
+	&vtbl_identify_sjis_docomo,
+	&vtbl_identify_sjis_kddi,
+	&vtbl_identify_sjis_sb,
+	&vtbl_identify_utf8_docomo,
+	&vtbl_identify_utf8_kddi,
+	&vtbl_identify_utf8_kddi_b,
+	&vtbl_identify_utf8_sb,
 	&vtbl_identify_euccn,
 	&vtbl_identify_cp936,
 	&vtbl_identify_hz,

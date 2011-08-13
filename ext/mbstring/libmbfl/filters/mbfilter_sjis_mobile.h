@@ -40,7 +40,9 @@ extern const mbfl_encoding mbfl_encoding_sjis_kddi_pua;
 extern const mbfl_encoding mbfl_encoding_sjis_kddi_pua_b;
 extern const mbfl_encoding mbfl_encoding_sjis_sb_pua;
 
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis_mobile;
+extern const struct mbfl_identify_vtbl vtbl_identify_sjis_docomo;
+extern const struct mbfl_identify_vtbl vtbl_identify_sjis_kddi;
+extern const struct mbfl_identify_vtbl vtbl_identify_sjis_sb;
 
 extern const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo;
@@ -61,5 +63,20 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb_pua;
 int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter);
+
+int mbfilter_sjis_emoji_docomo2unicode(int s, int *snd);
+int mbfilter_sjis_emoji_kddi2unicode(int s, int *snd);
+int mbfilter_sjis_emoji_sb2unicode(int s, int *snd);
+
+int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter);
+int mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter);
+int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter);
+
+int mbfilter_unicode_pua2sjis_emoji_docomo( int c, int *s1, int *s2, int *c1, int *c2);
+int mbfilter_unicode_pua2sjis_emoji_kddi(int c, int *s1, int *s2, int *c1, int *c2);
+int mbfilter_unicode_pua2sjis_emoji(int c, int *s1, int *s2, int *c1, int *c2, int *sjis_encoded);
+
+int mbfilter_conv_map_tbl(int c, int *w, const int map[][3], int n);
+int mbfilter_conv_r_map_tbl(int c, int *w, const int map[][3], int n);
 
 #endif /* MBFL_MBFILTER_SJIS_MOBILE_H */
