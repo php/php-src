@@ -5,6 +5,7 @@ PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
 require(dirname(__FILE__).'/skipif.inc');
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
+if ($stress_test !== true) die ('skip Test not run when $stress_test is FALSE');
 ?>
 --INI--
 memory_limit=6M

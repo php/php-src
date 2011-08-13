@@ -10,6 +10,8 @@ if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) 
     die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
+--ENV--
+NLS_LANG=
 --FILE--
 <?php
 
