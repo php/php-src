@@ -376,9 +376,6 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 								w = 0xf87f;
 							} else if (w & 0x80000) {
 								w = 0x20dd;
-							} else if (w & 0xF0000) {
-								// TBD
-								w = 0;
 							} else {
 								w = 0;
 							}
