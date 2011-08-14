@@ -59,6 +59,7 @@
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
+#include "filters/mbfilter_gb18030.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_koi8r.h"
 #include "filters/mbfilter_koi8u.h"
@@ -156,6 +157,8 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_euccn,
 	&vtbl_cp936_wchar,
 	&vtbl_wchar_cp936,
+	&vtbl_gb18030_wchar,
+	&vtbl_wchar_gb18030,
 	&vtbl_hz_wchar,
 	&vtbl_wchar_hz,
 	&vtbl_euctw_wchar,
