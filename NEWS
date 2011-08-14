@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Improved mbstring extension:
   . Added Shift_JIS Emoji (pictograms) support. (rui)
   . Ill-formed UTF-8 check for security enhancements. (rui)
+  . Added MacJapanese (Shift_JIS) and gb18030 encoding support. (rui)
+  . Added encode/decode in hex format to mb_[en|de]code_numericentity(). (rui)
 
 - Improved NSAPI SAPI: (Uwe Schindler)
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403).
