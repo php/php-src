@@ -172,6 +172,8 @@ PHP                                                                        NEWS
 - Improved mbstring extension:
   . Added Shift_JIS Emoji (pictograms) support. (rui)
   . Ill-formed UTF-8 check for security enhancements. (rui)
+  . Added MacJapanese (Shift_JIS) and gb18030 encoding support. (rui)
+  . Added encode/decode in hex format to mb_[en|de]code_numericentity(). (rui)
 
 - Improved MySQL extensions:
   . MySQL: Deprecated mysql_list_dbs(). FR #50667. (Andrey)
