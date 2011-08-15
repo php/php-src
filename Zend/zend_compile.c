@@ -3544,7 +3544,7 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
         /* Only on merge into an actual class */
         &&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT))) {
 				INIT_ZVAL(class_name_zv);
-				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 0);
+				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
 				class_name_literal = zend_add_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
 				opcode_copy[i].op1.zv = &fe->op_array.literals[class_name_literal].constant;
 			}
@@ -3564,7 +3564,7 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
         /* Only on merge into an actual class */
         &&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT))) {
 				INIT_ZVAL(class_name_zv);
-				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 0);
+				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
 				class_name_literal = zend_add_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
 				opcode_copy[i].op2.zv = &fe->op_array.literals[class_name_literal].constant;
 			}
