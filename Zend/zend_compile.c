@@ -3645,6 +3645,14 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		zend_function* parent_function;
 		if (ce->parent && zend_hash_quick_find(&ce->parent->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &parent_function) != FAILURE) {
 			prototype = parent_function; /* ->common.fn_flags |= ZEND_ACC_ABSTRACT; */
+			
+			/* we got that method in the parent class, and are going to override it,
+			   except, if the trait is just asking to have an abstract method implemented. */
+			if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				/* then we clean up an skip this method */
+				zend_function_dtor(fn);
+				return ZEND_HASH_APPLY_REMOVE;
+			}
 		}
 
 		fn->common.scope = ce;
