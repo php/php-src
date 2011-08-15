@@ -3635,10 +3635,13 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 	} else if (existing_fn->common.scope != ce) {
 		add = 1; /* or inherited from other class or interface */
 		/* it is just a reference which was added to the subclass while doing the inheritance */
-		/* prototype = existing_fn; */
-		/* memory is scrambled anyway???? */
-		/* function_add_ref(prototype);  */
-		zend_hash_quick_del(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h);
+		/* so we can deleted now, and will add the overriding method afterwards */
+
+		/* except, if we try to add an abstract function, then we should not delete the inherited one */
+		/* delete inherited fn if the function to be added is not abstract */
+		if ((fn->common.fn_flags & ZEND_ACC_ABSTRACT) == 0) {
+			zend_hash_quick_del(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h);
+		}
 	}
 
 	if (add) {
