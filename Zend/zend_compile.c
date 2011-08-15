@@ -339,25 +339,47 @@ void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
 }
 /* }}} */
 
+/* Common part of zend_add_literal and zend_append_individual_literal */
+static inline void zend_insert_literal(zend_op_array *op_array, const zval *zv, int literal_position TSRMLS_DC) /* {{{ */
+{
+	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
+		zval *z = (zval*)zv;
+		Z_STRVAL_P(z) = zend_new_interned_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv) + 1, 1 TSRMLS_CC);
+	}
+	CONSTANT_EX(op_array, literal_position) = *zv;
+	Z_SET_REFCOUNT(CONSTANT_EX(op_array, literal_position), 2);
+	Z_SET_ISREF(CONSTANT_EX(op_array, literal_position));
+	op_array->literals[literal_position].hash_value = 0;
+	op_array->literals[literal_position].cache_slot = -1;
+}
+/* }}} */
+
+/* Is used while compiling a function, using the context to keep track
+   of an approximate size to avoid to relocate to often.
+   Literals are truncated to actual size in the second compiler pass (pass_two()). */
 int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
 	if (i >= CG(context).literals_size) {
-		CG(context).literals_size += 16; /* FIXME */
+		while (i >= CG(context).literals_size) {
+			CG(context).literals_size += 16; /* FIXME */
+		}
 		op_array->literals = (zend_literal*)erealloc(op_array->literals, CG(context).literals_size * sizeof(zend_literal));
 	}
-	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
-		zval *z = (zval*)zv;
+	zend_insert_literal(op_array, zv, i TSRMLS_CC);
+	return i;
+}
+/* }}} */
 
-		Z_STRVAL_P(z) =
-			zend_new_interned_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv) + 1, 1 TSRMLS_CC);
-	}
-	CONSTANT_EX(op_array, i) = *zv;
-	Z_SET_REFCOUNT(CONSTANT_EX(op_array, i), 2);
-	Z_SET_ISREF(CONSTANT_EX(op_array, i));
-	op_array->literals[i].hash_value = 0;
-	op_array->literals[i].cache_slot = -1;
+/* Is used after normal compilation to append an additional literal.
+   Allocation is done precisely here. */
+int zend_append_individual_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
+{
+	int i = op_array->last_literal;
+	op_array->last_literal++;
+	op_array->literals = (zend_literal*)erealloc(op_array->literals, (i + 1) * sizeof(zend_literal));
+	zend_insert_literal(op_array, zv, i TSRMLS_CC);
 	return i;
 }
 /* }}} */
@@ -3488,6 +3510,7 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 	zval class_name_zv;
 	int class_name_literal;
 	int i;
+	int number_of_literals;
 
 	if (fe->op_array.static_variables) {
 		HashTable *tmpHash;
@@ -3498,12 +3521,11 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 
 		fe->op_array.static_variables = tmpHash;
 	}
-  
-	/* TODO: Verify that this size is a global thing, do not see why but is used
-	         like this elsewhere */
-	literals_copy = (zend_literal*)emalloc(CG(context).literals_size * sizeof(zend_literal));
 
-	for (i = 0; i < fe->op_array.last_literal; i++) {
+	number_of_literals = fe->op_array.last_literal;
+	literals_copy = (zend_literal*)emalloc(number_of_literals * sizeof(zend_literal));
+
+	for (i = 0; i < number_of_literals; i++) {
 		literals_copy[i] = fe->op_array.literals[i];
 		zval_copy_ctor(&literals_copy[i].constant);
 	}
@@ -3538,14 +3560,15 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 		} else {
 			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
 			if (target_ce
-        /* REM: used a IS_NULL place holder with a special marker LVAL */
+				/* REM: used a IS_NULL place holder with a special marker LVAL */
 				&& Z_TYPE_P(opcode_copy[i].op1.zv) == IS_NULL
 				&& Z_LVAL_P(opcode_copy[i].op1.zv) == ZEND_ACC_TRAIT
-        /* Only on merge into an actual class */
-        &&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT))) {
+				/* Only on merge into an actual class */
+				&&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT)))
+			{
 				INIT_ZVAL(class_name_zv);
 				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
-				class_name_literal = zend_add_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
+				class_name_literal = zend_append_individual_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
 				opcode_copy[i].op1.zv = &fe->op_array.literals[class_name_literal].constant;
 			}
 		}
@@ -3558,14 +3581,15 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 		} else {
 			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
 			if (target_ce
-        /* REM: used a IS_NULL place holder with a special marker LVAL */
+				/* REM: used a IS_NULL place holder with a special marker LVAL */
 				&& Z_TYPE_P(opcode_copy[i].op2.zv) == IS_NULL
 				&& Z_LVAL_P(opcode_copy[i].op2.zv) == ZEND_ACC_TRAIT
-        /* Only on merge into an actual class */
-        &&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT))) {
+				/* Only on merge into an actual class */
+				&&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT)))
+			{
 				INIT_ZVAL(class_name_zv);
 				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
-				class_name_literal = zend_add_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
+				class_name_literal = zend_append_individual_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
 				opcode_copy[i].op2.zv = &fe->op_array.literals[class_name_literal].constant;
 			}
 		}
