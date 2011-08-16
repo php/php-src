@@ -6647,6 +6647,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
+		if (!strcmp(Z_STRVAL_P(name), "strict")) {
+			zend_error(E_COMPILE_ERROR, "You seem to be trying to use a different language...");
+		}
 		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
 	}
 	efree(lcname);
