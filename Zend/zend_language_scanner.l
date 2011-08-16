@@ -1313,6 +1313,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ARRAY;
 }
 
+<ST_IN_SCRIPTING>"callable" {
+ return T_CALLABLE;
+}
+
 <ST_IN_SCRIPTING>"++" {
 	return T_INC;
 }

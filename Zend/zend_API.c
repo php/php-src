@@ -217,6 +217,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "resource";
 		case IS_NULL:
 			return "null";
+		case IS_CALLABLE:
+			return "callable";
 		case IS_ARRAY:
 			return "array";
 		default:

@@ -362,6 +362,15 @@ UPGRADE NOTES - PHP X.Y
     foo()[0]
     $foo->bar()[0]
 
+- Callable typehint, argument must be callable (i.e. pass is_callable($arg, false))
+  example:
+  function foo(callable $do) {
+  }
+  foo("strcmp");
+  foo(function() {});
+  $o = new ArrayObject();
+  foo(array($o, "count"));
+
 ===================
 13. Windows support
 ===================
@@ -459,6 +468,7 @@ UPGRADE NOTES - PHP X.Y
          - ReflectionClass::getTraitNames()
          - ReflectionClass::getTraitAliases()
          - ReflectionParameter::canBePassedByValue()
+         - ReflectionParameter::isCallable()
        
        - RegexIterator
          - RegexIterator::getRegex()
