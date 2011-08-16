@@ -330,7 +330,7 @@ PHP                                                                        NEWS
 - Core
   . Fixed bug #55339 (Segfault with allow_call_time_pass_reference = Off).
     (Dmitry)
-  . Fix bug #55295 [NEW]: popen_ex on windows, fixed possible heap overflow
+  . Fixed bug #55295 (popen_ex on windows, fixed possible heap overflow).
     (Pierre)
   . Fixed bug #50816 (Using class constants in array definition fails).
     (Pierrick, Dmitry)
