@@ -2383,6 +2383,22 @@ ZEND_METHOD(reflection_parameter, isArray)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::isCallable()
+   Returns whether parameter MUST be callable */
+ZEND_METHOD(reflection_parameter, isCallable)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_CALLABLE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::allowsNull()
    Returns whether NULL is allowed as this parameters's value */
 ZEND_METHOD(reflection_parameter, allowsNull)
@@ -5827,6 +5843,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getPosition, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)

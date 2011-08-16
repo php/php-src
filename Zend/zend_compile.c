@@ -1890,27 +1890,38 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 		cur_arg_info->allow_null = 0;
 
 		if (class_type->u.constant.type != IS_NULL) {
-			cur_arg_info->type_hint = IS_OBJECT;
-			if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
-				zend_resolve_class_name(class_type, opline->extended_value, 1 TSRMLS_CC);
-			}
-			class_type->u.constant.value.str.val = zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
-			cur_arg_info->class_name = class_type->u.constant.value.str.val;
-			cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
-			if (op == ZEND_RECV_INIT) {
-				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
-					cur_arg_info->allow_null = 1;
-				} else {
-					zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
+			if (class_type->u.constant.type == IS_ARRAY) {
+				cur_arg_info->type_hint = IS_ARRAY;
+				if (op == ZEND_RECV_INIT) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+						cur_arg_info->allow_null = 1;
+					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
+						zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
+					}
 				}
-			}
-		} else {
-			cur_arg_info->type_hint = IS_ARRAY;
-			if (op == ZEND_RECV_INIT) {
-				if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
-					cur_arg_info->allow_null = 1;
-				} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
-					zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
+			} else if (class_type->u.constant.type == IS_CALLABLE) {
+				cur_arg_info->type_hint = IS_CALLABLE;
+				if (op == ZEND_RECV_INIT) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+						cur_arg_info->allow_null = 1;
+					} else {
+						zend_error(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
+					}
+				}
+			} else {
+				cur_arg_info->type_hint = IS_OBJECT;
+				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
+					zend_resolve_class_name(class_type, opline->extended_value, 1 TSRMLS_CC);
+				}
+				class_type->u.constant.value.str.val = zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
+				cur_arg_info->class_name = class_type->u.constant.value.str.val;
+				cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+				if (op == ZEND_RECV_INIT) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+						cur_arg_info->allow_null = 1;
+					} else {
+						zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
+					}
 				}
 			}
 		}

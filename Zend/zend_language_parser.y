@@ -186,6 +186,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
+%token T_CALLABLE        "callable (T_CALLABLE)"
 %token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
 %token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
@@ -523,7 +524,8 @@ non_empty_parameter_list:
 
 optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_NULL; }
+	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
+	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
 	|	fully_qualified_class_name			{ $$ = $1; }
 ;
 
