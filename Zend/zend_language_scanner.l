@@ -1780,7 +1780,7 @@ inline_char_handler:
 		if (YYCURSOR < YYLIMIT) {
 			switch (*YYCURSOR) {
 				case '?':
-					if (CG(short_tags) || !strncasecmp(YYCURSOR + 1, "php", 3)) { /* Assume [ \t\n\r] follows "php" */
+					if (CG(short_tags) || !strncasecmp(YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
 						break;
 					}
 					continue;
