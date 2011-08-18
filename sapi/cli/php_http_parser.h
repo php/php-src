@@ -112,7 +112,7 @@ struct php_http_parser {
   unsigned char index;
 
   uint32_t nread;
-  int64_t content_length;
+  size_t content_length;
 
   /** READ-ONLY **/
   unsigned short http_major;
