@@ -727,7 +727,9 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	nsapi_free(value);
 
 	php_register_variable("SERVER_SOFTWARE", system_version(), track_vars_array TSRMLS_CC);
-	php_register_variable("HTTPS", (security_active ? "ON" : "OFF"), track_vars_array TSRMLS_CC);
+	if (security_active) {
+		php_register_variable("HTTPS", "ON", track_vars_array TSRMLS_CC);
+	}
 	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
 
 	/* DOCUMENT_ROOT */

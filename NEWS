@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.8
 
+- Improved NSAPI SAPI: (Uwe Schindler)
+  . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403).
+
 18 Aug 2011, PHP 5.3.7
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
 - Upgraded bundled PCRE to version 8.12. (Scott)
