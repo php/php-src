@@ -6,8 +6,10 @@ PHP                                                                        NEWS
   . Turn on html_errors by default again in php.ini-production like it was in
     PHP 5.3, but only generate docref links when the docref_root INI setting is
     not empty.
-- Fixed bug #55378: Binary number literal returns float number though its value
-  is small enough. (Derick)
+  . Fixed bug #55378: Binary number literal returns float number though its value
+    is small enough. (Derick)
+  . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
+    (virsacer at web dot de, Pierre)
 
 - Improved mbstring extension:
   . Added Shift_JIS Emoji (pictograms) support. (rui)
