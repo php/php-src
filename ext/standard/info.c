@@ -626,7 +626,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 
 
 	PUTS("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
-	PUTS("<html>");
+	PUTS("<html xmlns=\"http://www.w3.org/1999/xhtml\">>");
 	PUTS("<head>\n");
 	php_info_print_style(TSRMLS_C);
 	PUTS("<title>phpinfo()</title>");

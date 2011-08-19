@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.8
 
+- Core:
+  . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
+    (virsacer at web dot de, Pierre)
+
 - Improved NSAPI SAPI: (Uwe Schindler)
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403).
 
