@@ -55,7 +55,9 @@ do {                                                                 \
   }                                                                  \
 } while (0)
 
-
+#ifdef PHP_WIN32
+# undef CALLBACK
+#endif
 #define CALLBACK(FOR)                                                \
 do {                                                                 \
   CALLBACK_NOCLEAR(FOR);                                             \
