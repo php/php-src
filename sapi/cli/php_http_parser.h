@@ -28,7 +28,9 @@ extern "C" {
 
 #include <sys/types.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
+# include <windows.h>
 # include "win32/php_stdint.h"
+# include "config.w32.h"
 #else
 # include <stdint.h>
 #endif
