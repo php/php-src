@@ -316,6 +316,7 @@ PHP                                                                        NEWS
 
 - Fixed PDO objects binary incompatibility. (Dmitry)
 - Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
+- Fixed bug #55450 (Built in web server not accepting file uploads). (Laruence)
 
 28 Jul 2011, PHP 5.3.7 RC4
 - Improved core functions:
