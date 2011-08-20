@@ -42,6 +42,7 @@ $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
 var_dump(@$session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->getErrno() == SNMP::ERRNO_GENERIC);
 var_dump($session->getError());
+var_dump(@$session->get(array('.1.3.6.1.2.1.1.1.0')));
 $session->close();
 ?>
 --EXPECTF--
@@ -61,3 +62,4 @@ SNMP::ERRNO_GENERIC
 bool(false)
 bool(true)
 %string|unicode%(%d) "Fatal error: Unknown user name"
+bool(false)
