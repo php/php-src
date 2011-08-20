@@ -37,26 +37,10 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter);
+extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
+extern const unsigned char mblen_table_sjis[];
 
-static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
-};
+static int mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
 
@@ -73,7 +57,7 @@ const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_sjis_mac
+	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
@@ -141,7 +125,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 
 #include "sjis_mac2uni.h"
 
-const int code_tbl[][3] = {
+static const int code_tbl[][3] = {
 	{0x02f0, 0x0303, 0x2460},
 	{0x030e, 0x0321, 0x2474},
 	{0x032c, 0x0334, 0x2776},
@@ -151,7 +135,7 @@ const int code_tbl[][3] = {
 	{0x038a, 0x03a3, 0x249c},
 };
 
-const int code_ofst_tbl[] [2]= {
+static const int code_ofst_tbl[] [2]= {
 	{0x03ac, 0x03c9},
 	{0x0406, 0x0420},
 	{0x0432, 0x0441},
@@ -162,11 +146,11 @@ const int code_ofst_tbl[] [2]= {
 	{0x1ff2, 0x20a5},
 };
 
-const int *code_map[] = {
+static const int *code_map[] = {
 	sjis_mac2wchar1, sjis_mac2wchar2, sjis_mac2wchar3, sjis_mac2wchar4,
 	sjis_mac2wchar5, sjis_mac2wchar6, sjis_mac2wchar7, sjis_mac2wchar8};
 
-const int code_tbl_m[][6] = {
+static const int code_tbl_m[][6] = {
 	{0x0340, 0xf860, 0x0030, 0x002e, 0x0000, 0x0000},
 	{0x03c9, 0xf860, 0x0054, 0x0042, 0x0000, 0x0000},
 	{0x035c, 0xf860, 0x0058, 0x0056, 0x0000, 0x0000},
@@ -181,7 +165,7 @@ const int code_tbl_m[][6] = {
 	{0x0523, 0xf862, 0x8ca1, 0x56e3, 0x6cd5, 0x4eba},
 };
 
-const int s_form_tbl[] = {
+static const int s_form_tbl[] = {
 	0x2010,0x2016,0x2026,
 	0x3001,0x3002,0x301c,0x3041,0x3043,0x3045,0x3047,0x3049,
 	0x3063,0x3083,0x3085,0x3087,0x308e,0x30a1,0x30a3,0x30a5,
@@ -192,7 +176,7 @@ const int s_form_tbl[] = {
 	0x21e6,0x21e7,0x21e8,0x21e9, // black arrow f87a (4)
 };
 
-const int s_form_sjis_tbl[] = {
+static const int s_form_sjis_tbl[] = {
 	0xeb5d,0xeb61,0xeb63,
 	0xeb41,0xeb42,0xeb60,0xec9f,0xeca1,0xeca3,0xeca5,0xeca7,
 	0xecc1,0xece1,0xece3,0xece5,0xecec,0xed40,0xed42,0xed44,
@@ -203,7 +187,7 @@ const int s_form_sjis_tbl[] = {
 	0x86d4,0x86d5,0x86d3,0x86d6, // black arrow
 };
 
-const int s_form_sjis_fallback_tbl[] = {
+static const int s_form_sjis_fallback_tbl[] = {
 	0x815d,0x8161,0x8163,
 	0x8141,0x8142,0x8160,0x829f,0x82a1,0x82a3,0x82a5,0x82a7,
 	0x82c1,0x82e1,0x82e3,0x82e5,0x82ec,0x8340,0x8342,0x8344,
@@ -214,7 +198,7 @@ const int s_form_sjis_fallback_tbl[] = {
 	0x86d0,0x86d1,0x86cf,0x86d2, // arrow
 };
 
-const int wchar2sjis_mac_r_tbl[][3] = {
+static const int wchar2sjis_mac_r_tbl[][3] = {
 	{0x2160, 0x216b, 0x034e},
 	{0x2170, 0x217b, 0x0362},
 	{0x2460, 0x2473, 0x02f0},
@@ -226,7 +210,7 @@ const int wchar2sjis_mac_r_tbl[][3] = {
 	{0x32a4, 0x32a9, 0x04ba},
 };
 
-const int wchar2sjis_mac_r_map[][2] = {
+static const unsigned short wchar2sjis_mac_r_map[][2] = {
 	{0x2660, 0x2667},
 	{0x322a, 0x3243},
 	{0x3296, 0x329e},
@@ -234,10 +218,10 @@ const int wchar2sjis_mac_r_map[][2] = {
 	{0xfe30, 0xfe44},
 };
 
-const int *wchar2sjis_mac_code_map[] = {
+static const int *wchar2sjis_mac_code_map[] = {
 	wchar2sjis_mac4, wchar2sjis_mac7, wchar2sjis_mac8, wchar2sjis_mac9, wchar2sjis_mac10};
 
-const int wchar2sjis_mac_wchar_tbl[][2] = {
+static const int wchar2sjis_mac_wchar_tbl[][2] = {
 	{0x2109, 0x03c2},
 	{0x2110, 0x21ef5},
 	{0x2113, 0x03bc},
@@ -580,7 +564,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			}
 
 			if (s1 <= 0) {
-				for (i=0; i<sizeof(wchar2sjis_mac_r_map)/(2*sizeof(int));i++) {
+				for (i=0; i<sizeof(wchar2sjis_mac_r_map)/(2*sizeof(unsigned short));i++) {
 					if (c >= wchar2sjis_mac_r_map[i][0] && c <= wchar2sjis_mac_r_map[i][1]) {
 						s1 = wchar2sjis_mac_code_map[i][c-wchar2sjis_mac_r_map[i][0]]; 
 						break;
@@ -812,7 +796,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
+static int
 mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 {
 	int i, c1, s1 = 0;
@@ -838,25 +822,4 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-
-static int mbfl_filt_ident_sjis_mac(int c, mbfl_identify_filter *filter)
-{
-	if (filter->status) {		/* kanji second char */
-		if (c < 0x40 || c > 0xfc || c == 0x7f) {	/* bad */
-		    filter->flag = 1;
-		}
-		filter->status = 0;
-	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
-		;
-	} else if (c > 0xa0 && c < 0xe0) {	/* kana  ok */
-		;
-	} else if (c > 0x80 && c < 0xfd && c != 0xa0) {	/* kanji first char */
-		filter->status = 1;
-	} else {							/* bad */
-		filter->flag = 1;
-	}
-
-	return c;
-}
-
 

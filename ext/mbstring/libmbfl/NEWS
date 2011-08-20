@@ -1,0 +1,30 @@
+
+version 1.3.2 August 20, 2011
+
+- added JISX-0213:2004 based encoding : Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004 (rui).
+- added gb18030 encoding (rui).
+- added CP950 with user user defined area based on Big5 (rui).
+- added mapping for user defined character area to CP936 (rui).
+- added UTF-8-Mobile to support the pictogram characters defined by mobile phone carrier in Japan (rui).
+
+version 1.3.1 August 5, 2011
+
+- added check for invalid/obsolete utf-8 encoding (rui).
+ 
+version 1.3.0 August 1, 2011
+
+- added encoding conversion between Shift_JIS and Unicode (6.0 or PUA) 
+  for pictogram characters defined by mobile phone carrier in Japan (rui).
+ 
+  Detailed info:https://github.com/hirokawa/libmbfl/wiki/Introduction-to-libmbflhttps:--github.com-hirokawa-libmbfl-wiki-Introduction-to-libmbfl-_edit%23
+
+- fixed encoding conversion of cp5022x for user defined area (rui).
+- added MacJapanese (SJIS-mac) for legacy encoding support (rui).
+- backport from PHP 5.2 (rui).
+
+version 1.1.0 March 02, 2010
+
+- added cp5022x encoding (moriyoshi)
+- added ISO-2022-JP-MS (moriyoshi)
+- moved to github.com from sourceforge.jp (moriyoshi)
+
