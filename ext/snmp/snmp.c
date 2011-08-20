@@ -28,6 +28,7 @@
 #endif
 
 #include "php.h"
+#include "main/php_network.h"
 #include "ext/standard/info.h"
 #include "php_snmp.h"
 
@@ -1090,9 +1091,13 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 */
 static int netsnmp_session_init(php_snmp_session **session_p, int version, char *hostname, char *community, int timeout, int retries TSRMLS_DC)
 {
-	int remote_port = SNMP_PORT;
 	php_snmp_session *session;
 	char *pptr;
+	char buf[MAX_NAME_LEN];
+	int force_ipv6 = FALSE;
+	int n;
+	struct sockaddr **psal;
+	struct sockaddr **res;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -1100,25 +1105,86 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed allocating session");
 		return (-1);
 	}
+	memset(session, 0, sizeof(php_snmp_session));
+
+	strlcpy(buf, hostname, sizeof(buf));
 
 	snmp_sess_init(session);
 
 	session->version = version;
+	session->remote_port = SNMP_PORT;
 
 	session->peername = emalloc(MAX_NAME_LEN);
-	if(session->peername == NULL) {
+	if (session->peername == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while copying hostname");
-		netsnmp_session_free(&session);
+		return (-1);
+	}
+	*(session->peername) = '\0';
+
+	/* Reading the hostname and its optional non-default port number */
+	if (*hostname == '[') { /* IPv6 address */
+		force_ipv6 = TRUE;
+		hostname++;
+		if ((pptr = strchr(hostname, ']'))) {
+			if (pptr[1] == ':') {
+				session->remote_port = atoi(pptr + 2);
+			}
+			*pptr = '\0';
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mailformed IPv6 address, closing square bracket missing");
+			return (-1);
+		}
+	} else { /* IPv4 address */
+		if ((pptr = strchr(hostname, ':'))) {
+			session->remote_port = atoi(pptr + 1);
+			*pptr = '\0';
+		}
+	}
+
+	/* since Net-SNMP library requires 'udp6:' prefix for all IPv6 addresses (in FQDN form too) we need to
+	   perform possible name resolution before running any SNMP queries */
+	if ((n = php_network_getaddresses(hostname, SOCK_DGRAM, &psal, NULL TSRMLS_CC)) == 0) { /* some resover error */
+		/* warnings sent, bailing out */
 		return (-1);
 	}
 
-	/* Reading the hostname and its optional non-default port number */
-	strlcpy(session->peername, hostname, MAX_NAME_LEN);
-	if ((pptr = strchr(session->peername, ':'))) {
-		remote_port = strtol(pptr + 1, NULL, 0);
+	res = psal;
+	while (n-- > 0) {
+		pptr = session->peername;
+#if HAVE_GETADDRINFO && HAVE_IPV6 && HAVE_INET_NTOP
+		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
+			res++;
+			continue;
+		}
+		if ((*res)->sa_family == AF_INET6) {
+			strcpy(session->peername, "udp6:");
+			pptr = session->peername + strlen(session->peername);
+			inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), pptr, MAX_NAME_LEN);
+		} else if ((*res)->sa_family == AF_INET) {
+			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, MAX_NAME_LEN);
+		} else {
+			res++;
+			continue;
+		}
+#else
+		if (res->sa_family != AF_INET) {
+			res++;
+			continue;
+		}
+		strcat(pptr, inet_ntoa(res));
+#endif
+		break;
 	}
 
-	session->remote_port = remote_port;
+	if (strlen(session->peername) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown failure while resolving '%s'", buf);
+		return (-1);
+	}
+	/* XXX FIXME
+		There should be check for non-empty session->peername!
+	*/
+
+	php_network_freeaddresses(psal);
 
 	if (version == SNMP_VERSION_3) {
 		/* Setting the security name. */
