@@ -6,9 +6,11 @@ requests and 'private' community for write requests.
 Default timeout is 1000ms and there will be one request performed.
 */
 
-$hostname =	getenv('SNMP_HOSTNAME')		? getenv('SNMP_HOSTNAME') :	'127.0.0.1';
+$hostname4 =	getenv('SNMP_HOSTNAME')		? getenv('SNMP_HOSTNAME') :	'127.0.0.1';
+$hostname6 =	getenv('SNMP_HOSTNAME6')	? getenv('SNMP_HOSTNAME6') :	'::1';
 $port =		getenv('SNMP_PORT')		? getenv('SNMP_PORT') :		'161';
-$hostname .= ":$port";
+$hostname	= "$hostname4:$port";
+$hostname6_port = "[$hostname6]:$port";
 $community =	getenv('SNMP_COMMUNITY')	? getenv('SNMP_COMMUNITY') :	'public';
 $communityWrite = getenv('SNMP_COMMUNITY_WRITE')? getenv('SNMP_COMMUNITY_WRITE'):'private';
 

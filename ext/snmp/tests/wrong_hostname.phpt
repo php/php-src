@@ -18,5 +18,5 @@ var_dump(snmpget('192.168..6.1', 'community', '.1.3.6.1.2.1.1.1.0', $timeout, $r
 
 ?>
 --EXPECTF--
-Warning: snmpget(): Could not open snmp connection: Unknown host (192.168..6.1) (%s) in %s on line %d
+Warning: snmpget(): php_network_getaddresses: getaddrinfo failed: hostname nor servname provided, or not known in %s on line %d
 bool(false)

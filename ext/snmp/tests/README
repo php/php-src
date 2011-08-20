@@ -9,7 +9,9 @@ To enable these tests, you must have :
 ** How to test **
 You need to give credentials with environment vars if default ones are not
 sutable (see snmp_include.inc for more info):
-SNMP_HOSTNAME : IP or IP:PORT to connect to
+SNMP_HOSTNAME : IPv4 of remote SNMP agent
+SNMP_HOSTNAME : IPv6 or remote SNMP agent
+SNMP_PORT : SNMP port for queries
 SNMP_COMMUNITY : community name
 SNMP_COMMUNITY_WRITE : community used for write tests (snmpset()).
 SNMP_MIBDIR : Directory containing MIBS
@@ -26,6 +28,7 @@ On Linux/FreeBSD
   
 ###### Config file #####
 rocommunity public 127.0.0.1
+rocommunity6 public ::1
 rwcommunity private 127.0.0.1
 
 Do not enable them - being set here they make appropriate OID switch into r/o
