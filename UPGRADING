@@ -318,6 +318,9 @@ UPGRADE NOTES - PHP X.Y
              - Added feature-rich OO API (SNMP class)
              - Dropped UCD-SNMP compatibility code. Consider upgrading to
                net-snmp v5.3+. Net-SNMP v5.4+ is required for Windows version.
+             - In sake of adding support for IPv6 DNS name resolution of
+               remote SNMP agent (peer) is done by extension now, not by Net-SNMP
+               library anymore.
           
 
      d. no longer possible to disable
