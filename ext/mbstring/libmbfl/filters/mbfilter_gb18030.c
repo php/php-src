@@ -136,7 +136,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x20ac, filter->data));
 		} else if (c == 0xff) {
 			CK((*filter->output_function)(0x00ff, filter->data));
-		} else if (c > 0x80 && c < 0xff) {	/* dbcs/fbcs lead byte */
+		} else if (c > 0x80 && c < 0xff) {	/* dbcs/qbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
@@ -146,7 +146,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	case 1:		/* dbcs/fbcs second byte */
+	case 1:		/* dbcs/qbcs second byte */
 		c1 = filter->cache;
 		filter->status = 0;
 
@@ -154,7 +154,8 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
 			return c;
-		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) { /* 4 byte range: Unicode 16 planes */
+		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) { 
+			/* 4 byte range: Unicode 16 planes */
 			filter->status = 2;
 			filter->cache = (c1 << 8) | c;
 			return c;
@@ -162,16 +163,22 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 				   (c >= 0xa1 && c <= 0xfe)) { /* UDA part1,2: U+E000-U+E4C5 */
 			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
 			CK((*filter->output_function)(w, filter->data));
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) { /* UDA part3 : U+E4C6-U+E765*/
+		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) { 
+			/* UDA part3 : U+E4C6-U+E765*/
 			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
 			CK((*filter->output_function)(w, filter->data));
 		} 
 
-		if (w <= 0) {
-			c2 = (c1 << 8) | c;
+		c2 = (c1 << 8) | c;
+
+		if (w <= 0 && 
+			((c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
+			 (c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
+			 (c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844)))) {
 			for (k = 0; k < mbfl_gb18030_pua_tbl_max; k++) {
 				if (c2 >= mbfl_gb18030_pua_tbl[k][2] && 
-					c2 <= mbfl_gb18030_pua_tbl[k][2] +  mbfl_gb18030_pua_tbl[k][1] -  mbfl_gb18030_pua_tbl[k][0]) {
+					c2 <= mbfl_gb18030_pua_tbl[k][2] +  mbfl_gb18030_pua_tbl[k][1] 
+					-  mbfl_gb18030_pua_tbl[k][0]) {
 					w = c2 -  mbfl_gb18030_pua_tbl[k][2] + mbfl_gb18030_pua_tbl[k][0];
 					CK((*filter->output_function)(w, filter->data));
 					break;
@@ -207,7 +214,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			}
 		}
 		break;
-	case 2: /* fbcs third byte */
+	case 2: /* qbcs third byte */
 		c1 = (filter->cache >> 8) & 0xff;
 		c2 = filter->cache & 0xff;
 		filter->status = 0;
@@ -224,7 +231,7 @@ mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		}
  		break;
 
-	case 3: /* fbcs fourth byte */
+	case 3: /* qbcs fourth byte */
 		c1 = (filter->cache >> 16) & 0xff;
 		c2 = (filter->cache >> 8) & 0xff;
 		c3 = filter->cache & 0xff;
@@ -279,9 +286,8 @@ int
 mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 {
 	int k, k1, k2;
-	int c1, s, s1 = 0;
+	int c1, s = 0, s1 = 0;
 
-	s = 0;
 	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {
 		s = ucs_a1_cp936_table[c - ucs_a1_cp936_table_min];
 	} else if (c >= ucs_a2_cp936_table_min && c < ucs_a2_cp936_table_max) {
@@ -291,13 +297,37 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
 		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
 	} else if (c >= ucs_ci_cp936_table_min && c < ucs_ci_cp936_table_max) {
-		s = ucs_ci_cp936_table[c - ucs_ci_cp936_table_min];
+		/* U+F900-FA2F CJK Compatibility Ideographs */
+		if (c == 0xf92c) {
+			s = 0xfd9c;
+		} else if (c == 0xf979) {
+			s = 0xfd9d;
+		} else if (c == 0xf995) {
+			s = 0xfd9e;
+		} else if (c == 0xf9e7) {
+			s = 0xfd9f;
+		} else if (c == 0xf9f1) {
+			s = 0xfda0;
+		} else if (c >= 0xfa0c && c <= 0xfa29) {
+			s = ucs_ci_s_cp936_table[c - 0xfa0c];
+		}
 	} else if (c >= ucs_cf_cp936_table_min && c < ucs_cf_cp936_table_max) {
+		/* FE30h CJK Compatibility Forms  */
 		s = ucs_cf_cp936_table[c - ucs_cf_cp936_table_min];
 	} else if (c >= ucs_sfv_cp936_table_min && c < ucs_sfv_cp936_table_max) {
+		/* U+FE50-FE6F Small Form Variants */
 		s = ucs_sfv_cp936_table[c - ucs_sfv_cp936_table_min];
 	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
+		/* U+FF00-FFFF HW/FW Forms */
+		if (c == 0xff04) {
+			s = 0xa1e7;
+		} else if (c == 0xff5e) {
+			s = 0xa1ab; 
+		} else if (c >= 0xff01 && c <= 0xff5d) {
+			s = c - 0xff01 + 0xa3a1;
+		} else if (c >= 0xffe0 && c <= 0xffe5) {
+			s = ucs_hff_s_cp936_table[c-0xffe0];
+		}
 	}
 
 	if (c == 0x20ac) { /* euro-sign */
@@ -371,7 +401,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		if (s <= 0x80) {	/* latin */
 			CK((*filter->output_function)(s, filter->data));
-		} else if (s1 > 0) { /* fbcs */
+		} else if (s1 > 0) { /* qbcs */
 			CK((*filter->output_function)(s1 & 0xff, filter->data));
 			CK((*filter->output_function)((s >> 16) & 0xff, filter->data));
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
@@ -403,8 +433,8 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 			filter->status = 1;
 			filter->status |= (c << 8);
 		}
-	} else if (filter->status == 1) { /* dbcs/fbcs 2nd byte */
-		if (((c1 >= 0x81 && c1 <= 0x84) || (c1 >= 0x90 && c1 <= 0xe3)) && c >= 0x30 && c <= 0x39) { /* fbcs */
+	} else if (filter->status == 1) { /* dbcs/qbcs 2nd byte */
+		if (((c1 >= 0x81 && c1 <= 0x84) || (c1 >= 0x90 && c1 <= 0xe3)) && c >= 0x30 && c <= 0x39) { /* qbcs */
 			filter->status = 2;
 		} else if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) && (c >= 0xa1 && c <= 0xfe)) {
 			filter->status = 0; /* UDA part 1,2 */
@@ -420,14 +450,14 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 			filter->flag = 1; /* bad */
 			filter->status = 0;			
 		}
-	} else if (filter->status == 2) { /* fbcs 3rd byte */
+	} else if (filter->status == 2) { /* qbcs 3rd byte */
 		if (c > 0x80 && c < 0xff) {
 			filter->status = 3;
 		} else {
 			filter->flag = 1; /* bad */
 			filter->status = 0;
 		}
-	} else if (filter->status == 3) { /* fbcs 4th byte */
+	} else if (filter->status == 3) { /* qbcs 4th byte */
 		if (c >= 0x30 && c < 0x40) {
 			filter->status = 0;
 		} else {

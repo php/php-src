@@ -139,7 +139,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_open = {
 			}						\
 		} while (0)
 
-
 /*
  * SJIS-win => wchar
  */
@@ -308,6 +307,7 @@ mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter)
 			s1 = -1;
 		}
 	}
+
 	if (s1 >= 0) {
 		if (s1 < 0x100) { /* latin or kana */
 			CK((*filter->output_function)(s1, filter->data));

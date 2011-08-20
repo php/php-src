@@ -42,7 +42,7 @@
 
 int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 
-static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
+const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
