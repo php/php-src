@@ -55,7 +55,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_euc_kr.c \
 	mbfilter_uhc.c \
 	mbfilter_iso2022_jp_ms.c \
-	mbfilter_iso2022_jp_2004.c \
+	mbfilter_iso2022jp_2004.c \
 	mbfilter_gb18030.c \
 	mbfilter_iso2022_kr.c \
 	mbfilter_cp866.c \
@@ -90,7 +90,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_htmlent.h \
 	mbfilter_hz.h \
 	mbfilter_iso2022_jp_ms.h \
-	mbfilter_iso2022_jp_2004.h \
+	mbfilter_iso2022jp_2004.h \
 	mbfilter_iso2022_kr.h \
 	mbfilter_iso8859_1.h \
 	mbfilter_iso8859_10.h \
