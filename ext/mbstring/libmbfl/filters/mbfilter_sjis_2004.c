@@ -547,7 +547,7 @@ retry:
 		}
 	}
 
-	/* check for major japanese chars */
+	/* check for major japanese chars: U+4E00 - U+9FFF */
 	if (s1 <= 0) {
 		for (k=0; k < uni2jis_tbl_len ;k++) {
 			if (c >= uni2jis_tbl_range[k][0] && c <= uni2jis_tbl_range[k][1]) {
@@ -557,7 +557,7 @@ retry:
 		}
 	}
 	
-	/* check for japanese chars in compressed area */
+	/* check for japanese chars in compressed mapping area: U+1E00 - U+4DBF */
 	if (s1 <= 0 && c >= ucs_c1_jisx0213_min && c <= ucs_c1_jisx0213_max) {
 		k = mbfl_bisec_srch(c, ucs_c1_jisx0213_tbl, ucs_c1_jisx0213_tbl_len);
 		if (k >= 0) {
@@ -574,14 +574,24 @@ retry:
 	}
 
 	if (s1 <= 0) {
+		/* CJK Compatibility Forms: U+FE30 - U+FE4F */
+		if (c == 0xfe45) {
+			s1 = 0x233e;
+		} else if (c == 0xfe46) {
+			s1 = 0x233d;
+		} else if (c >= 0xf91d && c <= 0xf9dc) { 
+			/* CJK Compatibility Ideographs: U+F900 - U+F92A */
+			k = mbfl_bisec_srch2(c, ucs_r2b_jisx0213_cmap_key, ucs_r2b_jisx0213_cmap_len);
+			if (k >= 0) {
+				s1 = ucs_r2b_jisx0213_cmap_val[k];
+			}
+		}
+	}
+
+	if (s1 <= 0) {
 		c1 = c & ~MBFL_WCSPLANE_MASK;
 		if (c1 == MBFL_WCSPLANE_JIS0213) {
 			s1 = c & MBFL_WCSPLANE_MASK;
-		} else {
-			k = mbfl_bisec_srch2(c, jisx0213_uni2sjis_cmap_key, jisx0213_uni2sjis_cmap_len);
-			if (k >= 0) {
-				s1 = jisx0213_uni2sjis_cmap_val[k];
-			}
 		}
 		if (c == 0) {
 			s1 = 0;
