@@ -39,8 +39,6 @@
 #include "unicode_table_jis.h"
 
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
-
-static int mbfl_filt_conv_2022jp_2004_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter);
 
 const mbfl_encoding mbfl_encoding_2022jp_2004 = {
@@ -74,50 +72,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_2022jp_2004_flush
+	mbfl_filt_conv_jis2004_flush
 };
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-static int
-mbfl_filt_conv_2022jp_2004_flush(mbfl_convert_filter *filter)
-{
-	int k, c1, c2, s1, s2;
-
-	k = filter->cache;
-
-	if ((filter->status & 0xf) == 1 && k >= 0 && k <= jisx0213_u2_tbl_len) {
-		s1 = jisx0213_u2_fb_tbl[k];	
-		c1 = (s1 >> 8) & 0x7f;
-		c2 = s1 & 0x7f;
-
-		if ((filter->status & 0xff00) != 0x200) {
-			CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-			CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-			CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-			CK((*filter->output_function)(0x51, filter->data));		/* 'Q' */
-		}
-		filter->status = 0x200;
-		CK((*filter->output_function)(c1, filter->data));
-		CK((*filter->output_function)(c2, filter->data));		
-	}
-	filter->cache = 0;
-
-	/* back to latin */
-	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
-	}	
-
-	filter->status &= 0xff;
-
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
 
 static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
 {
