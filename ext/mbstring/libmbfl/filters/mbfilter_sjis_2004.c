@@ -34,28 +34,12 @@
 #include "mbfilter.h"
 #include "mbfilter_sjis_2004.h"
 
-#define UNICODE_TABLE_JIS2004_DEF
-
 #include "unicode_table_jis2004.h"
 #include "unicode_table_jis.h"
 
 extern const unsigned char mblen_table_sjis[];
 
 static int mbfl_filt_ident_sjis2004(int c, mbfl_identify_filter *filter);
-
-static const int uni2sjis_tbl_range[][2] = {
-	{0x0000, 0x045f},
-	{0x4e00, 0x9fff},
-	{0xff00, 0xffe5},
-	{0xfa0f, 0xfa6a},
-};
-
-static const unsigned short *uni2sjis_tbl[] = {
-	ucs_a1_jisx0213_table,
-	ucs_i_jisx0213_table,
-	ucs_r_jisx0213_table,
-	ucs_r2_jisx0213_table,
-};
 
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
@@ -236,7 +220,7 @@ retry:
 		w1 = (s1 << 8) | s2;
 
 		if (w1 >= 0x2121) {
-
+			/* conversion for combining characters */
 			if ((w1 >= 0x2477 && w1 <= 0x2479) || (w1 >= 0x2479 && w1 <= 0x247B) ||
 				(w1 >= 0x2577 && w1 <= 0x257E) || w1 == 0x2678 || w1 == 0x2B44 ||
 				(w1 >= 0x2B48 && w1 <= 0x2B4F) || (w1 >= 0x2B65 && w1 <= 0x2B66)) {
@@ -248,6 +232,7 @@ retry:
 				}
 			} 
 
+			/* conversion for BMP  */
 			if (w <= 0) {
 				w1 = (s1 - 0x21)*94 + s2 - 0x21;
 				if (w1 >= 0 && w1 < jisx0213_ucs_table_size) {
@@ -255,6 +240,7 @@ retry:
 				}
 			}
 
+			/* conversion for CJK Unified Ideographs ext.B (U+2XXXX) */
 			if (w <= 0) {
 				w1 = (s1 << 8) | s2;
 				k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
@@ -285,7 +271,7 @@ retry:
 		}
 		break;
 
-	case 2:	/* got 0x8e : EUC-JP-2004 */
+	case 2:	/* got 0x8e : EUC-JP-2004 kana */
 		filter->status = 0;
 		if (c > 0xa0 && c < 0xe0) {
 			w = 0xfec0 + c;
@@ -300,41 +286,65 @@ retry:
 		}
 		break;
 
-	case 3:	/* got 0x8f,  X 0213 plane 2 first char : EUC-JP-2004 */
+	case 3:	/* X 0213 plane 2 first char : EUC-JP-2004 (0x8f), ISO-2022-JP-2004 */
 		if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
 			CK((*filter->output_function)(c, filter->data));
 			filter->status = 0;
 		} else {
-			filter->status++;
-			filter->cache = c;
+			if (filter->from->no_encoding == mbfl_no_encoding_eucjp2004) {
+				s1 = c - 0x80;
+			} else {
+				s1 = c;
+			}
+			if (s1 > 0x20 && s1 < 0x80) {
+				filter->cache = s1;
+				filter->status++;
+			} else {
+				if (filter->to->no_encoding == mbfl_no_encoding_eucjp2004) {
+					w = c | 0x8f00;
+					w &= MBFL_WCSGROUP_MASK;
+					w |= MBFL_WCSGROUP_THROUGH;
+				} else {
+					w = c & 0x7f;
+					w &= MBFL_WCSPLANE_MASK;
+					w |= MBFL_WCSPLANE_JIS0213;				
+				}
+				CK((*filter->output_function)(w, filter->data));
+			}
 		}
 		break;
 
-	case 4:	/* got 0x8f,  X 0213 plane 2 second char */
+	case 4:	/* X 0213 plane 2 second char : EUC-JP-2004, ISO-2022-JP-2004 */
 
 		filter->status &= ~0xf;
 		c1 = filter->cache;
-		c2 = c;
 		if (filter->from->no_encoding == mbfl_no_encoding_eucjp2004) {
-			c1 -= 0x80;
-			c2 -= 0x80;
+			c2 = c - 0x80;
+		} else {
+			c2 = c;
 		}
 		s1 = c1 - 0x21;
 		s2 = c2 - 0x21;
 
-		if (s1 >= 0 && s1 < 94 && s2 >= 0 && s2 < 94) {
+		if (((s1 >= 0 && s1 <= 4 && s1 != 1) || s1 == 7 || (s1 >= 11 && s1 <= 14) || 
+			(s1 >= 77 && s1 < 94)) && s2 >= 0 && s2 < 94) {
+			/* calc offset from ku */
 			for (k = 0; k < jisx0213_p2_ofst_len; k++) {
 				if (s1 == jisx0213_p2_ofst[k]-1) {
 					break;
 				} 
 			}			
 			k = k - (jisx0213_p2_ofst[k]-1);
+
+			/* check for japanese chars in BMP */
 			s = (s1 + 94 + k)*94 + s2;
 			if (s >= 0 && s < jisx0213_ucs_table_size) {
 				w = jisx0213_ucs_table[s];
 			} else {
 				w = 0;
 			}
+
+			/* check for japanese chars in CJK Unified Ideographs ext.B (U+2XXXX) */
 			if (w <= 0) {
 				w1 = ((c1 + k + 94) << 8) | c2;
 				k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
@@ -342,11 +352,13 @@ retry:
 					w = jisx0213_jis_u5_tbl[k] + 0x20000;
 				}
 			}
+
 			if (w <= 0) {
 				w = ((c1 & 0x7f) << 8) | (c2 & 0x7f);
 				w &= MBFL_WCSPLANE_MASK;
 				w |= MBFL_WCSPLANE_JIS0213;
 			}
+
 			CK((*filter->output_function)(w, filter->data));			
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
 			CK((*filter->output_function)(c, filter->data));
@@ -365,7 +377,7 @@ retry:
 
 		break;
 
-	case 5:	/* X 0212 */
+	case 5:	/* X 0208 : ISO-2022-JP-2004 */
 		filter->status &= ~0xf;
 		c1 = filter->cache;
 		if (c > 0x20 && c < 0x7f) {
@@ -382,7 +394,7 @@ retry:
 		CK((*filter->output_function)(w, filter->data));
 		break;
 
-	/* ESC */
+	/* ESC : ISO-2022-JP-2004 */
 /*	case 0x06:	*/
 /*	case 0x16:	*/
 /*	case 0x26:	*/
@@ -401,7 +413,7 @@ retry:
 		}
 		break;
 
-	/* ESC $ */
+	/* ESC $ : ISO-2022-JP-2004 */
 /*	case 0x07:	*/
 /*	case 0x17:	*/
 /*	case 0x27:	*/
@@ -423,7 +435,7 @@ retry:
 
 		break;
 
-	/* ESC $ ( */
+	/* ESC $ ( : ISO-2022-JP-2004 */
 /*	case 0x08:	*/
 /*	case 0x18:	*/
 /*	case 0x28:	*/
@@ -444,7 +456,7 @@ retry:
 		}
 		break;
 
-	/* ESC ( */
+	/* ESC ( : ISO-2022-JP-2004 */
 /*	case 0x09:	*/
 /*	case 0x19:	*/
 /*	case 0x29:	*/
@@ -476,8 +488,13 @@ mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter) {
 
 retry:
 
-	if ((filter->status & 0xf)== 0 && ( c == 0x00E6 ||
-					(c >= 0x0254 && c <= 0x02E9) || (c >= 0x304B && c <= 0x31F7))) {
+	/* check for 1st char of combining characters */
+	if ((filter->status & 0xf)== 0 && ( 
+			c == 0x00E6 ||
+			(c >= 0x0254 && c <= 0x02E9) || 
+			(c >= 0x304B && c <= 0x3053) ||
+			(c >= 0x30AB && c <= 0x30C8) ||
+			c == 0x31F7)) {
 		for (k=0;k<jisx0213_u2_tbl_len;k++) {
 			if (c == jisx0213_u2_tbl[2*k]) {
 				filter->status++;
@@ -487,6 +504,7 @@ retry:
 		}
 	}	
 
+	/* check for 2nd char of combining characters */
 	if ((filter->status & 0xf) == 1 && 
 		filter->cache >= 0 && filter->cache <= jisx0213_u2_tbl_len) {
 		k = filter->cache;
@@ -529,23 +547,26 @@ retry:
 		}
 	}
 
+	/* check for major japanese chars */
 	if (s1 <= 0) {
-		for (k=0; k<sizeof(uni2sjis_tbl_range)/(sizeof(int)*2);k++) {
-			if (c >= uni2sjis_tbl_range[k][0] && c <= uni2sjis_tbl_range[k][1]) {
-				s1 = uni2sjis_tbl[k][c-uni2sjis_tbl_range[k][0]];
+		for (k=0; k < uni2jis_tbl_len ;k++) {
+			if (c >= uni2jis_tbl_range[k][0] && c <= uni2jis_tbl_range[k][1]) {
+				s1 = uni2jis_tbl[k][c-uni2jis_tbl_range[k][0]];
 				break;
 			}
 		}
 	}
 	
-	if (c >= ucs_c1_jisx0213_min && c <= ucs_c1_jisx0213_max) {
+	/* check for japanese chars in compressed area */
+	if (s1 <= 0 && c >= ucs_c1_jisx0213_min && c <= ucs_c1_jisx0213_max) {
 		k = mbfl_bisec_srch(c, ucs_c1_jisx0213_tbl, ucs_c1_jisx0213_tbl_len);
 		if (k >= 0) {
 			s1 = ucs_c1_jisx0213_ofst[k] + c - ucs_c1_jisx0213_tbl[2*k];
 		}
 	}
 	
-	if (c >= jisx0213_u5_tbl_min && c <= jisx0213_u5_tbl_max) {
+	/* check for japanese chars in CJK Unified Ideographs ext.B (U+2XXXX) */
+	if (s1 <= 0 && c >= jisx0213_u5_tbl_min && c <= jisx0213_u5_tbl_max) {
 		k = mbfl_bisec_srch2(c - 0x20000, jisx0213_u5_jis_key, jisx0213_u5_tbl_len);
 		if (k >= 0) {
 			s1 = jisx0213_u5_jis_tbl[k];
@@ -649,6 +670,7 @@ mbfl_filt_conv_jis2004_flush(mbfl_convert_filter *filter)
 	int k, c1, c2, s1, s2;
 
 	k = filter->cache;
+	filter->cache = 0;
 
 	if (filter->status == 1 && k >= 0 && k <= jisx0213_u2_tbl_len) {
 		s1 = jisx0213_u2_fb_tbl[k];	
@@ -660,12 +682,29 @@ mbfl_filt_conv_jis2004_flush(mbfl_convert_filter *filter)
 		} else if (filter->to->no_encoding == mbfl_no_encoding_eucjp2004) {
 			s2 = (s1 & 0xff) | 0x80;			
 			s1 = ((s1 >> 8) & 0xff) | 0x80;
+		} else {
+			s2 = s1 & 0x7f;			
+			s1 = (s1 >> 8) & 0x7f;
+			if ((filter->status & 0xff00) != 0x200) {
+				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
+				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
+				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
+				CK((*filter->output_function)(0x51, filter->data));		/* 'Q' */
+			}
+			filter->status = 0x200;
 		}
 
 		CK((*filter->output_function)(s1, filter->data));
 		CK((*filter->output_function)(s2, filter->data));		
 	}
-	filter->cache = 0;
+
+	/* back to latin */
+	if ((filter->status & 0xff00) != 0) {
+		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
+		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
+		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
+	}	
+
 	filter->status = 0;
 
 	if (filter->flush_function != NULL) {
