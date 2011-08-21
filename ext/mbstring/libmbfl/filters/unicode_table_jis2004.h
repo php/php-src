@@ -4585,6 +4585,7 @@ static const int ucs_i_jisx0213_table_min = 0x4E00;
 static const int ucs_i_jisx0213_table_max = 0x4E00 + (sizeof(ucs_i_jisx0213_table)/
 											   sizeof(unsigned short));
 
+/* Halfwidth and Fullwidth Forms */
 static const unsigned short ucs_r_jisx0213_table[] = { // 0xff00 - 0xffe5
 
 /* FF00h */
@@ -4622,6 +4623,7 @@ static const int ucs_r_jisx0213_table_min = 0xFF00;
 static const int ucs_r_jisx0213_table_max = 0xFF00 + (sizeof(ucs_r_jisx0213_table)/
 													  sizeof(unsigned short));
 
+/* CJK Compatibility Ideographs : U+F900 - U+FAFF  */
 static const unsigned short ucs_r2_jisx0213_table[] = { // 0xfa0f - 0xfa6a
 0x2F4B,
 0x2F57,0x4F72,0x0000,0x8679,0x757A,0x775A,0x776F,0x0000,
@@ -4640,8 +4642,47 @@ static const unsigned short ucs_r2_jisx0213_table[] = { // 0xfa0f - 0xfa6a
 static const int ucs_r2_jisx0213_min = 0xFA0F;
 static const int ucs_r2_jisx0213_max = 0xFA6A;
 
-static const unsigned short ucs_c1_jisx0213_tbl[] = {
- // 0x1e00 - 0x4dff
+/* 
+   CJK Compatibility Ideographs: U+F900 - U+FAFF (seperate mapping for U+F9XX)
+*/
+static const unsigned short ucs_r2b_jisx0213_cmap_key[] = {
+	0xf91d,0xf928,0xf929,0xf936,0xf970,0xf9d0,0xf9dc};
+
+static const unsigned short ucs_r2b_jisx0213_cmap_val[] = {
+	0x763b,0x742e,0x754e,0x7b4f,0x7649,0x7e24,0x7d5d};
+
+static const int ucs_r2b_jisx0213_cmap_len = 
+	sizeof(ucs_r2b_jisx0213_cmap_key)/sizeof(unsigned short);
+
+/*
+  U+1E00 - U+4DBF in compresed mapping
+
+  Latin Extended Additional: U+1E00 - U+1EFF
+  Greek Extended: U+1F00 - U+1FFF
+  General Punctuation: U+2000 - U+206F
+  Currency Symbols U+20A0 - U+20CF
+  Combining Diacritical Marks for Symbols: U+20D0 - 20FF
+  Number Forms: U+2150 - U+218F
+  Arrow : U+2190 - U+21FF
+  Mathematical Operations : U+2200 - U+22FF
+  Miscellaneous Technical : U+2300 - U+23FF
+  Enclosed Alphanumerics : U+2460 - U+24FF
+  Box Drawing: U+2500 - U+257F
+  Geometric Shapes: U+25A0 - U+25FF
+  Miscellanuous Symbols : U+2600 - U+26FF
+  Digbats : U+2700 - U+27BF
+  Supplemental Arrows-B: U+2900 - U+297F
+  Miscellaneous Mathematical Symbols-B: U+2980 - U+29FF
+  CJK Symbols and Punctution: U+3000 - U+303F
+  Hiragana (*1) : U+3040 - U+309F
+  Katakana (*1): U+30A0 - U+30FF
+  CJK Strokes: U+31C0-31EF
+  Katakana Phonetic Extensions : U+31F0 - U+31FF
+  CJK Unified Ideographs Extension A: U+3400 - U+4DBF
+
+  *1 U+3000 - U+30FF is also defined in ucs_hk to optimize for speed.
+ */
+static const unsigned short ucs_c1_jisx0213_tbl[] = { // 0x1e00 - 0x4dff
 0x1E3E,0x1E3F,0x1F70,0x1F71,0x1F72,0x1F73,0x2010,0x2010,
 0x2013,0x2013,0x2014,0x2014,0x2016,0x2016,0x2018,0x2019,
 0x201C,0x201D,0x2020,0x2021,0x2022,0x2022,0x2025,0x2025,
@@ -4970,12 +5011,14 @@ static const int jisx0213_u5_tbl_min = 0x2000B;
 static const int jisx0213_u5_tbl_max = 0x2A6B2;
 static const int jisx0213_u5_tbl_len = sizeof(jisx0213_u5_jis_key)/sizeof(unsigned short);
 
+/* combined chars in JIS X 0213 */
 static const unsigned short jisx0213_u2_key[] = {
 	0x2477,0x2478,0x2479,0x247A,0x247B,0x2577,0x2578,0x2579,
 	0x257A,0x257B,0x257C,0x257D,0x257E,0x2678,0x2B44,0x2B48,
 	0x2B49,0x2B4A,0x2B4B,0x2B4C,0x2B4D,0x2B4E,0x2B4F,0x2B65,
 	0x2B66};
 
+/* combined pairs in Unicode */
 static const unsigned short jisx0213_u2_tbl[] = {
 	0x304B,0x309A,0x304D,0x309A,0x304F,0x309A,0x3051,0x309A,
 	0x3053,0x309A,0x30AB,0x309A,0x30AD,0x309A,0x30AF,0x309A,
@@ -4985,6 +5028,7 @@ static const unsigned short jisx0213_u2_tbl[] = {
 	0x0259,0x0301,0x025A,0x0300,0x025A,0x0301,0x02E9,0x02E5,
 	0x02E5,0x02E9};
 
+/* fallback chars for combined chars in Unicode */
 static const unsigned short jisx0213_u2_fb_tbl[] = {
 	0x242B,0x242D,0x242F,0x2431,0x2433,0x252B,0x252D,0x252F,
 	0x2531,0x2533,0x253B,0x2544,0x2548,0x2675,0x295C,0x2B38,
@@ -4992,19 +5036,6 @@ static const unsigned short jisx0213_u2_fb_tbl[] = {
 	0x2B60};
 
 static const int jisx0213_u2_tbl_len = sizeof(jisx0213_u2_key)/sizeof(unsigned short);
-
-static const unsigned short jisx0213_uni2sjis_cmap_key[] = {
-	0xf91d,0xf928,0xf929,0xf936,0xf970,0xf9d0,0xf9dc,
-	0xfe45,0xfe46,0xffe5, 
-};
-
-static const unsigned short jisx0213_uni2sjis_cmap_val[] = {
-	0x763b,0x742e,0x754e,0x7b4f,0x7649,0x7e24,0x7d5d,
-	0x233e,0x233d,0x216f,
-};
-
-static const int jisx0213_uni2sjis_cmap_len = 
-	sizeof(jisx0213_uni2sjis_cmap_key)/sizeof(unsigned short);
 
 
 static const unsigned short jisx0213_p2_ofst[] = {
