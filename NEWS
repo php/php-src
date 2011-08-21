@@ -247,5 +247,6 @@ PHP                                                                        NEWS
 - Fixed PDO objects binary incompatibility. (Dmitry)
 - Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
 - Fixed bug #55450 (Built in web server not accepting file uploads). (Laruence)
+- Fixed bug #55471 (ZTS build broken with dtrace). (Laruence)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
