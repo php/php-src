@@ -2271,7 +2271,7 @@ AC_DEFUN([PHP_SETUP_KERBEROS],[
     KERBEROS_LIBS=`$KRB5_CONFIG --libs gssapi`
     KERBEROS_CFLAGS=`$KRB5_CONFIG --cflags gssapi`
 
-    if test -n "$KERBEROS_LIBS" && test -n "$KERBEROS_CFLAGS"; then
+    if test -n "$KERBEROS_LIBS"; then
       found_kerberos=yes
       PHP_EVAL_LIBLINE($KERBEROS_LIBS, $1)
       PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
