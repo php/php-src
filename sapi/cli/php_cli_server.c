@@ -509,6 +509,12 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 		} else {
 			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", client->addr_str TSRMLS_CC);
 		}
+	} 
+	{
+		char *tmp;
+		spprintf(&tmp, 0, "PHP %s Development Server", PHP_VERSION);
+		sapi_cli_server_register_variable(track_vars_array, "SERVER_SOFTWARE", tmp TSRMLS_CC);
+		efree(tmp);
 	}
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method TSRMLS_CC);
