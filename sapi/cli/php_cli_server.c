@@ -496,6 +496,20 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 			sapi_cli_server_register_variable(track_vars_array, "HTTP_REFERER", *val TSRMLS_CC);
 		}
 	}
+	{
+		char *tmp;
+		if ((tmp = strrchr(client->addr_str, ':'))) {
+			char addr[64], port[8];
+			strncpy(port, tmp + 1, 8);
+			port[7] = '\0';
+			strncpy(addr, client->addr_str, tmp - client->addr_str);
+			addr[tmp - client->addr_str] = '\0';
+			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", addr TSRMLS_CC);
+			sapi_cli_server_register_variable(track_vars_array, "REMOTE_PORT", port TSRMLS_CC);
+		} else {
+			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", client->addr_str TSRMLS_CC);
+		}
+	}
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath TSRMLS_CC);
