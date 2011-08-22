@@ -99,11 +99,11 @@ $start = new DateTime('2010-03-15 18:57:55 EDT');  // sp post, zt2
 examine_diff($end, $start, 'P+0Y0M0DT1H2M4S', 0);
 
 echo "test_time_spring_type2_stsec_type3_dtsec: ";
-$end   = new DateTime('2010-03-15 03:00:00');  // dtsec, zt3
-$start = new DateTime('2010-03-13 01:59:59 EST');  // stsec, zt2
+$end   = new DateTime('2010-03-14 03:00:00');  // dtsec, zt3
+$start = new DateTime('2010-03-14 01:59:59 EST');  // stsec, zt2
 examine_diff($end, $start, 'P+0Y0M0DT0H0M1S', 0);
 
 echo "test_time_spring_type2_dtsec_type3_stsec: ";
-$end   = new DateTime('2010-03-15 01:59:59');  // stsec, zt3
-$start = new DateTime('2010-03-13 03:00:00 EDT');  // dtsec, zt2
+$end   = new DateTime('2010-03-14 01:59:59');  // stsec, zt3
+$start = new DateTime('2010-03-14 03:00:00 EDT');  // dtsec, zt2
 examine_diff($end, $start, 'P-0Y0M0DT0H0M1S', 0);
