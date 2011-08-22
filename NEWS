@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.8
+23 Aug 2011, PHP 5.3.8
 
 - Core:
   . Fixed bug #55439 (crypt() returns only the salt for MD5). (Stas)
