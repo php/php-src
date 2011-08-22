@@ -4,6 +4,9 @@ Bug #5547 (mysql_pconnect leaks file descriptors on reconnect)
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+	die("skip Test doesn't work on Windows");
+}
 ?>
 --INI--
 mysql.max_persistent=30
