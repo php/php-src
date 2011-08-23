@@ -2,10 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
 
-23 Aug 2011, PHP 5.3.8
-
 - Core:
-  . Fixed bug #55439 (crypt() returns only the salt for MD5). (Stas)
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
 
@@ -13,9 +10,15 @@ PHP                                                                        NEWS
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403). (Uwe
     Schindler)
 
+23 Aug 2011, PHP 5.3.8
+
+- Core:
+  . Fixed bug #55439 (crypt() returns only the salt for MD5). (Stas)
+
 - OpenSSL:
-  . Reverted a change in timeout handling restoring PHP 5.3.6 behavior. (Pierre,
-    Andrey, Johannes)
+  . Reverted a change in timeout handling restoring PHP 5.3.6 behavior,
+    as the new behavior caused mysqlnd SSL connections to hang (#55283).
+    (Pierre, Andrey, Johannes)
 
 18 Aug 2011, PHP 5.3.7
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
