@@ -71,15 +71,19 @@ examine_diff('2010-03-01', '2010-01-01', 'P+0Y2M0DT0H0M0S', 59);
 echo "test_bug_49081__20: ";
 examine_diff('2010-03-01', '2010-01-31', 'P+0Y0M29DT0H0M0S', 29);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081__21: ";
 examine_diff('2010-03-27', '2010-01-31', 'P+0Y1M24DT0H0M0S', 55);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081__22: ";
 examine_diff('2010-03-28', '2010-01-31', 'P+0Y1M25DT0H0M0S', 56);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081__23: ";
 examine_diff('2010-03-29', '2010-01-31', 'P+0Y1M26DT0H0M0S', 57);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081__24: ";
 examine_diff('2010-03-30', '2010-01-31', 'P+0Y1M27DT0H0M0S', 58);
 
@@ -168,18 +172,23 @@ examine_diff('2010-01-27', '2010-02-28', 'P-0Y1M1DT0H0M0S', 32);
 echo "test_bug_49081_negative__19: ";
 examine_diff('2010-01-01', '2010-03-01', 'P-0Y2M0DT0H0M0S', 59);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081_negative__20: ";
 examine_diff('2010-01-31', '2010-03-01', 'P-0Y1M1DT0H0M0S', 29);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081_negative__21: ";
 examine_diff('2010-01-31', '2010-03-27', 'P-0Y1M27DT0H0M0S', 55);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081_negative__22: ";
 examine_diff('2010-01-31', '2010-03-28', 'P-0Y1M28DT0H0M0S', 56);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081_negative__23: ";
 examine_diff('2010-01-31', '2010-03-29', 'P-0Y1M29DT0H0M0S', 57);
 
+// NOTE: sub() produces different answer.
 echo "test_bug_49081_negative__24: ";
 examine_diff('2010-01-31', '2010-03-30', 'P-0Y1M30DT0H0M0S', 58);
 

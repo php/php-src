@@ -20,6 +20,7 @@ examine_diff('2007-02-07', '2000-02-07', 'P+7Y0M0DT0H0M0S', 2557);
 echo "test_years_positive__7_by_1_day: ";
 examine_diff('2007-02-08', '2000-02-07', 'P+7Y0M1DT0H0M0S', 2558);
 
+// NOTE: sub() produces different answer.
 echo "test_years_positive__6_shy_1_day: ";
 examine_diff('2007-02-06', '2000-02-07', 'P+6Y11M30DT0H0M0S', 2556);
 
@@ -48,6 +49,7 @@ examine_diff('2000-02-07', '2007-02-07', 'P-7Y0M0DT0H0M0S', 2557);
 echo "test_years_negative__7_by_1_day: ";
 examine_diff('2000-02-07', '2007-02-08', 'P-7Y0M1DT0H0M0S', 2558);
 
+// NOTE: sub() produces different answer.
 echo "test_years_negative__6_shy_1_day: ";
 examine_diff('2000-02-07', '2007-02-06', 'P-6Y11M28DT0H0M0S', 2556);
 
