@@ -4,16 +4,11 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #55439 (crypt() returns only the salt for MD5). (Stas)
-  . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
-    (virsacer at web dot de, Pierre)
-
-- NSAPI SAPI:
-  . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403). (Uwe
-    Schindler)
 
 - OpenSSL:
-  . Reverted a change in timeout handling restoring PHP 5.3.6 behavior. (Pierre,
-    Andrey, Johannes)
+  . Reverted a change in timeout handling restoring PHP 5.3.6 behavior,
+    as the new behavior caused mysqlnd SSL connections to hang (#55283).
+    (Pierre, Andrey, Johannes)
 
 18 Aug 2011, PHP 5.3.7
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
@@ -175,6 +170,10 @@ PHP                                                                        NEWS
   . Fixed bug #55169 (mcrypt_create_iv always fails to gather sufficient random 
     data on Windows). (Pierre)
 
+- MySQL Improved extension:
+  . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
+    (Andrey)
+
 - mysqlnd
   . Fixed crash when using more than 28,000 bound parameters. Workaround is to
     set mysqlnd.net_cmd_buffer_size to at least 9000. (Andrey)
@@ -184,8 +183,6 @@ PHP                                                                        NEWS
 - MySQLi extension:
   . Fixed bug #55283 (SSL options set by mysqli_ssl_set ignored for MySQLi
     persistent connections). (Andrey)
-  . Fixed Bug #54221 (mysqli::get_warnings segfault when used in multi queries).
-    (Andrey)
 
 - OpenSSL extension:
   . openssl_encrypt()/openssl_decrypt() truncated keys of variable length
