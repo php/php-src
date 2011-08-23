@@ -125,8 +125,8 @@ static unsigned int check_mb_utf8_sequence(const char *start, const char *end)
 		if (!((start[1] ^ 0x80) < 0x40 &&
 			(start[2] ^ 0x80) < 0x40 &&
 			(start[3] ^ 0x80) < 0x40 &&
-				(c >= 0xf1 || start[1] >= 0x90) &&
-				(c <= 0xf3 || start[1] <= 0x8F)))
+				(c >= 0xf1 || start[1] >= (char)0x90) &&
+				(c <= 0xf3 || start[1] <= (char)0x8F)))
 		{
 			return 0;	/* invalid utf8 character */
 		}
