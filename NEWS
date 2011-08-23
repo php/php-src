@@ -325,6 +325,7 @@ PHP                                                                        NEWS
 - Fixed bug #55450 (Built in web server not accepting file uploads). (Laruence)
 - Fixed bug #55471 (ZTS build broken with dtrace). (Laruence)
 - Fixed bug #55463 (cli-server missing _SERVER[REMOTE_ADDR]). (Laruence)
+- Fixed bug #55473 (mysql_pconnect leaks file descriptors on reconnect). (Andrey, Laruence)
 
 28 Jul 2011, PHP 5.3.7 RC4
 - Improved core functions:
