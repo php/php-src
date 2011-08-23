@@ -1,5 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+23 Aug 2011, PHP 5.3.8
+
+- Core:
+  . Fixed bug #55439 (crypt() returns only the salt for MD5). (Stas)
+
+- OpenSSL:
+  . Reverted a change in timeout handling restoring PHP 5.3.6 behavior. (Pierre,
+    Andrey, Johannes)
+
 18 Aug 2011, PHP 5.3.7
 - Upgraded bundled SQLite to version 3.7.7.1. (Scott)
 - Upgraded bundled PCRE to version 8.12. (Scott)
