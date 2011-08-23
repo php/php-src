@@ -228,7 +228,7 @@ announcement file should list in detail:
 
 7. Add a short notice to phpweb stating that there is a new release, and
 highlight the major important things (security fixes) and when it is important
-to upgrade.
+to upgrade. Make sure the news entry links to the ChangeLog and downloads.
 
  a. Call php bin/createNewsEntry in your local phpweb checkout
 
