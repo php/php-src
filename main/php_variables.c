@@ -597,7 +597,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 			|| (key_type == HASH_KEY_IS_STRING && zend_hash_find(dest, string_key, string_key_len, (void **) &dest_entry) != SUCCESS)
 			|| (key_type == HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
 			|| Z_TYPE_PP(dest_entry) != IS_ARRAY
-        ) {
+			) {
 			Z_ADDREF_PP(src_entry);
 			if (key_type == HASH_KEY_IS_STRING) {
 				if (!globals_check || string_key_len != sizeof("GLOBALS") || memcmp(string_key, "GLOBALS", sizeof("GLOBALS") - 1)) {
@@ -662,7 +662,7 @@ static zend_bool php_auto_globals_create_post(char *name, uint name_len TSRMLS_D
 	zval *vars;
 
 	if (PG(variables_order) &&
-	    (strchr(PG(variables_order),'P') || strchr(PG(variables_order),'p')) &&
+			(strchr(PG(variables_order),'P') || strchr(PG(variables_order),'p')) &&
 		!SG(headers_sent) &&
 		SG(request_info).request_method &&
 		!strcasecmp(SG(request_info).request_method, "POST")) {
@@ -736,7 +736,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 				zval **argc, **argv;
 	
 				if (zend_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
-				    zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
+					zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
 					Z_ADDREF_PP(argc);
 					Z_ADDREF_PP(argv);
 					zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
