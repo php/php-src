@@ -59,31 +59,45 @@ foreach ($codes as $key => $code) {
 
 echo "\nDone\n";
 ?>
+--XFAIL--
+https://bugs.php.net/bug.php?id=55496
 --EXPECTF--
 --------------
 Snippet no. 1:
 --------------
 Interactive shell
 
-php > Hello world
-php > 
+php > echo 'Hello world';
+Hello world
+php > exit
+
 
 --------------
 Snippet no. 2:
 --------------
 Interactive shell
 
-php > php ' php ' multine
+php > echo 'multine
+php ' single
+php ' quote';
+multine
 single
 quote
-php > 
+php > exit
+
 
 --------------
 Snippet no. 3:
 --------------
 Interactive shell
 
-php > <<< > <<< > <<< > <<< > <<< > Here
+php > echo <<<HEREDOC
+<<< > Here
+<<< > comes
+<<< > the
+<<< > doc
+<<< > HEREDOC;
+Here
 comes
 the
 doc
@@ -94,7 +108,11 @@ Snippet no. 4:
 --------------
 Interactive shell
 
-php > php { php { php > Done
+php > if (0) {
+php {     echo "I'm not there";
+php { }
+php > echo "Done";
+Done
 php > 
 
 --------------
@@ -102,7 +120,11 @@ Snippet no. 5:
 --------------
 Interactive shell
 
-php > php { php { php > I was called!
+php > function a_function_with_some_name() {
+php {     echo "I was called!";
+php { }
+php > a_function_with_some_name();
+I was called!
 php > 
 
 Done
