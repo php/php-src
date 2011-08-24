@@ -1,5 +1,5 @@
 --TEST--
-ldap_ldap_control_paged_results() test (fetching the first page with a pagesize=2)
+ldap_ldap_control_paged_result() test (fetching the first page with a pagesize=2)
 --CREDITS--
 Jean-Sebastien Hedde <jeanseb@au-fil-du.net>
 --SKIPIF--
@@ -17,7 +17,7 @@ insert_dummy_data($link);
 $dn = "dc=my-domain,dc=com";
 $filter = "(cn=*)";
 var_dump(
-	ldap_control_paged_results($link, 2),
+	ldap_control_paged_result($link, 2),
 	$result = ldap_search($link, $dn, $filter, array('cn')),
 	ldap_get_entries($link, $result)
 );
