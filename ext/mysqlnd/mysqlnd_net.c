@@ -120,6 +120,17 @@ MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const schem
 
 	net->packet_no = net->compressed_envelope_packet_no = 0;
 
+	if (net->stream) {
+		/* close before opening a new one */
+		DBG_INF_FMT("Freeing stream. abstract=%p", net->stream->abstract);
+		if (net->persistent) {
+			php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
+		} else {
+			php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE);
+		}
+		net->stream = NULL;
+	}
+
 	if (net->options.timeout_connect) {
 		tv.tv_sec = net->options.timeout_connect;
 		tv.tv_usec = 0;

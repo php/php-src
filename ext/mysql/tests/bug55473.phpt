@@ -15,6 +15,11 @@ mysql.allow_persistent=1
 <?php
 	include "connect.inc";
 
+    if ($socket)
+        $host = sprintf("%s:%s", $host, $socket);
+    else if ($port)
+        $host = sprintf("%s:%s", $host, $port);
+
 	$tmp    = NULL;
 	$link   = NULL;
 

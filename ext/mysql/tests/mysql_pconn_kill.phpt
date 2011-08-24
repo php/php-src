@@ -64,7 +64,9 @@ mysql.max_persistent=2
 
 	mysql_close($plink);
 
-	if (!($plink = mysql_pconnect($myhost, $user, $passwd)))
+	/* mysql_pconnect cound generate a warning when linked against mysqlnd 
+       PHP Warning:  mysql_pconnect(): MySQL server has gone away */  
+	if (!($plink = @mysql_pconnect($myhost, $user, $passwd)))
 		printf("[009] Cannot create new persistent connection, [%d] %s\n", mysql_errno(), mysql_error());
 	mysql_select_db($db, $plink);
 
