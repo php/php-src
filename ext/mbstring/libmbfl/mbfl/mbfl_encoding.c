@@ -65,6 +65,7 @@
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_iso2022jp_2004.h"
+#include "filters/mbfilter_iso2022jp_mobile.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
 #include "filters/mbfilter_euc_jp_2004.h"
@@ -212,6 +213,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_cp850,
 	&mbfl_encoding_jis_ms,
 	&mbfl_encoding_2022jp_2004,
+	&mbfl_encoding_2022jp_kddi,
 	&mbfl_encoding_cp50220,
 	&mbfl_encoding_cp50220raw,
 	&mbfl_encoding_cp50221,

@@ -246,6 +246,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_hz.c
      libmbfl/filters/mbfilter_iso2022_jp_ms.c
      libmbfl/filters/mbfilter_iso2022jp_2004.c
+     libmbfl/filters/mbfilter_iso2022jp_mobile.c
      libmbfl/filters/mbfilter_iso2022_kr.c
      libmbfl/filters/mbfilter_iso8859_1.c
      libmbfl/filters/mbfilter_iso8859_10.c
