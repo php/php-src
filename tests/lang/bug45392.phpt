@@ -6,6 +6,7 @@ display_errors=stderr
 <?php
 echo __LINE__ . "\n";
 ini_set('memory_limit', 100);
+ini_set('log_errors', 1);
 ob_start();
 $i = 0;
 while($i++ < 5000)  {
