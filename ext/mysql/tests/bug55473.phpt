@@ -18,6 +18,11 @@ mysql.allow_persistent=1
 	$tmp    = NULL;
 	$link   = NULL;
 
+ 	if ($socket)
+        $host = sprintf("%s:%s", $host, $socket);
+    else if ($port)
+        $host = sprintf("%s:%s", $host, $port);
+
 	function connect($host, $user, $passwd) {
 		$conn = mysql_pconnect($host, $user, $passwd);
 		if (!$conn)
