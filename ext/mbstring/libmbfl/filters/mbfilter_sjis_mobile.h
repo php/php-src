@@ -59,7 +59,7 @@ int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filt
 int mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter);
 int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter);
 
-int mbfilter_conv_map_tbl(int c, int *w, const int map[][3], int n);
-int mbfilter_conv_r_map_tbl(int c, int *w, const int map[][3], int n);
+int mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n);
+int mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n);
 
 #endif /* MBFL_MBFILTER_SJIS_MOBILE_H */

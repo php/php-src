@@ -22,8 +22,8 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter_ja.c
- * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
+ * The source code included in this files was separated from mbfilter_iso2022_jp_ms.c
+ * by Rui Hirokawa <hirokawa@php.net> on 25 July 2011.
  * 
  */
 
@@ -32,48 +32,48 @@
 #endif
 
 #include "mbfilter.h"
-#include "mbfilter_iso2022_jp_ms.h"
+#include "mbfilter_iso2022jp_mobile.h"
+#include "mbfilter_sjis_mobile.h"
 
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
+extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
+extern int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
 
-static const char *mbfl_encoding_2022jpms_aliases[] = {"ISO2022JPMS", NULL};
-
-const mbfl_encoding mbfl_encoding_2022jpms = {
-	mbfl_no_encoding_2022jpms,
-	"ISO-2022-JP-MS",
+const mbfl_encoding mbfl_encoding_2022jp_kddi = {
+	mbfl_no_encoding_2022jp_kddi,
+	"ISO-2022-JP-MOBILE#KDDI",
 	"ISO-2022-JP",
-	(const char *(*)[])&mbfl_encoding_2022jpms_aliases,
+	NULL,
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_2022jpms = {
-	mbfl_no_encoding_2022jpms,
+const struct mbfl_identify_vtbl vtbl_identify_2022jp_kddi = {
+	mbfl_no_encoding_2022jp_kddi,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022jpms
 };
 
-const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {
-	mbfl_no_encoding_2022jpms,
+const struct mbfl_convert_vtbl vtbl_2022jp_kddi_wchar = {
+	mbfl_no_encoding_2022jp_kddi,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_2022jpms_wchar,
+	mbfl_filt_conv_2022jp_mobile_wchar,
 	mbfl_filt_conv_common_flush
 };
 
-const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
+const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_2022jpms,
+	mbfl_no_encoding_2022jp_kddi,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_2022jpms,
-	mbfl_filt_conv_any_2022jpms_flush
+	mbfl_filt_conv_wchar_2022jp_mobile,
+	mbfl_filt_conv_any_jis_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -85,13 +85,62 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
 #define idxtojis1(c) (((c) / 94) + 0x21)
 #define idxtojis2(c) (((c) % 94) + 0x21)
 
+#define SJIS_ENCODE(c1,c2,s1,s2)	\
+		do {						\
+			s1 = c1;				\
+			s1--;					\
+			s1 >>= 1;				\
+			if ((c1) < 0x5f) {		\
+				s1 += 0x71;			\
+			} else {				\
+				s1 += 0xb1;			\
+			}						\
+			s2 = c2;				\
+			if ((c1) & 1) {			\
+				if ((c2) < 0x60) {	\
+					s2--;			\
+				}					\
+				s2 += 0x20;			\
+			} else {				\
+				s2 += 0x7e;			\
+			}						\
+		} while (0)
+
+#define SJIS_DECODE(c1,c2,s1,s2)	\
+		do {						\
+			s1 = c1;				\
+			if (s1 < 0xa0) {		\
+				s1 -= 0x81;			\
+			} else {				\
+				s1 -= 0xc1;			\
+			}						\
+			s1 <<= 1;				\
+			s1 += 0x21;				\
+			s2 = c2;				\
+			if (s2 < 0x9f) {		\
+				if (s2 < 0x7f) {	\
+					s2++;			\
+				}					\
+				s2 -= 0x20;			\
+			} else {				\
+				s1++;				\
+				s2 -= 0x7e;			\
+			}						\
+		} while (0)
+
+#define CODE2JIS(c1,c2,s1,s2)       \
+	c1 = (s1)/94+0x21;				\
+	c2 = (s1)-94*((c1)-0x21)+0x21;	\
+	s1 = ((c1) << 8) | (c2);		\
+	s2 = 1
+
 /*
- * ISO-2022-JP-MS => wchar
+ * ISO-2022-JP-Mobile => wchar
  */
 int
-mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
+mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, s, w;
+	int c1, c2, s, w, s1, s2, snd;
 
 retry:
 	switch (filter->status & 0xf) {
@@ -99,13 +148,12 @@ retry:
 /*	case 0x10:	 X 0201 latin */
 /*	case 0x20:	 X 0201 kana */
 /*	case 0x80:	 X 0208 */
-/*	case 0xa0:	 UDC */
 	case 0:
 		if (c == 0x1b) {
 			filter->status += 2;
 		} else if (filter->status == 0x20 && c > 0x20 && c < 0x60) {		/* kana */
 			CK((*filter->output_function)(0xff40 + c, filter->data));
-		} else if ((filter->status == 0x80 || filter->status == 0xa0) && c > 0x20 && c < 0x80) {		/* kanji first char */
+		} else if (filter->status == 0x80 && c > 0x20 && c < 0x80) {		/* kanji first char */
 			filter->cache = c;
 			filter->status += 1;
 		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
@@ -120,59 +168,57 @@ retry:
 		break;
 
 /*	case 0x81:	 X 0208 second char */
-/*	case 0xa1:	 UDC second char */
 	case 1:
 		w = 0;
 		filter->status &= ~0xf;
 		c1 = filter->cache;
 		if (c > 0x20 && c < 0x7f) {
 			s = (c1 - 0x21)*94 + c - 0x21;
-			if (filter->status == 0x80) {
-				if (s <= 137) {
-					if (s == 31) {
-						w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-					} else if (s == 32) {
-						w = 0xff5e;			/* FULLWIDTH TILDE */
-					} else if (s == 33) {
-						w = 0x2225;			/* PARALLEL TO */
-					} else if (s == 60) {
-						w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
-					} else if (s == 80) {
-						w = 0xffe0;			/* FULLWIDTH CENT SIGN */
-					} else if (s == 81) {
-						w = 0xffe1;			/* FULLWIDTH POUND SIGN */
-					} else if (s == 137) {
-						w = 0xffe2;			/* FULLWIDTH NOT SIGN */
-					}
+
+			if (s <= 137) {
+				if (s == 31) {
+					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
+				} else if (s == 32) {
+					w = 0xff5e;			/* FULLWIDTH TILDE */
+				} else if (s == 33) {
+					w = 0x2225;			/* PARALLEL TO */
+				} else if (s == 60) {
+					w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
+				} else if (s == 80) {
+					w = 0xffe0;			/* FULLWIDTH CENT SIGN */
+				} else if (s == 81) {
+					w = 0xffe1;			/* FULLWIDTH POUND SIGN */
+				} else if (s == 137) {
+					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
 				}
-				if (w == 0) {
-					if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-						w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-					} else if (s >= 0 && s < jisx0208_ucs_table_size) {
-						w = jisx0208_ucs_table[s];
-					} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {		/* vendor ext2 (89ku - 92ku) */
-						w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
-					} else {
-						w = 0;
-					}
-				}
-				if (w <= 0) {
-					w = (c1 << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0208;
-				}
-				CK((*filter->output_function)(w, filter->data));
-			} else {
-				if (c1 > 0x20 && c1 < 0x35) {
-					w = 0xe000 + (c1 - 0x21)*94 + c - 0x21;
-				}
-				if (w <= 0) {
-					w = (((c1 - 0x21) + 0x7f) << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0208;
-				}
-				CK((*filter->output_function)(w, filter->data));
 			}
+			
+			if (w == 0) {
+				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
+					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
+				} else if (s >= 0 && s < jisx0208_ucs_table_size) {
+					w = jisx0208_ucs_table[s];
+				} else {
+					w = 0;
+				}
+			}
+			
+			if (s >= (84*94) && s < 91*94) {
+				s += 22*94;
+				if (filter->from->no_encoding == mbfl_no_encoding_2022jp_kddi) {
+					w = mbfilter_sjis_emoji_kddi2unicode(s, &snd);
+				}
+				if (w > 0  && snd > 0) {
+					CK((*filter->output_function)(snd, filter->data));
+				}					
+			}
+			
+			if (w <= 0) {
+				w = (c1 << 8) | c;
+				w &= MBFL_WCSPLANE_MASK;
+				w |= MBFL_WCSPLANE_JIS0208;
+				}
+			CK((*filter->output_function)(w, filter->data));
 		} else if (c == 0x1b) {
 			filter->status += 2;
 		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
@@ -190,7 +236,6 @@ retry:
 /*	case 0x12:	*/
 /*	case 0x22:	*/
 /*	case 0x82:	*/
-/*	case 0xa2:	*/
 	case 2:
 		if (c == 0x24) {		/* '$' */
 			filter->status++;
@@ -208,7 +253,6 @@ retry:
 /*	case 0x13:	*/
 /*	case 0x23:	*/
 /*	case 0x83:	*/
-/*	case 0xa3:	*/
 	case 3:
 		if (c == 0x40 || c == 0x42) {	/* '@' or 'B' */
 			filter->status = 0x80;
@@ -227,12 +271,9 @@ retry:
 /*	case 0x14:	*/
 /*	case 0x24:	*/
 /*	case 0x84:	*/
-/*	case 0xa4:	*/
 	case 4:
 		if (c == 0x40 || c == 0x42) {	/* '@' or 'B' */
 			filter->status = 0x80;
-		} else if (c == 0x3f) {			/* '?' */
-			filter->status = 0xa0;
 		} else {
 			filter->status &= ~0xf;
 			CK((*filter->output_function)(0x1b, filter->data));
@@ -247,7 +288,6 @@ retry:
 /*	case 0x15:	*/
 /*	case 0x25:	*/
 /*	case 0x85:	*/
-/*	case 0xa5:	*/
 	case 5:
 		if (c == 0x42) {		/* 'B' */
 			filter->status = 0;
@@ -271,26 +311,11 @@ retry:
 	return c;
 }
 
-static int
-cp932ext3_cp932ext2_jis(int c)
-{
-	int idx;
-
-	idx = sjistoidx(0xfa, 0x40) + c;
-	if (idx >= sjistoidx(0xfa, 0x5c))
-		idx -=  sjistoidx(0xfa, 0x5c) - sjistoidx(0xed, 0x40);
-	else if (idx >= sjistoidx(0xfa, 0x55))
-		idx -=  sjistoidx(0xfa, 0x55) - sjistoidx(0xee, 0xfa);
-	else if (idx >= sjistoidx(0xfa, 0x40))
-		idx -=  sjistoidx(0xfa, 0x40) - sjistoidx(0xee, 0xef);
-	return idxtojis1(idx) << 8 | idxtojis2(idx);
-}
-
 /*
- * wchar => ISO-2022-JP-MS
+ * wchar => ISO-2022-JP-Mobile
  */
 int
-mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
+mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s1, s2;
 
@@ -340,6 +365,7 @@ mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 			s1 = 0x224c;
 		}
 	}
+
 	if ((s1 <= 0) || (s1 >= 0xa1a1 && s2 == 0)) { /* not found or X 0212 */
 		s1 = -1;
 		c1 = 0;
@@ -351,23 +377,23 @@ mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 			}
 			c1++;
 		}
-		if (s1 <= 0) {
-			c1 = 0;
-			c2 = cp932ext3_ucs_table_max - cp932ext3_ucs_table_min;
-			while (c1 < c2) {		/* CP932 vendor ext3 (115ku - 119ku) */
-				if (c == cp932ext3_ucs_table[c1]) {
-					s1 = cp932ext3_cp932ext2_jis(c1);
-					break;
-				}
-				c1++;
-			}
-		}
 		if (c == 0) {
 			s1 = 0;
 		} else if (s1 <= 0) {
 			s1 = -1;
 		}
 	}
+
+ 	if (filter->to->no_encoding == mbfl_no_encoding_2022jp_kddi &&
+		mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0) {
+		CODE2JIS(c1,c2,s1,s2);
+		s1 -= 0x1600;
+ 	}
+
+	if (filter->status == 1 && filter->cache > 0) {
+		return c;
+	}
+
 	if (s1 >= 0) {
 		if (s1 < 0x80) { /* latin */
 			if ((filter->status & 0xff00) != 0) {
@@ -394,134 +420,11 @@ mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 			filter->status = 0x200;
 			CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
 			CK((*filter->output_function)(s1 & 0x7f, filter->data));
-		} else if (s1 < 0x927f) { /* UDC */
-			if ((filter->status & 0xff00) != 0x800) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x24, filter->data));		/* '$' */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x3f, filter->data));		/* '?' */
-			}
-			filter->status = 0x800;
-			CK((*filter->output_function)(((s1 >> 8) - 0x5e) & 0x7f, filter->data));
-			CK((*filter->output_function)(s1 & 0x7f, filter->data));
-		}
+		} 
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			CK(mbfl_filt_conv_illegal_output(c, filter));
 		}
-	}
-
-	return c;
-}
-
-int
-mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter)
-{
-	/* back to latin */
-	if ((filter->status & 0xff00) != 0) {
-		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
-	}
-
-	filter->status &= 0xff;
-
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 X 0201 latin */
-/*	case 0x20:	 X 0201 kana */
-/*	case 0x80:	 X 0208 */
-/*	case 0xa0:	 X UDC */
-	case 0:
-		if (c == 0x1b) {
-			filter->status += 2;
-		} else if ((filter->status == 0x80 || filter->status == 0xa0) && c > 0x20 && c < 0x80) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x81:	 X 0208 second char */
-/*	case 0xa1:	 UDC second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c == 0x1b) {
-			goto retry;
-		} else if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else if (c == 0x28) {		/* '(' */
-			filter->status += 3;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x28) {     /* '(' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ ( */
-	case 4:
-		if (c == 0x40 || c == 0x42) {		/* '@' or 'B' */
-			filter->status = 0x80;
-		} else if (c == 0x3f) {		/* '?' */
-			filter->status = 0xa0;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC ( */
-	case 5:
-		if (c == 0x42) {		/* 'B' */
-			filter->status = 0;
-		} else if (c == 0x4a) {		/* 'J' */
-			filter->status = 0;
-		} else if (c == 0x49) {		/* 'I' */
-			filter->status = 0x20;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
 	}
 
 	return c;

@@ -40,6 +40,7 @@
 
 #include "emoji2uni.h"
 
+extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
@@ -149,14 +150,14 @@ static const char nflags_s[10][2] = {"CN","DE","ES","FR","GB","IT","JP","KR","RU
 static const int nflags_code_kddi[10] = {0x2549, 0x2546, 0x24c0, 0x2545, 0x2548, 0x2547, 0x2750, 0x254a, 0x24c1, 0x27f7};
 static const int nflags_code_sb[10] = {0x2b0a, 0x2b05, 0x2b08, 0x2b04, 0x2b07, 0x2b06, 0x2b02, 0x2b0b, 0x2b09, 0x2b03};
 
-const int mbfl_docomo2uni_pua[4][3] = {
+const unsigned short mbfl_docomo2uni_pua[4][3] = {
 	{0x28c2, 0x2929, 0xe63e},
 	{0x2930, 0x2932, 0xe6ac},
 	{0x2935, 0x293e, 0xe6b1},
 	{0x2952, 0x29db, 0xe6ce},	
 };
 
-const int mbfl_kddi2uni_pua[6][3] = {
+const unsigned short mbfl_kddi2uni_pua[6][3] = {
 	{0x26ec, 0x2838, 0xe468},
 	{0x284c, 0x2863, 0xe5b5},
 	{0x24b8, 0x24ca, 0xe5cd},
@@ -165,7 +166,7 @@ const int mbfl_kddi2uni_pua[6][3] = {
 	{0x2546, 0x25c0, 0xeb0e},	
 };
 
-const int mbfl_sb2uni_pua[6][3] = {
+const unsigned short mbfl_sb2uni_pua[6][3] = {
 	{0x27a9, 0x2802, 0xe101},
 	{0x2808, 0x285a, 0xe201},
 	{0x2921, 0x297a, 0xe001},
@@ -174,7 +175,7 @@ const int mbfl_sb2uni_pua[6][3] = {
 	{0x2af8, 0x2b2e, 0xe501},
 };
 
-const int mbfl_kddi2uni_pua_b[8][3] = {
+const unsigned short mbfl_kddi2uni_pua_b[8][3] = {
 	{0x24b8, 0x24f6, 0xec40},
 	{0x24f7, 0x2573, 0xec80},
 	{0x2574, 0x25b2, 0xed40},
@@ -239,7 +240,7 @@ const int mbfl_kddi2uni_pua_b[8][3] = {
 	s2 = 1
 
 int
-mbfilter_conv_map_tbl(int c, int *w, const int map[][3], int n)
+mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	int i, match = 0;
 	
@@ -254,7 +255,7 @@ mbfilter_conv_map_tbl(int c, int *w, const int map[][3], int n)
 }
 
 int
-mbfilter_conv_r_map_tbl(int c, int *w, const int map[][3], int n)
+mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	int i, match = 0;
 	
@@ -269,21 +270,6 @@ mbfilter_conv_r_map_tbl(int c, int *w, const int map[][3], int n)
 }
 
 int
-mbfilter_conv_seq_tbl(int c, int *w, const int *key, const int *val, int n)
-{
-	int i, match = 0;
-	for (i = 0; i< n; i++) {
-		if (c == key[i]) {
-			*w = val[i];
-			match = 1;
-			break;
-		}
-	}
-	return match;
-}
-
-
-int
 mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 {
 	int w = s;
@@ -293,14 +279,23 @@ mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 			s != mb_tbl_code2uni_docomo1_min + 0x00a3) {
 			w =  0x20E3; 	
 			*snd = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min]; 
+			if (*snd > 0xf000) {
+				*snd += 0x10000;
+			}
 		} else {
 			w = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min];
+			if (w > 0xf000) {
+				w += 0x10000;
+			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+				w += 0xf0000;
+			}
 			*snd = 0;
 			if (!w) {
 				w = s;
 			}
 		}
 	}
+
 	return w;
 }
 
@@ -324,6 +319,11 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			*snd = 0x0023; w = 0x20E3;
 		} else {
 			w = mb_tbl_code2uni_kddi1[si];
+			if (w > 0xf000) {
+				w += 0x10000;
+			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+				w += 0xf0000;
+			}			
 		}
 	} else if (s >= mb_tbl_code2uni_kddi2_min && s <= mb_tbl_code2uni_kddi2_max) {
 		si = s - mb_tbl_code2uni_kddi2_min;
@@ -337,6 +337,11 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			*snd = 0x0030; w = 0x20E3;
 		} else {
 			w = mb_tbl_code2uni_kddi2[si];
+			if (w > 0xf000) {
+				w += 0x10000;
+			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+				w += 0xf0000;
+			}			
 		}
 	}
 	return w;
@@ -353,13 +358,26 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 		si = s - mb_tbl_code2uni_sb1_min;
 		if (si == 0x006e || (si >= 0x007a && si <= 0x0083)) {
 			*snd =  mb_tbl_code2uni_sb1[si];
+			if (*snd > 0xf000) {
+				*snd += 0x10000;
+			}
 			w = 0x20E3;
 		} else {
 			w = mb_tbl_code2uni_sb1[si];    
+			if (w > 0xf000) {
+				w += 0x10000;
+			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+				w += 0xf0000;
+			}			
 		}
 	} else if (s >= mb_tbl_code2uni_sb2_min && s <= mb_tbl_code2uni_sb2_max) {
 		si = s - mb_tbl_code2uni_sb2_min;
 		w = mb_tbl_code2uni_sb2[si];
+		if (w > 0xf000) {
+			w += 0x10000;
+		} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			w += 0xf0000;
+		}		
 	} else if (s >= mb_tbl_code2uni_sb3_min && s <= mb_tbl_code2uni_sb3_max) {
 		si = s - mb_tbl_code2uni_sb3_min;
 		if (si >= 0x0069 && si <= 0x0072) {
@@ -367,6 +385,11 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			*snd = NFLAGS(nflags_s[c][0]); w = NFLAGS(nflags_s[c][1]);
 		} else {
 			w = mb_tbl_code2uni_sb3[si];
+			if (w > 0xf000) {
+				w += 0x10000;
+			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+				w += 0xf0000;
+			}			
 		}
 	}
 	return w;
@@ -408,11 +431,23 @@ mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 		} else if (c == 0x00AE) {
 			*s1 = 0x29ba; match = 1;
 		} else if (c >= mb_tbl_uni_docomo2code2_min && c <= mb_tbl_uni_docomo2code2_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_docomo2code2_key, mb_tbl_uni_docomo2code2_value,
-										  sizeof(mb_tbl_uni_docomo2code2_key)/sizeof(int));
+			i = mbfl_bisec_srch2(c, mb_tbl_uni_docomo2code2_key, mb_tbl_uni_docomo2code2_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_docomo2code2_value[i];
+				match = 1;
+			}
 		} else if (c >= mb_tbl_uni_docomo2code3_min && c <= mb_tbl_uni_docomo2code3_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_docomo2code3_key, mb_tbl_uni_docomo2code3_value,
-										  sizeof(mb_tbl_uni_docomo2code3_key)/sizeof(int));
+			i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_docomo2code3_key, mb_tbl_uni_docomo2code3_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_docomo2code3_value[i];
+				match = 1;
+			}			
+		} else if (c >= mb_tbl_uni_docomo2code5_min && c <= mb_tbl_uni_docomo2code5_max) {
+			i = mbfl_bisec_srch2(c - 0xf0000, mb_tbl_uni_docomo2code5_key, mb_tbl_uni_docomo2code5_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_docomo2code5_val[i];
+				match = 1;
+			} 			
 		}
 	}
 
@@ -467,12 +502,24 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 		} else if (c == 0x00AE) {
 			*s1 = 0x27dd; match = 1;
 		} else if (c >= mb_tbl_uni_kddi2code2_min && c <= mb_tbl_uni_kddi2code2_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_kddi2code2_key, mb_tbl_uni_kddi2code2_value,
-										  sizeof(mb_tbl_uni_kddi2code2_key)/sizeof(int));
+			i = mbfl_bisec_srch2(c, mb_tbl_uni_kddi2code2_key, mb_tbl_uni_kddi2code2_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_kddi2code2_value[i];
+				match = 1;
+			}
 		} else if (c >= mb_tbl_uni_kddi2code3_min && c <= mb_tbl_uni_kddi2code3_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_kddi2code3_key, mb_tbl_uni_kddi2code3_value,
-										  sizeof(mb_tbl_uni_kddi2code3_key)/sizeof(int));
-		}
+			i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_kddi2code3_key, mb_tbl_uni_kddi2code3_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_kddi2code3_value[i];
+				match = 1;
+			}
+		} else if (c >= mb_tbl_uni_kddi2code5_min && c <= mb_tbl_uni_kddi2code5_max) {
+			i = mbfl_bisec_srch2(c - 0xf0000, mb_tbl_uni_kddi2code5_key, mb_tbl_uni_kddi2code5_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_kddi2code5_val[i];
+				match = 1;
+			} 			
+		}		
 	}
 	
 	return match;
@@ -525,14 +572,25 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 		} else if (c == 0x00AE) {
 			*s1 = 0x2856; match = 1;
 		} else if (c >= mb_tbl_uni_sb2code2_min && c <= mb_tbl_uni_sb2code2_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_sb2code2_key, mb_tbl_uni_sb2code2_value,
-										  sizeof(mb_tbl_uni_sb2code2_key)/sizeof(int));
+			i = mbfl_bisec_srch2(c, mb_tbl_uni_sb2code2_key, mb_tbl_uni_sb2code2_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_sb2code2_value[i];
+				match = 1;
+			}
 		} else if (c >= mb_tbl_uni_sb2code3_min && c <= mb_tbl_uni_sb2code3_max) {
-			match = mbfilter_conv_seq_tbl(c, s1, mb_tbl_uni_sb2code3_key, mb_tbl_uni_sb2code3_value,
-										  sizeof(mb_tbl_uni_sb2code3_key)/sizeof(int));
-		}
+			i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_sb2code3_key, mb_tbl_uni_sb2code3_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_sb2code3_value[i];
+				match = 1;
+			}
+		} else if (c >= mb_tbl_uni_sb2code5_min && c <= mb_tbl_uni_sb2code5_max) {
+			i = mbfl_bisec_srch2(c - 0xf0000, mb_tbl_uni_sb2code5_key, mb_tbl_uni_sb2code5_len);
+			if (i >= 0) {
+				*s1 = mb_tbl_uni_sb2code5_val[i];
+				match = 1;
+			} 			
+		}		
 	}
-	
 	return match;
 }
 
@@ -545,6 +603,7 @@ mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 	int c1, s, s1, s2, w;
 	int snd = 0;
 
+retry:
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80) {	/* latin */
@@ -632,34 +691,37 @@ mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;
+	/* ESC : Softbank Emoji */
 	case 2:
 		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb && 
 			c == 0x24) {
 				filter->cache = c;
-				filter->status = 3;
+				filter->status++;
 		} else {
 			filter->cache = 0;
 			filter->status = 0;
 			CK((*filter->output_function)(0x1b, filter->data));
+			goto retry;
 		}
 		break;
 
+	/* ESC $ : Softbank Emoji */
 	case 3:
-		/* Softbank Emoji: ESC $ [GEFOPQ] X 0x0f */
 		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb && 
 			((c >= 0x45 && c <= 0x47) || (c >= 0x4f && c <= 0x51))) {
 				filter->cache = c;
-				filter->status = 4;
+				filter->status++;
 		} else {
 			filter->cache = 0;
 			filter->status = 0;
 			CK((*filter->output_function)(0x1b, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
+			goto retry;
 		}
 		break;
 
+	/* ESC [GEFOPQ] : Softbank Emoji */
 	case 4:
-		/* Softbank Emoji Web code: ESC $ [GEFOPQ] X 0x0f */
 		w = 0;
 		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb) {
 			c1 = filter->cache;
@@ -684,10 +746,10 @@ mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 				}
 				s  = (s1 - 0x21)*94 + s2 - 0x21;
 				w = mbfilter_sjis_emoji_sb2unicode(s, &snd);
-				if (w > 0  && snd > 0) {
-					CK((*filter->output_function)(snd, filter->data));
-				}					
 				if (w > 0) {
+					if (snd > 0) {
+						CK((*filter->output_function)(snd, filter->data));
+					}					
 					CK((*filter->output_function)(w, filter->data));
 				}
 			}
@@ -697,12 +759,10 @@ mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			c1 = filter->cache;
 			filter->cache = 0;
 			filter->status = 0;
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(0x1b, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(c1 & 0xff, filter->data));
-			CK((*filter->output_function)(w, filter->data));
+			goto retry;
 		}
 		break;
 

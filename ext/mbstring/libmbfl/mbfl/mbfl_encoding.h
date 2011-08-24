@@ -84,6 +84,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_2022jp,
 	mbfl_no_encoding_2022jp_2004,
+	mbfl_no_encoding_2022jp_kddi,
 	mbfl_no_encoding_2022jpms,
 	mbfl_no_encoding_gb18030,
 	mbfl_no_encoding_cp1252,

@@ -59,6 +59,7 @@
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_iso2022jp_2004.h"
+#include "filters/mbfilter_iso2022jp_mobile.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_2004.h"
 #include "filters/mbfilter_euc_jp_win.h"
@@ -132,6 +133,8 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_2022jpms,
 	&vtbl_2022jp_2004_wchar,
 	&vtbl_wchar_2022jp_2004,
+	&vtbl_2022jp_kddi_wchar,
+	&vtbl_wchar_2022jp_kddi,
 	&vtbl_eucjpwin_wchar,
 	&vtbl_wchar_eucjpwin,
 	&vtbl_eucjp2004_wchar,
