@@ -16,6 +16,13 @@ SNMP_COMMUNITY : community name
 SNMP_COMMUNITY_WRITE : community used for write tests (snmpset()).
 SNMP_MIBDIR : Directory containing MIBS
 
+To run test suite you may use this command (presuming that you pwd is where
+this README file is located):
+> make -C ../../.. test TESTS="`cd ../../..; /bin/ls -1 ext/snmp/tests/*.phpt | xargs echo`"
+Running run-tests.php directly will clear your environment and therefore
+tests will fail if your SNMP configuration does not fit into default values
+specified in snmp_include.inc.
+
 ** Configuring the SNMPD server **
 
 On Linux/FreeBSD
