@@ -1407,7 +1407,7 @@ MYSQLND_METHOD(mysqlnd_conn, kill)(MYSQLND * conn, unsigned int pid TSRMLS_DC)
 	char buff[4];
 
 	DBG_ENTER("mysqlnd_conn::kill");
-	DBG_INF_FMT("conn=%llu pid=%lu", conn->thread_id, pid);
+	DBG_INF_FMT("conn=%llu pid=%u", conn->thread_id, pid);
 
 	int4store(buff, pid);
 
