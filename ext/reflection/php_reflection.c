@@ -4129,6 +4129,25 @@ ZEND_METHOD(reflection_class, newInstance)
 }
 /* }}} */
 
+/* {{{ proto public stdclass ReflectionClass::newInstanceWithoutConstructor()
+   Returns an instance of this class without invoking its constructor */
+ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
+{
+	zval *retval_ptr = NULL;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	METHOD_NOTSTATIC(reflection_class_ptr);
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (ce->create_object != NULL) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class that cannot be instantiated without invoking its constructor", ce->name);
+	}
+
+	object_init_ex(return_value, ce);
+}
+/* }}} */
+
 /* {{{ proto public stdclass ReflectionClass::newInstanceArgs([array args])
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstanceArgs)
@@ -5694,6 +5713,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstanceWithoutConstructor, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_newInstanceArgs, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
@@ -5742,6 +5764,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstance, arginfo_reflection_class_isInstance, 0)
 	ZEND_ME(reflection_class, newInstance, arginfo_reflection_class_newInstance, 0)
+	ZEND_ME(reflection_class, newInstanceWithoutConstructor, arginfo_reflection_class_newInstanceWithoutConstructor, 0)
 	ZEND_ME(reflection_class, newInstanceArgs, arginfo_reflection_class_newInstanceArgs, 0)
 	ZEND_ME(reflection_class, getParentClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isSubclassOf, arginfo_reflection_class_isSubclassOf, 0)
