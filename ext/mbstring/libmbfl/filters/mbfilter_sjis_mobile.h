@@ -47,6 +47,11 @@ extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi;
 extern const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb;
 
+extern const unsigned short mbfl_docomo2uni_pua[4][3];
+extern const unsigned short mbfl_kddi2uni_pua[6][3];
+extern const unsigned short mbfl_sb2uni_pua[6][3];
+extern const unsigned short mbfl_kddi2uni_pua_b[8][3];
+
 int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter);
