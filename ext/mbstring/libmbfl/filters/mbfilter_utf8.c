@@ -116,7 +116,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = 0;
 			if ((status == 0x10 && s >= 0x80) ||
 			    (status == 0x21 && s >= 0x800 && (s < 0xd800 || s > 0xdfff)) ||
-			    (status == 0x32 && s >= 0x10000 && s < 0x200000)) {
+			    (status == 0x32 && s >= 0x10000 && s < 0x110000)) {
 				CK((*filter->output_function)(s, filter->data));
 			} else {
 				w = s & MBFL_WCSGROUP_MASK;

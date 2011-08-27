@@ -207,7 +207,7 @@ int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = 0;
 			if ((status == 0x10 && s >= 0x80) ||
 			    (status == 0x21 && s >= 0x800 && (s < 0xd800 || s > 0xdfff)) ||
-			    (status == 0x32 && s >= 0x10000 && s < 0x200000)) {
+			    (status == 0x32 && s >= 0x10000 && s < 0x110000)) {
 				
 				if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo &&
 					mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
