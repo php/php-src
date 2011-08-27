@@ -24,8 +24,7 @@ $a = 'This gets echoed twice';
 <%= 'so should this' %>
 
 
-<?= $a?>
-
+This gets echoed twice
 <%= $a%>
 
 <? $b=3; ?>
