@@ -87,10 +87,7 @@ bool(false)
 Multiple OID
 
 Warning: snmpget(): Invalid object identifier: .1.3.6.1.2.1...1.1.0 in %s on line %d
-array(1) {
-  ["%s"]=>
-  %unicode|string%(%d) "%d"
-}
+bool(false)
 noSuchName checks
 Single OID
 
