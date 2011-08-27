@@ -744,12 +744,46 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 
 	while (keepwalking) {
 		keepwalking = 0;
-		if (st & (SNMP_CMD_GET | SNMP_CMD_GETNEXT)) {
-			pdu = snmp_pdu_create((st & SNMP_CMD_GET) ? SNMP_MSG_GET : SNMP_MSG_GETNEXT);
+		if (st & SNMP_CMD_WALK) {
+			if (session->version == SNMP_VERSION_1) {
+				pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+			} else {
+				pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
+				pdu->non_repeaters = objid_query->non_repeaters;
+				pdu->max_repetitions = objid_query->max_repetitions;
+			}
+			snmp_add_null_var(pdu, name, name_length);
+		} else {
+			if (st & SNMP_CMD_GET) {
+				pdu = snmp_pdu_create(SNMP_MSG_GET);
+			} else if (st & SNMP_CMD_GETNEXT) {
+				pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+			} else if (st & SNMP_CMD_SET) {
+				pdu = snmp_pdu_create(SNMP_MSG_SET);
+			} else {
+				snmp_close(ss);
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown SNMP command (internals)");
+				RETVAL_FALSE;
+				return;
+			}
 			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
 				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
 				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
+					snmp_free_pdu(pdu);
+					snmp_close(ss);
+					RETVAL_FALSE;
+					return;
+				}
+				if (st & SNMP_CMD_SET) {
+					if ((snmp_errno = snmp_add_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
+						snprint_objid(buf, sizeof(buf), objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
+						snmp_free_pdu(pdu);
+						snmp_close(ss);
+						RETVAL_FALSE;
+						return;
+					}
 				} else {
 					snmp_add_null_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
 				}
@@ -760,36 +794,6 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				RETVAL_FALSE;
 				return;
 			}
-		} else if (st & SNMP_CMD_SET) {
-			pdu = snmp_pdu_create(SNMP_MSG_SET);
-			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
-				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
-				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
-					snmp_free_pdu(pdu);
-					snmp_close(ss);
-					RETVAL_FALSE;
-					return;
-				} else {
-					if ((snmp_errno = snmp_add_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
-						snprint_objid(buf, sizeof(buf), objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
-						snmp_free_pdu(pdu);
-						snmp_close(ss);
-						RETVAL_FALSE;
-						return;
-					}
-				}
-			}
-		} else if (st & SNMP_CMD_WALK) {
-			if (session->version == SNMP_VERSION_1) {
-				pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-			} else {
-				pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
-				pdu->non_repeaters = objid_query->non_repeaters;
-				pdu->max_repetitions = objid_query->max_repetitions;
-			}
-			snmp_add_null_var(pdu, name, name_length);
 		}
 
 retry:
