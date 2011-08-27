@@ -37,10 +37,6 @@
 #include "mbfilter_sjis_mobile.h"
 
 extern int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter);
-extern const int mbfl_docomo2uni_pua[4][3];
-extern const int mbfl_kddi2uni_pua[6][3];
-extern const int mbfl_sb2uni_pua[6][3];
-extern const int mbfl_kddi2uni_pua_b[8][3];
 
 extern const unsigned char mblen_table_utf8[];
 
