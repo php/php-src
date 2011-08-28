@@ -37,6 +37,8 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+#include "sjis_mac2uni.h"
+
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
@@ -123,134 +125,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 			}						\
 		} while (0)
 
-#include "sjis_mac2uni.h"
-
-static const int code_tbl[][3] = {
-	{0x02f0, 0x0303, 0x2460},
-	{0x030e, 0x0321, 0x2474},
-	{0x032c, 0x0334, 0x2776},
-	{0x0341, 0x0349, 0x2488},
-	{0x034e, 0x0359, 0x2160},
-	{0x0362, 0x036d, 0x2170},
-	{0x038a, 0x03a3, 0x249c},
-};
-
-static const int code_ofst_tbl[] [2]= {
-	{0x03ac, 0x03c9},
-	{0x0406, 0x0420},
-	{0x0432, 0x0441},
-	{0x0468, 0x0480},
-	{0x04b8, 0x04e8},
-	{0x050c, 0x0551},
-	{0x1ed9, 0x1f18},
-	{0x1ff2, 0x20a5},
-};
-
-static const int *code_map[] = {
-	sjis_mac2wchar1, sjis_mac2wchar2, sjis_mac2wchar3, sjis_mac2wchar4,
-	sjis_mac2wchar5, sjis_mac2wchar6, sjis_mac2wchar7, sjis_mac2wchar8};
-
-static const int code_tbl_m[][6] = {
-	{0x0340, 0xf860, 0x0030, 0x002e, 0x0000, 0x0000},
-	{0x03c9, 0xf860, 0x0054, 0x0042, 0x0000, 0x0000},
-	{0x035c, 0xf860, 0x0058, 0x0056, 0x0000, 0x0000},
-	{0x0370, 0xf860, 0x0078, 0x0076, 0x0000, 0x0000},
-	{0x0439, 0xf860, 0x2193, 0x2191, 0x0000, 0x0000},
-	{0x0409, 0xf861, 0x0046, 0x0041, 0x0058, 0x0000},
-	{0x035b, 0xf861, 0x0058, 0x0049, 0x0056, 0x0000},
-	{0x036f, 0xf861, 0x0078, 0x0069, 0x0076, 0x0000},
-	{0x035a, 0xf862, 0x0058, 0x0049, 0x0049, 0x0049},
-	{0x036e, 0xf862, 0x0078, 0x0069, 0x0069, 0x0069},
-	{0x0522, 0xf862, 0x6709, 0x9650, 0x4f1a, 0x793e},
-	{0x0523, 0xf862, 0x8ca1, 0x56e3, 0x6cd5, 0x4eba},
-};
-
-static const int s_form_tbl[] = {
-	0x2010,0x2016,0x2026,
-	0x3001,0x3002,0x301c,0x3041,0x3043,0x3045,0x3047,0x3049,
-	0x3063,0x3083,0x3085,0x3087,0x308e,0x30a1,0x30a3,0x30a5,
-	0x30a7,0x30a9,0x30c3,0x30e3,0x30e5,0x30e7,0x30ee,0x30f5,
-	0x30f6,0x30fc,0xff1d,0xff3b,0xff3d,0xff5c,0xffe3, // vertical f87e (34)
-	0x2026,0xff47,0xff4d, // halfwidth f87f (3)
-	0x5927,0x5c0f,0x63a7, // enclosing circle 20dd (3)
-	0x21e6,0x21e7,0x21e8,0x21e9, // black arrow f87a (4)
-};
-
-static const int s_form_sjis_tbl[] = {
-	0xeb5d,0xeb61,0xeb63,
-	0xeb41,0xeb42,0xeb60,0xec9f,0xeca1,0xeca3,0xeca5,0xeca7,
-	0xecc1,0xece1,0xece3,0xece5,0xecec,0xed40,0xed42,0xed44,
-	0xed46,0xed48,0xed62,0xed83,0xed85,0xed87,0xed8e,0xed95,
-	0xed96,0xeb5b,0xeb81,0xeb6d,0xeb6e,0xeb62,0xeb50, // vertical
-	0x00ff,0x864b,0x8645, // halfwidth
-	0x8791,0x8792,0x879d, // enclosing circle
-	0x86d4,0x86d5,0x86d3,0x86d6, // black arrow
-};
-
-static const int s_form_sjis_fallback_tbl[] = {
-	0x815d,0x8161,0x8163,
-	0x8141,0x8142,0x8160,0x829f,0x82a1,0x82a3,0x82a5,0x82a7,
-	0x82c1,0x82e1,0x82e3,0x82e5,0x82ec,0x8340,0x8342,0x8344,
-	0x8346,0x8348,0x8362,0x8383,0x8385,0x8387,0x838e,0x8395,
-	0x8396,0x815b,0x8181,0x816d,0x816e,0x8162,0x8150, // vertical
-	0x815d,0x8287,0x828d, // halfwidth
-	0x91e5,0x8fac,0x8d54, // enclosing circle
-	0x86d0,0x86d1,0x86cf,0x86d2, // arrow
-};
-
-static const int wchar2sjis_mac_r_tbl[][3] = {
-	{0x2160, 0x216b, 0x034e},
-	{0x2170, 0x217b, 0x0362},
-	{0x2460, 0x2473, 0x02f0},
-	{0x2474, 0x2487, 0x030e},
-	{0x2488, 0x2490, 0x0341},
-	{0x249c, 0x24b5, 0x038a},
-	{0x2776, 0x277e, 0x032c},
-	{0x30f7, 0x30fa, 0x054e},
-	{0x32a4, 0x32a9, 0x04ba},
-};
-
-static const unsigned short wchar2sjis_mac_r_map[][2] = {
-	{0x2660, 0x2667},
-	{0x322a, 0x3243},
-	{0x3296, 0x329e},
-	{0x3300, 0x33d4},
-	{0xfe30, 0xfe44},
-};
-
-static const int *wchar2sjis_mac_code_map[] = {
-	wchar2sjis_mac4, wchar2sjis_mac7, wchar2sjis_mac8, wchar2sjis_mac9, wchar2sjis_mac10};
-
-static const int wchar2sjis_mac_wchar_tbl[][2] = {
-	{0x2109, 0x03c2},
-	{0x2110, 0x21ef5},
-	{0x2113, 0x03bc},
-	{0x2116, 0x0406},
-	{0x2121, 0x0408},
-	{0x21c4, 0x0437},
-	{0x21c5, 0x0438},
-	{0x21c6, 0x0436},
-	{0x21e6, 0x043b},
-	{0x21e7, 0x043c},
-	{0x21e8, 0x043a},
-	{0x21e9, 0x043d},
-	{0x221f, 0x0525},
-	{0x222e, 0x0524},
-	{0x22bf, 0x0526},
-	{0x260e, 0x041f},
-	{0x261c, 0x0433},
-	{0x261d, 0x0434},
-	{0x261e, 0x0432},
-	{0x261f, 0x0435},
-	{0x3004, 0x0420},
-	{0x301d, 0x0538},
-	{0x301f, 0x0539},
-	{0x3020, 0x041e},
-	{0x3094, 0x054c},
-};
-
-
-
 /*
  * SJIS-mac => wchar
  */
@@ -328,7 +202,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 
 			if (w == 0) {
 
-				for (i=0; i<12; i++) {
+				for (i=0; i<code_tbl_m_len; i++) {
 					if (s == code_tbl_m[i][0]) {
 						if (code_tbl_m[i][1] == 0xf860) {
 							n = 4;
@@ -350,21 +224,22 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 				for (i=0; i<8; i++) {
 					if (s >= code_ofst_tbl[i][0] && s <= code_ofst_tbl[i][1]) {
 						w = code_map[i][s - code_ofst_tbl[i][0]];
-						if (w >= 0x10000) {
-							CK((*filter->output_function)(w & 0xffff, filter->data));
-							if (w & 0x10000) {
-								w = 0xf87a;
-							} else if (w & 0x20000) {
-								w = 0xf87e;
-							} else if (w & 0x40000) {
-								w = 0xf87f;
-							} else if (w & 0x80000) {
-								w = 0x20dd;
-							} else {
-								w = 0;
-							}
+						s2 = 0;
+						if (s >= 0x043e && s <= 0x0441) {
+							s2 = 0xf87a;
+						} else if (s == 0x03b1 || s == 0x03b7) {
+							s2 = 0xf87f;
+						} else if (s == 0x04b8 || s == 0x04b9 || s == 0x04c4) {
+							s2 = 0x20dd;
+						} else if (s == 0x1ed9 || s == 0x1eda || s == 0x1ee8 || s == 0x1ef3 ||
+								   (s >= 0x1ef5 && s <= 0x1efb) || s == 0x1f05 || s == 0x1f06 ||
+								   s == 0x1f18 || (s >= 0x1ff2 && s <= 0x20a5)) {
+							s2 = 0xf87e;
 						}
-						
+						if (s2 > 0) {
+							CK((*filter->output_function)(w, filter->data));
+							w = s2;
+						}
 						break;
 					}
 				}
@@ -471,7 +346,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 
 		if (s2 > 0) {
-			for (i=0;i<sizeof(s_form_tbl)/sizeof(int);i++) {
+			for (i=0;i<s_form_tbl_len;i++) {
 				if (c1 == s_form_tbl[i]) {
 					s1 = s_form_sjis_fallback_tbl[i];
 					break;
@@ -521,7 +396,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 		
 		if (c >= 0x2000) {
-			for (i=0;i<sizeof(s_form_tbl)/sizeof(int);i++) {
+			for (i=0;i<s_form_tbl_len;i++) {
 				if (c == s_form_tbl[i]) {
 					filter->status = 1;
 					filter->cache = c;
@@ -556,7 +431,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 		
 		if (s1 <= 0) {
-			for (i=0; i<sizeof(wchar2sjis_mac_r_tbl)/(3*sizeof(int));i++) {
+			for (i=0; i<wchar2sjis_mac_r_tbl_len; i++) {
 				if (c >= wchar2sjis_mac_r_tbl[i][0] && c <= wchar2sjis_mac_r_tbl[i][1]) {
 					s1 = c - wchar2sjis_mac_r_tbl[i][0] + wchar2sjis_mac_r_tbl[i][2];
 					break;
@@ -564,7 +439,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			}
 
 			if (s1 <= 0) {
-				for (i=0; i<sizeof(wchar2sjis_mac_r_map)/(2*sizeof(unsigned short));i++) {
+				for (i=0; i<wchar2sjis_mac_r_map_len; i++) {
 					if (c >= wchar2sjis_mac_r_map[i][0] && c <= wchar2sjis_mac_r_map[i][1]) {
 						s1 = wchar2sjis_mac_code_map[i][c-wchar2sjis_mac_r_map[i][0]]; 
 						break;
@@ -573,7 +448,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			}
 
 			if (s1 <= 0) {
-				for (i=0; i<sizeof(wchar2sjis_mac_wchar_tbl)/(2*sizeof(int));i++) {
+				for (i=0; i<wchar2sjis_mac_wchar_tbl_len ; i++) {
 					if ( c == wchar2sjis_mac_wchar_tbl[i][0]) {
 						s1 = wchar2sjis_mac_wchar_tbl[i][1] & 0xffff;
 						break;
@@ -802,7 +677,7 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 	int i, c1, s1 = 0;
 	if (filter->status == 1 && filter->cache > 0) {
 		c1 = filter->cache;
-		for (i=0;i<sizeof(s_form_tbl)/sizeof(int);i++) {
+		for (i=0;i<s_form_tbl_len;i++) {
 			if (c1 == s_form_tbl[i]) {
 				s1 = s_form_sjis_fallback_tbl[i];
 				break;
