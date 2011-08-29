@@ -1288,7 +1288,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 }
 /* }}} */
 
-ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
 	int use_copy1 = 0, use_copy2 = 0;
@@ -1307,7 +1307,11 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		op2 = &op2_copy;
 	}
 
-	ZVAL_LONG(result, zend_binary_zval_strcmp(op1, op2));
+	if (case_insensitive) {
+		ZVAL_LONG(result, zend_binary_zval_strcasecmp(op1, op2));
+	} else {
+		ZVAL_LONG(result, zend_binary_zval_strcmp(op1, op2));
+	}
 
 	if (use_copy1) {
 		zval_dtor(op1);
@@ -1316,6 +1320,18 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		zval_dtor(op2);
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_compare_function_ex(result, op1, op2, 0);
+}
+/* }}} */
+
+ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_compare_function_ex(result, op1, op2, 1);
 }
 /* }}} */
 
