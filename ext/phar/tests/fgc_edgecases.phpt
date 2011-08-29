@@ -47,7 +47,7 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: file_get_contents() expects parameter 1 to be string, array given in %sfgc_edgecases.php on line %d
+Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %sfgc_edgecases.php on line %d
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));

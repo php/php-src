@@ -15,4 +15,4 @@ Content-type: text/html; charset=UTF-8
 --EXPECTF--
 string(9) "\Web\View"
 
-Parse error: syntax error, unexpected T_ECHO, expecting T_FUNCTION in phar://%sfatal_error_webphar.php/Web/View.php on line 380
+Parse error: syntax error, unexpected 'echo' (T_ECHO), expecting function (T_FUNCTION) in phar:///%sfatal_error_webphar.php/Web/View.php on line 380
