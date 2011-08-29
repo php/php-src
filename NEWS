@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     (virsacer at web dot de, Pierre)
   . Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
     sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (arpad)
+  . Fixed bug #55366: keys lost when using substr_replace an array (arpad)
 
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
