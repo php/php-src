@@ -1210,11 +1210,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			}
 #ifdef PHP_WIN32
 			if (PG(magic_quotes_gpc)) {
-				s = s ? s : filename;
-				tmp = strrchr(s, '\'');
-				s = tmp > s ? tmp : s;
-				tmp = strrchr(s, '"');
-				s = tmp > s ? tmp : s;
+				if ((tmp = strrchr(s ? s : filename, '\'')) > s) {
+					s = tmp;
+				}
+				if ((tmp = strrchr(s ? s : filename, '"')) > s) {
+					s = tmp;
+				}
 			}
 #endif
 
