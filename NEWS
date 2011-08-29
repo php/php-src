@@ -112,6 +112,8 @@ PHP                                                                        NEWS
     filter). (slusarz at curecanti dot org)
   . Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using 
     TMPDIR on Windows). (Pierre)
+  . Fixed bug #55510: ($_FILES 'name' missing first character after upload)
+    (arpad)
 
 - Apache2 Handler SAPI:
   . Fixed bug #54529 (SAPI crashes on apache_config.c:197).
