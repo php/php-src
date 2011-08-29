@@ -28,7 +28,7 @@ PHP                                                                        NEWS
     instance of a class without invoking its constructor. FR #55490. (Sebastian)
 
 - Improved JSON extension:
-  . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (christian dot pernot at pingroom dot net, Gwynne)
+  . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (Irker, Gwynne)
 
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
