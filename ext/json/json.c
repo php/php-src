@@ -95,6 +95,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -346,7 +347,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
-	int pos = 0;
+	int pos = 0, ulen = 0;
 	unsigned short us;
 	unsigned short *utf16;
 
@@ -378,15 +379,14 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		}
 		
 	}
-
-	utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
-
-	len = utf8_to_utf16(utf16, s, len);
-	if (len <= 0) {
+	
+	utf16 = (options & PHP_JSON_UNESCAPED_UNICODE) ? NULL : (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
+	ulen = utf8_to_utf16(utf16, s, len);
+	if (ulen <= 0) {
 		if (utf16) {
 			efree(utf16);
 		}
-		if (len < 0) {
+		if (ulen < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 			if (!PG(display_errors)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
@@ -397,12 +397,15 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		}
 		return;
 	}
+	if (!(options & PHP_JSON_UNESCAPED_UNICODE)) {
+		len = ulen;
+	}
 
 	smart_str_appendc(buf, '"');
 
 	while (pos < len)
 	{
-		us = utf16[pos++];
+		us = (options & PHP_JSON_UNESCAPED_UNICODE) ? s[pos++] : utf16[pos++];
 
 		switch (us)
 		{
@@ -479,7 +482,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 				break;
 
 			default:
-				if (us >= ' ' && (us & 127) == us) {
+				if (us >= ' ' && ((options & PHP_JSON_UNESCAPED_UNICODE) || (us & 127) == us)) {
 					smart_str_appendc(buf, (unsigned char) us);
 				} else {
 					smart_str_appendl(buf, "\\u", 2);
@@ -498,7 +501,9 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	}
 
 	smart_str_appendc(buf, '"');
-	efree(utf16);
+	if (utf16) {
+		efree(utf16);
+	}
 }
 /* }}} */
 
