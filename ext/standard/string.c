@@ -2398,6 +2398,10 @@ PHP_FUNCTION(substr_replace)
 			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);	
 		}
 	} else { /* str is array of strings */
+		char *str_index = NULL;
+		uint str_index_len;
+		ulong num_index;
+
 		array_init(return_value);
 
 		if (Z_TYPE_PP(from) == IS_ARRAY) {
@@ -2533,7 +2537,13 @@ PHP_FUNCTION(substr_replace)
 			}
 
 			result[result_len] = '\0';
-			add_next_index_stringl(return_value, result, result_len, 0);
+
+			if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(str), &str_index, &str_index_len, &num_index, 0, &pos_str) == HASH_KEY_IS_STRING) {
+				add_assoc_stringl_ex(return_value, str_index, str_index_len, result, result_len, 0);
+			} else {
+				add_index_stringl(return_value, num_index, result, result_len, 0);
+			}
+
 			if(Z_TYPE_PP(tmp_str) != IS_STRING) {
 				zval_dtor(orig_str);
 			}
