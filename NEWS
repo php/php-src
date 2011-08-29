@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - Improved JSON extension:
   . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (Irker, Gwynne)
 
+- Improved CLI SAPI:
+  . Added friendly log messages - Req #55109 (arpad)
+
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
  . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
