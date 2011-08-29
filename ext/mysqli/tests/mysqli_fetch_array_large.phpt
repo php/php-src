@@ -5,6 +5,8 @@ mysqli_fetch_array() - large packages (to test compression)
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+memory_limit=-1
 --FILE--
 <?php
 	require_once("connect.inc");
