@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
+  . Fixed bug #55366: keys lost when using substr_replace an array (arpad)
 
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
