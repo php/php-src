@@ -30,7 +30,7 @@ SOFTWARE.
 #include "utf8_decode.h"
 
 int 
-utf8_to_utf16(unsigned short w[], char p[], int length) 
+utf8_to_utf16(unsigned short *w, char p[], int length) 
 {
     int c;
     int the_index = 0;
@@ -43,14 +43,17 @@ utf8_to_utf16(unsigned short w[], char p[], int length)
             return (c == UTF8_END) ? the_index : UTF8_ERROR;
         }
         if (c < 0x10000) {
-            w[the_index] = (unsigned short)c;
+            if (w) {
+                w[the_index] = (unsigned short)c;
+            }
             the_index += 1;
         } else {
             c -= 0x10000;
-            w[the_index] = (unsigned short)(0xD800 | (c >> 10));
-            the_index += 1;
-            w[the_index] = (unsigned short)(0xDC00 | (c & 0x3FF));
-            the_index += 1;
+            if (w) {
+                w[the_index] = (unsigned short)(0xD800 | (c >> 10));
+                w[the_index + 1] = (unsigned short)(0xDC00 | (c & 0x3FF));
+            }
+            the_index += 2;
         }
     }
 }
