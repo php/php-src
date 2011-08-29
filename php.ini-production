@@ -898,6 +898,10 @@ default_socket_timeout = 60
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
 
+[CLI Server]
+; Whether the CLI web server uses ANSI color coding in its terminal output.
+cli_server.color = On
+
 [Date]
 ; Defines the default timezone used by the date functions
 ; http://php.net/date.timezone
