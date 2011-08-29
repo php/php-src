@@ -37,4 +37,4 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-[004] [0%s
+[004] [%s
