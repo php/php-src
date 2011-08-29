@@ -26,6 +26,16 @@
 extern sapi_module_struct cli_server_sapi_module;
 extern int do_cli_server(int argc, char **argv TSRMLS_DC);
 
+ZEND_BEGIN_MODULE_GLOBALS(cli_server)
+	short color;
+ZEND_END_MODULE_GLOBALS(cli_server)
+
+#ifdef ZTS
+#define CLI_SERVER_G(v) TSRMG(cli_server_globals_id, zend_cli_server_globals *, v)
+#else
+#define CLI_SERVER_G(v) (cli_server_globals.v)
+#endif
+
 #endif /* PHP_CLI_SERVER_H */
 
 /*
