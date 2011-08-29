@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
+  . Fixed bug#53872 (internal corruption of phar). (Hannes)
 
 - NSAPI SAPI:
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403). (Uwe
