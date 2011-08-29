@@ -999,10 +999,12 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	php_stream_filter_append(&ufp->writefilters, filter);
 	php_stream_seek(phar_get_entrypfp(entry TSRMLS_CC), phar_get_fp_offset(entry TSRMLS_CC), SEEK_SET);
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize, NULL)) {
-		spprintf(error, 4096, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
-		php_stream_filter_remove(filter, 1 TSRMLS_CC);
-		return FAILURE;
+	if (entry->uncompressed_filesize) {
+		if (SUCCESS != phar_stream_copy_to_stream(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize, NULL)) {
+			spprintf(error, 4096, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			return FAILURE;
+		}
 	}
 
 	php_stream_filter_flush(filter, 1);
