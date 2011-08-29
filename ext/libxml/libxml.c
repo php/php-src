@@ -937,9 +937,11 @@ static xmlParserInputPtr _php_libxml_user_entity_loader(const char *URL,
 						**params[]	= {&public, &system, &ctxzv},
 						*retval_ptr	= NULL;
 	int					retval;
+	zend_fcall_info		*fci;
 	TSRMLS_FETCH();
-	zend_fcall_info		*fci = &LIBXML(entity_loader).fci;
-	
+
+	fci = &LIBXML(entity_loader).fci;
+
 	ALLOC_INIT_ZVAL(public);
 	if (ID != NULL) {
 		ZVAL_STRING(public, ID, 1);
