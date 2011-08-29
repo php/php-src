@@ -296,6 +296,7 @@ PHP                                                                        NEWS
   . Added support for storing upload progress feedback in session data. (Arnaud)
   . Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
     either is present at compile time. (Rasmus)
+  . Expose session status via new function, session_status (Req #52982) (arpad)
 
 - Improved SPL extension:
   . Added RegexIterator::getRegex() method. (Joshua Thijssen)
