@@ -383,6 +383,9 @@ UPGRADE NOTES - PHP X.Y
          - stream_set_chunk_size()
          - socket_import_stream()
 
+       - libxml
+	     - libxml_set_external_entity_loader()
+
      f. New global constants
 
        - JSON_PRETTY_PRINT
