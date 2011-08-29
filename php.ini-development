@@ -1557,6 +1557,13 @@ session.hash_bits_per_character = 5
 ; http://php.net/url-rewriter.tags
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
+;session.upload_progress.enabled = "1"
+;session.upload_progress.cleanup = "1"
+;session.upload_progress.prefix = "upload_progress_"
+;session.upload_progress.name = "PHP_SESSION_UPLOAD_PROGRESS"
+;session.upload_progress.freq =  "1%"
+;session.upload_progress.min_freq = "1"
+
 [MSSQL]
 ; Allow or prevent persistent links.
 mssql.allow_persistent = On
