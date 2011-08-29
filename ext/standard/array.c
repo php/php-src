@@ -118,6 +118,8 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
@@ -141,13 +143,17 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 
 static void php_set_compare_func(int sort_type TSRMLS_DC) /* {{{ */
 {
-	switch (sort_type) {
+	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
 			ARRAYG(compare_func) = numeric_compare_function;
 			break;
 
 		case PHP_SORT_STRING:
-			ARRAYG(compare_func) = string_compare_function;
+			ARRAYG(compare_func) = sort_type & PHP_SORT_FLAG_CASE ? string_case_compare_function : string_compare_function;
+			break;
+
+		case PHP_SORT_NATURAL:
+			ARRAYG(compare_func) = sort_type & PHP_SORT_FLAG_CASE ? string_natural_case_compare_function : string_natural_compare_function;
 			break;
 
 #if HAVE_STRCOLL
@@ -3762,7 +3768,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	efree(args);							\
 	RETURN_FALSE;
 
-/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...])
+/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {
@@ -3812,7 +3818,7 @@ PHP_FUNCTION(array_multisort)
 				parse_state[k] = 1;
 			}
 		} else if (Z_TYPE_PP(args[i]) == IS_LONG) {
-			switch (Z_LVAL_PP(args[i])) {
+			switch (Z_LVAL_PP(args[i]) & ~PHP_SORT_FLAG_CASE) {
 				case PHP_SORT_ASC:
 				case PHP_SORT_DESC:
 					/* flag allowed here */
@@ -3829,6 +3835,7 @@ PHP_FUNCTION(array_multisort)
 				case PHP_SORT_REGULAR:
 				case PHP_SORT_NUMERIC:
 				case PHP_SORT_STRING:
+				case PHP_SORT_NATURAL:
 #if HAVE_STRCOLL
 				case PHP_SORT_LOCALE_STRING:
 #endif

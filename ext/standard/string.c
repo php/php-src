@@ -4734,6 +4734,49 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 }
 /* }}} */
 
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
+{
+	zval op1_copy, op2_copy;
+	int use_copy1 = 0, use_copy2 = 0, sort_result;
+
+	if (Z_TYPE_P(op1) != IS_STRING) {
+		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	}
+	if (Z_TYPE_P(op2) != IS_STRING) {
+		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	}
+
+	if (use_copy1) {
+		op1 = &op1_copy;
+	}
+	if (use_copy2) {
+		op2 = &op2_copy;
+	}
+
+	ZVAL_LONG(result, strnatcmp_ex(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2), case_insensitive));
+
+	if (use_copy1) {
+		zval_dtor(op1);
+	}
+	if (use_copy2) {
+		zval_dtor(op2);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_natural_compare_function_ex(result, op1, op2, 1 TSRMLS_CC);
+}
+/* }}} */
+
+PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_natural_compare_function_ex(result, op1, op2, 0 TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto int strnatcmp(string s1, string s2)
    Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)

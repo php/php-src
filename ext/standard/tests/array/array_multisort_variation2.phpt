@@ -2,7 +2,7 @@
 Test array_multisort() function : usage variation 
 --FILE--
 <?php
-/* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...])
+/* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
  * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL 
  * Source code: ext/standard/array.c
  * Alias to functions: 
@@ -101,7 +101,7 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for SORT_REGULAR|SORT_NUMERIC|SORT_STRING]]
+// loop through each element of the array for SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]]
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";

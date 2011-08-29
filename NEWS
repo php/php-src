@@ -54,6 +54,8 @@ PHP                                                                        NEWS
     one SAPI module the same time. FR #53271, FR #52410. (Jani)
   . Added optional argument to debug_backtrace() and debug_print_backtrace()
     to limit the amount of stack frames returned. (Sebastian, Patrick)
+  . Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
+    sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (arpad)
 
 - Improved Zend Engine memory usage: (Dmitry)
   . Replaced zend_function.pass_rest_by_reference by 

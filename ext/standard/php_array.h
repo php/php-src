@@ -113,6 +113,8 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
 #define PHP_SORT_DESC               3
 #define PHP_SORT_ASC                4
 #define PHP_SORT_LOCALE_STRING      5
+#define PHP_SORT_NATURAL            6
+#define PHP_SORT_FLAG_CASE          8
 
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];

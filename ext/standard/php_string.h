@@ -143,6 +143,10 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit);
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
+PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+
 #ifndef HAVE_STRERROR
 PHPAPI char *php_strerror(int errnum);
 #define strerror php_strerror
