@@ -415,6 +415,9 @@ UPGRADE NOTES - PHP X.Y
          - ldap_control_paged_results()
          - ldap_control_paged_results_response()
 
+       - libxml
+	     - libxml_set_external_entity_loader()
+
      f. New global constants
 
        - JSON_PRETTY_PRINT
