@@ -3103,9 +3103,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		/* this will have changed for all files that have either changed compression or been modified */
 		entry->offset = entry->offset_abs = offset;
 		offset += entry->compressed_filesize;
-		phar_stream_copy_to_stream(file, newfile, entry->compressed_filesize, &wrote);
-
-		if (entry->compressed_filesize != wrote) {
+		if (phar_stream_copy_to_stream(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}

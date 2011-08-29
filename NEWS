@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
 
+- Phar:
+  . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
+
 - NSAPI SAPI:
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403). (Uwe
     Schindler)
