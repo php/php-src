@@ -4640,7 +4640,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent"))) {
 		efree(lcname);
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
+		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", Z_STRVAL(class_name->u.constant));
 	}
 
 	/* Class name must not conflict with import names */
@@ -4707,6 +4707,11 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	opline->op2_type = IS_CONST;
 
 	if (doing_inheritance) {
+       /* Make sure a trait does not try to extend a class */
+       if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+           zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class", new_class_entry->name);
+       }
+    
 		opline->extended_value = parent_class_name->u.op.var;
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 	} else {
