@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     is small enough. (Derick)
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
+  . Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
+    sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (arpad)
 
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
