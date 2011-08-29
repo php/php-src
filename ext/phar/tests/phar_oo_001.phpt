@@ -30,14 +30,14 @@ try
 	$phar = new MyPhar();
 	var_dump($phar->getVersion());
 }
-catch (BadMethodCallException $e)
+catch (LogicException $e)
 {
 	var_dump($e->getMessage());
 }
 try {
 	$phar = new Phar('test.phar');
 	$phar->__construct('oops');
-} catch (BadMethodCallException $e)
+} catch (LogicException $e)
 {
 	var_dump($e->getMessage());
 }
@@ -52,6 +52,6 @@ __halt_compiler();
 --EXPECT--
 string(5) "1.0.0"
 int(5)
-string(50) "Cannot call method on an uninitialized Phar object"
+string(103) "In the constructor of MyPhar, parent::__construct() must be called and its exceptions cannot be cleared"
 string(29) "Cannot call constructor twice"
 ===DONE===
