@@ -1742,7 +1742,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		return;
 	}
 
-	if (SG(headers_sent)) {
+	if (SG(headers_sent) && PS(use_cookies)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot regenerate session id - headers already sent");
 		RETURN_FALSE;
 	}
