@@ -1325,13 +1325,13 @@ ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend
 
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	return string_compare_function_ex(result, op1, op2, 0);
+	return string_compare_function_ex(result, op1, op2, 0 TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	return string_compare_function_ex(result, op1, op2, 1);
+	return string_compare_function_ex(result, op1, op2, 1 TSRMLS_CC);
 }
 /* }}} */
 
