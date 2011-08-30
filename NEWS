@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (virsacer at web dot de, Pierre)
   . Fixed bug #55366: keys lost when using substr_replace an array (arpad)
 
+- DateTime:
+  . Fixed bug #48476 (cloning extended DateTime class without calling
+    parent::__constr crashed PHP). (Hannes)
+
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
   . Fixed bug#53872 (internal corruption of phar). (Hannes)
