@@ -1561,11 +1561,49 @@ session.hash_bits_per_character = 5
 ; http://php.net/url-rewriter.tags
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
-;session.upload_progress.enabled = "1"
-;session.upload_progress.cleanup = "1"
+; Enable upload procgress tracking in $_SESSION
+; Default Value: On
+; Development Value: On
+; Production Value: On
+; http://php.net/session.upload-progress.enabled
+;session.upload_progress.enabled = On
+
+; Cleanup the progress information as soon as all POST data has been read
+; (i.e. upload completed).
+; Default Value: On
+; Development Value: On
+; Production Value: On
+; http://php.net/session.upload-progress.cleanup
+;session.upload_progress.cleanup = On
+
+; A prefix used for the upload progress key in $_SESSION
+; Default Value: "upload_progress_"
+; Development Value: "upload_progress_"
+; Production Value: "upload_progress_"
+; http://php.net/session.upload-progress.prefix
 ;session.upload_progress.prefix = "upload_progress_"
+
+; The index name (concatenated with the prefix) in $_SESSION
+; containing the upload progress information
+; Default Value: "PHP_SESSION_UPLOAD_PROGRESS"
+; Development Value: "PHP_SESSION_UPLOAD_PROGRESS"
+; Production Value: "PHP_SESSION_UPLOAD_PROGRESS"
+; http://php.net/session.upload-progress.name
 ;session.upload_progress.name = "PHP_SESSION_UPLOAD_PROGRESS"
+
+; How frequently the upload progress should be updated.
+; Given either in percentages (per-file), or in bytes
+; Default Value: "1%"
+; Development Value: "1%"
+; Production Value: "1%"
+; http://php.net/session.upload-progress.freq
 ;session.upload_progress.freq =  "1%"
+
+; The minimum delay between updates, in seconds
+; Default Value: 1
+; Development Value: 1
+; Production Value: 1
+; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
 
 [MSSQL]
