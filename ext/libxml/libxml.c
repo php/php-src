@@ -228,9 +228,9 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 					php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 					break;
 				case XML_ATTRIBUTE_NODE:
-    					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-	    					xmlRemoveID(node->doc, (xmlAttrPtr) node);
-    					}
+						if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+							xmlRemoveID(node->doc, (xmlAttrPtr) node);
+						}
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
