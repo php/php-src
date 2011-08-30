@@ -1,0 +1,10 @@
+// $Id: config.w32 765 2010-10-21 13:04:03Z huixinchen $
+// vim:ft=javascript
+
+ARG_ENABLE("yaf", "enable yaf support", "no");
+
+if (PHP_YAF == "yes") {
+	EXTENSION("yaf", "yaf.c yaf_application.c yaf_loader.c yaf_bootstrap.c yaf_config.c yaf_dispatcher.c yaf_registry.c yaf_controller.c yaf_action.c yaf_view.c yaf_request.c yaf_response.c yaf_router.c yaf_exception.c yaf_plugin.c yaf_session.c");
+
+	AC_DEFINE("HAVE_YAF", 1, "Have Yaf Support");
+}

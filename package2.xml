@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.7" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd"> 
+ <name>yaf</name>
+ <channel>pecl.php.net</channel>
+ <summary>PHP Framework in PHP extension</summary>
+ <description>Yaf is a PHP framework similar to zend framework, which is written in c and built as PHP extension</description>
+ <lead>
+  <name>Xinchen Hui</name>
+  <user>laruence</user>
+  <email>laruence@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2011-08-30</date>
+ <time>18:48:25</time>
+ <version>
+  <release>2.1.0</release>
+  <api>2.1.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+- Avoided calling to get_class_entry for higher performance
+- Remove unnecessary stack variable initialization
+- Fixed mem leak reproted by test scripts
+- Added arginfo for all methods
+- Standardize error message
+- Add Yaf_Request::setRequstUri
+- Fixed build broken with PHP 5.4
+- many other litte improvements
+ </notes>
+ <contents> 
+  <dir name="/"> 
+   <file name="config.m4"    role="src" />
+   <file name="yaf_action.c" role="src" />
+   <file name="yaf_action.h" role="src" />
+   <file name="yaf_application.c" role="src" />
+   <file name="yaf_application.h" role="src" />
+   <file name="yaf_bootstrap.c" role="src" />
+   <file name="yaf_bootstrap.h" role="src" />
+   <file name="yaf.c" role="src" />
+   <file name="yaf_config.c" role="src" />
+   <file name="yaf_config.h" role="src" />
+   <file name="yaf_controller.c" role="src" />
+   <file name="yaf_controller.h" role="src" />
+   <file name="yaf_dispatcher.c" role="src" />
+   <file name="yaf_dispatcher.h" role="src" />
+   <file name="yaf.dsp" role="src" />
+   <file name="yaf_exception.c" role="src" />
+   <file name="yaf_exception.h" role="src" />
+   <file name="yaf_loader.c" role="src" />
+   <file name="yaf_loader.h" role="src" />
+   <file name="yaf_logo.h" role="src" />
+   <file name="yaf_namespace.h" role="src" />
+   <file name="yaf.php" role="src" />
+   <file name="yaf_plugin.c" role="src" />
+   <file name="yaf_plugin.h" role="src" />
+   <file name="yaf_registry.c" role="src" />
+   <file name="yaf_registry.h" role="src" />
+   <file name="yaf_request.c" role="src" />
+   <file name="yaf_request.h" role="src" />
+   <file name="yaf_response.c" role="src" />
+   <file name="yaf_response.h" role="src" />
+   <file name="yaf_router.c" role="src" />
+   <file name="yaf_router.h" role="src" />
+   <file name="yaf_session.c" role="src" />
+   <file name="yaf_session.h" role="src" />
+   <file name="yaf_view.c" role="src" />
+   <file name="yaf_view.h" role="src" />
+   <dir name="configs">
+    <file name="ini.c" role="src" />
+    <file name="simple.c" role="src" />
+   </dir>
+   <file name="config.w32" role="src" />
+   <file name="CREDITS" role="src" />
+   <file name="EXPERIMENTAL" role="src" />
+   <file name="php_yaf.h" role="src" />
+   <dir name="requests">
+    <file name="http.c" role="src" />
+    <file name="simple.c" role="src" />
+   </dir>
+   <dir name="response">
+    <file name="http.c" role="src" />
+    <file name="cli.c" role="src" />
+   </dir>
+   <dir name="routes">
+    <file name="interface.c" role="src" />
+    <file name="rewrite.c" role="src" />
+    <file name="supervar.c" role="src" />
+    <file name="static.c" role="src" />
+    <file name="simple.c" role="src" />
+    <file name="regex.c" role="src" />
+    <file name="map.c" role="src" />
+   </dir>
+   <dir name="views">
+    <file name="interface.c" role="src" />
+    <file name="simple.c" role="src" />
+   </dir>
+   <dir name="tests">
+    <file name="001.phpt" role="test" />
+    <file name="002.phpt" role="test" />
+    <file name="003.phpt" role="test" />
+    <file name="004.phpt" role="test" />
+    <file name="005.phpt" role="test" />
+    <file name="006.phpt" role="test" />
+    <file name="007.phpt" role="test" />
+    <file name="008.phpt" role="test" />
+    <file name="009.phpt" role="test" />
+    <file name="010.phpt" role="test" />
+    <file name="011.phpt" role="test" />
+    <file name="012.phpt" role="test" />
+    <file name="013.phpt" role="test" />
+    <file name="014.phpt" role="test" />
+    <file name="015.phpt" role="test" />
+    <file name="016.phpt" role="test" />
+    <file name="simple.ini" role="test" />
+   </dir>
+  </dir> 
+ </contents> 
+ <dependencies> 
+  <required> 
+   <php> 
+    <min>5.2.0</min> 
+    <max>5.4.0</max>
+   </php> 
+   <pearinstaller> 
+    <min>1.4.0</min> 
+   </pearinstaller> 
+  </required> 
+ </dependencies> 
+ <providesextension>yaf</providesextension>
+ <extsrcrelease />
+ <changelog> 
+  <release> 
+   <date>2011-08-28</date> 
+   <version> 
+    <release>2.1.0</release> 
+    <api>2.1.0</api> 
+   </version> 
+   <stability> 
+    <release>beta</release> 
+    <api>beta</api> 
+   </stability> 
+   <license uri="http://www.php.net/license">PHP License</license> 
+   <notes> 
+- Avoided calling to get_class_entry for higher performance
+- Added arginfo for all methods
+- Remove unnecessary stack variable initialization
+- Standardize error message
+- Add Yaf_Request::setRequstUri
+- Fixed build broken with PHP 5.4
+   </notes> 
+  </release> 
+  <release> 
+   <date>2011-06-28</date> 
+   <version> 
+    <release>2.0.1</release> 
+    <api>2.0.1</api> 
+   </version> 
+   <stability> 
+    <release>stable</release> 
+    <api>stable</api> 
+   </stability> 
+   <license uri="http://www.php.net/license">PHP License</license> 
+   <notes> 
+- Fixed Bug that when call to Yaf_Config_Ini/Yaf_Config_Simple with freaky paramters then invoke its methods cause crash (thanks to Felipe Pena)
+- Yaf_Application::execute call Zend_API call_user_func instead of call zif_call_user_func, since zif_call_user_func was not declared with dllexport
+- Built on windows with PHP-5.3.6 and PHP-5.2.15 (you can download the dll on Yaf Google Code)
+- Corrected some broken C89 statements
+   </notes> 
+  </release> 
+  <release> 
+   <date>2011-06-24</date> 
+   <version> 
+    <release>2.0.0</release> 
+    <api>2.0.0</api> 
+   </version> 
+   <stability> 
+    <release>stable</release> 
+    <api>stable</api> 
+   </stability> 
+   <license uri="http://www.php.net/license">PHP License</license> 
+   <notes> 
+    - First release version
+   </notes> 
+  </release> 
+ </changelog> 
+</package> 
+<!--
+vim:et:ts=1:sw=1
+--> 
