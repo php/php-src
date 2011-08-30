@@ -236,9 +236,9 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 					php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 					break;
 				case XML_ATTRIBUTE_NODE:
-    					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-	    					xmlRemoveID(node->doc, (xmlAttrPtr) node);
-    					}
+						if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+							xmlRemoveID(node->doc, (xmlAttrPtr) node);
+						}
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
@@ -552,8 +552,8 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 		const char *ID, xmlParserCtxtPtr context)
 {
-    xmlParserInputPtr	ret			= NULL;
-    const char			*resource	= NULL;
+	xmlParserInputPtr	ret			= NULL;
+	const char			*resource	= NULL;
 	zval				*public		= NULL,
 						*system		= NULL,
 						*ctxzv		= NULL,
@@ -647,7 +647,7 @@ is_string:
 		} else if (Z_TYPE_P(retval_ptr) != IS_NULL) {
 			/* retval not string nor resource nor null; convert to string */
 			SEPARATE_ZVAL(&retval_ptr);
-      		convert_to_string(retval_ptr);
+			convert_to_string(retval_ptr);
 			goto is_string;
 		} /* else is null; don't try anything */
 	}
@@ -671,7 +671,7 @@ is_string:
 	if (retval_ptr != NULL) {
 		zval_ptr_dtor(&retval_ptr);
 	}
-    return ret;
+	return ret;
 }
 
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
