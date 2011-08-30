@@ -109,6 +109,7 @@ typedef struct snmp_session php_snmp_session;
 #define PHP_SNMP_ERRNO_TIMEOUT		2
 #define PHP_SNMP_ERRNO_ERROR_IN_REPLY	3
 #define PHP_SNMP_ERRNO_OID_NOT_INCREASING 4
+#define PHP_SNMP_ERRNO_OID_PARSING_ERROR 5
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
@@ -690,7 +691,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 
 	if (st & SNMP_CMD_WALK) {
 		if (objid_query->count > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Multi OID walks are not supported!");
+			php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Multi OID walks are not supported!");
 			RETURN_FALSE;
 		}
 		rootlen = MAX_NAME_LEN;
@@ -698,7 +699,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 			if (snmp_parse_oid(objid_query->vars[0].oid, root, &rootlen)) {
 				gotroot = 1;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[0].oid);
+				php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[0].oid);
 				RETVAL_FALSE;
 				return;
 			}
@@ -754,7 +755,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
 				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
 				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
+					php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
 					snmp_free_pdu(pdu);
 					snmp_close(ss);
 					RETVAL_FALSE;
@@ -763,7 +764,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				if (st & SNMP_CMD_SET) {
 					if ((snmp_errno = snmp_add_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
 						snprint_objid(buf, sizeof(buf), objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
+						php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Could not add variable: OID='%s' type='%c' value='%s': %s", buf, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value, snmp_api_errstring(snmp_errno));
 						snmp_free_pdu(pdu);
 						snmp_close(ss);
 						RETVAL_FALSE;
@@ -2368,6 +2369,7 @@ PHP_MINIT_FUNCTION(snmp)
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_TIMEOUT",			(long)PHP_SNMP_ERRNO_TIMEOUT);
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		(long)PHP_SNMP_ERRNO_ERROR_IN_REPLY);
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	(long)PHP_SNMP_ERRNO_OID_NOT_INCREASING);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	(long)PHP_SNMP_ERRNO_OID_PARSING_ERROR);
 
 	return SUCCESS;
 }
