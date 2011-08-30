@@ -11,8 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
   . Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
-    sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (arpad)
-  . Fixed bug #55366: keys lost when using substr_replace an array (arpad)
+    sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (Arpad)
 
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
@@ -34,7 +33,10 @@ PHP                                                                        NEWS
   . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (Irker, Gwynne)
 
 - Improved CLI SAPI:
-  . Added friendly log messages - Req #55109 (arpad)
+  . Added friendly log messages - Req #55109 (Arpad)
+
+- Improved Session extension:
+  . Expose session status via new function, session_status (Req #52982) (Arpad)
 
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
@@ -299,7 +301,6 @@ PHP                                                                        NEWS
   . Added support for storing upload progress feedback in session data. (Arnaud)
   . Changed session.entropy_file to default to /dev/urandom or /dev/arandom if
     either is present at compile time. (Rasmus)
-  . Expose session status via new function, session_status (Req #52982) (arpad)
 
 - Improved SPL extension:
   . Added RegexIterator::getRegex() method. (Joshua Thijssen)
