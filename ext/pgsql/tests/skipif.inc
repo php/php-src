@@ -7,6 +7,7 @@
 //   database
 
 include("config.inc");
+include("lcmess.inc");
 
 if (!extension_loaded("pgsql")) {
     die("skip\n");

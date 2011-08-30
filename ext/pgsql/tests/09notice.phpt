@@ -1,16 +1,25 @@
 --TEST--
 PostgreSQL notice function
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php
+
+include("skipif.inc");
+
+_skip_lc_messages();
+
+?>
 --INI--
 pgsql.log_notice=1
 pgsql.ignore_notices=0
 --FILE--
 <?php
 include 'config.inc';
+include 'lcmess.inc';
 
 $db = pg_connect($conn_str);
-pg_exec($db, "SET LC_MESSAGES='C';");
+
+_set_lc_messages();
+
 pg_query($db, "BEGIN;");
 pg_query($db, "BEGIN;");
 

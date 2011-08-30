@@ -16,7 +16,7 @@ class test_class {
 
 $db = pg_connect($conn_str);
 
-$sql = "SELECT * FROM $table_name";
+$sql = "SELECT * FROM $table_name WHERE num = 0";
 $result = pg_query($db, $sql) or die('Cannot qeury db');
 $rows = pg_num_rows($result);
 
