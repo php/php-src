@@ -30,6 +30,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "zend_exceptions.h"
@@ -526,6 +527,29 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 }
 /* }}} */
 
+#ifdef MYSQLI_USE_MYSQLND
+static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv)
+{
+	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == mysqli_link_class_entry) {
+		MY_MYSQL *mysql;
+		MYSQLI_RESOURCE  *my_res;
+		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(zv TSRMLS_CC);
+		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
+			/* We know that we have a mysqli object, so this failure should be emitted */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);
+			return NULL;
+		}
+		mysql = ((MY_MYSQL *)my_res->ptr)->mysql;
+		return mysql ? mysql->mysql : NULL;
+	}
+	return NULL;
+}
+
+static mysqlnd_api_extension_t mysqli_api_ext = {
+	&mysqli_module_entry,
+	mysqli_convert_zv_to_mysqlnd
+};
+#endif
 
 /* {{{ PHP_INI_BEGIN
 */
@@ -811,6 +835,11 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_MASTER",     REFRESH_MASTER, CONST_CS | CONST_PERSISTENT);
 #ifdef REFRESH_BACKUP_LOG
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_BACKUP_LOG", REFRESH_BACKUP_LOG, CONST_CS | CONST_PERSISTENT);
+#endif
+
+
+#ifdef MYSQL_USE_MYSQLND
+	mysqlnd_register_api_extension(&mysqli_api_ext);
 #endif
 
 	return SUCCESS;

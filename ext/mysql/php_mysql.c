@@ -529,6 +529,31 @@ static PHP_GINIT_FUNCTION(mysql)
 }
 /* }}} */
 
+#ifdef MYSQL_USE_MYSQLND
+static MYSQLND *mysql_convert_zv_to_mysqlnd(zval *zv)
+{
+	php_mysql_conn *mysql;
+
+	if (Z_TYPE_P(zv) != IS_RESOURCE) {
+		/* Might be nicer to check resource type, too, but ext/mysql is the only one using resources so emitting an error is not to bad, while usually this hook should be silent */
+		return NULL;
+	}
+
+	mysql = (php_mysql_conn *)zend_fetch_resource(&zv TSRMLS_CC, -1, "MySQL-Link", NULL, 2, le_link, le_plink);
+
+	if (!mysql) {
+		return NULL;
+	}
+
+	return mysql->conn;
+}
+
+static mysqlnd_api_extension_t mysqlnd_api_ext = {
+	&mysql_module_entry,
+	mysql_convert_zv_to_mysqlnd
+};
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 ZEND_MODULE_STARTUP_D(mysql)
@@ -555,6 +580,10 @@ ZEND_MODULE_STARTUP_D(mysql)
 		return FAILURE;
 	}
 #endif
+#endif
+
+#ifdef MYSQL_USE_MYSQLND
+	mysqlnd_register_api_extension(&mysqlnd_api_ext);
 #endif
 
 	return SUCCESS;
