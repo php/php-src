@@ -4,6 +4,31 @@ Bug #49422 (mysqlnd: mysqli_real_connect() and LOAD DATA INFILE crash)
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+
+$link = mysqli_init();
+if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+	die(sprintf("skip Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+}
+
+if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
+	die(sprintf("skip Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+}
+
+if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=' . $engine)) {
+	die(sprintf("skip Failed to create test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+}
+
+require_once("local_infile_tools.inc");
+$file = create_standard_csv(4);
+
+if (!@mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s'
+		INTO TABLE test
+		FIELDS TERMINATED BY ';' OPTIONALLY ENCLOSED BY '\''
+		LINES TERMINATED BY '\n'",
+		mysqli_real_escape_string($link, $file)))) {
+		if (1148 == mysqli_errno($link))
+			die(sprintf("skip Cannot test LOAD DATA LOCAL INFILE, [%d] %s\n",  mysqli_errno($link), mysqli_error($link)));
+}
 ?>
 --INI--
 mysqli.allow_local_infile=1
