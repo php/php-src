@@ -30,8 +30,8 @@ Warning: XSLTProcessor::transformToXml(): xmlXPathCompiledEval: evaluation faile
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element value-of in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): xsltValueOf: text copy failed in %s on line %d
-bool(false)
+Warning: XSLTProcessor::transformToXml(): XPath evaluation returned no result. in %s on line %d
+NULL
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09
