@@ -8,5 +8,5 @@ Testfest 2009 Munich
 <?php
 rename('foo', 'bar');
 ?>
---EXPECTREGEX--
-.*No such.*
+--EXPECTF--
+Warning: %s in %sbug45986.php on line 2
