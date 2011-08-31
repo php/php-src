@@ -51,7 +51,7 @@ Notice: Undefined variable: x in %sbug52041.php on line 3
 
 Notice: Undefined variable: x in %sbug52041.php on line 3
 
-Notice: Undefined variable: x in %stests/bug52041.php on line 3
+Notice: Undefined variable: x in %sbug52041.php on line 3
 
 Notice: Undefined offset: 0 in %sbug52041.php on line 15
 
