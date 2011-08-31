@@ -129,7 +129,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_sjis_kddi,
 	&vtbl_identify_sjis_sb,
 	&vtbl_identify_utf8_docomo,
-	&vtbl_identify_utf8_kddi,
+	&vtbl_identify_utf8_kddi_a,
 	&vtbl_identify_utf8_kddi_b,
 	&vtbl_identify_utf8_sb,
 	&vtbl_identify_euccn,
