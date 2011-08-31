@@ -34,46 +34,22 @@ $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
 $items =  array (
-
 		  // integer values
-/*1*/	  0,
-		  10,
-	      2147483647,
+/*1*/	  2147483647,
 		  -2147483648,
+		  -20,
 		
-		  // float values
-/*5*/	  10.5,
-		  20.3,
-		  -20.5,
-		  10.1234567e5,
-		
-		  // array values
-/*9*/	  array(),
+	      // array values
+/*4*/	  array(),
 		  array(0),
 		  array(1, 2),
 		
-		  // boolean values
-/*12*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // null vlaues
-/*16*/	  NULL,
-		  null,
-		
 		  // objects
-/*18*/	  new sample(),
+/*7*/	  new sample(),
 		
 		  // resource
-/*19*/	  $file_handle,
-		
-		  // undefined variable
-/*20*/	  @$undefined_var,
-		
-		  // unset variable
-/*21*/	  @$unset_var
-);
+/*8*/	  $file_handle,
+		);
 
 //defining '$input' argument
 $input = "Test string";
@@ -95,86 +71,34 @@ setlocale(LC_ALL, $original);
 *** Testing nl_langinfo() : with unexpected inputs for 'item' argument ***
 -- Iteration 1 --
 
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
+Warning: nl_langinfo(): Item '2147483647' is not valid in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: nl_langinfo(): Item '10' is not valid in %s on line %d
+Warning: nl_langinfo(): Item '-2147483648' is not valid in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: nl_langinfo(): Item '2147483647' is not valid in %s on line %d
+Warning: nl_langinfo(): Item '-20' is not valid in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: nl_langinfo(): Item '-2147483648' is not valid in %s on line %d
-bool(false)
+Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 5 --
 
-Warning: nl_langinfo(): Item '10' is not valid in %s on line %d
-bool(false)
+Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 6 --
 
-Warning: nl_langinfo(): Item '20' is not valid in %s on line %d
-bool(false)
+Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
+NULL
 -- Iteration 7 --
-
-Warning: nl_langinfo(): Item '-20' is not valid in %s on line %d
-bool(false)
--- Iteration 8 --
-
-Warning: nl_langinfo(): Item '1012345' is not valid in %s on line %d
-bool(false)
--- Iteration 9 --
-
-Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
-NULL
--- Iteration 10 --
-
-Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
-NULL
--- Iteration 11 --
-
-Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line %d
-NULL
--- Iteration 12 --
-
-Warning: nl_langinfo(): Item '1' is not valid in %s on line %d
-bool(false)
--- Iteration 13 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
--- Iteration 14 --
-
-Warning: nl_langinfo(): Item '1' is not valid in %s on line %d
-bool(false)
--- Iteration 15 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
--- Iteration 16 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
--- Iteration 17 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
--- Iteration 18 --
 
 Warning: nl_langinfo() expects parameter 1 to be long, object given in %s on line %d
 NULL
--- Iteration 19 --
+-- Iteration 8 --
 
 Warning: nl_langinfo() expects parameter 1 to be long, resource given in %s on line %d
 NULL
--- Iteration 20 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
--- Iteration 21 --
-
-Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
-bool(false)
 ===DONE===
