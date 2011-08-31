@@ -9,18 +9,13 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 
 $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 if (!$link)
-  die(sprintf("skip Can't connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+	die(sprintf("skip Can't connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
-if (!mysqli_query($link,"DROP TABLE IF EXISTS t_061"))
-	die(sprintf("skip Cannot drop table: [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
+include_once("local_infile_tools.inc");
+if ($msg = check_local_infile_support($link, $engine))
+	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
-if (!mysqli_query($link,"CREATE TABLE t_061 (c1 varchar(10), c2 varchar(10))"))
-	die(sprintf("skip Cannot create table: [%d] %s\n", mysqli_errno($link), mysqli_error($link)));
-
-if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE t_061 FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $filename))))
-	if (1148 == mysqli_errno($link))
-		die(sprintf("skip Cannot test LOAD DATA LOCAL INFILE, [%d] %s", mysqli_errno($link), mysqli_error($link)));
-
+mysqli_close($link);
 ?>
 --FILE--
 <?php
