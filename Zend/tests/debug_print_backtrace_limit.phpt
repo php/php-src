@@ -20,12 +20,12 @@ function c() {
 a();
 ?>
 --EXPECTF--
-#0  c() called at [%s/debug_print_backtrace_limit.php:7]
-#0  c() called at [%s/debug_print_backtrace_limit.php:7]
-#1  b() called at [%s/debug_print_backtrace_limit.php:3]
-#0  c() called at [%s/debug_print_backtrace_limit.php:7]
-#1  b() called at [%s/debug_print_backtrace_limit.php:3]
-#2  a() called at [%s/debug_print_backtrace_limit.php:17]
-#0  c() called at [%s/debug_print_backtrace_limit.php:7]
-#1  b() called at [%s/debug_print_backtrace_limit.php:3]
-#2  a() called at [%s/debug_print_backtrace_limit.php:17]
+#0  c() called at [%sdebug_print_backtrace_limit.php:7]
+#0  c() called at [%sdebug_print_backtrace_limit.php:7]
+#1  b() called at [%sdebug_print_backtrace_limit.php:3]
+#0  c() called at [%sdebug_print_backtrace_limit.php:7]
+#1  b() called at [%sdebug_print_backtrace_limit.php:3]
+#2  a() called at [%sdebug_print_backtrace_limit.php:17]
+#0  c() called at [%sdebug_print_backtrace_limit.php:7]
+#1  b() called at [%sdebug_print_backtrace_limit.php:3]
+#2  a() called at [%sdebug_print_backtrace_limit.php:17]
