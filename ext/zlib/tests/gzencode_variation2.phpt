@@ -1,7 +1,7 @@
 --TEST--
 Test gzencode() function : variation - verify header contents with all encoding modes
 --XFAIL--
-Test will fail until bug #47178 resolved; missing gzip headers whne FORCE_DEFLATE specified
+Test will fail until bug #47178 resolved; missing gzip headers when FORCE_DEFLATE specified
 --SKIPIF--
 <?php 
 
