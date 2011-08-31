@@ -25,7 +25,7 @@ $t = <<<CODE
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-%s The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -119,7 +119,7 @@ typedef struct {
 
 CODE;
 
-echo $t;
+echo sprintf($t, date("Y"));
 
 $encodings = array(
     array(
@@ -213,7 +213,7 @@ foreach ($encodings as $e) {
         $s2tables_idents[$i] = $e["ident"];
         
         echo "static const enc_to_uni_stage2 enc_to_uni_s2_{$e['ident']}_".
-            sprintf("%02X", $i << 6)." = {\n";
+            sprintf("%02X", $i << 6)." = { {\n";
         for ($j = 0; $j < 64; $j++) {
             if ($j == 0) echo "\t";
             elseif ($j % 6 == 0) echo "\n\t";
@@ -223,7 +223,7 @@ foreach ($encodings as $e) {
             else
                 echo "0xFFFF,"; /* special value; indicates no mapping */
         }
-        echo "\n};\n\n";
+        echo "\n} };\n\n";
         
         $prevStage2[] = $mstable[$i];
     }
@@ -235,11 +235,11 @@ foreach ($encodings as $e) {
 "/* {{{ Stage 1 table for {$e['name']} */\n";
 
     echo
-"static const enc_to_uni enc_to_uni_{$e['ident']} = {
+"static const enc_to_uni enc_to_uni_{$e['ident']} = { {
 \t&enc_to_uni_s2_{$s2tables_idents[0]}_00,
 \t&enc_to_uni_s2_{$s2tables_idents[1]}_40,
 \t&enc_to_uni_s2_{$s2tables_idents[2]}_80,
-\t&enc_to_uni_s2_{$s2tables_idents[3]}_C0,
+\t&enc_to_uni_s2_{$s2tables_idents[3]}_C0 }
 };
 ";
 
@@ -471,17 +471,17 @@ foreach ($multicp_rows as $k => $v) {
 	if (key_exists("default", $v)) {
         if ($v['default'] == 'GT') /* hack to make > translate to &gt; not GT; */
             $v['default'] = "gt";
-		echo "\t{", sprintf("%02d", count($v) - 1),
+		echo "\t{ {", sprintf("%02d", count($v) - 1),
 			",\t\t", sprintf("\"%-21s", $v["default"].'",'), "\t",
-            sprintf("% 2d", strlen($v["default"])), '},', "\n"; 
+            sprintf("% 2d", strlen($v["default"])), '} },', "\n"; 
 	} else {
-		echo "\t{", sprintf("%02d", count($v)),
-			",\t\t", sprintf("%-22s", 'NULL'), ",\t0},\n"; 
+		echo "\t{ {", sprintf("%02d", count($v)),
+			",\t\t", sprintf("%-22s", 'NULL'), ",\t0} },\n"; 
 	}
 	unset($v["default"]);
 	foreach ($v as $l => $w) {
-		echo "\t{", sprintf("0x%05s", $l), ",\t", sprintf("\"%-21s", $w.'",'), "\t",
-            sprintf("% 2d", strlen($w)), '},', "\n"; 
+		echo "\t{ {", sprintf("0x%05s", $l), ",\t", sprintf("\"%-21s", $w.'",'), "\t",
+            sprintf("% 2d", strlen($w)), '} },', "\n"; 
 	}
 	echo "};\n";
 }
@@ -495,22 +495,22 @@ if ($pass2 < 2)
 $t = <<<CODE
 static const entity_stage3_row empty_stage3_table[] = {
 	/* 64 elements */
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
-	{0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0}, {0, NULL, 0},
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 };
 
 CODE;
@@ -550,14 +550,14 @@ for ($i = 0; $i < 0x1E; $i++) {
 				elseif ($y % 4 == 0) echo "\n\t";
 				else echo " ";
 				if ($z === NULL)
-					echo "{0, NULL, 0},";
+					echo "{0, { {NULL, 0} } },";
                 elseif ($z === "QUOT") /* hack to translate " into &quote;, not &QUOT; */
-                    echo "{0, \"quot\", 4},";
+                    echo "{0, { {\"quot\", 4} } },";
 				elseif ($z !== "")
-					echo "{0, \"$z\", ", strlen($z), "},";
+					echo "{0, { {\"$z\", ", strlen($z), "} } },";
 				else
-					echo "{1, (void*)", sprintf("multi_cp_{$ident}_%05X",
-						($i << 12) | ($k << 6) | $y ), "},";
+					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
+						($i << 12) | ($k << 6) | $y ), "} } },";
 				
 			}
 			echo "\n};\n\n";
@@ -712,7 +712,7 @@ typedef struct {
 	const entity_ht_bucket *buckets; /* .num_elems elements */
 } entity_ht;
 
-static const entity_cp_map ht_bucket_empty[] = { NULL };
+static const entity_cp_map ht_bucket_empty[] = { {NULL, 0, 0, 0} };
 
 CODE;
 
@@ -726,9 +726,9 @@ function hashfun($str)
 	$nKeyLength = strlen($str);
 	$pos = 0;
 
-	/* variant with the hash unrolled eight times */
 	for (; $nKeyLength > 0; $nKeyLength--) {
-		$hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]));
+		$hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]))
+				 & 0xFFFFFFFF;
 	}
 	return $hash;
 
@@ -762,7 +762,7 @@ for ($i = 0; $i < $numelems; $i++) {
 				$h[0], strlen($h[0]), hexdec($h[1]));
 		}
 	}
-	echo " {NULL} };\n";
+	echo " {NULL, 0, 0, 0} };\n";
 }
 echo "\n";
 
