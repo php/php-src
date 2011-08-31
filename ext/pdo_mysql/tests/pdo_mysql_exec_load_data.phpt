@@ -69,7 +69,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 		fwrite($fp, b"2;bar");
 		fclose($fp);
 
-		$sql = sprintf("LOAD DATA INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
+		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
 
 		if (exec_and_count(4, $db, $sql, 2)) {
 
