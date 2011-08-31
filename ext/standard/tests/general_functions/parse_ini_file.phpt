@@ -137,11 +137,11 @@ array(1) {
   string(0) ""
 }
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
+Warning: syntax error, unexpected '=', expecting $end or TC_SECTION or TC_LABEL or TC_OFFSET in %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 20
 bool(false)
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
+Warning: syntax error, unexpected '=', expecting $end or TC_SECTION or TC_LABEL or TC_OFFSET in %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 26
 bool(false)
 array(1) {
@@ -205,8 +205,6 @@ array(3) {
   ["foo_"]=>
   string(4) "bar3"
 }
-
-Deprecated: Comments starting with '#' are deprecated in %s
 array(3) {
   ["foo"]=>
   string(4) "bar1"
