@@ -6,11 +6,53 @@
 		}
 	}
 
-	function create_standard_csv($offset) {
+	function check_local_infile_support($link, $engine, $table_name = 'test') {
+
+		if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "local_infile"'))
+			return "Cannot check if Server variable 'local_infile' is set to 'ON'";
+
+		$row = mysqli_fetch_assoc($res);
+		mysqli_free_result($res);
+		if ('ON' != $row['Value'])
+			return sprintf("Server variable 'local_infile' seems not set to 'ON', found '%s'", $row['Value']);
+
+		if (!mysqli_query($link, sprintf('DROP TABLE IF EXISTS %s', $table_name))) {
+			return "Failed to drop old test table";
+		}
+
+		if (!mysqli_query($link, $sql = sprintf('CREATE TABLE %s(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=%s',
+			$table_name, $engine)))
+			return "Failed to create test table: $sql";
+
+		$file = create_standard_csv(1, false);
+		if (!$file) {
+			mysqli_query($link, sprintf('DROP TABLE IF EXISTS %s', $table_name));
+			return "Cannot create CSV file";
+		}
+
+		if (!@mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s'
+			INTO TABLE %s
+			FIELDS TERMINATED BY ';' OPTIONALLY ENCLOSED BY '\''
+			LINES TERMINATED BY '\n'",
+			mysqli_real_escape_string($link, $file),
+			$table_name))) {
+			  if (1148 == mysqli_errno($link)) {
+				  mysqli_query($link, sprintf('DROP TABLE IF EXISTS %s', $table_name));
+				  return "Cannot test LOAD DATA LOCAL INFILE, [1148] The used command is not allowed with this MySQL version";
+			  } else if ($link->errno) {
+				  return $link->error;
+			  }
+		}
+		mysqli_query($link, sprintf('DROP TABLE IF EXISTS %s', $table_name));
+		return "";
+	}
+
+	function create_standard_csv($offset, $verbose = true) {
 		// create a CVS file
 		$file = tempnam(sys_get_temp_dir(), 'mysqli_test');
 		if (!$fp = fopen($file, 'w')) {
-			printf("[%03d + 1] Cannot create CVS file '%s'\n", $offset, $file);
+			if ($verbose)
+				printf("[%03d + 1] Cannot create CVS file '%s'\n", $offset, $file);
 			return NULL;
 		} else {
 			/* Looks ugly? No, handy if you have crashes... */
@@ -21,14 +63,16 @@
 			if (!fwrite($fp, (binary)"'97';'x';\n") ||
 				!fwrite($fp, (binary)"'98';'y';\n") ||
 				!fwrite($fp, (binary)"99;'z';\n")) {
-				printf("[%03d + 2] Cannot write CVS file '%s'\n", $offset, $file);
+				if ($verbose)
+					printf("[%03d + 2] Cannot write CVS file '%s'\n", $offset, $file);
 				return NULL;
 			}
 		} else {
 			if (!fwrite($fp, "97;'x';\n") ||
 				!fwrite($fp, "98;'y';\n") ||
 				!fwrite($fp, "99;'z';\n")) {
-				printf("[%03d + 3] Cannot write CVS file '%s'\n", $offset, $file);
+				if ($verbose)
+					printf("[%03d + 3] Cannot write CVS file '%s'\n", $offset, $file);
 				return NULL;
 			}
 		}
@@ -36,8 +80,9 @@
 		fclose($fp);
 
 		if (!chmod($file, 0644)) {
-			printf("[%03d + 4] Cannot change the file perms of '%s' from 0600 to 0644, MySQL might not be able to read it\n",
-				$offset, $file);
+			if ($verbose)
+				printf("[%03d + 4] Cannot change the file perms of '%s' from 0600 to 0644, MySQL might not be able to read it\n",
+					$offset, $file);
 			return NULL;
 		}
 		return $file;

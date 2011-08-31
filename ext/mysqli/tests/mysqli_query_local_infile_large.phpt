@@ -4,6 +4,16 @@ mysql_query(LOAD DATA LOCAL INFILE) with large data set (10MB)
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+
+$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+if (!$link)
+	die(sprintf("skip Can't connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+
+include_once("local_infile_tools.inc");
+if ($msg = check_local_infile_support($link, $engine))
+	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+
+mysqli_close($link);
 ?>
 --INI--
 mysqli.allow_local_infile=1
