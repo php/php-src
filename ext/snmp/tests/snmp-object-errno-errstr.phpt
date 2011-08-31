@@ -73,6 +73,30 @@ $oid1 = 'SNMPv2-MIB::sysContact.0';
 var_dump(@$session->set($oid1, 'q', 'blah'));
 var_dump($session->getErrno() == SNMP::ERRNO_OID_PARSING_ERROR);
 var_dump($session->getError());
+
+echo "SNMP::ERRNO_MULTIPLE_SET_QUERIES\n";
+$oid1 = 'SNMPv2-MIB::sysContact.0';
+$oid2 = 'SNMPv2-MIB::sysLocation.0';
+$session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
+$session->max_oids = 1;
+$oldvalue1 = $session->get($oid1);
+$newvalue1 = $oldvalue1 . '0';
+$oldvalue2 = $session->get($oid2);
+$newvalue2 = $oldvalue2 . '0';
+$z = @$session->set(array($oid1, $oid2), array('s','s'), array($newvalue1, $newvalue2));
+var_dump($z);
+var_dump($session->getErrno() == SNMP::ERRNO_MULTIPLE_SET_QUERIES);
+var_dump($session->getError());
+var_dump(($session->get($oid1) === $newvalue1));
+var_dump(($session->get($oid2) === $newvalue2));
+$z = @$session->set(array($oid1, $oid2), array('s','s'), array($oldvalue1, $oldvalue2));
+var_dump($z);
+var_dump($session->getErrno() == SNMP::ERRNO_MULTIPLE_SET_QUERIES);
+var_dump($session->getError());
+var_dump(($session->get($oid1) === $oldvalue1));
+var_dump(($session->get($oid2) === $oldvalue2));
+var_dump($session->close());
 ?>
 --EXPECTF--
 SNMP::ERRNO_NOERROR
@@ -109,3 +133,15 @@ SET: Wrong type
 bool(false)
 bool(true)
 string(129) "Could not add variable: OID='.iso.org.dod.internet.mgmt.mib-2.system.sysContact.0' type='q' value='blah': Bad variable type ("q")"
+SNMP::ERRNO_MULTIPLE_SET_QUERIES
+bool(true)
+bool(true)
+string(74) "Can not fit all OIDs for SET query into one packet, using multiple queries"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(74) "Can not fit all OIDs for SET query into one packet, using multiple queries"
+bool(true)
+bool(true)
+bool(true)
