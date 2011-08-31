@@ -271,7 +271,7 @@ static inline unsigned int get_next_char(
 					MB_FAILURE(pos, 2);
 				}
 				pos += 2;
-			} else if (c < 0x80 || c >= 0xA1 && c <= 0xDF) {
+			} else if (c < 0x80 || (c >= 0xA1 && c <= 0xDF)) {
 				this_char = c;
 				pos += 1;
 			} else {
@@ -787,8 +787,8 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 			
 	/* strtol allows whitespace and other stuff in the beginning
 		* we're not interested */
-	if (hexadecimal && !isxdigit(**buf) ||
-			!hexadecimal && !isdigit(**buf)) {
+	if ((hexadecimal && !isxdigit(**buf)) ||
+			(!hexadecimal && !isdigit(**buf))) {
 		return FAILURE;
 	}
 
@@ -821,9 +821,9 @@ static inline int process_named_entity_html(const char **buf, const char **start
 	 * sequence of 8-bit code units. If in the ranges below, it represents
 	 * necessarily a alpha character because none of the supported encodings
 	 * has an overlap with ASCII in the leading byte (only on the second one) */
-	while (**buf >= 'a' && **buf <= 'z' ||
-			**buf >= 'A' && **buf <= 'Z' ||
-			**buf >= '0' && **buf <= '9') {
+	while ((**buf >= 'a' && **buf <= 'z') ||
+			(**buf >= 'A' && **buf <= 'Z') ||
+			(**buf >= '0' && **buf <= '9')) {
 		(*buf)++;
 	}
 
