@@ -6,10 +6,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
 ?>
---INI--
-open_basedir=.
 --FILE--
 <?php
+chdir(__DIR__);
+ini_set("open_basedir", ".");
 require_once "open_basedir.inc";
 $initdir = getcwd();
 test_open_basedir_before("readlink", FALSE);
@@ -32,7 +32,6 @@ $target = ($initdir."/test/ok/ok.txt");
 $symlink = ($initdir."/test/ok/symlink.txt");
 var_dump(symlink($target, $symlink));
 var_dump(readlink($symlink));
-var_dump(unlink($symlink));
 
 test_open_basedir_after("readlink");
 ?>
@@ -69,6 +68,5 @@ bool(false)
 
 Warning: readlink(): open_basedir restriction in effect. File(%s/test/ok/symlink.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-bool(true)
 *** Finished testing open_basedir configuration [readlink] ***
 
