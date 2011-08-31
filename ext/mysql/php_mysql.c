@@ -1590,6 +1590,7 @@ PHP_FUNCTION(mysql_list_dbs)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
+	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 }
 /* }}} */
@@ -1627,6 +1628,7 @@ PHP_FUNCTION(mysql_list_tables)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
+	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 }
 /* }}} */
@@ -1664,6 +1666,7 @@ PHP_FUNCTION(mysql_list_fields)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
+	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 }
 /* }}} */
@@ -1696,6 +1699,7 @@ PHP_FUNCTION(mysql_list_processes)
 		RETURN_FALSE;
 	}
 
+	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 }
 /* }}} */
