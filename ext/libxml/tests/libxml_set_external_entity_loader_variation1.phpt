@@ -48,7 +48,7 @@ string(10) "-//FOO/BAR"
 string(25) "http://example.com/foobar"
 array(4) {
   ["directory"]=>
-  string(36) "%s"
+  string(%d) "%s"
   ["intSubName"]=>
   string(3) "foo"
   ["extSubURI"]=>
@@ -60,7 +60,7 @@ string(13) "-//FOO/ENTITY"
 string(32) "http://example.com/fooentity.ent"
 array(4) {
   ["directory"]=>
-  string(36) "%s"
+  string(%d) "%s"
   ["intSubName"]=>
   string(3) "foo"
   ["extSubURI"]=>
