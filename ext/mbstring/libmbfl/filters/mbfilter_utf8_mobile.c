@@ -40,10 +40,10 @@ extern int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter);
 
 extern const unsigned char mblen_table_utf8[];
 
-static const char *mbfl_encoding_utf8_docomo_aliases[] = {"utf8-mobile#docomo", NULL};
-static const char *mbfl_encoding_utf8_kddi_aliases[] = {"utf8-mobile#kddi", NULL};
-static const char *mbfl_encoding_utf8_kddi_b_aliases[] = {"utf8-mobile#kddi-b", NULL};
-static const char *mbfl_encoding_utf8_sb_aliases[] = {"utf8-mobile#softbank", NULL};
+static const char *mbfl_encoding_utf8_docomo_aliases[] = {"UTF-8-DOCOMO", "UTF8-DOCOMO", NULL};
+static const char *mbfl_encoding_utf8_kddi_a_aliases[] = {"UTF-8-KDDI", "UTF8-KDDI", NULL};
+static const char *mbfl_encoding_utf8_kddi_b_aliases[] = {"UTF-8-Mobile#KDDI", "UTF-8-KDDI", "UTF8-KDDI", NULL};
+static const char *mbfl_encoding_utf8_sb_aliases[] = {"UTF-8-SOFTBANK", "UTF8-SOFTBANK", NULL};
 
 const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	mbfl_no_encoding_utf8_docomo,
@@ -54,11 +54,11 @@ const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	MBFL_ENCTYPE_MBCS
 };
 
-const mbfl_encoding mbfl_encoding_utf8_kddi = {
-	mbfl_no_encoding_utf8_kddi,
-	"UTF-8-Mobile#KDDI",
+const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
+	mbfl_no_encoding_utf8_kddi_a,
+	"UTF-8-Mobile#KDDI-A",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_kddi_aliases,
+	(const char *(*)[])&mbfl_encoding_utf8_kddi_a_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS
 };
@@ -88,8 +88,8 @@ const struct mbfl_identify_vtbl vtbl_identify_utf8_docomo = {
 	mbfl_filt_ident_utf8
 };
 
-const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi = {
-	mbfl_no_encoding_utf8_kddi,
+const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_a = {
+	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8
@@ -127,8 +127,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_docomo = {
 	mbfl_filt_conv_common_flush
 };
 
-const struct mbfl_convert_vtbl vtbl_utf8_kddi_wchar = {
-	mbfl_no_encoding_utf8_kddi,
+const struct mbfl_convert_vtbl vtbl_utf8_kddi_a_wchar = {
+	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
@@ -136,9 +136,9 @@ const struct mbfl_convert_vtbl vtbl_utf8_kddi_wchar = {
 	mbfl_filt_conv_common_flush
 };
 
-const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi = {
+const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_a = {
 	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_utf8_kddi,
+	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_utf8_mobile,
@@ -212,7 +212,7 @@ int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 				if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo &&
 					mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
 					s = mbfilter_sjis_emoji_docomo2unicode(s1, &snd);
-				} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi &&
+				} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
 						   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 6) > 0) {
 					s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
 				} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b &&
@@ -320,7 +320,7 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo &&
 			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 &&
 			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) || 
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi &&
+			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
 			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
 			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 6) > 0) ||
 			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b &&

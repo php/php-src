@@ -171,7 +171,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
  	&mbfl_encoding_sjis_mac,
 	&mbfl_encoding_sjis2004,
 	&mbfl_encoding_utf8_docomo,
-	&mbfl_encoding_utf8_kddi,
+	&mbfl_encoding_utf8_kddi_a,
 	&mbfl_encoding_utf8_kddi_b,
 	&mbfl_encoding_utf8_sb,
 	&mbfl_encoding_cp932,

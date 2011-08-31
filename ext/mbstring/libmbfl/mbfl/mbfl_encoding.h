@@ -63,7 +63,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_utf16le,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_utf8_docomo,
-	mbfl_no_encoding_utf8_kddi,
+	mbfl_no_encoding_utf8_kddi_a,
 	mbfl_no_encoding_utf8_kddi_b,
 	mbfl_no_encoding_utf8_sb,
 	mbfl_no_encoding_utf7,

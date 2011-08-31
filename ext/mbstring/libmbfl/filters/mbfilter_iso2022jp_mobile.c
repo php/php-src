@@ -42,11 +42,13 @@
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
 extern int mbfl_filt_ident_2022jpms(int c, mbfl_identify_filter *filter);
 
+static const char *mbfl_encoding_2022jp_kddi_aliases[] = {"ISO-2022-JP-KDDI", NULL};
+
 const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	mbfl_no_encoding_2022jp_kddi,
 	"ISO-2022-JP-MOBILE#KDDI",
 	"ISO-2022-JP",
-	NULL,
+	mbfl_encoding_2022jp_kddi_aliases,
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
