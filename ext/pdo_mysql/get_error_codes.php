@@ -5,7 +5,7 @@
 	while (!feof(STDIN)) {
 		$line = fgets(STDIN);
 
-		if (ereg('^(ER_.*),[[:space:]]+"(.*)",[[:space:]]+"(.*)"', $line, $matches)) {
+		if (ereg('^\{[[:space:]]+(ER_.*)[[:space:]]+,[[:space:]]*"(.*)",[[:space:]]*"(.*)"', $line, $matches)) {
 			$codes[$matches[1]] = $matches[2];
 			$maxlen = max($maxlen, strlen($matches[1]));
 		}
