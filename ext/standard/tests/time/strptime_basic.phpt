@@ -5,6 +5,7 @@ Test strptime() function : basic functionality
 	if (!function_exists('strptime')) { 
 		die("skip - strptime() function not available in this build"); 
 	}	 
+        if(PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
 ?>
 
 --FILE--
