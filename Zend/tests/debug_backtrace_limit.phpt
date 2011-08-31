@@ -24,7 +24,7 @@ Array
 (
     [0] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
             [args] => Array
@@ -38,7 +38,7 @@ Array
 (
     [0] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
             [args] => Array
@@ -49,7 +49,7 @@ Array
 
     [1] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
             [args] => Array
@@ -63,7 +63,7 @@ Array
 (
     [0] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
             [args] => Array
@@ -74,7 +74,7 @@ Array
 
     [1] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
             [args] => Array
@@ -85,7 +85,7 @@ Array
 
     [2] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 17
             [function] => a
             [args] => Array
@@ -99,7 +99,7 @@ Array
 (
     [0] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 7
             [function] => c
             [args] => Array
@@ -110,7 +110,7 @@ Array
 
     [1] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 3
             [function] => b
             [args] => Array
@@ -121,7 +121,7 @@ Array
 
     [2] => Array
         (
-            [file] => %s/debug_backtrace_limit.php
+            [file] => %sdebug_backtrace_limit.php
             [line] => 17
             [function] => a
             [args] => Array
