@@ -30,7 +30,7 @@ Test 10: EXSLT Support
     month-in-year        : 12
     month-name           : December
     month-abbreviation   : Dec
-    week-in-year         : 53
+    week-in-year         : 1
     day-in-year          : 365
     day-in-month         : 31
     day-of-week-in-month : 5
@@ -84,7 +84,7 @@ Test 10: EXSLT Support
     month-in-year        : 12
     month-name           : December
     month-abbreviation   : Dec
-    week-in-year         : 53
+    week-in-year         : 1
     day-in-year          : 365
     day-in-month         : 31
     day-of-week-in-month : 5
@@ -102,13 +102,103 @@ Test 10: EXSLT Support
     month-in-year        : 2
     month-name           : February
     month-abbreviation   : Feb
-    week-in-year         : 10
+    week-in-year         : 9
     day-in-year          : 60
     day-in-month         : 29
     day-of-week-in-month : 5
     day-in-week          : 1
     day-name             : Sunday
     day-abbreviation     : Sun
+    time                 : 
+    hour-in-day          : NaN
+    minute-in-hour       : NaN
+    second-in-minute     : NaN
+  
+  Test Date : 1999-01-02
+    year                 : 1999
+    leap-year            : false
+    month-in-year        : 1
+    month-name           : January
+    month-abbreviation   : Jan
+    week-in-year         : 53
+    day-in-year          : 2
+    day-in-month         : 2
+    day-of-week-in-month : 1
+    day-in-week          : 7
+    day-name             : Saturday
+    day-abbreviation     : Sat
+    time                 : 
+    hour-in-day          : NaN
+    minute-in-hour       : NaN
+    second-in-minute     : NaN
+  
+  Test Date : 1999-01-03
+    year                 : 1999
+    leap-year            : false
+    month-in-year        : 1
+    month-name           : January
+    month-abbreviation   : Jan
+    week-in-year         : 53
+    day-in-year          : 3
+    day-in-month         : 3
+    day-of-week-in-month : 1
+    day-in-week          : 1
+    day-name             : Sunday
+    day-abbreviation     : Sun
+    time                 : 
+    hour-in-day          : NaN
+    minute-in-hour       : NaN
+    second-in-minute     : NaN
+  
+  Test Date : 2004-01-01
+    year                 : 2004
+    leap-year            : true
+    month-in-year        : 1
+    month-name           : January
+    month-abbreviation   : Jan
+    week-in-year         : 1
+    day-in-year          : 1
+    day-in-month         : 1
+    day-of-week-in-month : 1
+    day-in-week          : 5
+    day-name             : Thursday
+    day-abbreviation     : Thu
+    time                 : 
+    hour-in-day          : NaN
+    minute-in-hour       : NaN
+    second-in-minute     : NaN
+  
+  Test Date : 2006-01-01
+    year                 : 2006
+    leap-year            : false
+    month-in-year        : 1
+    month-name           : January
+    month-abbreviation   : Jan
+    week-in-year         : 52
+    day-in-year          : 1
+    day-in-month         : 1
+    day-of-week-in-month : 1
+    day-in-week          : 1
+    day-name             : Sunday
+    day-abbreviation     : Sun
+    time                 : 
+    hour-in-day          : NaN
+    minute-in-hour       : NaN
+    second-in-minute     : NaN
+  
+  Test Date : 2007-12-31
+    year                 : 2007
+    leap-year            : false
+    month-in-year        : 12
+    month-name           : December
+    month-abbreviation   : Dec
+    week-in-year         : 1
+    day-in-year          : 365
+    day-in-month         : 31
+    day-of-week-in-month : 5
+    day-in-week          : 2
+    day-name             : Monday
+    day-abbreviation     : Mon
     time                 : 
     hour-in-day          : NaN
     minute-in-hour       : NaN
