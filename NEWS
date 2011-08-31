@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #48476 (cloning extended DateTime class without calling
     parent::__constr crashed PHP). (Hannes)
 
+- MySQL:
+  . Fixed bug #55550 (mysql.trace_mode miscounts result sets). (Johannes)
+
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
   . Fixed bug#53872 (internal corruption of phar). (Hannes)
