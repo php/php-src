@@ -4,6 +4,7 @@ libxml_set_external_entity_loader() variation: resolve externals and entities
 <?php if (!extension_loaded('dom')) die('skip'); ?>
 --FILE--
 <?php
+chdir(__DIR__);
 $xml = <<<XML
 <!DOCTYPE foo PUBLIC "-//FOO/BAR" "http://example.com/foobar">
 <foo>bar&fooz;</foo>
