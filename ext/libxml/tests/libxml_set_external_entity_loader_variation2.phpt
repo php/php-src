@@ -37,7 +37,7 @@ echo "Done.\n";
 
 --EXPECTF--
 string(10) "-//FOO/BAR"
-string(46) "%sfoobar.dtd"
+string(%d) "%sfoobar.dtd"
 
 Warning: DOMDocument::validate(): Could not load the external subset "foobar.dtd" in %s on line %d
 bool(false)
