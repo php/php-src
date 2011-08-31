@@ -44,11 +44,15 @@ extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
+static const char *mbfl_encoding_sjis_docomo_aliases[] = {"SJIS-DOCOMO", "shift_jis-imode", "x-sjis-emoji-docomo", NULL};
+static const char *mbfl_encoding_sjis_kddi_aliases[] = {"SJIS-KDDI", "shift_jis-kddi", "x-sjis-emoji-kddi", NULL};
+static const char *mbfl_encoding_sjis_sb_aliases[] = {"SJIS-SOFTBANK", "shift_jis-softbank", "x-sjis-emoji-softbank", NULL};
+
 const mbfl_encoding mbfl_encoding_sjis_docomo = {
  	mbfl_no_encoding_sjis_docomo,
  	"SJIS-Mobile#DOCOMO",
  	"Shift_JIS",
- 	NULL,
+ 	mbfl_encoding_sjis_docomo_aliases,
  	mblen_table_sjis,
  	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
@@ -57,7 +61,7 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
  	mbfl_no_encoding_sjis_kddi,
  	"SJIS-Mobile#KDDI",
  	"Shift_JIS",
- 	NULL,
+ 	mbfl_encoding_sjis_kddi_aliases,
  	mblen_table_sjis,
  	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
@@ -66,7 +70,7 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
  	mbfl_no_encoding_sjis_sb,
  	"SJIS-Mobile#SOFTBANK",
  	"Shift_JIS",
- 	NULL,
+ 	mbfl_encoding_sjis_sb_aliases,
  	mblen_table_sjis,
  	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
