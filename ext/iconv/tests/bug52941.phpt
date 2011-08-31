@@ -28,14 +28,14 @@ var_dump($decoded['X-Foo']);
 var_dump($decoded['X-Bar']);
 var_dump($decoded['To']);
 ?>
---EXPECT--
+--EXPECTF--
 string(17) "<foo@example.com>"
-string(29) "=?ks_c_5601-1987?B?UkU6odk=?="
-string(33) "=?ks_c_5601-1987?B?UkU6odk=?= Foo"
-string(33) "=?ks_c_5601-1987?B?UkU6odk=?= Foo"
+string(%d) "%s"
+string(%d) "%sFoo"
+string(%d) "%sFoo"
 string(18) "<test@example.com>"
 string(17) "<foo@example.com>"
-string(29) "=?ks_c_5601-1987?B?UkU6odk=?="
-string(33) "=?ks_c_5601-1987?B?UkU6odk=?= Foo"
-string(33) "=?ks_c_5601-1987?B?UkU6odk=?= Foo"
+string(%d) "%s"
+string(%d) "%sFoo"
+string(%d) "%sFoo"
 string(18) "<test@example.com>"
