@@ -17,14 +17,14 @@ echo "Checking error handling\n";
 //              string object_id [, int timeout [, int retries]]);
 
 var_dump(snmp3_get($hostname, $community, '', '', '', '', ''));
-var_dump(snmp3_get($hostname, $community, '', '', '', '', '', ''));
-var_dump(snmp3_get($hostname, $community, 'bugusPriv', '', '', '', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'TTT', '', '', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'MD5', '', '', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'MD5', 'te', '', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'BBB', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'AES', '', ''));
-var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'AES', 'ty', ''));
+var_dump(snmp3_get($hostname, $community, '', '', '', '', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'bugusPriv', '', '', '', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'TTT', '', '', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'MD5', '', '', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authNoPriv', 'MD5', 'te', '', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'BBB', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'AES', '', '.1.3.6.1.2.1.1.1.0'));
+var_dump(snmp3_get($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'AES', 'ty', '.1.3.6.1.2.1.1.1.0'));
 var_dump(snmp3_get($hostname, 'somebogususer', 'authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
 
 var_dump(snmp3_set($hostname, $community, 'authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '', 's'));
