@@ -133,6 +133,20 @@ mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ mysqlnd_minfo_dump_api_plugins */
+static int
+mysqlnd_minfo_dump_api_plugins(void *pDest, void * buf TSRMLS_DC)
+{
+	smart_str * buffer = (smart_str *) buf;
+	mysqlnd_api_extension_t *ext = *(mysqlnd_api_extension_t **) pDest;
+	if (buffer->len) {
+		smart_str_appendc(buffer, ',');
+	}
+	smart_str_appends(buffer, ext->module->name);
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -165,7 +179,6 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	php_info_print_table_row(2, "Collecting memory statistics", MYSQLND_G(collect_memory_statistics)? "Yes":"No");
 
 	php_info_print_table_row(2, "Tracing", MYSQLND_G(debug)? MYSQLND_G(debug):"n/a");
-	php_info_print_table_end();
 
 	/* loaded plugins */
 	{
@@ -174,7 +187,15 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		smart_str_0(&tmp_str);
 		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
 		smart_str_free(&tmp_str);
+
+		zend_hash_apply_with_argument(mysqlnd_get_api_extensions(), mysqlnd_minfo_dump_api_plugins, &tmp_str);
+		smart_str_0(&tmp_str);
+		php_info_print_table_row(2, "API Extensions", tmp_str.c);
+		smart_str_free(&tmp_str);
 	}
+
+	php_info_print_table_end();
+
 
 	/* Print client stats */
 	mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_plugin_stats, NULL);
