@@ -310,6 +310,15 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 
+typedef struct {
+	zend_module_entry *module;
+	MYSQLND *(*conversion_cb)(zval *zv);
+} mysqlnd_api_extension_t;
+
+PHPAPI HashTable *mysqlnd_get_api_extensions();
+PHPAPI void mysqlnd_register_api_extension(mysqlnd_api_extension_t *apiext);
+PHPAPI MYSQLND* zval_to_mysqlnd(zval *zv);
+
 #endif	/* MYSQLND_H */
 
 

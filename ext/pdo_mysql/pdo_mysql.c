@@ -47,6 +47,29 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql);
 # endif
 #endif
 
+#ifdef PDO_USE_MYSQLND
+static MYSQLND *pdo_mysql_convert_zv_to_mysqlnd(zval *zv)
+{
+	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == php_pdo_get_dbh_ce()) {
+		pdo_dbh_t *dbh = zend_object_store_get_object(zv TSRMLS_CC);
+
+		if (!dbh || dbh->driver != &pdo_mysql_driver) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
+			return NULL;
+		}
+
+		return ((pdo_mysql_db_handle *)dbh)->server;
+	}
+	return NULL;
+}
+
+static mysqlnd_api_extension_t pdo_mysql_api_ext = {
+	&pdo_mysql_module_entry,
+	pdo_mysql_convert_zv_to_mysqlnd
+};
+#endif
+
+
 /* {{{ PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
@@ -84,6 +107,11 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (long)PDO_MYSQL_ATTR_SSL_CA);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (long)PDO_MYSQL_ATTR_SSL_CAPATH);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (long)PDO_MYSQL_ATTR_SSL_CIPHER);
+
+#ifdef PDO_USE_MYSQLND
+	mysqlnd_register_api_extension(&pdo_mysql_api_ext);
+#endif
+
 	return php_pdo_register_driver(&pdo_mysql_driver);
 }
 /* }}} */
