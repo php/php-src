@@ -267,7 +267,7 @@ typedef enum_func_status	(*func_mysqlnd_net__set_client_option)(MYSQLND_NET * co
 typedef enum_func_status	(*func_mysqlnd_net__network_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
 typedef size_t				(*func_mysqlnd_net__network_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__decode)(zend_uchar * uncompressed_data, size_t uncompressed_data_len, const zend_uchar * const compressed_data, size_t compressed_data_len TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_net__encode)(zend_uchar * compress_buffer, size_t compress_buffer_len, const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_net__encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len, const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC);
 typedef size_t				(*func_mysqlnd_net__consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__free_contents)(MYSQLND_NET * net TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__enable_ssl)(MYSQLND_NET * const net TSRMLS_DC);
