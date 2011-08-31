@@ -50,28 +50,28 @@ unlink($file_path."/readlink_variation2.tmp");
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
 Warning: readlink() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 
 *** Done ***
