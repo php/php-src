@@ -13,18 +13,11 @@ require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die("skip Cannot connect to MySQL");
 
-if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "local_infile"')) {
-	mysqli_close($link);
-	die("skip Cannot check if Server variable 'local_infile' is set to 'ON'");
-}
+include_once("local_infile_tools.inc");
+if ($msg = check_local_infile_support($link, $engine))
+	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
-$row = mysqli_fetch_assoc($res);
-mysqli_free_result($res);
 mysqli_close($link);
-
-if ('ON' != $row['Value'])
-	die(sprintf("skip Server variable 'local_infile' seems not set to 'ON', found '%s'",
-		$row['Value']));
 ?>
 --INI--
 mysqli.allow_local_infile=1

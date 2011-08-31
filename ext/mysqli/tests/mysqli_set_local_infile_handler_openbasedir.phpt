@@ -18,13 +18,11 @@ if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "local_infile"')) {
 	die("skip Cannot check if Server variable 'local_infile' is set to 'ON'");
 }
 
-$row = mysqli_fetch_assoc($res);
-mysqli_free_result($res);
-mysqli_close($link);
+include_once("local_infile_tools.inc");
+if ($msg = check_local_infile_support($link, $engine))
+	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
-if ('ON' != $row['Value'])
-	die(sprintf("skip Server variable 'local_infile' seems not set to 'ON', found '%s'",
-		$row['Value']));
+mysqli_close($link);
 ?>
 --INI--
 open_basedir="."
