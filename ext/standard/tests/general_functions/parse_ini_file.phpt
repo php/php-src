@@ -205,6 +205,8 @@ array(3) {
   ["foo_"]=>
   string(4) "bar3"
 }
+
+Deprecated: Comments starting with '#' are deprecated in %s
 array(3) {
   ["foo"]=>
   string(4) "bar1"
