@@ -11,6 +11,9 @@ if (!$result || preg_match('/koi8/i', setlocale(LC_CTYPE, 0)) == 0) {
 	die("skip setlocale() failed\n");
 }
 ?>
+--COMMENT--
+As of PHP 5.4, htmlentities() no longer makes replacements with numerical
+entities. Hence, for this input there's no substitution.
 --FILE--
 <?php
 setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
@@ -19,4 +22,4 @@ var_dump($str, htmlentities($str, ENT_QUOTES, ''));
 ?>
 --EXPECT--
 string(9) "роскошный"
-string(63) "&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"
+string(9) "роскошный"
