@@ -160,6 +160,9 @@ require_once('skipifconnectfailure.inc');
 	if (defined('MYSQLI_DATA_TRUNCATED'))
 		$expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
+	if (defined('MYSQLI_SERVER_PS_OUT_PARAMS'))
+		$expected_constants["MYSQLI_SERVER_PS_OUT_PARAMS"] = true;
+
 	if (!$IS_MYSQLND) {
 		/* libmysql only */
 
