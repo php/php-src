@@ -302,6 +302,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	if (obj->stringval == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
+		valuePush(ctxt, xmlXPathNewString(""));
 		if (fci.param_count > 0) {
 			for (i = 0; i < nargs - 1; i++) {
 				zval_ptr_dtor(&args[i]);
@@ -323,7 +324,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", callable);
-		
+		valuePush(ctxt, xmlXPathNewString(""));
 	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable, strlen(callable) + 1) == 0) { 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not allowed to call handler '%s()'", callable);
 		/* Push an empty string, so that we at least have an xslt result... */
@@ -333,6 +334,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		if (result == FAILURE) {
 			if (Z_TYPE(handler) == IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
+				valuePush(ctxt, xmlXPathNewString(""));
 			}
 		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
 		} else if (retval == NULL) {
