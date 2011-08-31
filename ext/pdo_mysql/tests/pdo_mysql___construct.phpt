@@ -297,4 +297,4 @@ MySQLPDOTest::skip();
 [009] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [010] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [017] DSN=%s, SQLSTATE[%s] [%d] %s
-[033] DSN = mysql:%s, character sets has not been set, @@character_set_connection reports 'latin1', expecting 'latin2'done!
+done!
