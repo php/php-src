@@ -18,9 +18,9 @@ if (false !== getenv('PDO_OCI_TEST_DSN')) {
 	$config['ENV']['PDOTEST_PASS'] = getenv('PDO_OCI_TEST_PASS');
 	$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_OCI_TEST_ATTR');
 } else {
-	$config['ENV']['PDOTEST_DSN'] = 'oci:dbname=test';
+	$config['ENV']['PDOTEST_DSN'] = 'oci:dbname=localhost/xe;charset=WE8MSWIN1252';
 	$config['ENV']['PDOTEST_USER'] = 'SYSTEM';
-	$config['ENV']['PDOTEST_PASS'] = 'PASSWORD';
+	$config['ENV']['PDOTEST_PASS'] = 'oracle';
 }
 
 return $config;
