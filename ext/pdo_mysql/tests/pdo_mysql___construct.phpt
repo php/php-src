@@ -294,7 +294,7 @@ MySQLPDOTest::skip();
 [005] invalid data source name, [n/a] n/a
 [006] invalid data source name, [n/a] n/a
 [007] could not find driver, [n/a] n/a
-[009] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
-[010] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
+[009] SQLSTATE[%s] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
+[010] SQLSTATE[%s] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [017] DSN=%s, SQLSTATE[%s] [%d] %s
 done!
