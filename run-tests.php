@@ -326,12 +326,10 @@ function save_or_mail_results()
 			echo "\nYou may have found a problem in PHP.";
 		}
 		echo "\nThis report can be automatically sent to the PHP QA team at\n";
-		echo QA_REPORTS_PAGE . "\n";
-		echo "Reports for current versions of PHP will also appear on\n";
-		echo "http://news.php.net/php.qa.reports\n";
+		echo QA_REPORTS_PAGE . " and http://news.php.net/php.qa.reports\n";
 		echo "This gives us a better understanding of PHP's behavior.\n";
 		echo "If you don't want to send the report immediately you can choose\n";
-		echo "option \"s\" to save it.	You can then email this report to ". PHP_QA_EMAIL . " later.\n";
+		echo "option \"s\" to save it.	You can then email it to ". PHP_QA_EMAIL . " later.\n";
 		echo "Do you want to send this report now? [Yns]: ";
 		flush();
 
@@ -1950,7 +1948,7 @@ COMMAND $cmd
 	if (!$passed) {
 		if (isset($section_text['XFAIL'])) {
 			$restype[] = 'XFAIL';
-			$info = '  XFAIL REASON: ' . $section_text['XFAIL'];
+			$info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
 		} else {
 			$restype[] = 'FAIL';
 		}
