@@ -7,6 +7,7 @@ libxml_set_external_entity_loader() variation: restore original handler; returni
 @unlink(__DIR__ . "/foobar.dtd");
 --FILE--
 <?php
+chdir(__DIR__);
 $xml = <<<XML
 <!DOCTYPE foo PUBLIC "-//FOO/BAR" "foobar.dtd">
 <foo>bar</foo>
