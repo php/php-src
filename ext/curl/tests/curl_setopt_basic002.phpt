@@ -26,7 +26,7 @@ $curl_content = curl_exec($ch);
 
 fclose($handle);
 unset($handle);
-var_dump( file_get_contents($temp_file) );
+var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 @unlink($temp_file);
 
 ob_start(); // start output buffering
@@ -38,7 +38,7 @@ ob_end_clean();
 
 fclose($handle);
 unset($handle);
-var_dump( file_get_contents($temp_file) );
+var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 @unlink($temp_file);
 
 curl_close($ch);
