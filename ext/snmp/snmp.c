@@ -110,6 +110,7 @@ typedef struct snmp_session php_snmp_session;
 #define PHP_SNMP_ERRNO_ERROR_IN_REPLY	3
 #define PHP_SNMP_ERRNO_OID_NOT_INCREASING 4
 #define PHP_SNMP_ERRNO_OID_PARSING_ERROR 5
+#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES 6
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
@@ -670,11 +671,8 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	struct snmp_session *ss;
 	struct snmp_pdu *pdu=NULL, *response;
 	struct variable_list *vars;
-	oid name[MAX_NAME_LEN];
-	size_t name_length;
 	oid root[MAX_NAME_LEN];
 	size_t rootlen = 0;
-	int gotroot = 0;
 	int status, count, found;
 	char buf[2048];
 	char buf2[2048];
@@ -689,35 +687,10 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	/* reset errno and errstr */
 	php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_NOERROR, "");
 
-	if (st & SNMP_CMD_WALK) {
-		if (objid_query->count > 1) {
-			php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Multi OID walks are not supported!");
-			RETURN_FALSE;
-		}
-		rootlen = MAX_NAME_LEN;
-		if (strlen(objid_query->vars[0].oid)) { /* on a walk, an empty string means top of tree - no error */
-			if (snmp_parse_oid(objid_query->vars[0].oid, root, &rootlen)) {
-				gotroot = 1;
-			} else {
-				php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[0].oid);
-				RETVAL_FALSE;
-				return;
-			}
-		}
-
-		if (!gotroot) {
-			memmove((char *) root, (char *) objid_mib, sizeof(objid_mib));
-			rootlen = sizeof(objid_mib) / sizeof(oid);
-			gotroot = 1;
-		}
-
-		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
-		name_length = rootlen;
+	if (st & SNMP_CMD_WALK) { /* remember root OID */
+		memmove((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
+		rootlen = objid_query->vars[0].name_length;
 		objid_query->offset = objid_query->count;
-
-		memmove((char *)objid_query->vars[0].name, (char *)root, rootlen * sizeof(oid));
-		objid_query->vars[0].name_length = rootlen;
-
 	}
 
 	if ((ss = snmp_open(session)) == NULL) {
@@ -726,6 +699,10 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		free(err);
 		RETVAL_FALSE;
 		return;
+	}
+
+	if ((st & SNMP_CMD_SET) && objid_query->count > objid_query->step) {
+		php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES, "Can not fit all OIDs for SET query into one packet, using multiple queries");
 	}
 
 	while (keepwalking) {
@@ -738,7 +715,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				pdu->non_repeaters = objid_query->non_repeaters;
 				pdu->max_repetitions = objid_query->max_repetitions;
 			}
-			snmp_add_null_var(pdu, name, name_length);
+			snmp_add_null_var(pdu, objid_query->vars[0].name, objid_query->vars[0].name_length);
 		} else {
 			if (st & SNMP_CMD_GET) {
 				pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -753,14 +730,6 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				return;
 			}
 			for (count = 0; objid_query->offset < objid_query->count && count < objid_query->step; objid_query->offset++, count++){
-				objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
-				if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
-					php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
-					snmp_free_pdu(pdu);
-					snmp_close(ss);
-					RETVAL_FALSE;
-					return;
-				}
 				if (st & SNMP_CMD_SET) {
 					if ((snmp_errno = snmp_add_var(pdu, objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length, objid_query->vars[objid_query->offset].type, objid_query->vars[objid_query->offset].value))) {
 						snprint_objid(buf, sizeof(buf), objid_query->vars[objid_query->offset].name, objid_query->vars[objid_query->offset].name_length);
@@ -787,6 +756,10 @@ retry:
 		if (status == STAT_SUCCESS) {
 			if (response->errstat == SNMP_ERR_NOERROR) {
 				if (st & SNMP_CMD_SET) {
+					if (objid_query->offset < objid_query->count) { /* we have unprocessed OIDs */
+						keepwalking = 1;
+						continue;
+					}
 					snmp_free_pdu(response);
 					snmp_close(ss);
 					RETVAL_TRUE;
@@ -870,13 +843,13 @@ retry:
 
 					/* OID increase check */
 					if (st & SNMP_CMD_WALK) {
-						if (objid_query->oid_increasing_check == TRUE && snmp_oid_compare(name, name_length, vars->name, vars->name_length) >= 0) {
+						if (objid_query->oid_increasing_check == TRUE && snmp_oid_compare(objid_query->vars[0].name, objid_query->vars[0].name_length, vars->name, vars->name_length) >= 0) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							php_snmp_error(getThis(), NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = 0;
 						} else {
-							memmove((char *)name, (char *)vars->name, vars->name_length * sizeof(oid));
-							name_length = vars->name_length;
+							memmove((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
+							objid_query->vars[0].name_length = vars->name_length;
 							keepwalking = 1;
 						}
 					}
@@ -950,7 +923,7 @@ retry:
 * OID parser (and type, value for SNMP_SET command)
 */
 
-static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oid, zval **type, zval **value TSRMLS_DC)
+static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_query, zval **oid, zval **type, zval **value TSRMLS_DC)
 {
 	char *pptr;
 	HashPosition pos_oid, pos_type, pos_value;
@@ -1070,6 +1043,34 @@ static int php_snmp_parse_oid(int st, struct objid_query *objid_query, zval **oi
 		}
 	}
 
+	/* now parse all OIDs */
+	if (st & SNMP_CMD_WALK) {
+		if (objid_query->count > 1) {
+			php_snmp_error(object, NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Multi OID walks are not supported!");
+			efree(objid_query->vars);
+			return FALSE;
+		}
+		objid_query->vars[0].name_length = MAX_NAME_LEN;
+		if (strlen(objid_query->vars[0].oid)) { /* on a walk, an empty string means top of tree - no error */
+			if (!snmp_parse_oid(objid_query->vars[0].oid, objid_query->vars[0].name, &(objid_query->vars[0].name_length))) {
+				php_snmp_error(object, NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[0].oid);
+				efree(objid_query->vars);
+				return FALSE;
+			}
+		} else { 
+			memmove((char *)objid_query->vars[0].name, (char *)objid_mib, sizeof(objid_mib));
+			objid_query->vars[0].name_length = sizeof(objid_mib) / sizeof(oid);
+		}
+	} else {
+		for (objid_query->offset = 0; objid_query->offset < objid_query->count; objid_query->offset++) {
+			objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
+			if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
+				php_snmp_error(object, NULL TSRMLS_CC, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
+				efree(objid_query->vars);
+				return FALSE;
+			}
+		}
+	}
 	objid_query->offset = 0;
 	objid_query->step = objid_query->count;
 	return (objid_query->count > 0);
@@ -1450,7 +1451,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		}
 	}
 
-	if (!php_snmp_parse_oid(st, &objid_query, oid, type, value TSRMLS_CC)) {
+	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid, type, value TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -2370,6 +2371,7 @@ PHP_MINIT_FUNCTION(snmp)
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		(long)PHP_SNMP_ERRNO_ERROR_IN_REPLY);
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	(long)PHP_SNMP_ERRNO_OID_NOT_INCREASING);
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	(long)PHP_SNMP_ERRNO_OID_PARSING_ERROR);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	(long)PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
 
 	return SUCCESS;
 }

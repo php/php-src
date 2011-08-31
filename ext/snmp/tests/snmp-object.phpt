@@ -122,6 +122,23 @@ var_dump($z);
 var_dump(($session->get($oid1) === $oldvalue1));
 var_dump($session->close());
 
+echo "Multiple OID with max_oids = 1\n";
+$oid2 = 'SNMPv2-MIB::sysLocation.0';
+$session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
+$session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass);
+$session->max_oids = 1;
+$oldvalue2 = $session->get($oid2);
+$newvalue2 = $oldvalue2 . '0';
+$z = $session->set(array($oid1, $oid2), array('s','s'), array($newvalue1, $newvalue2));
+var_dump($z);
+var_dump(($session->get($oid1) === $newvalue1));
+var_dump(($session->get($oid2) === $newvalue2));
+$z = $session->set(array($oid1, $oid2), array('s','s'), array($oldvalue1, $oldvalue2));
+var_dump($z);
+var_dump(($session->get($oid1) === $oldvalue1));
+var_dump(($session->get($oid2) === $oldvalue2));
+var_dump($session->close());
+
 echo "SNMPv3, setting contextEngineID (authPriv)\n";
 $session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
 $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, '', 'aeeeff');
@@ -196,6 +213,18 @@ array(1) {
 bool(true)
 SET single OID
 bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Multiple OID with max_oids = 1
+
+Warning: SNMP::set(): Can not fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
+bool(true)
+bool(true)
+bool(true)
+
+Warning: SNMP::set(): Can not fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
 bool(true)
 bool(true)
 bool(true)
