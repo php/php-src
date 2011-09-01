@@ -37,39 +37,39 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test\bad) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 6
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest\bad) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 6
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test\bad): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 6
+Warning: parse_ini_file(%stest\bad): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 6
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test\bad\bad.txt) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 7
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest\bad\bad.txt) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 7
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test\bad\bad.txt): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 7
+Warning: parse_ini_file(%stest\bad\bad.txt): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 7
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 8
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 8
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 8
+Warning: parse_ini_file(%stest): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 8
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 9
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 9
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 9
+Warning: parse_ini_file(%stest): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 9
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test\bad) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 10
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest\bad) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 10
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test\bad): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 10
+Warning: parse_ini_file(%stest\bad): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 10
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test\bad\bad.txt) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 11
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest\bad\bad.txt) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 11
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test\bad\bad.txt): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 11
+Warning: parse_ini_file(%stest\bad\bad.txt): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 11
 bool(false)
 
-Warning: parse_ini_file(): open_basedir restriction in effect. File(G:\php-sdk\php-src\branches\PHP_5_4\test) is not within the allowed path(s): (.) in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 12
+Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest) is not within the allowed path(s): (.) in %sopen_basedir_parse_ini_file.php on line 12
 
-Warning: parse_ini_file(G:\php-sdk\php-src\branches\PHP_5_4\test): failed to open stream: Operation not permitted in G:\php-sdk\php-src\branches\PHP_5_4\tests\security\open_basedir_parse_ini_file.php on line 12
+Warning: parse_ini_file(%stest): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 12
 bool(false)
 *** Finished testing open_basedir configuration [parse_ini_file] ***
 
