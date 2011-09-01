@@ -1,11 +1,5 @@
 --TEST--
 Test open_basedir configuration
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip Not for Windows variation');
-}
-?>
 --INI--
 open_basedir=.
 --FILE--
