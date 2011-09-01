@@ -13,4 +13,4 @@ class foo {
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Parse error: %s error, %s(T_STRING)%s in %sbug51709_2.php on line %d
+Parse error: syntax error, unexpected 'goto' (T_GOTO), expecting identifier (T_STRING) in %sbug51709_2.php on line %d
