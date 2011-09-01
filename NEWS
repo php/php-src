@@ -26,6 +26,12 @@ PHP                                                                        NEWS
   . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403). (Uwe
     Schindler)
 
+- SimpleXML:
+  . Reverted the SimpleXML->query() behaviour to returning empty arrays
+    instead of false when no nodes are found as it was since 5.3.3 
+    (bug #48601). (chregu, rrichards)
+    
+
 23 Aug 2011, PHP 5.3.8
 
 - Core:

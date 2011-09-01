@@ -1264,8 +1264,9 @@ SXE_METHOD(xpath)
 
 	result = retval->nodesetval;
 
+	array_init(return_value);
+		
 	if (result != NULL) {
-		array_init(return_value);
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
 			if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
@@ -1286,8 +1287,6 @@ SXE_METHOD(xpath)
 				add_next_index_zval(return_value, value);
 			}
 		}
-	} else {
-		RETVAL_FALSE;
 	}
 
 	xmlXPathFreeObject(retval);
