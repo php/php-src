@@ -48,7 +48,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql);
 #endif
 
 #ifdef PDO_USE_MYSQLND
-static MYSQLND *pdo_mysql_convert_zv_to_mysqlnd(zval *zv)
+static MYSQLND *pdo_mysql_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == php_pdo_get_dbh_ce()) {
 		pdo_dbh_t *dbh = zend_object_store_get_object(zv TSRMLS_CC);
