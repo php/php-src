@@ -207,6 +207,12 @@ if (getenv('TEST_PHP_DETAILED')) {
 	$DETAILED = 0;
 }
 
+if (getenv('SHOW_ONLY_GROUPS')) {
+	$SHOW_ONLY_GROUPS = explode(",", getenv('SHOW_ONLY_GROUPS'));
+} else {
+	$SHOW_ONLY_GROUPS = array();
+}
+
 // Check whether user test dirs are requested.
 if (getenv('TEST_PHP_USER')) {
 	$user_tests = explode (',', getenv('TEST_PHP_USER'));
@@ -560,6 +566,9 @@ if (isset($argc) && $argc > 1) {
 				case 'd':
 					$ini_overwrites[] = $argv[++$i];
 					break;
+				case 'g':
+					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);;
+					break;
 				//case 'h'
 				case '--keep-all':
 					foreach($cfgfiles as $file) {
@@ -674,6 +683,9 @@ Options:
 
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar').
+
+    -g          Comma seperated list of groups to show during test run
+                (e.x. FAIL,SKIP).
 
     -m          Test for memory leaks with Valgrind.
 
@@ -2426,16 +2438,24 @@ function show_redirect_ends($tests, $tested, $tested_file)
 function show_test($test_idx, $shortname)
 {
 	global $test_cnt;
+	global $line_length;
 
-	echo "TEST $test_idx/$test_cnt [$shortname]\r";
+	$str = "TEST $test_idx/$test_cnt [$shortname]\r";
+	$line_length = strlen($str);
+	echo $str;
 	flush();
 }
 
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-	global $html_output, $html_file, $temp_target, $temp_urlbase;
+	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
 
-	echo "$result $tested [$tested_file] $extra\n";
+	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
+		echo "$result $tested [$tested_file] $extra\n";
+	} else {
+		// Write over the last line to avoid random trailing chars on next echo
+		echo str_repeat(" ", $line_length), "\r";
+	}
 
 	if ($html_output) {
 
