@@ -2565,7 +2565,7 @@ PHPAPI void mysqlnd_register_api_extension(mysqlnd_api_extension_t *apiext)
 /* }}} */
 
 /* {{{ zval_to_mysqlnd */
-PHPAPI MYSQLND* zval_to_mysqlnd(zval *zv)
+PHPAPI MYSQLND* zval_to_mysqlnd(zval *zv TSRMLS_DC)
 {
 	MYSQLND* retval;
 	mysqlnd_api_extension_t **elem;
@@ -2574,7 +2574,7 @@ PHPAPI MYSQLND* zval_to_mysqlnd(zval *zv)
 			zend_hash_get_current_data(&mysqlnd_api_ext_ht, (void **)&elem) == SUCCESS;
 			zend_hash_move_forward(&mysqlnd_api_ext_ht)) {
 		if ((*elem)->conversion_cb) {
-			retval = (*elem)->conversion_cb(zv);
+			retval = (*elem)->conversion_cb(zv TSRMLS_CC);
 			if (retval) {
 				return retval;
 			}

@@ -528,7 +528,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 /* }}} */
 
 #ifdef MYSQLI_USE_MYSQLND
-static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv)
+static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == mysqli_link_class_entry) {
 		MY_MYSQL *mysql;
