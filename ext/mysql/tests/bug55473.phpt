@@ -7,6 +7,9 @@ require_once('skipifconnectfailure.inc');
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die("skip Test doesn't work on Windows");
 }
+
+if (!($output = @exec("lsof -np " . getmypid())))
+	die("skip Test can't find command line tool lsof");
 ?>
 --INI--
 mysql.max_persistent=30
@@ -15,62 +18,62 @@ mysql.allow_persistent=1
 <?php
 	include "connect.inc";
 
-    if ($socket)
+	$tmp    = NULL;
+	$link   = NULL;
+
+ 	if ($socket)
         $host = sprintf("%s:%s", $host, $socket);
     else if ($port)
         $host = sprintf("%s:%s", $host, $port);
 
-	$tmp    = NULL;
-	$link   = NULL;
-
 	function connect($host, $user, $passwd) {
 		$conn = mysql_pconnect($host, $user, $passwd);
+
 		if (!$conn)
-			die(mysql_error()."\n");
-		mysql_query("set wait_timeout=1", $conn);
+			die(sprintf("[001] %s\n", mysql_error()));
+
+		if (!mysql_query("set wait_timeout=1", $conn))
+			printf("[002] [%d] %s\n", mysql_errno($conn), mysql_error($conn));
+
 		return $conn;
 	}	
 
 	$conn = connect($host, $user, $passwd);
 	$opened_files = -1;
-	for($i = 0; $i < 4; $i++) {
+
+	for ($i = 0; $i < 4; $i++) {
 		/* wait while mysql closes connection */
 		sleep(3);
 
 		if (!mysql_ping($conn)) {
-			echo "reconnect\n";
-			$conn = connect($host, $user, $passwd);
+			printf("[003] reconnect %d\n", $i);
+			$conn = connect($host, $user, $passwd);  
 		}
 
 		$r = mysql_query('select 1', $conn);
-		$error = $r ? 'OK' : mysql_error();
+		if (!$r)
+			printf("[004] [%d] %s\n", mysql_errno($conn), mysql_error($conn));
+
+
 		if ($opened_files == -1) {
 			$opened_files = trim(exec("lsof -np " . getmypid() . " | wc -l"));
-			echo "OK\n";
+			printf("[005] Setting openened files...\n");
 		} else if (($tmp = trim(exec("lsof -np " . getmypid() . " | wc -l"))) != $opened_files) {
-			printf("[01] [%d] different number of opened_files : expected %d, got %d", $i, $opened_files, $tmp);
+			printf("[006] [%d] different number of opened_files : expected %d, got %d", $i, $opened_files, $tmp);
 		} else {
-			echo "OK\n";
+			printf("[007] Opened files as expected\n");
 		}
 	}
-
 
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysql_ping(): MySQL server has gone away in %s on line %d
-reconnect
-OK
-
-Warning: mysql_ping(): MySQL server has gone away in %s on line %d
-reconnect
-OK
-
-Warning: mysql_ping(): MySQL server has gone away in %s on line %d
-reconnect
-OK
-
-Warning: mysql_ping(): MySQL server has gone away in %s on line %d
-reconnect
-OK
+[003] reconnect 0
+[005] Setting openened files...
+[003] reconnect 1
+[007] Opened files as expected
+[003] reconnect 2
+[007] Opened files as expected
+[003] reconnect 3
+[007] Opened files as expected
 done!
