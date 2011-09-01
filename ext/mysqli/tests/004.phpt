@@ -15,24 +15,27 @@ require_once('skipifconnectfailure.inc');
 	mysqli_select_db($link, $db);
 
 	if (!mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch"))
-		printf("[001] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 char(10), c2 text) ENGINE=" . $engine))
-		printf("[002] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link, "INSERT INTO test_bind_fetch VALUES ('1234567890', 'this is a test0')"))
-		printf("[003] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link, "INSERT INTO test_bind_fetch VALUES ('1234567891', 'this is a test1')"))
-		printf("[004] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link, "INSERT INTO test_bind_fetch VALUES ('1234567892', 'this is a test2')"))
-		printf("[005] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_query($link, "INSERT INTO test_bind_fetch VALUES ('1234567893', 'this is a test3')"))
-		printf("[006] [%d] string\n", mysqli_errno($link), mysqli_error($link));
+		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch ORDER BY c1");
+	if (!$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch ORDER BY c1"))
+		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	
+	$c1 = $c2 = NULL;
 	mysqli_stmt_bind_result($stmt, $c1, $c2);
 	mysqli_stmt_execute($stmt);
 	$i = 4;
