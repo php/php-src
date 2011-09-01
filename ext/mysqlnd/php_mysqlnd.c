@@ -188,7 +188,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
 		smart_str_free(&tmp_str);
 
-		zend_hash_apply_with_argument(mysqlnd_get_api_extensions(), mysqlnd_minfo_dump_api_plugins, &tmp_str);
+		zend_hash_apply_with_argument(mysqlnd_get_api_extensions(), mysqlnd_minfo_dump_api_plugins, &tmp_str TSRMLS_CC);
 		smart_str_0(&tmp_str);
 		php_info_print_table_row(2, "API Extensions", tmp_str.c);
 		smart_str_free(&tmp_str);
