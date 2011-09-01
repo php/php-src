@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 
 - Improved Session extension:
   . Expose session status via new function, session_status (Req #52982) (Arpad)
+  
+- Improved XSL extension:
+  . XSL doesn't stop transformation anymore, if a PHP function can't be called (chregu)
 
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
