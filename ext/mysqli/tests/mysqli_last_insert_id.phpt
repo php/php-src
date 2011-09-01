@@ -31,7 +31,7 @@ API vs. SQL LAST_INSERT_ID()
 			$host, $user, $db, $port, $socket);
 
 	if (!$link->query("DROP TABLE IF EXISTS test") ||
-		!$link->query("CREATE TABLE test (id INT auto_increment, label varchar(10) not null, PRIMARY KEY (id))") ||
+		!$link->query("CREATE TABLE test (id INT auto_increment, label varchar(10) not null, PRIMARY KEY (id)) ENGINE=MyISAM") ||
 		!$link->query("INSERT INTO test (id, label) VALUES (null, 'a')")) {
 		printf("[002] [%d] %s\n", $link->errno, $link->error);
 	}
