@@ -2305,6 +2305,18 @@ Time taken      : ' . sprintf('%4d seconds', $end_time - $start_time) . '
 ';
 	$failed_test_summary = '';
 
+	if (count($PHP_FAILED_TESTS['XFAILED'])) {
+		$failed_test_summary .= '
+=====================================================================
+EXPECTED FAILED TEST SUMMARY
+---------------------------------------------------------------------
+';
+		foreach ($PHP_FAILED_TESTS['XFAILED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
+
 	if (count($PHP_FAILED_TESTS['BORKED'])) {
 		$failed_test_summary .= '
 =====================================================================
@@ -2329,18 +2341,6 @@ FAILED TEST SUMMARY
 		}
 		$failed_test_summary .=  "=====================================================================\n";
 	}
-	if (count($PHP_FAILED_TESTS['XFAILED'])) {
-		$failed_test_summary .= '
-=====================================================================
-EXPECTED FAILED TEST SUMMARY
----------------------------------------------------------------------
-';
-		foreach ($PHP_FAILED_TESTS['XFAILED'] as $failed_test_data) {
-			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-		}
-		$failed_test_summary .=  "=====================================================================\n";
-	}
-
 	if (count($PHP_FAILED_TESTS['WARNED'])) {
 		$failed_test_summary .= '
 =====================================================================
