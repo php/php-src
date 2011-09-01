@@ -98,7 +98,7 @@ require_once('skipifconnectfailure.inc');
 --CLEAN--
 <?php require_once("clean_table.inc"); ?>
 --EXPECTF--
-Warning: mysqli_select_db(): (%d/%d): Unknown database '%s' in %s on line %d
+Warning: mysqli_select_db(): (%s/%d): Unknown database '%s' in %s on line %d
 
 Warning: mysqli_select_db(): Couldn't fetch mysqli in %s on line %d
 done!
