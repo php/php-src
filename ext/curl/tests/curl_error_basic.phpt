@@ -4,7 +4,15 @@ curl_error() function - basic test for curl_error using a fake url
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+<?php
+
+if (!extension_loaded("curl")) die("skip\n");
+
+$url = "fakeURL";
+$ip = gethostbyname($url);
+if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
+
+?>
 --FILE--
 <?php
 /*
@@ -21,13 +29,13 @@ echo "== Testing curl_error with a fake URL ==\n";
 
 // cURL handler
 $ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-ob_start(); // start output buffering
 curl_exec($ch);
-echo "Error: " . curl_error($ch);
+var_dump(curl_error($ch));
 curl_close($ch);
 
 ?>
---EXPECT--
+--EXPECTF--
 == Testing curl_error with a fake URL ==
-Error: Couldn't resolve host 'fakeURL'
+string(%d) "%sfakeURL%s"
