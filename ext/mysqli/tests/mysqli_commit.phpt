@@ -6,22 +6,12 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-		$host, $user, $db, $port, $socket));
-}
+require_once('connect.inc');
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	die(sprintf("Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
-if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
-	die(sprintf("skip Cannot fetch have_innodb variable\n"));
-}
-
-$row = mysqli_fetch_row($res);
-mysqli_free_result($res);
-mysqli_close($link);
-
-if ($row[1] == "DISABLED" || $row[1] == "NO") {
-	die(sprintf ("skip Innodb support is not installed or enabled."));
-}
+if (!have_innodb($link))
+	die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
