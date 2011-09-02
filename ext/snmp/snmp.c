@@ -34,6 +34,10 @@
 
 #include "zend_exceptions.h"
 
+#if HAVE_SPL
+#include "ext/spl/spl_exceptions.h"
+#endif
+
 #if HAVE_SNMP
 
 #include <sys/types.h>
@@ -105,12 +109,21 @@ typedef struct snmp_session php_snmp_session;
 }
 
 #define PHP_SNMP_ERRNO_NOERROR			0
-#define PHP_SNMP_ERRNO_GENERIC			1
-#define PHP_SNMP_ERRNO_TIMEOUT			2
-#define PHP_SNMP_ERRNO_ERROR_IN_REPLY		3
-#define PHP_SNMP_ERRNO_OID_NOT_INCREASING	4
-#define PHP_SNMP_ERRNO_OID_PARSING_ERROR	5
-#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES	6
+#define PHP_SNMP_ERRNO_GENERIC			(1 << 1)
+#define PHP_SNMP_ERRNO_TIMEOUT			(1 << 2)
+#define PHP_SNMP_ERRNO_ERROR_IN_REPLY		(1 << 3)
+#define PHP_SNMP_ERRNO_OID_NOT_INCREASING	(1 << 4)
+#define PHP_SNMP_ERRNO_OID_PARSING_ERROR	(1 << 5)
+#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES	(1 << 6)
+#define PHP_SNMP_ERRNO_ANY	( \
+		PHP_SNMP_ERRNO_GENERIC | \
+		PHP_SNMP_ERRNO_TIMEOUT | \
+		PHP_SNMP_ERRNO_ERROR_IN_REPLY | \
+		PHP_SNMP_ERRNO_OID_NOT_INCREASING | \
+		PHP_SNMP_ERRNO_OID_PARSING_ERROR | \
+		PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES | \
+		PHP_SNMP_ERRNO_NOERROR \
+	)
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
@@ -125,6 +138,7 @@ static zend_object_handlers php_snmp_object_handlers;
 
 /* Class entries */
 zend_class_entry *php_snmp_ce;
+zend_class_entry *php_snmp_exception_ce;
 
 /* Class object properties */
 static HashTable php_snmp_properties;
@@ -518,9 +532,13 @@ static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type,
 		return;
 	}
 
-	va_start(args, format);
-	php_verror(docref, "", E_WARNING, format, args TSRMLS_CC);
-	va_end(args);
+	if (object && (snmp_object->exceptions_enabled & type)) {
+		zend_throw_exception_ex(php_snmp_exception_ce, type, snmp_object->snmp_errstr TSRMLS_CC);
+	} else {
+		va_start(args, format);
+		php_verror(docref, "", E_WARNING, format, args TSRMLS_CC);
+		va_end(args);
+	}
 }
 
 /* }}} */
@@ -1796,6 +1814,7 @@ PHP_METHOD(snmp, __construct)
 	snmp_object->oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 	snmp_object->quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
 	snmp_object->oid_increasing_check = TRUE;
+	snmp_object->exceptions_enabled = 0;
 }
 /* }}} */
 
@@ -2135,6 +2154,7 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(valueretrieval)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
+PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
 static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
@@ -2261,6 +2281,27 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 }
 /* }}} */
 
+/* {{{ */
+static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval TSRMLS_DC)
+{
+	zval ztmp;
+	int ret = SUCCESS;
+	if (Z_TYPE_P(newval) != IS_LONG) {
+		ztmp = *newval;
+		zval_copy_ctor(&ztmp);
+		convert_to_long(&ztmp);
+		newval = &ztmp;
+	}
+
+	snmp_object->exceptions_enabled = Z_LVAL_P(newval);	
+
+	if (newval == &ztmp) {
+		zval_dtor(newval);
+	}
+	return ret;
+}
+/* }}} */
+
 /* {{{ php_snmp_class_methods[] */
 static zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 __construct,			arginfo_snmp_create,		ZEND_ACC_PUBLIC)
@@ -2288,6 +2329,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(enum_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_output_format),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_increasing_check),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(exceptions_enabled),
 	{ NULL, 0, NULL, NULL}
 };
 /* }}} */
@@ -2297,7 +2339,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 PHP_MINIT_FUNCTION(snmp)
 {
 	netsnmp_log_handler *logh;
-	zend_class_entry ce;
+	zend_class_entry ce, cex;
 
 	le_snmp_session = zend_register_list_destructors_ex(php_snmp_session_destructor, NULL, PHP_SNMP_SESSION_RES_NAME, module_number);
 
@@ -2355,18 +2397,27 @@ PHP_MINIT_FUNCTION(snmp)
 	REGISTER_LONG_CONSTANT("SNMP_INTEGER",		ASN_INTEGER,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_COUNTER64",	ASN_COUNTER64,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_1",			(long)SNMP_VERSION_1);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2c",			(long)SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2C",			(long)SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_3",			(long)SNMP_VERSION_3);
+	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_1",			SNMP_VERSION_1);
+	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2c",			SNMP_VERSION_2c);
+	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2C",			SNMP_VERSION_2c);
+	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_3",			SNMP_VERSION_3);
 
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_NOERROR",			(long)PHP_SNMP_ERRNO_NOERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_GENERIC",			(long)PHP_SNMP_ERRNO_GENERIC);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_TIMEOUT",			(long)PHP_SNMP_ERRNO_TIMEOUT);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		(long)PHP_SNMP_ERRNO_ERROR_IN_REPLY);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	(long)PHP_SNMP_ERRNO_OID_NOT_INCREASING);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	(long)PHP_SNMP_ERRNO_OID_PARSING_ERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	(long)PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_NOERROR",			PHP_SNMP_ERRNO_NOERROR);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ANY",			PHP_SNMP_ERRNO_ANY);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_GENERIC",			PHP_SNMP_ERRNO_GENERIC);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_TIMEOUT",			PHP_SNMP_ERRNO_TIMEOUT);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		PHP_SNMP_ERRNO_ERROR_IN_REPLY);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	PHP_SNMP_ERRNO_OID_NOT_INCREASING);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	PHP_SNMP_ERRNO_OID_PARSING_ERROR);
+	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
+
+	/* Register SNMPException class */
+	INIT_CLASS_ENTRY(cex, "SNMPException", NULL);
+#ifdef HAVE_SPL
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException, NULL TSRMLS_CC);
+#else
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+#endif
 
 	return SUCCESS;
 }
@@ -2396,10 +2447,22 @@ PHP_MINFO_FUNCTION(snmp)
 }
 /* }}} */
 
+/* {{{ snmp_module_deps[]
+ */
+static const zend_module_dep snmp_module_deps[] = {
+#ifdef HAVE_SPL
+	ZEND_MOD_REQUIRED("spl")
+#endif
+	ZEND_MOD_END
+};
+/* }}} */
+
 /* {{{ snmp_module_entry
  */
 zend_module_entry snmp_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	snmp_module_deps,
 	"snmp",
 	snmp_functions,
 	PHP_MINIT(snmp),
