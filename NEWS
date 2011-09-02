@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - MySQL:
   . Fixed bug #55550 (mysql.trace_mode miscounts result sets). (Johannes)
 
+- mysqlnd
+  . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
+    (Andrey)
+
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
   . Fixed bug#53872 (internal corruption of phar). (Hannes)
