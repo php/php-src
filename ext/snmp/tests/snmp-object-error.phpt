@@ -17,23 +17,40 @@ snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 try {
 var_dump(new SNMP(SNMP::VERSION_1, $hostname));
 } catch (Exception $e) {
-    print $e->getMessage() . "\n";
+	print $e->getMessage() . "\n";
 }
 try {
 var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
 } catch (Exception $e) {
-    print $e->getMessage() . "\n";
+	print $e->getMessage() . "\n";
 }
 try {
 var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
 } catch (Exception $e) {
-    print $e->getMessage() . "\n";
+	print $e->getMessage() . "\n";
 }
 try {
 var_dump(new SNMP(7, $hostname, $community));
 } catch (Exception $e) {
-    print $e->getMessage() . "\n";
+	print $e->getMessage() . "\n";
 }
+
+echo "Exception handling\n";
+$session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
+try {
+	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+} catch (SNMPException $e) {
+	var_dump($e->getCode());
+	var_dump($e->getMessage());
+}
+$session->exceptions_enabled = SNMP::ERRNO_ANY;
+try {
+	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+} catch (SNMPException $e) {
+	var_dump($e->getCode());
+	var_dump($e->getMessage());
+}
+var_dump($session->close());
 
 echo "Open normal session\n";
 $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
@@ -62,6 +79,13 @@ SNMP::__construct() expects at least 3 parameters, 2 given
 SNMP::__construct() expects parameter 4 to be long, string given
 SNMP::__construct() expects parameter 5 to be long, string given
 Unknown SNMP protocol version
+Exception handling
+
+Warning: SNMP::get(): Invalid object identifier: .1.3.6.1.2.1.1.1..0 in %s on line %d
+bool(false)
+int(32)
+string(46) "Invalid object identifier: .1.3.6.1.2.1.1.1..0"
+bool(true)
 Open normal session
 
 Warning: main(): Unknown SNMP value retrieval method '67' in %s on line %d
