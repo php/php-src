@@ -2526,8 +2526,6 @@ static const zend_module_dep snmp_module_deps[] = {
 	ZEND_MOD_END
 };
 #endif
-
-
 /* }}} */
 
 /* {{{ snmp_module_entry
