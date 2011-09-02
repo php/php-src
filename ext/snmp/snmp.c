@@ -124,12 +124,7 @@ static int le_snmp_session;
 static zend_object_handlers php_snmp_object_handlers;
 
 /* Class entries */
-zend_class_entry *php_snmp_class_entry;
-
-zend_class_entry *php_snmp_get_ce()
-{
-	return php_snmp_class_entry;
-}
+zend_class_entry *php_snmp_ce;
 
 /* Class object properties */
 static HashTable php_snmp_properties;
@@ -2330,7 +2325,7 @@ PHP_MINIT_FUNCTION(snmp)
 	INIT_CLASS_ENTRY(ce, "SNMP", php_snmp_class_methods);
 	ce.create_object = php_snmp_object_new;
 	php_snmp_object_handlers.clone_obj = NULL;
-	php_snmp_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_snmp_ce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* Register SNMP Class properties */
 	zend_hash_init(&php_snmp_properties, 0, NULL, NULL, 1);
