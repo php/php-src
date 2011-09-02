@@ -3,7 +3,7 @@ dnl $Id$
 dnl config.m4 for mysqlnd driver
 
 
-PHP_ARG_ENABLE(mysqlnd_compression_support, whether to enable compressed protocol support in mysqlnd,
+PHP_ARG_ENABLE(mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
                             Disable support for the MySQL compressed protocol in mysqlnd], yes, no)
 
