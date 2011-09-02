@@ -54,6 +54,23 @@ if ($res = mysql_query('SELECT COUNT(id) AS num FROM test', $link)) {
 	printf("[030] [%d] %s\n", mysql_errno($link), mysql_error($link));
 }
 
+if ($res = mysql_unbuffered_query('SELECT id, label FROM test')) {
+
+	if (0 != mysql_num_rows($res))
+		printf("[032] Expecting 0 rows got %d\n", mysql_num_rows($res));
+	
+	$rows = 0;
+	while ($row = mysql_fetch_assoc($res))
+		$rows++;
+
+	if ($rows != mysql_num_rows($res))
+		printf("[033] Expecting %d rows got %d\n", $rows, mysql_num_rows($res));
+
+	mysql_free_result($res);
+} else {
+	printf("[034] [%d] %s\n", mysql_errno($link), mysql_error($link));
+}
+
 mysql_close($link);
 print "done!";
 ?>
