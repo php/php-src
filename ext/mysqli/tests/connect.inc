@@ -234,7 +234,12 @@
 				/* MySQL 5.6.1+ */
 				if ($res = $link->query("SHOW ENGINES")) {
 					while ($row = $res->fetch_assoc()) {
-						if (('InnoDB' == $row['Engine']) && ('YES' == $row['Support'])) {
+						if (!isset($row['Engine']) || !isset($row['Support']))
+							return false;
+
+						if (('InnoDB' == $row['Engine']) &&
+							(('YES' == $row['Support']) || ('DEFAULT' == $row['Support']))
+							) {
 							return true;
 						}
 					}
