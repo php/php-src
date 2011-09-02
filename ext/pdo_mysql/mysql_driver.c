@@ -36,7 +36,7 @@
 #endif
 #include "zend_exceptions.h"
 
-#if PDO_USE_MYSQLND
+#if defined(PDO_USE_MYSQLND)
 #	define pdo_mysql_init(persistent) mysqlnd_init(persistent)
 #else
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
@@ -230,7 +230,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 
 	if (S->num_params) {
 		S->params_given = 0;
-#if PDO_USE_MYSQLND
+#if defined(PDO_USE_MYSQLND)
 		S->params = NULL;
 #else
 		S->params = ecalloc(S->num_params, sizeof(MYSQL_BIND));
@@ -433,7 +433,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			break;
 		case PDO_ATTR_SERVER_INFO: {
 			char *tmp;
-#if PDO_USE_MYSQLND
+#if defined(PDO_USE_MYSQLND)
 			unsigned int tmp_len;
 
 			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
@@ -555,7 +555,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 		;
 
-#if PDO_USE_MYSQLND
+#if defined(PDO_USE_MYSQLND)
 	int dbname_len = 0;
 	int password_len = 0;
 #endif
@@ -630,7 +630,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{
 			local_infile = 0;
 		}
-#ifdef MYSQL_OPT_LOCAL_INFILE
+#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
 		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
 			pdo_mysql_error(dbh);
 			goto cleanup;
@@ -638,7 +638,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 #ifdef MYSQL_OPT_RECONNECT
 		/* since 5.0.3, the default for this option is 0 if not specified.
-		 * we want the old behaviour */
+		 * we want the old behaviour
+		 * mysqlnd doesn't support reconnect, thus we don't have "|| defined(PDO_USE_MYSQLND)"
+		*/
 		{
 			long reconnect = 1;
 			mysql_options(H->server, MYSQL_OPT_RECONNECT, (const char*)&reconnect);
