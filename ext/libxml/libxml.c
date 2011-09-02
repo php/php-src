@@ -674,6 +674,18 @@ is_string:
 	return ret;
 }
 
+static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
+		const char *ID, xmlParserCtxtPtr context)
+{
+	/* Check whether we're running in a PHP context, since the entity loader
+	 * we've defined is an application level (true global) setting */
+	if (xmlGenericError == php_libxml_error_handler) {
+		return _php_libxml_external_entity_loader(URL, ID, context);
+	} else {
+		return _php_libxml_default_entity_loader(URL, ID, context);
+	}
+}
+
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list args;
@@ -713,7 +725,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 		xmlInitParser();
 		
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
-		xmlSetExternalEntityLoader(_php_libxml_external_entity_loader);
+		xmlSetExternalEntityLoader(_php_libxml_pre_ext_ent_loader);
 
 		zend_hash_init(&php_libxml_exports, 0, NULL, NULL, 1);
 
@@ -729,6 +741,8 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 #endif
 		xmlCleanupParser();
 		zend_hash_destroy(&php_libxml_exports);
+		
+		xmlSetExternalEntityLoader(_php_libxml_default_entity_loader);
 		_php_libxml_initialized = 0;
 	}
 }
