@@ -6,6 +6,7 @@ if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for oci driver - cannot reexecute after closing cursors without reparse');
 PDOTest::skip();
 ?>
 --FILE--

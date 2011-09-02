@@ -28,11 +28,13 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
 	$from = 'FROM DUAL';
+	$ob = '1';
 } else {
 	$from = '';
+	$ob = 'r';
 }
 
-$query = "SELECT 'row1' AS r $from UNION SELECT 'row2' $from UNION SELECT 'row3' $from UNION SELECT 'row4' $from ORDER BY r";
+$query = "SELECT 'row1' AS r $from UNION SELECT 'row2' $from UNION SELECT 'row3' $from UNION SELECT 'row4' $from ORDER BY $ob";
 $aParams = array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL);
 
 $res = $db->prepare($query, $aParams);
