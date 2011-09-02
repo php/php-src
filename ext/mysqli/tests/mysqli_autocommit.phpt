@@ -12,17 +12,8 @@ mysqli_autocommit()
 			$host, $user, $db, $port, $socket));
 	}
 
-	if (!$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
-		die("skip Cannot check for required InnoDB suppot");
-	}
-	if (!$row = mysqli_fetch_row($result))
-		die("skip Cannot check for required InnoDB suppot");
-
-	mysqli_free_result($result);
-	mysqli_close($link);
-	if ($row[1] == "DISABLED" || $row[1] == "NO") {
-		die(sprintf ("skip innodb support is not installed or enabled."));
-	}
+	if (!have_innodb($link))
+		die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php

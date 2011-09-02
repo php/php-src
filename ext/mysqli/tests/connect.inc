@@ -222,6 +222,30 @@
 			return $charsets;
 		}
 
+		function have_innodb($link) {
+		  if ($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'") &&
+				$row = $res->fetch_row() &&
+				!empty($row)) {
+				if ($row[1] == "DISABLED" || $row[1] == "NO") {
+					return false;
+				}
+				return true;
+		  } else {
+				/* MySQL 5.6.1+ */
+				if ($res = $link->query("SHOW ENGINES")) {
+					while ($row = $res->fetch_assoc()) {
+						if (('InnoDB' == $row['Engine']) && ('YES' == $row['Support'])) {
+							return true;
+						}
+					}
+					return false;
+				} else {
+					return false;
+				}
+		  }
+		  return false;
+		}
+
 	} else {
 		printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
 	}
