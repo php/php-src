@@ -91,6 +91,8 @@ object(SNMP)#%d (%d) {
   int(3)
   ["oid_increasing_check"]=>
   bool(true)
+  ["exceptions_enabled"]=>
+  int(0)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -116,6 +118,8 @@ object(SNMP)#%d (%d) {
   int(4)
   ["oid_increasing_check"]=>
   bool(false)
+  ["exceptions_enabled"]=>
+  int(0)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -141,6 +145,8 @@ object(SNMP)#%d (%d) {
   int(3)
   ["oid_increasing_check"]=>
   bool(true)
+  ["exceptions_enabled"]=>
+  int(0)
 }
 bool(true)
 bool(true)
@@ -169,6 +175,8 @@ object(SNMP)#%d (%d) {
   int(3)
   ["oid_increasing_check"]=>
   bool(true)
+  ["exceptions_enabled"]=>
+  int(0)
   ["123"]=>
   string(11) "param_value"
 }
