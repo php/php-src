@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
     (Andrey)
 
+- PDO MySQL driver:
+  . Fixed bug #54158 (MYSQLND+PDO MySQL requires #define MYSQL_OPT_LOCAL_INFILE)
+  (Andrey)
+
 - Phar:
   . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
   . Fixed bug#53872 (internal corruption of phar). (Hannes)
