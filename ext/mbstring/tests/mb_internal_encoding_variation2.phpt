@@ -330,15 +330,15 @@ string(6) "EUC-TW"
 -- Iteration 48 --
 string(6) "EUC-TW"
 bool(true)
-string(5) "BIG-5"
+string(5) "CP950"
 
 -- Iteration 49 --
-string(5) "BIG-5"
-bool(true)
 string(5) "CP950"
+bool(true)
+string(5) "BIG-5"
 
 -- Iteration 50 --
-string(5) "CP950"
+string(5) "BIG-5"
 bool(true)
 string(6) "EUC-KR"
 
