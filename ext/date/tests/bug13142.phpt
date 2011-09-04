@@ -4,6 +4,11 @@ Bug #13142 (strtotime handling of "M d H:i:s Y" format)
 date.timezone=US/Eastern
 --SKIPIF--
 <?php
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+	die("skip. set TZ env is not supported at runtime.");
+}
+--SKIPIF--
+<?php
 if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
 	die("skip unable to change TZ enviroment variable\n");
 }
