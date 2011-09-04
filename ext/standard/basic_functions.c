@@ -5734,7 +5734,6 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	VCWD_UNLINK(new_path);
 	if (VCWD_RENAME(path, new_path) == 0) {
 		successful = 1;
 #ifndef PHP_WIN32
