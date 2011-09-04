@@ -77,11 +77,11 @@ PHP_FUNCTION( numfmt_get_attribute )
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 		{
-			double value = unum_getDoubleAttribute(FORMATTER_OBJECT(nfo), attribute);
-			if(value == -1) {
+			double value_double = unum_getDoubleAttribute(FORMATTER_OBJECT(nfo), attribute);
+			if(value_double == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {
-				RETVAL_DOUBLE(value);
+				RETVAL_DOUBLE(value_double);
 			}
 		}
 			break;
