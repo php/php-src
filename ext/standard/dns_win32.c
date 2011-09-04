@@ -103,6 +103,11 @@ PHP_FUNCTION(dns_check_record)
 		return;
 	}
 
+	if (hostname_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host cannot be empty");
+		RETURN_FALSE;
+	}
+
 	if (rectype) {
 		     if (!strcasecmp("A",     rectype)) type = DNS_TYPE_A;
 		else if (!strcasecmp("NS",    rectype)) type = DNS_TYPE_NS;
