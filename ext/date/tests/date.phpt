@@ -3,14 +3,22 @@ date() function
 --FILE--
 <?php
 $tmp = "cr";
-putenv ("TZ=GMT0");
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+	date_default_timezone_set('GMT0');
+} else {
+	putenv ("TZ=GMT0");
+}
+
 
 for($a = 0;$a < strlen($tmp); $a++){
 	echo $tmp[$a], ': ', date($tmp[$a], 1043324459)."\n";
 }
 
-putenv ("TZ=MET");
-
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+	date_default_timezone_set("MET");
+} else {
+	putenv ("TZ=MET");
+}
 for($a = 0;$a < strlen($tmp); $a++){
 	echo $tmp[$a], ': ', date($tmp[$a], 1043324459)."\n";
 }
