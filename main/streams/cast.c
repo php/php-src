@@ -271,15 +271,15 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 			newstream = php_stream_fopen_tmpfile();
 			if (newstream) {
-				size_t retval = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
+				int retcopy = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
 
-				if (ret != SUCCESS) {
+				if (retcopy != SUCCESS) {
 					php_stream_close(newstream);
 				} else {
-					int retcode = php_stream_cast(newstream, castas | flags, (void **)ret, show_err);
+					int retcast = php_stream_cast(newstream, castas | flags, (void **)ret, show_err);
 
-					if (retcode == SUCCESS) {
-						rewind(*(FILE**)retval);
+					if (retcast == SUCCESS) {
+						rewind(*(FILE**)ret);
 					}
 
 					/* do some specialized cleanup */
@@ -287,7 +287,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 						php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);
 					}
 
-					return retcode;
+					/* TODO: we probably should be setting .stdiocast and .fclose_stdiocast or
+					 * we may be leaking the FILE*. Needs investigation, though. */
+					return retcast;
 				}
 			}
 		}
