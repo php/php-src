@@ -14,4 +14,4 @@ Michele Orselli mo@ideato.it
 ?>
 --EXPECT--
 bool(true)
-bool(true);
+bool(true)
