@@ -1,7 +1,5 @@
 --TEST--
 parse_ini_file() multiple calls
---SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) == 'WIN' ) die("skip Windows has different error message");?>
 --FILE--
 <?php
 
