@@ -14,5 +14,5 @@ echo gethostbyaddr("127.0.0.1")."\n";
 ===DONE===
 --EXPECTF--
 *** Testing gethostbyaddr() : basic functionality ***
-%rloopback|localhost(\.localdomain)?%r
+%rloopback|localhost(\.localdomain)?|%s%r
 ===DONE===
