@@ -3521,7 +3521,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_MINIT_SUBMODULE(module) \
 	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\
-		BASIC_ADD_SUBMODULE($module); \
+		BASIC_ADD_SUBMODULE(module); \
 	}
 
 #define BASIC_ADD_SUBMODULE(module) \
