@@ -30,6 +30,7 @@
 
 /* r->data should be always NULL, at least in recent libmysql versions, the status changes once data is read*/
 #define mysqli_result_is_unbuffered(r)		(((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT) || ((r)->data == NULL))
+#define mysqli_result_is_unbuffered_and_not_everything_is_fetched(r)		(((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT) || ((r)->data == NULL))
 #define mysqli_server_status(c)				(c)->server_status
 #define mysqli_stmt_get_id(s)				((s)->stmt_id)
 #define mysqli_stmt_warning_count(s)		mysql_warning_count((s)->mysql)

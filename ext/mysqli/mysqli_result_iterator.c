@@ -133,7 +133,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter TSRMLS_
 
 	if (mysqli_result_is_unbuffered(result)) {
 #if MYSQLI_USE_MYSQLND
-		if (result->unbuf && result->unbuf->eof_reached) {
+		if (result->unbuf->eof_reached) {
 #else
 		if (result->eof) {
 #endif

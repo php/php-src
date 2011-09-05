@@ -601,19 +601,18 @@ mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 static unsigned long *
 mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
 {
-	return result->lengths;
+	/* simulate output of libmysql */
+	return (!result->unbuf || result->unbuf->last_row_data || result->unbuf->eof_reached)? result->lengths:NULL;
 }
 /* }}} */
 
 
-#if !defined(MYSQLND_USE_OPTIMISATIONS) || MYSQLND_USE_OPTIMISATIONS == 0
 /* {{{ mysqlnd_res::fetch_lengths */
 PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->m.fetch_lengths? result->m.fetch_lengths(result TSRMLS_CC) : NULL;
 }
 /* }}} */
-#endif
 
 
 /* {{{ mysqlnd_fetch_row_unbuffered_c */
