@@ -250,7 +250,8 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	char *buf;
-	int   len, quotes;
+	size_t len;
+	int quotes;
 	
 	if (!(flags & FILTER_FLAG_NO_ENCODE_QUOTES)) {
 		quotes = ENT_QUOTES;
