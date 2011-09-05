@@ -1612,7 +1612,7 @@ PHP_FUNCTION(mysqli_num_rows)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (mysqli_result_is_unbuffered(result)) {
+	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
 		RETURN_LONG(0);
 	}
