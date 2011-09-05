@@ -1,5 +1,11 @@
 --TEST--
 Bug #48562 (Reference recursion causes segfault when used in wddx_serialize_vars())
+--SKIPIF--
+<?php
+if (!extension_loaded('wddx')) {
+    die('skip. wddx not available');
+}
+?>
 --FILE--
 <?php
 
