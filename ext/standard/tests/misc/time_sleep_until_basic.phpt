@@ -8,9 +8,10 @@ Michele Orselli mo@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --FILE--
 <?php
-  $time = time() + 2;
-  time_sleep_until( $time );
-  var_dump( time() >= $time );
+  $time = microtime(true) + 2;
+  var_dump(time_sleep_until( (int)$time ));
+  var_dump(microtime(true) >= (int)$time);
 ?>
 --EXPECT--
 bool(true)
+bool(true);
