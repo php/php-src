@@ -31,6 +31,7 @@
 #define MYSQLI_CLOSE_DISCONNECTED              MYSQLND_CLOSE_DISCONNECTED
 
 #define mysqli_result_is_unbuffered(r)	((r)->unbuf)
+#define mysqli_result_is_unbuffered_and_not_everything_is_fetched(r)	((r)->unbuf && !(r)->unbuf->eof_reached)
 #define mysqli_server_status(c)			(c)->upsert_status.server_status
 #define mysqli_stmt_get_id(s)			((s)->data->stmt_id)
 #define mysqli_stmt_warning_count(s)	mysqlnd_stmt_warning_count((s))
