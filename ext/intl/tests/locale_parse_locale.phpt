@@ -6,7 +6,7 @@ locale_parse_locale()
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
@@ -72,11 +72,12 @@ function ut_main()
     {
         $arr = ut_loc_locale_parse( $locale);
         $res_str .= "---------------------\n";
-        $res_str .= "$locale: \n";
+        $res_str .= "$locale:\n";
         if( $arr){
             foreach( $arr as $key => $value){
                     $res_str .= "$key : '$value' , ";
             }
+            $res_str = rtrim($res_str);
         }
         else{
             $res_str .= "No values found from Locale parsing.";
@@ -93,109 +94,109 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 ---------------------
-uk-ua_CALIFORNIA@currency=;currency=GRN: 
-language : 'uk' , region : 'UA' , variant0 : 'CALIFORNIA' , 
+uk-ua_CALIFORNIA@currency=;currency=GRN:
+language : 'uk' , region : 'UA' , variant0 : 'CALIFORNIA' ,
 ---------------------
-root: 
-language : 'root' , 
+root:
+language : 'root' ,
 ---------------------
-uk@currency=EURO: 
-language : 'uk' , 
+uk@currency=EURO:
+language : 'uk' ,
 ---------------------
-Hindi: 
-language : 'hindi' , 
+Hindi:
+language : 'hindi' ,
 ---------------------
-de: 
-language : 'de' , 
+de:
+language : 'de' ,
 ---------------------
-fr: 
-language : 'fr' , 
+fr:
+language : 'fr' ,
 ---------------------
-ja: 
-language : 'ja' , 
+ja:
+language : 'ja' ,
 ---------------------
-i-enochian: 
-grandfathered : 'i-enochian' , 
+i-enochian:
+grandfathered : 'i-enochian' ,
 ---------------------
-zh-Hant: 
-language : 'zh' , script : 'Hant' , 
+zh-Hant:
+language : 'zh' , script : 'Hant' ,
 ---------------------
-zh-Hans: 
-language : 'zh' , script : 'Hans' , 
+zh-Hans:
+language : 'zh' , script : 'Hans' ,
 ---------------------
-sr-Cyrl: 
-language : 'sr' , script : 'Cyrl' , 
+sr-Cyrl:
+language : 'sr' , script : 'Cyrl' ,
 ---------------------
-sr-Latn: 
-language : 'sr' , script : 'Latn' , 
+sr-Latn:
+language : 'sr' , script : 'Latn' ,
 ---------------------
-zh-Hans-CN: 
-language : 'zh' , script : 'Hans' , region : 'CN' , 
+zh-Hans-CN:
+language : 'zh' , script : 'Hans' , region : 'CN' ,
 ---------------------
-sr-Latn-CS: 
-language : 'sr' , script : 'Latn' , region : 'CS' , 
+sr-Latn-CS:
+language : 'sr' , script : 'Latn' , region : 'CS' ,
 ---------------------
-sl-rozaj: 
-language : 'sl' , 
+sl-rozaj:
+language : 'sl' ,%r( region : 'ROZAJ' ,)?%r
 ---------------------
-sl-nedis: 
-language : 'sl' , 
+sl-nedis:
+language : 'sl' ,%r( region : 'NEDIS' ,)?%r
 ---------------------
-de-CH-1901: 
-language : 'de' , region : 'CH' , variant0 : '1901' , 
+de-CH-1901:
+language : 'de' , region : 'CH' , variant0 : '1901' ,
 ---------------------
-sl-IT-nedis: 
-language : 'sl' , region : 'IT' , variant0 : 'NEDIS' , 
+sl-IT-nedis:
+language : 'sl' , region : 'IT' , variant0 : 'NEDIS' ,
 ---------------------
-sl-Latn-IT-nedis: 
-language : 'sl' , script : 'Latn' , region : 'IT' , variant0 : 'NEDIS' , 
+sl-Latn-IT-nedis:
+language : 'sl' , script : 'Latn' , region : 'IT' , variant0 : 'NEDIS' ,
 ---------------------
-de-DE: 
-language : 'de' , region : 'DE' , 
+de-DE:
+language : 'de' , region : 'DE' ,
 ---------------------
-en-US: 
-language : 'en' , region : 'US' , 
+en-US:
+language : 'en' , region : 'US' ,
 ---------------------
-es-419: 
-language : 'es' , region : '419' , 
+es-419:
+language : 'es' , region : '419' ,
 ---------------------
-de-CH-x-phonebk: 
-language : 'de' , region : 'CH' , private0 : 'phonebk' , 
+de-CH-x-phonebk:
+language : 'de' , region : 'CH' , private0 : 'phonebk' ,
 ---------------------
-az-Arab-x-AZE-derbend: 
-language : 'az' , script : 'Arab' , private0 : 'AZE' , private1 : 'derbend' , 
+az-Arab-x-AZE-derbend:
+language : 'az' , script : 'Arab' , private0 : 'AZE' , private1 : 'derbend' ,
 ---------------------
-zh-min: 
-grandfathered : 'zh-min' , 
+zh-min:
+grandfathered : 'zh-min' ,
 ---------------------
-zh-min-nan-Hant-CN: 
-language : 'zh' , region : 'MIN' , variant0 : 'NAN' , variant1 : 'HANT' , variant2 : 'CN' , 
+zh-min-nan-Hant-CN:
+language : 'zh' , region : 'MIN' , variant0 : 'NAN' , variant1 : 'HANT' , variant2 : 'CN' ,
 ---------------------
-qaa-Qaaa-QM-x-southern: 
-language : 'qaa' , script : 'Qaaa' , region : 'QM' , private0 : 'southern' , 
+qaa-Qaaa-QM-x-southern:
+language : 'qaa' , script : 'Qaaa' , region : 'QM' , private0 : 'southern' ,
 ---------------------
-sr-Latn-QM: 
-language : 'sr' , script : 'Latn' , region : 'QM' , 
+sr-Latn-QM:
+language : 'sr' , script : 'Latn' , region : 'QM' ,
 ---------------------
-sr-Qaaa-CS: 
-language : 'sr' , script : 'Qaaa' , region : 'CS' , 
+sr-Qaaa-CS:
+language : 'sr' , script : 'Qaaa' , region : 'CS' ,
 ---------------------
-en-US-u-islamCal: 
-language : 'en' , region : 'US' , 
+en-US-u-islamCal:
+language : 'en' , region : 'US' ,
 ---------------------
-zh-CN-a-myExt-x-private: 
-language : 'zh' , region : 'CN' , private0 : 'private' , 
+zh-CN-a-myExt-x-private:
+language : 'zh' , region : 'CN' , private0 : 'private' ,
 ---------------------
-en-a-myExt-b-another: 
-language : 'en' , 
+en-a-myExt-b-another:
+language : 'en' ,
 ---------------------
-de-419-DE: 
-language : 'de' , region : '419' , variant0 : 'DE' , 
+de-419-DE:
+language : 'de' , region : '419' , variant0 : 'DE' ,
 ---------------------
-a-DE: 
+a-DE:
 No values found from Locale parsing.
 ---------------------
-ar-a-aaa-b-bbb-a-ccc: 
+ar-a-aaa-b-bbb-a-ccc:
 language : 'ar' ,
