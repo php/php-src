@@ -78,12 +78,12 @@ Failed to write data to: " "
 
 -- Filename: \0 --
 
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
+Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %s on line %d
 Failed to write data to: \0
 
 -- Filename: array() --
 
-Warning: file_put_contents() expects parameter 1 to be string, array given in %s on line %d
+Warning: file_put_contents() expects parameter 1 to be a valid path, array given in %s on line %d
 Failed to write data to: array()
 
 -- Filename: /no/such/file/dir --
