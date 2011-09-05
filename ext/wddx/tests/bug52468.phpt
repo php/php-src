@@ -1,5 +1,11 @@
 --TEST--
 Bug #52468 (wddx_deserialize corrupts integer field value when left empty)
+--SKIPIF--
+<?php
+if (!extension_loaded('wddx')) {
+    die('skip. wddx not available');
+}
+?>
 --FILE--
 <?php
 
