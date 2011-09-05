@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - MySQL:
   . Fixed bug #55550 (mysql.trace_mode miscounts result sets). (Johannes)
 
+- MySQLi extension:
+  . Fixed bug #55582 (mysqli_num_rows() returns always 0 for unbuffered, when
+  mysqlnd is used). (Andrey)
+
 - mysqlnd
   . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
     (Andrey)
