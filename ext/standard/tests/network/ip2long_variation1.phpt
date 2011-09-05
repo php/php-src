@@ -1,5 +1,9 @@
 --TEST--
 Test ip2long() function : usage variation 
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("Windows is more compliant (like 0 for localhost, etc.)");
+?>
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)
