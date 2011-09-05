@@ -838,7 +838,7 @@ PHP_MINIT_FUNCTION(mysqli)
 #endif
 
 
-#ifdef MYSQL_USE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	mysqlnd_register_api_extension(&mysqli_api_ext);
 #endif
 
