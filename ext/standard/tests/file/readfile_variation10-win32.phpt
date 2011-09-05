@@ -71,11 +71,11 @@ Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
 
-Warning: readfile(): Filename cannot be empty in %s on line %d
+Warning: readfile() expects parameter 1 to be a valid path, string given in %s on line %d
 
 -- Filename: array() --
 
-Warning: readfile() expects parameter 1 to be string, array given in %s on line %d
+Warning: readfile() expects parameter 1 to be a valid path, array given in %s on line %d
 
 -- Filename: /no/such/file/dir --
 
