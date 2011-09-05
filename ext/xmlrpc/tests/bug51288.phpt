@@ -1,5 +1,7 @@
 --TEST--
 Bug #51288 (CVE-2010-0397, NULL pointer deref when no <methodName> in request)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 $method = NULL;
