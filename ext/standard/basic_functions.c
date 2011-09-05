@@ -3521,8 +3521,11 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_MINIT_SUBMODULE(module) \
 	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\
-		zend_hash_add_empty_element(&basic_submodules, #module, strlen(#module)); \
+		BASIC_ADD_SUBMODULE($module); \
 	}
+
+#define BASIC_ADD_SUBMODULE(module) \
+	zend_hash_add_empty_element(&basic_submodules, #module, strlen(#module));
 	
 #define BASIC_RINIT_SUBMODULE(module) \
 	if (zend_hash_exists(&basic_submodules, #module, strlen(#module))) { \
@@ -3619,6 +3622,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 
+	BASIC_ADD_SUBMODULE(dl)
+	BASIC_ADD_SUBMODULE(mail)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
 	BASIC_MINIT_SUBMODULE(browscap)
