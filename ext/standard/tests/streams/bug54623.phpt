@@ -14,6 +14,4 @@ fwrite($sock, "3");
 int(%d)
 int(%d)
 
-Notice: fwrite(): send of 1 bytes failed with errno=61 Connection refused in %s on line %d
-
 Warning: fwrite(): %d is not a valid stream resource in %s on line %d
