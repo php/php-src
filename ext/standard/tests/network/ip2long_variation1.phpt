@@ -3,7 +3,7 @@ Test ip2long() function : usage variation
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
-  die("Windows is more compliant (like 0 for localhost, etc.)");
+  die("skip. Windows is more compliant (like 0 for localhost, etc.)");
 ?>
 --FILE--
 <?php
