@@ -1,9 +1,5 @@
 --TEST--
 htmlentities() conformance check (HTML 4)
---SKIPIF--
-<?php
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-?>
 --FILE--
 <?php
 function utf32_utf8($k) {
@@ -43,15 +39,23 @@ function utf32_utf8($k) {
 	return $retval;
 }
 
-for ($i = 0; $i < 0x110000; $i++) {
+$table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES, 'UTF-8');
+
+for ($i = 0; $i < 0x2710; $i++) {
     if ($i >= 0xd800 && $i < 0xe000)
         continue;
     $str = utf32_utf8($i);
-    $result = htmlentities($str, ENT_QUOTES, 'UTF-8');
-    if ($str != $result) {
-        printf("%s\tU+%05X\n", $result, $i);
-    }
+	if (isset($table[$str])) {
+		printf("%s\tU+%05X\n", $table[$str], $i);
+		unset($table[$str]);
+	}
 }
+
+if (!empty($table)) {
+	echo "Not matched entities: ";
+	var_dump($table);
+}
+
 ?>
 --EXPECT--
 &quot;	U+00022
