@@ -385,6 +385,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("query=%s", query);
 
 	SET_ERROR_AFF_ROWS(stmt);
 	SET_ERROR_AFF_ROWS(stmt->conn);
