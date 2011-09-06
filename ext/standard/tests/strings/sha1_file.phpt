@@ -1,17 +1,5 @@
 --TEST--
 Test sha1_file() function with ASCII output and raw binary output. Based on ext/standard/tests/strings/md5_file.phpt
---SKIPIF--
-<?php
-
-$path = dirname(__FILE__);
-$data_file = "$path/EmptyFile.txt";
-$data_file1 = "$path/DataFile.txt";
-if !(($fp = fopen($data_file, 'w')) || ($fp1 = fopen($data_file1, 'w'))  {
-  echo "File could not be created ,hence exiting from testcase due to pre-requisite failure\n";
-}
-fclose( $fp );
-fclose( $fp1 );
-
 --FILE--
 <?php
 
