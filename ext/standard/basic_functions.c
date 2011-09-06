@@ -5938,7 +5938,7 @@ PHP_FUNCTION(parse_ini_file)
 PHP_FUNCTION(parse_ini_string)
 {
 	char *string = NULL, *str = NULL;
-	int str_len = 0;
+	size_t str_len = 0;
 	zend_bool process_sections = 0;
 	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
