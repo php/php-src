@@ -2,14 +2,17 @@
 mysqli_set_local_infile_handler() - open basedir restrictions
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+if (!$fp = @fopen('skipif.inc', 'r'))
+  die("skip open_basedir restrictions forbid opening include files");
+
+include_once('skipif.inc');
+include_once('skipifemb.inc');
+include_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_local_infile_handler'))
 	die("skip - function not available.");
 
-require_once('connect.inc');
+include_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die("skip Cannot connect to MySQL");
 
