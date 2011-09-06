@@ -26,8 +26,8 @@ object(Foo)#%d (0) {
 object(stdClass)#%d (0) {
 }
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'Class DateTime is an internal class that cannot be instantiated without invoking its constructor' in %s/tests/ReflectionClass_newInstanceWithoutConstructor.php:%d
+Fatal error: Uncaught exception 'ReflectionException' with message 'Class DateTime is an internal class that cannot be instantiated without invoking its constructor' in %sReflectionClass_newInstanceWithoutConstructor.php:%d
 Stack trace:
-#0 %s/ReflectionClass_newInstanceWithoutConstructor.php(%d): ReflectionClass->newInstanceWithoutConstructor()
+#0 %sReflectionClass_newInstanceWithoutConstructor.php(%d): ReflectionClass->newInstanceWithoutConstructor()
 #1 {main}
-  thrown in %s/ReflectionClass_newInstanceWithoutConstructor.php on line %d
+  thrown in %sReflectionClass_newInstanceWithoutConstructor.php on line %d
