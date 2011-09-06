@@ -1,5 +1,7 @@
 --TEST--
 Testing PDORow and PDOStatement instances with Reflection
+--SKIPIF--
+<?php if (!extension_loaded('pdo')) die('skip'); ?>
 --FILE--
 <?php
 
