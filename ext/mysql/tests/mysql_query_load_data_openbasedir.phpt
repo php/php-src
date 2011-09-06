@@ -2,9 +2,15 @@
 LOAD DATA INFILE - open_basedir
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+@include_once("connect.inc");
+
+if (!isset($db)) {
+  die("skip open_basedir setting prevents inclusing of required files");
+}
+
+include_once('skipif.inc');
+include_once('skipifconnectfailure.inc');
+
 
 if (!$IS_MYSQLND)
 	die("skip mysqlnd only, libmysql does not know about open_basedir restrictions");
@@ -30,6 +36,7 @@ open_basedir="."
 --FILE--
 <?php
 @include_once("connect.inc");
+
 if (!isset($db)) {
 	// run-tests, I love you for not allowing me to set ini settings dynamically
 	print "[006] [1148] The used command is not allowed with this MySQL version
