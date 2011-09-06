@@ -1,8 +1,9 @@
 --TEST--
-mcrypt_create_iv
-https://bugs.php.net/bug.php?id=55169
+mcrypt_create_iv https://bugs.php.net/bug.php?id=55169
 --CREDIT--
 Ryan Biesemeyer <ryan@yaauie.com>
+--SKIPIF--
+<?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
 for( $i=1; $i<=64; $i = $i*2 ){
