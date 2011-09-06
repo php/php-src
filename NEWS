@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Added ReflectionClass::newInstanceWithoutConstructor() to create a new
     instance of a class without invoking its constructor. FR #55490. (Sebastian)
 
+- Improved intl extension:
+  . Fixed bug #55562 (grapheme_substr() returns false on big length). (Stas)
+
 - Improved JSON extension:
   . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (Irker, Gwynne)
 
