@@ -1,7 +1,5 @@
 --TEST--
 Bug #31683 (changes to $name in __get($name) override future parameters)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
