@@ -1,5 +1,7 @@
 --TEST--
 ftok() tests
+--SKIPIF--
+<?php if (!extension_loaded("sysvshm")) print "skip"; ?>
 --FILE--
 <?php
 
