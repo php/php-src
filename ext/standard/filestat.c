@@ -415,6 +415,7 @@ PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 #endif
 		return SUCCESS;
 }
+#endif
 
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
@@ -450,11 +451,18 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
+#if !defined(WINDOWS)
+/* On Windows, we expect regular chgrp to fail silently by default */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chgrp() for a non-standard stream");
+#endif
 			RETURN_FALSE;
 		}
 	}
 
+#if defined(WINDOWS)
+	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
+	RETURN_FALSE;
+#else
 	if (Z_TYPE_P(group) == IS_LONG) {
 		gid = (gid_t)Z_LVAL_P(group);
 	} else if (Z_TYPE_P(group) == IS_STRING) {
@@ -484,20 +492,16 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
+#endif
 }
 /* }}} */
-#endif
 
 #ifndef NETWARE
 /* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
 PHP_FUNCTION(chgrp)
 {
-#if !defined(WINDOWS)
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-#else
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -546,6 +550,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 #endif
 		return SUCCESS;
 }
+#endif
 
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
@@ -581,10 +586,18 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
+#if !defined(WINDOWS)
+/* On Windows, we expect regular chown to fail silently by default */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chown() for a non-standard stream");
+#endif
 			RETURN_FALSE;
 		}
 	}
+
+#if defined(WINDOWS)
+	/* We have no native chown on Windows, nothing left to do if stream doesn't have own implementation */
+	RETURN_FALSE;
+#else
 
 	if (Z_TYPE_P(user) == IS_LONG) {
 		uid = (uid_t)Z_LVAL_P(user);
@@ -614,21 +627,18 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+	RETURN_TRUE;
+#endif
 }
 /* }}} */
-#endif
+
 
 #ifndef NETWARE
 /* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
-#if !defined(WINDOWS)
-	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-#else
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
