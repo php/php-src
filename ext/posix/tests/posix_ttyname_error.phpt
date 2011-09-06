@@ -4,6 +4,12 @@ Test function posix_ttyname() by calling it more than or less than its expected 
 Marco Fabbri mrfabbri@gmail.com
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
+--SKIPIF--
+<?php
+if (!extension_loaded('posix')) {
+    die('SKIP The posix extension is not loaded.');
+}
+?>
 --FILE--
 <?php
 
