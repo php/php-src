@@ -144,6 +144,8 @@ static const zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_callback_read_char,			arginfo_readline_callback_read_char)
 	PHP_FE(readline_callback_handler_remove,	arginfo_readline_callback_handler_remove)
 	PHP_FE(readline_redisplay, arginfo_readline_redisplay)
+#endif
+#if HAVE_RL_ON_NEW_LINE
 	PHP_FE(readline_on_new_line, arginfo_readline_on_new_line)
 #endif
 	PHP_FE_END
@@ -617,6 +619,9 @@ PHP_FUNCTION(readline_redisplay)
 }
 /* }}} */
 
+#endif
+
+#if HAVE_RL_ON_NEW_LINE
 /* {{{ proto void readline_on_new_line(void)
    Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
