@@ -3,7 +3,7 @@ openbase_dir runtime tightning
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. only for Windows');
+	die('skip.. only for unix');
 }
 --INI--
 open_basedir=/usr/local
