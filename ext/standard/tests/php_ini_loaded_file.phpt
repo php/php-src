@@ -11,4 +11,4 @@ precision=12
 var_dump(php_ini_loaded_file());
 ?>
 --EXPECTF--
-string(%d) "%stmp-php.ini"
+string(%d) "%sphp.ini"
