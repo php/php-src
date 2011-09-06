@@ -1,5 +1,7 @@
 --TEST--
 Test ResourceBundle iterator
+--SKIPIF--
+<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
 	include "resourcebundle.inc";
