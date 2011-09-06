@@ -299,6 +299,11 @@ zend_module_entry mysqlnd_module_entry = {
 };
 /* }}} */
 
+/* {{{ COMPILE_DL_MYSQLND */
+#ifdef COMPILE_DL_MYSQLND
+ZEND_GET_MODULE(mysqlnd)
+#endif
+/* }}} */
 
 /*
  * Local variables:

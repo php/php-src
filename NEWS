@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   mysqlnd is used). (Andrey)
 
 - mysqlnd
+  . Fixed bug #55609 (mysqlnd cannot be built shared). (Johannes)
   . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
     (Andrey)
 

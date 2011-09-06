@@ -2,6 +2,9 @@ dnl
 dnl $Id$
 dnl config.m4 for mysqlnd driver
 
+PHP_ARG_ENABLE(mysqlnd, whether to enable mysqlnd,
+  [  --enable-mysqlnd       Enable mysqlnd expliciely, will be done implicitly
+                         when required by other extensions], no, yes)
 
 PHP_ARG_ENABLE(mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
@@ -13,7 +16,7 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
-if test "$PHP_MYSQLND_ENABLED" = "yes"; then
+if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_ps_sources="mysqlnd_ps.c mysqlnd_ps_codec.c"
   mysqlnd_base_sources="mysqlnd.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
                    mysqlnd_loaddata.c mysqlnd_net.c mysqlnd_statistics.c \
@@ -27,12 +30,12 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable SSL support])
 
   mysqlnd_sources="$mysqlnd_base_sources $mysqlnd_ps_sources"
-  PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, no)
+  PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, $ext_shared)
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
   PHP_INSTALL_HEADERS([ext/mysqlnd/])
 fi
 
-if test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
+if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
 
   dnl This creates a file so it has to be after above macros
