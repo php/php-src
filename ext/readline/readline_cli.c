@@ -743,6 +743,11 @@ PHP_MSHUTDOWN_FUNCTION(cli_readline)
 
 PHP_MINFO_FUNCTION(cli_readline)
 {
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Readline Support", "enabled");
+	php_info_print_table_row(2, "Readline library", (rl_library_version ? rl_library_version : "Unknown"));
+	php_info_print_table_end();
+
 	DISPLAY_INI_ENTRIES();
 }
 
