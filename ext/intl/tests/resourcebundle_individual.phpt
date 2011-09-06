@@ -1,5 +1,7 @@
 --TEST--
 Test ResourceBundle::get() and length() - existing/missing keys
+--SKIPIF--
+<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
 	include "resourcebundle.inc";
