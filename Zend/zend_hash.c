@@ -197,7 +197,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 	ulong h;
 	uint nIndex;
 	Bucket *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -279,7 +279,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 {
 	uint nIndex;
 	Bucket *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -368,7 +368,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 {
 	uint nIndex;
 	Bucket *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -440,7 +440,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 static int zend_hash_do_resize(HashTable *ht)
 {
 	Bucket **t;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -487,7 +487,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 {
 	uint nIndex;
 	Bucket *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -610,7 +610,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 {
 	Bucket *retval;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
