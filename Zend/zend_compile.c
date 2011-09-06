@@ -5911,7 +5911,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 	znode dummy, value_node;
 	zend_bool assign_by_ref=0;
 
-	opline = &CG(active_op_array)->opcodes[as_token->u.op.	opline_num];
+	opline = &CG(active_op_array)->opcodes[as_token->u.op.opline_num];
 	if (key->op_type != IS_UNUSED) {
 		znode *tmp;
 
