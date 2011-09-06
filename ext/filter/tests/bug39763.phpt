@@ -1,5 +1,7 @@
 --TEST--
 Bug #39763 (filter applies magic_quotes twice in parse_str())
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
 magic_quotes_gpc=1
 filter.default=
