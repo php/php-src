@@ -5,11 +5,11 @@ Florian Anderiasch
 fa@php.net
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
+    if (!extension_loaded('sockets') || !function_exists('socket_strerror')) {
         die('skip sockets extension not available.');
     }
-    if (!stristr(PHP_OS, "linux") {
-        die('skip - test validtes linux error strings only.');
+    if (!stristr(PHP_OS, "Linux")) {
+        die('skip - test validates linux error strings only.');
     }
 ?>
 --FILE--
