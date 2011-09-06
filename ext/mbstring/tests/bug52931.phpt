@@ -1,5 +1,7 @@
 --TEST--
 Bug #52931 (strripos not overloaded with function overloading enabled)
+--SKIPIF--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 mbstring.func_overload = 7
 mbstring.internal_encoding = utf-8
