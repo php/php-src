@@ -224,7 +224,7 @@
 
 		function have_innodb($link) {
 		  if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'")) &&
-				$row = $res->fetch_row() &&
+				($row = $res->fetch_row()) &&
 				!empty($row)) {
 				if ($row[1] == "DISABLED" || $row[1] == "NO") {
 					return false;
