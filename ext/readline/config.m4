@@ -60,6 +60,13 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  PHP_CHECK_LIBRARY(edit, rl_on_new_line,
+  [
+    AC_DEFINE(HAVE_RL_ON_NEW_LINE, 1, [ ])
+  ],[],[
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
+  ])
+
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
 elif test "$PHP_LIBEDIT" != "no"; then
@@ -91,6 +98,20 @@ elif test "$PHP_LIBEDIT" != "no"; then
     AC_MSG_ERROR(edit library required by readline not found)
   ], [
     -L$READLINE_DIR/$PHP_LIBDIR 
+  ])
+
+  PHP_CHECK_LIBRARY(edit, rl_callback_read_char,
+  [
+    AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
+  ],[],[
+    -L$READLINE_DIR/$PHP_LIBDIR
+  ])
+
+  PHP_CHECK_LIBRARY(edit, rl_on_new_line,
+  [
+    AC_DEFINE(HAVE_RL_ON_NEW_LINE, 1, [ ])
+  ],[],[
+    -L$READLINE_DIR/$PHP_LIBDIR
   ])
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])

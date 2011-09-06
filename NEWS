@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - Improved CLI SAPI:
   . Added friendly log messages - Req #55109 (Arpad)
 
+- Improved readline extension:
+  . Fixed bug #54450 (Enable callback support when built against libedit).
+    (fedora at famillecollet dot com, Hannes)
+
 - Improved Session extension:
   . Expose session status via new function, session_status (Req #52982) (Arpad)
   
