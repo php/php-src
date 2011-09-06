@@ -422,8 +422,10 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	char *filename;
 	int filename_len;
 	zval *group;
+#if !defined(WINDOWS)
 	gid_t gid;
 	int ret;
+#endif
 	php_stream_wrapper *wrapper;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &group) == FAILURE) {
@@ -557,8 +559,10 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	char *filename;
 	int filename_len;
 	zval *user;
+#if !defined(WINDOWS)
 	uid_t uid;
 	int ret;
+#endif
 	php_stream_wrapper *wrapper;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &user) == FAILURE) {
