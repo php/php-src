@@ -2,7 +2,7 @@
 SplFileObject::fputcsv(): functionality tests
 --FILE--
 <?php
-$file = 'SplFileObject::fputcsv.csv';
+$file = 'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
 $list = array (
