@@ -116,6 +116,10 @@ UPGRADE NOTES - PHP X.Y
   
   Now emits a Fatal error due the incompatible declaration.
 
+- In previous versions, names of superglobals could be used for parameter
+  names, thereby shadowing the corresponding superglobal. This now causes a
+  fatal error such as "Cannot re-assign auto-global variable GLOBALS".
+
 =====================================
 4. Changes made to existing functions
 =====================================
