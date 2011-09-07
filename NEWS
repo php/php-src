@@ -9,8 +9,6 @@ PHP                                                                        NEWS
     not empty. (Derick)
   . Fixed bug #55378: Binary number literal returns float number though its
     value is small enough. (Derick)
-  . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
-    (virsacer at web dot de, Pierre)
   . Added support for SORT_NATURAL and SORT_FLAG_CASE in array
     sort functions (sort, rsort, ksort, krsort, asort, arsort and
     array_multisort). FR#55158 (Arpad)
@@ -28,10 +26,6 @@ PHP                                                                        NEWS
   . Added user JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004)
     support. (Rui)
   . Added the user user defined area for CP936 and CP950 (Rui).
-
-- Improved NSAPI SAPI:
-  . Fixed bug#55403 (Don't set $_SERVER['HTTPS'] on unsecure connection).
-    (Uwe Schindler)
 
 - Improved Reflection extension:
   . Added ReflectionClass::newInstanceWithoutConstructor() to create a new
