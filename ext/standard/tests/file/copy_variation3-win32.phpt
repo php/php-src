@@ -89,21 +89,29 @@ Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 2 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name =>  copy_variation3.tmp
-Size of source file => int(1500)
-Size of destination file => int(1500)
+Copy operation => 
+Warning: copy() expects parameter 2 to be a valid path, string given in %scopy_variation3-win32.php on line %d
+NULL
+Existence of destination file => 
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %scopy_variation3-win32.php on line %d
+NULL
+
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %scopy_variation3-win32.php on line %d
 
 -- Iteration 3 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(copy	variation3.tmp): failed to open stream: Invalid argument in %scopy_variation3-win32.php on line %d
 bool(false)
 Existence of destination file => bool(false)
 
 -- Iteration 4 --
 Copy operation => 
-Warning: copy(%s): %s
-bool(false)
-Existence of destination file => bool(false)
+Warning: copy() expects parameter 2 to be a valid path, string given in %scopy_variation3-win32.php on line %d
+NULL
+Existence of destination file => 
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %scopy_variation3-win32.php on line %d
+NULL
+
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %scopy_variation3-win32.php on line %d
 *** Done ***
+

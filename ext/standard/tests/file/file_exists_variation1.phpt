@@ -25,6 +25,8 @@ echo "Done";
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+
+Warning: file_exists() expects parameter 1 to be a valid path, string given in %sfile_exists_variation1.php on line %d
+NULL
 bool(false)
 Done
