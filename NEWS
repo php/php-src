@@ -6,60 +6,68 @@ PHP                                                                        NEWS
   . Implemented closure rebinding as parameter to bindTo. (Gustavo Lopes)
   . Turn on html_errors by default again in php.ini-production like it was in
     PHP 5.3, but only generate docref links when the docref_root INI setting is
-    not empty.
-  . Fixed bug #55378: Binary number literal returns float number though its value
-    is small enough. (Derick)
+    not empty. (Derick)
+  . Fixed bug #55378: Binary number literal returns float number though its
+    value is small enough. (Derick)
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
-  . Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
-    sort, rsort, ksort, krsort, asort, arsort and array_multisort. Req #55158 (Arpad)
+  . Added support for SORT_NATURAL and SORT_FLAG_CASE in array
+    sort functions (sort, rsort, ksort, krsort, asort, arsort and
+    array_multisort). FR#55158 (Arpad)
 
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
-  . Added JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004) support. (Rui)
+  . Added JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004)
+    support. (Rui)
   . Ill-formed UTF-8 check for security enhancements. (Rui)
   . Added MacJapanese (Shift_JIS) and gb18030 encoding support. (Rui)
   . Added encode/decode in hex format to mb_[en|de]code_numericentity(). (Rui)
-  . Added user JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004) support. (Rui)
+  . Added user JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004)
+    support. (Rui)
   . Added the user user defined area for CP936 and CP950 (Rui).
 
-- Improved NSAPI SAPI: (Uwe Schindler)
-  . Don't set $_SERVER['HTTPS'] on unsecure connection (bug #55403).
+- Improved NSAPI SAPI:
+  . Fixed bug#55403 (Don't set $_SERVER['HTTPS'] on unsecure connection).
+    (Uwe Schindler)
 
 - Improved Reflection extension:
   . Added ReflectionClass::newInstanceWithoutConstructor() to create a new
-    instance of a class without invoking its constructor. FR #55490. (Sebastian)
+    instance of a class without invoking its constructor. FR #55490.
+    (Sebastian)
 
 - Improved intl extension:
   . Fixed bug #55562 (grapheme_substr() returns false on big length). (Stas)
 
 - Improved JSON extension:
-  . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946. (Irker, Gwynne)
+  . Added new json_encode() option JSON_UNESCAPED_UNICODE. FR #53946.
+    (Alexander, Gwynne)
 
 - Improved CLI SAPI:
-  . Added friendly log messages - Req #55109 (Arpad)
+  . Added friendly log messages - FR #55109 (Arpad)
 
 - Improved readline extension:
   . Fixed bug #54450 (Enable callback support when built against libedit).
     (fedora at famillecollet dot com, Hannes)
 
 - Improved Session extension:
-  . Expose session status via new function, session_status (Req #52982) (Arpad)
+  . Expose session status via new function, session_status (FR #52982) (Arpad)
   
 - Improved XSL extension:
-  . XSL doesn't stop transformation anymore, if a PHP function can't be called (chregu)
+  . XSL doesn't stop transformation anymore, if a PHP function can't be called
+    (Christian)
 
 04 Aug 2011, PHP 5.4.0 Alpha 3
 - Added features:
- . Short array syntax, see UPGRADING guide for full details (rsky0711 at gmail 
-   . com, sebastian.deutsch at 9elements . com, Pierre)
+ . Short array syntax, see UPGRADING guide for full details
+   (rsky0711 at gmail . com, sebastian.deutsch at 9elements . com, Pierre)
  . Binary numbers format (0b001010). (Jonah dot Harris at gmail dot com)
  . Support for Class::{expr}() syntax (Pierrick)
 
 - Removed features:
-  . Removed magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase ini options.
-    get_magic_quotes_gpc, get_magic_quotes_runtime are kept but always return
-    false, set_magic_quotes_runtime raises an E_CORE_ERROR. (Pierrick, Pierre)
+  . Removed magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase
+    ini options. get_magic_quotes_gpc, get_magic_quotes_runtime are kept
+    but always return false, set_magic_quotes_runtime raises an
+    E_CORE_ERROR. (Pierrick, Pierre)
 
 - Changed E_ALL to include E_STRICT. (Stas)
 
