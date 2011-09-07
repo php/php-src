@@ -1542,7 +1542,7 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 	struct timeval tv = { 10, 0 };
 	ssize_t nbytes_left = str_len;
 	do {
-		ssize_t nbytes_sent = send(client->sock, str, str_len, 0);
+		ssize_t nbytes_sent = send(client->sock, str + str_len - nbytes_left, nbytes_left, 0);
 		if (nbytes_sent < 0) {
 			int err = php_socket_errno();
 			if (err == EAGAIN) {
