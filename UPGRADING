@@ -102,6 +102,10 @@ UPGRADE NOTES - PHP X.Y
   $test = new StdClass;
   $test->baz = 1;
 
+- In previous versions, names of superglobals could be used for parameter
+  names, thereby shadowing the corresponding superglobal. This now causes a
+  fatal error such as "Cannot re-assign auto-global variable GLOBALS".
+
 =====================================
 4. Changes made to existing functions
 =====================================
