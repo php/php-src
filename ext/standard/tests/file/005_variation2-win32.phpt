@@ -87,13 +87,13 @@ echo "Done";
 
 -- File ' ' --
 -- File access time is => 
-Warning: fileatime(): stat failed for   in %s on line %d
+Warning: fileatime() expects parameter 1 to be a valid path, string given in %s on line %d
 
 -- File modification time is => 
-Warning: filemtime(): stat failed for   in %s on line %d
+Warning: filemtime() expects parameter 1 to be a valid path, string given in %s on line %d
 
 -- inode change time is => 
-Warning: filectime(): stat failed for   in %s on line %d
+Warning: filectime() expects parameter 1 to be a valid path, string given in %s on line %d
 
 
 -- File '|' --
@@ -107,19 +107,13 @@ Warning: filemtime(): stat failed for | in %s on line %d
 Warning: filectime(): stat failed for | in %s on line %d
 
 
-*** testing touch ***
-Warning: touch(): %s in %s on line %d
+*** testing touch ***bool(false)
+bool(false)
 bool(false)
 
-Warning: touch(): %s in %s on line %d
-bool(false)
+Warning: touch() expects parameter 1 to be a valid path, string given in %s005_variation2-win32.php on line %d
+NULL
 
-Warning: touch(): %s in %s on line %d
-bool(false)
-
-Warning: touch(): %s in %s on line %d
-bool(false)
-
-Warning: touch(): %s in %s on line %d
+Warning: touch(): Unable to create file | because Invalid argument in %s005_variation2-win32.php on line %d
 bool(false)
 Done

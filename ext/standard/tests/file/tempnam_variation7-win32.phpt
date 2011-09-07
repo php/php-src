@@ -65,29 +65,31 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
 -- Iteration 0 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 1 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 2 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 3 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 4 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 5 --
-File name is => %s%et%s
-File permissions are => 100666
-File created in => temp dir
+
+Warning: tempnam() expects parameter 1 to be a valid path, string given in %stempnam_variation7-win32.php on line %d
+-- File is not created --
+
+Warning: unlink(): Invalid argument in %stempnam_variation7-win32.php on line %d
 -- Iteration 6 --
 
 Warning: tempnam() expects parameter 1 to be a valid path, string given in %stempnam_variation7-win32.php on line %d
@@ -96,18 +98,19 @@ Warning: tempnam() expects parameter 1 to be a valid path, string given in %stem
 Warning: unlink(): Invalid argument in %stempnam_variation7-win32.php on line %d
 -- Iteration 7 --
 
-Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
+Warning: tempnam() expects parameter 1 to be a valid path, array given in %stempnam_variation7-win32.php on line %d
 -- File is not created --
 
 Warning: unlink(): Invalid argument in %stempnam_variation7-win32.php on line %d
 -- Iteration 8 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 9 --
-File name is => %s%et%s
+File name is => %s.tmp
 File permissions are => 100666
 File created in => temp dir
 
 *** Done ***
+
 
