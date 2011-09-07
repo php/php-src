@@ -101,10 +101,15 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 	int s, c1, w = 0, flag = 0;
 
 	if (c < 0x80) {
+		if (filter->status != 0)  {
+			w = (filter->cache & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
+			CK((*filter->output_function)(w, filter->data));
+			filter->status = 0;
+			filter->cache = 0;
+		}
 		if (c >= 0) {
 			CK((*filter->output_function)(c, filter->data));
 		}
-		filter->status = 0;
 	} else if (c < 0xc0) {
 		int status = filter->status & 0xff;
 		switch (status) {
