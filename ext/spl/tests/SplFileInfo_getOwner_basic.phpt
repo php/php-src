@@ -10,7 +10,7 @@ Jacopo Romei <jacopo@sviluppoagile.it>
 #Test Fest Cesena (Italy) on 2009-06-20
 --FILE--
 <?php
-$filename = basename(__FILE__, 'phpt').'tmp';
+$filename = __DIR__ . "/SplFileInfo_getOwner_basic";
 touch($filename);
 $fileInfo = new SplFileInfo($filename);
 $expected = fileowner($filename);
@@ -19,7 +19,7 @@ var_dump($expected == $actual);
 ?>
 --CLEAN--
 <?php
-$filename = basename(__FILE__, 'phpt').'tmp';
+$filename = __DIR__ . "/SplFileInfo_getOwner_basic";
 unlink($filename);
 ?>
 --EXPECTF--
