@@ -76,38 +76,66 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::bindTo(object $to)
-   Bind a closure to another object */
-ZEND_METHOD(Closure, bindTo) /* {{{ */
-{
-	zval *newthis;
-	zend_closure *closure = (zend_closure *)zend_object_store_get_object(getThis() TSRMLS_CC);	
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!", &newthis) == FAILURE) {
-		RETURN_NULL();
-	}
-
-	zend_create_closure(return_value, &closure->func, newthis?Z_OBJCE_P(newthis):NULL, newthis TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ proto Closure Closure::bind(object $to, Closure $old)
-   Create a closure to with binding to another object */
+/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
+   Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind) /* {{{ */
 {
-	zval *newthis, *zclosure;
-	zend_closure *closure;	
+	zval *newthis, *zclosure, *scope_arg = NULL;
+	zend_closure *closure;
+	zend_class_entry *ce, **ce_p;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!O", &newthis, &zclosure, zend_ce_closure) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
 		RETURN_NULL();
 	}
 
 	closure = (zend_closure *)zend_object_store_get_object(zclosure TSRMLS_CC);	
 
-	zend_create_closure(return_value, &closure->func, newthis?Z_OBJCE_P(newthis):NULL, newthis TSRMLS_CC);
+	if ((newthis != NULL) && (closure->func.common.fn_flags & ZEND_ACC_STATIC)) {
+		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
+	}
+
+	if (scope_arg != NULL) { /* scope argument was given */
+		if (IS_ZEND_STD_OBJECT(*scope_arg)) {
+			ce = Z_OBJCE_P(scope_arg);
+		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
+			ce = NULL;
+		} else {
+			char *class_name;
+			int class_name_len;
+			zval tmp_zval;
+			INIT_ZVAL(tmp_zval);
+
+			if (Z_TYPE_P(scope_arg) == IS_STRING) {
+				class_name = Z_STRVAL_P(scope_arg);
+				class_name_len = Z_STRLEN_P(scope_arg);
+			} else {
+				tmp_zval = *scope_arg;
+				zval_copy_ctor(&tmp_zval);
+				convert_to_string(&tmp_zval);
+				class_name = Z_STRVAL(tmp_zval);
+				class_name_len = Z_STRLEN(tmp_zval);
+			}
+
+			if ((class_name_len == sizeof("static") - 1) &&
+				(memcmp("static", class_name, sizeof("static") - 1) == 0)) {
+				ce = closure->func.common.scope;
+			}
+			else if (zend_lookup_class_ex(class_name, class_name_len, NULL, 1, &ce_p TSRMLS_CC) == FAILURE) {
+				zend_error(E_WARNING, "Class '%s' not found", class_name);
+				zval_dtor(&tmp_zval);
+				RETURN_NULL();
+			} else {
+				ce = *ce_p;
+			}
+			zval_dtor(&tmp_zval);
+		}
+	} else { /* scope argument not given; do not change the scope by default */
+		ce = closure->func.common.scope;
+	}
+
+	zend_create_closure(return_value, &closure->func, ce, newthis TSRMLS_CC);
 }
 /* }}} */
-
 
 static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{{ */
 {
@@ -356,19 +384,21 @@ ZEND_METHOD(Closure, __construct)
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bindto, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bindto, 0, 0, 1)
 	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 0)
-	ZEND_ARG_INFO(0, newthis)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
 	ZEND_ARG_INFO(0, closure)
+	ZEND_ARG_INFO(0, newthis)
+	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
-	ZEND_ME(Closure, bindTo, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -409,6 +439,12 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure->func = *func;
 	closure->func.common.prototype = NULL;
 
+	if ((scope == NULL) && (this_ptr != NULL)) {
+		/* use dummy scope if we're binding an object without specifying a scope */
+		/* maybe it would be better to create one for this purpose */
+		scope = zend_ce_closure;
+	}
+
 	if (closure->func.type == ZEND_USER_FUNCTION) {
 		if (closure->func.op_array.static_variables) {
 			HashTable *static_variables = closure->func.op_array.static_variables;
@@ -439,6 +475,9 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	}
 
+	/* Invariants:
+	 * If the closure is unscoped, it has no bound object.
+	 * The the closure is scoped, it's either static or it's bound */
 	closure->func.common.scope = scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
