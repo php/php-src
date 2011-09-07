@@ -3,7 +3,7 @@ SPL: DirectoryIterator::getExtension() basic test
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for Windows');
+    die('skip.. only for Unix');
 }
 ?>
 --FILE--
