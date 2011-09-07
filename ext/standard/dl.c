@@ -97,9 +97,9 @@ PHPAPI PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
-/* {{{ php_dl
+/* {{{ php_load_extension
  */
-PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC) /* {{{ */
+PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 {
 	void *handle;
 	char *libpath;
