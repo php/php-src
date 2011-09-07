@@ -15,5 +15,10 @@ $nx->locateName("a",ZIPARCHIVE::FL_UNCHANGED);
 $nx->statName("a",ZIPARCHIVE::FL_UNCHANGED);
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$fname = dirname(__FILE__)."/test53885.zip";
+unlink($fname);
+?>
 --EXPECTF--
 ==DONE==
