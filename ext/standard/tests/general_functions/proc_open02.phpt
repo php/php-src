@@ -3,7 +3,6 @@ proc_open
 --SKIPIF--
 <?php
 if (!is_executable('/bin/sleep')) echo 'skip no sleep';
-if (!is_executable('/usr/bin/nohup')) echo 'skip no nohup';
 if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 ?>
 --FILE--
@@ -11,19 +10,19 @@ if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 $ds = array(array('pipe', 'r'));
 
 $cat = proc_open(
-	'/usr/bin/nohup /bin/sleep 50',
+	'/bin/sleep 2',
 	$ds,
 	$pipes
 );
 
-sleep(1); // let the OS run the nohup process before sending the signal
+usleep(20000); // let the OS run the sleep process before sending the signal
 
-var_dump(proc_terminate($cat, 1)); // send a SIGHUP
-sleep(1);
+var_dump(proc_terminate($cat, 0)); // status check
+usleep(20000);
 var_dump(proc_get_status($cat));
 
 var_dump(proc_terminate($cat)); // now really quit it
-sleep(1);
+usleep(20000);
 var_dump(proc_get_status($cat));
 
 proc_close($cat);
@@ -35,7 +34,7 @@ echo "Done!\n";
 bool(true)
 array(8) {
   ["command"]=>
-  string(28) "/usr/bin/nohup /bin/sleep 50"
+  string(12) "/bin/sleep 2"
   ["pid"]=>
   int(%d)
   ["running"]=>
@@ -54,7 +53,7 @@ array(8) {
 bool(true)
 array(8) {
   ["command"]=>
-  string(28) "/usr/bin/nohup /bin/sleep 50"
+  string(12) "/bin/sleep 2"
   ["pid"]=>
   int(%d)
   ["running"]=>
