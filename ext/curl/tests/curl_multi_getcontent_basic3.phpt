@@ -5,7 +5,7 @@ Rein Velt (rein@velt.org)
 #TestFest Utrecht 20090509
 --SKIPIF--
 <?php
-if (!extension_loaded('curl')) print 'skip';
+if (!extension_loaded('curl')) print 'skip need ext/curl';
 ?>
 --FILE--
 <?php
@@ -51,6 +51,7 @@ User-agent: *
 Disallow: /backend/
 Disallow: /distributions/
 Disallow: /stats/
+Disallow: /server-status/
 Disallow: /source.php
 Disallow: /search.php
 Disallow: /mod.php
