@@ -1,5 +1,5 @@
 --TEST--
-Closure 036: Rebinding closures
+Closure 036: Rebinding closures, keep calling scope
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ $b = new A(10);
 
 $ca = $a->getIncrementor();
 $cb = $ca->bindTo($b);
-$cb2 = Closure::bind($b, $ca);
+$cb2 = Closure::bind($ca, $b);
 
 var_dump($ca());
 var_dump($cb());

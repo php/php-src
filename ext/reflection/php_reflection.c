@@ -1670,6 +1670,27 @@ ZEND_METHOD(reflection_function, getClosureThis)
 }
 /* }}} */
 
+/* {{{ proto public ReflectionClass ReflectionFunction::getClosureScopeClass()
+   Returns the scope associated to the closure */
+ZEND_METHOD(reflection_function, getClosureScopeClass)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	const zend_function *closure_func;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (intern->obj) {
+		closure_func = zend_get_closure_method_def(intern->obj TSRMLS_CC);
+		if (closure_func && closure_func->common.scope) {
+			zend_reflection_class_factory(closure_func->common.scope, return_value TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public mixed ReflectionFunction::getClosure()
    Returns a dynamically created closure for the function */
 ZEND_METHOD(reflection_function, getClosure)
@@ -5574,6 +5595,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)

@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 Beta
 - General improvements:
   . Added callable typehint. (Hannes)
+  . Implemented closure rebinding as parameter to bindTo. (Gustavo Lopes)
   . Turn on html_errors by default again in php.ini-production like it was in
     PHP 5.3, but only generate docref links when the docref_root INI setting is
     not empty.
