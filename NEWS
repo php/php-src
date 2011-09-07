@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     sort functions (sort, rsort, ksort, krsort, asort, arsort and
     array_multisort). FR#55158 (Arpad)
 
+- Improved MySQL extensions:
+  . ext/mysql, mysqli and pdo_mysql now use mysqlnd by defalt. (Johannes)
+
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
   . Added JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004)

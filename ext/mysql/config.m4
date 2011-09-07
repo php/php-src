@@ -41,8 +41,8 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH(mysql, for MySQL support,
 [  --with-mysql[=DIR]      Include MySQL support.  DIR is the MySQL base
-                          directory.  If mysqlnd is passed as DIR, 
-                          the MySQL native driver will be used [/usr/local]])
+                          directory, if no DIR is passed or the value is
+                          mysqlnd the MySQL native driver will be used])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR]   MySQL/MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
@@ -53,7 +53,7 @@ if test -z "$PHP_ZLIB_DIR"; then
   [  --with-zlib-dir[=DIR]     MySQL: Set the path to libz install prefix], no, no)
 fi
 
-if test "$PHP_MYSQL" = "mysqlnd"; then
+if test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL" = "mysqlnd"; then
   dnl enables build of mysqnd library
   PHP_MYSQLND_ENABLED=yes
 
@@ -61,17 +61,15 @@ elif test "$PHP_MYSQL" != "no"; then
   MYSQL_DIR=
   MYSQL_INC_DIR=
 
-  for i in $PHP_MYSQL /usr/local /usr; do
-    if test -r $i/include/mysql/mysql.h; then
-      MYSQL_DIR=$i
-      MYSQL_INC_DIR=$i/include/mysql
-      break
-    elif test -r $i/include/mysql.h; then
-      MYSQL_DIR=$i
-      MYSQL_INC_DIR=$i/include
-      break
-    fi
-  done
+  if test -r $PHP_MYSQL/include/mysql/mysql.h; then
+    MYSQL_DIR=$PHP_MYSQL
+    MYSQL_INC_DIR=$PHP_MYSQL/include/mysql
+    break
+  elif test -r $PHP_MYSQL/include/mysql.h; then
+    MYSQL_DIR=$PHP_MYSQL
+    MYSQL_INC_DIR=$PHP_MYSQL/include
+    break
+  fi
 
   if test -z "$MYSQL_DIR"; then
     AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL.
@@ -155,7 +153,7 @@ if test "$PHP_MYSQL" != "no"; then
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
   PHP_SUBST(MYSQL_SHARED_LIBADD)
 
-  if test "$PHP_MYSQL" = "mysqlnd"; then
+  if test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysql, mysqlnd)
     AC_DEFINE([MYSQL_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
   fi

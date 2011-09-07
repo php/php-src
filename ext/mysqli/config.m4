@@ -4,24 +4,20 @@ dnl config.m4 for extension mysqli
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]    Include MySQLi support.  FILE is the path
-                          to mysql_config.  If mysqlnd is passed as FILE,
-                          the MySQL native driver will be used [mysql_config]])
+                          to mysql_config.  If no value or mysqlnd is passed 
+                          as FILE, the MySQL native driver will be used])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
 [  --enable-embedded-mysqli  MYSQLi: Enable embedded support
                             Note: Does not work with MySQL native driver!], no, no)
 
-if test "$PHP_MYSQLI" = "mysqlnd"; then
+if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
   dnl This needs to be set in any extension which wishes to use mysqlnd
   PHP_MYSQLND_ENABLED=yes
 
 elif test "$PHP_MYSQLI" != "no"; then
 
-  if test "$PHP_MYSQLI" = "yes"; then
-    MYSQL_CONFIG=`$php_shtool path mysql_config`
-  else
-    MYSQL_CONFIG=$PHP_MYSQLI
-  fi
+  MYSQL_CONFIG=$PHP_MYSQLI
 
   MYSQL_LIB_NAME='mysqlclient'
   if test "$PHP_EMBEDDED_MYSQLI" = "yes"; then
@@ -82,7 +78,7 @@ if test "$PHP_MYSQLI" != "no"; then
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([ext/mysqli/php_mysqli_structs.h])
 
-  if test "$PHP_MYSQLI" = "mysqlnd"; then
+  if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
     AC_DEFINE([MYSQLI_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
   fi
