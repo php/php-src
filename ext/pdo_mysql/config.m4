@@ -4,8 +4,8 @@ dnl vim: se ts=2 sw=2 et:
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 [  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory
-                                 If mysqlnd is passed as DIR, the MySQL native
-                                 native driver will be used [/usr/local]])
+                                 If no value or mysqlnd is passed as DIR, the
+                                 MySQL native driver will be used])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
@@ -28,30 +28,21 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     done
   ])
 
-  if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
-    PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
-  elif test "$PHP_PDO_MYSQL" != "yes"; then
-    if test -d "$PHP_PDO_MYSQL" ; then
-      if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
-        PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
-      else
-        PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+  if test "$PHP_PDO_MYSQL" != "yes" && test "$PHP_PDO_MYSQL" != "mysqlnd"; then
+    if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
+      PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
+    else
+      if test -d "$PHP_PDO_MYSQL" ; then
+        if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
+          PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
+        else
+          PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+        fi
       fi
     fi
-  else
-    for i in /usr/local /usr ; do
-      if test -x "$i/bin/mysql_config" ; then
-        PDO_MYSQL_CONFIG="$i/bin/mysql_config"
-        break;
-      fi
-      if test -r $i/include/mysql/mysql.h || test -r $i/include/mysql.h ; then
-        PDO_MYSQL_DIR="$i"
-        break;
-      fi
-    done
   fi
-
-  if test "$PHP_PDO_MYSQL" = "mysqlnd"; then
+  
+  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
