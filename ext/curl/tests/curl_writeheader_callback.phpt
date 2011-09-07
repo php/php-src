@@ -6,7 +6,14 @@ Dutch UG, TestFest 2009, Utrecht
 --DESCRIPTION--
 Hit the host identified by PHP_CURL_HTTP_REMOTE_SERVER and determine that the headers are sent to the callback specified for CURLOPT_HEADERFUNCTION. Different test servers specified for PHP_CURL_HTTP_REMOTE_SERVER might return different sets of headers. Just test for HTTP/1.1 200 OK.
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
+<?php 
+if (!extension_loaded("curl")) {
+	echo "skip - curl extension not available in this build";
+}
+if (!getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
+	echo "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable";
+}
+?>
 --FILE--
 <?php
 
