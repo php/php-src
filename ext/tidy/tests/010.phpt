@@ -4,12 +4,12 @@ Accessing root, body, html, and head nodes..
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php 
-    	$a = tidy_parse_string("<HTML><BODY BGCOLOR=#FFFFFF ALINK=#000000></BODY></HTML>");
-        var_dump($a->root());
-        var_dump($a->body());
-        var_dump($a->html());
-        var_dump($a->head());
- 
+$a = tidy_parse_string("<HTML><BODY BGCOLOR=#FFFFFF ALINK=#000000></BODY></HTML>", array('newline' => 'LF'));
+var_dump($a->root());
+var_dump($a->body());
+var_dump($a->html());
+var_dump($a->head());
+
 ?>
 --EXPECT--
 object(tidyNode)#2 (8) {
