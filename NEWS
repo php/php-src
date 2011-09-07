@@ -351,6 +351,7 @@ PHP                                                                        NEWS
 - Fixed bug #55471 (ZTS build broken with dtrace). (Laruence)
 - Fixed bug #55463 (cli-server missing _SERVER[REMOTE_ADDR]). (Laruence)
 - Fixed bug #55473 (mysql_pconnect leaks file descriptors on reconnect). (Andrey, Laruence)
+- Fixed bug #55423 (cli-server could not output correctly in some case). (Laruence, chobieee at gmail dot com)
 
 28 Jul 2011, PHP 5.3.7 RC4
 - Improved core functions:
