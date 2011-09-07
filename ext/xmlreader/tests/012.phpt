@@ -25,7 +25,9 @@ $xmlstring =<<<EOF
 EOF;
 
 $xmlstring = str_replace('012.dtd', dirname(__FILE__).'/012.dtd', $xmlstring);
-
+if (DIRECTORY_SEPARATOR == '\\') {
+	$xmlstring = str_replace('\\',"/", $xmlstring);
+}
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 $reader->setParserProperty(XMLReader::DEFAULTATTRS, true);
@@ -34,12 +36,15 @@ var_dump($reader->getAttribute('bar'));
 var_dump($reader->getAttribute('baz'));
 $reader->close();
 
-?>
-===FILE===
-<?php
-
+echo "\nUsing URI:\n";
 $reader = new XMLReader();
-$reader->open(dirname(__FILE__) . '/012.xml');
+$file = dirname(__FILE__) . '/012.xml';
+if (DIRECTORY_SEPARATOR == '\\') {
+	$file = str_replace('\\',"/", $file);
+}
+
+$reader->open($file);
+
 //$reader->setParserProperty(XMLReader::DEFAULTATTRS, true);
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 var_dump($reader->getAttribute('bar'));
@@ -61,7 +66,8 @@ string(0) ""
 NULL
 string(0) ""
 string(0) ""
-===FILE===
+
+Using URI:
 string(0) ""
 NULL
 string(0) ""
