@@ -26,9 +26,9 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: filesize(): stat failed for   in %s on line %d
-bool(false)
+Warning: filesize() expects parameter 1 to be a valid path, string given in %sfilesize_variation5.php on line %d
+NULL
 
-Warning: filesize(): stat failed for | in %s on line %d
+Warning: filesize(): stat failed for | in %sfilesize_variation5.php on line %d
 bool(false)
 *** Done ***

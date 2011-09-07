@@ -46,25 +46,25 @@ unlink($file_path."/fileperms_variation2.tmp");
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: fileperms(): stat failed for -2.34555 in %s on line %d
+Warning: fileperms(): stat failed for -2.34555 in %sfileperms_variation2.php on line %d
 bool(false)
 
-Warning: fileperms(): stat failed for   in %s on line %d
+Warning: fileperms() expects parameter 1 to be a valid path, string given in %sfileperms_variation2.php on line %d
+NULL
+bool(false)
+
+Warning: fileperms(): stat failed for 1 in %sfileperms_variation2.php on line %d
+bool(false)
 bool(false)
 bool(false)
 
-Warning: fileperms(): stat failed for 1 in %s on line %d
-bool(false)
-bool(false)
-bool(false)
-
-Warning: fileperms() expects parameter 1 to be a valid path, resource given in %s on line %d
+Warning: fileperms() expects parameter 1 to be a valid path, resource given in %sfileperms_variation2.php on line %d
 NULL
 
-Warning: fileperms(): stat failed for 1234 in %s on line %d
+Warning: fileperms(): stat failed for 1234 in %sfileperms_variation2.php on line %d
 bool(false)
 
-Warning: fileperms(): stat failed for 0 in %s on line %d
+Warning: fileperms(): stat failed for 0 in %sfileperms_variation2.php on line %d
 bool(false)
 
 *** Done ***

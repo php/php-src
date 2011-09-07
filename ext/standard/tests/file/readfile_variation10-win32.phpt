@@ -47,41 +47,42 @@ foreach($names_arr as $key => $value) {
 
 -- Filename: -1 --
 
-Warning: readfile(-1): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(-1): failed to open stream: No such file or directory in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: TRUE --
 
-Warning: readfile(1): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(1): failed to open stream: No such file or directory in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: FALSE --
 
-Warning: readfile(): Filename cannot be empty in %s on line %d
+Warning: readfile(): Filename cannot be empty in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: NULL --
 
-Warning: readfile(): Filename cannot be empty in %s on line %d
+Warning: readfile(): Filename cannot be empty in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: "" --
 
-Warning: readfile(): Filename cannot be empty in %s on line %d
+Warning: readfile(): Filename cannot be empty in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: " " --
 
-Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
+Warning: readfile() expects parameter 1 to be a valid path, string given in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: \0 --
 
-Warning: readfile() expects parameter 1 to be a valid path, string given in %s on line %d
+Warning: readfile() expects parameter 1 to be a valid path, string given in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: array() --
 
-Warning: readfile() expects parameter 1 to be a valid path, array given in %s on line %d
+Warning: readfile() expects parameter 1 to be a valid path, array given in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: /no/such/file/dir --
 
-Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 
 -- Filename: php/php --
 
-Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(php/php): failed to open stream: No such file or directory in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\readfile_variation10-win32.php on line 30
 ===Done===
+

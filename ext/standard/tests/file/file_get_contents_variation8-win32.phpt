@@ -47,51 +47,51 @@ foreach($names_arr as $key =>$value) {
 
 -- Filename: -1 --
 
-Warning: file_get_contents(-1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(-1): failed to open stream: No such file or directory in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: TRUE --
 
-Warning: file_get_contents(1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(1): failed to open stream: No such file or directory in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: FALSE --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
+Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: NULL --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
+Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: "" --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
+Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: " " --
 
-Warning: file_get_contents( ): failed to open stream: Permission denied in %s on line %d
-bool(false)
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %sfile_get_contents_variation8-win32.php on line %d
+NULL
 
 -- Filename: \0 --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %sfile_get_contents_variation8-win32.php on line %d
+NULL
 
 -- Filename: array() --
 
-Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
+Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %sfile_get_contents_variation8-win32.php on line %d
 NULL
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: php/php --
 
-Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 ===Done===
