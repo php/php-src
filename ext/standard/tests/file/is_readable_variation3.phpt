@@ -59,11 +59,9 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
 
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %sis_readable_variation3.php on line %d
-NULL
-
-Warning: is_readable() expects parameter 1 to be a valid path, array given in %sis_readable_variation3.php on line %d
+Warning: is_readable() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 bool(false)
 Done

@@ -438,14 +438,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const cha
 						if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
 							return "a valid path";
 						}
-#ifdef PHP_WIN32
-						if (c == 'p') {
-							/* do not allow trailing space (or single, */
-							if (Z_STRVAL_PP(arg)[0] == ' ' || Z_STRVAL_PP(arg)[Z_STRLEN_PP(arg) - 1] == ' ') {
-								return "a valid path";
-							}
-						}
-#endif
 						break;
 
 					case IS_OBJECT:

@@ -64,18 +64,15 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
+bool(false)
 
-Warning: is_writable() expects parameter 1 to be a valid path, string given in %sis_writable_variation3.php on line %d
+Warning: is_writable() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
-Warning: is_writeable() expects parameter 1 to be a valid path, string given in %sis_writable_variation3.php on line %d
-NULL
-
-Warning: is_writable() expects parameter 1 to be a valid path, array given in %sis_writable_variation3.php on line %d
-NULL
-
-Warning: is_writeable() expects parameter 1 to be a valid path, array given in %sis_writable_variation3.php on line %d
+Warning: is_writeable() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 bool(false)
 bool(false)
 Done
+
