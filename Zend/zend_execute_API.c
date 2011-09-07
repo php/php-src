@@ -1328,6 +1328,13 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 	TSRMLS_FETCH();
 
 	if (zend_on_timeout) {
+		/* 
+		   We got here because we got a timeout signal, so we are in a signal handler
+		   at this point. However, we want to be able to timeout any user-supplied
+		   shutdown functions, so pretend we are not in a signal handler while we are
+		   calling these 
+		*/
+		SIGG(running) = 0;
 		zend_on_timeout(EG(timeout_seconds) TSRMLS_CC);
 	}
 
