@@ -738,7 +738,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 		}
 	} else {
 		/* search for the end of the boundary */
-		boundary_end = strchr(boundary, ',');
+		boundary_end = strpbrk(boundary, ",;");
 	}
 	if (boundary_end) {
 		boundary_end[0] = '\0';
