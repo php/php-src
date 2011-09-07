@@ -4,7 +4,7 @@ Test CURLOPT_READDATA without a callback function
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
+<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable"; ?>
 --FILE--
 <?php
 
