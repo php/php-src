@@ -9,7 +9,7 @@ fa@php.net
         die('skip sockets extension not available.');
     }
     if (!stristr(PHP_OS, "Linux")) {
-        die('skip - test validtes linux error strings only.');
+        die('skip - test validates linux error strings only.');
     }
 ?>
 --FILE--
