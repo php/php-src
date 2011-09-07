@@ -18,7 +18,8 @@ $contents = '
 </wps:block>';
 
 $config = array(
-'new-blocklevel-tags' => 'wps:block,wps:var,wps:value'
+'new-blocklevel-tags' => 'wps:block,wps:var,wps:value',
+'newline' => 'LF'
 );
 
 $tidy = tidy_parse_string($contents, $config, 'utf8');
