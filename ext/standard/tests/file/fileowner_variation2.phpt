@@ -47,25 +47,26 @@ unlink($file_path."/fileowner_variation2.tmp");
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: fileowner(): stat failed for -2.34555 in %sfileowner_variation2.php on line %d
+Warning: fileowner(): stat failed for -2.34555 in %s on line %d
 bool(false)
 
-Warning: fileowner() expects parameter 1 to be a valid path, string given in %sfileowner_variation2.php on line %d
+Warning: fileowner(): stat failed for   in %s on line %d
+bool(false)
+bool(false)
+
+Warning: fileowner(): stat failed for 1 in %s on line %d
+bool(false)
+bool(false)
+bool(false)
+
+Warning: fileowner() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
+
+Warning: fileowner(): stat failed for 1234 in %s on line %d
 bool(false)
 
-Warning: fileowner(): stat failed for 1 in %sfileowner_variation2.php on line %d
-bool(false)
-bool(false)
-bool(false)
-
-Warning: fileowner() expects parameter 1 to be a valid path, resource given in %sfileowner_variation2.php on line %d
-NULL
-
-Warning: fileowner(): stat failed for 1234 in %sfileowner_variation2.php on line %d
-bool(false)
-
-Warning: fileowner(): stat failed for 0 in %sfileowner_variation2.php on line %d
+Warning: fileowner(): stat failed for 0 in %s on line %d
 bool(false)
 
 *** Done ***
+

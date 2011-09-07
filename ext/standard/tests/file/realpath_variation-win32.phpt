@@ -79,29 +79,24 @@ rmdir("$name_prefix/");
 *** Testing realpath(): usage variations ***
 
 *** Testing realpath() with filename stored inside a object ***
-string(112) "G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
 bool(false)
 
 *** Testing realpath() with filename stored in an array ***
-string(112) "G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
 bool(false)
 
 *** Testing realpath() with filename as empty string, NULL and single space ***
 -- Iteration1 --
-
-Warning: realpath() expects parameter 1 to be a valid path, string given in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\realpath_variation-win32.php on line 56
-NULL
+bool(false)
 -- Iteration2 --
-
-Warning: realpath() expects parameter 1 to be a valid path, string given in G:\php-sdk\php-src\branches\PHP_5_4\ext\standard\tests\file\realpath_variation-win32.php on line 56
-NULL
+bool(false)
 -- Iteration3 --
-string(35) "G:\php-sdk\php-src\branches\PHP_5_4"
+string(%d) "%s"
 -- Iteration4 --
-string(35) "G:\php-sdk\php-src\branches\PHP_5_4"
+string(%d) "%s"
 -- Iteration5 --
-string(35) "G:\php-sdk\php-src\branches\PHP_5_4"
+string(%d) "%s"
 -- Iteration6 --
-string(35) "G:\php-sdk\php-src\branches\PHP_5_4"
+string(%d) "%s"
 Done
-

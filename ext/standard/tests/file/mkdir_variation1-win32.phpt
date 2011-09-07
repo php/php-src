@@ -94,29 +94,29 @@ foreach($inputs as $key =>$value) {
 *** Testing mkdir() : usage variation ***
 
 --uppercase NULL--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --lowercase null--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --lowercase false--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --uppercase FALSE--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --empty string DQ--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --empty string SQ--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --undefined var--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --unset var--
-Error: 2 - mkdir(): Invalid argument, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 
 --single space--
-Error: 2 - mkdir() expects parameter 1 to be a valid path, string given, %smkdir_variation1-win32.php(%d)
+Error: 2 - mkdir(): %s, %s(%d)
 ===DONE===

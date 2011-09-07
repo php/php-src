@@ -58,41 +58,41 @@ foreach($names_arr as $key =>$value) {
 
 -- Filename: FALSE --
 
-Warning: file_put_contents(): Filename cannot be empty in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
 Failed to write data to: FALSE
 
 -- Filename: NULL --
 
-Warning: file_put_contents(): Filename cannot be empty in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
 Failed to write data to: NULL
 
 -- Filename: "" --
 
-Warning: file_put_contents(): Filename cannot be empty in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
 Failed to write data to: ""
 
 -- Filename: " " --
 
-Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents( ): failed to open stream: Permission denied in %s on line %d
 Failed to write data to: " "
 
 -- Filename: \0 --
 
-Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %s on line %d
 Failed to write data to: \0
 
 -- Filename: array() --
 
-Warning: file_put_contents() expects parameter 1 to be a valid path, array given in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents() expects parameter 1 to be a valid path, array given in %s on line %d
 Failed to write data to: array()
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_put_contents(/no/such/file/dir): failed to open stream: No such file or directory in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d
 Failed to write data to: /no/such/file/dir
 
 -- Filename: php/php --
 
-Warning: file_put_contents(php/php): failed to open stream: No such file or directory in %sfile_put_contents_variation8-win32.php on line %d
+Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
 Failed to write data to: php/php
 ===Done===
