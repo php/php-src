@@ -1,7 +1,5 @@
 --TEST--
 Testing isset accessing undefined array itens and properties
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 
@@ -31,9 +29,9 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Undefined variable: d in %s on line %d
-
 Notice: Undefined variable: c in %s on line %d
+
+Notice: Undefined variable: d in %s on line %d
 
 Notice: Trying to get property of non-object in %s on line %d
 bool(false)
