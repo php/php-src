@@ -2,7 +2,7 @@
 SplFileObject::fputcsv(): functionality tests
 --FILE--
 <?php
-$file = 'SplFileObject_fputcsv.csv';
+$file = __DIR__ . '/SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
 $list = array (
@@ -55,6 +55,7 @@ echo '$list = ';var_export($res);echo ";\n";
 <?php exit(0); ?>
 --CLEAN--
 <?php
+$file = __DIR__ . '/SplFileObject_fputcsv.csv';
 unlink($file);
 ?>
 --EXPECT--
