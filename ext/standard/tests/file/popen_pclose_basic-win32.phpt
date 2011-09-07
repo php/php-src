@@ -47,12 +47,7 @@ echo "\n--- Done ---";
 ?>
 --EXPECTF--
 *** Testing popen(): reading from the pipe ***
-
-Warning: popen() expects parameter 1 to be a valid path, string given in %spopen_pclose_basic-win32.php on line %d
-
-Warning: fpassthru() expects parameter 1 to be resource, null given in %spopen_pclose_basic-win32.php on line %d
-
-Warning: pclose() expects parameter 1 to be resource, null given in %spopen_pclose_basic-win32.php on line %d
+Sample String
 *** Testing popen(): writing to the pipe ***
 aaa
 ddd

@@ -47,25 +47,26 @@ unlink($file_path."/fileinode_variation2.tmp");
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: fileinode(): stat failed for -2.34555 in %sfileinode_variation2.php on line %d
+Warning: fileinode(): stat failed for -2.34555 in %s on line %d
 bool(false)
 
-Warning: fileinode() expects parameter 1 to be a valid path, string given in %sfileinode_variation2.php on line %d
+Warning: fileinode(): stat failed for   in %s on line %d
+bool(false)
+bool(false)
+
+Warning: fileinode(): stat failed for 1 in %s on line %d
+bool(false)
+bool(false)
+bool(false)
+
+Warning: fileinode() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
+
+Warning: fileinode(): stat failed for 1234 in %s on line %d
 bool(false)
 
-Warning: fileinode(): stat failed for 1 in %sfileinode_variation2.php on line %d
-bool(false)
-bool(false)
-bool(false)
-
-Warning: fileinode() expects parameter 1 to be a valid path, resource given in %sfileinode_variation2.php on line %d
-NULL
-
-Warning: fileinode(): stat failed for 1234 in %sfileinode_variation2.php on line %d
-bool(false)
-
-Warning: fileinode(): stat failed for 0 in %sfileinode_variation2.php on line %d
+Warning: fileinode(): stat failed for 0 in %s on line %d
 bool(false)
 
 *** Done ***
+

@@ -45,15 +45,13 @@ unlink($file_path."/is_file_variation3.tmp");
 --EXPECTF--
 *** Testing Invalid file types ***
 bool(false)
-
-Warning: is_file() expects parameter 1 to be a valid path, string given in %sis_file_variation3.php on line %d
-NULL
+bool(false)
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
-Warning: is_file() expects parameter 1 to be a valid path, resource given in %sis_file_variation3.php on line %d
+Warning: is_file() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 bool(false)
 bool(false)
