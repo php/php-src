@@ -14,11 +14,11 @@ require dirname(__FILE__).'/connect.inc';
 // Initialization
 
 $stmtarray = array(
-	"DROP table bug42496_tab",
-	"CREATE table bug42496_tab(c1 CLOB, c2 CLOB)",
-	"INSERT INTO bug42496_tab VALUES('test1', 'test1')",
-	"INSERT INTO bug42496_tab VALUES('test2', 'test2')",
-	"INSERT INTO bug42496_tab VALUES('test3', 'test3')"
+	"DROP table bug42496_1_tab",
+	"CREATE table bug42496_1_tab(c1 CLOB, c2 CLOB)",
+	"INSERT INTO bug42496_1_tab VALUES('test1', 'test1')",
+	"INSERT INTO bug42496_1_tab VALUES('test2', 'test2')",
+	"INSERT INTO bug42496_1_tab VALUES('test3', 'test3')"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -28,7 +28,7 @@ oci8_test_sql_execute($c, $stmtarray);
 echo "Test 1\n";
 
 for ($i = 0; $i < 15000; $i++) {
-	$s = oci_parse($c, "SELECT * from bug42496_tab");
+	$s = oci_parse($c, "SELECT * from bug42496_1_tab");
 	oci_define_by_name($s, "C1", $col1);
 	oci_define_by_name($s, "C2", $col2);
 	if (oci_execute($s)) {
@@ -46,7 +46,7 @@ echo "Done\n";
 // Cleanup
 
 $stmtarray = array(
-	"DROP table bug42496_tab"
+	"DROP table bug42496_1_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
