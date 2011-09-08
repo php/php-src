@@ -3,6 +3,7 @@ mysql_[p]connect() - max_links/max_persistent
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
 ?>
 --INI--
 mysql.max_links=2
