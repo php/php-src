@@ -1,7 +1,10 @@
 --TEST--
 mysql connect
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php
+require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 require_once('connect.inc');
