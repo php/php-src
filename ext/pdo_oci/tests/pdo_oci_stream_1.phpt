@@ -4,6 +4,7 @@ PDO_OCI: stream_get_contents length & offset test
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for WE8MSWIN1252 character set');
 PDOTest::skip();
 ?>
 --FILE--
