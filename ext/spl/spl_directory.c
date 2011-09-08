@@ -644,6 +644,7 @@ static int spl_filesystem_object_constructor_validator(void *object_data TSRMLS_
 	 * constructor or cleared its exception */
 	
 	return (fsobj->u.dir.entry.d_name[0] != '\0' /* GlobIterator */ ||
+			fsobj->_path != NULL /* SplFileInfo */ ||
 			fsobj->orig_path != NULL /* Spl[Temp]FileObject */);
 }
 /* }}} */
