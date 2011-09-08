@@ -7,6 +7,12 @@ $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
+
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))){
+    if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for Oracle with WE8MSWIN1252 character set');
+
+}
+
 ?>
 --FILE--
 <?php
