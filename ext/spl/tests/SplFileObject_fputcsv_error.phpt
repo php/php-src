@@ -2,7 +2,7 @@
 SplFileObject::fputcsv(): error conditions
 --FILE--
 <?php
-$fo = new SplFileObject('SplFileObject::fputcsv.csv', 'w');
+$fo = new SplFileObject('SplFileObject_fputcsv.csv', 'w');
 
 echo "*** Testing error conditions ***\n";
 // zero argument
