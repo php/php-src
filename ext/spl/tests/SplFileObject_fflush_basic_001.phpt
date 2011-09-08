@@ -17,8 +17,11 @@ class VariableStream {
     var $varname;
 
     function stream_open($path, $mode, $options, &$opened_path)
-    {  
+    {
         return true;
+    }
+
+    function url_stat() {
     }
 }
 stream_wrapper_register("SPLtest", "VariableStream");
