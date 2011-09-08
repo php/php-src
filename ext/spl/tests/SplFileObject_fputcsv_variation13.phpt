@@ -8,7 +8,7 @@ Test fputcsv() : usage variations - with default enclosure & delimiter of two ch
 
 echo "*** Testing fputcsv() : with default enclosure & delimiter of two chars ***\n";
 
-$fo = new SplFileObject('SplFileObject::fputcsv.csv', 'w');
+$fo = new SplFileObject('SplFileObject_fputcsv.csv', 'w');
 
 var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
 
