@@ -48,7 +48,11 @@ PHP                                                                        NEWS
 
 - Improved Session extension:
   . Expose session status via new function, session_status (FR #52982) (Arpad)
-  
+
+- Improved SPL extension:
+  . Immediately reject wrong usages of directories under Spl(Temp)FileObject
+    and friends. (Etienne, Pierre)
+
 - Improved XSL extension:
   . XSL doesn't stop transformation anymore, if a PHP function can't be called
     (Christian)
