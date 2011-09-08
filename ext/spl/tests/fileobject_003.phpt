@@ -33,8 +33,12 @@ function test($name, $lc, $lp)
 	} catch (LogicException $e) {
 		echo "LogicException: ".$e->getMessage()."\n";
 	}
-	$fo = $o->openFile();
-	var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
+	try {
+		$fo = $o->openFile();
+		var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
+	} catch (LogicException $e) {
+		echo "LogicException: ".$e->getMessage()."\n";
+	}
 }
 
 test(dirname(__FILE__) . '/' . 'fileobject_001a.txt', 't', substr(dirname(__FILE__),-1));
@@ -88,9 +92,7 @@ bool(false)
 bool(true)
 bool(true)
 LogicException: Cannot use SplFileObject with directories
-string(%d) "%stests"
-string(%d) "tests"
-string(%d) "%sspl"
+LogicException: Cannot use SplFileObject with directories
 ===2===
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
@@ -108,7 +110,5 @@ bool(false)
 bool(true)
 bool(true)
 LogicException: Cannot use SplFileObject with directories
-string(%d) "%stests"
-string(5) "tests"
-string(%d) "%sspl"
+LogicException: Cannot use SplFileObject with directories
 ===DONE===
