@@ -1328,6 +1328,7 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 	TSRMLS_FETCH();
 
 	if (zend_on_timeout) {
+#ifdef ZEND_SIGNALS
 		/* 
 		   We got here because we got a timeout signal, so we are in a signal handler
 		   at this point. However, we want to be able to timeout any user-supplied
@@ -1335,6 +1336,7 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		   calling these 
 		*/
 		SIGG(running) = 0;
+#endif
 		zend_on_timeout(EG(timeout_seconds) TSRMLS_CC);
 	}
 
