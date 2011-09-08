@@ -8,7 +8,7 @@ if (!function_exists('pcntl_fork')) die("skip no fork");
 <?php
 $context = stream_context_create();
 
-stream_context_set_option($context, 'ssl', 'local_cert', "./bug54992.pem");
+stream_context_set_option($context, 'ssl', 'local_cert', __DIR__ . "/bug54992.pem");
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 $server = stream_socket_server('ssl://127.0.0.1:64321', $errno, $errstr,
 	STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
@@ -22,7 +22,7 @@ if ($pid == -1) {
 		array(
 			'ssl' => array(
 				'verify_peer'		=> true,
-				'cafile'		=> 'bug54992-ca.pem',
+				'cafile'		=> __DIR__ . '/bug54992-ca.pem',
 				'CN_match'		=> 'buga_buga',
 			)
 		)
