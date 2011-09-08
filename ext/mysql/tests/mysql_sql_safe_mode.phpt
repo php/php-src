@@ -3,6 +3,7 @@ mysql_[p]connect() - safe_mode
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+require_once('skipifconnectfailure.inc');
 $link = @mysql_connect("", "", "", true);
 if ($link)
 	die("skip Test cannot be run if annonymous connections are allowed");
