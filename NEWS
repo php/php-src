@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #55504 (Content-Type header is not parsed correctly on
     HTTP POST request). (Hannes)
 
+- Curl:
+  . Fixed bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed
+    before calling curl_exec). (Hannes)
+
 - DateTime:
   . Fixed bug #48476 (cloning extended DateTime class without calling
     parent::__constr crashed PHP). (Hannes)

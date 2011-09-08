@@ -18,16 +18,19 @@ $ch = curl_init();
 
 curl_setopt($ch, CURLOPT_VERBOSE, 1);
 curl_setopt($ch, CURLOPT_STDERR, $fp);
-curl_setopt($ch, CURLOPT_URL, "");
+curl_setopt($ch, CURLOPT_URL, getenv('PHP_CURL_HTTP_REMOTE_SERVER'));
 
 fclose($fp); // <-- premature close of $fp caused a crash!
 
 curl_exec($ch);
+curl_close($ch);
 
 echo "Ok\n";
 
 ?>
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
---EXPECT--
+--EXPECTF--
+Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203.php on line %d
+%A
 Ok

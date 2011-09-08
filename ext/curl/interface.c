@@ -2213,6 +2213,26 @@ PHP_FUNCTION(curl_exec)
 
 	_php_curl_cleanup_handle(ch);
 
+	if (ch->handlers->std_err) {
+		php_stream  *stream;
+		stream = (php_stream*)zend_fetch_resource(&ch->handlers->std_err TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_STDERR resource has gone away, resetting to stderr");
+			zval_ptr_dtor(&ch->handlers->std_err);
+			curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
+		}
+	}
+	if (ch->handlers->read && ch->handlers->read->stream) {
+		php_stream  *stream;
+		stream = (php_stream*)zend_fetch_resource(&ch->handlers->read->stream TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_INFILE resource has gone away, resetting to default");
+			zval_ptr_dtor(&ch->handlers->read->stream);
+			ch->handlers->read->fd = 0;
+			ch->handlers->read->fp = 0;
+			curl_easy_setopt(ch->cp, CURLOPT_INFILE, (void *) ch);
+		}
+	}
 	error = curl_easy_perform(ch->cp);
 	SAVE_CURL_ERROR(ch, error);
 	/* CURLE_PARTIAL_FILE is returned by HEAD requests */
