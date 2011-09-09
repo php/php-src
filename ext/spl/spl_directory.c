@@ -2234,7 +2234,6 @@ SPL_METHOD(SplFileObject, __construct)
 	char *p1, *p2;
 	char *tmp_path;
 	int   tmp_path_len;
-	zval  tmp;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
