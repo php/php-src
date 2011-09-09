@@ -260,7 +260,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Cannot use SplFileObject with directories");
-		return;
+		return FAILURE;
 	}
 
 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
