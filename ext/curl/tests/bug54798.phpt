@@ -1,5 +1,5 @@
 --TEST--
-Bug #48203 (Crash when file pointers passed to curl are closed before calling curl_exec)
+Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling curl_exec)
 --SKIPIF--
 <?php 
 if (!extension_loaded("curl")) {
@@ -13,7 +13,7 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
 <?php
 
 function checkForClosedFilePointer($curl_option, $description) {
-	$fp = fopen(dirname(__FILE__) . '/bug48203.tmp', 'w+');
+	$fp = fopen(dirname(__FILE__) . '/bug54798.tmp', 'w+');
 
 	$ch = curl_init();
 
@@ -53,14 +53,14 @@ foreach($options_to_check as $option) {
 
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
+<?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>
 --EXPECTF--
-Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203_2.php on line %d
+Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug54798.php on line %d
 * About to connect() %a
 * Closing connection #%d
 Ok for CURLOPT_STDERR
 Ok for CURLOPT_WRITEHEADER
 Ok for CURLOPT_FILE
 
-Warning: curl_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %sbug48203_2.php on line %d
+Warning: curl_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %sbug54798.php on line %d
 Ok for CURLOPT_INFILE
