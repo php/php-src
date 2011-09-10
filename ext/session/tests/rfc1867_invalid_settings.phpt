@@ -9,7 +9,5 @@ session.upload_progress.freq=-1
 var_dump(ini_get("session.upload_progress.freq"));
 ?>
 --EXPECTF--
-PHP Warning:  PHP Startup: session.upload_progress.freq must be greater than or equal to zero in %s
-
 Warning: PHP Startup: session.upload_progress.freq must be greater than or equal to zero in %s
 string(%d) "1%"
