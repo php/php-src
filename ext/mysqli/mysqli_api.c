@@ -887,7 +887,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 			*/
 			/* Even if the string is of length zero there is one byte alloced so efree() in all cases */
 			if (Z_TYPE_P(stmt->result.vars[i]) == IS_STRING) {
-				efree(stmt->result.vars[i]->value.str.val);
+				STR_FREE(stmt->result.vars[i]->value.str.val);
 			}
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
