@@ -2,14 +2,12 @@
 mb_parse_str()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
---FAIL--
-register_globals calls killed the ability for mb_parse_str() to register into the global scope (obsolete in PHP 5.4)
+--XFAIL--
+register_globals calls killed the ability for mb_parse_str() to register into the global scope
 --INI--
 arg_separator.input=&
 --FILE--
 <?php
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 $queries = array(
 	"foo=abc&bar=def",
 	"%2bfoo=def&-bar=jkl",
@@ -39,9 +37,8 @@ array(2) {
 }
 string(0) ""
 string(0) ""
-ERR: Warning
-string(0) ""
-string(0) ""
+string(3) "abc"
+string(3) "def"
 array(2) {
   ["+foo"]=>
   string(3) "def"
@@ -50,7 +47,6 @@ array(2) {
 }
 string(0) ""
 string(0) ""
-ERR: Warning
 string(0) ""
 string(0) ""
 array(2) {
@@ -71,6 +67,15 @@ array(2) {
 }
 string(0) ""
 string(0) ""
-ERR: Warning
-string(0) ""
-string(0) ""
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+array(1) {
+  [0]=>
+  string(3) "jkl"
+}

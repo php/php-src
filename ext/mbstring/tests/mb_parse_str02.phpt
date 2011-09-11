@@ -3,13 +3,11 @@ mb_parse_str() test 2
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --XFAIL--
-register_globals calls killed the ability for mb_parse_str() to register into the global scope (obsolete in PHP 5.4)
+register_globals calls killed the ability for mb_parse_str() to register into the global scope
 --INI--
 arg_separator.input=&#
 --FILE--
 <?php
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 $queries = array(
 	"foo=abc#bar=def&fubar=ghi",
 	"%2bfoo=def&-bar=jkl#+fubar",
