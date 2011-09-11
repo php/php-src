@@ -2,7 +2,7 @@
 mb_parse_str() test 2
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
---XFAIL--
+--FAIL--
 register_globals calls killed the ability for mb_parse_str() to register into the global scope
 --INI--
 arg_separator.input=&#
