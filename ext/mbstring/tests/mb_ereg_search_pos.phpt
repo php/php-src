@@ -6,7 +6,7 @@ if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 ?>
 --FILE--
 <?php
-
+mb_regex_encoding('iso-8859-1');
 $test_str = 'Iñtërnâtiônàlizætiøn';
 
 if(mb_ereg_search_init($test_str))
