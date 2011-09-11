@@ -2025,7 +2025,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ proto bool mb_parse_str(string encoded_string , array result)
+/* {{{ proto bool mb_parse_str(string encoded_string [, array result])
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
@@ -2036,12 +2036,12 @@ PHP_FUNCTION(mb_parse_str)
 	const mbfl_encoding *detected;
 
 	track_vars_array = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
 		return;
 	}
 
-	/* Clear out the array */
 	if (track_vars_array != NULL) {
+		/* Clear out the array */
 		zval_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
@@ -2057,7 +2057,16 @@ PHP_FUNCTION(mb_parse_str)
 	info.num_from_encodings     = MBSTRG(http_input_list_size); 
 	info.from_language          = MBSTRG(language);
 
-	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr TSRMLS_CC);
+	if (track_vars_array != NULL) {
+		detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr TSRMLS_CC);
+	} else {
+		zval tmp;
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		Z_ARRVAL(tmp) = EG(active_symbol_table);		
+		detected = _php_mb_encoding_handler_ex(&info, &tmp, encstr TSRMLS_CC);		
+	}
 
 	MBSTRG(http_input_identify) = detected;
 
