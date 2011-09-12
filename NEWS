@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     condition. (Gustavo)
   . Fixed bug #55504 (Content-Type header is not parsed correctly on
     HTTP POST request). (Hannes)
+  . Fixed bug #55273 (base64_decode() with strict rejects whitespace after
+    pad). (Ilia)
 
 - Curl:
   . Fixed bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed
