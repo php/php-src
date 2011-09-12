@@ -1013,7 +1013,6 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 			return NULL;
 		}
 	} else {
-		convert_to_string_ex(&replace_val);
 		replace = Z_STRVAL_P(replace_val);
 		replace_len = Z_STRLEN_P(replace_val);
 		replace_end = replace + replace_len;
