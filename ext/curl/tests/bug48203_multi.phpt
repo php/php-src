@@ -67,40 +67,24 @@ foreach($options_to_check as $option) {
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
 --EXPECTF--
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203_multi.php on line 36
 
-Warning: curl_multi_exec(): CURLOPT_STDERR handle is incorrect in %s on line %d
-
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
-
-Warning: curl_multi_exec(): CURLOPT_STDERR handle is incorrect in %s on line %d
-%a
+Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203_multi.php on line 36
+%A
 Ok for CURLOPT_STDERR
 
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %sbug48203_multi.php on line 36
 
-Warning: curl_multi_exec(): CURLOPT_WRITEHEADER handle is incorrect in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %sbug48203_multi.php on line 36
+Ok for CURLOPT_WRITEHEADER
 
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %sbug48203_multi.php on line 36
 
-Warning: curl_multi_exec(): CURLOPT_WRITEHEADER handle is incorrect in %s on line %d
-%AOk for CURLOPT_WRITEHEADER
-
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
-
-Warning: curl_multi_exec(): CURLOPT_FILE handle is incorrect in %s on line %d
-
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
-
-Warning: curl_multi_exec(): CURLOPT_FILE handle is incorrect in %s on line %d
-%a
+Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %sbug48203_multi.php on line 36
+%A
 Ok for CURLOPT_FILE
 
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %sbug48203_multi.php on line 36
 
-Warning: curl_multi_exec(): CURLOPT_INFILE handle is incorrect in %s on line %d
-
-Warning: curl_multi_exec(): %d is not a valid stream resource in %s on line %d
-
-Warning: curl_multi_exec(): CURLOPT_INFILE handle is incorrect in %s on line %d
+Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %sbug48203_multi.php on line 36
 Ok for CURLOPT_INFILE

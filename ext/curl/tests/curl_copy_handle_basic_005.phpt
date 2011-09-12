@@ -32,8 +32,6 @@ Rick Buitenman <rick@meritos.nl>
   var_dump( $curl_content_copy );
 ?>
 ===DONE===
---XFAIL--
-This test fails, the output of the copy seems to be corrupted if the original is closed after exec()
 --EXPECTF--
 *** Test curl_copy_handle() after exec() with POST ***
 string(163) "array(1) {

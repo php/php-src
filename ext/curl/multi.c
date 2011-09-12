@@ -211,6 +211,19 @@ PHP_FUNCTION(curl_multi_exec)
 
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, &z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 
+	{
+		zend_llist_position pos;
+		php_curl *ch;
+		zval	*pz_ch;
+
+		for(pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+			ZEND_FETCH_RESOURCE(ch, php_curl *, &pz_ch, -1, le_curl_name, le_curl);
+			_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
+		}
+	}
+
 	convert_to_long_ex(&z_still_running);
 	still_running = Z_LVAL_P(z_still_running);
 	result = curl_multi_perform(mh->multi, &still_running);
@@ -324,6 +337,17 @@ void _php_curl_multi_close(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	php_curlm *mh = (php_curlm *) rsrc->ptr;
 	if (mh) {
+		zend_llist_position pos;
+		php_curl *ch;
+		zval	*pz_ch;
+
+		for(pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+			ch = (php_curl *) zend_fetch_resource(&pz_ch TSRMLS_CC, -1, le_curl_name, NULL, 1, le_curl);
+			_php_curl_verify_handlers(ch, 0 TSRMLS_CC);
+		}
+
 		curl_multi_cleanup(mh->multi);
 		zend_llist_clean(&mh->easyh);
 		efree(mh);

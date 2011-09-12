@@ -150,6 +150,7 @@ typedef struct {
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
+int  _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
 
 /* streams support */
 

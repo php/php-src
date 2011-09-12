@@ -150,6 +150,7 @@ static struct gcry_thread_cbs php_curl_gnutls_tsl = {
 static void _php_curl_close_ex(php_curl *ch TSRMLS_DC);
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
+
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s), (long) v);
@@ -201,6 +202,72 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* 
 #endif
 
 	return (error == CURLE_OK ? 1 : 0);
+}
+/* }}} */
+
+int _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC) /* {{{ */
+{
+	php_stream *stream;
+	if (!ch || !ch->handlers) {
+		return 0;
+	}
+
+	if (ch->handlers->std_err) {
+		stream = (php_stream *) zend_fetch_resource(&ch->handlers->std_err TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			if (reporterror) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_STDERR resource has gone away, resetting to stderr");
+			}
+			zval_ptr_dtor(&ch->handlers->std_err);
+			ch->handlers->std_err = NULL;
+
+			curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
+		}
+	}
+	if (ch->handlers->read && ch->handlers->read->stream) {
+		stream = (php_stream *) zend_fetch_resource(&ch->handlers->read->stream TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			if (reporterror) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_INFILE resource has gone away, resetting to default");
+			}
+			zval_ptr_dtor(&ch->handlers->read->stream);
+			ch->handlers->read->fd = 0;
+			ch->handlers->read->fp = 0;
+			ch->handlers->read->stream = NULL;
+
+			curl_easy_setopt(ch->cp, CURLOPT_INFILE, (void *) ch);
+		}
+	}
+	if (ch->handlers->write_header && ch->handlers->write_header->stream) {
+		stream = (php_stream *) zend_fetch_resource(&ch->handlers->write_header->stream TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			if (reporterror) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_WRITEHEADER resource has gone away, resetting to default");
+			}
+			zval_ptr_dtor(&ch->handlers->write_header->stream);
+			ch->handlers->write_header->fp = 0;
+			ch->handlers->write_header->stream = NULL;
+
+			ch->handlers->write_header->method = PHP_CURL_IGNORE;
+			curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER, (void *) ch);
+		}
+	}
+	if (ch->handlers->write && ch->handlers->write->stream) {
+		stream = (php_stream *) zend_fetch_resource(&ch->handlers->write->stream TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream == NULL) {
+			if (reporterror) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FILE resource has gone away, resetting to default");
+			}
+			zval_ptr_dtor(&ch->handlers->write->stream);
+			ch->handlers->write->fp = 0;
+			ch->handlers->write->stream = NULL;
+
+			ch->handlers->write->method = PHP_CURL_STDOUT;
+			ch->handlers->write->type   = PHP_CURL_ASCII;
+			curl_easy_setopt(ch->cp, CURLOPT_FILE, (void *) ch);
+		}
+	}
+	return 1;
 }
 /* }}} */
 
@@ -337,7 +404,6 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* }}} */
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(curl)
@@ -1394,6 +1460,7 @@ static void split_certinfo(char *string, zval *hash)
 		efree(org);
 	}
 }
+/* }}} */
 
 /* {{{ create_certinfo
  */
@@ -1537,6 +1604,7 @@ PHP_FUNCTION(curl_copy_handle)
 
 	dupch->cp = cp;
 	dupch->uses = 0;
+	ch->uses++;
 	if (ch->handlers->write->stream) {
 		Z_ADDREF_P(dupch->handlers->write->stream);
 		dupch->handlers->write->stream = ch->handlers->write->stream;
@@ -2211,28 +2279,10 @@ PHP_FUNCTION(curl_exec)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
+	_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
+
 	_php_curl_cleanup_handle(ch);
 
-	if (ch->handlers->std_err) {
-		php_stream  *stream;
-		stream = (php_stream*)zend_fetch_resource(&ch->handlers->std_err TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
-		if (stream == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_STDERR resource has gone away, resetting to stderr");
-			zval_ptr_dtor(&ch->handlers->std_err);
-			curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
-		}
-	}
-	if (ch->handlers->read && ch->handlers->read->stream) {
-		php_stream  *stream;
-		stream = (php_stream*)zend_fetch_resource(&ch->handlers->read->stream TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
-		if (stream == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_INFILE resource has gone away, resetting to default");
-			zval_ptr_dtor(&ch->handlers->read->stream);
-			ch->handlers->read->fd = 0;
-			ch->handlers->read->fp = 0;
-			curl_easy_setopt(ch->cp, CURLOPT_INFILE, (void *) ch);
-		}
-	}
 	error = curl_easy_perform(ch->cp);
 	SAVE_CURL_ERROR(ch, error);
 	/* CURLE_PARTIAL_FILE is returned by HEAD requests */
@@ -2241,6 +2291,14 @@ PHP_FUNCTION(curl_exec)
 			smart_str_free(&ch->handlers->write->buf);
 		}
 		RETURN_FALSE;
+	}
+
+	if (ch->handlers->std_err) {
+		php_stream  *stream;
+		stream = (php_stream*)zend_fetch_resource(&ch->handlers->std_err TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		if (stream) {
+			php_stream_flush(stream);
+		}
 	}
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
@@ -2520,11 +2578,7 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
-	/* Prevent crash inside cURL if passed file has already been closed */
-	if (ch->handlers->std_err && Z_REFCOUNT_P(ch->handlers->std_err) <= 0) {
-		curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
-	}
-
+	_php_curl_verify_handlers(ch, 0 TSRMLS_CC);
 	curl_easy_cleanup(ch->cp);
 	zend_llist_clean(&ch->to_free.str);
 
