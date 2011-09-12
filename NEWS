@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed
     before calling curl_exec). (Hannes)
+  . Fixed issues were curl_copy_handle() would sometimes lose copied
+    preferences. (Hannes)
 
 - DateTime:
   . Fixed bug #48476 (cloning extended DateTime class without calling
