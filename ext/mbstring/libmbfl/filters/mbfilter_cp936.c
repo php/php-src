@@ -191,7 +191,7 @@ int
 mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 {
 	int k, k1, k2;
-	int c1, s = 0, s1;
+	int c1, s = 0;
 
 	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {
 		/* U+0000 - U+0451 */
