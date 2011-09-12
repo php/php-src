@@ -2092,10 +2092,14 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 				nid = OBJ_txt2nid(strindex);
 				if (nid != NID_undef) {
-					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, 
+					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, 
 								(unsigned char*)Z_STRVAL_PP(item), -1, -1, 0))
 					{
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"dn: add_entry_by_NID %d -> %s (failed; check error"
+							" queue and value of string_mask OpenSSL option "
+							"if illegal characters are reported)",
+							nid, Z_STRVAL_PP(item));
 						return FAILURE;
 					}
 				} else {
@@ -2144,7 +2148,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			if (X509_NAME_get_index_by_NID(subj, nid, -1) >= 0) {
 				continue;
 			}
-			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_ASC, (unsigned char*)v->value, -1, -1, 0)) {
+			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_UTF8, (unsigned char*)v->value, -1, -1, 0)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
 				return FAILURE;
 			}
@@ -2168,7 +2172,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 					nid = OBJ_txt2nid(strindex);
 					if (nid != NID_undef) {
-						if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC, (unsigned char*)Z_STRVAL_PP(item), -1, -1, 0)) {
+						if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)Z_STRVAL_PP(item), -1, -1, 0)) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
 							return FAILURE;
 						}
@@ -2185,8 +2189,12 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				if (X509_REQ_get_attr_by_NID(csr, nid, -1) >= 0) {
 					continue;
 				}
-				if (!X509_REQ_add1_attr_by_txt(csr, v->name, MBSTRING_ASC, (unsigned char*)v->value, -1)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "add1_attr_by_txt %s -> %s (failed)", v->name, v->value);
+				if (!X509_REQ_add1_attr_by_txt(csr, v->name, MBSTRING_UTF8, (unsigned char*)v->value, -1)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+						"add1_attr_by_txt %s -> %s (failed; check error queue "
+						"and value of string_mask OpenSSL option if illegal "
+						"characters are reported)",
+						v->name, v->value);
 					return FAILURE;
 				}
 			}
