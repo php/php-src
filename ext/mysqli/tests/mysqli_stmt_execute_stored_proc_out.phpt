@@ -73,6 +73,8 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 
 mysqli_close($link);
 ?>
+--XFAIL--
+Unsupported and undefined, under development
 --EXPECTF--
 [008] More results: %s
 [009] Next results: %s
