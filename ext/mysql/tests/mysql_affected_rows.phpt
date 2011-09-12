@@ -8,6 +8,7 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 include_once("connect.inc");
+include_once('setupdefault.inc');
 
 $tmp    = NULL;
 $link   = NULL;
