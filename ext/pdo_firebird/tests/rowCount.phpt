@@ -38,6 +38,7 @@ $dbh->commit();
 
 $dbh->exec('DROP TABLE testz');
 
+unset($stmt);
 unset($dbh);
 
 ?>
