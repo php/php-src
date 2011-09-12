@@ -5,6 +5,9 @@ EXPLAIN - metadata
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+require_once("connect.inc");
+if (!$IS_MYSQLND)
+  die("skip Open libmysql/MySQL issue http://bugs.mysql.com/?id=62350");
 ?>
 --FILE--
 <?php
