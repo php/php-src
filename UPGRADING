@@ -198,6 +198,7 @@ UPGRADE NOTES - PHP X.Y
 - Write operations within XSLT (for example with the extension sax:output) are
   disabled by default. You can define what is forbidden with the method
   XsltProcess::setSecurityPrefs($options)
+- openssl_csr_new() expects the textual data to be in UTF-8.
 
 ===================================
 5. Changes made to existing methods
