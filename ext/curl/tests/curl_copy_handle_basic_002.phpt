@@ -29,8 +29,6 @@ Rick Buitenman <rick@meritos.nl>
   var_dump( $curl_content );
 ?>
 ===DONE===
---XFAIL--
-This test fails, the copy seems to be missing the CURLOPT_POSTFIELDS after the original is closed
 --EXPECTF--
 *** Testing curl copy handle with simple POST ***
 string(163) "array(1) {
