@@ -175,7 +175,7 @@ if (!$IS_MYSQLND)
 To be fixed later. Minor issue about fetching error message from killed line
 --EXPECTF--
 array(1) {
-  [%u|b%"processed beofre killed"]=>
+  [%u|b%"processed before killed"]=>
   %unicode|string%(1) "1"
 }
 Fetching from thread %d...
