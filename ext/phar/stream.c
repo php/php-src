@@ -403,7 +403,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	off_t temp = 0;
+	off_t temp;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
@@ -421,6 +421,8 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 		case SEEK_SET :
 			temp = data->zero + offset;
 			break;
+		default:
+			temp = 0;
 	}
 	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
