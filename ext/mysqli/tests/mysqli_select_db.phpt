@@ -70,7 +70,17 @@ require_once('skipifconnectfailure.inc');
 	mysqli_report(MYSQLI_REPORT_OFF);	  
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 	mysqli_report(MYSQLI_REPORT_ERROR);
+
+	ob_start();
 	mysqli_select_db($link, 'I can not imagine that this database exists');
+	$output = ob_get_contents();
+	ob_end_clean();
+	if (!stristr($output, "1049") && !stristr($output, "1044") && !stristr($output, "1045")) {
+	  /* Error: 1049 SQLSTATE: 42000 (ER_BAD_DB_ERROR) Message: Unknown database '%s'  */
+	  /* Error: 1044 SQLSTATE: 42000 (ER_DBACCESS_DENIED_ERROR) Message: Access denied for user '%s'@'%s' to database '%s' */
+	  /* Error: 1045 SQLSTATE: 28000 (ER_ACCESS_DENIED_ERROR) Message: Access denied for user '%s'@'%s' (using password: %s) */
+	  echo $output;
+	}
 
 	if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
 		printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -98,7 +108,5 @@ require_once('skipifconnectfailure.inc');
 --CLEAN--
 <?php require_once("clean_table.inc"); ?>
 --EXPECTF--
-Warning: mysqli_select_db(): (%s/%d): Unknown database '%s' in %s on line %d
-
 Warning: mysqli_select_db(): Couldn't fetch mysqli in %s on line %d
 done!
