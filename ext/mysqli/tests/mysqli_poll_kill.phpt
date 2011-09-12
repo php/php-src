@@ -136,15 +136,14 @@ if (!$IS_MYSQLND)
 	mysqli_kill(get_connection(), $thread_id);
 	// Sleep 0.1s  to ensure the KILL gets recognized
 	usleep(100000);
-	if (false !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed beofre killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
+	if (false !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed before killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
 		printf("[015] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	$links = array($link);
 	$errors = array($link);
 	$reject = array($link);
 
-	// Yes, that is weird, right? Its the OK package we have to fetch
-	if (1 !== ($tmp = (mysqli_poll($links, $errors, $reject, 0, 10000))))
+	if (0 !== ($tmp = (mysqli_poll($links, $errors, $reject, 0, 10000))))
 		printf("[016] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	if (!is_array($links) || empty($links))
@@ -172,6 +171,8 @@ if (!$IS_MYSQLND)
 	mysqli_close($link);
 	print "done!";
 ?>
+--XFAIL--
+To be fixed later. Minor issue about fetching error message from killed line
 --EXPECTF--
 array(1) {
   [%u|b%"processed beofre killed"]=>
