@@ -14,6 +14,10 @@ PHP                                                                        NEWS
     array_multisort). FR#55158 (Arpad)
   . Disable windows CRT warning by default, can be enabled again using the ini 
     directive windows_show_crt_warnings. (Pierre)
+  . Removed support for putenv("TZ=..") for setting the timezone. (Derick)
+  . Removed the timezone guessing algorithm in case the timezone isn't set with
+    date.timezone or date_default_timezone_set(). Instead of a guessed
+    timezone, "UTC" is now used instead. (Derick)
 
 - Improved MySQL extensions:
   . ext/mysql, mysqli and pdo_mysql now use mysqlnd by default. (Johannes)
