@@ -200,7 +200,7 @@ PHP_FUNCTION(assert)
 		zval *retval;
 		int i;
 		uint lineno = zend_get_executed_lineno(TSRMLS_C);
-		char *filename = zend_get_executed_filename(TSRMLS_C);
+		const char *filename = zend_get_executed_filename(TSRMLS_C);
 
 		MAKE_STD_ZVAL(args[0]);
 		MAKE_STD_ZVAL(args[1]);

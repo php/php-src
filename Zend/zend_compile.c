@@ -129,7 +129,7 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 {
 	str_efree(property_info->name);
 	if (property_info->doc_comment) {
-		efree(property_info->doc_comment);
+		efree((char*)property_info->doc_comment);
 	}
 }
 /* }}} */
@@ -137,7 +137,7 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 
 static void zend_destroy_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
-	str_free(property_info->name);
+	str_free((char*)property_info->name);
 }
 /* }}} */
 
@@ -145,7 +145,7 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 {
 	char char_pos_buf[32];
 	uint char_pos_len;
-	char *filename;
+	const char *filename;
 
 	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(yy_text));
 	if (CG(active_op_array)->filename) {
@@ -344,7 +344,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, const zval *zv, 
 {
 	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		zval *z = (zval*)zv;
-		Z_STRVAL_P(z) = zend_new_interned_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv) + 1, 1 TSRMLS_CC);
+		Z_STRVAL_P(z) = (char*)zend_new_interned_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv) + 1, 1 TSRMLS_CC);
 	}
 	CONSTANT_EX(op_array, literal_position) = *zv;
 	Z_SET_REFCOUNT(CONSTANT_EX(op_array, literal_position), 2);
@@ -412,7 +412,8 @@ int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ */
 {
 	int ret;
-	char *lc_name, *ns_separator;
+	char *lc_name;
+	const char *ns_separator;
 	int lc_len;
 	zval c;
 	int lc_literal;
@@ -431,7 +432,7 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 	lc_literal = zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
 	CALCULATE_LITERAL_HASH(lc_literal);
 
-	ns_separator = (char *) zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv)) + 1;
+	ns_separator = zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv)) + 1;
 	lc_len = Z_STRLEN_P(zv) - (ns_separator - Z_STRVAL_P(zv));
 	lc_name = zend_str_tolower_dup(ns_separator, lc_len);
 	ZVAL_STRINGL(&c, lc_name, lc_len, 0);
@@ -479,7 +480,8 @@ int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_D
 int zend_add_const_name_literal(zend_op_array *op_array, const zval *zv, int unqualified TSRMLS_DC) /* {{{ */
 {
 	int ret, tmp_literal;
-	char *name, *tmp_name, *ns_separator;
+	char *name, *tmp_name;
+	const char *ns_separator;
 	int name_len, ns_len;
 	zval c;
 
@@ -678,7 +680,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
 			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, hash TSRMLS_CC);
-			varname->u.constant.value.str.val = CG(active_op_array)->vars[result->u.op.var].name;
+			varname->u.constant.value.str.val = (char*)CG(active_op_array)->vars[result->u.op.var].name;
 			result->EA = 0;
 			return;
 		}
@@ -1536,7 +1538,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	int name_len = function_name->u.constant.value.str.len;
 	int function_begin_line = function_token->u.op.opline_num;
 	zend_uint fn_flags;
-	char *lcname;
+	const char *lcname;
 	zend_bool orig_interactive;
 	ALLOCA_FLAG(use_heap)
 
@@ -1852,7 +1854,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 	} else {
 		var.op_type = IS_CV;
 		var.u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, 0 TSRMLS_CC);
-		varname->u.constant.value.str.val = CG(active_op_array)->vars[var.u.op.var].name;
+		Z_STRVAL(varname->u.constant) = (char*)CG(active_op_array)->vars[var.u.op.var].name;
 		var.EA = 0;
 		if (CG(active_op_array)->vars[var.u.op.var].hash_value == THIS_HASHVAL &&
 			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
@@ -1913,7 +1915,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
 					zend_resolve_class_name(class_type, opline->extended_value, 1 TSRMLS_CC);
 				}
-				class_type->u.constant.value.str.val = zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
+				Z_STRVAL(class_type->u.constant) = (char*)zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
 				cur_arg_info->class_name = class_type->u.constant.value.str.val;
 				cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
 				if (op == ZEND_RECV_INIT) {
@@ -2749,7 +2751,7 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
 	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len, 0 TSRMLS_CC);
-	catch_var->u.constant.value.str.val = CG(active_op_array)->vars[opline->op2.var].name;
+	Z_STRVAL(catch_var->u.constant) = (char*)CG(active_op_array)->vars[opline->op2.var].name;
 	opline->result.num = 0; /* 1 means it's the last catch in the block */
 
 	try_token->u.op.opline_num = catch_op_number;
@@ -2964,7 +2966,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		}
 		if (fe->common.arg_info[i].class_name
 			&& strcasecmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
-			char *colon;
+			const char *colon;
 
 			if (fe->common.type != ZEND_USER_FUNCTION) {
 				return 0;
@@ -3935,7 +3937,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	free(resulting_table);
 }
 
-static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, char* prop_name, int prop_name_length, ulong prop_hash, zend_class_entry *coliding_ce) /* {{{ */
+static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, int prop_name_length, ulong prop_hash, zend_class_entry *coliding_ce) /* {{{ */
 {
 	size_t i;
 	zend_property_info *coliding_prop;
@@ -3955,10 +3957,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zend_property_info *property_info;
 	zend_property_info *coliding_prop;
 	zval compare_result;
-	char* prop_name;
+	const char* prop_name;
 	int   prop_name_length;
 	ulong prop_hash;
-	char* class_name_unused;
+	const char* class_name_unused;
 	zend_bool prop_found;
 	zend_bool not_compatible;
 	zval* prop_value;
@@ -4890,7 +4892,7 @@ static int zend_strnlen(const char* s, int maxlen) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_unmangle_property_name(char *mangled_property, int len, char **class_name, char **prop_name) /* {{{ */
+ZEND_API int zend_unmangle_property_name(const char *mangled_property, int len, const char **class_name, const char **prop_name) /* {{{ */
 {
 	int class_name_len;
 
@@ -4965,7 +4967,7 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_DC) /* {{{ */
 {
 	zval *property;
-	char *cname = NULL;
+	const char *cname = NULL;
 	int result;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
@@ -6047,7 +6049,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 		}
 
 		if (CG(multibyte)) {
-			zend_encoding *new_encoding, *old_encoding;
+			const zend_encoding *new_encoding, *old_encoding;
 			zend_encoding_filter old_input_filter;
 
 			CG(encoding_declared) = 1;
@@ -6464,7 +6466,7 @@ int zend_get_class_fetch_type(const char *class_name, uint class_name_len) /* {{
 }
 /* }}} */
 
-ZEND_API char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len) /* {{{ */
+ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len) /* {{{ */
 {
 	if (name_len) {
 		*name_len = op_array->vars[var].name_len;
@@ -6595,7 +6597,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	if (new_name) {
 		name = &new_name->u.constant;
 	} else {
-		char *p;
+		const char *p;
 
 		/* The form "use A\B" is eqivalent to "use A\B as B".
 		   So we extract the last part of compound name to use as a new_name */

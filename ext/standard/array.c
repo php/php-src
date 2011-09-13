@@ -186,7 +186,7 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 		Z_LVAL(first) = f->h;
 	} else {
 		Z_TYPE(first) = IS_STRING;
-		Z_STRVAL(first) = f->arKey;
+		Z_STRVAL(first) = (char*)f->arKey;
 		Z_STRLEN(first) = f->nKeyLength - 1;
 	}
 
@@ -195,7 +195,7 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 		Z_LVAL(second) = s->h;
 	} else {
 		Z_TYPE(second) = IS_STRING;
-		Z_STRVAL(second) = s->arKey;
+		Z_STRVAL(second) = (char*)s->arKey;
 		Z_STRLEN(second) = s->nKeyLength - 1;
 	}
 

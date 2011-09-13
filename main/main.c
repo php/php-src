@@ -627,9 +627,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *docref_target = "", *docref_root = "";
 	char *p;
 	int buffer_len = 0;
-	char *space = "";
-	char *class_name = "";
-	char *function;
+	const char *space = "";
+	const char *class_name = "";
+	const char *function;
 	int origin_len;
 	char *origin;
 	char *message;
@@ -1287,7 +1287,7 @@ static int php_get_configuration_directive_for_zend(const char *name, uint name_
 
 /* {{{ php_message_handler_for_zend
  */
-static void php_message_handler_for_zend(long message, void *data TSRMLS_DC)
+static void php_message_handler_for_zend(long message, const void *data TSRMLS_DC)
 {
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN:

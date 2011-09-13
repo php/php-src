@@ -401,7 +401,7 @@ options:
 		if (options) {
 			zval **attr_value;
 			char *str_key;
-			long long_key;
+			ulong long_key;
 			
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
 			while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&attr_value) 

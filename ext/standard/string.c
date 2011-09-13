@@ -1400,13 +1400,13 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
+PHPAPI void php_basename(const char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
 {
 	char *ret = NULL, *c, *comp, *cend;
 	size_t inc_len, cnt;
 	int state;
 
-	c = comp = cend = s;
+	c = comp = cend = (char*)s;
 	cnt = len;
 	state = 0;
 	while (cnt > 0) {
@@ -3214,7 +3214,7 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 			
 /* {{{ php_addcslashes
  */
-PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
+PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
 {
 	char flags[256];
 	char *new_str = safe_emalloc(4, (length?length:(length=strlen(str))), 1);
@@ -3229,7 +3229,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 
 	php_charmask((unsigned char *)what, wlength, flags TSRMLS_CC);
 
-	for (source = str, end = source + length, target = new_str; source < end; source++) {
+	for (source = (char*)str, end = source + length, target = new_str; source < end; source++) {
 		c = *source; 
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char) c < 32 || (unsigned char) c > 126) {
@@ -3259,7 +3259,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		*new_length = newlen;
 	}
 	if (should_free) {
-		STR_FREE(str);
+		STR_FREE((char*)str);
 	}
 	return new_str;
 }
@@ -4747,7 +4747,7 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	int use_copy1 = 0, use_copy2 = 0, sort_result;
+	int use_copy1 = 0, use_copy2 = 0;
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		zend_make_printable_zval(op1, &op1_copy, &use_copy1);

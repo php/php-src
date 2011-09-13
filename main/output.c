@@ -676,7 +676,7 @@ PHPAPI void php_output_set_implicit_flush(int flush TSRMLS_DC)
 
 /* {{{ char *php_output_get_start_filename(TSRMLS_D)
  * Get the file name where output has started */
-PHPAPI char *php_output_get_start_filename(TSRMLS_D)
+PHPAPI const char *php_output_get_start_filename(TSRMLS_D)
 {
 	return OG(output_start_filename);
 }

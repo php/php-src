@@ -233,7 +233,8 @@ static int zend_get_halt_offset_constant(const char *name, uint name_len, zend_c
 		return 0;
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
-		char *cfilename, *haltname;
+		const char *cfilename;
+		char *haltname;
 		int len, clen;
 
 		cfilename = zend_get_executed_filename(TSRMLS_C);
@@ -462,7 +463,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		/* keep in mind that c->name_len already contains the '\0' */
 		lowercase_name = estrndup(c->name, c->name_len-1);
 		zend_str_tolower(lowercase_name, c->name_len-1);
-		lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
+		lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
 		chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 	} else {
@@ -470,7 +471,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		if(slash) {
 			lowercase_name = estrndup(c->name, c->name_len-1);
 			zend_str_tolower(lowercase_name, slash-c->name);
-			lowercase_name = zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
+			lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
 			
 			chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;

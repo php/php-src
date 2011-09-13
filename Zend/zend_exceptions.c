@@ -430,7 +430,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
-			char *class_name;
+			const char *class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -440,7 +440,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 
 			TRACE_APPEND_STRL(class_name, class_name_len);
 			if(!dup) {
-				efree(class_name);
+				efree((char*)class_name);
 			}
 
 			TRACE_APPEND_STR("), ");

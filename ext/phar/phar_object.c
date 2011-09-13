@@ -541,7 +541,7 @@ PHP_METHOD(Phar, running)
 		return;
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
@@ -575,7 +575,7 @@ PHP_METHOD(Phar, mount)
 		return;
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 #ifdef PHP_WIN32
@@ -670,7 +670,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	phar_request_initialize(TSRMLS_C);
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 	if (phar_open_executed_filename(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
@@ -1482,7 +1482,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		return;
 	}
 
-	zname = zend_get_executed_filename(TSRMLS_C);
+	zname = (char*)zend_get_executed_filename(TSRMLS_C);
 	zname_len = strlen(zname);
 
 	if (zname_len > 7 && !memcmp(zname, "phar://", 7) && SUCCESS == phar_split_fname(zname, zname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {

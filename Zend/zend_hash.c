@@ -248,14 +248,14 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 		if (!p) {
 			return FAILURE;
 		}
-		p->arKey = (char*)arKey;
+		p->arKey = arKey;
 	} else {
 		p = (Bucket *) pemalloc(sizeof(Bucket) + nKeyLength, ht->persistent);
 		if (!p) {
 			return FAILURE;
 		}
-		p->arKey = (char*)(p + 1);
-		memcpy(p->arKey, arKey, nKeyLength);
+		p->arKey = (const char*)(p + 1);
+		memcpy((char*)p->arKey, arKey, nKeyLength);
 	}
 	p->nKeyLength = nKeyLength;
 	INIT_DATA(ht, p, pData, nDataSize);
@@ -325,14 +325,14 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 		if (!p) {
 			return FAILURE;
 		}
-		p->arKey = (char*)arKey;
+		p->arKey = arKey;
 	} else {
 		p = (Bucket *) pemalloc(sizeof(Bucket) + nKeyLength, ht->persistent);
 		if (!p) {
 			return FAILURE;
 		}
-		p->arKey = (char*)(p + 1);
-		memcpy(p->arKey, arKey, nKeyLength);
+		p->arKey = (const char*)(p + 1);
+		memcpy((char*)p->arKey, arKey, nKeyLength);
 	}
 
 	p->nKeyLength = nKeyLength;
@@ -1157,7 +1157,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
 			if (duplicate) {
 				*str_index = estrndup(p->arKey, p->nKeyLength - 1);
 			} else {
-				*str_index = p->arKey;
+				*str_index = (char*)p->arKey;
 			}
 			if (str_length) {
 				*str_length = p->nKeyLength;
@@ -1402,8 +1402,8 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			if (IS_INTERNED(str_index)) {
 				p->arKey = str_index;
 			} else {
-				p->arKey = (char*)(p+1);
-				memcpy(p->arKey, str_index, str_length);
+				p->arKey = (const char*)(p+1);
+				memcpy((char*)p->arKey, str_index, str_length);
 			}
 		}
 

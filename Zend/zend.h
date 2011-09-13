@@ -422,12 +422,12 @@ typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
 struct _zend_trait_method_reference {
-	char* method_name;
+	const char* method_name;
 	unsigned int mname_len;
 	
 	zend_class_entry *ce;
 	
-	char* class_name;
+	const char* class_name;
 	unsigned int cname_len;
 };
 typedef struct _zend_trait_method_reference	zend_trait_method_reference;
@@ -447,7 +447,7 @@ struct _zend_trait_alias {
 	/**
 	* name for method to be added
 	*/
-	char* alias;
+	const char* alias;
 	unsigned int alias_len;
 	
 	/**
@@ -511,10 +511,10 @@ struct _zend_class_entry {
 
 	union {
 		struct {
-			char *filename;
+			const char *filename;
 			zend_uint line_start;
 			zend_uint line_end;
-			char *doc_comment;
+			const char *doc_comment;
 			zend_uint doc_comment_len;
 		} user;
 		struct {
@@ -530,7 +530,7 @@ typedef struct _zend_utility_functions {
 	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
-	void (*message_handler)(long message, void *data TSRMLS_DC);
+	void (*message_handler)(long message, const void *data TSRMLS_DC);
 #ifndef ZEND_SIGNALS
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
@@ -714,7 +714,7 @@ END_EXTERN_C()
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC);
+ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()

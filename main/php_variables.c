@@ -617,9 +617,9 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC);
-static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC);
-static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_server(const char *name, uint name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_env(const char *name, uint name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_request(const char *name, uint name_len TSRMLS_DC);
 
 /* {{{ php_hash_environment
  */
@@ -634,7 +634,7 @@ int php_hash_environment(TSRMLS_D)
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_get(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_get(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -657,7 +657,7 @@ static zend_bool php_auto_globals_create_get(char *name, uint name_len TSRMLS_DC
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_post(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_post(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -684,7 +684,7 @@ static zend_bool php_auto_globals_create_post(char *name, uint name_len TSRMLS_D
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_cookie(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_cookie(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -707,7 +707,7 @@ static zend_bool php_auto_globals_create_cookie(char *name, uint name_len TSRMLS
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_files(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_files(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -726,7 +726,7 @@ static zend_bool php_auto_globals_create_files(char *name, uint name_len TSRMLS_
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_server(const char *name, uint name_len TSRMLS_DC)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables(TSRMLS_C);
@@ -764,7 +764,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_env(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *env_vars = NULL;
 	ALLOC_ZVAL(env_vars);
@@ -785,7 +785,7 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_request(const char *name, uint name_len TSRMLS_DC)
 {
 	zval *form_variables;
 	unsigned char _gpc_flags[3] = {0, 0, 0};

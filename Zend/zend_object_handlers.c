@@ -325,10 +325,10 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name, int prop_info_name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, int prop_info_name_len TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
-	char *class_name, *prop_name;
+	const char *class_name, *prop_name;
 	zval member;
 
 	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
@@ -1105,7 +1105,7 @@ static inline union _zend_function *zend_get_user_callstatic_function(zend_class
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, int function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc = NULL;
 	char *lc_class_name, *lc_function_name = NULL;
@@ -1194,7 +1194,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 }
 /* }}} */
 
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	ulong hash_value;
@@ -1243,7 +1243,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_error_noreturn(E_ERROR, "Attempt to unset static property %s::$%s", ce->name, property_name);
 	return 0;
@@ -1439,7 +1439,7 @@ zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-int zend_std_object_get_class_name(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
+int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zend_class_entry *ce;
