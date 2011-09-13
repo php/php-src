@@ -837,16 +837,9 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
-	char *env;
-
 	/* Checking configure timezone */
 	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
 		return DATEG(timezone);
-	}
-	/* Check environment variable */
-	env = getenv("TZ");
-	if (env && *env && timelib_timezone_id_is_valid(env, tzdb)) {
-		return env;
 	}
 	/* Check config setting for default timezone */
 	if (!DATEG(default_timezone)) {
@@ -862,73 +855,8 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 	} else if (*DATEG(default_timezone) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
 		return DATEG(default_timezone);
 	}
-#if HAVE_TM_ZONE
-	/* Try to guess timezone from system information */
-	{
-		struct tm *ta, tmbuf;
-		time_t     the_time;
-		char      *tzid = NULL;
-		
-		the_time = time(NULL);
-		ta = php_localtime_r(&the_time, &tmbuf);
-		if (ta) {
-			tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff, ta->tm_isdst);
-		}
-		if (! tzid) {
-			tzid = "UTC";
-		}
-		
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead", tzid, ta ? ta->tm_zone : "Unknown", ta ? (float) (ta->tm_gmtoff / 3600) : 0, ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
-		return tzid;
-	}
-#endif
-#ifdef PHP_WIN32
-	{
-		char *tzid;
-		TIME_ZONE_INFORMATION tzi;
-
-		switch (GetTimeZoneInformation(&tzi))
-		{
-			/* DST in effect */
-			case TIME_ZONE_ID_DAYLIGHT:
-				/* If user has disabled DST in the control panel, Windows returns 0 here */
-				if (tzi.DaylightBias == 0) {
-					goto php_win_std_time;
-				}
-				
-				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.DaylightBias) * -60, 1);
-				if (! tzid) {
-					tzid = "UTC";
-				}
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/DST' instead", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
-				break;
-
-			/* no DST or not in effect */
-			case TIME_ZONE_ID_UNKNOWN:
-			case TIME_ZONE_ID_STANDARD:
-			default:
-php_win_std_time:
-				tzid = timelib_timezone_id_from_abbr("", (tzi.Bias + tzi.StandardBias) * -60, 0);
-				if (! tzid) {
-					tzid = "UTC";
-				}
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/no DST' instead", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
-				break;
-
-		}
-		return tzid;
-	}
-#elif defined(NETWARE)
-	/* Try to guess timezone from system information */
-	{
-		char *tzid = timelib_timezone_id_from_abbr("", ((_timezone * -1) + (daylightOffset * daylightOnOff)), daylightOnOff);
-		if (tzid) {
-			return tzid;
-		}
-	}
-#endif
 	/* Fallback to UTC */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We had to select 'UTC' because your platform doesn't provide functionality for the guessing algorithm");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
 	return "UTC";
 }
 
