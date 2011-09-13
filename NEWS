@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Added support for SORT_NATURAL and SORT_FLAG_CASE in array
     sort functions (sort, rsort, ksort, krsort, asort, arsort and
     array_multisort). FR#55158 (Arpad)
+  . Disable windows CRT warning by default, can be enabled again using the ini 
+    directive windows_show_crt_warnings. (Pierre)
 
 - Improved MySQL extensions:
   . ext/mysql, mysqli and pdo_mysql now use mysqlnd by default. (Johannes)
