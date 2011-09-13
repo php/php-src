@@ -363,6 +363,9 @@ UPGRADE NOTES - PHP X.Y
   three times.
 - Changed E_ALL to include E_STRICT. Recommended production value changed to 
   E_ALL & ~E_DEPRECATED & ~E_STRICT.
+- a new directive, called windows_show_crt_warning, has been introduced.
+  This directive shows the CRT warnings when enabled. These warnings were
+  displayed by default until now. It is disabled by default. 
 
 ====================
 12. Syntax additions
