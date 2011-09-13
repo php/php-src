@@ -82,15 +82,16 @@ UPGRADE NOTES - PHP X.Y
   - safe_mode_protected_env_vars
   - zend.ze1_compatibility_mode
 
+
 =============================
 2. Reserved words and classes
 =============================
 
 - 
 
-=============================
+===================================
 3. Changes made to engine behaviour
-=============================
+===================================
 
 - Turning null, false or empty string into an object by adding a property
   will now emit a warning instead of an E_STRICT error.
@@ -330,6 +331,13 @@ UPGRADE NOTES - PHP X.Y
                remote SNMP agent (peer) is done by extension now, not by Net-SNMP
                library anymore.
           
+        - Date extension
+          - Setting the timezone with the TZ environment variable is no longer
+            supported, instead date.timezone and/or date_default_timezone_set()
+            have to be used.
+          - The extension will no longer guesses the default timezone if none
+            is set with date.timezone and/or date_default_timezone_set().
+            Instead it will always fall back to "UTC".
 
      d. no longer possible to disable
 
