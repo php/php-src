@@ -273,15 +273,15 @@ UPGRADE NOTES - PHP X.Y
        - session_is_registered()
        - session_register()
        - session_unregister()
-	   - mysqli_bind_param() (alias of mysqli_stmt_bind_param())
-	   - mysqli_bind_result() (alias of mysqli_stmt_bind_result())
-	   - mysqli_client_encoding() (alias of mysqli_character_set_name())
-	   - mysqli_fetch() (alias of mysqli_stmt_fetch())
-	   - mysqli_param_count() (alias of mysqli_stmt_param_count())
-	   - mysqli_get_metadata() (alias of mysqli_stmt_result_metadata())
-	   - mysqli_send_long_data() (alias of mysqli_stmt_send_long_data())
-	   - mysqli::client_encoding() (alias of mysqli::character_set_name)
-	   - mysqli_stmt::stmt() (never worked/always throws, undocumented)
+       - mysqli_bind_param() (alias of mysqli_stmt_bind_param())
+       - mysqli_bind_result() (alias of mysqli_stmt_bind_result())
+       - mysqli_client_encoding() (alias of mysqli_character_set_name())
+       - mysqli_fetch() (alias of mysqli_stmt_fetch())
+       - mysqli_param_count() (alias of mysqli_stmt_param_count())
+       - mysqli_get_metadata() (alias of mysqli_stmt_result_metadata())
+       - mysqli_send_long_data() (alias of mysqli_stmt_send_long_data())
+       - mysqli::client_encoding() (alias of mysqli::character_set_name)
+       - mysqli_stmt::stmt() (never worked/always throws, undocumented)
 
     d. removed syntax
 
@@ -303,8 +303,8 @@ UPGRADE NOTES - PHP X.Y
      c. with changed behaviour
 
         - The MySQL extensions (ext/mysql, mysqli and PDO_mysql) use mysqlnd
-	  as the default library now. It is still possible to use libmysql by
-	  specifying a path to the configure options.
+      as the default library now. It is still possible to use libmysql by
+      specifying a path to the configure options.
         - The session extension now can hook into the file upload feature
           in order to provide upload progress information through session 
           variables.
@@ -427,7 +427,7 @@ UPGRADE NOTES - PHP X.Y
          - ldap_control_paged_results_response()
 
        - libxml
-	     - libxml_set_external_entity_loader()
+         - libxml_set_external_entity_loader()
 
      f. New global constants
 
