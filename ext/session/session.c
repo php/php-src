@@ -1638,7 +1638,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			shutdown_function_entry.arguments[0] = callback;
 
 			/* add shutdown function, removing the old one if it exists */
-			if (!register_user_shutdown_function("session_shutdown", &shutdown_function_entry)) {
+			if (!register_user_shutdown_function("session_shutdown", &shutdown_function_entry TSRMLS_CC)) {
 				zval_ptr_dtor(&callback);
 				efree(shutdown_function_entry.arguments);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to register session shutdown function");
@@ -1646,7 +1646,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			}
 		} else {
 			/* remove shutdown function */
-			remove_user_shutdown_function("session_shutdown");
+			remove_user_shutdown_function("session_shutdown" TSRMLS_CC);
 		}
 
 		PS(mod_user_implemented) = 1;
@@ -1662,7 +1662,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	}
 
 	/* remove shutdown function */
-	remove_user_shutdown_function("session_shutdown");
+	remove_user_shutdown_function("session_shutdown" TSRMLS_CC);
 
 	for (i = 0; i < 6; i++) {
 		if (!zend_is_callable(*args[i], 0, &name TSRMLS_CC)) {
@@ -1946,7 +1946,7 @@ static PHP_FUNCTION(session_register_shutdown)
 	ZVAL_STRING(callback, "session_write_close", 1);
 	shutdown_function_entry.arguments[0] = callback;
 
-	if (!append_user_shutdown_function(shutdown_function_entry)) {
+	if (!append_user_shutdown_function(shutdown_function_entry TSRMLS_CC)) {
 		zval_ptr_dtor(&callback);
 		efree(shutdown_function_entry.arguments);
 

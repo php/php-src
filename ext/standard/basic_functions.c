@@ -5073,7 +5073,7 @@ PHP_FUNCTION(register_shutdown_function)
 }
 /* }}} */
 
-PHPAPI zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC) /* {{{ */
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
@@ -5084,7 +5084,7 @@ PHPAPI zend_bool register_user_shutdown_function(char *function_name, php_shutdo
 }
 /* }}} */
 
-PHPAPI zend_bool remove_user_shutdown_function(char *function_name) /* {{{ */
+PHPAPI zend_bool remove_user_shutdown_function(char *function_name TSRMLS_DC) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		return zend_hash_del_key_or_index(BG(user_shutdown_function_names), function_name, sizeof(function_name), 0, HASH_DEL_KEY) != FAILURE;
@@ -5094,7 +5094,7 @@ PHPAPI zend_bool remove_user_shutdown_function(char *function_name) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry TSRMLS_DC) /* {{{ */
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
