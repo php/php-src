@@ -137,7 +137,7 @@ PHP                                                                        NEWS
   . allow_call_time_pass_reference. (Pierrick)
   . define_syslog_variables ini option and its associated function. (Kalle)
   . highlight.bg ini option. (Kalle)
-  . Session bug compatibility mode (session.bug_compat42 and
+  . Session bug compatibility mode (session.bug_compat_42 and
     session.bug_compat_warn ini options). (Kalle)
   . session_is_registered(), session_register() and session_unregister() 
     functions. (Kalle)
