@@ -445,6 +445,12 @@ static MUTEX_T pow5mult_mutex;
 
 #endif /* ZTS */
 
+#ifdef DEBUG
+static void Bug(const char *message) {
+	fprintf(stderr, "%s\n", message);
+}
+#endif
+
 ZEND_API int zend_startup_strtod(void) /* {{{ */
 {
 #ifdef ZTS
