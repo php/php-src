@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     array_multisort). FR#55158 (Arpad)
 
 - Improved MySQL extensions:
-  . ext/mysql, mysqli and pdo_mysql now use mysqlnd by defalt. (Johannes)
+  . ext/mysql, mysqli and pdo_mysql now use mysqlnd by default. (Johannes)
 
 - Improved mbstring extension:
   . Added Shift_JIS/UTF-8 Emoji (pictograms) support. (Rui)
