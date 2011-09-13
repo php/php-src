@@ -303,8 +303,8 @@ UPGRADE NOTES - PHP X.Y
      c. with changed behaviour
 
         - The MySQL extensions (ext/mysql, mysqli and PDO_mysql) use mysqlnd
-      as the default library now. It is still possible to use libmysql by
-      specifying a path to the configure options.
+          as the default library now. It is still possible to use libmysql by
+          specifying a path to the configure options.
         - The session extension now can hook into the file upload feature
           in order to provide upload progress information through session 
           variables.
