@@ -3,6 +3,10 @@ Bug #33532 (Different output for strftime() and date())
 --INI--
 error_reporting=2047
 date.timezone=UTC
+--SKIPIF--
+<?php
+if(PHP_OS == 'Darwin' || defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip strftime uses system TZ on Darwin and Windows");
+?>
 --FILE--
 <?php
 
