@@ -1362,7 +1362,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 {
 	/* code ripped off from fopen_wrappers.c */
 	char *pathbuf, *ptr, *end;
-	char *exec_fname;
+	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
 	int path_length;

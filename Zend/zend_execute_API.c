@@ -341,7 +341,7 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 /* }}} */
 
 /* return class name and "::" or "". */
-ZEND_API char *get_active_class_name(char **space TSRMLS_DC) /* {{{ */
+ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) /* {{{ */
 {
 	if (!zend_is_executing(TSRMLS_C)) {
 		if (space) {
@@ -369,14 +369,14 @@ ZEND_API char *get_active_class_name(char **space TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API char *get_active_function_name(TSRMLS_D) /* {{{ */
+ZEND_API const char *get_active_function_name(TSRMLS_D) /* {{{ */
 {
 	if (!zend_is_executing(TSRMLS_C)) {
 		return NULL;
 	}
 	switch (EG(current_execute_data)->function_state.function->type) {
 		case ZEND_USER_FUNCTION: {
-				char *function_name = ((zend_op_array *) EG(current_execute_data)->function_state.function)->function_name;
+				const char *function_name = ((zend_op_array *) EG(current_execute_data)->function_state.function)->function_name;
 
 				if (function_name) {
 					return function_name;
@@ -394,7 +394,7 @@ ZEND_API char *get_active_function_name(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
+ZEND_API const char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
 {
 	if (EG(active_op_array)) {
 		return EG(active_op_array)->filename;
@@ -515,7 +515,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			char *actual = Z_STRVAL_P(p);
 
-			if ((colon = zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
@@ -615,8 +615,9 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				continue;
 			}
 			if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
-				char *actual, *save = str_index;
-				if ((colon = zend_memrchr(str_index, ':', str_index_len - 3))) {
+				char *actual;
+				const char *save = str_index;
+				if ((colon = (char*)zend_memrchr(str_index, ':', str_index_len - 3))) {
 					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
 					str_index_len -= ((colon - str_index) + 1);
 					str_index = colon;
@@ -1003,7 +1004,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (EX(function_state).function->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree(EX(function_state).function->common.function_name);
+			efree((char*)EX(function_state).function->common.function_name);
 		}
 		efree(EX(function_state).function);
 
@@ -1686,7 +1687,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	if (zend_hash_quick_del(ht, name, name_len, hash_value) == SUCCESS) {
 		name_len--;
@@ -1709,7 +1710,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, char *n
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ex;
 
@@ -1734,7 +1735,7 @@ ZEND_API int zend_delete_global_variable_ex(char *name, int name_len, ulong hash
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable(const char *name, int name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_delete_global_variable_ex(name, name_len, zend_inline_hash_func(name, name_len + 1) TSRMLS_CC);
 }

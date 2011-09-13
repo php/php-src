@@ -145,7 +145,7 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
-	char *output_start_filename;
+	const char *output_start_filename;
 	int output_start_lineno;
 ZEND_END_MODULE_GLOBALS(output)
 
@@ -201,7 +201,7 @@ PHPAPI void php_output_deactivate(TSRMLS_D);
 PHPAPI void php_output_set_status(int status TSRMLS_DC);
 PHPAPI int php_output_get_status(TSRMLS_D);
 PHPAPI void php_output_set_implicit_flush(int flush TSRMLS_DC);
-PHPAPI char *php_output_get_start_filename(TSRMLS_D);
+PHPAPI const char *php_output_get_start_filename(TSRMLS_D);
 PHPAPI int php_output_get_start_lineno(TSRMLS_D);
 
 PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC);

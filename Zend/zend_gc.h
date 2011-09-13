@@ -84,7 +84,7 @@ typedef struct _gc_root_buffer {
 	zend_object_handle        handle;	/* must be 0 for zval               */
 	union {
 		zval                 *pz;
-		zend_object_handlers *handlers;
+		const zend_object_handlers *handlers;
 	} u;
 } gc_root_buffer;
 

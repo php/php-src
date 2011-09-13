@@ -71,7 +71,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	efree(arguments);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	efree(func->internal_function.function_name);
+	efree((char*)func->internal_function.function_name);
 	efree(func);
 }
 /* }}} */

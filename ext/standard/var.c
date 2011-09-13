@@ -56,7 +56,7 @@ static int php_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list arg
 static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	char *prop_name, *class_name;
+	const char *prop_name, *class_name;
 
 	level = va_arg(args, int);
 
@@ -87,7 +87,7 @@ static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list a
 PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
-	char *class_name;
+	const char *class_name;
 	zend_uint class_name_len;
 	int (*php_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp;
@@ -136,7 +136,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 		if (Z_OBJ_HANDLER(**struc, get_class_name)) {
 			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
-			efree(class_name);
+			efree((char*)class_name);
 		} else {
 			php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
 		}
@@ -213,7 +213,7 @@ static int zval_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list ar
 static int zval_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	char *prop_name, *class_name;
+	const char *prop_name, *class_name;
 
 	level = va_arg(args, int);
 
@@ -242,7 +242,7 @@ static int zval_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list 
 PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht = NULL;
-	char *class_name;
+	const char *class_name;
 	zend_uint class_name_len;
 	int (*zval_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp = 0;
@@ -286,7 +286,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 		}
 		Z_OBJ_HANDLER_PP(struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
-		efree(class_name);
+		efree((char*)class_name);
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
@@ -388,9 +388,9 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 
 	buffer_append_spaces(buf, level + 2);
 	if (hash_key->nKeyLength != 0) {
-		char *class_name, /* ignored, but must be passed to unmangle */
-			 *pname,
-			 *pname_esc;
+		const char *class_name; /* ignored, but must be passed to unmangle */
+		const char *pname;
+		char *pname_esc;
 		int  pname_esc_len;
 		
 		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1,
@@ -418,7 +418,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 	HashTable *myht;
 	char *tmp_str, *tmp_str2;
 	int tmp_len, tmp_len2;
-	char *class_name;
+	const char *class_name;
 	zend_uint class_name_len;
 
 	switch (Z_TYPE_PP(struc)) {
@@ -478,7 +478,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		smart_str_appendl(buf, class_name, class_name_len);
 		smart_str_appendl(buf, "::__set_state(array(\n", 21);
 
-		efree(class_name);
+		efree((char*)class_name);
 		if (myht) {
 			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf);
 		}

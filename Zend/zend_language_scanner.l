@@ -469,7 +469,8 @@ ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSR
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
-	char *file_path = NULL, *buf;
+	const char *file_path = NULL;
+	char *buf;
 	size_t size, offset = 0;
 
 	/* The shebang line was read, get the current position to obtain the buffer start */
@@ -497,7 +498,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 
 	if (size != -1) {
 		if (CG(multibyte)) {
-			SCNG(script_org) = buf;
+			SCNG(script_org) = (unsigned char*)buf;
 			SCNG(script_org_size) = size;
 			SCNG(script_filtered) = NULL;
 
@@ -508,7 +509,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
 							"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
 				}
-				buf = SCNG(script_filtered);
+				buf = (char*)SCNG(script_filtered);
 				size = SCNG(script_filtered_size);
 			}
 		}
@@ -663,7 +664,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	size = str->value.str.len;
 
 	if (CG(multibyte)) {
-		SCNG(script_org) = buf;
+		SCNG(script_org) = (unsigned char*)buf;
 		SCNG(script_org_size) = size;
 		SCNG(script_filtered) = NULL;
 
@@ -674,7 +675,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 				zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
 						"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
 			}
-			buf = SCNG(script_filtered);
+			buf = (char*)SCNG(script_filtered);
 			size = SCNG(script_filtered_size);
 		}
 	}
@@ -820,7 +821,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	return SUCCESS;
 }
 
-ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC)
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding TSRMLS_DC)
 {
 	size_t length;
 	unsigned char *new_yy_start;
@@ -1552,7 +1553,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	char *class_name = NULL;
+	const char *class_name = NULL;
 	
 	if (CG(active_class_entry)
 		&& (ZEND_ACC_TRAIT ==
@@ -1579,7 +1580,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__TRAIT__" {
-	char *trait_name = NULL;
+	const char *trait_name = NULL;
 	
 	if (CG(active_class_entry)
 		&& (ZEND_ACC_TRAIT == 
@@ -1599,7 +1600,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	char *func_name = NULL;
+	const char *func_name = NULL;
 
 	if (CG(active_op_array)) {
 		func_name = CG(active_op_array)->function_name;
@@ -1615,8 +1616,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
-	char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
+	const char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
+	const char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
 	size_t len = 0;
 
 	if (class_name) {
@@ -1691,7 +1692,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"'php'"){WHITESPACE}*">" {
-	YYCTYPE *bracket = zend_memrchr(yytext, '<', yyleng - (sizeof("script language=php>") - 1));
+	YYCTYPE *bracket = (YYCTYPE*)zend_memrchr(yytext, '<', yyleng - (sizeof("script language=php>") - 1));
 
 	if (bracket != SCNG(yy_text)) {
 		/* Handle previously scanned HTML, as possible <script> tags found are assumed to not be PHP's */
@@ -1780,7 +1781,7 @@ inline_char_handler:
 		if (YYCURSOR < YYLIMIT) {
 			switch (*YYCURSOR) {
 				case '?':
-					if (CG(short_tags) || !strncasecmp(YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
+					if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
 						break;
 					}
 					continue;

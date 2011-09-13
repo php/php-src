@@ -2727,7 +2727,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 
 		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree(fbc->common.function_name);
+			efree((char*)fbc->common.function_name);
 		}
 		efree(fbc);
 
@@ -3167,8 +3167,8 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 	SAVE_OPLINE();
 	if (UNEXPECTED(param == NULL)) {
 		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL, opline->extended_value TSRMLS_CC)) {
-			char *space;
-			char *class_name;
+			const char *space;
+			const char *class_name;
 			zend_execute_data *ptr;
 
 			if (EG(active_op_array)->scope) {
@@ -4204,7 +4204,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
-			char *class_name, *prop_name;
+			const char *class_name, *prop_name;
 			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
 
 			fe_ht = Z_OBJPROP_P(array);
@@ -4303,7 +4303,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 
 		switch (key_type) {
 			case HASH_KEY_IS_STRING:
-				Z_STRVAL_P(key) = str_key;
+				Z_STRVAL_P(key) = (char*)str_key;
 				Z_STRLEN_P(key) = str_key_len-1;
 				Z_TYPE_P(key) = IS_STRING;
 				break;

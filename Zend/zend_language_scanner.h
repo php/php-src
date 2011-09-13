@@ -56,7 +56,7 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC);
-ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC);
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding TSRMLS_DC);
 ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSRMLS_DC);
 
 END_EXTERN_C()

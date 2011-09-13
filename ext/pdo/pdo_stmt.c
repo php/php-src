@@ -2727,7 +2727,7 @@ static union _zend_function *row_method_get(
 	return fbc;
 }
 
-static int row_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
+static int row_call_method(const char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	return FAILURE;
 }
@@ -2749,7 +2749,7 @@ static zend_class_entry *row_get_ce(const zval *object TSRMLS_DC)
 	return pdo_row_ce;
 }
 
-static int row_get_classname(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int row_get_classname(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	if (parent) {
 		return FAILURE;

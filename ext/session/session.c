@@ -1116,7 +1116,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 	if (PS(cache_limiter)[0] == '\0') return 0;
 
 	if (SG(headers_sent)) {
-		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
+		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
@@ -1156,7 +1156,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	char *e_session_name, *e_id;
 
 	if (SG(headers_sent)) {
-		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
+		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {

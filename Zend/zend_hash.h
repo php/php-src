@@ -60,7 +60,7 @@ typedef struct bucket {
 	struct bucket *pListLast;
 	struct bucket *pNext;
 	struct bucket *pLast;
-	char *arKey;
+	const char *arKey;
 } Bucket;
 
 typedef struct _hashtable {
@@ -83,7 +83,7 @@ typedef struct _hashtable {
 
 
 typedef struct _zend_hash_key {
-	char *arKey;
+	const char *arKey;
 	uint nKeyLength;
 	ulong h;
 } zend_hash_key;

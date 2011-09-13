@@ -64,7 +64,7 @@ ZEND_API void zend_indent()
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
-				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
 					token.type = 0;
@@ -118,16 +118,16 @@ dflt_printout:
 							} else {
 								handle_whitespace(emit_whitespace);
 							}
-							zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+							zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 							break;
 					}
 				} else {
 					handle_whitespace(emit_whitespace);
 					if (in_string) {
-						zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+						zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 						/* a part of a string */
 					} else {
-						zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+						zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 					}
 				}
 				break;

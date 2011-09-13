@@ -31,7 +31,7 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;

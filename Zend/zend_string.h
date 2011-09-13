@@ -50,13 +50,13 @@ void zend_interned_strings_dtor(TSRMLS_D);
 
 #define str_efree(s) do { \
 		if (!IS_INTERNED(s)) { \
-			efree(s); \
+			efree((char*)s); \
 		} \
 	} while (0)
 
 #define str_free(s) do { \
 		if (!IS_INTERNED(s)) { \
-			free(s); \
+			free((char*)s); \
 		} \
 	} while (0)
 

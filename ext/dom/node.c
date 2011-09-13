@@ -1825,7 +1825,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
 					char *prefix;
 					ulong idx;
-					int prefix_key_len;
+					uint prefix_key_len;
 
 					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
 						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
