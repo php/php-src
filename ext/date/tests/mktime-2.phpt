@@ -1,5 +1,9 @@
 --TEST--
 mktime() [2]
+--SKIPIF--
+<?php
+if(defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip mktime uses system TZ on Windows and putenv TZ is not supported on Windows at runtime");
+?>
 --INI--
 error_reporting=2047
 --FILE--
