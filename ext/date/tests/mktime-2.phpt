@@ -1,21 +1,17 @@
 --TEST--
 mktime() [2]
---SKIPIF--
-<?php
-if(defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip mktime uses system TZ on Windows and putenv TZ is not supported on Windows at runtime");
-?>
 --INI--
 error_reporting=2047
 --FILE--
 <?php
 $timezones = array(
-    'GMT0',
+    'UTC',
     'Europe/London'
 );
 
 foreach($timezones as $timezone)
 {
-    putenv('TZ='.$timezone);
+    date_default_timezone_set($timezone);
 
     /* status of daylight saving time unknown */
     var_dump(mktime(0, 0, 0, 1, 1, 2002));
