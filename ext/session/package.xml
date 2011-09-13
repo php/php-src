@@ -40,6 +40,7 @@ package.xml added to support installation using pear installer
    <file role="src" name="mod_mm.c"/>
    <file role="src" name="mod_mm.h"/>
    <file role="src" name="mod_user.c"/>
+   <file role="src" name="mod_user_class.c"/>
    <file role="src" name="mod_user.h"/>
    <file role="src" name="php_session.h"/>
    <file role="src" name="session.c"/>
