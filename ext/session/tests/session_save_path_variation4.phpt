@@ -1,10 +1,7 @@
 --TEST--
 Test session_save_path() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); 
-if(substr(PHP_OS, 0, 3) != "WIN")
-	die("skip Only for Windows");
-?>
+<?php include('skipif.inc');?>
 --INI--
 open_basedir=.
 session.save_handler=files
