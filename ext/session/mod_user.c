@@ -62,14 +62,9 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 	return retval;
 }
 
-#define STDVARS1							\
+#define STDVARS								\
 	zval *retval;							\
 	int ret = FAILURE
-
-#define STDVARS								\
-	STDVARS1;								\
-	char *mdata = PS_GET_MOD_DATA();		\
-	if (!mdata) { return FAILURE; }
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
@@ -84,32 +79,28 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 PS_OPEN_FUNC(user)
 {
 	zval *args[2];
-	static char dummy = 0;
-	STDVARS1;
+	STDVARS;
 
 	SESS_ZVAL_STRING((char*)save_path, args[0]);
 	SESS_ZVAL_STRING((char*)session_name, args[1]);
 
 	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
-	if (retval) {
-		/* This is necessary to fool the session module. Yes, it's safe to
-		 * use a static. Neither mod_user nor the session module itself will
-		 * ever touch this pointer. It could be set to 0xDEADBEEF for all the
-		 * difference it makes, but for the sake of paranoia it's set to some
-		 * valid value. */
-		PS_SET_MOD_DATA(&dummy);
-	}
+	PS(mod_user_implemented) = 1;
 
 	FINISH;
 }
 
 PS_CLOSE_FUNC(user)
 {
-	STDVARS1;
+	STDVARS;
+
+	if (!PS(mod_user_implemented)) {
+		/* already closed */
+		return SUCCESS;
+	}
 
 	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
-
-	PS_SET_MOD_DATA(NULL);
+	PS(mod_user_implemented) = 0;
 
 	FINISH;
 }
