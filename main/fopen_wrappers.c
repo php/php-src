@@ -565,7 +565,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 	/* check in calling scripts' current working directory as a fall back case
 	 */
 	if (zend_is_executing(TSRMLS_C)) {
-		char *exec_fname = zend_get_executed_filename(TSRMLS_C);
+		const char *exec_fname = zend_get_executed_filename(TSRMLS_C);
 		int exec_fname_length = strlen(exec_fname);
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
@@ -611,7 +611,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path TSRMLS_DC)
 {
 	char *pathbuf, *ptr, *end;
-	char *exec_fname;
+	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	FILE *fp;
 	int path_length;

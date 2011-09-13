@@ -113,8 +113,8 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	void *resource;
 	va_list resource_types;
 	int i;
-	char *space;
-	char *class_name;
+	const char *space;
+	const char *class_name;
 
 	if (default_id==-1) { /* use id */
 		if (!passed_id) {

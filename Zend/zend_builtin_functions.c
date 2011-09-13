@@ -744,7 +744,7 @@ ZEND_FUNCTION(defined)
 ZEND_FUNCTION(get_class)
 {
 	zval *obj = NULL;
-	char *name = "";
+	const char *name = "";
 	zend_uint name_len = 0;
 	int dup;
 
@@ -792,7 +792,7 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
 	zend_class_entry *ce = NULL;
-	char *name;
+	const char *name;
 	zend_uint name_length;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg) == FAILURE) {
@@ -974,7 +974,8 @@ ZEND_FUNCTION(get_object_vars)
 	zval **value;
 	HashTable *properties;
 	HashPosition pos;
-	char *key, *prop_name, *class_name;
+	char *key;
+	const char *prop_name, *class_name;
 	uint key_len;
 	ulong num_index;
 	zend_object *zobj;
@@ -1120,7 +1121,7 @@ ZEND_FUNCTION(method_exists)
 					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) ? 1 : 0);
 					
 				efree(lcname);
-				efree(((zend_internal_function*)func)->function_name);
+				efree((char*)((zend_internal_function*)func)->function_name);
 				efree(func);
 				return;
 			}
@@ -1450,6 +1451,7 @@ ZEND_FUNCTION(crash)
 ZEND_FUNCTION(get_included_files)
 {
 	char *entry;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1854,7 +1856,7 @@ ZEND_FUNCTION(zend_thread_id)
    Get the resource type name for a given resource */
 ZEND_FUNCTION(get_resource_type)
 {
-	char *resource_type;
+	const char *resource_type;
 	zval *z_resource_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_resource_type) == FAILURE) {
@@ -2037,11 +2039,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_execute_data *ptr, *skip;
 	int lineno, frameno = 0;
-	char *function_name;
-	char *filename;
+	const char *function_name;
+	const char *filename;
 	const char *class_name = NULL;
 	char *call_type;
-	char *include_filename = NULL;
+	const char *include_filename = NULL;
 	zval *arg_array = NULL;
 	int indent = 0;
 	long options = 0;
@@ -2148,7 +2150,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			if (build_filename_arg && include_filename) {
 				MAKE_STD_ZVAL(arg_array);
 				array_init(arg_array);
-				add_next_index_string(arg_array, include_filename, 1);
+				add_next_index_string(arg_array, (char*)include_filename, 1);
 			}
 			call_type = NULL;
 		}
@@ -2187,7 +2189,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		ptr = skip->prev_execute_data;
 		++indent;
 		if (free_class_name) {
-			efree(free_class_name);
+			efree((char*)free_class_name);
 		}
 	}
 }
@@ -2198,10 +2200,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 {
 	zend_execute_data *ptr, *skip;
 	int lineno, frameno = 0;
-	char *function_name;
-	char *filename;
-	char *class_name;
-	char *include_filename = NULL;
+	const char *function_name;
+	const char *filename;
+	const char *class_name;
+	const char *include_filename = NULL;
 	zval *stack_frame;
 
 	ptr = EG(current_execute_data);
@@ -2237,7 +2239,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (skip->op_array) {
 			filename = skip->op_array->filename;
 			lineno = skip->opline->lineno;
-			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
@@ -2254,7 +2256,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}				    
 				if (prev->op_array) {
-					add_assoc_string_ex(stack_frame, "file", sizeof("file"), prev->op_array->filename, 1);
+					add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)prev->op_array->filename, 1);
 					add_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
 					break;
 				}
@@ -2266,17 +2268,17 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		function_name = ptr->function_state.function->common.function_name;
 
 		if (function_name) {
-			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+			add_assoc_string_ex(stack_frame, "function", sizeof("function"), (char*)function_name, 1);
 
 			if (ptr->object && Z_TYPE_P(ptr->object) == IS_OBJECT) {
 				if (ptr->function_state.function->common.scope) {
-					add_assoc_string_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, 1);
+					add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)ptr->function_state.function->common.scope->name, 1);
 				} else {
 					zend_uint class_name_len;
 					int dup;
 
 					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
-					add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, dup);
+					add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)class_name, dup);
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
@@ -2286,7 +2288,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
-				add_assoc_string_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, 1);
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), (char*)ptr->function_state.function->common.scope->name, 1);
 				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 			}
 
@@ -2340,11 +2342,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 
-				add_next_index_string(arg_array, include_filename, 1);
+				add_next_index_string(arg_array, (char*)include_filename, 1);
 				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
 			}
 
-			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+			add_assoc_string_ex(stack_frame, "function", sizeof("function"), (char*)function_name, 1);
 		}
 
 		add_next_index_zval(return_value, stack_frame);

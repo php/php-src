@@ -63,7 +63,7 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRML
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
-static void (*zend_message_dispatcher_p)(long message, void *data TSRMLS_DC);
+static void (*zend_message_dispatcher_p)(long message, const void *data TSRMLS_DC);
 static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
@@ -157,7 +157,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
-					char *prop_name, *class_name;
+					const char *prop_name, *class_name;
 					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
 
 					ZEND_PUTS_EX(prop_name);
@@ -349,7 +349,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 		case IS_OBJECT:
 		{
 			HashTable *properties = NULL;
-			char *class_name = NULL;
+			const char *class_name = NULL;
 			zend_uint clen;
 
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
@@ -361,7 +361,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 				zend_printf("%s Object (", "Unknown Class");
 			}
 			if (class_name) {
-				efree(class_name);
+				efree((char*)class_name);
 			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
@@ -407,7 +407,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_OBJECT:
 			{
 				HashTable *properties;
-				char *class_name = NULL;
+				const char *class_name = NULL;
 				zend_uint clen;
 				int is_temp;
 
@@ -421,7 +421,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				}
 				ZEND_PUTS_EX(" Object\n");
 				if (class_name) {
-					efree(class_name);
+					efree((char*)class_name);
 				}
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
@@ -616,7 +616,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
-static zend_bool php_auto_globals_create_globals(char *name, uint name_len TSRMLS_DC) /* {{{ */
+static zend_bool php_auto_globals_create_globals(const char *name, uint name_len TSRMLS_DC) /* {{{ */
 {
 	zval *globals;
 
@@ -956,7 +956,7 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC) /* {{{ */
+ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC) /* {{{ */
 {
 	if (zend_message_dispatcher_p) {
 		zend_message_dispatcher_p(message, data TSRMLS_CC);
@@ -999,7 +999,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zval ***params;
 	zval *retval;
 	zval *z_error_type, *z_error_message, *z_error_filename, *z_error_lineno, *z_context;
-	char *error_filename;
+	const char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
 	zend_bool in_compilation;
@@ -1307,7 +1307,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC) /* {{{ */
 {
-	char *cur_filename;
+	const char *cur_filename;
 	int cur_lineno;
 	char *compiled_string_description;
 

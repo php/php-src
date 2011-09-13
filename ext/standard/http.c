@@ -31,8 +31,10 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *key_suffix, int key_suffix_len,
 			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
 {
-	char *key = NULL, *ekey, *newprefix, *p;
-	int arg_sep_len, key_len, ekey_len, key_type, newprefix_len;
+	char *key = NULL;
+	char *ekey, *newprefix, *p;
+	int arg_sep_len, ekey_len, key_type, newprefix_len;
+	uint key_len;
 	ulong idx;
 	zval **zdata = NULL, *copyzval;
 
@@ -64,14 +66,14 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 		/* handling for private & protected object properties */
 		if (key && *key == '\0' && type != NULL) {
-			char *tmp;
+			const char *tmp;
 
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
 			if (zend_check_property_access(zobj, key, key_len-1 TSRMLS_CC) != SUCCESS) {
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			zend_unmangle_property_name(key, key_len-1, &tmp, &key);
+			zend_unmangle_property_name(key, key_len-1, &tmp, (const char**)&key);
 			key_len = strlen(key);		
 		}
 

@@ -209,11 +209,11 @@ char *zend_visibility_string(zend_uint fn_flags);
 
 typedef struct _zend_property_info {
 	zend_uint flags;
-	char *name;
+	const char *name;
 	int name_length;
 	ulong h;
 	int offset;
-	char *doc_comment;
+	const char *doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
 } zend_property_info;
@@ -244,7 +244,7 @@ typedef struct _zend_internal_function_info {
 } zend_internal_function_info;
 
 typedef struct _zend_compiled_variable {
-	char *name;
+	const char *name;
 	int name_len;
 	ulong hash_value;
 } zend_compiled_variable;
@@ -252,7 +252,7 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	char *function_name;		
+	const char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -282,10 +282,10 @@ struct _zend_op_array {
 
 	zend_uint this_var;
 
-	char *filename;
+	const char *filename;
 	zend_uint line_start;
 	zend_uint line_end;
-	char *doc_comment;
+	const char *doc_comment;
 	zend_uint doc_comment_len;
 	zend_uint early_binding; /* the linked list of delayed declarations */
 
@@ -305,7 +305,7 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	char * function_name;
+	const char * function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -325,7 +325,7 @@ typedef union _zend_function {
 
 	struct {
 		zend_uchar type;  /* never used */
-		char *function_name;
+		const char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
 		union _zend_function *prototype;
@@ -415,7 +415,7 @@ ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC);
-ZEND_API char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
+ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
@@ -650,7 +650,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-ZEND_API int zend_unmangle_property_name(char *mangled_property, int mangled_property_len, char **class_name, char **prop_name);
+ZEND_API int zend_unmangle_property_name(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
@@ -670,9 +670,9 @@ ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC)
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
 int zend_get_class_fetch_type(const char *class_name, uint class_name_len);
 
-typedef zend_bool (*zend_auto_global_callback)(char *name, uint name_len TSRMLS_DC);
+typedef zend_bool (*zend_auto_global_callback)(const char *name, uint name_len TSRMLS_DC);
 typedef struct _zend_auto_global {
-	char *name;
+	const char *name;
 	uint name_len;
 	zend_auto_global_callback auto_global_callback;
 	zend_bool jit;

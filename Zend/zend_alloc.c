@@ -344,9 +344,9 @@ typedef struct _zend_mm_block_info {
 #if ZEND_DEBUG
 
 typedef struct _zend_mm_debug_info {
-	char *filename;
+	const char *filename;
 	uint lineno;
-	char *orig_filename;
+	const char *orig_filename;
 	uint orig_lineno;
 	size_t size;
 #if ZEND_MM_HEAP_PROTECTION
@@ -460,7 +460,7 @@ struct _zend_mm_heap {
 		sizeof(zend_mm_free_block*) * 2 - \
 		sizeof(zend_mm_small_free_block))
 
-#define ZEND_MM_REST_BLOCK ((zend_mm_free_block*)(zend_uintptr_t)(1))
+#define ZEND_MM_REST_BLOCK ((zend_mm_free_block**)(zend_uintptr_t)(1))
 
 #define ZEND_MM_MAX_REST_BLOCKS 16
 
@@ -1750,7 +1750,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 		heap->reserve = NULL;
 	}
 	if (heap->overflow == 0) {
-		char *error_filename;
+		const char *error_filename;
 		uint error_lineno;
 		TSRMLS_FETCH();
 		if (zend_is_compiling(TSRMLS_C)) {

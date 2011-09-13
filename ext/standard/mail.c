@@ -232,7 +232,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		efree(tmp);
 	}
 	if (PG(mail_x_header)) {
-		char *tmp = zend_get_executed_filename(TSRMLS_C);
+		const char *tmp = zend_get_executed_filename(TSRMLS_C);
 		char *f;
 		size_t f_len;
 

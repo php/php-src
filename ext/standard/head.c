@@ -220,7 +220,7 @@ PHP_FUNCTION(setrawcookie)
 PHP_FUNCTION(headers_sent)
 {
 	zval *arg1 = NULL, *arg2 = NULL;
-	char *file="";
+	const char *file="";
 	int line=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE)

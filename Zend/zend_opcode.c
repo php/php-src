@@ -223,16 +223,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
-	 				efree(ce->trait_aliases[i]->trait_method->method_name);
+	 				efree((char*)ce->trait_aliases[i]->trait_method->method_name);
 				}
 				if (ce->trait_aliases[i]->trait_method->class_name) {
-	 				efree(ce->trait_aliases[i]->trait_method->class_name);
+	 				efree((char*)ce->trait_aliases[i]->trait_method->class_name);
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
 			
 			if (ce->trait_aliases[i]->alias) {
-				efree(ce->trait_aliases[i]->alias);
+				efree((char*)ce->trait_aliases[i]->alias);
 			}
 			
 			efree(ce->trait_aliases[i]);
@@ -246,8 +246,8 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		size_t i = 0;
 		
 		while (ce->trait_precedences[i]) {
-			efree(ce->trait_precedences[i]->trait_method->method_name);
-			efree(ce->trait_precedences[i]->trait_method->class_name);
+			efree((char*)ce->trait_precedences[i]->trait_method->method_name);
+			efree((char*)ce->trait_precedences[i]->trait_method->class_name);
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
@@ -291,16 +291,14 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			if (!IS_INTERNED(ce->name)) {
-				efree(ce->name);
-			}
+			str_efree(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
-				efree(ce->info.user.doc_comment);
+				efree((char*)ce->info.user.doc_comment);
 			}
 			
 			_destroy_zend_class_traits_info(ce);
@@ -327,9 +325,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			if (!IS_INTERNED(ce->name)) {
-				free(ce->name);
-			}
+			str_free(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
@@ -386,10 +382,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	efree(op_array->opcodes);
 
 	if (op_array->function_name) {
-		efree(op_array->function_name);
+		efree((char*)op_array->function_name);
 	}
 	if (op_array->doc_comment) {
-		efree(op_array->doc_comment);
+		efree((char*)op_array->doc_comment);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
@@ -402,9 +398,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	if (op_array->arg_info) {
 		for (i=0; i<op_array->num_args; i++) {
-			str_efree((char *)op_array->arg_info[i].name);
-			if (op_array->arg_info[i].class_name && !IS_INTERNED(op_array->arg_info[i].class_name)) {
-				efree((char*)op_array->arg_info[i].class_name);
+			str_efree(op_array->arg_info[i].name);
+			if (op_array->arg_info[i].class_name) {
+				str_efree(op_array->arg_info[i].class_name);
 			}
 		}
 		efree(op_array->arg_info);

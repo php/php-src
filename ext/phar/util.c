@@ -273,7 +273,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 	if (PHAR_G(last_phar) && !memcmp(fname, "phar://", 7) && fname_len - 7 >= PHAR_G(last_phar_name_len) && !memcmp(fname + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
@@ -365,7 +365,7 @@ splitted:
 		goto doit;
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		goto doit;
@@ -523,7 +523,7 @@ not_stream:
 
 	/* check in calling scripts' current working directory as a fall back case */
 	if (zend_is_executing(TSRMLS_C)) {
-		char *exec_fname = zend_get_executed_filename(TSRMLS_C);
+		char *exec_fname = (char*)zend_get_executed_filename(TSRMLS_C);
 		int exec_fname_length = strlen(exec_fname);
 		const char *p;
 		int n = 0;

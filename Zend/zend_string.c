@@ -119,7 +119,7 @@ static const char *zend_new_interned_string_int(const char *arKey, int nKeyLengt
 #endif
 	
 	p->arKey = (char*)(p+1);
-	memcpy(p->arKey, arKey, nKeyLength);
+	memcpy((char*)p->arKey, arKey, nKeyLength);
 	if (free_src) {
 		efree((void *)arKey);
 	}

@@ -275,7 +275,7 @@ static void _free_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 		&& fptr->type == ZEND_INTERNAL_FUNCTION
 		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
 	{
-		efree(fptr->internal_function.function_name);
+		efree((char*)fptr->internal_function.function_name);
 		efree(fptr);
 	}
 }
@@ -302,7 +302,7 @@ static void reflection_free_objects_storage(void *object TSRMLS_DC) /* {{{ */
 			break;
 		case REF_TYPE_DYNAMIC_PROPERTY:
 			prop_reference = (property_reference*)intern->ptr;
-			efree(prop_reference->prop.name);
+			efree((char*)prop_reference->prop.name);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_OTHER:
@@ -923,7 +923,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 /* {{{ _property_string */
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC)
 {
-	char *class_name;
+	const char *class_name;
 
 	string_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
@@ -953,7 +953,7 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 			string_printf(str, "static ");
 		}
 
-		zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
+		zend_unmangle_property_name(prop->name, prop->name_length, &class_name, (const char**)&prop_name);
 		string_printf(str, "$%s", prop_name);
 	}
 
@@ -1316,7 +1316,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	zval *name;
 	zval *classname;
 	property_reference *reference;
-	char *class_name, *prop_name;
+	const char *class_name, *prop_name;
 
 	zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
 
@@ -2205,7 +2205,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					efree(fptr->common.function_name);
+					efree((char*)fptr->common.function_name);
 				}
 				efree(fptr);
 			}
@@ -2229,7 +2229,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position == -1) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					efree(fptr->common.function_name);
+					efree((char*)fptr->common.function_name);
 				}
 				efree(fptr);
 			}
@@ -4154,7 +4154,6 @@ ZEND_METHOD(reflection_class, newInstance)
    Returns an instance of this class without invoking its constructor */
 ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 {
-	zval *retval_ptr = NULL;
 	reflection_object *intern;
 	zend_class_entry *ce;
 
@@ -4646,7 +4645,8 @@ ZEND_METHOD(reflection_property, export)
 ZEND_METHOD(reflection_property, __construct)
 {
 	zval *propname, *classname;
-	char *name_str, *class_name, *prop_name;
+	char *name_str;
+	const char *class_name, *prop_name;
 	int name_len, dynam_prop = 0;
 	zval *object;
 	reflection_object *intern;
@@ -4871,7 +4871,7 @@ ZEND_METHOD(reflection_property, getValue)
 		zval_copy_ctor(return_value);
  		INIT_PZVAL(return_value);
 	} else {
-		char *class_name, *prop_name;
+		const char *class_name, *prop_name;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
@@ -4946,7 +4946,7 @@ ZEND_METHOD(reflection_property, setValue)
 			}
 		}
 	} else {
-		char *class_name, *prop_name;
+		const char *class_name, *prop_name;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
@@ -4965,7 +4965,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	property_reference *ref;
 	zend_class_entry *tmp_ce, *ce;
 	zend_property_info *tmp_info;
-	char *prop_name, *class_name;
+	const char *prop_name, *class_name;
 	int prop_name_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {

@@ -75,7 +75,7 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC);
-ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, char *given_kind TSRMLS_DC);
+ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
 
 static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
@@ -377,9 +377,9 @@ void execute_new_code(TSRMLS_D);
 
 
 /* services */
-ZEND_API char *get_active_class_name(char **space TSRMLS_DC);
-ZEND_API char *get_active_function_name(TSRMLS_D);
-ZEND_API char *zend_get_executed_filename(TSRMLS_D);
+ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC);
+ZEND_API const char *get_active_function_name(TSRMLS_D);
+ZEND_API const char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 

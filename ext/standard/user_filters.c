@@ -544,7 +544,8 @@ PHP_FUNCTION(stream_bucket_new)
 PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
-	int key_flags, filter_name_len = 0;
+	int key_flags;
+	uint filter_name_len = 0;
 	HashTable *filters_hash;
 	ulong num_key;
 

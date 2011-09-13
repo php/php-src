@@ -45,7 +45,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -122,7 +122,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
@@ -253,7 +253,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
@@ -349,7 +349,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
@@ -621,7 +621,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
 
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -911,7 +911,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -978,7 +978,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */

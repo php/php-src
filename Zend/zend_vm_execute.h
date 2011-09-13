@@ -696,7 +696,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		}
 
 		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree(fbc->common.function_name);
+			efree((char*)fbc->common.function_name);
 		}
 		efree(fbc);
 
@@ -761,8 +761,8 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	if (UNEXPECTED(param == NULL)) {
 		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL, opline->extended_value TSRMLS_CC)) {
-			char *space;
-			char *class_name;
+			const char *space;
+			const char *class_name;
 			zend_execute_data *ptr;
 
 			if (EG(active_op_array)->scope) {
@@ -11387,7 +11387,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
 
 		case ZEND_ITER_PLAIN_OBJECT: {
-			char *class_name, *prop_name;
+			const char *class_name, *prop_name;
 			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
 
 			fe_ht = Z_OBJPROP_P(array);
@@ -11486,7 +11486,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 		switch (key_type) {
 			case HASH_KEY_IS_STRING:
-				Z_STRVAL_P(key) = str_key;
+				Z_STRVAL_P(key) = (char*)str_key;
 				Z_STRLEN_P(key) = str_key_len-1;
 				Z_TYPE_P(key) = IS_STRING;
 				break;

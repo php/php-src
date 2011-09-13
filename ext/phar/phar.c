@@ -2331,7 +2331,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 		*error = NULL;
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
@@ -3336,7 +3336,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 		return phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	}
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
-		if (SUCCESS == phar_open_from_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
+		if (SUCCESS == phar_open_from_filename((char*)file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
 				zend_file_handle f = *file_handle;
 
@@ -3417,7 +3417,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		char *fname;
 		int fname_len;
 
-		fname = zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 		fname_len = strlen(fname);
 
 		if (fname_len > 7 && !strncasecmp(fname, "phar://", 7)) {
