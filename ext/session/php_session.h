@@ -129,6 +129,7 @@ typedef struct _php_ps_globals {
 	zend_bool  cookie_secure;
 	zend_bool  cookie_httponly;
 	ps_module *mod;
+	ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
 	long gc_probability;
@@ -147,6 +148,8 @@ typedef struct _php_ps_globals {
 			zval *ps_gc;
 		} name;
 	} mod_user_names;
+	int mod_user_implemented;
+	int mod_user_is_open;
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
@@ -267,5 +270,15 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
+
+#define PS_CLASS_NAME "SessionHandler"
+extern zend_class_entry *php_session_class_entry;
+
+extern PHP_METHOD(SessionHandler, open);
+extern PHP_METHOD(SessionHandler, close);
+extern PHP_METHOD(SessionHandler, read);
+extern PHP_METHOD(SessionHandler, write);
+extern PHP_METHOD(SessionHandler, destroy);
+extern PHP_METHOD(SessionHandler, gc);
 
 #endif

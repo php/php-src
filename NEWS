@@ -54,6 +54,7 @@ PHP                                                                        NEWS
 
 - Improved Session extension:
   . Expose session status via new function, session_status (FR #52982) (Arpad)
+  . Added support for object-oriented session handlers. (Arpad)
 
 - Improved SPL extension:
   . Immediately reject wrong usages of directories under Spl(Temp)FileObject

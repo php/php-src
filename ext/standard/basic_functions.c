@@ -118,11 +118,6 @@ PHPAPI php_basic_globals basic_globals;
 
 static zend_class_entry *incomplete_class_entry = NULL;
 
-typedef struct _php_shutdown_function_entry {
-	zval **arguments;
-	int arg_count;
-} php_shutdown_function_entry;
-
 typedef struct _user_tick_function_entry {
 	zval **arguments;
 	int arg_count;
@@ -5075,6 +5070,38 @@ PHP_FUNCTION(register_shutdown_function)
 	if (function_name) {
 		efree(function_name);
 	}
+}
+/* }}} */
+
+PHPAPI zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
+{
+	if (!BG(user_shutdown_function_names)) {
+		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
+		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
+	}
+
+	return zend_hash_update(BG(user_shutdown_function_names), function_name, sizeof(function_name), shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL) != FAILURE;
+}
+/* }}} */
+
+PHPAPI zend_bool remove_user_shutdown_function(char *function_name) /* {{{ */
+{
+	if (BG(user_shutdown_function_names)) {
+		return zend_hash_del_key_or_index(BG(user_shutdown_function_names), function_name, sizeof(function_name), 0, HASH_DEL_KEY) != FAILURE;
+	}
+
+	return 0;
+}
+/* }}} */
+
+PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry) /* {{{ */
+{
+	if (!BG(user_shutdown_function_names)) {
+		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
+		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
+	}
+
+	return zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL) != FAILURE;
 }
 /* }}} */
 

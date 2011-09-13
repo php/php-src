@@ -251,4 +251,13 @@ typedef struct {
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
+typedef struct _php_shutdown_function_entry {
+	zval **arguments;
+	int arg_count;
+} php_shutdown_function_entry;
+
+PHPAPI extern zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry);
+PHPAPI extern zend_bool remove_user_shutdown_function(char *function_name);
+PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry);
+
 #endif /* BASIC_FUNCTIONS_H */
