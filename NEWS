@@ -59,6 +59,9 @@ PHP                                                                        NEWS
     instead of false when no nodes are found as it was since 5.3.3 
     (bug #48601). (chregu, rrichards)
     
+- String:
+  . Fixed bug #55674 (fgetcsv & str_getcsv skip empty fields in some tab-separated 
+    records). (Laruence)
 
 23 Aug 2011, PHP 5.3.8
 
