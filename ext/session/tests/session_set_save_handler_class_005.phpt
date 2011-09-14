@@ -44,7 +44,7 @@ session_unset();
 *** Testing session_set_save_handler() : incomplete implementation ***
 
 Warning: SessionHandler::read(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
-string(32) "%x"
+string(%d) "%s"
 string(4) "user"
 array(0) {
 }

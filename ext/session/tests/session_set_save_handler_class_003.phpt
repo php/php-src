@@ -70,7 +70,7 @@ array(1) {
   string(5) "hello"
 }
 int(4)
-string(32) "%x"
+string(%d) "%s"
 array(1) {
   ["foo"]=>
   string(5) "hello"
