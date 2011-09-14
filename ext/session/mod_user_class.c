@@ -23,7 +23,7 @@
 
 #define PS_SANITY_CHECK						\
 	if (PS(default_mod) == NULL) {				\
-		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "Called default SessionHandler but session.save_handler is user"); \
+		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "Cannot call default session handler"); \
 		RETURN_FALSE;						\
 	}							
 
