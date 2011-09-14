@@ -311,6 +311,9 @@ PS_OPEN_FUNC(files)
 	data->basedir_len = strlen(save_path);
 	data->basedir = estrndup(save_path, data->basedir_len);
 
+	if (PS_GET_MOD_DATA()) {
+		ps_close_files(mod_data TSRMLS_CC);
+	}
 	PS_SET_MOD_DATA(data);
 
 	return SUCCESS;
