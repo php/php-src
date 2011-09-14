@@ -36,7 +36,7 @@ session_unset();
 
 --EXPECTF--
 *** Testing session_set_save_handler() : default object ***
-string(32) "%x"
+string(%d) "%s"
 string(4) "user"
 array(1) {
   ["foo"]=>
