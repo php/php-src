@@ -43,12 +43,12 @@ session_unset();
 --EXPECTF--
 *** Testing session_set_save_handler() : incomplete implementation ***
 
-Warning: SessionHandler::read(): Parent session handler is not open in %s/session_set_save_handler_class_005.php on line %d
+Warning: SessionHandler::read(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
 string(32) "%x"
 string(4) "user"
 array(0) {
 }
 
-Warning: SessionHandler::write(): Parent session handler is not open in %s/session_set_save_handler_class_005.php on line %d
+Warning: SessionHandler::write(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
 
-Warning: SessionHandler::close(): Parent session handler is not open in %s/session_set_save_handler_class_005.php on line %d
+Warning: SessionHandler::close(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
