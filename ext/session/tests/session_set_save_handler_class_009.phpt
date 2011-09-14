@@ -57,6 +57,6 @@ ob_end_flush();
 *** Testing session_set_save_handler() : implicit shutdown ***
 (#1) constructor called
 done
-(#1) writing %x = foo|s:3:"bar";
-(#1) closing %x
+(#1) writing %s = foo|s:3:"bar";
+(#1) closing %s
 (#1) destructor called

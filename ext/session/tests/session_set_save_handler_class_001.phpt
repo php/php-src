@@ -53,15 +53,15 @@ session_unset();
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 
-Read %x
-string(32) "%x"
+Read %s
+string(%d) "%s"
 string(5) "files"
 string(4) "user"
 int(2)
 array(0) {
 }
-Open %x
-Read %x
+Open %s
+Read %s
 array(1) {
   ["foo"]=>
   string(5) "hello"

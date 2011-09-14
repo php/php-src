@@ -45,8 +45,8 @@ var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i
 --EXPECTF--
 *** Testing session_set_save_handler() : incorrect arguments for existing handler close ***
 Open 
-Read %x
-string(32) "%x"
+Read %s
+string(%d) "%s"
 string(5) "files"
 string(4) "user"
 int(2)

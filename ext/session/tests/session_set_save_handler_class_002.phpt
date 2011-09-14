@@ -91,7 +91,7 @@ session_unset();
 
 --EXPECTF--
 *** Testing session_set_save_handler() : full handler implementation ***
-string(32) "%x"
+string(%d) "%s"
 string(4) "user"
 array(1) {
   ["foo"]=>
@@ -101,7 +101,7 @@ array(1) {
   ["foo"]=>
   string(5) "hello"
 }
-string(32) "%x"
+string(%d) "%s"
 string(4) "user"
 array(1) {
   ["foo"]=>

@@ -44,10 +44,10 @@ var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i
 Open 
 
 Warning: SessionHandler::open() expects exactly 2 parameters, 0 given in %s on line %d
-Read %x
+Read %s
 
 Warning: SessionHandler::read(): Parent session handler is not open in %s on line %d
-string(32) "%x"
+string(%d) "%s"
 string(5) "files"
 string(4) "user"
 int(2)
