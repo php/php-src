@@ -17,7 +17,13 @@ $csr_info = array(
   "organizationalUnitName" => "IT \xe4\xba\x92",
   "commonName" => "www.example.com",);
 $private = openssl_pkey_new($config);
-$csr_res = openssl_csr_new($csr_info, $private);
+while (openssl_error_string()) {}
+$csr_res = openssl_csr_new($csr_info, $private,
+	['config' => __DIR__."/openssl.cnf"]);
+if (!$csr_res) {
+	while ($e = openssl_error_string()) { $err = $e; }
+	die("Failed; last error: $err");
+}
 openssl_csr_export($csr_res, $csr);
 $output = openssl_csr_get_subject($csr);
 
