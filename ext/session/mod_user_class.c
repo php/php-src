@@ -133,7 +133,7 @@ PHP_METHOD(SessionHandler, gc)
 	long maxlifetime;
 	int nrdels;
 
-	PS_SANITY_CHECK;
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &maxlifetime) == FAILURE) {
 		return;
