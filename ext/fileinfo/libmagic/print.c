@@ -30,6 +30,7 @@
  */
 
 #include "php.h"
+#include "main/snprintf.h"
 
 #include "file.h"
 
