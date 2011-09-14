@@ -32,7 +32,7 @@ static const zend_encoding *dummy_encoding_fetcher(const char *encoding_name TSR
 
 static const char *dummy_encoding_name_getter(const zend_encoding *encoding)
 {
-	return NULL;
+	return (const char*)encoding;
 }
 
 static int dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
@@ -79,11 +79,11 @@ static zend_multibyte_functions multibyte_functions = {
 	dummy_internal_encoding_setter
 };
 
-ZEND_API const zend_encoding *zend_multibyte_encoding_utf32be;
-ZEND_API const zend_encoding *zend_multibyte_encoding_utf32le;
-ZEND_API const zend_encoding *zend_multibyte_encoding_utf16be;
-ZEND_API const zend_encoding *zend_multibyte_encoding_utf16le;
-ZEND_API const zend_encoding *zend_multibyte_encoding_utf8;
+ZEND_API const zend_encoding *zend_multibyte_encoding_utf32be = (const zend_encoding*)"UTF-32BE";
+ZEND_API const zend_encoding *zend_multibyte_encoding_utf32le = (const zend_encoding*)"UTF-32LE";
+ZEND_API const zend_encoding *zend_multibyte_encoding_utf16be = (const zend_encoding*)"UTF-16BE";
+ZEND_API const zend_encoding *zend_multibyte_encoding_utf16le = (const zend_encoding*)"UTF-32LE";
+ZEND_API const zend_encoding *zend_multibyte_encoding_utf8 = (const zend_encoding*)"UTF-8";
 
 ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functions TSRMLS_DC)
 {
