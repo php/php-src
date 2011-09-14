@@ -38,3 +38,6 @@ subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always,issuer:always
 basicConstraints = CA:true
 
+[ usr_cert ]
+basicConstraints=CA:FALSE
+
