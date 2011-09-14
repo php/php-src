@@ -9,7 +9,8 @@ if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
 <?php 
 $configargs = array(
         "req_extensions" => "v3_req",
-        "x509_extensions" => "usr_cert"
+        "x509_extensions" => "usr_cert",
+		"config" => __DIR__."/openssl.cnf",
 );
 
 $dn = array(
