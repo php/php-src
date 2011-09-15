@@ -822,7 +822,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		return;
 	}
 	
-	if (Z_TYPE_P(obj) == IS_STRING) {
+	if (only_subclass && Z_TYPE_P(obj) == IS_STRING) {
 		zend_class_entry **the_ce;
 		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
