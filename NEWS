@@ -11,7 +11,6 @@ PHP                                                                        NEWS
   . Fixed bug #55509 (segfault on x86_64 using more than 2G memory). (Laruence)
   . Fixed bug #55504 (Content-Type header is not parsed correctly on
     HTTP POST request). (Hannes)
-  . Fixed bug #55475 (is_a() triggers autoloader). (alan at akbkhome dot com)
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
   . Fixed bug #55366: keys lost when using substr_replace an array. (Arpad)
