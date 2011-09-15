@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2011, PHP 5.4.0 RC1
+
 15 Sep 2011, PHP 5.4.0 Beta
 - General improvements:
   . Added callable typehint. (Hannes)
