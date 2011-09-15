@@ -89,7 +89,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		}
 	}
 }
-
+/* }}} */
 
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC) /* {{{ */
 {
