@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Fixed bug #55366: keys lost when using substr_replace an array. (Arpad)
   . Fixed bug #55273 (base64_decode() with strict rejects whitespace after
     pad). (Ilia)
+  . Fixed bug #50982 (incorrect assumption of PAGE_SIZE size). (Dmitry)
 
 - Curl:
   . Fixed bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed

@@ -27,10 +27,24 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if HAVE_SYS_MMAN_H
-# include <sys/mman.h>
-# ifndef PAGE_SIZE
-#  define PAGE_SIZE 4096
+#if HAVE_MMAP
+# if HAVE_UNISTD_H
+#  include <unistd.h>
+#  if defined(_SC_PAGESIZE)
+#    define REAL_PAGE_SIZE sysconf(_SC_PAGESIZE);
+#  elif defined(_SC_PAGE_SIZE)
+#    define REAL_PAGE_SIZE sysconf(_SC_PAGE_SIZE);
+#  endif
+# endif
+# if HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+# endif
+# ifndef REAL_PAGE_SIZE
+#  ifdef PAGE_SIZE
+#   define REAL_PAGE_SIZE PAGE_SIZE
+#  else
+#   define REAL_PAGE_SIZE 4096
+#  endif
 # endif
 #endif
 
@@ -215,9 +229,11 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 
 	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
 #if HAVE_MMAP
+		size_t page_size = REAL_PAGE_SIZE;
+
 		if (file_handle->handle.fp &&
 		    size != 0 &&
-		    ((size - 1) % PAGE_SIZE) <= PAGE_SIZE - ZEND_MMAP_AHEAD) {
+		    ((size - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD) {
 			/*  *buf[size] is zeroed automatically by the kernel */
 			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
 			if (*buf != MAP_FAILED) {

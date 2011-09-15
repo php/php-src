@@ -92,14 +92,25 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
-#if HAVE_SYS_MMAN_H
-# include <sys/mman.h>
-# ifndef PAGE_SIZE
-#  define PAGE_SIZE 4096
+#if HAVE_MMAP
+# if HAVE_UNISTD_H
+#  include <unistd.h>
+#  if defined(_SC_PAGESIZE)
+#    define REAL_PAGE_SIZE sysconf(_SC_PAGESIZE);
+#  elif defined(_SC_PAGE_SIZE)
+#    define REAL_PAGE_SIZE sysconf(_SC_PAGE_SIZE);
+#  endif
 # endif
-#endif
-#ifdef PHP_WIN32
-# define PAGE_SIZE 4096
+# if HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+# endif
+# ifndef REAL_PAGE_SIZE
+#  ifdef PAGE_SIZE
+#   define REAL_PAGE_SIZE PAGE_SIZE
+#  else
+#   define REAL_PAGE_SIZE 4096
+#  endif
+# endif
 #endif
 /* }}} */
 
@@ -1201,6 +1212,10 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &handle->opened_path);
 
 	if (stream) {
+#if HAVE_MMAP
+		size_t page_size = REAL_PAGE_SIZE;
+#endif
+
 		handle->filename = (char*)filename;
 		handle->free_filename = 0;
 		handle->handle.stream.handle  = stream;
@@ -1211,7 +1226,9 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
 		len = php_zend_stream_fsizer(stream TSRMLS_CC);
 		if (len != 0
-		&& ((len - 1) % PAGE_SIZE) <= PAGE_SIZE - ZEND_MMAP_AHEAD
+#if HAVE_MMAP
+		&& ((len - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD
+#endif
 		&& php_stream_mmap_possible(stream)
 		&& (p = php_stream_mmap_range(stream, 0, len, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped_len)) != NULL) {
 			handle->handle.stream.closer   = php_zend_stream_mmap_closer;
