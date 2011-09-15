@@ -29,8 +29,8 @@
  * print.c - debugging printout routines
  */
 
+#define _GNU_SOURCE
 #include "php.h"
-#include "main/snprintf.h"
 
 #include "file.h"
 
@@ -38,6 +38,7 @@
 FILE_RCSID("@(#)$File: print.c,v 1.66 2009/02/03 20:27:51 christos Exp $")
 #endif  /* lint */
 
+#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
