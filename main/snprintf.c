@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-
+#define _GNU_SOURCE
 #include "php.h"
 
 #include <zend_strtod.h>
