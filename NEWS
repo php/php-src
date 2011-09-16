@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fixed bug #55366: keys lost when using substr_replace an array. (Arpad)
   . Fixed bug #55273 (base64_decode() with strict rejects whitespace after
     pad). (Ilia)
+  . Fixed bug #54304 (RegexIterator::accept() doesn't work with scalar values).
+    (Hannes)
   . Fixed bug #50982 (incorrect assumption of PAGE_SIZE size). (Dmitry)
 
 - Curl:
