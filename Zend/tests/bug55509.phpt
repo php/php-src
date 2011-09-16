@@ -30,4 +30,4 @@ echo "6\n";
 4
 5
 
-Fatal error: Allowed memory size of %d bytes exhausted (tried to allocate %d bytes) in %s/bug55509.php on line %d
+Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %sbug55509.php on line %d
