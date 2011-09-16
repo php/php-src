@@ -1,5 +1,11 @@
 --TEST--
 Test scandir() function : usage variations - different data types as $dir arg
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. Not valid for Windows');
+}
+?>
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
