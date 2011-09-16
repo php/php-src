@@ -4,8 +4,9 @@ Test file_get_contents() function : variation - obscure filenames
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Do not run on Windows");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. Not valid for Windows');
+}
 ?>
 --FILE--
 <?php

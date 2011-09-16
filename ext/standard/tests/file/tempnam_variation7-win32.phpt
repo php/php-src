@@ -13,7 +13,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 /* Passing invalid/non-existing args for $dir, 
      hence the unique files will be created in temporary dir */
-
+ 
 echo "*** Testing tempnam() with invalid/non-existing directory names ***\n";
 /* An array of names, which will be passed as a dir name */ 
 $names_arr = array(
@@ -93,13 +93,13 @@ File created in => temp dir
 Warning: tempnam() expects parameter 1 to be a valid path, string given in %stempnam_variation7-win32.php on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %stempnam_variation7-win32.php on line %d
+Warning: unlink(): Invalid argument in %s on line %d
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %stempnam_variation7-win32.php on line %d
+Warning: unlink(): Invalid argument in %s on line %d
 -- Iteration 8 --
 File name is => %s%et%s
 File permissions are => 100666

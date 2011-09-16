@@ -1,5 +1,11 @@
 --TEST--
 Test opendir() function : usage variations - different data types as $path arg
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. Not valid for Windows');
+}
+?>
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
