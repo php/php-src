@@ -2,8 +2,8 @@
 Test dir() function : usage variations - non-existent directory
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -48,9 +48,13 @@ echo "Done";
 *** Testing dir() : open a non-existent directory ***
 -- opening previously removed directory --
 
+Warning: dir(%s): The system cannot find the file specified. (code: %d) in %s on line %d
+
 Warning: dir(%s): failed to open dir: %s in %s on line %d
 bool(false)
 -- opening non-existent directory --
+
+Warning: dir(%s): The system cannot find the file specified. (code: %d) in %s on line %d
 
 Warning: dir(%s): failed to open dir: %s in %s on line %d
 bool(false)

@@ -2,8 +2,8 @@
 Test scandir() function : usage variations - Wildcards in directory path
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -52,24 +52,32 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
-Warning: scandir(%s/scandir_var*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_var*,%s/scandir_var*): No such file or directory in %s on line %d
+
+Warning: scandir(%s/scandir_var*): failed to open dir: No such file or directory in %sscandir_variation6-win32.php on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/*,%s/*): No such file or directory in %s on line %d
+
+Warning: scandir(%s/*): failed to open dir: No such file or directory in %sscandir_variation6-win32.php on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: scandir(%s/scandir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub_dir?,%s/scandir_variation6/sub_dir?): No such file or directory in %s on line %d
+
+Warning: scandir(%s/scandir_variation6/sub_dir?): failed to open dir: No such file or directory in %sscandir_variation6-win32.php on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub?dir1,%s/scandir_variation6/sub?dir1): No such file or directory in %s on line %d
+
+Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: No such file or directory in %sscandir_variation6-win32.php on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)

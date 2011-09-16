@@ -2,8 +2,8 @@
 Test opendir() function : usage variations - different data types as $path arg
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -121,45 +121,63 @@ rmdir($path);
 
 -- Iteration 1 --
 
+Warning: opendir(0,0): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(0): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 2 --
+
+Warning: opendir(1,1): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
+Warning: opendir(12345,12345): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(12345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 4 --
+
+Warning: opendir(-2345,-2345): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(-2345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
+Warning: opendir(10.5,10.5): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 6 --
+
+Warning: opendir(-10.5,-10.5): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(-10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
+Warning: opendir(123456789000,123456789000): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(123456789000): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 8 --
 
+Warning: opendir(1.23456789E-9,1.23456789E-9): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(1.23456789E-9): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 9 --
+
+Warning: opendir(0.5,0.5): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(0.5): failed to open dir: %s in %s on line %d
 bool(false)
@@ -172,6 +190,8 @@ bool(false)
 
 -- Iteration 12 --
 
+Warning: opendir(1,1): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
@@ -179,6 +199,8 @@ bool(false)
 bool(false)
 
 -- Iteration 14 --
+
+Warning: opendir(1,1): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
@@ -201,6 +223,8 @@ NULL
 resource(%d) of type (stream)
 
 -- Iteration 20 --
+
+Warning: opendir(string,string): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: opendir(string): failed to open dir: %s in %s on line %d
 bool(false)

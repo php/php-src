@@ -4,8 +4,9 @@ Test file_get_contents() function : variation - obscure filenames
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) != "WIN")
-  die("skip Only run on Windows");
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
 ?>
 --FILE--
 <?php
@@ -62,7 +63,7 @@ bool(false)
 
 -- Filename: NULL --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
+Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
 bool(false)
 
 -- Filename: "" --
@@ -77,12 +78,12 @@ bool(false)
 
 -- Filename: \0 --
 
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 -- Filename: array() --
 
-Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
+Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
 -- Filename: /no/such/file/dir --

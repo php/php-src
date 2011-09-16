@@ -2,8 +2,8 @@
 Test dir() function : usage variations - open a file instead of directory
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -29,6 +29,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing dir() : open a file instead of a directory ***
+
+Warning: dir(%s): The directory name is invalid. (code: %d) in %s on line %d
 
 Warning: dir(%s): failed to open dir: %s in %s on line %d
 bool(false)

@@ -2,8 +2,8 @@
 Test dir() function : usage variations - unexpected value for 'dir' argument
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -123,6 +123,8 @@ bool(false)
 
 -- Iteration 8 --
 
+Warning: dir(1,1): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: dir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
@@ -130,6 +132,8 @@ bool(false)
 bool(false)
 
 -- Iteration 10 --
+
+Warning: dir(1,1): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: dir(1): failed to open dir: %s in %s on line %d
 bool(false)

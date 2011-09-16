@@ -2,8 +2,8 @@
 Test opendir() function : error conditions - Non-existent directory
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -33,10 +33,14 @@ var_dump(opendir('idonotexist'));
 
 -- Pass a non-existent absolute path: --
 
+Warning: opendir(%s/idonotexist,%s/idonotexist): The system cannot find the file specified. (code: %d) in %s on line %d
+
 Warning: opendir(%s/idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Pass a non-existent relative path: --
+
+Warning: opendir(idonotexist,idonotexist): The system cannot find the file specified. (code: %d) in %s on line %d
 
 Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
 bool(false)

@@ -2,8 +2,8 @@
 Test opendir() function : usage variations - Different wildcards
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -51,16 +51,24 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
+Warning: opendir(%s/opendir_var*,%s/opendir_var*): No such file or directory in %s on line %d
+
 Warning: opendir(%s/opendir_var*): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: opendir(%s/*,%s/*): No such file or directory in %s on line %d
 
 Warning: opendir(%s/*): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
+Warning: opendir(%s/opendir_variation6/sub_dir?,%s/opendir_variation6/sub_dir?): No such file or directory in %s on line %d
+
 Warning: opendir(%s/opendir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: opendir(%s/opendir_variation6/sub?dir1,%s/opendir_variation6/sub?dir1): No such file or directory in %s on line %d
 
 Warning: opendir(%s/opendir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
 bool(false)

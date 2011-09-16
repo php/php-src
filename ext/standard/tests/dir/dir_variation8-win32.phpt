@@ -2,8 +2,8 @@
 Test dir() function : usage variations - checking with wildcard characters
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -45,15 +45,23 @@ echo "Done";
 *** Testing dir() : checking with wildcard characters ***
 -- wildcard = '*' --
 
+Warning: dir(%s/dir_var*,%s/dir_var*): No such file or directory in %s on line %d
+
 Warning: dir(%s/dir_var*): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: dir(%s/*,%s/*): No such file or directory in %s on line %d
 
 Warning: dir(%s/*): failed to open dir: %s in %s on line %d
 bool(false)
 -- wildcard = '?' --
 
+Warning: dir(%s/dir_variation81/sub_dir?,%s/dir_variation81/sub_dir?): No such file or directory in %s on line %d
+
 Warning: dir(%s/dir_variation81/sub_dir?): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: dir(%s/dir_variation81/sub?dir1,%s/dir_variation81/sub?dir1): No such file or directory in %s on line %d
 
 Warning: dir(%s/dir_variation81/sub?dir1): failed to open dir: %s in %s on line %d
 bool(false)

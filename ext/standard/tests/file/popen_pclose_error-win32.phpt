@@ -41,9 +41,9 @@ NULL
 
 Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
-resource(%d) of type (stream)
-'abc.txt' is not recognized as an internal or external command,
-operable program or batch file.
+
+Warning: popen(abc.txt,rw): Invalid argument in %s on line %d
+bool(false)
 
 Warning: pclose() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
@@ -54,4 +54,5 @@ bool(false)
 Warning: pclose() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 
---- Done ---
+--- Done ---'abc.txt' is not recognized as an internal or external command,
+operable program or batch file.

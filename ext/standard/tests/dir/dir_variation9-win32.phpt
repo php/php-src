@@ -2,8 +2,8 @@
 Test dir() function : usage variations - relative valid and invalid paths
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -103,14 +103,22 @@ object(Directory)#%d (2) {
 
 -- With invalid paths --
 
+Warning: dir(%sdir_variation91/sub_dir12/sub_dir111/..,%sdir_variation91/sub_dir12/sub_dir111/..): The system cannot find the path specified. (code: 3) in %sdir_variation9-win32.php on line %d
+
 Warning: dir(%s/dir_variation91/sub_dir12/sub_dir111/..): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: dir(%sdir_variation92/sub_dir21/../dir_variation91,%sdir_variation92/sub_dir21/../dir_variation91): The system cannot find the file specified. (code: 2) in %sdir_variation9-win32.php on line %d
 
 Warning: dir(%s/dir_variation92/sub_dir21/../dir_variation91): failed to open dir: %s in %s on line %d
 bool(false)
 
+Warning: dir(%sdir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..,%sdir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..): The system cannot find the file specified. (code: 2) in %sdir_variation9-win32.php on line %d
+
 Warning: dir(%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..): failed to open dir: %s in %s on line %d
 bool(false)
+
+Warning: dir(%sdir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..,%sdir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..): The system cannot find the path specified. (code: 3) in %sdir_variation9-win32.php on line %d
 
 Warning: dir(%s/dir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..): failed to open dir: %s in %s on line %d
 bool(false)

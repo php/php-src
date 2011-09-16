@@ -2,8 +2,8 @@
 Test scandir() function : error conditions - Non-existent directory
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -33,12 +33,16 @@ var_dump(scandir('/idonotexist'));
 
 -- Pass scandir() an absolute path that does not exist --
 
+Warning: scandir(%s/idonotexist,%s/idonotexist): The system cannot find the file specified. (code: 2) in %s on line %d
+
 Warning: scandir(%s/idonotexist): failed to open dir: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Pass scandir() a relative path that does not exist --
+
+Warning: scandir(/idonotexist,/idonotexist): The system cannot find the file specified. (code: 2) in %s on line %d
 
 Warning: scandir(/idonotexist): failed to open dir: %s in %s on line %d
 
