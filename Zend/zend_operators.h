@@ -659,7 +659,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
-				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2);
+				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2);
 				Z_TYPE_P(result) = IS_DOUBLE;
 			} else {
 				Z_TYPE_P(result) = IS_LONG;
