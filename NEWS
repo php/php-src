@@ -5,4 +5,14 @@ PHP                                                                        NEWS
 - General improvements:
   . World domination
 
+- Core:
+  . Fixed bug #55707 (undefined reference to `__sync_fetch_and_add_4' on Linux
+    parisc). (Felipe)
+  . Fixed bug #55705 (Omitting a callable typehinted argument causes a segfault).
+    (Felipe, Laruence)
+
+- MySQLi extension:
+  . Fixed bug #55703 (PHP crash when calling mysqli_fetch_fields). 
+    (eran at zend dot com, Laruence)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
