@@ -7,10 +7,6 @@ PHP                                                                        NEWS
   . Fixed bug #55705 (Omitting a callable typehinted argument causes a segfault).
     (Felipe, Laruence)
 
-- MySQLi extension:
-  . Fixed bug #55703 (PHP crash when calling mysqli_fetch_fields). 
-    (eran at zend dot com, Laruence)
-
 15 Sep 2011, PHP 5.4.0 Beta
 - General improvements:
   . Added callable typehint. (Hannes)
