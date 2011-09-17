@@ -74,9 +74,9 @@ static HashTable mysqlnd_api_ext_ht;
 static void
 mysqlnd_error_list_pdtor(void * pDest)
 {
+	TSRMLS_FETCH();
 	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
 	DBG_ENTER("mysqlnd_error_list_pdtor");
-	TSRMLS_FETCH();
 	if (element->error) {
 		mnd_pefree(element->error, TRUE);
 	}
