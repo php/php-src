@@ -1057,7 +1057,12 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRML
 	add_property_string(value, "orgtable",(field->org_table ? field->org_table : ""), 1);
 	add_property_string(value, "def",(field->def ? field->def : ""), 1);
 	add_property_string(value, "db",(field->db ? field->db : ""), 1);
-	add_property_string(value, "catalog",(field->catalog ? field->catalog : ""), 1);
+
+	/* FIXME: manually set the catalog to "def" due to bug in
+	 * libmysqlclient which does not initialize field->catalog
+	 * and in addition, the catalog is always be "def"
+	 */
+	add_property_string(value, "catalog", "def", 1);
 
 	add_property_long(value, "max_length", field->max_length);
 	add_property_long(value, "length", field->length);
