@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.3.9
 
 - Core:
+  . Fixed bug #55707 (undefined reference to `__sync_fetch_and_add_4' on Linux
+    parisc). (Felipe)
   . Fixed bug #55649 (Undefined function Bug()). (Laruence)
   . Fixed bug #55576: Cannot conditionally move uploaded file without race
     condition. (Gustavo)
