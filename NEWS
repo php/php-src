@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - MySQLi extension:
   . Fixed bug #55582 (mysqli_num_rows() returns always 0 for unbuffered, when
   mysqlnd is used). (Andrey)
+  . Fixed bug #55703 (PHP crash when calling mysqli_fetch_fields). 
+    (eran at zend dot com, Laruence)
 
 - mysqlnd
   . Fixed bug #55609 (mysqlnd cannot be built shared). (Johannes)
