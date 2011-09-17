@@ -58,8 +58,8 @@ static void
 mysqlnd_ps_error_list_pdtor(void * pDest)
 {
 	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-	DBG_ENTER("mysqlnd_ps_error_list_pdtor");
 	TSRMLS_FETCH();
+	DBG_ENTER("mysqlnd_ps_error_list_pdtor");
 	if (element->error) {
 		mnd_pefree(element->error, TRUE);
 	}
