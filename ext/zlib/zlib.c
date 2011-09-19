@@ -847,7 +847,6 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 /* {{{ PHP_RINIT_FUNCTION */
 static PHP_RINIT_FUNCTION(zlib)
 {
-	ZLIBG(output_compression) = 0;
 	ZLIBG(compression_coding) = 0;
 
 	php_zlib_output_compression_start(TSRMLS_C);
@@ -855,6 +854,13 @@ static PHP_RINIT_FUNCTION(zlib)
 	return SUCCESS;
 }
 /* }}} */
+
+static PHP_RSHUTDOWN_FUNCTION(zlib)
+{
+	ZLIBG(output_compression) = 0;
+
+    return SUCCESS;
+}
 
 /* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(zlib)
@@ -879,7 +885,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_MINIT(zlib),
 	PHP_MSHUTDOWN(zlib),
 	PHP_RINIT(zlib),
-	NULL,
+	PHP_RSHUTDOWN(zlib),
 	PHP_MINFO(zlib),
 	"2.0",
 	PHP_MODULE_GLOBALS(zlib),
