@@ -54,7 +54,7 @@ static const char *pdo_mysql_get_sqlstate(unsigned int my_errno) { /* {{{ */
 #endif
 
 /* {{{ _pdo_mysql_error */
-int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err; 
@@ -160,7 +160,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 /* }}} */
 
 /* {{{ mysql_handle_closer */
-static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	
@@ -324,6 +324,7 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	*len = strlen(id);
 	PDO_DBG_RETURN(id);
 }
+/* }}} */ 
 
 /* {{{ mysql_handle_quoter */
 static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
@@ -361,6 +362,7 @@ static int mysql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("COMMIT") TSRMLS_CC));
 #endif
 }
+/* }}} */
 
 /* {{{ mysql_handle_rollback */
 static int mysql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
@@ -503,7 +505,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 /* }}} */
 
 /* {{{ pdo_mysql_check_liveness */
-static int pdo_mysql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+static int pdo_mysql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 #if MYSQL_VERSION_ID <= 32230
@@ -560,7 +562,7 @@ static struct pdo_dbh_methods mysql_methods = {
 #endif
 
 /* {{{ pdo_mysql_handle_factory */
-static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
+static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H;
 	int i, ret = 0;

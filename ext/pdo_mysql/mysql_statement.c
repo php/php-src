@@ -335,7 +335,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 	PDO_DBG_RETURN(1);
 }
-/* {{{ */
+/* }}} */
 
 static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
@@ -461,8 +461,7 @@ static const char * const pdo_param_event_names[] =
 };
 
 
-static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC) /* {{{ */
 {
 #ifndef PDO_USE_MYSQLND
 	PDO_MYSQL_PARAM_BIND *b;
@@ -604,8 +603,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 }
 /* }}} */
 
-static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, long offset TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if PDO_USE_MYSQLND
@@ -777,7 +775,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	PDO_DBG_RETURN(1);
 } /* }}} */
 
-static char *type_to_name_native(int type) /* }}} */
+static char *type_to_name_native(int type) /* {{{ */
 {
 #define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
 
