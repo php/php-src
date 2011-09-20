@@ -12,11 +12,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 include "php_cli_server.inc";
-$php = getenv('TEST_PHP_EXECUTABLE');
-$handle = php_cli_server_start($php, 'chdir("/tmp"); echo "okey";');
+php_cli_server_start('chdir("/tmp"); echo "okey";');
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
-php_cli_server_shutdown($handle);
 ?>
 --EXPECTF--	
 string(4) "okey"
