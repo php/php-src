@@ -1,7 +1,8 @@
 <?php
 define ("PHP_CLI_SERVER_ADDRESS", "localhost:8964");
 
-function php_cli_server_start($php_executable, $code = 'echo "Hello world";') {
+function php_cli_server_start($code = 'echo "Hello world";') {
+    $php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
 	$router = "router.php";
 	file_put_contents($doc_root . '/' . $router, '<?php ' . $code . ' ?>');
@@ -12,18 +13,18 @@ function php_cli_server_start($php_executable, $code = 'echo "Hello world";') {
 		2 => STDERR,
 	);
 
-	$cmd = "{$php_executable} -t {$doc_root} -S " . PHP_CLI_SERVER_ADDRESS . " {$router}";
+	$cmd = "exec {$php_executable} -t {$doc_root} -S " . PHP_CLI_SERVER_ADDRESS . " {$router}";
 
 	$handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
-	sleep(1);
 
-	return $handle;
-}
+    register_shutdown_function(
+        function($handle) {
+            proc_terminate($handle);
+            @unlink(__DIR__ . "/router.php");
+        },
+        $handle
+    );
 
-function php_cli_server_shutdown($handle) {
-	proc_terminate($handle);
-	proc_close($handle);
-	@unlink(__DIR__ . "router.php");
-	return true;
+    usleep(50000);
 }
 ?>
