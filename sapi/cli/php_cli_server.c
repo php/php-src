@@ -1537,7 +1537,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 }
 /* }}} */
 
-static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len) /* }}} */
+static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len) /* {{{ */
 {
 	struct timeval tv = { 10, 0 };
 	ssize_t nbytes_left = str_len;
@@ -1935,6 +1935,7 @@ fail:
 	php_cli_server_close_connection(server, client TSRMLS_CC);
 	return SUCCESS;
 }
+/* }}} */
 
 static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
@@ -2133,7 +2134,7 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	int(*whandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC);
 } php_cli_server_do_event_for_each_fd_callback_params;
 
-static int php_cli_server_do_event_for_each_fd_callback(void *_params, int fd, int event)
+static int php_cli_server_do_event_for_each_fd_callback(void *_params, int fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
 #ifdef ZTS
@@ -2185,7 +2186,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, int fd, i
 		}
 	}
 	return SUCCESS;
-}
+} /* }}} */
 
 static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC), int(*whandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
@@ -2228,13 +2229,13 @@ out:
 	return retval;
 } /* }}} */
 
-
 static php_cli_server server;
 
-static void php_cli_server_sigint_handler(int sig)
+static void php_cli_server_sigint_handler(int sig) /* {{{ */
 {
 	server.is_running = 0;
-};
+}
+/* }}} */
 
 int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 {
