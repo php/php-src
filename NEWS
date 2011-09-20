@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #55544 (ob_gzhandler always conflicts with 
     zlib.output_compression). (Mike)
 
+- CLI SAPI:
+  . Fixed bug #55726 (Changing the working directory makes router script
+    inaccessible). (Laruence)
+
 15 Sep 2011, PHP 5.4.0 Beta
 - General improvements:
   . Added callable typehint. (Hannes)
