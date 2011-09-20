@@ -1,7 +1,7 @@
 --TEST--
 Bug #55726 (Changing the working directory makes router script inaccessible)
 --INI--
-allow_url_fopen = 1 
+allow_url_fopen=1
 --SKIPIF--
 <?php
 include "skipif.inc"; 
