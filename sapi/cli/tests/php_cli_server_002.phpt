@@ -1,7 +1,7 @@
 --TEST--
 $_SERVER variable
 --INI--
-allow_url_fopen = TRUE
+allow_url_fopen=1
 --SKIPIF--
 <?php
 include "skipif.inc"; 
