@@ -27,6 +27,7 @@ GET / HTTP/1.1
 Host:{$host}
 User-Agent:dummy
 Custom:foo
+Referer:http://www.php.net/
 
 
 HEADER
@@ -41,9 +42,10 @@ HEADER
 HTTP/1.1 200 OK
 Host: %s
 Connection: closed
-X-Powered-By: PHP/5.5.0-dev
+X-Powered-By: PHP/%s-dev
 Content-type: text/html
 
 string(19) "HTTP_HOST:localhost"
 string(21) "HTTP_USER_AGENT:dummy"
 string(15) "HTTP_CUSTOM:foo"
+string(32) "HTTP_REFERER:http://www.php.net/"
