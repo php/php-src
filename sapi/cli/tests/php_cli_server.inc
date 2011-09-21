@@ -24,7 +24,6 @@ function php_cli_server_start($code = 'echo "Hello world";') {
         },
         $handle
     );
-
-    usleep(50000);
+	usleep(50000);
 }
 ?>
