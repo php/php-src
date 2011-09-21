@@ -539,7 +539,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);
 			return NULL;
 		}
-		mysql = ((MY_MYSQL *)my_res->ptr)->mysql;
+		mysql = (MY_MYSQL *)(my_res->ptr);
 		return mysql ? mysql->mysql : NULL;
 	}
 	return NULL;
