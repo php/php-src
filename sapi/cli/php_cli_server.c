@@ -524,7 +524,7 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	}
 } /* }}} */
 
-static int sapi_cli_server_register_client_headers(char **entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ { 
+static int sapi_cli_server_register_entry_cb(char **entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ { 
 	zval *track_vars_array = va_arg(args, zval *);
 	if (hash_key->nKeyLength) {
 		char *real_key, *key;
@@ -583,7 +583,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 	if (client->request.query_string) {
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string TSRMLS_CC);
 	}
-	zend_hash_apply_with_arguments(&client->request.headers TSRMLS_CC, (apply_func_args_t)sapi_cli_server_register_client_headers, 1, track_vars_array);
+	zend_hash_apply_with_arguments(&client->request.headers TSRMLS_CC, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
 static void sapi_cli_server_log_message(char *msg TSRMLS_DC) /* {{{ */
