@@ -1880,17 +1880,12 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	}
 	{
 		zend_file_handle zfd;
-#if HAVE_BROKEN_GETCWD 
-		int old_cwd_fd = -1;
-		old_cwd_fd = open(".", 0);
-#else
 		char *old_cwd;
+
 		ALLOCA_FLAG(use_heap)
-#define OLD_CWD_SIZE 4096
-		old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);
+		old_cwd = do_alloca(MAXPATHLEN, use_heap);
 		old_cwd[0] = '\0';
-		php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
-#endif
+		php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 		zfd.type = ZEND_HANDLE_FILENAME;
 		zfd.filename = server->router;
@@ -1910,17 +1905,11 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			}
 		} zend_end_try();
 
-#if HAVE_BROKEN_GETCWD
-		if (old_cwd_fd != -1) {
-			fchdir(old_cwd_fd);
-			close(old_cwd_fd);
-		}
-#else
 		if (old_cwd[0] != '\0') {
 			php_ignore_value(VCWD_CHDIR(old_cwd));
 		}
+
 		free_alloca(old_cwd, use_heap);
-#endif
 	}
 
 	if (decline) {
