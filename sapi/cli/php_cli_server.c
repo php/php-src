@@ -524,31 +524,33 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	}
 } /* }}} */
 
+static int sapi_cli_server_register_client_headers(char **entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ { 
+	zval *track_vars_array = va_arg(args, zval *);
+	if (hash_key->nKeyLength) {
+		char *real_key, *key;
+		uint i;
+		key = estrndup(hash_key->arKey, hash_key->nKeyLength);
+		for(i=0; i<hash_key->nKeyLength; i++) {
+			if (key[i] == '-') {
+				key[i] = '_';
+			} else {
+				key[i] = toupper(key[i]);
+			}
+		}
+		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
+		sapi_cli_server_register_variable(track_vars_array, real_key, *entry TSRMLS_CC);
+		efree(key);
+		efree(real_key);
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	sapi_cli_server_register_variable(track_vars_array, "DOCUMENT_ROOT", client->server->document_root TSRMLS_CC);
-	{
-		smart_str buf = { 0 };
-		smart_str_appends(&buf, client->server->host);
-		smart_str_appendc(&buf, ':');
-		smart_str_append_generic_ex(&buf, client->server->port, 0, int, _unsigned);
-		smart_str_0(&buf);
-		sapi_cli_server_register_variable(track_vars_array, "HTTP_HOST", buf.c TSRMLS_CC);
-		smart_str_free(&buf);
-	}
-	{
-		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Cookie", sizeof("Cookie"), (void**)&val)) {
-			sapi_cli_server_register_variable(track_vars_array, "HTTP_COOKIE", *val TSRMLS_CC);
-		}
-	}
-	{
-		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Referer", sizeof("Referer"), (void**)&val)) {
-			sapi_cli_server_register_variable(track_vars_array, "HTTP_REFERER", *val TSRMLS_CC);
-		}
-	}
 	{
 		char *tmp;
 		if ((tmp = strrchr(client->addr_str, ':'))) {
@@ -581,6 +583,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 	if (client->request.query_string) {
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string TSRMLS_CC);
 	}
+	zend_hash_apply_with_arguments(&client->request.headers TSRMLS_CC, (apply_func_args_t)sapi_cli_server_register_client_headers, 1, track_vars_array);
 } /* }}} */
 
 static void sapi_cli_server_log_message(char *msg TSRMLS_DC) /* {{{ */

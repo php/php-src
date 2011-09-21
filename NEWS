@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - CLI SAPI:
   . Fixed bug #55726 (Changing the working directory makes router script
     inaccessible). (Laruence)
+  . Fixed bug #55747 (request headers missed in $_SERVER). (Laruence)
 
 15 Sep 2011, PHP 5.4.0 Beta
 - General improvements:
