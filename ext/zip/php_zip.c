@@ -272,14 +272,6 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	}
 
 	n = 0;
-	if (stream == NULL) {
-		int ret = zip_fclose(zf);
-		efree(fullpath);
-		efree(file_basename);
-		efree(file_dirname_fullpath);
-		free(new_state.cwd);
-		return 0;
-	}
 
 	while ((n=zip_fread(zf, b, sizeof(b))) > 0) {
 		php_stream_write(stream, b, n);
