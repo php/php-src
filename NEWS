@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #55726 (Changing the working directory makes router script
     inaccessible). (Laruence)
   . Fixed bug #55747 (request headers missed in $_SERVER). (Laruence)
+  . Fixed bug #55755 (SegFault when outputting header WWW-Authenticate). (Laruence)
 
 15 Sep 2011, PHP 5.4.0 Beta
 - General improvements:
