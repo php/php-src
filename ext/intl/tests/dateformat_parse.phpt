@@ -11,6 +11,7 @@ date.timezone="America/Los_Angeles"
  * Test for the datefmt_parse  function
  */
 
+putenv('TZ=America/Los_Angeles');
 
 function ut_main()
 {
