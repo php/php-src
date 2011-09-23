@@ -798,11 +798,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				}
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
-
-				myuid = php_getuid(TSRMLS_C);
-				efree(header_line);
-
-				sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
 			}
 			if (sapi_header.header==header_line) {
 				*colon_offset = ':';
