@@ -2029,6 +2029,12 @@ string_copy:
 
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 
+					/* Pretend we have a string_key here */
+					if(!string_key) {
+						spprintf(&string_key, 0, "%ld", num_key);
+						string_key_len = strlen(string_key)+1;
+					}
+
 					postval = Z_STRVAL_PP(current);
 
 					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
