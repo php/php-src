@@ -816,13 +816,19 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	int class_name_len;
 	zend_class_entry *instance_ce;
 	zend_class_entry **ce;
+	zend_bool allow_string = only_subclass;
 	zend_bool retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &obj, &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|b", &obj, &class_name, &class_name_len, &allow_string) == FAILURE) {
 		return;
 	}
-	
-	if (Z_TYPE_P(obj) == IS_STRING) {
+	/*
+	   allow_string - is_a default is no, is_subclass_of is yes. 
+	   if it's allowed, then the autoloader will be called if the class does not exist.
+	   default behaviour is different, as 'is_a' usage is normally to test mixed return values 
+	*/
+
+	if (allow_string && Z_TYPE_P(obj) == IS_STRING) {
 		zend_class_entry **the_ce;
 		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
@@ -848,7 +854,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 }
 
 
-/* {{{ proto bool is_subclass_of(object object, string class_name)
+/* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true])
    Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
@@ -857,8 +863,8 @@ ZEND_FUNCTION(is_subclass_of)
 /* }}} */
 
 
-/* {{{ proto bool is_a(object object, string class_name)
-   Returns true if the object is of this class or has this class as one of its parents */
+/* {{{ proto bool is_a(mixed object_or_string, string class_name [, bool allow_string=false])
+   Returns true if the first argument is an object and is this class or has this class as one of its parents, */
 ZEND_FUNCTION(is_a)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
