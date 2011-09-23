@@ -15,4 +15,4 @@ class Test extends TestInterface {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of Test::__construct() must be compatible with that of TestInterface::__construct() in %s on line %d
+Fatal error: Declaration of Test::__construct() must be compatible with TestInterface::__construct(ExampleClass $var) in %s on line %d
