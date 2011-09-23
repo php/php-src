@@ -2007,10 +2007,6 @@ string_copy:
 				HashTable        *postfields;
 				struct HttpPost  *first = NULL;
 				struct HttpPost  *last  = NULL;
-				char             *postval;
-				char             *string_key = NULL;
-				ulong             num_key;
-				uint              string_key_len;
 
 				postfields = HASH_OF(*zvalue);
 				if (!postfields) {
@@ -2023,11 +2019,16 @@ string_copy:
 					 zend_hash_get_current_data(postfields, (void **) &current) == SUCCESS;
 					 zend_hash_move_forward(postfields)
 				) {
+					char *postval;
+					char *string_key = NULL;
+					uint  string_key_len;
+					ulong num_key;
 
 					SEPARATE_ZVAL(current);
 					convert_to_string_ex(current);
 
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
+
 					/* Pretend we have a string_key here */
 					if(!string_key) {
 						spprintf(&string_key, 0, "%ld", num_key);
