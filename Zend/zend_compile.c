@@ -3010,7 +3010,169 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC)
+#define REALLOC_BUF_IF_EXCEED(buf, offset, length, size) \
+	if (UNEXPECTED(offset - buf + size >= length)) { 	\
+		length += size + 1; 				\
+		buf = erealloc(buf, length); 		\
+	}
+
+static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{ */ 
+{
+	char *offset, *buf;
+	zend_uint length = 1024;
+
+	offset = buf = (char *)emalloc(length * sizeof(char));
+	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		*(offset++) = '&';
+		*(offset++) = ' ';
+	}
+
+	if (fptr->common.scope) {
+		memcpy(offset, fptr->common.scope->name, fptr->common.scope->name_length);
+		offset += fptr->common.scope->name_length;
+		*(offset++) = ':';
+		*(offset++) = ':';
+	}
+	
+	{
+		size_t name_len = strlen(fptr->common.function_name);
+		REALLOC_BUF_IF_EXCEED(buf, offset, length, name_len);
+		memcpy(offset, fptr->common.function_name, name_len);
+		offset += name_len;
+	}
+
+	*(offset++) = '(';
+	if (fptr->common.arg_info) {
+		zend_uint i, required;
+		zend_arg_info *arg_info = fptr->common.arg_info;
+
+		required = fptr->common.required_num_args;
+		for (i = 0; i < fptr->common.num_args;) {
+			if (arg_info->class_name) {
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, arg_info->class_name_len);
+				memcpy(offset, arg_info->class_name, arg_info->class_name_len);
+				offset += arg_info->class_name_len;
+				*(offset++) = ' ';
+			} else if (arg_info->type_hint) {
+				zend_uint type_name_len;
+				char *type_name = zend_get_type_by_const(arg_info->type_hint);
+				type_name_len = strlen(type_name);
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, type_name_len);
+				memcpy(offset, type_name, type_name_len);
+				offset += type_name_len;
+				*(offset++) = ' ';
+			}
+				
+			if (arg_info->pass_by_reference) {
+				*(offset++) = '&';
+			}
+			*(offset++) = '$';
+
+			if (arg_info->name) {
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, arg_info->name_len);
+				memcpy(offset, arg_info->name, arg_info->name_len);
+				offset += arg_info->name_len;
+			} else {
+				zend_uint idx = i;
+				memcpy(offset, "param", 5);
+				offset += 5;
+				do {
+					*(offset++) = (char) (idx % 10) + '0';
+					idx /= 10;
+				} while (idx > 0);
+			}
+			if (i >= required) {
+				*(offset++) = ' ';
+				*(offset++) = '=';
+				*(offset++) = ' ';
+				if (fptr->type == ZEND_USER_FUNCTION) {
+					zend_op *precv = NULL;
+					{
+						zend_uint idx  = i;
+						zend_op *op = ((zend_op_array *)fptr)->opcodes;
+						zend_op *end = op + ((zend_op_array *)fptr)->last;
+
+						++idx;
+						while (op < end) {
+							if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
+									&& op->op1.num == (long)idx)
+							{
+								precv = op;
+							}
+							++op;
+						}
+					}
+					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
+						zval *zv, zv_copy;
+						int use_copy;
+						ALLOC_ZVAL(zv);
+						*zv = *precv->op2.zv;
+						zval_copy_ctor(zv);
+						INIT_PZVAL(zv);
+						zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
+						if (Z_TYPE_P(zv) == IS_BOOL) {
+							if (Z_LVAL_P(zv)) {
+								memcpy(offset, "true", 4);
+								offset += 4;
+							} else {
+								memcpy(offset, "false", 5);
+								offset += 5;
+							}
+						} else if (Z_TYPE_P(zv) == IS_NULL) {
+							memcpy(offset, "NULL", 4);
+							offset += 4;
+						} else if (Z_TYPE_P(zv) == IS_STRING) {
+							*(offset++) = '\'';
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN_P(zv), 10));
+							memcpy(offset, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
+							offset += MIN(Z_STRLEN_P(zv), 10);
+							if (Z_STRLEN_P(zv) > 10) {
+								*(offset++) = '.';
+								*(offset++) = '.';
+								*(offset++) = '.';
+							}
+							*(offset++) = '\'';
+						} else {
+							zend_make_printable_zval(zv, &zv_copy, &use_copy);
+							if (Z_TYPE_P(zv) == IS_STRING) {
+								REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN_P(zv), Z_STRLEN_P(zv)));
+								memcpy(offset, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+								offset += Z_STRLEN_P(zv);
+							} else if (Z_TYPE_P(zv) == IS_LONG) {
+								REALLOC_BUF_IF_EXCEED(buf, offset, length, 21); 
+								offset += zend_sprintf(offset, "%ld", Z_LVAL_P(zv));
+							} else if (Z_TYPE_P(zv) == IS_DOUBLE) {
+								REALLOC_BUF_IF_EXCEED(buf, offset, length, 21); 
+								offset += zend_sprintf(offset, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
+							}
+							if (use_copy) {
+								zval_dtor(&zv_copy);
+							}
+						}
+						zval_ptr_dtor(&zv);
+					}
+				} else {
+					memcpy(offset, "NULL", 4);
+					offset += 4;
+				}
+			}
+
+			if (++i < fptr->common.num_args) {
+				*(offset++) = ',';
+				*(offset++) = ' ';
+			}
+			arg_info++;
+			REALLOC_BUF_IF_EXCEED(buf, offset, length, 23);
+		}
+	}
+	*(offset++) = ')';
+	*offset = '\0';
+
+	return buf;
+} 
+/* }}} */
+
+static void do_inheritance_check_on_method(zend_function *child, zend_function *parent TSRMLS_DC) /* {{{ */
 {
 	zend_uint child_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
@@ -3069,14 +3231,17 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC)); 
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
-			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(parent), parent->common.function_name);
+			char *method_prototype = zend_get_function_declaration(child->common.prototype TSRMLS_CC);
+			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype); 
+			efree(method_prototype);
 		}
 	}
 }
+/* }}} */
 
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
 {
