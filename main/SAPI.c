@@ -638,7 +638,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 {
 	sapi_header_struct sapi_header;
 	char *colon_offset;
-	long myuid = 0L;
 	char *header_line;
 	uint header_line_len;
 	int http_response_code;
