@@ -21,6 +21,7 @@
 /* $Id: mysqlnd_debug.c 309303 2011-03-16 12:42:59Z andrey $ */
 
 #include "php.h"
+#include "Zend/zend_builtin_functions.h"
 
 /* Follows code borrowed from zend_builtin_functions.c because the functions there are static */
 
