@@ -46,6 +46,9 @@ PHP                                                                        NEWS
   . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
     (Andrey)
 
+- PDO
+  . Fixed bug #55776 (PDORow to session bug). (Johannes)
+
 - PDO MySQL driver:
   . Fixed bug #54158 (MYSQLND+PDO MySQL requires #define MYSQL_OPT_LOCAL_INFILE)
   (Andrey)
