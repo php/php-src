@@ -913,30 +913,32 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 #endif
 			/* copy the part of the string before the match */
 			smart_str_appendl(&out_buf, pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
-			/* copy replacement and backrefs */
-			i = 0;
-			p = replace;
-			while (i < replace_len) {
-				int fwd = (int) php_mb_mbchar_bytes_ex(p, enc);
-				n = -1;
-				if ((replace_len - i) >= 2 && fwd == 1 &&
+
+			if (!is_callable) {
+				/* copy replacement and backrefs */
+				i = 0;
+				p = replace;
+				while (i < replace_len) {
+					int fwd = (int) php_mb_mbchar_bytes_ex(p, enc);
+					n = -1;
+					if ((replace_len - i) >= 2 && fwd == 1 &&
 					p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
-					n = p[1] - '0';
-				}
-				if (n >= 0 && n < regs->num_regs) {
-					if (regs->beg[n] >= 0 && regs->beg[n] < regs->end[n] && regs->end[n] <= string_len) {
-						smart_str_appendl(pbuf, string + regs->beg[n], regs->end[n] - regs->beg[n]);
+						n = p[1] - '0';
 					}
-					p += 2;
-					i += 2;
-				} else {
-					smart_str_appendl(pbuf, p, fwd);
-					p += fwd;
-					i += fwd;
+					if (n >= 0 && n < regs->num_regs) {
+						if (regs->beg[n] >= 0 && regs->beg[n] < regs->end[n] && regs->end[n] <= string_len) {
+							smart_str_appendl(pbuf, string + regs->beg[n], regs->end[n] - regs->beg[n]);
+						}
+						p += 2;
+						i += 2;
+					} else {
+						smart_str_appendl(pbuf, p, fwd);
+						p += fwd;
+						i += fwd;
+					}
 				}
 			}
-
-
+				
 			if (eval) {
 				zval v;
 				/* null terminate buffer */
