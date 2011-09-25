@@ -34,7 +34,6 @@
 	PHP_FE(mb_eregi,			arginfo_mb_eregi) \
 	PHP_FE(mb_ereg_replace,			arginfo_mb_ereg_replace) \
 	PHP_FE(mb_eregi_replace,			arginfo_mb_eregi_replace) \
-	PHP_FE(mb_ereg_replace_callback,			arginfo_mb_ereg_replace_callback) \
 	PHP_FE(mb_split,					arginfo_mb_split) \
 	PHP_FE(mb_ereg_match,			arginfo_mb_ereg_match) \
 	PHP_FE(mb_ereg_search,			arginfo_mb_ereg_search) \
@@ -82,7 +81,6 @@ PHP_FUNCTION(mb_ereg);
 PHP_FUNCTION(mb_eregi);
 PHP_FUNCTION(mb_ereg_replace);
 PHP_FUNCTION(mb_eregi_replace);
-PHP_FUNCTION(mb_ereg_replace_callback);
 PHP_FUNCTION(mb_split);
 PHP_FUNCTION(mb_ereg_match);
 PHP_FUNCTION(mb_ereg_search);

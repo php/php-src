@@ -784,7 +784,7 @@ PHP_FUNCTION(mb_eregi)
 /* }}} */
 
 /* {{{ _php_mb_regex_ereg_replace_exec */
-static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options, int is_callable)
+static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options)
 {
 	zval **arg_pattern_zval;
 
@@ -793,11 +793,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 	char *replace;
 	int replace_len;
-	zval **arg_replace_zval;
 
 	char *string;
 	int string_len;
-	zval **arg_string_zval;
 
 	char *p;
 	php_mb_regex_t *re;
@@ -828,19 +826,13 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		char *option_str = NULL;
 		int option_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|s",
-								  &arg_pattern_zval,
-								  &arg_replace_zval,
-								  &arg_string_zval,
-								  &option_str, &option_str_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zss|s",
+									&arg_pattern_zval,
+									&replace, &replace_len,
+									&string, &string_len,
+									&option_str, &option_str_len) == FAILURE) {
 			RETURN_FALSE;
 		}
-
-		replace = Z_STRVAL_PP(arg_replace_zval);
-		replace_len = Z_STRLEN_PP(arg_replace_zval);
-
-		string = Z_STRVAL_PP(arg_string_zval);
-		string_len = Z_STRLEN_PP(arg_string_zval);
 
 		if (option_str != NULL) {
 			_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, &eval);
@@ -867,28 +859,12 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		RETURN_FALSE;
 	}
 
-	if (eval || is_callable) {
+	if (eval) {
 		pbuf = &eval_buf;
 		description = zend_make_compiled_string_description("mbregex replace" TSRMLS_CC);
 	} else {
 		pbuf = &out_buf;
 		description = NULL;
-	}
-
-	if (is_callable) {
-		char *callback_name;
-		if (!zend_is_callable(*arg_replace_zval, 0, &callback_name TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%s', to be a valid callback", callback_name);
-			efree(callback_name);
-			MAKE_COPY_ZVAL(arg_string_zval, return_value);
-			RETURN_FALSE;
-		}
-		efree(callback_name);
-
-		if (eval) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option 'e' cannot be used with replacement callback");
-			RETURN_FALSE;
-		}
 	}
 
 	/* do the actual work */
@@ -935,8 +911,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					i += fwd;
 				}
 			}
-
-
 			if (eval) {
 				zval v;
 				/* null terminate buffer */
@@ -954,38 +928,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				/* Clean up */
 				eval_buf.len = 0;
 				zval_dtor(&v);
-			} else if (is_callable) {
-				zval *retval_ptr;
-				zval **args[1];
-				zval *subpats;
-				int i;
-				
-				MAKE_STD_ZVAL(subpats);
-				array_init(subpats);
-				
-				for (i = 0; i < regs->num_regs; i++) {
-					add_next_index_stringl(subpats, string + regs->beg[i], regs->end[i] - regs->beg[i], 1);
-				}				
-				
-				args[0] = &subpats;
-				/* null terminate buffer */
-				smart_str_0(&eval_buf);
-				
-				if (call_user_function_ex(EG(function_table), NULL, *arg_replace_zval, &retval_ptr, 1, args, 0, 
-										  NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
-					convert_to_string_ex(&retval_ptr);
-					smart_str_appendl(&out_buf, Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
-					eval_buf.len = 0;
-					zval_ptr_dtor(&retval_ptr);
-				} else {
-					efree(description);
-					if (!EG(exception)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call custom replacement function");
-					}
-				}
-				zval_ptr_dtor(&subpats);
 			}
-
 			n = regs->end[0];
 			if ((pos - (OnigUChar *)string) < n) {
 				pos = (OnigUChar *)string + n;
@@ -1026,7 +969,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
    Replace regular expression for multibyte string */
 PHP_FUNCTION(mb_ereg_replace)
 {
-	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
+	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1034,15 +977,7 @@ PHP_FUNCTION(mb_ereg_replace)
    Case insensitive replace regular expression for multibyte string */
 PHP_FUNCTION(mb_eregi_replace)
 {
-	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, ONIG_OPTION_IGNORECASE, 0);
-}
-/* }}} */
-
-/* {{{ proto string mb_ereg_replace_callback(string pattern, string callback, string string [, string option])
-    regular expression for multibyte string using replacement callback */
-PHP_FUNCTION(mb_ereg_replace_callback)
-{
-	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
+	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, ONIG_OPTION_IGNORECASE);
 }
 /* }}} */
 
