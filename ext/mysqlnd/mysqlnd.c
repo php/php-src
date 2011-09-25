@@ -1043,7 +1043,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND **conn_array, fd_set *fds TS
 
 	return ret;
 }
-
+/* }}} */
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
