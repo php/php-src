@@ -5,6 +5,7 @@ Bug #31454 (Incorrect adding PHPSESSID to links, which contains \r\n)
 --INI--
 session.use_trans_sid=1
 session.use_cookies=0
+session.use_only_cookies=0
 session.name=sid
 --FILE--
 <?php

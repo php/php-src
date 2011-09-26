@@ -4,6 +4,7 @@ Bug #41600 (url rewriter tags doesn't work with namespaced tags)
 <?php include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
+session.use_only_cookies=0
 session.cache_limiter=
 session.use_trans_sid=1
 arg_separator.output="&amp;"

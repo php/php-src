@@ -4,6 +4,7 @@ rewriter uses arg_seperator.output for modifying URLs
 <?php include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
+session.use_only_cookies=0
 session.cache_limiter=
 session.use_trans_sid=1
 arg_separator.output="&amp;"
