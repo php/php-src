@@ -871,7 +871,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 }
 
 
-/* {{{ proto bool is_subclass_of(object object, string class_name)
+/* {{{ proto bool is_subclass_of(mixed object, string class_name)
    Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
@@ -880,7 +880,7 @@ ZEND_FUNCTION(is_subclass_of)
 /* }}} */
 
 
-/* {{{ proto bool is_a(object object, string class_name)
+/* {{{ proto bool is_a(mixed object, string class_name)
    Returns true if the object is of this class or has this class as one of its parents */
 ZEND_FUNCTION(is_a)
 {
