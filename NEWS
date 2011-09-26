@@ -5,11 +5,13 @@ PHP                                                                        NEWS
   . Improve the warning message of incompatible arguments. (Laruence) 
 
 - Core:
+  . Fixed bug #55749 (TOCTOU issue in getenv() on Windows builds). (Pierre)
   . Fixed bug #55707 (undefined reference to `__sync_fetch_and_add_4' on Linux
     parisc). (Felipe)
   . Fixed bug #55705 (Omitting a callable typehinted argument causes a segfault).
     (Felipe, Laruence)
   . Fixed bug #55758 (Digest Authenticate missed in 5.4) . (Laruence)
+  . Fixed bug #55622 (memory corruption in parse_ini_string). (Pierre)
 
 - Zlib:
   . Fixed bug #55544 (ob_gzhandler always conflicts with 
