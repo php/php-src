@@ -5965,13 +5965,17 @@ PHP_FUNCTION(parse_ini_file)
 PHP_FUNCTION(parse_ini_string)
 {
 	char *string = NULL, *str = NULL;
-	size_t str_len = 0;
+	int str_len = 0;
 	zend_bool process_sections = 0;
 	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
+		RETVAL_FALSE;
 	}
 
 	/* Set callback function */
