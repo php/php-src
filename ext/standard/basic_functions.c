@@ -4024,7 +4024,13 @@ PHP_FUNCTION(getenv)
 
 		ptr = emalloc(size);
 		size = GetEnvironmentVariableA(str, ptr, size);
-		RETURN_STRING(ptr, 0);
+		if (size == 0) {
+				/* has been removed between the two calls */
+				efree(ptr);
+				RETURN_EMPTY_STRING();
+		} else {
+			RETURN_STRING(ptr, 0);
+		}
 	}
 #else
 	/* system method returns a const */
