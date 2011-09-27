@@ -141,12 +141,27 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
 					strcpy(*pdo_err, "42S02");
 					break;
-
-				case 22:	/* ORA-00022: invalid session id */
-				case 1012:	/* ORA-01012: */
-				case 3113:	/* ORA-03133: end of file on communication channel */
-				case 604:
-				case 1041:
+				
+				case	22:	/* ORA-00022: invalid session id */
+				case   378:
+				case   602:
+				case   603:
+				case   604:
+				case   609:
+				case  1012:	/* ORA-01012: */
+				case  1033:
+				case  1041:
+				case  1043:
+				case  1089:
+				case  1090:
+				case  1092:
+				case  3113:	/* ORA-03133: end of file on communication channel */
+				case  3114:
+				case  3122:
+				case  3135:
+				case 12153:
+				case 27146:
+				case 28511:
 					/* consider the connection closed */
 					dbh->is_closed = 1;
 					H->attached = 0;
@@ -516,6 +531,43 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 }
 /* }}} */
 
+static int pdo_oci_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
+	sb4 error_code = 0;
+	char version[256];
+
+	/* TODO move attached check to PDO level */
+	if (H->attached == 0) {
+		return FAILURE;
+	}
+	/* TODO add persistent_timeout check at PDO level */
+
+
+	/* Use OCIPing instead of OCIServerVersion. If OCIPing returns ORA-1010 (invalid OCI operation)
+	 * such as from Pre-10.1 servers, the error is still from the server and we would have
+	 * successfully performed a roundtrip and validated the connection. Use OCIServerVersion for
+	 * Pre-10.2 clients
+	 */	
+#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
+	H->last_err = OCIPing (H->svc, H->err, OCI_DEFAULT);
+#else
+	/* use good old OCIServerVersion() */
+	H->last_err = OCIServerVersion (H->svc, H->err, (text *)version, sizeof(version), OCI_HTYPE_SVCCTX);
+#endif
+	if (H->last_err == OCI_SUCCESS) { 
+		return SUCCESS;
+	}
+
+	OCIErrorGet (H->err, (ub4)1, NULL, &error_code, NULL, 0, OCI_HTYPE_ERROR);
+
+	if (error_code == 1010) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+
 static struct pdo_dbh_methods oci_methods = {
 	oci_handle_closer,
 	oci_handle_preparer,
@@ -528,7 +580,7 @@ static struct pdo_dbh_methods oci_methods = {
 	NULL,
 	pdo_oci_fetch_error_func,
 	oci_handle_get_attribute,
-	NULL,	/* check_liveness */
+	pdo_oci_check_liveness,	/* check_liveness */
 	NULL	/* get_driver_methods */
 };
 
@@ -674,6 +726,7 @@ static inline ub4 pdo_oci_sanitize_prefetch(long prefetch) /* {{{ */
 	return ((ub4)prefetch);
 }
 /* }}} */
+
 
 /*
  * Local variables:

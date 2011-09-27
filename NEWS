@@ -55,9 +55,13 @@ PHP                                                                        NEWS
   . Fixed bug #54158 (MYSQLND+PDO MySQL requires #define MYSQL_OPT_LOCAL_INFILE)
   (Andrey)
 
+- PDO OCI driver:
+  . Fixed bug #55768 (PDO_OCI can't resume Oracle session after it's been killed)
+  (mikhail dot v dot gavrilov at gmail dot com, Chris Jones, Tony)
+
 - Phar:
-  . Fixed bug#52013 (Unable to decompress files in a compressed phar). (Hannes)
-  . Fixed bug#53872 (internal corruption of phar). (Hannes)
+  . Fixed bug #52013 (Unable to decompress files in a compressed phar). (Hannes)
+  . Fixed bug #53872 (internal corruption of phar). (Hannes)
 
 - Session:
   . Fixed bug #55267 (session_regenerate_id fails after header sent). (Hannes)
