@@ -15,8 +15,18 @@ echo "*** Testing is_subclass_of() : error conditions ***\n";
 echo "\n-- Testing is_subclass_of() function with more than expected no. of arguments --\n";
 $object = new stdclass();
 $class_name = 'string_val';
+$allow_string = false;
 $extra_arg = 10;
-var_dump( is_subclass_of($object, $class_name, $extra_arg) );
+var_dump( is_subclass_of($object, $class_name, $allow_string, $extra_arg) );
+
+//Test is_subclass_of with invalid last argument
+echo "\n-- Testing is_subclass_of() function with more than typo style invalid 3rd argument --\n";
+var_dump( is_subclass_of($object, $class_name, $class_name) );
+
+
+//Test is_subclass_of with invalid last argument
+echo "\n-- Testing is_subclass_of() function with more than invalid 3rd argument --\n";
+var_dump( is_subclass_of($object, $class_name, $object) );
 
 // Testing is_subclass_of with one less than the expected number of arguments
 echo "\n-- Testing is_subclass_of() function with less than expected no. of arguments --\n";
@@ -30,11 +40,19 @@ echo "Done";
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
 
-Warning: is_subclass_of() expects exactly 2 parameters, 3 given in %s on line 16
+Warning: is_subclass_of() expects at most 3 parameters, 4 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 17
+NULL
+
+-- Testing is_subclass_of() function with more than typo style invalid 3rd argument --
+bool(false)
+
+-- Testing is_subclass_of() function with more than invalid 3rd argument --
+
+Warning: is_subclass_of() expects parameter 3 to be boolean, object given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 26
 NULL
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
 
-Warning: is_subclass_of() expects exactly 2 parameters, 1 given in %s on line 21
+Warning: is_subclass_of() expects at least 2 parameters, 1 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 31
 NULL
 Done
