@@ -40,7 +40,7 @@ echo "Done";
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
 
-Warning: is_subclass_of() expects at most 3 parameters, 4 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 17
+Warning: is_subclass_of() expects at most 3 parameters, 4 given in %s on line 17
 NULL
 
 -- Testing is_subclass_of() function with more than typo style invalid 3rd argument --
@@ -48,11 +48,11 @@ bool(false)
 
 -- Testing is_subclass_of() function with more than invalid 3rd argument --
 
-Warning: is_subclass_of() expects parameter 3 to be boolean, object given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 26
+Warning: is_subclass_of() expects parameter 3 to be boolean, object given in %s on line 26
 NULL
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
 
-Warning: is_subclass_of() expects at least 2 parameters, 1 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 31
+Warning: is_subclass_of() expects at least 2 parameters, 1 given in %s on line 31
 NULL
 Done

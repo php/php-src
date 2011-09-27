@@ -39,16 +39,16 @@ echo "Done";
 
 -- Testing is_a() function with more than expected no. of arguments --
 
-Warning: is_a() expects at most 3 parameters, 4 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_a_error_001.php on line 17
+Warning: is_a() expects at most 3 parameters, 4 given in %s on line 17
 NULL
 
 -- Testing is_a() function with non-boolean in last position --
 
-Warning: is_a() expects parameter 3 to be boolean, object given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_a_error_001.php on line 21
+Warning: is_a() expects parameter 3 to be boolean, object given in %s on line 21
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
 
-Warning: is_a() expects at least 2 parameters, 1 given in /home/alan/git/PHP_5_3/ext/standard/tests/class_object/is_a_error_001.php on line 27
+Warning: is_a() expects at least 2 parameters, 1 given in %s on line 27
 NULL
 Done
