@@ -26,6 +26,10 @@ PHP                                                                        NEWS
     (Hannes)
   . Fixed bug #50982 (incorrect assumption of PAGE_SIZE size). (Dmitry)
 
+- Calendar:
+  . Fixed bug #55797 (Integer overflow in SdnToGregorian leads to segfault (in
+    optimized builds). (Gustavo)
+
 - Curl:
   . Fixed bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed
     before calling curl_exec). (Hannes)
