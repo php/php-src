@@ -182,6 +182,8 @@ void SdnToGregorian(
 	*pYear = year;
 	*pMonth = month;
 	*pDay = day;
+	return;
+
 fail:
 	*pYear = 0;
 	*pMonth = 0;
