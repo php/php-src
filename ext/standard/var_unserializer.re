@@ -268,7 +268,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
 
-static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long elements)
+static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long elements, int objprops)
 {
 	while (elements-- > 0) {
 		zval *key, *data, **old_data;
@@ -297,7 +297,8 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 			return 0;
 		}
 
-		switch (Z_TYPE_P(key)) {
+		if (!objprops) {
+			switch (Z_TYPE_P(key)) {
 			case IS_LONG:
 				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)==SUCCESS) {
 					var_push_dtor(var_hash, old_data);
@@ -310,6 +311,12 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 				}
 				zend_symtable_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
+			}
+		} else {
+			/* object properties should include no integers */
+			convert_to_string(key);
+			zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data,
+					sizeof data, NULL);
 		}
 		
 		zval_dtor(key);
@@ -377,7 +384,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	zval *retval_ptr = NULL;
 	zval fname;
 
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_OBJPROP_PP(rval), elements)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_OBJPROP_PP(rval), elements, 1)) {
 		return 0;
 	}
 
@@ -592,7 +599,7 @@ use_double:
 
 	array_init_size(*rval, elements);
 
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_PP(rval), elements)) {
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_PP(rval), elements, 0)) {
 		return 0;
 	}
 
