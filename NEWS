@@ -87,6 +87,10 @@ PHP                                                                        NEWS
   . Fixed bug #55674 (fgetcsv & str_getcsv skip empty fields in some tab-separated 
     records). (Laruence)
 
+- SPL:
+  . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
+    (jgotti at modedemploi dot fr, Hannes)
+
 23 Aug 2011, PHP 5.3.8
 
 - Core:
