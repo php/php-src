@@ -3190,7 +3190,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	/* make encoding list */
 	list = NULL;
 	size = 0;
-	if (ZEND_NUM_ARGS() >= 2 && Z_STRVAL_P(encoding_list)) {
+	if (ZEND_NUM_ARGS() >= 2) {
 		switch (Z_TYPE_P(encoding_list)) {
 		case IS_ARRAY:
 			if (FAILURE == php_mb_parse_encoding_array(encoding_list, &list, &size, 0 TSRMLS_CC)) {
