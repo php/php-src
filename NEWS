@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - SPL:
   . FilesystemIterator, GlobIterator and (Recursive)DirectoryIterator now use
     the default stream context. (Hannes)
+  . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
+    (jgotti at modedemploi dot fr, Hannes)
 
 - CLI SAPI:
   . Fixed bug #55726 (Changing the working directory makes router script
