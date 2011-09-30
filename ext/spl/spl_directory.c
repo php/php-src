@@ -225,7 +225,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 
 	intern->type = SPL_FS_DIR;
 	intern->_path_len = strlen(path);
-	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, NULL);
+	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, FG(default_context));
 
 	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len-1)) {
 		intern->_path = estrndup(path, --intern->_path_len);
