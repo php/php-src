@@ -244,8 +244,8 @@ static void php_enchant_broker_free(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 			if (broker->pbroker) {
 				if (broker->dictcnt && broker->dict) {
 					if (broker->dict) {
-						int total, tofree;
-						tofree = total = broker->dictcnt-1;
+						int total;
+						total = broker->dictcnt-1;
 						do {
 							zend_list_delete(broker->dict[total]->rsrc_id);
 							efree(broker->dict[total]);
@@ -357,8 +357,8 @@ PHP_FUNCTION(enchant_broker_init)
 	enchant_broker *broker;
 	EnchantBroker *pbroker;
 
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	pbroker = enchant_broker_init();
@@ -542,6 +542,11 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	}
 
 	PHP_ENCHANT_GET_BROKER;
+	
+	if (taglen == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tag cannot be empty");
+		RETURN_FALSE;
+	}
 
 	d = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
 	if (d) {
