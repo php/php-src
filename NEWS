@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     (Felipe, Laruence)
   . Fixed bug #55758 (Digest Authenticate missed in 5.4) . (Laruence)
   . Fixed bug #55622 (memory corruption in parse_ini_string). (Pierre)
+  . Fixed bug #55825 (Missing initial value of static locals in trait methods).
+    (Laruence)
 
 - Zlib:
   . Fixed bug #55544 (ob_gzhandler always conflicts with 

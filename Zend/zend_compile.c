@@ -3695,7 +3695,7 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 
 		ALLOC_HASHTABLE(tmpHash);
 		zend_hash_init(tmpHash, zend_hash_num_elements(fe->op_array.static_variables), NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_apply_with_arguments(tmpHash TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, fe->op_array.static_variables);
+		zend_hash_apply_with_arguments(fe->op_array.static_variables TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, tmpHash);
 
 		fe->op_array.static_variables = tmpHash;
 	}
@@ -4101,6 +4101,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	zend_hash_graceful_destroy(resulting_table);
 	free(resulting_table);
 }
+/* }}} */
 
 static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, int prop_name_length, ulong prop_hash, zend_class_entry *coliding_ce) /* {{{ */
 {
