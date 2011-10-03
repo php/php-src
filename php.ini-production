@@ -1561,7 +1561,7 @@ session.hash_bits_per_character = 5
 ; http://php.net/url-rewriter.tags
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
-; Enable upload procgress tracking in $_SESSION
+; Enable upload progress tracking in $_SESSION
 ; Default Value: On
 ; Development Value: On
 ; Production Value: On
