@@ -32,6 +32,7 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltInternals.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
+#include <libxslt/security.h> 
 #if HAVE_XSL_EXSLT
 #include <libexslt/exslt.h>
 #include <libexslt/exsltconfig.h>
@@ -42,6 +43,13 @@ extern zend_module_entry xsl_module_entry;
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
+
+#define XSL_SECPREF_NONE 0
+#define XSL_SECPREF_READ_FILE 2
+#define XSL_SECPREF_WRITE_FILE 4
+#define XSL_SECPREF_CREATE_DIRECTORY 8
+#define XSL_SECPREF_READ_NETWORK 16
+#define XSL_SECPREF_WRITE_NETWORK 32
 
 typedef struct _xsl_object {
 	zend_object  std;

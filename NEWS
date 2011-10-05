@@ -90,6 +90,12 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
     (jgotti at modedemploi dot fr, Hannes)
+    
+- XSL:
+  . Added xsl.security_prefs ini option to define forbidden operations within XSLT 
+    stylesheets, default is not to enable write operations. This option won't be 
+    in 5.4, since there's a new method. Bug #54446 (Chregu, Nicolas Gregoire)
+
 
 23 Aug 2011, PHP 5.3.8
 

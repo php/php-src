@@ -475,6 +475,9 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zval *doXInclude, *member;
 	zend_object_handlers *std_hnd;
 	FILE *f;
+	int secPrefsError;
+	int secPrefsIni;
+	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
 	
@@ -531,11 +534,56 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 	efree(member);
 
-	newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
+	
+	secPrefsIni = INI_INT("xsl.security_prefs");
+	
+	//if securityPrefs is set to NONE, we don't have to do any checks, but otherwise...
+	if (secPrefsIni != XSL_SECPREF_NONE) {
+		secPrefs = xsltNewSecurityPrefs(); 
+		if (secPrefsIni & XSL_SECPREF_READ_FILE ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (secPrefsIni & XSL_SECPREF_WRITE_FILE ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (secPrefsIni & XSL_SECPREF_CREATE_DIRECTORY ) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (secPrefsIni & XSL_SECPREF_READ_NETWORK) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+		if (secPrefsIni & XSL_SECPREF_WRITE_NETWORK) { 
+			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid)) { 
+				secPrefsError = 1;
+			}
+		}
+	
+		if (0 != xsltSetCtxtSecurityPrefs(secPrefs, ctxt)) { 
+			secPrefsError = 1;
+		}
+	}
+	
+	if (secPrefsError == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
+	} else {
+		newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
+	}
 	if (f) {
 		fclose(f);
 	}
+	
 	xsltFreeTransformContext(ctxt);
+	if (secPrefs) {
+		xsltFreeSecurityPrefs(secPrefs);
+	}
 
 	if (intern->node_list != NULL) {
 		zend_hash_destroy(intern->node_list);
