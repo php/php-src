@@ -58,7 +58,7 @@ static MYSQLND *pdo_mysql_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 			return NULL;
 		}
 
-		return ((pdo_mysql_db_handle *)dbh)->server;
+		return ((pdo_mysql_db_handle *)dbh->driver_data)->server;
 	}
 	return NULL;
 }
