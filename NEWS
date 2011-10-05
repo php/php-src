@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #55825 (Missing initial value of static locals in trait methods).
     (Laruence)
 
+- Openssl
+- Revert r313616 (When we have a blocking SSL socket, respect the timeout
+  option, scottmac), breaks ssl support as described in bugs #55283 and #55848
+
 - Sysvshm
   . Fixed bug #55750 (memory copy issue in sysvshm extension).
     (Ilia, jeffhuang9999 at gmail dot com)
