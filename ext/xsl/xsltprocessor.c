@@ -475,7 +475,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zval *doXInclude, *member;
 	zend_object_handlers *std_hnd;
 	FILE *f;
-	int secPrefsError;
+	int secPrefsError = 0;
 	int secPrefsIni;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
