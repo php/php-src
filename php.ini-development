@@ -1896,6 +1896,12 @@ ldap.max_links = -1
 [dba]
 ;dba.default_handler=
 
+[xsl]
+; Write operations from within XSLT are disabled by default.
+; XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE = 44
+; Set it to 0 to allow all operations
+;xsl.security_prefs = 44
+
 ; Local Variables:
 ; tab-width: 4
 ; End:

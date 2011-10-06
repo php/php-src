@@ -142,7 +142,9 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* }}} */
 
 PHP_INI_BEGIN()
-//XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44
+/* Default is not allowing any write operations. 
+   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44 
+*/
 PHP_INI_ENTRY("xsl.security_prefs", "44", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
