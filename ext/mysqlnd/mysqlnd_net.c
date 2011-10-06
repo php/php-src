@@ -932,7 +932,15 @@ mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 		if (net->stream) {
 			DBG_INF_FMT("Freeing stream. abstract=%p", net->stream->abstract);
 			if (pers) {
-				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
+				if (EG(active)) {
+					php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
+				} else {
+					/*
+					  otherwise we will crash because the EG(persistent_list) has been freed already,
+					  before the modules are shut down
+					*/
+					php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
+				}
 			} else {
 				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE);
 			}
