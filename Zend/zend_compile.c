@@ -3134,17 +3134,9 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 							*(offset++) = '\'';
 						} else {
 							zend_make_printable_zval(zv, &zv_copy, &use_copy);
-							if (Z_TYPE_P(zv) == IS_STRING) {
-								REALLOC_BUF_IF_EXCEED(buf, offset, length, MIN(Z_STRLEN_P(zv), Z_STRLEN_P(zv)));
-								memcpy(offset, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
-								offset += Z_STRLEN_P(zv);
-							} else if (Z_TYPE_P(zv) == IS_LONG) {
-								REALLOC_BUF_IF_EXCEED(buf, offset, length, 21); 
-								offset += zend_sprintf(offset, "%ld", Z_LVAL_P(zv));
-							} else if (Z_TYPE_P(zv) == IS_DOUBLE) {
-								REALLOC_BUF_IF_EXCEED(buf, offset, length, 21); 
-								offset += zend_sprintf(offset, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
-							}
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN(zv_copy));
+							memcpy(offset, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
+							offset += Z_STRLEN(zv_copy);
 							if (use_copy) {
 								zval_dtor(&zv_copy);
 							}
