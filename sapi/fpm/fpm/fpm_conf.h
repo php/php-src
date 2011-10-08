@@ -18,55 +18,61 @@ struct key_value_s {
 	char *value;
 };
 
+/*
+ * Please keep the same order as in fpm_conf.c and in php-fpm.conf.in
+ */
 struct fpm_global_config_s {
-	int emergency_restart_threshold;
-	int emergency_restart_interval;
-	int process_control_timeout;
-	int daemonize;
 	char *pid_file;
 	char *error_log;
-	int log_level;
 #ifdef HAVE_SYSLOG_H
 	char *syslog_ident;
 	int syslog_facility;
 #endif
+	int log_level;
+	int emergency_restart_threshold;
+	int emergency_restart_interval;
+	int process_control_timeout;
+	int process_max;
+	int daemonize;
 	int rlimit_files;
 	int rlimit_core;
-	int process_max;
 };
 
 extern struct fpm_global_config_s fpm_global_config;
 
+/*
+ * Please keep the same order as in fpm_conf.c and in php-fpm.conf.in
+ */
 struct fpm_worker_pool_config_s {
 	char *name;
 	char *prefix;
 	char *user;
 	char *group;
-	char *chroot;
-	char *chdir;
-	int request_terminate_timeout;
-	int request_slowlog_timeout;
-	char *slowlog;
-	int rlimit_files;
-	int rlimit_core;
-	int catch_workers_output;
-	int pm;
-	int pm_max_children;
-	char *pm_status_path;
-	int pm_max_requests;
-	int pm_start_servers;
-	int pm_min_spare_servers;
-	int pm_max_spare_servers;
-	char *ping_path;
-	char *ping_response;
-	char *access_log;
-	char *access_format;
 	char *listen_address;
 	int listen_backlog;
 	char *listen_owner;
 	char *listen_group;
 	char *listen_mode;
 	char *listen_allowed_clients;
+	int pm;
+	int pm_max_children;
+	int pm_start_servers;
+	int pm_min_spare_servers;
+	int pm_max_spare_servers;
+	int pm_max_requests;
+	char *pm_status_path;
+	char *ping_path;
+	char *ping_response;
+	char *access_log;
+	char *access_format;
+	char *slowlog;
+	int request_slowlog_timeout;
+	int request_terminate_timeout;
+	int rlimit_files;
+	int rlimit_core;
+	char *chroot;
+	char *chdir;
+	int catch_workers_output;
 	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;
