@@ -17,11 +17,29 @@
 
 static struct fpm_scoreboard_s *fpm_scoreboard = NULL;
 static int fpm_scoreboard_i = -1;
+#ifdef HAVE_TIMES
+static float fpm_scoreboard_tick;
+#endif
+
 
 int fpm_scoreboard_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	int i;
+
+#ifdef HAVE_TIMES
+#if (defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK))
+	fpm_scoreboard_tick = sysconf(_SC_CLK_TCK);
+#else /* _SC_CLK_TCK */
+#ifdef HZ
+	fpm_scoreboard_tick = HZ;
+#else /* HZ */
+	fpm_scoreboard_tick = 100;
+#endif /* HZ */
+#endif /* _SC_CLK_TCK */
+	zlog(ZLOG_DEBUG, "got clock tick '%.0f'", fpm_scoreboard_tick);
+#endif /* HAVE_TIMES */
+
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (wp->config->pm_max_children < 1) {
@@ -233,6 +251,7 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 		return;
 	}
 	proc->pid = pid;
+	proc->start_epoch = time(NULL);
 }
 /* }}} */
 
@@ -298,4 +317,12 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 	return 0;
 }
 /* }}} */
+
+#ifdef HAVE_TIMES
+float fpm_scoreboard_get_tick() /* {{{ */
+{
+	return fpm_scoreboard_tick;
+}
+/* }}} */
+#endif
 
