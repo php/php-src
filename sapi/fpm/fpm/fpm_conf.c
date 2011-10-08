@@ -121,6 +121,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "ping.response",             &fpm_conf_set_string,      WPO(ping_response) },
 	{ "access.log",                &fpm_conf_set_string,      WPO(access_log) },
 	{ "access.format",             &fpm_conf_set_string,      WPO(access_format) },
+	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
 	{ 0, 0, 0 }
 };
 
@@ -599,6 +600,7 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->prefix);
 	free(wpc->access_log);
 	free(wpc->access_format);
+	free(wpc->security_limit_extensions);
 
 	return 0;
 }
@@ -842,6 +844,56 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			fpm_evaluate_full_path(&wp->config->access_log, wp, NULL, 0);
 			if (!wp->config->access_format) {
 				wp->config->access_format = strdup("%R - %u %t \"%m %r\" %s");
+			}
+		}
+
+		if (!wp->config->security_limit_extensions) {
+			wp->config->security_limit_extensions = strdup(".php");
+		}
+
+		if (*wp->config->security_limit_extensions) {
+			int nb_ext;
+			char *ext;
+			char *security_limit_extensions;
+			char *limit_extensions;
+
+
+			/* strdup because strtok(3) alters the string it parses */
+			security_limit_extensions = strdup(wp->config->security_limit_extensions);
+			limit_extensions = security_limit_extensions;
+			nb_ext = 0;
+
+			/* find the number of extensions */
+			while ((ext = strtok(limit_extensions, " \t"))) {
+				limit_extensions = NULL;
+				nb_ext++;
+			}
+			free(security_limit_extensions);
+
+			/* if something found */
+			if (nb_ext > 0) {
+
+				/* malloc the extension array */
+				wp->limit_extensions = malloc(sizeof(char *) * (nb_ext + 1));
+				if (!wp->limit_extensions) {
+					zlog(ZLOG_ERROR, "[pool %s] unable to malloc extensions array", wp->config->name);
+					return -1;
+				}
+
+				/* strdup because strtok(3) alters the string it parses */
+				security_limit_extensions = strdup(wp->config->security_limit_extensions);
+				limit_extensions = security_limit_extensions;
+				nb_ext = 0;
+
+				/* parse the string and save the extension in the array */
+				while ((ext = strtok(security_limit_extensions, " \t"))) {
+					security_limit_extensions = NULL;
+					wp->limit_extensions[nb_ext++] = strdup(ext);
+				}
+
+				/* end the array with NULL in order to parse it */
+				wp->limit_extensions[nb_ext] = NULL;
+				free(security_limit_extensions);
 			}
 		}
 
@@ -1380,6 +1432,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);
+		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tenv[%s] = %s", kv->key, kv->value);
