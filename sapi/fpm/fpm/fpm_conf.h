@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "php.h"
 
-#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : "dynamic")
+#define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : (a == PM_STYLE_DYNAMIC ? "dynamic" : "ondemand"))
 
 #define FPM_CONF_MAX_PONG_LENGTH 64
 
@@ -38,6 +38,7 @@ struct fpm_global_config_s {
 	int daemonize;
 	int rlimit_files;
 	int rlimit_core;
+	char *events_mechanism;
 };
 
 extern struct fpm_global_config_s fpm_global_config;
@@ -61,6 +62,7 @@ struct fpm_worker_pool_config_s {
 	int pm_start_servers;
 	int pm_min_spare_servers;
 	int pm_max_spare_servers;
+	int pm_process_idle_timeout;
 	int pm_max_requests;
 	char *pm_status_path;
 	char *ping_path;
@@ -89,7 +91,8 @@ struct ini_value_parser_s {
 
 enum {
 	PM_STYLE_STATIC = 1,
-	PM_STYLE_DYNAMIC = 2
+	PM_STYLE_DYNAMIC = 2,
+	PM_STYLE_ONDEMAND = 3
 };
 
 int fpm_conf_init_main(int test_conf);

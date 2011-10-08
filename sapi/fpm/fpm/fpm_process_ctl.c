@@ -355,6 +355,23 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		}
 		fpm_scoreboard_update(idle, active, cur_lq, -1, -1, -1, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 
+		/* this is specific to PM_STYLE_ONDEMAND */
+		if (wp->config->pm == PM_STYLE_ONDEMAND) {
+			struct timeval last, now;
+
+			zlog(ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children", wp->config->name, active, idle);
+
+			if (!last_idle_child) continue;
+
+			fpm_request_last_activity(last_idle_child, &last);
+			fpm_clock_get(&now);
+			if (last.tv_sec < now.tv_sec - wp->config->pm_process_idle_timeout) {
+				last_idle_child->idle_kill = 1;
+				fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_QUIT);
+			}
+
+			continue;
+		}
 
 		/* the rest is only used by PM_STYLE_DYNAMIC */
 		if (wp->config->pm != PM_STYLE_DYNAMIC) continue;
@@ -469,6 +486,50 @@ void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, 
 	/* first call without setting which to initialize the timer */
 	fpm_event_set_timer(&heartbeat, FPM_EV_PERSIST, &fpm_pctl_perform_idle_server_maintenance_heartbeat, NULL);
 	fpm_event_add(&heartbeat, FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT);
+}
+/* }}} */
+
+void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+{
+	struct fpm_worker_pool_s *wp = (struct fpm_worker_pool_s *)arg;
+	struct fpm_child_s *child;
+
+
+	if (fpm_globals.parent_pid != getpid()) {
+		/* prevent a event race condition when child process
+		 * have not set up its own event loop */
+		return;
+	}
+
+	wp->socket_event_set = 0;
+
+//	zlog(ZLOG_DEBUG, "[pool %s] heartbeat running_children=%d", wp->config->name, wp->running_children);
+
+	if (wp->running_children >= wp->config->pm_max_children) {
+		if (!wp->warn_max_children) {
+			fpm_scoreboard_update(0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+			zlog(ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
+			wp->warn_max_children = 1;
+		}
+
+		return;
+	}
+
+	for (child = wp->children; child; child = child->next) {
+		/* if there is at least on idle child, it will handle the connection, stop here */
+		if (fpm_request_is_idle(child)) {
+			return;
+		}
+	}
+
+	wp->warn_max_children = 0;
+	fpm_children_make(wp, 1, 1, 1);
+
+	if (fpm_globals.is_child) {
+		return;
+	}
+
+	zlog(ZLOG_DEBUG, "[pool %s] got accept without idle child available .... I forked", wp->config->name);
 }
 /* }}} */
 
