@@ -75,6 +75,9 @@ PHP                                                                        NEWS
   . Fixed bug #53872 (internal corruption of phar). (Hannes)
 
 - PHP-FPM SAPI:
+  . Backported from 5.4 branch (Dropped restriction of not setting the same
+    value multiple times, the last one holds).
+    (giovanni at giacobbi dot net, fat)
   . Backported FR #55166 from 5.4 branch (Added process.max to control
     the number of process FPM can fork). (fat)
   . Backported FR #55181 from 5.4 branch (Enhance security by limiting access
