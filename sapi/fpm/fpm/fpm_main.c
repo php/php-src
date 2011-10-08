@@ -656,22 +656,7 @@ static void sapi_cgi_log_message(char *message)
 	TSRMLS_FETCH();
 
 	if (CGIG(fcgi_logging)) {
-		fcgi_request *request;
-
-		request = (fcgi_request*) SG(server_context);
-		if (request) {
-			int len = strlen(message);
-			char *buf = malloc(len+2);
-
-			memcpy(buf, message, len);
-			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
-			free(buf);
-		} else {
-			fprintf(stderr, "%s\n", message);
-			//FIXME zlog(ZLOG_NOTICE, "PHP message: %s", message);
-		}
-		/* ignore return code */
+		zlog(ZLOG_NOTICE, "PHP message: %s", message);
 	}
 }
 
@@ -1385,14 +1370,14 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 	if (!mode || !arg1) return;
 
 	if (callback_type != ZEND_INI_PARSER_ENTRY) {
-		fprintf(stderr, "Passing INI directive through FastCGI: only classic entries are allowed\n");
+		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: only classic entries are allowed");
 		return;
 	}
 
 	key = Z_STRVAL_P(arg1);
 
 	if (!key || strlen(key) < 1) {
-		fprintf(stderr, "Passing INI directive through FastCGI: empty key\n");
+		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: empty key");
 		return;
 	}
 
@@ -1401,7 +1386,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 	}
 
 	if (!value) {
-		fprintf(stderr, "Passing INI directive through FastCGI: empty value for key '%s'\n", key);
+		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: empty value for key '%s'", key);
 		return;
 	}
 
@@ -1409,7 +1394,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 	kv.value = value;
 	kv.next = NULL;
 	if (fpm_php_apply_defines_ex(&kv, *mode) == -1) {
-		fprintf(stderr, "Passing INI directive through FastCGI: unable to set '%s'\n", key);
+		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: unable to set '%s'", key);
 	}
 }
 /* }}} */
