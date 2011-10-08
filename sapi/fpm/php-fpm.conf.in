@@ -69,6 +69,13 @@
 ; Default Value: 0
 ;process_control_timeout = 0
 
+; The maximum number of processes FPM will fork. This has been design to control
+; the global number of processes when using dynamic PM within a lot of pools.
+; Use it with caution.
+; Note: A value of 0 indicates no limit
+; Default Value: 0
+; process.max = 128
+
 ; Send FPM to background. Set to 'no' to keep FPM in foreground for debugging.
 ; Default Value: yes
 ;daemonize = yes

@@ -362,6 +362,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	pid_t pid;
 	struct fpm_child_s *child;
 	int max;
+	static int warned = 0;
 
 	if (wp->config->pm == PM_STYLE_DYNAMIC) {
 		if (!in_event_loop) { /* starting */
@@ -373,7 +374,16 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		max = wp->config->pm_max_children;
 	}
 
-	while (fpm_pctl_can_spawn_children() && wp->running_children < max) {
+	/*
+	 * fork children while:
+	 *   - fpm_pctl_can_spawn_children : FPM is running in a NORMAL state (aka not restart, stop or reload)
+	 *   - wp->running_children < max  : there is less than the max process for the current pool
+	 *   - (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max):
+	 *     if fpm_global_config.process_max is set, FPM has not fork this number of processes (globaly)
+	 */
+	while (fpm_pctl_can_spawn_children() && wp->running_children < max && (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max)) {
+
+		warned = 0;
 		child = fpm_resources_prepare(wp);
 
 		if (!child) {
@@ -404,6 +414,11 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				zlog(is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
 		}
 
+	}
+
+	if (!warned && fpm_global_config.process_max > 0 && fpm_globals.running_children >= fpm_global_config.process_max) {
+		warned = 1;
+		zlog(ZLOG_WARNING, "The maximum number of processes has been reached. Please review your configuration and consider raising 'process.max'");
 	}
 
 	return 1; /* we are done */
