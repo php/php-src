@@ -89,6 +89,16 @@
 ; Default Value: system defined value
 ;rlimit_core = 0
 
+; Specify the event mechanism FPM will use. The following is available:
+; - select     (any POSIX os)
+; - poll       (any POSIX os)
+; - epoll      (linux >= 2.5.44)
+; - kqueue     (FreeBSD >= 4.1, OpenBSD >= 2.9, NetBSD >= 2.0)
+; - /dev/poll  (Solaris >= 7)
+; - port       (Solaris >= 10)
+; Default Value: not set (auto detection)
+; events.mechanism = epoll
+
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ; 
 ;;;;;;;;;;;;;;;;;;;;
@@ -157,7 +167,8 @@ listen = 127.0.0.1:9000
 ; Possible Values:
 ;   static  - a fixed number (pm.max_children) of child processes;
 ;   dynamic - the number of child processes are set dynamically based on the
-;             following directives:
+;             following directives. With this process management, there will be
+;             always at least 1 children.
 ;             pm.max_children      - the maximum number of children that can
 ;                                    be alive at the same time.
 ;             pm.start_servers     - the number of children created on startup.
@@ -169,17 +180,23 @@ listen = 127.0.0.1:9000
 ;                                    state (waiting to process). If the number
 ;                                    of 'idle' processes is greater than this
 ;                                    number then some children will be killed.
+;  ondemand - no children are created at startup. Children will be forked when
+;             new requests will connect. The following parameter are used:
+;             pm.max_children           - the maximum number of children that
+;                                         can be alive at the same time.
+;             pm.process_idle_timeout   - The number of seconds after which
+;                                         an idle process will be killed.
 ; Note: This value is mandatory.
 pm = dynamic
 
 ; The number of child processes to be created when pm is set to 'static' and the
-; maximum number of child processes to be created when pm is set to 'dynamic'.
+; maximum number of child processes when pm is set to 'dynamic' or 'ondemand'.
 ; This value sets the limit on the number of simultaneous requests that will be
 ; served. Equivalent to the ApacheMaxClients directive with mpm_prefork.
 ; Equivalent to the PHP_FCGI_CHILDREN environment variable in the original PHP
 ; CGI. The below defaults are based on a server without much resources. Don't
 ; forget to tweak pm.* to fit your needs.
-; Note: Used when pm is set to either 'static' or 'dynamic'
+; Note: Used when pm is set to 'static', 'dynamic' or 'ondemand'
 ; Note: This value is mandatory.
 pm.max_children = 5
 
@@ -197,6 +214,11 @@ pm.min_spare_servers = 1
 ; Note: Used only when pm is set to 'dynamic'
 ; Note: Mandatory when pm is set to 'dynamic'
 pm.max_spare_servers = 3
+
+; The number of seconds after which an idle process will be killed.
+; Note: Used only when pm is set to 'ondemand'
+; Default Value: 10s
+;pm.process_idle_timeout = 10s;
  
 ; The number of requests each child process should execute before respawning.
 ; This can be useful to work around memory leaks in 3rd party libraries. For
@@ -207,7 +229,7 @@ pm.max_spare_servers = 3
 ; The URI to view the FPM status page. If this value is not set, no URI will be
 ; recognized as a status page. It shows the following informations:
 ;   pool                 - the name of the pool;
-;   process manager      - static or dynamic;
+;   process manager      - static, dynamic or ondemand;
 ;   start time           - the date and time FPM has started;
 ;   start since          - number of seconds since FPM has started;
 ;   accepted conn        - the number of request accepted by the pool;
@@ -223,7 +245,7 @@ pm.max_spare_servers = 3
 ;                          has started;
 ;   max children reached - number of times, the process limit has been reached,
 ;                          when pm tries to start more children (works only for
-;                          pm 'dynamic');
+;                          pm 'dynamic' and 'ondemand');
 ; Value are updated in real time.
 ; Example output:
 ;   pool:                 www

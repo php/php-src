@@ -38,6 +38,10 @@ struct fpm_worker_pool_s {
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 	char **limit_extensions;
+
+	/* for ondemand PM */
+	struct fpm_event_s *ondemand_event;
+	int socket_event_set;
 };
 
 struct fpm_worker_pool_s *fpm_worker_pool_alloc();

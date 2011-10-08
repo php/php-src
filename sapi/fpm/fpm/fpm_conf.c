@@ -43,6 +43,7 @@
 #include "fpm_shm.h"
 #include "fpm_status.h"
 #include "fpm_log.h"
+#include "fpm_events.h"
 #include "zlog.h"
 
 #define STR2STR(a) (a ? a : "undefined")
@@ -52,6 +53,7 @@
 
 static int fpm_conf_load_ini_file(char *filename TSRMLS_DC);
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset);
+static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset);
@@ -93,6 +95,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
+	{ "events.mechanism",            &fpm_conf_set_string,          GO(events_mechanism) },
 	{ 0, 0, 0 }
 };
 
@@ -114,6 +117,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
 	{ "pm.min_spare_servers",      &fpm_conf_set_integer,     WPO(pm_min_spare_servers) },
 	{ "pm.max_spare_servers",      &fpm_conf_set_integer,     WPO(pm_max_spare_servers) },
+	{ "pm.process_idle_timeout",   &fpm_conf_set_time,        WPO(pm_process_idle_timeout) },
 	{ "pm.max_requests",           &fpm_conf_set_integer,     WPO(pm_max_requests) },
 	{ "pm.status_path",            &fpm_conf_set_string,      WPO(pm_status_path) },
 	{ "ping.path",                 &fpm_conf_set_string,      WPO(ping_path) },
@@ -231,6 +235,22 @@ static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /
 		}
 	}
 	* (int *) ((char *) *config + offset) = atoi(val);
+	return NULL;
+}
+/* }}} */
+
+static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {{{ */
+{
+	char *val = Z_STRVAL_P(value);
+	char *p;
+
+	for (p = val; *p; p++) {
+		if ( p == val && *p == '-' ) continue;
+		if (*p < '0' || *p > '9') {
+			return "is not a valid number (greater or equal than zero)";
+		}
+	}
+	* (long int *) ((char *) *config + offset) = atol(val);
 	return NULL;
 }
 /* }}} */
@@ -487,8 +507,10 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 		c->pm = PM_STYLE_STATIC;
 	} else if (!strcasecmp(val, "dynamic")) {
 		c->pm = PM_STYLE_DYNAMIC;
+	} else if (!strcasecmp(val, "ondemand")) {
+		c->pm = PM_STYLE_ONDEMAND;
 	} else {
-		return "invalid process manager (static or dynamic)";
+		return "invalid process manager (static, dynamic or ondemand)";
 	}
 	return NULL;
 }
@@ -554,6 +576,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 
 	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
+	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -719,8 +742,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		}
 
 		/* pm */
-		if (wp->config->pm != PM_STYLE_STATIC && wp->config->pm != PM_STYLE_DYNAMIC) {
-			zlog(ZLOG_ALERT, "[pool %s] the process manager is missing (static or dynamic)", wp->config->name);
+		if (wp->config->pm != PM_STYLE_STATIC && wp->config->pm != PM_STYLE_DYNAMIC && wp->config->pm != PM_STYLE_ONDEMAND) {
+			zlog(ZLOG_ALERT, "[pool %s] the process manager is missing (static, dynamic or ondemand)", wp->config->name);
 			return -1;
 		}
 
@@ -763,7 +786,28 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				zlog(ZLOG_ALERT, "[pool %s] pm.start_servers(%d) must not be less than pm.min_spare_servers(%d) and not greater than pm.max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
 				return -1;
 			}
+		} else if (wp->config->pm == PM_STYLE_ONDEMAND) {
+			struct fpm_worker_pool_config_s *config = wp->config;
 
+			if (!fpm_event_support_edge_trigger()) {
+				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanisme is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
+				return -1;
+			}
+
+			if (config->pm_process_idle_timeout < 1) {
+				zlog(ZLOG_ALERT, "[pool %s] pm.process_idle_timeout(%ds) must be greater than 0s", wp->config->name, config->pm_process_idle_timeout);
+				return -1;
+			}
+
+			if (config->listen_backlog < FPM_BACKLOG_DEFAULT) {
+				zlog(ZLOG_WARNING, "[pool %s] listen.backlog(%d) was too low for the ondemand process manager. I updated it for you to %d.", wp->config->name, config->listen_backlog, FPM_BACKLOG_DEFAULT);
+				config->listen_backlog = FPM_BACKLOG_DEFAULT;
+			}
+
+			/* certainely useless but proper */
+			config->pm_start_servers = 0;
+			config->pm_min_spare_servers = 0;
+			config->pm_max_spare_servers = 0;
 		}
 
 		/* status */
@@ -1075,6 +1119,10 @@ static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 		return -1;
 	}
 
+	if (0 > fpm_event_pre_init(fpm_global_config.events_mechanism)) {
+		return -1;
+	}
+
 	if (0 > fpm_conf_process_all_pools()) {
 		return -1;
 	}
@@ -1097,6 +1145,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 {
 	free(fpm_global_config.pid_file);
 	free(fpm_global_config.error_log);
+	free(fpm_global_config.events_mechanism);
 	fpm_global_config.pid_file = 0;
 	fpm_global_config.error_log = 0;
 #ifdef HAVE_SYSLOG_H
@@ -1436,6 +1485,7 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
+	zlog(ZLOG_NOTICE, "\tevents.mechanism = %s",            fpm_event_machanism_name());
 	zlog(ZLOG_NOTICE, " ");
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
@@ -1456,6 +1506,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);
 		zlog(ZLOG_NOTICE, "\tpm.min_spare_servers = %d",       wp->config->pm_min_spare_servers);
 		zlog(ZLOG_NOTICE, "\tpm.max_spare_servers = %d",       wp->config->pm_max_spare_servers);
+		zlog(ZLOG_NOTICE, "\tpm.process_idle_timeout = %d",    wp->config->pm_process_idle_timeout);
 		zlog(ZLOG_NOTICE, "\tpm.max_requests = %d",            wp->config->pm_max_requests);
 		zlog(ZLOG_NOTICE, "\tpm.status_path = %s",             STR2STR(wp->config->pm_status_path));
 		zlog(ZLOG_NOTICE, "\tping.path = %s",                  STR2STR(wp->config->ping_path));

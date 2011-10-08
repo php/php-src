@@ -2,6 +2,7 @@ fpm: $(SAPI_FPM_PATH)
 
 $(builddir)/fpm: 
 	@mkdir -p $(builddir)/fpm
+	@mkdir -p $(builddir)/fpm/events
 
 $(SAPI_FPM_PATH): $(builddir)/fpm $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(SAPI_EXTRA_DEPS)
 	$(BUILD_FPM)
