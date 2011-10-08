@@ -12,6 +12,8 @@
 #include <sys/time.h>
 #include <errno.h>
 
+#include "php_syslog.h"
+
 #include "zlog.h"
 #include "fpm.h"
 
@@ -22,12 +24,22 @@ static int zlog_level = ZLOG_NOTICE;
 static int launched = 0;
 
 static const char *level_names[] = {
-	[ZLOG_DEBUG]		= "DEBUG",
-	[ZLOG_NOTICE]		= "NOTICE",
-	[ZLOG_WARNING]		= "WARNING",
-	[ZLOG_ERROR]		= "ERROR",
-	[ZLOG_ALERT]		= "ALERT",
+	[ZLOG_DEBUG]   = "DEBUG",
+	[ZLOG_NOTICE]  = "NOTICE",
+	[ZLOG_WARNING] = "WARNING",
+	[ZLOG_ERROR]   = "ERROR",
+	[ZLOG_ALERT]   = "ALERT",
 };
+
+#ifdef HAVE_SYSLOG_H
+const int syslog_priorities[] = {
+	[ZLOG_DEBUG]   = LOG_DEBUG,
+	[ZLOG_NOTICE]  = LOG_NOTICE,
+	[ZLOG_WARNING] = LOG_WARNING,
+	[ZLOG_ERROR]   = LOG_ERR,
+	[ZLOG_ALERT]   = LOG_ALERT,
+};
+#endif
 
 const char *zlog_get_level_name(int log_level) /* {{{ */
 {
@@ -94,18 +106,30 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	}
 
 	saved_errno = errno;
-	if (!fpm_globals.is_child) {
-		gettimeofday(&tv, 0);
-		len = zlog_print_time(&tv, buf, buf_size);
-	}
-	if (zlog_level == ZLOG_DEBUG) {
-		if (!fpm_globals.is_child) {
-			len += snprintf(buf + len, buf_size - len, "%s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+#ifdef HAVE_SYSLOG_H
+	if (zlog_fd == ZLOG_SYSLOG /* && !fpm_globals.is_child */) {
+		len = 0;
+		if (zlog_level == ZLOG_DEBUG) {
+			len += snprintf(buf, buf_size, "[%s] %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], function, line);
 		} else {
-			len += snprintf(buf + len, buf_size - len, "%s: %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], function, line);
+			len += snprintf(buf, buf_size, "[%s] ", level_names[flags & ZLOG_LEVEL_MASK]);
 		}
-	} else {
-		len += snprintf(buf + len, buf_size - len, "%s: ", level_names[flags & ZLOG_LEVEL_MASK]);
+	} else
+#endif
+	{
+		if (!fpm_globals.is_child) {
+			gettimeofday(&tv, 0);
+			len = zlog_print_time(&tv, buf, buf_size);
+		}
+		if (zlog_level == ZLOG_DEBUG) {
+			if (!fpm_globals.is_child) {
+				len += snprintf(buf + len, buf_size - len, "%s: pid %d, %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], getpid(), function, line);
+			} else {
+				len += snprintf(buf + len, buf_size - len, "%s: %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], function, line);
+			}
+		} else {
+			len += snprintf(buf + len, buf_size - len, "%s: ", level_names[flags & ZLOG_LEVEL_MASK]);
+		}
 	}
 
 	if (len > buf_size - 1) {
@@ -135,9 +159,19 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 		len = buf_size - 1;
 	}
 
-	buf[len++] = '\n';
-	write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
-	if (zlog_fd != STDERR_FILENO && zlog_fd > -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
+#ifdef HAVE_SYSLOG_H
+	if (zlog_fd == ZLOG_SYSLOG) {
+		buf[len] = '\0';
+		php_syslog(syslog_priorities[zlog_level], "%s", buf);
+		buf[len++] = '\n';
+	} else 
+#endif
+	{
+		buf[len++] = '\n';
+		write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
+	}
+
+	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 && !launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
 		write(STDERR_FILENO, buf, len);
 	}
 }
