@@ -75,6 +75,8 @@ PHP                                                                        NEWS
   . Fixed bug #53872 (internal corruption of phar). (Hannes)
 
 - PHP-FPM SAPI:
+  . Backported FR #54098 from 5.4 branch (Lowered process manager
+    default value). (fat)
   . Backported FR #52052 from 5.4 branch (Added partial syslog support). (fat)
   . Implemented FR #54577 (Enhanced status page with full status and details
     about each processes. Also provide a web page (status.html) for

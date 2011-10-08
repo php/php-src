@@ -170,25 +170,26 @@ pm = dynamic
 ; This value sets the limit on the number of simultaneous requests that will be
 ; served. Equivalent to the ApacheMaxClients directive with mpm_prefork.
 ; Equivalent to the PHP_FCGI_CHILDREN environment variable in the original PHP
-; CGI.
+; CGI. The below defaults are based on a server without much resources. Don't
+; forget to tweak pm.* to fit your needs.
 ; Note: Used when pm is set to either 'static' or 'dynamic'
 ; Note: This value is mandatory.
-pm.max_children = 50
+pm.max_children = 5
 
 ; The number of child processes created on startup.
 ; Note: Used only when pm is set to 'dynamic'
 ; Default Value: min_spare_servers + (max_spare_servers - min_spare_servers) / 2
-;pm.start_servers = 20
+pm.start_servers = 2
 
 ; The desired minimum number of idle server processes.
 ; Note: Used only when pm is set to 'dynamic'
 ; Note: Mandatory when pm is set to 'dynamic'
-;pm.min_spare_servers = 5
+pm.min_spare_servers = 1
 
 ; The desired maximum number of idle server processes.
 ; Note: Used only when pm is set to 'dynamic'
 ; Note: Mandatory when pm is set to 'dynamic'
-;pm.max_spare_servers = 35
+pm.max_spare_servers = 3
  
 ; The number of requests each child process should execute before respawning.
 ; This can be useful to work around memory leaks in 3rd party libraries. For
