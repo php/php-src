@@ -257,14 +257,13 @@ static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)\
 	MY_MYSQL *mysql;
 
 	MAKE_STD_ZVAL(*retval);
+	ZVAL_NULL(*retval);
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	if (!mysql) {
-		ZVAL_NULL(*retval);
-	} else {
+	if (mysql) {
 		char * stat_msg;
 #if defined(MYSQLI_USE_MYSQLND)
 		uint stat_msg_len;
