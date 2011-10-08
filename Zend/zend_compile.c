@@ -3658,16 +3658,16 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
       strncmp(mname, str, mname_len)
 
 #define _ADD_MAGIC_METHOD(ce, mname, mname_len, fe) { \
-	if (!IS_EQUAL(mname, mname_len, "__clone")) 	{	(ce)->clone			= (fe); (fe)->common.fn_flags |= ZEND_ACC_CLONE; } \
-	else if (!IS_EQUAL(mname, mname_len, "__construct"))  {		(ce)->constructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_CTOR; } \
-	else if (!IS_EQUAL(mname, mname_len, "__destruct"))  {		(ce)->destructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_DTOR; } \
-	else if (!IS_EQUAL(mname, mname_len, "__get"))		(ce)->__get			= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__set"))		(ce)->__set			= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__call"))		(ce)->__call		= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__unset"))		(ce)->__unset		= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__isset"))		(ce)->__isset		= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__callstatic"))(ce)->__callstatic	= (fe); \
-	else if (!IS_EQUAL(mname, mname_len, "__tostring"))	(ce)->__tostring	= (fe); \
+	if (     !IS_EQUAL(mname, mname_len, ZEND_CLONE_FUNC_NAME))       { (ce)->clone       = (fe); (fe)->common.fn_flags |= ZEND_ACC_CLONE; } \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_CONSTRUCTOR_FUNC_NAME)) { (ce)->constructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_CTOR; } \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_DESTRUCTOR_FUNC_NAME))  { (ce)->destructor  = (fe); (fe)->common.fn_flags |= ZEND_ACC_DTOR; } \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_GET_FUNC_NAME))        (ce)->__get          = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_SET_FUNC_NAME))        (ce)->__set          = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_CALL_FUNC_NAME))       (ce)->__call         = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_UNSET_FUNC_NAME))      (ce)->__unset        = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_ISSET_FUNC_NAME))      (ce)->__isset        = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_CALLSTATIC_FUNC_NAME)) (ce)->__callstatic   = (fe); \
+	else if (!IS_EQUAL(mname, mname_len, ZEND_TOSTRING_FUNC_NAME))   (ce)->__tostring     = (fe); \
 }
 
 /* {{{ Originates from php_runkit_function_copy_ctor
