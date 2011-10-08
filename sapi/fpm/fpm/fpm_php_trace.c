@@ -144,7 +144,7 @@ void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 	slowlog = fopen(child->wp->config->slowlog, "a+");
 
 	if (!slowlog) {
-		zlog(ZLOG_SYSERROR, "fopen(%s) failed", child->wp->config->slowlog);
+		zlog(ZLOG_SYSERROR, "unable to open slowlog (%s)", child->wp->config->slowlog);
 		goto done0;
 	}
 

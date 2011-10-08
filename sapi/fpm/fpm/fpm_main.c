@@ -100,13 +100,13 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fastcgi.h"
 
 #include <php_config.h>
-#include <fpm/fpm.h>
-#include <fpm/fpm_request.h>
-#include <fpm/fpm_status.h>
-#include <fpm/fpm_conf.h>
-#include <fpm/fpm_php.h>
-#include <fpm/fpm_log.h>
-#include <fpm/zlog.h>
+#include "fpm.h"
+#include "fpm_request.h"
+#include "fpm_status.h"
+#include "fpm_conf.h"
+#include "fpm_php.h"
+#include "fpm_log.h"
+#include "zlog.h"
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */

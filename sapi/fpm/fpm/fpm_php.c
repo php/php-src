@@ -253,7 +253,7 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 	}
 
 
-	zlog(ZLOG_NOTICE, "Access to the file '%s' has been denied (see security.limit_extensions)", path);
+	zlog(ZLOG_NOTICE, "Access to the script '%s' has been denied (see security.limit_extensions)", path);
 	return 1; /* extension not found: not allowed  */
 }
 /* }}} */

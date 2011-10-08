@@ -29,9 +29,9 @@
 #include <limits.h>
 
 #include <php_config.h>
-#include <fpm/fpm.h>
-#include <fpm/fpm_request.h>
-#include <fpm/zlog.h>
+#include "fpm.h"
+#include "fpm_request.h"
+#include "zlog.h"
 
 #ifdef _WIN32
 
@@ -268,7 +268,7 @@ void fcgi_set_allowed_clients(char *ip)
 			}
 			allowed_clients[n] = inet_addr(cur);
 			if (allowed_clients[n] == INADDR_NONE) {
-				fprintf(stderr, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS or listen.allowed_clients\n", cur);
+				zlog(ZLOG_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
 			}
 			n++;
 			cur = end;
@@ -816,7 +816,7 @@ int fcgi_accept_request(fcgi_request *req)
 							n++;
 						}
 						if (!allowed) {
-							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
+							zlog(ZLOG_ERROR, "Connection disallowed: IP address '%s' has been dropped.", inet_ntoa(sa.sa_inet.sin_addr));
 							closesocket(req->fd);
 							req->fd = -1;
 							continue;
@@ -872,7 +872,7 @@ int fcgi_accept_request(fcgi_request *req)
 						}
 						fcgi_close(req, 1, 0);
 					} else {
-						fprintf(stderr, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
+						zlog(ZLOG_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
 						fcgi_close(req, 1, 0);
 					}
 #endif
