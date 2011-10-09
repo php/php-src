@@ -918,6 +918,11 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 
 			fpm_globals.heartbeat = fpm_globals.heartbeat ? MIN(fpm_globals.heartbeat, (wp->config->request_slowlog_timeout * 1000) / 3) : (wp->config->request_slowlog_timeout * 1000) / 3;
+
+			if (wp->config->request_terminate_timeout && wp->config->request_slowlog_timeout > wp->config->request_terminate_timeout) {
+				zlog(ZLOG_ERROR, "[pool %s] 'request_slowlog_timeout' (%d) can't be greater than 'request_terminate_timeout' (%d)", wp->config->name, wp->config->request_slowlog_timeout, wp->config->request_terminate_timeout);
+				return -1;
+			}
 		}
 
 		/* chroot */
