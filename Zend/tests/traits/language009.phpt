@@ -22,13 +22,13 @@ trait C {
    }
 }
 
-class Foo {
+class MyClass {
     use C, A, B {
 		B::foo insteadof A, C; 
 	}
 }
 
-$t = new Foo;
+$t = new MyClass;
 $t->foo();
 
 ?>
