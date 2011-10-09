@@ -1521,6 +1521,7 @@ int main(int argc, char *argv[])
 	char *fpm_prefix = NULL;
 	char *fpm_pid = NULL;
 	int test_conf = 0;
+	int php_information = 0;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1632,20 +1633,8 @@ int main(int argc, char *argv[])
 				goto out;
 
 			case 'i': /* php info & quit */
-				cgi_sapi_module.phpinfo_as_text = 1;
-				cgi_sapi_module.startup(&cgi_sapi_module);
-				if (php_request_startup(TSRMLS_C) == FAILURE) {
-					SG(server_context) = NULL;
-					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
-				}
-				SG(headers_sent) = 1;
-				SG(request_info).no_headers = 1;
-				php_print_info(0xFFFFFFFF TSRMLS_CC);
-				php_request_shutdown((void *) 0);
-				fcgi_shutdown();
-				exit_status = 0;
-				goto out;
+				php_information = 1;
+				break;
 
 			default:
 			case 'h':
@@ -1680,6 +1669,23 @@ int main(int argc, char *argv[])
 				exit_status = 0;
 				goto out;
 		}
+	}
+
+	if (php_information) {
+		cgi_sapi_module.phpinfo_as_text = 1;
+		cgi_sapi_module.startup(&cgi_sapi_module);
+		if (php_request_startup(TSRMLS_C) == FAILURE) {
+			SG(server_context) = NULL;
+			php_module_shutdown(TSRMLS_C);
+			return FAILURE;
+		}
+		SG(headers_sent) = 1;
+		SG(request_info).no_headers = 1;
+		php_print_info(0xFFFFFFFF TSRMLS_CC);
+		php_request_shutdown((void *) 0);
+		fcgi_shutdown();
+		exit_status = 0;
+		goto out;
 	}
 
 	/* No other args are permitted here as there is no interactive mode */
