@@ -878,6 +878,10 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
+		if (wp->config->request_terminate_timeout) {
+			fpm_globals.heartbeat = fpm_globals.heartbeat ? MIN(fpm_globals.heartbeat, (wp->config->request_terminate_timeout * 1000) / 3) : (wp->config->request_terminate_timeout * 1000) / 3;
+		}
+
 		/* slowlog */
 		if (wp->config->slowlog && *wp->config->slowlog) {
 			fpm_evaluate_full_path(&wp->config->slowlog, wp, NULL, 0);
@@ -912,6 +916,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				}
 				close(fd);
 			}
+
+			fpm_globals.heartbeat = fpm_globals.heartbeat ? MIN(fpm_globals.heartbeat, (wp->config->request_slowlog_timeout * 1000) / 3) : (wp->config->request_slowlog_timeout * 1000) / 3;
 		}
 
 		/* chroot */

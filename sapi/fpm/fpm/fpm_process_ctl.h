@@ -11,8 +11,9 @@
 #define FPM_MAX_SPAWN_RATE (32)
 /* 1s (in ms) heartbeat for idle server maintenance */
 #define FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT (1000)
-/* 130ms heartbeat for pctl */
-#define FPM_PCTL_HEARTBEAT (130)
+/* a minimum of 130ms heartbeat for pctl */
+#define FPM_PCTL_MIN_HEARTBEAT (130)
+
 
 struct fpm_child_s;
 
