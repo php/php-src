@@ -3654,21 +3654,6 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 }
 /* }}} */
 
-#define IS_EQUAL(mname, mname_len, str) \
-      strncmp(mname, str, mname_len)
-
-#define _ADD_MAGIC_METHOD(ce, mname, mname_len, fe) { \
-	if (     !IS_EQUAL(mname, mname_len, ZEND_CLONE_FUNC_NAME))       { (ce)->clone       = (fe); (fe)->common.fn_flags |= ZEND_ACC_CLONE; } \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_CONSTRUCTOR_FUNC_NAME)) { (ce)->constructor = (fe); (fe)->common.fn_flags |= ZEND_ACC_CTOR; } \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_DESTRUCTOR_FUNC_NAME))  { (ce)->destructor  = (fe); (fe)->common.fn_flags |= ZEND_ACC_DTOR; } \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_GET_FUNC_NAME))        (ce)->__get          = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_SET_FUNC_NAME))        (ce)->__set          = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_CALL_FUNC_NAME))       (ce)->__call         = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_UNSET_FUNC_NAME))      (ce)->__unset        = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_ISSET_FUNC_NAME))      (ce)->__isset        = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_CALLSTATIC_FUNC_NAME)) (ce)->__callstatic   = (fe); \
-	else if (!IS_EQUAL(mname, mname_len, ZEND_TOSTRING_FUNC_NAME))   (ce)->__tostring     = (fe); \
-}
 
 /* {{{ Originates from php_runkit_function_copy_ctor
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
@@ -3790,7 +3775,39 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
   
 }
-/* }}}} */
+/* }}} */
+
+static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint mname_len, zend_function* fe TSRMLS_DC) {
+	if (     !strncmp(mname, ZEND_CLONE_FUNC_NAME,       mname_len)) {	ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE; }
+	else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
+		if (ce->constructor) {
+			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+		}
+		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR; 
+	}
+	else if (!strncmp(mname, ZEND_DESTRUCTOR_FUNC_NAME,  mname_len)) {	ce->destructor  = fe; fe->common.fn_flags |= ZEND_ACC_DTOR; }
+	else if (!strncmp(mname, ZEND_GET_FUNC_NAME,         mname_len)) ce->__get       = fe;
+	else if (!strncmp(mname, ZEND_SET_FUNC_NAME,         mname_len)) ce->__set       = fe;
+	else if (!strncmp(mname, ZEND_CALL_FUNC_NAME,        mname_len)) ce->__call      = fe;
+	else if (!strncmp(mname, ZEND_UNSET_FUNC_NAME,       mname_len)) ce->__unset     = fe;
+	else if (!strncmp(mname, ZEND_ISSET_FUNC_NAME,       mname_len)) ce->__isset     = fe;
+	else if (!strncmp(mname, ZEND_CALLSTATIC_FUNC_NAME,  mname_len)) ce->__callstatic= fe;
+	else if (!strncmp(mname, ZEND_TOSTRING_FUNC_NAME,    mname_len)) ce->__tostring	 = fe;
+	else if (ce->name_length + 1 == mname_len) {
+		char *lowercase_name = emalloc(ce->name_length + 1);
+		zend_str_tolower_copy(lowercase_name, ce->name, ce->name_length);
+		lowercase_name = (char*)zend_new_interned_string(lowercase_name, ce->name_length + 1, 1 TSRMLS_CC);
+		if (!memcmp(mname, lowercase_name, mname_len)) {
+			if (ce->constructor) {
+				zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+			}
+			ce->constructor = fe;
+			fe->common.fn_flags |= ZEND_ACC_CTOR;
+		}
+		str_efree(lowercase_name);
+	}
+}
+
 
 static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
@@ -3858,9 +3875,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
 
-		_ADD_MAGIC_METHOD(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p);
-		/* it could be necessary to update child classes as well */
-		/* zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t)php_runkit_update_children_methods, 5, dce, dce, &dfe, dfunc, dfunc_len); */
+		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
 
 		zend_function_dtor(fn);
 	} else {
