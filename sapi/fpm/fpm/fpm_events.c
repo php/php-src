@@ -350,7 +350,9 @@ void fpm_event_loop(int err) /* {{{ */
 	fpm_event_add(&signal_fd_event, 0);
 
 	/* add timers */
-	fpm_pctl_heartbeat(NULL, 0, NULL);
+	if (fpm_globals.heartbeat > 0) {
+		fpm_pctl_heartbeat(NULL, 0, NULL);
+	}
 
 	if (!err) {
 		fpm_pctl_perform_idle_server_maintenance_heartbeat(NULL, 0, NULL);

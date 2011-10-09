@@ -36,7 +36,8 @@ struct fpm_globals_s fpm_globals = {
 	.listening_socket = 0,
 	.max_requests = 0,
 	.is_child = 0,
-	.test_successful = 0
+	.test_successful = 0,
+	.heartbeat = 0
 };
 
 int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf) /* {{{ */

@@ -453,9 +453,13 @@ void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ *
 		return;
 	}
 
+	/* ensure heartbeat is not lower than FPM_PCTL_MIN_HEARTBEAT */
+	fpm_globals.heartbeat = MAX(fpm_globals.heartbeat, FPM_PCTL_MIN_HEARTBEAT);
+
 	/* first call without setting to initialize the timer */
+	zlog(ZLOG_DEBUG, "heartbeat have been set up with a timeout of %dms", fpm_globals.heartbeat);
 	fpm_event_set_timer(&heartbeat, FPM_EV_PERSIST, &fpm_pctl_heartbeat, NULL);
-	fpm_event_add(&heartbeat, FPM_PCTL_HEARTBEAT);
+	fpm_event_add(&heartbeat, fpm_globals.heartbeat);
 }
 /* }}} */
 
