@@ -92,6 +92,8 @@ object(mysqli)#%d (%d) {
   %unicode|string%(%d) "%s"
   [%u|b%"server_version"]=>
   int(%d)
+  [%u|b%"stat"]=>
+  string(%d) "Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d"
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "00000"
   [%u|b%"protocol_version"]=>
@@ -129,6 +131,8 @@ object(mysqli)#%d (%d) {
   [%u|b%"server_info"]=>
   NULL
   [%u|b%"server_version"]=>
+  NULL
+  [%u|b%"stat"]=>
   NULL
   [%u|b%"sqlstate"]=>
   NULL
