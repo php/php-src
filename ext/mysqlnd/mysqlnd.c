@@ -219,7 +219,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn TSRMLS_DC)
 	conn->m->free_options(conn TSRMLS_CC);
 
 	if (conn->net) {
-		mysqlnd_net_free(conn->net TSRMLS_CC);
+		mysqlnd_net_free(conn->net, conn->stats, &conn->error_info TSRMLS_CC);
 		conn->net = NULL;
 	}
 
@@ -389,6 +389,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND * conn, enum php_mysqlnd_se
 			DBG_ERR_FMT("Error while sending %s packet", mysqlnd_command_to_text[command]);
 			php_error(E_WARNING, "Error while sending %s packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 		}
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		DBG_ERR("Server is gone");
 		ret = FAIL;
 	} else if (ok_packet != PROT_LAST) {
@@ -644,8 +645,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
-	char *errstr = NULL;
-	int errcode = 0, host_len;
+	size_t host_len;
 	zend_bool unix_socket = FALSE;
 	zend_bool named_pipe = FALSE;
 	zend_bool reconnect = FALSE;
@@ -756,7 +756,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 		goto err; /* OOM */
 	}
 
-	if (FAIL == conn->net->m.connect(conn->net, conn->scheme, conn->scheme_len, conn->persistent, &errstr, &errcode TSRMLS_CC)) {
+	if (FAIL == conn->net->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
+										conn->stats, &conn->error_info TSRMLS_CC))
+	{
 		goto err;
 	}
 
@@ -952,13 +954,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 err:
 	PACKET_FREE(greet_packet);
 
-	if (errstr) {
-		DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", errcode, errstr, conn->scheme);
-		SET_CLIENT_ERROR(conn->error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%u] %.128s (trying to connect via %s)", errcode, errstr, conn->scheme);
-		/* no mnd_ since we don't allocate it */
-		efree(errstr);
+	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info.error_no, conn->error_info.error, conn->scheme);
+	if (!conn->error_info.error_no) {
+		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, conn->error_info.error? conn->error_info.error:"Unknown error");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%u] %.128s (trying to connect via %s)",
+						 conn->error_info.error_no, conn->error_info.error, conn->scheme);
 	}
+
 	conn->m->free_contents(conn TSRMLS_CC);
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_FAILURE);
 
@@ -1680,7 +1682,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 	DBG_ENTER("mysqlnd_conn::close");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
-	if (conn->state >= CONN_READY) {
+	if (CONN_GET_STATE(conn) >= CONN_READY) {
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
@@ -2483,7 +2485,7 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 	mysqlnd_stats_init(&conn->stats, STAT_LAST);
 	SET_ERROR_AFF_ROWS(conn);
 
-	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
+	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, &conn->error_info TSRMLS_CC);
 	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
 
 	DBG_RETURN(conn->stats && conn->net && conn->protocol? PASS:FAIL);

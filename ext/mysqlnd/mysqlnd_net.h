@@ -23,8 +23,8 @@
 #ifndef MYSQLND_NET_H
 #define MYSQLND_NET_H
 
-PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
-PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC);
+PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
+PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
 
 PHPAPI struct st_mysqlnd_net_methods * mysqlnd_net_get_methods();
 
