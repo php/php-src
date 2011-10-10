@@ -126,7 +126,8 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->node_list = NULL;
 	intern->doc = NULL;
 	intern->profiling = NULL;
-	intern->securityPrefs = XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY;
+	intern->securityPrefs = XSL_SECPREF_DEFAULT;
+	intern->securityPrefsSet = 0;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
@@ -140,6 +141,13 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	return retval;
 }
 /* }}} */
+
+PHP_INI_BEGIN()
+/* Default is not allowing any write operations. 
+   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44 
+*/
+PHP_INI_ENTRY("xsl.security_prefs", "44", PHP_INI_ALL, NULL)
+PHP_INI_END()
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -173,6 +181,7 @@ PHP_MINIT_FUNCTION(xsl)
 	REGISTER_LONG_CONSTANT("XSL_SECPREF_CREATE_DIRECTORY", XSL_SECPREF_CREATE_DIRECTORY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSL_SECPREF_READ_NETWORK",     XSL_SECPREF_READ_NETWORK,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSL_SECPREF_WRITE_NETWORK",    XSL_SECPREF_WRITE_NETWORK,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_DEFAULT",          XSL_SECPREF_DEFAULT,          CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("LIBXSLT_VERSION",           LIBXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXSLT_DOTTED_VERSION",  LIBXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
@@ -181,6 +190,8 @@ PHP_MINIT_FUNCTION(xsl)
 	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION",           LIBEXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION",  LIBEXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
 #endif
+
+    REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
@@ -264,6 +275,8 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 				   (const xmlChar *) "http://php.net/xsl");
 
 	xsltCleanupGlobals();
+
+	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
