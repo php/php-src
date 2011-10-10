@@ -105,8 +105,6 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 		auth_packet->auth_plugin_name = auth_protocol;
 
 		if (!PACKET_WRITE(auth_packet, conn)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
 	}
