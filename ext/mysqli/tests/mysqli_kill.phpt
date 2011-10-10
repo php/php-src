@@ -120,6 +120,8 @@ object(mysqli)#%d (%d) {
   %unicode|string%(%d) "%s"
   [%u|b%"server_version"]=>
   int(%d)
+  [%u|b%"stat"]=>
+  NULL
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "HY000"
   [%u|b%"protocol_version"]=>
