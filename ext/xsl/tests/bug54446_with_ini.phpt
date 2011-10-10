@@ -1,5 +1,5 @@
 --TEST--
-Bug #54446 (Arbitrary file creation via libxslt 'output' extension)
+Bug #54446 (Arbitrary file creation via libxslt 'output' extension with php.ini setting)
 --SKIPIF--
 <?php
 if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");

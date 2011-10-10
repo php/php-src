@@ -476,7 +476,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
-	int secPrefsIni;
+	int secPrefsValue;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
@@ -535,32 +535,32 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	efree(member);
 
 	
-	secPrefsIni = INI_INT("xsl.security_prefs");
+	secPrefsValue = INI_INT("xsl.security_prefs");
 	
-	//if securityPrefs is set to NONE, we don't have to do any checks, but otherwise...
-	if (secPrefsIni != XSL_SECPREF_NONE) {
+	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
+	if (secPrefsValue != XSL_SECPREF_NONE) {
 		secPrefs = xsltNewSecurityPrefs(); 
-		if (secPrefsIni & XSL_SECPREF_READ_FILE ) { 
+		if (secPrefsValue & XSL_SECPREF_READ_FILE ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (secPrefsIni & XSL_SECPREF_WRITE_FILE ) { 
+		if (secPrefsValue & XSL_SECPREF_WRITE_FILE ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (secPrefsIni & XSL_SECPREF_CREATE_DIRECTORY ) { 
+		if (secPrefsValue & XSL_SECPREF_CREATE_DIRECTORY ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (secPrefsIni & XSL_SECPREF_READ_NETWORK) { 
+		if (secPrefsValue & XSL_SECPREF_READ_NETWORK) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (secPrefsIni & XSL_SECPREF_WRITE_NETWORK) { 
+		if (secPrefsValue & XSL_SECPREF_WRITE_NETWORK) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}

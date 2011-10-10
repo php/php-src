@@ -153,6 +153,15 @@ UPGRADE NOTES - PHP 5.3
 
 - SplObjectStorage now has ArrayAccess support. It is also now possible to
   store associative information with objects in SplObjectStorage.
+  
+=====================
+4.1 New in PHP 5.3.9
+=====================
+
+- Write operations within XSLT (for example with the extension sax:output) are
+  disabled by default. You can define what is forbidden with the INI option
+  xsl.security_prefs. This option will be marked as deprecated in 5.4 again. 
+  Use the method XsltProcess::setSecurityPrefs($options) there.
 
 =============
 5. Deprecated
