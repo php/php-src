@@ -205,6 +205,8 @@ object(mysqli)#%d (%d) {
   NULL
   [%u|b%"server_version"]=>
   NULL
+  [%u|b%"stat"]=>
+  NULL
   [%u|b%"sqlstate"]=>
   NULL
   [%u|b%"protocol_version"]=>
