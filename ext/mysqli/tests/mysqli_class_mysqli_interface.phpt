@@ -151,6 +151,11 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
 
+	assert(mysqli_stat($link) === $mysqli->stat);
+	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
+		$mysqli->stat, gettype($mysqli->stat),
+		mysqli_stat($link), gettype(mysqli_stat($link)));
+
 	assert(mysqli_get_host_info($link) === $mysqli->host_info);
 	printf("mysqli->host_info = '%s'/%s ('%s'/%s)\n",
 		$mysqli->host_info, gettype($mysqli->host_info),
@@ -236,6 +241,7 @@ protocol_version
 server_info
 server_version
 sqlstate
+stat
 thread_id
 warning_count
 
@@ -254,6 +260,7 @@ info
 insert_id
 server_info
 server_version
+stat
 sqlstate
 protocol_version
 thread_id
@@ -269,6 +276,7 @@ mysqli->error_list = 'Array'/array ('Array'/array)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
+mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
 mysqli->info = ''/NULL (''/%unicode|string%)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
