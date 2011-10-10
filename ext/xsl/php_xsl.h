@@ -50,6 +50,8 @@ extern zend_module_entry xsl_module_entry;
 #define XSL_SECPREF_CREATE_DIRECTORY 8
 #define XSL_SECPREF_READ_NETWORK 16
 #define XSL_SECPREF_WRITE_NETWORK 32
+/* Default == disable all write access ==  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE */
+#define XSL_SECPREF_DEFAULT 44
 
 typedef struct _xsl_object {
 	zend_object  std;
@@ -64,6 +66,7 @@ typedef struct _xsl_object {
 	php_libxml_node_object *doc;
 	char *profiling;
 	long securityPrefs;
+	int securityPrefsSet;
 } xsl_object;
 
 void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);

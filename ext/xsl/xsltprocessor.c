@@ -487,6 +487,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
+	int secPrefsValue, secPrefsIni;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
@@ -544,31 +545,49 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 	efree(member);
 
+	secPrefsValue = intern->securityPrefs;
 	
-	//if securityPrefs is set to NONE, we don't have to do any checks, but otherwise...
-	if (intern->securityPrefs != XSL_SECPREF_NONE) {
+	/* This whole if block can be removed, when we remove the xsl.security_prefs php.ini option in PHP 6+ */
+	secPrefsIni= INI_INT("xsl.security_prefs");
+	/* if secPrefsIni has the same value as secPrefsValue, all is fine */
+	if (secPrefsIni != secPrefsValue) {
+		if (secPrefsIni != XSL_SECPREF_DEFAULT) {
+			/* if the ini value is not set to the default, throw an E_DEPRECATED warning */
+			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead");
+			if (intern->securityPrefsSet == 0) {
+				/* if securityPrefs were not set through the setSecurityPrefs method, take the ini setting */
+				secPrefsValue = secPrefsIni;
+			} else {
+				/* else throw a notice, that the ini setting was not used */
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The xsl.security_prefs php.ini was not used, since the  XsltProcessor->setSecurityPrefs() method was used");
+			}
+		}
+	}
+
+	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
+	if (secPrefsValue != XSL_SECPREF_NONE) {
 		secPrefs = xsltNewSecurityPrefs(); 
-		if (intern->securityPrefs & XSL_SECPREF_READ_FILE ) { 
+		if (secPrefsValue & XSL_SECPREF_READ_FILE ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (intern->securityPrefs & XSL_SECPREF_WRITE_FILE ) { 
+		if (secPrefsValue & XSL_SECPREF_WRITE_FILE ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (intern->securityPrefs & XSL_SECPREF_CREATE_DIRECTORY ) { 
+		if (secPrefsValue & XSL_SECPREF_CREATE_DIRECTORY ) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (intern->securityPrefs & XSL_SECPREF_READ_NETWORK) { 
+		if (secPrefsValue & XSL_SECPREF_READ_NETWORK) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
 		}
-		if (intern->securityPrefs & XSL_SECPREF_WRITE_NETWORK) { 
+		if (secPrefsValue & XSL_SECPREF_WRITE_NETWORK) { 
 			if (0 != xsltSetSecurityPrefs(secPrefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid)) { 
 				secPrefsError = 1;
 			}
@@ -927,6 +946,8 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	oldSecurityPrefs = intern->securityPrefs; 
 	intern->securityPrefs = securityPrefs;
+	/* set this to 1 so that we know, it was set through this method. Can be removed, when we remove the ini setting */
+	intern->securityPrefsSet = 1;
 	RETURN_LONG(oldSecurityPrefs);
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
