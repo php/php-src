@@ -453,6 +453,7 @@ PHP_FUNCTION(spl_autoload_call)
 			zend_exception_save(TSRMLS_C);
 			if (retval) {
 				zval_ptr_dtor(&retval);
+				retval = NULL;
 			}
 			if (zend_hash_exists(EG(class_table), lc_name, class_name_len + 1)) {
 				break;
