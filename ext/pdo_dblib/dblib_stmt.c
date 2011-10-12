@@ -235,9 +235,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 			/* uniqueidentifier is a 16-byte binary number, convert to 32 char hex string */
 #ifdef SQLUNIQUE
-			*len = dbconvert(NULL, SQLUNIQUE, ptr, *len, SQLCHAR, tmp_ptr, *len);
+			*len = dbconvert(NULL, SQLUNIQUE, *ptr, *len, SQLCHAR, tmp_ptr, *len);
 #else
-			*len = dbconvert(NULL, 36, ptr, *len, SQLCHAR, tmp_ptr, *len);
+			*len = dbconvert(NULL, 36, *ptr, *len, SQLCHAR, tmp_ptr, *len);
 #endif
 			php_strtoupper(tmp_ptr, *len);
 			*ptr = tmp_ptr;
