@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 RC1
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
+  
 
 - Core:
   . Fixed bug #55749 (TOCTOU issue in getenv() on Windows builds). (Pierre)
@@ -18,6 +19,10 @@ PHP                                                                        NEWS
 - Openssl
 - Revert r313616 (When we have a blocking SSL socket, respect the timeout
   option, scottmac), breaks ssl support as described in bugs #55283 and #55848
+  
+- PDO DBlib driver:
+  . Fixed bug #60033 (Incorrectly merged PDO dblib patches break
+    uniqueidentifier column type). (warezthebeef at gmail dot com)
 
 - Sysvshm
   . Fixed bug #55750 (memory copy issue in sysvshm extension).
