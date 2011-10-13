@@ -1052,7 +1052,7 @@ PHP_FUNCTION(socket_accept)
 	zval				 *arg1;
 	php_socket			 *php_sock, *new_sock;
 	php_sockaddr_storage sa;
-	socklen_t			 sa_len = sizeof(sa);
+	socklen_t			 php_sa_len = sizeof(sa);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		return;
@@ -1060,7 +1060,7 @@ PHP_FUNCTION(socket_accept)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr*)&sa, &sa_len TSRMLS_CC)) {
+	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr*)&sa, &php_sa_len TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
