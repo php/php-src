@@ -608,6 +608,7 @@ utime \
 vsnprintf \
 vasprintf \
 asprintf \
+nanosleep \
 )
 
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc

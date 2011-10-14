@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.3.9
 
 - Core:
+  . Fixed bug #60019 (Function time_nanosleep() is undefined on OS X). (Ilia)
   . Fixed bug #55798 (serialize followed by unserialize with numeric object
     prop. gives integer prop). (Gustavo)
   . Fixed bug #55749 (TOCTOU issue in getenv() on Windows builds). (Pierre)
