@@ -1,9 +1,8 @@
-README  2007/06/18
+README  2007/05/31
 
 Oniguruma  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
 http://www.geocities.jp/kosako3/oniguruma/
-http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 Oniguruma is a regular expressions library.
 The characteristics of this library is that different character encoding
@@ -13,15 +12,19 @@ Supported character encodings:
 
   ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,
   EUC-JP, EUC-TW, EUC-KR, EUC-CN,
-  Shift_JIS, Big5, GB 18030, KOI8-R, KOI8,
+  Shift_JIS, Big5, GB18030, KOI8-R, CP1251,
   ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,
   ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,
   ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 
-* GB 18030: contributed by KUBO Takehiro
-* KOI8 is not included in library archive by default setup.
-  (need to edit Makefile if you want to use it.)
+* GB18030: contributed by KUBO Takehiro
+* CP1251:  contributed by Byte
 ------------------------------------------------------------
+
+License
+
+   BSD license.
+
 
 Install
 
@@ -63,14 +66,6 @@ Install
 
 
 
-License
-
-   When this software is partly used or it is distributed with Ruby, 
-   this of Ruby follows the license of Ruby.
-   It follows the BSD license in the case of the one except for it.
-
-
-
 Regular Expressions
 
   See doc/RE (or doc/RE.ja for Japanese).
@@ -108,7 +103,10 @@ Sample Programs
   sample/posix.c     POSIX API sample.
   sample/sql.c       example of the variable meta characters.
                      (SQL-like pattern matching)
+
+Test Programs
   sample/syntax.c    Perl, Java and ASIS syntax test.
+  sample/crnl.c      --enable-crnl-as-line-terminator test
 
 
 Source Files
@@ -145,9 +143,10 @@ Source Files
   enc/euc_kr.c       EUC-KR, EUC-CN encoding.
   enc/sjis.c         Shift_JIS encoding.
   enc/big5.c         Big5      encoding.
-  enc/gb18030.c      GB 18030  encoding  (contributed by KUBO Takehiro)
+  enc/gb18030.c      GB18030   encoding.
   enc/koi8.c         KOI8      encoding.
   enc/koi8_r.c       KOI8-R    encoding.
+  enc/cp1251.c       CP1251    encoding.
   enc/iso8859_1.c    ISO-8859-1  encoding. (Latin-1)
   enc/iso8859_2.c    ISO-8859-2  encoding. (Latin-2)
   enc/iso8859_3.c    ISO-8859-3  encoding. (Latin-3)
@@ -176,14 +175,15 @@ Source Files
 
 
 
-API differences with Japanized GNU regex(version 0.12) of Ruby 1.8/1.6
+ToDo
 
-   + re_compile_fastmap() is removed.
-   + re_alloc_pattern() is added.
+  ? case fold flag: Katakana <-> Hiragana.
+  ? add ONIG_OPTION_NOTBOS/NOTEOS. (\A, \z, \Z)
+ ?? \X (== \PM\pM*)
+ ?? implement syntax behavior ONIG_SYN_CONTEXT_INDEP_ANCHORS.
+ ?? transmission stopper. (return ONIG_STOP from match_at())
 
-
-
-I'm thankful to Akinori MUSHA.
+and I'm thankful to Akinori MUSHA.
 
 
 Mail Address: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>

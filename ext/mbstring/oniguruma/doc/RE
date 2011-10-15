@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 4.3.0    2006/08/17
+Oniguruma Regular Expressions Version 5.9.1    2007/09/05
 
 syntax: ONIG_SYNTAX_RUBY (default)
 
@@ -70,6 +70,38 @@ syntax: ONIG_SYNTAX_RUBY (default)
   \H       non hexadecimal digit char
 
 
+  Character Property
+
+    * \p{property-name}
+    * \p{^property-name}    (negative)
+    * \P{property-name}     (negative)
+
+    property-name:
+
+     + works on all encodings
+       Alnum, Alpha, Blank, Cntrl, Digit, Graph, Lower,
+       Print, Punct, Space, Upper, XDigit, Word, ASCII,
+
+     + works on EUC_JP, Shift_JIS
+       Hiragana, Katakana
+
+     + works on UTF8, UTF16, UTF32
+       Any, Assigned, C, Cc, Cf, Cn, Co, Cs, L, Ll, Lm, Lo, Lt, Lu,
+       M, Mc, Me, Mn, N, Nd, Nl, No, P, Pc, Pd, Pe, Pf, Pi, Po, Ps,
+       S, Sc, Sk, Sm, So, Z, Zl, Zp, Zs, 
+       Arabic, Armenian, Bengali, Bopomofo, Braille, Buginese,
+       Buhid, Canadian_Aboriginal, Cherokee, Common, Coptic,
+       Cypriot, Cyrillic, Deseret, Devanagari, Ethiopic, Georgian,
+       Glagolitic, Gothic, Greek, Gujarati, Gurmukhi, Han, Hangul,
+       Hanunoo, Hebrew, Hiragana, Inherited, Kannada, Katakana,
+       Kharoshthi, Khmer, Lao, Latin, Limbu, Linear_B, Malayalam,
+       Mongolian, Myanmar, New_Tai_Lue, Ogham, Old_Italic, Old_Persian,
+       Oriya, Osmanya, Runic, Shavian, Sinhala, Syloti_Nagri, Syriac,
+       Tagalog, Tagbanwa, Tai_Le, Tamil, Telugu, Thaana, Thai, Tibetan,
+       Tifinagh, Ugaritic, Yi
+
+
+
 4. Quantifier
 
   greedy
@@ -111,11 +143,7 @@ syntax: ONIG_SYNTAX_RUBY (default)
   \A      beginning of string
   \Z      end of string, or before newline at the end
   \z      end of string
-  \G      matching start position (*)
-
-          * Ruby Regexp:
-                 previous end-of-match position
-                (This specification is not related to this library.)
+  \G      matching start position 
 
 
 6. Character class
@@ -135,40 +163,43 @@ syntax: ONIG_SYNTAX_RUBY (default)
 
     Not Unicode Case:
 
-    alnum    alphabet or digit char
-    alpha    alphabet
-    ascii    code value: [0 - 127]
-    blank    \t, \x20
-    cntrl
-    digit    0-9
-    graph    include all of multibyte encoded characters
-    lower
-    print    include all of multibyte encoded characters
-    punct
-    space    \t, \n, \v, \f, \r, \x20
-    upper
-    xdigit   0-9, a-f, A-F
+      alnum    alphabet or digit char
+      alpha    alphabet
+      ascii    code value: [0 - 127]
+      blank    \t, \x20
+      cntrl
+      digit    0-9
+      graph    include all of multibyte encoded characters
+      lower
+      print    include all of multibyte encoded characters
+      punct
+      space    \t, \n, \v, \f, \r, \x20
+      upper
+      xdigit   0-9, a-f, A-F
+      word     alphanumeric, "_" and multibyte characters
 
 
     Unicode Case:
 
-    alnum    Letter | Mark | Decimal_Number
-    alpha    Letter | Mark
-    ascii    0000 - 007F
-    blank    Space_Separator | 0009
-    cntrl    Control | Format | Unassigned | Private_Use | Surrogate
-    digit    Decimal_Number
-    graph    [[:^space:]] && ^Control && ^Unassigned && ^Surrogate
-    lower    Lowercase_Letter
-    print    [[:graph:]] | [[:space:]]
-    punct    Connector_Punctuation | Dash_Punctuation | Close_Punctuation |
-             Final_Punctuation | Initial_Punctuation | Other_Punctuation |
-             Open_Punctuation
-    space    Space_Separator | Line_Separator | Paragraph_Separator |
-             0009 | 000A | 000B | 000C | 000D | 0085
-    upper    Uppercase_Letter
-    xdigit   0030 - 0039 | 0041 - 0046 | 0061 - 0066
-             (0-9, a-f, A-F)
+      alnum    Letter | Mark | Decimal_Number
+      alpha    Letter | Mark
+      ascii    0000 - 007F
+      blank    Space_Separator | 0009
+      cntrl    Control | Format | Unassigned | Private_Use | Surrogate
+      digit    Decimal_Number
+      graph    [[:^space:]] && ^Control && ^Unassigned && ^Surrogate
+      lower    Lowercase_Letter
+      print    [[:graph:]] | [[:space:]]
+      punct    Connector_Punctuation | Dash_Punctuation | Close_Punctuation |
+               Final_Punctuation | Initial_Punctuation | Other_Punctuation |
+               Open_Punctuation
+      space    Space_Separator | Line_Separator | Paragraph_Separator |
+               0009 | 000A | 000B | 000C | 000D | 0085
+      upper    Uppercase_Letter
+      xdigit   0030 - 0039 | 0041 - 0046 | 0061 - 0066
+               (0-9, a-f, A-F)
+      word     Letter | Mark | Decimal_Number | Connector_Punctuation
+
 
 
 7. Extended groups
@@ -200,9 +231,9 @@ syntax: ONIG_SYNTAX_RUBY (default)
   (?>subexp)         atomic group
                      don't backtrack in subexp.
 
-  (?<name>subexp)    define named group
-                     (All characters of the name must be a word character.
-                     And first character must not be a digit or uppper case)
+  (?<name>subexp), (?'name'subexp)
+                     define named group
+                     (All characters of the name must be a word character.)
 
                      Not only a name but a number is assigned like a captured
                      group.
@@ -215,7 +246,12 @@ syntax: ONIG_SYNTAX_RUBY (default)
 8. Back reference
 
   \n          back reference by group number (n >= 1)
+  \k<n>       back reference by group number (n >= 1)
+  \k'n'       back reference by group number (n >= 1)
+  \k<-n>      back reference by relative group number (n >= 1)
+  \k'-n'      back reference by relative group number (n >= 1)
   \k<name>    back reference by group name
+  \k'name'    back reference by group name
 
   In the back reference by the multiplex definition name,
   a subexp with a large number is referred to preferentially.
@@ -227,10 +263,17 @@ syntax: ONIG_SYNTAX_RUBY (default)
 
   back reference with nest level
 
-    (This function is disabled in Ruby 1.9.)
+    level: 0, 1, 2, ...
 
-    \k<name+n>     n: 0, 1, 2, ...
-    \k<name-n>     n: 0, 1, 2, ...
+    \k<n+level>     (n >= 1)
+    \k<n-level>     (n >= 1)
+    \k'n+level'     (n >= 1)
+    \k'n-level'     (n >= 1)
+
+    \k<name+level>
+    \k<name-level>
+    \k'name+level'
+    \k'name-level'
 
     Destinate relative nest level from back reference position.    
 
@@ -256,7 +299,11 @@ syntax: ONIG_SYNTAX_RUBY (default)
 9. Subexp call ("Tanaka Akira special")
 
   \g<name>    call by group name
+  \g'name'    call by group name
   \g<n>       call by group number (n >= 1)
+  \g'n'       call by group number (n >= 1)
+  \g<-n>      call by relative group number (n >= 1)
+  \g'-n'      call by relative group number (n >= 1)
 
   * left-most recursive call is not allowed.
      ex. (?<name>a|\g<name>b)   => error
@@ -300,7 +347,6 @@ syntax: ONIG_SYNTAX_RUBY (default)
 
   ('g' and 'G' options are argued in ruby-dev ML)
 
-  These options are not implemented in Ruby level.
 
 
 -----------------------------
@@ -317,14 +363,13 @@ A-1. Syntax depend options
 A-2. Original extensions
 
    + hexadecimal digit char type  \h, \H
-   + named group                  (?<name>...)
+   + named group                  (?<name>...), (?'name'...)
    + named backref                \k<name>
    + subexp call                  \g<name>, \g<group-num>
 
 
 A-3. Lacked features compare with perl 5.8.0
 
-   + [:word:]
    + \N{name}
    + \l,\u,\L,\U, \X, \C
    + (?{code})
@@ -334,20 +379,10 @@ A-3. Lacked features compare with perl 5.8.0
    * \Q...\E
      This is effective on ONIG_SYNTAX_PERL and ONIG_SYNTAX_JAVA.
 
-   * \p{property}, \P{property}
-     This is effective on ONIG_SYNTAX_PERL and ONIG_SYNTAX_JAVA.
-     Alnum, Alpha, Blank, Cntrl, Digit, Graph, Lower,
-     Print, Punct, Space, Upper, XDigit, ASCII are supported.
 
-     Prefix 'Is' of property name is allowed in ONIG_SYNTAX_PERL only.
-     ex. \p{IsXDigit}.
+A-4. Differences with Japanized GNU regex(version 0.12) of Ruby 1.8
 
-     Negation operator of property is supported in ONIG_SYNTAX_PERL only.
-     \p{^...}, \P{^...}
-
-
-A-4. Differences with Japanized GNU regex(version 0.12) of Ruby
-
+   + add character property (\p{property}, \P{property})
    + add hexadecimal digit char type (\h, \H)
    + add look-behind
      (?<=fixed-char-length-pattern), (?<!fixed-char-length-pattern)
@@ -401,7 +436,9 @@ A-5. Disabled functions by default syntax
 
 A-6. Problems
 
-   + Invalid encoding byte sequence is not checked in UTF-8.
+   + Invalid encoding byte sequence is not checked.
+
+     ex. UTF-8
 
      * Invalid first byte is treated as a character.
        /./u =~ "\xa3"

@@ -1,111 +1,316 @@
 History
 
-2007/08/16: Version 4.7.1
+2010/01/09: Version 5.9.2
 
-2007/08/16: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
-2007/07/04: [spec] (thanks K.Takata)
+2010/01/05: [bug]  fix utf16be_code_to_mbc() and utf16le_code_to_mbc().
+2008/09/16: [bug]  fix memory leaks in parse_exp().
+2008/08/01: [bug]  fix memory leaks.
+2008/06/17: [bug]  invalid type of argument was used
+                   in onig_st_lookup_strend().
+2008/06/16: [bug]  invalid CaseFoldMap entry in ISO-8859-5. 0xdf -> 0xde
+2008/02/19: [new]  add: onig_reg_init().
+2008/02/19: [new]  add: onig_free_body().
+2008/02/19: [new]  add: onig_new_without_alloc().
+2008/02/19: [API]  rename onig_alloc_init() to onig_reg_init(),
+                   and argument type changed.
+2008/01/31: [impl] move UTF16_IS_SURROGATE_XXX() to regenc.h.
+2008/01/30: [bug]  (thanks akr)
+                   fix euctw_islead().
+2008/01/23: [bug]  update enc/koi8.c.
+
+2007/12/22: Version 5.9.1
+
+2007/12/21: [impl] add sprint_byte().
+2007/11/28: [bug]  (thanks Andy Armstrong)
+                   don't overwrite error code in fetch_name().
+2007/11/12: [bug]  utf8 mbc length of code 0xfe, 0xff are not 1,
+2007/10/23: [spec] onig_enc_len() takes three arguments. (not used)
+2007/10/15: [impl] (thanks Rui Hirokawa)
+                   add check HAVE_STDARG_H.
+2007/09/07: [API]  rename enc_len() to onig_enc_len() in oniguruma.h.
+2007/09/04: [API]  remove ONIGENC_ERR_XXXXX.
+2007/09/03: [API]  add error ONIGERR_INVALID_CODE_POINT_VALUE.
+2007/09/03: [impl] change error message to "invaid code point value"
+                   for ONIGERR_INVALID_WIDE_CHAR_VALUE.
+2007/09/03: [bug]  xxx_code_to_mbclen() should return
+                   ONIGERR_INVALID_WIDE_CHAR_VALUE for invalid code point.
+                   ex. /[\x{7fffffff}]/ for ASCII encoding.
+2007/08/28: [impl] remove "warning: no previous declaration ...".
+2007/08/21: [impl] remove warnings in enc/mktable.c.
+2007/08/20: [impl] remove "warning: unused parameter"
+2007/08/20: [impl] remove "warning: comparison between signed and unsigned".
+2007/08/06: [impl] remove clear_not_flag_cclass().
+2007/08/03: [bug]  fix the case of undefined USE_NAMED_GROUP.
+2007/08/02: [spec] add backref by number.
+2007/08/01: [API]  add OnigCtype.
+2007/07/27: [spec] add USE_CASE_FOLD_IS_APPLIED_INSIDE_NEGATIVE_CCLASS.
+2007/07/24: [impl] define PLATFORM_UNALIGNED_WORD_ACCESS.
+2007/07/23: [dist] fix doc/FAQ.ja.
+
+2007/07/14: Version 5.9.0
+
+2007/07/13: [bug]  add check into onig_reduce_nested_quantifier().
+2007/06/26: [spec] (thanks K.Takata)
                    ONIG_OPTION_SINGLELINE: '$' -> '\Z'  (as Perl)
-2007/07/04: [dist] (thanks K.Takata)
+2007/06/26: [dist] (thanks K.Takata)
                    fix documents API and API.ja.
-
-2007/06/18: Version 4.7.0
-
-2007/06/18: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
+2007/06/19: [impl] remove IS_NOT_NULL() check before onig_node_free().
 2007/06/18: [bug]  (thanks KUBO Takehiro)
                    WORD_ALIGNMENT_SIZE must be sizeof(OnigCodePoint).
-2007/06/05: [impl] add #ifndef vsnprintf in regint.h.
-2007/06/05: [bug]  should check USE_CRNL_AS_LINE_TERMINATOR case
+2007/06/18: [impl] rename CClassNode flags.
+2007/06/18: [bug]  initialization miss.
+2007/06/13: [impl] change node type reference NXXXX.
+2007/06/11: [impl] add node type bit.
+2007/06/11: [spec] allow anchor in enclosed repeater. /(\z)*/
+2007/06/11: [impl] rename node types.
+2007/06/08: [impl] remove OP_SET_OPTION_PUSH and OP_SET_OPTION from match_at().
+2007/06/07: [impl] use xvsnprintf().
+2007/06/06: [tune] don't set qn->next_head_exact for string first byte is zero.
+2007/06/06: [impl] remove unused variables.
+
+2007/06/04: Version 5.8.0
+
+2007/06/04: [impl] add #ifndef vsnprintf into regint.h.
+2007/05/31: [dist] add configure option '--enable-crnl-as-line-terminator'.
+2007/05/30: [dist] add sample/crnl.c.
+2007/05/30: [bug]  should check USE_CRNL_AS_LINE_TERMINATOR case
                    in onig_search().
+2007/05/29: [impl] move USE_CRNL_AS_LINE_TERMINATOR into regenc.h.
+2007/05/29: [impl] should check USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
+                   in forward_search_range() and backward_search_range().
 
-2007/04/12: Version 4.6.2
+2007/04/27: Version 5.7.0
 
+2007/04/20: [spec] add config USE_MATCH_RANGE_IS_COMPLETE_RANGE.
+2007/04/20: [impl] refactoring in match_at().
+
+2007/04/12: Version 5.6.1
+
+2007/04/12: [bug]  must not use UChar in oniguruma.h.
 2007/04/09: [impl] change STATE_CHECK_BUFF_MAX_SIZE value from 0x8000
-                   to 0x4000.
+                   to 0x4000. [ruby-core:10883]
+
+2007/04/04: Version 5.6.0  (mourning for Hideo Takamatsu)
+
+2007/04/03: [spec] add new notation (?'name'), \k'name', \g'name'.
+2007/04/03: [impl] remove unused variable.
 2007/03/26: [impl] add 'void' to function declarations.
 
-2007/03/06: Version 4.6.1
+2007/03/06: Version 5.5.3
 
-2007/03/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
 2007/03/06: [bug]  add #include <malloc.h> for bcc32.
                    (In bcc32, alloca() is declared in malloc.h.)
-2007/03/06: [impl] remove including version.h of Ruby.
 2007/03/02: [bug]  invalid optimization for semi-end-buf in onig_search().
                    ex. /\n\Z/.match("aaaaaaaaaa\n")
 2007/03/02: [impl] move range > start check position in end_buf process.
 
-2007/02/08: Version 4.6.0
+2007/01/09: Version 5.5.2
 
-2007/02/08: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
-2007/01/09: [tune] select_opt_exact_info() didn't work for empty info.
+2007/01/09: [impl] rename USE_EXTERNAL_LOWER_CASE_CONV_TABLE.
+2007/01/05: [tune] select_opt_exact_info() didn't work for empty info.
                    ex. /.a/ make MAP info instead of EXACT info.
-2006/12/29: [impl] add print_enc_string() for ONIG_DEBUG mode.
-2006/12/22: [spec] should check too short multibyte char in parse_exp().
-                   add USE_PAD_TO_SHORT_BYTE_CHAR.
+2006/12/28: [impl] add print_enc_string() for ONIG_DEBUG mode.
+
+2006/12/22: Version 5.5.1
+
+2006/12/22: [impl] rename ADD_PAD_TO_SHORT_BYTE_STRING
+                 . to USE_PAD_TO_SHORT_BYTE_CHAR.
+2006/12/21: [spec] should check too short multibyte char in parse_exp().
+                   add ADD_PAD_TO_SHORT_BYTE_STRING.
                    ex. /\x00/ in UTF16 should be error.
 
-2006/11/17: Version 4.5.1
+2006/12/06: Version 5.5.0
 
-2006/11/17: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
-2006/11/15: [impl] remove CHECK_INTERRUPT.
+2006/12/05: [bug]  should add unfold-1 codes from folded code into
+                   onigenc_unicode_get_case_fold_codes_by_str().
+                   (ex. "S" -> "s" -> 0x017f)
+2006/12/05: [new]  add flag ONIGENC_CASE_FOLD_TURKISH_AZERI and
+                   USE_UNICODE_CASE_FOLD_TURKISH_AZERI. (disabled in default)
+2006/12/04: [spec] remove ONIGENC_CASE_FOLD_FULL.
+2006/11/30: [impl] remove unnecessary check in xxx_mbc_case_fold().
+
+2006/11/29: Version 5.4.0
+
+2006/11/28: [spec] INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR is enabled in
+                   default case fold status.
+2006/11/28: [spec] rename ONIGENC_CASE_FOLD_MULTI_CHAR to
+                   INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR.
+2006/11/28: [impl] remove USE_UNICODE_CASE_FOLD_MULTI_CHAR.
+2006/11/28: [impl] remove Fold[123]Table and add FoldTable.
+2006/11/27: [impl] change tool/unicode_fc.rb to see CaseFolding.txt.
+2006/11/24: [bug]  should call callback for to[j] <-> to[k] in
+                   onigenc_unicode_apply_all_case_fold().
+
+2006/11/22: Version 5.3.0
+
+2006/11/22: [dist] add index_ja.html.
+2006/11/22: [impl] undef ONIG_ESCAPE_UCHAR_COLLISION in regint.h and regenc.h.
+2006/11/21: [bug]  invalid array access.
+2006/11/21: [impl] escape UChar collision from config.h.
+2006/11/20: [new]  add Hiragana/Katakana properties into Shift_JIS.
+2006/11/20: [impl] fix CR_Katakana[] values in EUC-JP.
+2006/11/17: [impl] declare strend hash table functions in regint.h.
+2006/11/17: [impl] move property list functions to regenc.c.
+2006/11/17: [new]  add Hiragana/Katakana properties into EUC-JP.
+2006/11/15: [impl] remove NOT_RUBY from AM_CFLAGS.
+
+2006/11/14: Version 5.2.0
+
+2006/11/14: [impl] remove program codes for Ruby.
+2006/11/14: [impl] reduce program codes for Ruby.
 2006/11/10: [bug]  0x24, 0x2b, 0x3c, 0x3d, 0x3e, 0x5e, 0x60, 0x7c, 0x7e
                    should be [:punct:].
+2006/11/09: [new]  (thanks Byte)
+                   add new character encoding CP1251.
 2006/11/08: [impl] rename QUALIFIER -> QUANTIFIER.
+
+2006/11/07: Version 5.1.0
+
+2006/11/07: [dist] remove test.rb, testconv.rb and testconvu.rb.
+2006/11/07: [bug]  get_case_fold_codes_by_str() should handle 'Ss' and 'sS'
+                   combination for ess-tsett.
+2006/11/07: [impl] apply_all_case_fold() doesn't need to return all 
+                   case character combination for multi-character folding.
+                   (ONIGENC_CASE_FOLD_MULTI_CHAR)
 2006/11/07: [bug]  (thanks Byte)
-                   add 0xa3 <=> 0xb3 to CaseFoldMap[] for KOI8-R.
-
-2006/11/06: Version 4.5.0
-
-2006/11/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
-2006/11/06: [API]  remove ONIGENC_AMBIGUOUS_MATCH_COMPOUND.
+                   add { 0xa3, 0xb3 } to CaseFoldMap[] for KOI8-R.
 2006/11/06: [spec] change ONIG_OPTION_FIND_LONGEST to search all of 
                    the string range.
                    add USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE.
-
-2006/10/30: Version 4.4.6
-
-2006/10/30: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/11/02: [impl] re-implement expand_case_fold_string() for
+                   ONIGENC_CASE_FOLD_MULTI_CHAR.
+2006/10/30: [impl] add NSTR_DONT_GET_OPTINFO flag.
 2006/10/30: [impl] (thanks K.Takata)
                    add THREAD_SYSTEM_INIT and THREAD_SYSTEM_END.
 2006/10/30: [bug]  (thanks Wolfgang Nadasi-Donner)
                    invalid offset value was used in STATE_CHECK_BUFF_INIT().
-
-2006/10/24: Version 4.4.5
-
-2006/10/24: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
-2006/10/24: [impl] escape -Wall warning.
-2006/10/24: [tune] (thanks Kornelius Kalnbach)
+2006/10/27: [tune] speed up ONIGENC_MBC_CASE_FOLD() for UTF-16, UTF-32.
+                   (ASCII code check)
+2006/10/27: [tune] (thanks Kornelius Kalnbach)
                    String#scan for long string needs long time compare with
                    old Ruby
                    by initialization time for combination explosion check
                    ex. ("test " * 100_000).scan(/\w*\s?/)
                    change STATE_CHECK_BUFF_MAX_SIZE from 0x8000000 to 0x8000.
                    reduce initialization area of state_check_buff.
+2006/10/25: [impl] add DISABLE_CASE_FOLD_MULTI_CHAR().
+
+2006/10/23: Version 5.0.1
+
+2006/10/23: [bug]  should fold string in expand_case_fold_string().
+2006/10/23: [bug]  (thanks Km)
+                   too many case fold/unfold expansion problem.
+                   don't expand and set ambig flag to the string node.
+                   (except ONIGENC_CASE_FOLD_MULTI_CHAR).
+2006/10/23: [bug]  (thanks K.Takata)
+                   invalid \p{Alnum}, \p{ASCII}, [:alnum:], [:ascii:].
+                   fix OnigEncAsciiCtypeTable[] etc...
+2006/10/23: [spec] (thanks K.Takata)
+                   add [:word:] POSIX bracket.
+2006/10/23: [bug]  (thanks K.Takata)
+                   \p{Word} doesn't work.
+2006/10/20: [impl] don't expand for AMBIG_FLAG string in
+                   expand_case_fold_string().
+
+2006/10/19: Version 5.0.0
+
+2006/10/18: [bug]  ONIGENC_GET_CASE_FOLD_CODES_MAX_NUM should be 13.
+2006/10/18: [impl] remove unused functions.
+2006/10/18: [dist] update documents.
+2006/10/18: [API]  move OnigMetaCharTableType to OnigSyntaxType.
+2006/10/18: [dev]  add too/unicode_fc.rb, unicode_pc.rb.
+2006/10/18: [dist] remove MANIFEST-RUBY from distribution.
+2006/10/18: [bug]  return duplicated code in
+                   onigenc_unicode_get_case_fold_codes_by_str().
+2006/10/18  [API]  remove ONIG_SYN_OP2_CHAR_PROPERTY_PREFIX_IS.
+2006/10/18: [dev]  add tool/19.
+2006/10/18: [dist] remove target 19 from Makefile.am.
+2006/10/17: [dist] add enc/unicode.c to target 19 of win32/Makefile.
+2006/10/17: [impl] change type for escape VC++ warning.
+2006/10/17: [API]  rename ONIGENC_CASE_FOLD_NONE to ONIGENC_CASE_FOLD_MIN.
+2006/10/17: [dist] remove INSTALL-RUBY from distribution.
+2006/10/17: [dist] update LTVERSION to "2:0:0".
+2006/10/17: [impl] remove warnings for [make CFLAGS="-g -O2 -Wall"]
+                   in the case USE_UNICODE_PROPERTIES and
+                   USE_UNICODE_CASE_FOLD_MULTI_CHAR are undefined.
+2006/10/17: [impl] remove warnings for [make CFLAGS="-g -O2 -Wall"].
+2006/10/17: [impl] re-implement onigenc_unicode_apply_all_case_fold().
+                   multi-char by case folded char-class is treated as
+                   caseless-string (ambig flag on).
+                   enable OP_EXACT1_IC and OP_EXACTN_IC.
+2006/10/16: [bug]  unfold expand for 1->2, 1->3 folding in
+                   onigenc_unicode_apply_all_case_fold().
+                   add CaseFoldExpand_12[], CaseFoldExpand_13[].
 2006/10/16: [bug]  (thanks Akinori Musha)
                    first argument of rb_warn() should be format string.
-2006/10/10: [impl] add msa.state_check_buff_size initialization
+2006/10/16: [impl] add msa.state_check_buff_size initialization
                    in onig_search().
+2006/10/16: [spec] re-implement Unicode Caseless Match codes.
 2006/10/10: [bug]  should call onig_st_free_table() in
                    onig_free_shared_cclass_table().
+2006/10/10: [impl] remove OnigCompCaseFoldCodes.
+2006/10/10: [impl] remove onigenc_ascii_is_mbc_ambiguous() and
+                   onigenc_mbn_is_mbc_ambiguous().
+2006/10/10: [API]  remove is_mbc_ambiguous() member from OnigEncodingType.
+2006/10/10: [API]  rename onig_set_default_ambig_flag() to
+                   onig_set_default_case_fold_flag(),
+                   onig_get_default_ambig_flag() to
+                   onig_get_default_case_fold_flag(),
+                   onig_get_ambig_flag() to onig_get_case_fold_flag().
+2006/10/10: [API]  rename ambig_flag to case_fold_flag.
+2006/10/10: [API]  rename OnigAmbigType to OnigCaseFoldType.
+2006/10/10: [impl] rename ONIGENC_IS_CODE_SB_WORD() to IS_CODE_SB_WORD()
+                   and move to regint.h.
 2006/10/10: [impl] remove OP_WORD_SB and OP_WORD_MB.
+2006/10/10: [impl] remove OP_EXACT1_IC and OP_EXACTN_IC from match_at().
+2006/10/10: [impl] should free new_str in expand_case_fold_string().
+2006/10/06: [dist] add test entrys to sample/encode.c.
+2006/10/06: [impl] re-implement caseless match (case-fold).
+2006/10/06: [impl] expand string node by case fold variations.
+                   add expand_case_fold_string().
+2006/10/05: [spec] rename OnigCompAmbigCodeItem to OnigCaseFoldCodeItem.
+2006/10/05: [spec] add apply_all_case_fold() and get_case_fold_codes_by_str()
+                   to OnigEncodingType.
+2006/10/05: [spec] remove ambig_flag, get_all_pair_ambig_codes() and
+                   get_all_comp_ambig_codes() member from OnigEncodingType.
+2006/10/03: [impl] rename mbc_to_normalize() to mbc_case_fold().
+2006/10/03: [spec] rename ONIGENC_AMBIGUOUS_MATCH_XXX
+                   to ONIGENC_CASE_FOLD_XXX.
+                   rename ONIGENC_CASE_FOLD_COMPOUND
+                   to ONIGENC_CASE_FOLD_MULTI_CHAR.
+2006/10/02: [impl] remove all ONIG_RUBY_M17N part.
 2006/09/29: [impl] initialize state_check_buff_size in STATE_CHECK_BUFF_INIT().
                    make valgrind happy.
-2006/09/22: [impl] convert to ascii for parameter string in
+2006/09/22: [impl] remove parse time ctype values (CTYPE_WORD etc...)
+2006/09/22: [ruby] enable USE_BACKREF_AT_LEVEL for Ruby mode.
+2006/09/22: [spec] (thanks Allan Odgaard)
+                   allow upper case letter as the first character
+                   of group name.
+                   fetch_name() and fetch_name_with_level()
+2006/09/21: [impl] convert to ascii for parameter string in
                    onig_error_code_to_str().
                    add enc member into OnigErrorInfo.
-
-2006/09/19: Version 4.4.4
-
-2006/09/19: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/21: [dist] update documents for Unicode Property.
+2006/09/21: [new]  add Unicode Properties. (enc/unicode.c)
+                   Any, Assigned, C, Cc, L, Lm, Arabic, Greek etc...
+2006/09/21: [impl] add USE_UNICODE_PROPERTIES into regenc.h.
+2006/09/21: [impl] remove USE_UNICODE_FULL_RANGE_CTYPE.
+2006/09/20: [impl] change ONIGENC_CTYPE_XXXX to sequencial values.
+                   add BIT_CTYPE_XXXX bit flags to regenc.h.
+                   update XXXX_CtypeTable[] for BIT_CTYPE_ALNUM.
+2006/09/19: [memo] move from CVS to Subversion (1.3.2).
 2006/09/19: [impl] (thanks KOYAMA Tetsuji)
                    HAVE_STDARG_PROTOTYPES was not defined in Mac OS X
                    by Xcode 2.4(gcc 4.0.1) problem. [php-dev 1312] etc...
-
-2006/09/15: Version 4.4.3
-
-2006/09/15: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
 2006/09/15: [bug]  (thanks Allan Odgaard)
                    out of range access in bm_search_notrev().
                    (p < s)
+2006/09/13: [impl] add ONIGENC_CTYPE_ENC_EXT flag.
+2006/09/13: [spec] remove 'Is' prefix check for property name
+                   from fetch_char_property_to_ctype().
+2006/09/13: [API]  add property_name_to_ctype member to OnigEncodingType.
+2006/09/12: [spec][ruby] add ONIG_SYN_OP2_ESC_P_BRACE_CHAR_PROPERTY and
+                   ONIG_SYN_OP2_ESC_P_BRACE_CIRCUMFLEX_NOT to OnigSyntaxRuby.
 
 2006/09/08: Version 4.4.2
 
@@ -1808,8 +2013,17 @@ History
 [inst: changes for installation]
 [dist: distribution change]
 [test: test]
+[dev:  development]
 [memo: memo]
 --
+<create tag>
+svn copy file:///home/kosako/svnreps/svnrep_onig/trunk file:///home/kosako/svnreps/svnrep_onig/tags/5.0.0 -m "ADD TAG: 5.0.0"
+
+<set ignore files by .cvsignore>
+svn propset svn:ignore -F .cvsignore .
+svn commit -m "..."
+
+
 <CVS: show all tags>
 cvs history -T
 
@@ -1820,7 +2034,7 @@ cvs rtag "VERSION_X_X_X" oniguruma
 <GNU Autotools: bootstrap>
 * write Makefile.am and configure.in.
 > aclocal
-> libtoolize
+> libtoolize   or   glibtoolize
 > automake --foreign --add-missing
 > autoconf
 > configure --with-rubydir=... CFLAGS="-O2 -Wall"
