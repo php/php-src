@@ -1,4 +1,4 @@
-FAQ    2006/10/30
+FAQ    2007/07/23
 
 1. 最長マッチ
 
@@ -13,7 +13,7 @@ FAQ    2006/10/30
 
    (A) Oniguruma Layer
 
-       oniguruma/regint.hの中のNOT_RUBYの部分の以下のマクロを定義する。
+       oniguruma/regint.hの中の以下のマクロを定義する。
 
        USE_MULTI_THREAD_SYSTEM
        THREAD_ATOMIC_START
@@ -35,7 +35,16 @@ FAQ    2006/10/30
    "スレッドセーフに関する補足"に書いておいた。
 
 
-3. メーリングリスト
+3. CR + LF
+
+   DOSの改行(CR(0x0c) + LF(0x0a)の連続)
+
+   regenc.hの中の、以下の部分を有効にする。
+
+     /* #define USE_CRNL_AS_LINE_TERMINATOR */
+
+
+4. メーリングリスト
 
    鬼車に関するメーリングリストは存在しない。
 
@@ -59,8 +68,7 @@ Onigurumaライブラリの中で行うか、どちらかを選ぶことができます。
 
 (A) Onigurumaの中で対応する場合
 
-oniguruma/regint.hの中のNOT_RUBYで囲まれている部分の中で
-以下のマクロを定義して再コンパイルしてください。
+oniguruma/regint.hの中で以下のマクロを定義して再コンパイルしてください。
 
 USE_MULTI_THREAD_SYSTEM
 

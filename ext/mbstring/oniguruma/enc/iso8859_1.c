@@ -2,7 +2,7 @@
   iso8859_1.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,90 +30,221 @@
 #include "regenc.h"
 
 #define ENC_IS_ISO_8859_1_CTYPE(code,ctype) \
-  ((EncISO_8859_1_CtypeTable[code] & ctype) != 0)
+  ((EncISO_8859_1_CtypeTable[code] & CTYPE_TO_BIT(ctype)) != 0)
 
 static const unsigned short EncISO_8859_1_CtypeTable[256] = {
-  0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
-  0x2008, 0x220c, 0x2209, 0x2208, 0x2208, 0x2208, 0x2008, 0x2008,
-  0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
-  0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
-  0x2284, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
-  0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
-  0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0,
-  0x38b0, 0x38b0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
-  0x21a0, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x31a0,
-  0x21a0, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x2008,
+  0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008,
+  0x4008, 0x420c, 0x4209, 0x4208, 0x4208, 0x4208, 0x4008, 0x4008,
+  0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008,
+  0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008,
+  0x4284, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0,
+  0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0,
+  0x78b0, 0x78b0, 0x78b0, 0x78b0, 0x78b0, 0x78b0, 0x78b0, 0x78b0,
+  0x78b0, 0x78b0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x41a0,
+  0x41a0, 0x7ca2, 0x7ca2, 0x7ca2, 0x7ca2, 0x7ca2, 0x7ca2, 0x74a2,
+  0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2,
+  0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2, 0x74a2,
+  0x74a2, 0x74a2, 0x74a2, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x51a0,
+  0x41a0, 0x78e2, 0x78e2, 0x78e2, 0x78e2, 0x78e2, 0x78e2, 0x70e2,
+  0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2,
+  0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2,
+  0x70e2, 0x70e2, 0x70e2, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x4008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0284, 0x01a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x10e2, 0x01a0, 0x00a0, 0x01a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x10a0, 0x10a0, 0x00a0, 0x10e2, 0x00a0, 0x01a0,
-  0x00a0, 0x10a0, 0x10e2, 0x01a0, 0x10a0, 0x10a0, 0x10a0, 0x01a0,
-  0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2,
-  0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2,
-  0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x00a0,
-  0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x14a2, 0x10e2,
-  0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2,
-  0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2,
-  0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x00a0,
-  0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2, 0x10e2
+  0x00a0, 0x00a0, 0x30e2, 0x01a0, 0x00a0, 0x01a0, 0x00a0, 0x00a0,
+  0x00a0, 0x00a0, 0x10a0, 0x10a0, 0x00a0, 0x30e2, 0x00a0, 0x01a0,
+  0x00a0, 0x10a0, 0x30e2, 0x01a0, 0x10a0, 0x10a0, 0x10a0, 0x01a0,
+  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
+  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
+  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x00a0,
+  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x00a0,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2
+};
+
+static const OnigPairCaseFoldCodes CaseFoldMap[] = {
+  { 0xc0, 0xe0 },
+  { 0xc1, 0xe1 },
+  { 0xc2, 0xe2 },
+  { 0xc3, 0xe3 },
+  { 0xc4, 0xe4 },
+  { 0xc5, 0xe5 },
+  { 0xc6, 0xe6 },
+  { 0xc7, 0xe7 },
+  { 0xc8, 0xe8 },
+  { 0xc9, 0xe9 },
+  { 0xca, 0xea },
+  { 0xcb, 0xeb },
+  { 0xcc, 0xec },
+  { 0xcd, 0xed },
+  { 0xce, 0xee },
+  { 0xcf, 0xef },
+
+  { 0xd0, 0xf0 },
+  { 0xd1, 0xf1 },
+  { 0xd2, 0xf2 },
+  { 0xd3, 0xf3 },
+  { 0xd4, 0xf4 },
+  { 0xd5, 0xf5 },
+  { 0xd6, 0xf6 },
+  { 0xd8, 0xf8 },
+  { 0xd9, 0xf9 },
+  { 0xda, 0xfa },
+  { 0xdb, 0xfb },
+  { 0xdc, 0xfc },
+  { 0xdd, 0xfd },
+  { 0xde, 0xfe }
 };
 
 static int
-iso_8859_1_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end, UChar* lower)
+apply_all_case_fold(OnigCaseFoldType flag,
+		    OnigApplyAllCaseFoldFunc f, void* arg)
 {
-  const UChar* p = *pp;
-
-  if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-       ONIGENC_IS_MBC_ASCII(p)) ||
-      ((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
-       !ONIGENC_IS_MBC_ASCII(p))) {
-    *lower = ONIGENC_ISO_8859_1_TO_LOWER_CASE(*p);
-  }
-  else {
-    *lower = *p;
-  }
-  (*pp)++;
-  return 1; /* return byte length of converted char to lower */
+  return onigenc_apply_all_case_fold_with_map(
+            sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 1,
+            flag, f, arg);
 }
 
 static int
-iso_8859_1_is_mbc_ambiguous(OnigAmbigType flag,
-			    const UChar** pp, const UChar* end)
+get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
+			   const OnigUChar* p, const OnigUChar* end,
+			   OnigCaseFoldCodeItem items[])
 {
-  const UChar* p = *pp;
-
-  (*pp)++;
-  if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-       ONIGENC_IS_MBC_ASCII(p)) ||
-      ((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
-       !ONIGENC_IS_MBC_ASCII(p))) {
-    int v = (EncISO_8859_1_CtypeTable[*p] &
-             (ONIGENC_CTYPE_UPPER | ONIGENC_CTYPE_LOWER));
-
-    if ((v | ONIGENC_CTYPE_LOWER) != 0) {
-      /* 0xdf, 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
-      if (*p == 0xdf || (*p >= 0xaa && *p <= 0xba))
-        return FALSE;
-      else
-        return TRUE;
+  if (0x41 <= *p && *p <= 0x5a) {
+    items[0].byte_len = 1;
+    items[0].code_len = 1;
+    items[0].code[0] = (OnigCodePoint )(*p + 0x20);
+    if (*p == 0x53 && end > p + 1
+	&& (*(p+1) == 0x53 || *(p+1) == 0x73)) { /* SS */
+      items[1].byte_len = 2;
+      items[1].code_len = 1;
+      items[1].code[0] = (OnigCodePoint )0xdf;
+      return 2;
     }
-
-    return (v != 0 ? TRUE : FALSE);
+    else
+      return 1;
   }
-  return FALSE;
+  else if (0x61 <= *p && *p <= 0x7a) {
+    items[0].byte_len = 1;
+    items[0].code_len = 1;
+    items[0].code[0] = (OnigCodePoint )(*p - 0x20);
+    if (*p == 0x73 && end > p + 1
+	&& (*(p+1) == 0x73 || *(p+1) == 0x53)) { /* ss */
+      items[1].byte_len = 2;
+      items[1].code_len = 1;
+      items[1].code[0] = (OnigCodePoint )0xdf;
+      return 2;
+    }
+    else
+      return 1;
+  }
+  else if (0xc0 <= *p && *p <= 0xcf) {
+    items[0].byte_len = 1;
+    items[0].code_len = 1;
+    items[0].code[0] = (OnigCodePoint )(*p + 0x20);
+    return 1;
+  }
+  else if (0xd0 <= *p && *p <= 0xdf) {
+    if (*p == 0xdf) {
+      items[0].byte_len = 1;
+      items[0].code_len = 2;
+      items[0].code[0] = (OnigCodePoint )'s';
+      items[0].code[1] = (OnigCodePoint )'s';
+
+      items[1].byte_len = 1;
+      items[1].code_len = 2;
+      items[1].code[0] = (OnigCodePoint )'S';
+      items[1].code[1] = (OnigCodePoint )'S';
+
+      items[2].byte_len = 1;
+      items[2].code_len = 2;
+      items[2].code[0] = (OnigCodePoint )'s';
+      items[2].code[1] = (OnigCodePoint )'S';
+
+      items[3].byte_len = 1;
+      items[3].code_len = 2;
+      items[3].code[0] = (OnigCodePoint )'S';
+      items[3].code[1] = (OnigCodePoint )'s';
+
+      return 4;
+    }
+    else if (*p != 0xd7) {
+      items[0].byte_len = 1;
+      items[0].code_len = 1;
+      items[0].code[0] = (OnigCodePoint )(*p + 0x20);
+      return 1;
+    }
+  }
+  else if (0xe0 <= *p && *p <= 0xef) {
+    items[0].byte_len = 1;
+    items[0].code_len = 1;
+    items[0].code[0] = (OnigCodePoint )(*p - 0x20);
+    return 1;
+  }
+  else if (0xf0 <= *p && *p <= 0xfe) {
+    if (*p != 0xf7) {
+      items[0].byte_len = 1;
+      items[0].code_len = 1;
+      items[0].code[0] = (OnigCodePoint )(*p - 0x20);
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static int
-iso_8859_1_is_code_ctype(OnigCodePoint code, unsigned int ctype)
+mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
+	      const UChar* end ARG_UNUSED, UChar* lower)
+{
+  const UChar* p = *pp;
+
+  if (*p == 0xdf && (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
+    *lower++ = 's';
+    *lower   = 's';
+    (*pp)++;
+    return 2;
+  }
+
+  *lower = ONIGENC_ISO_8859_1_TO_LOWER_CASE(*p);
+  (*pp)++;
+  return 1;
+}
+
+#if 0
+static int
+is_mbc_ambiguous(OnigCaseFoldType flag,
+		 const UChar** pp, const UChar* end)
+{
+  int v;
+  const UChar* p = *pp;
+
+  if (*p == 0xdf && (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
+    (*pp)++;
+    return TRUE;
+  }
+
+  (*pp)++;
+  v = (EncISO_8859_1_CtypeTable[*p] & (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
+  if ((v | BIT_CTYPE_LOWER) != 0) {
+    /* 0xdf, 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
+    if (*p >= 0xaa && *p <= 0xba)
+      return FALSE;
+    else
+      return TRUE;
+  }
+
+  return (v != 0 ? TRUE : FALSE);
+}
+#endif
+
+static int
+is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
   if (code < 256)
     return ENC_IS_ISO_8859_1_CTYPE(code, ctype);
@@ -126,25 +257,15 @@ OnigEncodingType OnigEncodingISO_8859_1 = {
   "ISO-8859-1",  /* name */
   1,             /* max enc length */
   1,             /* min enc length */
-  (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
-  {
-      (OnigCodePoint )'\\'                       /* esc */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
-  },
   onigenc_is_mbc_newline_0x0a,
   onigenc_single_byte_mbc_to_code,
   onigenc_single_byte_code_to_mbclen,
   onigenc_single_byte_code_to_mbc,
-  iso_8859_1_mbc_to_normalize,
-  iso_8859_1_is_mbc_ambiguous,
-  onigenc_iso_8859_1_get_all_pair_ambig_codes,
-  onigenc_ess_tsett_get_all_comp_ambig_codes,
-  iso_8859_1_is_code_ctype,
+  mbc_case_fold,
+  apply_all_case_fold,
+  get_case_fold_codes_by_str,
+  onigenc_minimum_property_name_to_ctype,
+  is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   onigenc_single_byte_left_adjust_char_head,
   onigenc_always_true_is_allowed_reverse_match

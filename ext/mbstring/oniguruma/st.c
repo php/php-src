@@ -2,7 +2,6 @@
 
 /* static	char	sccsid[] = "@(#) st.c 5.1 89/12/14 Crucible"; */
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,22 +10,7 @@
 #include <malloc.h>
 #endif
 
-#ifdef NOT_RUBY
 #include "regint.h"
-#else
-#ifdef RUBY_PLATFORM
-#define xmalloc ruby_xmalloc
-#define xcalloc ruby_xcalloc
-#define xrealloc ruby_xrealloc
-#define xfree ruby_xfree
-
-void *xmalloc(long);
-void *xcalloc(long, long);
-void *xrealloc(void *, long);
-void xfree(void *);
-#endif
-#endif
-
 #include "st.h"
 
 typedef struct st_table_entry st_table_entry;
@@ -467,8 +451,13 @@ st_delete_safe(table, key, value, never)
 }
 
 static int
+#if defined(__GNUC__)
+delete_never(st_data_t key __attribute__ ((unused)), st_data_t value,
+	     st_data_t never)
+#else
 delete_never(key, value, never)
     st_data_t key, value, never;
+#endif
 {
     if (value == never) return ST_DELETE;
     return ST_CONTINUE;
