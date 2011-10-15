@@ -1386,7 +1386,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		if (header_length < 0) {
 			return FALSE;
 		}
-		http_buf = emalloc(header_length + 1);
+		http_buf = safe_emalloc(1, header_length, 1);
 		while (http_buf_size < header_length) {
 			int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
 			if (len_read <= 0) {
