@@ -9,11 +9,11 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 session.save_handler=files
 session.save_path=
 session.name=PHPSESSID
+open_basedir=.
 --FILE--
 <?php
 
 ob_start();
-ini_set('open_basedir', __DIR__);
 /* 
  * Prototype : string session_save_path([string $path])
  * Description : Get and/or set the current session save path
