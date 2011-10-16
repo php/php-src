@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #55622 (memory corruption in parse_ini_string). (Pierre)
   . Fixed bug #55825 (Missing initial value of static locals in trait methods).
     (Laruence)
+  . Fixed bug #60038 (SIGALRM cause segfault in php_error_cb). (Laruence)
 
 - Openssl
 - Revert r313616 (When we have a blocking SSL socket, respect the timeout

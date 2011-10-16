@@ -900,6 +900,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 	/* store the error if it has changed */
 	if (display) {
+#ifdef ZEND_SIGNALS
+		HANDLE_BLOCK_INTERRUPTIONS();	
+#endif
 		if (PG(last_error_message)) {
 			free(PG(last_error_message));
 			PG(last_error_message) = NULL;
@@ -908,6 +911,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			free(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
+#ifdef ZEND_SIGNALS
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+#endif
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
