@@ -297,7 +297,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 						json_pretty_print_indent(buf, options TSRMLS_CC);
 
-						json_escape_string(buf, key, key_len - 1, options TSRMLS_CC);
+						json_escape_string(buf, key, key_len - 1, options & ~PHP_JSON_NUMERIC_CHECK TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
 						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
