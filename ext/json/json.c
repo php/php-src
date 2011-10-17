@@ -238,7 +238,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 							need_comma = 1;
 						}
 
-						json_escape_string(buf, key, key_len - 1, options TSRMLS_CC);
+						json_escape_string(buf, key, key_len - 1, options & ~PHP_JSON_NUMERIC_CHECK TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
 						php_json_encode(buf, *data, options TSRMLS_CC);
