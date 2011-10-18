@@ -1469,7 +1469,8 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			&& opline->result.var == op1->u.op.var) {
 			if (opline->opcode == ZEND_FETCH_R ||
 			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_OBJ_R) {
+			    opline->opcode == ZEND_FETCH_OBJ_R ||
+			    opline->opcode == ZEND_QM_ASSIGN_VAR) {
 				/* It's very rare and useless case. It's better to use
 				   additional FREE opcode and simplify the FETCH handlers
 				   their selves */
@@ -6308,8 +6309,13 @@ void zend_do_jmp_set(const znode *value, znode *jmp_token, znode *colon_token TS
 	int op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_JMP_SET;
-	opline->result_type = IS_TMP_VAR;
+	if (value->op_type == IS_VAR || value->op_type == IS_CV) {
+		opline->opcode = ZEND_JMP_SET_VAR;
+		opline->result_type = IS_VAR;
+	} else {
+		opline->opcode = ZEND_JMP_SET;
+		opline->result_type = IS_TMP_VAR;
+	}
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	SET_NODE(opline->op1, value);
 	SET_UNUSED(opline->op2);
@@ -6326,9 +6332,20 @@ void zend_do_jmp_set_else(znode *result, const znode *false_value, const znode *
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_QM_ASSIGN;
-	opline->extended_value = 0;
 	SET_NODE(opline->result, colon_token);
+	if (colon_token->op_type == IS_TMP_VAR) {
+		if (false_value->op_type == IS_VAR || false_value->op_type == IS_CV) {
+			CG(active_op_array)->opcodes[jmp_token->u.op.opline_num].opcode = ZEND_JMP_SET_VAR;
+			CG(active_op_array)->opcodes[jmp_token->u.op.opline_num].result_type = IS_VAR;
+			opline->opcode = ZEND_QM_ASSIGN_VAR;
+			opline->result_type = IS_VAR;
+		} else {
+			opline->opcode = ZEND_QM_ASSIGN;
+		}
+	} else {
+		opline->opcode = ZEND_QM_ASSIGN_VAR;
+	}
+	opline->extended_value = 0;
 	SET_NODE(opline->op1, false_value);
 	SET_UNUSED(opline->op2);
 	
@@ -6363,8 +6380,13 @@ void zend_do_qm_true(const znode *true_value, znode *qm_token, znode *colon_toke
 
 	CG(active_op_array)->opcodes[qm_token->u.op.opline_num].op2.opline_num = get_next_op_number(CG(active_op_array))+1; /* jmp over the ZEND_JMP */
 
-	opline->opcode = ZEND_QM_ASSIGN;
-	opline->result_type = IS_TMP_VAR;
+	if (true_value->op_type == IS_VAR || true_value->op_type == IS_CV) {
+		opline->opcode = ZEND_QM_ASSIGN_VAR;
+		opline->result_type = IS_VAR;
+	} else {
+		opline->opcode = ZEND_QM_ASSIGN;
+		opline->result_type = IS_TMP_VAR;
+	}
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	SET_NODE(opline->op1, true_value);
 	SET_UNUSED(opline->op2);
@@ -6383,8 +6405,19 @@ void zend_do_qm_false(znode *result, const znode *false_value, const znode *qm_t
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_QM_ASSIGN;
 	SET_NODE(opline->result, qm_token);
+	if (qm_token->op_type == IS_TMP_VAR) {
+		if (false_value->op_type == IS_VAR || false_value->op_type == IS_CV) {
+			CG(active_op_array)->opcodes[colon_token->u.op.opline_num - 1].opcode = ZEND_QM_ASSIGN_VAR;
+			CG(active_op_array)->opcodes[colon_token->u.op.opline_num - 1].result_type = IS_VAR;
+			opline->opcode = ZEND_QM_ASSIGN_VAR;
+			opline->result_type = IS_VAR;
+		} else {
+			opline->opcode = ZEND_QM_ASSIGN;
+		}
+	} else {
+		opline->opcode = ZEND_QM_ASSIGN_VAR;
+	}
 	SET_NODE(opline->op1, false_value);
 	SET_UNUSED(opline->op2);
 

@@ -4661,8 +4661,45 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 
 	if (i_zend_is_true(value)) {
 		ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, value);
-		zendi_zval_copy_ctor(EX_T(opline->result.var).tmp_var);
-		FREE_OP1();
+		if (!IS_OP1_TMP_FREE()) {
+			zendi_zval_copy_ctor(EX_T(opline->result.var).tmp_var);
+		}
+		FREE_OP1_IF_VAR();
+#if DEBUG_ZEND>=2
+		printf("Conditional jmp to %d\n", opline->op2.opline_num);
+#endif
+		ZEND_VM_JMP(opline->op2.jmp_addr);
+	}
+
+	FREE_OP1();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(158, ZEND_JMP_SET_VAR, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *value, *ret;
+
+	SAVE_OPLINE();
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (i_zend_is_true(value)) {
+		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
+			Z_ADDREF_P(value);
+			EX_T(opline->result.var).var.ptr = value;
+			EX_T(opline->result.var).var.ptr_ptr = NULL;
+		} else {
+			ALLOC_ZVAL(ret);
+			INIT_PZVAL_COPY(ret, value);
+			EX_T(opline->result.var).var.ptr = ret;
+			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			if (!IS_OP1_TMP_FREE()) {
+				zval_copy_ctor(EX_T(opline->result.var).var.ptr);
+			}
+		}
+		FREE_OP1_IF_VAR();
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.opline_num);
 #endif
@@ -4687,6 +4724,34 @@ ZEND_VM_HANDLER(22, ZEND_QM_ASSIGN, CONST|TMP|VAR|CV, ANY)
 	if (!IS_OP1_TMP_FREE()) {
 		zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
 	}
+	FREE_OP1_IF_VAR();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(157, ZEND_QM_ASSIGN_VAR, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *value, *ret;
+
+	SAVE_OPLINE();
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
+		Z_ADDREF_P(value);
+		EX_T(opline->result.var).var.ptr = value;
+		EX_T(opline->result.var).var.ptr_ptr = NULL;
+	} else {
+		ALLOC_ZVAL(ret);
+		INIT_PZVAL_COPY(ret, value);
+		EX_T(opline->result.var).var.ptr = ret;
+		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		if (!IS_OP1_TMP_FREE()) {
+			zval_copy_ctor(EX_T(opline->result.var).var.ptr);
+		}
+	}
+
 	FREE_OP1_IF_VAR();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

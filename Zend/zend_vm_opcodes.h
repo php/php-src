@@ -157,3 +157,5 @@
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
+#define ZEND_QM_ASSIGN_VAR                   157
+#define ZEND_JMP_SET_VAR                     158

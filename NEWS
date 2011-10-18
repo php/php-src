@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 RC1
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
+  . Improve ternary operator performance when returning arrays. (Arnaud, Dmitry)
   
 
 - Core:
