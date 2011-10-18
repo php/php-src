@@ -886,6 +886,144 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 /* }}} */
 
 
+/* {{{ mysqlnd_conn::change_user */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
+										  const char *user,
+										  const char *passwd,
+										  const char *db,
+										  zend_bool silent TSRMLS_DC)
+{
+	size_t user_len;
+	enum_func_status ret = FAIL;
+	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
+	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 2 /* charset*/ + 2];
+	char *p = buffer;
+	const MYSQLND_CHARSET * old_cs = conn->charset;
+
+	DBG_ENTER("mysqlnd_conn::change_user");
+	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
+				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
+
+	SET_ERROR_AFF_ROWS(conn);
+
+	if (!user) {
+		user = "";
+	}
+	if (!passwd) {
+		passwd = "";
+	}
+	if (!db) {
+		db = "";
+	}
+
+	/* 1. user ASCIIZ */
+	user_len = MIN(strlen(user), MYSQLND_MAX_ALLOWED_USER_LEN);
+	memcpy(p, user, user_len);
+	p += user_len;
+	*p++ = '\0';
+
+	/* 2. password SCRAMBLE_LENGTH followed by the scramble or \0 */
+	if (passwd[0]) {
+		*p++ = SCRAMBLE_LENGTH;
+		php_mysqlnd_scramble((unsigned char *)p, conn->scramble, (unsigned char *)passwd);
+		p += SCRAMBLE_LENGTH;
+	} else {
+		*p++ = '\0';
+	}
+
+	/* 3. db ASCIIZ */
+	if (db[0]) {
+		size_t db_len = MIN(strlen(db), MYSQLND_MAX_ALLOWED_DB_LEN);
+		memcpy(p, db, db_len);
+		p += db_len;
+	}
+	*p++ = '\0';
+
+	/*
+	  4. request the current charset, or it will be reset to the system one.
+	  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug : 
+	  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
+	*/
+	if (mysqlnd_get_server_version(conn) >= 50123) {
+		int2store(p, conn->charset->nr);
+		p+=2;
+	}
+
+	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
+									   PROT_LAST /* we will handle the OK packet*/,
+									   silent, TRUE TSRMLS_CC)) {
+		DBG_RETURN(FAIL);
+	}
+
+	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!chg_user_resp) {
+		SET_OOM_ERROR(conn->error_info);
+		goto end;
+	}
+	ret = PACKET_READ(chg_user_resp, conn);
+	conn->error_info = chg_user_resp->error_info;
+
+	if (conn->error_info.error_no) {
+		ret = FAIL;
+		/*
+		  COM_CHANGE_USER is broken in 5.1. At least in 5.1.15 and 5.1.14, 5.1.11 is immune.
+		  bug#25371 mysql_change_user() triggers "packets out of sync"
+		  When it gets fixed, there should be one more check here
+		*/
+		if (mysqlnd_get_server_version(conn) > 50113L && mysqlnd_get_server_version(conn) < 50118L) {
+			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+			if (redundant_error_packet) {
+				PACKET_READ(redundant_error_packet, conn);
+				PACKET_FREE(redundant_error_packet);
+				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
+			} else {
+				SET_OOM_ERROR(conn->error_info);
+			}
+		}
+	}
+	if (ret == PASS) {
+		char * tmp = NULL;
+		/* if we get conn->user as parameter and then we first free it, then estrndup it, we will crash */
+		tmp = mnd_pestrndup(user, user_len, conn->persistent);
+		if (conn->user) {
+			mnd_pefree(conn->user, conn->persistent);
+		}
+		conn->user = tmp;
+
+		tmp = mnd_pestrdup(passwd, conn->persistent);
+		if (conn->passwd) {
+			mnd_pefree(conn->passwd, conn->persistent);
+		}
+		conn->passwd = tmp;
+
+		if (conn->last_message) {
+			mnd_pefree(conn->last_message, conn->persistent);
+			conn->last_message = NULL;
+		}
+		memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
+		/* set charset for old servers */
+		if (mysqlnd_get_server_version(conn) < 50123) {
+			ret = conn->m->set_charset(conn, old_cs->name TSRMLS_CC);
+		}
+	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
+		/* old authentication with new server  !*/
+		DBG_ERR(mysqlnd_old_passwd);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
+	}
+end:
+	PACKET_FREE(chg_user_resp);
+
+	/*
+	  Here we should close all statements. Unbuffered queries should not be a
+	  problem as we won't allow sending COM_CHANGE_USER.
+	*/
+	DBG_INF(ret == PASS? "PASS":"FAIL");
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_conn::query */
 /*
   If conn->error_info.error_no is not zero, then we had an error.
@@ -1865,149 +2003,6 @@ PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
 		default:
 			return "unknown";
 	}
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn::change_user */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
-										  const char *user,
-										  const char *passwd,
-										  const char *db,
-										  zend_bool silent TSRMLS_DC)
-{
-	/*
-	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
-	  Stack space is not that expensive, so use a bit more to be protected against
-	  buffer overflows.
-	*/
-	size_t user_len;
-	enum_func_status ret = FAIL;
-	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
-	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 2 /* charset*/ ];
-	char *p = buffer;
-	const MYSQLND_CHARSET * old_cs = conn->charset;
-
-	DBG_ENTER("mysqlnd_conn::change_user");
-	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
-				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
-
-	SET_ERROR_AFF_ROWS(conn);
-
-	if (!user) {
-		user = "";
-	}
-	if (!passwd) {
-		passwd = "";
-	}
-	if (!db) {
-		db = "";
-	}
-
-	/* 1. user ASCIIZ */
-	user_len = MIN(strlen(user), MYSQLND_MAX_ALLOWED_USER_LEN);
-	memcpy(p, user, user_len);
-	p += user_len;
-	*p++ = '\0';
-
-	/* 2. password SCRAMBLE_LENGTH followed by the scramble or \0 */
-	if (passwd[0]) {
-		*p++ = SCRAMBLE_LENGTH;
-		php_mysqlnd_scramble((unsigned char *)p, conn->scramble, (unsigned char *)passwd);
-		p += SCRAMBLE_LENGTH;
-	} else {
-		*p++ = '\0';
-	}
-
-	/* 3. db ASCIIZ */
-	if (db[0]) {
-		size_t db_len = MIN(strlen(db), MYSQLND_MAX_ALLOWED_DB_LEN);
-		memcpy(p, db, db_len);
-		p += db_len;
-	}
-	*p++ = '\0';
-
-	/*
-	  4. request the current charset, or it will be reset to the system one.
-	  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug : 
-	  Bug #30472 libmysql doesn't reset charset, insert_id after succ. mysql_change_user() call
-	*/
-	if (mysqlnd_get_server_version(conn) >= 50123) {
-		int2store(p, conn->charset->nr);
-		p+=2;
-	}
-
-	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
-									   PROT_LAST /* we will handle the OK packet*/,
-									   silent, TRUE TSRMLS_CC)) {
-		DBG_RETURN(FAIL);
-	}
-
-	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
-	if (!chg_user_resp) {
-		SET_OOM_ERROR(conn->error_info);
-		goto end;
-	}
-	ret = PACKET_READ(chg_user_resp, conn);
-	conn->error_info = chg_user_resp->error_info;
-
-	if (conn->error_info.error_no) {
-		ret = FAIL;
-		/*
-		  COM_CHANGE_USER is broken in 5.1. At least in 5.1.15 and 5.1.14, 5.1.11 is immune.
-		  bug#25371 mysql_change_user() triggers "packets out of sync"
-		  When it gets fixed, there should be one more check here
-		*/
-		if (mysqlnd_get_server_version(conn) > 50113L && mysqlnd_get_server_version(conn) < 50118L) {
-			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
-			if (redundant_error_packet) {
-				PACKET_READ(redundant_error_packet, conn);
-				PACKET_FREE(redundant_error_packet);
-				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
-			} else {
-				SET_OOM_ERROR(conn->error_info);
-			}
-		}
-	}
-	if (ret == PASS) {
-		char * tmp = NULL;
-		/* if we get conn->user as parameter and then we first free it, then estrndup it, we will crash */
-		tmp = mnd_pestrndup(user, user_len, conn->persistent);
-		if (conn->user) {
-			mnd_pefree(conn->user, conn->persistent);
-		}
-		conn->user = tmp;
-
-		tmp = mnd_pestrdup(passwd, conn->persistent);
-		if (conn->passwd) {
-			mnd_pefree(conn->passwd, conn->persistent);
-		}
-		conn->passwd = tmp;
-
-		if (conn->last_message) {
-			mnd_pefree(conn->last_message, conn->persistent);
-			conn->last_message = NULL;
-		}
-		memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
-		/* set charset for old servers */
-		if (mysqlnd_get_server_version(conn) < 50123) {
-			ret = conn->m->set_charset(conn, old_cs->name TSRMLS_CC);
-		}
-	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
-		/* old authentication with new server  !*/
-		DBG_ERR(mysqlnd_old_passwd);
-		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
-	}
-end:
-	PACKET_FREE(chg_user_resp);
-
-	/*
-	  Here we should close all statements. Unbuffered queries should not be a
-	  problem as we won't allow sending COM_CHANGE_USER.
-	*/
-	DBG_INF(ret == PASS? "PASS":"FAIL");
-	DBG_RETURN(ret);
 }
 /* }}} */
 
