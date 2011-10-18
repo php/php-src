@@ -202,6 +202,35 @@ function read_str_offset($n) {
 	}
 }
 
+function issetor($n) {
+	$val = array(0,1,2,3,4,5,6,7,8,9);
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $val ?: null;
+	}
+}
+
+function issetor2($n) {
+	$f = false; $j = 0;
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $f ?: $j + 1;
+	}
+}
+
+function ternary($n) {
+	$val = array(0,1,2,3,4,5,6,7,8,9);
+	$f = false;
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $f ? null : $val;
+	}
+}
+
+function ternary2($n) {
+	$f = false; $j = 0;
+	for ($i = 0; $i < $n; ++$i) {
+		$x = $f ? $f : $j + 1;
+	}
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -318,4 +347,12 @@ read_hash(N);
 $t = end_test($t, '$x = $hash[\'v\']', $overhead);
 read_str_offset(N);
 $t = end_test($t, '$x = $str[0]', $overhead);
+issetor(N);
+$t = end_test($t, '$x = $a ?: null', $overhead);
+issetor2(N);
+$t = end_test($t, '$x = $f ?: tmp', $overhead);
+ternary(N);
+$t = end_test($t, '$x = $f ? $f : $a', $overhead);
+ternary2(N);
+$t = end_test($t, '$x = $f ? $f : tmp', $overhead);
 total($t0, "Total");
