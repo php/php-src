@@ -853,7 +853,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  void cdf_unpack_header(cdf_header_t *, char *);
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2011-09-15 23:28:13.000000000 +0800
-+++ libmagic/cdf_time.c	2011-09-15 23:28:26.000000000 +0800
++++ libmagic/cdf_time.c	2011-10-19 22:51:40.000000000 +0800
 @@ -96,7 +96,7 @@
  }
  
@@ -874,6 +874,15 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  
  	t /= CDF_TIME_PREC;
  	tm.tm_sec = t % 60;
+@@ -117,7 +117,7 @@
+ 	tm.tm_hour = t % 24;
+ 	t /= 24;
+ 
+-	// XXX: Approx
++	/* XXX: Approx */
+ 	tm.tm_year = CDF_BASE_YEAR + (t / 365);
+ 
+ 	rdays = cdf_getdays(tm.tm_year);
 @@ -143,7 +143,7 @@
  }
  
