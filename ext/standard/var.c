@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jani Lehtim‰ki <jkl@njet.net>                               |
+   | Authors: Jani Lehtim√§ki <jkl@njet.net>                               |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
@@ -788,7 +788,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				if (ce && ce != PHP_IC_ENTRY && zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
+					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), &struc, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+					BG(serialize_lock)--;
 
 					if (res == SUCCESS && !EG(exception)) {
 						if (retval_ptr) {

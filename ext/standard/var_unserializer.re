@@ -392,7 +392,9 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
 		INIT_PZVAL(&fname);
 		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
+		BG(serialize_lock)++;
 		call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+		BG(serialize_lock)--;
 	}
 
 	if (retval_ptr)
