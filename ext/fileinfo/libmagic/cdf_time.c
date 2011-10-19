@@ -117,7 +117,7 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 	tm.tm_hour = t % 24;
 	t /= 24;
 
-	// XXX: Approx
+	/* XXX: Approx */
 	tm.tm_year = CDF_BASE_YEAR + (t / 365);
 
 	rdays = cdf_getdays(tm.tm_year);
