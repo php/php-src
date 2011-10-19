@@ -530,7 +530,7 @@ static PHP_GINIT_FUNCTION(mysql)
 /* }}} */
 
 #ifdef MYSQL_USE_MYSQLND
-static MYSQLND *mysql_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
+static MYSQLND * mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
 	php_mysql_conn *mysql;
 
@@ -548,7 +548,7 @@ static MYSQLND *mysql_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 	return mysql->conn;
 }
 
-static mysqlnd_api_extension_t mysqlnd_api_ext = {
+static MYSQLND_REVERSE_API mysql_reverse_api = {
 	&mysql_module_entry,
 	mysql_convert_zv_to_mysqlnd
 };
@@ -583,7 +583,7 @@ ZEND_MODULE_STARTUP_D(mysql)
 #endif
 
 #ifdef MYSQL_USE_MYSQLND
-	mysqlnd_register_api_extension(&mysqlnd_api_ext);
+	mysqlnd_reverse_api_register_api(&mysql_reverse_api TSRMLS_CC);
 #endif
 
 	return SUCCESS;

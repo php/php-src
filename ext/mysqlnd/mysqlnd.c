@@ -27,6 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_reverse_api.h"
 
 /*
   TODO :
@@ -68,8 +69,6 @@ static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
 static struct st_mysqlnd_plugin_core mysqlnd_plugin_core;
 
-static HashTable mysqlnd_api_ext_ht;
-
 /* {{{ mysqlnd_error_list_pdtor */
 static void
 mysqlnd_error_list_pdtor(void * pDest)
@@ -93,7 +92,7 @@ PHPAPI void mysqlnd_library_end(TSRMLS_D)
 		mysqlnd_stats_end(mysqlnd_global_stats);
 		mysqlnd_global_stats = NULL;
 		mysqlnd_library_initted = FALSE;
-		zend_hash_destroy(&mysqlnd_api_ext_ht);
+		mysqlnd_reverse_api_end(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -2547,45 +2546,11 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
 		mysqlnd_register_builtin_authentication_plugins(TSRMLS_C);
 
-		zend_hash_init(&mysqlnd_api_ext_ht, 3, NULL, NULL, 1);
+		mysqlnd_reverse_api_init(TSRMLS_C);
 	}
 }
 /* }}} */
 
-/* {{{ myslqnd_get_api_extensions */
-PHPAPI HashTable *mysqlnd_get_api_extensions()
-{
-	return &mysqlnd_api_ext_ht;
-}
-/* }}} */
-
-/* {{{ mysqlnd_register_api_extension */
-PHPAPI void mysqlnd_register_api_extension(mysqlnd_api_extension_t *apiext)
-{
-	zend_hash_add(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name)+1, &apiext, sizeof(mysqlnd_api_extension_t), NULL);
-}
-/* }}} */
-
-/* {{{ zval_to_mysqlnd */
-PHPAPI MYSQLND* zval_to_mysqlnd(zval *zv TSRMLS_DC)
-{
-	MYSQLND* retval;
-	mysqlnd_api_extension_t **elem;
-
-	for (zend_hash_internal_pointer_reset(&mysqlnd_api_ext_ht);
-			zend_hash_get_current_data(&mysqlnd_api_ext_ht, (void **)&elem) == SUCCESS;
-			zend_hash_move_forward(&mysqlnd_api_ext_ht)) {
-		if ((*elem)->conversion_cb) {
-			retval = (*elem)->conversion_cb(zv TSRMLS_CC);
-			if (retval) {
-				return retval;
-			}
-		}
-	}
-
-	return NULL;
-}
-/* }}} */
 
 /* {{{ mysqlnd_conn_get_methods */
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods()

@@ -14,6 +14,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_loaddata.c " +
+			"mysqlnd_reverse_api.c " +
 			"mysqlnd_net.c " +
 			"mysqlnd_plugin.c " +
 			"mysqlnd_ps.c " +

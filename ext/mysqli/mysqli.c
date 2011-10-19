@@ -528,12 +528,12 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 /* }}} */
 
 #ifdef MYSQLI_USE_MYSQLND
-static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
+static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == mysqli_link_class_entry) {
-		MY_MYSQL *mysql;
-		MYSQLI_RESOURCE  *my_res;
-		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(zv TSRMLS_CC);
+		MY_MYSQL * mysql;
+		MYSQLI_RESOURCE  * my_res;
+		mysqli_object * intern = (mysqli_object *)zend_object_store_get_object(zv TSRMLS_CC);
 		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
 			/* We know that we have a mysqli object, so this failure should be emitted */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);
@@ -545,7 +545,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval *zv TSRMLS_DC)
 	return NULL;
 }
 
-static mysqlnd_api_extension_t mysqli_api_ext = {
+static MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };
@@ -839,7 +839,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 
 #ifdef MYSQLI_USE_MYSQLND
-	mysqlnd_register_api_extension(&mysqli_api_ext);
+	mysqlnd_reverse_api_register_api(&mysqli_reverse_api TSRMLS_CC);
 #endif
 
 	return SUCCESS;
