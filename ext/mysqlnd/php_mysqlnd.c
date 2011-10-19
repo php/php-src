@@ -25,6 +25,7 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_statistics.h"
+#include "mysqlnd_reverse_api.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
 
@@ -135,10 +136,10 @@ mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
 
 /* {{{ mysqlnd_minfo_dump_api_plugins */
 static int
-mysqlnd_minfo_dump_api_plugins(void *pDest, void * buf TSRMLS_DC)
+mysqlnd_minfo_dump_api_plugins(void * pDest, void * buf TSRMLS_DC)
 {
 	smart_str * buffer = (smart_str *) buf;
-	mysqlnd_api_extension_t *ext = *(mysqlnd_api_extension_t **) pDest;
+	MYSQLND_REVERSE_API * ext = *(MYSQLND_REVERSE_API **) pDest;
 	if (buffer->len) {
 		smart_str_appendc(buffer, ',');
 	}
@@ -188,7 +189,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
 		smart_str_free(&tmp_str);
 
-		zend_hash_apply_with_argument(mysqlnd_get_api_extensions(), mysqlnd_minfo_dump_api_plugins, &tmp_str TSRMLS_CC);
+		zend_hash_apply_with_argument(mysqlnd_reverse_api_get_api_list(TSRMLS_C), mysqlnd_minfo_dump_api_plugins, &tmp_str TSRMLS_CC);
 		smart_str_0(&tmp_str);
 		php_info_print_table_row(2, "API Extensions", tmp_str.c);
 		smart_str_free(&tmp_str);

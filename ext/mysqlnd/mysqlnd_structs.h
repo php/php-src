@@ -1023,4 +1023,11 @@ struct st_mysqlnd_authentication_plugin
 };
 
 
+typedef struct st_mysqlnd_reverse_api
+{
+	zend_module_entry * module;
+	MYSQLND *(*conversion_cb)(zval * zv TSRMLS_DC);
+} MYSQLND_REVERSE_API;
+
+
 #endif /* MYSQLND_STRUCTS_H */
