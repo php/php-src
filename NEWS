@@ -122,6 +122,9 @@ PHP                                                                        NEWS
     stylesheets, default is not to enable write operations. This option won't be 
     in 5.4, since there's a new method. Bug #54446 (Chregu, Nicolas Gregoire)
 
+- Fileinfo:
+  . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
+
 
 23 Aug 2011, PHP 5.3.8
 
