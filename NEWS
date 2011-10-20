@@ -236,6 +236,8 @@ PHP                                                                        NEWS
     to limit the amount of stack frames returned. (Sebastian, Patrick)
   . Added stream metadata API support and stream_metadata() stream class
     handler. (Stas)
+  . User wrappers can now define a stream_truncate() method that responds
+    to truncation, e.g. through ftruncate(). FR #53888. (Gustavo)
 
 - Improved Zend Engine memory usage: (Dmitry)
   . Replaced zend_function.pass_rest_by_reference by 
