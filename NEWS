@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.4.0 RC1
+20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
   . Improve ternary operator performance when returning arrays. (Arnaud, Dmitry)
@@ -51,7 +51,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
 
-15 Sep 2011, PHP 5.4.0 Beta
+15 Sep 2011, PHP 5.4.0 Beta1
 - General improvements:
   . Added callable typehint. (Hannes)
   . Implemented closure rebinding as parameter to bindTo. (Gustavo Lopes)
