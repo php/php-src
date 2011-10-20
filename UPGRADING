@@ -1,6 +1,6 @@
 $Id$
 
-UPGRADE NOTES - PHP X.Y
+UPGRADE NOTES - PHP 5.4
 
 1. Changes made to default configuration
 2. Reserved words and classes
@@ -19,7 +19,7 @@ UPGRADE NOTES - PHP X.Y
 11. Changes in INI directives
 12. Syntax additions
 13. Windows support
-14. New in PHP X.Y:
+14. New in PHP 5.4:
      a. New libraries
      b. New extensions
      c. New stream wrappers
@@ -42,7 +42,7 @@ UPGRADE NOTES - PHP X.Y
 
     default_charset = iso-8859-1
 
-  to your php.ini to preserve pre-PHPX.Y behavior.
+  to your php.ini to preserve pre-5.4 behavior.
 
 - We now check at compile time if /dev/urandom or /dev/arandom
   are present to provide non-blocking entropy to session id
@@ -54,7 +54,7 @@ UPGRADE NOTES - PHP X.Y
     session.entropy_file=
     session.entropy_length=0
 
-  to your php.ini to preserve pre-PHPX.Y behavior.
+  to your php.ini to preserve pre-PHP5.4 behavior.
 
 - Deprecated ini directives will now throw an E_CORE_WARNING's 
   instead of the previous E_WARNING's.
@@ -87,7 +87,7 @@ UPGRADE NOTES - PHP X.Y
 2. Reserved words and classes
 =============================
 
-- 
+- "trait" is a reserved word now
 
 ===================================
 3. Changes made to engine behaviour
@@ -226,6 +226,9 @@ UPGRADE NOTES - PHP X.Y
   RecursiveTreeIterator.
   It is no longer possible to defer the parent constructor call until after the
   object is constructed.
+- Classes that implement stream wrappers can define a method called stream_metadata that
+  will be called on touch(), chmod(), chgrp(), chown().
+
   
 
 =============
@@ -401,7 +404,7 @@ UPGRADE NOTES - PHP X.Y
   or later. Earlier systems do not support symbolic links.
 
 ===================
-14. New in PHP X.Y:
+14. New in PHP 5.4:
 ===================
 
      a. New libraries
