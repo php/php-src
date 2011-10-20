@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2011, PHP 5.4.0 RC1
+
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
