@@ -89,7 +89,6 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 }
 /* }}} */
 
-
 /*
  * Local variables:
  * tab-width: 4
