@@ -21,15 +21,9 @@
 /* $Id: mysqlnd.c 306407 2010-12-16 12:56:19Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
-#include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
-#include "mysqlnd_result.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-/* for php_get_current_user() */
-#include "ext/standard/basic_functions.h"
-
 
 /*--------------------------------------------------------------------*/
 

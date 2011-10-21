@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -147,6 +147,7 @@ typedef struct st_mysqlnd_infile
 	zval	*callback;
 	void	*userdata;
 } MYSQLND_INFILE;
+
 
 typedef struct st_mysqlnd_options
 {
@@ -365,7 +366,6 @@ struct st_mysqlnd_protocol_methods
 	void * unused4;
 	void * unused5;
 };
-
 
 
 typedef enum_func_status	(*func_mysqlnd_conn__init)(MYSQLND * conn TSRMLS_DC);
@@ -735,9 +735,13 @@ struct st_mysqlnd_net
 	zend_uchar			compressed_envelope_packet_no;
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_READ_BUFFER	* uncompressed_data;
+#else
+	void * 				unused_pad1;
 #endif
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	zend_uchar			last_command;
+#else
+	zend_uchar			unused_pad2;
 #endif
 	/* cmd buffer */
 	MYSQLND_CMD_BUFFER	cmd_buffer;
@@ -752,8 +756,8 @@ struct st_mysqlnd_net
 
 struct st_mysqlnd_protocol
 {
-	struct st_mysqlnd_protocol_methods m;
 	zend_bool persistent;
+	struct st_mysqlnd_protocol_methods m;
 };
 
 
@@ -885,8 +889,6 @@ struct st_mysqlnd_unbuffered_result
 
 struct st_mysqlnd_res
 {
-	struct st_mysqlnd_res_methods m;
-
 	MYSQLND					*conn;
 	enum_mysqlnd_res_type	type;
 	unsigned int			field_count;
@@ -908,6 +910,8 @@ struct st_mysqlnd_res
 
 	MYSQLND_MEMORY_POOL		* result_set_memory_pool;
 	zend_bool				persistent;
+
+	struct st_mysqlnd_res_methods m;
 };
 
 

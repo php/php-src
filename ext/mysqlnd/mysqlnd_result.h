@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -24,7 +24,6 @@
 #define MYSQLND_RESULT_H
 
 PHPAPI MYSQLND_RES * mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC);
-PHPAPI struct st_mysqlnd_res_methods * mysqlnd_result_get_methods();
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND * conn, MYSQLND_STMT * stmt TSRMLS_DC);
 

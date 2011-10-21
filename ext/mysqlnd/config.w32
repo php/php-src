@@ -13,6 +13,8 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_bt.c " +
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
+			"mysqlnd_driver.c " +
+			"mysqlnd_ext_plugin.c " +
 			"mysqlnd_loaddata.c " +
 			"mysqlnd_reverse_api.c " +
 			"mysqlnd_net.c " +

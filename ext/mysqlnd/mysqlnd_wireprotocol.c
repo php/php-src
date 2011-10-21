@@ -12,11 +12,13 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
+
+/* $Id$ */
 #include "php.h"
 #include "php_globals.h"
 #include "mysqlnd.h"
@@ -2348,7 +2350,6 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 /* }}} */
 
 
-static
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol)
 	MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet),
@@ -2396,29 +2397,6 @@ mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
 		mnd_pefree(protocol, pers);
 	}
 	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ _mysqlnd_plugin_get_plugin_protocol_data */
-PHPAPI void **
-_mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_plugin_get_plugin_protocol_data");
-	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!protocol || plugin_id >= mysqlnd_plugin_count()) {
-		return NULL;
-	}
-	DBG_RETURN((void *)((char *)protocol + sizeof(MYSQLND_PROTOCOL) + plugin_id * sizeof(void *)));
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_protocol_get_methods */
-PHPAPI struct st_mysqlnd_protocol_methods *
-mysqlnd_protocol_get_methods()
-{
-	return &mysqlnd_mysqlnd_protocol_methods;
 }
 /* }}} */
 
