@@ -148,26 +148,31 @@ array(1) {
   [0]=>
   string(3) "0.5"
 }
+Error: 8 - Array to string conversion, %ssplit_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(74)
 Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %ssplit_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(74)
 Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %ssplit_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(74)
 Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %ssplit_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(74)
 Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %ssplit_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(74)

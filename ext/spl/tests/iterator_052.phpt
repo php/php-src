@@ -122,6 +122,8 @@ array(3) {
   array(0) {
   }
 }
+
+Notice: Array to string conversion in %siterator_052.php on line %d
 bool(true)
 int(5)
 array(3) {
@@ -248,6 +250,8 @@ array(2) {
   array(0) {
   }
 }
+
+Notice: Array to string conversion in %siterator_052.php on line %d
 bool(true)
 int(5)
 array(2) {

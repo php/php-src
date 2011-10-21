@@ -75,7 +75,7 @@ $values = array(
 // loop through each element of the array for class_name
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( is_a($object, $value) );
 };
 

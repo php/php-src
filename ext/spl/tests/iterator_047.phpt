@@ -70,6 +70,8 @@ int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %siterator_047.php on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -78,6 +80,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %siterator_047.php on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)
@@ -100,6 +104,8 @@ int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %siterator_047.php on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -108,6 +114,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
+
+Notice: Array to string conversion in %siterator_047.php on line %d
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)

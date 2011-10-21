@@ -109,22 +109,27 @@ string(20) "MS4wNzY1NDMyMUUtOQ=="
 
 Arg value 0.5 
 string(4) "MC41"
+Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
+Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
+Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
+Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
+Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
