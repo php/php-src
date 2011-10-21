@@ -109,12 +109,18 @@ int(1)
 101234567000
 int(1)
 -- Iteration 9 --
+
+Notice: Array to string conversion in %sprint_variation1.php on line %d
 Array
 int(1)
 -- Iteration 10 --
+
+Notice: Array to string conversion in %sprint_variation1.php on line %d
 Array
 int(1)
 -- Iteration 11 --
+
+Notice: Array to string conversion in %sprint_variation1.php on line %d
 Array
 int(1)
 -- Iteration 12 --

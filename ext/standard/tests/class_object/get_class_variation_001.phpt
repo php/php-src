@@ -67,7 +67,7 @@ $values = array(
 // loop through each element of the array for object
 
 foreach($values as $value) {
-      echo "\nArg value: $value (type: " . gettype($value) . ")\n";
+      echo @"\nArg value: $value (type: " . gettype($value) . ")\n";
       var_dump( get_class($value) );
 };
 

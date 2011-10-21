@@ -114,18 +114,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)

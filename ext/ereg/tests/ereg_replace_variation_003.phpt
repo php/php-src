@@ -119,26 +119,31 @@ string(29) "new value.0765432new valueE-9"
 Arg value 0.5 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(3) "0.5"
+Error: 8 - Array to string conversion, %sereg_replace_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 Error: 2 - ereg_replace() expects parameter 3 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %sereg_replace_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 Error: 2 - ereg_replace() expects parameter 3 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %sereg_replace_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 Error: 2 - ereg_replace() expects parameter 3 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %sereg_replace_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 Error: 2 - ereg_replace() expects parameter 3 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %sereg_replace_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)

@@ -122,22 +122,27 @@ bool(false)
 Arg value 0.5 
 In __autoload(0.5)
 bool(false)
+Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - trait_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
+Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - trait_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
+Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - trait_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
+Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - trait_exists() expects parameter 1 to be string, array given, %s(77)
 NULL
+Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - trait_exists() expects parameter 1 to be string, array given, %s(77)

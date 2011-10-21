@@ -13,7 +13,7 @@ var_dump(strval(true));
 var_dump(strval(false));
 var_dump(strval(array('foo')));
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "bar"
 string(3) "BAR"
 string(6) "foobar"
@@ -21,4 +21,6 @@ string(1) "1"
 string(3) "1.1"
 string(1) "1"
 string(0) ""
+
+Notice: Array to string conversion in %sstrval.php on line %d
 string(5) "Array"

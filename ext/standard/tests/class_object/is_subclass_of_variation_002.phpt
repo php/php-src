@@ -113,22 +113,27 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
 Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
 NULL
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
 Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
 NULL
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
 Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
 NULL
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
 Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
 NULL
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_002.php(%d)
 
 Arg value Array 
 Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)

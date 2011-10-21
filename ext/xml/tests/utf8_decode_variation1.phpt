@@ -79,7 +79,7 @@ $values = array(
 // loop through each element of the array for data
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( utf8_decode($value) );
 };
 

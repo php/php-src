@@ -39,8 +39,40 @@ echo "Done";
 --EXPECTF--
 *** Testing array_diff() : usage variations ***
 -- Compare two 2-D arrays --
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
 array(0) {
 }
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
 array(0) {
 }
 
@@ -69,6 +101,16 @@ array(3) {
 }
 
 -- Compare a subarray from one 2-D array and one 2-D array --
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
 array(3) {
   [0]=>
   int(1)
@@ -77,6 +119,20 @@ array(3) {
   [2]=>
   int(3)
 }
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
+
+Notice: Array to string conversion in %sarray_diff_variation9.php on line %d
 array(2) {
   ["sub_array1"]=>
   array(3) {

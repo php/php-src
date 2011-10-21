@@ -12,7 +12,7 @@ class ArrayReferenceProxy implements ArrayAccess
 	
 	function __construct(ArrayAccess $object, array &$element)
 	{
-		echo __METHOD__ . "($element)\n";
+		echo __METHOD__ . "(Array)\n";
 		$this->object = $object;
 		$this->element = &$element;
 	}
@@ -23,17 +23,17 @@ class ArrayReferenceProxy implements ArrayAccess
 	}
 
 	function offsetGet($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
+		echo __METHOD__ . "(Array, $index)\n";
 		return isset($this->element[$index]) ? $this->element[$index] : NULL;
 	}
 
 	function offsetSet($index, $value) {
-		echo __METHOD__ . "($this->element, $index, $value)\n";
+		echo __METHOD__ . "(Array, $index, $value)\n";
 		$this->element[$index] = $value;
 	}
 
 	function offsetUnset($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
+		echo __METHOD__ . "(Array, $index)\n";
 		unset($this->element[$index]);
 	}
 }

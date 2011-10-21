@@ -133,22 +133,27 @@ array(1) {
   ["path"]=>
   string(3) "0.5"
 }
+Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
