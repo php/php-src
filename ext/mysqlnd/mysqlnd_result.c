@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -28,6 +28,7 @@
 #include "mysqlnd_result_meta.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_ext_plugin.h"
 
 #define MYSQLND_SILENT
 
@@ -1634,7 +1635,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int
 /* }}} */
 
 
-static 
 MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	NULL, /* fetch_row */
 	mysqlnd_fetch_row_buffered,
@@ -1686,33 +1686,12 @@ mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 
 	ret->persistent		= persistent;
 	ret->field_count	= field_count;
-	ret->m = mysqlnd_mysqlnd_res_methods;
+	ret->m = *mysqlnd_result_get_methods();
 
 	DBG_RETURN(ret);
 }
 /* }}} */
 
-
-/* {{{ _mysqlnd_plugin_get_plugin_result_data */
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result, unsigned int plugin_id TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_plugin_get_plugin_result_data");
-	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!result || plugin_id >= mysqlnd_plugin_count()) {
-		return NULL;
-	}
-	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES) + plugin_id * sizeof(void *)));
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_result_get_methods */
-PHPAPI struct st_mysqlnd_res_methods *
-mysqlnd_result_get_methods()
-{
-	return &mysqlnd_mysqlnd_res_methods;
-}
-/* }}} */
 
 /*
  * Local variables:

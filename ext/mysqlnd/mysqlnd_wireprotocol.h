@@ -308,7 +308,6 @@ enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK *
 
 PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);
 PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC);
-PHPAPI struct st_mysqlnd_protocol_methods * mysqlnd_protocol_get_methods();
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 
