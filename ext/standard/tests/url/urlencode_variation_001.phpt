@@ -110,22 +110,27 @@ string(13) "1.07654321E-9"
 
 Arg value 0.5 
 string(3) "0.5"
+Error: 8 - Array to string conversion, %surlencode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - urlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %surlencode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - urlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %surlencode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - urlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %surlencode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - urlencode() expects parameter 1 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %surlencode_variation_001.php(%d)
 
 Arg value Array 
 Error: 2 - urlencode() expects parameter 1 to be string, array given, %s(74)

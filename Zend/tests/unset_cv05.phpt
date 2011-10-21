@@ -23,5 +23,7 @@ ok
 Warning: session_start(): Cannot send session cookie - headers already sent by (output started at %sunset_cv05.php on line %d
 
 Warning: session_start(): Cannot send session cache limiter - headers already sent (output started at %sunset_cv05.php:%d) in %sunset_cv05.php on line %d
+
+Notice: Array to string conversion in %sunset_cv05.php on line %d
 Array
 ok

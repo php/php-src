@@ -76,7 +76,7 @@ $values = array(
 // loop through each element of the array for offset
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( fseek($fp, $value, $whence) );
       var_dump( ftell($fp));
 };

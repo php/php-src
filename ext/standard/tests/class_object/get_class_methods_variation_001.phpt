@@ -113,18 +113,23 @@ NULL
 
 Arg value 0.5 
 NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
 Arg value Array 
 NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
 Arg value Array 
 NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
 Arg value Array 
 NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
 Arg value Array 
 NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
 Arg value Array 
 NULL

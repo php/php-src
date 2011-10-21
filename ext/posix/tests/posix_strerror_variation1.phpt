@@ -96,25 +96,35 @@ string
 Arg value 0.5 
 string
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-boolean
+Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 boolean
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-boolean
+Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 boolean
+
+Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+boolean
+
+Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+boolean
+
+Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
 Arg value Array 
 

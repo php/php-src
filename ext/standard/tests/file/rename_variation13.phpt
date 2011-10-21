@@ -41,7 +41,7 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   $name = $names_arr[$i];
-  echo "-- testing '$name' --\n";  
+  echo @"-- testing '$name' --\n";
   touch($aFile);
   var_dump(rename($aFile, $name));
   if (file_exists($name)) {

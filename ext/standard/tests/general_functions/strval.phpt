@@ -283,12 +283,20 @@ string(14) "Resource id #5"
 -- Iteration 3 --
 string(14) "Resource id #6"
 -- Iteration 4 --
+
+Notice: Array to string conversion in %sstrval.php on line %d
 string(5) "Array"
 -- Iteration 5 --
+
+Notice: Array to string conversion in %sstrval.php on line %d
 string(5) "Array"
 -- Iteration 6 --
+
+Notice: Array to string conversion in %sstrval.php on line %d
 string(5) "Array"
 -- Iteration 7 --
+
+Notice: Array to string conversion in %sstrval.php on line %d
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""

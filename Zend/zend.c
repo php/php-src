@@ -250,6 +250,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			Z_STRLEN_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #%ld", Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
+			zend_error(E_NOTICE, "Array to string conversion");
 			Z_STRLEN_P(expr_copy) = sizeof("Array") - 1;
 			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
 			break;

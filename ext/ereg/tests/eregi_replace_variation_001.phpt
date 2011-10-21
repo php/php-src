@@ -122,23 +122,28 @@ Arg value 0.5
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
+Error: 8 - Array to string conversion, %seregi_replace_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
+Error: 8 - Array to string conversion, %seregi_replace_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
+Error: 8 - Array to string conversion, %seregi_replace_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
+Error: 8 - Array to string conversion, %seregi_replace_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
+Error: 8 - Array to string conversion, %seregi_replace_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
