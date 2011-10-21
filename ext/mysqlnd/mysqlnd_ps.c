@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -28,15 +28,13 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
-
+#include "mysqlnd_ext_plugin.h"
 
 #define MYSQLND_SILENT
 
 
 const char * const mysqlnd_not_bound_as_blob = "Can't send long data for non-string/non-binary data types";
 const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
-
-static struct st_mysqlnd_stmt_methods *mysqlnd_stmt_methods;
 
 /* Exported by mysqlnd_ps_codec.c */
 enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
@@ -2375,7 +2373,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 		if (!ret) {
 			break;
 		}
-		ret->m = mysqlnd_stmt_methods;
+		ret->m = mysqlnd_stmt_get_methods();
 		ret->persistent = conn->persistent;
 
 		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
@@ -2417,40 +2415,11 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ _mysqlnd_plugin_get_plugin_stmt_data */
-PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_plugin_get_plugin_stmt_data");
-	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!stmt || plugin_id >= mysqlnd_plugin_count()) {
-		return NULL;
-	}
-	DBG_RETURN((void *)((char *)stmt + sizeof(MYSQLND_STMT) + plugin_id * sizeof(void *)));
-}
-/* }}} */
-
-
 /* {{{ _mysqlnd_init_ps_subsystem */
 void _mysqlnd_init_ps_subsystem()
 {
-	mysqlnd_stmt_methods = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt);
+	mysqlnd_stmt_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt));
 	_mysqlnd_init_ps_fetch_subsystem();
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_get_methods */
-PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods()
-{
-	return mysqlnd_stmt_methods;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_set_methods */
-PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)
-{
-	mysqlnd_stmt_methods = methods;
 }
 /* }}} */
 

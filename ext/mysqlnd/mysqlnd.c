@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -27,7 +27,6 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-#include "mysqlnd_reverse_api.h"
 
 /*
   TODO :
@@ -63,9 +62,6 @@ PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't
 PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
-static zend_bool mysqlnd_library_initted = FALSE;
-
-static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
 static struct st_mysqlnd_plugin_core mysqlnd_plugin_core;
 
@@ -82,21 +78,6 @@ mysqlnd_error_list_pdtor(void * pDest)
 	DBG_VOID_RETURN;
 }
 /* }}} */
-
-
-/* {{{ mysqlnd_library_end */
-PHPAPI void mysqlnd_library_end(TSRMLS_D)
-{
-	if (mysqlnd_library_initted == TRUE) {
-		mysqlnd_plugin_subsystem_end(TSRMLS_C);
-		mysqlnd_stats_end(mysqlnd_global_stats);
-		mysqlnd_global_stats = NULL;
-		mysqlnd_library_initted = FALSE;
-		mysqlnd_reverse_api_end(TSRMLS_C);
-	}
-}
-/* }}} */
-
 
 /* {{{ mysqlnd_conn::free_options */
 static void
@@ -2395,11 +2376,24 @@ MYSQLND_METHOD(mysqlnd_conn, tx_rollback)(MYSQLND * conn TSRMLS_DC)
 /* }}} */
 
 
+/* {{{ mysqlnd_conn::init */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::init");
+	mysqlnd_stats_init(&conn->stats, STAT_LAST);
+	SET_ERROR_AFF_ROWS(conn);
+
+	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, &conn->error_info TSRMLS_CC);
+	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
+
+	DBG_RETURN(conn->stats && conn->net && conn->protocol? PASS:FAIL);
+}
+/* }}} */
 
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
-static enum_func_status MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC);
 
-static
+
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, init),
 	MYSQLND_METHOD(mysqlnd_conn, connect),
@@ -2476,22 +2470,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_conn::init */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
-{
-	DBG_ENTER("mysqlnd_conn::init");
-	mysqlnd_stats_init(&conn->stats, STAT_LAST);
-	SET_ERROR_AFF_ROWS(conn);
-
-	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, &conn->error_info TSRMLS_CC);
-	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
-
-	DBG_RETURN(conn->stats && conn->net && conn->protocol? PASS:FAIL);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_init */
 PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
@@ -2506,7 +2484,7 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	}
 
 	ret->persistent = persistent;
-	ret->m = mysqlnd_conn_methods;
+	ret->m = mysqlnd_conn_get_methods();
 	CONN_SET_STATE(ret, CONN_ALLOCED);
 	ret->m->get_reference(ret TSRMLS_CC);
 
@@ -2526,79 +2504,6 @@ PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	DBG_RETURN(ret);
 }
 /* }}} */
-
-
-/* {{{ mysqlnd_library_init */
-PHPAPI void mysqlnd_library_init(TSRMLS_D)
-{
-	if (mysqlnd_library_initted == FALSE) {
-		mysqlnd_library_initted = TRUE;
-		mysqlnd_conn_methods = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn);
-		_mysqlnd_init_ps_subsystem();
-		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
-		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
-		mysqlnd_plugin_subsystem_init(TSRMLS_C);
-		{
-			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
-			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core TSRMLS_CC);
-		}
-		mysqlnd_example_plugin_register(TSRMLS_C);
-		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
-		mysqlnd_register_builtin_authentication_plugins(TSRMLS_C);
-
-		mysqlnd_reverse_api_init(TSRMLS_C);
-	}
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_get_methods */
-PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods()
-{
-	return mysqlnd_conn_methods;
-}
-/* }}} */
-
-/* {{{ mysqlnd_conn_set_methods */
-PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
-{
-	mysqlnd_conn_methods = methods;
-}
-/* }}} */
-
-
-/* {{{ _mysqlnd_plugin_get_plugin_connection_data */
-PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC)
-{
-	DBG_ENTER("_mysqlnd_plugin_get_plugin_connection_data");
-	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!conn || plugin_id >= mysqlnd_plugin_count()) {
-		return NULL;
-	}
-	DBG_RETURN((void *)((char *)conn + sizeof(MYSQLND) + plugin_id * sizeof(void *)));
-}
-/* }}} */
-
-
-static struct st_mysqlnd_plugin_core mysqlnd_plugin_core =
-{
-	{
-		MYSQLND_PLUGIN_API_VERSION,
-		"mysqlnd",
-		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
-		"PHP License 3.01",
-		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
-		{
-			NULL, /* will be filled later */
-			mysqlnd_stats_values_names,
-		},
-		{
-			NULL /* plugin shutdown */
-		}
-	}
-};
-
 
 /*
  * Local variables:
