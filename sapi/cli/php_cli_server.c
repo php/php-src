@@ -571,6 +571,12 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 		sapi_cli_server_register_variable(track_vars_array, "SERVER_SOFTWARE", tmp TSRMLS_CC);
 		efree(tmp);
 	}
+	{
+		char *tmp;
+		spprintf(&tmp, 0, "HTTP/%d.%d", client->request.protocol_version / 100, client->request.protocol_version % 100);
+		sapi_cli_server_register_variable(track_vars_array, "SERVER_PROTOCOL", tmp TSRMLS_CC);
+		efree(tmp);
+	}
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath TSRMLS_CC);
