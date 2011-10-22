@@ -7,7 +7,7 @@ if (PHP_INT_SIZE == 4) {
 }
 ?>
 --INI--
-memory_limit=3G
+memory_limit=2100M
 --FILE--
 <?php
 $a1 = str_repeat("1", 1024 * 1024 * 1024 * 0.5);
@@ -20,14 +20,11 @@ $a4 = str_repeat("4", 1024 * 1024 * 1024 * 0.5);
 echo "4\n";
 $a5 = str_repeat("5", 1024 * 1024 * 1024 * 0.5);
 echo "5\n";
-$a6 = str_repeat("6", 1024 * 1024 * 1024 * 0.5);
-echo "6\n";
 ?>
 --EXPECTF--
 1
 2
 3
 4
-5
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %sbug55509.php on line %d
