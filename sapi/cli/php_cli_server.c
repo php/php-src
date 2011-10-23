@@ -1248,13 +1248,31 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_patch = 0, *q, *vpath;
+	size_t prev_patch_len;
+	int  is_static_file = 0;
+
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
 	vpath = p;
 	if (request->vpath_len > 0 && request->vpath[0] != '/') {
-		*p++ = '/';
+		*p++ = DEFAULT_SLASH;
+	}
+	q = request->vpath + request->vpath_len;
+	while (q > request->vpath) {
+		if (*q-- == '.') {
+			is_static_file = 1;
+			break;
+		}
 	}
 	memmove(p, request->vpath, request->vpath_len);
+#ifdef PHP_WIN32
+	q = p + request->vpath_len;
+	do {
+		if (*q == '/') {
+			*q = '\\';
+		}
+	} while (q-- > p);
+#endif
 	p += request->vpath_len;
 	*p = '\0';
 	q = p;
@@ -1262,14 +1280,14 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 		if (!stat(buf, &sb)) {
 			if (sb.st_mode & S_IFDIR) {
 				const char **file = index_files;
-				if (p > buf && p[-1] != '/') {
-					*p++ = '/';
+				if (q[-1] != DEFAULT_SLASH) {
+					*q++ = DEFAULT_SLASH;
 				}
 				while (*file) {
 					size_t l = strlen(*file);
-					memmove(p, *file, l + 1);
+					memmove(q, *file, l + 1);
 					if (!stat(buf, &sb) && (sb.st_mode & S_IFREG)) {
-						p += l;
+						q += l;
 						break;
 					}
 					file++;
@@ -1280,30 +1298,40 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 				}
 			}
 			break; /* regular file */
-		}
-		while (q > buf && *(--q) != '/');
+		} else if (is_static_file) {
+			pefree(buf, 1);
+			return;
+		}	
 		if (prev_patch) {
-			*prev_patch = '/';
+			pefree(prev_patch, 1);
+			*q = DEFAULT_SLASH;
 		}
+		while (q > buf && *(--q) != DEFAULT_SLASH);
+		prev_patch_len = p - q;
+		prev_patch = pestrndup(q, prev_patch_len, 1);
 		*q = '\0';
-		prev_patch = q;
 	}
 	if (prev_patch) {
-		*prev_patch = '/';
-		request->path_info = pestrndup(prev_patch, p - prev_patch, 1);
-		request->path_info_len = p - prev_patch;
+		request->path_info_len = prev_patch_len;
+#ifdef PHP_WIN32
+		while (prev_patch_len--) {
+			if (prev_patch[prev_patch_len] == '\\') {
+				prev_patch[prev_patch_len] = '/';
+			}
+		}
+#endif
+		request->path_info = prev_patch;
 		pefree(request->vpath, 1);
-		request->vpath = pestrndup(vpath, prev_patch - vpath, 1);
-		request->vpath_len = prev_patch - vpath;
-		*prev_patch = '\0';
+		request->vpath = pestrndup(vpath, q - vpath, 1);
+		request->vpath_len = q - vpath;
 		request->path_translated = buf;
-		request->path_translated_len = prev_patch - buf;
+		request->path_translated_len = q - buf;
 	} else {
 		pefree(request->vpath, 1);
-		request->vpath = pestrndup(vpath, p - vpath, 1);
-		request->vpath_len = p - vpath;
+		request->vpath = pestrndup(vpath, q - vpath, 1);
+		request->vpath_len = q - vpath;
 		request->path_translated = buf;
-		request->path_translated_len = p - buf;
+		request->path_translated_len = q - buf;
 	}
 	request->sb = sb;
 } /* }}} */
