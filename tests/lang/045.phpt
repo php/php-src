@@ -1,5 +1,9 @@
 --TEST--
 Timeout again inside register_shutdown_function
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 set_time_limit(1);

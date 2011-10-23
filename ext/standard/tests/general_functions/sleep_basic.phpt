@@ -1,5 +1,9 @@
 --TEST--
 Test sleep() function : basic functionality 
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 /* Prototype  : int sleep  ( int $seconds  )
