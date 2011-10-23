@@ -2,6 +2,7 @@
 Bug #39322 (proc_terminate() loosing process resource)
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (!is_executable('/bin/sleep')) echo 'skip sleep not found';
 ?>
 --FILE--

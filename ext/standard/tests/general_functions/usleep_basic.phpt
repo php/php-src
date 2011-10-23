@@ -1,5 +1,9 @@
 --TEST--
 Test usleep() function
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 /* Prototype  : void usleep  ( int $micro_seconds  )
