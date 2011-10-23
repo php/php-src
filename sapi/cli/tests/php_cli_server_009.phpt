@@ -1,0 +1,99 @@
+--TEST--
+PATH_INFO (relevant to #60112)
+--DESCRIPTION--
+After this fix(#60112), previously 404 request like "localhost/foo/bar"
+now could serve correctly with request_uri "index.php" and PATH_INFO "/foo/bar/"
+--SKIPIF--
+<?php
+include "skipif.inc"; 
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die ("skip not for Windows");
+}
+?>
+--FILE--
+<?php
+include "php_cli_server.inc";
+php_cli_server_start('var_dump($_SERVER["PATH_INFO"]);', TRUE);
+
+list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
+$port = intval($port)?:80;
+
+$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
+if (!$fp) {
+  die("connect failed");
+}
+
+if(fwrite($fp, <<<HEADER
+GET /foo/bar HTTP/1.1
+Host: {$host}
+
+
+HEADER
+)) {
+	while (!feof($fp)) {
+		echo fgets($fp);
+	}
+}
+
+fclose($fp);
+
+$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
+if (!$fp) {
+  die("connect failed");
+}
+
+
+if(fwrite($fp, <<<HEADER
+GET /foo/bar/ HTTP/1.0
+Host: {$host}
+
+
+HEADER
+)) {
+	while (!feof($fp)) {
+		echo fgets($fp);
+	}
+}
+
+fclose($fp);
+
+$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
+if (!$fp) {
+  die("connect failed");
+}
+
+
+if(fwrite($fp, <<<HEADER
+GET /foo/bar.js HTTP/1.0
+Host: {$host}
+
+
+HEADER
+)) {
+	while (!feof($fp)) {
+		echo fgets($fp);
+		break;
+	}
+}
+
+fclose($fp);
+?>
+--EXPECTF--
+[%s] %s
+HTTP/1.1 200 OK
+Host: %s
+Connection: closed
+X-Powered-By: PHP/%s-dev
+Content-type: text/html
+
+string(8) "/foo/bar"
+[%s] %s
+HTTP/1.0 200 OK
+Host: %s
+Connection: closed
+X-Powered-By: PHP/5.5.0-dev
+Content-type: text/html
+
+string(9) "/foo/bar/"
+[%s] %s
+HTTP/1.0 404 Not Found
