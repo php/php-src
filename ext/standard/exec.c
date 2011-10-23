@@ -50,6 +50,16 @@
 #include <unistd.h>
 #endif
 
+/* {{{ register_exec_constants
+ *  */
+void register_exec_constants(INIT_FUNC_ARGS)
+{
+    REGISTER_LONG_CONSTANT("ESCAPE_CMD_PAIR", ESCAPE_CMD_PAIR, CONST_PERSISTENT|CONST_CS);
+    REGISTER_LONG_CONSTANT("ESCAPE_CMD_END", ESCAPE_CMD_END, CONST_PERSISTENT|CONST_CS);
+    REGISTER_LONG_CONSTANT("ESCAPE_CMD_ALL", ESCAPE_CMD_ALL, CONST_PERSISTENT|CONST_CS);
+}
+/* }}} */
+
 /* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -238,7 +248,7 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-PHPAPI char *php_escape_shell_cmd(char *str)
+PHPAPI char *php_escape_shell_cmd_ex(char *str, int flag)
 {
 	register int x, y, l = strlen(str);
 	char *cmd;
@@ -266,14 +276,26 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 #ifndef PHP_WIN32
 			case '"':
 			case '\'':
-				if (!p && (p = memchr(str + x + 1, str[x], l - x - 1))) {
-					/* noop */
-				} else if (p && *p == str[x]) {
-					p = NULL;
-				} else {
+				if (flag == ESCAPE_CMD_ALL) {
 					cmd[y++] = '\\';
+					cmd[y++] = str[x];
+				} else if (flag == ESCAPE_CMD_END) {
+					if (x == 0 || x == l - 1) {
+						cmd[y++] = str[x];
+                    } else {
+                        cmd[y++] = '\\';
+                        cmd[y++] = str[x];
+                    }
+				} else { /* ESCAPE_CMD_PAIR */
+					if (!p && (p = memchr(str + x + 1, str[x], l - x - 1))) {
+						/* noop */
+					} else if (p && *p == str[x]) {
+						p = NULL;
+					} else {
+						cmd[y++] = '\\';
+					}
+					cmd[y++] = str[x];
 				}
-				cmd[y++] = str[x];
 				break;
 #else
 			/* % is Windows specific for enviromental variables, ^%PATH% will 
@@ -324,6 +346,14 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 	}
 
 	return cmd;
+}
+/* }}} */
+
+/* {{{ php_escape_shell_cmd
+ */
+PHPAPI char *php_escape_shell_cmd(char *str)
+{
+    return php_escape_shell_cmd_ex(str, ESCAPE_CMD_PAIR);
 }
 /* }}} */
 
@@ -397,14 +427,15 @@ PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
 	int command_len;
+	long flag = ESCAPE_CMD_PAIR;
 	char *cmd = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &command, &command_len, &flag) == FAILURE) {
 		return;
 	}
 
 	if (command_len) {
-		cmd = php_escape_shell_cmd(command);
+		cmd = php_escape_shell_cmd_ex(command, flag);
 		RETVAL_STRING(cmd, 0);
 	} else {
 		RETVAL_EMPTY_STRING();
