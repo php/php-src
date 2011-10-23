@@ -5,6 +5,21 @@ Bug #55509 (segfault on x86_64 using more than 2G memory)
 if (PHP_INT_SIZE == 4) {
   die('skip Not for 32-bits OS');
 }
+// check the available memory
+if (PHP_OS == 'Linux') {
+  $lines = file('/proc/meminfo');
+  $infos = array();
+  foreach ($lines as $line) {
+    $tmp = explode(":", $line);
+    $index = strtolower($tmp[0]);
+    $value = (int)ltrim($tmp[1], " ")*1024;
+    $infos[$index] = $value;
+  }
+  $freeMemory = $infos['memfree']+$infos['buffers']+$infos['cached'];
+  if ($freeMemory < 2100*1024*1024) {
+    die('skip Not enough memory.');
+  }
+}
 ?>
 --INI--
 memory_limit=2100M
