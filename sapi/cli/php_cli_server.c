@@ -1787,6 +1787,9 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 
 	php_cli_server_log_response(client, status, errstr ? errstr : "?" TSRMLS_CC);
 	php_cli_server_poller_add(&server->poller, POLLOUT, client->sock);
+	if (errstr) {
+		pefree(errstr, 1);
+	}
 	efree(escaped_request_uri);
 	return SUCCESS;
 
