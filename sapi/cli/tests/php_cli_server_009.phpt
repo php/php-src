@@ -91,7 +91,7 @@ string(8) "/foo/bar"
 HTTP/1.0 200 OK
 Host: %s
 Connection: closed
-X-Powered-By: PHP/5.5.0-dev
+X-Powered-By: PHP/%s-dev
 Content-type: text/html
 
 string(9) "/foo/bar/"
