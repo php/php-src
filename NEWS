@@ -3,9 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
+
 - CLI SAPI:
   . Fixed bug #60112 (If URI does not contain a file, index.php is not served)
     .(Laruence)
+  . Fixed bug #60115 (memory definitely lost in cli server). (Laruence)
 
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
