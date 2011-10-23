@@ -11,26 +11,19 @@ UPGRADE NOTES - PHP 5.4
 7. Deprecated
 8. Removed
 9. Extensions:
-     a. moved out to PECL and actively maintained there
-     b. no longer maintained
-     c. with changed behaviour
-     d. no longer possible to disable
+     a. with changed behaviour
+     b. no longer possible to disable
 10. Changes in SAPI support
 11. Changes in INI directives
 12. Syntax additions
 13. Windows support
 14. New in PHP 5.4:
-     a. New libraries
-     b. New extensions
-     c. New stream wrappers
-     d. New stream filters
-     e. New functions
-     f. New global constants
-     g. New classes
-     h. New methods
-     i. New class constants
-     j. New hash algorithms
-     k. New Syntax
+     a. New functions
+     b. New global constants
+     c. New classes
+     d. New methods
+     e. New class constants
+     f. New hash algorithms
 
 ========================================
 1. Changes made to default configuration
@@ -87,11 +80,16 @@ UPGRADE NOTES - PHP 5.4
 2. Reserved words and classes
 =============================
 
-- "trait" is a reserved word now
+- "trait" and "insteadof" are reserved words now.
 
 ===================================
 3. Changes made to engine behaviour
 ===================================
+
+- Changed E_ALL to include E_STRICT. 
+
+- Closures now support scopes and $this and can be rebound to
+  objects using Closure::bind() and Closure::bindTo().
 
 - Turning null, false or empty string into an object by adding a property
   will now emit a warning instead of an E_STRICT error.
@@ -120,6 +118,15 @@ UPGRADE NOTES - PHP 5.4
 - In previous versions, names of superglobals could be used for parameter
   names, thereby shadowing the corresponding superglobal. This now causes a
   fatal error such as "Cannot re-assign auto-global variable GLOBALS".
+
+- Converting array to string now will cause E_NOTICE warning. 
+
+- Added multibyte support by default. Now it can be enabled or disabled through
+  zend.multibyte directive in php.ini.
+
+- <?= is now always available regardless of the short_open_tag setting.
+
+- Parse error messages are changed to contain more information about the error. 
 
 =====================================
 4. Changes made to existing functions
@@ -190,22 +197,41 @@ UPGRADE NOTES - PHP 5.4
 - fclose() closes streams with resource refcount > 1; it doesn't merely
   decrement the resource refcount.
 - socket_set_options() and socket_get_options() now support multicast options.
-- Arrays cast from SimpleXMLElement now always contain all nodes instead of
-  just the first matching node.
-- All SimpleXMLElement children are now always printed when using var_dump(),
-  var_export(), and print_r().
 - The raw data parameter in openssl_encrypt()/openssl_decrypt() is now an options
   integer rather than a boolean. A value of true produces the same behaviour.
 - Write operations within XSLT (for example with the extension sax:output) are
   disabled by default. You can define what is forbidden with the method
-  XsltProcess::setSecurityPrefs($options)
+  XsltProcess::setSecurityPrefs($options).
+- Added AES support to OpenSSL.
 - openssl_csr_new() expects the textual data to be in UTF-8.
+- Added no padding option to openssl_encrypt()/openssl_decrypt().
+- Added a "no_ticket" SSL context option to disable the SessionTicket TLS 
+  extension.
+- Added new json_encode() options: JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES, 
+  JSON_NUMERIC_CHECK, JSON_BIGINT_AS_STRING, JSON_UNESCAPED_UNICODE.
+- Added Tokyo Cabinet and Berkley DB 5 support to DBA extension.
+- Added support for CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE
+  to cURL.
+- Added optional argument to debug_backtrace() and debug_print_backtrace() 
+  to limit the amount of stack frames returned.
+- Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode now
+  supports hashes marked $2a$, $2x$, $2y$ and $2z$. 
+- mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji, 
+  JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004), 
+  MacJapanese (Shift_JIS), gb18030.
+- Added encode/decode in hex format to mb_[en|de]code_numericentity().
+- Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions 
+  (sort, rsort, ksort, krsort, asort, arsort and array_multisort).
 
 ===================================
 5. Changes made to existing methods
 ===================================
 
-- 
+- DateTime::parseFromFormat() now has + modifier to allow trailing text in 
+  the string to parse without throwing an error.
+- Added the ability to pass options to DOMDocument::loadHTML().
+- FilesystemIterator, GlobIterator and (Recursive)DirectoryIterator now use
+  the default stream context.
 
 ===================================
 6. Changes made to existing classes
@@ -228,12 +254,20 @@ UPGRADE NOTES - PHP 5.4
   object is constructed.
 - Classes that implement stream wrappers can define a method called stream_metadata that
   will be called on touch(), chmod(), chgrp(), chown().
-
-  
+- Arrays cast from SimpleXMLElement now always contain all nodes instead of
+  just the first matching node.
+- All SimpleXMLElement children are now always printed when using var_dump(),
+  var_export(), and print_r().
+- Added iterator support in MySQLi. mysqli_result implements Traversable.
 
 =============
 7. Deprecated
 =============
+
+- get_magic_quotes_gpc()
+- get_magic_quotes_runtime()
+- mcrypt_generic_end()
+- mysql_list_dbs()
 
 ==========
 8. Removed
@@ -296,19 +330,17 @@ UPGRADE NOTES - PHP 5.4
 9. Extensions
 =============
 
-     a. moved out to PECL and actively maintained there
-
-        - 
-
-     b. no longer maintained
+     a. no longer maintained
 
         - ext/sqlite
 
-     c. with changed behaviour
+     b. with changed behaviour
 
         - The MySQL extensions (ext/mysql, mysqli and PDO_mysql) use mysqlnd
           as the default library now. It is still possible to use libmysql by
           specifying a path to the configure options.
+        - PDO_mysql: Support for linking with MySQL client libraries older
+		  than 4.1 is removed.
         - The session extension now can hook into the file upload feature
           in order to provide upload progress information through session 
           variables.
@@ -342,22 +374,29 @@ UPGRADE NOTES - PHP 5.4
             is set with date.timezone and/or date_default_timezone_set().
             Instead it will always fall back to "UTC".
 
-     d. no longer possible to disable
-
-        - 
-
 ==========================
 10. Changes in SAPI support
 ==========================
 
+- Added built-in CLI web server that is intended for testing purposes.
 - The REQUEST_TIME value inside server now returns a floating point number
   indicating the time with microsecond precision. All SAPIs providing this
   value should be returning float and not time_t.
+- apache_child_terminate(), getallheaders(), apache_request_headers() 
+  and apache_response_headers() now supported on FastCGI.
+- Added shortcut #inisetting=value to change ini settings at run-time.
+- Changed shell not to terminate on fatal errors.
+- Interactive shell works with shared readline extension.
+- Added command line option --rz <name> which shows information of the 
+  named Zend extension.
+- PHP-FPM now supports syslog value for error_log.
 
 =============================
 11. Changes in INI directives
 =============================
 
+- Recommended production value for error_reporting changed to 
+  E_ALL & ~E_DEPRECATED & ~E_STRICT.
 - Added session.upload_progress.enabled, session.upload_progress.cleanup, 
   session.upload_progress.prefix, session.upload_progress.name, 
   session.upload_progress.freq, session.upload_progress.min_freq.
@@ -372,17 +411,31 @@ UPGRADE NOTES - PHP 5.4
   raw POST data in multipart requests and read/process the POST data in a
   stream fashion (through php://input), without having it copied in memory two/
   three times.
-- Changed E_ALL to include E_STRICT. Recommended production value changed to 
-  E_ALL & ~E_DEPRECATED & ~E_STRICT.
-- a new directive, called windows_show_crt_warning, has been introduced.
+- A new directive, called windows_show_crt_warning, has been introduced.
   This directive shows the CRT warnings when enabled. These warnings were
   displayed by default until now. It is disabled by default. 
+- Added cli.pager php.ini setting to set a pager for CLI output.
+- Added cli.prompt php.ini setting to configure the CLI shell prompt.
+- Added process.max to control the number of process FPM can fork.
 
 ====================
 12. Syntax additions
 ====================
+- Traits:
+	trait HelloWorld {
+    	public function sayHello() {
+        	echo 'Hello World!';
+    	}
+	}
 
-- Array dereferencing.
+	class CanIGetHello {
+    	use HelloWorld;	
+	}
+	
+	$hello = new CanIGetHello();
+	$hello->sayHello();
+	
+- Function call result array access:
   e.g.
     foo()[0]
     $foo->bar()[0]
@@ -396,6 +449,30 @@ UPGRADE NOTES - PHP 5.4
   $o = new ArrayObject();
   foo(array($o, "count"));
 
+- Short array syntax:
+    $a = [1, 2, 3, 4];
+    $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
+    $a = ['one' => 1, 2, 'three' => 3, 4];
+
+- Binary number format:
+    0b00100 0b010101
+
+- $str[1][0] where $str is a string is now a legal construct.
+
+- Anonymous functions now support using $this and class scope. 
+  Anonymous function can be declared as "static" to ignore the scope.
+
+- Class::{expr}() syntax is now supported:
+	class A { 
+		static function foo() { 
+			echo "Hello world!\n";
+		}
+	} 
+	$x = "f"; 
+	$y = "o"; 
+	A::{$x.$y.$y}();
+
+
 ===================
 13. Windows support
 ===================
@@ -407,77 +484,131 @@ UPGRADE NOTES - PHP 5.4
 14. New in PHP 5.4:
 ===================
 
-     a. New libraries
-
-       - 
-
-     b. New extensions
-
-       - 
-
-     c. New stream wrappers
-
-       - 
-
-     d. New stream filters
-
-       - 
-
-     e. New functions
+     a. New functions
 
        - Core:
          - get_declared_traits()
+         - getimagesizefromstring()
          - hex2bin()
+ 		 - header_register_callback()
          - http_response_code()
          - stream_set_chunk_size()
          - socket_import_stream()
          - trait_exists()
 
+	   - Intl:
+         - transliterator_create()
+         - transliterator_create_from_rules()
+         - transliterator_create_inverse()
+         - transliterator_get_error_code()
+         - transliterator_get_error_message()
+         - transliterator_list_ids()
+         - transliterator_transliterate()
+	
        - LDAP:
          - ldap_control_paged_results()
          - ldap_control_paged_results_response()
 
-       - libxml
+       - libxml:
          - libxml_set_external_entity_loader()
+	
+	   - mysqli:
+	     - mysqli_error_list()
+		 - mysqli_stmt_error_list()
+	
+	   - Session:
+	     - session_register_shutdown()
+		 - session_status()
+		
+	   - SPL
+		 - class_uses()
 
-     f. New global constants
+     b. New global constants
 
+       - CURLOPT_MAX_RECV_SPEED_LARGE
+       - CURLOPT_MAX_SEND_SPEED_LARGE
+	   - ENT_DISALLOWED
+	   - ENT_HTML401
+	   - ENT_HTML5
+	   - ENT_SUBSTITUTE
+	   - ENT_XHTML
+	   - ENT_XML1
+       - IPPROTO_IP
+       - IPPROTO_IPV6
+       - IPV6_MULTICAST_HOPS
+       - IPV6_MULTICAST_IF
+       - IPV6_MULTICAST_LOOP
+       - IP_MULTICAST_IF
+       - IP_MULTICAST_LOOP
+       - IP_MULTICAST_TTL
+       - JSON_BIGINT_AS_STRING
+       - JSON_OBJECT_AS_ARRAY
        - JSON_PRETTY_PRINT
        - JSON_UNESCAPED_SLASHES
-       - ENT_SUBSTITUTE
-       - ENT_ALLOWED
-       - ENT_HTML401
-       - ENT_XML1
-       - ENT_XHTML
-       - ENT_HTML5
-       - SCANDIR_SORT_ASCENDING
-       - SCANDIR_SORT_DESCENDING
-       - SCANDIR_SORT_NONE
+       - JSON_UNESCAPED_UNICODE
+       - LIBXML_HTML_NODEFDTD
+       - LIBXML_HTML_NOIMPLIED
+       - LIBXML_PEDANTIC
        - MCAST_JOIN_GROUP
        - MCAST_LEAVE_GROUP
        - MCAST_BLOCK_SOURCE
        - MCAST_UNBLOCK_SOURCE
        - MCAST_JOIN_SOURCE_GROUP
        - MCAST_LEAVE_SOURCE_GROUP
-       - IP_MULTICAST_IF
-       - IP_MULTICAST_TTL
-       - IP_MULTICAST_LOOP
-       - IPV6_MULTICAST_IF
-       - IPV6_MULTICAST_HOPS
-       - IPV6_MULTICAST_LOOP
-       - IPPROTO_IP
-       - IPPROTO_IPV6
+       - OPENSSL_CIPHER_AES_128_CBC
+       - OPENSSL_CIPHER_AES_192_CBC
+       - OPENSSL_CIPHER_AES_256_CBC
        - OPENSSL_RAW_DATA
        - OPENSSL_ZERO_PADDING
+       - PHP_OUTPUT_HANDLER_CLEAN
+       - PHP_OUTPUT_HANDLER_CLEANABLE
+       - PHP_OUTPUT_HANDLER_DISABLED
+       - PHP_OUTPUT_HANDLER_FINAL
+       - PHP_OUTPUT_HANDLER_FLUSH
+       - PHP_OUTPUT_HANDLER_FLUSHABLE
+       - PHP_OUTPUT_HANDLER_REMOVABLE
+       - PHP_OUTPUT_HANDLER_STARTED
+       - PHP_OUTPUT_HANDLER_STDFLAGS
+       - PHP_OUTPUT_HANDLER_WRITE
+       - PHP_QUERY_RFC1738
+       - PHP_QUERY_RFC3986
+       - PHP_SESSION_ACTIVE
+       - PHP_SESSION_DISABLED
+       - PHP_SESSION_NONE
+       - SCANDIR_SORT_ASCENDING
+       - SCANDIR_SORT_DESCENDING
+       - SCANDIR_SORT_NONE
+       - SORT_FLAG_CASE
+       - SORT_NATURAL
+       - STREAM_META_ACCESS
+       - STREAM_META_GROUP
+       - STREAM_META_GROUP_NAME
+       - STREAM_META_OWNER
+       - STREAM_META_OWNER_NAME
+       - STREAM_META_TOUCH
+       - T_CALLABLE
+       - T_INSTEADOF
+       - T_TRAIT
+       - T_TRAIT_C
+       - ZLIB_ENCODING_DEFLATE
+       - ZLIB_ENCODING_GZIP
+       - ZLIB_ENCODING_RAW
 
-     g. New classes
+     c. New classes
 
        - Reflection:
          - ReflectionZendExtension
        
        - Intl:
          - Transliterator
+		 - Spoofchecker
        
+       - JSON:
+         - JsonSerializable
+
+	   - Session: 
+	     - SessionHandler
+	
        - SNMP:
          - SNMP
 
@@ -485,46 +616,74 @@ UPGRADE NOTES - PHP 5.4
          - CallbackFilterIterator
          - RecursiveCallbackFilterIterator
 
-     h. New methods
+     d. New methods
 
-       - DirectoryIterator
-         - DirectoryIterator::getExtension()
+	   - Closure: 
+	      - Closure::bind()
+	      - Closure::bindTo() 
 
        - Reflection:
-         - ReflectionClass::isCloneable()
-         - ReflectionClass::getTraits()
-         - ReflectionClass::getTraitNames()
          - ReflectionClass::getTraitAliases()
+         - ReflectionClass::getTraitNames()
+         - ReflectionClass::getTraits()
+         - ReflectionClass::isCloneable()
+         - ReflectionClass::isTrait()
+         - ReflectionClass::newInstanceWithoutConstructor()
+         - ReflectionExtension::isPersistent()
+         - ReflectionExtension::isTemporary()
+         - ReflectionFunction::getClosure()
+         - ReflectionFunction::getClosureScopeClass()
+         - ReflectionFunction::getClosureThis()
+         - ReflectionFunctionAbstract::getClosureScopeClass()
+         - ReflectionFunctionAbstract::getClosureThis()
+         - ReflectionMethod::getClosure()
+         - ReflectionMethod::getClosureScopeClass()
+         - ReflectionMethod::getClosureThis()
+         - ReflectionObject::getTraitAliases()
+         - ReflectionObject::getTraitNames()
+         - ReflectionObject::getTraits()
+         - ReflectionObject::isCloneable()
+         - ReflectionObject::isTrait()
+         - ReflectionObject::newInstanceWithoutConstructor()
          - ReflectionParameter::canBePassedByValue()
          - ReflectionParameter::isCallable()
-       
-       - RegexIterator
-         - RegexIterator::getRegex()
 
-       - PDO_dblib
+       - PDO_dblib:
          - PDO::newRowset()
 
-       - SplFileInfo
+       - SPL:
+       	 - DirectoryIterator::getExtension()
+         - RegexIterator::getRegex()
+         - SplDoublyLinkedList::serialize()
+         - SplDoublyLinkedList::unserialize()
          - SplFileInfo::getExtension()
-
-       - SplFileObject
          - SplFileObject::fputcsv()
+	     - SplObjectStorage::getHash()
+         - SplQueue::serialize
+         - SplQueue::unserialize
+         - SplStack::serialize
+         - SplStack::unserialize
+         - SplTempFileObject::fputcsv
 
-     i. New class constants
+	   - XSLT:
+	     - XsltProcessor::setSecurityPrefs()
+		 - XsltProcessor::getSecurityPrefs()
 
-       - 
+     e. New class constants
 
-     j. New Hash algorithms
+       - PDO:
+		 - PDO::MYSQL_ATTR_SSL_CA
+	     - PDO::MYSQL_ATTR_SSL_CAPATH
+	     - PDO::MYSQL_ATTR_SSL_CERT
+	     - PDO::MYSQL_ATTR_SSL_CIPHER
+	     - PDO::MYSQL_ATTR_SSL_KEY
+
+     f. New Hash algorithms
 
        - fnv132
        - fnv164
        - joaat
-       
-     k. New Syntax
-       - Short array syntax in 5.4.0
-         $a = [1, 2, 3, 4];
-         $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
-         $a = ['one' => 1, 2, 'three' => 3, 4];
 
-       - Binary number format
-         0b00100 0b010101
+
+	
+       
