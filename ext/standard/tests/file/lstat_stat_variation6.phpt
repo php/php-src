@@ -2,6 +2,7 @@
 Test lstat() and stat() functions: usage variations - effects of touch() on link 
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (!(stristr(PHP_OS, 'linux')))  {
     die('skip.. test valid for linux only');
 }
@@ -47,7 +48,7 @@ clearstatcache();
 
 var_dump( touch($link_name) );
 
-$new_stat = lstat($link_name);
+$new_stat = stat($file_name);
 
 // compare self stats
 var_dump( compare_self_stat($old_stat) );

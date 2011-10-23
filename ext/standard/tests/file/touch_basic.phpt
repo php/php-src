@@ -4,6 +4,7 @@ Test touch() function : basic functionality
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only for Non Windows');
 }
