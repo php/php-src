@@ -2,6 +2,7 @@
 getmxrr() test
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip: no Windows support');
 }
