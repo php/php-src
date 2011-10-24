@@ -1037,20 +1037,9 @@ MYSQLND_CLASS_METHODS_END;
 PHPAPI MYSQLND_NET *
 mysqlnd_net_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
-
+	MYSQLND_NET * net;
 	DBG_ENTER("mysqlnd_net_init");
-	DBG_INF_FMT("persistent=%u", persistent);
-	if (net) {
-		net->persistent = persistent;
-		net->m = *mysqlnd_net_get_methods();
-
-		if (PASS != net->m.init(net, stats, error_info TSRMLS_CC)) {
-			net->m.dtor(net, stats, error_info TSRMLS_CC);
-			net = NULL;
-		}
-	}
+	net = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_io_channel(persistent, stats, error_info TSRMLS_CC);
 	DBG_RETURN(net);
 }
 /* }}} */

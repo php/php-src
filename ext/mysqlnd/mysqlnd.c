@@ -63,22 +63,6 @@ PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 
-static struct st_mysqlnd_plugin_core mysqlnd_plugin_core;
-
-/* {{{ mysqlnd_error_list_pdtor */
-static void
-mysqlnd_error_list_pdtor(void * pDest)
-{
-	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-	TSRMLS_FETCH();
-	DBG_ENTER("mysqlnd_error_list_pdtor");
-	if (element->error) {
-		mnd_pefree(element->error, TRUE);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
 /* {{{ mysqlnd_conn::free_options */
 static void
 MYSQLND_METHOD(mysqlnd_conn, free_options)(MYSQLND * conn TSRMLS_DC)
@@ -2470,37 +2454,13 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_init */
-PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
+/* {{{ _mysqlnd_init */
+PHPAPI MYSQLND *
+_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND *ret;
-
+	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_init");
-	DBG_INF_FMT("persistent=%u", persistent);
-	ret = mnd_pecalloc(1, alloc_size, persistent);
-	if (!ret) {
-		DBG_RETURN(NULL);
-	}
-
-	ret->persistent = persistent;
-	ret->m = mysqlnd_conn_get_methods();
-	CONN_SET_STATE(ret, CONN_ALLOCED);
-	ret->m->get_reference(ret TSRMLS_CC);
-
-	if (PASS != ret->m->init(ret TSRMLS_CC)) {
-		ret->m->dtor(ret TSRMLS_CC);
-		ret = NULL;
-	}
-
-	ret->error_info.error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (!ret->error_info.error_list) {
-		ret->m->dtor(ret TSRMLS_CC);
-		ret = NULL;
-	} else {
-		zend_llist_init(ret->error_info.error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
-	}
-
+	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_connection(persistent TSRMLS_CC);
 	DBG_RETURN(ret);
 }
 /* }}} */

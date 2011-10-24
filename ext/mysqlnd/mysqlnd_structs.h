@@ -25,6 +25,12 @@
 
 #define MYSQLND_TYPEDEFED_METHODS
 
+#define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
+#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class)
+
+#define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
+#define MYSQLND_CLASS_METHODS_END			}
+
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
 typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIST;
@@ -365,6 +371,21 @@ struct st_mysqlnd_protocol_methods
 	void * unused3;
 	void * unused4;
 	void * unused5;
+};
+
+
+typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(zend_bool persistent TSRMLS_DC);
+typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND * conn TSRMLS_DC);
+typedef MYSQLND_NET * (*func_mysqlnd_object_factory__get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
+typedef MYSQLND_PROTOCOL * (*func_mysqlnd_object_factory__get_protocol_decoder)(zend_bool persistent TSRMLS_DC);
+
+
+struct st_mysqlnd_object_factory_methods
+{
+	func_mysqlnd_object_factory__get_connection get_connection;
+	func_mysqlnd_object_factory__get_prepared_statement get_prepared_statement;
+	func_mysqlnd_object_factory__get_io_channel get_io_channel;
+	func_mysqlnd_object_factory__get_protocol_decoder get_protocol_decoder;
 };
 
 
