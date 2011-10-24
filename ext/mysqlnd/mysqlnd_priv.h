@@ -47,11 +47,6 @@
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
 
-#define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
-#define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
-#define MYSQLND_CLASS_METHODS_END			}
-#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class)
-
 #if MYSQLND_UNICODE
 #define mysqlnd_array_init(arg, field_count) \
 { \
@@ -205,6 +200,7 @@ PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
 PHPAPI extern const char * const mysqlnd_out_of_memory;
 
+extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);

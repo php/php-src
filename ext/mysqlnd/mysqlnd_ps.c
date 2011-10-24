@@ -51,21 +51,6 @@ static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_D
 static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
 
-/* {{{ mysqlnd_ps_error_list_pdtor */
-static void
-mysqlnd_ps_error_list_pdtor(void * pDest)
-{
-	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-	TSRMLS_FETCH();
-	DBG_ENTER("mysqlnd_ps_error_list_pdtor");
-	if (element->error) {
-		mnd_pefree(element->error, TRUE);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_stmt::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
@@ -2362,55 +2347,13 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ _mysqlnd_stmt_init */
-MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
+MYSQLND_STMT *
+_mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
-	MYSQLND_STMT_DATA * stmt = NULL;
-
+	MYSQLND_STMT * ret;
 	DBG_ENTER("_mysqlnd_stmt_init");
-	do {
-		if (!ret) {
-			break;
-		}
-		ret->m = mysqlnd_stmt_get_methods();
-		ret->persistent = conn->persistent;
-
-		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
-		DBG_INF_FMT("stmt=%p", stmt);
-		if (!stmt) {
-			break;
-		}
-		stmt->persistent = conn->persistent;
-		stmt->state = MYSQLND_STMT_INITTED;
-		stmt->execute_cmd_buffer.length = 4096;
-		stmt->execute_cmd_buffer.buffer = mnd_pemalloc(stmt->execute_cmd_buffer.length, stmt->persistent);
-		if (!stmt->execute_cmd_buffer.buffer) {
-			break;
-		}
-
-		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
-		/*
-		  Mark that we reference the connection, thus it won't be
-		  be destructed till there is open statements. The last statement
-		  or normal query result will close it then.
-		*/
-		stmt->conn = conn->m->get_reference(conn TSRMLS_CC);
-		stmt->error_info.error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
-		if (!stmt->error_info.error_list) {
-			break;
-		}
-		zend_llist_init(stmt->error_info.error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_ps_error_list_pdtor, conn->persistent);
-
-		DBG_RETURN(ret);
-	} while (0);
-
-	SET_OOM_ERROR(conn->error_info);
-	if (ret) {
-		ret->m->dtor(ret, TRUE TSRMLS_CC);
-		ret = NULL;
-	}
-	DBG_RETURN(NULL);
+	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_prepared_statement(conn TSRMLS_CC);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
