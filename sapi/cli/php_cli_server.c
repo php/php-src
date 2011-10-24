@@ -1292,11 +1292,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					}
 					file++;
 				}
-				if (!*file) {
-					pefree(buf, 1);
-					return;
-				}
-				if (is_static_file) {
+				if (!*file || is_static_file) {
 					pefree(buf, 1);
 					return;
 				}
