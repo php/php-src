@@ -1296,12 +1296,13 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					pefree(buf, 1);
 					return;
 				}
+				if (is_static_file) {
+					pefree(buf, 1);
+					return;
+				}
 			}
 			break; /* regular file */
-		} else if (is_static_file) {
-			pefree(buf, 1);
-			return;
-		}	
+		} 
 		if (prev_patch) {
 			pefree(prev_patch, 1);
 			*q = DEFAULT_SLASH;
