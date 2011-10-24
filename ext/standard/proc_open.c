@@ -380,7 +380,6 @@ PHP_FUNCTION(proc_get_status)
 # define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 2048L) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
-# define COMSPEC_9X	"command.com"
 
 static inline HANDLE dup_handle(HANDLE src, BOOL inherit, BOOL closeorig)
 {
@@ -724,7 +723,7 @@ PHP_FUNCTION(proc_open)
 	if (bypass_shell) {
 		newprocok = CreateProcess(NULL, command, &security, &security, TRUE, dwCreateFlags, env.envp, cwd, &si, &pi);
 	} else {
-		spprintf(&command_with_cmd, 0, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
+		spprintf(&command_with_cmd, 0, "%s /c %s", COMSPEC_NT, command);
 
 		newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, dwCreateFlags, env.envp, cwd, &si, &pi);
 
