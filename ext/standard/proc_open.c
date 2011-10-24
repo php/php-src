@@ -377,7 +377,7 @@ PHP_FUNCTION(proc_get_status)
 
 /* {{{ handy definitions for portability/readability */
 #ifdef PHP_WIN32
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 2048L) ? 0 : -1)
+# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 0) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
 

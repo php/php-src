@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #60115 (memory definitely lost in cli server). (Laruence)
 
+- Core:
+  . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
+    the data exceeds or is equal to 2048 bytes). (Pierre, Pascal Borreli)
+
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
