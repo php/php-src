@@ -106,7 +106,12 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define SQLT_CFILEE 115
 #endif
 
-#define PHP_OCI_ERRBUF_LEN 1024
+#ifdef OCI_ERROR_MAXMSG_SIZE2
+/* Bigger size is defined from 11.2.0.3 onwards */
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
+#else
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
+#endif 
 
 #if ZEND_MODULE_API_NO > 20020429
 #define ONUPDATELONGFUNC OnUpdateLong
@@ -1063,7 +1068,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 {
 	sword errstatus;
 	sb4   ora_error_code = 0;
-	text  tmp_buf[PHP_OCI_ERRBUF_LEN];
+	text  tmp_buf[OCI_ERROR_MAXMSG_SIZE];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
 
 	errstatus = OCIEnvNlsCreate(&OCI_G(env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, 0, 0);
 
@@ -1074,7 +1079,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
 		if (OCI_G(env)
-			&& OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
+			&& OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
 			&& *tmp_buf) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tmp_buf);
 		}
@@ -1103,7 +1108,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 		PHP_OCI_CALL(OCIHandleFree, (cpoolh, OCI_HTYPE_CPOOL));
 #endif
 	} else {
-		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
+		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ERROR);
 
 		if (ora_error_code) {
 			int tmp_buf_len = strlen((char *)tmp_buf);
@@ -2181,10 +2186,10 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 		return 1;
 	} else {
 		sb4 error_code = 0;
-		text tmp_buf[PHP_OCI_ERRBUF_LEN];
+		text tmp_buf[OCI_ERROR_MAXMSG_SIZE];
 
 		/* Treat ORA-1010 as a successful Ping */
-		OCIErrorGet(OCI_G(err), (ub4)1, NULL, &error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
+		OCIErrorGet(OCI_G(err), (ub4)1, NULL, &error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ERROR);
 		if (error_code == 1010) {
 			return 1;
 		}

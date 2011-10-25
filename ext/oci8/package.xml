@@ -33,21 +33,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2011-08-22</date>
+ <date>2011-10-25</date>
  <time>12:00:00</time>
 
  <version>
-  <release>1.4.6</release>
-  <api>1.4.6</api>
+  <release>1.4.7</release>
+  <api>1.4.7</api>
  </version>
  <stability>
-  <release>stable</release>
+  <release>devel</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-   Added oci_client_version() returning the runtime Oracle client library version
-   Made OCI8 extension buildable with PHP 5.4-development code
+  Increased maximum possible Oracle DB error message length
  </notes>
  <contents>
   <dir name="/">
@@ -251,6 +250,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="edition_2.phpt" role="test" />
     <file name="error1.phpt" role="test" />
     <file name="error2.phpt" role="test" />
+    <file name="error3.phpt" role="test" />
     <file name="error_bind.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
@@ -406,6 +406,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.6</release>
+  <api>1.4.6</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Added oci_client_version() returning the runtime Oracle client library version
+   Made OCI8 extension buildable with PHP 5.4-development code
+ </notes>
+</release>
 
 <release>
  <version>
