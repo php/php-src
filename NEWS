@@ -60,6 +60,10 @@ PHP                                                                        NEWS
   . Fixed bug #55067 (MySQL doesn't support compression - wrong config option).
     (Andrey)
 
+- Oracle Database extension (OCI8):
+  . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
+    (Chris Jones)
+
 - PDO
   . Fixed bug #55776 (PDORow to session bug). (Johannes)
 
