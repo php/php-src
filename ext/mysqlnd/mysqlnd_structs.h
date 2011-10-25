@@ -154,7 +154,6 @@ typedef struct st_mysqlnd_infile
 	void	*userdata;
 } MYSQLND_INFILE;
 
-
 typedef struct st_mysqlnd_options
 {
 	ulong		flags;
@@ -463,6 +462,9 @@ typedef enum_func_status	(*func_mysqlnd_conn__set_autocommit)(MYSQLND * conn, un
 typedef enum_func_status	(*func_mysqlnd_conn__tx_commit)(MYSQLND * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__tx_rollback)(MYSQLND * conn TSRMLS_DC);
 
+typedef enum_func_status	(*func_mysqlnd_conn__local_tx_start)(MYSQLND * conn, size_t this_func TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn__local_tx_end)(MYSQLND * conn, size_t this_func, enum_func_status status TSRMLS_DC);
+
 
 struct st_mysqlnd_conn_methods
 {
@@ -538,6 +540,9 @@ struct st_mysqlnd_conn_methods
 	func_mysqlnd_conn__set_autocommit set_autocommit;
 	func_mysqlnd_conn__tx_commit tx_commit;
 	func_mysqlnd_conn__tx_rollback tx_rollback;
+
+	func_mysqlnd_conn__local_tx_start local_tx_start;
+	func_mysqlnd_conn__local_tx_end local_tx_end;
 };
 
 
