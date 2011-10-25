@@ -35,9 +35,9 @@
 #define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type_as_text, packet_type) \
 	{ \
 		DBG_INF_FMT("buf=%p size=%u", (buf), (buf_size)); \
-		if (FAIL == mysqlnd_read_header((conn)->net, &((packet)->header), (conn)->stats, &((conn)->error_info) TSRMLS_CC)) {\
+		if (FAIL == mysqlnd_read_header((conn)->net, &((packet)->header), (conn)->stats, ((conn)->error_info) TSRMLS_CC)) {\
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
+			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Can't read %s's header", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
@@ -47,9 +47,9 @@
 						(buf_size), (packet)->header.size, (packet)->header.size - (buf_size)); \
 						DBG_RETURN(FAIL); \
 		}\
-		if (FAIL == conn->net->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, &((conn)->error_info) TSRMLS_CC)) { \
+		if (FAIL == conn->net->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, ((conn)->error_info) TSRMLS_CC)) { \
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
+			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Empty '%s' packet body", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
@@ -541,7 +541,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND * conn TSRMLS_DC)
 		}
 		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);
 	} else {
-		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, &conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (!sent) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		}
@@ -701,7 +701,7 @@ php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND * conn TSRMLS_DC)
 	}
 
 	{
-		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, &conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (buffer != conn->net->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
@@ -922,7 +922,7 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND * conn TSRMLS_DC)
 		zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 
 		int1store(buffer + MYSQLND_HEADER_SIZE, packet->command);
-		sent = net->m.send_ex(net, buffer, 1, conn->stats, &conn->error_info TSRMLS_CC);
+		sent = net->m.send_ex(net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
 	} else {
 		size_t tmp_len = packet->arg_len + 1 + MYSQLND_HEADER_SIZE;
 		zend_uchar *tmp, *p;
@@ -937,7 +937,7 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND * conn TSRMLS_DC)
 
 		memcpy(p, packet->argument, packet->arg_len);
 
-		sent = net->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, &conn->error_info TSRMLS_CC);
+		sent = net->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (tmp != net->cmd_buffer.buffer) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
@@ -1020,7 +1020,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND * conn TSRMLS_DC)
 				packet->info_or_local_file[len] = '\0';
 				packet->info_or_local_file_len = len;
 			} else {
-				SET_OOM_ERROR(conn->error_info);
+				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;	
 			}
 			break;
@@ -1047,7 +1047,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND * conn TSRMLS_DC)
 					packet->info_or_local_file[len] = '\0';
 					packet->info_or_local_file_len = len;
 				} else {
-					SET_OOM_ERROR(conn->error_info);
+					SET_OOM_ERROR(*conn->error_info);
 					ret = FAIL;
 				}
 			}
@@ -1220,7 +1220,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND * conn TSRMLS_DC)
 		DBG_INF_FMT("Def found, length %lu, persistent=%u", len, packet->persistent_alloc);
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		if (!meta->def) {
-			SET_OOM_ERROR(conn->error_info);
+			SET_OOM_ERROR(*conn->error_info);
 			DBG_RETURN(FAIL);		
 		}
 		memcpy(meta->def, p, len);
@@ -1232,7 +1232,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND * conn TSRMLS_DC)
 	DBG_INF_FMT("allocing root. persistent=%u", packet->persistent_alloc);
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	if (!root_ptr) {
-		SET_OOM_ERROR(conn->error_info);
+		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL);	
 	}
 	
@@ -1336,7 +1336,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 
 	*data_size = prealloc_more_bytes;
 	while (1) {
-		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, &conn->error_info TSRMLS_CC)) {
+		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info TSRMLS_CC)) {
 			ret = FAIL;
 			break;
 		}
@@ -1368,7 +1368,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 			  to be able to implement read-only variables.
 			*/
 			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC)) {
-				SET_OOM_ERROR(conn->error_info);
+				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				break;
 			}
@@ -1376,7 +1376,7 @@ php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
-		if (PASS != (ret = conn->net->m.receive_ex(conn->net, p, header.size, conn->stats, &conn->error_info TSRMLS_CC))) {
+		if (PASS != (ret = conn->net->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info TSRMLS_CC))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
 			break;

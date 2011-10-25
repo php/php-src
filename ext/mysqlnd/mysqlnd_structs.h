@@ -433,6 +433,7 @@ typedef unsigned int		(*func_mysqlnd_conn__get_warning_count)(const MYSQLND * co
 
 typedef unsigned int		(*func_mysqlnd_conn__get_field_count)(const MYSQLND * const conn TSRMLS_DC);
 
+typedef unsigned int		(*func_mysqlnd_conn__get_server_status)(const MYSQLND * const conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__set_server_option)(MYSQLND * const conn, enum_mysqlnd_server_option option TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn__set_client_option)(MYSQLND * const conn, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn__free_contents)(MYSQLND *conn TSRMLS_DC);	/* private */
@@ -513,6 +514,8 @@ struct st_mysqlnd_conn_methods
 
 	func_mysqlnd_conn__get_field_count get_field_count;
 
+	func_mysqlnd_conn__get_server_status get_server_status;
+	
 	func_mysqlnd_conn__set_server_option set_server_option;
 	func_mysqlnd_conn__set_client_option set_client_option;
 	func_mysqlnd_conn__free_contents free_contents;
@@ -821,12 +824,14 @@ struct st_mysqlnd_connection
 	unsigned long	server_capabilities;
 
 	/* For UPSERT queries */
-	MYSQLND_UPSERT_STATUS upsert_status;
+	MYSQLND_UPSERT_STATUS * upsert_status;
+	MYSQLND_UPSERT_STATUS upsert_status_impl;
 	char			*last_message;
 	unsigned int	last_message_len;
 
 	/* If error packet, we use these */
-	MYSQLND_ERROR_INFO	error_info;
+	MYSQLND_ERROR_INFO	* error_info;
+	MYSQLND_ERROR_INFO	error_info_impl;
 
 	/*
 	  To prevent queries during unbuffered fetches. Also to
@@ -853,7 +858,8 @@ struct st_mysqlnd_connection
 	zend_bool		persistent;
 
 	/* options */
-	MYSQLND_OPTIONS	options;
+	MYSQLND_OPTIONS	* options;
+	MYSQLND_OPTIONS	options_impl;
 
 	/* stats */
 	MYSQLND_STATS	* stats;
@@ -971,9 +977,11 @@ struct st_mysqlnd_stmt_data
 	zend_bool					result_zvals_separated_once;
 	zend_bool					persistent;
 
-	MYSQLND_UPSERT_STATUS		upsert_status;
+	MYSQLND_UPSERT_STATUS * 	upsert_status;
+	MYSQLND_UPSERT_STATUS 		upsert_status_impl;
 
-	MYSQLND_ERROR_INFO			error_info;
+	MYSQLND_ERROR_INFO *		error_info;
+	MYSQLND_ERROR_INFO			error_info_impl;
 
 	zend_bool					update_max_length;
 	unsigned long				prefetch_rows;
@@ -1051,13 +1059,6 @@ struct st_mysqlnd_authentication_plugin
 		func_auth_plugin__get_auth_data get_auth_data;
 	} methods;
 };
-
-
-typedef struct st_mysqlnd_reverse_api
-{
-	zend_module_entry * module;
-	MYSQLND *(*conversion_cb)(zval * zv TSRMLS_DC);
-} MYSQLND_REVERSE_API;
 
 
 #endif /* MYSQLND_STRUCTS_H */

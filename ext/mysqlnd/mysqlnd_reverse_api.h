@@ -13,22 +13,27 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@mysql.com>                           |
-  |          Georg Richter <georg@mysql.com>                             |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 /* $Id: mysqlnd.h 318051 2011-10-12 16:18:02Z andrey $ */
 
 #ifndef MYSQLND_REVERSE_API_H
 #define MYSQLND_REVERSE_API_H
-struct st_mysqlnd_api_extension;
+typedef struct st_mysqlnd_reverse_api
+{
+	zend_module_entry * module;
+	MYSQLND *(*conversion_cb)(zval * zv TSRMLS_DC);
+} MYSQLND_REVERSE_API;
+
 
 PHPAPI void mysqlnd_reverse_api_init(TSRMLS_D);
 PHPAPI void mysqlnd_reverse_api_end(TSRMLS_D);
 
 PHPAPI HashTable * mysqlnd_reverse_api_get_api_list(TSRMLS_D);
 
-PHPAPI void mysqlnd_reverse_api_register_api(struct st_mysqlnd_api_extension * apiext TSRMLS_DC);
+PHPAPI void mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC);
 
 PHPAPI MYSQLND * zval_to_mysqlnd(zval * zv TSRMLS_DC);
 
