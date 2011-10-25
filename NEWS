@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
     the data exceeds or is equal to 2048 bytes). (Pierre, Pascal Borreli)
 
+- Oracle Database extension (OCI8):
+  . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
+    (Chris Jones)
+
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
