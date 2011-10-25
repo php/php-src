@@ -3,9 +3,6 @@ Bug #55758 (Digest Authenticate missed in 5.4)
 --SKIPIF--
 <?php
 include "skipif.inc"; 
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die ("skip not for Windows");
-}
 ?>
 --FILE--
 <?php

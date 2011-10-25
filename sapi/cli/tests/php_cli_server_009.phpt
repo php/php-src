@@ -6,9 +6,6 @@ now could serve correctly with request_uri "index.php" and PATH_INFO "/foo/bar/"
 --SKIPIF--
 <?php
 include "skipif.inc"; 
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die ("skip not for Windows");
-}
 ?>
 --FILE--
 <?php
@@ -79,7 +76,6 @@ HEADER
 fclose($fp);
 ?>
 --EXPECTF--
-[%s] %s
 HTTP/1.1 200 OK
 Host: %s
 Connection: closed
@@ -87,7 +83,6 @@ X-Powered-By: PHP/%s-dev
 Content-type: text/html
 
 string(8) "/foo/bar"
-[%s] %s
 HTTP/1.0 200 OK
 Host: %s
 Connection: closed
@@ -95,5 +90,4 @@ X-Powered-By: PHP/%s-dev
 Content-type: text/html
 
 string(9) "/foo/bar/"
-[%s] %s
 HTTP/1.0 404 Not Found
