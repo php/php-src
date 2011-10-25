@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -166,10 +166,10 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
-	if (!(conn->options.flags & CLIENT_LOCAL_FILES)) {
+	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		/* write empty packet to server */
-		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, &conn->error_info TSRMLS_CC);
+		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
 		*is_warning = TRUE;
 		goto infile_error;
 	}
@@ -182,40 +182,40 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 	/* init handler: allocate read buffer and open file */
 	if (infile.local_infile_init(&info, (char *)filename, conn->infile.userdata TSRMLS_CC)) {
-		char tmp_buf[sizeof(conn->error_info.error)];
+		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
 		*is_warning = TRUE;
 		/* error occured */
 		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
-		SET_CLIENT_ERROR(conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
+		SET_CLIENT_ERROR(*conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		/* write empty packet to server */
-		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, &conn->error_info TSRMLS_CC);
+		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
 		goto infile_error;
 	}
 
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE, buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
-		if ((ret = net->m.send_ex(net, buf, bufsize, conn->stats, &conn->error_info TSRMLS_CC)) == 0) {
+		if ((ret = net->m.send_ex(net, buf, bufsize, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
-			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
+			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
 		}
 	}
 
 	/* send empty packet for eof */
-	if ((ret = net->m.send_ex(net, empty_packet, 0, conn->stats, &conn->error_info TSRMLS_CC)) == 0) {
-		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
+	if ((ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
+		SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		goto infile_error;
 	}
 
 	/* error during read occured */
 	if (bufsize < 0) {
-		char tmp_buf[sizeof(conn->error_info.error)];
+		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
 		*is_warning = TRUE;
 		DBG_ERR_FMT("Bufsize < 0, warning,  %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
-		SET_CLIENT_ERROR(conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
+		SET_CLIENT_ERROR(*conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		goto infile_error;
 	}
 

@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -138,7 +138,7 @@ mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
 
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND *conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND * conn TSRMLS_DC)
 {
 	unsigned int i = 0;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
@@ -151,7 +151,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE TSRMLS_CC);
 	if (!field_packet) {
-		SET_OOM_ERROR(conn->error_info);
+		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL);
 	}
 	field_packet->persistent_alloc = meta->persistent;
@@ -170,7 +170,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			DBG_RETURN(FAIL);
 		}
 		if (field_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(conn->error_info, field_packet->error_info);
+			COPY_CLIENT_ERROR(*conn->error_info, field_packet->error_info);
 			/* Return back from CONN_QUERY_SENT */
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);

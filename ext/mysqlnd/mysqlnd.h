@@ -147,6 +147,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_get_host_info(conn)		(conn)->m->get_host_information((conn) TSRMLS_CC)
 #define mysqlnd_get_proto_info(conn)	(conn)->m->get_protocol_information((conn) TSRMLS_CC)
 #define mysqlnd_thread_id(conn)			(conn)->m->get_thread_id((conn) TSRMLS_CC)
+#define mysqlnd_get_server_status(conn)	(conn)->m->get_server_status((conn) TSRMLS_CC)
 
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
