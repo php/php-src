@@ -3,9 +3,6 @@ Bug #55755 (SegFault when outputting header WWW-Authenticate)
 --SKIPIF--
 <?php
 include "skipif.inc"; 
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die ("skip not for Windows");
-}
 ?>
 --FILE--
 <?php
