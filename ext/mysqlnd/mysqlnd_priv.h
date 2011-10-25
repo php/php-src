@@ -99,7 +99,7 @@
 #define MAX_CHARSET_LEN			32
 
 
-#define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status.affected_rows = (uint64_t) ~0
+#define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status->affected_rows = (uint64_t) ~0
 
 /* Error handling */
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
@@ -168,7 +168,7 @@
 #define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR((error_info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 
 
-#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR((stmt)->error_info, a, b, c)
+#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(*(stmt)->error_info, a, b, c)
 
 
 #ifdef ZTS

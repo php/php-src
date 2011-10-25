@@ -110,7 +110,7 @@ static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND *ret;
+	MYSQLND * ret;
 
 	DBG_ENTER("mysqlnd_driver::get_connection");
 	DBG_INF_FMT("persistent=%u", persistent);
@@ -119,6 +119,10 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 		DBG_RETURN(NULL);
 	}
 
+	ret->error_info = &(ret->error_info_impl);
+	ret->options = &(ret->options_impl);
+	ret->upsert_status = &(ret->upsert_status_impl);
+
 	ret->persistent = persistent;
 	ret->m = mysqlnd_conn_get_methods();
 	CONN_SET_STATE(ret, CONN_ALLOCED);
@@ -126,15 +130,15 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 
 	if (PASS != ret->m->init(ret TSRMLS_CC)) {
 		ret->m->dtor(ret TSRMLS_CC);
-		ret = NULL;
+		DBG_RETURN(NULL);
 	}
 
-	ret->error_info.error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (!ret->error_info.error_list) {
+	ret->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
+	if (!ret->error_info->error_list) {
 		ret->m->dtor(ret TSRMLS_CC);
-		ret = NULL;
+		DBG_RETURN(NULL);
 	} else {
-		zend_llist_init(ret->error_info.error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
+		zend_llist_init(ret->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 	}
 
 	DBG_RETURN(ret);
@@ -164,6 +168,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND * const c
 			break;
 		}
 		stmt->persistent = conn->persistent;
+		stmt->error_info = &(stmt->error_info_impl);
+		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
 		stmt->execute_cmd_buffer.length = 4096;
 		stmt->execute_cmd_buffer.buffer = mnd_pemalloc(stmt->execute_cmd_buffer.length, stmt->persistent);
@@ -178,16 +184,17 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND * const c
 		  or normal query result will close it then.
 		*/
 		stmt->conn = conn->m->get_reference(conn TSRMLS_CC);
-		stmt->error_info.error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
-		if (!stmt->error_info.error_list) {
+		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
+		if (!stmt->error_info->error_list) {
 			break;
 		}
-		zend_llist_init(stmt->error_info.error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, conn->persistent);
+
+		zend_llist_init(stmt->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, conn->persistent);
 
 		DBG_RETURN(ret);
 	} while (0);
 
-	SET_OOM_ERROR(conn->error_info);
+	SET_OOM_ERROR(*conn->error_info);
 	if (ret) {
 		ret->m->dtor(ret, TRUE TSRMLS_CC);
 		ret = NULL;

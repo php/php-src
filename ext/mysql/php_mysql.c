@@ -530,6 +530,7 @@ static PHP_GINIT_FUNCTION(mysql)
 /* }}} */
 
 #ifdef MYSQL_USE_MYSQLND
+#include "ext/mysqlnd/mysqlnd_reverse_api.h"
 static MYSQLND * mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
 	php_mysql_conn *mysql;
