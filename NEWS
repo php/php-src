@@ -21,7 +21,7 @@ PHP                                                                        NEWS
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
   . Improve ternary operator performance when returning arrays. (Arnaud, Dmitry)
-  
+
 - Core:
   . Fixed bug #55801 (Behavior of unserialize has changed). (Mike)
   . Fixed bug #55749 (TOCTOU issue in getenv() on Windows builds). (Pierre)
