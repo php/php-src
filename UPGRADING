@@ -370,7 +370,7 @@ UPGRADE NOTES - PHP 5.4
           - Setting the timezone with the TZ environment variable is no longer
             supported, instead date.timezone and/or date_default_timezone_set()
             have to be used.
-          - The extension will no longer guesses the default timezone if none
+          - The extension will no longer guess the default timezone if none
             is set with date.timezone and/or date_default_timezone_set().
             Instead it will always fall back to "UTC".
 
