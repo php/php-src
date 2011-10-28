@@ -422,18 +422,18 @@ UPGRADE NOTES - PHP 5.4
 12. Syntax additions
 ====================
 - Traits:
-	trait HelloWorld {
-    	public function sayHello() {
-        	echo 'Hello World!';
-    	}
-	}
+    trait HelloWorld {
+        public function sayHello() {
+            echo 'Hello World!';
+        }
+    }
 
-	class CanIGetHello {
-    	use HelloWorld;	
-	}
+    class CanIGetHello {
+        use HelloWorld;	
+    }
 	
-	$hello = new CanIGetHello();
-	$hello->sayHello();
+    $hello = new CanIGetHello();
+    $hello->sayHello();
 	
 - Function call result array access:
   e.g.
@@ -463,14 +463,14 @@ UPGRADE NOTES - PHP 5.4
   Anonymous function can be declared as "static" to ignore the scope.
 
 - Class::{expr}() syntax is now supported:
-	class A { 
-		static function foo() { 
-			echo "Hello world!\n";
-		}
-	} 
-	$x = "f"; 
-	$y = "o"; 
-	A::{$x.$y.$y}();
+    class A { 
+        static function foo() { 
+            echo "Hello world!\n";
+        }
+    } 
+    $x = "f"; 
+    $y = "o"; 
+    A::{$x.$y.$y}();
 
 
 ===================
@@ -490,13 +490,13 @@ UPGRADE NOTES - PHP 5.4
          - get_declared_traits()
          - getimagesizefromstring()
          - hex2bin()
- 		 - header_register_callback()
+         - header_register_callback()
          - http_response_code()
          - stream_set_chunk_size()
          - socket_import_stream()
          - trait_exists()
 
-	   - Intl:
+       - Intl:
          - transliterator_create()
          - transliterator_create_from_rules()
          - transliterator_create_inverse()
@@ -512,27 +512,27 @@ UPGRADE NOTES - PHP 5.4
        - libxml:
          - libxml_set_external_entity_loader()
 	
-	   - mysqli:
-	     - mysqli_error_list()
-		 - mysqli_stmt_error_list()
+       - mysqli:
+         - mysqli_error_list()
+         - mysqli_stmt_error_list()
 	
-	   - Session:
-	     - session_register_shutdown()
-		 - session_status()
+       - Session:
+         - session_register_shutdown()
+         - session_status()
 		
-	   - SPL
-		 - class_uses()
+       - SPL
+         - class_uses()
 
      b. New global constants
 
        - CURLOPT_MAX_RECV_SPEED_LARGE
        - CURLOPT_MAX_SEND_SPEED_LARGE
-	   - ENT_DISALLOWED
-	   - ENT_HTML401
-	   - ENT_HTML5
-	   - ENT_SUBSTITUTE
-	   - ENT_XHTML
-	   - ENT_XML1
+       - ENT_DISALLOWED
+       - ENT_HTML401
+       - ENT_HTML5
+       - ENT_SUBSTITUTE
+       - ENT_XHTML
+       - ENT_XML1
        - IPPROTO_IP
        - IPPROTO_IPV6
        - IPV6_MULTICAST_HOPS
@@ -606,8 +606,8 @@ UPGRADE NOTES - PHP 5.4
        - JSON:
          - JsonSerializable
 
-	   - Session: 
-	     - SessionHandler
+       - Session: 
+         - SessionHandler
 	
        - SNMP:
          - SNMP
@@ -618,9 +618,9 @@ UPGRADE NOTES - PHP 5.4
 
      d. New methods
 
-	   - Closure: 
-	      - Closure::bind()
-	      - Closure::bindTo() 
+       - Closure: 
+         - Closure::bind()
+         - Closure::bindTo() 
 
        - Reflection:
          - ReflectionClass::getTraitAliases()
@@ -658,25 +658,25 @@ UPGRADE NOTES - PHP 5.4
          - SplDoublyLinkedList::unserialize()
          - SplFileInfo::getExtension()
          - SplFileObject::fputcsv()
-	     - SplObjectStorage::getHash()
+         - SplObjectStorage::getHash()
          - SplQueue::serialize
          - SplQueue::unserialize
          - SplStack::serialize
          - SplStack::unserialize
          - SplTempFileObject::fputcsv
 
-	   - XSLT:
-	     - XsltProcessor::setSecurityPrefs()
-		 - XsltProcessor::getSecurityPrefs()
+       - XSLT:
+         - XsltProcessor::setSecurityPrefs()
+         - XsltProcessor::getSecurityPrefs()
 
      e. New class constants
 
        - PDO:
-		 - PDO::MYSQL_ATTR_SSL_CA
-	     - PDO::MYSQL_ATTR_SSL_CAPATH
-	     - PDO::MYSQL_ATTR_SSL_CERT
-	     - PDO::MYSQL_ATTR_SSL_CIPHER
-	     - PDO::MYSQL_ATTR_SSL_KEY
+         - PDO::MYSQL_ATTR_SSL_CA
+         - PDO::MYSQL_ATTR_SSL_CAPATH
+         - PDO::MYSQL_ATTR_SSL_CERT
+         - PDO::MYSQL_ATTR_SSL_CIPHER
+         - PDO::MYSQL_ATTR_SSL_KEY
 
      f. New Hash algorithms
 
