@@ -63,15 +63,13 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-	char *			autoload_extensions;
-	HashTable *		autoload_functions;
-	int				autoload_running;
-	int				autoload_extensions_len;
-	intptr_t		hash_mask_handle;
-	intptr_t		hash_mask_handlers;
-	int				hash_mask_init;
-	zend_function	constr_wrapper_fun;
-	int				(*validating_fun)(void *object_data TSRMLS_DC);
+	char *       autoload_extensions;
+	HashTable *  autoload_functions;
+	int          autoload_running;
+	int          autoload_extensions_len;
+	intptr_t     hash_mask_handle;
+	intptr_t     hash_mask_handlers;
+	int          hash_mask_init;
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
@@ -88,8 +86,6 @@ PHP_FUNCTION(class_implements);
 PHP_FUNCTION(class_uses);
 
 PHPAPI void php_spl_object_hash(zval *obj, char* md5str TSRMLS_DC);
-
-zend_function *php_spl_get_constructor_helper(zval *object, int (*validating_fun)(void *object_data TSRMLS_DC) TSRMLS_DC);
 
 #endif /* PHP_SPL_H */
 
