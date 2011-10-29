@@ -18,8 +18,4 @@ echo $foo->bar();
 ==DONE==
 <?php exit(0); ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'LogicException' with message 'In the constructor of foo, parent::__construct() must be called and its exceptions cannot be cleared' in %s:%d
-Stack trace:
-#0 %s(%d): foo->internal_construction_wrapper('This is bar')
-#1 {main}
-  thrown in %s on line %d
+Fatal error: main(): The foo instance wasn't initialized properly in %s on line %d
