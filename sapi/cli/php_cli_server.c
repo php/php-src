@@ -1579,7 +1579,7 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 		ssize_t nbytes_sent = send(client->sock, str + str_len - nbytes_left, nbytes_left, 0);
 		if (nbytes_sent < 0) {
 			int err = php_socket_errno();
-			if (err == EAGAIN) {
+			if (err == SOCK_EAGAIN) {
 				int nfds = php_pollfd_for(client->sock, POLLOUT, &tv);
 				if (nfds > 0) {
 					continue;
