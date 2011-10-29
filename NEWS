@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #60112 (If URI does not contain a file, index.php is not served).
     (Laruence)
   . Fixed bug #60115 (memory definitely lost in cli server). (Laruence)
+  . Fixed bug #60146 (Last 2 lines of page not being output). (Laruence)
 
 - Core:
   . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
