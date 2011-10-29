@@ -131,75 +131,6 @@ $o = new SplTempFileObjectTest;
 $o->rewind();
 } );
 
-
-echo "SplFileInfo... ";
-class SplFileInfoTest extends SplFileInfo {
-    function __construct(){}
-}
-test ( function() {
-$o = new SplFileInfoTest;
-$o->getMTime();
-} );
-
-echo "DirectoryIterator... ";
-class DirectoryIteratortest extends DirectoryIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new DirectoryIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-echo "DirectoryIterator (exception cleared)... ";
-class DirectoryIteratorTest2 extends DirectoryIterator {
-    function __construct(){
-		try {
-			parent::__construct();
-		} catch (Exception $e) { }
-	}
-}
-test ( function() {
-$o = new DirectoryIteratorTest2;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-echo "FileSystemIterator... ";
-class FileSystemIteratorTest extends DirectoryIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new FileSystemIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-echo "RecursiveDirectoryIterator... ";
-class RecursiveDirectoryIteratorTest extends RecursiveDirectoryIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new RecursiveDirectoryIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-echo "RecursiveTreeIterator... ";
-class RecursiveTreeIteratorTest extends RecursiveDirectoryIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new RecursiveTreeIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
 echo "AppendIterator... ";
 class AppendIteratorTest extends AppendIterator {
     function __construct(){}
@@ -222,29 +153,6 @@ echo $a,"\n";
 }
 } );
 
-echo "CallbackFilterIterator... ";
-class CallbackFilterIteratorTest extends CallbackFilterIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new CallbackFilterIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-echo "RecursiveCallbackFilterIterator... ";
-class RecursiveCallbackFilterIteratorTest extends RecursiveCallbackFilterIterator {
-    function __construct(){}
-}
-test ( function() {
-$o = new RecursiveCallbackFilterIteratorTest;
-foreach ($o as $a) {
-echo $a,"\n";
-}
-} );
-
-
 --EXPECT--
 IteratorIterator... exception (expected)
 FilterIterator... exception (expected)
@@ -259,13 +167,5 @@ RecursiveRegexIterator... exception (expected)
 GlobIterator... exception (expected)
 SplFileObject... exception (expected)
 SplTempFileObject... exception (expected)
-SplFileInfo... exception (expected)
-DirectoryIterator... exception (expected)
-DirectoryIterator (exception cleared)... exception (expected)
-FileSystemIterator... exception (expected)
-RecursiveDirectoryIterator... exception (expected)
-RecursiveTreeIterator... exception (expected)
 AppendIterator... exception (expected)
 InfiniteIterator... exception (expected)
-CallbackFilterIterator... exception (expected)
-RecursiveCallbackFilterIterator... exception (expected)

@@ -241,17 +241,6 @@ UPGRADE NOTES - PHP 5.4
   stream_truncate that will respond to truncation, e.g. through ftruncate.
   Strictly speaking, this is an addition to the user-space stream wrapper
   template, not a change to an actual class.
-- Constructors of userspace subclasses of the following SPL classes are now
-  required to call the parent constructor and not clear any exceptions they
-  throw (replacing the thrown exception by another one is permitted):
-  SplFileInfo, DirectoryIterator, FilesystemIterator, GlobIterator,
-  SplFileObject, SplTempFileObject, RecursiveDirectoryIterator,
-  IteratorIterator, FilterIterator, RecursiveFilterIterator, ParentIterator,
-  LimitIterator, CachingIterator, RecursiveCachingIterator, NoRewindIterator,
-  AppendIterator, InfiniteIterator, RegexIterator, RecursiveRegexIterator, and
-  RecursiveTreeIterator.
-  It is no longer possible to defer the parent constructor call until after the
-  object is constructed.
 - Classes that implement stream wrappers can define a method called stream_metadata that
   will be called on touch(), chmod(), chgrp(), chown().
 - Arrays cast from SimpleXMLElement now always contain all nodes instead of

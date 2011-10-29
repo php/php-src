@@ -18,6 +18,11 @@ PHP                                                                        NEWS
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
     (Chris Jones)
 
+- SPL extension
+  . Reverted changes that required constructor overrides to invoke the parent
+    constructor in several SPL classes and applied 5.3 fixes instead.
+    Related bugs: #54384, #55175 and #55300.
+
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
   . Improve the warning message of incompatible arguments. (Laruence) 
