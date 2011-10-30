@@ -280,7 +280,7 @@ PHPAPI char *php_escape_shell_cmd_ex(char *str, int flag)
 					cmd[y++] = '\\';
 					cmd[y++] = str[x];
 				} else if (flag == ESCAPE_CMD_END) {
-					if (x == 0 || x == l - 1) {
+					if ((x == 0 || x == l - 1) && (str[0] == str[l-1])) {
 						cmd[y++] = str[x];
                     } else {
                         cmd[y++] = '\\';
