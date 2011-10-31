@@ -3133,6 +3133,9 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 								*(offset++) = '.';
 							}
 							*(offset++) = '\'';
+						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
+							memcpy(offset, "Array", 5);
+							offset += 5;
 						} else {
 							zend_make_printable_zval(zv, &zv_copy, &use_copy);
 							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN(zv_copy));
@@ -3155,7 +3158,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				*(offset++) = ' ';
 			}
 			arg_info++;
-			REALLOC_BUF_IF_EXCEED(buf, offset, length, 23);
+			REALLOC_BUF_IF_EXCEED(buf, offset, length, 32);
 		}
 	}
 	*(offset++) = ')';
