@@ -26,6 +26,7 @@
 #include "mysqlnd_debug.h"
 
 static struct st_mysqlnd_conn_methods * mysqlnd_conn_methods;
+static struct st_mysqlnd_conn_data_methods * mysqlnd_conn_data_methods;
 static struct st_mysqlnd_stmt_methods * mysqlnd_stmt_methods;
 
 /* {{{ _mysqlnd_plugin_get_plugin_connection_data */
@@ -122,6 +123,22 @@ mysqlnd_conn_get_methods()
 PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
 {
 	mysqlnd_conn_methods = methods;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_get_methods */
+PHPAPI struct st_mysqlnd_conn_data_methods *
+mysqlnd_conn_data_get_methods()
+{
+	return mysqlnd_conn_data_methods;
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_set_methods */
+PHPAPI void mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods)
+{
+	mysqlnd_conn_data_methods = methods;
 }
 /* }}} */
 

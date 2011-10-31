@@ -72,6 +72,7 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 	if (mysqlnd_library_initted == FALSE) {
 		mysqlnd_library_initted = TRUE;
 		mysqlnd_conn_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn));
+		mysqlnd_conn_data_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn_data));
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
 		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
@@ -127,7 +128,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 		DBG_RETURN(NULL);
 	}
 	new_object->persistent = persistent;
-
+	new_object->m = mysqlnd_conn_get_methods();
 	data = new_object->data;
 
 	data->error_info = &(data->error_info_impl);
@@ -135,23 +136,52 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 	data->upsert_status = &(data->upsert_status_impl);
 
 	data->persistent = persistent;
-	data->m = mysqlnd_conn_get_methods();
+	data->m = mysqlnd_conn_data_get_methods();
 	CONN_SET_STATE(data, CONN_ALLOCED);
 	data->m->get_reference(data TSRMLS_CC);
 
 	if (PASS != data->m->init(data TSRMLS_CC)) {
-		data->m->outter_dtor(new_object TSRMLS_CC);
+		new_object->m->dtor(new_object TSRMLS_CC);
 		DBG_RETURN(NULL);
 	}
 
 	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
 	if (!data->error_info->error_list) {
-		data->m->outter_dtor(new_object TSRMLS_CC);
+		new_object->m->dtor(new_object TSRMLS_CC);
 		DBG_RETURN(NULL);
 	} else {
 		zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 	}
 
+	DBG_RETURN(new_object);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_object_factory::clone_connection_object */
+static MYSQLND *
+MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_cloned TSRMLS_DC)
+{
+	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND * new_object;
+
+	DBG_ENTER("mysqlnd_driver::clone_connection_object");
+	DBG_INF_FMT("persistent=%u", to_be_cloned->persistent);
+	if (!to_be_cloned || !to_be_cloned->data) {
+		DBG_RETURN(NULL);
+	}
+	new_object = mnd_pecalloc(1, alloc_size_ret, to_be_cloned->persistent);
+	if (!new_object) {
+		DBG_RETURN(NULL);
+	}
+	new_object->persistent = to_be_cloned->persistent;
+	new_object->m = mysqlnd_conn_get_methods();
+
+	new_object->data = to_be_cloned->data->m->get_reference(to_be_cloned->data TSRMLS_CC);
+	if (!new_object->data) {
+		new_object->m->dtor(new_object TSRMLS_CC);
+		new_object = NULL;
+	}
 	DBG_RETURN(new_object);
 }
 /* }}} */
@@ -259,6 +289,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persisten
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
+	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)

@@ -202,6 +202,7 @@ PHPAPI extern const char * const mysqlnd_out_of_memory;
 
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
+extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
