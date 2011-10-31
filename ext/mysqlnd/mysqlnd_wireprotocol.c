@@ -301,7 +301,7 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 
 /* {{{ php_mysqlnd_greet_read */
 static enum_func_status
-php_mysqlnd_greet_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	zend_uchar buf[2048];
 	zend_uchar *p = buf;
@@ -463,7 +463,7 @@ void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation TSRML
 
 /* {{{ php_mysqlnd_auth_write */
 static
-size_t php_mysqlnd_auth_write(void * _packet, MYSQLND * conn TSRMLS_DC)
+size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	zend_uchar buffer[AUTH_WRITE_BUFFER_LEN];
 	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
@@ -567,7 +567,7 @@ void php_mysqlnd_auth_free_mem(void * _packet, zend_bool stack_allocation TSRMLS
 
 /* {{{ php_mysqlnd_auth_response_read */
 static enum_func_status
-php_mysqlnd_auth_response_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
 	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
@@ -687,7 +687,7 @@ php_mysqlnd_auth_response_free_mem(void * _packet, zend_bool stack_allocation TS
 
 /* {{{ php_mysqlnd_change_auth_response_write */
 static size_t
-php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *packet= (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
 	zend_uchar * buffer = conn->net->cmd_buffer.length >= packet->auth_data_len? conn->net->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
@@ -730,7 +730,7 @@ php_mysqlnd_change_auth_response_free_mem(void * _packet, zend_bool stack_alloca
 
 /* {{{ php_mysqlnd_ok_read */
 static enum_func_status
-php_mysqlnd_ok_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	zend_uchar local_buf[OK_BUFFER_SIZE];
 	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length : OK_BUFFER_SIZE;
@@ -815,7 +815,7 @@ php_mysqlnd_ok_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
 
 /* {{{ php_mysqlnd_eof_read */
 static enum_func_status
-php_mysqlnd_eof_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_eof_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/*
 	  EOF packet is since 4.1 five bytes long,
@@ -892,7 +892,7 @@ void php_mysqlnd_eof_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 
 
 /* {{{ php_mysqlnd_cmd_write */
-size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND * conn TSRMLS_DC)
+size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/* Let's have some space, which we can use, if not enough, we will allocate new buffer */
 	MYSQLND_PACKET_COMMAND * packet= (MYSQLND_PACKET_COMMAND *) _packet;
@@ -970,7 +970,7 @@ void php_mysqlnd_cmd_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 
 /* {{{ php_mysqlnd_rset_header_read */
 static enum_func_status
-php_mysqlnd_rset_header_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1108,7 +1108,7 @@ static size_t rset_field_offsets[] =
 
 /* {{{ php_mysqlnd_rset_field_read */
 static enum_func_status
-php_mysqlnd_rset_field_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/* Should be enough for the metadata of a single row */
 	MYSQLND_PACKET_RES_FIELD *packet= (MYSQLND_PACKET_RES_FIELD *) _packet;
@@ -1314,7 +1314,7 @@ void php_mysqlnd_rset_field_free_mem(void * _packet, zend_bool stack_allocation 
 
 /* {{{ php_mysqlnd_read_row_ex */
 static enum_func_status
-php_mysqlnd_read_row_ex(MYSQLND * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
+php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
 						size_t * data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes TSRMLS_DC)
@@ -1730,7 +1730,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
   if PS => packet->fields is passed from outside
 */
 static enum_func_status
-php_mysqlnd_rowp_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	MYSQLND_NET * net = conn->net;
 	zend_uchar *p;
@@ -1853,7 +1853,7 @@ php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
 
 /* {{{ php_mysqlnd_stats_read */
 static enum_func_status
-php_mysqlnd_stats_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_stats_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	MYSQLND_PACKET_STATS *packet= (MYSQLND_PACKET_STATS *) _packet;
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1895,7 +1895,7 @@ void php_mysqlnd_stats_free_mem(void * _packet, zend_bool stack_allocation TSRML
 
 /* {{{ php_mysqlnd_prepare_read */
 static enum_func_status
-php_mysqlnd_prepare_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/* In case of an error, we should have place to put it */
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1983,7 +1983,7 @@ php_mysqlnd_prepare_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_D
 
 /* {{{ php_mysqlnd_chg_user_read */
 static enum_func_status
-php_mysqlnd_chg_user_read(void * _packet, MYSQLND * conn TSRMLS_DC)
+php_mysqlnd_chg_user_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	/* There could be an error message */
 	size_t buf_len = conn->net->cmd_buffer.length;

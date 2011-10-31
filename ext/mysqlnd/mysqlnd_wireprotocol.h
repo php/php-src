@@ -51,8 +51,8 @@ PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
 	size_t				struct_size;
-	enum_func_status	(*read_from_net)(void *packet, MYSQLND *conn TSRMLS_DC);
-	size_t				(*write_to_net)(void *packet, MYSQLND *conn TSRMLS_DC);
+	enum_func_status	(*read_from_net)(void * packet, MYSQLND_CONN_DATA * conn TSRMLS_DC);
+	size_t				(*write_to_net)(void * packet, MYSQLND_CONN_DATA * conn TSRMLS_DC);
 	void				(*free_mem)(void *packet, zend_bool stack_allocation TSRMLS_DC);
 } mysqlnd_packet_methods;
 
