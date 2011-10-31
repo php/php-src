@@ -110,7 +110,7 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats((values) TSRMLS_CC ZEND_FILE_LINE_CC)
 
-#define mysqlnd_close(conn,is_forced)					((conn)->data)->m->close((conn), (is_forced) TSRMLS_CC)
+#define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced) TSRMLS_CC)
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len) TSRMLS_CC)
 #define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len) TSRMLS_CC)
 #define mysqlnd_poll(r, err, d_pull,sec,usec,desc_num)	_mysqlnd_poll((r), (err), (d_pull), (sec), (usec), (desc_num) TSRMLS_CC)
@@ -211,7 +211,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 
 /* Escaping */
 #define mysqlnd_real_escape_string(conn, newstr, escapestr, escapestr_len) \
-		((conn)->data)->m->escape_string((conn), (newstr), (escapestr), (escapestr_len) TSRMLS_CC)
+		((conn)->data)->m->escape_string((conn)->data, (newstr), (escapestr), (escapestr_len) TSRMLS_CC)
 #define mysqlnd_escape_string(newstr, escapestr, escapestr_len) \
 		mysqlnd_old_escape_string((newstr), (escapestr), (escapestr_len) TSRMLS_CC)
 
