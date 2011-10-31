@@ -44,6 +44,9 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsi
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
 PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods * methods);
 
+PHPAPI struct st_mysqlnd_conn_data_methods * mysqlnd_conn_data_get_methods();
+PHPAPI void mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods);
+
 PHPAPI struct st_mysqlnd_res_methods * mysqlnd_result_get_methods();
 PHPAPI void mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods);
 
