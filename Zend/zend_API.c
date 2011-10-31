@@ -1107,7 +1107,9 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	zend_object *object;
 
 	if (class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		char *what = class_type->ce_flags & ZEND_ACC_INTERFACE ? "interface" : "abstract class";
+		char *what =   (class_type->ce_flags & ZEND_ACC_INTERFACE)                ? "interface"
+					 :((class_type->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) ? "trait"
+					 :                                                              "abstract class";
 		zend_error(E_ERROR, "Cannot instantiate %s %s", what, class_type->name);
 	}
 
