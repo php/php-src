@@ -1291,8 +1291,11 @@ PHP_FUNCTION(mysqli_get_host_info)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
+#if !defined(MYSQLI_USE_MYSQLND)
 	RETURN_STRING((mysql->mysql->host_info) ? mysql->mysql->host_info : "", 1);
+#else
+	RETURN_STRING((mysql->mysql->data->host_info) ? mysql->mysql->data->host_info : "", 1);
+#endif
 }
 /* }}} */
 
@@ -1804,7 +1807,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(last_error, stmt->stmt->last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
-			MYSQLND_ERROR_INFO error_info = *mysql->mysql->error_info;
+			MYSQLND_ERROR_INFO error_info = *mysql->mysql->data->error_info;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;
@@ -1815,7 +1818,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
 #else
-			*mysql->mysql->error_info = error_info;
+			*mysql->mysql->data->error_info = error_info;
 #endif
 		}
 	}
