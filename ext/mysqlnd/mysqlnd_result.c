@@ -315,7 +315,7 @@ void mysqlnd_internal_free_result(MYSQLND_RES * result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::read_result_metadata */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND *conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::read_result_metadata");
 
@@ -360,7 +360,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND 
 
 /* {{{ mysqlnd_query_read_result_set_header */
 enum_func_status
-mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
+mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s ? s->data:NULL;
 	enum_func_status ret;
@@ -1102,7 +1102,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 
 /* {{{ mysqlnd_res::store_result_fetch_data */
 enum_func_status
-MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES * result,
+MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA *meta,
 													zend_bool binary_protocol TSRMLS_DC)
 {
@@ -1248,7 +1248,7 @@ end:
 /* {{{ mysqlnd_res::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
-										  MYSQLND * const conn,
+										  MYSQLND_CONN_DATA * const conn,
 										  zend_bool ps_protocol TSRMLS_DC)
 {
 	enum_func_status ret;

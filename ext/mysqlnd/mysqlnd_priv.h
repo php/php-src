@@ -206,7 +206,7 @@ extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
 extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
 
-enum_func_status mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
+enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
 
 
 
@@ -228,7 +228,7 @@ struct st_mysqlnd_packet_greet;
 struct st_mysqlnd_authentication_plugin;
 
 enum_func_status
-mysqlnd_auth_handshake(MYSQLND * conn,
+mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const char * const user,
 						const char * const passwd,
 						const size_t passwd_len,
@@ -248,7 +248,7 @@ mysqlnd_auth_handshake(MYSQLND * conn,
 						TSRMLS_DC);
 
 enum_func_status
-mysqlnd_auth_change_user(MYSQLND * const conn,
+mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const char * const user,
 								const size_t user_len,
 								const char * const passwd,

@@ -31,7 +31,7 @@
 
 /* {{{ mysqlnd_auth_handshake */
 enum_func_status
-mysqlnd_auth_handshake(MYSQLND * conn,
+mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const user,
 							  const char * const passwd,
 							  const size_t passwd_len,
@@ -153,7 +153,7 @@ end:
 
 /* {{{ mysqlnd_auth_change_user */
 enum_func_status
-mysqlnd_auth_change_user(MYSQLND * const conn,
+mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const char * const user,
 								const size_t user_len,
 								const char * const passwd,
@@ -220,7 +220,7 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 		auth_packet->auth_plugin_name = auth_protocol;
 
 
-		if (mysqlnd_get_server_version(conn) >= 50123) {
+		if (conn->m->get_server_version(conn TSRMLS_CC) >= 50123) {
 			auth_packet->charset_no	= conn->charset->nr;
 		}
 	
@@ -260,12 +260,12 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 		  bug#25371 mysql_change_user() triggers "packets out of sync"
 		  When it gets fixed, there should be one more check here
 		*/
-		if (mysqlnd_get_server_version(conn) > 50113L && mysqlnd_get_server_version(conn) < 50118L) {
+		if (conn->m->get_server_version(conn TSRMLS_CC) > 50113L &&conn->m->get_server_version(conn TSRMLS_CC) < 50118L) {
 			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 			if (redundant_error_packet) {
 				PACKET_READ(redundant_error_packet, conn);
 				PACKET_FREE(redundant_error_packet);
-				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));
+				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn TSRMLS_CC));
 			} else {
 				SET_OOM_ERROR(*conn->error_info);
 			}
@@ -292,7 +292,7 @@ mysqlnd_auth_change_user(MYSQLND * const conn,
 		}
 		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 		/* set charset for old servers */
-		if (mysqlnd_get_server_version(conn) < 50123) {
+		if (conn->m->get_server_version(conn TSRMLS_CC) < 50123) {
 			ret = conn->m->set_charset(conn, old_cs->name TSRMLS_CC);
 		}
 	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
@@ -358,7 +358,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 static zend_uchar *
 mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								  size_t * auth_data_len,
-								  MYSQLND * conn, const char * const user, const char * const passwd,
+								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
 								  TSRMLS_DC)
@@ -416,7 +416,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 static zend_uchar *
 mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
-							   MYSQLND * conn, const char * const user, const char * const passwd,
+							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
 							   TSRMLS_DC)

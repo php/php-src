@@ -27,7 +27,7 @@
 
 /* {{{ mysqlnd_local_infile_init */
 static
-int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS_DC)
+int mysqlnd_local_infile_init(void ** ptr, char * filename, void ** userdata TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info;
 	php_stream_context	*context = NULL;
@@ -66,7 +66,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 /* {{{ mysqlnd_local_infile_read */
 static
-int mysqlnd_local_infile_read(void *ptr, zend_uchar * buf, unsigned int buf_len TSRMLS_DC)
+int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int count;
@@ -87,7 +87,7 @@ int mysqlnd_local_infile_read(void *ptr, zend_uchar * buf, unsigned int buf_len 
 
 /* {{{ mysqlnd_local_infile_error */
 static
-int	mysqlnd_local_infile_error(void *ptr, char *error_buf, unsigned int error_buf_len TSRMLS_DC)
+int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 
@@ -108,7 +108,7 @@ int	mysqlnd_local_infile_error(void *ptr, char *error_buf, unsigned int error_bu
 
 /* {{{ mysqlnd_local_infile_end */
 static
-void mysqlnd_local_infile_end(void *ptr TSRMLS_DC)
+void mysqlnd_local_infile_end(void * ptr TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 
@@ -125,7 +125,8 @@ void mysqlnd_local_infile_end(void *ptr TSRMLS_DC)
 
 
 /* {{{ mysqlnd_local_infile_default */
-PHPAPI void mysqlnd_local_infile_default(MYSQLND *conn)
+PHPAPI void
+mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 {
 	conn->infile.local_infile_init = mysqlnd_local_infile_init;
 	conn->infile.local_infile_read = mysqlnd_local_infile_read;
@@ -134,8 +135,10 @@ PHPAPI void mysqlnd_local_infile_default(MYSQLND *conn)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_set_local_infile_handler */
-PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND * const conn, const char * const funcname)
+PHPAPI void
+mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, const char * const funcname)
 {
 	if (!conn->infile.callback) {
 		MAKE_STD_ZVAL(conn->infile.callback);
@@ -152,7 +155,7 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 
 /* {{{ mysqlnd_handle_local_infile */
 enum_func_status
-mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC)
+mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning TSRMLS_DC)
 {
 	zend_uchar			*buf = NULL;
 	zend_uchar			empty_packet[MYSQLND_HEADER_SIZE];

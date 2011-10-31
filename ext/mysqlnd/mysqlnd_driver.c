@@ -109,46 +109,56 @@ mysqlnd_error_list_pdtor(void * pDest)
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND * ret;
+	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND * new_object;
+	MYSQLND_CONN_DATA * data;
 
 	DBG_ENTER("mysqlnd_driver::get_connection");
 	DBG_INF_FMT("persistent=%u", persistent);
-	ret = mnd_pecalloc(1, alloc_size, persistent);
-	if (!ret) {
+	new_object = mnd_pecalloc(1, alloc_size_ret, persistent);
+	if (!new_object) {
+		DBG_RETURN(NULL);
+	}
+	new_object->data = mnd_pecalloc(1, alloc_size_ret_data, persistent);
+	if (!new_object->data) {
+		mnd_pefree(new_object, persistent);
+		DBG_RETURN(NULL);
+	}
+	new_object->persistent = persistent;
+
+	data = new_object->data;
+
+	data->error_info = &(data->error_info_impl);
+	data->options = &(data->options_impl);
+	data->upsert_status = &(data->upsert_status_impl);
+
+	data->persistent = persistent;
+	data->m = mysqlnd_conn_get_methods();
+	CONN_SET_STATE(data, CONN_ALLOCED);
+	data->m->get_reference(data TSRMLS_CC);
+
+	if (PASS != data->m->init(data TSRMLS_CC)) {
+		data->m->outter_dtor(new_object TSRMLS_CC);
 		DBG_RETURN(NULL);
 	}
 
-	ret->error_info = &(ret->error_info_impl);
-	ret->options = &(ret->options_impl);
-	ret->upsert_status = &(ret->upsert_status_impl);
-
-	ret->persistent = persistent;
-	ret->m = mysqlnd_conn_get_methods();
-	CONN_SET_STATE(ret, CONN_ALLOCED);
-	ret->m->get_reference(ret TSRMLS_CC);
-
-	if (PASS != ret->m->init(ret TSRMLS_CC)) {
-		ret->m->dtor(ret TSRMLS_CC);
-		DBG_RETURN(NULL);
-	}
-
-	ret->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (!ret->error_info->error_list) {
-		ret->m->dtor(ret TSRMLS_CC);
+	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
+	if (!data->error_info->error_list) {
+		data->m->outter_dtor(new_object TSRMLS_CC);
 		DBG_RETURN(NULL);
 	} else {
-		zend_llist_init(ret->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
+		zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 	}
 
-	DBG_RETURN(ret);
+	DBG_RETURN(new_object);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND * const conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);

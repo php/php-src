@@ -102,7 +102,7 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
 #else
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
-MYSQLI_WARNING *php_new_warning(const zval *reason, int errorno TSRMLS_DC)
+MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 {
 	MYSQLI_WARNING *w;
 
@@ -123,17 +123,17 @@ MYSQLI_WARNING *php_new_warning(const zval *reason, int errorno TSRMLS_DC)
 
 
 /* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC) */
-MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
+MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 {
 	MYSQLI_WARNING	*w, *first = NULL, *prev = NULL;
 	MYSQL_RES		*result;
 	zval			*row;
 
-	if (mysql_real_query(mysql, "SHOW WARNINGS", 13)) {
+	if (mysql->m->query(mysql, "SHOW WARNINGS", 13 TSRMLS_CC)) {
 		return NULL;
 	}
 
-	result = mysql_use_result(mysql);
+	result = mysql->m->use_result(mysql TSRMLS_CC);
 
 	for (;;) {
 		zval **entry;
@@ -267,7 +267,9 @@ PHP_METHOD(mysqli_warning, __construct)
 {
 	zval			*z;
 	mysqli_object	*obj;
+#ifndef MYSQLI_USE_MYSQLND
 	MYSQL			*hdl;
+#endif
 	MYSQLI_WARNING  *w;
 	MYSQLI_RESOURCE *mysqli_resource;
 
@@ -282,20 +284,33 @@ PHP_METHOD(mysqli_warning, __construct)
 	if (obj->zo.ce == mysqli_link_class_entry) {
 		MY_MYSQL *mysql;
 		MYSQLI_FETCH_RESOURCE_CONN(mysql, &z, MYSQLI_STATUS_VALID);
-		hdl = mysql->mysql;
+		if (mysql_warning_count(mysql->mysql)) {
+#ifndef MYSQLI_USE_MYSQLND
+			w = php_get_warnings(mysql->mysql TSRMLS_CC);
+#else
+			w = php_get_warnings(mysql->mysql->data TSRMLS_CC);
+#endif
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
+			RETURN_FALSE;
+		}
 	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
 		MY_STMT *stmt;
 		MYSQLI_FETCH_RESOURCE_STMT(stmt, &z, MYSQLI_STATUS_VALID);
+#ifndef MYSQLI_USE_MYSQLND
 		hdl = mysqli_stmt_get_connection(stmt->stmt);
+		if (mysql_warning_count(hdl)) {
+			w = php_get_warnings(hdl TSRMLS_CC);
+#else
+		if (mysqlnd_stmt_warning_count(stmt->stmt)) {
+			w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt) TSRMLS_CC);
+#endif
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
+			RETURN_FALSE;
+		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid class argument");
-		RETURN_FALSE;
-	}
-
-	if (mysql_warning_count(hdl)) {
-		w = php_get_warnings(hdl TSRMLS_CC);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
 		RETURN_FALSE;
 	}
 
