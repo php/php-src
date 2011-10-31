@@ -79,11 +79,14 @@ static PHP_GSHUTDOWN_FUNCTION(oci);
 #endif
 
 /* For a user friendly message about environment setup */
-/* TODO: add cases for SHLIB_PATH, LIBPATH, LD_LIBRARY_PATH_64 etc */
 #if defined(PHP_WIN32)
 #define PHP_OCI8_LIB_PATH_MSG "PATH"
 #elif defined(__APPLE__)
 #define PHP_OCI8_LIB_PATH_MSG "DYLD_LIBRARY_PATH"
+#elif defined(_AIX)
+#define PHP_OCI8_LIB_PATH_MSG "LIBPATH"
+#elif defined(__hpux)
+#define PHP_OCI8_LIB_PATH_MSG "SHLIB_PATH"
 #else
 #define PHP_OCI8_LIB_PATH_MSG "LD_LIBRARY_PATH"
 #endif
