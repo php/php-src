@@ -15,7 +15,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
     the data exceeds or is equal to 2048 bytes). (Pierre, Pascal Borreli)
-  . Fixed bug #60174 (Notice when array in method prototype error). Laruence
+  . Fixed bug #60174 (Notice when array in method prototype error).
+    (Laruence)
 
 - Oracle Database extension (OCI8):
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
