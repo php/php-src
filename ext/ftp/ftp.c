@@ -1122,6 +1122,9 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 
 	data = ftp->outbuf;
 
+	/* Clear the extra-lines buffer */
+	ftp->extra = NULL;
+
 	if (my_send(ftp, ftp->fd, data, size) != size) {
 		return 0;
 	}
