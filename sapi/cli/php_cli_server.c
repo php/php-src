@@ -1931,7 +1931,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 		destroy_request_info(&SG(request_info));
 		return -1;
 	}
-	{
+	if (!php_handle_special_queries(TSRMLS_C)) {
 		zend_file_handle zfd;
 		char *old_cwd;
 
