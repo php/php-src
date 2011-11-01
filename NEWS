@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #60115 (memory definitely lost in cli server). (Laruence)
   . Fixed bug #60146 (Last 2 lines of page not being output). (Laruence)
   . Fixed bug #60180 ($_SERVER["PHP_SELF"] incorrect). (Laruence)
+  . Fixed bug #60189 (php logo can not be displayed). (Laruence)
 
 - Core:
   . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
