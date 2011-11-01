@@ -1894,19 +1894,14 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	if (im->sx < 4) {
 		int ix = x, iy = y, c;
 		do {
-			c = gdImageGetPixel(im, ix, iy);
-			if (c != oc) {
-				goto done;
-			}
-			gdImageSetPixel(im, ix, iy, nc);
-		} while(ix++ < (im->sx -1));
-		ix = x; iy = y + 1;
-		do {
-			c = gdImageGetPixel(im, ix, iy);
-			if (c != oc) {
-				goto done;
-			}
-			gdImageSetPixel(im, ix, iy, nc);
+			do {
+				c = gdImageGetPixel(im, ix, iy);
+				if (c != oc) {
+					goto done;
+				}
+				gdImageSetPixel(im, ix, iy, nc);
+			} while(ix++ < (im->sx -1));
+			ix = x;
 		} while(iy++ < (im->sy -1));
 		goto done;
 	}
