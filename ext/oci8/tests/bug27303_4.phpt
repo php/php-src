@@ -4,9 +4,13 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) {
-	die("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
-} else if (preg_match('/^11\./', oci_client_version()) != 1) {
+// The bind buffer size edge cases seem to change each DB version.
+if (preg_match('/Release 10\.2\.0\.2/', oci_server_version($c), $matches) !== 1 &&
+    preg_match('/Release 11\.2\.0\.2/', oci_server_version($c), $matches) !== 1) {
+        die("skip expected output only valid when using Oracle 10.2.0.2 or 11.2.0.2 databases");
+        // Other point releases may also work
+}
+if (preg_match('/^11\./', oci_client_version()) != 1) {
     die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
@@ -23,10 +27,7 @@ $create_st[] = "drop table mytab";
 $create_st[] = "create sequence myseq";
 $create_st[] = "create table mytab (mydata varchar2(20), seqcol number)";
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
-}
+oci8_test_sql_execute($c, $create_st);
 
 define('MYLIMIT', 200);
 
@@ -50,10 +51,7 @@ $drop_st = array();
 $drop_st[] = "drop sequence myseq";
 $drop_st[] = "drop table mytab";
 
-foreach ($create_st as $statement) {
-	$stmt = oci_parse($c, $statement);
-	oci_execute($stmt);
-}
+oci8_test_sql_execute($c, $drop_st);
 
 echo "Done\n";
 ?>
