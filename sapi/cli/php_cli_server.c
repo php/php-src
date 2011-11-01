@@ -579,12 +579,20 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method TSRMLS_CC);
-	sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath TSRMLS_CC);
+	sapi_cli_server_register_variable(track_vars_array, "SCRIPT_NAME", client->request.vpath TSRMLS_CC);
 	if (SG(request_info).path_translated) {
 		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", SG(request_info).path_translated TSRMLS_CC);
 	}
 	if (client->request.path_info) {
 		sapi_cli_server_register_variable(track_vars_array, "PATH_INFO", client->request.path_info TSRMLS_CC);
+	}
+	if (client->request.path_info_len) {
+		char *tmp;
+		spprintf(&tmp, 0, "%s%s", client->request.vpath, client->request.path_info);
+		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", tmp TSRMLS_CC);
+		efree(tmp);
+	} else {
+		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath TSRMLS_CC);
 	}
 	if (client->request.query_string) {
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string TSRMLS_CC);
@@ -1330,6 +1338,16 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 		request->path_translated = buf;
 		request->path_translated_len = q - buf;
 	}
+#ifdef PHP_WIN32
+	{
+		uint i = 0;
+		for (;i<request->vpath_len;i++) {
+			if (request->vpath[i] == '\\') {
+				request->vpath[i] = '/';
+			}
+		}	
+	}
+#endif
 	request->sb = sb;
 } /* }}} */
 
