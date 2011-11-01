@@ -3616,6 +3616,9 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 		if (zend_hash_quick_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&other_trait_fn) == SUCCESS) {
 			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				/* Make sure they are compatible */
+				do_inheritance_check_on_method(fn, other_trait_fn TSRMLS_CC);
+				
 				/* we can savely free and remove it from other table */
 				zend_function_dtor(other_trait_fn);
 				zend_hash_quick_del(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h);
@@ -3623,6 +3626,9 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 				/* if it is not an abstract method, there is still no collision */
 				/* if fn is an abstract method */
 				if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					/* Make sure they are compatible */
+					do_inheritance_check_on_method(other_trait_fn, fn TSRMLS_CC);
+					
 					/* just mark as solved, will be added if its own trait is processed */
 					abstract_solved = 1;
 				} else {
