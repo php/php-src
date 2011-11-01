@@ -3831,14 +3831,6 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		add = 1; /* not found */
 	} else if (existing_fn->common.scope != ce) {
 		add = 1; /* or inherited from other class or interface */
-		/* it is just a reference which was added to the subclass while doing the inheritance */
-		/* so we can deleted now, and will add the overriding method afterwards */
-
-		/* except, if we try to add an abstract function, then we should not delete the inherited one */
-		/* delete inherited fn if the function to be added is not abstract */
-		if ((fn->common.fn_flags & ZEND_ACC_ABSTRACT) == 0) {
-			zend_hash_quick_del(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h);
-		}
 	}
 
 	if (add) {
@@ -3871,6 +3863,23 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (prototype) {
 			do_inheritance_check_on_method(fn, prototype TSRMLS_CC);
 		}
+		/* one more thing: make sure we properly implement an abstract method */
+		if (existing_fn && existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
+		}
+
+		/* delete inherited fn if the function to be added is not abstract */
+		if (existing_fn
+			&& existing_fn->common.scope != ce
+			&& (fn->common.fn_flags & ZEND_ACC_ABSTRACT) == 0) {
+			/* it is just a reference which was added to the subclass while doing
+			   the inheritance, so we can deleted now, and will add the overriding 
+			   method afterwards.
+			   Except, if we try to add an abstract function, then we should not
+			   delete the inherited one */
+			zend_hash_quick_del(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h);
+		}
+
 
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
