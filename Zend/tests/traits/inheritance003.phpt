@@ -1,5 +1,5 @@
 --TEST--
-Trait method overriddes base class method and satisfies prototype
+Trait method overrides base class method and satisfies prototype
 --FILE--
 <?php
 error_reporting(E_ALL);
