@@ -5023,6 +5023,12 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 void zend_do_implements_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+  if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
+    zend_error(E_COMPILE_ERROR,
+               "Cannot use traits inside of interfaces. %s is used in %s",
+               Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name);
+  }
+
 
 	switch (zend_get_class_fetch_type(Z_STRVAL(trait_name->u.constant), Z_STRLEN(trait_name->u.constant))) {
 		case ZEND_FETCH_CLASS_SELF:
