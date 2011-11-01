@@ -19,6 +19,10 @@ if (preg_match('/Release (11|12)\./', oci_server_version($c), $matches) === 1 &&
 --FILE--
 <?php
 
+// This test will diff if either the client or the server is 11.2.0.3
+// (or greater) and the other is 11.2.0.2 (or earlier).  Both client
+// and server must be upgraded at the same time.
+
 require dirname(__FILE__)."/connect.inc";
 
 $new_password = "test";

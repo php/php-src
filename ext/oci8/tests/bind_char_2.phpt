@@ -4,9 +4,13 @@ SELECT oci_bind_by_name with SQLT_AFC aka CHAR and dates
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
-if (preg_match('/Release 1[01]\.2\./', oci_server_version($c), $matches) !== 1) {
-	die("skip expected output only valid when using Oracle 10gR2 or 11gR2 databases");
-} else if (preg_match('/^11\./', oci_client_version()) != 1) {
+// The bind buffer size edge cases seem to change each DB version.
+if (preg_match('/Release 10\.2\./', oci_server_version($c), $matches) !== 1) {
+    if (preg_match('/Release 11\.2\.0\.2/', oci_server_version($c), $matches) !== 2) {
+        die("skip expected output only valid when using Oracle 10gR2 or 11.2.0.2 databases");
+    }
+}
+if (preg_match('/^11\./', oci_client_version()) != 1) {
     die("skip test expected to work only with Oracle 11g or greater version of client");
 }
 ?>
