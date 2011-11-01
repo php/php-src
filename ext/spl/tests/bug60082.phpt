@@ -1,5 +1,7 @@
 --TEST--
 Bug #60082 (100% CPU / when using references with ArrayObject(&$ref))
+--SKIPIF--
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 $test = array();
