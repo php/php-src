@@ -131,6 +131,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
 
+- FTP:
+  . Fixed bug #60183 (out of sync ftp responses). (bram at ebskamp dot me, rasmus)
+
 
 23 Aug 2011, PHP 5.3.8
 
