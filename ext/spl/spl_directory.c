@@ -2877,6 +2877,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0)
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
+	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fputcsv, 0, 0, 1)
