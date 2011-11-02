@@ -376,6 +376,17 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 }
 /* }}} */
 
+static HashTable *zend_closure_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+
+	*table = closure->this_ptr ? &closure->this_ptr : NULL;
+	*n = closure->this_ptr ? 1 : 0;
+	return (closure->func.type == ZEND_USER_FUNCTION) ?
+		closure->func.op_array.static_variables : NULL;
+}
+/* }}} */
+
 /* {{{ proto Closure::__construct()
    Private constructor preventing instantiation */
 ZEND_METHOD(Closure, __construct)
@@ -425,6 +436,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	closure_handlers.clone_obj = zend_closure_clone;
 	closure_handlers.get_debug_info = zend_closure_get_debug_info;
 	closure_handlers.get_closure = zend_closure_get_closure;
+	closure_handlers.get_gc = zend_closure_get_gc;
 }
 /* }}} */
 
