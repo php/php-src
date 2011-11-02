@@ -21,6 +21,25 @@ if (PHP_OS == 'Linux') {
     die('skip Not enough memory.');
   }
 }
+elseif (PHP_OS == 'FreeBSD') {
+  $lines = explode("\n",`sysctl -a`);
+  $infos = array();
+  foreach ($lines as $line) {
+    if(!$line){
+      continue;
+    }
+    $tmp = explode(":", $line);
+    $index = strtolower($tmp[0]);
+    $value = trim($tmp[1], " ");
+    $infos[$index] = $value;
+  }
+  $freeMemory = ($infos['vm.stats.vm.v_inactive_count']*$infos['hw.pagesize'])
+                +($infos['vm.stats.vm.v_cache_count']*$infos['hw.pagesize'])
+                +($infos['vm.stats.vm.v_free_count']*$infos['hw.pagesize']);
+  if ($freeMemory < 2100*1024*1024) {
+    die('skip Not enough memory.');
+  }
+}
 ?>
 --INI--
 memory_limit=2100M
