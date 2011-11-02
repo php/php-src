@@ -70,6 +70,7 @@ PHP                                                                        NEWS
   . Fixed bug #55776 (PDORow to session bug). (Johannes)
 
 - PDO MySQL driver:
+  . Fixed bug #60155 (pdo_mysql.default_socket ignored). (Johannes)
   . Fixed bug #55870 (PDO ignores all SSL parameters when used with mysql 
     native driver) (Pierre)
   . Fixed bug #54158 (MYSQLND+PDO MySQL requires #define 
