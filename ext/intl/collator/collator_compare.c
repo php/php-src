@@ -99,6 +99,10 @@ PHP_FUNCTION( collator_compare )
 		RETURN_FALSE;
 	}
 
+	if (!co || !co->ucoll) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+	}
+
 	/* Then compare them. */
 	result = ucol_strcoll(
 		co->ucoll,
