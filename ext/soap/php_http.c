@@ -1383,7 +1383,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		}
 
 	} else if (header_length) {
-		if (header_length < 0) {
+		if (header_length < 0 || header_length >= INT_MAX) {
 			return FALSE;
 		}
 		http_buf = safe_emalloc(1, header_length, 1);
