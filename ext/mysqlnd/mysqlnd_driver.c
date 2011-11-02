@@ -175,7 +175,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 		DBG_RETURN(NULL);
 	}
 	new_object->persistent = to_be_cloned->persistent;
-	new_object->m = mysqlnd_conn_get_methods();
+	new_object->m = to_be_cloned->m;
 
 	new_object->data = to_be_cloned->data->m->get_reference(to_be_cloned->data TSRMLS_CC);
 	if (!new_object->data) {
