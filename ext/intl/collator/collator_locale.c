@@ -51,6 +51,10 @@ PHP_FUNCTION( collator_get_locale )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (!co || !co->ucoll) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+	}
+
 	/* Get locale by specified type. */
 	locale_name = (char*) ucol_getLocaleByType(
 		co->ucoll, type, COLLATOR_ERROR_CODE_P( co ) );
