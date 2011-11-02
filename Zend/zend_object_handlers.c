@@ -102,6 +102,28 @@ ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_DC) /* {{{ */
+{
+	if (Z_OBJ_HANDLER_P(object, get_properties) != zend_std_get_properties) {
+		*table = NULL;
+		*n = 0;
+		return Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC);
+	} else {
+		zend_object *zobj = Z_OBJ_P(object);
+
+		if (zobj->properties) {
+			*table = NULL;
+			*n = 0;
+			return zobj->properties;
+		} else {
+			*table = zobj->properties_table;
+			*n = zobj->ce->default_properties_count;
+			return NULL;
+		}
+	}
+}
+/* }}} */
+
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
 	*is_temp = 0;
@@ -1584,6 +1606,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	NULL,									/* count_elements */
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
+	zend_std_get_gc,						/* get_gc */
 };
 
 /*
