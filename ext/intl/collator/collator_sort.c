@@ -73,6 +73,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		/* Fetch collator object. */
 		co = (Collator_object *) zend_object_store_get_object( INTL_G(current_collator) TSRMLS_CC );
 
+	if (!co || !co->ucoll) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+	}
+
 		/* Compare the strings using ICU. */
 		result->value.lval = ucol_strcoll(
 				co->ucoll,
@@ -441,6 +445,10 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* Get sort key, reallocating the buffer if needed. */
 		bufLeft = sortKeyBufSize - sortKeyBufOffset;
 
+		if (!co || !co->ucoll) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+		}
+
 		sortKeyLen = ucol_getSortKey( co->ucoll,
 									  utf16_buf,
 									  utf16_len,
@@ -569,6 +577,10 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
 		efree( ustr );
 		RETURN_FALSE;
+	}
+
+	if (!co || !co->ucoll) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
 	}
 
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
