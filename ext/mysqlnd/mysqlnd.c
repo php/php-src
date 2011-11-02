@@ -2633,7 +2633,7 @@ MYSQLND_METHOD(mysqlnd_conn, clone_object)(MYSQLND * const conn TSRMLS_DC)
 static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_conn_data::dtor");
+	DBG_ENTER("mysqlnd_conn::dtor");
 	DBG_INF_FMT("conn=%llu", conn->data->thread_id);
 
 	conn->data->m->free_reference(conn->data TSRMLS_CC);
@@ -2660,7 +2660,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 	};
 	enum_mysqlnd_collected_stats statistic = close_type_to_stat_map[close_type];
 
-	DBG_ENTER("mysqlnd_conn_data::close");
+	DBG_ENTER("mysqlnd_conn::close");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
