@@ -525,12 +525,11 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_check_liveness
 };
 /* }}} */
-#ifdef PDO_USE_MYSQLND
-# ifdef PHP_WIN32
-#  define MYSQL_UNIX_ADDR	"MySQL"
-# else
-#  define MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
-# endif
+
+#ifdef PHP_WIN32
+# define MYSQL_UNIX_ADDR	NULL
+#else
+# define MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
 #endif
 
 /* {{{ pdo_mysql_handle_factory */
