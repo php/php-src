@@ -3787,8 +3787,11 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 }
 /* }}} */
 
-static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint mname_len, zend_function* fe TSRMLS_DC) {
-	if (     !strncmp(mname, ZEND_CLONE_FUNC_NAME,       mname_len)) {	ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE; }
+static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint mname_len, zend_function* fe TSRMLS_DC) /* {{{ */
+{
+	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
+		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
+	}
 	else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
 		if (ce->constructor) {
 			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
@@ -3817,7 +3820,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 		str_efree(lowercase_name);
 	}
 }
-
+/* }}} */
 
 static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
