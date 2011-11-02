@@ -3823,7 +3823,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 {
 	zend_class_entry *ce = va_arg(args, zend_class_entry*);
 	int add = 0;
-	zend_function* existing_fn;
+	zend_function* existing_fn = NULL;
 	zend_function fn_copy, *fn_copy_p;
 	zend_function* prototype = NULL;  /* is used to determine the prototype according to the inheritance chain */
 
