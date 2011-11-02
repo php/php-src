@@ -1698,6 +1698,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 	DBG_INF_FMT("conn=%llu conn->net->stream->abstract=%p",
 				conn->thread_id, conn->net->stream? conn->net->stream->abstract:NULL);
 
+	if (CONN_GET_STATE(conn) >= CONN_READY) {
+		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
+		if (conn->persistent) {
+			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
+		}
+	}
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
@@ -2652,24 +2658,18 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_methods, close);
 	MYSQLND_CONN_DATA * conn = conn_handle->data;
 	enum_func_status ret = FAIL;
-	static enum_mysqlnd_collected_stats
-	close_type_to_stat_map[MYSQLND_CLOSE_LAST] = {
-		STAT_CLOSE_EXPLICIT,
-		STAT_CLOSE_IMPLICIT,
-		STAT_CLOSE_DISCONNECT
-	};
-	enum_mysqlnd_collected_stats statistic = close_type_to_stat_map[close_type];
 
 	DBG_ENTER("mysqlnd_conn::close");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		if (CONN_GET_STATE(conn) >= CONN_READY) {
-			MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
-			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
-			if (conn->persistent) {
-				MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
-			}
+			static enum_mysqlnd_collected_stats close_type_to_stat_map[MYSQLND_CLOSE_LAST] = {
+				STAT_CLOSE_EXPLICIT,
+				STAT_CLOSE_IMPLICIT,
+				STAT_CLOSE_DISCONNECT
+			};
+			MYSQLND_INC_CONN_STATISTIC(conn->stats, close_type_to_stat_map[close_type]);
 		}
 
 		/*
@@ -2678,7 +2678,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 		*/
 		ret = conn->m->send_close(conn TSRMLS_CC);
 
-		/* do it after free_reference and we might crash */
+		/* do it after free_reference/dtor and we might crash */
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);
 
 		conn_handle->m->dtor(conn_handle TSRMLS_CC);
