@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Reverted changes that required constructor overrides to invoke the parent
     constructor in several SPL classes and applied 5.3 fixes instead.
     Related bugs: #54384, #55175 and #55300.
+  . Fixed bug #60201 (SplFileObject::setCsvControl does not expose third
+    argument via Reflection). (Peter)
 
 20 Oct 2011, PHP 5.4.0 beta2
 - General improvements:
