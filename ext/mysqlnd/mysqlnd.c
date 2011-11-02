@@ -951,6 +951,32 @@ err:
 /* }}} */
 
 
+/* {{{ mysqlnd_conn::connect */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
+						 const char * host, const char * user,
+						 const char * passwd, unsigned int passwd_len,
+						 const char * db, unsigned int db_len,
+						 unsigned int port,
+						 const char * socket_or_pipe,
+						 unsigned int mysql_flags
+						 TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, connect);
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = conn_handle->data;
+
+	DBG_ENTER("mysqlnd_conn::connect");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
+
+		conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);
+	}
+	DBG_RETURN(ret);
+}
+
+
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 						 const char * host, const char * user,
@@ -963,7 +989,6 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 {
 	enum_func_status ret = FAIL;
 	zend_bool self_alloced = FALSE;
-	MYSQLND_CONN_DATA * conn;
 
 	DBG_ENTER("mysqlnd_connect");
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host?host:"", user?user:"", db?db:"", port, mysql_flags);
@@ -975,9 +1000,8 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 			DBG_RETURN(NULL);
 		}
 	}
-	conn = conn_handle->data;
 
-	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
+	ret = conn_handle->m->connect(conn_handle, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
 
 	if (ret == FAIL) {
 		if (self_alloced) {
@@ -2689,6 +2713,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
+	MYSQLND_METHOD(mysqlnd_conn, connect),
 	MYSQLND_METHOD(mysqlnd_conn, clone_object),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor),
 	MYSQLND_METHOD(mysqlnd_conn, close)
