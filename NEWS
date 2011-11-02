@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.3.9
 
 - Core:
+  . Fixed bug #60139 (Anonymous functions create cycles not detected by the
+    GC). (Dmitry)
   . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when 
     the data exceeds or is equal to 2048 bytes). (Pierre, Pascal Borreli)
   . Fixed bug #60019 (Function time_nanosleep() is undefined on OS X). (Ilia)
