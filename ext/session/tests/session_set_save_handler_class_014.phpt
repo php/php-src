@@ -28,5 +28,3 @@ session_start();
 *** Testing session_set_save_handler() : calling default handler when save_handler=user ***
 
 Fatal error: SessionHandler::open(): Cannot call default session handler in %s on line %d
-
-Fatal error: Unknown: Cannot call default session handler in %s on line %d

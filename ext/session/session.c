@@ -1649,7 +1649,6 @@ static PHP_FUNCTION(session_set_save_handler)
 			remove_user_shutdown_function("session_shutdown" TSRMLS_CC);
 		}
 
-		PS(mod_user_implemented) = 1;
 		if (PS(mod) && PS(session_status) == php_session_none && PS(mod) != &ps_mod_user) {
 			zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		}
@@ -1674,7 +1673,6 @@ static PHP_FUNCTION(session_set_save_handler)
 		efree(name);
 	}
 	
-	PS(mod_user_implemented) = 1;
 
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
