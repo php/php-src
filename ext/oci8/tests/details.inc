@@ -9,10 +9,6 @@
  * greater, and $dbase should be set to the tnsnames.ora entry
  * corresponding to the POOLED server instance or an Easy Connect
  * string like hostname:port/service_name:POOLED
- *
- * Set $stress_test to TRUE if you want to run some longer/slower/more
- * memory intensive tests.	External configuration such as increasing
- * the timeout of run-tests.php may also be needed.
  */
 
 if (file_exists(dirname(__FILE__)."/details_local.inc")) {
@@ -23,23 +19,16 @@ if (file_exists(dirname(__FILE__)."/details_local.inc")) {
 		$password	= getenv('PHP_OCI8_TEST_PASS');	  // Password for $user
 		$dbase		= getenv('PHP_OCI8_TEST_DB');	  // Database connection string
 		$test_drcp	= getenv('PHP_OCI8_TEST_DRCP');
-		$stress_test = getenv('PHP_OCI8_STRESS_TEST');
 		if (false !== $test_drcp && 0 == strcasecmp($test_drcp,'TRUE')) {
 			$test_drcp = TRUE;
 		} else {
 			$test_drcp = FALSE;
-		}
-		if (false !== $stress_test && 0 == strcasecmp($stress_test,'TRUE')) {
-			$stress_test = TRUE;
-		} else {
-			$stress_test = FALSE;
 		}
 	} else {
 		$user						= "system";
 		$password					= "oracle";
 		$dbase						= "localhost/XE";
 		$test_drcp					= FALSE;
-		$stress_test				= FALSE;
 	}
 	
 	/*
