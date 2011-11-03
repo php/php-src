@@ -137,6 +137,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #60183 (out of sync ftp responses). (bram at ebskamp dot me, rasmus)
 
+- SAPI:
+  . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
+
 
 23 Aug 2011, PHP 5.3.8
 

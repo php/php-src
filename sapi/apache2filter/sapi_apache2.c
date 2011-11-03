@@ -420,7 +420,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	efree(content_type);
 
 	content_length = (char *) apr_table_get(f->r->headers_in, "Content-Length");
-	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+	SG(request_info).content_length = (content_length ? atol(content_length) : 0);
 	
 	apr_table_unset(f->r->headers_out, "Content-Length");
 	apr_table_unset(f->r->headers_out, "Last-Modified");
