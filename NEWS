@@ -28,7 +28,7 @@ PHP                                                                        NEWS
     is_a and is_subclass_of). (alan_k)
   . Fixed bug #52461 (Incomplete doctype and missing xmlns). 
     (virsacer at web dot de, Pierre)
-  . Fixed bug #55366 (keys lost when using substr_replace an array) (Arpad)
+  . Fixed bug #55366 (keys lost when using substr_replace an array). (Arpad)
   . Fixed bug #55273 (base64_decode() with strict rejects whitespace after
     pad). (Ilia)
   . Fixed bug #50982 (incorrect assumption of PAGE_SIZE size). (Dmitry)
@@ -53,7 +53,7 @@ PHP                                                                        NEWS
 - MySQLi extension:
   . Fixed bug #55859 (mysqli->stat property access gives error). (Andrey)
   . Fixed bug #55582 (mysqli_num_rows() returns always 0 for unbuffered, when
-  mysqlnd is used). (Andrey)
+    mysqlnd is used). (Andrey)
   . Fixed bug #55703 (PHP crash when calling mysqli_fetch_fields). 
     (eran at zend dot com, Laruence)
 
@@ -63,7 +63,7 @@ PHP                                                                        NEWS
     (Andrey)
 
 - Oracle Database extension (OCI8):
-  . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
+  . Increased maxium Oracle error message buffer length for new 11.2.0.3 size.
     (Chris Jones)
 
 - PDO
@@ -72,13 +72,13 @@ PHP                                                                        NEWS
 - PDO MySQL driver:
   . Fixed bug #60155 (pdo_mysql.default_socket ignored). (Johannes)
   . Fixed bug #55870 (PDO ignores all SSL parameters when used with mysql 
-    native driver) (Pierre)
+    native driver). (Pierre)
   . Fixed bug #54158 (MYSQLND+PDO MySQL requires #define 
-    MYSQL_OPT_LOCAL_INFILE) (Andrey)
+    MYSQL_OPT_LOCAL_INFILE). (Andrey)
 
 - PDO OCI driver:
-  . Fixed bug #55768 (PDO_OCI can't resume Oracle session after it's been killed)
-  (mikhail dot v dot gavrilov at gmail dot com, Chris Jones, Tony)
+  . Fixed bug #55768 (PDO_OCI can't resume Oracle session after it's been
+    killed). (mikhail dot v dot gavrilov at gmail dot com, Chris Jones, Tony)
 
 - Phar:
   . Fixed bug #52013 (Unable to decompress files in a compressed phar). (Hannes)
@@ -118,7 +118,8 @@ PHP                                                                        NEWS
     (bug #48601). (chregu, rrichards)
 
 - Sockets:
-  . Fixed bug #60048 (sa_len a #define on IRIX). (china at thewrittenword dot com)
+  . Fixed bug #60048 (sa_len a #define on IRIX). (china at thewrittenword dot
+    com)
 
 - SPL:
   . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
@@ -127,15 +128,17 @@ PHP                                                                        NEWS
     (Hannes)
     
 - XSL:
-  . Added xsl.security_prefs ini option to define forbidden operations within XSLT 
-    stylesheets, default is not to enable write operations. This option won't be 
-    in 5.4, since there's a new method. Bug #54446 (Chregu, Nicolas Gregoire)
+  . Added xsl.security_prefs ini option to define forbidden operations within
+    XSLT stylesheets, default is not to enable write operations. This option 
+    won't be in 5.4, since there's a new method. Fixes Bug #54446. (Chregu,
+    Nicolas Gregoire)
 
 - Fileinfo:
   . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
 
 - FTP:
-  . Fixed bug #60183 (out of sync ftp responses). (bram at ebskamp dot me, rasmus)
+  . Fixed bug #60183 (out of sync ftp responses). (bram at ebskamp dot me,
+    rasmus)
 
 - SAPI:
   . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
