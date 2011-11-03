@@ -6,7 +6,6 @@ Bug #60192 (SegFault when Collator not constructed properly)
 ?>
 --FILE--
 <?php
-
 class Collator2 extends Collator{
 	public function __construct() {
 		// ommitting parent::__construct($someLocale);
@@ -14,7 +13,7 @@ class Collator2 extends Collator{
 }
 
 $c = new Collator2();
-$c->compare('h', 'H');
+$a = $c->compare('h', 'H');
 --EXPECTF--
 
-Fatal error: Collator::compare(): Object not initialized in %s on line %d
+Catchable fatal error: Collator::compare(): Object not initialized in %s on line %d
