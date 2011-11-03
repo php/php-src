@@ -5,6 +5,14 @@ PHP                                                                        NEWS
 - PHP-FPM SAPI:
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
 
+- Intl:
+  . Fixed bug #60192 (SegFault when Collator not constructed
+    properly). (Florian)
+
+- Gd:
+  . Fixed bug #60160 (imagefill() doesn't work correctly
+    for small images). (Florian)
+
 
 03 Nov 2011, PHP 5.3.9RC1
 
