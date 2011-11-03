@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.3.9
+03 Nov 2011, PHP 5.3.9RC1
 
 - Core:
   . Fixed bug #60139 (Anonymous functions create cycles not detected by the
