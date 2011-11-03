@@ -539,7 +539,7 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 	if (convert_to_bool) {
 		char *err = fpm_conf_set_boolean(value, &subconf, 0);
 		if (err) return err;
-		kv->value = strdup(b ? "On" : "Off");
+		kv->value = strdup(b ? "1" : "0");
 	} else {
 		kv->value = strdup(Z_STRVAL_P(value));
 		if (fpm_conf_expand_pool_name(&kv->value) == -1) {
@@ -1343,20 +1343,10 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_value", Z_STRVAL_P(name))) {
-		if (!*Z_STRVAL_P(value)) {
-			zlog(ZLOG_ERROR, "[%s:%d] empty value", ini_filename, ini_lineno);
-			*error = 1;
-			return;
-		}
 		config = (char *)current_wp->config + WPO(php_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
 	} else if (!strcmp("php_admin_value", Z_STRVAL_P(name))) {
-		if (!*Z_STRVAL_P(value)) {
-			zlog(ZLOG_ERROR, "[%s:%d] empty value", ini_filename, ini_lineno);
-			*error = 1;
-			return;
-		}
 		config = (char *)current_wp->config + WPO(php_admin_values);
 		err = fpm_conf_set_array(key, value, &config, 0);
 
