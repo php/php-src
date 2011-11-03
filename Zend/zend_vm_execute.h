@@ -2863,12 +2863,12 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 			Z_ADDREF_P(value);
 			EX_T(opline->result.var).var.ptr = value;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		} else {
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, value);
 			EX_T(opline->result.var).var.ptr = ret;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 			if (!0) {
 				zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 			}
@@ -2914,12 +2914,12 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 		Z_ADDREF_P(value);
 		EX_T(opline->result.var).var.ptr = value;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	} else {
 		ALLOC_ZVAL(ret);
 		INIT_PZVAL_COPY(ret, value);
 		EX_T(opline->result.var).var.ptr = ret;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		if (!0) {
 			zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 		}
@@ -7223,12 +7223,12 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 			Z_ADDREF_P(value);
 			EX_T(opline->result.var).var.ptr = value;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		} else {
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, value);
 			EX_T(opline->result.var).var.ptr = ret;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 			if (!1) {
 				zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 			}
@@ -7275,12 +7275,12 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 		Z_ADDREF_P(value);
 		EX_T(opline->result.var).var.ptr = value;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	} else {
 		ALLOC_ZVAL(ret);
 		INIT_PZVAL_COPY(ret, value);
 		EX_T(opline->result.var).var.ptr = ret;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		if (!1) {
 			zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 		}
@@ -11694,12 +11694,12 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 			Z_ADDREF_P(value);
 			EX_T(opline->result.var).var.ptr = value;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		} else {
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, value);
 			EX_T(opline->result.var).var.ptr = ret;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 			if (!0) {
 				zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 			}
@@ -11746,12 +11746,12 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 		Z_ADDREF_P(value);
 		EX_T(opline->result.var).var.ptr = value;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	} else {
 		ALLOC_ZVAL(ret);
 		INIT_PZVAL_COPY(ret, value);
 		EX_T(opline->result.var).var.ptr = ret;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		if (!0) {
 			zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 		}
@@ -27346,12 +27346,12 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 			Z_ADDREF_P(value);
 			EX_T(opline->result.var).var.ptr = value;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		} else {
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, value);
 			EX_T(opline->result.var).var.ptr = ret;
-			EX_T(opline->result.var).var.ptr_ptr = NULL;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 			if (!0) {
 				zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 			}
@@ -27397,12 +27397,12 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 	if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 		Z_ADDREF_P(value);
 		EX_T(opline->result.var).var.ptr = value;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 	} else {
 		ALLOC_ZVAL(ret);
 		INIT_PZVAL_COPY(ret, value);
 		EX_T(opline->result.var).var.ptr = ret;
-		EX_T(opline->result.var).var.ptr_ptr = NULL;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		if (!0) {
 			zval_copy_ctor(EX_T(opline->result.var).var.ptr);
 		}
