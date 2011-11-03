@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
 
+- PHP-FPM SAPI:
+  . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
+
 
 03 Nov 2011, PHP 5.3.9RC1
 
