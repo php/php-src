@@ -18,4 +18,4 @@ $a = array('a', 'b');
 $c->sort($a);
 --EXPECTF--
 
-Fatal error: Collator::sort(): Object not initialized in %s on line %d
+Catchable fatal error: Collator::sort(): Object not initialized in %s on line %d
