@@ -3718,9 +3718,14 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 	for(i = 0; i < fe->op_array.last; i++) {
 		opcode_copy[i] = fe->op_array.opcodes[i];
 		if (opcode_copy[i].op1_type != IS_CONST) {
-			if (opcode_copy[i].op1.jmp_addr >= fe->op_array.opcodes &&
-				opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
-				opcode_copy[i].op1.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op1.jmp_addr - fe->op_array.opcodes);
+			switch (opcode_copy[i].opcode) {
+				case ZEND_GOTO:
+				case ZEND_JMP:
+					if (opcode_copy[i].op1.jmp_addr && opcode_copy[i].op1.jmp_addr >= fe->op_array.opcodes &&
+						opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
+						opcode_copy[i].op1.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op1.jmp_addr - fe->op_array.opcodes);
+					}
+				break;
 			}
 		} else {
 			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
@@ -3739,9 +3744,18 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 		}
 
 		if (opcode_copy[i].op2_type != IS_CONST) {
-			if (opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
-				opcode_copy[i].op2.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
-				opcode_copy[i].op2.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op2.jmp_addr - fe->op_array.opcodes);
+			switch (opcode_copy[i].opcode) {
+				case ZEND_JMPZ:
+				case ZEND_JMPNZ:
+				case ZEND_JMPZ_EX:
+				case ZEND_JMPNZ_EX:
+				case ZEND_JMP_SET:
+				case ZEND_JMP_SET_VAR:
+					if (opcode_copy[i].op2.jmp_addr && opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
+						opcode_copy[i].op2.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
+						opcode_copy[i].op2.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op2.jmp_addr - fe->op_array.opcodes);
+					}
+				break;
 			}
 		} else {
 			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
