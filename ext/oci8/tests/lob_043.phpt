@@ -4,7 +4,7 @@ Bug #49560 (LOB resource destructor and refcount test)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-if ($stress_test !== true) die ('skip Slow test not run when $stress_test is FALSE');
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --FILE--
 <?php
