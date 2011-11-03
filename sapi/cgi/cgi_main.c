@@ -1413,7 +1413,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = CGI_GETENV("QUERY_STRING");
 		SG(request_info).content_type = (content_type ? content_type : "" );
-		SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+		SG(request_info).content_length = (content_length ? atol(content_length) : 0);
 
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 		auth = CGI_GETENV("HTTP_AUTHORIZATION");
