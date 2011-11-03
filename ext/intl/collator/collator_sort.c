@@ -74,7 +74,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		co = (Collator_object *) zend_object_store_get_object( INTL_G(current_collator) TSRMLS_CC );
 
 		if (!co || !co->ucoll) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+			intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+			intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
+				"Object not initialized", 0 TSRMLS_CC );
+			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
 		}
 
 		/* Compare the strings using ICU. */
@@ -391,6 +394,14 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (!co || !co->ucoll) {
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
+			"Object not initialized", 0 TSRMLS_CC );
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+
+		RETURN_FALSE;
+	}
 
 	/*
 	 * Sort specified array.
@@ -444,10 +455,6 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 		/* Get sort key, reallocating the buffer if needed. */
 		bufLeft = sortKeyBufSize - sortKeyBufOffset;
-
-		if (!co || !co->ucoll) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
-		}
 
 		sortKeyLen = ucol_getSortKey( co->ucoll,
 									  utf16_buf,
@@ -559,6 +566,14 @@ PHP_FUNCTION( collator_get_sort_key )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (!co || !co->ucoll) {
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
+			"Object not initialized", 0 TSRMLS_CC );
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+
+		RETURN_FALSE;
+	}
 
 	/*
 	 * Compare given strings (converting them to UTF-16 first).
@@ -577,10 +592,6 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
 		efree( ustr );
 		RETURN_FALSE;
-	}
-
-	if (!co || !co->ucoll) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
 	}
 
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
