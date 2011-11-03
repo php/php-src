@@ -22,7 +22,6 @@ require_once('skipifconnectfailure.inc');
 		'autocommit'			=> true,
 		'change_user'			=> true,
 		'character_set_name'		=> true,
-		'client_encoding'		=> true,
 		'close'				=> true,
 		'commit'	=> true,
 		'connect'			=> true,
@@ -57,9 +56,13 @@ require_once('skipifconnectfailure.inc');
 		'thread_safe'			=> true,
 		'use_result'			=> true,
 	);
+
+	if (version_compare(PHP_VERSION, '5.3.99', '<=')) {
+		$expected_methods['client_encoding'] = true;
+	}
+
 	if ($IS_MYSQLND) {
 		// mysqlnd only
-		/* $expected_methods['get_cache_stats']		= true; */
 		/* $expected_methods['get_client_stats']	= true; */
 		$expected_methods['get_connection_stats']	= true;
 		$expected_methods['reap_async_query']	= true;
@@ -96,15 +99,70 @@ require_once('skipifconnectfailure.inc');
 		printf("ok\n");
 
 	printf("\nClass variables:\n");
-	$variables = array_keys(get_class_vars(get_class($mysqli)));
-	sort($variables);
-	foreach ($variables as $k => $var)
-		printf("%s\n", $var);
+
+	$expected_class_variables = $expected_object_variables = array(
+		"affected_rows" 	=> true,
+		"client_info"		=> true,
+		"client_version"	=> true,
+		"connect_errno"		=> true,
+		"connect_error"		=> true,
+		"errno"				=> true,
+		"error"				=> true,
+		"field_count"		=> true,
+		"host_info"			=> true,
+		"info"				=> true,
+		"insert_id"			=> true,
+		"protocol_version"	=> true,
+		"server_info"		=> true,
+		"server_version"	=> true,
+		"sqlstate"			=> true,
+		"stat"				=> true,
+		"thread_id"			=> true,
+		"warning_count"		=> true,
+	);
+
+	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
+	  $expected_class_variables["error_list"] = true;
+	  $expected_object_variables["error_list"] = true;
+	}
+
+	$variables = get_class_vars(get_class($mysqli));
+	foreach ($variables as $var => $v) {
+		if (isset($expected_class_variables[$var])) {
+			unset($expected_class_variables[$var]);
+			unset($variables[$var]);
+		}
+	}
+
+	if (!empty($expected_class_variables)) {
+	  printf("Dumping list of missing class variables\n");
+	  var_dump($expected_class_variables);
+	}
+	if (!empty($variables)) {
+	  printf("Dumping list of unexpected class variables\n");
+	  var_dump($variables);
+	}
+	echo "ok\n";
 
 	printf("\nObject variables:\n");
-	$variables = array_keys(get_object_vars($mysqli));
-	foreach ($variables as $k => $var)
-		printf("%s\n", $var);
+	$variables = get_object_vars($mysqli);
+	foreach ($variables as $var => $v) {
+		if (isset($expected_object_variables[$var])) {
+			unset($expected_object_variables[$var]);
+			unset($variables[$var]);
+		}
+	}
+
+	if (!empty($expected_object_variables)) {
+	  printf("Dumping list of missing object variables\n");
+	  var_dump($expected_object_variables);
+	}
+	if (!empty($variables)) {
+	  printf("Dumping list of unexpected object variables\n");
+	  var_dump($variables);
+	}
+	echo "ok\n";
+
 
 	printf("\nMagic, magic properties:\n");
 
@@ -133,6 +191,11 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->error, gettype($mysqli->error),
 		mysqli_error($link), gettype(mysqli_error($link)));
 
+	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
+		assert(mysqli_error_list($link) === $mysqli->error_list);
+		assert(is_array($mysqli->error_list));
+	}
+
 	assert(mysqli_field_count($link) === $mysqli->field_count);
 	printf("mysqli->field_count = '%s'/%s ('%s'/%s)\n",
 		$mysqli->field_count, gettype($mysqli->field_count),
@@ -147,6 +210,11 @@ require_once('skipifconnectfailure.inc');
 	printf("mysqli->sqlstate = '%s'/%s ('%s'/%s)\n",
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
+
+	assert(mysqli_stat($link) === $mysqli->stat);
+	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
+		$mysqli->stat, gettype($mysqli->stat),
+		mysqli_stat($link), gettype(mysqli_stat($link)));
 
 	assert(mysqli_get_host_info($link) === $mysqli->host_info);
 	printf("mysqli->host_info = '%s'/%s ('%s'/%s)\n",
@@ -217,42 +285,10 @@ Methods:
 ok
 
 Class variables:
-affected_rows
-client_info
-client_version
-connect_errno
-connect_error
-errno
-error
-field_count
-host_info
-info
-insert_id
-protocol_version
-server_info
-server_version
-sqlstate
-thread_id
-warning_count
+ok
 
 Object variables:
-affected_rows
-client_info
-client_version
-connect_errno
-connect_error
-errno
-error
-field_count
-host_info
-info
-insert_id
-server_info
-server_version
-sqlstate
-protocol_version
-thread_id
-warning_count
+ok
 
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)
@@ -263,6 +299,7 @@ mysqli->error = ''/%unicode|string% (''/%unicode|string%)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
+mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
 mysqli->info = ''/NULL (''/%unicode|string%)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
