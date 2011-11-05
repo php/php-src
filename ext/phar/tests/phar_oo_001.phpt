@@ -52,6 +52,6 @@ __halt_compiler();
 --EXPECT--
 string(5) "1.0.0"
 int(5)
-string(103) "In the constructor of MyPhar, parent::__construct() must be called and its exceptions cannot be cleared"
+string(50) "Cannot call method on an uninitialized Phar object"
 string(29) "Cannot call constructor twice"
 ===DONE===
