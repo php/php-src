@@ -3617,7 +3617,19 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* Make sure they are compatible */
-				do_inheritance_check_on_method(fn, other_trait_fn TSRMLS_CC);
+        if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+          /* In case both are abstract, just check prototype, but need to do that in both directions */
+          if (   !zend_do_perform_implementation_check(fn, other_trait_fn TSRMLS_CC)
+              || !zend_do_perform_implementation_check(other_trait_fn, fn TSRMLS_CC)) {
+            zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", //ZEND_FN_SCOPE_NAME(fn), fn->common.function_name, //::%s()
+              zend_get_function_declaration(fn TSRMLS_CC),
+              zend_get_function_declaration(other_trait_fn TSRMLS_CC));
+          }
+        }
+        else {
+          /* otherwise, do the full check */
+          do_inheritance_check_on_method(fn, other_trait_fn TSRMLS_CC);
+        }
 				
 				/* we can savely free and remove it from other table */
 				zend_function_dtor(other_trait_fn);
@@ -3626,7 +3638,8 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 				/* if it is not an abstract method, there is still no collision */
 				/* if fn is an abstract method */
 				if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-					/* Make sure they are compatible */
+					/* Make sure they are compatible.
+             Here, we already know other_trait_fn cannot be abstract, full check ok. */
 					do_inheritance_check_on_method(other_trait_fn, fn TSRMLS_CC);
 					
 					/* just mark as solved, will be added if its own trait is processed */
@@ -3843,39 +3856,39 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 	zend_function* existing_fn = NULL;
 	zend_function fn_copy, *fn_copy_p;
 	zend_function* prototype = NULL;  /* is used to determine the prototype according to the inheritance chain */
-
+  
 	if (zend_hash_quick_find(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &existing_fn) == FAILURE) {
 		add = 1; /* not found */
 	} else if (existing_fn->common.scope != ce) {
 		add = 1; /* or inherited from other class or interface */
 	}
-
+  
 	if (add) {
 		zend_function* parent_function;
 		if (ce->parent && zend_hash_quick_find(&ce->parent->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &parent_function) != FAILURE) {
 			prototype = parent_function; /* ->common.fn_flags |= ZEND_ACC_ABSTRACT; */
 			
 			/* we got that method in the parent class, and are going to override it,
-			   except, if the trait is just asking to have an abstract method implemented. */
+       except, if the trait is just asking to have an abstract method implemented. */
 			if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* then we clean up an skip this method */
 				zend_function_dtor(fn);
 				return ZEND_HASH_APPLY_REMOVE;
 			}
 		}
-
+    
 		fn->common.scope = ce;
 		fn->common.prototype = prototype;
-
+    
 		if (prototype
-			&& (prototype->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
-				|| prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-			fn->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
-		} else if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
-			/* remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class */
-			fn->common.fn_flags = fn->common.fn_flags - ZEND_ACC_IMPLEMENTED_ABSTRACT;
-		}
-
+        && (prototype->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
+            || prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+          fn->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
+        } else if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
+          /* remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class */
+          fn->common.fn_flags = fn->common.fn_flags - ZEND_ACC_IMPLEMENTED_ABSTRACT;
+        }
+    
 		/* check whether the trait method fullfills the inheritance requirements */
 		if (prototype) {
 			do_inheritance_check_on_method(fn, prototype TSRMLS_CC);
@@ -3906,18 +3919,18 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		}
 		fn_copy = *fn;
 		zend_traits_duplicate_function(&fn_copy, ce, estrdup(fn->common.function_name) TSRMLS_CC);
-
+    
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
-
+    
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
-
+    
 		zend_function_dtor(fn);
 	} else {
 		zend_function_dtor(fn);
 	}
-
+  
 	return ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
