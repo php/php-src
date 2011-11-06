@@ -461,6 +461,10 @@ UPGRADE NOTES - PHP 5.4
     $y = "o"; 
     A::{$x.$y.$y}();
 
+- Class member acces on instantiation:
+  (new foo)->method()
+  (new foo)->property
+  (new foo)[0]
 
 ===================
 13. Windows support

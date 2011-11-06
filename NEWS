@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
+  . Added class member access on instantiation (e.g. (new foo)->bar()) support.
+    (Felipe)
 
 - CLI SAPI:
   . Fixed bug #60112 (If URI does not contain a file, index.php is not served).
