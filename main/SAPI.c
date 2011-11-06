@@ -712,7 +712,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	} else {
 		/* new line safety check */
 		char *s = header_line, *e = header_line + header_line_len, *p;
-		while (s < e && (p = memchr(s, '\n', (e - s)))) {
+		while (s < e && ((p = memchr(s, '\n', (e - s))) || (p = memchr(s, '\r', (e - s))))) {
 			if (*(p + 1) == ' ' || *(p + 1) == '\t') {
 				s = p + 1;
 				continue;
