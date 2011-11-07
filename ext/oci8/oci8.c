@@ -2901,11 +2901,20 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
 	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvNlsCreate, (&retenv, OCI_G(events) ? PHP_OCI_INIT_MODE | OCI_EVENTS : PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, charsetid, charsetid));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
+		sb4   ora_error_code = 0;
+		text  ora_msg_buf[OCI_ERROR_MAXMSG_SIZE];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
+
 #ifdef HAVE_OCI_INSTANT_CLIENT
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that " PHP_OCI8_LIB_PATH_MSG " includes the directory with Oracle Instant Client libraries");
 #else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
+		if (retenv
+			&& OCIErrorGet(retenv, (ub4)1, NULL, &ora_error_code, ora_msg_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
+			&& *ora_msg_buf) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ora_msg_buf);
+		}
+		
 		return NULL;
 	}
 	return retenv;
