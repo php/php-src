@@ -47,6 +47,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
   Increased maximum possible Oracle DB error message length
+  Improve internal initalization failure error messages
  </notes>
  <contents>
   <dir name="/">
