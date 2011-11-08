@@ -198,6 +198,9 @@ typedef struct _zend_try_catch_element {
 /* function flag for internal user call handlers __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_HANDLER     0x200000
 
+/* disable inline caching */
+#define ZEND_ACC_NEVER_CACHE          0x400000
+
 #define ZEND_ACC_PASS_REST_BY_REFERENCE 0x1000000
 #define ZEND_ACC_PASS_REST_PREFER_REF	0x2000000
 
