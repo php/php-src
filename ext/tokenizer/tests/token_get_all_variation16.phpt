@@ -47,17 +47,17 @@ else
 
 list($value1,$value2) = $c;
 if(empty($value1) && !isset($value1)) {
-  __halt_compiler();
+  myFunction();
 }
 ?>';
 $tokens =  token_get_all($source);
 var_dump($tokens);
 
-echo "Done"
+echo "Done";
 ?>
 --EXPECTF--
 *** Testing token_get_all() : with different function constructs ***
-array(135) {
+array(142) {
   [0]=>
   array(3) {
     [0]=>
@@ -958,9 +958,46 @@ array(135) {
     [0]=>
     int(%d)
     [1]=>
-    string(15) "__halt_compiler"
+    string(10) "myFunction"
     [2]=>
     int(26)
+  }
+  [135]=>
+  string(1) "("
+  [136]=>
+  string(1) ")"
+  [137]=>
+  string(1) ";"
+  [138]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(26)
+  }
+  [139]=>
+  string(1) "}"
+  [140]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(27)
+  }
+  [141]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "?>"
+    [2]=>
+    int(28)
   }
 }
 Done
