@@ -716,7 +716,10 @@ finish:
 			char *e = http_header_line + http_header_line_length - 1;
 			if (*e != '\n') {
 				do { /* partial header */
-					php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length);
+					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
+						php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed to read HTTP headers");
+						goto out;
+					}
 					e = http_header_line + http_header_line_length - 1;
 				} while (*e != '\n');
 				continue;
