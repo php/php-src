@@ -32,8 +32,10 @@
 #include "zend_language_scanner_defs.h"
 #include <zend_language_parser.h>
 
-#define zendtext LANG_SCNG(yy_text)
-#define zendleng LANG_SCNG(yy_leng)
+#define zendtext   LANG_SCNG(yy_text)
+#define zendleng   LANG_SCNG(yy_leng)
+#define zendcursor LANG_SCNG(yy_cursor)
+#define zendlimit  LANG_SCNG(yy_limit)
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
@@ -106,6 +108,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	int token_type;
 	zend_bool destroy;
 	int token_line = 1;
+	int need_tokens = -1; // for __halt_compiler lexing. -1 = disabled
 
 	array_init(return_value);
 
@@ -150,11 +153,28 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		}
 		ZVAL_NULL(&token);
 
-		token_line = CG(zend_lineno);
-
-		if (token_type == T_HALT_COMPILER) {
-			break;
+		// after T_HALT_COMPILER collect the next three non-dropped tokens
+		if (need_tokens != -1) {
+			if (token_type != T_WHITESPACE && token_type != T_OPEN_TAG
+			    && token_type != T_COMMENT && token_type != T_DOC_COMMENT
+			    && --need_tokens == 0
+			) {
+				// fetch the rest into a T_INLINE_HTML
+				if (zendcursor != zendlimit) {
+					MAKE_STD_ZVAL(keyword);
+					array_init(keyword);
+					add_next_index_long(keyword, T_INLINE_HTML);
+					add_next_index_stringl(keyword, (char *)zendcursor, zendlimit - zendcursor, 1);
+					add_next_index_long(keyword, token_line);
+					add_next_index_zval(return_value, keyword);
+				}
+				break;
+			}
+		} else if (token_type == T_HALT_COMPILER) {
+			need_tokens = 3;
 		}
+
+		token_line = CG(zend_lineno);
 	}
 }
 
