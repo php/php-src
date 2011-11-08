@@ -15,7 +15,7 @@ echo mb_ereg_replace($ptr,'$1',$txt,'e');
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '1' (T_LNUMBER), expecting variable (T_VARIABLE) or '$' in %sbug43301.php(%d) : mbregex replace on line %d
+Parse error: syntax error, unexpected %s, expecting %s or '$' in %sbug43301.php(%d) : mbregex replace on line %d
 
 Fatal error: mb_ereg_replace(): Failed evaluating code: 
 $1 in %sbug43301.php on line %d
