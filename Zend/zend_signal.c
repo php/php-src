@@ -267,7 +267,7 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
 		sa.sa_mask      = global_sigmask;
 
 		if (sigaction(signo, &sa, NULL) < 0) {
-			zend_error(E_ERROR, "Error installing signal handler for %d", signo);
+			zend_error(E_WARNING, "Error installing signal handler for %d", signo);
 		}
 
 		return SUCCESS;
