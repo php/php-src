@@ -33,7 +33,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2011-11-03</date>
+ <date>2011-11-08</date>
  <time>12:00:00</time>
 
  <version>
@@ -66,6 +66,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="array_bind_012.phpt" role="test" />
     <file name="array_bind_013.phpt" role="test" />
     <file name="array_bind_014.phpt" role="test" />
+    <file name="array_bind_bdouble.phpt" role="test" />
+    <file name="array_bind_bfloat.phpt" role="test" />
     <file name="array_bind_date1.phpt" role="test" />
     <file name="array_bind_date.phpt" role="test" />
     <file name="array_bind_float1.phpt" role="test" />
@@ -74,6 +76,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="array_bind_int.phpt" role="test" />
     <file name="array_bind_str1.phpt" role="test" />
     <file name="array_bind_str.phpt" role="test" />
+    <file name="array_bind_uin.phpt" role="test" />
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
