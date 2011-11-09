@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #60169 (Conjunction of ternary and list crashes PHP). 
     (Laruence)
+  . Fixed bug #55475 (is_a() triggers autoloader, new optional 3rd argument to
+    is_a and is_subclass_of). (alan_k)    
 
 - Oracle Database extension (OCI8):
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
@@ -32,6 +34,10 @@ PHP                                                                        NEWS
     Related bugs: #54384, #55175 and #55300.
   . Fixed bug #60201 (SplFileObject::setCsvControl does not expose third
     argument via Reflection). (Peter)
+
+- Tokenizer extension
+  . Fixed bug #54089 (token_get_all with regards to __halt_compiler is 
+    not binary safe). (Nikita Popov)
 
 - SAPI:
   . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
