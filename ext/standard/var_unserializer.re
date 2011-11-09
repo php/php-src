@@ -409,7 +409,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval **rval_ref;
 
-	limit = cursor = *p;
+	limit = max;
+	cursor = *p;
+	
+	if (YYCURSOR >= YYLIMIT) {
+		return 0;
+	}
 	
 	if (var_hash && cursor[0] != 'R') {
 		var_push(var_hash, rval);
