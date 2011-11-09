@@ -45,8 +45,9 @@ Currently we have the following branches in use::
 
   trunk             The active development branch. 
 
-  branches/PHP_5_4  Is used to release the PHP 5.4.x series. It still allows for
-                    larger enhancements.
+  branches/PHP_5_4  Is used to release the PHP 5.4.x series. In release
+                    process, only bugfixes and very small changes approved
+                    by RMs are allowed.
 
   branches/PHP_5_3  Is used to release the PHP 5.3.x series. This is current 
                     stable version and is open for bugfixes and small
