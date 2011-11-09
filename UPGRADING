@@ -222,6 +222,9 @@ UPGRADE NOTES - PHP 5.4
 - Added encode/decode in hex format to mb_[en|de]code_numericentity().
 - Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions 
   (sort, rsort, ksort, krsort, asort, arsort and array_multisort).
+- is_a() and is_subclass_of() now have third boolean parameter, which specifies
+  if the first argument can be a string class name. Default if false for is_a
+  and true for is_subclass_of() for BC reasons.
 
 ===================================
 5. Changes made to existing methods
