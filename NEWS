@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     is_a and is_subclass_of). (alan_k) 
   . Fixed bug #60116 (escapeshellcmd() cannot escape the characters 
      which cause shell command injection). (rui)
+  . Fixed bug #60227 (header() cannot detect the multi-line header with 
+     CR(0x0D)). (rui)
  
 - Oracle Database extension (OCI8):
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
