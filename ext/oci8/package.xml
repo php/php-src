@@ -46,7 +46,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-  Increased maximum possible Oracle DB error message length
+  Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
+  Increased maximum Oracle error message buffer length for new Oracle 11.2.0.3 size
   Improve internal initalization failure error messages
  </notes>
  <contents>
