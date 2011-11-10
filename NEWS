@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 RC2
 
+- Core:
+  . Fixed bug #60116 (escapeshellcmd() cannot escape the characters 
+     which cause shell command injection). (rui)
+  . Fixed bug #60227 (header() cannot detect the multi-line header with 
+     CR(0x0D)). (rui)
+
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
@@ -25,10 +31,6 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #55475 (is_a() triggers autoloader, new optional 3rd argument to
     is_a and is_subclass_of). (alan_k) 
-  . Fixed bug #60116 (escapeshellcmd() cannot escape the characters 
-     which cause shell command injection). (rui)
-  . Fixed bug #60227 (header() cannot detect the multi-line header with 
-     CR(0x0D)). (rui)
  
 - Oracle Database extension (OCI8):
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
