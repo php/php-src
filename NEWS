@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2011, PHP 5.4.0 RC1
+11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
   . Added class member access on instantiation (e.g. (new foo)->bar()) support.
