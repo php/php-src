@@ -24,8 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #60169 (Conjunction of ternary and list crashes PHP). 
     (Laruence)
   . Fixed bug #55475 (is_a() triggers autoloader, new optional 3rd argument to
-    is_a and is_subclass_of). (alan_k)    
-
+    is_a and is_subclass_of). (alan_k) 
+  . Fixed bug #60116 (escapeshellcmd() cannot escape the characters 
+     which cause shell command injection). (rui)
+ 
 - Oracle Database extension (OCI8):
   . Increased maxium Oracle error message buffer length for new 11.2.0.3 size 
     (Chris Jones)
