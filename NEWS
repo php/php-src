@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #60160 (imagefill() doesn't work correctly
     for small images). (Florian)
 
+- Oracle Database extension (OCI8):
+  . Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
+    (Chris Jones)
 
 03 Nov 2011, PHP 5.3.9RC1
 
@@ -77,8 +80,9 @@ PHP                                                                        NEWS
     (Andrey)
 
 - Oracle Database extension (OCI8):
-  . Increased maxium Oracle error message buffer length for new 11.2.0.3 size.
+  . Increased maximum Oracle error message buffer length for new 11.2.0.3 size.
     (Chris Jones)
+  . Improve internal initalization failure error messages (Chris Jones)
 
 - PDO
   . Fixed bug #55776 (PDORow to session bug). (Johannes)
