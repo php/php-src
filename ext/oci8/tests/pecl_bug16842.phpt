@@ -39,7 +39,8 @@ oci_close($c);
 Test 1
 Raises NO_DATA_FOUND
 
-Warning: oci_execute(): OCI_NO_DATA in %s on line 11
+Warning: oci_execute(): ORA-01403: %s
+ORA-06512: at line %d in %specl_bug16842.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
