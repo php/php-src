@@ -21,10 +21,6 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#define ESCAPE_CMD_PAIR  0 
-#define ESCAPE_CMD_END   1 
-#define ESCAPE_CMD_ALL   2
-
 PHP_FUNCTION(system);
 PHP_FUNCTION(exec);
 PHP_FUNCTION(escapeshellcmd);
