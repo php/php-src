@@ -1215,7 +1215,10 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
 #if defined(PHP_WIN32) || HAVE_SYMLINK
-	if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
+	if (intern->file_name == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename");
+		RETURN_FALSE;
+	} else if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
 		char expanded_path[MAXPATHLEN];
 
 		/* TODO: Fix expand_filepath to do not resolve links but only expand the path

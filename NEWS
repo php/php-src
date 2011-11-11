@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Oracle Database extension (OCI8):
   . Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
     (Chris Jones)
+    
+- Phar:
+  . Fixed bug #60261 (phar dos null pointer). (Felipe)
 
 03 Nov 2011, PHP 5.3.9RC1
 
