@@ -1,5 +1,5 @@
 --TEST--
-Bug #5547 (mysql_pconnect leaks file descriptors on reconnect)
+Bug #55473 (mysql_pconnect leaks file descriptors on reconnect)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
