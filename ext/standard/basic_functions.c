@@ -3583,7 +3583,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
-	register_exec_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 

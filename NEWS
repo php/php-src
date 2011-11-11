@@ -3,8 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2011, PHP 5.4.0 RC2
 
 - Core:
-  . Fixed bug #60116 (escapeshellcmd() cannot escape the characters 
-     which cause shell command injection). (rui)
   . Fixed bug #60227 (header() cannot detect the multi-line header with 
      CR(0x0D)). (rui)
 
