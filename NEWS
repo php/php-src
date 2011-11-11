@@ -14,11 +14,11 @@ PHP                                                                        NEWS
     for small images). (Florian)
 
 - Oracle Database extension (OCI8):
-  . Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
+  . Fixed bug #59985 (show normal warning text for OCI_NO_DATA).
     (Chris Jones)
     
 - Phar:
-  . Fixed bug #60261 (phar dos null pointer). (Felipe)
+  . Fixed bug #60261 (NULL pointer dereference in phar). (Felipe)
 
 03 Nov 2011, PHP 5.3.9RC1
 
@@ -85,7 +85,7 @@ PHP                                                                        NEWS
 - Oracle Database extension (OCI8):
   . Increased maximum Oracle error message buffer length for new 11.2.0.3 size.
     (Chris Jones)
-  . Improve internal initalization failure error messages (Chris Jones)
+  . Improve internal initalization failure error messages. (Chris Jones)
 
 - PDO
   . Fixed bug #55776 (PDORow to session bug). (Johannes)
@@ -288,7 +288,7 @@ PHP                                                                        NEWS
     exception and fatal error). (Hannes)
 
 - DBA extension:
-  . Supress warning on non-existent file open with Berkeley DB 5.2 (Chris Jones)
+  . Supress warning on non-existent file open with Berkeley DB 5.2. (Chris Jones)
   . Fixed bug #54242 (dba_insert returns true if key already exists). (Felipe)
 
 - Exif extesion:
@@ -357,7 +357,7 @@ PHP                                                                        NEWS
 
 - Oracle Database extension (OCI8):
   . Added oci_client_version() returning the runtime Oracle client library
-    version (Chris Jones)
+    version. (Chris Jones)
 
 . PCRE extension:
   . Increased the backtrack limit from 100000 to 1000000 (Rasmus)
