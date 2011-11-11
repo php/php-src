@@ -522,7 +522,7 @@ static void php_cli_usage(char *argv0)
 				"  -E <end_code>    Run PHP <end_code> after processing all input lines\n"
 				"  -H               Hide any passed arguments from external tools.\n"
 				"  -S <addr>:<port> Run with built-in web server.\n"
-				"  -t <docroot>     Specify document root <docroot> for bult-in web server.\n"
+				"  -t <docroot>     Specify document root <docroot> for built-in web server.\n"
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"
