@@ -86,7 +86,7 @@ string(8) "/foo/bar"
 HTTP/1.0 200 OK
 Host: %s
 Connection: closed
-X-Powered-By: PHP/%s-dev
+X-Powered-By: PHP/%s
 Content-type: text/html
 
 string(9) "/foo/bar/"
