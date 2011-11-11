@@ -62,7 +62,7 @@ string(8) "HTTP/1.1"
 HTTP/1.0 200 OK
 Host: %s
 Connection: closed
-X-Powered-By: PHP/%s-dev
+X-Powered-By: PHP/%s
 Content-type: text/html
 
 string(8) "HTTP/1.0"
