@@ -225,6 +225,8 @@ UPGRADE NOTES - PHP 5.4
 - is_a() and is_subclass_of() now have third boolean parameter, which specifies
   if the first argument can be a string class name. Default if false for is_a
   and true for is_subclass_of() for BC reasons.
+- ob_start() will now treat a chunk size of 1 as meaning 1 byte, rather than
+  the previous special case behaviour of treating it as 4096 bytes.
 
 ===================================
 5. Changes made to existing methods
