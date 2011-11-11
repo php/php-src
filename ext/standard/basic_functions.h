@@ -257,8 +257,8 @@ typedef struct _php_shutdown_function_entry {
 	int arg_count;
 } php_shutdown_function_entry;
 
-PHPAPI extern zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC);
-PHPAPI extern zend_bool remove_user_shutdown_function(char *function_name TSRMLS_DC);
+PHPAPI extern zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC);
+PHPAPI extern zend_bool remove_user_shutdown_function(char *function_name, size_t function_len TSRMLS_DC);
 PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry TSRMLS_DC);
 
 #endif /* BASIC_FUNCTIONS_H */
