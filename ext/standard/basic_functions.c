@@ -5116,21 +5116,21 @@ PHP_FUNCTION(register_shutdown_function)
 }
 /* }}} */
 
-PHPAPI zend_bool register_user_shutdown_function(char *function_name, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC) /* {{{ */
+PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC) /* {{{ */
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
 		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
 	}
 
-	return zend_hash_update(BG(user_shutdown_function_names), function_name, sizeof(function_name), shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL) != FAILURE;
+	return zend_hash_update(BG(user_shutdown_function_names), function_name, function_len, shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL) != FAILURE;
 }
 /* }}} */
 
-PHPAPI zend_bool remove_user_shutdown_function(char *function_name TSRMLS_DC) /* {{{ */
+PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t function_len TSRMLS_DC) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
-		return zend_hash_del_key_or_index(BG(user_shutdown_function_names), function_name, sizeof(function_name), 0, HASH_DEL_KEY) != FAILURE;
+		return zend_hash_del_key_or_index(BG(user_shutdown_function_names), function_name, function_len, 0, HASH_DEL_KEY) != FAILURE;
 	}
 
 	return 0;
