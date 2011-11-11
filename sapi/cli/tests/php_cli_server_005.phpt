@@ -51,7 +51,7 @@ HEADER
 HTTP/1.1 200 OK
 Host: %s
 Connection: closed
-X-Powered-By: PHP/%s-dev
+X-Powered-By: PHP/%s
 Content-type: text/html
 
 array(1) {
