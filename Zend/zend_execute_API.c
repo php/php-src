@@ -1195,7 +1195,9 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		}
 		CG(interactive) = 0;
 
-		zend_execute(new_op_array TSRMLS_CC);
+		zend_try {
+		    zend_execute(new_op_array TSRMLS_CC);
+		} zend_end_try();
 
 		CG(interactive) = orig_interactive;
 		if (local_retval_ptr) {
