@@ -38,7 +38,7 @@ echo "\n-- No filename --\n";
 var_dump( sha1_file("") );
 
 echo "\n-- invalid filename --\n";
-var_dump( sha1_file("a") );
+var_dump( sha1_file("rewncwYcn89q") );
 
 echo "\n-- Scalar value as filename --\n";
 var_dump( sha1_file(12) );
@@ -82,7 +82,7 @@ bool(false)
 
 -- invalid filename --
 
-Warning: sha1_file(a): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(rewncwYcn89q): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Scalar value as filename --
