@@ -1,5 +1,7 @@
 --TEST--
 Bug #60282 (Segfault when using ob_gzhandler() with open buffers)
+--SKIPIF--
+<?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
 ob_start();
