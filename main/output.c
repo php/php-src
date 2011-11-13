@@ -508,14 +508,14 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
  * Check whether a certain output handler is in use */
 PHPAPI int php_output_handler_started(const char *name, size_t name_len TSRMLS_DC)
 {
-	php_output_handler **handlers;
+	php_output_handler ***handlers;
 	int i, count = php_output_get_level(TSRMLS_C);
 
 	if (count) {
-		handlers = *(php_output_handler ***) zend_stack_base(&OG(handlers));
+		handlers = (php_output_handler ***) zend_stack_base(&OG(handlers));
 
 		for (i = 0; i < count; ++i) {
-			if (name_len == handlers[i]->name_len && !memcmp(handlers[i]->name, name, name_len)) {
+			if (name_len == (*(handlers[i]))->name_len && !memcmp((*(handlers[i]))->name, name, name_len)) {
 				return 1;
 			}
 		}

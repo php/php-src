@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
     (Chris Jones)
 
+- Output:
+  . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
+    (Laruence)
+
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
