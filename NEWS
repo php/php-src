@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #60261 (NULL pointer dereference in phar). (Felipe)
 
+- SOAP
+  . Fixed bug #44686 (SOAP-ERROR: Parsing WSDL with references). (Dmitry)
+
 03 Nov 2011, PHP 5.3.9RC1
 
 - Core:

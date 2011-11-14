@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.gomeznetworks.com/webservices/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://www.gomeznetworks.com/webservices/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.gomeznetworks.com/webservices/">
+      <s:element name="ProvisionMonitors">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" ref="ProvisioningOrder" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProvisionMonitorsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" ref="ProvisioningOrderResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+    <s:schema elementFormDefault="qualified">
+      <s:element name="ProvisioningOrder" type="ProvisioningOrder" />
+      <s:complexType name="ProvisioningOrder">
+        <s:complexContent mixed="false">
+          <s:extension base="CServiceObject">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="MonitorOrders" type="ArrayOfMonitorOrder" />
+              <s:element minOccurs="0" maxOccurs="1" name="MonitorSites" type="ArrayOfMonitorSiteOrder" />
+              <s:element minOccurs="0" maxOccurs="1" name="ReportOrders" type="ArrayOfReportOrder" />
+              <s:element minOccurs="0" maxOccurs="1" name="MonitorAttributes" type="ArrayOfMonitorAttribute" />
+            </s:sequence>
+            <s:attribute name="name" type="s:string" />
+            <s:attribute name="expirationDate" type="s:dateTime" use="required" />
+            <s:attribute name="autoDelete" type="s:boolean" use="required" />
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="CServiceObject" abstract="true" />
+      <s:complexType name="ArrayOfMonitorOrder">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MonitorOrder" nillable="true" type="MonitorOrder" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MonitorOrder">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="MonitorSites" type="ArrayOfMonitorSiteOrder" />
+          <s:element minOccurs="0" maxOccurs="1" name="MonitorAttributes" type="ArrayOfMonitorAttribute" />
+        </s:sequence>
+        <s:attribute name="name" type="s:string" />
+        <s:attribute name="url" type="s:string" />
+        <s:attribute name="frequencyInMins" type="s:int" use="required" />
+        <s:attribute name="targetClass" type="MonitorTargetClass" use="required" />
+        <s:attribute name="fileSizeOverrideInKB" type="s:int" use="required" />
+      </s:complexType>
+      <s:complexType name="ArrayOfMonitorSiteOrder">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MonitorSite" nillable="true" type="MonitorSiteOrder" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MonitorSiteOrder">
+        <s:attribute name="siteId" type="s:int" use="required" />
+      </s:complexType>
+      <s:complexType name="ArrayOfMonitorAttribute">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MonitorAttribute" nillable="true" type="MonitorAttribute" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MonitorAttribute">
+        <s:attribute name="name" type="s:string" />
+        <s:attribute name="value" type="s:string" />
+      </s:complexType>
+      <s:simpleType name="MonitorTargetClass">
+        <s:restriction base="s:string">
+          <s:enumeration value="eTransaction" />
+          <s:enumeration value="eSingleURL" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfReportOrder">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ReportOrder" nillable="true" type="ReportOrder" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ReportOrder">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="EmailTargets" type="ArrayOfEmailTarget" />
+        </s:sequence>
+        <s:attribute name="name" type="s:string" />
+        <s:attribute name="reportFormatType" type="ReportFormatType" use="required" />
+        <s:attribute name="reportDeliveryType" type="ReportDeliveryType" use="required" />
+        <s:attribute name="reportDelayInMins" type="s:int" use="required" />
+      </s:complexType>
+      <s:complexType name="ArrayOfEmailTarget">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="EmailTarget" nillable="true" type="EmailTarget" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="EmailTarget">
+        <s:attribute name="address" type="s:string" />
+      </s:complexType>
+      <s:simpleType name="ReportFormatType">
+        <s:restriction base="s:string">
+          <s:enumeration value="eBarChartTestByNode" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="ReportDeliveryType">
+        <s:restriction base="s:string">
+          <s:enumeration value="eHTML" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="ProvisioningOrderResponse" type="ProvisioningOrderResponse" />
+      <s:complexType name="ProvisioningOrderResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="CommonServiceResponse">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="MonitorOrderResponses" type="ArrayOfMonitorOrderResponse" />
+              <s:element minOccurs="0" maxOccurs="1" name="ReportOrderResponses" type="ArrayOfReportOrderResponse" />
+            </s:sequence>
+            <s:attribute name="name" type="s:string" />
+            <s:attribute name="groupId" type="s:int" use="required" />
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="CommonServiceResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="status" type="StatusType" />
+          <s:element minOccurs="0" maxOccurs="1" name="errorMessage" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="StatusType">
+        <s:restriction base="s:string">
+          <s:enumeration value="SUCCESS" />
+          <s:enumeration value="FAILED" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ReportOrderResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="CommonServiceResponse">
+            <s:attribute name="name" type="s:string" />
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="MonitorOrderResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="CommonServiceResponse">
+            <s:attribute name="monitorId" type="s:int" use="required" />
+            <s:attribute name="name" type="s:string" />
+            <s:attribute name="url" type="s:string" />
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfMonitorOrderResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MonitorOrderResponse" nillable="true" type="MonitorOrderResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfReportOrderResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ReportOrderResponse" nillable="true" type="ReportOrderResponse" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ProvisionMonitorsSoapIn">
+    <wsdl:part name="parameters" element="tns:ProvisionMonitors" />
+  </wsdl:message>
+  <wsdl:message name="ProvisionMonitorsSoapOut">
+    <wsdl:part name="parameters" element="tns:ProvisionMonitorsResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ProvisioningServiceSoap">
+    <wsdl:operation name="ProvisionMonitors">
+      <wsdl:input message="tns:ProvisionMonitorsSoapIn" />
+      <wsdl:output message="tns:ProvisionMonitorsSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ProvisioningServiceSoap" type="tns:ProvisioningServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ProvisionMonitors">
+      <soap:operation soapAction="http://www.gomeznetworks.com/webservices/ProvisionMonitors" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ProvisioningService">
+    <wsdl:port name="ProvisioningServiceSoap" binding="tns:ProvisioningServiceSoap">
+      <soap:address location="test://" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
