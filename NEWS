@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #60227 (header() cannot detect the multi-line header with 
      CR(0x0D)). (rui)
 
+- OpenSSL:
+  . Fixed bug #60279 (Fixed NULL pointer dereference in
+    stream_socket_enable_crypto, case when ssl_handle of session_stream is not
+    initialized.) (shm)
+
 - Oracle Database extension (OCI8):
   . Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
     (Chris Jones)
