@@ -13,6 +13,11 @@ PHP                                                                        NEWS
   . Fixed bug #60160 (imagefill() doesn't work correctly
     for small images). (Florian)
 
+- OpenSSL:
+  . Fixed bug #60279 (Fixed NULL pointer dereference in
+    stream_socket_enable_crypto, case when ssl_handle of session_stream is not
+    initialized.) (shm)
+
 - Oracle Database extension (OCI8):
   . Fixed bug #59985 (show normal warning text for OCI_NO_DATA).
     (Chris Jones)
