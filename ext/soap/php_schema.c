@@ -1081,8 +1081,8 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			nsptr = xmlSearchNs(groupType->doc, groupType, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
-				smart_str_appendc(&key, ':');
 			}
+			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, type);
 			smart_str_0(&key);
 
@@ -1508,9 +1508,9 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			nsptr = xmlSearchNs(element->doc, element, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&nscat, (char*)nsptr->href);
-				smart_str_appendc(&nscat, ':');
 				newType->namens = estrdup((char*)nsptr->href);
-			}
+			} 
+			smart_str_appendc(&nscat, ':');
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
 			smart_str_0(&nscat);
@@ -1734,9 +1734,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			nsptr = xmlSearchNs(attrType->doc, attrType, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
-				smart_str_appendc(&key, ':');
 				newAttr->namens = estrdup((char*)nsptr->href);
 			}
+			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
 			newAttr->ref = estrdup(key.c);
@@ -1970,8 +1970,8 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			nsptr = xmlSearchNs(attrGroup->doc, attrGroup, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
-				smart_str_appendc(&key, ':');
 			}
+			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
 			newAttr->ref = estrdup(key.c);
