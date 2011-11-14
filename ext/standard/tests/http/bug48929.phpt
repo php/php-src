@@ -1,5 +1,7 @@
 --TEST--
 Bug #48929 (duplicate \r\n sent after last header line)
+--INI--
+allow_url_fopen=1
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --FILE--

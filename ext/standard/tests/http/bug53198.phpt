@@ -3,6 +3,7 @@ Bug #53198 (From: header cannot be changed with ini_set)
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --INI--
+allow_url_fopen=1
 from=teste@teste.pt
 --FILE--
 <?php
