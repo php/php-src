@@ -1,5 +1,7 @@
 --TEST--
 Bug #38802 (ignore_errors and max_redirects)
+--INI--
+allow_url_fopen=1
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --FILE--
