@@ -45,6 +45,6 @@ try {
 CallbackFilterIterator::__construct() expects exactly 2 parameters, 0 given
 Argument 1 passed to CallbackFilterIterator::__construct() must implement interface Iterator, null given
 CallbackFilterIterator::__construct() expects exactly 2 parameters, 1 given
-CallbackFilterIterator::__construct() expects parameter 2 to be a valid callback, no array or string given
+CallbackFilterIterator::__construct() expects parameter 2 to be a valid callback, no array, string, closure or functor given
 CallbackFilterIterator::__construct() expects parameter 2 to be a valid callback, array must have exactly two members
 some message

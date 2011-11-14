@@ -37,7 +37,7 @@ NULL
 
 - Arg 1 wrong type
 
-Warning: ob_start(): no array or string given in %s on line 20
+Warning: ob_start(): no array, string, closure or functor given in %s on line 20
 
 Notice: ob_start(): failed to create buffer in %s on line 20
 bool(false)
