@@ -2452,6 +2452,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 	} else {
 		convert_to_long(zrow);
 		row = Z_LVAL_P(zrow);
+		if (row < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The row parameter must be greater or equal to zero");
+			RETURN_FALSE;
+		}
 	}
 	use_row = ZEND_NUM_ARGS() > 1 && row != -1;
 
