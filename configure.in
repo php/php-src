@@ -661,6 +661,13 @@ if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
+dnl Check for the __sync_fetch_and_add builtin
+AC_CACHE_CHECK([for __sync_fetch_and_add], ac_cv_func_sync_fetch_and_add,
+[AC_TRY_LINK([],[int x;__sync_fetch_and_add(&x,1);],ac_cv_func_sync_fetch_and_add=yes,ac_cv_func_sync_fetch_and_add=no)])
+if test "$ac_cv_func_sync_fetch_and_add" = yes; then
+  AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
+fi
+
 AC_REPLACE_FUNCS(strlcat strlcpy getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
