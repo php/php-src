@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Output:
   . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
     (Laruence)
+    
+- Tidy:
+  . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
+    (Maksymilian Arciemowicz, Felipe)
 
 -CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
