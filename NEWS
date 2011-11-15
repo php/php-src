@@ -19,6 +19,11 @@ PHP                                                                        NEWS
   . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
     (Laruence)
 
+-CLI SAPI:
+  . Fixed bug #60159 (Router returns false, but POST is not passed to requested
+    resource). (Laruence)
+  . Fixed bug #55759 (mem leak when use built-in server). (Laruence)
+
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
