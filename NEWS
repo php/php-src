@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #55874 (GCC does not provide __sync_fetch_and_add on some archs).
     (klightspeed at netspace dot net dot au)
-  . Fixed bug #52624 (tempnam() by-pass open_basedir with inexistent directory).
-    (Felipe)
+  . Fixed bug #52624 (tempnam() by-pass open_basedir with nonnexistent
+    directory). (Felipe)
 
 - PHP-FPM SAPI:
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
