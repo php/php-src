@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60227 (header() cannot detect the multi-line header with 
      CR(0x0D)). (rui)
+  . Fixed bug #52624 (tempnam() by-pass open_basedir with inexistent directory).
+    (Felipe)
 
 - OpenSSL:
   . Fixed bug #60279 (Fixed NULL pointer dereference in
