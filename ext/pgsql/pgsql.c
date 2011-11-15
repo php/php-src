@@ -2452,6 +2452,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 	} else {
 		convert_to_long(zrow);
 		row = Z_LVAL_P(zrow);
+		if (row < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The row parameter must be greater or equal to zero");
+			RETURN_FALSE;
+		}
 	}
 	use_row = ZEND_NUM_ARGS() > 1 && row != -1;
 
@@ -4798,10 +4802,24 @@ PHP_FUNCTION(pg_get_notify)
 	if (result_type & PGSQL_NUM) {
 		add_index_string(return_value, 0, pgsql_notify->relname, 1);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
+#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
+		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+#else 
+		if (atof(PG_VERSION) >= 9.0) {
+#endif 
+			add_index_string(return_value, 2, pgsql_notify->extra, 1);
+		}
 	}
 	if (result_type & PGSQL_ASSOC) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
+		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+#else 
+		if (atof(PG_VERSION) >= 9.0) {
+#endif 
+			add_assoc_string(return_value, "payload", pgsql_notify->extra, 1);
+		}
 	}
 	PQfreemem(pgsql_notify);
 }
