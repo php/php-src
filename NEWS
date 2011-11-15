@@ -7,8 +7,8 @@ PHP                                                                        NEWS
      CR(0x0D)). (rui)
   . Fixed bug #55874 (GCC does not provide __sync_fetch_and_add on some archs).
     (klightspeed at netspace dot net dot au)
-  . Fixed bug #52624 (tempnam() by-pass open_basedir with inexistent directory).
-    (Felipe)
+  . Fixed bug #52624 (tempnam() by-pass open_basedir with nonexistent
+    directory). (Felipe)
 
 - OpenSSL:
   . Fixed bug #60279 (Fixed NULL pointer dereference in
@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 -CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
     resource). (Laruence)
-  . Fixed bug #55759 (mem leak when use built-in server). (Laruence)
+  . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
 
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
