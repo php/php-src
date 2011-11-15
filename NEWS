@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     resource). (Laruence)
   . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
 
+- Improved PHP-FPM SAPI:
+  . enhance error log when the primary script can't be open. FR #60199. (fat)
+
+
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
   . Changed silent conversion of array to string to produce a notice. (Patrick)
