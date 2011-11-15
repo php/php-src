@@ -28,16 +28,12 @@ echo "\n-- magic quotes runtime after set: " . $g . " --\n";
 --EXPECTF--
 Simple testcase for set_magic_quotes_runtime() function - basic test
 
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
-
 -- magic quotes runtime set in INI file: --
 
 -- Set magic quotes runtime to 0:  --
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 
 -- magic quotes runtime after set:  --
 
