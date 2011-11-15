@@ -5,7 +5,9 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
 	$router = "index.php";
-	file_put_contents($doc_root . '/' . $router, '<?php ' . $code . ' ?>');
+	if ($code) {
+		file_put_contents($doc_root . '/' . $router, '<?php ' . $code . ' ?>');
+	}
 
 	$descriptorspec = array(
 		0 => STDIN,
