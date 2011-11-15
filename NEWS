@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
 
+- Core:
+  . Fixed bug #52624 (tempnam() by-pass open_basedir with inexistent directory).
+    (Felipe)
+
 - PHP-FPM SAPI:
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
 
