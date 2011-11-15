@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 
 - SOAP
   . Fixed bug #44686 (SOAP-ERROR: Parsing WSDL with references). (Dmitry)
+  
+- Tidy:
+  . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
+    (Maksymilian Arciemowicz, Felipe)
 
 03 Nov 2011, PHP 5.3.9RC1
 

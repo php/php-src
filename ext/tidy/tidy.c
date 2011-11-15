@@ -1288,7 +1288,7 @@ static PHP_FUNCTION(tidy_diagnose)
 {
 	TIDY_FETCH_OBJECT;
 
-	if (tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
+	if (tidyStatus(obj->ptdoc->doc) != 0 && tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
 		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
 	}
