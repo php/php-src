@@ -1815,22 +1815,8 @@ fail:
 
 static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
 {
-	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	{
-		char **auth;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
-			php_handle_auth_data(*auth TSRMLS_CC);
-		}
-	}
-	SG(sapi_headers).http_response_code = 200;
-	if (FAILURE == php_request_startup(TSRMLS_C)) {
-		/* should never be happen */
-		destroy_request_info(&SG(request_info));
-		return FAILURE;
-	}
 	if (strlen(client->request.path_translated) != client->request.path_translated_len) {
 		/* can't handle paths that contain nul bytes */
-		destroy_request_info(&SG(request_info));
 		return php_cli_server_send_error_page(server, client, 400 TSRMLS_CC);
 	}
 	{
@@ -1846,9 +1832,6 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	}
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL TSRMLS_CC);
-	php_request_shutdown(0);
-	php_cli_server_close_connection(server, client TSRMLS_CC);
-	destroy_request_info(&SG(request_info));
 	return SUCCESS;
 } /* }}} */
 
@@ -1910,27 +1893,35 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 }
 /* }}} */
 
-static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
-{
-	int decline = 0;
-
-	if (!server->router) {
-		return 1;
-	}
-
+static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */ 
+	char **auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	{
-		char **auth;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
-			php_handle_auth_data(*auth TSRMLS_CC);
-		}
+	if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
+		php_handle_auth_data(*auth TSRMLS_CC);
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup(TSRMLS_C)) {
 		/* should never be happen */
 		destroy_request_info(&SG(request_info));
-		return -1;
+		return FAILURE;
 	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */
+	php_request_shutdown(0);
+	php_cli_server_close_connection(server, client TSRMLS_CC);
+	destroy_request_info(&SG(request_info));
+	SG(server_context) = NULL;
+	return SUCCESS;
+}             
+/* }}} */  
+
+static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
+{
+	int decline = 0;
 	if (!php_handle_special_queries(TSRMLS_C)) {
 		zend_file_handle zfd;
 		char *old_cwd;
@@ -1965,44 +1956,51 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 		free_alloca(old_cwd, use_heap);
 	}
 
-	if (decline) {
-		php_request_shutdown_for_hook(0);
-	} else {
-		php_request_shutdown(0);
-		php_cli_server_close_connection(server, client TSRMLS_CC);
-	}
-	destroy_request_info(&SG(request_info));
-
-	return decline ? 1: 0;
+	return decline;
 }
 /* }}} */
 
 static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
 {
-	int status;
+	int is_static_file  = 0;
 
 	SG(server_context) = client;
-	status = php_cli_server_dispatch_router(server, client TSRMLS_CC);
+	if (client->request.ext_len != 3 || memcmp(client->request.ext, "php", 3) || !client->request.path_translated) {
+		is_static_file = 1;
+	}
 
-	if (status < 0) {
-		goto fail;
-	} else if (status > 0) {
-		if (client->request.ext_len == 3 && memcmp(client->request.ext, "php", 3) == 0 && client->request.path_translated) {
-			if (SUCCESS != php_cli_server_dispatch_script(server, client TSRMLS_CC) &&
-				SUCCESS != php_cli_server_send_error_page(server, client, 500 TSRMLS_CC)) {
-				goto fail;
-			}
-		} else {
-			if (SUCCESS != php_cli_server_begin_send_static(server, client TSRMLS_CC)) {
-				goto fail;
-			}
+	if (server->router || !is_static_file) {
+		if (FAILURE == php_cli_server_request_startup(server, client TSRMLS_CC)) {
+			SG(server_context) = NULL;
+			php_cli_server_close_connection(server, client TSRMLS_CC);
+			destroy_request_info(&SG(request_info));
+			return SUCCESS;
+		}
+	} 
+
+	if (server->router) {
+		if (!php_cli_server_dispatch_router(server, client TSRMLS_CC)) {
+			php_cli_server_request_shutdown(server, client TSRMLS_CC);
+			return SUCCESS;
 		}
 	}
-	SG(server_context) = 0;
-	return SUCCESS;
-fail:
-	SG(server_context) = 0;
-	php_cli_server_close_connection(server, client TSRMLS_CC);
+
+	if (!is_static_file) {
+		if (SUCCESS == php_cli_server_dispatch_script(server, client TSRMLS_CC)
+				|| SUCCESS != php_cli_server_send_error_page(server, client, 500 TSRMLS_CC)) {
+			php_cli_server_request_shutdown(server, client TSRMLS_CC);
+			return SUCCESS;
+		} 
+	} else {
+		if (SUCCESS != php_cli_server_begin_send_static(server, client TSRMLS_CC)) {
+			php_cli_server_close_connection(server, client TSRMLS_CC);
+		}
+		SG(server_context) = NULL;
+		return SUCCESS;
+	}
+
+	SG(server_context) = NULL;
+	destroy_request_info(&SG(request_info));
 	return SUCCESS;
 }
 /* }}} */
