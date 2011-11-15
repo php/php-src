@@ -94,8 +94,7 @@ void _crypt_extended_init_r(void)
 	if (!initialized) {
 #ifdef PHP_WIN32
 		InterlockedIncrement(&initialized);
-#elif (defined(__GNUC__) && !defined(__hpux) && !defined(__hppa__) && (__GNUC__ > 4 || \
-    (__GNUC__ == 4 && (__GNUC_MINOR__ > 1 || (__GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ > 1)))))
+#elif defined(HAVE_SYNC_FETCH_AND_ADD)
 		__sync_fetch_and_add(&initialized, 1);
 #elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
 		membar_producer();
