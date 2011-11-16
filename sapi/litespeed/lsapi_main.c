@@ -225,6 +225,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
 }
 
 
+#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
 static int add_variable_magic_quote( const char * pKey, int keyLen, const char * pValue, int valLen, 
                          void * arg )
 {
@@ -244,6 +245,8 @@ static int add_variable_magic_quote( const char * pKey, int keyLen, const char *
     return 1;
 }
 
+#endif
+
 /* {{{ sapi_lsapi_register_variables
  */
 static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
@@ -253,15 +256,19 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
         if ( (SG(request_info).request_uri ) )
             php_self = (SG(request_info).request_uri );
 
+#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         if (!PG(magic_quotes_gpc)) {
+#endif
             LSAPI_ForeachHeader( add_variable, track_vars_array );
             LSAPI_ForeachEnv( add_variable, track_vars_array );
             add_variable("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
+#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         } else {
             LSAPI_ForeachHeader( add_variable_magic_quote, track_vars_array );
             LSAPI_ForeachEnv( add_variable_magic_quote, track_vars_array );
             add_variable_magic_quote("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
         }
+#endif
         php_import_environment_variables(track_vars_array TSRMLS_CC);
     } else {
         php_import_environment_variables(track_vars_array TSRMLS_CC);
@@ -344,7 +351,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message)
+static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 {
     int len = strlen( message );
     LSAPI_Write_Stderr( message, len);
