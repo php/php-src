@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60227 (header() cannot detect the multi-line header with 
      CR(0x0D)). (rui)
+  . Fixed bug #60099 (__halt_compiler() works in braced namespaces). (Felipe)
   . Fixed bug #55874 (GCC does not provide __sync_fetch_and_add on some archs).
     (klightspeed at netspace dot net dot au)
   . Fixed bug #52624 (tempnam() by-pass open_basedir with nonexistent

@@ -5311,6 +5311,11 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 	char *name, *cfilename;
 	char haltoff[] = "__COMPILER_HALT_OFFSET__";
 	int len, clen;
+	
+	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
+		zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
+	}
+	
 	cfilename = zend_get_compiled_filename(TSRMLS_C);
 	clen = strlen(cfilename);
 	zend_mangle_property_name(&name, &len, haltoff, sizeof(haltoff) - 1, cfilename, clen, 0);
