@@ -33,8 +33,8 @@ PHP                                                                        NEWS
   . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
 
 - Improved PHP-FPM SAPI:
-  . enhance error log when the primary script can't be open. FR #60199. (fat)
-  . remove EXPERIMENTAL flag. (fat)
+  . Enhance error log when the primary script can't be open. FR #60199. (fat)
+  . Remove EXPERIMENTAL flag. (fat)
 
 
 11 Nov 2011, PHP 5.4.0 RC1
