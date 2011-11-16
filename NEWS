@@ -10,7 +10,7 @@ PHP                                                                        NEWS
 
 - PHP-FPM SAPI:
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
-  . enhance error log when the primary script can't be open. FR #60199. (fat)
+  . Enhance error log when the primary script can't be open. FR #60199. (fat)
 
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed
