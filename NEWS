@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Gd:
   . Fixed bug #60160 (imagefill() doesn't work correctly
     for small images). (Florian)
+    
+- MS SQL:
+  . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
 - OpenSSL:
   . Fixed bug #60279 (Fixed NULL pointer dereference in
