@@ -986,10 +986,16 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
+#if PHP_MAJOR_VERSION > 4
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
+
+#else
+#define arginfo_litespeed__void NULL
+#endif
 
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
