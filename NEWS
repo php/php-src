@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Improved PHP-FPM SAPI:
   . Enhance error log when the primary script can't be open. FR #60199. (fat)
   . Remove EXPERIMENTAL flag. (fat)
+  . Added .phar to default authorized extensions. (fat)
 
 
 11 Nov 2011, PHP 5.4.0 RC1
