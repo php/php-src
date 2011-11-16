@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     (klightspeed at netspace dot net dot au)
   . Fixed bug #52624 (tempnam() by-pass open_basedir with nonexistent
     directory). (Felipe)
+    
+- MS SQL:
+  . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
 - OpenSSL:
   . Fixed bug #60279 (Fixed NULL pointer dereference in

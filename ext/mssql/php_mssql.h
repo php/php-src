@@ -26,6 +26,11 @@
 #if HAVE_MSSQL
 #define MSDBLIB
 
+/* FreeTDS checks for PHP_MSSQL_API for avoid type redefinition */
+#ifdef HAVE_FREETDS
+#define PHP_MSSQL_API
+#endif
+
 #include <sqlfront.h>
 #include <sqldb.h>
 
