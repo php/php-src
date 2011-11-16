@@ -314,7 +314,7 @@ PHP                                                                        NEWS
   . Improved unserialize() performance.
     (galaxy dot mipt at gmail dot com, Kalle)
   . Improved unix build system to allow building multiple PHP binary SAPIs and
-    one SAPI module the same time. FR #53271, FR #52410. (Jani)
+    one SAPI module the same time. FR #53271, FR #52419. (Jani)
   . Added optional argument to debug_backtrace() and debug_print_backtrace()
     to limit the amount of stack frames returned. (Sebastian, Patrick)
   . Added stream metadata API support and stream_metadata() stream class
