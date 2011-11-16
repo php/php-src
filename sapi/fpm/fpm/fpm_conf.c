@@ -973,7 +973,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		/* security.limit_extensions */
 		if (!wp->config->security_limit_extensions) {
-			wp->config->security_limit_extensions = strdup(".php");
+			wp->config->security_limit_extensions = strdup(".php .phar");
 		}
 
 		if (*wp->config->security_limit_extensions) {
