@@ -4047,7 +4047,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	char *lcname;
-	bool method_exists;
+	zend_bool method_exists;
 
 	/* resolve class references */
 	if (ce->trait_precedences) {
