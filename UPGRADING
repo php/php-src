@@ -80,7 +80,7 @@ UPGRADE NOTES - PHP 5.4
 2. Reserved words and classes
 =============================
 
-- "trait" and "insteadof" are reserved words now.
+- "callable", "insteadof" and "trait" are reserved words now.
 
 ===================================
 3. Changes made to engine behaviour
