@@ -3980,6 +3980,11 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					zend_error(E_COMPILE_ERROR, "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
 				}
 				efree(lcname);
+
+				/** Record the trait from which this alias was resolved. */
+				if (!aliases[i]->trait_method->ce) {
+					aliases[i]->trait_method->ce = fn->common.scope;
+				}
 			}
 			i++;
 		}
@@ -4008,6 +4013,11 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 					}
 					fn_copy.common.fn_flags |= fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK);
+
+					/** Record the trait from which this alias was resolved. */
+					if (!aliases[i]->trait_method->ce) {
+						aliases[i]->trait_method->ce = fn->common.scope;
+					}
 				}
 				i++;
 			}
@@ -4036,14 +4046,36 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	size_t i, j = 0;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
+	char *lcname;
+	bool method_exists;
 
 	/* resolve class references */
 	if (ce->trait_precedences) {
 		i = 0;
 		while ((cur_precedence = ce->trait_precedences[i])) {
+			/** Resolve classes for all precedence operations. */
 			if (cur_precedence->exclude_from_classes) {
-				cur_precedence->trait_method->ce = zend_fetch_class(cur_precedence->trait_method->class_name, cur_precedence->trait_method->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+				cur_method_ref = cur_precedence->trait_method;
+				cur_precedence->trait_method->ce = zend_fetch_class(cur_method_ref->class_name,
+																	cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+
+				/** Ensure that the prefered method is actually available. */
+				lcname = zend_str_tolower_dup(cur_method_ref->method_name,
+											  cur_method_ref->mname_len);
+				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
+												 lcname,
+												 cur_method_ref->mname_len + 1);
+				efree(lcname);
+				if (!method_exists) {
+					zend_error(E_COMPILE_ERROR,
+							   "A precedence rule was defined for %s::%s but this method does not exist",
+							   cur_method_ref->ce->name,
+							   cur_method_ref->method_name);
+				}
 			
+				/** With the other traits, we are more permissive.
+					We do not give errors for those. This allows to be more
+					defensive in such definitions. */
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j]) {
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
@@ -4061,9 +4093,21 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	if (ce->trait_aliases) {
 		i = 0;
 		while (ce->trait_aliases[i]) {
+			/** For all aliases with an explicit class name, resolve the class now. */
 			if (ce->trait_aliases[i]->trait_method->class_name) {
 				cur_method_ref = ce->trait_aliases[i]->trait_method;
 				cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+
+				/** And, ensure that the referenced method is resolvable, too. */
+				lcname = zend_str_tolower_dup(cur_method_ref->method_name,
+                                      cur_method_ref->mname_len);
+				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
+                                         lcname, cur_method_ref->mname_len + 1);
+				efree(lcname);
+
+				if (!method_exists) {
+					zend_error(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name, cur_method_ref->method_name);
+				}
 			}
 			i++;
 		}
@@ -4273,6 +4317,26 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 }
 /* }}} */
 
+static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+	int i = 0;
+	
+	if (ce->trait_aliases) {
+		while (ce->trait_aliases[i]) {
+			/** The trait for this alias has not been resolved, this means, this
+				alias was not applied. Abort with an error. */
+			if (!ce->trait_aliases[i]->trait_method->ce) {
+				zend_error(E_COMPILE_ERROR,
+						   "An alias (%s) was defined for method %s(), but this method does not exist",
+						   ce->trait_aliases[i]->alias,
+						   ce->trait_aliases[i]->trait_method->method_name);
+			}
+			i++;
+		}
+	}
+}
+/* }}} */
+
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 
@@ -4285,6 +4349,9 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 
 	/* first care about all methods to be flattened into the class */
 	zend_do_traits_method_binding(ce TSRMLS_CC);
+  
+	/* Aliases which have not been applied indicate typos/bugs. */
+	zend_do_check_for_inconsistent_traits_aliasing(ce TSRMLS_CC);
 
 	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
 	zend_do_traits_property_binding(ce TSRMLS_CC);
