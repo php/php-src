@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
     (Laruence)
     
+- SOAP extension:
+  . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
+
 - Tidy:
   . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
     (Maksymilian Arciemowicz, Felipe)

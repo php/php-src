@@ -2469,6 +2469,11 @@ PHP_METHOD(SoapClient, SoapClient)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			add_property_stringl(this_ptr, "_user_agent", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 		}
+		
+		if (zend_hash_find(ht, "keep_alive", sizeof("keep_alive"), (void**)&tmp) == SUCCESS &&
+				(Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) && Z_LVAL_PP(tmp) == 0) {
+			add_property_long(this_ptr, "_keep_alive", 0);
+		}
 	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
 	}
