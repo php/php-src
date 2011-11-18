@@ -142,7 +142,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 int
 mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, c2, s, w, s1, s2, snd;
+	int c1, s, w, snd;
 
 retry:
 	switch (filter->status & 0xf) {
