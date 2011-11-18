@@ -16,14 +16,14 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 	);
 
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
-		$cmd = "{$php_executable} -t {$doc_root} -S " . PHP_CLI_SERVER_ADDRESS;
+		$cmd = "{$php_executable} -t {$doc_root} -n -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!$no_router) {
 			$cmd .= " {$router}";
 		}
 
 		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
 	} else {
-		$cmd = "exec {$php_executable} -t {$doc_root} -S " . PHP_CLI_SERVER_ADDRESS;
+		$cmd = "exec {$php_executable} -t {$doc_root} -n -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!$no_router) {
 			$cmd .= " {$router}";
 		}
