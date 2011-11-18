@@ -103,7 +103,7 @@ int
 mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 {
 	int k;
-	int c1, c2, w;
+	int c1, c2, w = -1;
 
 	switch (filter->status) {
 	case 0:
@@ -304,5 +304,3 @@ static int mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-
