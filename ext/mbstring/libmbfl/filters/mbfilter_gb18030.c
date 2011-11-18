@@ -82,7 +82,6 @@ int
 mbfl_bisec_srch(int w, const unsigned short *tbl, int n)
 {
 	int k, k1 = 0, k2 = n-1;
-	int match = 0;
 	
 	while (k1 < k2) {
 		k = (k1+k2) >> 1;
