@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     (Chris Jones)
 
 - Output:
+  . Fixed bug #60321 (ob_get_status(true) no longer returns an array when 
+    buffer is empty). (Pierrick)
   . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
     (Laruence)
     
