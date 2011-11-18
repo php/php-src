@@ -2054,8 +2054,12 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			connection->is_persistent = 0;
 		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
+			if (connection == NULL) {
+				return NULL;
+			}
 			connection->hash_key = zend_strndup(hashed_details.c, hashed_details.len);
-			if(connection->hash_key == NULL) {
+			if (connection->hash_key == NULL) {
+				free(connection);
 				return NULL;
 			}
 			connection->is_persistent = 1;
@@ -2707,12 +2711,20 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	ub4 poolmode = OCI_DEFAULT;	/* Mode to be passed to OCISessionPoolCreate */
 	OCIAuthInfo *spoolAuth = NULL;
 
-	/*Allocate sessionpool out of persistent memory */
+	/* Allocate sessionpool out of persistent memory */
 	session_pool = (php_oci_spool *) calloc(1, sizeof(php_oci_spool));
+	if (session_pool == NULL) {
+		iserror = 1;
+		goto exit_create_spool;
+	}
 
 	/* Populate key if passed */
 	if (hash_key_len) {
 		session_pool->spool_hash_key = zend_strndup(hash_key, hash_key_len);
+		if (session_pool->spool_hash_key == NULL) {
+			iserror = 1;
+			goto exit_create_spool;
+		}
 	}
 
 	/* Create the session pool's env */
