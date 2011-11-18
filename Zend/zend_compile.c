@@ -3625,8 +3625,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 													zend_get_function_declaration(fn TSRMLS_CC),
 													zend_get_function_declaration(other_trait_fn TSRMLS_CC));
 					}
-				}
-				else {
+				} else {
 					/* otherwise, do the full check */
 					do_inheritance_check_on_method(fn, other_trait_fn TSRMLS_CC);
 				}
@@ -3818,22 +3817,28 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 {
 	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
-	}
-	else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
+	} else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
 		if (ce->constructor) {
 			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR; 
-	}
-	else if (!strncmp(mname, ZEND_DESTRUCTOR_FUNC_NAME,  mname_len)) {	ce->destructor  = fe; fe->common.fn_flags |= ZEND_ACC_DTOR; }
-	else if (!strncmp(mname, ZEND_GET_FUNC_NAME,         mname_len)) ce->__get       = fe;
-	else if (!strncmp(mname, ZEND_SET_FUNC_NAME,         mname_len)) ce->__set       = fe;
-	else if (!strncmp(mname, ZEND_CALL_FUNC_NAME,        mname_len)) ce->__call      = fe;
-	else if (!strncmp(mname, ZEND_UNSET_FUNC_NAME,       mname_len)) ce->__unset     = fe;
-	else if (!strncmp(mname, ZEND_ISSET_FUNC_NAME,       mname_len)) ce->__isset     = fe;
-	else if (!strncmp(mname, ZEND_CALLSTATIC_FUNC_NAME,  mname_len)) ce->__callstatic= fe;
-	else if (!strncmp(mname, ZEND_TOSTRING_FUNC_NAME,    mname_len)) ce->__tostring	 = fe;
-	else if (ce->name_length + 1 == mname_len) {
+	} else if (!strncmp(mname, ZEND_DESTRUCTOR_FUNC_NAME,  mname_len)) {
+		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
+	} else if (!strncmp(mname, ZEND_GET_FUNC_NAME, mname_len)) {
+		ce->__get = fe;
+	} else if (!strncmp(mname, ZEND_SET_FUNC_NAME, mname_len)) {
+		ce->__set = fe;
+	} else if (!strncmp(mname, ZEND_CALL_FUNC_NAME, mname_len)) {
+		ce->__call = fe;
+	} else if (!strncmp(mname, ZEND_UNSET_FUNC_NAME, mname_len)) {
+		ce->__unset = fe;
+	} else if (!strncmp(mname, ZEND_ISSET_FUNC_NAME, mname_len)) {
+		ce->__isset = fe;
+	} else if (!strncmp(mname, ZEND_CALLSTATIC_FUNC_NAME, mname_len)) {
+		ce->__callstatic = fe;
+	} else if (!strncmp(mname, ZEND_TOSTRING_FUNC_NAME, mname_len)) {
+		ce->__tostring = fe;
+	} else if (ce->name_length + 1 == mname_len) {
 		char *lowercase_name = emalloc(ce->name_length + 1);
 		zend_str_tolower_copy(lowercase_name, ce->name, ce->name_length);
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, ce->name_length + 1, 1 TSRMLS_CC);
@@ -4335,8 +4340,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 							   "An alias (%s) was defined for method %s(), but this method does not exist",
 							   cur_alias->alias,
 							   cur_alias->trait_method->method_name);
-				}
-				else {
+				} else {
 					/** Here are two possible cases:
 						1) this is an attempt to modifiy the visibility
 						   of a method introduce as part of another alias.
@@ -4354,8 +4358,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 						zend_error(E_COMPILE_ERROR,
 								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name);
-					}
-					else {
+					} else {
 						efree(lc_method_name);
 						zend_error(E_COMPILE_ERROR,
 								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
