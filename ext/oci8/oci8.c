@@ -2055,6 +2055,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
 			connection->hash_key = zend_strndup(hashed_details.c, hashed_details.len);
+			if(connection->hash_key == NULL) {
+				return NULL;
+			}
 			connection->is_persistent = 1;
 		}
 	} else {

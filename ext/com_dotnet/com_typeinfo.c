@@ -187,6 +187,10 @@ PHPAPI int php_com_import_typelib(ITypeLib *TL, int mode, int codepage TSRMLS_DC
 				const_name = php_com_olestring_to_string(bstr_ids, &c.name_len, codepage TSRMLS_CC);
 				c.name = zend_strndup(const_name, c.name_len);
 				efree(const_name);
+				if(c.name == NULL) {
+					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
+					continue;
+				}
 				c.name_len++; /* include NUL */
 				SysFreeString(bstr_ids);
 
