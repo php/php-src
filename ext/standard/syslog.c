@@ -146,6 +146,9 @@ PHP_FUNCTION(openlog)
 		free(BG(syslog_device));
 	}
 	BG(syslog_device) = zend_strndup(ident, ident_len);
+	if(BG(syslog_device) == NULL) {
+		RETURN_FALSE;
+	}
 	openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
