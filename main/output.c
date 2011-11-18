@@ -1438,12 +1438,12 @@ PHP_FUNCTION(ob_get_status)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE) {
 		return;
 	}
+	
+	array_init(return_value);
 
 	if (!OG(active)) {
-		RETURN_FALSE;
+		return;
 	}
-
-	array_init(return_value);
 
 	if (full_status) {
 		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
