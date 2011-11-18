@@ -433,12 +433,14 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		if (http_1_1) {
-			smart_str_append_const(&soap_headers, "\r\n"
-				"Connection: Keep-Alive\r\n");
-		} else {
+		if (!http_1_1 ||
+			(zend_hash_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive"), (void **)&tmp) == SUCCESS &&
+			 Z_LVAL_PP(tmp) == 0)) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
+		} else {
+			smart_str_append_const(&soap_headers, "\r\n"
+				"Connection: Keep-Alive\r\n");
 		}
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
