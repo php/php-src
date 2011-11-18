@@ -175,6 +175,8 @@ PHP                                                                        NEWS
     com)
 
 - SPL:
+  . Fixed bug #60082 (Crash in ArrayObject() when using recursive references).
+    (Tony)
   . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
     (jgotti at modedemploi dot fr, Hannes)
   . Fixed bug #54304 (RegexIterator::accept() doesn't work with scalar values).
