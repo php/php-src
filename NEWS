@@ -42,7 +42,7 @@ PHP                                                                        NEWS
   . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
     (Laruence)
 
--CLI SAPI:
+- CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
     resource). (Laruence)
   . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
