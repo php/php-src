@@ -706,7 +706,7 @@ repeat:
 	}
 	c.flags = case_sensitive; /* non persistent */
 	c.name = IS_INTERNED(name) ? name : zend_strndup(name, name_len);
-	if(name == NULL) {
+	if(c.name == NULL) {
 		RETURN_FALSE;
 	}
 	c.name_len = name_len+1;
