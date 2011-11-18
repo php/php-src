@@ -4320,16 +4320,49 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	int i = 0;
+	zend_trait_alias* cur_alias;
+	char* lc_method_name;
 	
 	if (ce->trait_aliases) {
 		while (ce->trait_aliases[i]) {
+			cur_alias = ce->trait_aliases[i];
 			/** The trait for this alias has not been resolved, this means, this
 				alias was not applied. Abort with an error. */
-			if (!ce->trait_aliases[i]->trait_method->ce) {
-				zend_error(E_COMPILE_ERROR,
-						   "An alias (%s) was defined for method %s(), but this method does not exist",
-						   ce->trait_aliases[i]->alias,
-						   ce->trait_aliases[i]->trait_method->method_name);
+			if (!cur_alias->trait_method->ce) {
+				if (cur_alias->alias) {
+					/** Plain old inconsistency/typo/bug */
+					zend_error(E_COMPILE_ERROR,
+							   "An alias (%s) was defined for method %s(), but this method does not exist",
+							   cur_alias->alias,
+							   cur_alias->trait_method->method_name);
+				}
+				else {
+					/** Here are two possible cases:
+						1) this is an attempt to modifiy the visibility
+						   of a method introduce as part of another alias.
+						   Since that seems to violate the DRY principle,
+						   we check against it and abort.
+						2) it is just a plain old inconsitency/typo/bug
+						   as in the case where alias is set. */
+					
+					lc_method_name = zend_str_tolower_dup(cur_alias->trait_method->method_name,
+														  cur_alias->trait_method->mname_len);
+					if (zend_hash_exists(&ce->function_table,
+										 lc_method_name,
+										 cur_alias->trait_method->mname_len+1)) {
+						efree(lc_method_name);
+						zend_error(E_COMPILE_ERROR,
+								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
+								   cur_alias->trait_method->method_name);
+					}
+					else {
+						efree(lc_method_name);
+						zend_error(E_COMPILE_ERROR,
+								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
+								   cur_alias->trait_method->method_name);
+
+					}
+				}
 			}
 			i++;
 		}
