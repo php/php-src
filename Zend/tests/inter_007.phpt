@@ -17,4 +17,4 @@ interface a extends d, w { }
 
 ?>
 --EXPECTF--
-Fatal error: Can't inherit abstract function c::B() (previously declared abstract in d) in %s on line %d
+Fatal error: Cannot make non static method c::B() static in class d in %s on line %d
