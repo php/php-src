@@ -13,10 +13,6 @@ PHP                                                                        NEWS
   . Fixed bug #55748 (multiple NULL Pointer Dereference with zend_strndup()) 
     (CVE-2011-4153). (Stas)
     
-- EXIF:
-  . Fixed bu #60150 (Integer overflow during the parsing of invalid exif 
-    header). (Stas, flolechaud at gmail dot com)
-
 - MS SQL:
   . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
