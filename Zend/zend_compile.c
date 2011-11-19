@@ -2628,7 +2628,8 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
 
-	if (parent->common.fn_flags & ZEND_ACC_ABSTRACT
+	if ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
+		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
 		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
 		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
 		zend_error(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)", 
