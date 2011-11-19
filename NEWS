@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Enhance error log when the primary script can't be open. FR #60199. (fat)
   . Added .phar to default authorized extensions. (fat)
 
+- BCmath:
+  . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
+
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
     header). (Stas, flolechaud at gmail dot com)
