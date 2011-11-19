@@ -1569,7 +1569,9 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 	const char zip_magic[] = "PK\x03\x04";
 	const char gz_magic[] = "\x1f\x8b\x08";
 	const char bz_magic[] = "BZh";
-	char *pos, buffer[1024 + sizeof(token)], test = '\0';
+	char *pos, test = '\0';
+	const int window_size = 1024;
+	char buffer[window_size + sizeof(token)]; /* a 1024 byte window + the size of the halt_compiler token (moving window) */
 	const long readsize = sizeof(buffer) - sizeof(token);
 	const long tokenlen = sizeof(token) - 1;
 	long halt_offset;
@@ -1717,7 +1719,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 		}
 
 		halt_offset += got;
-		memmove(buffer, buffer + tokenlen, got + 1);
+		memmove(buffer, buffer + window_size, tokenlen); /* move the memory buffer by the size of the window */
 	}
 
 	MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (__HALT_COMPILER(); not found)")

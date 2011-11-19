@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     
 - Phar:
   . Fixed bug #60261 (NULL pointer dereference in phar). (Felipe)
+  . Fixed bug #60164 (Stubs of a specific length break phar_open_from_fp
+    scanning for __HALT_COMPILER). (Ralph Schindler)
 
 - Postgres:
   . Fixed bug #60244 (pg_fetch_* functions do not validate that row param 
