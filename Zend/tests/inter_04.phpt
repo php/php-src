@@ -14,6 +14,8 @@ interface b {
 interface c extends a, b {
 }
 
+echo "done!\n";
+
 ?>
 --EXPECTF--
-Fatal error: Can't inherit abstract function b::b() (previously declared abstract in a) in %s on line %d
+done!

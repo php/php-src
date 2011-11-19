@@ -14,6 +14,8 @@ interface Itest2 {
 interface Itest3 extends Itest, Itest2 {
 }
 
+echo "done!\n";
+
 ?>
 --EXPECTF--
-Fatal error: Can't inherit abstract function Itest2::a() (previously declared abstract in Itest) in %s on line %d
+done!
