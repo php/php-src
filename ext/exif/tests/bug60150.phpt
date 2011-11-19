@@ -1,5 +1,5 @@
 --TEST--
-Bug #34704 (Integer overflow during the parsing of invalid exif header)
+Bug #60150 (Integer overflow during the parsing of invalid exif header)
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
