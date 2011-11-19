@@ -3173,7 +3173,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	zend_uint child_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
 
-	if (parent->common.fn_flags & ZEND_ACC_ABSTRACT
+	if ((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
+		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
 		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
 		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
 		zend_error(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)", 

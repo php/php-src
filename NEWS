@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #55748 (multiple NULL Pointer Dereference with zend_strndup()) 
     (CVE-2011-4153). (Stas)
     
+- Zend Engine:
+  . Fixed bug #43200 (Interface implementation / inheritence not possible in
+    abstract classes). (Felipe)
+    
 - MS SQL:
   . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
