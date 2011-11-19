@@ -560,7 +560,7 @@ PHP_FUNCTION(bcscale)
 		return;
 	}
 
-	BCG(bc_precision) = (new_scale < 0) ? 0 : new_scale;
+	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
 
 	RETURN_TRUE;
 }
