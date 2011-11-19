@@ -52,6 +52,8 @@ PHP                                                                        NEWS
   . Remove EXPERIMENTAL flag. (fat)
   . Added .phar to default authorized extensions. (fat)
 
+- BCmath:
+  . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
 
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
