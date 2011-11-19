@@ -4980,6 +4980,7 @@ parse_exp(Node** np, OnigToken* tok, int term,
 
             CCLASS_SET_SHARE(&(NCCLASS(*np)));
             new_key = (type_cclass_key* )xmalloc(sizeof(type_cclass_key));
+            xmemcpy(new_key, &key, sizeof(type_cclass_key));
             onig_st_add_direct(OnigTypeCClassTable, (st_data_t )new_key,
                                (st_data_t )*np);
             
