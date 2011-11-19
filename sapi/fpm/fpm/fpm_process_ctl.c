@@ -507,7 +507,7 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 
 	wp->socket_event_set = 0;
 
-//	zlog(ZLOG_DEBUG, "[pool %s] heartbeat running_children=%d", wp->config->name, wp->running_children);
+/*	zlog(ZLOG_DEBUG, "[pool %s] heartbeat running_children=%d", wp->config->name, wp->running_children);*/
 
 	if (wp->running_children >= wp->config->pm_max_children) {
 		if (!wp->warn_max_children) {
