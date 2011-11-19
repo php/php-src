@@ -278,7 +278,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
 
 	memcpy(ps_mm_path, PS(save_path), save_path_len);
-	if (PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
+	if (save_path_len && PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		save_path_len++;
 	}
