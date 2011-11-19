@@ -17,7 +17,7 @@ PHP                                                                        NEWS
   . Added .phar to default authorized extensions. (fat)
 
 - EXIF:
-  . Fixed bu #60150 (Integer overflow during the parsing of invalid exif
+  . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
     header). (Stas, flolechaud at gmail dot com)
 
 - Intl:
