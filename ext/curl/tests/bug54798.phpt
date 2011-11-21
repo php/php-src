@@ -12,7 +12,7 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
 --FILE--
 <?php
 
-function checkForClosedFilePointer($curl_option, $description) {
+function checkForClosedFilePointer($host, $curl_option, $description) {
 	$fp = fopen(dirname(__FILE__) . '/bug54798.tmp', 'w+');
 
 	$ch = curl_init();
@@ -28,7 +28,7 @@ function checkForClosedFilePointer($curl_option, $description) {
 
 	curl_setopt($ch, $curl_option, $fp);
 	
-	curl_setopt($ch, CURLOPT_URL, 'localhost');
+	curl_setopt($ch, CURLOPT_URL, $host);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 	fclose($fp); // <-- premature close of $fp caused a crash!
@@ -47,8 +47,9 @@ $options_to_check = array(
     "CURLOPT_INFILE"
 );
 
+$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 foreach($options_to_check as $option) {
-	checkForClosedFilePointer(constant($option), $option);
+	checkForClosedFilePointer($host, constant($option), $option);
 }
 
 ?>
