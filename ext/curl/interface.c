@@ -1420,6 +1420,9 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->header.str_len = 0;
 
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
+	(*ch)->handlers->write->stream = NULL;
+	(*ch)->handlers->write_header->stream = NULL;
+	(*ch)->handlers->read->stream = NULL;
 
 	zend_llist_init(&(*ch)->to_free.str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
@@ -1886,6 +1889,9 @@ string_copy:
 			switch (option) {
 				case CURLOPT_FILE:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
+						if (ch->handlers->write->stream) {
+							Z_DELREF_P(ch->handlers->write->stream);
+						}
 						Z_ADDREF_PP(zvalue);
 						ch->handlers->write->fp = fp;
 						ch->handlers->write->method = PHP_CURL_FILE;
@@ -1898,6 +1904,9 @@ string_copy:
 					break;
 				case CURLOPT_WRITEHEADER:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
+						if (ch->handlers->write_header->stream) {
+							Z_DELREF_P(ch->handlers->write_header->stream);
+						}
 						Z_ADDREF_PP(zvalue);
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
@@ -1909,6 +1918,9 @@ string_copy:
 					}
 					break;
 				case CURLOPT_INFILE:
+					if (ch->handlers->read->stream) {
+						Z_DELREF_P(ch->handlers->read->stream);
+					}
 					Z_ADDREF_PP(zvalue);
 					ch->handlers->read->fp = fp;
 					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
