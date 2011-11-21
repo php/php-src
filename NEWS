@@ -45,6 +45,7 @@ PHP                                                                        NEWS
 - Mbstring
   . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
     (Laruence)
+  . Fixed possible crash in mb_ereg_search_init() using empty pattern. (Felipe)
 
 - CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
