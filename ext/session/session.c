@@ -2429,7 +2429,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 				if (PS(rfc1867_freq) >= 0) {
 					progress->update_step = PS(rfc1867_freq);
-				} else if (PS(rfc1867_freq) < 0) { // % of total size
+				} else if (PS(rfc1867_freq) < 0) { /* % of total size */
 					progress->update_step = progress->content_length * -PS(rfc1867_freq) / 100;
 				}
 				progress->next_update = 0;
