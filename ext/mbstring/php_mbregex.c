@@ -1245,13 +1245,18 @@ PHP_FUNCTION(mb_ereg_search_init)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	zval *arg_str;
-	char *arg_pattern, *arg_options;
-	int arg_pattern_len, arg_options_len;
+	char *arg_pattern = NULL, *arg_options = NULL;
+	int arg_pattern_len = 0, arg_options_len = 0;
 	OnigSyntaxType *syntax = NULL;
 	OnigOptionType option;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "z|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
 		return;
+	}
+	
+	if (arg_pattern_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty pattern");
+		RETURN_FALSE;
 	}
 
 	option = MBREX(regex_default_options);
