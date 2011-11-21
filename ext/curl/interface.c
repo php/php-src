@@ -2035,6 +2035,7 @@ string_copy:
 					char  *string_key = NULL;
 					uint   string_key_len;
 					ulong  num_key;
+					int    numeric_key;
 
 					SEPARATE_ZVAL(current);
 					convert_to_string_ex(current);
@@ -2045,6 +2046,9 @@ string_copy:
 					if(!string_key) {
 						spprintf(&string_key, 0, "%ld", num_key);
 						string_key_len = strlen(string_key)+1;
+						numeric_key = 1;
+					} else {
+						numeric_key = 0;
 					}
 
 					postval = Z_STRVAL_PP(current);
@@ -2087,6 +2091,10 @@ string_copy:
 											 CURLFORM_COPYCONTENTS, postval,
 											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
 											 CURLFORM_END);
+					}
+
+					if (numeric_key) {
+						efree(string_key);
 					}
 				}
 
