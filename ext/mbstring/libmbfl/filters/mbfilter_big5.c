@@ -319,7 +319,7 @@ mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
 {
 	int c1;
-	if (filter->encoding == mbfl_no_encoding_cp950) {
+	if (filter->encoding->no_encoding == mbfl_no_encoding_cp950) {
 		c1 = 0x80;
 	} else {
 		c1 = 0xa0;
