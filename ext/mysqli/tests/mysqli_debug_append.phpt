@@ -14,6 +14,9 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 	die("skip: debug functionality not enabled");
+
+if (!$IS_MYSQLND)
+	die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
 ?>
 --FILE--
 <?php
