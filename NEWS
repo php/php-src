@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     directory). (Felipe)
   . Fixed bug #55748 (multiple NULL Pointer Dereference with zend_strndup()) 
     (CVE-2011-4153). (Stas)
+  . Fixed invalid free in call_user_method() function. (Felipe)
     
 - Zend Engine:
   . Fixed bug #43200 (Interface implementation / inheritence not possible in
