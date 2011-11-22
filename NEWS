@@ -17,6 +17,27 @@ PHP                                                                        NEWS
   . Fixed bug #43200 (Interface implementation / inheritence not possible in
     abstract classes). (Felipe)
     
+- CLI SAPI:
+  . Fixed bug #60159 (Router returns false, but POST is not passed to requested
+    resource). (Laruence)
+  . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
+
+- Improved PHP-FPM SAPI:
+  . Enhance error log when the primary script can't be open. FR #60199. (fat)
+  . Remove EXPERIMENTAL flag. (fat)
+  . Added .phar to default authorized extensions. (fat)
+
+- BCmath:
+  . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
+  
+- Intl:
+  . Fixed memory leak in several Intl locale functions. (Felipe)
+  
+- Mbstring
+  . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
+    (Laruence)
+  . Fixed possible crash in mb_ereg_search_init() using empty pattern. (Felipe)
+  
 - MS SQL:
   . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
@@ -35,34 +56,16 @@ PHP                                                                        NEWS
   . Fixed bug #60282 (Segfault when using ob_gzhandler() with open buffers).
     (Laruence)
     
-- SOAP extension:
-  . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
-
-- Tidy:
-  . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
-    (Maksymilian Arciemowicz, Felipe)
-
-- Mbstring
-  . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
-    (Laruence)
-  . Fixed possible crash in mb_ereg_search_init() using empty pattern. (Felipe)
-
-- CLI SAPI:
-  . Fixed bug #60159 (Router returns false, but POST is not passed to requested
-    resource). (Laruence)
-  . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
-
-- Improved PHP-FPM SAPI:
-  . Enhance error log when the primary script can't be open. FR #60199. (fat)
-  . Remove EXPERIMENTAL flag. (fat)
-  . Added .phar to default authorized extensions. (fat)
-
-- BCmath:
-  . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
-
 - Reflection:
   . Fixed bug #60357 (__toString() method triggers E_NOTICE "Array to string 
     conversion"). (Laruence)
+    
+- SOAP extension:
+  . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
+  
+- Tidy:
+  . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
+    (Maksymilian Arciemowicz, Felipe)
 
 11 Nov 2011, PHP 5.4.0 RC1
 - General improvements:
