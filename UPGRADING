@@ -258,8 +258,6 @@ UPGRADE NOTES - PHP 5.4
 7. Deprecated
 =============
 
-- get_magic_quotes_gpc()
-- get_magic_quotes_runtime()
 - mcrypt_generic_end()
 - mysql_list_dbs()
 
