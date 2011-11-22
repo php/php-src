@@ -196,7 +196,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len TSRM
 #else
 	copystr = estrndup(url, len);
 	error = curl_easy_setopt(ch->cp, CURLOPT_URL, copystr);
-	zend_llist_add_element(&ch->to_free.str, &copystr);
+	zend_llist_add_element(&ch->to_free->str, &copystr);
 #endif
 
 	return (error == CURLE_OK ? 1 : 0);
@@ -1410,6 +1410,7 @@ PHP_FUNCTION(curl_version)
 static void alloc_curl_handle(php_curl **ch)
 {
 	*ch                           = emalloc(sizeof(php_curl));
+	(*ch)->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
 	(*ch)->handlers               = ecalloc(1, sizeof(php_curl_handlers));
 	(*ch)->handlers->write        = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
@@ -1424,9 +1425,9 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write_header->stream = NULL;
 	(*ch)->handlers->read->stream = NULL;
 
-	zend_llist_init(&(*ch)->to_free.str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
-	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
-	zend_llist_init(&(*ch)->to_free.post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
+	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
+	zend_llist_init(&(*ch)->to_free->slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
+	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
 }
 /* }}} */
 
@@ -1650,12 +1651,8 @@ PHP_FUNCTION(curl_copy_handle)
 	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
 	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
 
-	zend_llist_copy(&dupch->to_free.str, &ch->to_free.str);
-	/* Don't try to free copied strings, they're free'd when the original handle is destroyed */
-	dupch->to_free.str.dtor = NULL;
-
-	zend_llist_copy(&dupch->to_free.slist, &ch->to_free.slist);
-	zend_llist_copy(&dupch->to_free.post, &ch->to_free.post);
+	efree(dupch->to_free);
+	dupch->to_free = ch->to_free;
 
 	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
 	Z_ADDREF_P(ch->clone);
@@ -1849,7 +1846,7 @@ string_copy:
 #endif
 					copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
 					error = curl_easy_setopt(ch->cp, option, copystr);
-					zend_llist_add_element(&ch->to_free.str, &copystr);
+					zend_llist_add_element(&ch->to_free->str, &copystr);
 				} else {
 #if LIBCURL_VERSION_NUM >= 0x071100
 					/* Strings passed to libcurl as ’char *’ arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
@@ -2104,7 +2101,7 @@ string_copy:
 					return 1;
 				}
 
-				zend_llist_add_element(&ch->to_free.post, &first);
+				zend_llist_add_element(&ch->to_free->post, &first);
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
 
 			} else {
@@ -2118,7 +2115,7 @@ string_copy:
 
 				convert_to_string_ex(zvalue);
 				post = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
-				zend_llist_add_element(&ch->to_free.str, &post);
+				zend_llist_add_element(&ch->to_free->str, &post);
 
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_PP(zvalue));
@@ -2154,7 +2151,7 @@ string_copy:
 					return 1;
 				}
 			}
-			zend_llist_add_element(&ch->to_free.slist, &slist);
+			zend_llist_add_element(&ch->to_free->slist, &slist);
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -2184,7 +2181,7 @@ string_copy:
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
 
 			error = curl_easy_setopt(ch->cp, option, copystr);
-			zend_llist_add_element(&ch->to_free.str, &copystr);
+			zend_llist_add_element(&ch->to_free->str, &copystr);
 #endif
 			break;
 		}
@@ -2629,19 +2626,16 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 
 	_php_curl_verify_handlers(ch, 0 TSRMLS_CC);
 	curl_easy_cleanup(ch->cp);
-	zend_llist_clean(&ch->to_free.str);
 
 	/* cURL destructors should be invoked only by last curl handle */
 	if (Z_REFCOUNT_P(ch->clone) <= 1) {
-		zend_llist_clean(&ch->to_free.slist);
-		zend_llist_clean(&ch->to_free.post);
+		zend_llist_clean(&ch->to_free->str);
+		zend_llist_clean(&ch->to_free->slist);
+		zend_llist_clean(&ch->to_free->post);
+		efree(ch->to_free);
 		FREE_ZVAL(ch->clone);
 	} else {
 		Z_DELREF_P(ch->clone);
-		ch->to_free.slist.dtor = NULL;
-		ch->to_free.post.dtor = NULL;
-		zend_llist_clean(&ch->to_free.slist);
-		zend_llist_clean(&ch->to_free.post);
 	}
 
 	if (ch->handlers->write->buf.len > 0) {
