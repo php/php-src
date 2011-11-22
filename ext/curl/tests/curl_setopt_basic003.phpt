@@ -38,6 +38,6 @@ var_dump( $curl_content );
 --EXPECTF--
 *** curl_setopt() call with CURLOPT_HTTPHEADER
 
-Warning: curl_setopt(): You must pass either an object or an array with the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE arguments in %s on line %d
+Warning: curl_setopt(): You must pass either an object or an array with the CURLOPT_HTTPHEADER argument in %s on line %d
 bool(false)
 bool(true)
