@@ -470,6 +470,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	char*       disp_loc_name       = NULL;
 	int         disp_loc_name_len   = 0;
+	int         free_loc_name       = 0;
 
 	UChar*      disp_name      	= NULL;
 	int32_t     disp_name_len  	= 0;
@@ -517,16 +518,17 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	if( mod_loc_name==NULL ){
 		mod_loc_name = estrdup( loc_name );
 	}
+	
+	/* Check if disp_loc_name passed , if not use default locale */
+	if( !disp_loc_name){
+		disp_loc_name = estrdup(INTL_G(default_locale));
+		free_loc_name = 1;
+	}
 
     /* Get the disp_value for the given locale */
     do{
         disp_name = erealloc( disp_name , buflen  );
         disp_name_len = buflen;
-
-        /* Check if disp_loc_name passed , if not use default locale */
-        if( !disp_loc_name){
-            disp_loc_name = estrdup(INTL_G(default_locale));
-        }
 
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 			buflen = uloc_getDisplayLanguage ( mod_loc_name , disp_loc_name , disp_name , disp_name_len , &status);
@@ -557,12 +559,20 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 			if( mod_loc_name){
 				efree( mod_loc_name );
 			}
+			if (free_loc_name) {
+				efree(disp_loc_name);
+				disp_loc_name = NULL;
+			}
 			RETURN_FALSE;
 		}
 	} while( buflen > disp_name_len );
 
 	if( mod_loc_name){
 		efree( mod_loc_name );
+	}
+	if (free_loc_name) {
+		efree(disp_loc_name);
+		disp_loc_name = NULL;
 	}
 	/* Convert display locale name from UTF-16 to UTF-8. */
 	intl_convert_utf16_to_utf8( &utf8value, &utf8value_len, disp_name, buflen, &status );
