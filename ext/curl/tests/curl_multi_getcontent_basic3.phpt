@@ -6,6 +6,9 @@ Rein Velt (rein@velt.org)
 --SKIPIF--
 <?php
 if (!extension_loaded('curl')) print 'skip need ext/curl';
+if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
+	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
+}
 ?>
 --FILE--
 <?php
@@ -16,7 +19,8 @@ if (!extension_loaded('curl')) print 'skip need ext/curl';
 	$ch2=curl_init();
 
 	//SET URL AND OTHER OPTIONS
-	curl_setopt($ch1, CURLOPT_URL, "http://php.net/robots.txt");
+	$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+	curl_setopt($ch1, CURLOPT_URL, "{$host}/get.php?test=getpost&get_param=Hello%20World");
 	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
@@ -46,20 +50,13 @@ if (!extension_loaded('curl')) print 'skip need ext/curl';
 	echo $results2;
 
 ?>
---EXPECT--
-User-agent: *
-Disallow: /backend/
-Disallow: /distributions/
-Disallow: /stats/
-Disallow: /server-status/
-Disallow: /source.php
-Disallow: /search.php
-Disallow: /mod.php
-Disallow: /manual/add-note.php
-
-Disallow: /harming/humans
-Disallow: /ignoring/human/orders
-Disallow: /harm/to/self
-
+--EXPECTF--
+array(2) {
+  ["test"]=>
+  string(7) "getpost"
+  ["get_param"]=>
+  string(11) "Hello World"
+}
+array(0) {
+}
 CURL2
-
