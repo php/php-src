@@ -1319,7 +1319,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		return;
 	}
 	
-	if (arg_pattern_len == 0) {
+	if (argc > 1 && arg_pattern_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty pattern");
 		RETURN_FALSE;
 	}
