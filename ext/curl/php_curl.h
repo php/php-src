@@ -41,14 +41,12 @@ extern zend_module_entry curl_module_entry;
 #define curl_module_ptr &curl_module_entry
 
 #define CURLOPT_RETURNTRANSFER 19913
-#define CURLOPT_BINARYTRANSFER 19914
+#define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
 #define PHP_CURL_USER   2
 #define PHP_CURL_DIRECT 3
 #define PHP_CURL_RETURN 4
-#define PHP_CURL_ASCII  5
-#define PHP_CURL_BINARY 6
 #define PHP_CURL_IGNORE 7
 
 extern int  le_curl;
@@ -85,7 +83,6 @@ typedef struct {
 	FILE            *fp;
 	smart_str       buf;
 	int             method;
-	int             type;
 	zval		*stream;
 } php_curl_write;
 
