@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
     header). (Stas, flolechaud at gmail dot com)
+    
+- Fileinfo:
+  . Fixed possible memory leak in finfo_open(). (Felipe)
 
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed

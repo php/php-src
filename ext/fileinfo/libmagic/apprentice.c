@@ -2137,7 +2137,7 @@ error1:
 		php_stream_close(stream);
 	}
 
-	if (mm && ret == 1) {
+	if (mm) {
 		efree(mm);
 	} else {
 		*magicp = NULL;
