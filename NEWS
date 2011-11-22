@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (klightspeed at netspace dot net dot au)
   . Fixed bug #52624 (tempnam() by-pass open_basedir with nonnexistent
     directory). (Felipe)
+  . Fixed invalid free in call_user_method() function. (Felipe)
     
 - Zend Engine:
   . Fixed bug #43200 (Interface implementation / inheritence not possible in
