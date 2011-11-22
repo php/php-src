@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - BCmath:
   . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
   
+- Fileinfo:
+  . Fixed possible memory leak in finfo_open(). (Felipe)
+  
 - Intl:
   . Fixed memory leak in several Intl locale functions. (Felipe)
   
