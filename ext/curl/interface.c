@@ -767,10 +767,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_RTSPREQ_RECORD);
 	REGISTER_CURL_CONSTANT(CURL_RTSPREQ_RECEIVE);
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071403 /* Available since 7.21.3 */
+#if LIBCURL_VERSION_NUM >= 0x071503 /* Available since 7.21.3 */
 	REGISTER_CURL_CONSTANT(CURLOPT_RESOLVE);
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071406 /* Available since 7.21.6 */
+#if LIBCURL_VERSION_NUM >= 0x071506 /* Available since 7.21.6 */
 	REGISTER_CURL_CONSTANT(CURLOPT_ACCEPT_ENCODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_TRANSFER_ENCODING);
 #endif
@@ -1970,7 +1970,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_SSLENGINE:
 		case CURLOPT_SSLENGINE_DEFAULT:
 		case CURLOPT_SSLCERTTYPE:
-#if LIBCURL_VERSION_NUM >= 0x071406 /* Available since 7.21.6 */			
+#if LIBCURL_VERSION_NUM >= 0x071506 /* Available since 7.21.6 */			
 		case CURLOPT_ACCEPT_ENCODING:
 		case CURLOPT_TRANSFER_ENCODING:
 #else
@@ -2300,7 +2300,7 @@ string_copy:
 #if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
 		case CURLOPT_MAIL_RCPT:
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071403 /* Available since 7.21.3 */
+#if LIBCURL_VERSION_NUM >= 0x071503 /* Available since 7.21.3 */
 		case CURLOPT_RESOLVE:
 #endif
 		{
@@ -2330,9 +2330,11 @@ string_copy:
 					case CURLOPT_MAIL_RCPT:
 						name = "CURLOPT_MAIL_RCPT";
 						break;
+#if LIBCURL_VERSION_NUM >= 0x071503 /* Available since 7.21.3 */
 					case CURLOPT_RESOLVE:
 						name = "CURLOPT_RESOLVE";
 						break;
+#endif
 				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must pass either an object or an array with the %s argument", name);
 				RETVAL_FALSE;
