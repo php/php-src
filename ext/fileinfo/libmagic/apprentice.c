@@ -2070,11 +2070,11 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	}
 
 	mm = emalloc((size_t)st.sb.st_size);
+	ret = 1;
 	if (php_stream_read(stream, mm, (size_t)st.sb.st_size) != (size_t)st.sb.st_size) {
 		file_badread(ms);
 		goto error1;
 	}
-	ret = 1;
 
 	php_stream_close(stream);
 	stream = NULL;
@@ -2137,7 +2137,7 @@ error1:
 		php_stream_close(stream);
 	}
 
-	if (mm) {
+	if (mm && ret == 1) {
 		efree(mm);
 	} else {
 		*magicp = NULL;
