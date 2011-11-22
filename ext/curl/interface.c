@@ -261,7 +261,6 @@ int _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC) /* {{{ */
 			ch->handlers->write->stream = NULL;
 
 			ch->handlers->write->method = PHP_CURL_STDOUT;
-			ch->handlers->write->type   = PHP_CURL_ASCII;
 			curl_easy_setopt(ch->cp, CURLOPT_FILE, (void *) ch);
 		}
 	}
@@ -1536,7 +1535,6 @@ PHP_FUNCTION(curl_init)
 	ch->cp = cp;
 
 	ch->handlers->write->method = PHP_CURL_STDOUT;
-	ch->handlers->write->type   = PHP_CURL_ASCII;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
 	ch->handlers->write_header->method = PHP_CURL_IGNORE;
 
@@ -1610,7 +1608,6 @@ PHP_FUNCTION(curl_copy_handle)
 		dupch->handlers->write->stream = ch->handlers->write->stream;
 	}
 	dupch->handlers->write->method = ch->handlers->write->method;
-	dupch->handlers->write->type   = ch->handlers->write->type;
 	if (ch->handlers->read->stream) {
 		Z_ADDREF_P(ch->handlers->read->stream);
 	}
@@ -1953,13 +1950,7 @@ string_copy:
 			}
 			break;
 		case CURLOPT_BINARYTRANSFER:
-			convert_to_long_ex(zvalue);
-
-			if (Z_LVAL_PP(zvalue)) {
-				ch->handlers->write->type = PHP_CURL_BINARY;
-			} else {
-				ch->handlers->write->type = PHP_CURL_ASCII;
-			}
+			/* Do nothing, just backward compatibility */
 			break;
 		case CURLOPT_WRITEFUNCTION:
 			if (ch->handlers->write->func_name) {

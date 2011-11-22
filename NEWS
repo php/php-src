@@ -5,4 +5,8 @@ PHP                                                                        NEWS
 - General improvements:
   . World domination
 
+- Curl:
+  . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
+	still exists for backward compatibility but is doing nothing). (Pierrick)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
