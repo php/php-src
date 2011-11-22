@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed
     properly). (Florian)
+  . Fixed memory leak in several Intl locale functions. (Felipe)
 
 - Gd:
   . Fixed bug #60160 (imagefill() doesn't work correctly
