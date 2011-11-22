@@ -4797,7 +4797,9 @@ PHP_FUNCTION(call_user_method)
 		Z_TYPE_P(object) != IS_STRING
 	) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
-		efree(params);
+		if (params) {
+			efree(params);
+		}
 		RETURN_FALSE;
 	}
 
