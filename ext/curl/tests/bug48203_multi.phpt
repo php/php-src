@@ -72,7 +72,7 @@ Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to 
 Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug48203_multi.php on line 36
 %A
 Ok for CURLOPT_STDERR
-
+%A
 Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %sbug48203_multi.php on line 36
 
 Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %sbug48203_multi.php on line 36
