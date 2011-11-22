@@ -746,6 +746,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 					string_write(str, "...", sizeof("...")-1);
 				}
 				string_write(str, "'", sizeof("'")-1);
+			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
+				string_write(str, "Array", sizeof("Array")-1);
 			} else {
 				zend_make_printable_zval(zv, &zv_copy, &use_copy);
 				string_write(str, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
