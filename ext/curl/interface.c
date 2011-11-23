@@ -2328,9 +2328,11 @@ string_copy:
 					case CURLOPT_PREQUOTE:
 						name = "CURLOPT_PREQUOTE";
 						break;
+#if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */						
 					case CURLOPT_MAIL_RCPT:
 						name = "CURLOPT_MAIL_RCPT";
 						break;
+#endif						
 #if LIBCURL_VERSION_NUM >= 0x071503 /* Available since 7.21.3 */
 					case CURLOPT_RESOLVE:
 						name = "CURLOPT_RESOLVE";
