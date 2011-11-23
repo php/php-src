@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   
 - Fileinfo:
   . Fixed possible memory leak in finfo_open(). (Felipe)
+  . Fixed memory leak when calling the Finfo constructor twice. (Felipe)
   
 - Intl:
   . Fixed memory leak in several Intl locale functions. (Felipe)
