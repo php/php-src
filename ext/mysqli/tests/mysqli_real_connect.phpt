@@ -176,40 +176,42 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
-object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
+object(mysqli)#%d (18) {
+  ["affected_rows"]=>
   NULL
-  [%u|b%"client_info"]=>
+  ["client_info"]=>
   %s
-  [%u|b%"client_version"]=>
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
-  int(%d)
-  [%u|b%"connect_error"]=>
-  NULL
-  [%u|b%"errno"]=>
+  ["connect_errno"]=>
+  int(0)
+  ["connect_error"]=>
   %s
-  [%u|b%"error"]=>
+  ["errno"]=>
   %s
-  [%u|b%"field_count"]=>
+  ["error"]=>
+  %s
+  ["field_count"]=>
   NULL
-  [%u|b%"host_info"]=>
+  ["host_info"]=>
+  %s
+  ["info"]=>
   NULL
-  [%u|b%"info"]=>
+  ["insert_id"]=>
   NULL
-  [%u|b%"insert_id"]=>
+  ["server_info"]=>
   NULL
-  [%u|b%"server_info"]=>
+  ["server_version"]=>
   NULL
-  [%u|b%"server_version"]=>
+  ["stat"]=>
   NULL
-  [%u|b%"sqlstate"]=>
+  ["sqlstate"]=>
   NULL
-  [%u|b%"protocol_version"]=>
+  ["protocol_version"]=>
   NULL
-  [%u|b%"thread_id"]=>
+  ["thread_id"]=>
   NULL
-  [%u|b%"warning_count"]=>
+  ["warning_count"]=>
   NULL
 }
 
