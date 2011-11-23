@@ -53,6 +53,8 @@ extern int  le_curl;
 #define le_curl_name "cURL handle"
 extern int  le_curl_multi_handle;
 #define le_curl_multi_handle_name "cURL Multi Handle"
+extern int  le_curl_share_handle;
+#define le_curl_share_handle_name "cURL Share Handle"
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
@@ -75,7 +77,12 @@ PHP_FUNCTION(curl_multi_exec);
 PHP_FUNCTION(curl_multi_getcontent);
 PHP_FUNCTION(curl_multi_info_read);
 PHP_FUNCTION(curl_multi_close);
+PHP_FUNCTION(curl_share_init);
+PHP_FUNCTION(curl_share_close);
+PHP_FUNCTION(curl_share_setopt);
+
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
+void _php_curl_share_close(zend_rsrc_list_entry * TSRMLS_DC);
 
 typedef struct {
 	zval            *func_name;
@@ -144,6 +151,11 @@ typedef struct {
 	CURLM *multi;
 	zend_llist easyh;
 } php_curlm;
+
+typedef struct {
+	CURLSH                   *share;
+	MUTEX_T                  locks[CURL_LOCK_DATA_LAST];
+} php_curlsh;
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
