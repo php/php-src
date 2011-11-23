@@ -1209,6 +1209,14 @@ isStatic: no
 isDefault: yes
 Modifiers: 256
 
+Inspecting property 'stat'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
 Inspecting property 'thread_id'
 isPublic: yes
 isPrivate: no
@@ -1239,6 +1247,7 @@ Default property 'protocol_version'
 Default property 'server_info'
 Default property 'server_version'
 Default property 'sqlstate'
+Default property 'stat'
 Default property 'thread_id'
 Default property 'warning_count'
 done!
