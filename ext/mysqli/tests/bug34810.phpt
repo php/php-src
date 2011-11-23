@@ -89,6 +89,8 @@ object(mysqli)#%d (%d) {
   %unicode|string%(%d) "%s"
   [%u|b%"server_version"]=>
   int(%d)
+  ["stat"]=>
+  %s
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "00000"
   [%u|b%"protocol_version"]=>
@@ -124,6 +126,8 @@ object(mysqli)#%d (%d) {
   [%u|b%"server_info"]=>
   NULL
   [%u|b%"server_version"]=>
+  NULL
+  ["stat"]=>
   NULL
   [%u|b%"sqlstate"]=>
   NULL
