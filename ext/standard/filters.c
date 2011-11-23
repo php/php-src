@@ -1897,7 +1897,6 @@ php_stream_filter_factory consumed_filter_factory = {
 typedef enum _php_chunked_filter_state {
 	CHUNK_SIZE_START,
 	CHUNK_SIZE,
-	CHUNK_SIZE_EXT_START,
 	CHUNK_SIZE_EXT,
 	CHUNK_SIZE_CR,
 	CHUNK_SIZE_LF,
@@ -1937,7 +1936,7 @@ static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
 						data->state = CHUNK_ERROR;
 						break;
 					} else {
-						data->state = CHUNK_SIZE_EXT_START;
+						data->state = CHUNK_SIZE_EXT;
 						break;
 					}
 					data->state = CHUNK_SIZE;
@@ -1947,13 +1946,6 @@ static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
 					continue;
 				} else if (p == end) {
 					return out_len;
-				}
-			case CHUNK_SIZE_EXT_START:
-				if (*p == ';'|| *p == '\r' || *p == '\n') {
-					data->state = CHUNK_SIZE_EXT;
- 				} else {
-					data->state = CHUNK_ERROR;
-					continue;
 				}
 			case CHUNK_SIZE_EXT:
 				/* skip extension */
