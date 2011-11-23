@@ -26,5 +26,6 @@ PHP                                                                        NEWS
     (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
 	still exists for backward compatibility but is doing nothing). (Pierrick)
+  . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
