@@ -290,6 +290,16 @@ PHP_FUNCTION(finfo_open)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &options, &file, &file_len) == FAILURE) {
 		RETURN_FALSE;
 	}
+	
+	if (object) {
+		struct finfo_object *finfo_obj = (struct finfo_object*)zend_object_store_get_object(object TSRMLS_CC);
+		
+		if (finfo_obj->ptr) {
+			magic_close(finfo_obj->ptr->magic);
+			efree(finfo_obj->ptr);
+			finfo_obj->ptr = NULL;
+		}
+	}
 
 	if (file_len == 0) {
 		file = NULL;

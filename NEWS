@@ -30,6 +30,7 @@ PHP                                                                        NEWS
     
 - Fileinfo:
   . Fixed possible memory leak in finfo_open(). (Felipe)
+  . Fixed memory leak when calling the Finfo constructor twice. (Felipe)
 
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed
