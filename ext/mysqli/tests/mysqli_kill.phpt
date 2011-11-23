@@ -42,30 +42,33 @@ require_once('skipifconnectfailure.inc');
 	var_dump($link);
 	if ($IS_MYSQLND) {
 		if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
-			printf("[008] mysqlnd used to be more verbose and used to support SELECT");
+			printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
+		}
+		if ($link->stat != NULL) {
+			printf("[009] NULL expected because of error.\n");
 		}
 	} else {
 		if ($link->info != NULL) {
-			printf("[008] Time for wonders - libmysql has started to support SELECT, change test");
+			printf("[008] Time for wonders - libmysql has started to support SELECT, change test\n");
 		}
 	}
 
 	mysqli_close($link);
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		printf("[009] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+		printf("[010] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_kill($link, -1);
 	if ((!$res = mysqli_query($link, "SELECT id FROM test LIMIT 1")) ||
 		(!$tmp = mysqli_fetch_assoc($res))) {
-		printf("[010] Connection should not be gone, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[011] Connection should not be gone, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	var_dump($tmp);
 	mysqli_free_result($res);
 	mysqli_close($link);
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		printf("[011] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+		printf("[012] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);      mysqli_kill($link, -1);
 
@@ -121,7 +124,7 @@ object(mysqli)#%d (%d) {
   [%u|b%"server_version"]=>
   int(%d)
   [%u|b%"stat"]=>
-  NULL
+  %s
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "HY000"
   [%u|b%"protocol_version"]=>
