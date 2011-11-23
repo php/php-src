@@ -86,21 +86,6 @@ UPGRADE NOTES - PHP 5.4
 3. Changes made to engine behaviour
 ===================================
 
-- Changed E_ALL to include E_STRICT. 
-
-- Closures now support scopes and $this and can be rebound to
-  objects using Closure::bind() and Closure::bindTo().
-
-- Turning null, false or empty string into an object by adding a property
-  will now emit a warning instead of an E_STRICT error.
-  
-  $test = null;
-  $test->baz = 1;
-  
-  To create a generic object you can use StdClass:
-  $test = new StdClass;
-  $test->baz = 1;
-  
 - It's now possible to enforce the class' __construct arguments in an abstract
   constructor in the base class.
 
@@ -119,7 +104,25 @@ UPGRADE NOTES - PHP 5.4
   names, thereby shadowing the corresponding superglobal. This now causes a
   fatal error such as "Cannot re-assign auto-global variable GLOBALS".
 
+- Turning null, false or empty string into an object by adding a property
+  will now emit a warning instead of an E_STRICT error.
+
+  $test = null;
+  $test->baz = 1;
+
+  To create a generic object you can use StdClass:
+  $test = new StdClass;
+  $test->baz = 1;
+
 - Converting array to string now will cause E_NOTICE warning. 
+
+- Chained string offsets - e.g. $a[0][0] where $a is a string - now work, which 
+means isset($a['foo']['bar']) now will return true due to automatic type conversion.
+
+- Changed E_ALL to include E_STRICT. 
+
+- Closures now support scopes and $this and can be rebound to
+  objects using Closure::bind() and Closure::bindTo().
 
 - Added multibyte support by default. Now it can be enabled or disabled through
   zend.multibyte directive in php.ini.
