@@ -4272,10 +4272,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 					/* this one is inherited, lets look it up in its own class */
 					zend_hash_quick_find(&coliding_prop->ce->properties_info, prop_name, prop_name_length+1, prop_hash, (void **) &coliding_prop);
 				}
-				if ((coliding_prop->flags & ZEND_ACC_PPP_MASK) == (property_info->flags & ZEND_ACC_PPP_MASK)) {
+				if (   (coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
+					== (property_info->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 					/* flags are identical, now the value needs to be checked */
 					if (property_info->flags & ZEND_ACC_STATIC) {
-            not_compatible = (FAILURE == compare_function(&compare_result,
+						not_compatible = (FAILURE == compare_function(&compare_result,
                                           ce->default_static_members_table[coliding_prop->offset],
                                           ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC))
                               || (Z_LVAL(compare_result) != 0);
