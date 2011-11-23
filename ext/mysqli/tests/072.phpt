@@ -27,6 +27,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 int(1)
 int(1051)
-%unicode|string%(26) "Unknown table 'not_exists'"
+%unicode|string%(%d) "Unknown table %snot_exists%s"
 %unicode|string%(5) "HY000"
 done!
