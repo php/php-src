@@ -156,6 +156,6 @@ int main(int argc, char *argv[])
     AC_DEFINE(PHP_CURL_URL_WRAPPERS,1,[ ])
   fi
 
-  PHP_NEW_EXTENSION(curl, interface.c multi.c share.c streams.c, $ext_shared)
+  PHP_NEW_EXTENSION(curl, interface.c multi.c streams.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

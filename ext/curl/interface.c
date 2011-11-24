@@ -90,7 +90,6 @@
 
 int  le_curl;
 int  le_curl_multi_handle;
-int  le_curl_share_handle;
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
 static MUTEX_T *php_curl_openssl_tsl = NULL;
@@ -349,19 +348,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_init, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_close, 0)
-	ZEND_ARG_INFO(0, sh)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_setopt, 0)
-	ZEND_ARG_INFO(0, sh)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -385,9 +371,6 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_multi_getcontent,    arginfo_curl_multi_getcontent)
 	PHP_FE(curl_multi_info_read,     arginfo_curl_multi_info_read)
 	PHP_FE(curl_multi_close,         arginfo_curl_multi_close)
-	PHP_FE(curl_share_init,          arginfo_curl_share_init)
-	PHP_FE(curl_share_close,         arginfo_curl_share_close)
-	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
 	PHP_FE_END
 };
 /* }}} */
@@ -544,7 +527,6 @@ PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl_multi", module_number);
-	le_curl_share_handle = zend_register_list_destructors_ex(_php_curl_share_close, NULL, "curl_share", module_number);
 
 	REGISTER_INI_ENTRIES();
 
@@ -1006,14 +988,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_NOCWD);
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_SINGLECWD);
 #endif
-
-	/* Constant for curl_share_setopt */
-	REGISTER_CURL_CONSTANT(CURLOPT_SHARE);
-	REGISTER_CURL_CONSTANT(CURLSHOPT_SHARE);
-	REGISTER_CURL_CONSTANT(CURLSHOPT_UNSHARE);
-	REGISTER_CURL_CONSTANT(CURL_LOCK_DATA_COOKIE);
-	REGISTER_CURL_CONSTANT(CURL_LOCK_DATA_DNS);
-	REGISTER_CURL_CONSTANT(CURL_LOCK_DATA_SSL_SESSION);
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (!CRYPTO_get_id_callback()) {
@@ -2443,15 +2417,6 @@ string_copy:
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 0);
 			}
 			break;
-		case CURLOPT_SHARE:
-			{
-				php_curlsh *sh = NULL;
-			    ZEND_FETCH_RESOURCE(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
-				if (sh) {
-					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
-				}
-			}
-
 	}
 
 	SAVE_CURL_ERROR(ch, error);
