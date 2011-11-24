@@ -1,9 +1,7 @@
 --TEST--
-DateTime::add() and sub() result -1 hour on objects with time zone type 2
+Bug #55253: DateTime::add() and sub() result -1 hour on objects with time zone type 2
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-Bug 55253 exists
 --FILE--
 <?php
 
