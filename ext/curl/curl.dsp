@@ -166,10 +166,6 @@ SOURCE=.\multi.c
 # End Source File
 
 # Begin Source File
-SOURCE=.\share.c
-# End Source File
-
-# Begin Source File
 SOURCE=.\streams.c
 # End Source File
 

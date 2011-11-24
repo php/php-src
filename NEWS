@@ -6,8 +6,6 @@ PHP                                                                        NEWS
   . World domination
 
 - cURL:
-  . Implemented FR #55540, added functions curl_share_init(), 
-    curl_share_setopt() and curl_share_close(). (Pierrick)
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
     CURLOPT_DIRLISTONLY, CURLOPT_NEW_DIRECTORY_PERMS, CURLOPT_NEW_FILE_PERMS, 
     CURLOPT_NETRC_FILE, CURLOPT_PREQUOTE, CURLOPT_KRBLEVEL, CURLOPT_MAXFILESIZE,
@@ -27,7 +25,7 @@ PHP                                                                        NEWS
     CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
     (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
-    still exists for backward compatibility but is doing nothing). (Pierrick)
+	still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
