@@ -217,8 +217,8 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
   to cURL.
 - Added optional argument to debug_backtrace() and debug_print_backtrace() 
   to limit the amount of stack frames returned.
-- Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode now
-  supports hashes marked $2a$, $2x$, $2y$ and $2z$. 
+- Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode
+  now supports hashes marked $2a$, $2x$, $2y$ and $2z$. 
 - mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji, 
   JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004), 
   MacJapanese (Shift_JIS), gb18030.
@@ -230,6 +230,10 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
   and true for is_subclass_of() for BC reasons.
 - ob_start() will now treat a chunk size of 1 as meaning 1 byte, rather than
   the previous special case behaviour of treating it as 4096 bytes.
+- idn_to_ascii() and idn_to_utf8() now take two extra parameters, one indicating
+  the variant (IDNA 2003 or UTS #46) and another, passed by reference, to return
+  details about the operation in case UTS #46 is chosen.
+
 
 ===================================
 5. Changes made to existing methods
@@ -594,6 +598,26 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
        - ZLIB_ENCODING_DEFLATE
        - ZLIB_ENCODING_GZIP
        - ZLIB_ENCODING_RAW
+       - U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR
+       - IDNA_CHECK_BIDI
+       - IDNA_CHECK_CONTEXTJ
+       - IDNA_NONTRANSITIONAL_TO_ASCII
+       - IDNA_NONTRANSITIONAL_TO_UNICODE
+       - INTL_IDNA_VARIANT_2003
+       - INTL_IDNA_VARIANT_UTS46
+       - IDNA_ERROR_EMPTY_LABEL
+       - IDNA_ERROR_LABEL_TOO_LONG
+       - IDNA_ERROR_DOMAIN_NAME_TOO_LONG
+       - IDNA_ERROR_LEADING_HYPHEN
+       - IDNA_ERROR_TRAILING_HYPHEN
+       - IDNA_ERROR_HYPHEN_3_4
+       - IDNA_ERROR_LEADING_COMBINING_MARK
+       - IDNA_ERROR_DISALLOWED
+       - IDNA_ERROR_PUNYCODE
+       - IDNA_ERROR_LABEL_HAS_DOT
+       - IDNA_ERROR_INVALID_ACE_LABEL
+       - IDNA_ERROR_BIDI
+       - IDNA_ERROR_CONTEXTJ
 
      c. New classes
 
