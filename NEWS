@@ -66,6 +66,7 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #60357 (__toString() method triggers E_NOTICE "Array to string 
     conversion"). (Laruence)
+  . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
     
 - SOAP extension:
   . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
