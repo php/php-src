@@ -75,6 +75,9 @@ PHP                                                                        NEWS
   . Fixed bug #54682 (Tidy::diagnose() NULL pointer dereference).
     (Maksymilian Arciemowicz, Felipe)
 
+- Reflection:
+  . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
+
 03 Nov 2011, PHP 5.3.9RC1
 
 - Core:
