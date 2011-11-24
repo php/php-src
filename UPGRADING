@@ -343,6 +343,9 @@ UPGRADE NOTES - PHP 5.3
 
 - A new directive, request_order, controls the behavior of $_REQUEST
   independently of variables_order.
+- A new directive, called windows.show_crt_warning, has been introduced.
+  This directive shows the CRT warnings when enabled. These warnings were
+  displayed by default until now. It is disabled by default.
 
 - New INI directives: 
   - mail.add_x_header

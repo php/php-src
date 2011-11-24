@@ -544,6 +544,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_ini.filename",		".user.ini",	PHP_INI_SYSTEM,		OnUpdateString,		user_ini_filename,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("user_ini.cache_ttl",		"300",			PHP_INI_SYSTEM,		OnUpdateLong,		user_ini_cache_ttl,	php_core_globals,		core_globals)
 	STD_PHP_INI_BOOLEAN("exit_on_timeout",		"0",		PHP_INI_ALL,		OnUpdateBool,			exit_on_timeout,			php_core_globals,	core_globals)
+#ifdef PHP_WIN32
+	STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
+#endif
 PHP_INI_END()
 /* }}} */
 
@@ -1787,18 +1790,21 @@ void dummy_invalid_parameter_handler(
 	int len;
 
 	if (!called) {
-		called = 1;
-		if (function) {
-			if (file) {
-				len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws' (%ws:%d)", function, file, line);
+		TSRMLS_FETCH();
+		if(PG(windows_show_crt_warning)) {
+			called = 1;
+			if (function) {
+				if (file) {
+					len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws' (%ws:%d)", function, file, line);
+				} else {
+					len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws'", function);
+				}
 			} else {
-				len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws'", function);
+				len = _snprintf(buf, sizeof(buf)-1, "Invalid CRT parameter detected (function not known)");
 			}
-		} else {
-			len = _snprintf(buf, sizeof(buf)-1, "Invalid CRT parameters detected");
+			zend_error(E_WARNING, "%s", buf);
+			called = 0;
 		}
-		zend_error(E_WARNING, "%s", buf);
-		called = 0;
 	}
 }
 #endif
