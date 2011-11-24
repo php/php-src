@@ -2,8 +2,6 @@
 RFC: DateTime and Daylight Saving Time Transitions (zone type 2)
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-RFC not implemented yet
 --FILE--
 <?php
 
