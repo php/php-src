@@ -577,6 +577,12 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 		sapi_cli_server_register_variable(track_vars_array, "SERVER_PROTOCOL", tmp TSRMLS_CC);
 		efree(tmp);
 	}
+	{
+		char *tmp;
+		spprintf(&tmp, 0, "%i",  client->server->port);
+		sapi_cli_server_register_variable(track_vars_array, "SERVER_PORT", tmp TSRMLS_CC);
+	}
+
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method TSRMLS_CC);
 	sapi_cli_server_register_variable(track_vars_array, "SCRIPT_NAME", client->request.vpath TSRMLS_CC);
