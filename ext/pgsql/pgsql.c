@@ -422,6 +422,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_unescape_bytea, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+#if HAVE_PQESCAPE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_literal, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_identifier, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
@@ -652,6 +663,8 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
 	PHP_FE(pg_escape_bytea, 	arginfo_pg_escape_bytea)
 	PHP_FE(pg_unescape_bytea, 	arginfo_pg_unescape_bytea)
+	PHP_FE(pg_escape_literal,	arginfo_pg_escape_literal)
+	PHP_FE(pg_escape_identifier,	arginfo_pg_escape_identifier)
 #endif
 #if HAVE_PQSETERRORVERBOSITY
 	PHP_FE(pg_set_error_verbosity,	arginfo_pg_set_error_verbosity)
@@ -815,7 +828,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 	TSRMLS_FETCH();
 	if (! PGG(ignore_notices)) {
 		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
-		notice->message = _php_pgsql_trim_message(message, &notice->len);
+		notice->message = _php_pgsql_trim_message(message, (int *)&notice->len);
 		if (PGG(log_notices)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
 		}
@@ -4199,6 +4212,130 @@ PHP_FUNCTION(pg_unescape_bytea)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_PQESCAPE
+#if !HAVE_PQESCAPELITERAL
+/* emulate libpq's PQescapeInternal() 9.0 or later */
+static char* php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t len, int escape_literal) {
+	char *result, *rp;
+	const char *s;
+	size_t tmp_len;
+	int input_len = len;
+	char quote_char = escape_literal ? '\'' : '"';
+
+	if (!conn) {
+		return NULL;
+	}
+
+	/*
+	 * NOTE: multibyte strings that could cointain slashes should be considered.
+	 * (e.g. SJIS, BIG5) However, it cannot be done without valid PGconn and mbstring. 
+	 * Therefore, this function does not support such encodings currently.
+	 * FIXME: add encoding check and skip multibyte char bytes if there is vaild PGconn.
+	 */
+
+	/* allocate enough memory */
+	rp = result = (char *)emalloc(len*2 + 5); /* leading " E" needs extra 2 bytes + quote_chars on both end for 2 bytes + NULL */
+
+	if (escape_literal) {
+		/* check backslashes */
+		tmp_len = strspn(str, "\\");
+		if (tmp_len != len) {
+			/* add " E" for escaping slashes */
+			*rp++ = ' ';
+			*rp++ = 'E';
+		}
+	}
+	/* open quote */
+	*rp++ = quote_char;
+	for (s = str; s - str < input_len; ++s) {
+		if (*s == quote_char || (escape_literal && *s == '\\')) {
+			*rp++ = *s;
+			*rp++ = *s;
+		} else {
+			*rp++ = *s;
+		}
+	}
+	*rp++ = quote_char;
+	*rp = '\0';
+	
+	return result;
+}
+#endif
+
+static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) {
+	char *from = NULL, *to = NULL, *tmp = NULL;
+	zval *pgsql_link = NULL;
+	PGconn *pgsql;
+	int to_len;
+	int from_len;
+	int id = -1;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &from, &from_len) == FAILURE) {
+				return;
+			}
+			pgsql_link = NULL;
+			id = PGG(default_link);
+			break;
+
+		default:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &from, &from_len) == FAILURE) {
+				return;
+			}
+			break;
+	}
+
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	if (pgsql == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get default pgsql link");
+		RETURN_FALSE;
+	}
+#ifdef HAVE_PQESCAPELITERAL
+	if (escape_literal) {
+		tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
+	} else {
+		tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
+	}
+	if (!tmp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
+		RETURN_FALSE;
+	}
+	to = estrdup(tmp);
+	PQfreemem(tmp);
+#else 
+	to = php_pgsql_PQescapeInternal(pgsql, from, (size_t)from_len, escape_literal);
+	if (!to) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
+		RETURN_FALSE;
+	}
+#endif
+
+	RETURN_STRING(to, 0);
+}
+
+/* {{{ proto string pg_escape_literal([resource connection,] string data)
+   Escape parameter as string literal (i.e. parameter)	*/
+PHP_FUNCTION(pg_escape_literal)
+{
+	php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto string pg_escape_identifier([resource connection,] string data)
+   Escape identifier (i.e. table name, field name)	*/
+PHP_FUNCTION(pg_escape_identifier)
+{
+	php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+#endif
+
 
 /* {{{ proto string pg_result_error(resource result)
    Get error message associated with result */
