@@ -246,7 +246,7 @@ static void function_dtor(void *pDest)
 {
 	zend_internal_function *f = (zend_internal_function*)pDest;
 
-	efree(f->function_name);
+	efree((char*)f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -283,7 +283,7 @@ static union _zend_function *com_method_get(zval **object_ptr, char *name, int l
 		f.num_args = 0;
 		f.arg_info = NULL;
 		f.scope = obj->ce;
-		f.fn_flags = 0;
+		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = estrndup(name, len);
 		f.handler = PHP_FN(com_method_handler);
 
@@ -364,7 +364,7 @@ static union _zend_function *com_method_get(zval **object_ptr, char *name, int l
 	return NULL;
 }
 
-static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
+static int com_call_method(const char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args = NULL;
 	php_com_dotnet_object *obj;
@@ -387,7 +387,7 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 	VariantInit(&v);
 
-	if (SUCCESS == php_com_do_invoke_byref(obj, method, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
+	if (SUCCESS == php_com_do_invoke_byref(obj, (char*)method, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
 		php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 		ret = SUCCESS;
 		VariantClear(&v);
@@ -442,7 +442,7 @@ static zend_class_entry *com_class_entry_get(const zval *object TSRMLS_DC)
 	return obj->ce;
 }
 
-static int com_class_name_get(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int com_class_name_get(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
@@ -580,7 +580,10 @@ zend_object_handlers php_com_object_handlers = {
 	com_class_name_get,
 	com_objects_compare,
 	com_object_cast,
-	com_object_count
+	com_object_count,
+	NULL,									/* get_debug_info */
+	NULL,									/* get_closure */
+	NULL,									/* get_gc */
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC)
