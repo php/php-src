@@ -19,7 +19,11 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #43200 (Interface implementation / inheritence not possible in
     abstract classes). (Felipe)
-    
+
+
+- Built-in Server SAPI:
+  . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']. (Pierre)
+
 - CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
     resource). (Laruence)
