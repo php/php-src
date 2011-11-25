@@ -1020,8 +1020,8 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 						code = strtol(p + 2, &next, 10);
 					}
 
-					if (code == '\'' && !(quote_style & ENT_HTML_QUOTE_SINGLE) ||
-						code == '"' && !(quote_style & ENT_HTML_QUOTE_DOUBLE)) {
+					if ((code == '\'' && !(quote_style & ENT_HTML_QUOTE_SINGLE)) ||
+						(code == '"' && !(quote_style & ENT_HTML_QUOTE_DOUBLE))) {
 						invalid_code = 1;
 					}
 
