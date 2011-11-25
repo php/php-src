@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug #60377 (bcscale related crashes on 64bits platforms). (shm)
 
 - Date:
+  . Fixed bug #60373 (Startup errors with log_errors on cause segfault).
+    (Derick)
   . Fixed bug #60236 (TLA timezone dates are not converted properly from
     timestamp). (Derick)
   . Fixed bug #55253 (DateTime::add() and sub() result -1 hour on objects with
