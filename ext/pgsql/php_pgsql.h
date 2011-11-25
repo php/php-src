@@ -172,6 +172,8 @@ PHP_FUNCTION(pg_set_error_verbosity);
 PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
 PHP_FUNCTION(pg_unescape_bytea);
+PHP_FUNCTION(pg_escape_literal);
+PHP_FUNCTION(pg_escape_identifier);
 #endif
 
 /* misc functions */
