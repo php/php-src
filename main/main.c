@@ -575,7 +575,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			char *error_time_str;
 
 			time(&error_time);
-			error_time_str = php_format_date("d-M-Y H:i:s", 11, error_time, 1 TSRMLS_CC);
+			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 0 TSRMLS_CC);
 			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
