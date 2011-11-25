@@ -1,5 +1,7 @@
 --TEST--
 Bug #60236: TLA timezone dates are not converted properly from timestamp
+--INI--
+date.timezone=America/New_York
 --FILE--
 <?php
 $t = new DateTime('2010-07-06 18:38:28 EDT'); 
