@@ -33,6 +33,8 @@ PHP                                                                        NEWS
     timestamp). (Derick)
   . Fixed bug #55253 (DateTime::add() and sub() result -1 hour on objects with
     time zone type 2). (Derick)
+  . Fixed bug #54851 (DateTime::createFromFormat() doesn't interpret "D").
+    (Derick)
   . Fixed bug #54596 (incorrect years for DateTime objects created with 4-digit
     years). (Derick)
 
