@@ -678,7 +678,7 @@ Options:
                 with value 'bar').
 
     -g          Comma seperated list of groups to show during test run
-                (e.x. FAIL,SKIP).
+                (possible values: PASS, FAIL, XFAIL, SKIP, BORK, WARN, LEAK, REDIRECT).
 
     -m          Test for memory leaks with Valgrind.
 
@@ -2384,24 +2384,34 @@ function show_summary()
 
 function show_redirect_start($tests, $tested, $tested_file)
 {
-	global $html_output, $html_file;
+	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
 
 	if ($html_output) {
 		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
 	}
 
-	echo "---> $tests ($tested [$tested_file]) begin\n";
+	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
+		   echo "REDIRECT $tests ($tested [$tested_file]) begin\n";
+	} else {
+		   // Write over the last line to avoid random trailing chars on next echo
+		   echo str_repeat(" ", $line_length), "\r";
+	}
 }
 
 function show_redirect_ends($tests, $tested, $tested_file)
 {
-	global $html_output, $html_file;
+	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
 
 	if ($html_output) {
 		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
 	}
 
-	echo "---> $tests ($tested [$tested_file]) done\n";
+	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
+		   echo "REDIRECT $tests ($tested [$tested_file]) done\n";
+	} else {
+		   // Write over the last line to avoid random trailing chars on next echo
+		   echo str_repeat(" ", $line_length), "\r";
+	}
 }
 
 function show_test($test_idx, $shortname)
