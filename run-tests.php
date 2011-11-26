@@ -1333,7 +1333,7 @@ TEST $file
 		if ($JUNIT) {
 			$JUNIT['test_total']++;
 			$JUNIT['test_error']++;
-			$JUNIT['result_xml'] .= '<testcase classname="'.$shortname.'" name="'.htmlspecialchars($tested, ENT_QUOTES).'" time="0">'."\n";
+			$JUNIT['result_xml'] .= '<testcase classname="'.$shortname.'" name="'.htmlspecialchars($tested_file, ENT_QUOTES).'" time="0">'."\n";
 			$JUNIT['result_xml'] .= '<error type="BORKED" message="'.$bork_info.'" />'."\n";
 			$JUNIT['result_xml'] .= '</testcase>'."\n";
 		}
