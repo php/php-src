@@ -59,11 +59,11 @@ do  { \
 		ALLOC_HASHTABLE(var_hash_ptr); \
 		zend_hash_init((var_hash_ptr), 10, NULL, NULL, 0); \
 		if (!BG(serialize_lock)) { \
-			BG(serialize).var_hash = (var_hash_ptr); \
+			BG(serialize).var_hash = (void *)(var_hash_ptr); \
 			BG(serialize).level = 1; \
 		} \
 	} else { \
-		(var_hash_ptr) = BG(serialize).var_hash; \
+		(var_hash_ptr) = (php_serialize_data_t)BG(serialize).var_hash; \
 		++BG(serialize).level; \
 	} \
 } while(0)
@@ -76,8 +76,8 @@ do { \
 		FREE_HASHTABLE(var_hash_ptr); \
 	} else { \
 		if (!--BG(serialize).level) { \
-			zend_hash_destroy(BG(serialize).var_hash); \
-			FREE_HASHTABLE(BG(serialize).var_hash); \
+			zend_hash_destroy((php_serialize_data_t)BG(serialize).var_hash); \
+			FREE_HASHTABLE((php_serialize_data_t)BG(serialize).var_hash); \
 			BG(serialize).var_hash = NULL; \
 		} \
 	} \
@@ -87,13 +87,13 @@ do { \
 do { \
 	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */ \
 	if (BG(serialize_lock) || !BG(unserialize).level) { \
-		(var_hash_ptr) = ecalloc(1, sizeof(struct php_unserialize_data)); \
+		(var_hash_ptr) = (php_unserialize_data_t)ecalloc(1, sizeof(struct php_unserialize_data)); \
 		if (!BG(serialize_lock)) { \
-			BG(unserialize).var_hash = (var_hash_ptr); \
+			BG(unserialize).var_hash = (void *)(var_hash_ptr); \
 			BG(unserialize).level = 1; \
 		} \
 	} else { \
-		(var_hash_ptr) = BG(unserialize).var_hash; \
+		(var_hash_ptr) = (php_serialize_data_t)BG(unserialize).var_hash; \
 		++BG(unserialize).level; \
 	} \
 } while (0)
