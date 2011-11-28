@@ -80,6 +80,8 @@ PHP                                                                        NEWS
     is >0). (Ilia)
 
 - SOAP
+  . Fixed bug #54911 (Access to a undefined member in inherit SoapClient may
+    cause Segmentation Fault). (Dmitry)
   . Fixed bug #48216 (PHP Fatal error: SOAP-ERROR: Parsing WSDL:
     Extra content at the end of the doc, when server uses chunked transfer
     encoding with spaces after chunk size). (Dmitry)
