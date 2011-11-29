@@ -191,11 +191,6 @@
 ;   Development Value: "GPCS"
 ;   Production Value: "GPCS"
 
-;windows.show_crt_warning
-; Default value: 0
-; Development value: 0
-; Production value: 0
-
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
 ;;;;;;;;;;;;;;;;;;;;
@@ -642,6 +637,11 @@ html_errors = On
 ; Log errors to syslog (Event Log on NT, not valid in Windows 95).
 ;error_log = syslog
 
+;windows.show_crt_warning
+; Default value: 0
+; Development value: 0
+; Production value: 0
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -964,7 +964,7 @@ default_socket_timeout = 60
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
-;extension=php_oci8_11g.dll  ; Use with Oracle 11g Instant Client
+;extension=php_oci8_11g.dll  ; Use with Oracle 11gR2 Instant Client
 ;extension=php_openssl.dll
 ;extension=php_pdo_firebird.dll
 ;extension=php_pdo_mssql.dll
@@ -1300,12 +1300,12 @@ mysqli.default_pw =
 mysqli.reconnect = Off
 
 [mysqlnd]
-; Enable / Disable collection of general statstics by mysqlnd which can be
+; Enable / Disable collection of general statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_statistics
 mysqlnd.collect_statistics = On
 
-; Enable / Disable collection of memory usage statstics by mysqlnd which can be
+; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
 ; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = On
@@ -1372,7 +1372,7 @@ mysqlnd.collect_memory_statistics = On
 ; http://php.net/oci8.old-oci-close-semantics
 ;oci8.old_oci_close_semantics = Off
 
-[PostgresSQL]
+[PostgreSQL]
 ; Allow or prevent persistent links.
 ; http://php.net/pgsql.allow-persistent
 pgsql.allow_persistent = On
@@ -1604,7 +1604,6 @@ session.entropy_length = 0
 ; On windows, setting the entropy_length setting will activate the 
 ; Windows random source (using the CryptoAPI)
 ;session.entropy_file = /dev/urandom
-session.entropy_file =
 
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
