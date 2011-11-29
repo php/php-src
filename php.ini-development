@@ -176,11 +176,6 @@
 ;   Development Value: "GPCS"
 ;   Production Value: "GPCS"
 
-;windows.show_crt_warning
-; Default value: 0
-; Development value: 0
-; Production value: 0
-
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
 ;;;;;;;;;;;;;;;;;;;;
@@ -583,6 +578,11 @@ html_errors = On
 ; Log errors to syslog (Event Log on NT, not valid in Windows 95).
 ;error_log = syslog
 
+;windows.show_crt_warning
+; Default value: 0
+; Development value: 0
+; Production value: 0
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -873,7 +873,7 @@ default_socket_timeout = 60
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
-;extension=php_oci8_11g.dll  ; Use with Oracle 11g Instant Client
+;extension=php_oci8_11g.dll  ; Use with Oracle 11gR2 Instant Client
 ;extension=php_openssl.dll
 ;extension=php_pdo_firebird.dll
 ;extension=php_pdo_mysql.dll
