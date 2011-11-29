@@ -2,6 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 RC3
 
+- CLI SAPI:
+  . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']). (Pierre)
+
+- Intl:
+  . Added support for UTS #46. (Gustavo)
+
+- Reflection:
+  . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
+
 24 Nov 2011, PHP 5.4.0 RC2
 
 - Core:
@@ -19,10 +28,6 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #43200 (Interface implementation / inheritence not possible in
     abstract classes). (Felipe)
-
-
-- Built-in Server SAPI:
-  . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']. (Pierre)
 
 - CLI SAPI:
   . Fixed bug #60159 (Router returns false, but POST is not passed to requested
@@ -43,7 +48,6 @@ PHP                                                                        NEWS
   
 - Intl:
   . Fixed memory leak in several Intl locale functions. (Felipe)
-  . Added support for UTS #46. (Gustavo)
   
 - Mbstring
   . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
@@ -71,7 +75,6 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #60357 (__toString() method triggers E_NOTICE "Array to string 
     conversion"). (Laruence)
-  . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
     
 - SOAP extension:
   . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
