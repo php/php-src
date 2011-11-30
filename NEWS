@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.4.0 RC3
+- Core:
+  . Fixed bug #60350 (No string escape code for ESC (ascii 27), normally \e).
+    (php at mickweiss dot com)
 
 - CLI SAPI:
   . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']). (Pierre)

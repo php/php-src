@@ -902,6 +902,10 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 					*t++ = '\v';
 					zendlval->value.str.len--;
 					break;
+				case 'e':
+					*t++ = '\e';
+					zendlval->value.str.len--;
+					break;
 				case '"':
 				case '`':
 					if (*s != quote_type) {
