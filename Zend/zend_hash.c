@@ -1399,6 +1399,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			p->h = num_index;
 		} else {
 			p->h = h;
+			p->nKeyLength = str_length;
 			if (IS_INTERNED(str_index)) {
 				p->arKey = str_index;
 			} else {
