@@ -863,7 +863,7 @@ fi
 
 PHP_ARG_WITH(layout, layout of installed files,
 [  --with-layout=TYPE      Set how installed files will be laid out.  Type can
-                          be either PHP or GNU [PHP]], PHP, no)
+                          be either PHP or GNU @<:@PHP@:>@], PHP, no)
 
 case $PHP_LAYOUT in
   GNU)
@@ -876,7 +876,7 @@ esac
 
 PHP_ARG_WITH(config-file-path, path to configuration file,
 [  --with-config-file-path=PATH
-                          Set the path in which to look for php.ini [PREFIX/lib]], DEFAULT, no)
+                          Set the path in which to look for php.ini @<:@PREFIX/lib@:>@], DEFAULT, no)
 
 if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
@@ -1068,7 +1068,7 @@ if test "$PHP_CLI" = "no"; then
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR [PREFIX/lib/php]
+[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
   --without-pear          Do not install PEAR], DEFAULT, yes)
 
 if test "$PHP_PEAR" != "no"; then
