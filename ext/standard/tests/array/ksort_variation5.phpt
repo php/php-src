@@ -80,14 +80,14 @@ array(11) {
   string(1) ""
   [""]=>
   string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
   string(3) "\cx"
   ["\ddd"]=>
   string(4) "\ddd"
-  ["\e"]=>
-  string(2) "\e"
   ["\xhh"]=>
   string(4) "\xhh"
 }
@@ -108,14 +108,14 @@ array(11) {
   string(1) ""
   [""]=>
   string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
   string(3) "\cx"
   ["\ddd"]=>
   string(4) "\ddd"
-  ["\e"]=>
-  string(2) "\e"
   ["\xhh"]=>
   string(4) "\xhh"
 }
@@ -136,14 +136,14 @@ array(11) {
   string(1) ""
   [""]=>
   string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
   string(3) "\cx"
   ["\ddd"]=>
   string(4) "\ddd"
-  ["\e"]=>
-  string(2) "\e"
   ["\xhh"]=>
   string(4) "\xhh"
 }

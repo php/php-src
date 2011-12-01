@@ -45,14 +45,14 @@ array(11) {
   string(1) "	"
   [5]=>
   string(1) ""
+  [4]=>
+  string(1) ""
   [2]=>
   string(2) "\a"
   [3]=>
   string(3) "\cx"
   [9]=>
   string(4) "\ddd"
-  [4]=>
-  string(2) "\e"
   [8]=>
   string(4) "\xhh"
 }
