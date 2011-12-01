@@ -2100,11 +2100,11 @@ $output
 		}
 		elseif (in_array('FAIL', $restype)) {
 			$JUNIT['test_fail']++;
-			$JUNIT['result_xml'] .= '<failure type="'.$restype[0].'ED" message="'.$info.'"><![CDATA['."\n".$diff."\n".']]></failure>'."\n";
+			$JUNIT['result_xml'] .= '<failure type="'.$restype[0].'ED" message="'.$info.'"><![CDATA['."\n".preg_replace('/\e/', '<esc>', $diff)."\n".']]></failure>'."\n";
 		}
 		else{
 			$JUNIT['test_error']++;
-			$JUNIT['result_xml'] .= '<error type="'.$restype[0].'ED" message="'.$info.'"><![CDATA['."\n".$diff."\n".']]></error>'."\n";
+			$JUNIT['result_xml'] .= '<error type="'.$restype[0].'ED" message="'.$info.'"><![CDATA['."\n".preg_replace('/\e/', '<esc>', $diff)."\n".']]></error>'."\n";
 		}
 		$JUNIT['result_xml'] .= '</testcase>'."\n";
 	}
