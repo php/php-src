@@ -79,7 +79,7 @@ extern ZEND_API zend_signal_globals_t zend_signal_globals;
 # define SIGNAL_END_CRITICAL()		zend_sigprocmask(SIG_SETMASK, &oldmask, NULL);
 
 void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context);
-void zend_signal_handler_unblock();
+ZEND_API void zend_signal_handler_unblock();
 void zend_signal_activate(TSRMLS_D);
 void zend_signal_deactivate(TSRMLS_D);
 void zend_signal_startup();
