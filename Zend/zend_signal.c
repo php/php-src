@@ -131,7 +131,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 
 /* {{{ zend_signal_handler_unblock
  * Handle deferred signal from HANDLE_UNBLOCK_ALARMS */
-void zend_signal_handler_unblock(TSRMLS_D)
+ZEND_API void zend_signal_handler_unblock(TSRMLS_D)
 {
 	zend_signal_queue_t *queue;
 	zend_signal_t zend_signal;
