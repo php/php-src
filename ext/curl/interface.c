@@ -1643,7 +1643,7 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write        = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
-	(*ch)->handlers->progress     = ecalloc(1, sizeof(php_curl_progress));
+	(*ch)->handlers->progress     = NULL;
 
 	(*ch)->in_callback = 0;
 	(*ch)->header.str_len = 0;
@@ -2447,7 +2447,9 @@ string_copy:
 		case CURLOPT_PROGRESSFUNCTION:
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
-			if (ch->handlers->progress->func_name) {
+			if (NULL == ch->handlers->progress) {
+				ch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
+			} else if (ch->handlers->progress->func_name) {
 				zval_ptr_dtor(&ch->handlers->progress->func_name);
 				ch->handlers->progress->fci_cache = empty_fcall_info_cache;
 			}
@@ -3020,9 +3022,6 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	if (ch->handlers->write_header->func_name) {
 		zval_ptr_dtor(&ch->handlers->write_header->func_name);
 	}
-	if (ch->handlers->progress->func_name) {
-		zval_ptr_dtor(&ch->handlers->progress->func_name);
-	}
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);
 	}
@@ -3046,7 +3045,14 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	efree(ch->handlers->write);
 	efree(ch->handlers->write_header);
 	efree(ch->handlers->read);
-	efree(ch->handlers->progress);
+
+	if (ch->handlers->progress) {
+		if (ch->handlers->progress->func_name) {
+			zval_ptr_dtor(&ch->handlers->progress->func_name);
+		}
+		efree(ch->handlers->progress);
+	}
+
 	efree(ch->handlers);
 	efree(ch);
 }
@@ -3093,12 +3099,13 @@ static _php_curl_reset_handlers(php_curl *ch)
 		ch->handlers->std_err = NULL;
 	}
 
-	if (ch->handlers->progress->func_name) {
-		zval_ptr_dtor(&ch->handlers->progress->func_name);
-		ch->handlers->progress->fci_cache = empty_fcall_info_cache;
-		ch->handlers->progress->func_name = NULL;
+	if (ch->handlers->progress) {
+		if (ch->handlers->progress->func_name) {
+			zval_ptr_dtor(&ch->handlers->progress->func_name);
+		}
+		efree(ch->handlers->progress);
+		ch->handlers->progress = NULL;
 	}
-	ch->handlers->progress->method = 0;
 }
 /* }}} */
 
