@@ -1281,7 +1281,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 {
 	php_curl       *ch = (php_curl *) clientp;
 	php_curl_progress  *t  = ch->handlers->progress;
-	int             length = -1;
 	size_t	rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -1331,7 +1330,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			ch->in_callback = 0;
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
-				length = -1;
 			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
