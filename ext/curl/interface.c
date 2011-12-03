@@ -832,7 +832,8 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLAUTH_NTLM);
 #endif
 
-#if LIBCURL_VERSION_NUM >= 0x070a07 /* Available since 7.10.7 */ 
+#if LIBCURL_VERSION_NUM >= 0x070a07 /* Available since 7.10.7 */
+	REGISTER_CURL_CONSTANT(CURLINFO_HTTP_CONNECTCODE);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_CREATE_MISSING_DIRS);
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXYAUTH);
 #endif
@@ -840,7 +841,9 @@ PHP_MINIT_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM >= 0x070a08 /* Available since 7.10.8 */
 	REGISTER_CURL_CONSTANT(CURLE_FILESIZE_EXCEEDED);
 	REGISTER_CURL_CONSTANT(CURLE_LDAP_INVALID_URL);
+	REGISTER_CURL_CONSTANT(CURLINFO_HTTPAUTH_AVAIL);
 	REGISTER_CURL_CONSTANT(CURLINFO_RESPONSE_CODE);
+	REGISTER_CURL_CONSTANT(CURLINFO_PROXYAUTH_AVAIL);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_RESPONSE_TIMEOUT);
 	REGISTER_CURL_CONSTANT(CURLOPT_IPRESOLVE);
 	REGISTER_CURL_CONSTANT(CURLOPT_MAXFILESIZE);
@@ -874,7 +877,17 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_TCP_NODELAY);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x070c02 /* Available since 7.12.2 */
+	REGISTER_CURL_CONSTANT(CURLINFO_OS_ERRNO);
+#endif	
+
+#if LIBCURL_VERSION_NUM >= 0x070c03 /* Available since 7.12.3 */
+	REGISTER_CURL_CONSTANT(CURLINFO_NUM_CONNECTS);
+	REGISTER_CURL_CONSTANT(CURLINFO_SSL_ENGINES);
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070e01 /* Available since 7.14.1 */
+	REGISTER_CURL_CONSTANT(CURLINFO_COOKIELIST);
 	REGISTER_CURL_CONSTANT(CURLOPT_COOKIELIST);
 	REGISTER_CURL_CONSTANT(CURLOPT_IGNORE_CONTENT_LENGTH);
 #endif
@@ -897,6 +910,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_MULTICWD);
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_NOCWD);
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_SINGLECWD);
+#endif
+
+#if LIBCURL_VERSION_NUM >- 0x070f04 /* Available since 7.15.4 */
+	REGISTER_CURL_CONSTANT(CURLINFO_FTP_ENTRY_PATH);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x070f05 /* Available since 7.15.5 */
@@ -950,15 +967,18 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
 	REGISTER_CURL_CONSTANT(CURLE_SSH);
+	REGISTER_CURL_CONSTANT(CURLINFO_APPCONNECT_TIME);
+	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_IP);
+
 	REGISTER_CURL_CONSTANT(CURLOPT_ADDRESS_SCOPE);
 	REGISTER_CURL_CONSTANT(CURLOPT_CRLFILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_ISSUERCERT);
 	REGISTER_CURL_CONSTANT(CURLOPT_KEYPASSWD);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_AUTH_TYPES);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PRIVATE_KEYFILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PUBLIC_KEYFILE);
 
-	REGISTER_CURL_CONSTANT(CURLOPT_SSH_AUTH_TYPES);
 	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_ANY);
 	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_DEFAULT);
 	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_HOST);
@@ -983,12 +1003,15 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
+	REGISTER_CURL_CONSTANT(CURLINFO_CONDITION_UNMET);
+
 	REGISTER_CURL_CONSTANT(CURLOPT_NOPROXY);
 	REGISTER_CURL_CONSTANT(CURLOPT_PROTOCOLS);
 	REGISTER_CURL_CONSTANT(CURLOPT_REDIR_PROTOCOLS);
 	REGISTER_CURL_CONSTANT(CURLOPT_SOCKS5_GSSAPI_NEC);
 	REGISTER_CURL_CONSTANT(CURLOPT_SOCKS5_GSSAPI_SERVICE);
 	REGISTER_CURL_CONSTANT(CURLOPT_TFTP_BLKSIZE);
+
 	REGISTER_CURL_CONSTANT(CURLPROTO_ALL);
 	REGISTER_CURL_CONSTANT(CURLPROTO_DICT);
 	REGISTER_CURL_CONSTANT(CURLPROTO_FILE);
@@ -1009,6 +1032,10 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_RTSP_CLIENT_CSEQ);
+	REGISTER_CURL_CONSTANT(CURLINFO_RTSP_CSEQ_RECV);
+	REGISTER_CURL_CONSTANT(CURLINFO_RTSP_SERVER_CSEQ);
+	REGISTER_CURL_CONSTANT(CURLINFO_RTSP_SESSION_ID);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_USE_PRET);
 	REGISTER_CURL_CONSTANT(CURLOPT_MAIL_FROM);
 	REGISTER_CURL_CONSTANT(CURLOPT_MAIL_RCPT);
@@ -1039,6 +1066,9 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_IP);
+	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_PORT);
+	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_PORT);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMP);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPE);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPS);
@@ -2786,18 +2816,25 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_TIME, &d_code) == CURLE_OK) {
 			CAAD("redirect_time", d_code);
 		}
-#if LIBCURL_VERSION_NUM > 0x071301
+#if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_URL, &s_code) == CURLE_OK) {
+			CAAS("redirect_url", s_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */		
+		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
+			CAAS("primary_ip", s_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
 			MAKE_STD_ZVAL(listcode);
 			array_init(listcode);
 			create_certinfo(ci, listcode TSRMLS_CC);
 			CAAZ("certinfo", listcode);
 		}
-		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
-			CAAS("primary_ip", s_code);
-		}
 #endif
-#if LIBCURL_VERSION_NUM > 0x071500
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_PORT, &l_code) == CURLE_OK) {
 			CAAL("primary_port", l_code);
 		}
@@ -2808,88 +2845,18 @@ PHP_FUNCTION(curl_getinfo)
 			CAAL("local_port", l_code);
 		}
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071202
-		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_URL, &s_code) == CURLE_OK) {
-			CAAS("redirect_url", s_code);
-		}
-#endif
 		if (ch->header.str_len > 0) {
 			CAAS("request_header", ch->header.str);
 		}
 	} else {
 		switch (option) {
-			/* string variable types */
-#if LIBCURL_VERSION_NUM >= 0x071500
-			case CURLINFO_PRIMARY_IP:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x071500
-			case CURLINFO_LOCAL_IP:
-#endif
-			case CURLINFO_PRIVATE:
-			case CURLINFO_EFFECTIVE_URL:
-			case CURLINFO_CONTENT_TYPE:
-#if LIBCURL_VERSION_NUM >= 0x071202
-			case CURLINFO_REDIRECT_URL:
-#endif
-			{
-				char *s_code = NULL;
-
-				if (curl_easy_getinfo(ch->cp, option, &s_code) == CURLE_OK && s_code) {
-					RETURN_STRING(s_code, 1);
-				} else {
-					RETURN_FALSE;
-				}
-				break;
-			}
-			/* Long variable types */
-#if LIBCURL_VERSION_NUM >= 0x071500
-			case CURLINFO_PRIMARY_PORT:
-			case CURLINFO_LOCAL_PORT:
-#endif
-			case CURLINFO_HTTP_CODE:
-			case CURLINFO_HEADER_SIZE:
-			case CURLINFO_REQUEST_SIZE:
-			case CURLINFO_FILETIME:
-			case CURLINFO_SSL_VERIFYRESULT:
-			case CURLINFO_REDIRECT_COUNT: {
-				long code = 0;
-
-				if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
-					RETURN_LONG(code);
-				} else {
-					RETURN_FALSE;
-				}
-				break;
-			}
-			/* Double variable types */
-			case CURLINFO_TOTAL_TIME:
-			case CURLINFO_NAMELOOKUP_TIME:
-			case CURLINFO_CONNECT_TIME:
-			case CURLINFO_PRETRANSFER_TIME:
-			case CURLINFO_SIZE_UPLOAD:
-			case CURLINFO_SIZE_DOWNLOAD:
-			case CURLINFO_SPEED_DOWNLOAD:
-			case CURLINFO_SPEED_UPLOAD:
-			case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-			case CURLINFO_CONTENT_LENGTH_UPLOAD:
-			case CURLINFO_STARTTRANSFER_TIME:
-			case CURLINFO_REDIRECT_TIME: {
-				double code = 0.0;
-
-				if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
-					RETURN_DOUBLE(code);
-				} else {
-					RETURN_FALSE;
-				}
-				break;
-			}
 			case CURLINFO_HEADER_OUT:
 				if (ch->header.str_len > 0) {
 					RETURN_STRINGL(ch->header.str, ch->header.str_len, 1);
 				} else {
 					RETURN_FALSE;
 				}
-#if LIBCURL_VERSION_NUM > 0x071301
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 			case CURLINFO_CERTINFO: {
 				struct curl_certinfo *ci = NULL;
 
@@ -2903,6 +2870,60 @@ PHP_FUNCTION(curl_getinfo)
 				break;
 			}
 #endif
+			default: {
+				int type = CURLINFO_TYPEMASK & option;
+				switch (type) {
+					case CURLINFO_STRING:
+					{
+						char *s_code = NULL;
+	
+						if (curl_easy_getinfo(ch->cp, option, &s_code) == CURLE_OK && s_code) {
+							RETURN_STRING(s_code, 1);
+						} else {
+							RETURN_FALSE;
+						}
+						break;
+					}
+					case CURLINFO_LONG:
+					{
+						long code = 0;
+	
+						if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
+							RETURN_LONG(code);
+						} else {
+							RETURN_FALSE;
+						}
+						break;
+					}
+					case CURLINFO_DOUBLE:
+					{
+						double code = 0.0;
+
+						if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
+							RETURN_DOUBLE(code);
+						} else {
+							RETURN_FALSE;
+						}
+						break;
+					}
+					case CURLINFO_SLIST:
+					{
+						struct curl_slist *slist;
+						array_init(return_value);
+						if (curl_easy_getinfo(ch->cp, option, &slist) == CURLE_OK) {
+							while (slist) {
+								add_next_index_string(return_value, slist->data, 1);
+								slist = slist->next;
+							}
+						} else {
+							RETURN_FALSE;
+						}
+						break;
+					}
+					default:
+						RETURN_FALSE;
+				}
+			}
 		}
 	}
 }
