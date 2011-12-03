@@ -1290,7 +1290,8 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 
 	switch (t->method) {
 		case PHP_CURL_USER: {
-			zval **argv[4];
+			zval **argv[5];
+			zval  *handle = NULL;
 			zval  *zdltotal = NULL;
 			zval  *zdlnow = NULL;
 			zval  *zultotal = NULL;
@@ -1300,27 +1301,31 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			zend_fcall_info fci;
 			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
+			MAKE_STD_ZVAL(handle);
 			MAKE_STD_ZVAL(zdltotal);
 			MAKE_STD_ZVAL(zdlnow);
 			MAKE_STD_ZVAL(zultotal);
 			MAKE_STD_ZVAL(zulnow);
 
+			ZVAL_RESOURCE(handle, ch->id);
+			zend_list_addref(ch->id);
 			ZVAL_LONG(zdltotal, (long) dltotal);
 			ZVAL_LONG(zdlnow, (long) dlnow);
 			ZVAL_LONG(zultotal, (long) ultotal);
 			ZVAL_LONG(zulnow, (long) ulnow);
 
-			argv[0] = &zdltotal;
-			argv[1] = &zdlnow;
-			argv[2] = &zultotal;
-			argv[3] = &zulnow;
+			argv[0] = &handle;
+			argv[1] = &zdltotal;
+			argv[2] = &zdlnow;
+			argv[3] = &zultotal;
+			argv[4] = &zulnow;
 
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
 			fci.function_name = t->func_name;
 			fci.object_ptr = NULL;
 			fci.retval_ptr_ptr = &retval_ptr;
-			fci.param_count = 4;
+			fci.param_count = 5;
 			fci.params = argv;
 			fci.no_separation = 0;
 			fci.symbol_table = NULL;
@@ -1343,6 +1348,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			zval_ptr_dtor(argv[1]);
 			zval_ptr_dtor(argv[2]);
 			zval_ptr_dtor(argv[3]);
+			zval_ptr_dtor(argv[4]);
 			break;
 		}
 	}
