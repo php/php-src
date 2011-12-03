@@ -469,42 +469,40 @@ PHP_MINFO_FUNCTION(curl)
 		unsigned int i;
 
 		static const struct feat feats[] = {
-#if LIBCURL_VERSION_NUM > 0x070a06 /* 7.10.7 */
+#if LIBCURL_VERSION_NUM >= 0x070a07 /* 7.10.7 */
 			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 #endif
-#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
+			{"CharConv", CURL_VERSION_CONV},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070a06 /* 7.10.6 */
 			{"Debug", CURL_VERSION_DEBUG},
 			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 #endif
-#if LIBCURL_VERSION_NUM > 0x070b02 /* 7.12.0 */
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
 			{"IDN", CURL_VERSION_IDN},
 #endif
-#ifdef CURL_VERSION_IPV6
 			{"IPv6", CURL_VERSION_IPV6},
-#endif
-#if LIBCURL_VERSION_NUM > 0x070b00 /* 7.11.1 */
+			{"krb4", CURL_VERSION_KERBEROS4},
+#if LIBCURL_VERSION_NUM >= 0x070b01 /* 7.11.1 */
 			{"Largefile", CURL_VERSION_LARGEFILE},
 #endif
-#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
+			{"libz", CURL_VERSION_LIBZ},
+#if LIBCURL_VERSION_NUM >= 0x070a06 /* 7.10.6 */
 			{"NTLM", CURL_VERSION_NTLM},
 #endif
-#if LIBCURL_VERSION_NUM > 0x070a07 /* 7.10.8 */
+#if LIBCURL_VERSION_NUM >= 0x071600 /* 7.22.0 */
+			{"NTLMWB", CURL_VERSION_NTLM_WB},
+#endif			
+#if LIBCURL_VERSION_NUM >= 0x070a08 /* 7.10.8 */
 			{"SPNEGO", CURL_VERSION_SPNEGO},
 #endif
-#ifdef CURL_VERSION_SSL
 			{"SSL",  CURL_VERSION_SSL},
-#endif
-#if LIBCURL_VERSION_NUM > 0x070d01 /* 7.13.2 */
+#if LIBCURL_VERSION_NUM >= 0x070d02 /* 7.13.2 */
 			{"SSPI",  CURL_VERSION_SSPI},
 #endif
-#ifdef CURL_VERSION_KERBEROS4
-			{"krb4", CURL_VERSION_KERBEROS4},
-#endif
-#ifdef CURL_VERSION_LIBZ
-			{"libz", CURL_VERSION_LIBZ},
-#endif
-#if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
-			{"CharConv", CURL_VERSION_CONV},
+#if LIBCURL_VERSION_NUM >= 0x071504 /* 7.21.4 */
+			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
 #endif
 			{NULL, 0}
 		};
