@@ -1649,11 +1649,18 @@ PHP_FUNCTION(curl_copy_handle)
 		zval_add_ref(&ch->handlers->write_header->func_name);
 		dupch->handlers->write_header->func_name = ch->handlers->write_header->func_name;
 	}
+	
+	if (ch->handlers->progress->func_name) {
+		zval_add_ref(&ch->handlers->progress->func_name);
+		dupch->handlers->progress->func_name = ch->handlers->progress->func_name;
+	}
+	dupch->handlers->progress->method = ch->handlers->progress->method;
 
 	curl_easy_setopt(dupch->cp, CURLOPT_ERRORBUFFER,       dupch->err.str);
 	curl_easy_setopt(dupch->cp, CURLOPT_FILE,              (void *) dupch);
 	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
 	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
+	curl_easy_setopt(dupch->cp, CURLOPT_PROGRESSDATA,      (void *) dupch); 
 
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;

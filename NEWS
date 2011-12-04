@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - BCmath:
   . Fixed bug #60377 (bcscale related crashes on 64bits platforms). (shm)
 
+- cURL:
+  . Fixed bug #60439 (curl_copy_handle segfault when used with 
+    CURLOPT_PROGRESSFUNCTION). (Pierrick)
+
 - Date:
   . Fixed bug #60373 (Startup errors with log_errors on cause segfault).
     (Derick)
