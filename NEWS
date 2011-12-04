@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - CLI SAPI:
   . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']). (Pierre)
 
+- cURL:
+  . Fixed bug #60439 (curl_copy_handle segfault when used with
+    CURLOPT_PROGRESSFUNCTION). (Pierrick)
+
 - Intl:
   . Added support for UTS #46. (Gustavo)
 
