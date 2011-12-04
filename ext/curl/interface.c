@@ -1067,12 +1067,17 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_IP);
 	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_PORT);
 	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_PORT);
+	REGISTER_CURL_CONSTANT(CURLOPT_FNMATCH_FUNCTION);
+	REGISTER_CURL_CONSTANT(CURLOPT_WILDCARDMATCH);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMP);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPE);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPS);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPT);
 	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPTE);
-	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPTS); 
+	REGISTER_CURL_CONSTANT(CURLPROTO_RTMPTS);
+	REGISTER_CURL_CONSTANT(CURL_FNMATCHFUNC_FAIL);
+	REGISTER_CURL_CONSTANT(CURL_FNMATCHFUNC_MATCH);
+	REGISTER_CURL_CONSTANT(CURL_FNMATCHFUNC_NOMATCH);
 #endif 
 
 #if LIBCURL_VERSION_NUM >= 0x071502 /* Available since 7.21.2 */
@@ -1274,6 +1279,71 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	return length;
 }
 /* }}} */
+
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+/* {{{ curl_fnmatch
+ */
+static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
+{
+	php_curl       *ch = (php_curl *) ctx;
+	php_curl_fnmatch *t = ch->handlers->fnmatch;
+	int rval = CURL_FNMATCHFUNC_FAIL;
+	switch (t->method) {
+		case PHP_CURL_USER: {
+			zval **argv[3];
+			zval  *zhandle = NULL;
+			zval  *zpattern = NULL;
+			zval  *zstring = NULL;
+			zval  *retval_ptr;
+			int   error;
+			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
+
+			MAKE_STD_ZVAL(zhandle);
+			MAKE_STD_ZVAL(zpattern);
+			MAKE_STD_ZVAL(zstring);
+
+			ZVAL_RESOURCE(zhandle, ch->id);
+			zend_list_addref(ch->id);
+			ZVAL_STRING(zpattern, pattern, 1);
+			ZVAL_STRING(zstring, string, 1);
+
+			argv[0] = &zhandle;
+			argv[1] = &zpattern;
+			argv[2] = &zstring;
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = t->func_name;
+			fci.object_ptr = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 3;
+			fci.params = argv;
+			fci.no_separation = 0;
+			fci.symbol_table = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
+			} else if (retval_ptr) {
+				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
+					convert_to_long_ex(&retval_ptr);
+				}
+				rval = Z_LVAL_P(retval_ptr);
+				zval_ptr_dtor(&retval_ptr);
+			}
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(argv[2]);
+			break;
+		}
+	}
+	return rval;
+}
+/* }}} */
+#endif
 
 /* {{{ curl_progress
  */
@@ -1650,6 +1720,9 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
 	(*ch)->handlers->progress     = NULL;
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+	(*ch)->handlers->fnmatch      = NULL;
+#endif
 
 	(*ch)->in_callback = 0;
 	(*ch)->header.str_len = 0;
@@ -2033,6 +2106,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_RTSP_CLIENT_CSEQ:
 		case CURLOPT_RTSP_REQUEST:
 		case CURLOPT_RTSP_SERVER_CSEQ:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+		case CURLOPT_WILDCARDMATCH:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071504 /* Available since 7.21.4 */
 		case CURLOPT_TLSAUTH_TYPE:
@@ -2453,7 +2529,7 @@ string_copy:
 		case CURLOPT_PROGRESSFUNCTION:
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
-			if (NULL == ch->handlers->progress) {
+			if (ch->handlers->progress == NULL) {
 				ch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
 			} else if (ch->handlers->progress->func_name) {
 				zval_ptr_dtor(&ch->handlers->progress->func_name);
@@ -2583,6 +2659,22 @@ string_copy:
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
 			}
+
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+		case CURLOPT_FNMATCH_FUNCTION:
+			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_FUNCTION, curl_fnmatch);
+			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, ch);
+			if (ch->handlers->fnmatch == NULL) {
+				ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
+			} else if (ch->handlers->fnmatch->func_name) {
+				zval_ptr_dtor(&ch->handlers->fnmatch->func_name);
+				ch->handlers->fnmatch->fci_cache = empty_fcall_info_cache;
+			}
+			zval_add_ref(zvalue);
+			ch->handlers->fnmatch->func_name = *zvalue;
+			ch->handlers->fnmatch->method = PHP_CURL_USER;
+			break;
+#endif
 
 	}
 
@@ -3059,6 +3151,15 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 		efree(ch->handlers->progress);
 	}
 
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+	if (ch->handlers->fnmatch) {
+		if (ch->handlers->fnmatch->func_name) {
+			zval_ptr_dtor(&ch->handlers->fnmatch->func_name);
+		}
+		efree(ch->handlers->fnmatch);
+	}
+#endif
+
 	efree(ch->handlers);
 	efree(ch);
 }
@@ -3112,6 +3213,17 @@ static _php_curl_reset_handlers(php_curl *ch)
 		efree(ch->handlers->progress);
 		ch->handlers->progress = NULL;
 	}
+
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+	if (ch->handlers->fnmatch) {
+		if (ch->handlers->fnmatch->func_name) {
+			zval_ptr_dtor(&ch->handlers->fnmatch->func_name);
+		}       
+		efree(ch->handlers->fnmatch);
+		ch->handlers->fnmatch = NULL;
+	}
+#endif
+
 }
 /* }}} */
 
