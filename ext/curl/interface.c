@@ -1965,6 +1965,26 @@ PHP_FUNCTION(curl_copy_handle)
 	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
 	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
 
+	if (ch->handlers->progress) {
+		dupch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
+		if (ch->handlers->progress->func_name) {
+			zval_add_ref(&ch->handlers->progress->func_name);
+			dupch->handlers->progress->func_name = ch->handlers->progress->func_name;
+		}
+		dupch->handlers->progress->method = ch->handlers->progress->method;
+		curl_easy_setopt(dupch->cp, CURLOPT_PROGRESSDATA, (void *) dupch);
+	}
+
+	if (ch->handlers->fnmatch) {
+		dupch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
+		if (ch->handlers->fnmatch->func_name) {
+			zval_add_ref(&ch->handlers->fnmatch->func_name);
+			dupch->handlers->fnmatch->func_name = ch->handlers->fnmatch->func_name;
+		}   
+		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
+		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
+	}
+
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;
 
