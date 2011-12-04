@@ -10,13 +10,12 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 
 $dir = 'ftp://your:self@localhost/';
 
-var_dump(opendir($dir));
-var_dump(opendir($dir));
+var_dump(@opendir($dir));
+var_dump(@opendir($dir));
 
 ?>
+===DONE===
 --EXPECTF--
-Warning: opendir(ftp://...@localhost/): failed to open dir: not implemented in %s on line %d
 bool(false)
-
-Warning: opendir(ftp://...@localhost/): failed to open dir: not implemented in %s on line %d
 bool(false)
+===DONE===
