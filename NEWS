@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
+- Filter:
+  . Fixed Bug #55478 (FILTER_VALIDATE_EMAIL fails with internationalized 
+    domain name addresses containing >1 -). (Ilia)
 
 24 Nov 2011, PHP 5.3.9RC2
 
