@@ -7,17 +7,13 @@ Maybe not a bug
 class Foo {
  public function __construct() {
   eval("class Bar extends Foo {}");
-  Some::foo($this);
  }
  public static function test() {
   static $i = 0;
   var_dump(++$i);
  }
 }
-class Some {
- public static function foo(Foo $foo) {
- }
-}
+
 foo::test();
 new Foo;
 foo::test();
