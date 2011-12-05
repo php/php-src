@@ -3031,6 +3031,7 @@ PHP_FUNCTION(curl_getinfo)
 								add_next_index_string(return_value, slist->data, 1);
 								slist = slist->next;
 							}
+							curl_slist_free_all(slist);
 						} else {
 							RETURN_FALSE;
 						}
