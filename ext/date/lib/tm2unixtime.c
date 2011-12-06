@@ -179,11 +179,11 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 }
 
-static void do_normalize(timelib_time* time)
+void timelib_do_normalize(timelib_time* time)
 {
-	do {} while (do_range_limit(0, 60, 60, &time->s, &time->i));
-	do {} while (do_range_limit(0, 60, 60, &time->i, &time->h));
-	do {} while (do_range_limit(0, 24, 24, &time->h, &time->d));
+	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 60, 60, &time->s, &time->i));
+	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 60, 60, &time->i, &time->h));
+	if (time->s != TIMELIB_UNSET) do {} while (do_range_limit(0, 24, 24, &time->h, &time->d));
 	do {} while (do_range_limit(1, 13, 12, &time->m, &time->y));
 
 	do {} while (do_range_limit_days(&time->y, &time->m, &time->d));
@@ -195,7 +195,7 @@ static void do_adjust_relative(timelib_time* time)
 	if (time->relative.have_weekday_relative) {
 		do_adjust_for_weekday(time);
 	}
-	do_normalize(time);
+	timelib_do_normalize(time);
 
 	if (time->have_relative) {
 		time->s += time->relative.s;
@@ -215,7 +215,7 @@ static void do_adjust_relative(timelib_time* time)
 			time->m++;
 			break;
 	}
-	do_normalize(time);
+	timelib_do_normalize(time);
 }
 
 static void do_adjust_special_weekday(timelib_time* time)
@@ -280,7 +280,7 @@ static void do_adjust_special(timelib_time* time)
 				break;
 		}
 	}
-	do_normalize(time);
+	timelib_do_normalize(time);
 	memset(&(time->relative.special), 0, sizeof(time->relative.special));
 }
 
@@ -300,7 +300,7 @@ static void do_adjust_special_early(timelib_time* time)
 				break;
 		}
 	}
-	do_normalize(time);
+	timelib_do_normalize(time);
 }
 
 static timelib_sll do_years(timelib_sll year)
