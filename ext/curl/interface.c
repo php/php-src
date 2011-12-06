@@ -1975,6 +1975,8 @@ PHP_FUNCTION(curl_copy_handle)
 		curl_easy_setopt(dupch->cp, CURLOPT_PROGRESSDATA, (void *) dupch);
 	}
 
+/* Available since 7.21.0 */
+#if LIBCURL_VERSION_NUM >= 0x071500
 	if (ch->handlers->fnmatch) {
 		dupch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
 		if (ch->handlers->fnmatch->func_name) {
@@ -1982,7 +1984,6 @@ PHP_FUNCTION(curl_copy_handle)
 			dupch->handlers->fnmatch->func_name = ch->handlers->fnmatch->func_name;
 		}   
 		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
-#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
 #endif
 	}
