@@ -6486,7 +6486,7 @@ void zend_do_jmp_set(const znode *value, znode *jmp_token, znode *colon_token TS
 	
 	GET_NODE(colon_token, opline->result);
 
-	jmp_token->u.op	.opline_num = op_number;
+	jmp_token->u.op.opline_num = op_number;
 
 	INC_BPC(CG(active_op_array));
 }
