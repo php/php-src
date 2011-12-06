@@ -1483,6 +1483,18 @@ TEST $file
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 
+	// Additional required extensions
+	if (array_key_exists('EXTENSIONS', $section_text)) {
+		$ext_dir=`$php -r 'echo ini_get("extension_dir");'`;
+		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
+		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
+		foreach ($extensions as $req_ext) {
+			if (!in_array($req_ext, $loaded)) {
+				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+			}
+		}
+	}
+
 	settings2params($ini_settings);
 
 	// Check if test should be skipped.
