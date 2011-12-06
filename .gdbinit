@@ -39,7 +39,62 @@ define dump_bt
 	while $t
 		printf "[0x%08x] ", $t
 		if $t->function_state.function->common.function_name
-			printf "%s() ", $t->function_state.function->common.function_name
+			if !$__plain
+				if $t->function_state.arguments
+					set $count = (int)*($t->function_state.arguments)
+					printf "%s(", $t->function_state.function->common.function_name
+					while $count > 0
+						set $zvalue = *(zval **)($t->function_state.arguments - $count)
+						set $type = $zvalue->type
+						if $type == 0
+							printf "NULL"
+						end
+						if $type == 1
+							printf "%ld", $zvalue->value.lval
+						end
+						if $type == 2
+							printf "%lf", $zvalue->value.dval
+						end
+						if $type == 3
+							if $zvalue->value.lval
+								printf "true"
+							else
+								printf "false"
+							end
+						end
+						if $type == 4
+							printf "array(%d)[0x%08x]", $zvalue->value.ht->nNumOfElements, $zvalue
+						end
+						if $type == 5
+							printf "object[0x%08x]", $zvalue
+						end
+						if $type == 6
+							____print_str $zvalue->value.str.val $zvalue->value.str.len
+						end
+						if $type == 7
+							printf "resource(#%d)", $zvalue->value.lval
+						end
+						if $type == 8 
+							printf "constant"
+						end
+						if $type == 9
+							printf "const_array"
+						end
+						if $type > 9
+							printf "unknown type %d", $type
+						end
+						set $count = $count -1
+						if $count > 0
+							printf ", "
+						end
+					end
+					printf ") "
+				else
+					printf "%s() ", $t->function_state.function->common.function_name
+				end
+			else
+				printf "%s() ", $t->function_state.function->common.function_name
+			end
 		else
 			printf "??? "
 		end
@@ -480,12 +535,28 @@ end
 
 define zbacktrace
 	____executor_globals
+	set $__plain = 1
 	dump_bt $eg.current_execute_data
 end
 
 document zbacktrace
 	prints backtrace.
 	This command is almost a short cut for
+	> (gdb) ____executor_globals
+	> (gdb) dump_bt $eg.current_execute_data
+end
+
+define zbacktrace_ex
+	____executor_globals
+	set $__plain = 0
+	dump_bt $eg.current_execute_data
+	set $__plain = 1
+end
+
+document zbacktrace_ex
+	prints backtrace with arguments info
+	This command is almost a short cut for
+    > set $__plain = 0
 	> (gdb) ____executor_globals
 	> (gdb) dump_bt $eg.current_execute_data
 end
