@@ -8,7 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die('skip strftime uses system TZ');
 date.timezone=US/Eastern
 --FILE--
 <?php
-
 $stamp = 1112427000;
 print strftime('%c %Z',strtotime('now',$stamp)) ."\n";
 print strftime('%c %Z',strtotime('tomorrow',$stamp)) ."\n";
