@@ -1982,7 +1982,9 @@ PHP_FUNCTION(curl_copy_handle)
 			dupch->handlers->fnmatch->func_name = ch->handlers->fnmatch->func_name;
 		}   
 		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
+#endif
 	}
 
 	efree(dupch->to_free);
