@@ -1,8 +1,8 @@
 --TEST--
-Bug #48678 DateInterval segfaults when unserialising
+Bug #48678: DateInterval segfaults when unserialising
 --FILE--
 <?php
-$x = new dateinterval("P3Y6M4DT12H30M5S");
+$x = new DateInterval("P3Y6M4DT12H30M5S");
 print_r($x);
 $y = unserialize(serialize($x));
 print_r($y);
