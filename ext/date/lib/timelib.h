@@ -26,11 +26,13 @@
 #include <limits.h>
 #endif
 
-#define TIMELIB_VERSION 201101
+#define TIMELIB_VERSION 201102
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
 #define TIMELIB_NO_CLONE         0x02
+
+#define TIMELIB_UNSET   -99999
 
 #define TIMELIB_SPECIAL_WEEKDAY                   0x01
 #define TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH      0x02
@@ -52,6 +54,9 @@
 #define strncasecmp strnicmp
 #endif
 
+/* Function pointers */
+typedef timelib_tzinfo* (*timelib_tz_get_wrapper)(char *tzname, const timelib_tzdb *tzdb);
+
 /* From dow.c */
 timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_sll timelib_iso_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
@@ -63,8 +68,8 @@ int timelib_valid_time(timelib_sll h, timelib_sll i, timelib_sll s);
 int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
 
 /* From parse_date.re */
-timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
-timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
+timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
@@ -78,6 +83,7 @@ void timelib_strtointerval(char *s, int len,
 
 /* From tm2unixtime.c */
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
+void timelib_do_normalize(timelib_time *base);
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt);
 
 /* From unixtime2tm.c */
