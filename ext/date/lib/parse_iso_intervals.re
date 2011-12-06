@@ -364,7 +364,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 				break;
 			}
 
-			nr = timelib_get_unsigned_nr((char **) &ptr, 9);
+			nr = timelib_get_unsigned_nr((char **) &ptr, 12);
 			switch (*ptr) {
 				case 'Y': s->period->y = nr; break;
 				case 'W': s->period->d = nr * 7; break;
