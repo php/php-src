@@ -1246,7 +1246,7 @@ TEST $file
 		}
 
 		// Match the beginning of a section.
-		if (preg_match(b'/^--([_A-Z]+)--/', $line, $r)) {
+		if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
 			settype($section, 'string');
 
@@ -1481,6 +1481,18 @@ TEST $file
 			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
+	}
+
+	// Additional required extensions
+	if (array_key_exists('EXTENSIONS', $section_text)) {
+		$ext_dir=`$php -r 'echo ini_get("extension_dir");'`;
+		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
+		$loaded = explode(",", `$php -n -r 'echo join(",", get_loaded_extensions());'`);
+		foreach ($extensions as $req_ext) {
+			if (!in_array($req_ext, $loaded)) {
+				$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+			}
+		}
 	}
 
 	settings2params($ini_settings);
