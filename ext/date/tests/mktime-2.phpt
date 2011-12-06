@@ -5,13 +5,13 @@ error_reporting=2047
 --FILE--
 <?php
 $timezones = array(
-    'GMT0',
+    'UTC',
     'Europe/London'
 );
 
 foreach($timezones as $timezone)
 {
-    putenv('TZ='.$timezone);
+    date_default_timezone_set($timezone);
 
     /* status of daylight saving time unknown */
     var_dump(mktime(0, 0, 0, 1, 1, 2002));
