@@ -49,7 +49,7 @@ PHP                                                                        NEWS
     DateTime::setTimestamp). (Derick)
   . Fixed bug #51994 (date_parse_from_format is parsing invalid date using 'yz'
     format). (Derick)
-  . Fixed bug #51223 (Seg fault while creating (by unserialization)
+  . Fixed bug #52113 (Seg fault while creating (by unserialization)
     DatePeriod). (Derick)
 
 - EXIF:
