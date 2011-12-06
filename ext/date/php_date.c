@@ -463,6 +463,8 @@ const zend_function_entry date_funcs_timezone[] = {
 
 const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __construct,                 arginfo_date_interval_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(DateInterval,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateInterval,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,            date_interval_format,        arginfo_date_method_interval_format, 0)
 	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	arginfo_date_interval_create_from_date_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
@@ -831,6 +833,12 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 		zend_hash_add(DATEG(tzcache), formal_tzname, strlen(formal_tzname) + 1, (void *) &tzi, sizeof(timelib_tzinfo*), NULL);
 	}
 	return tzi;
+}
+
+timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib_tzdb *tzdb)
+{
+	TSRMLS_FETCH();
+	return php_date_parse_tzfile(formal_tzname, tzdb TSRMLS_CC);
 }
 /* }}} */
 
@@ -1367,7 +1375,7 @@ PHPAPI signed long php_parse_date(char *string, signed long *now)
 	int           error2;
 	signed long   retval;
 
-	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB);
+	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (error->error_count) {
 		timelib_error_container_dtor(error);
 		return -1;
@@ -1404,7 +1412,7 @@ PHP_FUNCTION(strtotime)
 
 		initial_ts = emalloc(25);
 		snprintf(initial_ts, 24, "@%ld UTC", preset_ts);
-		t = timelib_strtotime(initial_ts, strlen(initial_ts), NULL, DATE_TIMEZONEDB); /* we ignore the error here, as this should never fail */
+		t = timelib_strtotime(initial_ts, strlen(initial_ts), NULL, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
@@ -1426,7 +1434,7 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
-	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB);
+	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	error1 = error->error_count;
 	timelib_error_container_dtor(error);
 	timelib_fill_holes(t, now, TIMELIB_NO_CLONE);
@@ -2395,9 +2403,9 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 		timelib_time_dtor(dateobj->time);
 	}
 	if (format) {
-		dateobj->time = timelib_parse_from_format(format, time_str_len ? time_str : "", time_str_len ? time_str_len : 0, &err, DATE_TIMEZONEDB);
+		dateobj->time = timelib_parse_from_format(format, time_str_len ? time_str : "", time_str_len ? time_str_len : 0, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	} else {
-		dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
+		dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	}
 
 	/* update last errors and warnings */
@@ -2731,7 +2739,7 @@ PHP_FUNCTION(date_parse)
 		RETURN_FALSE;
 	}
 
-	parsed_time = timelib_strtotime(date, date_len, &error, DATE_TIMEZONEDB);
+	parsed_time = timelib_strtotime(date, date_len, &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
 }
 /* }}} */
@@ -2750,7 +2758,7 @@ PHP_FUNCTION(date_parse_from_format)
 		RETURN_FALSE;
 	}
 
-	parsed_time = timelib_parse_from_format(format, date, date_len, &error, DATE_TIMEZONEDB);
+	parsed_time = timelib_parse_from_format(format, date, date_len, &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
 }
 /* }}} */
@@ -2792,7 +2800,7 @@ PHP_FUNCTION(date_modify)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
-	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB);
+	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
 	/* update last errors and warnings */
 	update_errors_warnings(err TSRMLS_CC);
@@ -3613,6 +3621,70 @@ PHP_METHOD(DateInterval, __construct)
 }
 /* }}} */
 
+static long php_date_long_from_hash_element(HashTable *myht, char *element, size_t size)
+{
+	zval            **z_arg = NULL;
+
+	if (zend_hash_find(myht, element, size + 1, (void**) &z_arg) == SUCCESS) {
+		convert_to_long(*z_arg);
+		return Z_LVAL_PP(z_arg);
+	} else {
+		return -1;
+	}
+}
+
+static int php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht TSRMLS_DC)
+{
+	(*intobj)->diff = timelib_rel_time_ctor();
+
+	(*intobj)->diff->y = php_date_long_from_hash_element(myht, "y", 1);
+	(*intobj)->diff->m = php_date_long_from_hash_element(myht, "m", 1);
+	(*intobj)->diff->d = php_date_long_from_hash_element(myht, "d", 1);
+	(*intobj)->diff->h = php_date_long_from_hash_element(myht, "h", 1);
+	(*intobj)->diff->i = php_date_long_from_hash_element(myht, "i", 1);
+	(*intobj)->diff->s = php_date_long_from_hash_element(myht, "s", 1);
+	(*intobj)->diff->invert = php_date_long_from_hash_element(myht, "invert", 6);
+	(*intobj)->diff->days = php_date_long_from_hash_element(myht, "days", 4);
+	(*intobj)->initialized = 1;
+
+	return 0;
+}
+
+/* {{{ proto DateInterval::__set_state()
+*/
+PHP_METHOD(DateInterval, __set_state)
+{
+	php_interval_obj *intobj;
+	zval             *array;
+	HashTable        *myht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	myht = HASH_OF(array);
+
+	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
+	intobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	php_date_interval_initialize_from_hash(&return_value, &intobj, myht TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto DateInterval::__wakeup()
+*/
+PHP_METHOD(DateInterval, __wakeup)
+{
+	zval             *object = getThis();
+	php_interval_obj *intobj;
+	HashTable        *myht;
+
+	intobj = (php_interval_obj *) zend_object_store_get_object(object TSRMLS_CC);
+
+	myht = Z_OBJPROP_P(object);
+
+	php_date_interval_initialize_from_hash(&return_value, &intobj, myht TSRMLS_CC);
+}
+/* }}} */
 /* {{{ proto DateInterval date_interval_create_from_date_string(string time)
    Uses the normal date parsers and sets up a DateInterval from the relative parts of the parsed string
 */
@@ -3630,7 +3702,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 
 	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
 
-	time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB);
+	time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	diobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
@@ -3668,8 +3740,8 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 				case 'I': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 				case 'i': length = slprintf(buffer, 32, "%d", (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
-				case 's': length = slprintf(buffer, 32, "%d", (int) t->s); break;
+				case 'S': length = slprintf(buffer, 32, "%02ld", (long) t->s); break;
+				case 's': length = slprintf(buffer, 32, "%ld", (long) t->s); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {

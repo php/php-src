@@ -44,6 +44,13 @@ PHP                                                                        NEWS
     (Derick)
   . Fixed bug #54596 (incorrect years for DateTime objects created with 4-digit
     years). (Derick)
+  . Fixed bug #53502 (strtotime with timezone memory leak). (Derick)
+  . Fixed bug #52062 (large timestamps with DateTime::getTimestamp and
+    DateTime::setTimestamp). (Derick)
+  . Fixed bug #51994 (date_parse_from_format is parsing invalid date using 'yz'
+    format). (Derick)
+  . Fixed bug #51223 (Seg fault while creating (by unserialization)
+    DatePeriod). (Derick)
 
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
