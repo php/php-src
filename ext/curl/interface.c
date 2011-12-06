@@ -1985,8 +1985,8 @@ PHP_FUNCTION(curl_copy_handle)
 		}   
 		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
 		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
-#endif
 	}
+#endif
 
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;
