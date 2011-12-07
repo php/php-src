@@ -421,7 +421,11 @@ int php_init_config(TSRMLS_D)
 					env_location = "";
 				} else {
 					size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-					env_location = phprc_path;
+					if (size == 0) {
+						env_location = "";
+					} else {
+						env_location = phprc_path;
+					}
 				}
 			}
 		}
