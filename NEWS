@@ -6,6 +6,8 @@ PHP                                                                        NEWS
     (php at mickweiss dot com)
   . Fixed bug #60240 (invalid read/writes when unserializing specially crafted
     strings). (Mike)
+  . Implement FR #54514 (Get php binary path during script execution). 
+    (Laruence)
 
 - CLI SAPI:
   . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']). (Pierre)

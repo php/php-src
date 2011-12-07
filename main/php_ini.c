@@ -393,7 +393,6 @@ int php_init_config(TSRMLS_D)
 		int search_path_size;
 		char *default_location;
 		char *env_location;
-		char *binary_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
@@ -472,51 +471,11 @@ int php_init_config(TSRMLS_D)
 			strlcat(php_ini_search_path, ".", search_path_size);
 		}
 
-		/* Add binary directory */
-#ifdef PHP_WIN32
-		binary_location = (char *) emalloc(MAXPATHLEN);
-		if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
-			efree(binary_location);
-			binary_location = NULL;
-		}
-#else
-		if (sapi_module.executable_location) {
-			binary_location = (char *)emalloc(MAXPATHLEN);
-			if (!strchr(sapi_module.executable_location, '/')) {
-				char *envpath, *path;
-				int found = 0;
+		if (PG(php_binary)) {
+			char *separator_location, *binary_location;
 
-				if ((envpath = getenv("PATH")) != NULL) {
-					char *search_dir, search_path[MAXPATHLEN];
-					char *last = NULL;
-
-					path = estrdup(envpath);
-					search_dir = php_strtok_r(path, ":", &last);
-
-					while (search_dir) {
-						snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
-						if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
-							found = 1;
-							break;
-						}
-						search_dir = php_strtok_r(NULL, ":", &last);
-					}
-					efree(path);
-				}
-				if (!found) {
-					efree(binary_location);
-					binary_location = NULL;
-				}
-			} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
-				efree(binary_location);
-				binary_location = NULL;
-			}
-		} else {
-			binary_location = NULL;
-		}
-#endif
-		if (binary_location) {
-			char *separator_location = strrchr(binary_location, DEFAULT_SLASH);
+			binary_location = estrdup(PG(php_binary));
+			separator_location = strrchr(binary_location, DEFAULT_SLASH);
 
 			if (separator_location && separator_location != binary_location) {
 				*(separator_location) = 0;

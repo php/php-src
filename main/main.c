@@ -255,6 +255,57 @@ static void php_disable_classes(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_binary_init
+ */
+static void php_binary_init(TSRMLS_D) 
+{
+	char *binary_location;
+#ifdef PHP_WIN32
+	binary_location = (char *)malloc(MAXPATHLEN);
+	if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
+		free(binary_location);
+		PG(php_binary) = NULL;
+	}
+#else
+	if (sapi_module.executable_location) {
+		binary_location = (char *)malloc(MAXPATHLEN);
+		if (!strchr(sapi_module.executable_location, '/')) {
+			char *envpath, *path;
+			int found = 0;
+
+			if ((envpath = getenv("PATH")) != NULL) {
+				char *search_dir, search_path[MAXPATHLEN];
+				char *last = NULL;
+
+				path = estrdup(envpath);
+				search_dir = php_strtok_r(path, ":", &last);
+
+				while (search_dir) {
+					snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
+					if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
+						found = 1;
+						break;
+					}
+					search_dir = php_strtok_r(NULL, ":", &last);
+				}
+				efree(path);
+			}
+			if (!found) {
+				free(binary_location);
+				binary_location = NULL;
+			}
+		} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
+			free(binary_location);
+			binary_location = NULL;
+		}
+	} else {
+		binary_location = NULL;
+	}
+#endif
+	PG(php_binary) = binary_location;
+}
+/* }}} */
+
 /* {{{ PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateTimeout)
@@ -1819,6 +1870,9 @@ static void core_globals_dtor(php_core_globals *core_globals TSRMLS_DC)
 	if (core_globals->disable_classes) {
 		free(core_globals->disable_classes);
 	}
+	if (core_globals->php_binary) {
+		free(core_globals->php_binary);
+	}
 
 	php_shutdown_ticks(TSRMLS_C);
 }
@@ -2068,6 +2122,13 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_SERVER", VER_NT_SERVER, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
 #endif
+
+	php_binary_init(TSRMLS_C);
+	if (PG(php_binary)) {
+		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS);
+	} else {
+		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS);
+	}
 
 	php_output_register_constants(TSRMLS_C);
 	php_rfc1867_register_constants(TSRMLS_C);
