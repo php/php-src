@@ -33,7 +33,7 @@ $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt;type=text/plain;f
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
 
-$params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt;type=text/plain;filename=foo.txt');
+$params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt;filename=foo.txt;type=text/plain');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
 
