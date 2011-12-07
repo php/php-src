@@ -1,5 +1,5 @@
 --TEST--
-Bug #54851: DateTime::createFromFormat() doesn't interpret "D".
+Bug #54851 (DateTime::createFromFormat() doesn't interpret "D")
 --INI--
 date.timezone=UTC
 --FILE--

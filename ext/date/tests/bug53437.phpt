@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437: Crash when using unserialized DatePeriod instance
+Bug #53437 (Crash when using unserialized DatePeriod instance)
 --XFAIL--
 Bug #53437 Not fixed yet
 --FILE--
