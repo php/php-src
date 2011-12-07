@@ -1,5 +1,5 @@
 --TEST--
-Bug#48476 (cloning extended DateTime class without calling parent::__constr crashed PHP)
+Bug #48476 (cloning extended DateTime class without calling parent::__constr crashed PHP)
 --FILE--
 <?php
 class MyDateTime extends DateTime {
