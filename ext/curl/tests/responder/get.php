@@ -25,6 +25,11 @@
     case 'contenttype':
       header('Content-Type: text/plain;charset=utf-8');
       break;
+    case 'file':
+      if (isset($_FILES['file'])) {
+          echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
+      }
+      break;
     default:
       echo "Hello World!\n";
       echo "Hello World!";
