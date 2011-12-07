@@ -1,5 +1,8 @@
 --TEST--
-DateInterval::format()
+DateInterval::format(), except %a
+--DESCRIPTION--
+%a is covered in a separate test.
+Don't want an XFAIL here to cause confusion if a real bug comes up.
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2010 BKTK
@@ -29,7 +32,6 @@ echo $interval->format('h=%h') . "\n";
 echo $interval->format('i=%i') . "\n";
 echo $interval->format('s=%s') . "\n";
 echo $interval->format('r=%r') . "\n";
-echo $interval->format('a=%a') . "\n";
 
 echo "\n";
 
@@ -61,7 +63,6 @@ h=4
 i=5
 s=6
 r=
-a=428
 
 inverted R=-
 inverted r=-
