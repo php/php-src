@@ -4941,13 +4941,19 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 #ifdef PHP_WIN32
 	strong_result = 1;
 	/* random/urandom equivalent on Windows */
-	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE){
+	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE) {
 		efree(buffer);
+		if (zstrong_result_returned) {
+			ZVAL_BOOL(zstrong_result_returned, 0);
+		}
 		RETURN_FALSE;
 	}
 #else
 	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
 		efree(buffer);
+		if (zstrong_result_returned) {
+			ZVAL_BOOL(zstrong_result_returned, 0);
+		}
 		RETURN_FALSE;
 	}
 #endif

@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 
 - Intl:
   . Added support for UTS #46. (Gustavo)
+  
+- OpenSSL:
+  . On error in openssl_random_pseudo_bytes() make sure we set strong result
+    to false. (Scott)
 
 - Reflection:
   . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
