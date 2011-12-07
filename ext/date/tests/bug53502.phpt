@@ -1,5 +1,7 @@
 --TEST--
 Bug #53502: strtotime with timezone memory leak
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 for ($i = 0; $i < 1000; $i++) {
