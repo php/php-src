@@ -1,5 +1,7 @@
 --TEST--
 Bug #52113: Seg fault while creating (by unserialization) DatePeriod
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $start = new DateTime('2003-01-02 08:00:00');
