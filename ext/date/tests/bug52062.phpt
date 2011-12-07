@@ -1,5 +1,11 @@
 --TEST--
 Bug #52062: large timestamps with DateTime::getTimestamp and DateTime::setTimestamp
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) die('skip tests require 64bit integer (php\' int, long in C.');
+?>
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $d = new DateTime('@100000000000');
