@@ -1,5 +1,5 @@
 --TEST--
-Bug #52113: Seg fault while creating (by unserialization) DatePeriod
+Bug #52113 (Seg fault while creating (by unserialization) DatePeriod)
 --INI--
 date.timezone=UTC
 --FILE--
