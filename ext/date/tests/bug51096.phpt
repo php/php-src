@@ -1,5 +1,5 @@
 --TEST--
-Bug #51096: Test for "first day" vs "first day of".
+Bug #51096 (Test for "first day" vs "first day of")
 --FILE--
 <?php
 $tests = array(

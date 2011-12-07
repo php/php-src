@@ -1,5 +1,5 @@
 --TEST--
-Bug #60236: TLA timezone dates are not converted properly from timestamp
+Bug #60236 (TLA timezone dates are not converted properly from timestamp)
 --INI--
 date.timezone=America/New_York
 --FILE--

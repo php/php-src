@@ -1,5 +1,5 @@
 --TEST--
-Bug #52062: large timestamps with DateTime::getTimestamp and DateTime::setTimestamp (64 bit)
+Bug #52062 (large timestamps with DateTime::getTimestamp and DateTime::setTimestamp) (64 bit)
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE == 4) die('skip 64 bit only');

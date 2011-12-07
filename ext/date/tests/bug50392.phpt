@@ -1,5 +1,5 @@
 --TEST--
-Bug #50392 date_create_from_format enforces 6 digits for 'u' format character
+Bug #50392 (date_create_from_format enforces 6 digits for 'u' format character)
 --FILE--
 <?php
 date_default_timezone_set('Europe/Bratislava');

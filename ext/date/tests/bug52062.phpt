@@ -1,5 +1,5 @@
 --TEST--
-Bug #52062: large timestamps with DateTime::getTimestamp and DateTime::setTimestamp (32 bit)
+Bug #52062 (large timestamps with DateTime::getTimestamp and DateTime::setTimestamp) (32 bit)
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE == 8) die('skip 32-bit only');

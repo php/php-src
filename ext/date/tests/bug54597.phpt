@@ -1,5 +1,5 @@
 --TEST--
-Bug #54597: incorrect years for DateTime objects created with 4-digit years
+Bug #54597 (incorrect years for DateTime objects created with 4-digit years)
 --INI--
 date.timezone=Europe/London
 --FILE--
