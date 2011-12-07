@@ -1,5 +1,9 @@
 --TEST--
 date_default_timezone_set() function [1]
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip diff TZ detection on windows.');
+?>
 --INI--
 date.timezone=
 --FILE--
