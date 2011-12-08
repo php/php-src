@@ -5,6 +5,26 @@ PHP                                                                        NEWS
   . Fixed Bug #55478 (FILTER_VALIDATE_EMAIL fails with internationalized 
     domain name addresses containing >1 -). (Ilia)
 
+- cURL:
+  . Fixed bug #60439 (curl_copy_handle segfault when used with
+    CURLOPT_PROGRESSFUNCTION). (Pierrick)
+
+
+- Date:
+  . Fixed bug #54851 (DateTime::createFromFormat() doesn't interpret "D").
+    (Derick)
+  . Fixed bug #53502 (strtotime with timezone memory leak). (Derick)
+  . Fixed bug #52062 (large timestamps with DateTime::getTimestamp and
+    DateTime::setTimestamp). (Derick)
+  . Fixed bug #51994 (date_parse_from_format is parsing invalid date using 'yz'
+    format). (Derick)
+  . Fixed bug #52113 (Seg fault while creating (by unserialization)
+    DatePeriod). (Derick)
+
+- SOAP
+  . Fixed bug #54911 (Access to a undefined member in inherit SoapClient may
+    cause Segmentation Fault). (Dmitry)
+
 24 Nov 2011, PHP 5.3.9RC2
 
 - Core:
@@ -29,10 +49,6 @@ PHP                                                                        NEWS
 - BCmath:
   . Fixed bug #60377 (bcscale related crashes on 64bits platforms). (shm)
 
-- cURL:
-  . Fixed bug #60439 (curl_copy_handle segfault when used with 
-    CURLOPT_PROGRESSFUNCTION). (Pierrick)
-
 - Date:
   . Fixed bug #60373 (Startup errors with log_errors on cause segfault).
     (Derick)
@@ -40,17 +56,6 @@ PHP                                                                        NEWS
     timestamp). (Derick)
   . Fixed bug #55253 (DateTime::add() and sub() result -1 hour on objects with
     time zone type 2). (Derick)
-  . Fixed bug #54851 (DateTime::createFromFormat() doesn't interpret "D").
-    (Derick)
-  . Fixed bug #54596 (incorrect years for DateTime objects created with 4-digit
-    years). (Derick)
-  . Fixed bug #53502 (strtotime with timezone memory leak). (Derick)
-  . Fixed bug #52062 (large timestamps with DateTime::getTimestamp and
-    DateTime::setTimestamp). (Derick)
-  . Fixed bug #51994 (date_parse_from_format is parsing invalid date using 'yz'
-    format). (Derick)
-  . Fixed bug #52113 (Seg fault while creating (by unserialization)
-    DatePeriod). (Derick)
 
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
@@ -94,8 +99,6 @@ PHP                                                                        NEWS
     is >0). (Ilia)
 
 - SOAP
-  . Fixed bug #54911 (Access to a undefined member in inherit SoapClient may
-    cause Segmentation Fault). (Dmitry)
   . Fixed bug #48216 (PHP Fatal error: SOAP-ERROR: Parsing WSDL:
     Extra content at the end of the doc, when server uses chunked transfer
     encoding with spaces after chunk size). (Dmitry)
