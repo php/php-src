@@ -419,6 +419,10 @@ disable_classes =
 ; http://php.net/realpath-cache-ttl
 ;realpath_cache_ttl = 120
 
+; Enables or disables the circular reference collector.
+; http://php.net/zend.enable-gc
+zend.enable_gc = On
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;
