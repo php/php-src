@@ -1,5 +1,6 @@
 <?php
-  switch($_GET['test']) {
+  $test = isset($_GET['test']) ? $_GET['test'] : null;
+  switch($test) {
     case 'post':
       var_dump($_POST);
       break;
