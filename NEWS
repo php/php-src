@@ -2,8 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2011, PHP 5.4.0 RC4
 - CLI SAPI:
-  . Fixed bug #60477 (Segfault after two multipart/form-data POST requests).
-    (Laruence)
+  . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
+    one 200 RQ and one 404). (Laruence)
 
 08 Dec 2011, PHP 5.4.0 RC3
 - Core:
