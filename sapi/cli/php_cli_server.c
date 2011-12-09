@@ -1921,6 +1921,7 @@ static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_serve
 	php_cli_server_close_connection(server, client TSRMLS_CC);
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
+	SG(rfc1867_uploaded_files) = NULL;
 	return SUCCESS;
 }             
 /* }}} */  
