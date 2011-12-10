@@ -433,6 +433,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 					case ':':
 						in_param = 1;
 						ppname = pname;
+						*ppname++ = sql[l];
 					case '?':
 						*c++ = '?';
 						++pindex;
