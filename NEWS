@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
 
+- Streams:
+  . Fixed bug #60455 (stream_get_line misbehaves if EOF is not detected together
+    with the last read). (Gustavo)
+
 08 Dec 2011, PHP 5.3.9RC3
 
 - Filter:

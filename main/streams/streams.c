@@ -918,9 +918,8 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		just_read = (stream->writepos - stream->readpos) - len;
 		len += just_read;
 
-		/* read operation have less data than request; assume the stream is
-		 * temporarily or permanently out of data */
-		if (just_read < toread) {
+		/* Assume the stream is temporarily or permanently out of data */
+		if (just_read == 0) {
 			break;
 		}
 	}
