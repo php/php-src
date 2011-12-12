@@ -1,5 +1,10 @@
 --TEST--
-Test sort() function : usage variations - sort strings 
+Test sort() function : usage variations - sort strings
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+  die("skip Output tested contains chars that are not shown the same on windows concole (ESC and co)");
+}
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -74,7 +79,8 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) ""
+  string(1) "
+"
   [7]=>
   string(2) "\a"
   [8]=>
@@ -103,7 +109,8 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) ""
+  string(1) "
+"
   [7]=>
   string(2) "\a"
   [8]=>
@@ -132,7 +139,8 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) ""
+  string(1) "
+"
   [7]=>
   string(2) "\a"
   [8]=>
