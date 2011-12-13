@@ -9,4 +9,4 @@ echo tempnam("directory_that_not_exists", "prefix_");
 
 ?>
 --EXPECTF--
-Warning: tempnam(): open_basedir restriction in effect. File(/tmp) is not within the allowed path(s): (%s) in %s on line %d
+Warning: tempnam(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s) in %s on line %d
