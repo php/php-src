@@ -25,7 +25,7 @@ if (!$IS_MYSQLND)
 	// Killing connection - 1
 
 	$link = get_connection();
-	if (true !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed beofre killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
+	if (true !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed before killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
 		printf("[002] Expecting boolean/true got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	// Sleep 0.1s - the asynchronous query should have been processed after the wait period
