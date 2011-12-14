@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2011, PHP 5.4.0 RC4
+- Core:
+  . Added max_input_vars directive to prevent attacks based on hash collisions
+    (Dmitry).
 - CLI SAPI:
   . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
     one 200 RQ and one 404). (Laruence)
@@ -9,6 +12,8 @@ PHP                                                                        NEWS
 
 08 Dec 2011, PHP 5.4.0 RC3
 - Core:
+  . Fixed bug #60444 (Segmentation fault with include & class extending).
+    (Laruence, Dmitry).
   . Fixed bug #60350 (No string escape code for ESC (ascii 27), normally \e).
     (php at mickweiss dot com)
   . Fixed bug #60240 (invalid read/writes when unserializing specially crafted
