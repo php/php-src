@@ -193,12 +193,12 @@ PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
 PHPAPI extern const char * const mysqlnd_out_of_memory;
 
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
 

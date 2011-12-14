@@ -269,7 +269,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 
 
 /* {{{ mysqlnd_object_factory::get_protocol_decoder */
-PHPAPI MYSQLND_PROTOCOL *
+static MYSQLND_PROTOCOL *
 MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
@@ -287,7 +287,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persisten
 /* }}} */
 
 
-MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
+PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
