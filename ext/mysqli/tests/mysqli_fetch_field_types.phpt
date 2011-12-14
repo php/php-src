@@ -10,14 +10,14 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require('table.inc');
 
-	function mysqli_field_datatypes($link, $sql_type, $php_value, $php_type, $datatypes) {
+	function mysqli_field_datatypes($link, $sql_type, $php_value, $php_type, $datatypes, $default_charset="latin1") {
 		if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
 			printf("[001] %s, [%d] %s\n", $sql_type,
 				mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
-		$create = sprintf("CREATE TABLE test(id %s)", $sql_type);
+		$create = sprintf("CREATE TABLE test(id %s) DEFAULT CHARSET %s", $sql_type, $default_charset);
 		if (!mysqli_query($link, $create)) {
 			printf("[002] '%s' - '%s', [%d] %s\n", $sql_type, $create,
 				mysqli_errno($link), mysqli_error($link));
