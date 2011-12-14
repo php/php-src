@@ -289,7 +289,7 @@ Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; ch
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
-Warning: mysqli_change_user(): (%d/%d): Access denied for user '0123456789-10-4%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_change_user(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 
