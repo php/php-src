@@ -18,7 +18,6 @@ if (PHP_CURL != "no") {
 		AC_DEFINE('HAVE_CURL_SSL', 1, 'Have SSL suppurt in cURL');
 		AC_DEFINE('HAVE_CURL_EASY_STRERROR', 1, 'Have curl_easy_strerror in cURL');
 		AC_DEFINE('HAVE_CURL_MULTI_STRERROR', 1, 'Have curl_multi_strerror in cURL');
-		AC_DEFINE('HAVE_CURL_VERSION_INFO', 1, 'Have curl_version_info in cURL');
 		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB");
 		// TODO: check for curl_version_info
 		// AC_DEFINE('PHP_CURL_URL_WRAPPERS', 0, 'Use curl for URL wrappers [experimental]');

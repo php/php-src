@@ -131,13 +131,6 @@ int main(int argc, char *argv[])
     $CURL_LIBS -L$CURL_DIR/$PHP_LIBDIR
   ])
 
-  PHP_CHECK_LIBRARY(curl,curl_version_info,
-  [
-    AC_DEFINE(HAVE_CURL_VERSION_INFO,1,[ ])
-  ],[],[
-    $CURL_LIBS -L$CURL_DIR/$PHP_LIBDIR
-  ])
-
   PHP_CHECK_LIBRARY(curl,curl_easy_strerror,
   [
     AC_DEFINE(HAVE_CURL_EASY_STRERROR,1,[ ])
