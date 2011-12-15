@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2011, PHP 5.3.9
 
+- Core:
+  . Added max_input_vars directive to prevent attacks based on hash collisions
+    (Dmitry).
+
 - Streams:
   . Fixed bug #60455 (stream_get_line misbehaves if EOF is not detected together
     with the last read). (Gustavo)

@@ -174,6 +174,8 @@ struct _php_core_globals {
 #ifdef PHP_WIN32
 	zend_bool windows_show_crt_warning;
 #endif
+
+	long max_input_vars;
 };
 
 
