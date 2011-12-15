@@ -163,6 +163,11 @@ UPGRADE NOTES - PHP 5.3
   xsl.security_prefs. This option will be marked as deprecated in 5.4 again. 
   Use the method XsltProcess::setSecurityPrefs($options) there.
 
+- the following new directives were added
+
+  - max_input_vars - specifies how many GET/POST/COOKIE input variables may be
+    accepted. default value 1000. 
+
 =============
 5. Deprecated
 =============
