@@ -82,6 +82,11 @@ UPGRADE NOTES - PHP X.Y
   - safe_mode_protected_env_vars
   - zend.ze1_compatibility_mode
 
+- the following new directives were added
+
+  - max_input_vars - specifies how many GET/POST/COOKIE input variables may be
+    accepted. default value 1000. 
+
 =============================
 2. Reserved words and classes
 =============================
