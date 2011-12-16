@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Core:
   . Added max_input_vars directive to prevent attacks based on hash collisions
     (Dmitry).
+  . Fixed bug #60536 (Traits Segfault). (Laruence)
 - CLI SAPI:
   . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
     one 200 RQ and one 404). (Laruence)
