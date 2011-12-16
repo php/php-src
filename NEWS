@@ -8,8 +8,11 @@ PHP                                                                        NEWS
 - CLI SAPI:
   . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
     one 200 RQ and one 404). (Laruence)
+  . Fixed bug #60523 (PHP Errors are not reported in browsers using built-in 
+    SAPI). (Laruence, Derick)
 - Pdo Firebird:
-  . Fixed bug #48877 ("bindValue" and "bindParam" do not work for PDO Firebird).(Mariuz)  
+  . Fixed bug #48877 ("bindValue" and "bindParam" do not work for PDO Firebird).
+    (Mariuz)  
 
 08 Dec 2011, PHP 5.4.0 RC3
 - Core:
