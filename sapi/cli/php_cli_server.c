@@ -1913,6 +1913,7 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
+	PG(during_request_startup) = 0;
 
 	return SUCCESS;
 }
