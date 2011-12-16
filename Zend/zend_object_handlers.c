@@ -62,6 +62,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		ALLOC_HASHTABLE(zobj->properties);
 		zend_hash_init(zobj->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (ce->default_properties_count) {
+			int *flags = ecalloc(ce->default_properties_count, sizeof(int));
 			for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 			     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
 			     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
@@ -70,6 +71,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    prop_info->offset >= 0 &&
 				    zobj->properties_table[prop_info->offset]) {
 					zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+					flags[prop_info->offset] = 1;
 				}				
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
@@ -81,11 +83,16 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
 					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 && 
 					    prop_info->offset >= 0 &&
-					    zobj->properties_table[prop_info->offset]) {
-						zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+						zobj->properties_table[prop_info->offset]) {
+						if (UNEXPECTED(flags[prop_info->offset])) {
+							zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+						} else {
+							zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
+						}
 					}				
 				}
 			}
+			efree(flags);
 		}
 	}
 }
