@@ -22,5 +22,4 @@ $a->x();
 echo "DONE";
 ?>
 --EXPECTF--
-Strict Standards: X and T define the same property ($x) in the composition of Y. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %sbug60536_001.php on line %d
 DONE

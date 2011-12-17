@@ -4234,6 +4234,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	ulong prop_hash;
 	const char* class_name_unused;
 	zend_bool prop_found;
+	zend_bool parent_prop_is_private = 0;
 	zend_bool not_compatible;
 	zval* prop_value;
   
@@ -4271,40 +4272,44 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
 					/* this one is inherited, lets look it up in its own class */
 					zend_hash_quick_find(&coliding_prop->ce->properties_info, prop_name, prop_name_length+1, prop_hash, (void **) &coliding_prop);
+					parent_prop_is_private = (coliding_prop->flags & ZEND_ACC_PRIVATE) == ZEND_ACC_PRIVATE;
 				}
-				if (   (coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
-					== (property_info->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
-					/* flags are identical, now the value needs to be checked */
-					if (property_info->flags & ZEND_ACC_STATIC) {
-						not_compatible = (FAILURE == compare_function(&compare_result,
-                                          ce->default_static_members_table[coliding_prop->offset],
-                                          ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC))
-                              || (Z_LVAL(compare_result) != 0);
+				
+				if (!parent_prop_is_private) {
+					if (   (coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
+						== (property_info->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
+						/* flags are identical, now the value needs to be checked */
+						if (property_info->flags & ZEND_ACC_STATIC) {
+							not_compatible = (FAILURE == compare_function(&compare_result,
+											  ce->default_static_members_table[coliding_prop->offset],
+											  ce->traits[i]->default_static_members_table[property_info->offset] TSRMLS_CC))
+								  || (Z_LVAL(compare_result) != 0);
+						} else {
+							not_compatible = (FAILURE == compare_function(&compare_result,
+											  ce->default_properties_table[coliding_prop->offset],
+											  ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC))
+								  || (Z_LVAL(compare_result) != 0);
+						}
 					} else {
-						not_compatible = (FAILURE == compare_function(&compare_result,
-                                          ce->default_properties_table[coliding_prop->offset],
-                                          ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC))
-                              || (Z_LVAL(compare_result) != 0);
+						/* the flags are not identical, thus, we assume properties are not compatible */
+						not_compatible = 1;
 					}
-				} else {
-					/* the flags are not identical, thus, we assume properties are not compatible */
-					not_compatible = 1;
-				}
 
-				if (not_compatible) {
-					zend_error(E_COMPILE_ERROR, 
-							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
-								find_first_definition(ce, i, prop_name, prop_name_length, prop_hash, coliding_prop->ce)->name,
-								property_info->ce->name,
-								prop_name,
-								ce->name);
-				} else {
-					zend_error(E_STRICT, 
-							   "%s and %s define the same property ($%s) in the composition of %s. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed",
-								find_first_definition(ce, i, prop_name, prop_name_length, prop_hash, coliding_prop->ce)->name,
-								property_info->ce->name,
-								prop_name,
-								ce->name);
+					if (not_compatible) {
+						zend_error(E_COMPILE_ERROR, 
+								   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+									find_first_definition(ce, i, prop_name, prop_name_length, prop_hash, coliding_prop->ce)->name,
+									property_info->ce->name,
+									prop_name,
+									ce->name);
+					} else {
+						zend_error(E_STRICT, 
+								   "%s and %s define the same property ($%s) in the composition of %s. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed",
+									find_first_definition(ce, i, prop_name, prop_name_length, prop_hash, coliding_prop->ce)->name,
+									property_info->ce->name,
+									prop_name,
+									ce->name);
+					}
 				}
 			}
 
