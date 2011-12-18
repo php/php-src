@@ -4713,7 +4713,9 @@ PHP_FUNCTION(openssl_encrypt)
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
 	}
 	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
-	EVP_EncryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
+	if (data_len > 0) {
+		EVP_EncryptUpdate(&cipher_ctx, outbuf, &i, (unsigned char *)data, data_len);
+	}
 	outlen = i;
 	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + i, &i)) {
 		outlen += i;
