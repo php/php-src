@@ -4208,6 +4208,50 @@ static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t curr
 }
 /* }}} */
 
+static void zend_traits_register_private_property(zend_class_entry *ce, const char *name, int name_len, zend_property_info *old_info, zval *property TSRMLS_DC) /* {{{ */
+{
+	char *priv_name;
+	int priv_name_length;
+	const char *interned_name;
+	zend_property_info property_info;
+	ulong h = zend_get_hash_value(name, name_len+1);
+	property_info = *old_info;
+
+	if (old_info->flags & ZEND_ACC_STATIC) {
+		property_info.offset = ce->default_static_members_count++;
+		ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval*) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
+		ce->default_static_members_table[property_info.offset] = property;
+		if (ce->type == ZEND_USER_CLASS) {
+			ce->static_members_table = ce->default_static_members_table;
+		}
+	} else {
+		property_info.offset = ce->default_properties_count++;
+		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval*) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+		ce->default_properties_table[property_info.offset] = property;
+	}
+
+	zend_mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_len, ce->type & ZEND_INTERNAL_CLASS);
+	property_info.name = priv_name;
+	property_info.name_length = priv_name_length;
+
+	interned_name = zend_new_interned_string(property_info.name, property_info.name_length+1, 0 TSRMLS_CC);
+	if (interned_name != property_info.name) {
+		if (ce->type == ZEND_USER_CLASS) {
+			efree((char*)property_info.name);
+		} else {
+			free((char*)property_info.name);
+		}
+		property_info.name = interned_name;
+	}
+
+	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
+
+	property_info.ce = ce;
+
+	zend_hash_quick_update(&ce->properties_info, name, name_len+1, h, &property_info, sizeof(zend_property_info), NULL);
+}
+/* }}} */
+
 static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	size_t i;
@@ -4295,6 +4339,17 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 									prop_name,
 									ce->name);
 					}
+				} else {
+					/* private property, make the property_info.offset indenpended */
+					if (property_info->flags & ZEND_ACC_STATIC) {
+						prop_value = ce->traits[i]->default_static_members_table[property_info->offset];
+					} else {
+						prop_value = ce->traits[i]->default_properties_table[property_info->offset];
+					}
+					Z_ADDREF_P(prop_value);
+
+					zend_traits_register_private_property(ce, prop_name, prop_name_length, property_info, prop_value TSRMLS_CC);
+					return;
 				}
 			}
 
