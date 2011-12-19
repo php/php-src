@@ -7,7 +7,6 @@ PHP                                                                        NEWS
   . Fixed bug #60536 (Traits Segfault). (Laruence)
   . Fixed bug #60362 (non-existent sub-sub keys should not have values).
     (Laruence, alan_k, Stas)
-  . Fixed bug #60558 (Invalid read and writes). (Laruence)
 
 - CLI SAPI:
   . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
