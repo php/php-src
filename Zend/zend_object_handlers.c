@@ -85,7 +85,6 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    prop_info->offset >= 0 &&
 						zobj->properties_table[prop_info->offset]) {
 						if (UNEXPECTED(flags[prop_info->offset])) {
-							Z_ADDREF_P(*(zval **)zobj->properties_table[prop_info->offset]);
 							zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
 						} else {
 							zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
