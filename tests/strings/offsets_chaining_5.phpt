@@ -15,8 +15,13 @@ var_dump($array['expected_array']['foo']['bar']);
 --EXPECTF--
 bool(true)
 string(6) "foobar"
-bool(true)
-string(1) "f"
-bool(true)
-string(1) "f"
+bool(false)
 
+Warning: Illegal string offset 'foo' in %soffsets_chaining_5.php on line %d
+string(1) "f"
+bool(false)
+
+Warning: Illegal string offset 'foo' in %soffsets_chaining_5.php on line %d
+
+Warning: Illegal string offset 'bar' in %soffsets_chaining_5.php on line %d
+string(1) "f"
