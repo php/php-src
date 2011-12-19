@@ -4507,10 +4507,17 @@ ZEND_VM_C_LABEL(num_index_prop):
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
+			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+				|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, -1))) {
 			ZVAL_COPY_VALUE(&tmp, offset);
 			zval_copy_ctor(&tmp);
 			convert_to_long(&tmp);
 			offset = &tmp;
+			} else {
+				/* can not be converted to proper offset, return "not set" */
+				result = 0;
+		}
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {

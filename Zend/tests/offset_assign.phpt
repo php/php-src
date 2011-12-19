@@ -8,4 +8,6 @@ $x['x']['y'] += 1;
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Cannot use string offset as an array in %s on line %d
+Warning: Illegal string offset 'x' in %soffset_assign.php on line %d
+
+Fatal error: Cannot use string offset as an array in %soffset_assign.php on line %d
