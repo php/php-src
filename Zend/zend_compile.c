@@ -115,7 +115,6 @@ static void zend_duplicate_property_info(zend_property_info *property_info) /* {
 }
 /* }}} */
 
-
 static void zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
 	if (!IS_INTERNED(property_info->name)) {		
@@ -123,7 +122,6 @@ static void zend_duplicate_property_info_internal(zend_property_info *property_i
 	}
 }
 /* }}} */
-
 
 static void zend_destroy_property_info(zend_property_info *property_info) /* {{{ */
 {
@@ -133,7 +131,6 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 	}
 }
 /* }}} */
-
 
 static void zend_destroy_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
@@ -166,7 +163,6 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 	Z_SET_REFCOUNT_P(result, 1);
 }
 /* }}} */
-
 
 static void init_compiler_declarables(TSRMLS_D) /* {{{ */
 {
@@ -211,7 +207,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-
 ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	TSRMLS_FETCH();
@@ -219,7 +214,6 @@ ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 	zend_file_handle_dtor(fh TSRMLS_CC);
 }
 /* }}} */
-
 
 void init_compiler(TSRMLS_D) /* {{{ */
 {
@@ -231,7 +225,6 @@ void init_compiler(TSRMLS_D) /* {{{ */
 	CG(unclean_shutdown) = 0;
 }
 /* }}} */
-
 
 void shutdown_compiler(TSRMLS_D) /* {{{ */
 {
@@ -247,7 +240,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(context_stack));
 }
 /* }}} */
-
 
 ZEND_API char *zend_set_compiled_filename(const char *new_compiled_filename TSRMLS_DC) /* {{{ */
 {
@@ -265,13 +257,11 @@ ZEND_API char *zend_set_compiled_filename(const char *new_compiled_filename TSRM
 }
 /* }}} */
 
-
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC) /* {{{ */
 {
 	CG(compiled_filename) = original_compiled_filename;
 }
 /* }}} */
-
 
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D) /* {{{ */
 {
@@ -279,20 +269,17 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
 {
 	return CG(zend_lineno);
 }
 /* }}} */
 
-
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 {
 	return CG(in_compilation);
 }
 /* }}} */
-
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
@@ -608,7 +595,6 @@ void zend_do_unary_op(zend_uchar op, znode *result, const znode *op1 TSRMLS_DC) 
 /* }}} */
 
 #define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(opline->result)); memset(&opline->op1,0,sizeof(opline->op1)); memset(&opline->op2,0,sizeof(opline->op2)); opline->result_type=opline->op1_type=opline->op2_type=IS_UNUSED;  }
-
 
 static void zend_do_op_data(zend_op *data_op, const znode *value TSRMLS_DC) /* {{{ */
 {
@@ -3677,7 +3663,6 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 }
 /* }}} */
 
-
 /* {{{ Originates from php_runkit_function_copy_ctor
 	Duplicate structures in an op_array where necessary to make an outright duplicate */
 static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *target_ce, char *newname TSRMLS_DC)
@@ -3810,7 +3795,7 @@ static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *
 	fe->op_array.try_catch_array = (zend_try_catch_element*)estrndup((char*)fe->op_array.try_catch_array, sizeof(zend_try_catch_element) * fe->op_array.last_try_catch);
 
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
-
+  
 }
 /* }}} */
 
@@ -3868,32 +3853,32 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 	} else if (existing_fn->common.scope != ce) {
 		add = 1; /* or inherited from other class or interface */
 	}
-  
+
 	if (add) {
 		zend_function* parent_function;
 		if (ce->parent && zend_hash_quick_find(&ce->parent->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**) &parent_function) != FAILURE) {
 			prototype = parent_function; /* ->common.fn_flags |= ZEND_ACC_ABSTRACT; */
 			
 			/* we got that method in the parent class, and are going to override it,
-			   except, if the trait is just asking to have an abstract method implemented. */
+			  except, if the trait is just asking to have an abstract method implemented. */
 			if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* then we clean up an skip this method */
 				zend_function_dtor(fn);
 				return ZEND_HASH_APPLY_REMOVE;
 			}
 		}
-    
+
 		fn->common.scope = ce;
 		fn->common.prototype = prototype;
-    
+
 		if (prototype
 			&& (prototype->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
-				|| prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-				fn->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
-			} else if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
-				/* remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class */
-				fn->common.fn_flags = fn->common.fn_flags - ZEND_ACC_IMPLEMENTED_ABSTRACT;
-			}
+			|| prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			fn->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
+		} else if (fn->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT) {
+			/* remove ZEND_ACC_IMPLEMENTED_ABSTRACT flag, think it shouldn't be copied to class */
+			fn->common.fn_flags = fn->common.fn_flags - ZEND_ACC_IMPLEMENTED_ABSTRACT;
+		}
 
 		/* check whether the trait method fullfills the inheritance requirements */
 		if (prototype) {
@@ -3929,9 +3914,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
 		}
-
+   
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
-
+   
 		zend_function_dtor(fn);
 	} else {
 		zend_function_dtor(fn);
@@ -3952,7 +3937,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	zend_function fn_copy;
 	void* dummy;
 	size_t i = 0;
-	
+
 	target        = va_arg(args, HashTable*);
 	target_ce     = va_arg(args, zend_class_entry*);
 	aliases       = va_arg(args, zend_trait_alias**);
@@ -4237,8 +4222,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zend_bool parent_prop_is_private = 0;
 	zend_bool not_compatible;
 	zval* prop_value;
-
-
+  
+  
 	/* In the following steps the properties are inserted into the property table
 	 * for that, a very strict approach is applied:
 	 * - check for compatibility, if not compatible with any property in class -> fatal
@@ -4276,7 +4261,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				}
 				
 				if (!parent_prop_is_private) {
-					if (   (coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
+					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (property_info->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* flags are identical, now the value needs to be checked */
 						if (property_info->flags & ZEND_ACC_STATIC) {
@@ -4401,14 +4386,13 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 
 	/* verify that all abstract methods from traits have been implemented */
 	zend_verify_abstract_class(ce TSRMLS_CC);
-
+  
 	/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	}
 }
 /* }}} */
-
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
@@ -4447,7 +4431,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 }
 /* }}} */
 
-
 void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
@@ -4485,7 +4468,6 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	result->op_type = IS_TMP_VAR;
 }
 /* }}} */
-
 
 void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC) /* {{{ */
 {
@@ -5178,11 +5160,11 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 void zend_do_implements_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-  if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-    zend_error(E_COMPILE_ERROR,
-               "Cannot use traits inside of interfaces. %s is used in %s",
-               Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name);
-  }
+	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
+		zend_error(E_COMPILE_ERROR,
+				"Cannot use traits inside of interfaces. %s is used in %s",
+				Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name);
+	}
 
 
 	switch (zend_get_class_fetch_type(Z_STRVAL(trait_name->u.constant), Z_STRLEN(trait_name->u.constant))) {
