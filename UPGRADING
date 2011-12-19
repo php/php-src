@@ -30,7 +30,7 @@ UPGRADE NOTES - PHP 5.4
 ========================================
 
 - The default_charset setting now defaults to UTF-8.
-  It was ISO-88590-1 before, so if you were relying 
+  It was ISO-88590-1 before, so if you were relying
   on the default, you will need to add:
 
     default_charset = iso-8859-1
@@ -49,7 +49,7 @@ UPGRADE NOTES - PHP 5.4
 
   to your php.ini to preserve pre-PHP5.4 behavior.
 
-- Deprecated ini directives will now throw an E_CORE_WARNING's 
+- Deprecated ini directives will now throw an E_CORE_WARNING's
   instead of the previous E_WARNING's.
 
   The following directives are marked as deprecated:
@@ -57,8 +57,8 @@ UPGRADE NOTES - PHP 5.4
   - magic_quotes_runtime
   - magic_quotes_sybase
 
-- The following directives, which indicates a removed feature 
-  in PHP will now throw an E_CORE_ERROR upon startup like the 
+- The following directives, which indicates a removed feature
+  in PHP will now throw an E_CORE_ERROR upon startup like the
   deprecation warnings.
 
   The following directives are no longer available:
@@ -78,7 +78,7 @@ UPGRADE NOTES - PHP 5.4
 - the following new directives were added
 
   - max_input_vars - specifies how many GET/POST/COOKIE input variables may be
-    accepted. default value 1000. 
+    accepted. default value 1000.
 
 =============================
 2. Reserved words and classes
@@ -101,7 +101,7 @@ UPGRADE NOTES - PHP 5.4
   {
     public function __construct($bar) {}
   }
-  
+
   Now emits a Fatal error due the incompatible declaration.
 
 - In previous versions, names of superglobals could be used for parameter
@@ -118,12 +118,18 @@ UPGRADE NOTES - PHP 5.4
   $test = new StdClass;
   $test->baz = 1;
 
-- Converting array to string now will cause E_NOTICE warning. 
+- Converting array to string now will cause E_NOTICE warning.
 
-- Chained string offsets - e.g. $a[0][0] where $a is a string - now work, which 
-means isset($a['foo']['bar']) now will return true due to automatic type conversion.
+- Chained string offsets - e.g. $a[0][0] where $a is a string - now work.
 
-- Changed E_ALL to include E_STRICT. 
+- Non-numeric string offsets - e.g. $a['foo'] where $a is a string - now return
+  false on isset() and true on empty(), and produce warning if trying to use them.
+  Offsets of types double, bool and null produce notice. Numeric strings ($a['2'])
+  still work as before.
+  Note that offsets like '12.3' and '5 and a half' are considered non-numeric
+  and produce warning, but are converted to 12 and 5 respectively for BC reasons.
+
+- Changed E_ALL to include E_STRICT.
 
 - Closures now support scopes and $this and can be rebound to
   objects using Closure::bind() and Closure::bindTo().
@@ -133,7 +139,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 
 - <?= is now always available regardless of the short_open_tag setting.
 
-- Parse error messages are changed to contain more information about the error. 
+- Parse error messages are changed to contain more information about the error.
 
 =====================================
 4. Changes made to existing functions
@@ -212,22 +218,22 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 - Added AES support to OpenSSL.
 - openssl_csr_new() expects the textual data to be in UTF-8.
 - Added no padding option to openssl_encrypt()/openssl_decrypt().
-- Added a "no_ticket" SSL context option to disable the SessionTicket TLS 
+- Added a "no_ticket" SSL context option to disable the SessionTicket TLS
   extension.
-- Added new json_encode() options: JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES, 
+- Added new json_encode() options: JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES,
   JSON_NUMERIC_CHECK, JSON_BIGINT_AS_STRING, JSON_UNESCAPED_UNICODE.
 - Added Tokyo Cabinet and Berkley DB 5 support to DBA extension.
 - Added support for CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE
   to cURL.
-- Added optional argument to debug_backtrace() and debug_print_backtrace() 
+- Added optional argument to debug_backtrace() and debug_print_backtrace()
   to limit the amount of stack frames returned.
 - Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode
-  now supports hashes marked $2a$, $2x$, $2y$ and $2z$. 
-- mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji, 
-  JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004), 
+  now supports hashes marked $2a$, $2x$, $2y$ and $2z$.
+- mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji,
+  JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004),
   MacJapanese (Shift_JIS), gb18030.
 - Added encode/decode in hex format to mb_[en|de]code_numericentity().
-- Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions 
+- Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions
   (sort, rsort, ksort, krsort, asort, arsort and array_multisort).
 - is_a() and is_subclass_of() now have third boolean parameter, which specifies
   if the first argument can be a string class name. Default if false for is_a
@@ -243,7 +249,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 5. Changes made to existing methods
 ===================================
 
-- DateTime::parseFromFormat() now has + modifier to allow trailing text in 
+- DateTime::parseFromFormat() now has + modifier to allow trailing text in
   the string to parse without throwing an error.
 - Added the ability to pass options to DOMDocument::loadHTML().
 - FilesystemIterator, GlobIterator and (Recursive)DirectoryIterator now use
@@ -281,8 +287,8 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
     a. removed features
 
        - magic quotes
-         . remove magic_quotes_gpc, magic_quotes_runtime, 
-           magic_quotes_sybase (calling ini_set('magic_....') 
+         . remove magic_quotes_gpc, magic_quotes_runtime,
+           magic_quotes_sybase (calling ini_set('magic_....')
            returns 0|false
          . get_magic_quotes_gpc, get_magic_quotes_runtime are kept but
            always return false
@@ -347,10 +353,10 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
         - PDO_mysql: Support for linking with MySQL client libraries older
 		  than 4.1 is removed.
         - The session extension now can hook into the file upload feature
-          in order to provide upload progress information through session 
+          in order to provide upload progress information through session
           variables.
         - SNMP extension
-             - Functions in SNMP extension now returns FALSE on every error 
+             - Functions in SNMP extension now returns FALSE on every error
                condition including SNMP-related (no such instance, end of MIB,
                etc). Thus, in patricular, breaks previous behaviour of get/walk
                functions returning an empty string on SNMP-related errors.
@@ -358,7 +364,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
              - New constants added for use in snmp_set_oid_output_format()
                function.
              - Function snmp_set_valueretrieval() changed it's behaviour:
-                    SNMP_VALUE_OBJECT can be combined with one of 
+                    SNMP_VALUE_OBJECT can be combined with one of
                     SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY resulting OID value
                     changes. When no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
                     is supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_LIBRARY is used.
@@ -370,7 +376,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
              - In sake of adding support for IPv6 DNS name resolution of
                remote SNMP agent (peer) is done by extension now, not by Net-SNMP
                library anymore.
-          
+
         - Date extension
           - Setting the timezone with the TZ environment variable is no longer
             supported, instead date.timezone and/or date_default_timezone_set()
@@ -387,12 +393,12 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 - The REQUEST_TIME value inside server now returns a floating point number
   indicating the time with microsecond precision. All SAPIs providing this
   value should be returning float and not time_t.
-- apache_child_terminate(), getallheaders(), apache_request_headers() 
+- apache_child_terminate(), getallheaders(), apache_request_headers()
   and apache_response_headers() now supported on FastCGI.
 - Added shortcut #inisetting=value to change ini settings at run-time.
 - Changed shell not to terminate on fatal errors.
 - Interactive shell works with shared readline extension.
-- Added command line option --rz <name> which shows information of the 
+- Added command line option --rz <name> which shows information of the
   named Zend extension.
 - PHP-FPM now supports syslog value for error_log.
 
@@ -400,10 +406,10 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 11. Changes in INI directives
 =============================
 
-- Recommended production value for error_reporting changed to 
+- Recommended production value for error_reporting changed to
   E_ALL & ~E_DEPRECATED & ~E_STRICT.
-- Added session.upload_progress.enabled, session.upload_progress.cleanup, 
-  session.upload_progress.prefix, session.upload_progress.name, 
+- Added session.upload_progress.enabled, session.upload_progress.cleanup,
+  session.upload_progress.prefix, session.upload_progress.name,
   session.upload_progress.freq, session.upload_progress.min_freq.
 - Added zend.multibyte directive as a replacement of PHP compile time
   configuration option --enable-zend-multibyte. Now ZE always contains code for
@@ -418,7 +424,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
   three times.
 - A new directive, called windows_show_crt_warning, has been introduced.
   This directive shows the CRT warnings when enabled. These warnings were
-  displayed by default until now. It is disabled by default. 
+  displayed by default until now. It is disabled by default.
 - Added cli.pager php.ini setting to set a pager for CLI output.
 - Added cli.prompt php.ini setting to configure the CLI shell prompt.
 - Added process.max to control the number of process FPM can fork.
@@ -434,12 +440,12 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
     }
 
     class CanIGetHello {
-        use HelloWorld;	
+        use HelloWorld;
     }
-	
+
     $hello = new CanIGetHello();
     $hello->sayHello();
-	
+
 - Function call result array access:
   e.g.
     foo()[0]
@@ -464,17 +470,17 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 
 - $str[1][0] where $str is a string is now a legal construct.
 
-- Anonymous functions now support using $this and class scope. 
+- Anonymous functions now support using $this and class scope.
   Anonymous function can be declared as "static" to ignore the scope.
 
 - Class::{expr}() syntax is now supported:
-    class A { 
-        static function foo() { 
+    class A {
+        static function foo() {
             echo "Hello world!\n";
         }
-    } 
-    $x = "f"; 
-    $y = "o"; 
+    }
+    $x = "f";
+    $y = "o";
     A::{$x.$y.$y}();
 
 - Class member access on instantiation:
@@ -486,7 +492,7 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 13. Windows support
 ===================
 
-- is_link now works properly for symbolic links on Windows Vista 
+- is_link now works properly for symbolic links on Windows Vista
   or later. Earlier systems do not support symbolic links.
 
 ===================
@@ -513,22 +519,22 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
          - transliterator_get_error_message()
          - transliterator_list_ids()
          - transliterator_transliterate()
-	
+
        - LDAP:
          - ldap_control_paged_results()
          - ldap_control_paged_results_response()
 
        - libxml:
          - libxml_set_external_entity_loader()
-	
+
        - mysqli:
          - mysqli_error_list()
          - mysqli_stmt_error_list()
-	
+
        - Session:
          - session_register_shutdown()
          - session_status()
-		
+
        - SPL
          - class_uses()
 
@@ -627,17 +633,17 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 
        - Reflection:
          - ReflectionZendExtension
-       
+
        - Intl:
          - Transliterator
 		 - Spoofchecker
-       
+
        - JSON:
          - JsonSerializable
 
-       - Session: 
+       - Session:
          - SessionHandler
-	
+
        - SNMP:
          - SNMP
 
@@ -647,9 +653,9 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
 
      d. New methods
 
-       - Closure: 
+       - Closure:
          - Closure::bind()
-         - Closure::bindTo() 
+         - Closure::bindTo()
 
        - Reflection:
          - ReflectionClass::getTraitAliases()
@@ -714,5 +720,5 @@ means isset($a['foo']['bar']) now will return true due to automatic type convers
        - joaat
 
 
-	
-       
+
+

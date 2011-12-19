@@ -24,6 +24,6 @@ $x->prop;
 $x->y;
 echo "ok\n";
 --EXPECTF--
-Notice: Uninitialized string offset: 3 in %sresult_unused.php on line 11
+Notice: Uninitialized string offset: 3 in %sresult_unused.php on line %d
 ok
 
