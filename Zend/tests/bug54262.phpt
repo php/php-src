@@ -9,7 +9,7 @@ $simpleString["wrong"] = "f";
 echo "ok\n";
 ?>
 --EXPECTF--
-bool(true)
+bool(false)
 
 Warning: Attempt to modify property of non-object in %sbug54262.php on line 4
 
