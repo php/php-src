@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Dec 2011, PHP 5.4.0 RC4
+22 Dec 2011, PHP 5.4.0 RC4
 - Core:
   . Added max_input_vars directive to prevent attacks based on hash collisions
     (Dmitry).
