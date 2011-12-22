@@ -454,6 +454,11 @@ static void sapi_cli_server_flush(void *server_context) /* {{{ */
 	}
 } /* }}} */
 
+static int sapi_cli_server_discard_headers(sapi_headers_struct *sapi_headers TSRMLS_DC) /* {{{ */{
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
+}
+/* }}} */
+
 static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
@@ -1309,6 +1314,9 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					file++;
 				}
 				if (!*file || is_static_file) {
+					if (prev_patch) {
+						pefree(prev_patch, 1);
+					}
 					pefree(buf, 1);
 					return;
 				}
@@ -1742,19 +1750,30 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	}
 	{
 		int err = 0;
-		sapi_activate_headers_only(TSRMLS_C);
-		php_cli_server_client_begin_capture(client);
+		zval *style = NULL; 
 		zend_try {
+			php_output_activate(TSRMLS_C);
+			php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 			php_info_print_style(TSRMLS_C);
-			if (client->capture_buffer.first) {
-				php_cli_server_buffer_append(&client->content_sender.buffer, client->capture_buffer.first);
+			MAKE_STD_ZVAL(style);
+			php_output_get_contents(style TSRMLS_CC);
+			php_output_discard(TSRMLS_C);
+			php_output_deactivate(TSRMLS_C);
+			if (style && Z_STRVAL_P(style)) {
+				char *block = pestrndup(Z_STRVAL_P(style), Z_STRLEN_P(style), 1);
+				php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new(block, block, Z_STRLEN_P(style));
+				if (!chunk) {
+					zval_ptr_dtor(&style);
+					goto fail;
+				}
+				php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
+				zval_ptr_dtor(&style);
+			} else {
+				err = 1;
 			}
-			client->capture_buffer.first = client->capture_buffer.last = NULL;
 		} zend_catch {
 			err = 1;
 		} zend_end_try();
-		php_cli_server_client_end_capture(client);
-		sapi_deactivate(TSRMLS_C);
 		if (err) {
 			goto fail;
 		}
@@ -2002,6 +2021,15 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 			return SUCCESS;
 		} 
 	} else {
+		if (server->router) {
+			static int (*send_header_func)(sapi_headers_struct * TSRMLS_DC);
+			send_header_func = sapi_module.send_headers;
+			/* we don't want the header to be sent now */
+			sapi_module.send_headers = sapi_cli_server_discard_headers;
+			php_request_shutdown(0);
+			sapi_module.send_headers = send_header_func;
+			SG(rfc1867_uploaded_files) = NULL;
+		} 
 		if (SUCCESS != php_cli_server_begin_send_static(server, client TSRMLS_CC)) {
 			php_cli_server_close_connection(server, client TSRMLS_CC);
 		}
