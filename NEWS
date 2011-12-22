@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2012, PHP 5.4.0 RC5
+- CLI SAPI:
+  . Fixed bug #60591 (Memory leak when access a non-exists file). (Laruence)
 
 22 Dec 2011, PHP 5.4.0 RC4
 - Core:
