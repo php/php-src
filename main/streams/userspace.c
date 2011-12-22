@@ -886,6 +886,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 
 #define STAT_PROP_ENTRY(name) STAT_PROP_ENTRY_EX(name,name)
 
+	memset(ssb, 0, sizeof(php_stream_statbuf));
 	STAT_PROP_ENTRY(dev);
 	STAT_PROP_ENTRY(ino);
 	STAT_PROP_ENTRY(mode);
