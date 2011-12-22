@@ -64,9 +64,7 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-
-Notice: A non well formed numeric value encountered in %s line %d
-bool(false)
+bool(true)
 - bool ---
 bool(false)
 bool(false)
