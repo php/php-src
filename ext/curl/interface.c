@@ -960,7 +960,7 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
-    REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_URL);
+	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_URL);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
@@ -1743,14 +1743,14 @@ static void split_certinfo(char *string, zval *hash)
 	char *split;
 
 	if(org) {
-        do {
+		do {
 			char *key;
 			char *val;
 			char *tmp;
 
-            split = strstr(s, "; ");
-            if(split)
-                *split = '\0';
+			split = strstr(s, "; ");
+			if(split)
+				*split = '\0';
 			
 			key = s;
 			tmp = memchr(key, '=', 64);
@@ -2672,7 +2672,7 @@ string_copy:
 		case CURLOPT_SHARE:
 			{
 				php_curlsh *sh = NULL;
-			    ZEND_FETCH_RESOURCE(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
+				ZEND_FETCH_RESOURCE(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
 				if (sh) {
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
@@ -3237,7 +3237,7 @@ static _php_curl_reset_handlers(php_curl *ch)
 	if (ch->handlers->fnmatch) {
 		if (ch->handlers->fnmatch->func_name) {
 			zval_ptr_dtor(&ch->handlers->fnmatch->func_name);
-		}       
+		}
 		efree(ch->handlers->fnmatch);
 		ch->handlers->fnmatch = NULL;
 	}

@@ -125,8 +125,8 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 static int curl_compare_resources( zval *z1, zval **z2 ) /* {{{ */
 {
 	return (Z_TYPE_P( z1 ) == Z_TYPE_PP( z2 ) && 
-            Z_TYPE_P( z1 ) == IS_RESOURCE     &&
-            Z_LVAL_P( z1 ) == Z_LVAL_PP( z2 ) );
+			Z_TYPE_P( z1 ) == IS_RESOURCE     &&
+			Z_LVAL_P( z1 ) == Z_LVAL_PP( z2 ) );
 }
 /* }}} */
 
