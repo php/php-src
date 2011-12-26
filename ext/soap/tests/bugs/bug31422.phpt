@@ -4,6 +4,7 @@ Bug #31422 (No Error-Logging on SoapServer-Side)
 <?php require_once('skipif.inc'); ?>
 --INI--
 log_errors=1
+error_log=
 --FILE--
 <?php
 function Add($x,$y) {

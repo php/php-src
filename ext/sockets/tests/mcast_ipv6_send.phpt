@@ -8,6 +8,8 @@ if (!extension_loaded('sockets')) {
 if (!defined('IPPROTO_IPV6')) {
 	die('skip IPv6 not available.');
 }
+$level = IPPROTO_IPV6;
+$s = socket_create($domain, SOCK_DGRAM, SOL_UDP) or die("skip Can not create socket");
 if (socket_set_option($s, $level, IP_MULTICAST_IF, 1) === false) {
 	die("skip interface 1 either doesn't exist or has no ipv6 address");
 }
