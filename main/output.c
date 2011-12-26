@@ -1360,6 +1360,10 @@ PHP_FUNCTION(ob_get_clean)
 		return;
 	}
 
+	if(!OG(active)) {
+		RETURN_FALSE;
+	}
+
 	if (php_output_get_contents(return_value TSRMLS_CC) == FAILURE) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
