@@ -4697,7 +4697,7 @@ PHP_FUNCTION(openssl_encrypt)
 	int data_len, method_len, password_len, iv_len = 0, max_iv_len;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
-	int i, outlen, keylen;
+	int i=0, outlen, keylen;
 	unsigned char *outbuf, *key;
 	zend_bool free_iv;
 
