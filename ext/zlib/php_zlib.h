@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stefan Röhrich <sr@linux.de>                                |
+   |          Stefan Rï¿½hrich <sr@linux.de>                                |
    |          Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
 */
@@ -34,14 +34,6 @@
 #define PHP_ZLIB_OUTPUT_HANDLER_NAME "zlib output compression"
 #define PHP_ZLIB_BUFFER_SIZE_GUESS(in_len) (((size_t) ((double) in_len * (double) 1.015)) + 10 + 8 + 4 + 1)
 
-ZEND_BEGIN_MODULE_GLOBALS(zlib)
-	/* variables for transparent gzip encoding */
-	int compression_coding;
-	long output_compression;
-	long output_compression_level;
-	char *output_handler;
-ZEND_END_MODULE_GLOBALS(zlib);
-
 typedef struct _php_zlib_buffer {
 	char *data;
 	char *aptr;
@@ -54,6 +46,15 @@ typedef struct _php_zlib_context {
 	z_stream Z;
 	php_zlib_buffer buffer;
 } php_zlib_context;
+
+ZEND_BEGIN_MODULE_GLOBALS(zlib)
+	/* variables for transparent gzip encoding */
+	int compression_coding;
+	long output_compression;
+	long output_compression_level;
+	char *output_handler;
+	php_zlib_context *ob_gzhandler;
+ZEND_END_MODULE_GLOBALS(zlib);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 extern php_stream_ops php_stream_gzio_ops;

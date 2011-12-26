@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stefan Röhrich <sr@linux.de>                                |
+   |          Stefan RÃ¶hrich <sr@linux.de>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Jade Nicoletti <nicoletti@nns.ch>                           |
    |          Michael Wallner <mike@php.net>                              |
@@ -84,29 +84,11 @@ static int php_zlib_output_encoding(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ php_zlib_output_handler() */
-static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
+/* {{{ php_zlib_output_handler_ex() */
+static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
-	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
 	int flags = Z_SYNC_FLUSH;
 	PHP_OUTPUT_TSRMLS(output_context);
-
-	if (!php_zlib_output_encoding(TSRMLS_C)) {
-		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
-			so let's just send it with successfully compressed content or unless the complete
-			buffer gets discarded, see http://bugs.php.net/40325;
-
-			Test as follows:
-			+Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
-			+Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
-			-Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
-			-Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
-		*/
-		if (output_context->op != (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_CLEAN|PHP_OUTPUT_HANDLER_FINAL)) {
-			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
-		}
-		return FAILURE;
-	}
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		/* start up */
@@ -179,37 +161,85 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 				return FAILURE;
 		}
 
-		php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags TSRMLS_CC);
-		if (!(flags & PHP_OUTPUT_HANDLER_STARTED)) {
-			if (SG(headers_sent) || !ZLIBG(output_compression)) {
-				deflateEnd(&ctx->Z);
-				return FAILURE;
-			}
-			switch (ZLIBG(compression_coding)) {
-				case PHP_ZLIB_ENCODING_GZIP:
-					sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
-					break;
-				case PHP_ZLIB_ENCODING_DEFLATE:
-					sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
-					break;
-				default:
-					deflateEnd(&ctx->Z);
-					return FAILURE;
-			}
-			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
-			php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
-		}
-
 		if (output_context->op & PHP_OUTPUT_HANDLER_FINAL) {
 			deflateEnd(&ctx->Z);
 		}
 	}
+
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ php_zlib_output_handler_dtor() */
-static void php_zlib_output_handler_dtor(void *opaq TSRMLS_DC)
+/* {{{ php_zlib_output_handler() */
+static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
+{
+	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
+	PHP_OUTPUT_TSRMLS(output_context);
+
+	if (!php_zlib_output_encoding(TSRMLS_C)) {
+		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
+			so let's just send it with successfully compressed content or unless the complete
+			buffer gets discarded, see http://bugs.php.net/40325;
+
+			Test as follows:
+			+Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
+			+Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'
+			-Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
+			-Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
+		*/
+		if (output_context->op != (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_CLEAN|PHP_OUTPUT_HANDLER_FINAL)) {
+			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+		}
+		return FAILURE;
+	}
+
+	if (SUCCESS != php_zlib_output_handler_ex(ctx, output_context)) {
+		return FAILURE;
+	}
+
+	if (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
+		int flags;
+
+		if (SUCCESS == php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags TSRMLS_CC)) {
+			/* only run this once */
+			if (!(flags & PHP_OUTPUT_HANDLER_STARTED)) {
+				if (SG(headers_sent) || !ZLIBG(output_compression)) {
+					deflateEnd(&ctx->Z);
+					return FAILURE;
+				}
+				switch (ZLIBG(compression_coding)) {
+					case PHP_ZLIB_ENCODING_GZIP:
+						sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
+						break;
+					case PHP_ZLIB_ENCODING_DEFLATE:
+						sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
+						break;
+					default:
+						deflateEnd(&ctx->Z);
+						return FAILURE;
+				}
+				sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_zlib_output_handler_context_init() */
+static php_zlib_context *php_zlib_output_handler_context_init(TSRMLS_D)
+{
+	php_zlib_context *ctx = (php_zlib_context *) ecalloc(1, sizeof(php_zlib_context));
+	ctx->Z.zalloc = php_zlib_alloc;
+	ctx->Z.zfree = php_zlib_free;
+	return ctx;
+}
+/* }}} */
+
+/* {{{ php_zlib_output_handler_context_dtor() */
+static void php_zlib_output_handler_context_dtor(void *opaq TSRMLS_DC)
 {
 	php_zlib_context *ctx = (php_zlib_context *) opaq;
 
@@ -226,17 +256,13 @@ static void php_zlib_output_handler_dtor(void *opaq TSRMLS_DC)
 static php_output_handler *php_zlib_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *h = NULL;
-	php_zlib_context   *ctx;
 
 	if (!ZLIBG(output_compression)) {
 		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 	}
 
 	if ((h = php_output_handler_create_internal(handler_name, handler_name_len, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
-		ctx = (php_zlib_context *) ecalloc(1, sizeof(php_zlib_context));
-		ctx->Z.zalloc = php_zlib_alloc;
-		ctx->Z.zfree = php_zlib_free;
-		php_output_handler_set_context(h, ctx, php_zlib_output_handler_dtor TSRMLS_CC);
+		php_output_handler_set_context(h, php_zlib_output_handler_context_init(TSRMLS_C), php_zlib_output_handler_context_dtor TSRMLS_CC);
 	}
 
 	return h;
@@ -398,6 +424,85 @@ retry_raw_inflate:
 
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 	return FAILURE;
+}
+/* }}} */
+
+/* {{{ php_zlib_cleanup_ob_gzhandler_mess() */
+static void php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_D)
+{
+	if (ZLIBG(ob_gzhandler)) {
+		deflateEnd(&(ZLIBG(ob_gzhandler)->Z));
+		php_zlib_output_handler_context_dtor(ZLIBG(ob_gzhandler));
+		ZLIBG(ob_gzhandler) = NULL;
+	}
+}
+/* }}} */
+
+/* {{{ proto string ob_gzhandler(string data, int flags)
+   Legacy hack */
+static PHP_FUNCTION(ob_gzhandler)
+{
+	char *in_str;
+	int in_len;
+	long flags = 0;
+	php_output_context ctx = {0};
+	int encoding, rv;
+
+	/*
+	 * NOTE that the real ob_gzhandler is an alias to "zlib output compression".
+	 * This is a really bad hack, because
+	 * - we have to initialize a php_zlib_context on demand
+	 * - we have to clean it up in RSHUTDOWN
+	 * - OG(running) is not set or set to any other output handler
+	 * - we have to mess around with php_output_context */
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &in_str, &in_len, &flags)) {
+		RETURN_FALSE;
+	}
+
+	if (!(encoding = php_zlib_output_encoding(TSRMLS_C))) {
+		RETURN_FALSE;
+	}
+
+	if (flags & PHP_OUTPUT_HANDLER_START) {
+		switch (encoding) {
+			case PHP_ZLIB_ENCODING_GZIP:
+				sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
+				break;
+			case PHP_ZLIB_ENCODING_DEFLATE:
+				sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
+				break;
+		}
+		sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+	}
+
+	if (!ZLIBG(ob_gzhandler)) {
+		ZLIBG(ob_gzhandler) = php_zlib_output_handler_context_init(TSRMLS_C);
+	}
+
+	TSRMLS_SET_CTX(ctx.tsrm_ls);
+	ctx.op = flags;
+	ctx.in.data = in_str;
+	ctx.in.used = in_len;
+
+	rv = php_zlib_output_handler_ex(ZLIBG(ob_gzhandler), &ctx);
+
+	if (SUCCESS != rv) {
+		if (ctx.out.data && ctx.out.free) {
+			efree(ctx.out.data);
+		}
+		php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_C);
+		RETURN_FALSE;
+	}
+
+	if (ctx.out.data) {
+		RETVAL_STRINGL(ctx.out.data, ctx.out.used, 1);
+		if (ctx.out.free) {
+			efree(ctx.out.data);
+		}
+	} else {
+		RETVAL_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -615,6 +720,11 @@ ZEND_GET_MODULE(php_zlib)
 #endif
 
 /* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_gzhandler, 0, 0, 2)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_zlib_get_coding_type, 0)
 ZEND_END_ARG_INFO()
 
@@ -737,6 +847,7 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(zlib_encode,						arginfo_zlib_encode)
 	PHP_FE(zlib_decode,						arginfo_zlib_decode)
 	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
+	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
 	PHP_FE_END
 };
 /* }}} */
@@ -858,6 +969,8 @@ static PHP_RINIT_FUNCTION(zlib)
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
 	ZLIBG(output_compression) = 0;
+
+	php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_C);
 
     return SUCCESS;
 }
