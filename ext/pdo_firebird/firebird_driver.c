@@ -440,8 +440,10 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 					continue;
 				}
 			} else {
-				if ((in_param &= (sql[l] == '_') || (sql[l] >= 'A' && sql[l] <= 'Z') 
-						|| (sql[l] >= 'a' && sql[l] <= 'z') || (sql[l] >= '0' && sql[l] <= '9'))) {
+                                if ((in_param &= ((sql[l] >= 'A' && sql[l] <= 'Z') || (sql[l] >= 'a' && sql[l] <= 'z')
+                                        || (sql[l] >= '0' && sql[l] <= '9') || sql[l] == '_' || sql[l] == '-'))) { 
+
+					
 					*ppname++ = sql[l];
 					continue;
 				} else {
