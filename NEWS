@@ -15,6 +15,11 @@ PHP                                                                        NEWS
   . Fixed bug #60455 (stream_get_line misbehaves if EOF is not detected together
     with the last read). (Gustavo)
 
+- Pdo Firebird:
+  . Fixed bug #48877 ("bindValue" and "bindParam" do not work for PDO Firebird).
+    (Mariuz)
+
+
 08 Dec 2011, PHP 5.3.9RC3
 
 - Filter:
