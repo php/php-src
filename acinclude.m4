@@ -762,11 +762,7 @@ AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
     AC_PROG_CXX
     AC_PROG_CXXCPP
-    case $host_alias in
-      *darwin*)
-        PHP_ADD_LIBRARY(stdc++)
-      ;;
-    esac
+    PHP_ADD_LIBRARY(stdc++)
     php_cxx_done=yes
   fi
 ])
