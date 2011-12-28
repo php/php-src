@@ -1,9 +1,9 @@
 --TEST--
-PDO_Firebird: bug 48877 test
+PDO_Firebird: bug 48877 The "bindValue" and "bindParam" do not work for PDO Firebird if we use named parameters (:parameter).
 --SKIPIF--
 <?php extension_loaded("pdo_firebird") or die("skip"); ?>
 --FILE--
-<?php /* $Id: rowCount.phpt 316540 2011-09-12 13:41:28Z mariuz $ */
+<?php
 
 require("testdb.inc");
 
