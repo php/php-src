@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2012, PHP 5.4.0 RC5
 - Core:
+  . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
   . Fixed bug #60611 (Segmentation fault with Cls::{expr}() syntax). (Laruence)
 
 - CLI SAPI:
