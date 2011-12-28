@@ -89,7 +89,8 @@
 	} while (0)
 
 #define FREE_POLYMORPHIC_CACHE_SLOT(literal) do { \
-		if (CG(active_op_array)->literals[literal].cache_slot == \
+		if (CG(active_op_array)->literals[literal].cache_slot != -1 && \
+		    CG(active_op_array)->literals[literal].cache_slot == \
 		    CG(active_op_array)->last_cache_slot - POLYMORPHIC_CACHE_SLOT_SIZE) { \
 			CG(active_op_array)->literals[literal].cache_slot = -1; \
 			CG(active_op_array)->last_cache_slot -= POLYMORPHIC_CACHE_SLOT_SIZE; \
