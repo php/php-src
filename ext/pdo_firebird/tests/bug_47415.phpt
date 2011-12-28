@@ -12,7 +12,7 @@ $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $value = '2';
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$dbh->exec('INSERT INTO test VALUES(0, \'String0\')');
+$dbh->exec('INSERT INTO testz VALUES(0, \'String0\')');
 $dbh->commit();
 
 $query = "SELECT idx, txt FROM testz ORDER by idx";
