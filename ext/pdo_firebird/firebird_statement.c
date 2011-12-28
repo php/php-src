@@ -582,6 +582,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			break;
 
 		case PDO_PARAM_EVT_FETCH_POST:
+                        if (param->paramno == -1) {
+                            return 0;
+                        }
 			value = NULL;
 			value_len = 0;
 			caller_frees = 0;
@@ -598,6 +601,15 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							ZVAL_LONG(param->parameter, *(long*)value);
 							break;
 						}
+                                        case PDO_PARAM_EVT_NORMALIZE:
+                                                 if (!param->is_param) {
+                                                      char *s = param->name;
+                                                      while (*s != '\0') {
+                                                           *s = toupper(*s);
+                                                            s++;
+                                                      }
+                                                 }
+                                                        break;
 					default:
 						ZVAL_NULL(param->parameter);
 				}
