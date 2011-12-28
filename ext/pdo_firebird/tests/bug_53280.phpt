@@ -11,11 +11,11 @@ $dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 $value = '2';
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz(A VARCHAR(30), B VARCHAR(30), C VARCHAR(30))');
-$dbh->exec("INSERT INTO test VALUES ('A', 'B', 'C')");
+$dbh->exec("INSERT INTO testz VALUES ('A', 'B', 'C')");
 $dbh->commit();
 
-$stmt1 = "SELECT B FROM test WHERE A = ? AND B = ?";
-$stmt2 = "SELECT B, C FROM test WHERE A = ? AND B = ?";
+$stmt1 = "SELECT B FROM testz WHERE A = ? AND B = ?";
+$stmt2 = "SELECT B, C FROM testz WHERE A = ? AND B = ?";
 
 $stmth2 = $dbh->prepare($stmt2);
 $stmth2->execute(array('A', 'B'));
