@@ -9,12 +9,6 @@ class Cls {
 	}
 }
 
-Cls::{0}();
-Cls::{1.0}();
-Cls::{true}();
-Cls::{false}();
-Cls::{null}();
-
 $cls = new Cls;
 $cls->{0}();
 $cls->{1.0}();
@@ -22,7 +16,12 @@ $cls->{true}();
 $cls->{false}();
 $cls->{null}();
 
-echo "done";
+Cls::{0}();
+Cls::{1.0}();
+Cls::{true}();
+Cls::{false}();
+Cls::{null}();
+
 ?>
---EXPECT--
-done
+--EXPECTF--
+Fatal error: Method name must be a string in %sbug60611.php on line %d

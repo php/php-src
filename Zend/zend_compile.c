@@ -1975,8 +1975,9 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 			zval name;
 			name = CONSTANT(last_op->op2.constant);
 			if (Z_TYPE(name) != IS_STRING) {
-				convert_to_string(&name);
-			} else if (!IS_INTERNED(Z_STRVAL(name))) {
+				zend_error(E_COMPILE_ERROR, "Method name must be a string");
+			} 
+			if (!IS_INTERNED(Z_STRVAL(name))) {
 				Z_STRVAL(name) = estrndup(Z_STRVAL(name), Z_STRLEN(name));
 			}
 			FREE_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
@@ -2369,8 +2370,8 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 
 	if (method_name->op_type == IS_CONST) {
 		char *lcname;
-		if (Z_TYPE(method_name->u.constant) !=  IS_STRING) {
-			convert_to_string(&method_name->u.constant);
+		if (Z_TYPE(method_name->u.constant) != IS_STRING) {
+			zend_error(E_COMPILE_ERROR, "Method name must be a string");
 		}
 		lcname = zend_str_tolower_dup(Z_STRVAL(method_name->u.constant), Z_STRLEN(method_name->u.constant));
 		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(method_name->u.constant) &&
