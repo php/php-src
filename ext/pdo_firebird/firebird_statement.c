@@ -585,6 +585,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
                         if (param->paramno == -1) {
                             return 0;
                         }
+			if (param->is_param) {
+				break;
+			}
 			value = NULL;
 			value_len = 0;
 			caller_frees = 0;
