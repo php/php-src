@@ -338,6 +338,14 @@ PHPAPI int php_output_get_length(zval *p TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_output_handler* php_output_get_active_handler(TSRMLS_D)
+ * Get active output handler */
+PHPAPI php_output_handler* php_output_get_active_handler(TSRMLS_D)
+{
+	return OG(active);
+}
+/* }}} */
+
 /* {{{ SUCCESS|FAILURE php_output_handler_start_default(TSRMLS_D)
  * Start a "default output handler" */
 PHPAPI int php_output_start_default(TSRMLS_D)
@@ -1499,14 +1507,6 @@ PHP_FUNCTION(output_add_rewrite_var)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ php_output_handler* php_get_active_output_handler(TSRMLS_D)
- * Get active output handler */
-PHPAPI php_output_handler* php_get_active_output_handler(TSRMLS_D)
-{
-	return OG(active);
 }
 /* }}} */
 
