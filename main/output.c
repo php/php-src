@@ -1502,6 +1502,14 @@ PHP_FUNCTION(output_add_rewrite_var)
 }
 /* }}} */
 
+/* {{{ php_output_handler* php_get_active_output_handler(TSRMLS_D)
+ * Get active output handler */
+PHPAPI php_output_handler* php_get_active_output_handler(TSRMLS_D)
+{
+	return OG(active);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
