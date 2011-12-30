@@ -242,6 +242,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *handler_name
 
 PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *handler_name, size_t handler_name_len TSRMLS_DC);
 PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func TSRMLS_DC);
+PHPAPI php_output_handler* php_get_active_output_handler(TSRMLS_D);
 
 END_EXTERN_C()
 
