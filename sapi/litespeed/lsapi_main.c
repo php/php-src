@@ -1055,7 +1055,8 @@ PHP_FUNCTION(litespeed_request_headers)
     }
     array_init(return_value);
 
-    LSAPI_ForeachOrgHeader( add_associate_array, return_value );
+    if ( lsapi_mode )
+        LSAPI_ForeachOrgHeader( add_associate_array, return_value );
 
 }
 /* }}} */
