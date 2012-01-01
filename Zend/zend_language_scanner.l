@@ -756,6 +756,8 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		if (compiler_result==1) {
 			CG(active_op_array) = original_active_op_array;
 			CG(unclean_shutdown)=1;
+			destroy_op_array(op_array TSRMLS_CC);
+			efree(op_array);
 			retval = NULL;
 		} else {
 			zend_do_return(NULL, 0 TSRMLS_CC);
