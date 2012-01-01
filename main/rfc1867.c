@@ -556,7 +556,7 @@ static char *php_ap_basename(const zend_encoding *encoding, char *path TSRMLS_DC
 {
 	char *s = strrchr(path, '\\');
 	char *s2 = strrchr(path, '/');
-	
+
 	if (s && s2) {
 		if (s > s2) {
 			++s;
@@ -942,6 +942,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					}
 					tmp++;
 				}
+				/* Brackets should always be closed */
+				if(c != 0) {
+					skip_upload = 1;
+				}
 			}
 
 			total_bytes = cancel_upload = 0;
@@ -977,7 +981,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			offset = 0;
 			end = 0;
-			
+
 			if (!cancel_upload) {
 				/* only bother to open temp file if we have data */
 				blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end TSRMLS_CC);
@@ -1275,7 +1279,7 @@ SAPI_API void php_rfc1867_set_multibyte_callbacks(
 	php_rfc1867_getword = getword;
 	php_rfc1867_getword_conf = getword_conf;
 	php_rfc1867_basename = basename;
-}	
+}
 /* }}} */
 
 /*
