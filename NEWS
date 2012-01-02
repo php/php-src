@@ -4,12 +4,13 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
   . Fixed bug #60611 (Segmentation fault with Cls::{expr}() syntax). (Laruence)
+  . Fixed bug #55871 (Interruption in substr_replace()). (Stas)
 
 - SAPI:
-  . Fixed bug #54374 (Insufficient validating of upload name leading to 
-    corrupted $_FILES indices). (Stas, lekensteyn at gmail dot com)
   . Fixed bug #55500 (Corrupted $_FILES indices lead to security concern).
     (Stas)
+  . Fixed bug #54374 (Insufficient validating of upload name leading to 
+    corrupted $_FILES indices). (Stas, lekensteyn at gmail dot com)
 
 - CLI SAPI:
   . Fixed bug #60591 (Memory leak when access a non-exists file). (Laruence)
