@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed build on Fedora 15 / Ubuntu 11. (Hannes)
 
+- PHP-FPM SAPI:
+  . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
+    (fat)
+
 
 22 Dec 2011, PHP 5.4.0 RC4
 - Core:
