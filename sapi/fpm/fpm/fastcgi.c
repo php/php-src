@@ -946,7 +946,7 @@ int fcgi_flush(fcgi_request *req, int close)
 	return 1;
 }
 
-int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
+ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
 {
 	int limit, rest;
 

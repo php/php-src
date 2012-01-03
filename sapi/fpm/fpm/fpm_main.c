@@ -268,7 +268,7 @@ static void print_extensions(TSRMLS_D)
 
 static inline size_t sapi_cgibin_single_write(const char *str, uint str_length TSRMLS_DC)
 {
-	size_t ret;
+	ssize_t ret;
 
 	/* sapi has started which means everyhting must be send through fcgi */
 	if (fpm_is_running) {
@@ -277,7 +277,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 		if (ret <= 0) {
 			return 0;
 		}
-		return ret;
+		return (size_t)ret;
 	}
 
 	/* sapi has not started, output to stdout instead of fcgi */
@@ -286,7 +286,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 	if (ret <= 0) {
 		return 0;
 	}
-	return ret;
+	return (size_t)ret;
 #else
 	return fwrite(str, 1, MIN(str_length, 16384), stdout);
 #endif
