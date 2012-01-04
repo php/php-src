@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - PHP-FPM SAPI:
   . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
     (fat)
+  . Fixed bug #60659 (FPM does not clear auth_user on request accept). (fat)
 
 - Improved Session extension:
   . Fixed bug #60640 (invalid return values). (Arpad)
