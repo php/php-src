@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
   . Fixed bug #60611 (Segmentation fault with Cls::{expr}() syntax). (Laruence)
   . Fixed bug #55871 (Interruption in substr_replace()). (Stas)
+  . Fixed bug #60627 (httpd.worker segfault on startup with php_value).
+    (Laruence)
 
 - SAPI:
   . Fixed bug #55500 (Corrupted $_FILES indices lead to security concern).

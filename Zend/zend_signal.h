@@ -69,9 +69,13 @@ typedef struct _zend_signal_globals_t {
 BEGIN_EXTERN_C()
 ZEND_API extern int zend_signal_globals_id;
 END_EXTERN_C()
+# define ZEND_SIGNAL_BLOCK_INTERRUPUTIONS() if (EXPECTED(zend_signal_globals_id)) { SIGG(depth)++; }
+# define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (EXPECTED(zend_signal_globals_id) && UNEXPECTED((--SIGG(depth))==SIGG(blocked))) { zend_signal_handler_unblock(TSRMLS_C); }
 #else /* ZTS */
 # define SIGG(v) (zend_signal_globals.v)
 extern ZEND_API zend_signal_globals_t zend_signal_globals;
+# define ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()  SIGG(depth)++;
+# define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() if (UNEXPECTED((--SIGG(depth))==SIGG(blocked))) { zend_signal_handler_unblock(TSRMLS_C); }
 #endif /* not ZTS */
 
 # define SIGNAL_BEGIN_CRITICAL() 	sigset_t oldmask; \
