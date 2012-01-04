@@ -67,6 +67,9 @@ static int (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_
 /* SessionHandler class */
 zend_class_entry *php_session_class_entry;
 
+/* SessionHandlerInterface */
+zend_class_entry *php_session_iface_entry;
+
 /* ***********
    * Helpers *
    *********** */
@@ -1598,8 +1601,8 @@ static PHP_FUNCTION(session_set_save_handler)
 		php_shutdown_function_entry shutdown_function_entry;
 		zend_bool register_shutdown = 1;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &obj, php_session_class_entry, &register_shutdown) == FAILURE) {
-			return;
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
+			RETURN_FALSE;
 		}
 
 		/* Find implemented methods */
@@ -2064,7 +2067,20 @@ static const zend_function_entry session_functions[] = {
 };
 /* }}} */
 
-/* {{{ session class functions[]
+/* {{{ SessionHandlerInterface functions[]
+*/
+static const zend_function_entry php_session_iface_functions[] = {
+	PHP_ABSTRACT_ME(SessionHandlerInterface, open, arginfo_session_class_open)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, close, arginfo_session_class_close)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, read, arginfo_session_class_read)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_session_class_write)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_session_class_destroy)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_session_class_gc)
+	{ NULL, NULL, NULL }
+};
+/* }}} */
+
+/* {{{ SessionHandler functions[]
  */
 static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, open, arginfo_session_class_open, ZEND_ACC_PUBLIC)
@@ -2179,9 +2195,15 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_rfc1867_orig_callback = php_rfc1867_callback;
 	php_rfc1867_callback = php_session_rfc1867_callback;
 
+	/* Register interface */
+	INIT_CLASS_ENTRY(ce, PS_IFACE_NAME, php_session_iface_functions);
+	php_session_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_session_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
+
 	/* Register base class */
 	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, php_session_class_functions);
 	php_session_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_iface_entry);
 
 	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);

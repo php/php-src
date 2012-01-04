@@ -274,6 +274,9 @@ void php_session_shutdown(void *data);
 #define PS_CLASS_NAME "SessionHandler"
 extern zend_class_entry *php_session_class_entry;
 
+#define PS_IFACE_NAME "SessionHandlerInterface"
+extern zend_class_entry *php_session_iface_entry;
+
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
