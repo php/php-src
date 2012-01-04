@@ -1,5 +1,5 @@
 --TEST--
-Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write())
+Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) - fatal error in close during exec
 --XFAIL--
 Long term low priority bug, working on it
 --INI--
@@ -17,7 +17,8 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	die("close: goodbye cruel world\n");
+	echo "close: goodbye cruel world\n";
+	undefined_function();
 }
 
 function read($id) {
@@ -25,7 +26,7 @@ function read($id) {
 }
 
 function write($id, $session_data) {
-	die("write: goodbye cruel world\n");
+	return true;
 }
 
 function destroy($id) {
@@ -43,4 +44,6 @@ echo "um, hi\n";
 
 ?>
 --EXPECTF--
-write: goodbye cruel world
+close: goodbye cruel world
+
+Fatal error: Call to undefined function undefined_function() in %s on line %d
