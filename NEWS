@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 
 - Improved Session extension:
   . Fixed bug #60640 (invalid return values). (Arpad)
+  . Implement FR #60551 (session_set_save_handler should support a core's
+    session handler interface). (Arpad)
 
 22 Dec 2011, PHP 5.4.0 RC4
 - Core:
