@@ -92,6 +92,8 @@ void fpm_request_reading_headers() /* {{{ */
 	proc->request_method[0] = '\0';
 	proc->script_filename[0] = '\0';
 	proc->query_string[0] = '\0';
+	proc->query_string[0] = '\0';
+	proc->auth_user[0] = '\0';
 	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
 
