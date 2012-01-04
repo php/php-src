@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
     (fat)
 
+- Improved Session extension:
+  . Fixed bug #60640 (invalid return values). (Arpad)
 
 22 Dec 2011, PHP 5.4.0 RC4
 - Core:
