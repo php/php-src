@@ -35,4 +35,4 @@ hey, this is a function inside an eval()!
 hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
 
-Parse error: syntax error, unexpected end of file in %s019.php(12) : eval()'d code on line 1
+Parse error: syntax error, unexpected %s in %s019.php(12) : eval()'d code on line 1
