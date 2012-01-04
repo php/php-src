@@ -48,7 +48,7 @@ PHP_METHOD(SessionHandler, open)
 	}
 
 	PS(mod_user_is_open) = 1;
-	RETVAL_LONG(PS(default_mod)->s_open(&PS(mod_data), save_path, session_name TSRMLS_CC));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_open(&PS(mod_data), save_path, session_name TSRMLS_CC));
 }
 /* }}} */
 
@@ -63,7 +63,7 @@ PHP_METHOD(SessionHandler, close)
 	zend_parse_parameters_none();
 	
 	PS(mod_user_is_open) = 0;
-	RETVAL_LONG(PS(default_mod)->s_close(&PS(mod_data) TSRMLS_CC));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_close(&PS(mod_data) TSRMLS_CC));
 }
 /* }}} */
 
@@ -104,7 +104,7 @@ PHP_METHOD(SessionHandler, write)
 		return;
 	}
 
-	RETVAL_LONG(PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
 }
 /* }}} */
 
@@ -122,7 +122,7 @@ PHP_METHOD(SessionHandler, destroy)
 	}
 	
 	PS(mod_user_is_open) = 0;
-	RETVAL_LONG(PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
 }
 /* }}} */
 
@@ -139,6 +139,6 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 	
-	RETVAL_LONG(PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
 }
 /* }}} */
