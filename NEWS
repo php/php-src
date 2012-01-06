@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2012, PHP 5.4.0 RC6
 
+- Core:
+  . Restoring $_SERVER['REQUEST_TIME'] as a long and introducing
+    $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. (Patrick)
+
 07 Jan 2012, PHP 5.4.0 RC5
 - Core:
   . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
