@@ -581,10 +581,13 @@ static inline void php_register_server_variables(TSRMLS_D)
 	}
 	/* store request init time */
 	{
-		zval new_entry;
-		Z_TYPE(new_entry) = IS_DOUBLE;
-		Z_DVAL(new_entry) = sapi_get_request_time(TSRMLS_C);
-		php_register_variable_ex("REQUEST_TIME", &new_entry, array_ptr TSRMLS_CC);
+		zval request_time_float, request_time_long;
+		Z_TYPE(request_time_float) = IS_DOUBLE;
+		Z_DVAL(request_time_float) = sapi_get_request_time(TSRMLS_C);
+		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, array_ptr TSRMLS_CC);
+		Z_TYPE(request_time_long) = IS_LONG;
+		Z_LVAL(request_time_long) = zend_dval_to_lval(Z_DVAL(request_time_float));
+		php_register_variable_ex("REQUEST_TIME", &request_time_long, array_ptr TSRMLS_CC);
 	}
 
 }
