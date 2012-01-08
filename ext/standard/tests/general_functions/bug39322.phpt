@@ -16,7 +16,7 @@ $pipes = array();
 
 $process = proc_open('/bin/sleep 120', $descriptors, $pipes);
 
-proc_terminate($process);
+proc_terminate($process, 9);
 sleep(1); // wait a bit to let the process finish
 var_dump(proc_get_status($process));
 
@@ -38,7 +38,7 @@ array(8) {
   ["exitcode"]=>
   int(-1)
   ["termsig"]=>
-  int(15)
+  int(9)
   ["stopsig"]=>
   int(0)
 }
