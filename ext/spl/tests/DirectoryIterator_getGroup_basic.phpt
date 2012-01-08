@@ -1,5 +1,8 @@
 --TEST--
 SPL: DirectoryIterator test getGroup
+--SKIPIF--
+<?php
+if (posix_geteuid() == 0) die('SKIP Cannot run test as root.');
 --CREDITS--
 Cesare D'Amico <cesare.damico@gruppovolta.it>
 Andrea Giorgini <agiorg@gmail.com>
