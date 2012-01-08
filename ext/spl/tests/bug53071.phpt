@@ -2,6 +2,7 @@
 Bug #53071 (Usage of SPLObjectStorage defeats gc_collect_cycles)
 --FILE--
 <?php
+gc_enable();
 class myClass
 {
 	public $member;
