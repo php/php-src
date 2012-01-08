@@ -545,7 +545,7 @@ zend_function_entry intl_functions[] = {
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
     STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
-
+	STD_PHP_INI_ENTRY("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -653,6 +653,10 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose Spoofchecker constants to PHP scripts */
 	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 #endif
+
+	/* Register 'IntlException' PHP class */
+	intl_register_IntlException_class( TSRMLS_C );
+
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
 

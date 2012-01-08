@@ -44,4 +44,7 @@ void        intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg 
 void        intl_errors_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC );
 void        intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC );
 
+// exported to be called on extension MINIT
+void		intl_register_IntlException_class( TSRMLS_D );
+
 #endif // INTL_ERROR_H
