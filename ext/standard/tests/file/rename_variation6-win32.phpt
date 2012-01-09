@@ -33,7 +33,7 @@ var_dump(file_exists($tmp_file));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: readlink(): Could not open file (error 2) in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 string(%d) "%srename_variation6-win32.php.tmp"
 bool(true)
