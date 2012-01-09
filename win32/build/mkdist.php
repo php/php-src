@@ -382,7 +382,7 @@ function copy_test_dir($directory, $dest)
 		$directory = substr($directory,0,-1);
 	}
 
-	if ($directory == 'tests') {
+	if ($directory == 'tests' || $directory == 'examples') {
 		if (!is_dir($dest . '/tests')) {
 			mkdir($dest . '/tests', 0775, true);
 		}
