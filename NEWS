@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.9
 
+- Pdo Firebird:
+  . Fixed bug #47415 (PDO_Firebird segfaults when passing lowercased column name to bindColumn).
+  . Fixed bug #53280 (PDO_Firebird segfaults if query column count less than param count).
+    (Mariuz)
+
 22 Dec 2011, PHP 5.3.9RC4
 
 - Core:
