@@ -105,6 +105,19 @@ ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable
 if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
 }
+
+ARG_ENABLE('pgi', 'Generate PGO instrumented binaries', 'no');
+ARG_WITH('pgo', 'Compile optimized binaries using training data from folder', 'no');
+if (PHP_PGI == "yes" || PHP_PGO != "no") {
+	PGOMGR = PATH_PROG('pgomgr', WshShell.Environment("Process").Item("PATH"));
+	if (!PGOMGR) {
+		ERROR("--enable-pgi and --with-pgo options can only be used if PGO capable compiler is present.");
+	}
+	if (PHP_PGI == "yes" && PHP_PGO != "no") {
+		ERROR("Use of both --enable-pgi and --with-pgo not allowed.");
+	}
+}
+
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 // Configures the hard-coded installation dir
 ARG_WITH('prefix', 'where PHP will be installed', '');
@@ -232,6 +245,19 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
 	DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
 	DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
+}
+
+// CFLAGS, LDFLAGS and BUILD_DIR are defined
+// Add compiler and link flags if PGO options are selected
+if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+	ADD_FLAG('CFLAGS', "/GL /O2");
+	ADD_FLAG('LDFLAGS', "/LTCG:PGINSTRUMENT");
+	DEFINE("PGOPGD_DIR", "$(BUILD_DIR)");
+}
+else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+	ADD_FLAG('CFLAGS', "/GL /O2");
+	ADD_FLAG('LDFLAGS', "/LTCG:PGUPDATE");
+	DEFINE("PGOPGD_DIR", ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO));
 }
 
 // Find the php_build dir - it contains headers and libraries

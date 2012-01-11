@@ -22,6 +22,7 @@ LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
 RE2C="$(RE2C)"
+PGOMGR="$(PGOMGR)"
 PHP_BUILD=$(PHP_BUILD)
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
@@ -60,6 +61,12 @@ Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 !endif
 
+!if $(PGOMGR) != ""
+PHP5_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php5.pgd
+!else
+PHP5_PGD_OPTION=
+!endif
+
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
 $(MCFILE): win32\build\wsyslog.mc
@@ -82,7 +89,7 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
-	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP5_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
@@ -120,7 +127,16 @@ clean-all:
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
 	@cd "$(PHP_SRC_DIR)"
-	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
+	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.manifest $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
+
+clean-pgo: clean-all
+	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
+	-rd /s /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
+	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
+	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
+	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
+	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
 
 test:
 	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"

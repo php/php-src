@@ -414,7 +414,8 @@ can be built that way. \
 		 'php-build', 'snapshot-template', 'ereg',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
-		 'zend-multibyte', 'fd-setsize', 'memory-manager', 't1lib'
+		 'zend-multibyte', 'fd-setsize', 'memory-manager',
+		 't1lib', 'pgi', 'pgo'
 		);
 	var force;
 
@@ -1060,6 +1061,10 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ldflags = "$(LDFLAGS)";
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
+	
+	if(PHP_PGI == "yes" || PHP_PGO != "no") {
+		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
+	}
 
 	if (MODE_PHPIZE) {
 		if (ld) {
@@ -1199,6 +1204,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
+	var ldflags;
 
 	if (shared == null) {
 		eval("shared = PHP_" + EXT + "_SHARED;");
@@ -1228,7 +1234,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	MFO.WriteLine("# objects for EXT " + extname);
 	MFO.WriteBlankLines(1);
 
-
 	ADD_SOURCES(configure_module_dirname, file_list, extname, obj_dir);
 	
 	MFO.WriteBlankLines(1);
@@ -1242,6 +1247,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
 		var ld = "@$(CC)";
 
+		ldflags = "";
+		if (PHP_PGI == "yes" || PHP_PGO != "no") {
+			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
+		}
+
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
 		MFO.WriteBlankLines(1);
 		if (MODE_PHPIZE) {
@@ -1249,7 +1259,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
-			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
+			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
 		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
