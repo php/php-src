@@ -93,7 +93,7 @@ do { \
 			BG(unserialize).level = 1; \
 		} \
 	} else { \
-		(var_hash_ptr) = (php_serialize_data_t)BG(unserialize).var_hash; \
+		(var_hash_ptr) = (php_unserialize_data_t)BG(unserialize).var_hash; \
 		++BG(unserialize).level; \
 	} \
 } while (0)
