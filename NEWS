@@ -12,6 +12,12 @@ PHP                                                                        NEWS
   . Fixed bug #53280 (segfaults if query column count less than param count). 
     (Mariuz)
 
+- SNMP:
+  . Fixed bug #60585 (php build fails with USE flag snmp when IPv6 support
+    is disabled). (Boris Lytochkin)
+  . Fixed bug #60749 (SNMP module should not strip non-standard SNMP port
+    from hostname). (Boris Lytochkin)
+
 07 Jan 2012, PHP 5.4.0 RC5
 - Core:
   . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
