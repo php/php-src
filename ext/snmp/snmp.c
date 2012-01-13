@@ -1186,11 +1186,11 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 			continue;
 		}
 #else
-		if (res->sa_family != AF_INET) {
+		if ((*res)->sa_family != AF_INET) {
 			res++;
 			continue;
 		}
-		strcat(pptr, inet_ntoa(res));
+		strcat(pptr, inet_ntoa(((struct sockaddr_in*)(*res))->sin_addr));
 #endif
 		break;
 	}
@@ -1202,6 +1202,12 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	/* XXX FIXME
 		There should be check for non-empty session->peername!
 	*/
+
+	/* put back non-standard SNMP port */
+	if (session->remote_port != SNMP_PORT) {
+		pptr = session->peername + strlen(session->peername);
+		sprintf(pptr, ":%d", session->remote_port);
+	}
 
 	php_network_freeaddresses(psal);
 

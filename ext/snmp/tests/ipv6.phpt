@@ -4,15 +4,16 @@ IPv6 support
 Boris Lytochkin
 --SKIPIF--
 <?php
-	require_once(dirname(__FILE__).'/skipif.inc');
+require_once(dirname(__FILE__).'/skipif.inc');
 
-	if (!function_exists("inet_ntop")) die("skip no inet_ntop()");
+$packed = str_repeat(chr(0), 15) . chr(1);
+if (@inet_ntop($packed) === false) {
+	die("skip no IPv6 support");
+}
 ?>
 --FILE--
 <?php
 require_once(dirname(__FILE__).'/snmp_include.inc');
-
-$default_port = 161;
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
