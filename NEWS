@@ -1,5 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ?? 2012, PHP 5.3.10
+
+- Core:
+ . fixed bug #60227: header() cannot detect the multi-line header with CR (rui).
+
 10 Jan 2012, PHP 5.3.9
 
 - Core:
