@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - General improvements:
   . World domination
 
-- Core
+- Core:
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
 
