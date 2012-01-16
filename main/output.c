@@ -885,7 +885,8 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 
 	/* storable? */
 	if (php_output_handler_append(handler, &context->in TSRMLS_CC) && !context->op) {
-		status = PHP_OUTPUT_HANDLER_NO_DATA;
+		context->op = original_op;
+		return PHP_OUTPUT_HANDLER_NO_DATA;
 	} else {
 		/* need to start? */
 		if (!(handler->flags & PHP_OUTPUT_HANDLER_STARTED)) {
@@ -961,13 +962,13 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->buffer.used = 0;
 			handler->buffer.size = 0;
 			break;
-		case PHP_OUTPUT_HANDLER_SUCCESS:
-			/* no more buffered data */
-			handler->buffer.used = 0;
-			break;
 		case PHP_OUTPUT_HANDLER_NO_DATA:
 			/* handler ate all */
 			php_output_context_reset(context);
+			/* no break */
+		case PHP_OUTPUT_HANDLER_SUCCESS:
+			/* no more buffered data */
+			handler->buffer.used = 0;
 			break;
 	}
 

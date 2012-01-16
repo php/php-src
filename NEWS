@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Restoring $_SERVER['REQUEST_TIME'] as a long and introducing
     $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. (Patrick)
+  . Fixed bug #60768 (Output buffer not discarded) (Mike)
 
 - Pdo Firebird:
   . Fixed bug #47415 (segfaults when passing lowercased column name to 
