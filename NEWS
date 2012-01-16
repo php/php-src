@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - General improvements:
   . World domination
 
+- Core
+  . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
+    (Laruence)
+
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
     CURLOPT_DIRLISTONLY, CURLOPT_NEW_DIRECTORY_PERMS, CURLOPT_NEW_FILE_PERMS, 
