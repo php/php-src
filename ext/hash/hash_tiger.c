@@ -169,6 +169,15 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 	tiger_compress(context->passes, ((php_hash_uint64 *) context->buffer), context->state);
 }
 
+static inline void TigerDigest(unsigned char *digest_str, unsigned int digest_len, PHP_TIGER_CTX *context)
+{
+	unsigned int i;
+
+	for (i = 0; i < digest_len; ++i) {
+		digest_str[i] = (unsigned char) ((context->state[i/8] >> (8 * (i%8))) & 0xff);
+	}
+}
+
 PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
 {
 	memset(context, 0, sizeof(*context));
@@ -216,84 +225,21 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 PHP_HASH_API void PHP_TIGER128Final(unsigned char digest[16], PHP_TIGER_CTX *context)
 {
 	TigerFinalize(context);
-	
-	digest[0] = (unsigned char) ((context->state[0] >> 56) & 0xff);
-	digest[1] = (unsigned char) ((context->state[0] >> 48) & 0xff);
-	digest[2] = (unsigned char) ((context->state[0] >> 40) & 0xff);
-	digest[3] = (unsigned char) ((context->state[0] >> 32) & 0xff);
-	digest[4] = (unsigned char) ((context->state[0] >> 24) & 0xff);
-	digest[5] = (unsigned char) ((context->state[0] >> 16) & 0xff);
-	digest[6] = (unsigned char) ((context->state[0] >> 8) & 0xff);
-	digest[7] = (unsigned char) (context->state[0] & 0xff);
-	digest[8] = (unsigned char) ((context->state[1] >> 56) & 0xff);
-	digest[9] = (unsigned char) ((context->state[1] >> 48) & 0xff);
-	digest[10] = (unsigned char) ((context->state[1] >> 40) & 0xff);
-	digest[11] = (unsigned char) ((context->state[1] >> 32) & 0xff);
-	digest[12] = (unsigned char) ((context->state[1] >> 24) & 0xff);
-	digest[13] = (unsigned char) ((context->state[1] >> 16) & 0xff);
-	digest[14] = (unsigned char) ((context->state[1] >> 8) & 0xff);
-	digest[15] = (unsigned char) (context->state[1] & 0xff);
-	
+	TigerDigest(digest, 16, context);
 	memset(context, 0, sizeof(*context));
 }
 
 PHP_HASH_API void PHP_TIGER160Final(unsigned char digest[20], PHP_TIGER_CTX *context)
 {
 	TigerFinalize(context);
-	
-	digest[0] = (unsigned char) ((context->state[0] >> 56) & 0xff);
-	digest[1] = (unsigned char) ((context->state[0] >> 48) & 0xff);
-	digest[2] = (unsigned char) ((context->state[0] >> 40) & 0xff);
-	digest[3] = (unsigned char) ((context->state[0] >> 32) & 0xff);
-	digest[4] = (unsigned char) ((context->state[0] >> 24) & 0xff);
-	digest[5] = (unsigned char) ((context->state[0] >> 16) & 0xff);
-	digest[6] = (unsigned char) ((context->state[0] >> 8) & 0xff);
-	digest[7] = (unsigned char) (context->state[0] & 0xff);
-	digest[8] = (unsigned char) ((context->state[1] >> 56) & 0xff);
-	digest[9] = (unsigned char) ((context->state[1] >> 48) & 0xff);
-	digest[10] = (unsigned char) ((context->state[1] >> 40) & 0xff);
-	digest[11] = (unsigned char) ((context->state[1] >> 32) & 0xff);
-	digest[12] = (unsigned char) ((context->state[1] >> 24) & 0xff);
-	digest[13] = (unsigned char) ((context->state[1] >> 16) & 0xff);
-	digest[14] = (unsigned char) ((context->state[1] >> 8) & 0xff);
-	digest[15] = (unsigned char) (context->state[1] & 0xff);
-	digest[16] = (unsigned char) ((context->state[2] >> 56) & 0xff);
-	digest[17] = (unsigned char) ((context->state[2] >> 48) & 0xff);
-	digest[18] = (unsigned char) ((context->state[2] >> 40) & 0xff);
-	digest[19] = (unsigned char) ((context->state[2] >> 32) & 0xff);
-	
+	TigerDigest(digest, 20, context);
 	memset(context, 0, sizeof(*context));
 }
 
 PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *context)
 {
 	TigerFinalize(context);
-	
-	digest[0] = (unsigned char) ((context->state[0] >> 56) & 0xff);
-	digest[1] = (unsigned char) ((context->state[0] >> 48) & 0xff);
-	digest[2] = (unsigned char) ((context->state[0] >> 40) & 0xff);
-	digest[3] = (unsigned char) ((context->state[0] >> 32) & 0xff);
-	digest[4] = (unsigned char) ((context->state[0] >> 24) & 0xff);
-	digest[5] = (unsigned char) ((context->state[0] >> 16) & 0xff);
-	digest[6] = (unsigned char) ((context->state[0] >> 8) & 0xff);
-	digest[7] = (unsigned char) (context->state[0] & 0xff);
-	digest[8] = (unsigned char) ((context->state[1] >> 56) & 0xff);
-	digest[9] = (unsigned char) ((context->state[1] >> 48) & 0xff);
-	digest[10] = (unsigned char) ((context->state[1] >> 40) & 0xff);
-	digest[11] = (unsigned char) ((context->state[1] >> 32) & 0xff);
-	digest[12] = (unsigned char) ((context->state[1] >> 24) & 0xff);
-	digest[13] = (unsigned char) ((context->state[1] >> 16) & 0xff);
-	digest[14] = (unsigned char) ((context->state[1] >> 8) & 0xff);
-	digest[15] = (unsigned char) (context->state[1] & 0xff);
-	digest[16] = (unsigned char) ((context->state[2] >> 56) & 0xff);
-	digest[17] = (unsigned char) ((context->state[2] >> 48) & 0xff);
-	digest[18] = (unsigned char) ((context->state[2] >> 40) & 0xff);
-	digest[19] = (unsigned char) ((context->state[2] >> 32) & 0xff);
-	digest[20] = (unsigned char) ((context->state[2] >> 24) & 0xff);
-	digest[21] = (unsigned char) ((context->state[2] >> 16) & 0xff);
-	digest[22] = (unsigned char) ((context->state[2] >> 8) & 0xff);
-	digest[23] = (unsigned char) (context->state[2] & 0xff);
-	
+	TigerDigest(digest, 24, context);
 	memset(context, 0, sizeof(*context));
 }
 
