@@ -8,7 +8,7 @@ Steve Seear <stevseea@php.net>
 $rc = new ReflectionClass("ReflectionClass");
 echo $rc;
 ?>
---EXPECTF--
+--EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Constants [3] {
@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [49] {
+  - Methods [50] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -227,6 +227,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method isFinal ] {
 
       - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method setFinal ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> $value ]
       }
     }
 
