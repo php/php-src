@@ -3113,28 +3113,6 @@ ZEND_METHOD(reflection_method, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionMethod::setFinal([bool isFinal = true])
-      Sets/unsets class as final */
-ZEND_METHOD(reflection_method, setFinal)
-{
-	reflection_object *intern;
-	zend_function *mptr;
-	zend_bool isFinal = 1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &isFinal) == FAILURE) {
-		return;
-	}
-
-	GET_REFLECTION_OBJECT_PTR(mptr);
-
-	if (isFinal) {
-		mptr->common.fn_flags |= ZEND_ACC_FINAL;
-	} else {
-		mptr->common.fn_flags &= ~ZEND_ACC_FINAL;
-	}
-}
-/* }}} */
-
 /* {{{ proto public ReflectionClass ReflectionMethod::getDeclaringClass()
    Get the declaring class */
 ZEND_METHOD(reflection_method, getDeclaringClass)
@@ -4066,28 +4044,6 @@ ZEND_METHOD(reflection_class, isFinal)
 ZEND_METHOD(reflection_class, isAbstract)
 {
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
-}
-/* }}} */
-
-/* {{{ proto public void ReflectionClass::setFinal([bool isFinal = true])
-   Sets/unsets class as final */
-ZEND_METHOD(reflection_class, setFinal)
-{
-	reflection_object *intern;
-	zend_class_entry *ce;
-	zend_bool isFinal = 1;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &isFinal) == FAILURE) {
-		return;
-	}
-
-	GET_REFLECTION_OBJECT_PTR(ce);
-
-	if (isFinal) {
-		ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
-	} else {
-		ce->ce_flags &= ~ZEND_ACC_FINAL_CLASS;
-	}
 }
 /* }}} */
 
@@ -5695,10 +5651,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_setAccessible, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_setFinal, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_getClosure, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
@@ -5712,7 +5664,6 @@ static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, isProtected, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isFinal, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_method, setFinal, arginfo_reflection_method_setFinal, 0)
 	ZEND_ME(reflection_method, isStatic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isConstructor, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isDestructor, arginfo_reflection__void, 0)
@@ -5782,10 +5733,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_setFinal, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
@@ -5838,7 +5785,6 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_class, setFinal, arginfo_reflection_class_setFinal, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstance, arginfo_reflection_class_isInstance, 0)
 	ZEND_ME(reflection_class, newInstance, arginfo_reflection_class_newInstance, 0)

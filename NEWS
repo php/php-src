@@ -35,9 +35,4 @@ PHP                                                                        NEWS
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
-- Reflection:
-  . Added ReflectionCLass::setFinal() and ReflectionMethod::setFinal() to allow
-    stubbing and mocking of final classes and methods, for instance.
-    (Sebastian, Jan Dolecek <juzna.cz@gmail.com>)
-
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
