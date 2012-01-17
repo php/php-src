@@ -78,8 +78,6 @@ extern const php_hash_ops php_hash_gost_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
-extern const php_hash_ops php_hash_salsa10_ops;
-extern const php_hash_ops php_hash_salsa20_ops;
 extern const php_hash_ops php_hash_fnv132_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
 extern const php_hash_ops php_hash_joaat_ops;
