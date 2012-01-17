@@ -3709,142 +3709,6 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 }
 /* }}} */
 
-/* {{{ Originates from php_runkit_function_copy_ctor
-	Duplicate structures in an op_array where necessary to make an outright duplicate */
-static void zend_traits_duplicate_function(zend_function *fe, zend_class_entry *target_ce, char *newname TSRMLS_DC)
-{
-	zend_literal *literals_copy;
-	zend_compiled_variable *dupvars;
-	zend_op *opcode_copy;
-	zval class_name_zv;
-	int class_name_literal;
-	int i;
-	int number_of_literals;
-
-	if (fe->op_array.static_variables) {
-		HashTable *tmpHash;
-
-		ALLOC_HASHTABLE(tmpHash);
-		zend_hash_init(tmpHash, zend_hash_num_elements(fe->op_array.static_variables), NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_apply_with_arguments(fe->op_array.static_variables TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, tmpHash);
-
-		fe->op_array.static_variables = tmpHash;
-	}
-
-	number_of_literals = fe->op_array.last_literal;
-	literals_copy = (zend_literal*)emalloc(number_of_literals * sizeof(zend_literal));
-
-	for (i = 0; i < number_of_literals; i++) {
-		literals_copy[i] = fe->op_array.literals[i];
-		zval_copy_ctor(&literals_copy[i].constant);
-	}
-	fe->op_array.literals = literals_copy;
-
-
-	fe->op_array.refcount = emalloc(sizeof(zend_uint));
-	*(fe->op_array.refcount) = 1;
-
-	if (fe->op_array.vars) {
-		i = fe->op_array.last_var;
-		dupvars = safe_emalloc(fe->op_array.last_var, sizeof(zend_compiled_variable), 0);
-		while (i > 0) {
-			i--;
-			dupvars[i].name = estrndup(fe->op_array.vars[i].name, fe->op_array.vars[i].name_len);
-			dupvars[i].name_len = fe->op_array.vars[i].name_len;
-			dupvars[i].hash_value = fe->op_array.vars[i].hash_value;
-		}
-		fe->op_array.vars = dupvars;
-	} else {
-		fe->op_array.vars = NULL;
-	}
-
-	opcode_copy = safe_emalloc(sizeof(zend_op), fe->op_array.last, 0);
-	for(i = 0; i < fe->op_array.last; i++) {
-		opcode_copy[i] = fe->op_array.opcodes[i];
-		if (opcode_copy[i].op1_type != IS_CONST) {
-			switch (opcode_copy[i].opcode) {
-				case ZEND_GOTO:
-				case ZEND_JMP:
-					if (opcode_copy[i].op1.jmp_addr && opcode_copy[i].op1.jmp_addr >= fe->op_array.opcodes &&
-						opcode_copy[i].op1.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
-						opcode_copy[i].op1.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op1.jmp_addr - fe->op_array.opcodes);
-					}
-				break;
-			}
-		} else {
-			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
-			if (target_ce
-				/* REM: used a IS_NULL place holder with a special marker LVAL */
-				&& Z_TYPE_P(opcode_copy[i].op1.zv) == IS_NULL
-				&& Z_LVAL_P(opcode_copy[i].op1.zv) == ZEND_ACC_TRAIT
-				/* Only on merge into an actual class */
-				&&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT)))
-			{
-				INIT_ZVAL(class_name_zv);
-				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
-				class_name_literal = zend_append_individual_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
-				opcode_copy[i].op1.zv = &fe->op_array.literals[class_name_literal].constant;
-			}
-		}
-
-		if (opcode_copy[i].op2_type != IS_CONST) {
-			switch (opcode_copy[i].opcode) {
-				case ZEND_JMPZ:
-				case ZEND_JMPNZ:
-				case ZEND_JMPZ_EX:
-				case ZEND_JMPNZ_EX:
-				case ZEND_JMP_SET:
-				case ZEND_JMP_SET_VAR:
-					if (opcode_copy[i].op2.jmp_addr && opcode_copy[i].op2.jmp_addr >= fe->op_array.opcodes &&
-						opcode_copy[i].op2.jmp_addr <  fe->op_array.opcodes + fe->op_array.last) {
-						opcode_copy[i].op2.jmp_addr =  opcode_copy + (fe->op_array.opcodes[i].op2.jmp_addr - fe->op_array.opcodes);
-					}
-				break;
-			}
-		} else {
-			/* if __CLASS__ i.e. T_CLASS_C was used, we need to fix it up here */
-			if (target_ce
-				/* REM: used a IS_NULL place holder with a special marker LVAL */
-				&& Z_TYPE_P(opcode_copy[i].op2.zv) == IS_NULL
-				&& Z_LVAL_P(opcode_copy[i].op2.zv) == ZEND_ACC_TRAIT
-				/* Only on merge into an actual class */
-				&&  (ZEND_ACC_TRAIT != (target_ce->ce_flags & ZEND_ACC_TRAIT)))
-			{
-				INIT_ZVAL(class_name_zv);
-				ZVAL_STRINGL(&class_name_zv, target_ce->name, target_ce->name_length, 1);
-				class_name_literal = zend_append_individual_literal(&fe->op_array, &class_name_zv TSRMLS_CC);
-				opcode_copy[i].op2.zv = &fe->op_array.literals[class_name_literal].constant;
-			}
-		}
-	}
-	fe->op_array.opcodes = opcode_copy;
-	fe->op_array.function_name = newname;
-
-	/* was setting it to fe which does not work since fe is stack allocated and not a stable address */
-	/* fe->op_array.prototype = fe->op_array.prototype; */
-	if (fe->op_array.arg_info) {
-		zend_arg_info *tmpArginfo;
-
-		tmpArginfo = safe_emalloc(sizeof(zend_arg_info), fe->op_array.num_args, 0);
-		for(i = 0; i < fe->op_array.num_args; i++) {
-			tmpArginfo[i] = fe->op_array.arg_info[i];
-
-			tmpArginfo[i].name = estrndup(tmpArginfo[i].name, tmpArginfo[i].name_len);
-			if (tmpArginfo[i].class_name) {
-				tmpArginfo[i].class_name = estrndup(tmpArginfo[i].class_name, tmpArginfo[i].class_name_len);
-			}
-		}
-		fe->op_array.arg_info = tmpArginfo;
-	}
-
-	fe->op_array.doc_comment = estrndup(fe->op_array.doc_comment, fe->op_array.doc_comment_len);
-	fe->op_array.try_catch_array = (zend_try_catch_element*)estrndup((char*)fe->op_array.try_catch_array, sizeof(zend_try_catch_element) * fe->op_array.last_try_catch);
-
-	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
-  
-}
-/* }}} */
-
 static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint mname_len, zend_function* fe TSRMLS_DC) /* {{{ */
 {
 	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
@@ -3955,7 +3819,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 			ce->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
 		fn_copy = *fn;
-		zend_traits_duplicate_function(&fn_copy, ce, estrdup(fn->common.function_name) TSRMLS_CC);
+		function_add_ref(&fn_copy);
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
@@ -4000,7 +3864,11 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				&& aliases[i]->trait_method->mname_len == fnname_len
 				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
 				fn_copy = *fn;
-				zend_traits_duplicate_function(&fn_copy, NULL, estrndup(aliases[i]->alias, aliases[i]->alias_len) TSRMLS_CC);
+				function_add_ref(&fn_copy);
+				/* this function_name is never destroyed, because its refcount
+				   greater than 1, classes are always destoyed in reverse order
+				   and trait is declared early than this class */
+				fn_copy.common.function_name = aliases[i]->alias;
 					
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
@@ -4032,7 +3900,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
-		zend_traits_duplicate_function(&fn_copy, NULL, estrndup(fn->common.function_name, fnname_len) TSRMLS_CC);
+		function_add_ref(&fn_copy);
 
 		/* apply aliases which are not qualified by a class name, or which have not
 		 * alias name, just setting visibility */

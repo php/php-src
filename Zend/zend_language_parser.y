@@ -907,7 +907,6 @@ common_scalar:
 	|	T_LINE 						{ $$ = $1; }
 	|	T_FILE 						{ $$ = $1; }
 	|	T_DIR   					{ $$ = $1; }
-	|	T_CLASS_C					{ $$ = $1; }
 	|	T_TRAIT_C					{ $$ = $1; }
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
@@ -927,6 +926,7 @@ static_scalar: /* compile-time evaluated scalars */
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 	|	static_class_constant { $$ = $1; }
+	|	T_CLASS_C			{ $$ = $1; }
 ;
 
 static_class_constant:
@@ -942,6 +942,7 @@ scalar:
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+	|	T_CLASS_C				{ if (Z_TYPE($1.u.constant) == IS_CONSTANT) {zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC);} else {$$ = $1;} }
 ;
 
 
