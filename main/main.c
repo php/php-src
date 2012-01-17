@@ -92,7 +92,7 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
-#if HAVE_MMAP
+#if HAVE_MMAP || defined(PHP_WIN32)
 # if HAVE_UNISTD_H
 #  include <unistd.h>
 #  if defined(_SC_PAGESIZE)
@@ -1216,7 +1216,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &handle->opened_path);
 
 	if (stream) {
-#if HAVE_MMAP
+#if HAVE_MMAP || defined(PHP_WIN32)
 		size_t page_size = REAL_PAGE_SIZE;
 #endif
 
@@ -1230,7 +1230,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
 		len = php_zend_stream_fsizer(stream TSRMLS_CC);
 		if (len != 0
-#if HAVE_MMAP
+#if HAVE_MMAP || defined(PHP_WIN32)
 		&& ((len - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD
 #endif
 		&& php_stream_mmap_possible(stream)
