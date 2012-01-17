@@ -224,13 +224,45 @@ ZEND_API void zend_register_string_constant(const char *name, uint name_len, cha
 	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number TSRMLS_CC);
 }
 
-static int zend_get_halt_offset_constant(const char *name, uint name_len, zend_constant **c TSRMLS_DC)
+static int zend_get_special_constant(const char *name, uint name_len, zend_constant **c TSRMLS_DC)
 {
 	int ret;
 	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 	if (!EG(in_execution)) {
 		return 0;
+	} else if (name_len == sizeof("__CLASS__")-1 &&
+	          !memcmp(name, "__CLASS__", sizeof("__CLASS__")-1)) {
+		zend_constant tmp;
+
+		/* Returned constants may be cached, so they have to be stored */
+		if (EG(scope) && EG(scope)->name) {
+			int const_name_len;
+			char *const_name;
+			ALLOCA_FLAG(use_heap)
+			
+			const_name_len = sizeof("\0__CLASS__") + EG(scope)->name_length;
+			const_name = do_alloca(const_name_len, use_heap);
+			memcpy(const_name, "\0__CLASS__", sizeof("\0__CLASS__")-1);
+			zend_str_tolower_copy(const_name + sizeof("\0__CLASS__")-1, EG(scope)->name, EG(scope)->name_length);
+			if (zend_hash_find(EG(zend_constants), const_name, const_name_len, (void**)c) == FAILURE) {
+				zend_hash_add(EG(zend_constants), const_name, const_name_len, (void*)&tmp, sizeof(zend_constant), (void**)c);
+				memset(*c, 0, sizeof(zend_constant));
+				Z_STRVAL((**c).value) = estrndup(EG(scope)->name, EG(scope)->name_length);
+				Z_STRLEN((**c).value) = EG(scope)->name_length;
+				Z_TYPE((**c).value) = IS_STRING;
+			}
+			free_alloca(const_name, use_heap);
+		} else {
+			if (zend_hash_find(EG(zend_constants), "\0__CLASS__", sizeof("\0__CLASS__"), (void**)c) == FAILURE) {
+				zend_hash_add(EG(zend_constants), "\0__CLASS__", sizeof("\0__CLASS__"), (void*)&tmp, sizeof(zend_constant), (void**)c);
+				memset(*c, 0, sizeof(zend_constant));
+				Z_STRVAL((**c).value) = estrndup("", 0);
+				Z_STRLEN((**c).value) = 0;
+				Z_TYPE((**c).value) = IS_STRING;
+			}
+		}
+		return 1;
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
 		const char *cfilename;
@@ -265,7 +297,7 @@ ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSR
 				retval=0;
 			}
 		} else {
-			retval = zend_get_halt_offset_constant(name, name_len, &c TSRMLS_CC);
+			retval = zend_get_special_constant(name, name_len, &c TSRMLS_CC);
 		}
 		efree(lookup_name);
 	}
@@ -432,14 +464,14 @@ zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRM
 					    (c->flags & CONST_CS) != 0) {
 
 						key--;
-						if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
+						if (!zend_get_special_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
 							return NULL;
 						}
 					}
 				}
 			} else {
 				key--;
-				if (!zend_get_halt_offset_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
+				if (!zend_get_special_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant), &c TSRMLS_CC)) {
 					return NULL;
 				}
 			}

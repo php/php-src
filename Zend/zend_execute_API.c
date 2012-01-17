@@ -110,7 +110,7 @@ static int clean_non_persistent_function(zend_function *function TSRMLS_DC) /* {
 
 static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
 {
-	return (function->type != ZEND_INTERNAL_FUNCTION);
+	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
@@ -122,7 +122,7 @@ static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 
 static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
-	return ((*ce)->type != ZEND_INTERNAL_CLASS);
+	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
@@ -298,8 +298,8 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
-			zend_hash_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-			zend_hash_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+			zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
 		} else {
 			zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function TSRMLS_CC);
 			zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class TSRMLS_CC);

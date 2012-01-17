@@ -63,7 +63,6 @@ Class [ <user> class Bar ] {
       @@ %straits001.php 9 - 9
     }
 
-    
     Method [ <user> public method someMethod ] {
       @@ %straits001.php 3 - 3
     }
