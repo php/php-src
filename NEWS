@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. (Patrick)
   . Fixed bug #60768 (Output buffer not discarded) (Mike)
 
+- Hash
+  . Fixed bug #60221 (Tiger hash output byte order) (Mike)
+  . Removed Salsa10/Salsa20, which are actually stream ciphers (Mike)
+    
 - Pdo Firebird:
   . Fixed bug #47415 (segfaults when passing lowercased column name to 
     bindColumn). (Mariuz)
