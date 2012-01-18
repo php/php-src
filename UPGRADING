@@ -243,7 +243,9 @@ UPGRADE NOTES - PHP 5.4
 - idn_to_ascii() and idn_to_utf8() now take two extra parameters, one indicating
   the variant (IDNA 2003 or UTS #46) and another, passed by reference, to return
   details about the operation in case UTS #46 is chosen.
-
+- gzencode() used with FORCE_DEFLATE now generates RFC1950 compliant data.
+- ob_start() refuses to start multiple output buffers at once passed as
+  array("callback1", "callback2", "callback3", ...).
 
 ===================================
 5. Changes made to existing methods
@@ -336,6 +338,10 @@ UPGRADE NOTES - PHP 5.4
 
        - break $var;
        - continue $var;
+
+    e. removed hash algorithms
+    
+       - Salsa10 and Salsa20, which are actually stream ciphers
 
 =============
 9. Extensions
