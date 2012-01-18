@@ -32,10 +32,6 @@ PHP                                                                        NEWS
 	still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
-- hash
-  . Fixed bug #60221 (Tiger hash output byte order) (Mike)
-  . Removed Salsa10/Salsa20, which are actually stream ciphers (Mike)
-
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
