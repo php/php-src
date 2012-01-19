@@ -1171,7 +1171,9 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg TSRMLS_DC) /* {{{ *
 {
 	char *filename;
 	int *error = (int *)arg;;
+#ifdef HAVE_GLOB
 	glob_t g;
+#endif
 	int i;
 
 	if (!inc || !arg) return;
