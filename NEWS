@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2012, PHP 5.4.0 RC6
+?? Jan 2012, PHP 5.4.0
+
+19 Jan 2012, PHP 5.4.0 RC6
 
 - Core:
   . Restoring $_SERVER['REQUEST_TIME'] as a long and introducing
