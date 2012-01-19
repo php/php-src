@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
  . fixed bug #60227: header() cannot detect the multi-line header with CR (rui).
+- Firebird Database extension (ibase):
+ . Fixed bug #60802: ibase_trans() gives segfault when passing params
 
 10 Jan 2012, PHP 5.3.9
 
