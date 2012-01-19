@@ -57,15 +57,15 @@ rmdir($dir_name);
 --EXPECTF--
 *** Testing fileinode() with different notations of file names ***
 - Iteration 1 -
-int(%d)
+int(%i)
 - Iteration 2 -
 
 Warning: fileinode(): stat failed for %s//fileinode_variation3/fileinode_variation3.tmp/ in %s on line %d
 bool(false)
 - Iteration 3 -
-int(%d)
+int(%i)
 - Iteration 4 -
-int(%d)
+int(%i)
 - Iteration 5 -
 
 Warning: fileinode(): stat failed for %s//fileinode_variation3/*.tmp in %s on line %d
