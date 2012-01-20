@@ -2518,6 +2518,9 @@ PHP_FUNCTION(substr_replace)
 
 					if(Z_REFCOUNT_P(orig_str) != refcount) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument was modified while replacing");
+						if(Z_TYPE_PP(tmp_repl) != IS_STRING) {
+							zval_dtor(repl_str);
+						}
 						break;
 					}
 
