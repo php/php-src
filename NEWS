@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Core:
   . Restoring $_SERVER['REQUEST_TIME'] as a long and introducing
     $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. (Patrick)
+  . Fixed bug #60809 (TRAITS - PHPDoc Comment Style Bug). (Dmitry)
   . Fixed bug #60768 (Output buffer not discarded) (Mike)
 
 - Hash
