@@ -3700,7 +3700,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
+		INIT_PZVAL_COPY(&tmp_inc_filename, inc_filename);
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;

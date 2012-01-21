@@ -2529,7 +2529,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 	inc_filename = opline->op1.zv;
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
+		INIT_PZVAL_COPY(&tmp_inc_filename, inc_filename);
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
@@ -6859,7 +6859,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 	inc_filename = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
+		INIT_PZVAL_COPY(&tmp_inc_filename, inc_filename);
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
@@ -11216,7 +11216,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	inc_filename = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
+		INIT_PZVAL_COPY(&tmp_inc_filename, inc_filename);
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
@@ -27068,7 +27068,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	inc_filename = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
+		INIT_PZVAL_COPY(&tmp_inc_filename, inc_filename);
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
