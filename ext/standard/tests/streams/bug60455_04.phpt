@@ -1,5 +1,6 @@
 --TEST--
-Bug #60455: stream_get_line and 1-line followed by eol input
+Bug #60455: stream_get_line and 1-line with maxlen size followed by 0-length
+read with EOL indication
 --FILE--
 <?php
 class TestStream {
@@ -23,7 +24,7 @@ stream_wrapper_register("test", "TestStream");
 
 $f = fopen("test://", "r");
 while (!feof($f)) {
-    $line = stream_get_line($f, 99, "\n");
+    $line = stream_get_line($f, 2, "\n");
     var_dump($line);
 }
 --EXPECT--
