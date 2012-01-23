@@ -27,7 +27,7 @@ echo "Compressed lengths\n";
 var_dump($lens);
 
 ?>
---EXPECTREGEX--
+--EXPECTF--
 Compressed lengths
 array(1) {
   [0]=>
