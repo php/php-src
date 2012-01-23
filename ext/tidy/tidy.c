@@ -1235,7 +1235,7 @@ static PHP_FUNCTION(tidy_parse_file)
 	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
 
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path, &contents_len TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory%s", inputfile, (use_include_path) ? " (Using include path)" : "");
 		RETURN_FALSE;
 	}
 
