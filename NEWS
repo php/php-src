@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
  . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
    (rui)
+ . Fixed bug #60825 (Segfault when running symfony 2 tests).
+   (Dmitry, Laruence)
 
 - Firebird Database extension (ibase):
  . Fixed bug #60802 (ibase_trans() gives segfault when passing params).

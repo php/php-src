@@ -1902,14 +1902,15 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 	int return_value_used;
 
 	zval *inc_filename = &opline->op1.u.constant;
-	zval tmp_inc_filename;
+	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
 
 	if (inc_filename->type!=IS_STRING) {
-		tmp_inc_filename = *inc_filename;
-		zval_copy_ctor(&tmp_inc_filename);
-		convert_to_string(&tmp_inc_filename);
-		inc_filename = &tmp_inc_filename;
+		MAKE_STD_ZVAL(tmp_inc_filename);
+		*tmp_inc_filename = *inc_filename;
+		zval_copy_ctor(tmp_inc_filename);
+		convert_to_string(tmp_inc_filename);
+		inc_filename = tmp_inc_filename;
 	}
 
 	return_value_used = RETURN_VALUE_USED(opline);
@@ -1975,8 +1976,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (inc_filename==&tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+	if (tmp_inc_filename) {
+		zval_ptr_dtor(&tmp_inc_filename);
 	}
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
@@ -5190,14 +5191,15 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 	int return_value_used;
 	zend_free_op free_op1;
 	zval *inc_filename = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval tmp_inc_filename;
+	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
 
 	if (inc_filename->type!=IS_STRING) {
-		tmp_inc_filename = *inc_filename;
-		zval_copy_ctor(&tmp_inc_filename);
-		convert_to_string(&tmp_inc_filename);
-		inc_filename = &tmp_inc_filename;
+		MAKE_STD_ZVAL(tmp_inc_filename);
+		*tmp_inc_filename = *inc_filename;
+		zval_copy_ctor(tmp_inc_filename);
+		convert_to_string(tmp_inc_filename);
+		inc_filename = tmp_inc_filename;
 	}
 
 	return_value_used = RETURN_VALUE_USED(opline);
@@ -5263,8 +5265,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (inc_filename==&tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+	if (tmp_inc_filename) {
+		zval_ptr_dtor(&tmp_inc_filename);
 	}
 	zval_dtor(free_op1.var);
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
@@ -8573,14 +8575,15 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	int return_value_used;
 	zend_free_op free_op1;
 	zval *inc_filename = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	zval tmp_inc_filename;
+	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
 
 	if (inc_filename->type!=IS_STRING) {
-		tmp_inc_filename = *inc_filename;
-		zval_copy_ctor(&tmp_inc_filename);
-		convert_to_string(&tmp_inc_filename);
-		inc_filename = &tmp_inc_filename;
+		MAKE_STD_ZVAL(tmp_inc_filename);
+		*tmp_inc_filename = *inc_filename;
+		zval_copy_ctor(tmp_inc_filename);
+		convert_to_string(tmp_inc_filename);
+		inc_filename = tmp_inc_filename;
 	}
 
 	return_value_used = RETURN_VALUE_USED(opline);
@@ -8646,8 +8649,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (inc_filename==&tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+	if (tmp_inc_filename) {
+		zval_ptr_dtor(&tmp_inc_filename);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
@@ -22465,14 +22468,15 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	int return_value_used;
 
 	zval *inc_filename = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
-	zval tmp_inc_filename;
+	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
 
 	if (inc_filename->type!=IS_STRING) {
-		tmp_inc_filename = *inc_filename;
-		zval_copy_ctor(&tmp_inc_filename);
-		convert_to_string(&tmp_inc_filename);
-		inc_filename = &tmp_inc_filename;
+		MAKE_STD_ZVAL(tmp_inc_filename);
+		*tmp_inc_filename = *inc_filename;
+		zval_copy_ctor(tmp_inc_filename);
+		convert_to_string(tmp_inc_filename);
+		inc_filename = tmp_inc_filename;
 	}
 
 	return_value_used = RETURN_VALUE_USED(opline);
@@ -22538,8 +22542,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (inc_filename==&tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+	if (tmp_inc_filename) {
+		zval_ptr_dtor(&tmp_inc_filename);
 	}
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
