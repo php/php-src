@@ -8,7 +8,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
-  . Fixed bug #60825 (Segfault when running symfony 2 tests). (Laruence)
+  . Fixed bug #60825 (Segfault when running symfony 2 tests).
+    (Dmitry, Laruence)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 

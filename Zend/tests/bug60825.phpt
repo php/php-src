@@ -4,15 +4,16 @@ Bug #60825 (Segfault when running symfony 2 tests)
 run this with valgrind
 --FILE--
 <?php
-if (isset($loaded)) {
-    $loaded = true;
-	class test {
-		public function __toString() {
-			return __FILE__;
-		}
+class test {
+	public static $x;
+	public function __toString() {
+		self::$x = $this;
+		return __FILE__;
 	}
-	$a = new test;
-	require_once $a;
 }
+$a = new test;
+require_once $a;
+debug_zval_dump(test::$x);
 ?>
---EXPECT--
+--EXPECTF--
+string(%d) "%sbug60825.php" refcount(2)
