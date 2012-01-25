@@ -85,6 +85,18 @@ static inline void php_output_init_globals(zend_output_globals *G)
 }
 /* }}} */
 
+/* {{{ stderr writer if not PHP_OUTPUT_ACTIVATED */
+static int php_output_stderr(const char *str, size_t str_len)
+{
+	fwrite(str, 1, str_len, stderr);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+	fflush(stderr);
+#endif
+	return str_len;
+}
+/* }}} */
+
 /* {{{ void php_output_startup(void)
  * Set up module globals and initalize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
@@ -117,6 +129,7 @@ PHPAPI int php_output_activate(TSRMLS_D)
 #endif
 
 	zend_stack_init(&OG(handlers));
+	OG(flags) |= PHP_OUTPUT_ACTIVATED;
 
 	return SUCCESS;
 }
@@ -139,6 +152,8 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 		}
 		zend_stack_destroy(&OG(handlers));
 	}
+
+	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
 }
 /* }}} */
 
@@ -174,9 +189,11 @@ PHPAPI void php_output_set_status(int status TSRMLS_DC)
  * Get output control status */
 PHPAPI int php_output_get_status(TSRMLS_D)
 {
-	return OG(flags)
-			| (OG(active) ? PHP_OUTPUT_ACTIVE : 0)
-			| (OG(running)? PHP_OUTPUT_LOCKED : 0);
+	return (
+		OG(flags)
+		|	(OG(active) ? PHP_OUTPUT_ACTIVE : 0)
+		|	(OG(running)? PHP_OUTPUT_LOCKED : 0)
+	) & 0xff;
 }
 /* }}} */
 
@@ -187,7 +204,10 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
-	return sapi_module.ub_write(str, len TSRMLS_CC);
+	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
+		return sapi_module.ub_write(str, len TSRMLS_CC);
+	}
+	return php_output_stderr(str, len);
 }
 /* }}} */
 
@@ -198,8 +218,11 @@ PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
-	php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len TSRMLS_CC);
-	return (int) len;
+	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
+		php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len TSRMLS_CC);
+		return (int) len;
+	}
+	return php_output_stderr(str, len);
 }
 /* }}} */
 
