@@ -1,2 +1,3 @@
-libcurl-7.21.7
+libcurl-7.24.0
 libpng-1.2.46
+openssl-0.9.8t
