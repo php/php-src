@@ -310,6 +310,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		TSRMLS_DC)
 {
 	SSL_METHOD *method;
+	long ssl_ctx_options = SSL_OP_ALL;
 	
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -377,7 +378,10 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		return -1;
 	}
 
-	SSL_CTX_set_options(sslsock->ctx, SSL_OP_ALL);
+#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
+	ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+#endif
+	SSL_CTX_set_options(sslsock->ctx, ssl_ctx_options);
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL
 	{
