@@ -2391,23 +2391,23 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (OP2_TYPE != IS_CONST &&
-			EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) && 
-			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
+				EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+				zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zend_class_entry *ce;
 			zval **method = NULL;
 			zval **obj = NULL;
 
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
-			
+
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
-			
+
 			if (Z_TYPE_PP(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
-			
+
 			if (Z_TYPE_PP(obj) == IS_STRING) {
 				ce = zend_fetch_class_by_name(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(ce == NULL)) {
@@ -2415,7 +2415,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				}
 				EX(called_scope) = ce;
 				EX(object) = NULL;
-				
+
 				if (ce->get_static_method) {
 					EX(fbc) = ce->get_static_method(ce, Z_STRVAL_PP(method), Z_STRLEN_PP(method) TSRMLS_CC);
 				} else {
@@ -4509,16 +4509,16 @@ ZEND_VM_C_LABEL(num_index_prop):
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
 			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
-				|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-			ZVAL_COPY_VALUE(&tmp, offset);
-			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
-			offset = &tmp;
+				ZVAL_COPY_VALUE(&tmp, offset);
+				zval_copy_ctor(&tmp);
+				convert_to_long(&tmp);
+				offset = &tmp;
 			} else {
 				/* can not be converted to proper offset, return "not set" */
 				result = 0;
-		}
+			}
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
