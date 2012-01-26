@@ -2391,7 +2391,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (OP2_TYPE != IS_CONST &&
-			EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
+			EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) && 
 			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 			zend_class_entry *ce;
 			zval **method = NULL;
@@ -2399,15 +2399,15 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
-
+			
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
-
+			
 			if (Z_TYPE_PP(method) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Second array member is not a valid method");
 			}
-
+			
 			if (Z_TYPE_PP(obj) == IS_STRING) {
 				ce = zend_fetch_class_by_name(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(ce == NULL)) {
@@ -2415,7 +2415,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				}
 				EX(called_scope) = ce;
 				EX(object) = NULL;
-
+				
 				if (ce->get_static_method) {
 					EX(fbc) = ce->get_static_method(ce, Z_STRVAL_PP(method), Z_STRLEN_PP(method) TSRMLS_CC);
 				} else {
@@ -2429,7 +2429,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				if (UNEXPECTED(EX(fbc) == NULL)) {
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), Z_STRVAL_PP(method));
 				}
-
+				
 				if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					EX(object) = NULL;
 				} else {
@@ -3693,17 +3693,18 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	zend_op_array *new_op_array=NULL;
 	zend_free_op free_op1;
 	zval *inc_filename;
-	zval tmp_inc_filename;
+    zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
 
 	SAVE_OPLINE();
 	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (inc_filename->type!=IS_STRING) {
-		ZVAL_COPY_VALUE(&tmp_inc_filename, inc_filename);
-		zval_copy_ctor(&tmp_inc_filename);
-		convert_to_string(&tmp_inc_filename);
-		inc_filename = &tmp_inc_filename;
+		MAKE_STD_ZVAL(tmp_inc_filename);
+		ZVAL_COPY_VALUE(tmp_inc_filename, inc_filename);
+		zval_copy_ctor(tmp_inc_filename);
+		convert_to_string(tmp_inc_filename);
+		inc_filename = tmp_inc_filename;
 	}
 
 	if (opline->extended_value != ZEND_EVAL && strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename)) {
@@ -3767,8 +3768,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (inc_filename==&tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+	if (tmp_inc_filename) {
+		zval_ptr_dtor(&tmp_inc_filename);
 	}
 	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4510,14 +4511,14 @@ ZEND_VM_C_LABEL(num_index_prop):
 			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
 				|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_COPY_VALUE(&tmp, offset);
-				zval_copy_ctor(&tmp);
-				convert_to_long(&tmp);
-				offset = &tmp;
+			ZVAL_COPY_VALUE(&tmp, offset);
+			zval_copy_ctor(&tmp);
+			convert_to_long(&tmp);
+			offset = &tmp;
 			} else {
 				/* can not be converted to proper offset, return "not set" */
 				result = 0;
-			}
+		}
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {

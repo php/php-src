@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. (Patrick)
   . Fixed bug #60809 (TRAITS - PHPDoc Comment Style Bug). (Dmitry)
   . Fixed bug #60768 (Output buffer not discarded) (Mike)
+  . Fixed bug #60825 (Segfault when running symfony 2 tests).
+    (Dmitry, Laruence)
 
 - Hash
   . Fixed bug #60221 (Tiger hash output byte order) (Mike)
