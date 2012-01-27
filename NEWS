@@ -3,23 +3,25 @@ PHP                                                                        NEWS
 ?? ?? 2012, PHP 5.3.10
 
 - Core:
- . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
-   (rui)
- . Fixed bug #60825 (Segfault when running symfony 2 tests).
-   (Dmitry, Laruence)
+  . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
+    (rui)
+  . Fixed bug #60825 (Segfault when running symfony 2 tests).
+    (Dmitry, Laruence)
+  . Fix bug #60895 (Possible invalid handler usage in windows random
+    functions). (Pierre)
 
 - Firebird Database extension (ibase):
- . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
+  . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
 - Streams:
- . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not detected
-   together with the last read). (Gustavo)
- . Fixed bug #60817 (stream_get_line() reads from stream even when there is
-   already sufficient data buffered). stream_get_line() now behaves more like
-   fgets(), as is documented. (Gustavo)
+  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not detected
+    together with the last read). (Gustavo)
+  . Fixed bug #60817 (stream_get_line() reads from stream even when there is
+    already sufficient data buffered). stream_get_line() now behaves more like
+    fgets(), as is documented. (Gustavo)
 
 - PHP-FPM SAPI:
- . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
+  . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
  
 10 Jan 2012, PHP 5.3.9
 
