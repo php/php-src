@@ -1,3 +1,10 @@
+freetype-2.4.3
+icu-4.6.1
+jpeglib-6b
 libcurl-7.24.0
+libiconv-1.11
+libmcrypt-2.5.8
 libpng-1.2.46
+libxml-2.7.7
 openssl-0.9.8t
+
