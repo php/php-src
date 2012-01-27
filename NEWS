@@ -1,8 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2012, PHP 5.4.0 RC 7
-- Fix possible attack in SSL sockets with SSL 3.0 / TLS 1.0.
-  CVE-2011-3389. (Scott)
+- Core:
+  . Fix bug #60895 (Possible invalid handler usage in windows random
+    functions). (Pierre)
+
+- OpenSSL:
+  . Fix possible attack in SSL sockets with SSL 3.0 / TLS 1.0.
+    CVE-2011-3389. (Scott)
 
 19 Jan 2012, PHP 5.4.0 RC6
 

@@ -62,8 +62,10 @@ void php_win32_init_rng_lock()
 void php_win32_free_rng_lock()
 {
 	tsrm_mutex_lock(php_lock_win32_cryptoctx);
-	CryptReleaseContext(hCryptProv, 0);
-	has_crypto_ctx = 0;
+	if (has_crypto_ctx == 1) {
+		CryptReleaseContext(hCryptProv, 0);
+		has_crypto_ctx = 0;
+	}
 	tsrm_mutex_unlock(php_lock_win32_cryptoctx);
 	tsrm_mutex_free(php_lock_win32_cryptoctx);
 
