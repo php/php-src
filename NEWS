@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ?? 2012, PHP 5.3.10
+- Session:
+  . Fixed bug #60860 (session.save_handler=user without defined function core
+    dumps). (Felipe)
 
 - Core:
   . Fixed bug #60227 (header() cannot detect the multi-line header with CR).

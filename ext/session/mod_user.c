@@ -86,6 +86,13 @@ PS_OPEN_FUNC(user)
 	zval *args[2];
 	static char dummy = 0;
 	STDVARS1;
+	
+	if (PSF(open) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"user session functions not defined");
+			
+		return FAILURE;
+	}
 
 	SESS_ZVAL_STRING((char*)save_path, args[0]);
 	SESS_ZVAL_STRING((char*)session_name, args[1]);
