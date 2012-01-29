@@ -62,12 +62,23 @@ typedef struct _php_sqlite3_func {
 	struct php_sqlite3_fci afunc, astep, afini;
 } php_sqlite3_func;
 
+/* Structure for SQLite collation function */
+typedef struct _php_sqlite3_collation {
+	struct _php_sqlite3_collation *next;
+
+	const char *collation_name;
+	zval *cmp_func;
+	struct php_sqlite3_fci fci;
+} php_sqlite3_collation;
+
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_db_object  {
 	zend_object zo;
 	int initialised;
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
+	php_sqlite3_collation *collations;
+
 	zend_bool exception;
 
 	zend_llist free_list;
