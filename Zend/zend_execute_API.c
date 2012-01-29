@@ -1195,8 +1195,11 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		}
 		CG(interactive) = 0;
 
+		retval = SUCCESS;
 		zend_try {
 			zend_execute(new_op_array TSRMLS_CC);
+		} zend_catch {
+			retval = FAILURE;
 		} zend_end_try();
 
 		CG(interactive) = orig_interactive;
@@ -1218,7 +1221,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
-		retval = SUCCESS;
 	} else {
 		retval = FAILURE;
 	}
