@@ -848,6 +848,60 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 }
 /* }}} */
 
+static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, int b_len, const void* b) /* {{{ */
+{
+	php_sqlite3_collation *collation = (php_sqlite3_collation*)coll;
+	zval ***zargs = NULL;
+	zval *retval = NULL;
+	int ret;
+
+	TSRMLS_FETCH();
+
+	collation->fci.fci.size = (sizeof(collation->fci.fci));
+	collation->fci.fci.function_table = EG(function_table);
+	collation->fci.fci.function_name = collation->cmp_func;
+	collation->fci.fci.symbol_table = NULL;
+	collation->fci.fci.object_ptr = NULL;
+	collation->fci.fci.retval_ptr_ptr = &retval;
+	collation->fci.fci.param_count = 2;
+
+	zargs = (zval***)safe_emalloc(2, sizeof(zval**), 0);
+	zargs[0] = emalloc(sizeof(zval*));
+	zargs[1] = emalloc(sizeof(zval*));
+
+	MAKE_STD_ZVAL(*zargs[0]);
+	ZVAL_STRINGL(*zargs[0], a, a_len, 1);
+
+	MAKE_STD_ZVAL(*zargs[1]);
+	ZVAL_STRINGL(*zargs[1], b, b_len, 1);
+ 
+	collation->fci.fci.params = zargs;
+
+	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc TSRMLS_CC)) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the compare callback");
+	}
+
+	zval_ptr_dtor(zargs[0]);
+	zval_ptr_dtor(zargs[1]);
+	efree(zargs[0]);
+	efree(zargs[1]);
+	efree(zargs);
+
+	//retval ought to contain a ZVAL_LONG by now
+	// (the result of a comparison, i.e. most likely -1, 0, or 1)
+	//I suppose we could accept any scalar return type, though.
+	if (Z_TYPE_P(retval) != IS_LONG){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the compare callback (invalid return type).  Collation behaviour is undefined.");
+	}else{
+		ret = Z_LVAL_P(retval);
+	}
+
+	zval_ptr_dtor(&retval);
+
+	return ret;
+}
+/* }}} */
+
 /* {{{ proto bool SQLite3::createFunction(string name, mixed callback [, int argcount])
    Allows registration of a PHP function as a SQLite UDF that can be called within SQL statements. */
 PHP_METHOD(sqlite3, createFunction)
@@ -953,6 +1007,53 @@ PHP_METHOD(sqlite3, createAggregate)
 		RETURN_TRUE;
 	}
 	efree(func);
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool SQLite3::createCollation(string name, mixed callback)
+   Registers a PHP function as a comparator that can be used with the SQL COLLATE operator. Callback must accept two strings and return an integer (as strcmp()). */
+PHP_METHOD(sqlite3, createCollation)
+{
+	php_sqlite3_db_object *db_obj;
+	zval *object = getThis();
+	php_sqlite3_collation *collation;
+	char *collation_name, *callback_name;
+	int collation_name_len;
+	zval *callback_func;
+	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
+
+	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &collation_name, &collation_name_len, &callback_func) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (!collation_name_len) {
+		RETURN_FALSE;
+	}
+
+	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
+		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name);
+		efree(callback_name);
+		RETURN_FALSE;
+	}
+	efree(callback_name);
+
+	collation = (php_sqlite3_collation *)ecalloc(1, sizeof(*collation));
+	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
+		collation->collation_name = estrdup(collation_name);
+
+		MAKE_STD_ZVAL(collation->cmp_func);
+		MAKE_COPY_ZVAL(&callback_func, collation->cmp_func);
+
+		collation->next = db_obj->collations;
+		db_obj->collations = collation;
+
+		RETURN_TRUE;
+	}
+	efree(collation);
 
 	RETURN_FALSE;
 }
@@ -1746,6 +1847,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
 	ZEND_ARG_INFO(0, argument_count)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createcollation, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(argingo_sqlite3_openblob, 0, 0, 3)
 	ZEND_ARG_INFO(0, table)
 	ZEND_ARG_INFO(0, column)
@@ -1809,6 +1915,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		querySingle,		arginfo_sqlite3_querysingle, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		createFunction,		arginfo_sqlite3_createfunction, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		createAggregate,	arginfo_sqlite3_createaggregate, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		createCollation,	arginfo_sqlite3_createcollation, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		openBlob,			argingo_sqlite3_openblob, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		enableExceptions,	argingo_sqlite3_enableexceptions, ZEND_ACC_PUBLIC)
 	/* Aliases */
@@ -1905,6 +2012,7 @@ static void php_sqlite3_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	php_sqlite3_db_object *intern = (php_sqlite3_db_object *)object;
 	php_sqlite3_func *func;
+	php_sqlite3_collation *collation;
 
 	if (!intern) {
 		return;
@@ -1929,6 +2037,19 @@ static void php_sqlite3_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 			zval_ptr_dtor(&func->fini);
 		}
 		efree(func);
+	}
+
+	while (intern->collations){
+		collation = intern->collations;
+		intern->collations = collation->next;
+		if (intern->initialised && intern->db){
+			sqlite3_create_collation(intern->db, collation->collation_name, SQLITE_UTF8, NULL, NULL);
+		}
+		efree((char*)collation->collation_name);
+		if (collation->cmp_func){
+			zval_ptr_dtor(&collation->cmp_func);
+		}
+		efree(collation);
 	}
 
 	if (intern->initialised && intern->db) {
