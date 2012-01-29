@@ -1882,7 +1882,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	size_t segment_size;
 	zend_mm_segment *segment;
 	int keep_rest = 0;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -2058,7 +2058,7 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 	zend_mm_block *mm_block;
 	zend_mm_block *next_block;
 	size_t size;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 	if (!ZEND_MM_VALID_PTR(p)) {
@@ -2548,7 +2548,7 @@ ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -2567,7 +2567,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	int length;
 	char *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -2587,7 +2587,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
@@ -2608,7 +2608,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 ZEND_API char *zend_strndup(const char *s, uint length)
 {
 	char *p;
-#ifdef ZEND_SIGNALS	
+#ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
