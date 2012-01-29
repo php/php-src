@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
  
+- SQLite3 extension:
+  . Add createCollation() method. (Brad Dewar)
+
 10 Jan 2012, PHP 5.3.9
 
 - Core:
