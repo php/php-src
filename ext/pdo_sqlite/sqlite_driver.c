@@ -129,6 +129,28 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H TSRMLS_DC)
 		}
 		efree(func);
 	}
+
+	struct pdo_sqlite_collation *collation;
+
+	while (H->collations) {
+		collation = H->collations;
+		H->collations = collation->next;
+
+		if (H->db) {
+			/* delete the collation from the handle */
+			sqlite3_create_collation(H->db,
+				collation->name,
+				SQLITE_UTF8,
+				collation,
+				NULL);
+		}
+
+		efree((char*)collation->name);
+		if (collation->callback) {
+			zval_ptr_dtor(&collation->callback);
+		}
+		efree(collation);
+	}
 }
 
 static int sqlite_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
@@ -457,6 +479,57 @@ static void php_sqlite3_func_final_callback(sqlite3_context *context)
 	do_callback(&func->afini, func->fini, 0, NULL, context, 1 TSRMLS_CC);
 }
 
+static int php_sqlite3_collation_callback(void *context,
+	int string1_len, const void *string1,
+	int string2_len, const void *string2)
+{
+	int ret;
+	zval *zstring1, *zstring2;
+	zval **zargs[2];
+	zval *retval = NULL;
+	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
+	TSRMLS_FETCH();
+
+	collation->fc.fci.size = sizeof(collation->fc.fci);
+	collation->fc.fci.function_table = EG(function_table);
+	collation->fc.fci.function_name = collation->callback;
+	collation->fc.fci.symbol_table = NULL;
+	collation->fc.fci.object_ptr = NULL;
+	collation->fc.fci.retval_ptr_ptr = &retval;
+
+	// Prepare the arguments.
+	MAKE_STD_ZVAL(zstring1);
+	ZVAL_STRINGL(zstring1, (char *) string1, string1_len, 1);
+	zargs[0] = &zstring1;
+	MAKE_STD_ZVAL(zstring2);
+	ZVAL_STRINGL(zstring2, (char *) string2, string2_len, 1);
+	zargs[1] = &zstring2;
+	collation->fc.fci.param_count = 2;
+	collation->fc.fci.params = zargs;
+
+	if ((ret = zend_call_function(&collation->fc.fci, &collation->fc.fcc TSRMLS_CC)) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
+	}
+	else if (retval) {
+		if (Z_TYPE_P(retval) != IS_LONG) {
+			convert_to_long_ex(&retval);
+		}
+		ret = 0;
+		if (Z_LVAL_P(retval) > 0) {
+			ret = 1;
+		}
+		else if (Z_LVAL_P(retval) < 0) {
+			ret = -1;
+		}
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(zargs[0]);
+	zval_ptr_dtor(zargs[1]);
+
+	return ret;
+}
+
 /* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount])
    Registers a UDF with the sqlite db handle */
 static PHP_METHOD(SQLite, sqliteCreateFunction)
@@ -590,9 +663,62 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	RETURN_FALSE;
 }
 /* }}} */
+
+/* {{{ bool SQLite::sqliteCreateCollation(string name, mixed callback)
+   Registers a collation with the sqlite db handle */
+static PHP_METHOD(SQLite, sqliteCreateCollation)
+{
+	struct pdo_sqlite_collation *collation;
+	zval *callback;
+	char *collation_name;
+	int collation_name_len;
+	char *cbname = NULL;
+	pdo_dbh_t *dbh;
+	pdo_sqlite_db_handle *H;
+	int ret;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz",
+		&collation_name, &collation_name_len, &callback)) {
+		RETURN_FALSE;
+	}
+       
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	if (!zend_is_callable(callback, 0, &cbname TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
+		efree(cbname);
+		RETURN_FALSE;
+	}
+	efree(cbname);
+
+	H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
+	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
+
+	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_collation_callback);
+	if (ret == SQLITE_OK) {
+		collation->name = estrdup(collation_name);
+
+		MAKE_STD_ZVAL(collation->callback);
+		MAKE_COPY_ZVAL(&callback, collation->callback);
+
+		collation->next = H->collations;
+		H->collations = collation;
+
+		RETURN_TRUE;
+	}
+
+	efree(collation);
+	RETURN_FALSE;
+}
+/* }}} */
+
+
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(SQLite, sqliteCreateCollation, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

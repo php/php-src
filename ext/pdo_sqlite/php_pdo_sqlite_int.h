@@ -46,10 +46,19 @@ struct pdo_sqlite_func {
 	struct pdo_sqlite_fci afunc, astep, afini;
 };
 
+struct pdo_sqlite_collation {
+	struct pdo_sqlite_collation *next;
+
+	const char *name;
+	zval *callback;
+	struct pdo_sqlite_fci fc;
+};
+
 typedef struct {
 	sqlite3 *db;
 	pdo_sqlite_error_info einfo;
 	struct pdo_sqlite_func *funcs;
+	struct pdo_sqlite_collation *collations;
 } pdo_sqlite_db_handle;
 
 typedef struct {
