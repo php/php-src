@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - SQLite3 extension:
   . Add createCollation() method. (Brad Dewar)
 
+- PDO_Sqlite extension:
+  . Add createCollation support. (Damien)
+
 10 Jan 2012, PHP 5.3.9
 
 - Core:
