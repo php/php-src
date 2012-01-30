@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
   . Fix bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
+  . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
