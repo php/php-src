@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Core:
   . Fix bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
+  . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
 - OpenSSL:
   . Fix possible attack in SSL sockets with SSL 3.0 / TLS 1.0.
