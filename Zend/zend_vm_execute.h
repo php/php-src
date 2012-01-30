@@ -3453,7 +3453,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_CONST == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_CONST == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -4237,7 +4239,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_TMP_VAR == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_CONST == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -4900,7 +4904,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_VAR == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_CONST == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -5434,7 +5440,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_UNUSED == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_UNUSED == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_CONST == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -6088,7 +6096,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_CV == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_CONST == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -7856,6 +7866,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -8510,6 +8521,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -9175,6 +9187,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -10233,6 +10246,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -13298,6 +13312,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -13394,7 +13409,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_CONST == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_VAR == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -15447,6 +15464,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -15544,7 +15562,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_TMP_VAR == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_VAR == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -17571,6 +17591,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -17668,7 +17689,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_VAR == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_VAR == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -18918,7 +18941,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_UNUSED == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_UNUSED == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_VAR == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -20641,6 +20666,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -20737,7 +20763,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 			if (UNEXPECTED(EX(fbc) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
-			if (IS_CV == IS_CONST && EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
+			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 				if (IS_VAR == IS_CONST) {
 					CACHE_PTR(opline->op2.literal->cache_slot, EX(fbc));
 				} else {
@@ -22103,6 +22131,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -23350,6 +23379,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -24507,6 +24537,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -25931,6 +25962,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -28997,6 +29029,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CONST == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -30929,6 +30962,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_TMP_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -32926,6 +32960,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_VAR == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
@@ -35733,6 +35768,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 			}
 			if (IS_CV == IS_CONST &&
+			    EXPECTED(EX(fbc)->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((EX(fbc)->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
 			    EXPECTED(EX(object) == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, EX(called_scope), EX(fbc));
