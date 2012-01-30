@@ -760,6 +760,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 	while (1) {
 		if (len <= start) {
+			if (link_is_dir) {
+				*link_is_dir = 1;
+			}
 			return start;
 		}
 
@@ -776,6 +779,10 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			continue;
 		} else if (i == len - 2 && path[i] == '.' && path[i+1] == '.') {
 			/* remove '..' and previous directory */
+			is_dir = 1;
+			if (link_is_dir) {
+				*link_is_dir = 1;
+			}
 			if (i - 1 <= start) {
 				return start ? start : len;
 			}
@@ -1200,9 +1207,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 				return 1;
 			}
 			memcpy(resolved_path, state->cwd, state_cwd_length);
-			resolved_path[state_cwd_length] = DEFAULT_SLASH;
-			memcpy(resolved_path + state_cwd_length + 1, path, path_length + 1);
-			path_length += state_cwd_length + 1;
+			if (resolved_path[state_cwd_length-1] == DEFAULT_SLASH) {
+				memcpy(resolved_path + state_cwd_length, path, path_length + 1);
+				path_length += state_cwd_length;
+			} else {
+				resolved_path[state_cwd_length] = DEFAULT_SLASH;
+				memcpy(resolved_path + state_cwd_length + 1, path, path_length + 1);
+				path_length += state_cwd_length + 1;
+			}
 		}
 	} else {
 #ifdef TSRM_WIN32
