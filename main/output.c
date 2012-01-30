@@ -85,7 +85,12 @@ static inline void php_output_init_globals(zend_output_globals *G)
 }
 /* }}} */
 
-/* {{{ stderr writer if not PHP_OUTPUT_ACTIVATED */
+/* {{{ stderr/stdout writer if not PHP_OUTPUT_ACTIVATED */
+static int php_output_stdout(const char *str, size_t str_len)
+{
+	fwrite(str, 1, str_len, stdout);
+	return str_len;
+}
 static int php_output_stderr(const char *str, size_t str_len)
 {
 	fwrite(str, 1, str_len, stderr);
@@ -95,6 +100,7 @@ static int php_output_stderr(const char *str, size_t str_len)
 #endif
 	return str_len;
 }
+static int (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
 /* }}} */
 
 /* {{{ void php_output_startup(void)
@@ -105,6 +111,7 @@ PHPAPI void php_output_startup(void)
 	zend_hash_init(&php_output_handler_aliases, 0, NULL, NULL, 1);
 	zend_hash_init(&php_output_handler_conflicts, 0, NULL, NULL, 1);
 	zend_hash_init(&php_output_handler_reverse_conflicts, 0, NULL, (void (*)(void *)) zend_hash_destroy, 1);
+	php_output_direct = php_output_stdout;
 }
 /* }}} */
 
@@ -112,6 +119,7 @@ PHPAPI void php_output_startup(void)
  * Destroy module globals and the conflict and reverse conflict hash tables */
 PHPAPI void php_output_shutdown(void)
 {
+	php_output_direct = php_output_stderr;
 	zend_hash_destroy(&php_output_handler_aliases);
 	zend_hash_destroy(&php_output_handler_conflicts);
 	zend_hash_destroy(&php_output_handler_reverse_conflicts);
@@ -207,7 +215,7 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
 		return sapi_module.ub_write(str, len TSRMLS_CC);
 	}
-	return php_output_stderr(str, len);
+	return php_output_direct(str, len);
 }
 /* }}} */
 
@@ -222,7 +230,7 @@ PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
 		php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len TSRMLS_CC);
 		return (int) len;
 	}
-	return php_output_stderr(str, len);
+	return php_output_direct(str, len);
 }
 /* }}} */
 
