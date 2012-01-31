@@ -680,7 +680,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 		&collation_name, &collation_name_len, &callback)) {
 		RETURN_FALSE;
 	}
-       
+
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	PDO_CONSTRUCT_CHECK;
 
@@ -712,7 +712,6 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	RETURN_FALSE;
 }
 /* }}} */
-
 
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
