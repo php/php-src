@@ -103,6 +103,29 @@ static int php_output_stderr(const char *str, size_t str_len)
 static int (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
 /* }}} */
 
+/* {{{ void php_output_header(TSRMLS_D) */
+static void php_output_header(TSRMLS_D)
+{
+	if (!SG(headers_sent)) {
+		if (!OG(output_start_filename)) {
+			if (zend_is_compiling(TSRMLS_C)) {
+				OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
+				OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
+			} else if (zend_is_executing(TSRMLS_C)) {
+				OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
+				OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
+			}
+#if PHP_OUTPUT_DEBUG
+			fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
+#endif
+		}
+		if (!php_header(TSRMLS_C)) {
+			OG(flags) |= PHP_OUTPUT_DISABLED;
+		}
+	}
+}
+/* }}} */
+
 /* {{{ void php_output_startup(void)
  * Set up module globals and initalize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
@@ -149,6 +172,9 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 {
 	php_output_handler **handler = NULL;
 
+	php_output_header(TSRMLS_C);
+
+	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
 	OG(active) = NULL;
 	OG(running) = NULL;
 
@@ -161,7 +187,6 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 		zend_stack_destroy(&OG(handlers));
 	}
 
-	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
 }
 /* }}} */
 
@@ -1045,26 +1070,20 @@ static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC)
 	}
 
 	if (context.out.data && context.out.used) {
+		php_output_header(TSRMLS_C);
+
+		if (!(OG(flags) & PHP_OUTPUT_DISABLED)) {
 #if PHP_OUTPUT_DEBUG
-		fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
+			fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
 #endif
-		if (!SG(headers_sent) && php_header(TSRMLS_C)) {
-			if (zend_is_compiling(TSRMLS_C)) {
-				OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
-				OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
-			} else if (zend_is_executing(TSRMLS_C)) {
-				OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
-				OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
+			sapi_module.ub_write(context.out.data, context.out.used TSRMLS_CC);
+
+			if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
+				sapi_flush(TSRMLS_C);
 			}
-#if PHP_OUTPUT_DEBUG
-			fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
-#endif
+
+			OG(flags) |= PHP_OUTPUT_SENT;
 		}
-		sapi_module.ub_write(context.out.data, context.out.used TSRMLS_CC);
-		if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
-			sapi_flush(TSRMLS_C);
-		}
-		OG(flags) |= PHP_OUTPUT_SENT;
 	}
 	php_output_context_dtor(&context);
 }

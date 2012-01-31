@@ -325,6 +325,9 @@ static const char *get_template_string(int code) /* {{{ */
 
 static void append_http_status_line(smart_str *buffer, int protocol_version, int response_code, int persistent) /* {{{ */
 {
+	if (!response_code) {
+		response_code = 200;
+	}
 	smart_str_appendl_ex(buffer, "HTTP", 4, persistent);
 	smart_str_appendc_ex(buffer, '/', persistent);
 	smart_str_append_generic_ex(buffer, protocol_version / 100, persistent, int, _unsigned);
@@ -1752,13 +1755,11 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		int err = 0;
 		zval *style = NULL; 
 		zend_try {
-			php_output_activate(TSRMLS_C);
 			php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 			php_info_print_style(TSRMLS_C);
 			MAKE_STD_ZVAL(style);
 			php_output_get_contents(style TSRMLS_CC);
 			php_output_discard(TSRMLS_C);
-			php_output_deactivate(TSRMLS_C);
 			if (style && Z_STRVAL_P(style)) {
 				char *block = pestrndup(Z_STRVAL_P(style), Z_STRLEN_P(style), 1);
 				php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new(block, block, Z_STRLEN_P(style));

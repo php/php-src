@@ -1738,12 +1738,11 @@ void php_request_shutdown(void *dummy)
 		} else {
 			php_output_end_all(TSRMLS_C);
 		}
-		php_output_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 4. Send the set HTTP headers (note: This must be done AFTER php_output_discard_all() / php_output_end_all() !!) */
+	/* 4. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
 	zend_try {
-		sapi_send_headers(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
 	} zend_end_try();
 
 	/* 5. Reset max_execution_time (no longer executing php code after response sent) */
