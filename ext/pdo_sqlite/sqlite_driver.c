@@ -130,9 +130,8 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H TSRMLS_DC)
 		efree(func);
 	}
 
-	struct pdo_sqlite_collation *collation;
-
 	while (H->collations) {
+		struct pdo_sqlite_collation *collation;
 		collation = H->collations;
 		H->collations = collation->next;
 
