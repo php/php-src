@@ -237,11 +237,11 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 	s = strstr(ctx->sdl->source, "://");
 	if (!s) return;
 	s = strchr(s+3, '/');
-	l1 = s - ctx->sdl->source;
+	l1 = s ? (s - ctx->sdl->source) : strlen(ctx->sdl->source);
 	s = strstr((char*)uri, "://");
 	if (!s) return;
 	s = strchr(s+3, '/');
-	l2 = s - (char*)uri;
+	l2 = s ? (s - (char*)uri) : strlen((char*)uri);
 	if (l1 != l2) {
 		/* check for http://...:80/ */
 		if (l1 > 11 &&
