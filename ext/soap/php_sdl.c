@@ -242,6 +242,40 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 	if (!s) return;
 	s = strchr(s+3, '/');
 	l2 = s - (char*)uri;
+	if (l1 != l2) {
+		/* check for http://...:80/ */
+		if (l1 > 11 &&
+		    ctx->sdl->source[4] == ':' &&
+		    ctx->sdl->source[l1-3] == ':' &&
+		    ctx->sdl->source[l1-2] == '8' &&
+		    ctx->sdl->source[l1-1] == '0') {
+			l1 -= 3;
+		}
+		if (l2 > 11 &&
+		    uri[4] == ':' &&
+		    uri[l2-3] == ':' &&
+		    uri[l2-2] == '8' &&
+		    uri[l2-1] == '0') {
+			l2 -= 3;
+		}
+		/* check for https://...:443/ */
+		if (l1 > 13 &&
+		    ctx->sdl->source[4] == 's' &&
+		    ctx->sdl->source[l1-4] == ':' &&
+		    ctx->sdl->source[l1-3] == '4' &&
+		    ctx->sdl->source[l1-2] == '4' &&
+		    ctx->sdl->source[l1-1] == '3') {
+			l1 -= 4;
+		}
+		if (l2 > 13 &&
+		    uri[4] == 's' &&
+		    uri[l2-4] == ':' &&
+		    uri[l2-3] == '4' &&
+		    uri[l2-2] == '4' &&
+		    uri[l2-1] == '3') {
+			l2 -= 4;
+		}
+	}
 	if (l1 != l2 || memcmp(ctx->sdl->source, uri, l1) != 0) {
 		/* another server. clear authentication credentals */
 		context = php_libxml_switch_context(NULL TSRMLS_CC);

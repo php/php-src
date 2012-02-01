@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - PDO_Sqlite extension:
   . Add createCollation support. (Damien)
 
+- SOAP:
+  . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
+
 10 Jan 2012, PHP 5.3.9
 
 - Core:
