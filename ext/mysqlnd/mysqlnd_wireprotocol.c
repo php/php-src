@@ -1177,7 +1177,11 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		BAIL_IF_NO_MORE_DATA;
 	}
 
-	/* 1 byte filler */
+	/* 1 byte length */
+	if (12 != *p) {
+		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent false length. Expected 12");
+	}
 	p++;
 	BAIL_IF_NO_MORE_DATA;
 

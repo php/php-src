@@ -57,7 +57,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
-	char *index, *escaped_index = NULL;
+	char *index;
 	char *var, *var_orig;
 	int var_len, index_len;
 	zval *gpc_element, **gpc_element_p;
@@ -174,10 +174,14 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 			if (!index) {
 				MAKE_STD_ZVAL(gpc_element);
 				array_init(gpc_element);
-				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				if (zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p) == FAILURE) {
+					zval_ptr_dtor(&gpc_element);
+					zval_dtor(val);
+					free_alloca(var_orig, use_heap);
+					return;
+				}
 			} else {
-				escaped_index = index;
-				if (zend_symtable_find(symtable1, escaped_index, index_len + 1, (void **) &gpc_element_p) == FAILURE
+				if (zend_symtable_find(symtable1, index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					if (zend_hash_num_elements(symtable1) <= PG(max_input_vars)) {
 						if (zend_hash_num_elements(symtable1) == PG(max_input_vars)) {
@@ -185,14 +189,12 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 						}
 						MAKE_STD_ZVAL(gpc_element);
 						array_init(gpc_element);
-						zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+						zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 					} else {
+						zval_dtor(val);
 						free_alloca(var_orig, use_heap);
 						return;
 					}
-				}
-				if (index != escaped_index) {
-					efree(escaped_index);
 				}
 			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
@@ -214,9 +216,10 @@ plain_var:
 		gpc_element->value = val->value;
 		Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
 		if (!index) {
-			zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+			if (zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p) == FAILURE) {
+				zval_ptr_dtor(&gpc_element);
+			}
 		} else {
-			escaped_index = index;
 			/* 
 			 * According to rfc2965, more specific paths are listed above the less specific ones.
 			 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
@@ -225,20 +228,17 @@ plain_var:
 			 */
 			if (PG(http_globals)[TRACK_VARS_COOKIE] &&
 				symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) &&
-				zend_symtable_exists(symtable1, escaped_index, index_len + 1)) {
+				zend_symtable_exists(symtable1, index, index_len + 1)) {
 				zval_ptr_dtor(&gpc_element);
 			} else {
 				if (zend_hash_num_elements(symtable1) <= PG(max_input_vars)) {
 					if (zend_hash_num_elements(symtable1) == PG(max_input_vars)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 					}
-					zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+					zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				} else {
 					zval_ptr_dtor(&gpc_element);
 				}
-			}
-			if (escaped_index != index) {
-				efree(escaped_index);
 			}
 		}
 	}
