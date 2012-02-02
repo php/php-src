@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+02 Feb 2012, PHP 5.3.10
+
+- Core:
+  . Fixed arbitrary remote code execution vulnerability reported by Stefan 
+    Esser, CVE-2012-0830. (Stas, Dmitry)
+
 10 Jan 2012, PHP 5.3.9
 
 - Core:
