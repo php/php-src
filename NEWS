@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2012, PHP 5.4.0 RC 7
+02 Feb 2012, PHP 5.4.0 RC 7
 - Core:
   . Fix bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
