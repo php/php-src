@@ -5,7 +5,7 @@ Sort with SORT_LOCALE_STRING
 if (substr(PHP_OS, 0, 3) == 'WIN') {
   die("skip Unix locale name only, not available on windows (and crashes with VC6)\n");
 }
-if (false == setlocale(LC_CTYPE, "fr_FR", "fr_FR.ISO8859-1")) {
+if (false == setlocale(LC_CTYPE, "fr_FR.ISO8859-1", "fr_FR")) {
   die("skip setlocale() failed\n");
 }
 ?>
@@ -14,7 +14,7 @@ unicode.script_encoding=ISO8859-1
 unicode.output_encoding=ISO8859-1
 --FILE--
 <?php
-setlocale(LC_ALL, 'fr_FR', 'fr_FR.ISO8859-1');
+setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
