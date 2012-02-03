@@ -104,7 +104,7 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-3. Update ``web/qa/trunk/include/release-qa.php`` with the appropriate information.
+3. Update ``qa.git/include/release-qa.php`` with the appropriate information.
    See the documentation within release-qa.php for more information, but all releases
    and RCs are configured here. Only $QA_RELEASES needs to be edited.
 
@@ -113,15 +113,15 @@ Derick) run the following commands for you:
 
    Note: Remember to update the MD5 checksum information.
 
-4. Update ``web/php/trunk/include/version.inc`` (x=major version number)
+4. Update ``php.git/include/version.inc`` (x=major version number)
 
  a. ``$PHP_x_RC`` = "5.4.0RC1"
 
  b. ``$PHP_x_RC_DATE`` = "06 September 2007"
 
-5. Commit those changes:
+5. Commit and push those changes:
 
- a. ``svn commit web/qa/trunk web/php-bugs/trunk web/php/trunk``
+ a. ``git commit -a && git push origin master``
 
 6. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
