@@ -35,4 +35,8 @@ PHP                                                                        NEWS
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
+- Reflection:
+  . Fixed bug #60968 (Late static binding doesn't work with 
+    ReflectionMethod::invokeArgs()). (Laruence)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
