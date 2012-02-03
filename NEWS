@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
 
+- Reflection:
+  . Fixed bug #60968 (Late static binding doesn't work with 
+    ReflectionMethod::invokeArgs()). (Laruence)
+
 ?? ??? 2012, PHP 5.3.10
 
 (to be added)

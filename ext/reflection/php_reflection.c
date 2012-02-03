@@ -2744,7 +2744,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
-	fcc.called_scope = obj_ce;
+	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
