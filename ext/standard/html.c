@@ -1215,7 +1215,6 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 	size_t cursor, maxlen, len;
 	char *replaced;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
-	int matches_map;
 	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
@@ -1253,12 +1252,14 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 		}
 	}
 
+	/* initial estimate */
 	if (oldlen < 64) {
 		maxlen = 128;	
 	} else {
 		maxlen = 2 * oldlen;
 	}
-	replaced = emalloc(maxlen);
+
+	replaced = emalloc(maxlen + 1);
 	len = 0;
 	cursor = 0;
 	while (cursor < oldlen) {
@@ -1271,7 +1272,7 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
 		if (len + 40 > maxlen) {
-			replaced = erealloc(replaced, maxlen += 128);
+			replaced = erealloc(replaced, (maxlen += 128) + 1);
 		}
 
 		if (status == FAILURE) {
@@ -1291,7 +1292,6 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 			mbsequence = &old[cursor_before];
 			mbseqlen = cursor - cursor_before;
 		}
-		matches_map = 0;
 
 		if (this_char != '&') { /* no entity on this position */
 			const unsigned char *rep	= NULL;
@@ -1302,12 +1302,15 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 				goto pass_char_through;
 
 			if (all) { /* false that CHARSET_PARTIAL_SUPPORT(charset) */
-				/* look for entity for this char */
 				if (to_uni_table != NULL) {
+					/* !CHARSET_UNICODE_COMPAT therefore not UTF-8; since UTF-8
+					 * is the only multibyte encoding with !CHARSET_PARTIAL_SUPPORT,
+					 * we're using a single byte encoding */
 					map_to_unicode(this_char, to_uni_table, &this_char);
 					if (this_char == 0xFFFF) /* no mapping; pass through */
 						goto pass_char_through;
 				}
+				/* the cursor may advance */
 				find_entity_for_char(this_char, charset, entity_table.ms_table, &rep,
 					&rep_len, old, oldlen, &cursor);
 			} else {
@@ -1397,6 +1400,10 @@ encode_amp:
 					}
 				}
 				/* checks passed; copy entity to result */
+				/* entity size is unbounded, we may need more memory */
+				if (maxlen < len + ent_len + 2 /* & and ; */) {
+					replaced = erealloc(replaced, (maxlen += ent_len + 128) + 1);
+				}
 				replaced[len++] = '&';
 				memcpy(&replaced[len], &old[cursor], ent_len);
 				len += ent_len;
