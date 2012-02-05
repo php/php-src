@@ -27,10 +27,9 @@ $stmth1->execute(array('A', 'B'));
 $rows = $stmth1->fetchAll(); // <------- segfault
 var_dump($rows);
 
-$stmt = $dbh->prepare('DELETE FROM testz');
-$stmt->execute();
-
 $dbh->commit();
+unset($stmth1);
+unset($stmth2);
 
 $dbh->exec('DROP TABLE testz');
 
