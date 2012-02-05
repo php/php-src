@@ -78,7 +78,7 @@ include_once( 'ut_common.inc' );
 // Run the test
 ut_run();
 ?>
---EXPECT--
+--EXPECTF--
 -------------------------------
 
 Input text is : Thursday, December 18, 1969 8:49:59 AM PST
@@ -96,7 +96,7 @@ Input text is : June 18, 1969 8:49:59 AM
 IntlDateFormatter : DateType::LONG, TimeType::LONG	Error : 'Date parsing failed: U_PARSE_ERROR'
 ------------
 IntlDateFormatter : DateType::MEDIUM, TimeType::MEDIUM
-tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '3' , tm_yday : '169' , tm_mon : '5' , tm_isdst : '1' , 
+tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '3' , tm_yday : '169' , tm_mon : '5' , tm_isdst : '%d' , 
 ------------
 IntlDateFormatter : DateType::FULL, TimeType::FULL	Error : 'Date parsing failed: U_PARSE_ERROR'
 -------------------------------
