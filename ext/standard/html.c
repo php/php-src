@@ -1257,9 +1257,13 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 		maxlen = 128;	
 	} else {
 		maxlen = 2 * oldlen;
+		if (maxlen < oldlen) {
+			zend_error_noreturn(E_ERROR, "Input string is too long");
+			return NULL;
+		}
 	}
 
-	replaced = emalloc(maxlen + 1);
+	replaced = emalloc(maxlen + 1); /* adding 1 is safe: maxlen is even */
 	len = 0;
 	cursor = 0;
 	while (cursor < oldlen) {
@@ -1271,8 +1275,9 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
-		if (len + 40 > maxlen) {
-			replaced = erealloc(replaced, (maxlen += 128) + 1);
+		if (len > maxlen - 40) { /* maxlen can never be smaller than 128 */
+			replaced = safe_erealloc(replaced, maxlen , 1, 128 + 1);
+			maxlen += 128;
 		}
 
 		if (status == FAILURE) {
@@ -1401,8 +1406,11 @@ encode_amp:
 				}
 				/* checks passed; copy entity to result */
 				/* entity size is unbounded, we may need more memory */
-				if (maxlen < len + ent_len + 2 /* & and ; */) {
-					replaced = erealloc(replaced, (maxlen += ent_len + 128) + 1);
+				/* at this point maxlen - len >= 40 */
+				if (maxlen - len < ent_len + 2 /* & and ; */) {
+					/* ent_len < oldlen, which is certainly <= SIZE_MAX/2 */
+					replaced = safe_erealloc(replaced, maxlen, 1, ent_len + 128 + 1);
+					maxlen += ent_len + 128;
 				}
 				replaced[len++] = '&';
 				memcpy(&replaced[len], &old[cursor], ent_len);
