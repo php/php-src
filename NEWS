@@ -1,10 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2012, PHP 5.4.0 RC 8
+- Core:
+  . Fixed bug #60965 (Buffer overflow on htmlspecialchars/entities with
+    $double=false). (Gustavo)
 
 02 Feb 2012, PHP 5.4.0 RC 7
 - Core:
-  . Fix bug #60895 (Possible invalid handler usage in windows random
+  . Fixed bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
   . Fixed (disabled) inline-caching for ZEND_OVERLOADED_FUNCTION methods.
