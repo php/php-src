@@ -351,7 +351,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 			smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 		}
 	}
-	smart_str_appendl_ex(buffer, "Connection: closed\r\n", sizeof("Connection: closed\r\n") - 1, persistent);
+	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
 } /* }}} */
 
 static const char *get_mime_type(const char *ext, size_t ext_len) /* {{{ */
