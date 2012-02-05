@@ -9,7 +9,7 @@ $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
---EXPECT--
+--EXPECTF--
 array(12) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
@@ -27,7 +27,7 @@ array(12) {
     string(16) "hnangelo@php.net"
   }
   ["hash"]=>
-  string(8) "088c65c2"
+  string(8) "%s"
   ["issuer"]=>
   array(5) {
     ["C"]=>
@@ -54,7 +54,7 @@ array(12) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(8) {
+  array(9) {
     [1]=>
     array(3) {
       [0]=>
@@ -127,6 +127,15 @@ array(12) {
       [2]=>
       string(10) "ocsphelper"
     }
+    [9]=>
+    array(3) {
+      [0]=>
+      bool(false)
+      [1]=>
+      bool(true)
+      [2]=>
+      string(13) "timestampsign"
+    }
   }
   ["extensions"]=>
   array(3) {
@@ -158,7 +167,7 @@ array(12) {
     string(16) "hnangelo@php.net"
   }
   ["hash"]=>
-  string(8) "088c65c2"
+  string(8) "%s"
   ["issuer"]=>
   array(5) {
     ["countryName"]=>
@@ -185,7 +194,7 @@ array(12) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(8) {
+  array(9) {
     [1]=>
     array(3) {
       [0]=>
@@ -257,6 +266,15 @@ array(12) {
       bool(true)
       [2]=>
       string(11) "OCSP helper"
+    }
+    [9]=>
+    array(3) {
+      [0]=>
+      bool(false)
+      [1]=>
+      bool(true)
+      [2]=>
+      string(18) "Time Stamp signing"
     }
   }
   ["extensions"]=>
