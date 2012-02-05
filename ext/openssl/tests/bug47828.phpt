@@ -36,5 +36,5 @@ var_dump($arr['hash']);
 echo "Done";
 ?>
 --EXPECT--
-string(8) "9337ed77"
+string(8) "%s"
 Done
