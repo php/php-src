@@ -20,7 +20,9 @@ array(11) {
   ["nsCertType"]=>
   string(30) "SSL Client, SSL Server, S/MIME"
   ["crlDistributionPoints"]=>
-  string(51) "URI:http://mobile.blue-software.ro:90/ca/crl.shtml
+  string(65) "
+Full Name:
+  URI:http://mobile.blue-software.ro:90/ca/crl.shtml
 "
   ["nsCaPolicyUrl"]=>
   string(38) "http://mobile.blue-software.ro:90/pub/"
