@@ -35,6 +35,6 @@ $arr = openssl_x509_parse($cert);
 var_dump($arr['hash']);
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 string(8) "%s"
 Done
