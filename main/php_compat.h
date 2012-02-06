@@ -34,7 +34,6 @@
 #define pcre_exec			php_pcre_exec
 #define pcre_get_substring		php_pcre_get_substring
 #define pcre_get_substring_list		php_pcre_get_substring_list
-#define pcre_info			php_pcre_info
 #define pcre_maketables			php_pcre_maketables
 #define pcre_study			php_pcre_study
 #define pcre_version			php_pcre_version
