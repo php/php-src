@@ -241,6 +241,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	char				*pattern;
 	int					 do_study = 0;
 	int					 poptions = 0;
+	int				count = 0;
 	unsigned const char *tables = NULL;
 #if HAVE_SETLOCALE
 	char				*locale = setlocale(LC_CTYPE, NULL);
@@ -255,7 +256,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		 * We use a quick pcre_fullinfo() check to see whether cache is corrupted, and if it
 		 * is, we flush it and compile the pattern from scratch.
 		 */
-		if (pcre_fullinfo(pce->re, NULL, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
+		if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_CAPTURECOUNT, &count) == PCRE_ERROR_BADMAGIC) {
 			zend_hash_clean(&PCRE_G(pcre_cache));
 		} else {
 #if HAVE_SETLOCALE
