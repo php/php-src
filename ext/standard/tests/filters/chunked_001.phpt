@@ -5,6 +5,8 @@ Chunked encoding
 $filters = stream_get_filters();
 if(! in_array( "dechunk", $filters )) die( "chunked filter not available." );
 ?>
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 $streams = array(
