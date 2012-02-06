@@ -1,5 +1,7 @@
 --TEST--
 Bug #44034
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 

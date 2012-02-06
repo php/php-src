@@ -5,6 +5,8 @@ Bug #43353 wrong detection of 'data' wrapper
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip on Windows");
 ?>
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 
