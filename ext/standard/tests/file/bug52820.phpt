@@ -39,31 +39,31 @@ echo "\nmemory stream (leak):\n";
 leak_variable(do_stuff("php://memory"), true);
 
 echo "\nDone.\n";
---EXPECT--
+--EXPECTF--
 temp stream (close after):
 About to rewind!
-* About to connect() to 127.0.0.1 port 37349 (#0)
+* About to connect() to 127.0.0.1 port 37349%r.*%r
 *   Trying 127.0.0.1... * Connection refused
 * couldn't connect to host
 * Closing connection #0
 
 memory stream (close after):
 About to rewind!
-* About to connect() to 127.0.0.1 port 37349 (#0)
+* About to connect() to 127.0.0.1 port 37349%r.*%r
 *   Trying 127.0.0.1... * Connection refused
 * couldn't connect to host
 * Closing connection #0
 
 temp stream (leak):
 About to rewind!
-* About to connect() to 127.0.0.1 port 37349 (#0)
+* About to connect() to 127.0.0.1 port 37349%r.*%r
 *   Trying 127.0.0.1... * Connection refused
 * couldn't connect to host
 * Closing connection #0
 
 memory stream (leak):
 About to rewind!
-* About to connect() to 127.0.0.1 port 37349 (#0)
+* About to connect() to 127.0.0.1 port 37349%r.*%r
 *   Trying 127.0.0.1... * Connection refused
 * couldn't connect to host
 * Closing connection #0
