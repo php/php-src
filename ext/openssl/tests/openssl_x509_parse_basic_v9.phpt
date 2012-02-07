@@ -1,8 +1,8 @@
 --TEST--
-openssl_x509_parse() basic test
+openssl_x509_parse() basic test for OpenSSL 0.9
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
-if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
+if (OPENSSL_VERSION_NUMBER > 0x10000000) die("skip Output requires OpenSSL 0.9");
 ?>
 --FILE--
 <?php
@@ -56,7 +56,7 @@ array(12) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(9) {
+  array(8) {
     [1]=>
     array(3) {
       [0]=>
@@ -129,15 +129,6 @@ array(12) {
       [2]=>
       string(10) "ocsphelper"
     }
-    [9]=>
-    array(3) {
-      [0]=>
-      bool(false)
-      [1]=>
-      bool(true)
-      [2]=>
-      string(13) "timestampsign"
-    }
   }
   ["extensions"]=>
   array(3) {
@@ -196,7 +187,7 @@ array(12) {
   ["validTo_time_t"]=>
   int(1217413723)
   ["purposes"]=>
-  array(9) {
+  array(8) {
     [1]=>
     array(3) {
       [0]=>
@@ -268,15 +259,6 @@ array(12) {
       bool(true)
       [2]=>
       string(11) "OCSP helper"
-    }
-    [9]=>
-    array(3) {
-      [0]=>
-      bool(false)
-      [1]=>
-      bool(true)
-      [2]=>
-      string(18) "Time Stamp signing"
     }
   }
   ["extensions"]=>
