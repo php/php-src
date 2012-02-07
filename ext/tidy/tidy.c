@@ -190,6 +190,7 @@ struct _PHPTidyDoc {
 	TidyDoc     doc;
 	TidyBuffer  *errbuf;
 	unsigned int ref_count;
+	unsigned int initialized:1;
 };
 
 struct _PHPTidyObj {
@@ -701,6 +702,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			intern->ptdoc = emalloc(sizeof(PHPTidyDoc));
 			intern->ptdoc->doc = tidyCreate();
 			intern->ptdoc->ref_count = 1;
+			intern->ptdoc->initialized = 0;
 			intern->ptdoc->errbuf = emalloc(sizeof(TidyBuffer));
 			tidyBufInit(intern->ptdoc->errbuf);
 
@@ -1040,7 +1042,9 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *e
 			return FAILURE;
 		}
 	}
-	
+
+	obj->ptdoc->initialized = 1;
+
 	tidyBufInit(&buf);
 	tidyBufAppend(&buf, string, len);
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
@@ -1288,7 +1292,7 @@ static PHP_FUNCTION(tidy_diagnose)
 {
 	TIDY_FETCH_OBJECT;
 
-	if (tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
+	if (obj->ptdoc->initialized && tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
 		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
 	}
