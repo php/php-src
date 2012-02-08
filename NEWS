@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
+    vars). (Laruence)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
