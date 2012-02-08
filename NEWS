@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
+  . Fixed bug #60978 (exit code incorrect). (Laruence)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
