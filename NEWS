@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fix bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical vars).
+    (Laruence)
 
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
