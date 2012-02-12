@@ -81,10 +81,8 @@ array(12) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>
@@ -113,10 +111,8 @@ array(12) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>
@@ -145,10 +141,8 @@ array(12) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>

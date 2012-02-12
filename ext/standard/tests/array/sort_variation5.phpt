@@ -79,8 +79,7 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) "
-"
+  string(1) ""
   [7]=>
   string(2) "\a"
   [8]=>
@@ -109,8 +108,7 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) "
-"
+  string(1) ""
   [7]=>
   string(2) "\a"
   [8]=>
@@ -139,8 +137,7 @@ array(12) {
   [5]=>
   string(1) ""
   [6]=>
-  string(1) "
-"
+  string(1) ""
   [7]=>
   string(2) "\a"
   [8]=>
