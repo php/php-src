@@ -1563,15 +1563,16 @@ PHP_FUNCTION(array_fill)
 	array_init_size(return_value, num);
 
 	num--;
+	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
 	zval_add_ref(&val);
-	if (zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL) == FAILURE) {
-		zval_ptr_dtor(&val);
-	}
 
 	while (num--) {
-		zval_add_ref(&val);
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL) == FAILURE) {
-			zval_ptr_dtor(&val);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL) == SUCCESS) {
+			zval_add_ref(&val);
+		} else {
+			zval_dtor(return_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			RETURN_FALSE;
 		}
 	}
 }
