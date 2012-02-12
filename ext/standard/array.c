@@ -1558,11 +1558,15 @@ PHP_FUNCTION(array_fill)
 
 	num--;
 	zval_add_ref(&val);
-	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
+	if (zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL) == FAILURE) {
+		zval_ptr_dtor(&val);
+	}
 
 	while (num--) {
 		zval_add_ref(&val);
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL) == FAILURE) {
+			zval_ptr_dtor(&val);
+		}
 	}
 }
 /* }}} */
