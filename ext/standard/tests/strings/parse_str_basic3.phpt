@@ -2,6 +2,7 @@
 Test parse_str() function : basic functionality
 --INI--
 magic_quotes_gpc = on
+max_input_vars=1000
 --FILE--
 <?php
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
