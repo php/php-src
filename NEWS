@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra) 
 
 - Core:
+  . Fixed bug #61072 (Memory leak when restoring an exception handler).
+    (Nikic, Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical vars).
     (Laruence)
   . Fix bug #60895 (Possible invalid handler usage in windows random
