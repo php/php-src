@@ -1859,6 +1859,15 @@ int main(int argc, char *argv[])
 	php_optind = orig_optind;
 	php_optarg = orig_optarg;
 
+	if (fastcgi || bindpath) {
+		/* Override SAPI callbacks */
+		cgi_sapi_module.ub_write     = sapi_fcgi_ub_write;
+		cgi_sapi_module.flush        = sapi_fcgi_flush;
+		cgi_sapi_module.read_post    = sapi_fcgi_read_post;
+		cgi_sapi_module.getenv       = sapi_fcgi_getenv;
+		cgi_sapi_module.read_cookies = sapi_fcgi_read_cookies;
+	}
+
 #ifdef ZTS
 	SG(request_info).path_translated = NULL;
 #endif
@@ -1928,13 +1937,6 @@ consult the installation file that came with this distribution, or visit \n\
 		fastcgi = fcgi_is_fastcgi();
 	}
 	if (fastcgi) {
-		/* Override SAPI callbacks */
-		sapi_module.ub_write     = sapi_fcgi_ub_write;
-		sapi_module.flush        = sapi_fcgi_flush;
-		sapi_module.read_post    = sapi_fcgi_read_post;
-		sapi_module.getenv       = sapi_fcgi_getenv;
-		sapi_module.read_cookies = sapi_fcgi_read_cookies;
-
 		/* How many times to run PHP scripts before dying */
 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
 			max_requests = atoi(getenv("PHP_FCGI_MAX_REQUESTS"));
