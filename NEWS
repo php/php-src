@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . World domination
 
 - Core:
+  . Fixed bug #61072 (Memory leak when restoring an exception handler).
+    (Nikic, Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
     vars). (Laruence)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
