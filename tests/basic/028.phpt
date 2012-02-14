@@ -2,6 +2,7 @@
 RFC1867 character quotting
 --INI--
 file_uploads=1
+max_input_vars=1000
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
