@@ -5,6 +5,7 @@ magic_quotes_gpc=0
 always_populate_raw_post_data=0
 display_errors=0
 max_input_nesting_level=10
+max_input_vars=1000
 track_errors=1
 log_errors=0
 --POST--

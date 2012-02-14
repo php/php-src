@@ -3,6 +3,7 @@ Test HTTP_RAW_POST_DATA creation
 --INI--
 magic_quotes_gpc=0
 always_populate_raw_post_data=1
+max_input_vars=1000
 --POST--
 a=ABC&y=XYZ&c[]=1&c[]=2&c[a]=3
 --FILE--
