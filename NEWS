@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #60965 (Buffer overflow on htmlspecialchars/entities with
     $double=false). (Gustavo)
 
+- CGI/FastCGI SAPI
+  . Fixed reinitialization of SAPI callbacks after php_module_startup().
+    (Dmitry)
+
 02 Feb 2012, PHP 5.4.0 RC 7
 - Core:
   . Fixed bug #60895 (Possible invalid handler usage in windows random
