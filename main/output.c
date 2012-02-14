@@ -1260,11 +1260,19 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (func) {
-		uint safe_out_len;
+		char *out_str = NULL;
+		uint out_len = 0;
 
-		func(output_context->in.data, output_context->in.used, &output_context->out.data, &safe_out_len, output_context->op TSRMLS_CC);
-		output_context->out.used = safe_out_len;
-		output_context->out.free = 1;
+		func(output_context->in.data, output_context->in.used, &out_str, &out_len, output_context->op TSRMLS_CC);
+
+		if (out_str) {
+			output_context->out.data = out_str;
+			output_context->out.used = out_len;
+			output_context->out.free = 1;
+		} else {
+			php_output_context_pass(output_context);
+		}
+
 		return SUCCESS;
 	}
 	return FAILURE;
