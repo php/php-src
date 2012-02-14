@@ -1010,9 +1010,12 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 
 static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
+	char *p;
 
-	if (strncmp(url, "file://", sizeof("file://") - 1) == 0) {
-		url += sizeof("file://") - 1;
+	if ((p = strstr(url, "://")) != NULL) {
+		if (p < strchr(url, '/')) {
+			url = p + 3;
+		}
 	}
 
 	if (PG(safe_mode) &&(!php_checkuid_ex(url, NULL, CHECKUID_CHECK_FILE_AND_DIR, (flags & PHP_STREAM_URL_STAT_QUIET) ? CHECKUID_NO_ERRORS : 0))) {
@@ -1045,7 +1048,9 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 	int ret;
 
 	if ((p = strstr(url, "://")) != NULL) {
-		url = p + 3;
+		if (p < strchr(url, '/')) {
+			url = p + 3;
+		}
 	}
 
 	if (options & ENFORCE_SAFE_MODE) {
@@ -1093,11 +1098,15 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 #endif
 
 	if ((p = strstr(url_from, "://")) != NULL) {
-		url_from = p + 3;
+		if (p < strchr(url_from, '/')) {
+			url_from = p + 3;
+		}
 	}
 
 	if ((p = strstr(url_to, "://")) != NULL) {
-		url_to = p + 3;
+		if (p < strchr(url_to, '/')) {
+			url_to = p + 3;
+		}
 	}
 
 	if (PG(safe_mode) && (!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR) ||
@@ -1168,7 +1177,9 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 	char *p;
 
 	if ((p = strstr(dir, "://")) != NULL) {
-		dir = p + 3;
+		if (p < strchr(dir, '/')) {
+			dir = p + 3;
+		}
 	}
 
 	if (!recursive) {
