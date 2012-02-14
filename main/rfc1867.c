@@ -779,6 +779,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	void *event_extra_data = NULL;
 	int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
+	long count = 0;
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -918,7 +919,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					value = estrdup("");
 				}
 
-				if (sapi_module.input_filter(PARSE_POST, param, &value, value_len, &new_val_len TSRMLS_CC)) {
+				if (++count <= PG(max_input_vars) && sapi_module.input_filter(PARSE_POST, param, &value, value_len, &new_val_len TSRMLS_CC)) {
 					if (php_rfc1867_callback != NULL) {
 						multipart_event_formdata event_formdata;
 						size_t newlength = new_val_len;
@@ -945,15 +946,21 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 #else
 					safe_php_register_variable(param, value, new_val_len, array_ptr, 0 TSRMLS_CC);
 #endif
-				} else if (php_rfc1867_callback != NULL) {
-					multipart_event_formdata event_formdata;
+				} else {
+					if (count == PG(max_input_vars) + 1) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+					}
 
-					event_formdata.post_bytes_processed = SG(read_post_bytes);
-					event_formdata.name = param;
-					event_formdata.value = &value;
-					event_formdata.length = value_len;
-					event_formdata.newlength = NULL;
-					php_rfc1867_callback(MULTIPART_EVENT_FORMDATA, &event_formdata, &event_extra_data TSRMLS_CC);
+					if (php_rfc1867_callback != NULL) {
+						multipart_event_formdata event_formdata;
+
+						event_formdata.post_bytes_processed = SG(read_post_bytes);
+						event_formdata.name = param;
+						event_formdata.value = &value;
+						event_formdata.length = value_len;
+						event_formdata.newlength = NULL;
+						php_rfc1867_callback(MULTIPART_EVENT_FORMDATA, &event_formdata, &event_extra_data TSRMLS_CC);
+					}
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {

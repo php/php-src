@@ -196,21 +196,9 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				}
 				if (zend_symtable_find(symtable1, escaped_index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
-					if (zend_hash_num_elements(symtable1) <= PG(max_input_vars)) {
-						if (zend_hash_num_elements(symtable1) == PG(max_input_vars)) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
-						}
-						MAKE_STD_ZVAL(gpc_element);
-						array_init(gpc_element);
-						zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-					} else {
-						if (index != escaped_index) {
-							efree(escaped_index);
-						}
-						zval_dtor(val);
-						efree(var_orig);
-						return;
-					}
+					MAKE_STD_ZVAL(gpc_element);
+					array_init(gpc_element);
+					zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 				if (index != escaped_index) {
 					efree(escaped_index);
@@ -255,14 +243,7 @@ plain_var:
 				zend_symtable_exists(symtable1, escaped_index, index_len + 1)) {
 				zval_ptr_dtor(&gpc_element);
 			} else {
-				if (zend_hash_num_elements(symtable1) <= PG(max_input_vars)) {
-					if (zend_hash_num_elements(symtable1) == PG(max_input_vars)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
-					}
-					zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				} else {
-					zval_ptr_dtor(&gpc_element);
-				}
+				zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
 			if (escaped_index != index) {
 				efree(escaped_index);
@@ -276,6 +257,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
 	char *var, *val, *e, *s, *p;
 	zval *array_ptr = (zval *) arg;
+	long count = 0;
 
 	if (SG(request_info).post_data == NULL) {
 		return;
@@ -289,6 +271,10 @@ last_value:
 		if ((val = memchr(s, '=', (p - s)))) { /* have a value */
 			unsigned int val_len, new_val_len;
 
+			if (++count > PG(max_input_vars)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+				return;
+			}
 			var = s;
 
 			php_url_decode(var, (val - s));
@@ -322,6 +308,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	zval *array_ptr;
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
+	long count = 0;
 	
 	switch (arg) {
 		case PARSE_POST:
@@ -409,6 +396,11 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			if (var == val || *var == '\0') {
 				goto next_cookie;
 			}
+		}
+
+		if (++count > PG(max_input_vars)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+			break;
 		}
 
 		if (val) { /* have a value */
