@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     default (Stas).
   . Fixed bug #60965 (Buffer overflow on htmlspecialchars/entities with
     $double=false). (Gustavo)
+  . Fixed output layer compat function not passing along input buffer with 
+    php_output_context_pass() if the output_handler_func does not set out_str
+    (releaze3 at gmail dot com, Mike)
 
 - CGI/FastCGI SAPI
   . Fixed reinitialization of SAPI callbacks after php_module_startup().
