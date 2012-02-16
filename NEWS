@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2012, PHP 5.4.0 RC 8
+15 Feb 2012, PHP 5.4.0 RC 8
 - Core:
   . Added ability to reset user opcode handlers (Yoram).
   . Improved max_input_vars directive to check nested variables (Dmitry).
