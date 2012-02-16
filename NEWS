@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.0 RC 9
+
 15 Feb 2012, PHP 5.4.0 RC 8
 - Core:
   . Added ability to reset user opcode handlers (Yoram).
