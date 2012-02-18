@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
     (Laruence)
 
+- XMLRPC:
+  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
+
 02 Feb 2012, PHP 5.3.10
 
 - Core:

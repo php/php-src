@@ -1043,9 +1043,8 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 		 */
 		if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
 			/* save for later use */
-			MAKE_STD_ZVAL(method_name_save);
-			*method_name_save = **method_name;
-			zval_copy_ctor(method_name_save);
+			ALLOC_ZVAL(method_name_save);
+			MAKE_COPY_ZVAL(method_name, method_name_save);
 
 			/* register our php method */
 			add_zval(server->method_map, method_key, &method_name_save);
@@ -1073,9 +1072,8 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 
 	if (type == le_xmlrpc_server) {
 		/* save for later use */
-		MAKE_STD_ZVAL(method_name_save);
-		*method_name_save = **method_name;
-		zval_copy_ctor(method_name_save);
+		ALLOC_ZVAL(method_name_save);
+		MAKE_COPY_ZVAL(method_name, method_name_save);
 
 		/* register our php method */
 		add_zval(server->introspection_map, NULL, &method_name_save);
