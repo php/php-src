@@ -427,7 +427,7 @@ static void phar_do_403(char *entry, int entry_len TSRMLS_DC) /* {{{ */
 	sapi_header_line ctr = {0};
 
 	ctr.response_code = 403;
-	ctr.line_len = sizeof("HTTP/1.0 403 Access Denied");
+	ctr.line_len = sizeof("HTTP/1.0 403 Access Denied")-1;
 	ctr.line = "HTTP/1.0 403 Access Denied";
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 	sapi_send_headers(TSRMLS_C);
@@ -452,7 +452,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, cha
 	}
 
 	ctr.response_code = 404;
-	ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
+	ctr.line_len = sizeof("HTTP/1.0 404 Not Found")-1;
 	ctr.line = "HTTP/1.0 404 Not Found";
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 	sapi_send_headers(TSRMLS_C);
@@ -891,7 +891,7 @@ PHP_METHOD(Phar, webPhar)
 			char *tmp = NULL, sa = '\0';
 			sapi_header_line ctr = {0};
 			ctr.response_code = 301;
-			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
+			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")-1;
 			ctr.line = "HTTP/1.1 301 Moved Permanently";
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 
