@@ -54,9 +54,11 @@ PHP                                                                        NEWS
   . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
     (Laruence)
 
-?? ??? 2012, PHP 5.3.10
+02 Feb 2012, PHP 5.3.10
 
-(to be added)
+- Core:
+  . Fixed arbitrary remote code execution vulnerability reported by Stefan 
+    Esser, CVE-2012-0830. (Stas, Dmitry)
 
 10 Jan 2012, PHP 5.3.9
 
