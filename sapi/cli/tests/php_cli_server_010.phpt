@@ -55,7 +55,7 @@ fclose($fp);
 --EXPECTF--
 HTTP/1.1 200 OK
 Host: %s
-Connection: closed
+Connection: close
 X-Powered-By: PHP/%s
 Content-type: text/html
 
@@ -65,7 +65,7 @@ string(8) "/foo/bar"
 string(7) "foo=bar"
 HTTP/1.0 200 OK
 Host: %s
-Connection: closed
+Connection: close
 X-Powered-By: PHP/%s
 Content-type: text/html
 

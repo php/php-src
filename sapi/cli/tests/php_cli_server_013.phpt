@@ -83,7 +83,7 @@ fclose($fp);
 
 HTTP/1.1 404 Not Found
 Host: %s
-Connection: closed
+Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
@@ -91,7 +91,7 @@ Content-Length: %d
 </head><body><h1 class="h">Not Found</h1><p>The requested resource / was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
-Connection: closed
+Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
@@ -99,7 +99,7 @@ Content-Length: %d
 </head><body><h1 class="h">Not Found</h1><p>The requested resource /main/style.css was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
-Connection: closed
+Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
