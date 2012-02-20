@@ -1361,7 +1361,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
-		zendlval->value.lval = strtol(hex, NULL, 16);
+		if (len == 0) {
+			zendlval->value.lval = 0;
+		} else {
+			zendlval->value.lval = strtol(hex, NULL, 16);
+		}
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
 	} else {

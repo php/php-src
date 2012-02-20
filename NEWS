@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.11
 - Core:
   . Improved max_input_vars directive to check nested variables (Dmitry).
+  . Fixed bug #61095 (Incorect lexing of 0x00*+<NUM>). (Etienne)
 
 - Session:
   . Fixed bug #60860 (session.save_handler=user without defined function core
