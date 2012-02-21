@@ -450,6 +450,9 @@ UPGRADE NOTES - PHP X.Y
        - SplFileObject
          - SplFileObject::fputcsv()
 
+       - SplFixedArray
+         - SplFixedArray::__wakeup()
+
      i. New class constants
 
        - 
