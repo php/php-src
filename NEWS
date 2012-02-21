@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
+  . Fixed bug #60560 (SplFixedArray un-/serialize, getSize(), count() return 0,
+    keys are strings). (Adam)
 
 ?? ??? 2013, PHP 5.4.17
 
