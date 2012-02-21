@@ -444,11 +444,6 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		while (zend_list_delete(stream->rsrc_id) == SUCCESS) {}
 	}
 
-	/* Remove stream from any context link list */
-	if (stream->context && stream->context->links) {
-		php_stream_context_del_link(stream->context, stream);
-	}
-
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
 		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* calling fclose on an fopencookied stream will ultimately
@@ -2143,10 +2138,6 @@ PHPAPI void php_stream_context_free(php_stream_context *context)
 		php_stream_notification_free(context->notifier);
 		context->notifier = NULL;
 	}
-	if (context->links) {
-		zval_ptr_dtor(&context->links);
-		context->links = NULL;
-	}
 	efree(context);
 }
 
@@ -2208,66 +2199,6 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		wrapperhash = &category;
 	}
 	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
-}
-
-PHPAPI int php_stream_context_get_link(php_stream_context *context,
-        const char *hostent, php_stream **stream)
-{
-	php_stream **pstream;
-
-	if (!stream || !hostent || !context || !(context->links)) {
-		return FAILURE;
-	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&pstream)) {
-		*stream = *pstream;
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-
-PHPAPI int php_stream_context_set_link(php_stream_context *context,
-        const char *hostent, php_stream *stream)
-{
-	if (!context) {
-		return FAILURE;
-	}
-	if (!context->links) {
-		ALLOC_INIT_ZVAL(context->links);
-		array_init(context->links);
-	}
-	if (!stream) {
-		/* Delete any entry for <hostent> */
-		return zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1);
-	}
-	return zend_hash_update(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1, (void**)&stream, sizeof(php_stream *), NULL);
-}
-
-PHPAPI int php_stream_context_del_link(php_stream_context *context,
-        php_stream *stream)
-{
-	php_stream **pstream;
-	char *hostent;
-	int ret = SUCCESS;
-
-	if (!context || !context->links || !stream) {
-		return FAILURE;
-	}
-
-	for(zend_hash_internal_pointer_reset(Z_ARRVAL_P(context->links));
-		SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(context->links), (void**)&pstream);
-		zend_hash_move_forward(Z_ARRVAL_P(context->links))) {
-		if (*pstream == stream) {
-			if (SUCCESS == zend_hash_get_current_key(Z_ARRVAL_P(context->links), &hostent, NULL, 0)) {
-				if (FAILURE == zend_hash_del(Z_ARRVAL_P(context->links), (char*)hostent, strlen(hostent)+1)) {
-					ret = FAILURE;
-				}
-			} else {
-				ret = FAILURE;
-			}
-		}
-	}
-
-	return ret;
 }
 /* }}} */
 
