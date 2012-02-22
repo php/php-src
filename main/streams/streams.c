@@ -320,7 +320,9 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	int remove_rsrc = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
-	php_stream_context *context = stream->context;
+	/* on an unclean shutdown, the context may have already been freed (if it
+	 * was created after the stream resource), so don't reference it */
+	php_stream_context *context = CG(unclean_shutdown) ? NULL : stream->context;
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
 		preserve_handle = 1;
@@ -374,8 +376,8 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	/* Remove stream from any context link list */
-	if (stream->context && stream->context->links) {
-		php_stream_context_del_link(stream->context, stream);
+	if (context && context->links) {
+		php_stream_context_del_link(context, stream);
 	}
 
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
