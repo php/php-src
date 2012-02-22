@@ -366,7 +366,9 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	int ret = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
-	php_stream_context *context = stream->context;
+	/* on an unclean shutdown, the context may have already been freed (if it
+	 * was created after the stream resource), so don't reference it */
+	php_stream_context *context = CG(unclean_shutdown) ? NULL : stream->context;
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
 		preserve_handle = 1;
