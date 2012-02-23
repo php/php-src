@@ -242,9 +242,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #60261 (NULL pointer dereference in phar). (Felipe)
   . Fixed bug #60164 (Stubs of a specific length break phar_open_from_fp
+    scanning for __HALT_COMPILER). (Ralph Schindler)
   . Fixed bug #53872 (internal corruption of phar). (Hannes)
   . Fixed bug #52013 (Unable to decompress files in a compressed phar). (Hannes)
-    scanning for __HALT_COMPILER). (Ralph Schindler)
 
 - PHP-FPM SAPI:
   . Fixed bug #60659 (FPM does not clear auth_user on request accept).
