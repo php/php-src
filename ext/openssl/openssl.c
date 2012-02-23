@@ -4799,6 +4799,10 @@ PHP_FUNCTION(openssl_decrypt)
 
 	if (!(options & OPENSSL_RAW_DATA)) {
 		base64_str = (char*)php_base64_decode((unsigned char*)data, data_len, &base64_str_len);
+		if (!base64_str) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to base64 decode the input");
+			RETURN_FALSE;
+		}
 		data_len = base64_str_len;
 		data = base64_str;
 	}
