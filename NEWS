@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.0 RC 9
+- OpenSSL:
+  . Fixed bug #61124 (Crash when decoding an invalid base64 encoded string).
+    (me at ktamura dot com, Scott)
 
 15 Feb 2012, PHP 5.4.0 RC 8
 - Core:
