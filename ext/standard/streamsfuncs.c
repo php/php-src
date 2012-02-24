@@ -106,10 +106,6 @@ PHP_FUNCTION(stream_socket_client)
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	if (context) {
-		zend_list_addref(context->rsrc_id);
-	}
-
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
 		spprintf(&hashkey, 0, "stream_socket_client__%s", host);
 	}
