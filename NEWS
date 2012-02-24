@@ -1,22 +1,16 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.11
+
 - Core:
   . Improved max_input_vars directive to check nested variables (Dmitry).
   . Fixed bug #61095 (Incorect lexing of 0x00*+<NUM>). (Etienne)
-
-- Session:
-  . Fixed bug #60860 (session.save_handler=user without defined function core
-    dumps). (Felipe)
-
-- Tidy:
-  . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra) 
-
-- Core:
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
-  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical vars).
-    (Laruence)
+  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
+	(Laruence)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical
+	vars). (Laruence)
   . Fix bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
   . Fixed bug #60825 (Segfault when running symfony 2 tests).
@@ -25,17 +19,11 @@ PHP                                                                        NEWS
     (rui, Gustavo)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
+- Fileinfo
+  . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
+
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
-
-- Streams:
-  . Fixed bug #61115 (stream related segfault on fatal error in
-    php_stream_context_link). (Gustavo)
-  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not detected
-    together with the last read). (Gustavo)
-  . Fixed bug #60817 (stream_get_line() reads from stream even when there is
-    already sufficient data buffered). stream_get_line() now behaves more like
-    fgets(), as is documented. (Gustavo)
 
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
@@ -53,9 +41,21 @@ PHP                                                                        NEWS
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 
-- Array:
-  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
-    (Laruence)
+- Session:
+  . Fixed bug #60860 (session.save_handler=user without defined function core
+    dumps). (Felipe)
+
+- Streams:
+  . Fixed bug #61115 (stream related segfault on fatal error in
+    php_stream_context_link). (Gustavo)
+  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not
+    detected together with the last read). (Gustavo)
+  . Fixed bug #60817 (stream_get_line() reads from stream even when there is
+    already sufficient data buffered). stream_get_line() now behaves more like
+    fgets(), as is documented. (Gustavo)
+
+- Tidy:
+  . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra)
 
 - XMLRPC:
   . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
