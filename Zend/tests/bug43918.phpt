@@ -1,7 +1,7 @@
 --TEST--
 Bug #43918 (Segmentation fault in garbage collector)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if (!extension_loaded("simplexml")) print "skip SimpleXML extension required"; ?>
 --FILE--
 <?php
 $xmlstr = <<<XML

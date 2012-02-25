@@ -3,7 +3,7 @@ stream_get_line() on non-blocking stream
 --SKIPIF--
 <?php
 $sockets = @stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-if (!$sockets) die("skip");
+if (!$sockets) die("skip stream_socket_pair() should work");
 fclose($sockets[0]);
 fclose($sockets[1]);
 ?>
