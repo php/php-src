@@ -8,7 +8,7 @@ if (extension_loaded("openssl")) {
 	 when openssl loaded, tcp stream is less verbose, so some error messages are missing 
 	 so let's skip the test in this case  
 	 */
-	die("skip");
+	die("skip OpenSSL extension required");
 }
 ?>
 --FILE--

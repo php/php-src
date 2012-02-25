@@ -1,7 +1,7 @@
 --TEST--
 Bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if (!extension_loaded("simplexml")) print "skip SimpleXML extension required"; ?>
 --FILE--
 <?php
 $xml = "<root></root>";

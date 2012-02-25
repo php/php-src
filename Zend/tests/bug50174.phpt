@@ -1,7 +1,7 @@
 --TEST--
 Bug #50174 (Incorrectly matched docComment)
 --SKIPIF--
-<?php if (!extension_loaded('reflection') || !extension_loaded('spl')) print "skip"; ?>
+<?php if (!extension_loaded('reflection') || !extension_loaded('spl')) print "skip SPL and reflection extensions required"; ?>
 --FILE--
 <?php
 

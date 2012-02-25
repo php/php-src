@@ -1,7 +1,7 @@
 --TEST--
 unset() CV 10 (unset() of global variable in ArrayObject::offsetUnset($GLOBALS))
 --SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
+<?php if (!extension_loaded("spl")) print "skip SPL extension required"; ?>
 --FILE--
 <?php
 $a = new ArrayObject($GLOBALS);
