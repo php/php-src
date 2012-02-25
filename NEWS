@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . World domination
 
 - Core:
+  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
