@@ -254,10 +254,15 @@ ZEND_API int zend_get_object_classname(const zval *object, char **class_name, ze
 static int parse_arg_object_to_string(zval **arg TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
-		SEPARATE_ZVAL_IF_NOT_REF(arg);
-		if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING TSRMLS_CC) == SUCCESS) {
+		zval *obj;
+		ALLOC_ZVAL(obj);
+		MAKE_COPY_ZVAL(arg, obj);
+		if (Z_OBJ_HANDLER_P(*arg, cast_object)(*arg, obj, IS_STRING TSRMLS_CC) == SUCCESS) {
+			zval_ptr_dtor(arg);
+			*arg = obj;
 			return SUCCESS;
 		}
+		zval_ptr_dtor(&obj);
 	}
 	/* Standard PHP objects */
 	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
