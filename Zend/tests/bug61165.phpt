@@ -1,7 +1,5 @@
 --TEST--
 Bug #61165 (Segfault - strip_tags())
---XFAIL--
-#61165 doesn't fix yet
 --FILE--
 <?php
 
