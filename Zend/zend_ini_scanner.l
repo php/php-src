@@ -228,9 +228,12 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRML
 	char *buf;
 	size_t size;
 
-	if (zend_stream_fixup(fh, &buf, &size TSRMLS_CC) == FAILURE ||
-		init_ini_scanner(scanner_mode, fh TSRMLS_CC) == FAILURE
-	) {
+	if (zend_stream_fixup(fh, &buf, &size TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (init_ini_scanner(scanner_mode, fh TSRMLS_CC) == FAILURE) {
+		zend_file_handle_dtor(fh TSRMLS_CC);
 		return FAILURE;
 	}
 
