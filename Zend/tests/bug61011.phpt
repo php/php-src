@@ -1,6 +1,6 @@
 --TEST--
 Bug #61011 (Crash when an exception is thrown by __autoload accessing a static property)
---XFAILD--
+--XFAIL--
 #61011 have not been fixed yet
 --FILE--
 <?php
