@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
+  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
+    accessing a static property). (Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
     vars). (Laruence)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
