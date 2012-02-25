@@ -21,8 +21,8 @@ $t = new T;
 for ($i = 0; $i < 3; $i++) {
     strip_tags($t);
 	strip_tags(new T);
-    echo "$i\n";
 }
+var_dump($handler);
 --EXPECTF--
 object(T)#%d (1) {
   ["_this"]=>
