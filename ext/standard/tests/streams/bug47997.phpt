@@ -1,5 +1,7 @@
 --TEST--
 Bug #47997 (stream_copy_to_stream returns 1 on empty streams)
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 
