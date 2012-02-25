@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
+- Phar:
+  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL bytes). (Nikic)
+
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
  
