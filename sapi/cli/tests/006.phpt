@@ -4,7 +4,7 @@ show information about extension
 <?php 
 include "skipif.inc"; 
 if (!extension_loaded("reflection") || !extension_loaded("session")) {
-	die("skip");
+	die("skip reflection and session extensions required");
 }
 ?>
 --INI--

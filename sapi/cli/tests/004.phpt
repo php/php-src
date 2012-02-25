@@ -4,7 +4,7 @@ show information about function
 <?php 
 include "skipif.inc"; 
 if (!extension_loaded("reflection")) {
-	die("skip");
+	die("skip reflection extension required");
 }
 ?>
 --FILE--
