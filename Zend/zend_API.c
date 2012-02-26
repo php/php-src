@@ -263,8 +263,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 {
 	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
 		zval *obj;
-		ALLOC_ZVAL(obj);
-		MAKE_COPY_ZVAL(arg, obj);
+		MAKE_STD_ZVAL(obj);
 		if (Z_OBJ_HANDLER_P(*arg, cast_object)(*arg, obj, type TSRMLS_CC) == SUCCESS) {
 			zval_ptr_dtor(arg);
 			*arg = obj;
@@ -272,7 +271,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;
 		}
-		zval_ptr_dtor(&obj);
+		efree(obj);
 	}
 	/* Standard PHP objects */
 	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
