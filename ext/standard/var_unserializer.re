@@ -379,6 +379,9 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	return elements;
 }
 
+#ifdef PHP_WIN32
+# pragma optimize("", off)
+#endif
 static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 {
 	zval *retval_ptr = NULL;
@@ -403,6 +406,9 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 
 }
+#ifdef PHP_WIN32
+# pragma optimize("", on)
+#endif
 
 PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
