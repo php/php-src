@@ -21,7 +21,7 @@
 #ifndef PHP_SQLITE3_H
 #define PHP_SQLITE3_H
 
-#define PHP_SQLITE3_VERSION	 "0.7-dev"
+#define PHP_SQLITE3_VERSION	 "0.7"
 
 extern zend_module_entry sqlite3_module_entry;
 #define phpext_sqlite3_ptr &sqlite3_module_entry
