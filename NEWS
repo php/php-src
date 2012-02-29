@@ -253,32 +253,30 @@ PHP                                                                        NEWS
   . Fixed bug #52013 (Unable to decompress files in a compressed phar). (Hannes)
 
 - PHP-FPM SAPI:
+  . Dropped restriction of not setting the same value multiple times, the last
+    one holds. (giovanni at giacobbi dot net, fat)
+  . Added .phar to default authorized extensions. (fat)
   . Fixed bug #60659 (FPM does not clear auth_user on request accept).
     (bonbons at linux-vserver dot org)
   . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
     (fat)
+  . Enhance error log when the primary script can't be open. FR #60199. (fat)
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
-  . Fixed bug #55526 (Heartbeat causes a lot of unnecessary events). (fat)
-  . Fixed bug #55533 (The -d parameter doesn't work). (fat)
-  . Implemented FR #52569 (Add the "ondemand" process-manager
-    to allow zero children). (fat)
-  . Fixed bug #55486 (status show BIG processes number). (fat)
   . Fixed bug #55577 (status.html does not install). (fat)
-  . Backported from 5.4 branch (Dropped restriction of not setting the same
-    value multiple times, the last one holds).
-    (giovanni at giacobbi dot net, fat)
-  . Backported FR #55166 from 5.4 branch (Added process.max to control
-    the number of process FPM can fork). (fat)
-  . Backported FR #55181 from 5.4 branch (Enhance security by limiting access
-    to user defined extensions). (fat)
-  . Backported FR #54098 from 5.4 branch (Lowered process manager
-    default value). (fat)
-  . Backported FR #52052 from 5.4 branch (Added partial syslog support). (fat)
+  . Fixed bug #55533 (The -d parameter doesn't work). (fat)
+  . Fixed bug #55526 (Heartbeat causes a lot of unnecessary events). (fat)
+  . Fixed bug #55486 (status show BIG processes number). (fat)
+  . Enhanced security by limiting access to user defined extensions.
+    FR #55181. (fat)
+  . Added process.max to control the number of process FPM can fork. FR #55166.
+    (fat)
   . Implemented FR #54577 (Enhanced status page with full status and details
     about each processes. Also provide a web page (status.html) for
     real-time FPM status. (fat)
-  . Enhance error log when the primary script can't be open. FR #60199. (fat)
-  . Added .phar to default authorized extensions. (fat)
+  . Lowered default value for Process Manager. FR #54098. (fat)
+  . Implemented FR #52569 (Add the "ondemand" process-manager
+    to allow zero children). (fat)
+  . Added partial syslog support (on error_log only). FR #52052. (fat)
 
 - Postgres:
   . Fixed bug #60244 (pg_fetch_* functions do not validate that row param 
@@ -820,7 +818,7 @@ PHP                                                                        NEWS
 
 - Tokenizer Extension
   . Fixed bug #54089 (token_get_all() does not stop after __halt_compiler).
-    (Ilia)
+    (Nikita Popov, Ilia)
 
 - XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
