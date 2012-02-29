@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.1 RC1
+ 
 01 Mar 2012, PHP 5.4.0 
 
 - autoconf 2.59+ is now supported (and required) for generating the
