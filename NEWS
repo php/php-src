@@ -79,7 +79,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added max_input_vars directive to prevent attacks based on hash collisions
-    (Dmitry).
+    (CVE-2011-4885) (Dmitry).
   . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
   . Fixed bug #60139 (Anonymous functions create cycles not detected by the
     GC). (Dmitry)
@@ -158,7 +158,7 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
-    header). (Stas, flolechaud at gmail dot com)
+    header). (CVE-2011-4566) (Stas, flolechaud at gmail dot com)
 
 - Fileinfo:
   . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
