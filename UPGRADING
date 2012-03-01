@@ -29,39 +29,35 @@ UPGRADE NOTES - PHP 5.4
 1. Changes made to default configuration
 ========================================
 
-- The default_charset setting now defaults to UTF-8.
-  It was ISO-88590-1 before, so if you were relying
-  on the default, you will need to add:
+- The php.ini default_charset directive now defaults to UTF-8.  If you
+  were relying on the previous default of ISO-88590-1, you will need
+  to add:
 
     default_charset = iso-8859-1
 
   to your php.ini to preserve pre-5.4 behavior.
 
-- We now check at compile time if /dev/urandom or /dev/arandom
-  are present to provide non-blocking entropy to session id
-  generation.  If either is present, session.entropy_file
-  now defaults to that file and session.entropy_length defaults
-  to 32.  If you do not want extra entropy for your session ids
-  for some reason, add:
+- PHP 5.4 now checks at compile time if /dev/urandom or /dev/arandom
+  are present.  If either is available, session.entropy_file now
+  defaults to that file and session.entropy_length defaults to 32.
+  This provides non-blocking entropy to session id generation.  If you
+  do not want extra entropy for your session ids, add:
 
     session.entropy_file=
     session.entropy_length=0
 
   to your php.ini to preserve pre-PHP5.4 behavior.
 
-- Deprecated ini directives will now throw an E_CORE_WARNING's
+- Deprecated php.ini directives will now throw an E_CORE_WARNING's
   instead of the previous E_WARNING's.
 
-  The following directives are marked as deprecated:
+- The following php.ini directives are marked as deprecated:
   - magic_quotes_gpc
   - magic_quotes_runtime
   - magic_quotes_sybase
 
-- The following directives, which indicates a removed feature
-  in PHP will now throw an E_CORE_ERROR upon startup like the
-  deprecation warnings.
-
-  The following directives are no longer available:
+- The following php.ini directives are no longer available in PHP 5.4
+  and will now throw an E_CORE_ERROR upon startup:
   - allow_call_time_pass_reference
   - define_syslog_variables
   - highlight.bg
@@ -75,23 +71,22 @@ UPGRADE NOTES - PHP 5.4
   - safe_mode_protected_env_vars
   - zend.ze1_compatibility_mode
 
-- the following new directives were added
-
-  - max_input_vars - specifies how many GET/POST/COOKIE input variables may be
-    accepted. default value 1000.
+- the following new php.ini directives were added:
+  - max_input_vars - specifies how many GET/POST/COOKIE input
+    variables may be accepted. The default value is 1000.
 
 =============================
 2. Reserved words and classes
 =============================
 
-- "callable", "insteadof" and "trait" are reserved words now.
+- "callable", "insteadof" and "trait" are now reserved words.
 
 ===================================
 3. Changes made to engine behaviour
 ===================================
 
-- It's now possible to enforce the class' __construct arguments in an abstract
-  constructor in the base class.
+- The __construct arguments of an extended abstract constructor must
+  now match:
 
   abstract class Base
   {
@@ -102,44 +97,53 @@ UPGRADE NOTES - PHP 5.4
     public function __construct($bar) {}
   }
 
-  Now emits a Fatal error due the incompatible declaration.
+  This now emits a Fatal error due the incompatible declaration.
 
-- In previous versions, names of superglobals could be used for parameter
-  names, thereby shadowing the corresponding superglobal. This now causes a
-  fatal error such as "Cannot re-assign auto-global variable GLOBALS".
+- In previous versions, superglobal names could be used for parameter
+  names, thereby shadowing the corresponding superglobal. In PHP 5.4
+  this now causes a fatal error such as "Cannot re-assign auto-global
+  variable GLOBALS".
 
-- Turning null, false or empty string into an object by adding a property
-  will now emit a warning instead of an E_STRICT error.
+- Turning null, false or an empty string into an object by adding a
+  property will now emit a warning instead of an E_STRICT error.
 
   $test = null;
   $test->baz = 1;
 
   To create a generic object you can use StdClass:
+
   $test = new StdClass;
   $test->baz = 1;
 
-- Converting array to string now will cause E_NOTICE warning.
+- Converting an array to a string now will cause an E_NOTICE warning.
 
-- Chained string offsets - e.g. $a[0][0] where $a is a string - now work.
+- Chained string array offsets now work.
 
-- Non-numeric string offsets - e.g. $a['foo'] where $a is a string - now return
-  false on isset() and true on empty(), and produce warning if trying to use them.
-  Offsets of types double, bool and null produce notice. Numeric strings ($a['2'])
-  still work as before.
-  Note that offsets like '12.3' and '5 and a half' are considered non-numeric
-  and produce warning, but are converted to 12 and 5 respectively for BC reasons.
+  $a = "abc";
+  echo $a[0][0];
+
+- Non-numeric string offsets, e.g. $a['foo'] where $a is a string, now
+  return false on isset() and true on empty(), and produce warning if
+  trying to use them.  Offsets of types double, bool and null produce
+  notice. Numeric strings ($a['2']) still work as before.
+
+  Note that offsets like '12.3' and '5 and a half' are considered
+  non-numeric and produce warning, but are converted to 12 and 5
+  respectively for BC reasons.
 
 - Changed E_ALL to include E_STRICT.
 
 - Closures now support scopes and $this and can be rebound to
   objects using Closure::bind() and Closure::bindTo().
 
-- Added multibyte support by default. Now it can be enabled or disabled through
-  zend.multibyte directive in php.ini.
+- Added multibyte support by default. Now it can be enabled or
+  disabled through the zend.multibyte directive in php.ini.
 
-- <?= is now always available regardless of the short_open_tag setting.
+- <?= is now always available regardless of the short_open_tag
+  setting.
 
-- Parse error messages are changed to contain more information about the error.
+- Parse error messages are changed to contain more information about
+  the error.
 
 =====================================
 4. Changes made to existing functions
@@ -190,7 +194,7 @@ UPGRADE NOTES - PHP 5.4
   type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
 - Charset detection with $charset == '' no longer turns to mbstring's
   internal encoding defined through mb_internal_encoding(). Only the encoding
-  defined through the ini setting mbstring.internal_encoding is considered.
+  defined through the php.ini setting mbstring.internal_encoding is considered.
 - number_format() no longer truncates multibyte decimal points and thousand
   separators to the first byte.
 - The third parameter ($matches) to preg_match_all() is now optional. If
@@ -277,10 +281,11 @@ UPGRADE NOTES - PHP 5.4
 7. Deprecated
 =============
 
-- get_magic_quotes_gpc()
-- get_magic_quotes_runtime()
-- mcrypt_generic_end()
-- mysql_list_dbs()
+- The following functions are deprecated in PHP 5.4:
+  - get_magic_quotes_gpc()
+  - get_magic_quotes_runtime()
+  - mcrypt_generic_end()
+  - mysql_list_dbs()
 
 ==========
 8. Removed
@@ -302,7 +307,7 @@ UPGRADE NOTES - PHP 5.4
        - Session extension bug compatibility mode
        - y2k_compliance mode
 
-    b. removed ini directives
+    b. removed php.ini directives
 
        - define_syslog_variables
        - register_globals
@@ -357,7 +362,7 @@ UPGRADE NOTES - PHP 5.4
           as the default library now. It is still possible to use libmysql by
           specifying a path to the configure options.
         - PDO_mysql: Support for linking with MySQL client libraries older
-		  than 4.1 is removed.
+          than 4.1 is removed.
         - The session extension now can hook into the file upload feature
           in order to provide upload progress information through session
           variables.
@@ -391,9 +396,9 @@ UPGRADE NOTES - PHP 5.4
             is set with date.timezone and/or date_default_timezone_set().
             Instead it will always fall back to "UTC".
 
-==========================
+===========================
 10. Changes in SAPI support
-==========================
+===========================
 
 - Added built-in CLI web server that is intended for testing purposes.
 - The REQUEST_TIME value inside server now returns a floating point number
@@ -401,7 +406,7 @@ UPGRADE NOTES - PHP 5.4
   value should be returning float and not time_t.
 - apache_child_terminate(), getallheaders(), apache_request_headers()
   and apache_response_headers() now supported on FastCGI.
-- Added shortcut #inisetting=value to change ini settings at run-time.
+- Added shortcut #inisetting=value to change php.ini settings at run-time.
 - Changed shell not to terminate on fatal errors.
 - Interactive shell works with shared readline extension.
 - Added command line option --rz <name> which shows information of the
@@ -642,7 +647,7 @@ UPGRADE NOTES - PHP 5.4
 
        - Intl:
          - Transliterator
-		 - Spoofchecker
+         - Spoofchecker
 
        - JSON:
          - JsonSerializable
@@ -693,7 +698,7 @@ UPGRADE NOTES - PHP 5.4
          - PDO::newRowset()
 
        - SPL:
-       	 - DirectoryIterator::getExtension()
+         - DirectoryIterator::getExtension()
          - RegexIterator::getRegex()
          - SplDoublyLinkedList::serialize()
          - SplDoublyLinkedList::unserialize()
@@ -724,7 +729,3 @@ UPGRADE NOTES - PHP 5.4
        - fnv132
        - fnv164
        - joaat
-
-
-
-
