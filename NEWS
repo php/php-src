@@ -7,25 +7,30 @@ PHP                                                                        NEWS
 
 01 Mar 2012, PHP 5.4.0 
 
-- autoconf 2.59+ is now supported (and required) for generating the
-  configure script with ./buildconf. Autoconf 2.60+ is desirable
-  otherwise the configure help order may be incorrect.  (Rasmus, Chris Jones)
+- Installation:
+  . autoconf 2.59+ is now supported (and required) for generating the
+    configure script with ./buildconf. Autoconf 2.60+ is desirable
+    otherwise the configure help order may be incorrect.  (Rasmus, Chris Jones)
 
 - Removed legacy features:
   . break/continue $var syntax. (Dmitry)
-  . Safe mode and all related ini options. (Kalle)
-  . register_globals and register_long_arrays ini options. (Kalle)
+  . Safe mode and all related php.ini options. (Kalle)
+  . register_globals and register_long_arrays php.ini options. (Kalle)
   . import_request_variables(). (Kalle)
   . allow_call_time_pass_reference. (Pierrick)
-  . define_syslog_variables ini option and its associated function. (Kalle)
-  . highlight.bg ini option. (Kalle)
+  . define_syslog_variables php.ini option and its associated function. (Kalle)
+  . highlight.bg php.ini option. (Kalle)
+  . safe_mode, safe_mode_gid, safe_mode_include_dir,
+    safe_mode_exec_dir, safe_mode_allowed_env_vars and
+    safe_mode_protected_env_vars php.ini options.
+  . zend.ze1_compatibility_mode php.ini option.
   . Session bug compatibility mode (session.bug_compat_42 and
-    session.bug_compat_warn ini options). (Kalle)
+    session.bug_compat_warn php.ini options). (Kalle)
   . session_is_registered(), session_register() and session_unregister()
     functions. (Kalle)
-  . y2k_compliance ini option. (Kalle)
+  . y2k_compliance php.ini option. (Kalle)
   . magic_quotes_gpc, magic_quotes_runtime and magic_quotes_sybase
-    ini options. get_magic_quotes_gpc, get_magic_quotes_runtime are kept
+    php.ini options. get_magic_quotes_gpc, get_magic_quotes_runtime are kept
     but always return false, set_magic_quotes_runtime raises an
     E_CORE_ERROR. (Pierrick, Pierre)
   . Removed support for putenv("TZ=..") for setting the timezone. (Derick)
@@ -33,21 +38,21 @@ PHP                                                                        NEWS
     date.timezone or date_default_timezone_set(). Instead of a guessed
     timezone, "UTC" is now used instead. (Derick)
 
-- Moved extensions to PECL: (Johannes)
+- Moved extensions to PECL:
   . ext/sqlite.  (Note: the ext/sqlite3 and ext/pdo_sqlite extensions are
-    not affected)
+    not affected) (Johannes)
 
 - General improvements:
   . Added short array syntax support ([1,2,3]), see UPGRADING guide for full
     details. (rsky0711 at gmail . com, sebastian.deutsch at 9elements . com,
     Pierre)
-  . Added binary numbers format (0b001010). (Jonah dot Harris at gmail dot com)
+  . Added binary number format (0b001010). (Jonah dot Harris at gmail dot com)
   . Added support for Class::{expr}() syntax (Pierrick)
-  . Added multibyte support by default. Previously php had to be compiled
-    with --enable-zend-multibyte. Now it can be enabled or disabled through
-    zend.multibyte directive in php.ini. (Dmitry)
+  . Added multibyte support by default. Previously PHP had to be compiled
+    with --enable-zend-multibyte.  Now it can be enabled or disabled through
+    the zend.multibyte directive in php.ini. (Dmitry)
   . Removed compile time dependency from ext/mbstring (Dmitry)
-  . Added support for Traits. (Stefan)
+  . Added support for Traits. (Stefan, with fixes by Dmitry and Laruence)
   . Added closure $this support back. (Stas)
   . Added array dereferencing support. (Felipe)
   . Added callable typehint. (Hannes)
@@ -59,21 +64,21 @@ PHP                                                                        NEWS
   . Implemented Zend Signal Handling (configurable option --enable-zend-signals, 
     off by default). (Lucas Nealan, Arnaud Le Blanc, Brian Shire, Ilia)
   . Improved output layer, see README.NEW-OUTPUT-API for internals. (Mike)
-  . Improved unix build system to allow building multiple PHP binary SAPIs and
+  . Improved UNIX build system to allow building multiple PHP binary SAPIs and
     one SAPI module the same time. FR #53271, FR #52419. (Jani)
   . Implemented closure rebinding as parameter to bindTo. (Gustavo Lopes)
   . Improved the warning message of incompatible arguments. (Laruence)
   . Improved ternary operator performance when returning arrays. (Arnaud, Dmitry)
   . Changed error handlers to only generate docref links when the docref_root 
-    INI setting is not empty. (Derick)
+    php.ini setting is not empty. (Derick)
   . Changed silent conversion of array to string to produce a notice. (Patrick)
   . Changed default value of "default_charset" php.ini option from ISO-8859-1 to
-	UTF-8. (Rasmus)
-  . Changed silent casting of null/''/false into an Object when adding
-	a property into a warning. (Scott)
+    UTF-8. (Rasmus)
+  . Changed casting of null/''/false into an Object when adding a property
+    from E_STRICT into a warning. (Scott)
   . Changed E_ALL to include E_STRICT. (Stas)
-  . Disabled windows CRT warning by default, can be enabled again using the ini
-    directive windows_show_crt_warnings. (Pierre)
+  . Disabled Windows CRT warning by default, can be enabled again using the
+    php.ini directive windows_show_crt_warnings. (Pierre)
   . Fixed bug #55378: Binary number literal returns float number though its
     value is small enough. (Derick)
 
@@ -85,11 +90,11 @@ PHP                                                                        NEWS
     in zend_function.fn_flags.
   . Removed zend_arg_info.required_num_args as it was only needed for internal
     functions. Now the first arg_info for internal functions (which has special
-    meaning) is represented by zend_internal_function_info structure.
+    meaning) is represented by the zend_internal_function_info structure.
   . Moved zend_op_array.size, size_var, size_literal, current_brk_cont,
     backpatch_count into CG(context) as they are used only during compilation.
   . Moved zend_op_array.start_op into EG(start_op) as it's used only for
-    'interactive' execution of single top-level op-array.
+    'interactive' execution of a single top-level op-array.
   . Replaced zend_op_array.done_pass_two by ZEND_ACC_DONE_PASS_TWO in
     zend_op_array.fn_flags.
   . op_array.vars array is trimmed (reallocated) during pass_two.
@@ -100,14 +105,15 @@ PHP                                                                        NEWS
     See zend_class_entry.info union.
   . Reduced size of temp_variable.
 
-- Improved Zend Engine, performance tweaks and optimizations: (Dmitry)
+- Improved Zend Engine - performance tweaks and optimizations: (Dmitry)
   . Inlined most probable code-paths for arithmetic operations directly into
     executor.
   . Eliminated unnecessary iterations during request startup/shutdown.
   . Changed $GLOBALS into a JIT autoglobal, so it's initialized only if used.
     (this may affect opcode caches!)
   . Improved performance of @ (silence) operator.
-  . Simplified string offset reading. $str[1][0] is now a legal construct.
+  . Simplified string offset reading. Given $str="abc" then $str[1][0] is now
+    a legal construct.
   . Added caches to eliminate repeatable run-time bindings of functions,
     classes, constants, methods and properties.
   . Added concept of interned strings. All strings constants known at compile
@@ -134,11 +140,12 @@ PHP                                                                        NEWS
   . Changed the structure of op_array.opcodes. The constant values are moved from
     opcode operands into a separate literal table. (Dmitry)
   . Fixed (disabled) inline-caching for ZEND_OVERLOADED_FUNCTION methods.
-	(Dmitry)
-  . Fixed bug #43200 (Interface implementation / inheritence not possible in
-    abstract classes). (Felipe)
+    (Dmitry)
 
 - Improved core functions:
+  . Enforce an extended class' __construct arguments to match the
+    abstract constructor in the base class.
+  . Disallow reusing superglobal names as parameter names.
   . Added optional argument to debug_backtrace() and debug_print_backtrace()
     to limit the amount of stack frames returned. (Sebastian, Patrick)
   . Added hex2bin() function. (Scott)
@@ -157,24 +164,20 @@ PHP                                                                        NEWS
     (galaxy dot mipt at gmail dot com, Kalle)
   . Changed array_combine() to return empty array instead of FALSE when both
     parameter arrays are empty. FR #34857. (joel.perras@gmail.com)
-  . Fixed invalid free in call_user_method() function. (Felipe)
-  . Fixed crypt_blowfish handling of 8-bit characters. (Stas) (CVE-2011-2483)
   . Fixed bug #61095 (Incorect lexing of 0x00*+<NUM>). (Etienne)
   . Fixed bug #60965 (Buffer overflow on htmlspecialchars/entities with
     $double=false). (Gustavo)
   . Fixed bug #60895 (Possible invalid handler usage in windows random
-	functions). (Pierre)
-  .	Fixed bug #60879 (unserialize() Does not invoke __wakeup() on object).
-	(Pierre, Steve)
+    functions). (Pierre)
+  . Fixed bug #60879 (unserialize() Does not invoke __wakeup() on object).
+    (Pierre, Steve)
   . Fixed bug #60825 (Segfault when running symfony 2 tests).
-	(Dmitry, Laruence)
-  . Fixed bug #60809 (TRAITS - PHPDoc Comment Style Bug). (Dmitry)
+    (Dmitry, Laruence)
   . Fixed bug #60627 (httpd.worker segfault on startup with php_value).
   . Fixed bug #60613 (Segmentation fault with $cls->{expr}() syntax). (Dmitry)
   . Fixed bug #60611 (Segmentation fault with Cls::{expr}() syntax). (Laruence)
     (Laruence)
   . Fixed bug #60558 (Invalid read and writes). (Laruence)
-  . Fixed bug #60536 (Traits Segfault). (Laruence)
   . Fixed bug #60444 (Segmentation fault with include & class extending).
     (Laruence, Dmitry).
   . Fixed bug #60362 (non-existent sub-sub keys should not have values).
@@ -193,44 +196,25 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #60169 (Conjunction of ternary and list crashes PHP).
     (Laruence)
-  . Fixed bug #60120 (proc_open's streams may hang with stdin/out/err when
-    the data exceeds or is equal to 2048 bytes). (Pierre, Pascal Borreli)
-  . Fixed bug #60099 (__halt_compiler() works in braced namespaces). (Felipe)
   . Fixed bug #60038 (SIGALRM cause segfault in php_error_cb). (Laruence)
-  . Fixed bug #55874 (GCC does not provide __sync_fetch_and_add on some archs).
     (klightspeed at netspace dot net dot au)
   . Fixed bug #55871 (Interruption in substr_replace()). (Stas)
-  . Fixed bug #55825 (Missing initial value of static locals in trait methods).
-    (Laruence)
   . Fixed bug #55801 (Behavior of unserialize has changed). (Mike)
-  . Fixed bug #55622 (memory corruption in parse_ini_string). (Pierre)
   . Fixed bug #55758 (Digest Authenticate missed in 5.4) . (Laruence)
   . Fixed bug #55748 (multiple NULL Pointer Dereference with zend_strndup())
     (CVE-2011-4153). (Stas)
-  . Fixed bug #55749 (TOCTOU issue in getenv() on Windows builds). (Pierre)
-  . Fixed bug #55707 (undefined reference to `__sync_fetch_and_add_4' on Linux
-    parisc). (Felipe)
-  . Fixed bug #55705 (Omitting a callable typehinted argument causes a segfault).
-    (Felipe, Laruence)
-  . Fixed bug #55475 (is_a() triggers autoloader, new optional 3rd argument to
-    is_a and is_subclass_of). (alan_k)
-  . Fixed bug #55471 (ZTS build broken with dtrace). (Laruence)
   . Fixed bug #55124 (recursive mkdir fails with current (dot) directory in path).
     (Pierre)
   . Fixed bug #55084 (Function registered by header_register_callback is
     called only once per process). (Hannes)
   . Implement FR #54514 (Get php binary path during script execution).
     (Laruence)
-  . Fixed bug #52624 (tempnam() by-pass open_basedir with nonexistent
-    directory). (Felipe)
   . Fixed bug #52211 (iconv() returns part of string on error). (Felipe)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
 - Improved generic SAPI support: 
   . Added $_SERVER['REQUEST_TIME_FLOAT'] to include microsecond precision. 
     (Patrick)
-  . Added max_input_vars directive to prevent attacks based on hash collisions.
-    (Dmitry).
   . Added header_register_callback() which is invoked immediately
     prior to the sending of headers and after default headers have
     been added. (Scott)
@@ -240,42 +224,18 @@ PHP                                                                        NEWS
   . Fixed bug #54374 (Insufficient validating of upload name leading to 
     corrupted $_FILES indices). (Stas, lekensteyn at gmail dot com)
 
-- Improved Apache SAPI:
-  . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
-
-- Improved CLI SAPI: (Johannes, Moriyoshi)
-  . Added friendly log messages - FR #55109 (Arpad)
-  . Added built-in web server that is intended for testing purpose. (Moriyoshi)
+- Improved CLI SAPI:
+  . Added built-in web server that is intended for testing purpose. 
+    (Moriyoshi, Laruence, and fixes by Pierre, Derick, Arpad,
+    chobieee at gmail dot com)
   . Added command line option --rz <name> which shows information of the
     named Zend extension. (Johannes)
   . Interactive readline shell improvements: (Johannes)
     . Added "cli.pager" php.ini setting to set a pager for output.
     . Added "cli.prompt" php.ini setting to configure the shell prompt.
-    . Added shortcut #inisetting=value to change ini settings at run-time.
+    . Added shortcut #inisetting=value to change php.ini settings at run-time.
     . Changed shell not to terminate on fatal errors.
     . Interactive shell works with shared readline extension. FR #53878.
-  . Fixed bug #60591 (Memory leak when access a non-exists file). (Laruence)
-  . Fixed bug #60523 (PHP Errors are not reported in browsers using built-in
-    SAPI). (Laruence, Derick)
-  . Fixed bug #60477 (Segfault after two multipart/form-data POST requests,
-    one 200 RQ and one 404). (Laruence)
-  . Implement FR #60390 (Missing $_SERVER['SERVER_PORT']). (Pierre)
-  . Fixed bug #60180 ($_SERVER["PHP_SELF"] incorrect). (Laruence)
-  . Fixed bug #60159 (Router returns false, but POST is not passed to requested
-    resource). (Laruence)
-  . Fixed bug #60146 (Last 2 lines of page not being output). (Laruence)
-  . Fixed bug #60115 (memory definitely lost in cli server). (Laruence)
-  . Fixed bug #60112 (If URI does not contain a file, index.php is not served).
-    (Laruence)
-  . Fixed bug #55759 (memory leak when using built-in server). (Laruence)
-  . Fixed bug #55755 (SegFault when outputting header WWW-Authenticate). (Laruence)
-  . Fixed bug #55747 (request headers missed in $_SERVER). (Laruence)
-  . Fixed bug #55726 (Changing the working directory makes router script
-    inaccessible). (Laruence)
-  . Fixed bug #55463 (cli-server missing _SERVER[REMOTE_ADDR]). (Laruence)
-  . Fixed bug #55450 (Built in web server not accepting file uploads). (Laruence)
-  . Fixed bug #55423 (cli-server could not output correctly in some case). 
-    (Laruence, chobieee at gmail dot com)
 
 - Improved CGI/FastCGI SAPI: (Dmitry)
   . Added apache compatible functions: apache_child_terminate(),
@@ -285,33 +245,12 @@ PHP                                                                        NEWS
     (Dmitry)
 
 - Improved PHP-FPM SAPI:
-  . Added partial syslog support (on error_log only). FR #52052. (fat)
-  . Added .phar to default authorized extensions. (fat)
-  . Added process.max to control the number of process FPM can fork. FR #55166.
-    (fat)
-  . Dropped restriction of not setting the same value multiple times, the last
-    one holds. (giovanni at giacobbi dot net, fat)
-  . Lowered default value for Process Manager. FR #54098. (fat)
-  . Enhanced security by limiting access to user defined extensions.
-    FR #55181. (fat)
-  . Enhanced error log when the primary script can't be open. FR #60199. (fat)
   . Removed EXPERIMENTAL flag. (fat)
   . Fixed bug #60659 (FPM does not clear auth_user on request accept).
     (bonbons at linux-vserver dot org)
-  . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
-    (fat)
 
 - Improved Litespeed SAPI:
   . Fixed bug #55769 (Make Fails with "Missing Separator" error). (Adam)
-
-- Improved BCmath extension:
-   . Fixed bug #60377 (bcscale related crashes on 64bits platforms) (shm)
-
-- Improved CURL extension:
-  . Added support for CURLOPT_MAX_RECV_SPEED_LARGE and
-    CURLOPT_MAX_SEND_SPEED_LARGE. FR #51815. (Pierrick)
-  . Fixed bug #60439 (curl_copy_handle segfault when used with
-    CURLOPT_PROGRESSFUNCTION). (Pierrick)
 
 - Improved Date extension:
   . Added the + modifier to parseFromFormat to allow trailing text in the
@@ -328,11 +267,6 @@ PHP                                                                        NEWS
   . scandir() now accepts SCANDIR_SORT_NONE as a possible sorting_order value.
     FR #53407. (Adam)
 
-- Improved fileinfo extension:
-  . Fixed possible memory leak in finfo_open(). (Felipe)
-  . Fixed memory leak when calling the Finfo constructor twice. (Felipe)
-  . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
-
 - Improved HASH extension:
   . Added Jenkins's one-at-a-time hash support. (Martin Jansen)
   . Added FNV-1 hash support. (Michael Maclean)
@@ -346,7 +280,6 @@ PHP                                                                        NEWS
   . Added Transliterator class, allowing transliteration of strings. 
     (Gustavo)
   . Added support for UTS #46. (Gustavo)
-  . Fixed memory leak in several Intl locale functions. (Felipe)
   . Fixed build on Fedora 15 / Ubuntu 11. (Hannes)
   . Fixed bug #55562 (grapheme_substr() returns false on big length). (Stas)
 
@@ -375,12 +308,8 @@ PHP                                                                        NEWS
   . Added user JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004)
     support. (Rui)
   . Added the user defined area for CP936 and CP950 (Rui).
-  . Fixed possible crash in mb_ereg_search_init() using empty pattern. (Felipe)
   . Fixed bug #60306 (Characters lost while converting from cp936 to utf8).
     (Laruence)
-
-- Improved MS SQL extension:
-  . Fixed bug #60267 (Compile failure with freetds 0.91). (Felipe)
 
 - Improved MySQL extensions:
   . MySQL: Deprecated mysql_list_dbs(). FR #50667. (Andrey)
@@ -397,54 +326,31 @@ PHP                                                                        NEWS
 
 - Improved OpenSSL extension:
   . Added AES support. FR #48632. (yonas dot y at gmail dot com, Pierre)
-  . Added a "no_ticket" SSL context option to disable the SessionTicket TLS
-    extension. FR #53447. (Adam)
   . Added no padding option to openssl_encrypt()/openssl_decrypt(). (Scott)
   . Use php's implementation for Windows Crypto API in
     openssl_random_pseudo_bytes. (Pierre)
   . On error in openssl_random_pseudo_bytes() made sure we set strong result
     to false. (Scott)
-  . Fixed segfault with older versions of OpenSSL. (Scott)
   . Fixed possible attack in SSL sockets with SSL 3.0 / TLS 1.0.
     CVE-2011-3389. (Scott)
   . Fixed bug #61124 (Crash when decoding an invalid base64 encoded string).
     (me at ktamura dot com, Scott)
-  . Fixed bug #60279 (Fixed NULL pointer dereference in
-    stream_socket_enable_crypto, case when ssl_handle of session_stream is not
-    initialized.) (shm)
-
-- Improved Oracle Database extension (OCI8):
-  . Increased maximum Oracle error message buffer length for new 11.2.0.3 size.
-    (Chris Jones)
-  . Improved internal initalization failure error messages. (Chris Jones)
-  . Fixed bug #59985 (show normal warning text for OCI_NO_DATA).
-    (Chris Jones)
 
 - Improved PDO:
   . Fixed PDO objects binary incompatibility. (Dmitry)
 
 - PDO DBlib driver:
   . Added nextRowset support.
-  . Fixed bug #60033 (Incorrectly merged PDO dblib patches break
-    uniqueidentifier column type). (warezthebeef at gmail dot com)
   . Fixed bug #50755 (PDO DBLIB Fails with OOM).
-
-- Improved Pdo Firebird driver:
-  . Fixed bug #53280 (segfaults if query column count less than param count). 
-    (Mariuz)
-  . Fixed bug #48877 ("bindValue" and "bindParam" do not work for PDO Firebird).
-    (Mariuz)
-  . Fixed bug #47415 (segfaults when passing lowercased column name to 
-    bindColumn). (Mariuz)
 
 - Improved PostgreSQL extension:
   . Added support for "extra" parameter for PGNotify().
     (r dot i dot k at free dot fr, Ilia)
 
-- Improved preg extension:
+- Improved PCRE extension:
   . Changed third parameter of preg_match_all() to optional. FR #53238. (Adam)
 
-- Improved readline extension:
+- Improved Readline extension:
   . Fixed bug #54450 (Enable callback support when built against libedit).
     (fedora at famillecollet dot com, Hannes)
 
@@ -456,9 +362,6 @@ PHP                                                                        NEWS
     ReflectionExtension::isPersistent() methods. (Johannes)
   . Added ReflectionZendExtension class. (Johannes)
   . Added ReflectionClass::isCloneable(). (Felipe)
-  . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
-  . Fixed bug #60357 (__toString() method triggers E_NOTICE "Array to string
-    conversion"). (Laruence)
 
 - Improved Session extension:
   . Expose session status via new function, session_status (FR #52982) (Arpad)
@@ -479,7 +382,7 @@ PHP                                                                        NEWS
   . Allow ~infinite OIDs in GET/GETNEXT/SET queries. Autochunk them to max_oids
     upon request.
   . Introducing unit tests for extension with ~full coverage.
-  IPv6 support. (FR #42918)
+  . IPv6 support. (FR #42918)
   . Way of representing OID value can now be changed when SNMP_VALUE_OBJECT
     is used for value output mode. Use or'ed SNMP_VALUE_LIBRARY(default if
     not specified) or SNMP_VALUE_PLAIN. (FR #54502)
@@ -487,12 +390,10 @@ PHP                                                                        NEWS
     from hostname). (Boris Lytochkin)
   . Fixed bug #60585 (php build fails with USE flag snmp when IPv6 support
     is disabled). (Boris Lytochkin)
-  . Fixed bugs
-    . #53862 (snmp_set_oid_output_format does not allow returning to default)
-    . #51336 (snmprealwalk (snmp v1) does not handle end of OID tree correctly)
-    . #46065 (snmp_set_quick_print() persists between requests)
-    . #45893 (Snmp buffer limited to 2048 char)
-    . #44193 (snmp v3 noAuthNoPriv doesn't work)
+  . Fixed bug #53862 (snmp_set_oid_output_format does not allow returning to default)
+  . Fixed bug #46065 (snmp_set_quick_print() persists between requests)
+  . Fixed bug #45893 (Snmp buffer limited to 2048 char)
+  . Fixed bug #44193 (snmp v3 noAuthNoPriv doesn't work)
 
 - Improved SOAP extension:
   . Added new SoapClient option "keep_alive". FR #60329. (Pierrick)
@@ -509,8 +410,6 @@ PHP                                                                        NEWS
     the default stream context. (Hannes)
   . Fixed bug #60201 (SplFileObject::setCsvControl does not expose third
     argument via Reflection). (Peter)
-  . Fixed bug #55807 (Wrong value for splFileObject::SKIP_EMPTY).
-    (jgotti at modedemploi dot fr, Hannes)
   . Fixed bug #55287 (spl_classes() not includes CallbackFilter classes)
     (sasezaki at gmail dot com, salathe)
 
@@ -548,7 +447,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added max_input_vars directive to prevent attacks based on hash collisions
-    (Dmitry).
+    (CVE-2011-4885) (Dmitry).
   . Fixed bug #60205 (possible integer overflow in content_length). (Laruence)
   . Fixed bug #60139 (Anonymous functions create cycles not detected by the
     GC). (Dmitry)
@@ -627,7 +526,7 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Fixed bug #60150 (Integer overflow during the parsing of invalid exif
-    header). (Stas, flolechaud at gmail dot com)
+    header). (CVE-2011-4566) (Stas, flolechaud at gmail dot com)
 
 - Fileinfo:
   . Fixed bug #60094 (C++ comment fails in c89). (Laruence)
@@ -722,32 +621,30 @@ PHP                                                                        NEWS
   . Fixed bug #52013 (Unable to decompress files in a compressed phar). (Hannes)
 
 - PHP-FPM SAPI:
+  . Dropped restriction of not setting the same value multiple times, the last
+    one holds. (giovanni at giacobbi dot net, fat)
+  . Added .phar to default authorized extensions. (fat)
   . Fixed bug #60659 (FPM does not clear auth_user on request accept).
     (bonbons at linux-vserver dot org)
   . Fixed bug #60629 (memory corruption when web server closed the fcgi fd).
     (fat)
+  . Enhance error log when the primary script can't be open. FR #60199. (fat)
   . Fixed bug #60179 (php_flag and php_value does not work properly). (fat)
-  . Fixed bug #55526 (Heartbeat causes a lot of unnecessary events). (fat)
-  . Fixed bug #55533 (The -d parameter doesn't work). (fat)
-  . Implemented FR #52569 (Add the "ondemand" process-manager
-    to allow zero children). (fat)
-  . Fixed bug #55486 (status show BIG processes number). (fat)
   . Fixed bug #55577 (status.html does not install). (fat)
-  . Backported from 5.4 branch (Dropped restriction of not setting the same
-    value multiple times, the last one holds).
-    (giovanni at giacobbi dot net, fat)
-  . Backported FR #55166 from 5.4 branch (Added process.max to control
-    the number of process FPM can fork). (fat)
-  . Backported FR #55181 from 5.4 branch (Enhance security by limiting access
-    to user defined extensions). (fat)
-  . Backported FR #54098 from 5.4 branch (Lowered process manager
-    default value). (fat)
-  . Backported FR #52052 from 5.4 branch (Added partial syslog support). (fat)
+  . Fixed bug #55533 (The -d parameter doesn't work). (fat)
+  . Fixed bug #55526 (Heartbeat causes a lot of unnecessary events). (fat)
+  . Fixed bug #55486 (status show BIG processes number). (fat)
+  . Enhanced security by limiting access to user defined extensions.
+    FR #55181. (fat)
+  . Added process.max to control the number of process FPM can fork. FR #55166.
+    (fat)
   . Implemented FR #54577 (Enhanced status page with full status and details
     about each processes. Also provide a web page (status.html) for
     real-time FPM status. (fat)
-  . Enhance error log when the primary script can't be open. FR #60199. (fat)
-  . Added .phar to default authorized extensions. (fat)
+  . Lowered default value for Process Manager. FR #54098. (fat)
+  . Implemented FR #52569 (Add the "ondemand" process-manager
+    to allow zero children). (fat)
+  . Added partial syslog support (on error_log only). FR #52052. (fat)
 
 - Postgres:
   . Fixed bug #60244 (pg_fetch_* functions do not validate that row param 
@@ -1289,7 +1186,7 @@ PHP                                                                        NEWS
 
 - Tokenizer Extension
   . Fixed bug #54089 (token_get_all() does not stop after __halt_compiler).
-    (Ilia)
+    (Nikita Popov, Ilia)
 
 - XSL extension:
   . Fixed memory leaked introduced by the NULL poisoning patch.
