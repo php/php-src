@@ -425,8 +425,8 @@ d. Removed hash algorithms
 
 a. Extensions no longer maintained
 
-   - ext/sqlite is no longer part of the base distribution.
-     Use sqlite3 or PDO_SQLITE instead.
+   - ext/sqlite is no longer part of the base distribution and has been moved
+     to PECL.  Use sqlite3 or PDO_SQLITE instead.
 
 b. Extensions with changed behavior
 
