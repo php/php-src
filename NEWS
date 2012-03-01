@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
+  . make max_file_uploads ini directive settable outside of php.ini (Rasmus)
 
 01 Mar 2012, PHP 5.4.0 
 
